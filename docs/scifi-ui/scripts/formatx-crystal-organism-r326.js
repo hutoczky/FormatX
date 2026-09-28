@@ -223,6 +223,9 @@
   root.dataset.fxNativeMagVisualR1805='macro-edge-smoked-bioglass-softbox-reflection';
   root.dataset.fxNativeMagGeometryR1805='twelve-sixteen-edge-outline-high-smooth-normal-surface';
   root.dataset.fxNativeMagMobileR1805='angular-crystal-outline-smoked-glass-not-stone';
+  root.dataset.fxNativeMagVisualR1806='environment-reflected-smoked-bioglass-mobile';
+  root.dataset.fxNativeMagMaterialR1806='dark-transmissive-quartz-softbox-bands-cool-edge-warm-floor';
+  root.dataset.fxNativeMagMobileR1806='glass-not-clay-reflective-depth-visible-optic';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1499,6 +1502,11 @@
         float sideLight=max(dot(n,side),0.0);
         float facing=sat(abs(dot(n,view)));
         float fresnel=(1.0-facing);fresnel*=fresnel;
+        vec3 refl=reflect(-view,n);
+        float envTop=smoothstep(-.10,.82,refl.y);
+        float envSide=1.0-smoothstep(.16,.48,abs(refl.x+.18));
+        float envHorizon=1.0-smoothstep(.06,.28,abs(refl.y+.02));
+        float envWarm=smoothstep(-.78,-.12,refl.y);
         float keySpec=max(dot(n,normalize(key+view)),0.0);
         keySpec*=keySpec;keySpec*=keySpec;keySpec*=keySpec;
         float sideSpec=max(dot(n,normalize(side+view)),0.0);
@@ -1521,11 +1529,15 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),24.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.002,.004,.006),vec3(.038,.050,.052),lift)*facetTone*capShade*absorption;
-        col*=.990+.020*grain;
-        col+=vec3(.74,.76,.70)*keySpec*.190;
-        col+=vec3(.28,.36,.37)*sideSpec*.205;
-        col+=vec3(.055,.145,.154)*fresnel*.420;
+        vec3 col=mix(vec3(.0015,.003,.0045),vec3(.024,.034,.037),lift)*facetTone*capShade*absorption;
+        col*=.992+.016*grain;
+        col+=vec3(.64,.66,.61)*keySpec*.145;
+        col+=vec3(.23,.31,.32)*sideSpec*.165;
+        col+=vec3(.060,.160,.170)*fresnel*.470;
+        col+=vec3(.105,.118,.116)*envTop*(.055+.090*facing)*bodyMask;
+        col+=vec3(.135,.150,.146)*envSide*(.050+.105*fresnel)*bodyMask;
+        col+=vec3(.040,.094,.102)*envHorizon*(.060+.080*fresnel)*bodyMask;
+        col+=vec3(.085,.046,.024)*envWarm*.035*bodyMask;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.110,.118,.113)*ndl*.100;
@@ -1538,11 +1550,11 @@
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
         float slabA=pow(max(0.0,dot(n,normalize(vec3(-.22,.46,.86)))),2.2);
         float slabB=pow(max(0.0,dot(n,normalize(vec3(.62,.08,.78)))),2.0);
-        col+=vec3(.25,.27,.26)*pow(broadKey,1.18)*.090*bodyMask;
-        col+=vec3(.060,.110,.114)*pow(broadSide,1.22)*.095*bodyMask;
-        col+=vec3(.095,.052,.028)*pow(broadWarm,1.24)*.040*bodyMask;
-        col+=vec3(.14,.16,.15)*slabA*.120*bodyMask;
-        col+=vec3(.045,.100,.106)*slabB*.110*bodyMask;
+        col+=vec3(.20,.22,.21)*pow(broadKey,1.22)*.060*bodyMask;
+        col+=vec3(.050,.092,.096)*pow(broadSide,1.26)*.072*bodyMask;
+        col+=vec3(.082,.044,.025)*pow(broadWarm,1.28)*.032*bodyMask;
+        col+=vec3(.12,.14,.13)*slabA*.085*bodyMask;
+        col+=vec3(.040,.088,.094)*slabB*.082*bodyMask;
         col+=vec3(.024,.072,.078)*fresnel*.160*bodyMask;
         float softboxBody=exp(-pow((vLocal.x+.20)/.42,2.0)-pow((vLocal.y-.24)/.58,2.0))*bodyMask;
         float sideBox=exp(-pow((vLocal.x-.48)/.26,2.0)-pow((vLocal.y+.02)/.68,2.0))*bodyMask;
@@ -1552,10 +1564,10 @@
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
-        col+=vec3(.046,.078,.080)*internalDepth*(.32+.44*lift);
-        col+=vec3(.052,.145,.150)*glassEdge*.405;
-        col+=vec3(.030,.086,.092)*glassHalo*.185;
-        col+=vec3(.030,.060,.062)*frontDepth*.120;
+        col+=vec3(.030,.056,.060)*internalDepth*(.26+.36*lift);
+        col+=vec3(.060,.170,.178)*glassEdge*.470;
+        col+=vec3(.034,.102,.110)*glassHalo*.220;
+        col+=vec3(.018,.040,.044)*frontDepth*.080;
 
         vec3 bezel=vec3(.060,.070,.072)
           +vec3(.280,.292,.275)*(.30*ndl+.26*sideLight)
@@ -1580,12 +1592,13 @@
         float lensInner=1.0-smoothstep(.04,.42,lensRadial);
         float lensRim=exp(-pow((lensRadial-.335)/.060,2.0));
         float lensHot=exp(-pow(lensRadial/.090,2.0));
-        vec3 optical=vec3(.018,.060,.068)
-          +vec3(.060,.245,.255)*lensInner
-          +vec3(.66,.72,.66)*keySpec*.155
-          +vec3(.050,.145,.150)*fresnel*.145
-          +vec3(.080,.320,.328)*lensRim*.190
-          +vec3(.94,.99,.93)*lensHot*.270;
+        vec3 optical=vec3(.012,.040,.046)
+          +vec3(.050,.190,.202)*lensInner
+          +vec3(.72,.76,.70)*keySpec*.125
+          +vec3(.046,.126,.132)*fresnel*.125
+          +vec3(.070,.270,.282)*lensRim*.170
+          +vec3(.96,.98,.92)*lensHot*.245
+          +vec3(.080,.105,.102)*envTop*.080;
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
