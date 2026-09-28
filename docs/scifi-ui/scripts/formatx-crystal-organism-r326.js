@@ -137,6 +137,7 @@
   root.dataset.fxNativeMagVisualR1755='photographic-living-biocrystal-dermal-depth-microvascular-response';
   root.dataset.fxNativeMagMaterialR1755='smoky-pearl-bioglass-ggx-dermal-transmission-restrained-emission';
   root.dataset.fxNativeMagPerformanceR1755='single-webgl-60hz-quality-shed-before-cadence-scroll-compositor-settle-redraw';
+  root.dataset.fxNativeMagPerformanceR1796='hot-scroll-zero-raf-zero-dom-write-settle-single-render';
   root.dataset.fxNativeMagVisualR1775='photoreal-smoky-mineral-bioglass-physical-depth';
   root.dataset.fxNativeMagMaterialR1775='neutral-ggx-dielectric-absorption-low-emission-cinematic-softbox';
   root.dataset.fxNativeMagPerformanceR1775='same-single-webgl-pass-adaptive-60hz-budget';
@@ -1722,7 +1723,7 @@
       : (mobile?.80:.22);
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
-    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
+    let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
@@ -2177,23 +2178,25 @@
     }
     let previousScrollY=scrollY;
     function onScroll(){
-      if(scrollFrame)return;
-      scrollFrame=requestAnimationFrame(()=>{
-        scrollFrame=0;
-        const currentY=scrollY;
-        const velocity=clamp((currentY-previousScrollY)/120,-1,1);
-        previousScrollY=currentY;
-        const range=Math.max(1,document.documentElement.scrollHeight-innerHeight);
-        targetSiteProgress=clamp(currentY/range,0,1);
+      /* R1796 — keep the hot scroll path completely free of RAF and DOM writes.
+         scrollTo()/touch scrolling already owns the compositor frame. Mutating a
+         root data-* attribute here forced broad style invalidation, and a second
+         RAF callback competed with the browser's scroll cadence. Internal state
+         stays live; one DOM publication + one WebGL frame happen after settle. */
+      const currentY=scrollY;
+      const velocity=clamp((currentY-previousScrollY)/120,-1,1);
+      previousScrollY=currentY;
+      const range=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+      targetSiteProgress=clamp(currentY/range,0,1);
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
+      targetRotationY+=velocity*.016;
+      targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
+      clearTimeout(scrollSettleTimer);
+      scrollSettleTimer=setTimeout(()=>{
+        scrollSettleTimer=0;
         root.dataset.fxCoreSiteProgress=targetSiteProgress.toFixed(3);
-        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
-        targetRotationY+=velocity*.016;
-        targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
-        clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
-      });
+        schedule(1);
+      },96);
     }
 
     function globalPoint(event){
@@ -2386,7 +2389,7 @@
     function destroy(){
       if(disposed)return;disposed=true;
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
-      if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
+      if(raf)cancelAnimationFrame(raf);
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
       stage.remove();
