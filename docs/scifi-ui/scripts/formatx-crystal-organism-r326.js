@@ -202,6 +202,9 @@
   root.dataset.fxNativeMagVisualR1798='chunk-cut-smoky-teal-bioglass-angular-shoulders';
   root.dataset.fxNativeMagMaterialR1798='deep-teal-quartz-neutral-specular-warm-rim-caustic';
   root.dataset.fxNativeMagMobileR1798='non-monotonic-rings-low-smoothing-angular-depth-no-pebble';
+  root.dataset.fxNativeMagVisualR1799='polished-smoky-teal-crystal-clean-angular-silhouette';
+  root.dataset.fxNativeMagMaterialR1799='deep-teal-bioglass-soft-facet-contrast-dark-gunmetal-optic';
+  root.dataset.fxNativeMagMobileR1799='no-ring-shelves-clean-cut-contour-visible-facet-depth';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -437,7 +440,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.35:(mobile?.45:.86);
+        const smoothWeight=software?.62:(mobile?.68:.86);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -465,7 +468,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 22 : mobile ? 28 : constrained ? 60 : 72;
+      const sideCount = software ? 24 : mobile ? 30 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -510,13 +513,13 @@
             +Math.cos(a*6.0-ringIndex*.37)*.030*mid
             +Math.sin(a*2.0+ringIndex*.61)*.020
             +Math.cos(a*3.0-ringIndex*.29)*.018*mid;
-          const cutFront=1-.265*Math.pow(Math.max(0,Math.cos(a-.42)),4.0);
-          const cutRear=1-.185*Math.pow(Math.max(0,Math.cos(a+2.02)),5.0);
-          const cutSide=1-.220*Math.pow(Math.max(0,Math.cos(a-2.42)),6.0);
-          const cutNotch=1-.155*Math.pow(Math.max(0,Math.cos(a+1.12)),8.0);
+          const cutFront=1-.190*Math.pow(Math.max(0,Math.cos(a-.42)),4.0);
+          const cutRear=1-.130*Math.pow(Math.max(0,Math.cos(a+2.02)),5.0);
+          const cutSide=1-.155*Math.pow(Math.max(0,Math.cos(a-2.42)),6.0);
+          const cutNotch=1-.105*Math.pow(Math.max(0,Math.cos(a+1.12)),8.0);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const x=ox+Math.cos(a)*rx*irregular*radialCut;
-          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.060)*radialCut;
+          const z=oz+Math.sin(a)*rz*(1+Math.cos(sideIndex*1.61+ringIndex*.57)*.045)*radialCut;
           return bodyVertex([x,y,z],[sideIndex/sideCount,(ringIndex+1)/(ringDefs.length+1)]);
         });
       });
@@ -1492,18 +1495,18 @@
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
         float lift=sat(.105+ndl*.300+sideLight*.210);
-        float facetTone=.80+.30*fract(vFacet*5.73+.23);
+        float facetTone=.78+.34*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.13*smoothstep(.50,.96,vLocal.y);
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.005,.014,.018),vec3(.072,.118,.124),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.004,.013,.017),vec3(.058,.108,.118),lift)*facetTone*capShade*absorption;
         col*=.985+.030*grain;
         col+=vec3(.60,.62,.58)*keySpec*.180;
         col+=vec3(.255,.310,.308)*sideSpec*.205;
-        col+=vec3(.034,.082,.088)*fresnel*.215;
+        col+=vec3(.034,.102,.112)*fresnel*.245;
         col+=vec3(.155,.078,.036)*warmPlane*.060;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.110,.118,.113)*ndl*.100;
@@ -1529,11 +1532,11 @@
         col+=vec3(.026,.050,.052)*frontDepth*.095;
         col+=vec3(.030,.095,.102)*caustic*(.045+.075*lift);
 
-        vec3 bezel=vec3(.052,.062,.064)
-          +vec3(.235,.248,.232)*(.28*ndl+.24*sideLight)
-          +vec3(.68,.69,.61)*keySpec*.235
-          +vec3(.098,.158,.160)*fresnel*.24
-          +vec3(.072,.082,.078)*(.22+.20*facing);
+        vec3 bezel=vec3(.022,.032,.035)
+          +vec3(.155,.176,.172)*(.25*ndl+.20*sideLight)
+          +vec3(.48,.52,.48)*keySpec*.155
+          +vec3(.060,.122,.128)*fresnel*.18
+          +vec3(.040,.050,.050)*(.18+.16*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
