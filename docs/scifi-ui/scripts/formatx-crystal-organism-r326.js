@@ -193,6 +193,10 @@
   root.dataset.fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition';
   root.dataset.fxNativeMagMaterialR1795='charcoal-quartz-cool-edge-soft-transmission-warm-rim';
   root.dataset.fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding';
+  root.dataset.fxNativeMagVisualR1804='mobile-final-frame-smoky-bioglass-first-paint-parity';
+  root.dataset.fxNativeMagMaterialR1804='dark-charcoal-bioglass-low-pearl-physical-optic';
+  root.dataset.fxNativeMagMobileR1804='narrower-asymmetric-body-smaller-lens-no-gray-pebble';
+  root.dataset.fxNativeMagPerformanceR1804='single-webgl-same-mesh-material-and-projection-only-60hz-budget';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1049,6 +1053,7 @@
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
         projected*= ${mobile?'.680':'.825'};
+        projected.x*= ${mobile?'.820':'1.000'};
         projected.x+=${mobile?'.010':'.052'};
         projected.y+=${mobile?'.085':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
@@ -1193,8 +1198,10 @@
           +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
           +vec3(.16,.25,.27)*fresnel*.18;
         ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
+        ivory*= ${mobile?'.62':'1.0'};
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.48);
+        mineral=mix(mineral,ivory,plateMask*${mobile?'.29':'.48'});
+        mineral*= ${mobile?'.88':'1.0'};
         mineral=mix(mineral,vec3(.004,.007,.010),livingSeam*.40);
         mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
@@ -1211,7 +1218,7 @@
 
         /* R1593 — a physical smoked-glass lens, not a glowing eye or HUD.
            Its shading is driven by the same studio reflections as the obsidian. */
-        vec2 lq=vec2((q.x+.034)*1.28,(q.y-.018)*1.12);
+        vec2 lq=vec2((q.x+.034)*${mobile?'1.52':'1.28'},(q.y-.018)*${mobile?'1.34':'1.12'});
         float lensD=length(lq);
         float lensOuter=(1.0-smoothstep(.126,.184,lensD))*front;
         float lensGlass=(1.0-smoothstep(.078,.132,lensD))*front;
