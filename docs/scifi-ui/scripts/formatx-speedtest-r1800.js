@@ -10,6 +10,7 @@ lab.dataset.fxSpeedtestMounted='true';
 const start=lab.querySelector('[data-speed-start]');
 const stop=lab.querySelector('[data-speed-stop]');
 const status=lab.querySelector('[data-speed-status]');
+const progressRing=lab.querySelector('[role="progressbar"]');
 const dial=lab.querySelector('[data-speed-dial-value]');
 const dialUnit=lab.querySelector('[data-speed-dial-unit]');
 const edge=lab.querySelector('[data-speed-edge]');
@@ -66,7 +67,7 @@ function setStatus(key){
 function setProgress(value){
   const bounded=Math.max(0,Math.min(100,Number(value)||0));
   lab.style.setProperty('--fx-speed-progress',bounded.toFixed(1)+'%');
-  lab.setAttribute('aria-valuenow',String(Math.round(bounded)));
+  progressRing?.setAttribute('aria-valuenow',String(Math.round(bounded)));
 }
 function number(value,digits=1){
   return Number.isFinite(value)?value.toFixed(digits):'—';
@@ -154,10 +155,14 @@ async function downloadRound(bytes,parallel){
   return {mbps:(total*8)/(elapsed/1000)/1e6,elapsed,total};
 }
 async function downloadTest(saveData){
-  let result=await downloadRound(saveData?MiB:4*MiB,saveData?2:3);
-  setProgress(45);
-  if(!saveData&&result.elapsed<650){
-    result=await downloadRound(8*MiB,3);
+  let result=await downloadRound(saveData?512*1024:MiB,saveData?1:2);
+  setProgress(34);
+  if(!saveData&&result.elapsed<1800){
+    result=await downloadRound(4*MiB,3);
+    setProgress(50);
+    if(result.elapsed<650){
+      result=await downloadRound(8*MiB,3);
+    }
   }
   setProgress(64);
   return result.mbps;
@@ -183,10 +188,14 @@ async function uploadRound(bytes,parallel){
   return {mbps:(total*8)/(elapsed/1000)/1e6,elapsed,total};
 }
 async function uploadTest(saveData){
-  let result=await uploadRound(saveData?512*1024:2*MiB,2);
-  setProgress(82);
-  if(!saveData&&result.elapsed<650){
-    result=await uploadRound(4*MiB,2);
+  let result=await uploadRound(saveData?256*1024:512*1024,1);
+  setProgress(76);
+  if(!saveData&&result.elapsed<1800){
+    result=await uploadRound(2*MiB,2);
+    setProgress(88);
+    if(result.elapsed<650){
+      result=await uploadRound(4*MiB,2);
+    }
   }
   setProgress(98);
   return result.mbps;
@@ -202,7 +211,7 @@ function updateDataUsed(){
 }
 function setRunning(next){
   running=next;
-  lab.dataset.state=next?'running':'idle';
+  if(next)lab.dataset.state='running';
   lab.setAttribute('aria-busy',next?'true':'false');
   if(start)start.disabled=next;
   if(stop)stop.disabled=!next;
@@ -268,7 +277,7 @@ function cancel(){
 start?.addEventListener('click',run);
 stop?.addEventListener('click',cancel);
 window.addEventListener('formatx:languagechange',()=>{
-  if(!running)setStatus(lastPhase==='complete'?'complete':'ready');
+  if(!running)setStatus(lastPhase);
 });
 if(hint)hint.textContent=connectionHint();
 setStatus('ready');
