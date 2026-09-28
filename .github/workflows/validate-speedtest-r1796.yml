@@ -1,0 +1,45 @@
+name: Validate FormatX speed test R1796
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-launcher-r1796.js'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-r1796.js'
+      - 'docs/scifi-ui/styles/formatx-speedtest-r1796.css'
+      - 'billing-worker/src/speedtest-api.js'
+      - 'billing-worker/src/production-content-entry-r529.js'
+      - '.github/scripts/validate-speedtest-r1796.cjs'
+      - '.github/workflows/validate-speedtest-r1796.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-launcher-r1796.js'
+      - 'docs/scifi-ui/scripts/formatx-speedtest-r1796.js'
+      - 'docs/scifi-ui/styles/formatx-speedtest-r1796.css'
+      - 'billing-worker/src/speedtest-api.js'
+      - 'billing-worker/src/production-content-entry-r529.js'
+      - '.github/scripts/validate-speedtest-r1796.cjs'
+      - '.github/workflows/validate-speedtest-r1796.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  speedtest-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate speed test source contract
+        run: |
+          node .github/scripts/validate-speedtest-r1796.cjs
+          node --input-type=module --check < billing-worker/src/speedtest-api.js
+          node --check docs/scifi-ui/scripts/formatx-speedtest-launcher-r1796.js
+          node --input-type=module --check < docs/scifi-ui/scripts/formatx-speedtest-r1796.js
