@@ -35,7 +35,8 @@ root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallba
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1795-mobile-smoky-bioglass-airy';
+root.dataset.fxP0MotionCacheR1804='mobile-final-frame-smoky-bioglass-parity';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1804-mobile-final-frame-smoky-parity';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
