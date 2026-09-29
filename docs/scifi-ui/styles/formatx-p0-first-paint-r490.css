@@ -1036,7 +1036,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 
 /* The SOUND/ASK nodes can be inserted before the r264 owner class lands.
    Own their geometry by DOM location too, preventing the legacy 132px flash. */
-@media (min-width:901px) and (pointer:fine){
+@media (min-width:901px){
   html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
   html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{
     box-sizing:border-box!important;
