@@ -182,6 +182,40 @@ jobs:
             npx wrangler deploy
           fi
 
+      - name: Wait for exact production revision on both domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIGIN='https://formatxsuite.com'
+          WWW='https://www.formatxsuite.com'
+          EXPECTED='docs/production-revision.txt'
+          for attempt in $(seq 1 90); do
+            echo "Exact revision convergence attempt $attempt/90"
+            origin_ok=0
+            www_ok=0
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/production-revision.txt?rev=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/origin-revision.txt" \
+              && cmp -s "$EXPECTED" "$RUNNER_TEMP/origin-revision.txt"; then
+              origin_ok=1
+            fi
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$WWW/production-revision.txt?rev=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/www-revision.txt" \
+              && cmp -s "$EXPECTED" "$RUNNER_TEMP/www-revision.txt"; then
+              www_ok=1
+            fi
+            if [[ "$origin_ok" = 1 && "$www_ok" = 1 ]]; then
+              echo 'Exact production revision is live on both domains.'
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Connected Cloudflare build did not converge to the exact audited revision.' >&2
+          echo 'Expected:' >&2
+          cat "$EXPECTED" >&2
+          echo 'Origin served:' >&2
+          cat "$RUNNER_TEMP/origin-revision.txt" 2>/dev/null || true
+          echo 'WWW served:' >&2
+          cat "$RUNNER_TEMP/www-revision.txt" 2>/dev/null || true
+          exit 1
+
       - name: Smoke-test canonical production and shared seamless scrolling
         shell: bash
         run: |
