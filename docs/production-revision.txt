@@ -1,4 +1,4 @@
 FormatX production revision
-token=20260929-r1812-exact-production-convergence
-base_master=df599ad83039546724cba33c43c38f6e2957bb6a
-purpose=block live cinematic and Lighthouse validation until the exact connected Cloudflare build is serving
+token=20260929-r1813-intro-runtime-recovery
+base_master=e5927021b0a802b5f667418516c28e48012da84c
+purpose=verify live R533 runtime recovery before strict cinematic and Lighthouse audits

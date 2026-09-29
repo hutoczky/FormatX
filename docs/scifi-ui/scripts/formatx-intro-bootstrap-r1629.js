@@ -29,6 +29,47 @@ function activateStyles(){
   }
 }
 
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade';
+let retryCount=0,retryTimer=0;
+const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+function requestRuntime(reason='rescue'){
+  if(runtimeReady()){
+    r.dataset.fxIntroBootstrapRescueR1755='runtime-ready';
+    return;
+  }
+  let e=document.querySelector('script[data-fx-mag-birth-live-r533="true"]');
+  if(!(e instanceof HTMLScriptElement)){
+    e=document.createElement('script');
+    e.async=false;
+    e.dataset.fxMagBirthLiveR533='true';
+    e.dataset.fxIntroRescueR1755='true';
+    const retry=retryCount++;
+    e.src=RUNTIME_SRC+(retry?('&retry=r1813-'+retry):'');
+    document.head.appendChild(e);
+    r.dataset.fxIntroBootstrapRescueR1755=retry?'retry-requested':'requested';
+  }else{
+    r.dataset.fxIntroBootstrapRescueR1755='owner-present-observed';
+  }
+  const verify=()=>{
+    clearTimeout(retryTimer);
+    if(runtimeReady()){
+      r.dataset.fxIntroBootstrapRescueR1755='loaded-and-running';
+      return;
+    }
+    if(retryCount>=3){
+      r.dataset.fxIntroBootstrapRescueR1755='retry-exhausted';
+      return;
+    }
+    e.remove();
+    if(window.__formatxMagBirthR533Owner===true&&!runtimeReady())window.__formatxMagBirthR533Owner=false;
+    r.dataset.fxIntroBootstrapRescueR1755='retry-'+reason;
+    requestRuntime('verification');
+  };
+  e.addEventListener('load',()=>setTimeout(verify,0),{once:true});
+  e.addEventListener('error',()=>verify(),{once:true});
+  clearTimeout(retryTimer);
+  retryTimer=setTimeout(verify,3000);
+}
 function b(){
   document.getElementById('formatx-event-horizon')?.remove();
   if(!v){
@@ -37,21 +78,10 @@ function b(){
     return;
   }
   activateStyles();
-  if(document.querySelector('script[data-fx-mag-birth-live-r533="true"]')){
-    r.dataset.fxIntroBootstrapRescueR1755='owner-present';
-    r.dataset.fxIntroBootstrapVisualR1775='photoreal-intro-core';
-    r.dataset.fxIntroBootstrapVisualR1776='cinematic-irregular-crystal-depth';
-    return;
-  }
-  const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade';
-  e.async=false;
-  e.dataset.fxMagBirthLiveR533='true';
-  e.dataset.fxIntroRescueR1755='true';
-  e.addEventListener('load',()=>{r.dataset.fxIntroBootstrapRescueR1755='loaded';},{once:true});
-  e.addEventListener('error',()=>{r.dataset.fxIntroBootstrapRescueR1755='load-error';},{once:true});
-  document.head.appendChild(e);
-  r.dataset.fxIntroBootstrapRescueR1755='requested';
+  r.dataset.fxIntroBootstrapVisualR1775='photoreal-intro-core';
+  r.dataset.fxIntroBootstrapVisualR1776='cinematic-irregular-crystal-depth';
+  r.dataset.fxIntroBootstrapRecoveryR1813='verified-runtime-retry';
+  requestRuntime('startup');
 }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',b,{once:true}):b();
 })();

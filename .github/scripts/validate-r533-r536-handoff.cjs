@@ -134,7 +134,54 @@ async function verifyFullBirth(browser){
     // runtime may attach later on a cold remote edge, but users must never wait
     // on a black viewport while that script is fetched/parsed.
     await page.locator(`${PREPAINT}, ${OVERLAY}`).first().waitFor({state:'visible',timeout:5000});
-    await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
+    try{
+      await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
+    }catch(error){
+      const debug=await page.evaluate(({PREPAINT,OVERLAY})=>{
+        const root=document.documentElement;
+        const prepaint=document.querySelector(PREPAINT);
+        const overlay=document.querySelector(OVERLAY);
+        const info=el=>{
+          if(!(el instanceof Element))return null;
+          const cs=getComputedStyle(el),rect=el.getBoundingClientRect();
+          return{
+            tag:el.tagName,id:el.id,className:el.className,
+            display:cs.display,visibility:cs.visibility,opacity:cs.opacity,
+            width:rect.width,height:rect.height
+          };
+        };
+        const scripts=[...document.scripts]
+          .filter(script=>/formatx-(?:intro-bootstrap-r1629|mag-birth-live-r533)\.js/.test(script.src))
+          .map(script=>({
+            src:script.src,
+            birth:script.dataset.fxMagBirthLiveR533||'',
+            rescue:script.dataset.fxIntroRescueR1755||'',
+            readyState:script.readyState||''
+          }));
+        const resources=performance.getEntriesByType('resource')
+          .filter(entry=>/formatx-(?:intro-bootstrap-r1629|mag-birth-live-r533)\.js/.test(entry.name))
+          .map(entry=>({name:entry.name,duration:entry.duration,transferSize:entry.transferSize,encodedBodySize:entry.encodedBodySize}));
+        return{
+          href:location.href,
+          ownerLatch:window.__formatxMagBirthR533Owner===true,
+          rootData:{
+            prepaint:root.dataset.fxIntroPrepaintR1611||'',
+            prepaintOwner:root.dataset.fxIntroPrepaintOwnerR1611||'',
+            birthOwner:root.dataset.fxMagBirthOwnerR533||'',
+            birthLive:root.dataset.fxMagBirthLiveR533||'',
+            duplicateGuard:root.dataset.fxMagBirthDuplicateGuardR1755||'',
+            rescue:root.dataset.fxIntroBootstrapRescueR1755||'',
+            recovery:root.dataset.fxIntroBootstrapRecoveryR1813||''
+          },
+          prepaint:info(prepaint),
+          overlay:info(overlay),
+          scripts,
+          resources
+        };
+      },{PREPAINT,OVERLAY});
+      writeJson('desktop-overlay-timeout.json',{debug,errors,error:String(error?.stack||error)});
+      throw error;
+    }
     const active=await snapshot(page);
     const dnaGenesis=await page.evaluate(()=>({
       genome:document.documentElement.dataset.fxMagBirthGenomeR611||'',
