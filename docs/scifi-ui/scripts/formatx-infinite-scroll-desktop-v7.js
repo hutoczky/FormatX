@@ -85,6 +85,9 @@
   root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
   root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
   root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
+  root.dataset.fxLoopTailMaterializeR1807='strict-scroll-idle-style-batch';
+  root.dataset.fxLoopHotPathR1807='cached-geometry-minimal-root-mutation';
+  root.dataset.fxLoopHotPathR1808='cached-boundary-no-forced-layout-read';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -570,6 +573,21 @@
     activityTimer = 0;
     root.dataset.fxScrollActivity = 'idle';
     root.classList.remove('fx-page-scrolling');
+
+    /* R1807 — if the user reached the lazy-tail activation zone while moving,
+       materialise only now. commitDesktopTransfer() immediately re-samples fresh
+       geometry, so the loop keeps the same landing semantics without spending a
+       scroll frame on a multi-section style/layout batch. */
+    if (!isMobileFlow()
+      && root.dataset.fxLoopTailMaterializedR1727 !== 'ready'
+      && bridge?.isConnected) {
+      const idleBridgeTop=Number(loopGeometry.ready ? loopGeometry.bridgeTop : bridge.offsetTop);
+      if (Number.isFinite(idleBridgeTop)
+        && scrollY >= Math.max(0,idleBridgeTop-innerHeight*7.5)) {
+        materializeDesktopLoopTailNow();
+      }
+    }
+
     captureCanonicalLandingOrigin();
     if (isMobileFlow()) scheduleMobileTransfer();
     else commitDesktopTransfer();
@@ -851,8 +869,11 @@
       root.dataset.fxLoopEndIntentR1724=cachedEndIntent?'latched-cached-end':'latched-reachable-boundary';
     }
 
-    root.dataset.fxScrollActivity = 'scrolling';
-    root.classList.add('fx-page-scrolling');
+    if(root.dataset.fxScrollActivity !== 'scrolling'){
+      root.dataset.fxScrollActivity = 'scrolling';
+      root.classList.add('fx-page-scrolling');
+      root.dataset.fxLoopScrollHotPathR1807='state-write-once-per-gesture';
+    }
     clearTimeout(activityTimer);
     activityTimer = window.setTimeout(markIdle, ACTIVITY_IDLE_MS);
 
@@ -881,14 +902,35 @@
 
     pendingDesktopRelative = relative;
     pendingDesktopSourceTop = cachedGeometry.sourceTop;
-    root.dataset.fxInfiniteInput = 'native-wheel';
-    root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
+    if(root.dataset.fxInfiniteInput !== 'native-wheel')root.dataset.fxInfiniteInput = 'native-wheel';
+    if(root.dataset.fxLoopLandingState !== 'waiting-wheel-idle')root.dataset.fxLoopLandingState = 'waiting-wheel-idle';
   }
 
   function materializeDesktopLoopTailNow() {
+    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) {
+      tailMaterializeScheduled = false;
+      tailMaterializeTask = 0;
+      return false;
+    }
+
+    /* R1807 — content-visibility materialisation is a layout-heavy batch.
+       requestIdleCallback timeout is not a guarantee of visual idleness: the
+       callback may fire while a long native/programmatic scroll is still hot.
+       Never perform these style writes while scrolling. markIdle/scrollend will
+       run the batch synchronously after the gesture has actually settled. */
+    if (root.dataset.fxScrollActivity === 'scrolling'
+      || root.classList.contains('fx-page-scrolling')
+      || root.classList.contains('fx-seamless-loop-transfer')
+      || root.classList.contains('fx-section-navigation-active')) {
+      tailMaterializeScheduled = false;
+      tailMaterializeTask = 0;
+      root.dataset.fxLoopTailMaterializeR1807 = 'held-until-real-scroll-idle';
+      return false;
+    }
+
     tailMaterializeScheduled = false;
     tailMaterializeTask = 0;
-    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) return false;
+    root.dataset.fxLoopTailMaterializeR1807 = 'idle-batch-start';
 
     document.querySelectorAll([
       '#main-content > section.scene:not(#hero)',
@@ -939,21 +981,53 @@
       && !root.classList.contains('fx-seamless-loop-transfer')
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
-      const liveRect=bridge.getBoundingClientRect();
-      const liveBridgeTop=scrollY+liveRect.top;
-      const liveRelative=scrollY-liveBridgeTop;
-      const liveEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
-      if(liveRelative>=-2||scrollY>=liveEnd-4){
-        const sourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
-        pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
-        desktopGestureAnchorY=scrollY;
-        desktopGestureAnchorRelative=liveRelative;
-        desktopGestureBoundaryLatched=true;
-        root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
-        root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
-        clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
-        root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
+      /* R1805 — WebDriver-only bridge probing must not force layout during the
+         entire smooth-scroll sample. Use cached geometry on the hot path and
+         perform the live DOMRect read only when automation is close enough to
+         the loop boundary for the R1742 pre-materialisation latch to matter. */
+      const cachedBridgeTop=Number.isFinite(loopGeometry.bridgeTop)
+        ? loopGeometry.bridgeTop
+        : (Number.isFinite(stableDesktopBridgeTop)?stableDesktopBridgeTop:NaN);
+      const cachedEnd=Number.isFinite(loopGeometry.documentEnd)
+        ? loopGeometry.documentEnd
+        : NaN;
+      const nearBridge=Number.isFinite(cachedBridgeTop)
+        && scrollY>=Math.max(0,cachedBridgeTop-innerHeight*1.25);
+      const nearEnd=Number.isFinite(cachedEnd)
+        && scrollY>=Math.max(0,cachedEnd-innerHeight*.25);
+      const needsInitialProbe=!Number.isFinite(cachedBridgeTop)&&!loopGeometry.ready;
+      if(nearBridge||nearEnd||needsInitialProbe){
+        /* R1808 — when cached geometry exists, even the automation boundary
+           path remains layout-read free. R1807 guarantees that lazy-tail style
+           materialisation cannot move the bridge during the hot scroll. Only a
+           genuinely missing cache may fall back to one live DOMRect read. */
+        let boundaryBridgeTop=cachedBridgeTop;
+        let boundaryEnd=cachedEnd;
+        let probeMode='cached-geometry-near-boundary';
+        if(!Number.isFinite(boundaryBridgeTop)){
+          const liveRect=bridge.getBoundingClientRect();
+          boundaryBridgeTop=scrollY+liveRect.top;
+          probeMode='live-fallback-cache-unavailable';
+        }
+        if(!Number.isFinite(boundaryEnd)){
+          boundaryEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+        }
+        const liveRelative=scrollY-boundaryBridgeTop;
+        root.dataset.fxLoopAutomationProbeR1808=probeMode;
+        if(liveRelative>=-2||scrollY>=boundaryEnd-4){
+          const sourceHeight=Math.max(0,loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
+          pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
+          desktopGestureAnchorY=scrollY;
+          desktopGestureAnchorRelative=liveRelative;
+          desktopGestureBoundaryLatched=true;
+          root.dataset.fxLoopAutomationBoundaryR1742='cached-pre-materialisation-latched-r1808';
+          root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
+          clearTimeout(activityTimer);
+          activityTimer=window.setTimeout(markIdle,32);
+          root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
+        }
+      }else if(root.dataset.fxLoopAutomationProbeR1808!=='cached-geometry-hot-scroll'){
+        root.dataset.fxLoopAutomationProbeR1808='cached-geometry-hot-scroll';
       }
     }
 
@@ -1007,8 +1081,13 @@
         pendingDesktopRelative=projected>=-2
           ? Math.max(0,Math.min(projected,Math.max(0,eventSourceHeight-2)))
           : null;
-        if(projected>=-2)desktopGestureBoundaryLatched=true;
-        root.dataset.fxLoopGestureRelativeR1729=String(Math.round(projected));
+        if(projected>=-2){
+          if(!desktopGestureBoundaryLatched){
+            root.dataset.fxLoopGestureRelativeR1729=String(Math.round(projected));
+            root.dataset.fxLoopGestureTelemetryR1807='boundary-transition-only';
+          }
+          desktopGestureBoundaryLatched=true;
+        }
       }
     }
 

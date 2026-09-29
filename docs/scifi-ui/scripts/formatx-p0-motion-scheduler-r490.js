@@ -8,7 +8,8 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1724';
+root.dataset.fxP0MotionSchedulerR490='armed-r1805';
+root.dataset.fxP0MotionPerformanceR1805='wheel-sensory-only-webgl-on-deliberate-intent-or-idle';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1789='mobile-bioglass-depth-proof-pass';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
@@ -35,7 +36,8 @@ root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallba
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1795-mobile-smoky-bioglass-airy';
+root.dataset.fxP0MotionCacheR1804='mobile-final-frame-smoky-bioglass-parity';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1804-mobile-final-frame-smoky-parity';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
@@ -145,9 +147,14 @@ function onIntent(event){
 /* Deliberately exclude pointermove and scroll. Those can be emitted during
    browser startup/restoration and were the source of R492's 0.5–1.0 s random
    WebGL boot. These events represent explicit user action instead. */
-for(const type of ['pointerdown','touchstart','keydown','wheel']){
+/* R1805 — wheel/scroll stay on the lightweight sensory compositor.
+   They must not bootstrap the full R326/WebGL stack on the first page travel.
+   Pointer/touch/key remain deliberate activation, and the idle fallback still
+   brings the living MAG online automatically after the critical path. */
+for(const type of ['pointerdown','touchstart','keydown']){
   addEventListener(type,onIntent,{once:true,passive:true});
 }
+root.dataset.fxP0WheelPolicyR1805='sensory-only-no-webgl-bootstrap';
 
 if(document.readyState==='loading'){
   addEventListener('DOMContentLoaded',armStartup,{once:true,passive:true});
