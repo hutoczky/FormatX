@@ -35,11 +35,60 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
           window.__fxPerf.shifts.push({
             at: entry.startTime,
             value: entry.value,
-            sources: (entry.sources || []).map(source => ({
-              selector: selector(source.node),
-              previousRect: source.previousRect,
-              currentRect: source.currentRect
-            }))
+            sources: (entry.sources || []).map(source => {
+              const node = source.node;
+              const style = node instanceof Element ? getComputedStyle(node) : null;
+              const parent = node instanceof Element ? node.parentElement : null;
+              const parentStyle = parent ? getComputedStyle(parent) : null;
+              return {
+                selector: selector(node),
+                previousRect: source.previousRect,
+                currentRect: source.currentRect,
+                computed: style ? {
+                  width: style.width,
+                  height: style.height,
+                  minWidth: style.minWidth,
+                  maxWidth: style.maxWidth,
+                  minHeight: style.minHeight,
+                  maxHeight: style.maxHeight,
+                  position: style.position,
+                  top: style.top,
+                  right: style.right,
+                  bottom: style.bottom,
+                  left: style.left,
+                  transform: style.transform,
+                  translate: style.translate,
+                  scale: style.scale,
+                  rotate: style.rotate,
+                  display: style.display,
+                  zoom: style.zoom
+                } : null,
+                parent: parent ? {
+                  selector: selector(parent),
+                  className: parent.className,
+                  computed: parentStyle ? {
+                    width: parentStyle.width,
+                    height: parentStyle.height,
+                    position: parentStyle.position,
+                    top: parentStyle.top,
+                    right: parentStyle.right,
+                    bottom: parentStyle.bottom,
+                    left: parentStyle.left,
+                    transform: parentStyle.transform,
+                    translate: parentStyle.translate,
+                    scale: parentStyle.scale,
+                    display: parentStyle.display
+                  } : null
+                } : null,
+                rootState: {
+                  controlOwner: document.documentElement.dataset.fxControlOwnerR264 || '',
+                  referenceProduction: document.documentElement.dataset.fxReferenceProductionR244 || '',
+                  referenceLayout: document.documentElement.dataset.fxMobileReferenceLayout || '',
+                  crystal: document.documentElement.dataset.fxCrystalOrganismR326 || '',
+                  quality: document.documentElement.dataset.fxQualityR461 || ''
+                }
+              };
+            })
           });
         }
       }).observe({ type: 'layout-shift', buffered: true });
