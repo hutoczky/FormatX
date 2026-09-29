@@ -1030,6 +1030,37 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
 
 
+
+/* R1805b — canonical SOUND hit target outranks legacy r204 132px proof rules.
+   Geometry is viewport-owned, not pointer-capability-owned. */
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
+html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound{
+  box-sizing:border-box!important;
+  width:54px!important;
+  min-width:54px!important;
+  max-width:54px!important;
+  height:54px!important;
+  min-height:54px!important;
+  max-height:54px!important;
+  padding:0!important;
+  transform:none!important;
+  translate:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+@media (max-width:900px){
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
+  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound{
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+  }
+}
+/* production-r1805-canonical-sound-size-outranks-legacy */
+
 /* R1805 — static visual completion.
    Match the settled header and hero surface in the render-blocking layer.
    No animation, filter or JS is introduced here. */
