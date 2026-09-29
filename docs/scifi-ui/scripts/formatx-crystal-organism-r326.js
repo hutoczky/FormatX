@@ -193,6 +193,9 @@
   root.dataset.fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition';
   root.dataset.fxNativeMagMaterialR1795='charcoal-quartz-cool-edge-soft-transmission-warm-rim';
   root.dataset.fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding';
+  root.dataset.fxNativeMagVisualR1811='photographic-smoky-biocrystal-dermal-depth-low-emission';
+  root.dataset.fxNativeMagMaterialR1811='charcoal-bioglass-neutral-softbox-warm-subsurface-restrained-physiology';
+  root.dataset.fxNativeMagPerformanceR1811='same-shader-budget-no-extra-loop-photographic-material-pass';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -1170,15 +1173,15 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.025,.078,.086)*vascular*(.034+.060*uEnergy);
-        mineral+=vec3(.045,.018,.026)*vascular*subsurface*(.020+.040*uEnergy);
+        mineral+=vec3(.020,.060,.066)*vascular*(.024+.048*uEnergy);
+        mineral+=vec3(.038,.018,.024)*vascular*subsurface*(.015+.032*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
         float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
         mineral=mix(mineral,vec3(.012,.015,.019),cortexValley*.31);
         mineral+=vec3(.072,.090,.098)*cortexRidge*.082;
-        mineral+=vec3(.022,.092,.108)*cortexRidge*vascular*.31;
+        mineral+=vec3(.018,.064,.074)*cortexRidge*vascular*.22;
 
         /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
@@ -1194,10 +1197,10 @@
           +vec3(.16,.25,.27)*fresnel*.18;
         ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.48);
-        mineral=mix(mineral,vec3(.004,.007,.010),livingSeam*.40);
-        mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
-        mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
+        mineral=mix(mineral,ivory,plateMask*.34);
+        mineral=mix(mineral,vec3(.004,.007,.010),livingSeam*.29);
+        mineral+=vec3(.026,.126,.143)*vascular*(.050+.090*uEnergy);
+        mineral+=vec3(.42,.28,.19)*vascular*studioRibbonB*.036;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1245,7 +1248,7 @@
           float head=mix(-.18,1.18,sat(uSurfacePulse));
           pulse=exp(-pow((coordinate-head)/.060,2.0))*(.25+.75*fresnel);
         }
-        mineral+=vec3(.18,.42,.47)*pulse*.55;
+        mineral+=vec3(.14,.32,.36)*pulse*.42;
         mineral+=vec3(.58,.64,.62)*pulse*(.10+.24*softboxA);
 
         vec3 livingMembrane=vec3(.008,.022,.030);
@@ -1280,12 +1283,12 @@
         physicalLens+=vec3(.94,.99,.96)*softboxA*.18;
         physicalLens+=vec3(.48,.58,.60)*sideSpec*.10;
         physicalLens+=vec3(.12,.28,.34)*fresnel*.18;
-        physicalLens+=vec3(.020,.18,.24)*lensInner*(.08+.10*uEnergy);
-        physicalLens+=vec3(.038,.15,.17)*lensRing*(.060+.055*uEnergy);
-        physicalLens+=vec3(.72,.78,.74)*lensHot*(.090+.040*uEnergy);
-        physicalLens+=vec3(.060,.17,.19)*electric*(.085+.080*uEnergy);
-        physicalLens+=vec3(.84,.86,.81)*coreFlash*.125;
-        physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
+        physicalLens+=vec3(.018,.12,.15)*lensInner*(.07+.08*uEnergy);
+        physicalLens+=vec3(.032,.10,.11)*lensRing*(.045+.045*uEnergy);
+        physicalLens+=vec3(.58,.62,.60)*lensHot*(.070+.030*uEnergy);
+        physicalLens+=vec3(.040,.105,.118)*electric*(.055+.060*uEnergy);
+        physicalLens+=vec3(.78,.80,.76)*coreFlash*.095;
+        physicalLens+=vec3(.72,.33,.10)*lensRing*(.055+.055*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
