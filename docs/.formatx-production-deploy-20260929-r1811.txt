@@ -1,0 +1,8 @@
+FormatX production deployment trigger
+requested_at=2026-09-29
+source_master=54570dc0aac75d7738ecca4dab8c521fe7b755d7
+release_line=R1811
+purpose=deploy and strictly audit the current R1810-era production surface with the repository's 100x3 Lighthouse contract
+visual=current photoreal smoky-bioglass living MAG and intro; sitewide interactive sensory system; current production controls and responsive shell preserved
+performance_target=desktop/mobile Lighthouse categories performance/accessibility/best-practices/seo all 1.0 across 3 runs; 60fps-class interaction path preserved
+validation=trigger full production candidate, exact-revision deploy convergence, strict live Lighthouse x3 desktop/mobile, security and checkout invariants
