@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const VERSION = 'return-state-v2';
-  const LOOP_RUNTIME = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260929-r1812-boundary-only-automation-geometry';
+  const LOOP_RUNTIME = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260929-r1813-zero-live-layout-scroll-hot-path';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
 
   if (root.dataset.fxReturnStateRecovery === VERSION) return;
