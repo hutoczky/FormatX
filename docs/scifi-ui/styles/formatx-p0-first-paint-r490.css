@@ -1034,7 +1034,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
    Existing P0 rules own the complete styling; these selectors only make that
    geometry survive r264 class/reparent timing without adding mobile paint cost. */
 @media (min-width:901px){
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264{
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204{
     position:absolute!important;
     top:auto!important;
     right:auto!important;
@@ -1048,12 +1048,12 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
     max-height:76px!important;
     transform:translateX(-50%)!important;
   }
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > :is(.fx-reference-rail,.fx-reference-rail-r264){
     display:contents!important;
   }
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
     width:54px!important;
     min-width:54px!important;
     max-width:54px!important;
@@ -1062,4 +1062,4 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
     max-height:54px!important;
   }
 }
-/* production-r1811b-minimal-desktop-control-cls-lock */
+/* production-r1811c-first-byte-desktop-control-cls-lock */
