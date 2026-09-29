@@ -2,7 +2,7 @@
    Clear audio consent, keyboard/touch affordances and inclusive media modes.
    Strict CSP: no inline-style ownership. */
 
-html body .fx-three-sound.fx-wda-sound-toggle {
+html body .fx-three-sound.fx-wda-sound-toggle:not(.fx-control-owner-r264) {
   position: fixed !important;
   top: max(86px, calc(env(safe-area-inset-top) + 78px)) !important;
   right: max(16px, env(safe-area-inset-right)) !important;
@@ -34,7 +34,7 @@ html body .fx-three-sound.fx-wda-sound-toggle {
   -webkit-tap-highlight-color: transparent !important;
 }
 
-html body .fx-three-sound.fx-wda-sound-toggle::before {
+html body .fx-three-sound.fx-wda-sound-toggle:not(.fx-control-owner-r264)::before {
   content: "";
   width: 9px;
   height: 9px;
@@ -45,11 +45,11 @@ html body .fx-three-sound.fx-wda-sound-toggle::before {
   opacity: .92;
 }
 
-html[data-fx-audio-state="on"] body .fx-three-sound.fx-wda-sound-toggle {
+html[data-fx-audio-state="on"] body .fx-three-sound.fx-wda-sound-toggle:not(.fx-control-owner-r264) {
   border-color: rgba(132, 255, 211, .72) !important;
 }
 
-html body .fx-three-sound.fx-wda-sound-toggle:hover {
+html body .fx-three-sound.fx-wda-sound-toggle:not(.fx-control-owner-r264):hover {
   border-color: rgba(197, 247, 255, .9) !important;
 }
 
@@ -59,7 +59,7 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
 }
 
 @media (max-width: 900px), (pointer: coarse) {
-  html body .fx-three-sound.fx-wda-sound-toggle {
+  html body .fx-three-sound.fx-wda-sound-toggle:not(.fx-control-owner-r264) {
     top: max(80px, calc(env(safe-area-inset-top) + 74px)) !important;
     right: max(12px, env(safe-area-inset-right)) !important;
     min-width: 104px !important;
@@ -72,6 +72,11 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
     min-height: 44px !important;
   }
 }
+
+/* R1804 — parser-owned canonical SOUND already lives inside the hero control
+   group. Keep the old fixed WDA launcher only as a standalone fallback; it must
+   never seize the canonical R264 button during boot and create a transient CLS. */
+/* production-r1804-canonical-sound-exempts-legacy-fixed-launcher */
 
 /* r263 — one physical control geometry on every viewport. */
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r263 {
