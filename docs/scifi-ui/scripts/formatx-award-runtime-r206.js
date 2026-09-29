@@ -47,7 +47,7 @@
     return;
   }
 
-  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';
+  const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260929-r1804-canonical-sound-no-legacy-flash';
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
