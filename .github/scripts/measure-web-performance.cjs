@@ -58,7 +58,50 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const started = Date.now();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#hero-title');
-  await page.waitForTimeout(2500);
+
+  async function captureControlCascade(label) {
+    return page.evaluate(label => {
+      const el = document.querySelector('.fx-three-sound');
+      if (!el) return { label, missing: true };
+      const rect = el.getBoundingClientRect();
+      const computed = getComputedStyle(el);
+      const rules = [];
+      const scan = (ruleList, href) => {
+        for (const rule of ruleList || []) {
+          if (rule.cssRules) {
+            try { scan(rule.cssRules, href); } catch (_) {}
+            continue;
+          }
+          if (!rule.selectorText) continue;
+          let matches = false;
+          try { matches = el.matches(rule.selectorText); } catch (_) {}
+          if (!matches) continue;
+          const text = rule.style?.cssText || '';
+          if (!/(width|height|position|inset|top|right|bottom|left)/i.test(text)) continue;
+          rules.push({ href, selector: rule.selectorText, cssText: text });
+        }
+      };
+      for (const sheet of [...document.styleSheets]) {
+        try { scan(sheet.cssRules, sheet.href || 'inline'); } catch (_) {}
+      }
+      return {
+        label,
+        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        computed: {
+          width: computed.width, height: computed.height, position: computed.position,
+          top: computed.top, right: computed.right, bottom: computed.bottom, left: computed.left,
+          display: computed.display, transform: computed.transform
+        },
+        rules
+      };
+    }, label);
+  }
+
+  await page.waitForTimeout(40);
+  const controlCascadeEarly = await captureControlCascade('early-40ms');
+  await page.waitForTimeout(360);
+  const controlCascadeSettled = await captureControlCascade('settled-400ms');
+  await page.waitForTimeout(2100);
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
@@ -158,6 +201,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     url,
     wall_clock_ms: Date.now() - started,
     metrics,
+    control_cascade_diagnostic: { early: controlCascadeEarly, settled: controlCascadeSettled },
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
     viewport_change: { before: beforeResize, after: afterResize },
