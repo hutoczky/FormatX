@@ -42,15 +42,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 60); do
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-${{ matrix.profile }}-$attempt" -o "$RUNNER_TEMP/live-p0.txt" \
-              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then
-              echo 'Exact P0 marker is live on production.'
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/production-revision.txt?wait=${GITHUB_RUN_ID}-${{ matrix.profile }}-$attempt" -o "$RUNNER_TEMP/live-revision.txt" \
+              && cmp -s docs/production-revision.txt "$RUNNER_TEMP/live-revision.txt"; then
+              echo 'Exact production revision marker is live.'
               exit 0
             fi
             sleep 5
           done
-          echo 'Production never converged to the audited P0 marker.' >&2
+          echo 'Production never converged to the audited revision marker.' >&2
           exit 1
 
       - uses: actions/setup-node@v5
@@ -133,11 +133,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 60); do
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/p0-validation-version.txt?wait=${GITHUB_RUN_ID}-security-$attempt" -o "$RUNNER_TEMP/live-p0.txt" \
-              && cmp -s docs/p0-validation-version.txt "$RUNNER_TEMP/live-p0.txt"; then exit 0; fi
+          for attempt in $(seq 1 90); do
+            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/production-revision.txt?wait=${GITHUB_RUN_ID}-security-$attempt" -o "$RUNNER_TEMP/live-revision.txt" \
+              && cmp -s docs/production-revision.txt "$RUNNER_TEMP/live-revision.txt"; then exit 0; fi
             sleep 5
           done
+          echo 'Production revision marker did not converge before security audit.' >&2
           exit 1
 
       - name: Confirm production security headers
