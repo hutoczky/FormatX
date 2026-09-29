@@ -13,7 +13,41 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], controlSnapshots: [], loafs: [] };
+    const captureControls = label => {
+      const root = document.documentElement;
+      const controls = document.querySelector('#hero .fx-reference-controls-r204');
+      const sound = document.querySelector('#hero .fx-three-sound');
+      const ask = document.querySelector('#hero .fx-reference-ask');
+      const snap = node => {
+        if (!(node instanceof Element)) return null;
+        const rect = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return {
+          parent: node.parentElement?.className || node.parentElement?.id || node.parentElement?.tagName || '',
+          x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+          display: style.display, position: style.position,
+          top: style.top, right: style.right, bottom: style.bottom, left: style.left,
+          transform: style.transform
+        };
+      };
+      window.__fxPerf.controlSnapshots.push({
+        label, at: performance.now(),
+        referenceProduction: root.dataset.fxReferenceProductionR244 || '',
+        controlOwner: root.dataset.fxControlOwnerR264 || '',
+        referenceControlLayout: root.dataset.fxReferenceControlLayout || '',
+        controls: snap(controls), sound: snap(sound), ask: snap(ask)
+      });
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+      captureControls('domcontentloaded');
+      requestAnimationFrame(() => captureControls('raf1'));
+      requestAnimationFrame(() => requestAnimationFrame(() => captureControls('raf2')));
+      setTimeout(() => captureControls('t100'), 100);
+      setTimeout(() => captureControls('t250'), 250);
+      setTimeout(() => captureControls('t500'), 500);
+      setTimeout(() => captureControls('t1000'), 1000);
+    }, { once: true });
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -43,6 +77,26 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
           });
         }
       }).observe({ type: 'layout-shift', buffered: true });
+    } catch (_) {}
+    try {
+      new PerformanceObserver(list => {
+        for (const entry of list.getEntries()) {
+          window.__fxPerf.loafs.push({
+            startTime: entry.startTime,
+            duration: entry.duration,
+            blockingDuration: entry.blockingDuration,
+            scripts: (entry.scripts || []).map(script => ({
+              sourceURL: script.sourceURL || '',
+              invoker: script.invoker || '',
+              invokerType: script.invokerType || '',
+              duration: script.duration || 0,
+              executionStart: script.executionStart || 0,
+              forcedStyleAndLayoutDuration: script.forcedStyleAndLayoutDuration || 0,
+              pauseDuration: script.pauseDuration || 0
+            }))
+          });
+        }
+      }).observe({ type: 'long-animation-frame', buffered: true });
     } catch (_) {}
     try {
       new PerformanceObserver(list => {
@@ -134,6 +188,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       largestContentfulPaint: window.__fxPerf.lcp,
       cumulativeLayoutShift: window.__fxPerf.cls,
       layoutShifts: window.__fxPerf.shifts,
+      controlSnapshots: window.__fxPerf.controlSnapshots,
+      longAnimationFrames: window.__fxPerf.loafs,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
       introComplete: window.__fxPerf.introComplete,
       renderer: document.documentElement.dataset.fxRenderer || null,
