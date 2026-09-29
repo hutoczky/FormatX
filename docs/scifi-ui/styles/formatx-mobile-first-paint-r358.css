@@ -1003,3 +1003,27 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+
+/* R1804 — mobile hero information panel final paint at first frame.
+   Geometry is already owned by this render-blocking stylesheet. Mirror only
+   the settled R1781 habitat paint so deferred CSS no longer turns a black/raw
+   panel into the final deep-blue glass card several seconds after FCP. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root body.living-architecture
+  #hero > .hero-grid > .hero-copy{
+    background:
+      radial-gradient(circle at 84% 8%,rgba(103,218,238,.045),transparent 38%),
+      linear-gradient(150deg,rgba(4,18,29,.60),rgba(2,9,16,.70))!important;
+    border-color:rgba(119,222,239,.12)!important;
+    box-shadow:
+      inset 0 1px 0 rgba(224,251,255,.028),
+      0 18px 52px rgba(0,0,0,.12)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    filter:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+}
+/* production-r1804-mobile-hero-panel-first-paint-parity */
