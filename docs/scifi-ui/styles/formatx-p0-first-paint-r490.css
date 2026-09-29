@@ -802,16 +802,22 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
       radial-gradient(ellipse 34% 30% at 51% 51%,rgba(44,145,158,.032),transparent 74%)!important;
   }
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
-    inset:4% 22%!important;
-    clip-path:polygon(49% 0,62% 5%,72% 15%,82% 29%,79% 43%,90% 57%,78% 70%,72% 85%,58% 94%,52% 100%,40% 94%,29% 98%,24% 82%,13% 70%,18% 55%,10% 39%,18% 24%,29% 11%,41% 6%)!important;
+    inset:3% 16%!important;
+    clip-path:polygon(50% 0,66% 5%,80% 16%,91% 33%,89% 51%,82% 67%,70% 83%,56% 98%,40% 94%,26% 84%,14% 68%,9% 49%,12% 31%,23% 16%,37% 6%)!important;
     background:
-      linear-gradient(31deg,transparent 0 42.5%,rgba(57,165,176,.12) 43.2% 44.0%,transparent 44.8% 100%),
-      linear-gradient(118deg,transparent 0 52.6%,rgba(100,194,200,.078) 53.2% 54.0%,transparent 54.8% 100%),
-      linear-gradient(158deg,transparent 0 64.0%,rgba(42,132,145,.06) 64.6% 65.2%,transparent 66.0% 100%),
-      radial-gradient(ellipse at 34% 17%,rgba(188,204,201,.38),rgba(105,120,119,.15) 26%,transparent 48%),
-      radial-gradient(ellipse at 69% 77%,rgba(72,88,88,.19),transparent 55%),
-      conic-gradient(from 202deg at 49% 45%,rgba(9,13,15,.995),rgba(70,79,79,.70) 13%,rgba(19,26,28,.988) 27%,rgba(89,98,95,.42) 40%,rgba(12,18,20,.995) 53%,rgba(54,64,64,.68) 67%,rgba(7,12,14,.995) 83%,rgba(41,50,51,.68))!important;
-    opacity:.95!important;
+      linear-gradient(31deg,transparent 0 42.2%,rgba(72,178,187,.14) 43.0% 44.1%,transparent 45.0% 100%),
+      linear-gradient(118deg,transparent 0 52.2%,rgba(116,207,210,.095) 53.0% 54.2%,transparent 55.0% 100%),
+      linear-gradient(158deg,transparent 0 63.6%,rgba(55,148,158,.075) 64.4% 65.5%,transparent 66.4% 100%),
+      radial-gradient(ellipse at 34% 17%,rgba(221,230,225,.50),rgba(139,153,150,.24) 27%,transparent 50%),
+      radial-gradient(ellipse at 70% 78%,rgba(105,119,117,.28),transparent 57%),
+      conic-gradient(from 202deg at 49% 45%,rgba(22,28,30,.995),rgba(103,114,112,.78) 13%,rgba(37,45,47,.988) 27%,rgba(128,138,133,.56) 40%,rgba(26,33,35,.995) 53%,rgba(84,95,93,.76) 67%,rgba(17,23,25,.995) 83%,rgba(66,76,77,.76))!important;
+    box-shadow:
+      inset 0 1px 0 rgba(237,244,240,.20),
+      inset 9px -15px 25px rgba(2,8,11,.31),
+      inset -9px 11px 22px rgba(145,158,154,.12),
+      0 22px 46px rgba(0,0,0,.42)!important;
+    opacity:.97!important;
+    transform:translate3d(1.5%,0,0)!important;
   }
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
     inset:43.5% 41.6%!important;
@@ -829,6 +835,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 /* production-r1772-biocrystal-veins-iris-tendrils-final-frame-parity */
 /* production-r1773-compositor-promoted-biocrystal-proxy */
 /* production-r1803-first-paint-final-frame-smoky-bioglass-parity */
+/* production-r1806-mobile-first-final-silhouette-luminance-parity */
 @media(prefers-reduced-motion:reduce){
   .fx-mag-first-paint-r1756{transition:none!important}
 }
