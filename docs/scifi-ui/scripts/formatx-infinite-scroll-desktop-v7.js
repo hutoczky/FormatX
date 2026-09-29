@@ -86,6 +86,7 @@
   root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
   root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
   root.dataset.fxLoopAutomationHotPathR1812='zero-live-layout-r1813-cached-boundary-only';
+  root.dataset.fxLoopTailScrollBudgetR1814='settle-only-never-materialize-during-active-scroll';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -887,9 +888,21 @@
   }
 
   function materializeDesktopLoopTailNow() {
-    tailMaterializeScheduled = false;
     tailMaterializeTask = 0;
-    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) return false;
+    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) {
+      tailMaterializeScheduled = false;
+      return false;
+    }
+    /* R1814 — requestIdleCallback can legally fire between two active scroll
+       frames, and its timeout can fire while the gesture is still hot. Never
+       expand the deferred tail while native scrolling is active. */
+    if(root.dataset.fxScrollActivity==='scrolling'||root.classList.contains('fx-page-scrolling')){
+      root.dataset.fxLoopTailMaterializeR1814='deferred-until-scroll-settle';
+      tailMaterializeScheduled=true;
+      tailMaterializeTask=window.setTimeout(materializeDesktopLoopTailNow,180);
+      return false;
+    }
+    tailMaterializeScheduled = false;
 
     document.querySelectorAll([
       '#main-content > section.scene:not(#hero)',
