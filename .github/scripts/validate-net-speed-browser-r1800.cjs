@@ -62,10 +62,10 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   await page.waitForFunction(()=>{
     const el=document.querySelector('#network');
     return el?.getAttribute('data-fx-net-state')==='complete';
-  },null,{timeout:30000});
+  },null,{timeout:90000});
 
-  assert.ok(apiRequests>=12,'Expected ping/download/upload traffic after user action');
-  for(const selector of ['[data-net-ping]','[data-net-jitter]','[data-net-download]','[data-net-upload]']){
+  assert.ok(apiRequests>=30,'Expected parallel ping/download/upload traffic after user action');
+  for(const selector of ['[data-net-ping]','[data-net-jitter]','[data-net-download]','[data-net-down-latency]','[data-net-upload]','[data-net-up-latency]']){
     const value=(await page.locator(selector).textContent()||'').trim();
     assert.notEqual(value,'—',selector+' should contain a measured value');
   }
