@@ -10,6 +10,30 @@
   let fallback = 0;
   let observer = null;
 
+  function warmMobileHeroStyles() {
+    if (!matchMedia('(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)').matches) {
+      root.dataset.fxDeferredCssWarmR1813 = 'desktop-not-required';
+      return;
+    }
+    const links = Array.from(document.querySelectorAll('link[data-fx-r487-warm="mobile-hero"]'));
+    let count = 0;
+    for (const source of links) {
+      if (!(source instanceof HTMLLinkElement) || !source.href) continue;
+      if (document.querySelector(`link[data-fx-r487-preload-r1813][href="${CSS.escape(source.href)}"]`)) continue;
+      const preload = document.createElement('link');
+      preload.rel = 'preload';
+      preload.as = 'style';
+      preload.href = source.href;
+      preload.fetchPriority = 'low';
+      preload.dataset.fxR487PreloadR1813 = 'mobile-hero';
+      document.head.appendChild(preload);
+      count += 1;
+    }
+    root.dataset.fxDeferredCssWarmR1813 = count ? 'warming-mobile-hero' : 'no-mobile-hero-links';
+    root.dataset.fxDeferredCssWarmCountR1813 = String(count);
+  }
+
+
   function activate(reason) {
     if (activated) return;
     activated = true;
@@ -77,6 +101,12 @@
     if (activated || document.visibilityState !== 'visible') return;
     if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
   }, { passive: true });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', warmMobileHeroStyles, { once: true });
+  } else {
+    warmMobileHeroStyles();
+  }
 
   // Background tabs may never publish an FCP entry. Activating while hidden is
   // safe because no user-visible first paint can be displaced.
