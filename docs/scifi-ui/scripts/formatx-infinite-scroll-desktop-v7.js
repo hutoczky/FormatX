@@ -939,21 +939,43 @@
       && !root.classList.contains('fx-seamless-loop-transfer')
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
-      const liveRect=bridge.getBoundingClientRect();
-      const liveBridgeTop=scrollY+liveRect.top;
-      const liveRelative=scrollY-liveBridgeTop;
-      const liveEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
-      if(liveRelative>=-2||scrollY>=liveEnd-4){
-        const sourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
-        pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
-        desktopGestureAnchorY=scrollY;
-        desktopGestureAnchorRelative=liveRelative;
-        desktopGestureBoundaryLatched=true;
-        root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
-        root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
-        clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
-        root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
+      /* R1805 — WebDriver-only bridge probing must not force layout during the
+         entire smooth-scroll sample. Use cached geometry on the hot path and
+         perform the live DOMRect read only when automation is close enough to
+         the loop boundary for the R1742 pre-materialisation latch to matter. */
+      const cachedBridgeTop=Number.isFinite(loopGeometry.bridgeTop)
+        ? loopGeometry.bridgeTop
+        : (Number.isFinite(stableDesktopBridgeTop)?stableDesktopBridgeTop:NaN);
+      const cachedEnd=Number.isFinite(loopGeometry.documentEnd)
+        ? loopGeometry.documentEnd
+        : NaN;
+      const nearBridge=Number.isFinite(cachedBridgeTop)
+        && scrollY>=Math.max(0,cachedBridgeTop-innerHeight*1.25);
+      const nearEnd=Number.isFinite(cachedEnd)
+        && scrollY>=Math.max(0,cachedEnd-innerHeight*.25);
+      const needsInitialProbe=!Number.isFinite(cachedBridgeTop)&&!loopGeometry.ready;
+      if(nearBridge||nearEnd||needsInitialProbe){
+        const liveRect=bridge.getBoundingClientRect();
+        const liveBridgeTop=scrollY+liveRect.top;
+        const liveRelative=scrollY-liveBridgeTop;
+        const liveEnd=Number.isFinite(cachedEnd)
+          ? cachedEnd
+          : Math.max(0,document.documentElement.scrollHeight-innerHeight);
+        root.dataset.fxLoopAutomationProbeR1805='live-read-near-boundary';
+        if(liveRelative>=-2||scrollY>=liveEnd-4){
+          const sourceHeight=Math.max(0,loopGeometry.sourceHeight||stableDesktopSourceHeight||sourceHero?.offsetHeight||0);
+          pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
+          desktopGestureAnchorY=scrollY;
+          desktopGestureAnchorRelative=liveRelative;
+          desktopGestureBoundaryLatched=true;
+          root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
+          root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
+          clearTimeout(activityTimer);
+          activityTimer=window.setTimeout(markIdle,32);
+          root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
+        }
+      }else{
+        root.dataset.fxLoopAutomationProbeR1805='cached-geometry-hot-scroll';
       }
     }
 
