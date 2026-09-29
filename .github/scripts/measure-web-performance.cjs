@@ -13,7 +13,43 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], controlTimeline: [] };
+    const beginControlTrace = () => {
+      if (window.__fxPerf.controlTraceStarted) return;
+      const el = document.querySelector('.fx-three-sound');
+      if (!el) return;
+      window.__fxPerf.controlTraceStarted = true;
+      let lastKey = '';
+      const started = performance.now();
+      const snap = () => {
+        const rect = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        const key = [rect.x,rect.y,rect.width,rect.height,cs.position,cs.display].join('|');
+        if (key !== lastKey) {
+          lastKey = key;
+          const activeSheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
+            .filter(link => !link.disabled && (link.media === '' || link.media === 'all' || matchMedia(link.media).matches))
+            .map(link => (link.getAttribute('href') || '').split('?')[0].split('/').pop())
+            .filter(Boolean);
+          window.__fxPerf.controlTimeline.push({
+            at: performance.now(),
+            rect: { x:rect.x,y:rect.y,width:rect.width,height:rect.height },
+            computed: { width:cs.width,height:cs.height,position:cs.position,display:cs.display,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,transform:cs.transform },
+            rootState: {
+              referenceProduction: document.documentElement.dataset.fxReferenceProductionR244 || '',
+              referenceLayout: document.documentElement.dataset.fxMobileReferenceLayout || '',
+              quality: document.documentElement.dataset.fxQualityR461 || ''
+            },
+            activeSheets
+          });
+        }
+        if (performance.now() - started < 900) requestAnimationFrame(snap);
+      };
+      requestAnimationFrame(snap);
+    };
+    const controlObserver = new MutationObserver(() => beginControlTrace());
+    controlObserver.observe(document.documentElement,{childList:true,subtree:true});
+    addEventListener('DOMContentLoaded', beginControlTrace, { once:true });
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -59,56 +95,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#hero-title');
 
-  const controlCascadeTimeline = await page.evaluate(async () => {
-    const el = document.querySelector('.fx-three-sound');
-    if (!el) return [{ missing: true }];
-    const samples = [];
-    let lastKey = '';
-    const started = performance.now();
-    const snapshot = () => {
-      const rect = el.getBoundingClientRect();
-      const cs = getComputedStyle(el);
-      const key = [rect.x,rect.y,rect.width,rect.height,cs.position,cs.display].join('|');
-      if (key === lastKey) return;
-      lastKey = key;
-      const activeSheets = [...document.querySelectorAll('link[rel="stylesheet"]')]
-        .filter(link => !link.disabled && (link.media === '' || link.media === 'all' || matchMedia(link.media).matches))
-        .map(link => (link.getAttribute('href') || '').split('?')[0].split('/').pop())
-        .filter(Boolean);
-      samples.push({
-        at: performance.now(),
-        rect: { x:rect.x, y:rect.y, width:rect.width, height:rect.height },
-        computed: {
-          width:cs.width,height:cs.height,position:cs.position,display:cs.display,
-          top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,transform:cs.transform
-        },
-        media: {
-          coarse: matchMedia('(pointer:coarse)').matches,
-          fine: matchMedia('(pointer:fine)').matches,
-          max900: matchMedia('(max-width:900px)').matches,
-          max1100: matchMedia('(max-width:1100px)').matches
-        },
-        rootState: {
-          referenceProduction: document.documentElement.dataset.fxReferenceProductionR244 || '',
-          referenceLayout: document.documentElement.dataset.fxMobileReferenceLayout || '',
-          quality: document.documentElement.dataset.fxQualityR461 || '',
-          controlOwner: document.documentElement.dataset.fxReferenceControlsOwner || ''
-        },
-        activeSheets
-      });
-    };
-    snapshot();
-    await new Promise(resolve => {
-      const tick = () => {
-        snapshot();
-        if (performance.now() - started < 720) requestAnimationFrame(tick);
-        else resolve();
-      };
-      requestAnimationFrame(tick);
-    });
-    return samples;
-  });
-  await page.waitForTimeout(1780);
+  await page.waitForTimeout(2500);
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
@@ -208,7 +195,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     url,
     wall_clock_ms: Date.now() - started,
     metrics,
-    control_cascade_timeline: controlCascadeTimeline,
+    control_cascade_timeline: window.__fxPerf.controlTimeline,
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
     viewport_change: { before: beforeResize, after: afterResize },
