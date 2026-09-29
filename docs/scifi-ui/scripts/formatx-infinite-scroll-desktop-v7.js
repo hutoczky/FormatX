@@ -87,6 +87,7 @@
   root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
   root.dataset.fxLoopTailMaterializeR1807='strict-scroll-idle-style-batch';
   root.dataset.fxLoopHotPathR1807='cached-geometry-minimal-root-mutation';
+  root.dataset.fxLoopHotPathR1808='cached-boundary-no-forced-layout-read';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -996,27 +997,37 @@
         && scrollY>=Math.max(0,cachedEnd-innerHeight*.25);
       const needsInitialProbe=!Number.isFinite(cachedBridgeTop)&&!loopGeometry.ready;
       if(nearBridge||nearEnd||needsInitialProbe){
-        const liveRect=bridge.getBoundingClientRect();
-        const liveBridgeTop=scrollY+liveRect.top;
-        const liveRelative=scrollY-liveBridgeTop;
-        const liveEnd=Number.isFinite(cachedEnd)
-          ? cachedEnd
-          : Math.max(0,document.documentElement.scrollHeight-innerHeight);
-        root.dataset.fxLoopAutomationProbeR1805='live-read-near-boundary';
-        if(liveRelative>=-2||scrollY>=liveEnd-4){
-          const sourceHeight=Math.max(0,loopGeometry.sourceHeight||stableDesktopSourceHeight||sourceHero?.offsetHeight||0);
+        /* R1808 — when cached geometry exists, even the automation boundary
+           path remains layout-read free. R1807 guarantees that lazy-tail style
+           materialisation cannot move the bridge during the hot scroll. Only a
+           genuinely missing cache may fall back to one live DOMRect read. */
+        let boundaryBridgeTop=cachedBridgeTop;
+        let boundaryEnd=cachedEnd;
+        let probeMode='cached-geometry-near-boundary';
+        if(!Number.isFinite(boundaryBridgeTop)){
+          const liveRect=bridge.getBoundingClientRect();
+          boundaryBridgeTop=scrollY+liveRect.top;
+          probeMode='live-fallback-cache-unavailable';
+        }
+        if(!Number.isFinite(boundaryEnd)){
+          boundaryEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+        }
+        const liveRelative=scrollY-boundaryBridgeTop;
+        root.dataset.fxLoopAutomationProbeR1808=probeMode;
+        if(liveRelative>=-2||scrollY>=boundaryEnd-4){
+          const sourceHeight=Math.max(0,loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
           pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
           desktopGestureAnchorY=scrollY;
           desktopGestureAnchorRelative=liveRelative;
           desktopGestureBoundaryLatched=true;
-          root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
+          root.dataset.fxLoopAutomationBoundaryR1742='cached-pre-materialisation-latched-r1808';
           root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
           clearTimeout(activityTimer);
           activityTimer=window.setTimeout(markIdle,32);
           root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
         }
-      }else{
-        root.dataset.fxLoopAutomationProbeR1805='cached-geometry-hot-scroll';
+      }else if(root.dataset.fxLoopAutomationProbeR1808!=='cached-geometry-hot-scroll'){
+        root.dataset.fxLoopAutomationProbeR1808='cached-geometry-hot-scroll';
       }
     }
 
