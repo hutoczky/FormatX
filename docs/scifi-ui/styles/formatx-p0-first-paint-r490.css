@@ -1,3 +1,7 @@
+/* R1815 — first-byte geometry reset while the heavy critical-core sheet is deferred. */
+html:root body.living-architecture{margin:0!important;min-width:320px!important;overflow-x:clip!important}
+/* production-r1815-zero-default-body-margin */
+
 /* R1714 — tokens required before deferred quality/design enhancement. */
 :root{
   --fx-cyan:#7cecff;
@@ -1028,3 +1032,326 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
+
+
+/* R1816 — measured mobile first/final MAG mass parity.
+   Lighthouse filmstrip: first-paint visible mass ~=86x159px, settled R326
+   ~=108x160px. Preserve the height and widen the static bioglass proxy by
+   ~25% so the WebGL handoff no longer looks like a shape replacement.
+   Static CSS only: no extra JS, filter or animation work. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+    top:44%!important;
+    width:clamp(198px,55vw,228px)!important;
+    aspect-ratio:.98!important;
+    opacity:1!important;
+    background:
+      radial-gradient(ellipse 80% 82% at 50% 48%,rgba(65,91,89,.050),transparent 72%),
+      radial-gradient(ellipse 52% 54% at 46% 43%,rgba(76,99,95,.046),transparent 68%)!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    inset:1% 4% 0!important;
+    clip-path:polygon(
+      48% 0,
+      64% 4%,
+      79% 15%,
+      91% 31%,
+      96% 48%,
+      89% 64%,
+      75% 79%,
+      56% 100%,
+      37% 93%,
+      20% 79%,
+      8% 61%,
+      5% 41%,
+      15% 22%,
+      30% 8%
+    )!important;
+    background:
+      linear-gradient(151deg,transparent 0 28%,rgba(146,164,158,.10) 29% 32%,transparent 33% 100%),
+      linear-gradient(35deg,transparent 0 43%,rgba(18,31,32,.30) 44% 48%,transparent 49% 100%),
+      linear-gradient(103deg,transparent 0 55%,rgba(120,138,132,.085) 56% 59%,transparent 60% 100%),
+      radial-gradient(ellipse at 35% 20%,rgba(162,177,170,.38),rgba(87,106,101,.22) 27%,transparent 54%),
+      radial-gradient(ellipse at 75% 72%,rgba(17,29,31,.42),transparent 58%),
+      conic-gradient(
+        from 18deg at 49% 48%,
+        rgba(83,102,98,.97),
+        rgba(49,67,65,.99) 13%,
+        rgba(103,119,114,.95) 27%,
+        rgba(42,59,59,.99) 40%,
+        rgba(91,110,105,.96) 54%,
+        rgba(50,68,67,.99) 68%,
+        rgba(111,126,119,.94) 81%,
+        rgba(43,59,60,.99) 92%,
+        rgba(79,98,94,.98)
+      )!important;
+    box-shadow:
+      inset 10px -13px 23px rgba(2,7,10,.44),
+      inset -8px 8px 21px rgba(161,177,169,.055),
+      0 20px 42px rgba(0,0,0,.42)!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:46.5% 42% 45.5% 42%!important;
+    border-radius:46% 54% 49% 51%!important;
+    border:1px solid rgba(71,170,180,.38)!important;
+    background:
+      radial-gradient(circle at 44% 38%,rgba(137,224,224,.80) 0 5%,rgba(45,145,158,.67) 10%,rgba(6,44,54,.74) 23%,rgba(1,9,14,.99) 53%,rgba(0,3,6,.99) 100%)!important;
+    box-shadow:
+      0 0 0 3px rgba(1,6,10,.88),
+      0 0 8px rgba(55,166,179,.13),
+      inset -2px -2px 5px rgba(0,2,5,.74),
+      inset 1px 1px 4px rgba(103,208,212,.12)!important;
+  }
+}
+/* production-r1816-mobile-proxy-final-mass-parity */
+
+
+/* R1817 — desktop header first-paint/final geometry parity.
+   Lighthouse attributes ~0.0322 CLS to the topbar. The blocking desktop sheet
+   reserved only the 76px carrier; r244 later positioned/resized the brand and
+   MAG/HU/menu controls. Mirror those settled boxes before first layout.
+   Paint remains owned by r244; this block owns geometry only. */
+@media (min-width:901px){
+  html:root:root body.living-architecture .topbar{
+    position:relative!important;
+    inset:auto!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand{
+    position:absolute!important;
+    inset:18px auto auto max(38px,calc((100vw - 1320px)/2))!important;
+    display:flex!important;
+    align-items:center!important;
+    gap:12px!important;
+    box-sizing:border-box!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:40px!important;
+    min-height:40px!important;
+    max-height:40px!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand img{
+    box-sizing:border-box!important;
+    width:40px!important;
+    min-width:40px!important;
+    max-width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+    max-height:40px!important;
+    flex:0 0 40px!important;
+    object-fit:contain!important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand strong{
+    font-size:14px!important;
+    line-height:1!important;
+    letter-spacing:.15em!important;
+    white-space:nowrap!important;
+  }
+
+  html:root:root body.living-architecture .topbar .brand small{
+    display:block!important;
+    margin-top:5px!important;
+    font-size:7px!important;
+    line-height:1!important;
+    letter-spacing:.22em!important;
+    white-space:nowrap!important;
+  }
+
+  html:root:root body.living-architecture .topbar :is(
+    .fx-reference-mag-button,
+    .fx-language-toggle,
+    .fx-reference-menu-button
+  ){
+    position:absolute!important;
+    inset:auto!important;
+    box-sizing:border-box!important;
+    display:grid!important;
+    place-items:center!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-mag-button{
+    top:16px!important;
+    right:174px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-language-toggle{
+    top:16px!important;
+    right:112px!important;
+    width:46px!important;
+    min-width:46px!important;
+    max-width:46px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+  }
+
+  html:root:root body.living-architecture .topbar .fx-reference-menu-button{
+    top:10px!important;
+    right:38px!important;
+    width:58px!important;
+    min-width:58px!important;
+    max-width:58px!important;
+    height:56px!important;
+    min-height:56px!important;
+    max-height:56px!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .header-actions,
+  html:root:root body.living-architecture .topbar #fx-reference-legacy-menu,
+  html:root:root body.living-architecture .topbar .menu-toggle:not(.fx-reference-menu-button){
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}
+/* production-r1817-desktop-header-first-paint-parity */
+
+
+/* R1818 — APEX/atmosphere zero-flow first-byte owner.
+   The deferred critical-core sheet already carries this production contract,
+   but on desktop it activates only after FCP. Before then, the raw <canvas>
+   owns its intrinsic 300x150 layout box and pushes the topbar/hero downward.
+   Mirror the settled fixed geometry in P0 so those decorative layers never
+   participate in document flow at any rendered frame. */
+html:root:root body.living-architecture #fx-apex-canvas,
+html:root:root body.living-architecture > .fx-atmosphere,
+html:root:root body.living-architecture > .fx-atmosphere > span{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  pointer-events:none!important;
+}
+
+html:root:root body.living-architecture #fx-apex-canvas{
+  display:block!important;
+  z-index:-3!important;
+  opacity:0;
+}
+
+html:root:root body.living-architecture > .fx-atmosphere,
+html:root:root body.living-architecture > .fx-atmosphere > span{
+  z-index:-2!important;
+}
+/* production-r1818-apex-atmosphere-zero-flow-first-byte */
+
+
+/* R1819 — parent-independent desktop hero-control first-frame owner.
+   During early control canonicalisation the node can briefly live under a
+   legacy owner before r264 reattaches it to hero-space. The old owner exposes
+   132x132 top-right controls for one rendered frame. The desktop mode marker
+   is already published in <head>, so own geometry by mode instead of parent. */
+@media (min-width:901px){
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"]
+  body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264{
+    position:absolute!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:20px!important;
+    left:50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    gap:0 14px!important;
+    overflow:visible!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"]
+  body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+  }
+
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"]
+  body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"]
+  body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"]
+  body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    flex:0 0 54px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+}
+/* production-r1819-desktop-control-parent-independent-owner */
