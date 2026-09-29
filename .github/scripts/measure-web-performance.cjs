@@ -13,7 +13,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], controlSnapshots: [] };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], controlSnapshots: [], loafs: [] };
     const captureControls = label => {
       const root = document.documentElement;
       const controls = document.querySelector('#hero .fx-reference-controls-r204');
@@ -77,6 +77,26 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
           });
         }
       }).observe({ type: 'layout-shift', buffered: true });
+    } catch (_) {}
+    try {
+      new PerformanceObserver(list => {
+        for (const entry of list.getEntries()) {
+          window.__fxPerf.loafs.push({
+            startTime: entry.startTime,
+            duration: entry.duration,
+            blockingDuration: entry.blockingDuration,
+            scripts: (entry.scripts || []).map(script => ({
+              sourceURL: script.sourceURL || '',
+              invoker: script.invoker || '',
+              invokerType: script.invokerType || '',
+              duration: script.duration || 0,
+              executionStart: script.executionStart || 0,
+              forcedStyleAndLayoutDuration: script.forcedStyleAndLayoutDuration || 0,
+              pauseDuration: script.pauseDuration || 0
+            }))
+          });
+        }
+      }).observe({ type: 'long-animation-frame', buffered: true });
     } catch (_) {}
     try {
       new PerformanceObserver(list => {
@@ -169,6 +189,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       cumulativeLayoutShift: window.__fxPerf.cls,
       layoutShifts: window.__fxPerf.shifts,
       controlSnapshots: window.__fxPerf.controlSnapshots,
+      longAnimationFrames: window.__fxPerf.loafs,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
       introComplete: window.__fxPerf.introComplete,
       renderer: document.documentElement.dataset.fxRenderer || null,
