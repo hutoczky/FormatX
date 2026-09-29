@@ -241,13 +241,15 @@
   }
 
   function scenes() {
-    const sceneSections = SCENES.map(scene => document.getElementById(scene[0])).filter(Boolean);
+    /* R1812c — R536 is the canonical scroll/scene owner. Do not build a second
+       scene observer or retoggle navigation state when that runtime is present. */
     if(document.querySelector('script[data-fx-cinematic-journey-r536]')){
-      ROOT.dataset.fxApexScrollPerformanceR1646='r536-owner-no-legacy-progress-raf';
+      ROOT.dataset.fxApexScrollPerformanceR1646='r536-owner-zero-duplicate-scene-work';
       ROOT.style.setProperty('--progress','0');
-      setScene(activeScene);
+      ROOT.dataset.fxScene=String(activeScene);
       return;
     }
+    const sceneSections = SCENES.map(scene => document.getElementById(scene[0])).filter(Boolean);
     if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver(entries => {
         let best = null;
@@ -297,22 +299,30 @@
   }
 
   function flow() {
-    const chapters = Array.from(document.querySelectorAll('[data-flow]'));
-    chapters.forEach(chapter => {
-      chapter.addEventListener('mouseenter', () => updateFlow(Number(chapter.dataset.flow)));
-      chapter.addEventListener('focus', () => updateFlow(Number(chapter.dataset.flow)));
-    });
+    /* R1812c — the static shell already owns flow 01. Use one delegated
+       interaction listener instead of attaching handlers and rewriting all four
+       cards at startup. The scroll observer remains, but does no initial write. */
+    const container = document.querySelector('.flow-chapters');
+    if (!container) return;
+    const activate = event => {
+      const chapter = event.target instanceof Element ? event.target.closest('[data-flow]') : null;
+      if (chapter && container.contains(chapter)) updateFlow(Number(chapter.dataset.flow));
+    };
+    container.addEventListener('pointerover', activate, { passive: true });
+    container.addEventListener('focusin', activate, { passive: true });
+
     if ('IntersectionObserver' in window) {
+      const chapters = container.querySelectorAll('[data-flow]');
       const observer = new IntersectionObserver(entries => {
         let best = null;
         entries.forEach(entry => {
           if (entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) best = entry;
         });
         if (best) updateFlow(Number(best.target.dataset.flow));
-      }, { rootMargin: '-32% 0px -32%', threshold: [0, 0.2, 0.5, 0.8] });
+      }, { rootMargin: '-32% 0px -32%', threshold: [0.2, 0.5, 0.8] });
       chapters.forEach(chapter => observer.observe(chapter));
     }
-    updateFlow(0);
+    ROOT.dataset.fxFlow = String(activeFlow);
   }
 
   function pointerVariables() {
@@ -342,7 +352,6 @@
      Each phase still runs separately to avoid one monolithic task. */
   let deferredPhase = 0;
   let deferredCancelled = false;
-  let deferredStartTimer = 0;
   const deferredTasks = [
     ['reveal', reveal],
     ['scenes', scenes],
@@ -375,13 +384,9 @@
   function startDeferredAfterStablePaint() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        ROOT.dataset.fxApexDeferredR1812 = 'armed-after-first-paint';
-        deferredStartTimer = setTimeout(() => {
-          deferredStartTimer = 0;
-          if (deferredCancelled) return;
-          ROOT.dataset.fxApexDeferredR1812 = 'scheduled-after-cold-window';
-          scheduleDeferredPhase();
-        }, 1800);
+        if (deferredCancelled) return;
+        ROOT.dataset.fxApexDeferredR1812 = 'scheduled-after-stable-paint';
+        scheduleDeferredPhase();
       });
     });
   }
@@ -399,7 +404,6 @@
 
   addEventListener('pagehide', () => {
     deferredCancelled = true;
-    if (deferredStartTimer) clearTimeout(deferredStartTimer);
   }, { once: true });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseCritical, { once: true });
