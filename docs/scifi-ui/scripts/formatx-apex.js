@@ -334,21 +334,62 @@
     }, { once: true });
   }
 
-  function initialise() {
-    navigation();
-    applyLanguage(language, false);
-    reveal();
-    scenes();
-    flow();
-    pointerVariables();
-    updatePrice();
-    latestRelease();
-    setScene(activeScene);
-    ROOT.dataset.fxApex = 'controller-performance-v2';
-    ROOT.dataset.fxRenderer = 'three-host';
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+  /* R1812 — cold-start phase scheduler.
+     Keep controls and semantic ownership synchronous, but never initialise all
+     non-critical observers/network helpers in one DOMContentLoaded task. */
+  let deferredPhase = 0;
+  let deferredCancelled = false;
+  const deferredTasks = [
+    ['reveal', reveal],
+    ['scenes', scenes],
+    ['flow', flow],
+    ['pointer', pointerVariables],
+    ['release', latestRelease]
+  ];
+
+  function scheduleDeferredPhase() {
+    if (deferredCancelled || deferredPhase >= deferredTasks.length) {
+      if (!deferredCancelled) ROOT.dataset.fxApexDeferredR1812 = 'complete';
+      return;
+    }
+    const run = () => {
+      if (deferredCancelled) return;
+      const [name, task] = deferredTasks[deferredPhase++];
+      ROOT.dataset.fxApexDeferredR1812 = 'running-' + name;
+      try { task(); } catch (_) {}
+      scheduleDeferredPhase();
+    };
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(run, { timeout: 900 });
+    } else {
+      setTimeout(run, 0);
+    }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  else initialise();
+  function startDeferredAfterPaint() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ROOT.dataset.fxApexDeferredR1812 = 'scheduled-after-first-paint';
+        scheduleDeferredPhase();
+      });
+    });
+  }
+
+  function initialiseCritical() {
+    navigation();
+    applyLanguage(language, false);
+    setScene(activeScene);
+    ROOT.dataset.fxApex = 'controller-performance-v3-phased';
+    ROOT.dataset.fxApexColdStartR1812 = 'critical-ready';
+    ROOT.dataset.fxRenderer = 'three-host';
+    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated', phased: 'r1812' } }));
+    startDeferredAfterPaint();
+  }
+
+  addEventListener('pagehide', () => {
+    deferredCancelled = true;
+  }, { once: true });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseCritical, { once: true });
+  else initialiseCritical();
 }());
