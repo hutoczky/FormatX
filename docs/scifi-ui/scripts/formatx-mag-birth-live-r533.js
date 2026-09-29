@@ -50,11 +50,18 @@
     ROOT.dataset.fxMagBirthForcedStyleR1753 = 'immediate';
   }
   const LOW_POWER = MOBILE && CONSTRAINED;
-  const DURATION = 10000;
+  /* R1804 — keep the 10 s reference/proof timeline for deterministic design
+     evidence, but compress the real first-visit cinematic. Users should meet
+     the living core quickly instead of waiting through a ten-second gate. */
+  const DURATION = VISUAL_PROOF ? 10000 : (MOBILE ? (LOW_POWER ? 2200 : 2800) : 4200);
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
-  const EXIT_MS = 180;
-  const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
+  const EXIT_MS = 160;
+  const CORE_WARMUP_PROGRESS = MOBILE ? .54 : .58;
+  ROOT.dataset.fxMagBirthDurationR1804 = VISUAL_PROOF
+    ? 'reference-proof-10000ms'
+    : (MOBILE ? (LOW_POWER ? 'mobile-low-power-2200ms' : 'mobile-2800ms') : 'desktop-4200ms');
+  ROOT.dataset.fxMagBirthHandoffR1804 = 'early-native-warmup-compressed-cinematic';
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
   let seen = false;
@@ -126,8 +133,8 @@
   overlay.dataset.fxIntroR645 = 'biotic-genesis';
   overlay.dataset.fxIntroR646 = 'reference-biotic-film';
   overlay.dataset.fxIntroR647 = 'shot-match-biotic-genesis';
-  overlay.dataset.fxIntroR648 = 'exact-10s-runtime';
-  overlay.dataset.fxIntroAdaptiveR1549 = LOW_POWER ? 'full-10s-low-power-sharp-adaptive' : 'full-10s-studio-cinematic';
+  overlay.dataset.fxIntroR648 = VISUAL_PROOF ? 'exact-10s-reference-proof' : 'adaptive-fast-runtime-r1804';
+  overlay.dataset.fxIntroAdaptiveR1549 = VISUAL_PROOF ? 'full-10s-reference-proof' : (LOW_POWER ? 'compressed-low-power-cinematic-r1804' : 'compressed-studio-cinematic-r1804');
   overlay.dataset.fxIntroR649 = 'native-canvas-reference-rotoscope';
   overlay.dataset.fxIntroR650 = 'three-genesis-dna-cellular-living';
   overlay.dataset.fxIntroR651 = 'frame-matched-three-genesis';
@@ -207,7 +214,7 @@
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
-  ROOT.dataset.fxMagBirthArtR651 = 'frame-matched-10s-dna-cellular-tentacle-flash-handoff';
+  ROOT.dataset.fxMagBirthArtR651 = VISUAL_PROOF ? 'frame-matched-10s-reference-handoff' : 'compressed-dna-cellular-tentacle-flash-handoff-r1804';
   ROOT.dataset.fxMagBirthArtR657 = 'tubular-dna-diamond-iris-organic-shell-tapered-tendrils-reference-match';
   ROOT.dataset.fxMagBirthArtR660 = 'fine-dna-central-diamond-neural-cell-shell-mechanical-petals-nine-tendrils';
   ROOT.dataset.fxMagBirthArtR661 = 'dense-purple-cellular-shell-surface-diamond-dimensional-mechanical-core-eight-tendrils';
@@ -1224,9 +1231,9 @@
       }catch(_){}
     },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
 
-    // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
-    // deliberately close to the reference endpoint so a stalled GPU/import path
-    // can never strand the cinematic overlay beyond the finished shot.
+    // R1804: reference proof remains exactly 10.0 s; normal user playback is adaptive.
+    // Keep the bounded fail-open close to whichever timeline is active so a stalled
+    // GPU/import path can never strand the cinematic overlay beyond the finished shot.
     hardFinishTimer=window.setTimeout(
       ()=>finish(VALIDATED_SKIP_MODE?'validated-skip-timeout-r1557':'bounded-failsafe-r652'),
       VALIDATED_SKIP_MODE ? 35000 : (REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220))

@@ -44,7 +44,7 @@ function b(){
     return;
   }
   const e=document.createElement('script');
-  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade';
+  e.src='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260929-r1804-adaptive-intro-duration';
   e.async=false;
   e.dataset.fxMagBirthLiveR533='true';
   e.dataset.fxIntroRescueR1755='true';
