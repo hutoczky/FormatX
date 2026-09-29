@@ -1,5 +1,7 @@
-/* FormatX R1800 — user-initiated network speed test.
-   No automatic traffic. No idle RAF. Measures the browser -> FormatX edge path. */
+/* FormatX R1810 — user-initiated multi-stream gigabit network meter.
+   No automatic traffic. No idle RAF. Measures this browser -> FormatX Cloudflare edge.
+   High-throughput phases use parallel same-origin transfers so request/setup latency
+   cannot cap gigabit-class connections near ~100 Mbps. */
 (function(){
 'use strict';
 
@@ -20,12 +22,16 @@ const edge=section.querySelector('[data-net-edge]');
 const connection=section.querySelector('[data-net-connection]');
 const pingOut=section.querySelector('[data-net-ping]');
 const jitterOut=section.querySelector('[data-net-jitter]');
+const downLatencyOut=section.querySelector('[data-net-down-latency]');
+const upLatencyOut=section.querySelector('[data-net-up-latency]');
 const downOut=section.querySelector('[data-net-download]');
 const upOut=section.querySelector('[data-net-upload]');
 
 if(!(startButton instanceof HTMLButtonElement)||!(cancelButton instanceof HTMLButtonElement))return;
 
 const MB=1024*1024;
+const MAX_DOWNLOAD_STREAMS=8;
+const MAX_UPLOAD_STREAMS=8;
 let controller=null;
 let running=false;
 let result=null;
@@ -33,8 +39,8 @@ let result=null;
 const hu={
   idle:'A mérés csak gombnyomásra indul.',
   ping:'Kapcsolati késés mérése…',
-  download:'Letöltési sávszélesség mérése…',
-  upload:'Feltöltési sávszélesség mérése…',
+  download:'Letöltési sávszélesség mérése több párhuzamos adatfolyamon…',
+  upload:'Feltöltési sávszélesség mérése több párhuzamos adatfolyamon…',
   complete:'Mérés kész.',
   cancelled:'A mérés megszakítva.',
   error:'A mérés nem fejezhető be. Próbáld újra.',
@@ -49,8 +55,8 @@ const hu={
 const en={
   idle:'The test starts only when you press the button.',
   ping:'Measuring connection latency…',
-  download:'Measuring download bandwidth…',
-  upload:'Measuring upload bandwidth…',
+  download:'Measuring download bandwidth over multiple parallel streams…',
+  upload:'Measuring upload bandwidth over multiple parallel streams…',
   complete:'Test complete.',
   cancelled:'Test cancelled.',
   error:'The test could not finish. Try again.',
@@ -62,14 +68,19 @@ const en={
   edge:'EDGE',
   browserEstimate:'Browser estimate'
 };
+
 function copy(){return document.documentElement.lang==='en'?en:hu;}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function median(values){
-  const a=[...values].sort((x,y)=>x-y);
+  const a=values.filter(Number.isFinite).sort((x,y)=>x-y);
+  if(!a.length)return NaN;
   const m=Math.floor(a.length/2);
   return a.length%2?a[m]:(a[m-1]+a[m])/2;
 }
-function average(values){return values.reduce((a,b)=>a+b,0)/Math.max(1,values.length);}
+function average(values){
+  const a=values.filter(Number.isFinite);
+  return a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
+}
 function fmt(value,digits=1){return Number.isFinite(value)?value.toFixed(digits):'—';}
 function setStatus(text){if(status)status.textContent=text;}
 function setProgress(value){
@@ -100,8 +111,8 @@ function scoreLower(value,steps){
 function connectionScore(data){
   const latency=scoreLower(data.ping,[[10,100],[20,92],[40,80],[70,66],[110,48],[160,28]]);
   const jitter=scoreLower(data.jitter,[[2,100],[5,90],[10,76],[20,58],[35,38]]);
-  const down=scoreHigher(data.download,[[500,100],[250,94],[100,86],[50,75],[25,61],[10,45],[5,30]]);
-  const up=scoreHigher(data.upload,[[200,100],[100,94],[50,85],[25,74],[10,60],[5,45],[2,30]]);
+  const down=scoreHigher(data.download,[[1000,100],[750,98],[500,96],[250,92],[100,84],[50,74],[25,60],[10,44],[5,30]]);
+  const up=scoreHigher(data.upload,[[750,100],[500,98],[250,96],[100,92],[50,84],[25,73],[10,59],[5,44],[2,30]]);
   return Math.round(latency*.30+jitter*.15+down*.35+up*.20);
 }
 function qualityLabel(score){
@@ -112,15 +123,15 @@ function qualityLabel(score){
   return t.weak;
 }
 function speedLevel(mbps){
-  return clamp(Math.log10(1+Math.max(0,mbps))/Math.log10(1001),.06,1);
+  return clamp(Math.log10(1+Math.max(0,mbps))/Math.log10(2001),.06,1);
 }
 function latencyLevel(ms){
-  return clamp(1-(Math.max(0,ms)/180),.08,1);
+  return clamp(1-(Math.max(0,ms)/220),.08,1);
 }
 function nonce(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
 function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 
-async function request(url,options={},timeout=15000){
+async function request(url,options={},timeout=20000){
   if(!controller)throw new DOMException('Cancelled','AbortError');
   const local=new AbortController();
   const onAbort=()=>local.abort(controller.signal.reason);
@@ -134,29 +145,34 @@ async function request(url,options={},timeout=15000){
   }
 }
 
+async function pingSample(timeout=5000){
+  const started=performance.now();
+  const response=await request('/api/net/ping?r='+nonce(),{headers:{'Accept':'application/json'}},timeout);
+  if(!response.ok)throw new Error('ping '+response.status);
+  const payload=await response.json();
+  return {elapsed:performance.now()-started,payload};
+}
+
 async function measurePing(){
   const samples=[];
   let meta=null;
-  for(let i=0;i<6;i++){
-    const started=performance.now();
-    const response=await request('/api/net/ping?r='+nonce(),{headers:{'Accept':'application/json'}},5000);
-    if(!response.ok)throw new Error('ping '+response.status);
-    const payload=await response.json();
-    const elapsed=performance.now()-started;
-    if(i>0)samples.push(elapsed);
-    meta=payload;
-    setPrimary(fmt(elapsed,0),'ms',latencyLevel(elapsed));
-    setProgress(5+(i+1)*3);
-    if(i<5)await delay(45);
+  for(let i=0;i<8;i++){
+    const sample=await pingSample();
+    if(i>1)samples.push(sample.elapsed);
+    meta=sample.payload;
+    setPrimary(fmt(sample.elapsed,0),'ms',latencyLevel(sample.elapsed));
+    setProgress(4+(i+1)*2.25);
+    if(i<7)await delay(35);
   }
   const ping=median(samples);
   const diffs=samples.slice(1).map((v,i)=>Math.abs(v-samples[i]));
   return {ping,jitter:average(diffs),meta};
 }
 
-async function oneDownload(bytes){
-  const started=performance.now();
-  const response=await request('/api/net/download?bytes='+bytes+'&r='+nonce(),{headers:{'Accept':'application/octet-stream'}},18000);
+async function downloadStream(bytes){
+  const response=await request('/api/net/download?bytes='+bytes+'&r='+nonce(),{
+    headers:{'Accept':'application/octet-stream'}
+  },25000);
   if(!response.ok)throw new Error('download '+response.status);
   let received=0;
   if(response.body&&typeof response.body.getReader==='function'){
@@ -169,24 +185,73 @@ async function oneDownload(bytes){
   }else{
     received=(await response.arrayBuffer()).byteLength;
   }
+  return received;
+}
+
+async function parallelDownload(streams,bytesPerStream,progressStart,progressSpan){
+  const count=clamp(Math.round(streams),1,MAX_DOWNLOAD_STREAMS);
+  const started=performance.now();
+  let completed=0;
+  let received=0;
+  const tasks=Array.from({length:count},()=>downloadStream(bytesPerStream).then(bytes=>{
+    received+=bytes;
+    completed+=1;
+    const elapsed=Math.max(1,performance.now()-started);
+    const live=(received*8)/(elapsed*1000);
+    setPrimary(fmt(live),'Mbps',speedLevel(live));
+    setProgress(progressStart+progressSpan*(completed/count));
+    return bytes;
+  }));
+  const chunks=await Promise.all(tasks);
   const elapsed=Math.max(1,performance.now()-started);
-  return {mbps:(received*8)/(elapsed*1000),bytes:received,elapsed};
+  const total=chunks.reduce((sum,bytes)=>sum+bytes,0);
+  return {mbps:(total*8)/(elapsed*1000),bytes:total,elapsed,streams:count};
+}
+
+async function loadedLatencyDuring(taskFactory){
+  let done=false;
+  const samples=[];
+  const sampler=(async()=>{
+    while(!done&&samples.length<14){
+      try{
+        const sample=await pingSample(3500);
+        samples.push(sample.elapsed);
+      }catch(error){
+        if(error?.name==='AbortError')throw error;
+      }
+      if(!done)await delay(55);
+    }
+  })();
+  try{
+    const value=await taskFactory();
+    return {value,latency:median(samples)};
+  }finally{
+    done=true;
+    await sampler.catch(()=>{});
+  }
+}
+
+function downloadProfile(probeMbps){
+  if(probeMbps>=500)return {streams:8,bytes:8*MB};
+  if(probeMbps>=220)return {streams:7,bytes:8*MB};
+  if(probeMbps>=90)return {streams:6,bytes:6*MB};
+  if(probeMbps>=35)return {streams:4,bytes:4*MB};
+  return {streams:3,bytes:2*MB};
 }
 
 async function measureDownload(){
-  const values=[];
-  let first=await oneDownload(1*MB);
-  values.push(first.mbps);
-  setPrimary(fmt(first.mbps),'Mbps',speedLevel(first.mbps));
-  setProgress(38);
-  const size=first.mbps>=300?8*MB:first.mbps>=140?6*MB:first.mbps>=60?4*MB:first.mbps>=20?2*MB:1*MB;
-  for(let i=0;i<2;i++){
-    const sample=await oneDownload(size);
-    values.push(sample.mbps);
-    setPrimary(fmt(sample.mbps),'Mbps',speedLevel(sample.mbps));
-    setProgress(48+i*12);
-  }
-  return median(values);
+  await parallelDownload(3,1*MB,27,4);
+  const probe=await parallelDownload(6,4*MB,31,9);
+  const profile=downloadProfile(probe.mbps);
+  const measured=await loadedLatencyDuring(
+    ()=>parallelDownload(profile.streams,profile.bytes,40,27)
+  );
+  return {
+    mbps:measured.value.mbps,
+    loadedLatency:measured.latency,
+    streams:measured.value.streams,
+    bytes:measured.value.bytes
+  };
 }
 
 function payload(size){
@@ -195,35 +260,59 @@ function payload(size){
   return bytes;
 }
 
-async function oneUpload(bytes){
-  const body=payload(bytes);
-  const started=performance.now();
+async function uploadStream(body){
   const response=await request('/api/net/upload?r='+nonce(),{
     method:'POST',
     headers:{'Content-Type':'application/octet-stream','Accept':'application/json'},
     body
-  },18000);
+  },25000);
   if(!response.ok)throw new Error('upload '+response.status);
   const reply=await response.json();
+  return Number(reply.bytes)||body.size||0;
+}
+
+async function parallelUpload(streams,bytesPerStream,progressStart,progressSpan){
+  const count=clamp(Math.round(streams),1,MAX_UPLOAD_STREAMS);
+  const body=new Blob([payload(bytesPerStream)],{type:'application/octet-stream'});
+  let completed=0;
+  let sent=0;
+  const started=performance.now();
+  const tasks=Array.from({length:count},()=>uploadStream(body).then(bytes=>{
+    sent+=bytes;
+    completed+=1;
+    const elapsed=Math.max(1,performance.now()-started);
+    const live=(sent*8)/(elapsed*1000);
+    setPrimary(fmt(live),'Mbps',speedLevel(live));
+    setProgress(progressStart+progressSpan*(completed/count));
+    return bytes;
+  }));
+  const chunks=await Promise.all(tasks);
   const elapsed=Math.max(1,performance.now()-started);
-  const sent=Number(reply.bytes)||bytes;
-  return {mbps:(sent*8)/(elapsed*1000),bytes:sent,elapsed};
+  const total=chunks.reduce((sum,bytes)=>sum+bytes,0);
+  return {mbps:(total*8)/(elapsed*1000),bytes:total,elapsed,streams:count};
+}
+
+function uploadProfile(probeMbps){
+  if(probeMbps>=300)return {streams:8,bytes:4*MB};
+  if(probeMbps>=120)return {streams:7,bytes:4*MB};
+  if(probeMbps>=50)return {streams:6,bytes:3*MB};
+  if(probeMbps>=20)return {streams:4,bytes:2*MB};
+  return {streams:3,bytes:1*MB};
 }
 
 async function measureUpload(){
-  const values=[];
-  const first=await oneUpload(512*1024);
-  values.push(first.mbps);
-  setPrimary(fmt(first.mbps),'Mbps',speedLevel(first.mbps));
-  setProgress(76);
-  const size=first.mbps>=100?4*MB:first.mbps>=35?2*MB:1*MB;
-  for(let i=0;i<2;i++){
-    const sample=await oneUpload(size);
-    values.push(sample.mbps);
-    setPrimary(fmt(sample.mbps),'Mbps',speedLevel(sample.mbps));
-    setProgress(84+i*7);
-  }
-  return median(values);
+  await parallelUpload(2,512*1024,70,4);
+  const probe=await parallelUpload(4,2*MB,74,8);
+  const profile=uploadProfile(probe.mbps);
+  const measured=await loadedLatencyDuring(
+    ()=>parallelUpload(profile.streams,profile.bytes,82,16)
+  );
+  return {
+    mbps:measured.value.mbps,
+    loadedLatency:measured.latency,
+    streams:measured.value.streams,
+    bytes:measured.value.bytes
+  };
 }
 
 function updateBrowserConnection(){
@@ -258,10 +347,7 @@ async function run(){
   cancelButton.hidden=false;
   if(copyButton instanceof HTMLButtonElement)copyButton.disabled=true;
   setProgress(2);
-  setMetric(pingOut,NaN);
-  setMetric(jitterOut,NaN);
-  setMetric(downOut,NaN);
-  setMetric(upOut,NaN);
+  for(const el of [pingOut,jitterOut,downLatencyOut,upLatencyOut,downOut,upOut])setMetric(el,NaN);
   if(quality)quality.textContent='—';
   updateBrowserConnection();
 
@@ -276,16 +362,35 @@ async function run(){
 
     setStatus(copy().download);
     const download=await measureDownload();
-    setMetric(downOut,download,' Mbps');
+    setMetric(downOut,download.mbps,' Mbps');
+    setMetric(downLatencyOut,download.loadedLatency,' ms');
 
     setStatus(copy().upload);
     const upload=await measureUpload();
-    setMetric(upOut,upload,' Mbps');
+    setMetric(upOut,upload.mbps,' Mbps');
+    setMetric(upLatencyOut,upload.loadedLatency,' ms');
 
-    const score=connectionScore({ping:latency.ping,jitter:latency.jitter,download,upload});
-    result={ping:latency.ping,jitter:latency.jitter,download,upload,score,edge:latency.meta?.edge||'',protocol:latency.meta?.protocol||''};
+    const score=connectionScore({
+      ping:latency.ping,
+      jitter:latency.jitter,
+      download:download.mbps,
+      upload:upload.mbps
+    });
+    result={
+      ping:latency.ping,
+      jitter:latency.jitter,
+      download:download.mbps,
+      upload:upload.mbps,
+      downloadLoadedLatency:download.loadedLatency,
+      uploadLoadedLatency:upload.loadedLatency,
+      downloadStreams:download.streams,
+      uploadStreams:upload.streams,
+      score,
+      edge:latency.meta?.edge||'',
+      protocol:latency.meta?.protocol||''
+    };
     if(quality)quality.textContent=qualityLabel(score)+' · '+score+'/100';
-    setPrimary(fmt(download),'Mbps',speedLevel(download));
+    setPrimary(fmt(download.mbps),'Mbps',speedLevel(download.mbps));
     setProgress(100);
     setStatus(copy().complete);
     setState('complete');
@@ -320,7 +425,10 @@ async function copyResult(){
     'Ping: '+fmt(result.ping,1)+' ms',
     'Jitter: '+fmt(result.jitter,1)+' ms',
     'Download: '+fmt(result.download,1)+' Mbps',
+    'Download loaded latency: '+fmt(result.downloadLoadedLatency,1)+' ms',
     'Upload: '+fmt(result.upload,1)+' Mbps',
+    'Upload loaded latency: '+fmt(result.uploadLoadedLatency,1)+' ms',
+    'Streams: ↓ '+result.downloadStreams+' / ↑ '+result.uploadStreams,
     'Quality: '+qualityLabel(result.score)+' '+result.score+'/100',
     result.edge?('Edge: '+result.edge+(result.protocol?' · '+result.protocol:'')):'',
     'formatxsuite.com'
@@ -347,5 +455,7 @@ updateBrowserConnection();
 setProgress(0);
 setState('idle');
 setStatus(copy().idle);
-root.dataset.fxNetSpeedContractR1800='user-initiated-same-origin-no-idle-network';
+root.dataset.fxNetSpeedContractR1800='user-initiated-same-origin-multistream-gigabit-no-idle-network-r1810';
+root.dataset.fxNetSpeedThroughputR1810='parallel-aggregate-wall-clock-download-upload';
+root.dataset.fxNetSpeedLatencyR1810='idle-ping-jitter-plus-loaded-download-upload-latency';
 }());

@@ -52,7 +52,7 @@ jobs:
             renderer_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.css 'https://formatxsuite.com/scifi-ui/styles/formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor'
             net_css_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260928-r1800-network-sensor'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream'
             net_js_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net-ping.json "https://formatxsuite.com/api/net/ping?r=$GITHUB_SHA-$attempt"
             net_ping_status=$?
@@ -70,7 +70,7 @@ jobs:
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor' live-probe/home.html \
-               && grep -Fq 'formatx-net-speed-r1800.js?v=20260928-r1800-network-sensor' live-probe/home.html \
+               && grep -Fq 'formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream' live-probe/home.html \
                && grep -Fq 'production-r1773-compositor-promoted-biocrystal-proxy' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
@@ -78,7 +78,7 @@ jobs:
                && grep -Fq "fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition'" live-probe/crystal-organism.js \
                && grep -Fq "fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding'" live-probe/crystal-organism.js \
                && grep -Fq 'production-r1800-network-sensor-user-initiated-no-idle-traffic' live-probe/net.css \
-               && grep -Fq 'user-initiated-same-origin-no-idle-network' live-probe/net.js \
+               && grep -Fq 'user-initiated-same-origin-multistream-gigabit-no-idle-network-r1810' live-probe/net.js \
                && grep -Eq '"ok"[[:space:]]*:[[:space:]]*true' live-probe/net-ping.json \
                && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
               found_new=1
