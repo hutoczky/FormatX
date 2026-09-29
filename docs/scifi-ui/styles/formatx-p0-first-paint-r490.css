@@ -954,3 +954,77 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1763-mobile-first-paint-touch-target-lock */
+
+
+/* R1803 — mobile first-paint MAG must visually match the settled R1795
+   smoky-bioglass organism. The previous bright radial proxy looked like a
+   white flower and caused a large late visual delta when R326 became ready.
+   This is a static, zero-JS, zero-filter faceted mineral proxy. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+    top:44%!important;
+    width:clamp(158px,44vw,188px)!important;
+    aspect-ratio:.78!important;
+    opacity:1!important;
+    background:
+      radial-gradient(ellipse 76% 88% at 50% 48%,rgba(66,94,91,.055),transparent 72%),
+      radial-gradient(ellipse 44% 58% at 47% 46%,rgba(45,72,72,.055),transparent 68%)!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    inset:1% 3% 0!important;
+    clip-path:polygon(
+      48% 0,
+      63% 5%,
+      76% 16%,
+      88% 34%,
+      92% 51%,
+      84% 67%,
+      69% 82%,
+      54% 100%,
+      39% 92%,
+      24% 78%,
+      12% 59%,
+      8% 40%,
+      17% 22%,
+      31% 8%
+    )!important;
+    background:
+      linear-gradient(152deg,transparent 0 27%,rgba(151,168,161,.16) 28% 31%,transparent 32% 100%),
+      linear-gradient(34deg,transparent 0 43%,rgba(21,34,35,.66) 44% 48%,transparent 49% 100%),
+      linear-gradient(104deg,transparent 0 55%,rgba(111,133,128,.13) 56% 59%,transparent 60% 100%),
+      radial-gradient(ellipse at 36% 20%,rgba(150,165,158,.34),rgba(84,103,99,.20) 25%,transparent 52%),
+      radial-gradient(ellipse at 73% 70%,rgba(21,35,36,.44),transparent 57%),
+      conic-gradient(
+        from 20deg at 49% 48%,
+        rgba(79,99,96,.96),
+        rgba(46,64,63,.98) 12%,
+        rgba(96,114,109,.93) 25%,
+        rgba(39,55,56,.99) 39%,
+        rgba(86,106,102,.95) 53%,
+        rgba(48,65,64,.99) 67%,
+        rgba(105,120,114,.92) 80%,
+        rgba(41,56,57,.99) 91%,
+        rgba(75,94,91,.97)
+      )!important;
+    box-shadow:
+      inset 8px -12px 22px rgba(3,8,11,.42),
+      inset -8px 8px 20px rgba(147,164,157,.065),
+      0 20px 42px rgba(0,0,0,.42)!important;
+    opacity:.99!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:47% 41% 45% 41%!important;
+    border-radius:46% 54% 48% 52%!important;
+    border:1px solid rgba(76,184,194,.42)!important;
+    background:
+      radial-gradient(circle at 45% 39%,rgba(148,237,236,.86) 0 5%,rgba(50,163,176,.70) 10%,rgba(7,52,64,.72) 22%,rgba(1,10,16,.99) 52%,rgba(0,4,7,.99) 100%)!important;
+    box-shadow:
+      0 0 0 3px rgba(1,7,11,.86),
+      0 0 9px rgba(63,185,198,.16),
+      inset -2px -2px 5px rgba(0,2,6,.72),
+      inset 1px 1px 5px rgba(117,225,229,.14)!important;
+  }
+}
+/* production-r1803-mobile-smoky-mag-first-paint-parity */
