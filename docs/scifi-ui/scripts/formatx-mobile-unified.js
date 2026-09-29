@@ -5,7 +5,7 @@
   if (root.dataset.fxMobileUnified === 'ready-v3') return;
   root.dataset.fxMobileUnified = 'loading-v3';
 
-  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260929-r1813-zero-live-layout-scroll-hot-path';
+  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260929-r1814-settle-only-tail-materialization';
 
   function appendStyle(marker, href, readyKey) {
     if (document.querySelector('link[' + marker + ']')) return;
