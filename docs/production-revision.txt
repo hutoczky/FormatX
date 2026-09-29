@@ -1,0 +1,4 @@
+FormatX production revision
+token=20260929-r1812-exact-production-convergence
+base_master=df599ad83039546724cba33c43c38f6e2957bb6a
+purpose=block live cinematic and Lighthouse validation until the exact connected Cloudflare build is serving
