@@ -1030,12 +1030,9 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
 
 
-/* R1811 — first frame must already look like the settled interface.
-   This block owns geometry/material only. No extra animation, filters or JS. */
-
-/* Desktop: never allow legacy top-right controls to paint before the canonical
-   bottom-centre row. This selector intentionally does not depend on direct-child
-   timing so r264 reparenting cannot create a layout-shift frame. */
+/* R1811b — close the desktop control-owner race only.
+   Existing P0 rules own the complete styling; these selectors only make that
+   geometry survive r264 class/reparent timing without adding mobile paint cost. */
 @media (min-width:901px){
   html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264{
     position:absolute!important;
@@ -1043,301 +1040,26 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
     right:auto!important;
     bottom:20px!important;
     left:50%!important;
-    z-index:12080!important;
-    display:grid!important;
-    grid-template-columns:repeat(3,54px)!important;
-    grid-template-rows:76px!important;
-    align-items:start!important;
-    justify-items:center!important;
-    justify-content:center!important;
-    box-sizing:border-box!important;
     width:190px!important;
     min-width:190px!important;
     max-width:190px!important;
     height:76px!important;
     min-height:76px!important;
     max-height:76px!important;
-    margin:0!important;
-    padding:0!important;
-    column-gap:14px!important;
-    row-gap:0!important;
-    overflow:visible!important;
-    opacity:1!important;
-    visibility:visible!important;
-    pointer-events:auto!important;
-    transform:translate3d(-50%,0,0)!important;
-    translate:none!important;
-    animation:none!important;
-    transition:none!important;
-    contain:layout style!important;
+    transform:translateX(-50%)!important;
   }
   html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
     display:contents!important;
-    position:static!important;
-    inset:auto!important;
-    width:auto!important;
-    min-width:0!important;
-    max-width:none!important;
-    height:auto!important;
-    min-height:0!important;
-    max-height:none!important;
-    margin:0!important;
-    padding:0!important;
-    transform:none!important;
   }
   html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
   html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
   html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
-    position:relative!important;
-    inset:auto!important;
-    display:grid!important;
-    place-items:center!important;
-    box-sizing:border-box!important;
-    flex:0 0 54px!important;
     width:54px!important;
     min-width:54px!important;
     max-width:54px!important;
     height:54px!important;
     min-height:54px!important;
     max-height:54px!important;
-    margin:0!important;
-    padding:0!important;
-    opacity:1!important;
-    visibility:visible!important;
-    transform:none!important;
-    translate:none!important;
-    animation:none!important;
-    transition:none!important;
   }
 }
-
-/* Mobile: paint the exact settled R418 header geometry immediately. */
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
-  html:root:root:root body.living-architecture .topbar{
-    position:relative!important;
-    min-height:72px!important;
-    height:72px!important;
-    padding:0!important;
-    overflow:visible!important;
-  }
-  html:root:root:root body.living-architecture .topbar > .brand{
-    position:absolute!important;
-    top:10px!important;
-    left:14px!important;
-    right:auto!important;
-    bottom:auto!important;
-    display:inline-flex!important;
-    align-items:center!important;
-    gap:9px!important;
-    box-sizing:border-box!important;
-    width:auto!important;
-    max-width:118px!important;
-    height:52px!important;
-    min-height:52px!important;
-    margin:0!important;
-    overflow:hidden!important;
-    opacity:1!important;
-    visibility:visible!important;
-    transform:none!important;
-  }
-  html:root:root:root body.living-architecture .topbar > .brand img{
-    display:block!important;
-    width:38px!important;
-    min-width:38px!important;
-    max-width:38px!important;
-    height:38px!important;
-    min-height:38px!important;
-    max-height:38px!important;
-    flex:0 0 38px!important;
-    opacity:1!important;
-    visibility:visible!important;
-  }
-  html:root:root:root body.living-architecture .topbar > .brand strong{
-    font:780 12.2px/1 system-ui,-apple-system,"Segoe UI",sans-serif!important;
-    letter-spacing:.145em!important;
-  }
-  html:root:root:root body.living-architecture .topbar > .brand small{
-    display:block!important;
-    margin-top:5px!important;
-    font:650 6.5px/1 system-ui,-apple-system,"Segoe UI",sans-serif!important;
-    letter-spacing:.21em!important;
-  }
-
-  html:root:root:root body.living-architecture .topbar :is(.fx-reference-mag-button,.fx-language-toggle,.fx-reference-menu-button){
-    position:absolute!important;
-    bottom:auto!important;
-    left:auto!important;
-    margin:0!important;
-    box-sizing:border-box!important;
-    opacity:1!important;
-    visibility:visible!important;
-    pointer-events:auto!important;
-    transform:none!important;
-    translate:none!important;
-    animation:none!important;
-    transition:none!important;
-    z-index:12070!important;
-  }
-  html:root:root:root body.living-architecture .topbar .fx-reference-mag-button{
-    top:11px!important;
-    right:122px!important;
-    display:grid!important;
-    place-items:center!important;
-    width:50px!important;
-    min-width:50px!important;
-    max-width:50px!important;
-    height:48px!important;
-    min-height:48px!important;
-    max-height:48px!important;
-    padding:0!important;
-    color:rgba(239,248,253,.96)!important;
-    -webkit-text-fill-color:currentColor!important;
-    border:1px solid rgba(122,199,231,.26)!important;
-    border-radius:14px!important;
-    background:rgba(3,17,29,.90)!important;
-    background-image:none!important;
-    box-shadow:inset 0 0 22px rgba(70,191,236,.045),0 8px 24px rgba(0,0,0,.16)!important;
-    font:760 10px/1 ui-monospace,SFMono-Regular,Consolas,monospace!important;
-    letter-spacing:.06em!important;
-    text-indent:0!important;
-    text-transform:uppercase!important;
-    text-shadow:none!important;
-    overflow:hidden!important;
-  }
-  html:root:root:root body.living-architecture .topbar .fx-language-toggle{
-    top:11px!important;
-    right:70px!important;
-    display:inline-flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    width:44px!important;
-    min-width:44px!important;
-    max-width:44px!important;
-    height:48px!important;
-    min-height:48px!important;
-    max-height:48px!important;
-    padding:0!important;
-  }
-  html:root:root:root body.living-architecture .topbar .fx-reference-menu-button{
-    top:8px!important;
-    right:12px!important;
-    width:50px!important;
-    min-width:50px!important;
-    max-width:50px!important;
-    height:54px!important;
-    min-height:54px!important;
-    max-height:54px!important;
-    padding:0!important;
-  }
-
-  /* Final settled hero controls from the very first frame. */
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264{
-    position:absolute!important;
-    inset:auto auto 18px 50%!important;
-    z-index:12080!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,50px)!important;
-    grid-template-rows:72px!important;
-    align-items:start!important;
-    justify-items:center!important;
-    justify-content:center!important;
-    width:126px!important;
-    min-width:126px!important;
-    max-width:126px!important;
-    min-height:72px!important;
-    margin:0!important;
-    padding:0 6px 18px!important;
-    column-gap:14px!important;
-    transform:translate3d(-50%,0,0)!important;
-    transition:none!important;
-  }
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
-    display:contents!important;
-  }
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
-    position:relative!important;
-    inset:auto!important;
-    display:grid!important;
-    place-items:center!important;
-    box-sizing:border-box!important;
-    width:50px!important;
-    min-width:50px!important;
-    max-width:50px!important;
-    height:50px!important;
-    min-height:50px!important;
-    max-height:50px!important;
-    margin:0!important;
-    padding:0!important;
-    border:1px solid rgba(126,205,222,.26)!important;
-    border-radius:50%!important;
-    background:
-      radial-gradient(circle at 38% 28%,rgba(174,217,216,.08),transparent 38%),
-      linear-gradient(145deg,rgba(8,22,28,.96),rgba(3,12,18,.99))!important;
-    box-shadow:
-      inset 0 1px 0 rgba(230,250,248,.08),
-      inset 0 0 18px rgba(59,161,174,.035),
-      0 8px 24px rgba(0,0,0,.20)!important;
-    opacity:1!important;
-    visibility:visible!important;
-    transform:none!important;
-    transition:none!important;
-    filter:none!important;
-  }
-  html:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
-    display:none!important;
-    visibility:hidden!important;
-    opacity:0!important;
-    pointer-events:none!important;
-    width:0!important;
-    min-width:0!important;
-    max-width:0!important;
-    height:0!important;
-    min-height:0!important;
-    max-height:0!important;
-  }
-
-  /* R1811 visual proxy: less radial/conic symmetry, darker asymmetric living
-     mineral mass so WebGL takeover changes motion, not composition. */
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
-    top:44%!important;
-    width:clamp(158px,44vw,188px)!important;
-    aspect-ratio:.78!important;
-    opacity:1!important;
-    background:
-      radial-gradient(ellipse 64% 80% at 46% 47%,rgba(64,91,88,.048),transparent 68%),
-      radial-gradient(ellipse 32% 54% at 60% 54%,rgba(32,58,58,.045),transparent 66%)!important;
-  }
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
-    inset:1% 3% 0!important;
-    clip-path:polygon(
-      48% 0,61% 4%,74% 13%,84% 27%,92% 44%,88% 58%,79% 72%,
-      67% 84%,54% 100%,43% 94%,31% 88%,20% 75%,10% 58%,8% 42%,
-      15% 27%,27% 12%,38% 5%
-    )!important;
-    background:
-      linear-gradient(147deg,transparent 0 31%,rgba(133,154,149,.12) 32% 34%,transparent 35% 100%),
-      linear-gradient(37deg,transparent 0 47%,rgba(18,31,32,.72) 48% 51%,transparent 52% 100%),
-      linear-gradient(105deg,transparent 0 59%,rgba(94,116,111,.095) 60% 62%,transparent 63% 100%),
-      radial-gradient(ellipse at 34% 20%,rgba(139,154,148,.29),rgba(73,92,89,.18) 24%,transparent 50%),
-      radial-gradient(ellipse at 72% 70%,rgba(17,29,30,.48),transparent 56%),
-      linear-gradient(128deg,rgba(70,88,86,.97),rgba(39,54,54,.99) 28%,rgba(82,100,96,.96) 48%,rgba(35,50,51,.99) 69%,rgba(70,88,85,.97))!important;
-    box-shadow:
-      inset 9px -13px 24px rgba(2,7,10,.46),
-      inset -7px 7px 19px rgba(139,155,149,.055),
-      0 20px 42px rgba(0,0,0,.44)!important;
-  }
-  html:root:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:47% 41% 45% 41%!important;
-    border-radius:44% 56% 49% 51%!important;
-    border:1px solid rgba(72,171,181,.38)!important;
-    background:
-      radial-gradient(circle at 45% 39%,rgba(129,221,221,.72) 0 4%,rgba(44,145,158,.62) 9%,rgba(6,43,53,.72) 21%,rgba(1,9,14,.99) 52%,rgba(0,3,6,.99) 100%)!important;
-    box-shadow:
-      0 0 0 3px rgba(1,6,10,.88),
-      0 0 8px rgba(57,165,178,.13),
-      inset -2px -2px 5px rgba(0,2,5,.76),
-      inset 1px 1px 5px rgba(103,204,209,.11)!important;
-  }
-}
-/* production-r1811-first-frame-final-visual-parity */
+/* production-r1811b-minimal-desktop-control-cls-lock */
