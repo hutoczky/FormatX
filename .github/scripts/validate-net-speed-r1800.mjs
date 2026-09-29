@@ -14,15 +14,19 @@ const [index,client,css,workerSource]=await Promise.all([
 
 assert.match(index,/id="network"/);
 assert.match(index,/data-fx-net-speed-r1800="true"/);
-assert.match(index,/formatx-net-speed-r1800\.js\?v=20260928-r1800-network-sensor/);
+assert.match(index,/formatx-net-speed-r1800\.js\?v=20260929-r1810-gigabit-multistream/);
 assert.match(index,/formatx-net-speed-r1800\.css\?v=20260928-r1800-network-sensor/);
 assert.match(index,/https:\/\/www\.speedtest\.net\//);
-assert.match(client,/user-initiated-same-origin-no-idle-network/);
+assert.match(client,/user-initiated-same-origin-multistream-gigabit-no-idle-network-r1810/);
 assert.match(client,/\/api\/net\/ping/);
 assert.match(client,/\/api\/net\/download/);
 assert.match(client,/\/api\/net\/upload/);
 assert.match(css,/production-r1800-network-sensor-user-initiated-no-idle-traffic/);
 assert.match(workerSource,/production-r1800-network-sensor-speed-test-endpoints/);
+assert.match(workerSource,/production-r1810-gigabit-multistream-edge-transport/);
+assert.match(client,/parallelDownload/);
+assert.match(client,/parallelUpload/);
+assert.match(client,/loadedLatencyDuring/);
 
 const env={};
 const ctx={waitUntil(){}};
@@ -35,7 +39,7 @@ async function call(path,init={}){
   const response=await call('/api/net/ping');
   assert.equal(response.status,200);
   assert.match(response.headers.get('cache-control')||'',/no-store/);
-  assert.equal(response.headers.get('x-formatx-net-speed'),'r1800-user-initiated-edge-path');
+  assert.equal(response.headers.get('x-formatx-net-speed'),'r1810-user-initiated-multistream-edge-path');
   const json=await response.json();
   assert.equal(json.ok,true);
   assert.equal(typeof json.now,'number');
