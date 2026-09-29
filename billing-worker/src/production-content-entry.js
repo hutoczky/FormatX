@@ -56,7 +56,7 @@ const NET_SPEED_MAX_DOWNLOAD_BYTES = 8 * 1024 * 1024;
 const NET_SPEED_MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 const NET_SPEED_MIN_DOWNLOAD_BYTES = 64 * 1024;
 const NET_SPEED_DEFAULT_DOWNLOAD_BYTES = 1024 * 1024;
-const NET_SPEED_CHUNK_BYTES = 64 * 1024;
+const NET_SPEED_CHUNK_BYTES = 256 * 1024;
 const NET_SPEED_PATTERN = (() => {
   const chunk = new Uint8Array(NET_SPEED_CHUNK_BYTES);
   let state = 0x6d2b79f5;
@@ -76,7 +76,7 @@ function netSpeedHeaders(extra = {}) {
     'Cross-Origin-Resource-Policy': 'same-origin',
     'Timing-Allow-Origin': '*',
     'X-Robots-Tag': 'noindex, nofollow',
-    'X-FormatX-Net-Speed': 'r1800-user-initiated-edge-path',
+    'X-FormatX-Net-Speed': 'r1810-user-initiated-multistream-edge-path',
     ...extra,
   });
   return headers;
@@ -389,4 +389,4 @@ export default {
   },
 };
 
-// production-r1800-network-sensor-speed-test-endpoints\n// production-r1405-refined-irregular-crystal-deploy
+// production-r1800-network-sensor-speed-test-endpoints\n// production-r1810-gigabit-multistream-edge-transport\n// production-r1405-refined-irregular-crystal-deploy
