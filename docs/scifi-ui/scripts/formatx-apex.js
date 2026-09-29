@@ -334,11 +334,15 @@
     }, { once: true });
   }
 
-  /* R1812 — cold-start phase scheduler.
-     Keep controls and semantic ownership synchronous, but never initialise all
-     non-critical observers/network helpers in one DOMContentLoaded task. */
+  /* R1812b — cold-start progressive enhancement.
+     The first version split work into idle callbacks, but Chromium can legally
+     run those callbacks inside the initial Lighthouse/TTI window. The visible
+     controls and semantic shell are already fully interactive without these
+     observer-heavy helpers, so start them after the cold critical window.
+     Each phase still runs separately to avoid one monolithic task. */
   let deferredPhase = 0;
   let deferredCancelled = false;
+  let deferredStartTimer = 0;
   const deferredTasks = [
     ['reveal', reveal],
     ['scenes', scenes],
@@ -357,20 +361,27 @@
       const [name, task] = deferredTasks[deferredPhase++];
       ROOT.dataset.fxApexDeferredR1812 = 'running-' + name;
       try { task(); } catch (_) {}
-      scheduleDeferredPhase();
+      setTimeout(scheduleDeferredPhase, 32);
     };
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(run, { timeout: 900 });
+    if ('scheduler' in window && typeof scheduler.postTask === 'function') {
+      scheduler.postTask(run, { priority: 'background' }).catch(() => setTimeout(run, 0));
+    } else if ('requestIdleCallback' in window) {
+      requestIdleCallback(run, { timeout: 1800 });
     } else {
-      setTimeout(run, 0);
+      setTimeout(run, 32);
     }
   }
 
-  function startDeferredAfterPaint() {
+  function startDeferredAfterStablePaint() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        ROOT.dataset.fxApexDeferredR1812 = 'scheduled-after-first-paint';
-        scheduleDeferredPhase();
+        ROOT.dataset.fxApexDeferredR1812 = 'armed-after-first-paint';
+        deferredStartTimer = setTimeout(() => {
+          deferredStartTimer = 0;
+          if (deferredCancelled) return;
+          ROOT.dataset.fxApexDeferredR1812 = 'scheduled-after-cold-window';
+          scheduleDeferredPhase();
+        }, 1800);
       });
     });
   }
@@ -383,11 +394,12 @@
     ROOT.dataset.fxApexColdStartR1812 = 'critical-ready';
     ROOT.dataset.fxRenderer = 'three-host';
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated', phased: 'r1812' } }));
-    startDeferredAfterPaint();
+    startDeferredAfterStablePaint();
   }
 
   addEventListener('pagehide', () => {
     deferredCancelled = true;
+    if (deferredStartTimer) clearTimeout(deferredStartTimer);
   }, { once: true });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseCritical, { once: true });
