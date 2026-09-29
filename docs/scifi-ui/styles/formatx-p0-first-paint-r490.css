@@ -1171,3 +1171,45 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1810-first-frame-header-control-parity */
+
+
+/* R1812 — first-scroll compositor budget.
+   The sensory coordinator publishes fx-scroll-pressure before it mounts its
+   optional visual field. Keep the expensive full-page/panel blur path out of
+   active scrolling from the very first gesture; restore it after scroll settle. */
+html[data-fx-scroll-pressure-r1755="true"] body.living-architecture::before,
+html[data-fx-scroll-pressure-r1755="true"] body.living-architecture::after{
+  animation-play-state:paused!important;
+}
+
+html[data-fx-scroll-pressure-r1755="true"] body.living-architecture :is(
+  .hero-copy,
+  .flow-stage,
+  .flow-chapters article,
+  .card,
+  .price-card,
+  .payment,
+  .payment-console,
+  .system-grid article,
+  .release-card,
+  .fx-category-deck,
+  .fx-category-grid > article,
+  .fx-origin-proof,
+  .fx-origin-proof article,
+  .fx-award-proof,
+  #user-feedback,
+  .fx-plan-qr-card,
+  .fx-platform-card,
+  .fx-organism-console,
+  .fx-thought-genome-disclosure
+){
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+html[data-fx-scroll-pressure-r1755="true"] body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  filter:none!important;
+  -webkit-filter:none!important;
+}
+/* production-r1812-scroll-hot-path-compositor-budget */
