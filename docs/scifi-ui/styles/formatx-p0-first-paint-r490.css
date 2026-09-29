@@ -1033,8 +1033,8 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 
 /* R1805b — canonical SOUND hit target outranks legacy r204 132px proof rules.
    Geometry is viewport-owned, not pointer-capability-owned. */
-html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
-html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound{
+html:root:root:root:root:root #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
+html:root:root:root:root:root #hero .fx-reference-controls-r204 > .fx-three-sound{
   box-sizing:border-box!important;
   width:54px!important;
   min-width:54px!important;
@@ -1049,8 +1049,8 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
   transition:none!important;
 }
 @media (max-width:900px){
-  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
-  html:root:root:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound{
+  html:root:root:root:root:root #hero .fx-reference-controls-r204 .fx-three-sound.fx-wda-sound-toggle,
+  html:root:root:root:root:root #hero .fx-reference-controls-r204 > .fx-three-sound{
     width:50px!important;
     min-width:50px!important;
     max-width:50px!important;
@@ -1061,6 +1061,109 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
 }
 /* production-r1805-canonical-sound-size-outranks-legacy */
 
+
+/* R1805c — parser-first canonical control carrier.
+   Do not wait for body.living-architecture; the static DOM already contains
+   these controls and their first geometry must equal their settled geometry. */
+@media (min-width:901px){
+  html:root:root:root #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+    position:absolute!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:20px!important;
+    left:50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:calc(100% - 28px)!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    column-gap:14px!important;
+    row-gap:0!important;
+    overflow:visible!important;
+    isolation:isolate!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root:root #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
+    position:relative!important;
+    inset:auto!important;
+  }
+}
+
+@media (max-width:900px){
+  html:root:root:root #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+    position:absolute!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:18px!important;
+    left:50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,50px)!important;
+    grid-template-rows:72px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:max-content!important;
+    min-width:0!important;
+    max-width:calc(100% - 24px)!important;
+    min-height:72px!important;
+    margin:0!important;
+    padding:0 6px 18px!important;
+    column-gap:14px!important;
+    overflow:visible!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root #hero .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+  }
+  html:root:root:root #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+}
+/* production-r1805-parser-first-control-carrier */
+
 /* R1805 — static visual completion.
    Match the settled header and hero surface in the render-blocking layer.
    No animation, filter or JS is introduced here. */
@@ -1068,8 +1171,8 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
 /* The SOUND/ASK nodes can be inserted before the r264 owner class lands.
    Own their geometry by DOM location too, preventing the legacy 132px flash. */
 @media (min-width:901px){
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{
+  html:root:root:root #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root #hero .fx-reference-controls-r204 .fx-reference-ask{
     box-sizing:border-box!important;
     width:54px!important;
     min-width:54px!important;
@@ -1085,13 +1188,13 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     transition:none!important;
   }
 
-  html:root:root body.living-architecture .topbar{
+  html:root:root .topbar{
     position:relative!important;
     min-height:72px!important;
     height:72px!important;
     overflow:visible!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-reference-menu-button{
+  html:root:root .topbar > .fx-reference-menu-button{
     position:absolute!important;
     top:8px!important;
     right:22px!important;
@@ -1113,7 +1216,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     animation:none!important;
     transition:none!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-language-toggle{
+  html:root:root .topbar > .fx-language-toggle{
     position:absolute!important;
     top:14px!important;
     right:92px!important;
@@ -1138,7 +1241,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     animation:none!important;
     transition:none!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+  html:root:root .topbar > .fx-reference-mag-button{
     position:absolute!important;
     top:14px!important;
     right:150px!important;
@@ -1168,14 +1271,14 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     animation:none!important;
     transition:none!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-reference-mag-button::before,
-  html:root:root body.living-architecture .topbar > .fx-reference-mag-button::after{
+  html:root:root .topbar > .fx-reference-mag-button::before,
+  html:root:root .topbar > .fx-reference-mag-button::after{
     content:none!important;
     display:none!important;
   }
 
   /* Settled desktop category treatment is cheap paint-only styling. */
-  html:root:root body.living-architecture #hero .fx-category-definition{
+  html:root:root #hero .fx-category-definition{
     position:relative!important;
     inset:auto!important;
     box-sizing:border-box!important;
@@ -1193,7 +1296,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     animation:none!important;
     transition:none!important;
   }
-  html:root:root body.living-architecture #hero .fx-category-definition strong{
+  html:root:root #hero .fx-category-definition strong{
     display:block!important;
     margin:0 0 4px!important;
     color:#74e7ff!important;
@@ -1204,7 +1307,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
 }
 
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
-  html:root:root body.living-architecture .topbar{
+  html:root:root .topbar{
     position:relative!important;
     inset:auto!important;
     display:block!important;
@@ -1221,7 +1324,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     transform:none!important;
     translate:none!important;
   }
-  html:root:root body.living-architecture .topbar > .brand{
+  html:root:root .topbar > .brand{
     position:absolute!important;
     top:10px!important;
     left:14px!important;
@@ -1239,7 +1342,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     transform:none!important;
     translate:none!important;
   }
-  html:root:root body.living-architecture .topbar > .brand img{
+  html:root:root .topbar > .brand img{
     display:block!important;
     width:38px!important;
     min-width:38px!important;
@@ -1250,7 +1353,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     opacity:1!important;
     visibility:visible!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+  html:root:root .topbar > .fx-reference-mag-button{
     position:absolute!important;
     top:11px!important;
     right:122px!important;
@@ -1283,7 +1386,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     animation:none!important;
     transition:none!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-language-toggle{
+  html:root:root .topbar > .fx-language-toggle{
     position:absolute!important;
     top:11px!important;
     right:70px!important;
@@ -1307,7 +1410,7 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     animation:none!important;
     transition:none!important;
   }
-  html:root:root body.living-architecture .topbar > .fx-reference-menu-button{
+  html:root:root .topbar > .fx-reference-menu-button{
     position:absolute!important;
     top:8px!important;
     right:12px!important;
@@ -1329,8 +1432,8 @@ html:root:root:root:root:root body.living-architecture #hero .fx-reference-contr
     transition:none!important;
   }
 
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
-  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{
+  html:root:root:root #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root #hero .fx-reference-controls-r204 .fx-reference-ask{
     box-sizing:border-box!important;
     width:50px!important;
     min-width:50px!important;
