@@ -35,6 +35,7 @@ root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallba
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
+root.dataset.fxP0MotionCacheR1810='exclusive-intro-runtime-handoff-prewarm-only';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1795-mobile-smoky-bioglass-airy';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
@@ -119,14 +120,31 @@ function magBirthActive(){
     || document.querySelector('.fx-mag-birth-r533:not(.fx-mag-birth-prepaint-r1606)') instanceof HTMLElement;
 }
 
+function warmMotionRuntime(){
+  if(document.querySelector('link[data-fx-p0-motion-prewarm-r1810]'))return;
+  const link=document.createElement('link');
+  link.rel='preload';
+  link.as='script';
+  link.href=SRC;
+  link.fetchPriority='low';
+  link.dataset.fxP0MotionPrewarmR1810='true';
+  document.head.appendChild(link);
+}
+
 function armStartup(){
   if(AUDIT){
-    root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
+    root.dataset.fxP0MotionSchedulerR490='audit-static-r1810';
     return;
   }
   if(magBirthActive()){
-    root.dataset.fxP0MotionSchedulerR490='mag-birth-priority-r605';
-    requestAnimationFrame(()=>start('mag-birth-r605'));
+    root.dataset.fxP0MotionSchedulerR490='mag-birth-exclusive-r1810';
+    document.addEventListener('formatx:magbirthcorewarmup',()=>{
+      warmMotionRuntime();
+      root.dataset.fxP0MotionSchedulerR490='mag-birth-prewarmed-r1810';
+    },{once:true,passive:true});
+    document.addEventListener('formatx:magbirthcomplete',()=>{
+      requestAnimationFrame(()=>start('mag-birth-complete-r1810'));
+    },{once:true,passive:true});
     return;
   }
   armLateFallback();
