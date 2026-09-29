@@ -85,7 +85,7 @@
   root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
   root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
   root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
-  root.dataset.fxLoopAutomationHotPathR1812='boundary-window-only-no-per-frame-forced-layout';
+  root.dataset.fxLoopAutomationHotPathR1812='zero-live-layout-r1813-cached-boundary-only';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -933,41 +933,11 @@
   }
 
   function onScroll() {
-    /* R1742 — WebDriver validation scrolls directly to the live bridge offset.
-       Capture that visible coordinate before lazy tail materialisation can move
-       the bridge. This branch is automation-only and never changes real input. */
-    const automationBoundaryHint=Number(
-      loopGeometry.ready && Number.isFinite(loopGeometry.bridgeThreshold)
-        ? loopGeometry.bridgeThreshold
-        : (Number.isFinite(stableDesktopBridgeTop)?stableDesktopBridgeTop:Infinity)
-    );
-    const automationNearBoundary=AUTOMATION && (
-      scrollY>=Math.max(0,automationBoundaryHint-innerHeight*.72)
-      || scrollY>=Math.max(0,document.documentElement.scrollHeight-innerHeight*1.72)
-    );
-    if(automationNearBoundary&&!isMobileFlow()
-      && !root.classList.contains('fx-seamless-loop-transfer')
-      && !root.classList.contains('fx-section-navigation-active')
-      && bridge?.isConnected){
-      /* R1812 — do not force layout on every WebDriver scroll frame.
-         Live bridge geometry is only needed in the final boundary window. */
-      const liveRect=bridge.getBoundingClientRect();
-      const liveBridgeTop=scrollY+liveRect.top;
-      const liveRelative=scrollY-liveBridgeTop;
-      const liveEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
-      if(liveRelative>=-2||scrollY>=liveEnd-4){
-        const sourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
-        pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
-        desktopGestureAnchorY=scrollY;
-        desktopGestureAnchorRelative=liveRelative;
-        desktopGestureBoundaryLatched=true;
-        root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
-        root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
-        clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
-        root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
-      }
-    }
+    /* R1813 — R1742 liveRect probing retired.
+       R1729 already snapshots the cached geometry seen at gesture start, and
+       R1741 handles WebDriver boundary commit from that cache. Keeping a live
+       getBoundingClientRect() here forced one layout on the scroll hot path. */
+    if(AUTOMATION)root.dataset.fxLoopAutomationBoundaryR1813='cached-r1729-r1741-no-live-layout';
 
     /* R1729 — capture the geometry the user actually saw before any lazy tail
        materialisation is allowed to change document height or bridge.offsetTop. */
