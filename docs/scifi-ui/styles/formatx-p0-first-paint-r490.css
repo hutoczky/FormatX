@@ -334,6 +334,31 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
 }
 /* production-r1811-desktop-p0-final-typography-parity */
 
+/* R1811b — the SOUND/ASK controls exist briefly before r264 class ownership
+   settles. Lock their physical desktop hit-box immediately so the boot path
+   cannot expose the legacy 132px button and then collapse it to 54px. */
+@media (min-width:901px) and (pointer:fine){
+  html:root:root:root body.living-architecture #hero .fx-three-sound,
+  html:root:root:root body.living-architecture #hero .fx-reference-ask{
+    box-sizing:border-box!important;
+    flex:0 0 54px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+}
+/* production-r1811b-desktop-control-size-lock */
+
+
 
 
 /* R1732 — ASK dialogue critical surface merged into the existing P0 request.
