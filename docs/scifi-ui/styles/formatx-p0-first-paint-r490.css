@@ -1232,3 +1232,38 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1817-desktop-header-first-paint-parity */
+
+
+/* R1818 — APEX/atmosphere zero-flow first-byte owner.
+   The deferred critical-core sheet already carries this production contract,
+   but on desktop it activates only after FCP. Before then, the raw <canvas>
+   owns its intrinsic 300x150 layout box and pushes the topbar/hero downward.
+   Mirror the settled fixed geometry in P0 so those decorative layers never
+   participate in document flow at any rendered frame. */
+html:root:root body.living-architecture #fx-apex-canvas,
+html:root:root body.living-architecture > .fx-atmosphere,
+html:root:root body.living-architecture > .fx-atmosphere > span{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  pointer-events:none!important;
+}
+
+html:root:root body.living-architecture #fx-apex-canvas{
+  display:block!important;
+  z-index:-3!important;
+  opacity:0;
+}
+
+html:root:root body.living-architecture > .fx-atmosphere,
+html:root:root body.living-architecture > .fx-atmosphere > span{
+  z-index:-2!important;
+}
+/* production-r1818-apex-atmosphere-zero-flow-first-byte */
