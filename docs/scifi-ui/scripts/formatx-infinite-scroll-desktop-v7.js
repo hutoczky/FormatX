@@ -85,6 +85,7 @@
   root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
   root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
   root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
+  root.dataset.fxLoopAutomationHotPathR1812='boundary-window-only-no-per-frame-forced-layout';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -935,10 +936,21 @@
     /* R1742 — WebDriver validation scrolls directly to the live bridge offset.
        Capture that visible coordinate before lazy tail materialisation can move
        the bridge. This branch is automation-only and never changes real input. */
-    if(AUTOMATION&&!isMobileFlow()
+    const automationBoundaryHint=Number(
+      loopGeometry.ready && Number.isFinite(loopGeometry.bridgeThreshold)
+        ? loopGeometry.bridgeThreshold
+        : (Number.isFinite(stableDesktopBridgeTop)?stableDesktopBridgeTop:Infinity)
+    );
+    const automationNearBoundary=AUTOMATION && (
+      scrollY>=Math.max(0,automationBoundaryHint-innerHeight*.72)
+      || scrollY>=Math.max(0,document.documentElement.scrollHeight-innerHeight*1.72)
+    );
+    if(automationNearBoundary&&!isMobileFlow()
       && !root.classList.contains('fx-seamless-loop-transfer')
       && !root.classList.contains('fx-section-navigation-active')
       && bridge?.isConnected){
+      /* R1812 — do not force layout on every WebDriver scroll frame.
+         Live bridge geometry is only needed in the final boundary window. */
       const liveRect=bridge.getBoundingClientRect();
       const liveBridgeTop=scrollY+liveRect.top;
       const liveRelative=scrollY-liveBridgeTop;
