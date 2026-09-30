@@ -5,7 +5,7 @@ const CANONICAL_HOST = 'formatxsuite.com';
 const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
-const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260930-r1814-functional-query-state"></script>';
 const CRITICAL_SHELL_LINK = '<link rel="stylesheet" data-fx-critical-shell="v56" href="/scifi-ui/styles/formatx-critical-shell-v56.css?v=20260812-first-paint-r4">';
 const CLIENT_CACHE_REVISION_R197 = '20260817-r197-cache-migration';
 const CLIENT_CACHE_RECOVERY_R197 = '<script data-fx-client-cache-recovery-r197="true" src="/scifi-ui/scripts/formatx-client-cache-recovery-r197.js?v=20260817-r197-cache-migration"></script>';
