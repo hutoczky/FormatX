@@ -1,5 +1,5 @@
 FormatX production revision
-token=20260930-r1815-canonical-owner-query-parity
-base_master=31722abd01b6d6f7ca31c092da1f812277cf74f1
-purpose=preserve intro, visualintro, cinema, language, Lighthouse and audit query state in the actually deployed R369/R529 canonical homepage owner
-validation=production preflight canonical query-parity contract, exact-revision deploy convergence, live R533 to R536 cinematic handoff on apex and www, strict live Lighthouse x3 desktop/mobile, security and checkout invariants
+token=20260930-r1817-live-lighthouse-baseline
+base_master=2ed0412a3945322e630d95b5d6905a01dab05c8d
+purpose=measure the exact current R1816 production surface with strict live Lighthouse x3 desktop/mobile before further performance tuning
+validation=production preflight, exact-revision deploy convergence, strict live Lighthouse 100x3 desktop/mobile, security and checkout invariants
