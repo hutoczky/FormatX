@@ -1028,3 +1028,110 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
+
+
+/* R1820 — final hero typography is owned by the blocking P0 layer.
+   Deferred visual bundles may add material around the hero, but they must not
+   change the largest readable text after first paint. This keeps the real user
+   first frame and the settled frame visually identical instead of repainting
+   FORMATX / the lead several seconds later on slower devices. */
+html:root:root:root body.living-architecture #hero .hero-copy,
+html:root:root:root body.living-architecture #hero .hero-copy > *,
+html:root:root:root body.living-architecture #hero #hero-title,
+html:root:root:root body.living-architecture #hero .hero-title-main,
+html:root:root:root body.living-architecture #hero .hero-title-sub,
+html:root:root:root body.living-architecture #hero .hero-lead,
+html:root:root:root body.living-architecture #hero .fx-category-definition {
+  content-visibility:visible!important;
+  visibility:visible!important;
+  opacity:1!important;
+  animation:none!important;
+  transition:none!important;
+  filter:none!important;
+  transform:none!important;
+  translate:none!important;
+  text-rendering:optimizeLegibility;
+}
+
+@media (min-width:901px) {
+  html:root:root:root body.living-architecture #hero #hero-title {
+    display:grid!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    line-height:1!important;
+    white-space:normal!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-title-main {
+    display:block!important;
+    max-width:100%!important;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(64px,6.25vw,92px)!important;
+    font-weight:900!important;
+    line-height:.88!important;
+    letter-spacing:-.075em!important;
+    white-space:nowrap!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-title-sub {
+    display:block!important;
+    justify-self:end!important;
+    margin:7px 2px 0 0!important;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(27px,2.7vw,40px)!important;
+    font-weight:700!important;
+    line-height:1!important;
+    letter-spacing:.12em!important;
+    white-space:nowrap!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-lead {
+    display:block!important;
+    width:100%!important;
+    max-width:560px!important;
+    min-block-size:78px!important;
+    margin:24px 0 0!important;
+    font:400 clamp(16px,1.25vw,18px)/1.55 system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+}
+
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root body.living-architecture #hero .hero-copy > #hero-title {
+    display:grid!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0 0 20px!important;
+    line-height:1!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-title-main {
+    display:block!important;
+    max-width:100%!important;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(36px,11.2vw,48px)!important;
+    font-weight:900!important;
+    line-height:.94!important;
+    letter-spacing:-.035em!important;
+    white-space:nowrap!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-title-sub {
+    display:block!important;
+    margin:8px 0 0!important;
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(17px,5.4vw,24px)!important;
+    font-weight:700!important;
+    line-height:1.08!important;
+    letter-spacing:.07em!important;
+    white-space:nowrap!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-lead {
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-block-size:7.5em!important;
+    margin:0!important;
+    font:400 clamp(15px,4.1vw,18px)/1.56 system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+}
+/* production-r1820-final-hero-typography-lcp-lock */
