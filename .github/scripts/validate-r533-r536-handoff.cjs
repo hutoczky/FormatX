@@ -126,7 +126,7 @@ async function verifyFullBirth(browser){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed/i.test(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
@@ -235,7 +235,7 @@ async function verifySkip(browser){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed/i.test(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'commit',timeout:30000});
     const skip=page.locator(OVERLAY+' .fxb-skip');
