@@ -273,7 +273,11 @@ function isCanonicalHomepageRequest(request, url) {
 }
 
 function createHomepageAssetRequest(request) {
-  const assetUrl = new URL('/scifi-ui/', request.url);
+  const sourceUrl = new URL(request.url);
+  const assetUrl = new URL('/scifi-ui/', sourceUrl);
+  /* R1814 — the internal asset URL must retain functional query state so
+     intro/language/audit bootstraps observe the same request semantics. */
+  assetUrl.search = sourceUrl.search;
   return new Request(assetUrl, request);
 }
 
@@ -849,3 +853,5 @@ export function secureResponse(response, url) {
     headers,
   });
 }
+
+// production-r1814-homepage-query-parity

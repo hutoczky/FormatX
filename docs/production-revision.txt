@@ -1,4 +1,5 @@
 FormatX production revision
-token=20260929-r1813-intro-runtime-recovery
-base_master=e5927021b0a802b5f667418516c28e48012da84c
-purpose=verify live R533 runtime recovery before strict cinematic and Lighthouse audits
+token=20260930-r1814-preserve-functional-query
+base_master=6cca29c91a5f9d03cdb1ed75ad42d1f882995cf6
+purpose=preserve functional query parameters through canonical apex routing so forced intro, language, Lighthouse and audit modes reach the browser unchanged
+validation=production candidate, routing unit tests, exact-revision deploy convergence, live R533 to R536 cinematic handoff, strict live Lighthouse x3 desktop/mobile, security and checkout invariants

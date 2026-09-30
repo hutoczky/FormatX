@@ -77,7 +77,11 @@ assert.equal(scrollPolicy.desktop.automatic_loop, true, "public desktop loop pol
 assert.ok(thoughtGenome.includes("fxThoughtGenomeStage = 'hero-space'"), "Thought Genome current hero host fallback is missing");
 assert.ok(thoughtGenome.includes("questionStored: false"), "Thought Genome privacy contract regressed");
 assert.ok(!thoughtGenome.includes("style.setProperty('--fx-genome"), "Thought Genome reintroduced CSP-blocked inline styles");
-assert.ok(production.includes("new URL('/scifi-ui/', request.url)"), "domain root does not serve canonical homepage asset");
+assert.ok(
+  production.includes("new URL('/scifi-ui/', sourceUrl)")
+    && production.includes("assetUrl.search = sourceUrl.search"),
+  "domain root does not preserve canonical homepage asset query state"
+);
 assert.ok(production.includes("['/scifi-ui', '/scifi-ui/']"), "safe legacy homepage normalisation is missing");
 assert.ok(!production.includes("['/scifi-ui/', '/']"), "redirect-loop-prone legacy homepage redirect is present");
 

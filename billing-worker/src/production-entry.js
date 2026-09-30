@@ -141,7 +141,7 @@ export default {
       target.search = url.search;
       if (HOMEPAGE_ALIASES.has(url.pathname)) {
         target.pathname = '/';
-        target.search = '';
+        target.search = url.search;
       }
       return Response.redirect(target.toString(), 308);
     }
@@ -160,7 +160,10 @@ export default {
       upstreamUrl.protocol = 'https:';
       upstreamUrl.host = 'www.formatxsuite.com';
       upstreamUrl.pathname = '/';
-      upstreamUrl.search = '';
+      /* R1814 — preserve functional/audit query parameters end-to-end.
+         The browser-facing apex URL stays canonical; this only keeps the
+         internal homepage request semantically equivalent to the original. */
+      upstreamUrl.search = url.search;
       upstreamRequest = new Request(upstreamUrl, request);
     }
 
@@ -293,3 +296,5 @@ function withNoStore(response, withoutBody) {
     headers
   });
 }
+
+// production-r1814-preserve-functional-query
