@@ -4,9 +4,9 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
-  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260925-r1746-idle-tail-materialization';
+  const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260930-r1820-p0-final-audit-gate';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
-  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260925-r1744-window-capture-semantic-owner';
+  const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260930-r1820-p0-final-audit-gate';
   let mobileGeometryTimer = 0;
   let desktopGeometryTimer = 0;
 
