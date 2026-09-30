@@ -336,13 +336,10 @@
 
   let enhanced = false;
   let revealReady = false;
-  let enhanceTimer = 0;
   const intentEvents = ['pointerdown','keydown','focusin'];
 
   function removeEnhancementArms() {
-    intentEvents.forEach(type => addEventListener && removeEventListener(type, onIntent, true));
-    removeEventListener('scroll', onScrollIntent);
-    removeEventListener('wheel', onScrollIntent);
+    intentEvents.forEach(type => removeEventListener(type, onIntent, true));
   }
 
   function ensureReveal(reason='scroll') {
@@ -355,8 +352,6 @@
   function enhance(reason='intent') {
     if (enhanced) return;
     enhanced = true;
-    if (enhanceTimer) clearTimeout(enhanceTimer);
-    enhanceTimer = 0;
     removeEnhancementArms();
 
     applyLanguage(language, false);
@@ -379,24 +374,10 @@
     enhance(event.type === 'keydown' ? 'keyboard-intent' : event.type + '-intent');
   }
 
-  function onScrollIntent() {
-    if (enhanced || revealReady) return;
-    clearTimeout(enhanceTimer);
-    /* Scroll is already owned by R536. Only arm readable reveal state after
-       the gesture settles; never start release/flow/pointer legacy work on the
-       hot scroll path. */
-    enhanceTimer = setTimeout(() => {
-      enhanceTimer = 0;
-      ensureReveal('scroll-settled-lightweight');
-    }, 180);
-  }
-
   function armEnhancement() {
     intentEvents.forEach(type => addEventListener(type, onIntent, { capture: true, passive: type !== 'keydown', once: false }));
-    addEventListener('scroll', onScrollIntent, { passive: true });
-    addEventListener('wheel', onScrollIntent, { passive: true });
     ROOT.dataset.fxApexEnhancementR1818 = 'armed-pointer-key-focus';
-    ROOT.dataset.fxApexScrollR1818 = 'reveal-only-after-settle';
+    ROOT.dataset.fxApexScrollR1818 = 'zero-apex-work-scroll-owned-by-r536';
   }
 
   function initialiseShell() {
