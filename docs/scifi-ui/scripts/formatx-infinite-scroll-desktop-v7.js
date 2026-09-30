@@ -887,9 +887,30 @@
   }
 
   function materializeDesktopLoopTailNow() {
-    tailMaterializeScheduled = false;
     tailMaterializeTask = 0;
-    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) return false;
+    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || !bridge?.isConnected) {
+      tailMaterializeScheduled = false;
+      return false;
+    }
+
+    /* R1818 — materialising the whole deferred tail mutates several large
+       sections. Never allow requestIdleCallback's timeout fallback to execute
+       that work while a scroll gesture is active. Keep one pending task and
+       retry only after the same idle window used by the loop controller. */
+    if (root.dataset.fxScrollActivity === 'scrolling'
+      || root.classList.contains('fx-page-scrolling')
+      || root.classList.contains('fx-seamless-loop-transfer')) {
+      tailMaterializeScheduled = true;
+      root.dataset.fxLoopTailMaterializeR1818 = 'deferred-until-post-scroll';
+      tailMaterializeTask = window.setTimeout(
+        materializeDesktopLoopTailNow,
+        ACTIVITY_IDLE_MS + 80
+      );
+      return false;
+    }
+
+    tailMaterializeScheduled = false;
+    root.dataset.fxLoopTailMaterializeR1818 = 'post-scroll-dom-write';
 
     document.querySelectorAll([
       '#main-content > section.scene:not(#hero)',
@@ -917,18 +938,29 @@
   }
 
   function materializeDesktopLoopTail() {
-    if (isMobileFlow() || root.dataset.fxLoopTailMaterializedR1727 === 'ready' || tailMaterializeScheduled || !bridge?.isConnected) return false;
-    const bridgeTop = Number(loopGeometry.ready ? loopGeometry.bridgeTop : bridge.offsetTop);
+    if (isMobileFlow()
+      || root.dataset.fxLoopTailMaterializedR1727 === 'ready'
+      || tailMaterializeScheduled
+      || !bridge?.isConnected
+      || !loopGeometry.ready) return false;
+
+    /* Cache-only gate. offsetTop is deliberately forbidden here because this
+       function is called from the scroll listener. */
+    const bridgeTop = Number(loopGeometry.bridgeTop);
     if (!Number.isFinite(bridgeTop) || scrollY < Math.max(0, bridgeTop - innerHeight * 7.5)) return false;
 
     tailMaterializeScheduled = true;
-    root.dataset.fxLoopTailMaterializeR1746 = 'scheduled-idle';
-    const run=()=>materializeDesktopLoopTailNow();
-    if('requestIdleCallback' in window){
-      tailMaterializeTask=requestIdleCallback(run,{timeout:260});
-    }else{
-      tailMaterializeTask=window.setTimeout(run,0);
-    }
+    root.dataset.fxLoopTailMaterializeR1746 = 'scheduled-post-scroll-only';
+    root.dataset.fxLoopTailMaterializeR1818 = 'pending-scroll-settle';
+
+    /* A timeout is preferable to requestIdleCallback here. rIC may invoke its
+       timeout callback between animation frames while scrolling; this timer is
+       continuously rejected by materializeDesktopLoopTailNow until scroll is
+       genuinely idle. */
+    tailMaterializeTask = window.setTimeout(
+      materializeDesktopLoopTailNow,
+      ACTIVITY_IDLE_MS + 80
+    );
     return true;
   }
 
