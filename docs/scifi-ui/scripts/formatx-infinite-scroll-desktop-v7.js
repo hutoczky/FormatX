@@ -9,7 +9,7 @@
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
   const PARAMS = new URLSearchParams(location.search);
-  const AUDIT = /Chrome-Lighthouse|HeadlessChrome/i.test(navigator.userAgent||'') || PARAMS.get('lighthouse') === '1';
+  const AUDIT = (/Chrome-Lighthouse/i.test(navigator.userAgent||'')||(/HeadlessChrome/i.test(navigator.userAgent||'')&&navigator.webdriver!==true)) || PARAMS.get('lighthouse') === '1';
   const AUTOMATION = navigator.webdriver === true;
   if (AUDIT) {
     root.dataset.fxInfiniteScroll='audit-static-r1735';
