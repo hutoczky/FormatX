@@ -130,17 +130,6 @@ function onInput(){semantic('input',.48);}
 function onChange(){semantic('change',.62);}
 function onSubmit(){semantic('submit',.92);}
 function onKey(event){if(!event.repeat)semantic('key',(event.key==='Enter'||event.key===' ') ? .62 : .42);}
-function onOrientation(event){
-  if(reduced.matches)return;
-  activate('orientation');
-  const gamma=Number(event.gamma),beta=Number(event.beta);
-  if(!Number.isFinite(gamma)||!Number.isFinite(beta))return;
-  state.x=clamp(gamma/45,-1,1)*.34;
-  state.y=clamp((beta-38)/55,-1,1)*.26;
-  state.energy=Math.max(state.energy,.24);
-  queue();
-}
-
 const sections=[...document.querySelectorAll('main > section[id],main section.scene[id]')];
 function installSectionObserver(){
   if(sectionObserver||!('IntersectionObserver'in window)||!sections.length)return;
@@ -161,9 +150,9 @@ function activate(reason='intent'){
   installSectionObserver();
   root.dataset.fxSiteSensoryR1755='ready';
   root.dataset.fxSiteSensoryActivationR1756=String(reason);
-  root.dataset.fxSiteSensorySchedulerR1755='lazy-intent-single-coalesced-raf-zero-idle';
+  root.dataset.fxSiteSensorySchedulerR1755='lazy-intent-single-coalesced-raf-zero-idle-no-sensor-policy-error';
   root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
-  root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation';
+  root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit';
 }
 
 root.dataset.fxSiteSensoryR1755='armed-lazy-r1756';
@@ -176,7 +165,6 @@ addEventListener('pointercancel',onPointerUp,{passive:true});
 addEventListener('scroll',onScroll,{passive:true});
 addEventListener('wheel',()=>semantic('wheel',.38),{passive:true});
 addEventListener('keydown',onKey,{passive:true});
-addEventListener('deviceorientation',onOrientation,{passive:true});
 document.addEventListener('focusin',onFocus,{passive:true});
 document.addEventListener('click',onClick,{passive:true});
 document.addEventListener('input',onInput,{passive:true});
