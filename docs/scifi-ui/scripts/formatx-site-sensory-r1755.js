@@ -176,7 +176,15 @@ addEventListener('pointercancel',onPointerUp,{passive:true});
 addEventListener('scroll',onScroll,{passive:true});
 addEventListener('wheel',()=>semantic('wheel',.38),{passive:true});
 addEventListener('keydown',onKey,{passive:true});
-addEventListener('deviceorientation',onOrientation,{passive:true});
+const sensorPolicy=document.permissionsPolicy||document.featurePolicy;
+const orientationAllowed=!sensorPolicy?.allowsFeature||
+  (sensorPolicy.allowsFeature('accelerometer')&&sensorPolicy.allowsFeature('gyroscope'));
+if(orientationAllowed){
+  addEventListener('deviceorientation',onOrientation,{passive:true});
+  root.dataset.fxSiteSensoryOrientationR1818='enabled';
+}else{
+  root.dataset.fxSiteSensoryOrientationR1818='policy-disabled';
+}
 document.addEventListener('focusin',onFocus,{passive:true});
 document.addEventListener('click',onClick,{passive:true});
 document.addEventListener('input',onInput,{passive:true});

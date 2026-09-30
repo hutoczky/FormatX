@@ -40,15 +40,15 @@ jobs:
           for attempt in $(seq 1 48); do
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
             home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260927-r1773-compositor-biocrystal'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260929-r1803-smoky-mag-first-paint-parity'
             css_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade'
             js_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260930-r1818-headless-audit-runtime'
             sensory_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1795-mobile-smoky-bioglass-airy'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260930-r1818-headless-audit-runtime'
             current_mag_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260930-r1818-headless-audit-runtime'
             renderer_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.css 'https://formatxsuite.com/scifi-ui/styles/formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor'
             net_css_status=$?
@@ -65,16 +65,17 @@ jobs:
                && [ "$net_css_status" = '0' ] \
                && [ "$net_js_status" = '0' ] \
                && [ "$net_ping_status" = '0' ] \
-               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1773-compositor-biocrystal' live-probe/home.html \
-               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/home.html \
+               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260929-r1803-smoky-mag-first-paint-parity' live-probe/home.html \
+               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260930-r1818-headless-audit-runtime' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
-               && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
+               && grep -Fq 'formatx-site-sensory-r1755.js?v=20260930-r1818-headless-audit-runtime' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream' live-probe/home.html \
-               && grep -Fq 'production-r1773-compositor-promoted-biocrystal-proxy' live-probe/p0.css \
+               && grep -Fq 'production-r1803-mobile-smoky-mag-first-paint-parity' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
-               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/current-mag.js \
+               && grep -Fq "fxSiteSensoryOrientationR1818='policy-disabled'" live-probe/site-sensory.js \
+               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260930-r1818-headless-audit-runtime' live-probe/current-mag.js \
                && grep -Fq "fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition'" live-probe/crystal-organism.js \
                && grep -Fq "fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding'" live-probe/crystal-organism.js \
                && grep -Fq 'production-r1800-network-sensor-user-initiated-no-idle-traffic' live-probe/net.css \
@@ -116,10 +117,10 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves R1795 MAG plus R1800 NET'
+            description='Live domain serves R1818 audit-safe MAG plus R1800 NET'
           else
             state='failure'
-            description='Live domain is not yet serving the current R1795/R1800 build'
+            description='Live domain is not yet serving the current R1818/R1800 build'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \

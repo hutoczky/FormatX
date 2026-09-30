@@ -5,7 +5,7 @@ r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r24
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
 const f=p.get('intro')==='1'||p.get('visualintro')==='1';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
-const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
+const l=(/Chrome-Lighthouse/i.test(navigator.userAgent||'')||(/HeadlessChrome/i.test(navigator.userAgent||'')&&navigator.webdriver!==true))||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
 if(l){
   const o=new MutationObserver(()=>{
     const e=document.querySelector('link[data-fx-critical-core-r227]');

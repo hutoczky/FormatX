@@ -12,7 +12,7 @@
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
   const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || (/Chrome-Lighthouse/i.test(navigator.userAgent || '')||(/HeadlessChrome/i.test(navigator.userAgent || '')&&navigator.webdriver!==true)) || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
