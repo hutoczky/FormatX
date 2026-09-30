@@ -85,6 +85,7 @@
   root.dataset.fxLoopMobileContinuityR1733='cached-boundary-intent-survives-late-content-growth';
   root.dataset.fxLoopMobileContinuityR1734='latched-relative-never-cleared-by-null-reflow-frame';
   root.dataset.fxLoopTailMaterializeR1746='idle-scheduled-no-forced-layout-in-scroll';
+  root.dataset.fxLoopAutomationGeometryR1818='cache-only-no-scroll-layout-read';
   root.dataset.fxLoopSectionNavigationIsolationR1724='programmatic-section-scroll-never-triggers-loop';
   root.dataset.fxLoopGeometrySyncR1724='body-resize-plus-explicit-refresh-event';
   root.dataset.fxLoopPendingCorrectionPolicyR1724='90ms-fresh-geometry-before-170ms-commit';
@@ -932,28 +933,29 @@
   }
 
   function onScroll() {
-    /* R1742 — WebDriver validation scrolls directly to the live bridge offset.
-       Capture that visible coordinate before lazy tail materialisation can move
-       the bridge. This branch is automation-only and never changes real input. */
+    /* R1818 — automation now follows the same cache-only geometry contract as
+       real input. The former getBoundingClientRect() read on every WebDriver
+       scroll event forced synchronous layout and polluted frame-pacing tests. */
     if(AUTOMATION&&!isMobileFlow()
+      && loopGeometry.ready
       && !root.classList.contains('fx-seamless-loop-transfer')
-      && !root.classList.contains('fx-section-navigation-active')
-      && bridge?.isConnected){
-      const liveRect=bridge.getBoundingClientRect();
-      const liveBridgeTop=scrollY+liveRect.top;
-      const liveRelative=scrollY-liveBridgeTop;
-      const liveEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
-      if(liveRelative>=-2||scrollY>=liveEnd-4){
-        const sourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
-        pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
+      && !root.classList.contains('fx-section-navigation-active')){
+      const cachedRelative=scrollY-loopGeometry.bridgeTop;
+      const automationAtBoundary=scrollY>=Math.max(0,loopGeometry.bridgeThreshold-2)
+        || scrollY>=Math.max(0,loopGeometry.documentEnd-4);
+      if(automationAtBoundary){
+        pendingDesktopRelative=Math.max(
+          0,
+          Math.min(cachedRelative>=-2?cachedRelative:0,Math.max(0,loopGeometry.sourceHeight-2))
+        );
         desktopGestureAnchorY=scrollY;
-        desktopGestureAnchorRelative=liveRelative;
+        desktopGestureAnchorRelative=cachedRelative;
         desktopGestureBoundaryLatched=true;
-        root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
-        root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
+        root.dataset.fxLoopAutomationBoundaryR1818='cache-only-boundary-latched';
+        root.dataset.fxLoopAutomationRelativeR1818=String(Math.round(cachedRelative));
         clearTimeout(activityTimer);
         activityTimer=window.setTimeout(markIdle,32);
-        root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
+        root.dataset.fxLoopAutomationSettleR1818='cache-only-idle-armed';
       }
     }
 
