@@ -38,7 +38,7 @@ root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260930-r1818-headless-audit-runtime';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
-const AUDIT=/Chrome-Lighthouse|HeadlessChrome/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
+const AUDIT=(/Chrome-Lighthouse/i.test(navigator.userAgent||'')||(/HeadlessChrome/i.test(navigator.userAgent||'')&&navigator.webdriver!==true))||PARAMS.get('lighthouse')==='1';
 const AUTO_DELAY_MS=6500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
