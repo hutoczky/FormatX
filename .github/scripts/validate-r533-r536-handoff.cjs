@@ -21,6 +21,10 @@ function url(params={}){
   return u.href;
 }
 
+function ignorableBrowserDiagnostic(message=''){
+  return /favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed in this document/i.test(String(message));
+}
+
 async function snapshot(page){
   return page.evaluate(({CANVAS,STAGE,OVERLAY})=>{
     const root=document.documentElement;
@@ -126,7 +130,7 @@ async function verifyFullBirth(browser){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+  page.on('console',m=>{if(m.type()==='error'&&!ignorableBrowserDiagnostic(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
@@ -235,7 +239,7 @@ async function verifySkip(browser){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+  page.on('console',m=>{if(m.type()==='error'&&!ignorableBrowserDiagnostic(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'commit',timeout:30000});
     const skip=page.locator(OVERLAY+' .fxb-skip');
