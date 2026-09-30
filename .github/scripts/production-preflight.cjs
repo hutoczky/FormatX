@@ -75,6 +75,8 @@ const disclosureCss = read('docs/scifi-ui/styles/synaptic-thought-disclosure.css
 const privacy = read('docs/scifi-ui/privacy.html');
 const productionWrapper = productionRuntimeContract();
 const productionEntry = read('billing-worker/src/production-entry.js');
+const canonicalProductionEntry = read('billing-worker/src/production-content-entry-r369-base.js');
+const canonicalRecovery = read('docs/scifi-ui/scripts/formatx-canonical-recovery.js');
 const previewWrapper = read('content-preview-entry.js');
 const previewWorker = read('worker.js');
 const sitemap = read('docs/sitemap.xml');
@@ -86,6 +88,16 @@ check(
     && JSON.stringify((production.routes || []).map(route => route.pattern))
       === JSON.stringify(['formatxsuite.com', 'www.formatxsuite.com']),
   'Production Worker ownership is invalid'
+);
+
+check(
+  'canonical-homepage-query-parity',
+  canonicalProductionEntry.includes("const HOMEPAGE_BOOLEAN_PARAMS = ['intro','visualintro','cinema','lighthouse']")
+    && canonicalProductionEntry.includes("const HOMEPAGE_TEXT_PARAMS = ['r548','audit']")
+    && canonicalProductionEntry.includes('const internalSearch = homepagePublicSearch(url)')
+    && canonicalProductionEntry.includes('cleanAddressBar: shouldCleanHomepageAddress(url)')
+    && canonicalRecovery.includes('url.searchParams.delete(RECOVERY_PARAM)'),
+  'Canonical production owner must preserve supported functional homepage query state'
 );
 check(
   'preview-worker',

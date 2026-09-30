@@ -125,17 +125,18 @@ export default {
         return temporaryRedirect(target.toString());
       }
 
+      const internalSearch = homepagePublicSearch(url);
       const response = await fetchInternalNoLoop(
         request,
         env,
         ctx,
         '/scifi-ui/',
-        '',
+        internalSearch,
       );
 
       return canonicalisePublicResponse(response, request, url, {
         homepage: true,
-        cleanAddressBar: Boolean(url.search || url.hash),
+        cleanAddressBar: shouldCleanHomepageAddress(url),
         clearCachedRedirect: url.searchParams.has(RECOVERY_PARAM),
       });
     }
@@ -166,19 +167,37 @@ function supportedLanguage(value) {
   return value === 'hu' || value === 'en' ? value : '';
 }
 
+const HOMEPAGE_BOOLEAN_PARAMS = ['intro','visualintro','cinema','lighthouse'];
+const HOMEPAGE_TEXT_PARAMS = ['r548','audit'];
+
 function copyHomepagePublicParams(source, target) {
   const language = supportedLanguage(source.searchParams.get('lang'));
   if (language) target.searchParams.set('lang', language);
 
-  // R606: keep explicit public presentation/test intent across the legacy
-  // www -> canonical hop. These parameters are client-side only and are needed
-  // for deterministic MAG-birth replay/cinematic verification; arbitrary query
-  // data is intentionally not forwarded.
-  if (source.searchParams.get('intro') === '1') target.searchParams.set('intro', '1');
-  if (source.searchParams.get('cinema') === '1') target.searchParams.set('cinema', '1');
+  // R1815: preserve explicit public presentation/audit intent through the
+  // canonical homepage owner. Unknown query data remains excluded.
+  for (const name of HOMEPAGE_BOOLEAN_PARAMS) {
+    if (source.searchParams.get(name) === '1') target.searchParams.set(name, '1');
+  }
+  for (const name of HOMEPAGE_TEXT_PARAMS) {
+    const value = source.searchParams.get(name);
+    if (value && value.length <= 80) target.searchParams.set(name, value);
+  }
+}
 
-  const handoffProbe = source.searchParams.get('r548');
-  if (handoffProbe && handoffProbe.length <= 80) target.searchParams.set('r548', handoffProbe);
+function homepagePublicSearch(source) {
+  const target = new URL(CANONICAL_ORIGIN + '/');
+  copyHomepagePublicParams(source, target);
+  return target.search;
+}
+
+function shouldCleanHomepageAddress(source) {
+  if (source.searchParams.has(RECOVERY_PARAM)) return true;
+  const allowed = new Set(['lang', ...HOMEPAGE_BOOLEAN_PARAMS, ...HOMEPAGE_TEXT_PARAMS]);
+  for (const key of source.searchParams.keys()) {
+    if (!allowed.has(key)) return true;
+  }
+  return false;
 }
 
 function canonicalHomepageUrl(publicUrl) {
@@ -490,3 +509,5 @@ function mergeVary(existing, value) {
   values.add(value);
   return Array.from(values).join(', ');
 }
+
+// production-r1815-canonical-owner-query-parity
