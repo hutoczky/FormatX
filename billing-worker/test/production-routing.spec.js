@@ -219,6 +219,19 @@ describe('production routing and frame security', () => {
     expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/');
   });
 
+  it('preserves query parameters on apex canonical redirect', () => {
+    const request = new Request('https://formatxsuite.com/?intro=1&lang=en&lighthouse=1');
+    const response = canonicalPageRedirect(request, new URL(request.url));
+    const location = new URL(response?.headers.get('Location') || 'https://invalid.local/');
+
+    expect(response?.status).toBe(308);
+    expect(location.origin).toBe('https://www.formatxsuite.com');
+    expect(location.pathname).toBe('/');
+    expect(location.searchParams.get('intro')).toBe('1');
+    expect(location.searchParams.get('lang')).toBe('en');
+    expect(location.searchParams.get('lighthouse')).toBe('1');
+  });
+
   it('normalises the no-slash legacy homepage path without sending it back to root', () => {
     const request = new Request('https://www.formatxsuite.com/scifi-ui?lang=hu');
     const response = canonicalPageRedirect(request, new URL(request.url));
@@ -243,14 +256,17 @@ describe('production routing and frame security', () => {
     expect(response?.headers.get('Location')).toBe('https://www.formatxsuite.com/?lang=en');
   });
 
-  it('serves the homepage directly at the www domain root', async () => {
+  it('serves the homepage directly at the www domain root and preserves functional query state', async () => {
     let assetPath = '';
+    let assetSearch = '';
     const response = await productionWorker.fetch(
-      new Request('https://www.formatxsuite.com/'),
+      new Request('https://www.formatxsuite.com/?intro=1&lang=en&audit=r1814'),
       {
         ASSETS: {
           async fetch(request) {
-            assetPath = new URL(request.url).pathname;
+            const assetUrl = new URL(request.url);
+            assetPath = assetUrl.pathname;
+            assetSearch = assetUrl.search;
             return new Response('<!doctype html><title>FORMATX</title>', {
               headers: { 'Content-Type': 'text/html; charset=utf-8' },
             });
@@ -262,6 +278,9 @@ describe('production routing and frame security', () => {
 
     expect(response.status).toBe(200);
     expect(assetPath).toBe('/scifi-ui/');
+    expect(new URLSearchParams(assetSearch).get('intro')).toBe('1');
+    expect(new URLSearchParams(assetSearch).get('lang')).toBe('en');
+    expect(new URLSearchParams(assetSearch).get('audit')).toBe('r1814');
     expect(response.headers.get('Link')).toBe('<https://www.formatxsuite.com/>; rel="canonical"');
   });
 
