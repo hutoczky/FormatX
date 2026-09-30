@@ -1,5 +1,5 @@
 FormatX production revision
-token=20260930-r1817-live-lighthouse-baseline
-base_master=2ed0412a3945322e630d95b5d6905a01dab05c8d
-purpose=measure the exact current R1816 production surface with strict live Lighthouse x3 desktop/mobile before further performance tuning
-validation=production preflight, exact-revision deploy convergence, strict live Lighthouse 100x3 desktop/mobile, security and checkout invariants
+token=20260930-r1819-r1818-strict-live-audit
+base_master=b59e039910707248ed8d83bb9731e59a2bc367a8
+purpose=deploy the current R1818 production surface and verify the unified strict Lighthouse audit path against the real production experience
+validation=production preflight, exact-revision deploy convergence, strict live Lighthouse 100x3 desktop/mobile, security and checkout invariants, current MAG and responsive runtime contracts
