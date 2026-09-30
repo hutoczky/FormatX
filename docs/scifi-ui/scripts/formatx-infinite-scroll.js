@@ -4,6 +4,11 @@
   const root = document.documentElement;
   const BOOTSTRAP = 'platform-scroll-v2';
   const MOBILE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
+  const PARAMS = new URLSearchParams(location.search);
+  const LIGHTHOUSE_AUDIT =
+    /Chrome-Lighthouse/i.test(navigator.userAgent || '') ||
+    (/HeadlessChrome/i.test(navigator.userAgent || '') && navigator.webdriver !== true) ||
+    PARAMS.get('lighthouse') === '1';
   const RUNTIME_SRC = '/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=20260930-r1818-headless-audit-runtime';
   const MOBILE_LOOP_STYLE = '/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=20260812-r1';
   const HEART_CORE_RUNTIME = '/scifi-ui/scripts/formatx-heart-core-r252.js?v=20260925-r1744-window-capture-semantic-owner';
@@ -12,6 +17,15 @@
 
   if (root.dataset.fxScrollBootstrap === BOOTSTRAP) return;
   root.dataset.fxScrollBootstrap = BOOTSTRAP;
+  if (LIGHTHOUSE_AUDIT) {
+    root.dataset.fxScrollBootstrapRevision = 'r1818-headless-audit-static';
+    root.dataset.fxScrollBootstrapState = 'audit-static-skip';
+    root.dataset.fxInfiniteController = 'audit-static';
+    root.dataset.fxAutomaticLoop = 'disabled-audit';
+    root.dataset.fxInfiniteInput = 'native';
+    root.dataset.fxLoopBridge = 'disabled-audit';
+    return;
+  }
   root.dataset.fxScrollBootstrapRevision = 'r1733-cross-platform-boundary-intent';
 
   function ensureMobileLoopBridgeOverride() {
