@@ -334,8 +334,23 @@
     }, { once: true });
   }
 
-  function initialise() {
-    navigation();
+  let enhanced = false;
+  let enhanceTimer = 0;
+  const intentEvents = ['pointerdown','keydown','focusin'];
+
+  function removeEnhancementArms() {
+    intentEvents.forEach(type => addEventListener && removeEventListener(type, onIntent, true));
+    removeEventListener('scroll', onScrollIntent);
+    removeEventListener('wheel', onScrollIntent);
+  }
+
+  function enhance(reason='intent') {
+    if (enhanced) return;
+    enhanced = true;
+    if (enhanceTimer) clearTimeout(enhanceTimer);
+    enhanceTimer = 0;
+    removeEnhancementArms();
+
     applyLanguage(language, false);
     reveal();
     scenes();
@@ -344,11 +359,50 @@
     updatePrice();
     latestRelease();
     setScene(activeScene);
-    ROOT.dataset.fxApex = 'controller-performance-v2';
-    ROOT.dataset.fxRenderer = 'three-host';
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+
+    ROOT.dataset.fxApexEnhancementR1818 = reason;
+    dispatchEvent(new CustomEvent('formatx:apexenhanced', {
+      detail: { reason, renderer: 'three-host' }
+    }));
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  else initialise();
+  function onIntent(event) {
+    if (enhanced) return;
+    enhance(event.type === 'keydown' ? 'keyboard-intent' : event.type + '-intent');
+  }
+
+  function onScrollIntent() {
+    if (enhanced) return;
+    clearTimeout(enhanceTimer);
+    enhanceTimer = setTimeout(() => enhance('scroll-settled-intent'), 180);
+  }
+
+  function armEnhancement() {
+    intentEvents.forEach(type => addEventListener(type, onIntent, { capture: true, passive: type !== 'keydown', once: false }));
+    addEventListener('scroll', onScrollIntent, { passive: true });
+    addEventListener('wheel', onScrollIntent, { passive: true });
+    ROOT.dataset.fxApexEnhancementR1818 = 'armed-real-intent';
+  }
+
+  function initialiseShell() {
+    /* R1818 — first paint only needs interactive navigation and the canonical
+       static product shell. Expensive reveal/scene/flow/release scans are
+       progressive enhancement and start on real intent, never on the critical
+       first-load main-thread path. */
+    navigation();
+    armEnhancement();
+    ROOT.dataset.fxApex = 'controller-performance-v3';
+    ROOT.dataset.fxApexStartupR1818 = 'minimal-shell-zero-scan';
+    ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxScene = '0';
+    ROOT.dataset.fxFlow = '0';
+    ROOT.style.setProperty('--accent', '120,210,255');
+    ROOT.style.setProperty('--progress', '0');
+    dispatchEvent(new CustomEvent('formatx:apexready', {
+      detail: { renderer: 'three-host', infinite: 'delegated', startup: 'minimal-r1818' }
+    }));
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseShell, { once: true });
+  else initialiseShell();
 }());
