@@ -12,7 +12,31 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
-    try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
+    try {
+      localStorage.setItem('formatx:intro-seen-v1', '1');
+      sessionStorage.setItem('formatx:mag-birth-live-r533-seen', '1');
+    } catch (_) {}
+
+    /* R1818 diagnostics — capture the caller that attempts to reposition the
+       document during the synthetic scroll window. This wraps the native API
+       before any FormatX runtime executes and does not alter scroll behaviour. */
+    window.__fxScrollTrace = [];
+    const nativeScrollTo = window.scrollTo.bind(window);
+    window.scrollTo = function (...args) {
+      let top = null;
+      if (typeof args[0] === 'object' && args[0] !== null) top = Number(args[0].top);
+      else if (args.length > 1) top = Number(args[1]);
+      const row = {
+        at: performance.now(),
+        top: Number.isFinite(top) ? top : null,
+        beforeY: window.scrollY,
+        stack: String(new Error('scrollTo trace').stack || '').split('\n').slice(1, 7)
+      };
+      window.__fxScrollTrace.push(row);
+      if (window.__fxScrollTrace.length > 160) window.__fxScrollTrace.shift();
+      return nativeScrollTo(...args);
+    };
+
     window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
     try {
       new PerformanceObserver(list => {
@@ -128,7 +152,17 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
               over25ms: ordered.filter(v => v > 25).length,
               over33ms: ordered.filter(v => v > 33.34).length
             },
-            spikes
+            spikes,
+            scrollToTrace: (window.__fxScrollTrace || []).slice(-80),
+            runtimeOwners: {
+              renderer: document.documentElement.dataset.fxCoreRenderer || '',
+              crystal: document.documentElement.dataset.fxCrystalOrganismR326 || '',
+              threeHost: document.documentElement.dataset.fxThreeHost || '',
+              nativeApex: document.documentElement.dataset.fxNativeApex || '',
+              legacyRetirement: document.documentElement.dataset.fxLegacyRendererRetirementR1818 || '',
+              initialHeroGuard: document.documentElement.dataset.fxInitialHeroGuard || '',
+              initialHeroTop: document.documentElement.dataset.fxInitialHeroTop || ''
+            }
           });
         }
       }
