@@ -1,5 +1,6 @@
 (()=>{'use strict';
-const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px),(pointer:coarse)').matches;
+const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px)').matches;
+// R1816: reference-production prepaint uses the same width contract as R244 runtime.
 r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
