@@ -119,6 +119,9 @@ async function readTimeline(page){
 
 // R1405 live handoff tolerance: the film remains 10.0s; this wider CI wait only
 // tolerates slow remote script/bootstrap scheduling and does not alter product timing.
+// R1815c — production intentionally disables accelerometer via Permissions-Policy.
+// Chromium surfaces that restriction as a console error. It is expected and
+// must not mask the real R533/R536 cinematic assertions below.
 async function verifyFullBirth(browser){
   const context=await browser.newContext({
     viewport:{width:1440,height:900},colorScheme:'dark',reducedMotion:'no-preference',locale:'hu-HU'
@@ -126,7 +129,7 @@ async function verifyFullBirth(browser){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed/i.test(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
@@ -235,7 +238,7 @@ async function verifySkip(browser){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(m.text()))errors.push(m.text());});
+  page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed/i.test(m.text()))errors.push(m.text());});
   try{
     await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'commit',timeout:30000});
     const skip=page.locator(OVERLAY+' .fxb-skip');
