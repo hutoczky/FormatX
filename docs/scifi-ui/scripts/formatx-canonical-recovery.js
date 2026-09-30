@@ -17,6 +17,17 @@
       const language = url.searchParams.get('lang');
       const params = new URLSearchParams();
       if (SUPPORTED_LANGUAGES.has(language)) params.set('lang', language);
+
+      // R1815: presentation/audit parameters are public runtime inputs, not
+      // redirect debris. Keep them until the target runtime consumes them.
+      for (const name of ['intro','visualintro','cinema','lighthouse']) {
+        if (url.searchParams.get(name) === '1') params.set(name, '1');
+      }
+      for (const name of ['r548','audit']) {
+        const value = url.searchParams.get(name);
+        if (value && value.length <= 80) params.set(name, value);
+      }
+
       const search = params.toString() ? `?${params.toString()}` : '';
       const clean = `/${search}${url.hash}`;
       const current = `${url.pathname}${url.search}${url.hash}`;
