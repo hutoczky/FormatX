@@ -5,7 +5,7 @@ const CANONICAL_HOST = 'formatxsuite.com';
 const LEGACY_WWW_HOST = 'www.formatxsuite.com';
 const INTERNAL_HOST = 'formatx-routing.internal';
 const RECOVERY_PARAM = '_fx_redirect_recovery';
-const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260811-recovery-2"></script>';
+const RECOVERY_SCRIPT = '<script defer data-fx-canonical-recovery="true" src="/scifi-ui/scripts/formatx-canonical-recovery.js?v=20260930-r1814-functional-query-state"></script>';
 
 const HOMEPAGE_ALIASES = new Set([
   '/',
