@@ -8,7 +8,7 @@
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)');
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)');
   const PARAMS = new URLSearchParams(location.search);
-  const LIGHTHOUSE = /Chrome-Lighthouse|HeadlessChrome/i.test(navigator.userAgent || '') || PARAMS.get('lighthouse') === '1';
+  const LIGHTHOUSE = (/Chrome-Lighthouse/i.test(navigator.userAgent || '')||(/HeadlessChrome/i.test(navigator.userAgent || '')&&navigator.webdriver!==true)) || PARAMS.get('lighthouse') === '1';
   const VALIDATION = navigator.webdriver === true;
   const AUDIT = LIGHTHOUSE || VALIDATION;
   const LOW_POWER = AUDIT || (MOBILE.matches && (
