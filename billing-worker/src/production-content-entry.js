@@ -269,10 +269,10 @@ function scheduleMotionRuntime(html) {
 }
 function cacheBustR502Runtime(html) {
   return String(html || '')
-    .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260903-r507-mag-single-clock-owner')
+    .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260925-r1730-retired-r533-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260920-r644-persistent-open')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism')
-    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260924-r1724-exclusive-main-nav-owner')
+    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260925-r1746-lighthouse-ua-audit')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
 }
@@ -390,3 +390,5 @@ export default {
 };
 
 // production-r1800-network-sensor-speed-test-endpoints\n// production-r1810-gigabit-multistream-edge-transport\n// production-r1405-refined-irregular-crystal-deploy
+
+// production-r1818-current-runtime-cache-parity
