@@ -334,21 +334,71 @@
     }, { once: true });
   }
 
-  function initialise() {
-    navigation();
-    applyLanguage(language, false);
+  let enhanced = false;
+  let revealReady = false;
+  const intentEvents = ['pointerdown','keydown','focusin'];
+
+  function removeEnhancementArms() {
+    intentEvents.forEach(type => removeEventListener(type, onIntent, true));
+  }
+
+  function ensureReveal(reason='scroll') {
+    if (revealReady) return;
+    revealReady = true;
     reveal();
+    ROOT.dataset.fxApexRevealR1818 = reason;
+  }
+
+  function enhance(reason='intent') {
+    if (enhanced) return;
+    enhanced = true;
+    removeEnhancementArms();
+
+    applyLanguage(language, false);
+    ensureReveal(reason);
     scenes();
     flow();
     pointerVariables();
     updatePrice();
     latestRelease();
     setScene(activeScene);
-    ROOT.dataset.fxApex = 'controller-performance-v2';
-    ROOT.dataset.fxRenderer = 'three-host';
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+
+    ROOT.dataset.fxApexEnhancementR1818 = reason;
+    dispatchEvent(new CustomEvent('formatx:apexenhanced', {
+      detail: { reason, renderer: 'three-host' }
+    }));
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
-  else initialise();
+  function onIntent(event) {
+    if (enhanced) return;
+    enhance(event.type === 'keydown' ? 'keyboard-intent' : event.type + '-intent');
+  }
+
+  function armEnhancement() {
+    intentEvents.forEach(type => addEventListener(type, onIntent, { capture: true, passive: type !== 'keydown', once: false }));
+    ROOT.dataset.fxApexEnhancementR1818 = 'armed-pointer-key-focus';
+    ROOT.dataset.fxApexScrollR1818 = 'zero-apex-work-scroll-owned-by-r536';
+  }
+
+  function initialiseShell() {
+    /* R1818 — first paint only needs interactive navigation and the canonical
+       static product shell. Expensive reveal/scene/flow/release scans are
+       progressive enhancement and start on real intent, never on the critical
+       first-load main-thread path. */
+    navigation();
+    armEnhancement();
+    ROOT.dataset.fxApex = 'controller-performance-v3';
+    ROOT.dataset.fxApexStartupR1818 = 'minimal-shell-zero-scan';
+    ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxScene = '0';
+    ROOT.dataset.fxFlow = '0';
+    ROOT.style.setProperty('--accent', '120,210,255');
+    ROOT.style.setProperty('--progress', '0');
+    dispatchEvent(new CustomEvent('formatx:apexready', {
+      detail: { renderer: 'three-host', infinite: 'delegated', startup: 'minimal-r1818' }
+    }));
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseShell, { once: true });
+  else initialiseShell();
 }());

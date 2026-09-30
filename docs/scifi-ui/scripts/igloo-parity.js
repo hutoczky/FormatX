@@ -251,13 +251,31 @@
     }
 
     const source = queue[index];
+    const canonicalMagScheduled = Boolean(
+      document.querySelector('script[data-fx-p0-motion-scheduler-r490],script[data-fx-motion-runtime-loader-r239]')
+      || root.dataset.fxPrimaryMagOwnerR460 === 'r326-only'
+      || root.dataset.fxCurrentMagRuntimeR422
+      || root.dataset.fxCrystalOrganismR326
+    );
     const dedicatedCoreReady = /^(?:ready-v20|ready-v69)$/.test(root.dataset.fxCoreReal3d || '');
     const dedicatedCoreSettled = dedicatedCoreReady
       || ['context-unavailable', 'webgl2-unavailable', 'shader-failed', 'context-lost'].includes(root.dataset.fxCoreReal3d);
-    if (dedicatedCoreSettled
-      && (source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js'))) {
-      root.dataset.fxNativeApex = 'retired-for-dedicated-core-v69';
-      root.dataset.fxThreeHost = dedicatedCoreReady ? 'single-real3d-v69' : 'canvas2d-safety-fallback-v22';
+    const legacyRenderer = source.includes('formatx-apex-native.js') || source.includes('formatx-three-host-safe.js');
+
+    /* R1818 — the production shell has an explicit canonical R326 scheduler
+       from first parse and the R326 loader itself declares no legacy renderer
+       fallback. Starting the 2026-08 native-apex/three-host-safe renderers while
+       R326 is still booting creates a second scroll/GPU owner and can force
+       synchronous section geometry reads on every scroll event. Retire those
+       legacy renderers before they execute, not only after an old v20/v69 state. */
+    if (legacyRenderer && (canonicalMagScheduled || dedicatedCoreSettled)) {
+      root.dataset.fxNativeApex = canonicalMagScheduled
+        ? 'retired-for-canonical-r326-scheduler-r1818'
+        : 'retired-for-dedicated-core-v69';
+      root.dataset.fxThreeHost = canonicalMagScheduled
+        ? 'retired-single-r326-owner-r1818'
+        : (dedicatedCoreReady ? 'single-real3d-v69' : 'retired-no-legacy-fallback');
+      root.dataset.fxLegacyRendererRetirementR1818 = 'apex-native-three-host-safe-not-loaded';
       root.dataset.fxTranscendProgress = String(Math.round((index + 1) / queue.length * 100));
       load(index + 1);
       return;

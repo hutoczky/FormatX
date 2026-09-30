@@ -75,14 +75,39 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     let frames = 0;
     let previous = 0;
     const deltas = [];
+    const spikes = [];
     const start = performance.now();
     const duration = 1200;
+    const snapshot = (now, delta, progress) => {
+      const root = document.documentElement;
+      return {
+        atMs: now - start,
+        deltaMs: delta,
+        progress,
+        scrollY,
+        scrollHeight: document.documentElement.scrollHeight,
+        loopState: root.dataset.fxLoopLandingState || '',
+        scrollActivity: root.dataset.fxScrollActivity || '',
+        scrollBudget: root.dataset.fxScrollBudgetR1660 || '',
+        loopTail: root.dataset.fxLoopTailMaterializeR1818 || root.dataset.fxLoopTailMaterializeR1746 || '',
+        loopTransfer: root.classList.contains('fx-seamless-loop-transfer'),
+        pageScrolling: root.classList.contains('fx-page-scrolling'),
+        sensory: root.dataset.fxSiteSensoryR1755 || '',
+        apex: root.dataset.fxApexEnhancementR1818 || root.dataset.fxApex || '',
+        habitat: root.dataset.fxLivingHabitatSchedulerR1755 || root.dataset.fxLivingHabitat || '',
+        cinematic: root.dataset.fxCinematicJourneyR536 || root.dataset.fxCinematicJourney || '',
+      };
+    };
     return new Promise(resolve => {
       function frame(now) {
         frames += 1;
-        if (previous) deltas.push(now - previous);
-        previous = now;
         const progress = Math.min(1, (now - start) / duration);
+        if (previous) {
+          const delta = now - previous;
+          deltas.push(delta);
+          if (delta > 20) spikes.push(snapshot(now, delta, progress));
+        }
+        previous = now;
         scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * progress);
         if (progress < 1) requestAnimationFrame(frame);
         else {
@@ -102,7 +127,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
               over20ms: ordered.filter(v => v > 20).length,
               over25ms: ordered.filter(v => v > 25).length,
               over33ms: ordered.filter(v => v > 33.34).length
-            }
+            },
+            spikes
           });
         }
       }
