@@ -71,7 +71,7 @@ jobs:
           const fs=require('node:fs');
           const [src,out,profile]=process.argv.slice(2);
           const c=JSON.parse(fs.readFileSync(src,'utf8'));
-          c.ci.collect.url=[`https://formatxsuite.com/?lighthouse=1&p0_final=${process.env.GITHUB_RUN_ID}-${profile}`];
+          c.ci.collect.url=[`https://formatxsuite.com/?p0_final=${process.env.GITHUB_RUN_ID}-${profile}`];
           fs.writeFileSync(out,JSON.stringify(c,null,2)+'\n');
           NODE
           echo "LH_CONFIG=$out" >> "$GITHUB_ENV"
