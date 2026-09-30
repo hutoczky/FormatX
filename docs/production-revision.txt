@@ -1,5 +1,5 @@
 FormatX production revision
-token=20260930-r1814-preserve-functional-query
-base_master=6cca29c91a5f9d03cdb1ed75ad42d1f882995cf6
-purpose=preserve functional query parameters through canonical apex routing so forced intro, language, Lighthouse and audit modes reach the browser unchanged
-validation=production candidate, routing unit tests, exact-revision deploy convergence, live R533 to R536 cinematic handoff, strict live Lighthouse x3 desktop/mobile, security and checkout invariants
+token=20260930-r1815-canonical-owner-query-parity
+base_master=31722abd01b6d6f7ca31c092da1f812277cf74f1
+purpose=preserve intro, visualintro, cinema, language, Lighthouse and audit query state in the actually deployed R369/R529 canonical homepage owner
+validation=production preflight canonical query-parity contract, exact-revision deploy convergence, live R533 to R536 cinematic handoff on apex and www, strict live Lighthouse x3 desktop/mobile, security and checkout invariants
