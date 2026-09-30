@@ -112,13 +112,13 @@ const LIVING_CORE_CONTENT_SECURITY_POLICY = [
 ].join('; ');
 
 const PERMISSIONS_POLICY = [
-  'accelerometer=()',
+  'accelerometer=(self)',
   'ambient-light-sensor=()',
   'autoplay=(self)',
   'camera=()',
   'display-capture=()',
   'geolocation=()',
-  'gyroscope=()',
+  'gyroscope=(self)',
   'magnetometer=()',
   'microphone=()',
   'payment=()',
@@ -855,3 +855,5 @@ export function secureResponse(response, url) {
 }
 
 // production-r1814-homepage-query-parity
+
+// production-r1820-same-origin-motion-sensors
