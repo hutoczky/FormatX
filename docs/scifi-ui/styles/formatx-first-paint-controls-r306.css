@@ -396,7 +396,7 @@
     position: absolute !important;
     inset: auto auto 28px 50% !important;
     display: grid !important;
-    grid-template-columns: repeat(3,54px) !important;
+    grid-template-columns: repeat(2,54px) !important;
     grid-template-rows: auto !important;
     align-items: start !important;
     justify-content: center !important;
