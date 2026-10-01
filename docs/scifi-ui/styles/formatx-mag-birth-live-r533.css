@@ -2210,3 +2210,83 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1555-three-canvas-positive-stack */
 
 /* production-r1723-three-native-pixel-no-css-resample */
+
+
+/* R1800 — photographic living-organism birth grade.
+   The 3D organism is the hero. Reticles, purple/cyan bloom and CRT-grid styling
+   are deliberately suppressed so the sequence reads as a photographed event. */
+.fx-mag-birth-r533{
+  --fxb-cyan:#8fb4b5;
+  --fxb-violet:#8e7f88;
+  --fxb-gold:#a58e76;
+  color:#dce5e2!important;
+  background:
+    radial-gradient(ellipse 34% 58% at 50% -8%,rgba(216,226,218,.045),transparent 74%),
+    radial-gradient(ellipse 48% 46% at 48% 48%,rgba(48,67,68,.070),transparent 72%),
+    radial-gradient(ellipse 90% 82% at 50% 50%,rgba(10,17,19,.22),rgba(1,3,4,.985) 82%),
+    #010304!important;
+}
+.fx-mag-birth-r533::after{
+  opacity:.025!important;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.008) 1px,transparent 1px)!important;
+  background-size:7px 7px!important;
+  mix-blend-mode:normal!important;
+}
+.fx-mag-birth-r533 .fxb-veil{
+  opacity:.30!important;
+  background:
+    radial-gradient(circle at 48% 43%,rgba(119,151,151,.055),transparent 30%),
+    radial-gradient(circle at 55% 60%,rgba(84,68,75,.035),transparent 52%),
+    linear-gradient(180deg,#010304 0%,#020506 52%,#030304 100%)!important;
+  filter:none!important;
+}
+.fx-mag-birth-r533 .fxb-deep{
+  opacity:.44!important;
+  filter:saturate(.48) contrast(1.025)!important;
+}
+.fx-mag-birth-r533 .fxb-stars{opacity:.10!important}
+.fx-mag-birth-r533 .fxb-dna-stage::before,
+.fx-mag-birth-r533 .fxb-dna-stage::after{
+  opacity:0!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+.fx-mag-birth-r533 .fxb-dna-depth-fog{
+  opacity:.24!important;
+  background:
+    radial-gradient(ellipse at 48% 46%,rgba(170,192,188,.055),transparent 28%),
+    radial-gradient(ellipse at 52% 56%,rgba(92,72,78,.040),transparent 50%)!important;
+  filter:blur(26px)!important;
+}
+.fx-mag-birth-r533 .fxb-dna{
+  filter:none!important;
+}
+.fx-mag-birth-r533 .fxb-dna-strand-a{stroke:rgba(154,190,188,.72)!important}
+.fx-mag-birth-r533 .fxb-dna-strand-b{stroke:rgba(134,115,126,.58)!important}
+.fx-mag-birth-r533 .fxb-dna-bridge{stroke:rgba(205,218,211,.48)!important}
+.fx-mag-birth-r533 .fxb-dna-base3d-a,
+.fx-mag-birth-r533 .fxb-dna-base3d-b{
+  box-shadow:none!important;
+  filter:none!important;
+}
+.fx-mag-birth-r533 .fxb-dna-base3d-a{
+  background:radial-gradient(circle at 34% 28%,#dfe9e5 0 7%,#8fa9a6 19%,#405c5e 66%,#162326 100%)!important;
+}
+.fx-mag-birth-r533 .fxb-dna-base3d-b{
+  background:radial-gradient(circle at 34% 28%,#e1dedd 0 7%,#a09198 19%,#594b53 66%,#241c22 100%)!important;
+}
+.fx-mag-birth-r533 :is(
+  .fxb-title,.fxb-kicker,.fxb-subtitle,.fxb-status,.fxb-progress-label,
+  .fxb-phase-label,.fxb-system-copy
+){
+  text-shadow:none!important;
+  filter:none!important;
+}
+.fx-mag-birth-r533 :is(.fxb-orbit,.fxb-reticle,.fxb-ring,.fxb-hud-ring){
+  opacity:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+/* production-r1800-photographic-birth-film-no-neon-hud */
