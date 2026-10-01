@@ -98,12 +98,30 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     let frames = 0;
     let previous = 0;
     const deltas = [];
+    const spikes = [];
     const start = performance.now();
     const duration = 1200;
     return new Promise(resolve => {
       function frame(now) {
         frames += 1;
-        if (previous) deltas.push(now - previous);
+        if (previous) {
+          const delta = now - previous;
+          deltas.push(delta);
+          if (delta > 20) {
+            const center = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+            const section = center?.closest?.('section[id]');
+            spikes.push({
+              atMs: now - start,
+              deltaMs: delta,
+              scrollY,
+              section: section?.id || '',
+              scrollBudget: document.documentElement.dataset.fxScrollBudgetR1660 || '',
+              scrollPressure: document.documentElement.dataset.fxScrollPressureR1755 || '',
+              cinematic: document.documentElement.dataset.fxCinematicJourneyR536 || '',
+              habitat: document.documentElement.dataset.fxLivingHabitatR1530 || ''
+            });
+          }
+        }
         previous = now;
         const progress = Math.min(1, (now - start) / duration);
         scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * progress);
@@ -125,7 +143,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
               over20ms: ordered.filter(v => v > 20).length,
               over25ms: ordered.filter(v => v > 25).length,
               over33ms: ordered.filter(v => v > 33.34).length
-            }
+            },
+            spikes
           });
         }
       }
