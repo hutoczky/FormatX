@@ -26,18 +26,16 @@ html:root:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-a
   rotate: none !important;
   transform-origin: 50% 50% !important;
   mix-blend-mode: normal !important;
+  /* R1800 — no post-process neon. The physical shader owns reflections,
+     depth and edge response; CSS only applies a restrained photographic grade. */
   filter:
-    brightness(1.04)
-    contrast(1.14)
-    saturate(1.10)
-    drop-shadow(0 0 1px rgba(106,236,255,.10))
-    drop-shadow(0 0 6px rgba(62,151,214,.07)) !important;
+    brightness(1.00)
+    contrast(1.075)
+    saturate(.94) !important;
   -webkit-filter:
-    brightness(1.04)
-    contrast(1.14)
-    saturate(1.10)
-    drop-shadow(0 0 1px rgba(106,236,255,.10))
-    drop-shadow(0 0 6px rgba(62,151,214,.07)) !important;
+    brightness(1.00)
+    contrast(1.075)
+    saturate(.94) !important;
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -74,13 +72,13 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     rotate: none !important;
     filter:
       brightness(1.00)
-      contrast(1.20)
-      saturate(1.06)
+      contrast(1.085)
+      saturate(.96)
       blur(0) !important;
     -webkit-filter:
       brightness(1.00)
-      contrast(1.20)
-      saturate(1.06)
+      contrast(1.085)
+      saturate(.96)
       blur(0) !important;
   }
 
@@ -400,3 +398,13 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   }
 }
 /* production-r1480-realistic-crystal-optics */
+
+
+/* R1800 — photographic living-organism display contract.
+   No artificial bloom/drop-shadow owner is allowed above the native shader. */
+html[data-fx-native-mag-visual-r1800] #hero .fx-crystal-organism-r326-canvas{
+  mix-blend-mode:normal!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+}
+/* production-r1800-photographic-native-shader-display */
