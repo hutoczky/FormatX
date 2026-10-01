@@ -44,17 +44,18 @@ root.dataset.fxPerformancePolicyR1774='phase2-fetch-only-final-mag-prewarm-no-co
 root.dataset.fxPerformancePolicyR1778='mobile-monolith-clean-silhouette-low-overdraw-60fps';
 root.dataset.fxPerformancePolicyR1779='mobile-obsidian-zero-tendrils-broad-facets-proof-driven';
 root.dataset.fxPerformancePolicyR1781='clean-mobile-facets-no-aliased-surface-patterns';
+root.dataset.fxPerformancePolicyR1821='award-grade-optics-same-draw-budget-adaptive-60hz';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1795-mobile-smoky-bioglass-airy';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1795-mobile-smoky-bioglass-airy&r=20261001-r1821-award-grade';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy&r=20261001-r1821-award-grade';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
-const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
-const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
+const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity&r=20261001-r1821-award-grade';
+const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean&r=20261001-r1821-award-grade';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-deterministic-semantic-sweep';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260925-r1747-p0-owned-open';
