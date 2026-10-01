@@ -71,7 +71,7 @@ jobs:
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream' live-probe/home.html \
-               && grep -Fq 'production-r1820-final-hero-copy-lcp-lock' live-probe/p0.css \
+               && grep -Fq 'production-r1820-final-hero-typography-lcp-lock' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
                && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
                && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/current-mag.js \
