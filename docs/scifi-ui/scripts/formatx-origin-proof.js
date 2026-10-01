@@ -147,6 +147,9 @@
 
   let observer = null;
   let targetRetry = 0;
+  let scrollSettleTimer = 0;
+  let scrollHot = false;
+  let pendingViewportInject = false;
   let loaded = false;
 
   function inject() {
@@ -155,6 +158,9 @@
     root.dataset.fxProductShowcaseLoadState = 'loading';
     if (observer) observer.disconnect();
     clearInterval(targetRetry);
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer = 0;
+    pendingViewportInject = false;
 
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
@@ -189,7 +195,13 @@
     }
 
     observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) inject();
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      if (scrollHot) {
+        pendingViewportInject = true;
+        root.dataset.fxProductShowcaseLoadState = 'pending-scroll-settle';
+        return;
+      }
+      inject();
     }, { rootMargin: '240px 0px', threshold: 0.01 });
     observer.observe(trigger);
     root.dataset.fxProductShowcaseLoadState = 'armed';
@@ -205,8 +217,9 @@
 
   function ensureArmed() {
     if (loaded) return;
-    if (triggerNearViewport()) {
-      inject();
+    if (!('IntersectionObserver' in window) && triggerNearViewport()) {
+      if (scrollHot) pendingViewportInject = true;
+      else inject();
       return;
     }
     if (arm()) {
@@ -227,17 +240,36 @@
     }
   }
 
+  function onScrollHotPath() {
+    if (loaded) return;
+    scrollHot = true;
+    root.dataset.fxProductShowcaseScrollR1821 = 'hot-no-injection';
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer = window.setTimeout(() => {
+      scrollSettleTimer = 0;
+      scrollHot = false;
+      root.dataset.fxProductShowcaseScrollR1821 = 'settled';
+      if (pendingViewportInject) {
+        pendingViewportInject = false;
+        inject();
+        return;
+      }
+      if (!observer) ensureArmed();
+    }, 140);
+  }
+
   if (document.readyState === 'loading') {
     addEventListener('DOMContentLoaded', ensureArmed, { once: true });
   } else {
     ensureArmed();
   }
   ['pageshow', 'formatx:livingready', 'formatx:loop'].forEach(name => addEventListener(name, ensureArmed));
-  addEventListener('scroll', ensureArmed, { passive: true });
+  addEventListener('scroll', onScrollHotPath, { passive: true });
   addEventListener('hashchange', ensureArmed, { passive: true });
   addEventListener('pagehide', () => {
     if (observer) observer.disconnect();
     clearInterval(targetRetry);
+    clearTimeout(scrollSettleTimer);
   }, { once: true });
 }());
 
@@ -251,6 +283,9 @@
   let loaded = false;
   let observer = null;
   let retryTimer = 0;
+  let scrollSettleTimer = 0;
+  let scrollHot = false;
+  let pendingViewportInject = false;
 
   function launcherLabel() {
     return root.lang === 'en'
@@ -291,6 +326,9 @@
     loaded = true;
     if (observer) observer.disconnect();
     clearInterval(retryTimer);
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer = 0;
+    pendingViewportInject = false;
     root.dataset.fxLiveOsLoadState = 'loading';
 
     const stylesheet = document.createElement('link');
@@ -326,7 +364,13 @@
       return true;
     }
     observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) inject();
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      if (scrollHot) {
+        pendingViewportInject = true;
+        root.dataset.fxLiveOsLoadState = 'pending-scroll-settle';
+        return;
+      }
+      inject();
     }, { rootMargin: '520px 0px', threshold: 0.01 });
     observer.observe(trigger);
     root.dataset.fxLiveOsLoadState = 'armed';
@@ -358,6 +402,24 @@
     }
   }
 
+  function onScrollHotPath() {
+    if (loaded || root.dataset.fxLiveOsOpenPendingR644 === 'true') return;
+    scrollHot = true;
+    root.dataset.fxLiveOsScrollR1821 = 'hot-no-injection';
+    clearTimeout(scrollSettleTimer);
+    scrollSettleTimer = window.setTimeout(() => {
+      scrollSettleTimer = 0;
+      scrollHot = false;
+      root.dataset.fxLiveOsScrollR1821 = 'settled';
+      if (pendingViewportInject) {
+        pendingViewportInject = false;
+        inject();
+      }
+    }, 140);
+  }
+
+  addEventListener('scroll', onScrollHotPath, { passive: true });
+
   addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
@@ -375,5 +437,7 @@
   addEventListener('pagehide', () => {
     if (observer) observer.disconnect();
     clearInterval(retryTimer);
+    clearTimeout(scrollSettleTimer);
   }, { once: true });
+  root.dataset.fxOriginProofPerformanceR1821 = 'heavy-near-viewport-loaders-after-scroll-settle';
 }());
