@@ -390,3 +390,99 @@
   }
 }
 /* production-r1710-desktop-hero-geometry-lock */
+
+
+/* R1821 — retire the obsolete R1647 desktop top-right control owner.
+   R528's product contract has exactly two hero controls (SOUND + ASK), and the
+   settled R244/R337 geometry places them below the MAG. The blocking desktop
+   first-paint layer must therefore start in that exact geometry instead of
+   moving a legacy vertical rail from the top-right after hydration. */
+@media (min-width:901px){
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264,
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204{
+    position:absolute!important;
+    inset:auto auto 20px 50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:122px!important;
+    min-width:122px!important;
+    max-width:calc(100% - 28px)!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    column-gap:14px!important;
+    row-gap:0!important;
+    overflow:visible!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+    scale:none!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204 > .fx-three-sound{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-reference-controls-r204 .fx-reference-ask{
+    grid-column:2!important;
+    grid-row:1!important;
+  }
+  html:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
+    display:none!important;
+  }
+}
+/* production-r1821-retire-r1647-top-right-control-owner */
