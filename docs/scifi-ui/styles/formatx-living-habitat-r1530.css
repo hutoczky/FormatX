@@ -176,8 +176,8 @@ html:root:root:root:root:root:root:root:root:root:root body.living-architecture 
     -webkit-backdrop-filter:blur(3px) saturate(104%);
   }
   html:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    filter:brightness(1.01) contrast(1.11) saturate(.96) drop-shadow(0 13px 18px rgba(0,0,0,.30))!important;
-    -webkit-filter:brightness(1.01) contrast(1.11) saturate(.96) drop-shadow(0 13px 18px rgba(0,0,0,.30))!important;
+    filter:brightness(.995) contrast(1.055) saturate(.94)!important;
+    -webkit-filter:brightness(.995) contrast(1.055) saturate(.94)!important;
   }
 }
 
@@ -222,8 +222,8 @@ html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:
 body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
   opacity:1!important;
   image-rendering:auto!important;
-  filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
-  -webkit-filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
+  filter:brightness(.995) contrast(1.045) saturate(.92)!important;
+  -webkit-filter:brightness(.995) contrast(1.045) saturate(.92)!important;
   mix-blend-mode:normal!important;
 }
 
@@ -231,8 +231,8 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:1!important;
-    filter:brightness(1.07) contrast(1.11) saturate(1) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
-    -webkit-filter:brightness(1.07) contrast(1.11) saturate(1) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
+    filter:brightness(.995) contrast(1.055) saturate(.94)!important;
+    -webkit-filter:brightness(.995) contrast(1.055) saturate(.94)!important;
   }
 }
 /* production-r1531-proof-corrected-photoreal-mag-owner */
@@ -1745,3 +1745,13 @@ body>.fx-mag-birth-r533 .fxb-particles{opacity:.40!important;}
   }
 }
 /* production-r1778-mobile-monolith */
+
+
+/* R1800 — the living habitat must not post-process the native organism.
+   Physical depth, shadowing and edge response are owned inside WebGL. */
+html:root:root:root body.living-architecture #hero .fx-crystal-organism-r326-canvas{
+  box-shadow:none!important;
+  text-shadow:none!important;
+  mix-blend-mode:normal!important;
+}
+/* production-r1800-no-css-cgi-postprocess */

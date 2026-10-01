@@ -193,6 +193,10 @@
   root.dataset.fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition';
   root.dataset.fxNativeMagMaterialR1795='charcoal-quartz-cool-edge-soft-transmission-warm-rim';
   root.dataset.fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding';
+  root.dataset.fxNativeMagVisualR1800='photoreal-living-biocrystal-asymmetric-tissue-mineral-organism';
+  root.dataset.fxNativeMagMaterialR1800='smoked-dielectric-bioglass-dermal-depth-low-emission-softbox';
+  root.dataset.fxNativeMagAnatomyR1800='irregular-grown-monolith-no-porcelain-plates-no-neon-veins-integrated-optic';
+  root.dataset.fxNativeMagPerformanceR1800='same-single-webgl-pass-no-extra-draw-owner-60hz-budget';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -334,13 +338,19 @@
       // R1572 — photographic smoky-obsidian seed. One continuous asymmetric
       // mineral volume replaces the four-petal mechanical pod. The silhouette
       // is elongated, subtly leaning and never resolves into a logo-perfect diamond.
-      const ax=.735 + shoulderBase*.080 + direction[0]*.050 - direction[2]*.018
-        + Math.sin(theta*2.08+phi*.74)*.018;
-      const ay=.965 + shoulderBase*.055 + y*.036 + direction[0]*.020
-        + Math.cos(theta*1.72-phi*1.09)*.014;
-      const az=.625 + shoulderBase*.060 + direction[2]*.034 - direction[0]*.020
-        + Math.sin(theta*2.82+phi*.59)*.014;
-      const p=1.46;
+      /* R1800 — grown biocrystal morphology.
+         Keep a closed mineral volume, but break the old logo-like diamond with
+         three smooth growth lobes, one compressed flank and non-parallel cuts. */
+      const growthA=Math.pow(Math.max(0,direction[0]*.38+direction[1]*.72+direction[2]*.24),4.0);
+      const growthB=Math.pow(Math.max(0,-direction[0]*.76+direction[1]*.18+direction[2]*.34),4.4);
+      const growthC=Math.pow(Math.max(0,direction[0]*.22-direction[1]*.64-direction[2]*.55),4.2);
+      const ax=.742 + shoulderBase*.094 + direction[0]*.046 - direction[2]*.024
+        + growthA*.036 - growthB*.020 + Math.sin(theta*1.77+phi*.83)*.021;
+      const ay=.958 + shoulderBase*.061 + y*.028 + direction[0]*.026
+        + growthA*.050 + growthC*.018 + Math.cos(theta*1.39-phi*1.17)*.017;
+      const az=.632 + shoulderBase*.072 + direction[2]*.030 - direction[0]*.026
+        + growthB*.030 - growthC*.016 + Math.sin(theta*2.41+phi*.67)*.017;
+      const p=1.34;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -348,38 +358,37 @@
       const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
       const broadBias=
         1
-        +Math.sin(theta*2.03+phi*.86)*.031
-        +Math.cos(theta*3.11-phi*1.23)*.019
-        +Math.sin(theta*4.42+phi*.48)*.010
-        +Math.cos(theta*.93+phi*2.37)*.008;
-      const cutA=Math.pow(Math.max(0,direction[0]*.74+direction[1]*.44+direction[2]*.18),3.1);
-      const cutB=Math.pow(Math.max(0,-direction[0]*.66+direction[1]*.24+direction[2]*.52),3.3);
-      const cutC=Math.pow(Math.max(0,direction[0]*.18-direction[1]*.72+direction[2]*.46),3.5);
-      const cutD=Math.pow(Math.max(0,-direction[0]*.36-direction[1]*.18+direction[2]*.80),3.6);
-      const crystalRadius=baseRadius*broadBias*(1-.112*cutA-.086*cutB-.071*cutC-.056*cutD);
+        +Math.sin(theta*1.73+phi*.91)*.038
+        +Math.cos(theta*2.67-phi*1.31)*.024
+        +Math.sin(theta*4.18+phi*.39)*.011
+        +growthA*.034-growthB*.018+growthC*.014;
+      const cutA=Math.pow(Math.max(0,direction[0]*.70+direction[1]*.49+direction[2]*.19),3.0);
+      const cutB=Math.pow(Math.max(0,-direction[0]*.59+direction[1]*.31+direction[2]*.57),3.2);
+      const cutC=Math.pow(Math.max(0,direction[0]*.24-direction[1]*.67+direction[2]*.44),3.3);
+      const cutD=Math.pow(Math.max(0,-direction[0]*.41-direction[1]*.13+direction[2]*.76),3.5);
+      const cutE=Math.pow(Math.max(0,direction[0]*.62-direction[1]*.20-direction[2]*.50),3.7);
+      const crystalRadius=baseRadius*broadBias*(1-.094*cutA-.073*cutB-.058*cutC-.046*cutD-.036*cutE);
       const crystalPosition=[
-        direction[0]*crystalRadius*1.06,
-        direction[1]*crystalRadius*1.08,
-        direction[2]*crystalRadius*.99
+        direction[0]*crystalRadius*1.055,
+        direction[1]*crystalRadius*1.075,
+        direction[2]*crystalRadius*.985
       ];
-      const shoulder=Math.pow(shoulderBase,1.38);
-      crystalPosition[0]+=-.132*Math.pow(smoothUp,1.85)+.061*Math.pow(smoothDown,1.55)
-        +Math.sin(theta*1.64+phi*.77)*.037*shoulder
-        +direction[2]*y*.018;
-      crystalPosition[1]+=Math.pow(smoothUp,3.9)*.082
-        -Math.pow(smoothDown,3.25)*.032
-        +direction[0]*direction[2]*.014
-        +Math.sin(theta*2.38+phi*.48)*.028*shoulder;
-      crystalPosition[2]+=direction[0]*y*.019
-        +Math.pow(Math.max(direction[2],0),3.7)*.024
-        -direction[0]*.031
-        +Math.sin(theta*3.72-phi*.63)*.012*shoulder;
-      /* R1575: truncate both poles on slightly oblique planes. The lat/long
-         topology no longer resolves into an egg or logo-perfect diamond. */
-      const topCap=.735+crystalPosition[0]*.125-crystalPosition[2]*.052;
-      const bottomCap=-.765-crystalPosition[0]*.064+crystalPosition[2]*.041;
-      if(crystalPosition[1]>topCap)crystalPosition[1]=topCap+(crystalPosition[1]-topCap)*.075;
-      if(crystalPosition[1]<bottomCap)crystalPosition[1]=bottomCap+(crystalPosition[1]-bottomCap)*.075;
+      const shoulder=Math.pow(shoulderBase,1.30);
+      crystalPosition[0]+=-.145*Math.pow(smoothUp,1.76)+.072*Math.pow(smoothDown,1.46)
+        +Math.sin(theta*1.42+phi*.82)*.046*shoulder
+        +direction[2]*y*.024+growthB*.022;
+      crystalPosition[1]+=Math.pow(smoothUp,3.35)*.094
+        -Math.pow(smoothDown,2.92)*.038
+        +direction[0]*direction[2]*.020
+        +Math.sin(theta*2.08+phi*.54)*.033*shoulder+growthA*.018;
+      crystalPosition[2]+=direction[0]*y*.026
+        +Math.pow(Math.max(direction[2],0),3.2)*.030
+        -direction[0]*.038
+        +Math.sin(theta*3.16-phi*.71)*.016*shoulder-growthC*.018;
+      const topCap=.758+crystalPosition[0]*.142-crystalPosition[2]*.071;
+      const bottomCap=-.790-crystalPosition[0]*.078+crystalPosition[2]*.052;
+      if(crystalPosition[1]>topCap)crystalPosition[1]=topCap+(crystalPosition[1]-topCap)*.060;
+      if(crystalPosition[1]<bottomCap)crystalPosition[1]=bottomCap+(crystalPosition[1]-bottomCap)*.060;
       return {
         sphere: spherePosition,
         crystal: crystalPosition,
@@ -933,9 +942,11 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
+    /* R1800 — no synthetic canvas grade. Material response is authored in
+       the shader; the compositor only applies a tiny display compensation. */
     const compositorFilter=mobile
-      ? 'brightness(1.03) contrast(1.13) saturate(.96)'
-      : 'brightness(1.10) contrast(1.06) saturate(1.08)';
+      ? 'brightness(.995) contrast(1.055) saturate(.94)'
+      : 'brightness(.995) contrast(1.045) saturate(.92)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1172,32 +1183,24 @@
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
         mineral+=vec3(.025,.078,.086)*vascular*(.034+.060*uEnergy);
         mineral+=vec3(.045,.018,.026)*vascular*subsurface*(.020+.040*uEnergy);
-        float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
-        float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
-        float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
-        float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
-        mineral=mix(mineral,vec3(.012,.015,.019),cortexValley*.31);
-        mineral+=vec3(.072,.090,.098)*cortexRidge*.082;
-        mineral+=vec3(.022,.092,.108)*cortexRidge*vascular*.31;
-
-        /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
-           plates ride above dark cortical tissue. The plate field is broad,
-           irregular and organic; it is not a metallic armour texture. */
-        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
-        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
-        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
-        plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
-        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
-        float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.30,.33,.32)
-          +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
-          +vec3(.16,.25,.27)*fresnel*.18;
-        ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
-        mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.48);
-        mineral=mix(mineral,vec3(.004,.007,.010),livingSeam*.40);
-        mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
-        mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
+        /* R1800 — dermal bioglass, not porcelain armour.
+           Low-frequency tissue depth lives under the mineral surface; seams and
+           vessels are visible only as buried optical variation, never neon paint. */
+        float dermalA=.5+.5*sin(vLocal.y*8.6+vLocal.x*4.1+sin(vLocal.z*5.2)*1.1);
+        float dermalB=.5+.5*sin(vLocal.x*7.2-vLocal.y*5.4+vLocal.z*3.8+sin(vLocal.y*3.3)*.8);
+        float dermalDepth=smoothstep(.34,.82,dermalA*.62+dermalB*.38)*bodyMask;
+        float dermalSeam=pow(1.0-max(dermalA*.72,dermalB*.66),5.2)*bodyMask;
+        float pearl=pow(sat(fresnel*.82+softboxA*.36),1.35)*bodyMask;
+        vec3 deepTissue=vec3(.015,.019,.022)
+          +vec3(.025,.041,.044)*dermalDepth
+          +vec3(.030,.020,.032)*subsurface*.42;
+        mineral=mix(mineral,deepTissue,dermalDepth*.18);
+        mineral=mix(mineral,vec3(.006,.009,.011),dermalSeam*.18);
+        mineral+=vec3(.16,.18,.17)*pearl*.055;
+        mineral+=vec3(.052,.066,.066)*softboxA*dermalDepth*.055;
+        float buriedVessels=vascular*(.18+.82*subsurface)*(1.0-.72*facing);
+        mineral+=vec3(.010,.038,.042)*buriedVessels*(.030+.045*uEnergy);
+        mineral+=vec3(.044,.014,.028)*buriedVessels*subsurface*.018;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
@@ -1245,8 +1248,8 @@
           float head=mix(-.18,1.18,sat(uSurfacePulse));
           pulse=exp(-pow((coordinate-head)/.060,2.0))*(.25+.75*fresnel);
         }
-        mineral+=vec3(.18,.42,.47)*pulse*.55;
-        mineral+=vec3(.58,.64,.62)*pulse*(.10+.24*softboxA);
+        mineral+=vec3(.080,.19,.21)*pulse*.22;
+        mineral+=vec3(.30,.34,.33)*pulse*(.045+.10*softboxA);
 
         vec3 livingMembrane=vec3(.008,.022,.030);
         livingMembrane+=vec3(.085,.175,.205)*(.12*ndl+.22*sideLight+.58*fresnel);
@@ -1285,7 +1288,7 @@
         physicalLens+=vec3(.72,.78,.74)*lensHot*(.090+.040*uEnergy);
         physicalLens+=vec3(.060,.17,.19)*electric*(.085+.080*uEnergy);
         physicalLens+=vec3(.84,.86,.81)*coreFlash*.125;
-        physicalLens+=vec3(1.00,.45,.10)*lensRing*(.10+.10*studioRibbonB);
+        physicalLens+=vec3(.26,.19,.13)*lensRing*(.022+.026*studioRibbonB);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);

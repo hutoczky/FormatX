@@ -82,8 +82,9 @@ has(habitat,[
 ],'R1724 synchronized biocrystal world');
 has(home,[
   'procedural-interactive-living-crystal-organism-r1724',
-  'r1724-living-crystal-organism'
-],'R1724 living crystal static entry contract');
+  'formatx-mag-birth-live-r533.css?v=20261001-r1800-photographic-birth-film',
+  'data-fx-photoreal-r1800="living-biocrystal-photographic-organism"'
+],'R1800 photoreal living-organism static entry contract');
 
 has(life,[
   "const VERSION = 'native-webgl-periodic-and-interaction-life-r528'",'prefers-reduced-motion: reduce',
