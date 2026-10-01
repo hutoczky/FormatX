@@ -27,17 +27,13 @@ html:root:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-a
   transform-origin: 50% 50% !important;
   mix-blend-mode: normal !important;
   filter:
-    brightness(1.04)
-    contrast(1.14)
-    saturate(1.10)
-    drop-shadow(0 0 1px rgba(106,236,255,.10))
-    drop-shadow(0 0 6px rgba(62,151,214,.07)) !important;
+    brightness(1.02)
+    contrast(1.12)
+    saturate(1.04) !important;
   -webkit-filter:
-    brightness(1.04)
-    contrast(1.14)
-    saturate(1.10)
-    drop-shadow(0 0 1px rgba(106,236,255,.10))
-    drop-shadow(0 0 6px rgba(62,151,214,.07)) !important;
+    brightness(1.02)
+    contrast(1.12)
+    saturate(1.04) !important;
   animation: none !important;
   transition: none !important;
   will-change: auto !important;
@@ -73,14 +69,14 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
     translate: none !important;
     rotate: none !important;
     filter:
-      brightness(1.00)
-      contrast(1.20)
-      saturate(1.06)
+      brightness(1.01)
+      contrast(1.14)
+      saturate(1.00)
       blur(0) !important;
     -webkit-filter:
-      brightness(1.00)
-      contrast(1.20)
-      saturate(1.06)
+      brightness(1.01)
+      contrast(1.14)
+      saturate(1.00)
       blur(0) !important;
   }
 
@@ -400,3 +396,9 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   }
 }
 /* production-r1480-realistic-crystal-optics */
+
+
+/* R1821 — award-grade optical presentation.
+   All visible highlight/glow information is authored inside the physical WebGL
+   material. CSS performs only neutral display transfer; no synthetic bloom. */
+/* production-r1821-shader-owned-photographic-optics */
