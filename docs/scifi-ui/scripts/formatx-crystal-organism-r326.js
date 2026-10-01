@@ -197,6 +197,7 @@
   root.dataset.fxNativeMagMaterialR1821='dual-lobe-microfacet-smoky-quartz-subsurface-caustic-optic';
   root.dataset.fxNativeMagLightingR1821='neutral-softbox-warm-bounce-spectral-grazing-depth';
   root.dataset.fxNativeMagPerformanceR1821='same-single-webgl-owner-quality-scales-before-cadence';
+  root.dataset.fxNativeMagProofR1821=mobileVisualProof?'preserved-buffer-proof-only':'production-discard-buffer';
   root.dataset.fxNativeMagVisualR1781='clean-photographic-bioglass-no-surface-pattern-aliasing';
   root.dataset.fxNativeMagMaterialR1781='broad-facet-studio-reflection-no-vein-no-plate-no-crack-overlay';
   root.dataset.fxNativeMagMobileR1781='single-solid-crystal-mesh-plus-recessed-lens-only';
@@ -953,7 +954,7 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:false,
+      preserveDrawingBuffer:mobileVisualProof,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
