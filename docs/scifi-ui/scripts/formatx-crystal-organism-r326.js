@@ -942,9 +942,11 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
+    /* R1800 — no synthetic canvas grade. Material response is authored in
+       the shader; the compositor only applies a tiny display compensation. */
     const compositorFilter=mobile
-      ? 'brightness(1.03) contrast(1.13) saturate(.96)'
-      : 'brightness(1.10) contrast(1.06) saturate(1.08)';
+      ? 'brightness(.995) contrast(1.055) saturate(.94)'
+      : 'brightness(.995) contrast(1.045) saturate(.92)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
