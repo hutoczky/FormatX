@@ -525,8 +525,11 @@
      Forced cinema/validation paths stay immediate; normal visitors activate
      the journey on real intent or after the full MAG birth handoff. */
   let bootStarted=false;
+  let bootIntentTimer=0;
   const startBoot=source=>{
     if(bootStarted)return;
+    clearTimeout(bootIntentTimer);
+    bootIntentTimer=0;
     bootStarted=true;
     root.dataset.fxCinematicJourneyStartR1737=source;
     boot();
@@ -534,9 +537,24 @@
       removeEventListener(type,intentBoot,true);
     }
   };
+  const scheduleMotionBoot=source=>{
+    if(bootStarted)return;
+    clearTimeout(bootIntentTimer);
+    bootIntentTimer=setTimeout(()=>{
+      bootIntentTimer=0;
+      startBoot('settled-'+source);
+    },160);
+  };
   const intentBoot=event=>{
     if(event?.type==='keydown' && event.repeat)return;
-    startBoot('intent-'+(event?.type||'unknown'));
+    const type=event?.type||'unknown';
+    const motionIntent=type==='scroll'||type==='wheel'||type==='touchstart'||
+      (type==='pointerdown'&&event?.pointerType==='touch');
+    if(motionIntent){
+      scheduleMotionBoot(type);
+      return;
+    }
+    startBoot('intent-'+type);
   };
 
   if(FORCE){
@@ -545,6 +563,7 @@
   }else{
     root.dataset.fxCinematicJourneyR536='deferred-first-paint-r1737';
     root.dataset.fxCinematicJourneyPerformanceR1737='post-intent-zero-first-paint-layout-mutation';
+    root.dataset.fxCinematicJourneyPerformanceR1821='motion-intent-boot-after-160ms-settle-zero-hot-scroll-init';
     for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
       addEventListener(type,intentBoot,{once:false,capture:true,passive:type!=='keydown'});
     }
@@ -558,6 +577,7 @@
     clearTimeout(coreSettleTimer);
     clearTimeout(sceneCommitTimer);
     clearTimeout(refreshTimer);
+    clearTimeout(bootIntentTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
     removeEventListener('pointermove',onCinematicPointerMove);
