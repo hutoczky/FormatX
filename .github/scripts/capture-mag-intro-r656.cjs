@@ -114,6 +114,16 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
+      const canvasData=await page.evaluate(()=>{
+        const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+        return canvas instanceof HTMLCanvasElement ? canvas.toDataURL('image/png') : '';
+      });
+      if(!/^data:image\/png;base64,/.test(canvasData))errors.push('R1821 native MAG canvas pixel proof unavailable');
+      else{
+        const raw=Buffer.from(canvasData.split(',')[1],'base64');
+        fs.writeFileSync(path.join(OUT,'10-mobile-native-mag-canvas.png'),raw);
+        if(raw.length<12000)errors.push('R1821 native MAG canvas pixel proof suspiciously small: '+raw.length);
+      }
       if(state.shape!=='organism')errors.push('R1500 preflight shape is not organism: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1500 preflight still blurred: '+state.filter);
       if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1500 preflight hero ring visible: '+JSON.stringify(state.ring));
