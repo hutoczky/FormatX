@@ -116,7 +116,7 @@ html body #main-nav.open button {
 html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 {
   box-sizing: border-box !important;
   display: grid !important;
-  grid-template-columns: repeat(3, 54px) !important;
+  grid-template-columns: repeat(2,54px) !important;
   grid-template-rows: auto !important;
   align-items: start !important;
   justify-content: center !important;
