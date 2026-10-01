@@ -4,7 +4,7 @@ const root=document.documentElement;
 if(root.dataset.fxCoreShapeshifterR337==='ready')return;
 root.dataset.fxCoreShapeshifterR337='booting';
 
-const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
+const STYLE_URL='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20261001-r1800-photographic-shader-display';
 const SHAPES=['organism'];
 const LABELS={
   hu:{organism:'élő organizmus'},
