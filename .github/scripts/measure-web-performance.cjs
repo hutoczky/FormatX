@@ -60,29 +60,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   await page.waitForSelector('#hero-title');
   await page.waitForTimeout(2500);
 
-  const initialControlCascade = await page.evaluate(() => {
-    const props=['position','display','width','min-width','max-width','height','min-height','max-height','top','right','bottom','left','inset','transform','translate','scale'];
-    const snapshot=selector=>{
-      const el=document.querySelector(selector);
-      if(!(el instanceof HTMLElement))return null;
-      const cs=getComputedStyle(el),rect=el.getBoundingClientRect(),matches=[];
-      const walk=(rules,href,media='')=>{
-        for(const rule of Array.from(rules||[])){
-          if(rule instanceof CSSStyleRule){
-            let hit=false;try{hit=el.matches(rule.selectorText)}catch(_){}
-            if(!hit)continue;
-            const declarations={};
-            for(const prop of props){const value=rule.style.getPropertyValue(prop);if(value)declarations[prop]=value+(rule.style.getPropertyPriority(prop)?' !important':'');}
-            if(Object.keys(declarations).length)matches.push({href,media,selector:rule.selectorText,declarations});
-          }else if(rule.cssRules)walk(rule.cssRules,href,rule.conditionText||rule.name||media);
-        }
-      };
-      for(const sheet of Array.from(document.styleSheets)){try{walk(sheet.cssRules,sheet.href||'inline')}catch(_){}}
-      return{rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},computed:Object.fromEntries(props.map(prop=>[prop,cs.getPropertyValue(prop)])),matches:matches.slice(-100)};
-    };
-    return{controls:snapshot('#hero .fx-reference-controls-r204'),sound:snapshot('#hero .fx-three-sound'),ask:snapshot('#hero .fx-reference-ask')};
-  });
-
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
     if (!button) return null;
@@ -98,30 +75,12 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     let frames = 0;
     let previous = 0;
     const deltas = [];
-    const spikes = [];
     const start = performance.now();
     const duration = 1200;
     return new Promise(resolve => {
       function frame(now) {
         frames += 1;
-        if (previous) {
-          const delta = now - previous;
-          deltas.push(delta);
-          if (delta > 20) {
-            const center = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
-            const section = center?.closest?.('section[id]');
-            spikes.push({
-              atMs: now - start,
-              deltaMs: delta,
-              scrollY,
-              section: section?.id || '',
-              scrollBudget: document.documentElement.dataset.fxScrollBudgetR1660 || '',
-              scrollPressure: document.documentElement.dataset.fxScrollPressureR1755 || '',
-              cinematic: document.documentElement.dataset.fxCinematicJourneyR536 || '',
-              habitat: document.documentElement.dataset.fxLivingHabitatR1530 || ''
-            });
-          }
-        }
+        if (previous) deltas.push(now - previous);
         previous = now;
         const progress = Math.min(1, (now - start) / duration);
         scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * progress);
@@ -143,8 +102,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
               over20ms: ordered.filter(v => v > 20).length,
               over25ms: ordered.filter(v => v > 25).length,
               over33ms: ordered.filter(v => v > 33.34).length
-            },
-            spikes
+            }
           });
         }
       }
@@ -165,44 +123,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       totalJSHeapSize: performance.memory.totalJSHeapSize,
       jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
     } : null;
-    const controlCascade = (() => {
-      const props = ['position','display','width','min-width','max-width','height','min-height','max-height','top','right','bottom','left','inset','transform','translate','scale'];
-      const snapshot = selector => {
-        const el = document.querySelector(selector);
-        if (!(el instanceof HTMLElement)) return null;
-        const cs = getComputedStyle(el), rect = el.getBoundingClientRect(), matches = [];
-        const walk = (rules, href, media = '') => {
-          for (const rule of Array.from(rules || [])) {
-            if (rule instanceof CSSStyleRule) {
-              let hit = false;
-              try { hit = el.matches(rule.selectorText); } catch (_) {}
-              if (!hit) continue;
-              const declarations = {};
-              for (const prop of props) {
-                const value = rule.style.getPropertyValue(prop);
-                if (value) declarations[prop] = value + (rule.style.getPropertyPriority(prop) ? ' !important' : '');
-              }
-              if (Object.keys(declarations).length) matches.push({ href, media, selector: rule.selectorText, declarations });
-            } else if (rule.cssRules) {
-              walk(rule.cssRules, href, rule.conditionText || rule.name || media);
-            }
-          }
-        };
-        for (const sheet of Array.from(document.styleSheets)) {
-          try { walk(sheet.cssRules, sheet.href || 'inline'); } catch (_) {}
-        }
-        return {
-          rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-          computed: Object.fromEntries(props.map(prop => [prop, cs.getPropertyValue(prop)])),
-          matches: matches.slice(-80)
-        };
-      };
-      return {
-        controls: snapshot('#hero .fx-reference-controls-r204'),
-        sound: snapshot('#hero .fx-three-sound'),
-        ask: snapshot('#hero .fx-reference-ask')
-      };
-    })();
     return {
       navigation: nav ? {
         domContentLoaded: nav.domContentLoadedEventEnd,
@@ -219,7 +139,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
-      controlCascade,
       memory
     };
   });
@@ -239,7 +158,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     url,
     wall_clock_ms: Date.now() - started,
     metrics,
-    initial_control_cascade: initialControlCascade,
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
     viewport_change: { before: beforeResize, after: afterResize },
