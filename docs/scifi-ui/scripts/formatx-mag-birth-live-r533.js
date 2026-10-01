@@ -512,7 +512,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260928-r1777-photographic-final-lighting';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260928-r1777-photographic-final-lighting&r=20261001-r1821-award-grade';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1098,6 +1098,7 @@
     ROOT.dataset.fxMagBirthVisualR1775='photoreal-intro-core-material-continuity';
     ROOT.dataset.fxMagBirthVisualR1776='cinematic-irregular-crystal-deep-optic-continuity';
     ROOT.dataset.fxMagBirthVisualR1777='photographic-black-mineral-bioglass-final-lighting';
+    ROOT.dataset.fxMagBirthVisualR1821='award-grade-cinematic-biocrystal-genesis';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
