@@ -29,7 +29,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade&r=20261001-r1821-award-grade';
 let retryCount=0,retryTimer=0;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){
@@ -81,6 +81,7 @@ function b(){
   r.dataset.fxIntroBootstrapVisualR1775='photoreal-intro-core';
   r.dataset.fxIntroBootstrapVisualR1776='cinematic-irregular-crystal-depth';
   r.dataset.fxIntroBootstrapRecoveryR1813='verified-runtime-retry';
+  r.dataset.fxIntroBootstrapVisualR1821='award-grade-photoreal-biocrystal';
   requestRuntime('startup');
 }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',b,{once:true}):b();
