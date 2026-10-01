@@ -1119,8 +1119,8 @@
     justify-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
-    width: 190px !important;
-    min-width: 190px !important;
+    width:122px !important;
+    min-width:122px !important;
     max-width: calc(100% - 28px) !important;
     height: 76px !important;
     min-height: 76px !important;
