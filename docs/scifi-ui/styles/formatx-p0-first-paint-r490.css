@@ -1135,3 +1135,23 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+/* R1821 — final readable hero paint is also first-paint paint.
+   Deferred design/polish layers must not repaint the largest text later and
+   become a second LCP candidate after geometry is already stable. */
+html:root:root:root body.living-architecture #hero .hero-title-main{
+  color:transparent!important;
+  background:linear-gradient(115deg,#fff 0%,#c6f6ff 38%,#86caff 62%,#c8bcff 86%,#fff 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
+  text-shadow:0 0 28px rgba(82,204,255,.055)!important;
+  filter:none!important;
+}
+html:root:root:root body.living-architecture #hero .hero-title-sub{
+  color:#c4d8e4!important;
+  -webkit-text-fill-color:currentColor!important;
+  text-shadow:0 0 18px rgba(82,204,255,.035)!important;
+  filter:none!important;
+}
+/* production-r1821-final-hero-paint-parity */
