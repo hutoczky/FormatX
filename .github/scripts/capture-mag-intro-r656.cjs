@@ -99,7 +99,7 @@ const SHOTS=[
         const ring=document.querySelector('#hero .hero-ring');
         const ringStyle=ring?getComputedStyle(ring):null;
         return {
-          visual:root.dataset.fxNativeMagVisualR1590||root.dataset.fxNativeMagVisualR1589||root.dataset.fxNativeMagVisualR1588||root.dataset.fxNativeMagVisualR1587||root.dataset.fxNativeMagVisualR1586||root.dataset.fxNativeMagVisualR1585||root.dataset.fxNativeMagVisualR1584||root.dataset.fxNativeMagVisualR1559||root.dataset.fxNativeMagVisualR1500||'',
+          visual:root.dataset.fxNativeMagVisualR1821||root.dataset.fxNativeMagVisualR1795||root.dataset.fxNativeMagVisualR1590||root.dataset.fxNativeMagVisualR1589||root.dataset.fxNativeMagVisualR1588||root.dataset.fxNativeMagVisualR1587||root.dataset.fxNativeMagVisualR1586||root.dataset.fxNativeMagVisualR1585||root.dataset.fxNativeMagVisualR1584||root.dataset.fxNativeMagVisualR1559||root.dataset.fxNativeMagVisualR1500||'',
           shape:root.dataset.fxCoreShapeR337||'',
           renderer:root.dataset.fxCoreRenderer||'',
           resolution:root.dataset.fxCoreReal3dResolution||'',
@@ -114,6 +114,16 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
+      const canvasData=await page.evaluate(()=>{
+        const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+        return canvas instanceof HTMLCanvasElement ? canvas.toDataURL('image/png') : '';
+      });
+      if(!/^data:image\/png;base64,/.test(canvasData))errors.push('R1821 native MAG canvas pixel proof unavailable');
+      else{
+        const raw=Buffer.from(canvasData.split(',')[1],'base64');
+        fs.writeFileSync(path.join(OUT,'10-mobile-native-mag-canvas.png'),raw);
+        if(raw.length<12000)errors.push('R1821 native MAG canvas pixel proof suspiciously small: '+raw.length);
+      }
       if(state.shape!=='organism')errors.push('R1500 preflight shape is not organism: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.filter||''))errors.push('R1500 preflight still blurred: '+state.filter);
       if(state.ring.display!=='none'&&state.ring.visibility!=='hidden'&&state.ring.opacity>.01)errors.push('R1500 preflight hero ring visible: '+JSON.stringify(state.ring));
@@ -180,7 +190,7 @@ const SHOTS=[
           stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
           canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
           renderer:root.dataset.fxCoreRenderer||'',
-          visual:root.dataset.fxNativeMagVisualR1590||root.dataset.fxNativeMagVisualR1589||root.dataset.fxNativeMagVisualR1588||root.dataset.fxNativeMagVisualR1587||root.dataset.fxNativeMagVisualR1586||root.dataset.fxNativeMagVisualR1585||root.dataset.fxNativeMagVisualR1584||root.dataset.fxNativeMagVisualR1559||root.dataset.fxNativeMagVisualR1500||'',
+          visual:root.dataset.fxNativeMagVisualR1821||root.dataset.fxNativeMagVisualR1795||root.dataset.fxNativeMagVisualR1590||root.dataset.fxNativeMagVisualR1589||root.dataset.fxNativeMagVisualR1588||root.dataset.fxNativeMagVisualR1587||root.dataset.fxNativeMagVisualR1586||root.dataset.fxNativeMagVisualR1585||root.dataset.fxNativeMagVisualR1584||root.dataset.fxNativeMagVisualR1559||root.dataset.fxNativeMagVisualR1500||'',
           shape:root.dataset.fxCoreShapeR337||'',
           canvasFilter:canvas?getComputedStyle(canvas).filter:'',
           heroRing:ring?{present:true,display:ringStyle.display,visibility:ringStyle.visibility,opacity:Number(ringStyle.opacity||0)}:{present:false,display:'none',visibility:'hidden',opacity:0},
@@ -191,7 +201,7 @@ const SHOTS=[
       await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
-      if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure')errors.push('R1723 living organism visual marker missing: '+state.visual);
+      if(state.visual!=='award-grade-cinematic-biocrystal-optical-volume')errors.push('R1821 award-grade living MAG visual marker missing: '+state.visual);
       if(state.shape!=='organism')errors.push('R1500 mobile MAG shape is not organism: '+state.shape);
       if(/blur\((?!0(?:px)?\))/i.test(state.canvasFilter||''))errors.push('R1500 mobile MAG still has blur: '+state.canvasFilter);
       if(state.heroRing.present&&state.heroRing.display!=='none'&&state.heroRing.visibility!=='hidden'&&state.heroRing.opacity>.01)errors.push('R1500 legacy hero ring visible: '+JSON.stringify(state.heroRing));
@@ -389,7 +399,7 @@ const SHOTS=[
             stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
             canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             renderer:root.dataset.fxCoreRenderer||'',
-            visual:root.dataset.fxNativeMagVisualR1590||root.dataset.fxNativeMagVisualR1589||root.dataset.fxNativeMagVisualR1588||root.dataset.fxNativeMagVisualR1587||root.dataset.fxNativeMagVisualR1586||root.dataset.fxNativeMagVisualR1585||root.dataset.fxNativeMagVisualR1584||root.dataset.fxNativeMagVisualR1559||root.dataset.fxNativeMagVisualR1500||'',
+            visual:root.dataset.fxNativeMagVisualR1821||root.dataset.fxNativeMagVisualR1795||root.dataset.fxNativeMagVisualR1590||root.dataset.fxNativeMagVisualR1589||root.dataset.fxNativeMagVisualR1588||root.dataset.fxNativeMagVisualR1587||root.dataset.fxNativeMagVisualR1586||root.dataset.fxNativeMagVisualR1585||root.dataset.fxNativeMagVisualR1584||root.dataset.fxNativeMagVisualR1559||root.dataset.fxNativeMagVisualR1500||'',
             optics:root.dataset.fxPrimaryMagOpticsR1383||'',
             resolution:root.dataset.fxCoreReal3dResolution||'',
             shape:root.dataset.fxCoreShapeR337||'',
