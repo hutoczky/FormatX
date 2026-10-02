@@ -2218,10 +2218,10 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 .fx-mag-birth-r533[data-fx-renderer="three"],
 .fx-mag-birth-r533[data-fx-renderer="three-loading"]{
   background:
-    radial-gradient(ellipse 52% 58% at 47% 44%,rgba(56,126,131,.185) 0%,rgba(21,60,65,.092) 34%,rgba(8,25,30,.040) 56%,transparent 74%),
-    radial-gradient(ellipse 92% 48% at 50% 106%,rgba(49,72,70,.22) 0%,rgba(15,27,28,.06) 48%,transparent 72%),
-    radial-gradient(ellipse 30% 36% at 76% 34%,rgba(72,49,65,.072) 0%,transparent 74%),
-    linear-gradient(180deg,#010405 0%,#02080a 48%,#010304 100%)!important;
+    radial-gradient(ellipse 48% 52% at 48% 44%,rgba(142,169,168,.155) 0%,rgba(68,101,102,.090) 30%,rgba(18,43,47,.045) 56%,transparent 74%),
+    radial-gradient(ellipse 108% 34% at 50% 103%,rgba(134,151,145,.110) 0%,rgba(47,61,59,.055) 34%,transparent 70%),
+    radial-gradient(ellipse 34% 40% at 78% 32%,rgba(96,87,94,.045) 0%,transparent 75%),
+    linear-gradient(180deg,#020506 0%,#03090b 46%,#010405 100%)!important;
 }
 html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-veil,
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-veil{
@@ -2234,12 +2234,13 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 }
 html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-deep,
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-deep{
-  opacity:.20!important;
+  opacity:.24!important;
   background:
-    radial-gradient(ellipse 54% 50% at 48% 46%,rgba(62,132,136,.090),transparent 74%)!important;
+    radial-gradient(ellipse 54% 50% at 48% 46%,rgba(102,151,151,.080),transparent 74%),
+    linear-gradient(180deg,rgba(255,255,255,.010),transparent 52%,rgba(0,0,0,.08))!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-stars{
-  opacity:.055!important;
+  opacity:.032!important;
   filter:none!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="three"]::after{
@@ -2248,3 +2249,5 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 }
 /* production-r1842-photographic-studio-field-no-flat-black */
 /* production-r1862-deep-photographic-studio-chamber */
+
+/* production-r1871-silver-ice-studio-horizon */
