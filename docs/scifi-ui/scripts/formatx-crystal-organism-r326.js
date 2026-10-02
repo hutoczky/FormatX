@@ -1598,7 +1598,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0022,.0052,.0068),vec3(.038,.056,.058),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0045,.0090,.0110),vec3(.070,.088,.088),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.94,.95,.90)*keySpec*.310;
         col+=vec3(.48,.60,.60)*sideSpec*.255;
@@ -1618,8 +1618,8 @@
         col+=vec3(.50,.54,.52)*pow(broadKey,2.90)*.080*bodyMask;
         col+=vec3(.15,.27,.28)*pow(broadSide,2.55)*.070*bodyMask;
         col+=vec3(.08,.050,.032)*pow(broadWarm,2.60)*.016*bodyMask;
-        col+=vec3(.94,.99,.96)*studioStripeA*.205;
-        col+=vec3(.28,.48,.51)*studioStripeB*.095;
+        col+=vec3(.94,.99,.96)*studioStripeA*.245;
+        col+=vec3(.30,.52,.55)*studioStripeB*.110;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1631,8 +1631,8 @@
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
-        col+=vec3(.060,.196,.215)*iceVolume*(.165+.125*(1.0-facing));
-        col+=vec3(.045,.053,.051)*bodyMask*(.34+.66*facing);
+        col+=vec3(.085,.185,.198)*iceVolume*(.165+.115*(1.0-facing));
+        col+=vec3(.060,.071,.069)*bodyMask*(.34+.66*facing);
         col+=vec3(.050,.082,.083)*grain*iceVolume*.055;
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
@@ -1676,7 +1676,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.66),clamp(alpha,.985,1.0));
+        ${outputName}=vec4(tone(col*2.92),clamp(alpha,.985,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1709,6 +1709,7 @@
     root.dataset.fxNativeMagStudioR1853='sealed-raster-seams-silver-ice-midtone-internal-striation-optic-parity';
     root.dataset.fxNativeMagStudioR1855='bright-silver-ice-midtone-uncrushed-oled-studio-compositor';
     root.dataset.fxNativeMagStudioR1856='crease-aware-mineral-planes-smooth-optic-teal-volume';
+    root.dataset.fxNativeMagStudioR1857='software-visible-midtone-teal-glass-proof-parity';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
