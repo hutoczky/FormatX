@@ -512,7 +512,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261002-r1862-lobed-silver-bioglass';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261002-r1864-premium-optic-genome';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
