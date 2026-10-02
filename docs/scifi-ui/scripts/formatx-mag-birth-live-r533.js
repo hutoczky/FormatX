@@ -507,6 +507,8 @@
   let filmRendererPromise = null;
   let pendingRendererInteraction = null;
   let filmRendererFallbackStarted = false;
+  let referenceFilmRequested = false;
+  const REFERENCE_FILM_SRC = '/scifi-ui/scripts/formatx-mag-reference-film-r649.js?v=20260928-r1776-photoreal-visual-upgrade';
   let softwareFallbackActive = SOFTWARE_SAFE;
   let lastSoftwareFallbackPhase = -1;
   let threeWaitStartedAt = 0;
@@ -732,6 +734,32 @@
     });
   }
 
+  function requestReferenceFilm(){
+    if(window.FormatXMagReferenceFilmR649?.attach || referenceFilmRequested || finished)return;
+    referenceFilmRequested=true;
+    ROOT.dataset.fxMagBirthReferenceFilmR1822='lazy-requested-on-fallback-only';
+    const existing=[...document.scripts].find(script=>/formatx-mag-reference-film-r649\.js/.test(script.src));
+    const onReady=()=>{
+      ROOT.dataset.fxMagBirthReferenceFilmR1822=window.FormatXMagReferenceFilmR649?.attach?'lazy-loaded':'lazy-loaded-api-missing';
+      if(finished || filmRenderer)return;
+      filmRendererFallbackStarted=false;
+      startR649Fallback();
+    };
+    if(existing){
+      existing.addEventListener?.('load',onReady,{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=REFERENCE_FILM_SRC;
+    script.async=true;
+    script.dataset.fxMagReferenceFilmLazyR1822='true';
+    script.addEventListener('load',onReady,{once:true});
+    script.addEventListener('error',()=>{
+      ROOT.dataset.fxMagBirthReferenceFilmR1822='lazy-load-failed-particle-fallback-retained';
+    },{once:true});
+    document.head.appendChild(script);
+  }
+
   function startR649Fallback(){
     if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
     filmRendererFallbackStarted=true;
@@ -745,7 +773,12 @@
       ROOT.dataset.fxMagBirthRendererR1360=filmRenderer?'native-canvas-reference-film':'fallback-particles';
       ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
+    }else{
+      requestReferenceFilm();
     }
+    /* Immediate lightweight particles bridge the rare fallback path while the
+       richer reference film downloads. Normal Three/WebGL startup never pays
+       the R649 parse/execute cost. */
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
