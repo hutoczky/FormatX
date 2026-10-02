@@ -155,6 +155,7 @@ const DEFERRED_STYLE_PATHS = new Set([
   // R514: artifact-proven first-divergence owner; activate with the existing
   // R487 double-rAF scheduler after the first painted frame.
   '/scifi-ui/styles/formatx-critical-core-r227.css',
+  '/scifi-ui/styles/formatx-reference-production-r244.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
@@ -297,6 +298,7 @@ function deferNonCriticalStyles(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
     if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+    if (/\bdata-fx-r487-deferred-style\s*=/.test(tag)) return tag;
     const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
     const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
     let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
