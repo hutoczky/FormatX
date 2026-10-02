@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'living-luminous-electric-crystal-r454';
-  const CANONICAL_REVISION = 'fully-living-organism-r1723';
+  const REVISION = 'studio-smoky-bioglass-organism-r1830';
+  const CANONICAL_REVISION = 'igloo-grade-monolithic-organism-r1830';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
@@ -428,7 +428,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.68:(mobile?.74:.86);
+        const smoothWeight=software?.72:(mobile?.86:.90);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -456,7 +456,7 @@
       /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
          so 46 circumferential body slices add startup cost without visible
          silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 42 : mobile ? 48 : constrained ? 60 : 72;
+      const sideCount = software ? 42 : mobile ? 64 : constrained ? 60 : 72;
       /* R1719 — healthy living body: a smooth, tensioned biomechanical envelope.
          Radii expand and contract continuously instead of zig-zagging between
          rings, removing the chewed/saw-tooth silhouette seen on phones. */
@@ -464,18 +464,21 @@
          A tall asymmetric rhombic envelope replaces the swollen torso. The
          silhouette is crystalline while the surface remains cortical and alive. */
       const ringDefs = [
-        [.94,.180,.118,-.162,-.016,.090],
-        [.83,.315,.210,-.126,.008,.074],
-        [.68,.475,.315,-.082,.030,.058],
-        [.50,.610,.398,-.018,.052,.042],
-        [.30,.700,.448,.058,.060,.024],
-        [.08,.748,.478,.108,.044,.006],
-        [-.14,.704,.452,.092,.012,-.014],
-        [-.34,.608,.392,.046,-.012,-.034],
-        [-.54,.492,.318,-.016,-.032,-.052],
-        [-.72,.352,.226,-.082,-.036,-.068],
-        [-.86,.205,.132,-.134,-.026,-.082],
-        [-.94,.112,.072,-.164,-.016,-.092]
+        /* R1830 — art-directed monolithic bioglass silhouette.
+           Wider shoulders, a quieter waist and oblique offsets create one
+           deliberate sculpt instead of a stretched pebble/egg on phones. */
+        [.95,.205,.142,-.118,-.018,.082],
+        [.84,.382,.248,-.086,.008,.067],
+        [.69,.548,.350,-.044,.032,.050],
+        [.52,.665,.416,.016,.050,.032],
+        [.33,.738,.458,.072,.052,.014],
+        [.12,.770,.482,.106,.036,-.002],
+        [-.10,.742,.466,.100,.010,-.020],
+        [-.31,.672,.418,.060,-.016,-.038],
+        [-.51,.558,.350,.010,-.034,-.055],
+        [-.69,.424,.266,-.050,-.040,-.070],
+        [-.84,.278,.172,-.102,-.030,-.082],
+        [-.95,.128,.078,-.136,-.014,-.094]
       ];
       function bodyVertex(position, uv) {
         const dir=normalize(position);
@@ -824,8 +827,8 @@
     }
 
     if(!auditMode){
-      const centreX=-.036,centreY=.012;
-      const bezelInner=.088,bezelOuter=.132,bezelSteps=software?56:mobile?56:60,bezelZ=.637;
+      const centreX=-.030,centreY=.010;
+      const bezelInner=.112,bezelOuter=.166,bezelSteps=software?56:mobile?64:64,bezelZ=.640;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -849,9 +852,9 @@
       }
 
       const lensCenter=[centreX,centreY,.648];
-      const lensRadiusX=.112;
-      const lensRadiusY=.090;
-      const lensDepth=.076;
+      const lensRadiusX=.148;
+      const lensRadiusY=.116;
+      const lensDepth=.086;
       const radialSteps=software?8:mobile?9:10;
       const angularSteps=software?56:mobile?56:60;
       function lensVertex(radial,angle){
@@ -1048,9 +1051,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.680':'.825'};
-        projected.x+=${mobile?'.010':'.052'};
-        projected.y+=${mobile?'.085':'.002'};
+        projected*= ${mobile?'.650':'.825'};
+        projected.x+=${mobile?'.006':'.052'};
+        projected.y+=${mobile?'.050':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1189,12 +1192,12 @@
         plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
         float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
         float plateFacetTone=.90+.14*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.30,.33,.32)
-          +vec3(.38,.40,.36)*(.20*ndl+.15*sideLight+.22*softboxA)
-          +vec3(.16,.25,.27)*fresnel*.18;
-        ivory+=vec3(.54,.36,.24)*studioRibbonB*.050;
-        mineral*=mix(1.0,plateFacetTone,bodyMask*.42);
-        mineral=mix(mineral,ivory,plateMask*.48);
+        vec3 ivory=vec3(.115,.132,.130)
+          +vec3(.27,.29,.27)*(.18*ndl+.13*sideLight+.20*softboxA)
+          +vec3(.12,.20,.22)*fresnel*.16;
+        ivory+=vec3(.42,.27,.17)*studioRibbonB*.036;
+        mineral*=mix(1.0,plateFacetTone,bodyMask*.24);
+        mineral=mix(mineral,ivory,plateMask*.22);
         mineral=mix(mineral,vec3(.004,.007,.010),livingSeam*.40);
         mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
@@ -1303,7 +1306,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.54),clamp(outAlpha,.76,1.0));
+        ${outputName}=vec4(filmic(mineral*2.22),clamp(outAlpha,.80,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
