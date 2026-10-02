@@ -157,6 +157,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1862='lobed-three-quarter-silver-bioglass-genome-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1864='extended-genome-emergence-larger-recessed-optic-three-quarter-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1865='luminous-teal-optic-polished-silver-bezel-readable-genome';
+      document.documentElement.dataset.fxMagBirthVisualR1868='dual-softbox-layered-bioglass-silver-optic-premium-genome-filament';
       document.documentElement.dataset.fxMagBirthVisualR1854='world-space-three-quarter-pose-smoked-recessed-optic-no-hud-ring';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
@@ -829,23 +830,23 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.202,.0065,28,144),
         new T.MeshPhysicalMaterial({
-          color:0x4a6163,metalness:.10,roughness:.085,
-          clearcoat:.98,clearcoatRoughness:.032,
-          emissive:0x031316,emissiveIntensity:.018,
-          specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
-          envMapIntensity:2.05,transparent:true,opacity:.68
+          color:0x8aa0a1,metalness:.12,roughness:.070,
+          clearcoat:.99,clearcoatRoughness:.024,
+          emissive:0x021013,emissiveIntensity:.010,
+          specularIntensity:1.0,specularColor:new T.Color(0xf6ffff),
+          envMapIntensity:2.95,transparent:true,opacity:.76
         })
       );
       socketBezel.position.z=.306;
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x06232a,metalness:0,roughness:.030,
-        clearcoat:.99,clearcoatRoughness:.018,
-        transmission:.66,thickness:.44,ior:1.51,
-        attenuationColor:new T.Color(0x0a6574),attenuationDistance:.30,
-        emissive:0x07586a,emissiveIntensity:.085,
-        envMapIntensity:2.75,
+        color:0x05242b,metalness:0,roughness:.024,
+        clearcoat:.995,clearcoatRoughness:.014,
+        transmission:.82,thickness:.50,ior:1.51,
+        attenuationColor:new T.Color(0x075a69),attenuationDistance:.22,
+        emissive:0x064653,emissiveIntensity:.060,
+        envMapIntensity:3.10,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
@@ -868,11 +869,11 @@
       const glassRing=new T.Mesh(
         new T.TorusGeometry(.124,.0042,18,112),
         new T.MeshPhysicalMaterial({
-          color:0xa9c6c7,metalness:.06,roughness:.085,
-          clearcoat:.98,clearcoatRoughness:.026,
-          emissive:0x0a4a56,emissiveIntensity:.060,
+          color:0xc6d4d2,metalness:.08,roughness:.070,
+          clearcoat:.99,clearcoatRoughness:.022,
+          emissive:0x06313a,emissiveIntensity:.030,
           specularIntensity:1.0,specularColor:new T.Color(0xf7ffff),
-          transparent:true,opacity:.42
+          transparent:true,opacity:.46
         })
       );
       glassRing.position.z=.376;
