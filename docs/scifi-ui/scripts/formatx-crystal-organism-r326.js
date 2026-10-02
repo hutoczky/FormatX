@@ -1473,8 +1473,14 @@
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
         col+=vec3(.055,.185,.205)*iceVolume*(.145+.115*(1.0-facing));
-        col+=vec3(.038,.046,.044)*bodyMask*(.34+.66*facing);
-        col+=vec3(.040,.075,.078)*strata*iceVolume*.050;
+        col+=vec3(.026,.062,.068)*bodyMask*(.34+.66*facing);
+        col+=vec3(.036,.082,.090)*strata*iceVolume*.050;
+        vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
+        float socketD=length(socketQ);
+        float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
+        float opticCaustic=exp(-dot(socketQ,socketQ)*.72)*smoothstep(.06,.58,vLocal.z)*bodyMask;
+        col*=1.0-.22*socketShade;
+        col+=vec3(.010,.110,.145)*opticCaustic*(.055+.070*uEnergy);
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.023,.065,.078),vec3(.045,.020,.058),chromaSide)*fresnel*bodyMask*.105;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
@@ -1502,12 +1508,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.072,.082,.080)
-          +vec3(.210,.228,.218)*(.16*ndl+.22*sideLight)
-          +vec3(.94,.96,.91)*softboxA*.26
-          +vec3(.42,.53,.54)*sideSpec*.18
-          +vec3(.040,.13,.145)*fresnel*.12
-          +vec3(.035,.022,.040)*subsurface*.06;
+        vec3 cartilage=vec3(.010,.019,.021)
+          +vec3(.070,.092,.094)*(.14*ndl+.20*sideLight)
+          +vec3(.84,.91,.88)*softboxA*.18
+          +vec3(.34,.50,.52)*sideSpec*.15
+          +vec3(.030,.120,.138)*fresnel*.11
+          +vec3(.024,.016,.030)*subsurface*.04;
         col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1632,16 +1638,22 @@
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
         col+=vec3(.085,.185,.198)*iceVolume*(.165+.115*(1.0-facing));
-        col+=vec3(.060,.071,.069)*bodyMask*(.34+.66*facing);
-        col+=vec3(.050,.082,.083)*grain*iceVolume*.055;
+        col+=vec3(.030,.066,.071)*bodyMask*(.34+.66*facing);
+        col+=vec3(.044,.090,.096)*grain*iceVolume*.055;
+        vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
+        float socketD=length(socketQ);
+        float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
+        float opticCaustic=exp(-dot(socketQ,socketQ)*.70)*smoothstep(.04,.58,vLocal.z)*bodyMask;
+        col*=1.0-.20*socketShade;
+        col+=vec3(.012,.120,.155)*opticCaustic*(.060+.070*uEnergy);
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.095,.108,.104)
-          +vec3(.245,.265,.252)*(.18*ndl+.16*sideLight)
-          +vec3(1.00,1.00,.96)*keySpec*.42
-          +vec3(.050,.130,.138)*fresnel*.10
-          +vec3(.095,.108,.103)*(.14+.12*facing);
+        vec3 bezel=vec3(.010,.020,.022)
+          +vec3(.072,.096,.098)*(.15*ndl+.14*sideLight)
+          +vec3(.92,.96,.91)*keySpec*.28
+          +vec3(.038,.125,.136)*fresnel*.095
+          +vec3(.028,.042,.042)*(.12+.10*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1710,6 +1722,7 @@
     root.dataset.fxNativeMagStudioR1855='bright-silver-ice-midtone-uncrushed-oled-studio-compositor';
     root.dataset.fxNativeMagStudioR1856='crease-aware-mineral-planes-smooth-optic-teal-volume';
     root.dataset.fxNativeMagStudioR1857='software-visible-midtone-teal-glass-proof-parity';
+    root.dataset.fxNativeMagStudioR1858='recessed-optic-caustic-dark-bezel-teal-bioglass';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
