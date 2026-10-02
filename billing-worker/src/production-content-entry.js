@@ -9,8 +9,8 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261002-r1848-readable-ice-volume';
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-r+/qCTqqwxIXItRfqXEcqS2P9z7wcn9KTjorW5XU8HM='";
+const STARTUP_REVISION = '20261002-r1854-three-quarter-smoked-optic';
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-cA4PlsyADkuomO1p8R6XbkhqSd7WAQLy6Bf0te2kSWo='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -171,7 +171,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1777-photographic-final-lighting',
-    rewrites: [[/formatx-mag-genesis-three-r1360\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1360.js?v=20260928-r1777-photographic-final-lighting']],
+    rewrites: [[/formatx-mag-genesis-three-r1360\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1360.js?v=20261002-r1854-three-quarter-smoked-optic']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
