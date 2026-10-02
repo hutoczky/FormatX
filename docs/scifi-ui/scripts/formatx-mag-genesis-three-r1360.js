@@ -154,6 +154,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
+      document.documentElement.dataset.fxMagBirthVisualR1862='lobed-three-quarter-silver-bioglass-genome-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1854='world-space-three-quarter-pose-smoked-recessed-optic-no-hud-ring';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
@@ -817,7 +818,7 @@
           clearcoat:.94,clearcoatRoughness:.046,
           emissive:0x01080b,emissiveIntensity:.006,
           specularIntensity:.72,specularColor:new T.Color(0xcde9e9),
-          envMapIntensity:1.42,transparent:true,opacity:.46
+          envMapIntensity:1.28,transparent:true,opacity:.26
         })
       );
       socketBezel.position.z=.306;
@@ -959,12 +960,12 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x36575c,roughness:.092,metalness:.001,
+        color:0x4b6b6f,roughness:.078,metalness:.001,
         clearcoat:.98,clearcoatRoughness:.030,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00125,
         transparent:true,opacity:0,
-        transmission:.26,thickness:.48,ior:1.49,
-        attenuationColor:new T.Color(0x17464e),attenuationDistance:.50,
+        transmission:.36,thickness:.50,ior:1.49,
+        attenuationColor:new T.Color(0x1d5058),attenuationDistance:.46,
         emissive:0x051114,emissiveIntensity:.012,
         envMapIntensity:3.05,
         specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
@@ -1017,18 +1018,19 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.38,.34,Math.PI,.82,.210);
-        const rightCentre=mass(.02,.38,0,.76,.155);
-        const lowerLeft=mass(-.43,.30,2.46,.76,.128);
-        const waist=mass(-.19,.24,-.54,.92,.096);
-        const sculpt=1+upperLeft+rightCentre+lowerLeft-waist;
+        const upperLeft=mass(.38,.34,Math.PI,.82,.285);
+        const rightCentre=mass(.02,.38,0,.76,.218);
+        const lowerLeft=mass(-.43,.30,2.46,.76,.182);
+        const waist=mass(-.19,.24,-.54,.92,.138);
+        const rightLowerCut=mass(-.34,.20,-.12,.58,.092);
+        const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-rightLowerCut;
         p.x*=sculpt;
         p.z*=sculpt;
 
-        p.x+=-.150*Math.pow(Math.max(n.y,0),1.55)+.072*Math.pow(Math.max(-n.y,0),1.45)
-          +Math.sin(az*1.55+el*.72)*.046*shoulder;
-        p.y+=Math.sin(az*1.88+el*.42)*.012*shoulder;
-        p.z-=n.x*.024;
+        p.x+=-.178*Math.pow(Math.max(n.y,0),1.55)+.088*Math.pow(Math.max(-n.y,0),1.45)
+          +Math.sin(az*1.55+el*.72)*.054*shoulder;
+        p.y+=Math.sin(az*1.88+el*.42)*.014*shoulder;
+        p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
 
         const topCap=.805+p.x*.110-p.z*.042;
         const bottomCap=-.825-p.x*.062+p.z*.032;
@@ -1060,10 +1062,10 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x526f73,roughness:.070,metalness:0,
-        clearcoat:.97,clearcoatRoughness:.030,
-        transmission:.76,thickness:.12,ior:1.48,
-        attenuationColor:new T.Color(0x244e54),attenuationDistance:.62,
+        color:0x607d80,roughness:.058,metalness:0,
+        clearcoat:.98,clearcoatRoughness:.026,
+        transmission:.82,thickness:.13,ior:1.48,
+        attenuationColor:new T.Color(0x28565c),attenuationDistance:.58,
         transparent:true,opacity:0,depthWrite:false,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00008,
         envMapIntensity:2.32,side:T.FrontSide
@@ -1823,8 +1825,8 @@
       this.mechanicalGroup.position.set(tx,ty,.02);
       this.tentacleGroup.position.set(tx,ty,-.04);
       this.coreGroup.scale.setScalar(sc*mix(1,.90,endMove));
-      this.coreGroup.rotation.y=.410+Math.sin(time*.00016)*.010+this.interactionX*.026+this.interactionSpin;
-      this.coreGroup.rotation.x=-.070+Math.sin(time*.00019)*.006-this.interactionY*.020;
+      this.coreGroup.rotation.y=.485+Math.sin(time*.00016)*.010+this.interactionX*.024+this.interactionSpin;
+      this.coreGroup.rotation.x=-.095+Math.sin(time*.00019)*.006-this.interactionY*.018;
 
       const irisAwake=smooth((t-.70)/.80)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
@@ -1846,15 +1848,15 @@
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.rotation.y=.410+Math.sin(time*.00011)*.008+this.interactionX*.016;
-      this.organicGroup.rotation.x=-.070+Math.sin(time*.00013)*.005-this.interactionY*.012;
+      this.organicGroup.rotation.y=.485+Math.sin(time*.00011)*.008+this.interactionX*.014;
+      this.organicGroup.rotation.x=-.095+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?1.04:1.13;
+      const finalScale=this.mobileProfile?1.08:1.17;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.020+.012*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.016+.010*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=0;
       this.organicHoodMaterial.opacity=0;
