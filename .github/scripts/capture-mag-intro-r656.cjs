@@ -90,7 +90,18 @@ const SHOTS=[
         30000,
         120
       );
-      if(!ready)throw new Error('R1500 mobile preflight MAG did not become ready');
+      if(!ready){
+        const diagnostic=await page.evaluate(()=>({
+          crystal:document.documentElement.dataset.fxCrystalOrganismR326||'',
+          core:document.documentElement.dataset.fxCoreReal3d||'',
+          shader:document.documentElement.dataset.fxCoreShaderCompileR600||'',
+          renderer:document.documentElement.dataset.fxCoreRenderer||'',
+          motion:document.documentElement.dataset.fxP0MotionCacheR1830||document.documentElement.dataset.fxP0MotionCacheR1774||'',
+          scripts:[...document.scripts].map(s=>s.src).filter(Boolean).filter(src=>/formatx-(?:crystal-organism|current-mag-loader|motion-runtime-loader|p0-motion-scheduler)/.test(src)),
+          stageCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length
+        }));
+        throw new Error('R1500 mobile preflight MAG did not become ready: '+JSON.stringify({diagnostic,errors}));
+      }
       await page.waitForTimeout(650);
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
