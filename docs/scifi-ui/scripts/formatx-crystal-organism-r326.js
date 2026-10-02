@@ -1378,6 +1378,7 @@
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.352)/.044,2.0));
+        float lensIris=exp(-pow((lensRadial-.205)/.046,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.30),4.0);
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1394,7 +1395,8 @@
         physicalLens+=vec3(.52,.60,.60)*sideSpec*.11;
         physicalLens+=vec3(.085,.19,.22)*fresnel*.15;
         physicalLens+=vec3(.012,.095,.115)*lensInner*(.10+.10*uEnergy);
-        physicalLens+=vec3(.070,.245,.285)*lensRing*(.10+.065*uEnergy);
+        physicalLens+=vec3(.080,.310,.350)*lensRing*(.13+.075*uEnergy);
+        physicalLens+=vec3(.030,.260,.320)*lensIris*(.18+.12*uEnergy);
         physicalLens+=vec3(.72,.90,.89)*lensHot*(.12+.04*uEnergy);
         physicalLens+=vec3(.035,.17,.19)*electric*(.08+.07*uEnergy);
         physicalLens+=vec3(.86,.94,.91)*coreFlash*.15;
@@ -1553,6 +1555,7 @@
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.352)/.044,2.0));
+        float lensIris=exp(-pow((lensRadial-.205)/.046,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.30),4.0);
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1567,7 +1570,8 @@
           +vec3(.50,.61,.63)*sideSpec*.14
           +vec3(.090,.22,.25)*fresnel*.17
           +vec3(.010,.105,.130)*lensInner*(.11+.10*uEnergy)
-          +vec3(.055,.31,.37)*lensRing*(.14+.08*uEnergy)
+          +vec3(.070,.40,.49)*lensRing*(.18+.10*uEnergy)
+          +vec3(.025,.31,.38)*lensIris*(.22+.14*uEnergy)
           +vec3(.76,.94,.93)*lensHot*(.17+.05*uEnergy)
           +vec3(.050,.20,.24)*electric*(.10+.09*uEnergy)
           +vec3(.88,.95,.92)*coreFlash*.20
@@ -1754,6 +1758,7 @@
     root.dataset.fxNativeMagVisualR1718='mobile-sharp-readable-midtone-photoreal-organism';
     root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
+    root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
