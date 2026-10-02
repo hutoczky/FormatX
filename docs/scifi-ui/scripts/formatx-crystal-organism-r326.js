@@ -477,9 +477,9 @@
         /* R1843 — authored ice-block envelope. A sub-quadratic superellipsoid
            keeps the body smooth while giving it broad mineral shoulders and
            cut corners instead of the previous oval/egg read. */
-        const ax=.600+.145*shoulder;
-        const ay=.975+.030*shoulder;
-        const az=.520+.100*shoulder;
+        const ax=.565+.132*shoulder;
+        const ay=1.035+.038*shoulder;
+        const az=.505+.098*shoulder;
         const exponent=1.62;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
@@ -491,18 +491,19 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.275*g(dir[0],dir[1],-.45,.34,.37,.31);
-        const rightMass=.205*g(dir[0],dir[1], .42,.02,.34,.33);
-        const lowerMass=.170*g(dir[0],dir[1],-.29,-.43,.37,.27);
-        const waistCut=.155*g(dir[0],dir[1], .12,-.17,.36,.23);
-        const rightLowerCut=.072*g(dir[0],dir[1], .38,-.35,.26,.23);
-        const crownNotch=.118*g(dir[0],dir[1],-.020,.71,.178,.132);
-        const crownLeftLift=.054*g(dir[0],dir[1],-.34,.65,.29,.21);
-        const crownRightLift=.042*g(dir[0],dir[1], .30,.61,.27,.21);
-        const opticShoulder=.020*g(dir[0],dir[1], .12,.19,.25,.24);
+        const upperMass=.355*g(dir[0],dir[1],-.46,.36,.36,.30);
+        const rightMass=.305*g(dir[0],dir[1], .46,.04,.33,.32);
+        const lowerMass=.245*g(dir[0],dir[1],-.31,-.44,.35,.26);
+        const waistCut=.215*g(dir[0],dir[1], .10,-.16,.34,.22);
+        const leftWaistCut=.128*g(dir[0],dir[1],-.67,-.02,.24,.18);
+        const rightLowerCut=.132*g(dir[0],dir[1], .48,-.34,.25,.20);
+        const crownNotch=.188*g(dir[0],dir[1],-.018,.72,.160,.122);
+        const crownLeftLift=.078*g(dir[0],dir[1],-.35,.65,.28,.20);
+        const crownRightLift=.062*g(dir[0],dir[1], .31,.62,.27,.20);
+        const opticShoulder=.034*g(dir[0],dir[1], .10,.18,.26,.24);
 
         radius*=upperTaper*lowerTaper*
-          (1+upperMass+rightMass+lowerMass+crownLeftLift+crownRightLift+opticShoulder-waistCut-rightLowerCut-crownNotch);
+          (1+upperMass+rightMass+lowerMass+crownLeftLift+crownRightLift+opticShoulder-waistCut-leftWaistCut-rightLowerCut-crownNotch);
 
         const lowFreq=
           1
@@ -518,16 +519,17 @@
         ];
 
         /* Art-directed lean, three-mass silhouette and shallow planar caps. */
-        p[0]+=-.078+.112*cp-.045*Math.pow(Math.max(-cp,0),1.34)
-          +.018*Math.sin(theta*1.35+phi*.42)*shoulder;
-        p[1]+=.014*Math.sin(theta+0.4)*shoulder;
+        p[0]+=-.070+.100*cp-.042*Math.pow(Math.max(-cp,0),1.34)
+          -.042*upperMass+.050*rightMass-.028*lowerMass
+          +.014*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[1]+=.042*upperMass-.026*lowerMass+.012*Math.sin(theta+0.4)*shoulder;
         p[2]-=.044*dir[0]+.020*Math.sin(theta*2.0+phi*.55)*shoulder;
 
         /* Broad soft-cut planes turn the volume into a designed mineral object
            while keeping enough curvature for continuous studio reflections. */
         let cutNormal=null,cutWeight=0;
         const registerCut=(normal,overshoot)=>{
-          const w=Math.min(.92,.58+Math.max(0,overshoot)*1.85);
+          const w=Math.min(.46,.20+Math.max(0,overshoot)*.92);
           if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
         };
         const topCap=.805+p[0]*.130-p[2]*.045;
@@ -573,8 +575,8 @@
         }
 
         /* Recess the smoked optical organ into the front plane. */
-        const socketX=(p[0]-.030)/.255;
-        const socketY=(p[1]+.012)/.196;
+        const socketX=(p[0]+.105)/.300;
+        const socketY=(p[1]+.010)/.215;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,dir[2]);
         p[2]-=.155*socket;
 
@@ -916,9 +918,9 @@
     }
 
     if(!auditMode){
-      const centreX=.028,centreY=-.012;
+      const centreX=-.105,centreY=-.010;
       const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.505;
-      const bezelMajorX=.164,bezelMajorY=.124,bezelTube=.0017;
+      const bezelMajorX=.190,bezelMajorY=.145,bezelTube=.0019;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -943,9 +945,9 @@
       }
 
       const lensCenter=[centreX,centreY,.508];
-      const lensRadiusX=.166;
-      const lensRadiusY=.126;
-      const lensDepth=.049;
+      const lensRadiusX=.194;
+      const lensRadiusY=.148;
+      const lensDepth=.054;
       const radialSteps=software?15:mobile?18:20;
       const angularSteps=software?96:mobile?112:128;
       function lensVertex(radial,angle){
@@ -1029,7 +1031,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(.98) contrast(1.24) saturate(.98)'
+      ? 'brightness(1.035) contrast(1.18) saturate(.98)'
       : 'brightness(1.07) contrast(1.10) saturate(.92)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
