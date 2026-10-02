@@ -916,9 +916,9 @@
     }
 
     if(!auditMode){
-      const centreX=.032,centreY=-.010;
-      const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.521;
-      const bezelMajorX=.168,bezelMajorY=.132,bezelTube=.0031;
+      const centreX=.028,centreY=-.012;
+      const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.505;
+      const bezelMajorX=.151,bezelMajorY=.116,bezelTube=.0026;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -942,10 +942,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.526];
-      const lensRadiusX=.180;
-      const lensRadiusY=.139;
-      const lensDepth=.068;
+      const lensCenter=[centreX,centreY,.508];
+      const lensRadiusX=.162;
+      const lensRadiusY=.123;
+      const lensDepth=.046;
       const radialSteps=software?15:mobile?18:20;
       const angularSteps=software?96:mobile?112:128;
       function lensVertex(radial,angle){
@@ -1200,9 +1200,9 @@
         float softboxB=exp(-pow((refl.x-.42)/.34,2.0)-pow((refl.y-.01)/.62,2.0))*smoothstep(-.30,.52,refl.z);
         float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.16)/.205,2.0)-pow((refl.y-.16)/.78,2.0))*smoothstep(-.22,.62,refl.z);
-        float studioRibbonB=exp(-pow((refl.x-.31)/.155,2.0)-pow((refl.y+.08)/.66,2.0))*smoothstep(-.18,.64,refl.z);
-        float studioRibbonC=exp(-pow((refl.x+.015+refl.y*.10)/.084,2.0)-pow((refl.y-.06)/.88,2.0))*smoothstep(-.12,.70,refl.z);
+        float studioRibbonA=exp(-pow((refl.x+.18)/.168,2.0)-pow((refl.y-.18)/.72,2.0))*smoothstep(-.20,.64,refl.z);
+        float studioRibbonB=exp(-pow((refl.x-.30)/.132,2.0)-pow((refl.y+.06)/.60,2.0))*smoothstep(-.16,.66,refl.z);
+        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.060,2.0)-pow((refl.y-.04)/.82,2.0))*smoothstep(-.10,.72,refl.z);
 
         float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
         float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
@@ -1375,7 +1375,7 @@
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
-        float lensRing=exp(-pow((lensRadial-.355)/.052,2.0));
+        float lensRing=exp(-pow((lensRadial-.352)/.044,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.30),4.0);
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1457,9 +1457,9 @@
         float softboxA=exp(-pow((refl.x+.26)/.36,2.0)-pow((refl.y-.30)/.58,2.0))*smoothstep(-.26,.48,refl.z);
         float softboxB=exp(-pow((refl.x-.42)/.34,2.0)-pow((refl.y-.01)/.62,2.0))*smoothstep(-.30,.52,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.16)/.205,2.0)-pow((refl.y-.16)/.78,2.0))*smoothstep(-.22,.62,refl.z);
-        float studioRibbonB=exp(-pow((refl.x-.31)/.155,2.0)-pow((refl.y+.08)/.66,2.0))*smoothstep(-.18,.64,refl.z);
-        float studioRibbonC=exp(-pow((refl.x+.015+refl.y*.10)/.084,2.0)-pow((refl.y-.06)/.88,2.0))*smoothstep(-.12,.70,refl.z);
+        float studioRibbonA=exp(-pow((refl.x+.18)/.168,2.0)-pow((refl.y-.18)/.72,2.0))*smoothstep(-.20,.64,refl.z);
+        float studioRibbonB=exp(-pow((refl.x-.30)/.132,2.0)-pow((refl.y+.06)/.60,2.0))*smoothstep(-.16,.66,refl.z);
+        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.060,2.0)-pow((refl.y-.04)/.82,2.0))*smoothstep(-.10,.72,refl.z);
         float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
         float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
         float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
@@ -1474,17 +1474,17 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0040,.0055,.0060),vec3(.078,.086,.083),lift);
-        col*=.972+.028*smoke;
-        col+=vec3(.004,.006,.0065)*strata*(.08+.16*lift);
-        col-=vec3(.0016,.0022,.0025)*inclusion;
+        vec3 col=mix(vec3(.0028,.0040,.0046),vec3(.066,.076,.074),lift);
+        col*=.984+.016*smoke;
+        col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
+        col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(.99,.99,.96)*keySpec*.205;
         col+=vec3(.72,.82,.82)*sideSpec*.175;
-        col+=vec3(.96,1.00,.98)*softboxA*.235;
-        col+=vec3(.50,.68,.70)*softboxB*.110;
-        col+=vec3(1.00,1.00,.97)*studioRibbonA*.185;
-        col+=vec3(.42,.28,.18)*studioRibbonB*.026;
-        col+=vec3(.68,.88,.89)*studioRibbonC*.105;
+        col+=vec3(.97,1.00,.98)*softboxA*.280;
+        col+=vec3(.48,.64,.66)*softboxB*.092;
+        col+=vec3(1.00,1.00,.98)*studioRibbonA*.240;
+        col+=vec3(.40,.27,.18)*studioRibbonB*.018;
+        col+=vec3(.70,.90,.91)*studioRibbonC*.145;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
         col+=vec3(.032,.112,.132)*fresnel*.105;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1503,10 +1503,10 @@
         col*=1.0-.17*sculptValleyA-.12*sculptValleyB;
         col+=vec3(.050,.118,.128)*sculptShoulder*.085;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
-        col+=vec3(.105,.132,.130)*iceVolume*(.120+.100*(1.0-facing));
-        col+=vec3(.105,.124,.122)*innerVeil*(.050+.068*facing);
-        col+=vec3(.026,.062,.068)*bodyMask*(.34+.66*facing);
-        col+=vec3(.036,.082,.090)*strata*iceVolume*.050;
+        col+=vec3(.080,.105,.103)*iceVolume*(.070+.050*(1.0-facing));
+        col+=vec3(.078,.098,.096)*innerVeil*(.028+.034*facing);
+        col+=vec3(.020,.052,.058)*bodyMask*(.28+.72*facing);
+        col+=vec3(.026,.064,.071)*strata*iceVolume*.024;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
@@ -1550,14 +1550,14 @@
 
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
-        float lensRing=exp(-pow((lensRadial-.355)/.052,2.0));
+        float lensRing=exp(-pow((lensRadial-.352)/.044,2.0));
         float lensHot=pow(sat(1.0-lensRadial/.30),4.0);
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
         float electric=pow(.5+.5*sin(lensAngle*12.0+lensRadial*72.0-uTime*2.0),16.0)*lensInner;
         float coreFlash=exp(-pow(lensRadial/.074,2.0))*(.66+.34*sin(uTime*3.8));
         float lensGlint=exp(-pow((vUv.x-.34)/.060,2.0)-pow((vUv.y-.31)/.052,2.0));
-        float lensPupil=1.0-smoothstep(.060,.125,lensRadial);
+        float lensPupil=1.0-smoothstep(.066,.122,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
         vec3 physicalLens=vec3(.002,.008,.010)
           +vec3(.016,.070,.078)*(.24+.28*uEnergy)
@@ -1565,8 +1565,8 @@
           +vec3(.50,.61,.63)*sideSpec*.14
           +vec3(.090,.22,.25)*fresnel*.17
           +vec3(.010,.105,.130)*lensInner*(.11+.10*uEnergy)
-          +vec3(.075,.34,.40)*lensRing*(.15+.09*uEnergy)
-          +vec3(.74,.92,.91)*lensHot*(.20+.07*uEnergy)
+          +vec3(.060,.42,.50)*lensRing*(.17+.10*uEnergy)
+          +vec3(.80,.96,.95)*lensHot*(.22+.07*uEnergy)
           +vec3(.050,.20,.24)*electric*(.10+.09*uEnergy)
           +vec3(.88,.95,.92)*coreFlash*.20
           +vec3(.92,1.00,1.00)*lensGlint*.52
@@ -1765,6 +1765,7 @@
     root.dataset.fxNativeMagStudioR1851='vertical-cut-ice-sculpt-larger-recessed-silver-optic-crisp-studio-bands';
     root.dataset.fxNativeMagStudioR1874='calm-authored-silhouette-deep-flush-optic-premium-ice-volume';
     root.dataset.fxNativeMagStudioR1875='microfaceted-high-density-ice-cut-dark-body-controlled-softbox';
+    root.dataset.fxNativeMagStudioR1877='flush-smoked-optic-crisp-studio-ribbons-clean-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
     root.dataset.fxNativeMagStudioR1869='anti-aliased-clear-optic-edge-silver-recess-no-black-halo';
