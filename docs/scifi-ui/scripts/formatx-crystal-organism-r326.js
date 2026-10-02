@@ -428,7 +428,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.94:(mobile?.995:.985);
+        const smoothWeight=software?.89:(mobile?.945:.925);
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -470,14 +470,17 @@
         const cp=Math.cos(phi);
         const dir=[sp*Math.cos(theta),cp,sp*Math.sin(theta)];
 
-        const shoulder=Math.pow(Math.max(0,1-cp*cp),.72);
-        const upperTaper=1-.12*Math.pow(Math.max(cp,0),3.2);
-        const lowerTaper=1-.19*Math.pow(Math.max(-cp,0),2.55);
+        const shoulder=Math.pow(Math.max(0,1-cp*cp),.66);
+        const upperTaper=1-.070*Math.pow(Math.max(cp,0),2.7);
+        const lowerTaper=1-.255*Math.pow(Math.max(-cp,0),1.95);
 
-        const ax=.61+.090*shoulder;
-        const ay=.94+.030*shoulder;
-        const az=.535+.070*shoulder;
-        const exponent=2.22;
+        /* R1843 — authored ice-block envelope. A sub-quadratic superellipsoid
+           keeps the body smooth while giving it broad mineral shoulders and
+           cut corners instead of the previous oval/egg read. */
+        const ax=.655+.118*shoulder;
+        const ay=.915+.025*shoulder;
+        const az=.555+.082*shoulder;
+        const exponent=1.62;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
           Math.pow(Math.abs(dir[1])/ay,exponent)+
@@ -488,17 +491,18 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.085*g(dir[0],dir[1],-.42,.36,.34,.28);
-        const rightMass=.070*g(dir[0],dir[1], .38,.04,.30,.32);
-        const lowerMass=.052*g(dir[0],dir[1],-.22,-.43,.34,.25);
-        const waistCut=.035*g(dir[0],dir[1], .16,-.20,.34,.20);
+        const upperMass=.145*g(dir[0],dir[1],-.43,.34,.34,.28);
+        const rightMass=.105*g(dir[0],dir[1], .39,.03,.30,.31);
+        const lowerMass=.082*g(dir[0],dir[1],-.25,-.43,.34,.24);
+        const waistCut=.060*g(dir[0],dir[1], .13,-.18,.32,.19);
 
         radius*=upperTaper*lowerTaper*(1+upperMass+rightMass+lowerMass-waistCut);
 
         const lowFreq=
           1
-          +Math.sin(theta*2.0+phi*.55)*.010*shoulder
-          +Math.cos(theta*3.0-phi*.42)*.0055*shoulder;
+          +Math.sin(theta*2.0+phi*.55)*.014*shoulder
+          +Math.cos(theta*3.0-phi*.42)*.0075*shoulder
+          +Math.sin(theta+phi*.31)*.005*shoulder;
         radius*=lowFreq;
 
         const p=[
@@ -507,16 +511,22 @@
           dir[2]*radius
         ];
 
-        /* Art-directed lean and lower taper. */
-        p[0]+=-.052+.060*cp-.022*Math.pow(Math.max(-cp,0),1.5);
-        p[1]+=.022*Math.sin(theta+0.4)*shoulder;
-        p[2]-=.018*dir[0]+.010*Math.sin(theta*2.0)*shoulder;
+        /* Art-directed lean, three-mass silhouette and shallow planar caps. */
+        p[0]+=-.060+.102*cp-.046*Math.pow(Math.max(-cp,0),1.34)
+          +.024*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[1]+=.015*Math.sin(theta+0.4)*shoulder;
+        p[2]-=.026*dir[0]+.014*Math.sin(theta*2.0)*shoulder;
+
+        const topCap=.842+p[0]*.105-p[2]*.034;
+        const bottomCap=-.858-p[0]*.062+p[2]*.030;
+        if(p[1]>topCap)p[1]=topCap+(p[1]-topCap)*.15;
+        if(p[1]<bottomCap)p[1]=bottomCap+(p[1]-bottomCap)*.14;
 
         /* Optical socket depression in the front (+Z) surface. */
-        const socketX=(p[0]+.022)/.24;
-        const socketY=(p[1]-.010)/.19;
+        const socketX=(p[0]+.020)/.205;
+        const socketY=(p[1]-.006)/.158;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,dir[2]);
-        p[2]-=.070*socket;
+        p[2]-=.090*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -842,8 +852,8 @@
     }
 
     if(!auditMode){
-      const centreX=-.020,centreY=.006;
-      const bezelInner=.132,bezelOuter=.190,bezelSteps=software?60:mobile?72:72,bezelZ=.565;
+      const centreX=-.018,centreY=.004;
+      const bezelInner=.105,bezelOuter=.154,bezelSteps=software?56:mobile?64:68,bezelZ=.566;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
           +(outer?.020:.014)*Math.sin(angle*3.0+.34)
@@ -867,9 +877,9 @@
       }
 
       const lensCenter=[centreX,centreY,.575];
-      const lensRadiusX=.166;
-      const lensRadiusY=.130;
-      const lensDepth=.094;
+      const lensRadiusX=.132;
+      const lensRadiusY=.104;
+      const lensDepth=.082;
       const radialSteps=software?8:mobile?9:10;
       const angularSteps=software?56:mobile?56:60;
       function lensVertex(radial,angle){
@@ -1615,6 +1625,7 @@
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
     root.dataset.fxNativeMagStudioR1836='narrow-specular-studio-stripes-no-gray-plane';
     root.dataset.fxNativeMagStudioR1837='three-mass-single-sculpt-atmospheric-stage';
+    root.dataset.fxNativeMagStudioR1843='authored-ice-block-silhouette-smaller-integrated-optic-broad-mineral-planes';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
