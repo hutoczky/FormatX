@@ -1248,6 +1248,11 @@
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
         float iceVolume=exp(-pow((vLocal.x+.10)/.46,2.0)-pow((vLocal.y-.08)/.58,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
+        float sculptValleyA=exp(-pow((vLocal.x+.035)/.105,2.0)-pow((vLocal.y-.22)/.42,2.0))*bodyMask;
+        float sculptValleyB=exp(-pow((vLocal.x-.19)/.095,2.0)-pow((vLocal.y+.30)/.25,2.0))*bodyMask;
+        float sculptShoulder=exp(-pow((vLocal.x+.34)/.21,2.0)-pow((vLocal.y-.38)/.25,2.0))*bodyMask;
+        mineral*=1.0-.13*sculptValleyA-.09*sculptValleyB;
+        mineral+=vec3(.060,.118,.124)*sculptShoulder*.060;
         float iceCloud=.5+.5*sin(vLocal.x*6.2-vLocal.y*4.7+vLocal.z*5.4+sin(vLocal.y*3.2));
         mineral+=vec3(.050,.110,.116)*iceVolume*(.060+.070*(1.0-facing))*(.72+.28*iceCloud);
         float chromaSide=.5+.5*n.x;
@@ -1476,6 +1481,11 @@
         col+=vec3(.016,.050,.058)*edgeTransmission*.26;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
+        float sculptValleyA=exp(-pow((vLocal.x+.035)/.110,2.0)-pow((vLocal.y-.22)/.43,2.0))*bodyMask;
+        float sculptValleyB=exp(-pow((vLocal.x-.19)/.100,2.0)-pow((vLocal.y+.30)/.26,2.0))*bodyMask;
+        float sculptShoulder=exp(-pow((vLocal.x+.34)/.22,2.0)-pow((vLocal.y-.38)/.26,2.0))*bodyMask;
+        col*=1.0-.17*sculptValleyA-.12*sculptValleyB;
+        col+=vec3(.050,.118,.128)*sculptShoulder*.085;
         col+=vec3(.055,.185,.205)*iceVolume*(.145+.115*(1.0-facing));
         col+=vec3(.026,.062,.068)*bodyMask*(.34+.66*facing);
         col+=vec3(.036,.082,.090)*strata*iceVolume*.050;
@@ -1637,6 +1647,11 @@
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
         float iceVolume=exp(-pow((vLocal.x+.10)/.50,2.0)-pow((vLocal.y-.08)/.62,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
+        float sculptValleyA=exp(-pow((vLocal.x+.035)/.112,2.0)-pow((vLocal.y-.22)/.44,2.0))*bodyMask;
+        float sculptValleyB=exp(-pow((vLocal.x-.19)/.102,2.0)-pow((vLocal.y+.30)/.27,2.0))*bodyMask;
+        float sculptShoulder=exp(-pow((vLocal.x+.34)/.23,2.0)-pow((vLocal.y-.38)/.27,2.0))*bodyMask;
+        col*=1.0-.20*sculptValleyA-.14*sculptValleyB;
+        col+=vec3(.044,.110,.121)*sculptShoulder*.095;
         col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
@@ -1731,6 +1746,7 @@
     root.dataset.fxNativeMagStudioR1860='high-density-three-quarter-monolith-dark-integrated-optic';
     root.dataset.fxNativeMagStudioR1861='three-mass-smoky-glass-sculpt-narrow-softboxes-deep-optic';
     root.dataset.fxNativeMagStudioR1862='lobed-smoky-glass-sculpt-embedded-optic-dimensional-studio-chamber';
+    root.dataset.fxNativeMagStudioR1863='soft-sculpt-creases-lobed-volume-photographic-depth';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
