@@ -110,6 +110,53 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     });
   });
 
+  const controlCssDiagnostic = await page.evaluate(() => {
+    const element = document.querySelector('#hero .fx-three-sound');
+    if (!(element instanceof HTMLElement)) return null;
+    const rect = element.getBoundingClientRect();
+    const computed = getComputedStyle(element);
+    const matches = [];
+    const visit = (rules, source, active = true) => {
+      for (const rule of Array.from(rules || [])) {
+        if (rule instanceof CSSMediaRule) {
+          const mediaActive = active && matchMedia(rule.conditionText).matches;
+          visit(rule.cssRules, source, mediaActive);
+          continue;
+        }
+        if (rule instanceof CSSSupportsRule) {
+          let supports = false;
+          try { supports = CSS.supports(rule.conditionText); } catch (_) {}
+          visit(rule.cssRules, source, active && supports);
+          continue;
+        }
+        if (!(rule instanceof CSSStyleRule) || !active) continue;
+        let matched = false;
+        try { matched = element.matches(rule.selectorText); } catch (_) {}
+        if (!matched) continue;
+        const interesting = {};
+        for (const name of ['position','display','width','min-width','max-width','height','min-height','max-height','padding','inset','top','right','bottom','left','aspect-ratio','box-sizing','transform']) {
+          const value = rule.style.getPropertyValue(name);
+          if (value) interesting[name] = value + (rule.style.getPropertyPriority(name) ? ' !important' : '');
+        }
+        if (Object.keys(interesting).length) matches.push({ source, selector: rule.selectorText, declarations: interesting });
+      }
+    };
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules;
+      try { rules = sheet.cssRules; } catch (_) { continue; }
+      visit(rules, sheet.href || 'inline');
+    }
+    return {
+      rect: { x:rect.x,y:rect.y,width:rect.width,height:rect.height },
+      computed: {
+        position:computed.position,display:computed.display,width:computed.width,minWidth:computed.minWidth,maxWidth:computed.maxWidth,
+        height:computed.height,minHeight:computed.minHeight,maxHeight:computed.maxHeight,padding:computed.padding,boxSizing:computed.boxSizing,
+        top:computed.top,right:computed.right,bottom:computed.bottom,left:computed.left,transform:computed.transform
+      },
+      matches
+    };
+  });
+
   const beforeResize = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scrollWidth: document.documentElement.scrollWidth }));
   await page.setViewportSize({ width: 900, height: 1440 });
   await page.waitForTimeout(350);
@@ -160,6 +207,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     metrics,
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
+    control_css_diagnostic: controlCssDiagnostic,
     viewport_change: { before: beforeResize, after: afterResize },
     background_restore_ms: backgroundRestoreMs,
     interpretation: 'Raw CI measurement only. Do not present as phone, customer or production performance without a matching environment record.'
