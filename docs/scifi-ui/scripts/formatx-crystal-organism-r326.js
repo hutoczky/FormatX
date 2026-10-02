@@ -1352,11 +1352,11 @@
         livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
         mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.006,.011,.013);
-        cartilage+=vec3(.055,.070,.071)*(.16*ndl+.20*sideLight);
-        cartilage+=vec3(.36,.42,.40)*softboxA*.095;
-        cartilage+=vec3(.20,.30,.31)*sideSpec*.090;
-        cartilage+=vec3(.028,.11,.12)*fresnel*.095;
+        vec3 cartilage=vec3(.020,.030,.032);
+        cartilage+=vec3(.090,.108,.108)*(.16*ndl+.20*sideLight);
+        cartilage+=vec3(.72,.78,.74)*softboxA*.155;
+        cartilage+=vec3(.34,.46,.46)*sideSpec*.135;
+        cartilage+=vec3(.040,.15,.16)*fresnel*.125;
         cartilage+=vec3(.035,.018,.042)*subsurface*.050;
         cartilage+=vec3(.012,.060,.070)*vascular*.055;
         mineral=mix(mineral,cartilage,armorMask*.985);
@@ -1522,11 +1522,11 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.004,.009,.011)
-          +vec3(.045,.060,.062)*(.12*ndl+.17*sideLight)
-          +vec3(.40,.46,.44)*softboxA*.085
-          +vec3(.18,.29,.30)*sideSpec*.090
-          +vec3(.022,.095,.108)*fresnel*.080
+        vec3 cartilage=vec3(.016,.026,.028)
+          +vec3(.078,.096,.098)*(.12*ndl+.17*sideLight)
+          +vec3(.68,.74,.71)*softboxA*.145
+          +vec3(.31,.43,.44)*sideSpec*.125
+          +vec3(.036,.13,.145)*fresnel*.110
           +vec3(.016,.010,.022)*subsurface*.025;
         col=mix(col,cartilage,armorMask*.985);
 
@@ -1668,11 +1668,11 @@
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.012,.026,.028)
-          +vec3(.046,.066,.068)*(.10*ndl+.11*sideLight)
-          +vec3(.30,.36,.35)*keySpec*.060
-          +vec3(.018,.066,.076)*fresnel*.040
-          +vec3(.024,.036,.036)*(.10+.08*facing);
+        vec3 bezel=vec3(.026,.040,.042)
+          +vec3(.080,.100,.102)*(.10*ndl+.11*sideLight)
+          +vec3(.68,.74,.71)*keySpec*.145
+          +vec3(.034,.12,.13)*fresnel*.075
+          +vec3(.040,.055,.055)*(.10+.08*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1748,6 +1748,7 @@
     root.dataset.fxNativeMagStudioR1862='lobed-smoky-glass-sculpt-embedded-optic-dimensional-studio-chamber';
     root.dataset.fxNativeMagStudioR1863='soft-sculpt-creases-lobed-volume-photographic-depth';
     root.dataset.fxNativeMagStudioR1864='larger-recessed-optic-narrow-softbox-deeper-sculpt-valleys';
+    root.dataset.fxNativeMagStudioR1865='polished-silver-optic-bezel-cross-tier-readable-lens';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
