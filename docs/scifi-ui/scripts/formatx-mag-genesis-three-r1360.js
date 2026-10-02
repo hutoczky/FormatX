@@ -157,6 +157,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1879='clean-elliptical-optic-recess-zero-seed-shell-crescents';
       document.documentElement.dataset.fxMagBirthVisualR1883='mineral-product-glass-flush-elliptical-sensor-low-bloom-no-eye';
       document.documentElement.dataset.fxMagBirthVisualR1878='readable-genome-prologue-delayed-body-reveal-flush-product-optic';
+      document.documentElement.dataset.fxMagBirthVisualR1885='calm-continuous-luxury-bioglass-sculpt-three-quarter-product-film';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
@@ -986,14 +987,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x2b4043,roughness:.112,metalness:.001,
-        clearcoat:.90,clearcoatRoughness:.060,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00135,
+        color:0x17383d,roughness:.072,metalness:.001,
+        clearcoat:.98,clearcoatRoughness:.030,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00055,
         transparent:true,opacity:0,
-        transmission:.10,thickness:.70,ior:1.48,
-        attenuationColor:new T.Color(0x102d32),attenuationDistance:.34,
-        emissive:0x02090b,emissiveIntensity:.003,
-        envMapIntensity:2.82,
+        transmission:.17,thickness:.72,ior:1.49,
+        attenuationColor:new T.Color(0x0b343b),attenuationDistance:.38,
+        emissive:0x02090b,emissiveIntensity:.002,
+        envMapIntensity:3.18,
         specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
         sheen:.012,sheenColor:new T.Color(0x789294),sheenRoughness:.34,
         depthWrite:true
@@ -1044,27 +1045,27 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.38,.33,Math.PI,.82,.285);
-        const rightCentre=mass(.02,.37,0,.76,.215);
-        const lowerLeft=mass(-.43,.29,2.46,.76,.178);
-        const waist=mass(-.19,.23,-.54,.90,.160);
-        const rightLowerCut=mass(-.34,.19,-.12,.58,.095);
+        const upperLeft=mass(.38,.35,Math.PI,.86,.205);
+        const rightCentre=mass(.02,.39,0,.80,.158);
+        const lowerLeft=mass(-.43,.31,2.46,.80,.128);
+        const waist=mass(-.19,.25,-.54,.94,.102);
+        const rightLowerCut=mass(-.34,.22,-.12,.64,.058);
         const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-rightLowerCut;
         p.x*=sculpt;
         p.z*=sculpt;
 
-        p.x+=-.142*Math.pow(Math.max(n.y,0),1.55)+.068*Math.pow(Math.max(-n.y,0),1.45)
-          +Math.sin(az*1.55+el*.72)*.032*shoulder;
+        p.x+=-.090*Math.pow(Math.max(n.y,0),1.55)+.044*Math.pow(Math.max(-n.y,0),1.45)
+          +Math.sin(az*1.55+el*.72)*.018*shoulder;
         p.y+=Math.sin(az*1.88+el*.42)*.014*shoulder;
         p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
 
         const topCap=.805+p.x*.110-p.z*.042;
         const bottomCap=-.825-p.x*.062+p.z*.032;
-        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.10;
-        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.10;
+        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.28;
+        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.28;
         const crownT=Math.max(0,Math.min(1,(p.y-.48)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.145*Math.exp(-Math.pow((p.x+.015)/.145,2.0))*crownEase;
+        const crownCleft=.102*Math.exp(-Math.pow((p.x+.015)/.172,2.0))*crownEase;
         p.y-=crownCleft;
         p.x+=Math.sign(p.x+.018)*crownCleft*.22;
 
@@ -1072,10 +1073,10 @@
         const rightPlane=.665-.082*p.y+.022*p.z;
         const frontPlane=.600-.030*p.y-.020*p.x;
         const backPlane=-.555+.022*p.y+.016*p.x;
-        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.20;
-        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.20;
-        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.32;
-        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.36;
+        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.46;
+        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.46;
+        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.56;
+        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.56;
 
         const socketX=(p.x-.064)/.255;
         const socketY=(p.y+.018)/.194;
@@ -1884,10 +1885,10 @@
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.rotation.y=(this.mobileProfile?.30:.27)+Math.sin(time*.00011)*.007+this.interactionX*.012;
+      this.organicGroup.rotation.y=(this.mobileProfile?.36:.33)+Math.sin(time*.00011)*.006+this.interactionX*.012;
       this.organicGroup.rotation.x=-.080+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?1.20:1.30;
+      const finalScale=this.mobileProfile?1.23:1.32;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
