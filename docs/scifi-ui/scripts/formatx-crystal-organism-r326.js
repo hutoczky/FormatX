@@ -480,7 +480,7 @@
         const ax=.655+.118*shoulder;
         const ay=.915+.025*shoulder;
         const az=.555+.082*shoulder;
-        const exponent=1.62;
+        const exponent=1.48;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
           Math.pow(Math.abs(dir[1])/ay,exponent)+
@@ -491,10 +491,10 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.145*g(dir[0],dir[1],-.43,.34,.34,.28);
-        const rightMass=.105*g(dir[0],dir[1], .39,.03,.30,.31);
-        const lowerMass=.082*g(dir[0],dir[1],-.25,-.43,.34,.24);
-        const waistCut=.060*g(dir[0],dir[1], .13,-.18,.32,.19);
+        const upperMass=.168*g(dir[0],dir[1],-.43,.34,.34,.28);
+        const rightMass=.122*g(dir[0],dir[1], .39,.03,.30,.31);
+        const lowerMass=.094*g(dir[0],dir[1],-.25,-.43,.34,.24);
+        const waistCut=.074*g(dir[0],dir[1], .13,-.18,.32,.19);
 
         radius*=upperTaper*lowerTaper*(1+upperMass+rightMass+lowerMass-waistCut);
 
@@ -853,12 +853,12 @@
 
     if(!auditMode){
       const centreX=-.018,centreY=.004;
-      const bezelInner=.105,bezelOuter=.154,bezelSteps=software?56:mobile?64:68,bezelZ=.566;
+      const bezelInner=.110,bezelOuter=.146,bezelSteps=software?56:mobile?64:68,bezelZ=.566;
       const cartilagePoint=(angle,radius,outer=false)=>{
         const lobe=1
-          +(outer?.020:.014)*Math.sin(angle*3.0+.34)
-          +(outer?.010:.008)*Math.sin(angle*5.0-.72)
-          +.005*Math.cos(angle*7.0+.18);
+          +(outer?.008:.006)*Math.sin(angle*3.0+.34)
+          +(outer?.004:.003)*Math.sin(angle*5.0-.72)
+          +.002*Math.cos(angle*7.0+.18);
         const yStretch=outer?1.015:1.010;
         return [
           centreX+Math.cos(angle)*radius*lobe*1.08,
@@ -1626,6 +1626,7 @@
     root.dataset.fxNativeMagStudioR1836='narrow-specular-studio-stripes-no-gray-plane';
     root.dataset.fxNativeMagStudioR1837='three-mass-single-sculpt-atmospheric-stage';
     root.dataset.fxNativeMagStudioR1843='authored-ice-block-silhouette-smaller-integrated-optic-broad-mineral-planes';
+    root.dataset.fxNativeMagStudioR1844='faceted-ice-volume-subtle-chromatic-edge-smoked-optic';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
