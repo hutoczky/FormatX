@@ -542,7 +542,9 @@
           p[1]=bottomCap-over*.11;
           registerCut([-.075,-1,.034],over);
         }
-        const crownCleft=.095*Math.exp(-Math.pow((p[0]+.020)/.135,2.0))*smoothstep(.50,.82,p[1]);
+        const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
+        const crownCleftEase=crownCleftT*crownCleftT*(3-2*crownCleftT);
+        const crownCleft=.095*Math.exp(-Math.pow((p[0]+.020)/.135,2.0))*crownCleftEase;
         p[1]-=crownCleft;
         p[0]+=Math.sign(p[0]+.020)*crownCleft*.20;
         const leftPlane=-.695+.120*p[1]-.035*p[2];
@@ -1765,6 +1767,7 @@
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
     root.dataset.fxNativeMagStudioR1869='anti-aliased-clear-optic-edge-silver-recess-no-black-halo';
     root.dataset.fxNativeMagStudioR1870='smoked-silver-ice-crown-cleft-neutral-studio-cyan-optic-only-accent';
+    root.dataset.fxNativeMagStudioR1872='runtime-safe-crown-ease-smoked-silver-bioglass';
     root.dataset.fxNativeMagStudioR1853='sealed-raster-seams-silver-ice-midtone-internal-striation-optic-parity';
     root.dataset.fxNativeMagStudioR1855='bright-silver-ice-midtone-uncrushed-oled-studio-compositor';
     root.dataset.fxNativeMagStudioR1856='crease-aware-mineral-planes-smooth-optic-teal-volume';
