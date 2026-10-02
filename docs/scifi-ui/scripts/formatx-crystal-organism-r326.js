@@ -1703,11 +1703,11 @@
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.018,.025,.026)
-          +vec3(.060,.074,.072)*(.10*ndl+.11*sideLight)
-          +vec3(.92,.96,.92)*keySpec*.175
-          +vec3(.038,.095,.105)*fresnel*.048
-          +vec3(.030,.040,.039)*(.10+.08*facing);
+        vec3 bezel=vec3(.022,.034,.035)
+          +vec3(.070,.086,.084)*(.11*ndl+.12*sideLight)
+          +vec3(.96,.99,.95)*keySpec*.260
+          +vec3(.045,.125,.138)*fresnel*.080
+          +vec3(.036,.050,.048)*(.12+.10*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1725,6 +1725,7 @@
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.20,.47,lensRadial);
         float lensRim=exp(-pow((lensRadial-.35)/.060,2.0));
+        float lensIris=exp(-pow((lensRadial-.205)/.050,2.0));
         float lensHot=exp(-pow(lensRadial/.082,2.0));
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
@@ -1733,7 +1734,8 @@
           +vec3(.006,.070,.100)*lensInner
           +vec3(.90,.96,.93)*keySpec*.185
           +vec3(.018,.062,.078)*fresnel*.075
-          +vec3(.060,.31,.39)*lensRim*.175
+          +vec3(.085,.48,.57)*lensRim*.220
+          +vec3(.045,.58,.68)*lensIris*.310
           +vec3(.76,.96,.96)*lensHot*.230
           +vec3(.98,1.00,1.00)*lensGlint*.58
           +vec3(.44,.66,.68)*lensEdge*(.10+.14*keySpec+.08*sideSpec);
@@ -1766,6 +1768,7 @@
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
     root.dataset.fxNativeMagStudioR1892='audit-parity-recessed-optic-soft-trilobate-silhouette';
     root.dataset.fxNativeMagStudioR1894='cinematic-angular-mass-parity-breathing-room-living-iris';
+    root.dataset.fxNativeMagStudioR1896='cross-tier-cyan-iris-smoked-silver-bezel-proof-parity';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
