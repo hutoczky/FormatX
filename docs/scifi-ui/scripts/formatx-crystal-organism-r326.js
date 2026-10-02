@@ -1196,13 +1196,13 @@
         float keySoft=pow(NoH,5.6);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),42.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.25)/.285,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.24,.50,refl.z);
-        float softboxB=exp(-pow((refl.x-.40)/.285,2.0)-pow((refl.y-.01)/.54,2.0))*smoothstep(-.28,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.25)/.235,2.0)-pow((refl.y-.30)/.46,2.0))*smoothstep(-.24,.50,refl.z);
+        float softboxB=exp(-pow((refl.x-.40)/.245,2.0)-pow((refl.y-.01)/.50,2.0))*smoothstep(-.28,.54,refl.z);
         float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.18)/.110,2.0)-pow((refl.y-.18)/.66,2.0))*smoothstep(-.18,.66,refl.z);
+        float studioRibbonA=exp(-pow((refl.x+.18)/.082,2.0)-pow((refl.y-.18)/.62,2.0))*smoothstep(-.18,.66,refl.z);
         float studioRibbonB=exp(-pow((refl.x-.30)/.098,2.0)-pow((refl.y+.06)/.56,2.0))*smoothstep(-.14,.68,refl.z);
-        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.048,2.0)-pow((refl.y-.04)/.76,2.0))*smoothstep(-.08,.74,refl.z);
+        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.040,2.0)-pow((refl.y-.04)/.72,2.0))*smoothstep(-.08,.74,refl.z);
 
         float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
         float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
@@ -1454,12 +1454,12 @@
         float keySpec=pow(max(dot(n,normalize(key+view)),0.0),72.0);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.25)/.285,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.24,.50,refl.z);
-        float softboxB=exp(-pow((refl.x-.40)/.285,2.0)-pow((refl.y-.01)/.54,2.0))*smoothstep(-.28,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.25)/.235,2.0)-pow((refl.y-.30)/.46,2.0))*smoothstep(-.24,.50,refl.z);
+        float softboxB=exp(-pow((refl.x-.40)/.245,2.0)-pow((refl.y-.01)/.50,2.0))*smoothstep(-.28,.54,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.18)/.110,2.0)-pow((refl.y-.18)/.66,2.0))*smoothstep(-.18,.66,refl.z);
+        float studioRibbonA=exp(-pow((refl.x+.18)/.082,2.0)-pow((refl.y-.18)/.62,2.0))*smoothstep(-.18,.66,refl.z);
         float studioRibbonB=exp(-pow((refl.x-.30)/.098,2.0)-pow((refl.y+.06)/.56,2.0))*smoothstep(-.14,.68,refl.z);
-        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.048,2.0)-pow((refl.y-.04)/.76,2.0))*smoothstep(-.08,.74,refl.z);
+        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.040,2.0)-pow((refl.y-.04)/.72,2.0))*smoothstep(-.08,.74,refl.z);
         float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
         float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
         float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
@@ -1470,19 +1470,19 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.052+ndl*.185+sideLight*.115+fillLight*.060);
+        float lift=sat(.040+ndl*.158+sideLight*.095+fillLight*.045);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0028,.0040,.0046),vec3(.078,.090,.087),lift);
+        vec3 col=mix(vec3(.0018,.0030,.0038),vec3(.052,.066,.066),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
-        col+=vec3(.99,.99,.96)*keySpec*.205;
-        col+=vec3(.72,.82,.82)*sideSpec*.175;
-        col+=vec3(.98,1.00,.98)*softboxA*.160;
-        col+=vec3(.50,.66,.67)*softboxB*.052;
-        col+=vec3(1.00,1.00,.98)*studioRibbonA*.145;
+        col+=vec3(.99,.99,.96)*keySpec*.185;
+        col+=vec3(.66,.78,.79)*sideSpec*.150;
+        col+=vec3(.98,1.00,.98)*softboxA*.185;
+        col+=vec3(.46,.62,.64)*softboxB*.044;
+        col+=vec3(1.00,1.00,.98)*studioRibbonA*.178;
         col+=vec3(.40,.27,.18)*studioRibbonB*.009;
         col+=vec3(.68,.89,.90)*studioRibbonC*.072;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
@@ -1519,8 +1519,8 @@
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
         col*=mix(1.0,facetTone,bodyMask*.08);
-        col+=vec3(.035,.042,.041)*pow(broadFacet,.94)*.060*bodyMask;
-        col+=vec3(.048,.028,.018)*pow(warmFacet,1.05)*.040*bodyMask;
+        col+=vec3(.026,.033,.032)*pow(broadFacet,1.20)*.035*bodyMask;
+        col+=vec3(.040,.024,.016)*pow(warmFacet,1.20)*.025*bodyMask;
         col+=vec3(.018,.047,.052)*fresnel*.080*bodyMask;
 
         float pulse=0.0;
@@ -1540,9 +1540,9 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.105,.115,.113)
-          +vec3(.115,.128,.127)*(.12*ndl+.17*sideLight)
-          +vec3(.94,.96,.91)*softboxA*.205
+        vec3 cartilage=vec3(.024,.032,.032)
+          +vec3(.068,.082,.080)*(.12*ndl+.17*sideLight)
+          +vec3(.94,.96,.91)*softboxA*.175
           +vec3(.50,.60,.59)*sideSpec*.170
           +vec3(.050,.11,.120)*fresnel*.060
           +vec3(.012,.009,.015)*subsurface*.014;
@@ -1585,7 +1585,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.14),clamp(outAlpha,.92,1.0));
+        ${outputName}=vec4(filmic(col*2.06),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1771,6 +1771,7 @@
     root.dataset.fxNativeMagStudioR1885='continuous-luxury-bioglass-soft-cuts-flush-optic-highlight-control';
     root.dataset.fxNativeMagStudioR1886='fused-trilobate-bioglass-sculpt-continuous-specular-surface';
     root.dataset.fxNativeMagStudioR1887='dark-photographic-bioglass-narrow-softboxes-smoked-optic-mobile-parity';
+    root.dataset.fxNativeMagStudioR1889='cross-tier-dark-bioglass-narrow-reflection-optic-parity';
     root.dataset.fxNativeMagStudioR1877='flush-smoked-optic-crisp-studio-ribbons-clean-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
