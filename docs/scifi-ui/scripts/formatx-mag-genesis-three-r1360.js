@@ -158,6 +158,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1883='mineral-product-glass-flush-elliptical-sensor-low-bloom-no-eye';
       document.documentElement.dataset.fxMagBirthVisualR1878='readable-genome-prologue-delayed-body-reveal-flush-product-optic';
       document.documentElement.dataset.fxMagBirthVisualR1885='calm-continuous-luxury-bioglass-sculpt-three-quarter-product-film';
+      document.documentElement.dataset.fxMagBirthVisualR1886='fused-trilobate-bioglass-product-sculpt-smooth-specular-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
@@ -1030,13 +1031,13 @@
         const ax=.78+shoulder*.125+n.x*.045-n.z*.020;
         const ay=1.08+shoulder*.058+n.y*.024+n.x*.016;
         const azr=.64+shoulder*.092+n.z*.032-n.x*.020;
-        const exponent=1.34;
+        const exponent=1.62;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
           Math.pow(Math.abs(n.y)/ay,exponent)+
           Math.pow(Math.abs(n.z)/azr,exponent);
         const radius=1/Math.pow(Math.max(.001,lp),1/exponent);
-        const livingBias=1+Math.sin(az*2.1+el*.8)*.006+Math.cos(az*4.0-el*1.3)*.003;
+        const livingBias=1+Math.sin(az*2.1+el*.8)*.0035+Math.cos(az*4.0-el*1.3)*.0018;
         p.set(n.x*radius*livingBias,n.y*radius*livingBias,n.z*radius*livingBias);
 
         const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
@@ -1045,10 +1046,10 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.38,.35,Math.PI,.86,.205);
-        const rightCentre=mass(.02,.39,0,.80,.158);
-        const lowerLeft=mass(-.43,.31,2.46,.80,.128);
-        const waist=mass(-.19,.25,-.54,.94,.102);
+        const upperLeft=mass(.38,.35,Math.PI,.88,.260);
+        const rightCentre=mass(.02,.40,0,.82,.198);
+        const lowerLeft=mass(-.43,.32,2.46,.82,.160);
+        const waist=mass(-.19,.26,-.54,.96,.142);
         const rightLowerCut=mass(-.34,.22,-.12,.64,.058);
         const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-rightLowerCut;
         p.x*=sculpt;
@@ -1061,8 +1062,8 @@
 
         const topCap=.805+p.x*.110-p.z*.042;
         const bottomCap=-.825-p.x*.062+p.z*.032;
-        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.28;
-        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.28;
+        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.52;
+        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.52;
         const crownT=Math.max(0,Math.min(1,(p.y-.48)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
         const crownCleft=.102*Math.exp(-Math.pow((p.x+.015)/.172,2.0))*crownEase;
@@ -1073,10 +1074,10 @@
         const rightPlane=.665-.082*p.y+.022*p.z;
         const frontPlane=.600-.030*p.y-.020*p.x;
         const backPlane=-.555+.022*p.y+.016*p.x;
-        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.46;
-        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.46;
-        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.56;
-        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.56;
+        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.68;
+        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.68;
+        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.72;
+        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.72;
 
         const socketX=(p.x-.064)/.255;
         const socketY=(p.y+.018)/.194;
