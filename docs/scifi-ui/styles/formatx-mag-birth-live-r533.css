@@ -2218,25 +2218,25 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 .fx-mag-birth-r533[data-fx-renderer="three"],
 .fx-mag-birth-r533[data-fx-renderer="three-loading"]{
   background:
-    radial-gradient(ellipse 46% 52% at 49% 46%,rgba(42,101,105,.135) 0%,rgba(17,48,52,.070) 34%,transparent 69%),
-    radial-gradient(ellipse 84% 42% at 52% 104%,rgba(35,55,54,.16) 0%,transparent 68%),
-    radial-gradient(ellipse 28% 34% at 76% 35%,rgba(58,41,48,.060) 0%,transparent 74%),
-    linear-gradient(180deg,#010405 0%,#020709 48%,#010304 100%)!important;
+    radial-gradient(ellipse 52% 58% at 47% 44%,rgba(56,126,131,.185) 0%,rgba(21,60,65,.092) 34%,rgba(8,25,30,.040) 56%,transparent 74%),
+    radial-gradient(ellipse 92% 48% at 50% 106%,rgba(49,72,70,.22) 0%,rgba(15,27,28,.06) 48%,transparent 72%),
+    radial-gradient(ellipse 30% 36% at 76% 34%,rgba(72,49,65,.072) 0%,transparent 74%),
+    linear-gradient(180deg,#010405 0%,#02080a 48%,#010304 100%)!important;
 }
 html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-veil,
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-veil{
-  opacity:.085!important;
+  opacity:.105!important;
   background:
-    radial-gradient(ellipse 44% 50% at var(--fxb-x) var(--fxb-y),rgba(111,215,220,.055),transparent 70%),
-    linear-gradient(180deg,rgba(255,255,255,.010),transparent 28%,rgba(0,0,0,.10))!important;
+    radial-gradient(ellipse 46% 54% at var(--fxb-x) var(--fxb-y),rgba(128,224,226,.070),transparent 72%),
+    linear-gradient(180deg,rgba(255,255,255,.012),transparent 28%,rgba(0,0,0,.10))!important;
   -webkit-mask-image:none!important;
   mask-image:none!important;
 }
 html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-deep,
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-deep{
-  opacity:.16!important;
+  opacity:.20!important;
   background:
-    radial-gradient(ellipse 48% 46% at 49% 47%,rgba(51,115,119,.070),transparent 72%)!important;
+    radial-gradient(ellipse 54% 50% at 48% 46%,rgba(62,132,136,.090),transparent 74%)!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-stars{
   opacity:.055!important;
@@ -2247,3 +2247,4 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   background-size:9px 9px!important;
 }
 /* production-r1842-photographic-studio-field-no-flat-black */
+/* production-r1862-deep-photographic-studio-chamber */
