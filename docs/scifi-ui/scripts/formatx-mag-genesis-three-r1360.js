@@ -148,6 +148,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
       document.documentElement.dataset.fxMagBirthVisualR1842='high-density-three-mass-studio-sculpt-integrated-optic-no-egg-no-hud-flash';
       document.documentElement.dataset.fxMagBirthVisualR1847='muted-blue-grey-ice-volume-smoked-optic-luxury-studio';
+      document.documentElement.dataset.fxMagBirthVisualR1848='readable-blue-grey-ice-volume-soft-ambient-studio';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
       document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
@@ -254,7 +255,8 @@
     makeLights(){
       const T=this.THREE;
       // R1583 — softer photographic studio lighting plus procedural environment reflections.
-      this.scene.add(new T.HemisphereLight(0xc4d2d0,0x010304,0.72));
+      this.scene.add(new T.HemisphereLight(0xd2dedc,0x010304,0.88));
+      this.scene.add(new T.AmbientLight(0x66878b,.20));
       const key=new T.DirectionalLight(0xfffbf1,2.72);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
@@ -263,12 +265,12 @@
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
       this.rimLight=rim;
-      const frontFill=new T.PointLight(0x6f9fa3,this.mobileProfile?.52:.82,9,2);
+      const frontFill=new T.PointLight(0x7faeb2,this.mobileProfile?.76:1.18,9,2);
       frontFill.position.set(-.30,.18,4.8);
       this.scene.add(frontFill);
       this.frontFillLight=frontFill;
       if(!this.mobileProfile&&!this.lowPowerProfile){
-        const bioticFill=new T.PointLight(0x768f90,1.46,10,2);
+        const bioticFill=new T.PointLight(0x829b9d,1.62,10,2);
         bioticFill.position.set(-2.7,-.9,2.8);
         this.scene.add(bioticFill);
         const warmBounce=new T.PointLight(0xc49a72,.68,8,2);
@@ -948,14 +950,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x1b3034,roughness:.125,metalness:.001,
-        clearcoat:.94,clearcoatRoughness:.050,
+        color:0x29484d,roughness:.135,metalness:.001,
+        clearcoat:.94,clearcoatRoughness:.052,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.0017,
         transparent:true,opacity:0,
-        transmission:.16,thickness:.36,ior:1.48,
-        attenuationColor:new T.Color(0x0d4650),attenuationDistance:.46,
-        emissive:0x031015,emissiveIntensity:.018,
-        envMapIntensity:2.30,
+        transmission:.24,thickness:.38,ior:1.48,
+        attenuationColor:new T.Color(0x1d5c64),attenuationDistance:.62,
+        emissive:0x041519,emissiveIntensity:.024,
+        envMapIntensity:2.42,
         specularIntensity:1.0,specularColor:new T.Color(0xf4fbf7),
         sheen:.035,sheenColor:new T.Color(0x54767a),sheenRoughness:.42,
         depthWrite:true
@@ -1824,9 +1826,9 @@
       const finalScale=this.mobileProfile?.96:1.08;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
-      this.organicShellMaterial.opacity=(.88+.08*maturity)*visible;
+      this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.055+.030*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.085+.040*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=0;
       this.organicHoodMaterial.opacity=0;
