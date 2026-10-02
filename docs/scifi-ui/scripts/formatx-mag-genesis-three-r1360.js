@@ -151,6 +151,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1848='readable-blue-grey-ice-volume-soft-ambient-studio';
       document.documentElement.dataset.fxMagBirthVisualR1849='narrow-softbox-ice-reflections-silver-smoked-optic-low-bloom';
       document.documentElement.dataset.fxMagBirthVisualR1852='vertical-cut-silver-ice-monolith-recessed-smoked-optic-visible-dna-studio-depth';
+      document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
@@ -955,14 +956,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x667679,roughness:.092,metalness:.001,
+        color:0x28464c,roughness:.086,metalness:.001,
         clearcoat:.98,clearcoatRoughness:.030,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00125,
         transparent:true,opacity:0,
-        transmission:.36,thickness:.44,ior:1.49,
-        attenuationColor:new T.Color(0x42666a),attenuationDistance:.88,
+        transmission:.22,thickness:.46,ior:1.49,
+        attenuationColor:new T.Color(0x17424a),attenuationDistance:.56,
         emissive:0x051114,emissiveIntensity:.012,
-        envMapIntensity:2.82,
+        envMapIntensity:3.05,
         specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
         sheen:.016,sheenColor:new T.Color(0x879b9c),sheenRoughness:.36,
         depthWrite:true
@@ -1843,7 +1844,7 @@
       const visible=grow;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?.92:1.02;
+      const finalScale=this.mobileProfile?.99:1.10;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
@@ -1960,25 +1961,27 @@
     updateCamera(t,time){
       const ix=this.interactionX,iy=this.interactionY;
       const impulse=this.interactionImpulse;
-      let z=this.mobileProfile?5.82:4.92,y=.012,x=0;
+      let z=this.mobileProfile?5.74:4.70,y=.012,x=this.mobileProfile?.105:.180;
       if(t<2.70){
         const k=smooth(t/2.70);
-        z=mix(this.mobileProfile?5.96:5.34,this.mobileProfile?5.64:4.72,k);
-        x=Math.sin(time*.00027)*.018*(1-k*.35);
+        z=mix(this.mobileProfile?5.90:5.18,this.mobileProfile?5.56:4.52,k);
+        x=(this.mobileProfile?.090:.155)+Math.sin(time*.00027)*.014*(1-k*.35);
         y=.010+Math.sin(time*.00024)*.007;
       }else if(t<5.55){
-        z=(this.mobileProfile?5.64:4.72)+Math.sin(time*.00020)*.005;
-        x=Math.sin(time*.00015)*.003;
+        z=(this.mobileProfile?5.56:4.52)+Math.sin(time*.00020)*.005;
+        x=(this.mobileProfile?.110:.190)+Math.sin(time*.00015)*.004;
         y=Math.cos(time*.00018)*.003;
       }else if(t<7.25){
         const k=smooth((t-5.55)/1.70);
-        z=mix(5.70,5.18,k);
+        z=mix(this.mobileProfile?5.56:4.52,this.mobileProfile?5.26:4.28,k);
         y=mix(0,.002,k);
       }else if(t<9.10){
-        z=5.18+Math.sin(time*.00018)*.006;
+        z=(this.mobileProfile?5.26:4.28)+Math.sin(time*.00018)*.006;
+        x=this.mobileProfile?.105:.175;
         y=.002;
       }else{
-        z=mix(5.18,5.08,smooth((t-9.10)/.60));
+        z=mix(this.mobileProfile?5.26:4.28,this.mobileProfile?5.18:4.20,smooth((t-9.10)/.60));
+        x=this.mobileProfile?.100:.165;
         y=.002;
       }
       if(this.width<this.height)z+=.44;
@@ -1988,9 +1991,9 @@
       z+=Math.abs(this.interactionScroll)*.018-this.interactionPress*.026-this.interactionSemantic*.010;
       this.camera.position.set(x,y,z);
       this.camera.lookAt(
-        ix*.026+this.interactionVelocityX*.006,
-        -iy*.020-this.interactionVelocityY*.005,
-        0
+        -.045+ix*.026+this.interactionVelocityX*.006,
+        -.010-iy*.020-this.interactionVelocityY*.005,
+        -.015
       );
     }
 
