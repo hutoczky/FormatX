@@ -90,6 +90,47 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
         for (const entry of list.getEntries()) window.__fxPerf.longTaskMs += entry.duration;
       }).observe({ type: 'longtask', buffered: true });
     } catch (_) {}
+    window.__fxPerf.controlTimeline = [];
+    const captureControlFrame = label => {
+      const sound = document.querySelector('#hero .fx-three-sound');
+      const ask = document.querySelector('#hero .fx-reference-ask');
+      const controls = document.querySelector('#hero .fx-reference-controls-r204');
+      const snap = element => {
+        if (!(element instanceof HTMLElement)) return null;
+        const r = element.getBoundingClientRect();
+        const cs = getComputedStyle(element);
+        return {
+          parent: element.parentElement?.className || '',
+          x:+r.x.toFixed(2), y:+r.y.toFixed(2), width:+r.width.toFixed(2), height:+r.height.toFixed(2),
+          position:cs.position, display:cs.display, visibility:cs.visibility, opacity:cs.opacity,
+          widthCss:cs.width, heightCss:cs.height, transform:cs.transform
+        };
+      };
+      window.__fxPerf.controlTimeline.push({
+        label, at:+performance.now().toFixed(2),
+        sound:snap(sound), ask:snap(ask), controls:snap(controls),
+        sheets:Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link=>({
+          href:link.getAttribute('href')||'', media:link.media||'', disabled:Boolean(link.disabled)
+        }))
+      });
+    };
+    const scheduleCapture = () => {
+      captureControlFrame('sync');
+      requestAnimationFrame(() => {
+        captureControlFrame('raf1');
+        requestAnimationFrame(() => captureControlFrame('raf2'));
+      });
+      for (const delay of [25,50,75,100,150,200,250,300,350,400,450,500,650]) {
+        setTimeout(() => captureControlFrame('t'+delay), delay);
+      }
+    };
+    document.addEventListener('DOMContentLoaded', scheduleCapture, { once:true });
+    document.addEventListener('formatx:controlownerready', () => captureControlFrame('controlownerready'));
+    new MutationObserver(mutations => {
+      if (!mutations.some(m => m.type === 'attributes' && m.target instanceof HTMLLinkElement)) return;
+      captureControlFrame('stylesheet-mutation');
+    }).observe(document.documentElement, { subtree:true, attributes:true, attributeFilter:['media','disabled'] });
+
     document.addEventListener('formatx:introcomplete', () => {
       window.__fxPerf.introComplete = performance.now();
     }, { once: true });
@@ -222,6 +263,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       largestContentfulPaint: window.__fxPerf.lcp,
       cumulativeLayoutShift: window.__fxPerf.cls,
       layoutShifts: window.__fxPerf.shifts,
+      controlTimeline: window.__fxPerf.controlTimeline,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
       introComplete: window.__fxPerf.introComplete,
       renderer: document.documentElement.dataset.fxRenderer || null,
