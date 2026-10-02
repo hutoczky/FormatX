@@ -124,21 +124,21 @@
       || !(rail instanceof HTMLElement)
       || !(button instanceof HTMLButtonElement)) return false;
 
-    const mobile = mobileViewport();
-    const owner = space;
-
-    // R1822 — prepare the final control geometry before any DOM ownership move.
-    // The previous order reparented the legacy proof controls first and only
-    // then removed their old geometry, exposing a transient 132x132 layout to
-    // Chromium's layout-shift tracker. Keep the whole handoff atomic by
-    // normalising state/classes before prepend/appendChild.
-    for (const node of [controls, rail, button, ask, pause]) clearLegacyControlGeometry(node);
-    controls.classList.add('fx-reference-controls-r263');
-    button.classList.add('fx-wda-sound-toggle');
-
     if (button.parentElement !== controls) controls.prepend(button);
     if (rail.parentElement !== controls) controls.appendChild(rail);
+
+    const mobile = mobileViewport();
+    const owner = space;
     if (controls.parentElement !== owner) owner.appendChild(controls);
+
+    // r244 and older mobile generations may have left inline !important flex,
+    // top/right or translate geometry. The late r263 stylesheet is the single
+    // final geometry owner, so remove only layout inline state from this small
+    // canonical control group. Audio state and event listeners remain intact.
+    for (const node of [controls, rail, button, ask, pause]) clearLegacyControlGeometry(node);
+
+    controls.classList.add('fx-reference-controls-r263');
+    button.classList.add('fx-wda-sound-toggle');
 
     if (mag instanceof HTMLButtonElement) {
       mag.classList.add('fx-reference-mag-text-r263');
