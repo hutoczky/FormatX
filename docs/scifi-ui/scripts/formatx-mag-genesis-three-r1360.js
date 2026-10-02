@@ -145,6 +145,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1891='fused-trilobate-dark-bioglass-centered-living-optic';
       document.documentElement.dataset.fxMagBirthVisualR1893='embedded-optic-studio-bioglass-handoff-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1895='flush-living-optic-cinematic-final-attachment';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -874,7 +875,7 @@
         new T.MeshPhysicalMaterial({
           color:0x59cbd3,metalness:0,roughness:.10,
           clearcoat:.86,clearcoatRoughness:.055,
-          emissive:0x0b5662,emissiveIntensity:.34,
+          emissive:0x0b6672,emissiveIntensity:.42,
           transparent:true,opacity:.22,depthWrite:false,
           blending:T.AdditiveBlending
         })
@@ -1872,7 +1873,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx-.036*chestEmbed,ty-.010*chestEmbed,.40-.245*chestEmbed);
+      this.coreGroup.position.set(tx-.040*chestEmbed,ty-.008*chestEmbed,.40-.105*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1892,9 +1893,9 @@
       this.coreGlass.visible=seedShellLife>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=irisAwake>.004;
-      this.irisGroup.scale.setScalar((this.mobileProfile?1.34:1.31)*(1+irisAwake*.018)*pulse);
+      this.irisGroup.scale.setScalar((this.mobileProfile?1.31:1.29)*(1+irisAwake*.016)*pulse);
       if(this.livingIris){
-        this.livingIris.material.opacity=(.11+.13*irisAwake)*irisAwake;
+        this.livingIris.material.opacity=(.15+.16*irisAwake)*irisAwake;
         this.livingIris.rotation.z=.08+Math.sin(time*.00055)*.018;
       }
       if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
