@@ -250,6 +250,19 @@
         [.42,'rgba(66,54,45,.065)'],
         [1,'rgba(0,0,0,0)']
       ]);
+      const stripA=x.createLinearGradient(118,0,166,0);
+      stripA.addColorStop(0,'rgba(255,255,255,0)');
+      stripA.addColorStop(.32,'rgba(239,250,246,.34)');
+      stripA.addColorStop(.50,'rgba(255,255,251,.74)');
+      stripA.addColorStop(.68,'rgba(224,243,240,.30)');
+      stripA.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=stripA;x.fillRect(104,18,78,342);
+      const stripB=x.createLinearGradient(548,0,590,0);
+      stripB.addColorStop(0,'rgba(255,255,255,0)');
+      stripB.addColorStop(.48,'rgba(152,224,228,.30)');
+      stripB.addColorStop(.62,'rgba(218,247,246,.46)');
+      stripB.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=stripB;x.fillRect(526,46,88,286);
       const ceiling=x.createLinearGradient(0,0,0,120);
       ceiling.addColorStop(0,'rgba(205,224,220,.26)');
       ceiling.addColorStop(1,'rgba(0,0,0,0)');
@@ -962,16 +975,16 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x4b6b6f,roughness:.078,metalness:.001,
-        clearcoat:.98,clearcoatRoughness:.030,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00125,
+        color:0x355e64,roughness:.068,metalness:.001,
+        clearcoat:.99,clearcoatRoughness:.024,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00105,
         transparent:true,opacity:0,
-        transmission:.36,thickness:.50,ior:1.49,
-        attenuationColor:new T.Color(0x1d5058),attenuationDistance:.46,
-        emissive:0x051114,emissiveIntensity:.012,
-        envMapIntensity:3.05,
+        transmission:.42,thickness:.56,ior:1.49,
+        attenuationColor:new T.Color(0x16454c),attenuationDistance:.42,
+        emissive:0x041114,emissiveIntensity:.010,
+        envMapIntensity:3.38,
         specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
-        sheen:.016,sheenColor:new T.Color(0x879b9c),sheenRoughness:.36,
+        sheen:.012,sheenColor:new T.Color(0x789294),sheenRoughness:.34,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -1051,7 +1064,7 @@
         const socketX=(p.x-.068)/.255;
         const socketY=(p.y+.018)/.198;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,n.z);
-        p.z-=.055*socket;
+        p.z-=.034*socket;
 
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
@@ -1064,17 +1077,17 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x607d80,roughness:.058,metalness:0,
-        clearcoat:.98,clearcoatRoughness:.026,
-        transmission:.82,thickness:.13,ior:1.48,
-        attenuationColor:new T.Color(0x28565c),attenuationDistance:.58,
+        color:0x214a50,roughness:.072,metalness:0,
+        clearcoat:.96,clearcoatRoughness:.034,
+        transmission:.66,thickness:.22,ior:1.48,
+        attenuationColor:new T.Color(0x0e3940),attenuationDistance:.38,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00008,
-        envMapIntensity:2.32,side:T.FrontSide
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00006,
+        envMapIntensity:2.54,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.978,1.040,.854);
-      this.organicMembrane.position.set(-.040,.004,.006);
+      this.organicMembrane.scale.set(.925,.982,.804);
+      this.organicMembrane.position.set(-.040,.004,-.018);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
@@ -1858,7 +1871,7 @@
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.016+.010*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.050+.026*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=0;
       this.organicHoodMaterial.opacity=0;
