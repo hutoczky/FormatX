@@ -156,6 +156,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
       document.documentElement.dataset.fxMagBirthVisualR1862='lobed-three-quarter-silver-bioglass-genome-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1864='extended-genome-emergence-larger-recessed-optic-three-quarter-sculpt';
+      document.documentElement.dataset.fxMagBirthVisualR1865='luminous-teal-optic-polished-silver-bezel-readable-genome';
       document.documentElement.dataset.fxMagBirthVisualR1854='world-space-three-quarter-pose-smoked-recessed-optic-no-hud-ring';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
@@ -802,9 +803,9 @@
       const socketBack=new T.Mesh(
         new T.CircleGeometry(.270,96),
         new T.MeshPhysicalMaterial({
-          color:0x02090c,metalness:.01,roughness:.17,
-          clearcoat:.76,clearcoatRoughness:.075,
-          emissive:0x03161d,emissiveIntensity:.055,
+          color:0x06252b,metalness:.01,roughness:.14,
+          clearcoat:.82,clearcoatRoughness:.060,
+          emissive:0x07596a,emissiveIntensity:.18,
           specularIntensity:.94,specularColor:new T.Color(0xd8f6f7),
           transparent:true,opacity:.99,side:T.DoubleSide
         })
@@ -815,23 +816,23 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.202,.0065,28,144),
         new T.MeshPhysicalMaterial({
-          color:0x081214,metalness:.04,roughness:.11,
-          clearcoat:.94,clearcoatRoughness:.046,
-          emissive:0x01080b,emissiveIntensity:.006,
-          specularIntensity:.72,specularColor:new T.Color(0xcde9e9),
-          envMapIntensity:1.28,transparent:true,opacity:.26
+          color:0x4a6163,metalness:.10,roughness:.085,
+          clearcoat:.98,clearcoatRoughness:.032,
+          emissive:0x031316,emissiveIntensity:.018,
+          specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
+          envMapIntensity:2.05,transparent:true,opacity:.68
         })
       );
       socketBezel.position.z=.306;
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x031114,metalness:0,roughness:.036,
-        clearcoat:.98,clearcoatRoughness:.022,
-        transmission:.90,thickness:.50,ior:1.51,
-        attenuationColor:new T.Color(0x0a3e48),attenuationDistance:.24,
-        emissive:0x011015,emissiveIntensity:.022,
-        envMapIntensity:2.55,
+        color:0x06232a,metalness:0,roughness:.030,
+        clearcoat:.99,clearcoatRoughness:.018,
+        transmission:.66,thickness:.44,ior:1.51,
+        attenuationColor:new T.Color(0x0a6574),attenuationDistance:.30,
+        emissive:0x07586a,emissiveIntensity:.085,
+        envMapIntensity:2.75,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
@@ -842,7 +843,7 @@
       this.irisGroup.add(lens);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.031,64),
+        new T.CircleGeometry(.018,64),
         new T.MeshPhysicalMaterial({
           color:0x010305,metalness:.04,roughness:.10,
           clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
@@ -854,11 +855,11 @@
       const glassRing=new T.Mesh(
         new T.TorusGeometry(.124,.0042,18,112),
         new T.MeshPhysicalMaterial({
-          color:0x93aaab,metalness:.04,roughness:.11,
-          clearcoat:.96,clearcoatRoughness:.034,
-          emissive:0x041619,emissiveIntensity:.016,
-          specularIntensity:.98,specularColor:new T.Color(0xf2ffff),
-          transparent:true,opacity:.12
+          color:0xa9c6c7,metalness:.06,roughness:.085,
+          clearcoat:.98,clearcoatRoughness:.026,
+          emissive:0x0a4a56,emissiveIntensity:.060,
+          specularIntensity:1.0,specularColor:new T.Color(0xf7ffff),
+          transparent:true,opacity:.42
         })
       );
       glassRing.position.z=.376;
@@ -1799,7 +1800,7 @@
         h.scale.setScalar(b.s*.54);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*.82;
+          m.opacity=(bases[mi]??.5)*fade*.90;
         });
       });
     }
