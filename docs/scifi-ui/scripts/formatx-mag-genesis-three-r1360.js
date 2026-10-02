@@ -151,6 +151,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1848='readable-blue-grey-ice-volume-soft-ambient-studio';
       document.documentElement.dataset.fxMagBirthVisualR1849='narrow-softbox-ice-reflections-silver-smoked-optic-low-bloom';
       document.documentElement.dataset.fxMagBirthVisualR1852='vertical-cut-silver-ice-monolith-recessed-smoked-optic-visible-dna-studio-depth';
+      document.documentElement.dataset.fxMagBirthVisualR1874='calm-three-mass-ice-monolith-flush-optic-photographic-studio';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
@@ -841,19 +842,19 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x05242b,metalness:0,roughness:.024,
-        clearcoat:.995,clearcoatRoughness:.014,
-        transmission:.82,thickness:.50,ior:1.51,
-        attenuationColor:new T.Color(0x075a69),attenuationDistance:.22,
-        emissive:0x064653,emissiveIntensity:.060,
-        envMapIntensity:3.10,
+        color:0x03161b,metalness:0,roughness:.032,
+        clearcoat:.995,clearcoatRoughness:.018,
+        transmission:.76,thickness:.42,ior:1.51,
+        attenuationColor:new T.Color(0x07505f),attenuationDistance:.26,
+        emissive:0x03252d,emissiveIntensity:.030,
+        envMapIntensity:2.90,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.164,96,56),lensMat);
-      lens.scale.set(1.22,.94,.34);
-      lens.position.set(-.014,.004,.348);
+      const lens=new T.Mesh(new T.SphereGeometry(.168,96,56),lensMat);
+      lens.scale.set(1.24,.94,.24);
+      lens.position.set(-.014,.004,.292);
       this.irisGroup.add(lens);
 
       const aperture=new T.Mesh(
@@ -863,7 +864,7 @@
           clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
         })
       );
-      aperture.position.z=.381;
+      aperture.position.z=.316;
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
@@ -876,7 +877,7 @@
           transparent:true,opacity:.46
         })
       );
-      glassRing.position.z=.376;
+      glassRing.position.z=.314;
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
