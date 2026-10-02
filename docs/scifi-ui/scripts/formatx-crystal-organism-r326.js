@@ -1033,7 +1033,7 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:false,
+      preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
@@ -1723,6 +1723,7 @@
     root.dataset.fxNativeMagStudioR1856='crease-aware-mineral-planes-smooth-optic-teal-volume';
     root.dataset.fxNativeMagStudioR1857='software-visible-midtone-teal-glass-proof-parity';
     root.dataset.fxNativeMagStudioR1858='recessed-optic-caustic-dark-bezel-teal-bioglass';
+    root.dataset.fxNativeMagStudioR1859='proof-buffer-parity-for-zero-idle-mobile-capture';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
