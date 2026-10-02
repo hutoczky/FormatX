@@ -963,8 +963,8 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:44%!important;
-    width:clamp(158px,44vw,188px)!important;
-    aspect-ratio:.78!important;
+    width:clamp(176px,48vw,214px)!important;
+    aspect-ratio:.80!important;
     opacity:1!important;
     background:
       radial-gradient(ellipse 76% 88% at 50% 48%,rgba(66,94,91,.055),transparent 72%),
@@ -974,52 +974,56 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
     inset:1% 3% 0!important;
     clip-path:polygon(
-      48% 0,
-      63% 5%,
-      76% 16%,
-      88% 34%,
-      92% 51%,
-      84% 67%,
-      69% 82%,
-      54% 100%,
-      39% 92%,
-      24% 78%,
-      12% 59%,
-      8% 40%,
-      17% 22%,
-      31% 8%
+      43% 1%,
+      58% 0,
+      72% 8%,
+      84% 21%,
+      92% 39%,
+      90% 55%,
+      80% 70%,
+      67% 83%,
+      54% 98%,
+      41% 94%,
+      27% 84%,
+      15% 68%,
+      8% 50%,
+      10% 34%,
+      19% 18%,
+      31% 7%
     )!important;
     background:
-      linear-gradient(152deg,transparent 0 27%,rgba(151,168,161,.16) 28% 31%,transparent 32% 100%),
-      linear-gradient(34deg,transparent 0 43%,rgba(21,34,35,.66) 44% 48%,transparent 49% 100%),
-      linear-gradient(104deg,transparent 0 55%,rgba(111,133,128,.13) 56% 59%,transparent 60% 100%),
-      radial-gradient(ellipse at 36% 20%,rgba(150,165,158,.34),rgba(84,103,99,.20) 25%,transparent 52%),
-      radial-gradient(ellipse at 73% 70%,rgba(21,35,36,.44),transparent 57%),
+      radial-gradient(ellipse 34% 62% at 31% 22%,rgba(226,239,235,.34),rgba(122,143,139,.13) 32%,transparent 66%),
+      radial-gradient(ellipse 31% 54% at 79% 68%,rgba(57,91,94,.24),transparent 68%),
+      linear-gradient(151deg,transparent 0 25%,rgba(196,212,207,.11) 26% 30%,transparent 31% 100%),
+      linear-gradient(31deg,transparent 0 45%,rgba(6,16,20,.78) 46% 51%,transparent 52% 100%),
+      linear-gradient(101deg,transparent 0 58%,rgba(92,121,120,.14) 59% 62%,transparent 63% 100%),
       conic-gradient(
-        from 20deg at 49% 48%,
-        rgba(79,99,96,.96),
-        rgba(46,64,63,.98) 12%,
-        rgba(96,114,109,.93) 25%,
-        rgba(39,55,56,.99) 39%,
-        rgba(86,106,102,.95) 53%,
-        rgba(48,65,64,.99) 67%,
-        rgba(105,120,114,.92) 80%,
-        rgba(41,56,57,.99) 91%,
-        rgba(75,94,91,.97)
+        from 17deg at 47% 48%,
+        rgba(48,67,67,.98),
+        rgba(19,32,34,.99) 12%,
+        rgba(67,87,85,.96) 25%,
+        rgba(15,27,30,.995) 40%,
+        rgba(58,79,78,.97) 53%,
+        rgba(18,31,33,.995) 67%,
+        rgba(76,94,90,.95) 81%,
+        rgba(14,25,28,.995) 92%,
+        rgba(43,62,62,.98)
       )!important;
     box-shadow:
-      inset 8px -12px 22px rgba(3,8,11,.42),
-      inset -8px 8px 20px rgba(147,164,157,.065),
-      0 20px 42px rgba(0,0,0,.42)!important;
+      inset 12px -18px 30px rgba(0,4,7,.56),
+      inset -8px 10px 24px rgba(193,215,208,.055),
+      inset 1px 0 0 rgba(215,237,231,.08),
+      0 24px 48px rgba(0,0,0,.48)!important;
     opacity:.99!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:47% 41% 45% 41%!important;
+    inset:45% 36.5% 42% 36.5%!important;
     border-radius:46% 54% 48% 52%!important;
     border:1px solid rgba(76,184,194,.42)!important;
     background:
-      radial-gradient(circle at 45% 39%,rgba(148,237,236,.86) 0 5%,rgba(50,163,176,.70) 10%,rgba(7,52,64,.72) 22%,rgba(1,10,16,.99) 52%,rgba(0,4,7,.99) 100%)!important;
+      radial-gradient(circle at 39% 34%,rgba(230,255,252,.96) 0 4%,rgba(117,219,221,.78) 8%,rgba(21,102,116,.64) 18%,rgba(3,27,34,.97) 43%,rgba(0,7,11,.995) 74%),
+      radial-gradient(circle at 64% 70%,rgba(26,100,113,.18),transparent 54%)!important;
     box-shadow:
       0 0 0 3px rgba(1,7,11,.86),
       0 0 9px rgba(63,185,198,.16),
@@ -1028,6 +1032,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 }
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
+/* production-r1830-igloo-grade-dark-bioglass-first-paint */
 
 
 /* R1820 — final hero typography is owned by the blocking P0 layer.
