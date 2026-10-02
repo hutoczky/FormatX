@@ -491,15 +491,15 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.440*g(dir[0],dir[1],-.48,.36,.31,.25);
-        const rightMass=.330*g(dir[0],dir[1], .44,.02,.27,.28);
-        const lowerMass=.285*g(dir[0],dir[1],-.31,-.45,.31,.22);
-        const waistCut=.285*g(dir[0],dir[1], .14,-.17,.28,.17);
-        const rightLowerCut=.180*g(dir[0],dir[1], .39,-.36,.21,.18);
-        const crownNotch=.205*g(dir[0],dir[1],-.025,.72,.145,.105);
-        const crownLeftLift=.112*g(dir[0],dir[1],-.35,.66,.24,.16);
-        const crownRightLift=.084*g(dir[0],dir[1], .31,.62,.22,.17);
-        const opticShoulder=.058*g(dir[0],dir[1], .12,.19,.20,.20);
+        const upperMass=.315*g(dir[0],dir[1],-.48,.36,.32,.27);
+        const rightMass=.245*g(dir[0],dir[1], .44,.02,.29,.30);
+        const lowerMass=.205*g(dir[0],dir[1],-.31,-.45,.32,.24);
+        const waistCut=.220*g(dir[0],dir[1], .14,-.17,.30,.19);
+        const rightLowerCut=.145*g(dir[0],dir[1], .39,-.36,.23,.20);
+        const crownNotch=.165*g(dir[0],dir[1],-.025,.72,.155,.115);
+        const crownLeftLift=.082*g(dir[0],dir[1],-.35,.66,.25,.17);
+        const crownRightLift=.060*g(dir[0],dir[1], .31,.62,.23,.18);
+        const opticShoulder=.038*g(dir[0],dir[1], .12,.19,.22,.21);
 
         radius*=upperTaper*lowerTaper*
           (1+upperMass+rightMass+lowerMass+crownLeftLift+crownRightLift+opticShoulder-waistCut-rightLowerCut-crownNotch);
@@ -518,8 +518,8 @@
         ];
 
         /* Art-directed lean, three-mass silhouette and shallow planar caps. */
-        p[0]+=-.118+.196*cp-.090*Math.pow(Math.max(-cp,0),1.34)
-          +.054*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[0]+=-.102+.162*cp-.072*Math.pow(Math.max(-cp,0),1.34)
+          +.032*Math.sin(theta*1.35+phi*.42)*shoulder;
         p[1]+=.014*Math.sin(theta+0.4)*shoulder;
         p[2]-=.044*dir[0]+.020*Math.sin(theta*2.0+phi*.55)*shoulder;
 
@@ -544,7 +544,7 @@
         }
         const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
         const crownCleftEase=crownCleftT*crownCleftT*(3-2*crownCleftT);
-        const crownCleft=.165*Math.exp(-Math.pow((p[0]+.018)/.125,2.0))*crownCleftEase;
+        const crownCleft=.125*Math.exp(-Math.pow((p[0]+.018)/.145,2.0))*crownCleftEase;
         p[1]-=crownCleft;
         p[0]+=Math.sign(p[0]+.020)*crownCleft*.20;
         const leftPlane=-.695+.120*p[1]-.035*p[2];
@@ -573,10 +573,10 @@
         }
 
         /* Recess the smoked optical organ into the front plane. */
-        const socketX=(p[0]-.030)/.245;
-        const socketY=(p[1]+.012)/.188;
+        const socketX=(p[0]-.030)/.255;
+        const socketY=(p[1]+.012)/.196;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,dir[2]);
-        p[2]-=.125*socket;
+        p[2]-=.155*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -916,9 +916,9 @@
     }
 
     if(!auditMode){
-      const centreX=.034,centreY=-.008;
-      const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.548;
-      const bezelMajorX=.151,bezelMajorY=.122,bezelTube=.0044;
+      const centreX=.032,centreY=-.010;
+      const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.521;
+      const bezelMajorX=.168,bezelMajorY=.132,bezelTube=.0031;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -942,10 +942,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.553];
-      const lensRadiusX=.164;
-      const lensRadiusY=.128;
-      const lensDepth=.096;
+      const lensCenter=[centreX,centreY,.526];
+      const lensRadiusX=.180;
+      const lensRadiusY=.139;
+      const lensDepth=.068;
       const radialSteps=software?15:mobile?18:20;
       const angularSteps=software?96:mobile?112:128;
       function lensVertex(radial,angle){
@@ -1763,6 +1763,7 @@
     root.dataset.fxNativeMagStudioR1846='cross-tier-cold-volume-smoked-optic-parity';
     root.dataset.fxNativeMagStudioR1850='silver-optic-bezel-readable-ice-depth-cross-tier';
     root.dataset.fxNativeMagStudioR1851='vertical-cut-ice-sculpt-larger-recessed-silver-optic-crisp-studio-bands';
+    root.dataset.fxNativeMagStudioR1874='calm-authored-silhouette-deep-flush-optic-premium-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
     root.dataset.fxNativeMagStudioR1869='anti-aliased-clear-optic-edge-silver-recess-no-black-halo';
