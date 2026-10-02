@@ -1630,7 +1630,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.046+ndl*.158+sideLight*.105);
+        float lift=sat(.038+ndl*.135+sideLight*.090);
         float facetTone=.994+.012*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
@@ -1638,7 +1638,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0032,.0048,.0054),vec3(.082,.094,.092),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0028,.0042,.0048),vec3(.070,.082,.080),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.96,.97,.92)*keySpec*.235;
         col+=vec3(.42,.56,.57)*sideSpec*.185;
@@ -1659,9 +1659,9 @@
         col+=vec3(.42,.46,.44)*pow(broadKey,3.20)*.046*bodyMask;
         col+=vec3(.12,.23,.24)*pow(broadSide,2.90)*.042*bodyMask;
         col+=vec3(.07,.044,.028)*pow(broadWarm,2.90)*.010*bodyMask;
-        col+=vec3(.99,1.00,.97)*studioStripeA*.235;
-        col+=vec3(.22,.48,.53)*studioStripeB*.072;
-        col+=vec3(.60,.82,.84)*studioStripeC*.088;
+        col+=vec3(.99,1.00,.97)*studioStripeA*.165;
+        col+=vec3(.22,.48,.53)*studioStripeB*.045;
+        col+=vec3(.60,.82,.84)*studioStripeC*.055;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1673,16 +1673,16 @@
         float sculptValleyB=exp(-pow((vLocal.x-.19)/.102,2.0)-pow((vLocal.y+.30)/.27,2.0))*bodyMask;
         float sculptShoulder=exp(-pow((vLocal.x+.34)/.23,2.0)-pow((vLocal.y-.38)/.27,2.0))*bodyMask;
         col*=1.0-.24*sculptValleyA-.17*sculptValleyB;
-        col+=vec3(.044,.110,.121)*sculptShoulder*.095;
+        col+=vec3(.040,.096,.106)*sculptShoulder*.055;
         col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
-        col+=vec3(.112,.130,.128)*iceVolume*(.108+.085*(1.0-facing));
-        col+=vec3(.095,.112,.110)*innerVeil*(.045+.064*facing);
-        col+=vec3(.018,.047,.052)*bodyMask*(.30+.70*facing);
-        col+=vec3(.030,.070,.076)*grain*iceVolume*.032;
+        col+=vec3(.090,.108,.106)*iceVolume*(.032+.028*(1.0-facing));
+        col+=vec3(.082,.098,.096)*innerVeil*(.012+.016*facing);
+        col+=vec3(.014,.038,.043)*bodyMask*(.26+.74*facing);
+        col+=vec3(.026,.060,.066)*grain*iceVolume*.012;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
@@ -1733,7 +1733,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.58),clamp(alpha,.985,1.0));
+        ${outputName}=vec4(tone(col*2.36),clamp(alpha,.985,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1766,6 +1766,7 @@
     root.dataset.fxNativeMagStudioR1874='calm-authored-silhouette-deep-flush-optic-premium-ice-volume';
     root.dataset.fxNativeMagStudioR1875='microfaceted-high-density-ice-cut-dark-body-controlled-softbox';
     root.dataset.fxNativeMagStudioR1877='authored-three-mass-crown-cleft-tight-softbox-smoked-sensor-optic';
+    root.dataset.fxNativeMagStudioR1880='clear-dark-volume-restrained-software-softbox-smoked-sensor';
     root.dataset.fxNativeMagStudioR1877='flush-smoked-optic-crisp-studio-ribbons-clean-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
