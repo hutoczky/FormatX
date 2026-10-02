@@ -155,6 +155,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
       document.documentElement.dataset.fxMagBirthVisualR1862='lobed-three-quarter-silver-bioglass-genome-cinematic';
+      document.documentElement.dataset.fxMagBirthVisualR1864='extended-genome-emergence-larger-recessed-optic-three-quarter-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1854='world-space-three-quarter-pose-smoked-recessed-optic-no-hud-ring';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
@@ -799,7 +800,7 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.238,80),
+        new T.CircleGeometry(.270,96),
         new T.MeshPhysicalMaterial({
           color:0x02090c,metalness:.01,roughness:.17,
           clearcoat:.76,clearcoatRoughness:.075,
@@ -812,7 +813,7 @@
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.176,.008,24,128),
+        new T.TorusGeometry(.202,.0065,28,144),
         new T.MeshPhysicalMaterial({
           color:0x081214,metalness:.04,roughness:.11,
           clearcoat:.94,clearcoatRoughness:.046,
@@ -835,13 +836,13 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.142,80,48),lensMat);
-      lens.scale.set(1.20,.92,.31);
-      lens.position.set(-.018,.006,.344);
+      const lens=new T.Mesh(new T.SphereGeometry(.164,96,56),lensMat);
+      lens.scale.set(1.22,.94,.34);
+      lens.position.set(-.014,.004,.348);
       this.irisGroup.add(lens);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.024,56),
+        new T.CircleGeometry(.031,64),
         new T.MeshPhysicalMaterial({
           color:0x010305,metalness:.04,roughness:.10,
           clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
@@ -851,7 +852,7 @@
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
-        new T.TorusGeometry(.102,.0045,16,96),
+        new T.TorusGeometry(.124,.0042,18,112),
         new T.MeshPhysicalMaterial({
           color:0x93aaab,metalness:.04,roughness:.11,
           clearcoat:.96,clearcoatRoughness:.034,
@@ -870,7 +871,7 @@
         transparent:true,opacity:.018,depthWrite:false,
         blending:T.NormalBlending
       }));
-      this.irisCorona.scale.set(.48,.48,1);
+      this.irisCorona.scale.set(.56,.56,1);
       this.irisCorona.position.z=.305;
       this.irisGroup.add(this.irisCorona);
       this.coreGroup.add(this.irisGroup);
@@ -879,7 +880,7 @@
         map:this.makeGlowTexture(),color:0x9fc8cc,
         transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
-      this.glowSprite.scale.set(.60,.60,1);
+      this.glowSprite.scale.set(.66,.66,1);
       this.glowSprite.position.z=.29;
       this.coreGroup.add(this.glowSprite);
 
@@ -890,7 +891,7 @@
           depthWrite:false,blending:T.AdditiveBlending
         })
       );
-      this.coreInner.scale.set(.72,.72,.34);
+      this.coreInner.scale.set(.82,.82,.38);
       this.coreInner.position.z=.31;
       this.coreGroup.add(this.coreInner);
 
@@ -1783,7 +1784,7 @@
     }
 
     updateDNA(t,time){
-      const fade=(1-smooth((t-1.72)/.58))*smooth(t/.34);
+      const fade=(1-smooth((t-2.42)/.72))*smooth(t/.28);
       const intro=ease(t/.52);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
@@ -1834,7 +1835,7 @@
       this.coreGlass.material.opacity=.030*seedShellLife;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=coreLife>.005;
-      this.irisGroup.scale.setScalar((this.mobileProfile?1.08:1.04)*(1+irisAwake*.028)*pulse);
+      this.irisGroup.scale.setScalar((this.mobileProfile?1.22:1.18)*(1+irisAwake*.028)*pulse);
       if(this.irisCorona)this.irisCorona.material.opacity=.006*coreLife+.010*irisAwake;
       this.glowSprite.material.opacity=(.0025*coreLife+.006*irisAwake)*pulse;
       this.glowSprite.scale.setScalar(.48+irisAwake*.04+this.interactionImpulse*.015);
@@ -1844,14 +1845,14 @@
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-.92)/1.08);
+      const grow=smooth((t-1.36)/1.12);
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.rotation.y=.485+Math.sin(time*.00011)*.008+this.interactionX*.014;
-      this.organicGroup.rotation.x=-.095+Math.sin(time*.00013)*.005-this.interactionY*.010;
+      this.organicGroup.rotation.y=.620+Math.sin(time*.00011)*.010+this.interactionX*.016;
+      this.organicGroup.rotation.x=-.115+Math.sin(time*.00013)*.006-this.interactionY*.011;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?1.08:1.17;
+      const finalScale=this.mobileProfile?1.12:1.20;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
