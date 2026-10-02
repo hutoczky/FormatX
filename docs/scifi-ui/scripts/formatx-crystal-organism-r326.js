@@ -428,7 +428,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.90:(mobile?.965:(constrained?.950:.965));
+        const smoothWeight=software?.955:(mobile?.990:(constrained?.980:.988));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -491,15 +491,15 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.345*g(dir[0],dir[1],-.48,.36,.31,.26);
-        const rightMass=.270*g(dir[0],dir[1], .44,.02,.28,.29);
-        const lowerMass=.225*g(dir[0],dir[1],-.31,-.45,.31,.23);
-        const waistCut=.255*g(dir[0],dir[1], .14,-.17,.29,.18);
-        const rightLowerCut=.165*g(dir[0],dir[1], .39,-.36,.22,.19);
-        const crownNotch=.195*g(dir[0],dir[1],-.025,.72,.148,.108);
-        const crownLeftLift=.082*g(dir[0],dir[1],-.35,.66,.25,.17);
-        const crownRightLift=.060*g(dir[0],dir[1], .31,.62,.23,.18);
-        const opticShoulder=.038*g(dir[0],dir[1], .12,.19,.22,.21);
+        const upperMass=.220*g(dir[0],dir[1],-.45,.34,.35,.30);
+        const rightMass=.170*g(dir[0],dir[1], .42,.02,.32,.32);
+        const lowerMass=.145*g(dir[0],dir[1],-.29,-.43,.35,.26);
+        const waistCut=.125*g(dir[0],dir[1], .12,-.17,.34,.22);
+        const rightLowerCut=.072*g(dir[0],dir[1], .38,-.35,.26,.23);
+        const crownNotch=.118*g(dir[0],dir[1],-.020,.71,.178,.132);
+        const crownLeftLift=.054*g(dir[0],dir[1],-.34,.65,.29,.21);
+        const crownRightLift=.042*g(dir[0],dir[1], .30,.61,.27,.21);
+        const opticShoulder=.020*g(dir[0],dir[1], .12,.19,.25,.24);
 
         radius*=upperTaper*lowerTaper*
           (1+upperMass+rightMass+lowerMass+crownLeftLift+crownRightLift+opticShoulder-waistCut-rightLowerCut-crownNotch);
@@ -518,8 +518,8 @@
         ];
 
         /* Art-directed lean, three-mass silhouette and shallow planar caps. */
-        p[0]+=-.102+.162*cp-.072*Math.pow(Math.max(-cp,0),1.34)
-          +.032*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[0]+=-.078+.112*cp-.045*Math.pow(Math.max(-cp,0),1.34)
+          +.018*Math.sin(theta*1.35+phi*.42)*shoulder;
         p[1]+=.014*Math.sin(theta+0.4)*shoulder;
         p[2]-=.044*dir[0]+.020*Math.sin(theta*2.0+phi*.55)*shoulder;
 
@@ -534,17 +534,17 @@
         const bottomCap=-.825-p[0]*.075+p[2]*.034;
         if(p[1]>topCap){
           const over=p[1]-topCap;
-          p[1]=topCap+over*.11;
+          p[1]=topCap+over*.30;
           registerCut([-.130,1,.045],over);
         }
         if(p[1]<bottomCap){
           const over=bottomCap-p[1];
-          p[1]=bottomCap-over*.11;
+          p[1]=bottomCap-over*.30;
           registerCut([-.075,-1,.034],over);
         }
         const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
         const crownCleftEase=crownCleftT*crownCleftT*(3-2*crownCleftT);
-        const crownCleft=.160*Math.exp(-Math.pow((p[0]+.018)/.135,2.0))*crownCleftEase;
+        const crownCleft=.112*Math.exp(-Math.pow((p[0]+.018)/.165,2.0))*crownCleftEase;
         p[1]-=crownCleft;
         p[0]+=Math.sign(p[0]+.020)*crownCleft*.24;
         const leftPlane=-.695+.120*p[1]-.035*p[2];
@@ -553,22 +553,22 @@
         const backPlane=-.505+.025*p[1]+.018*p[0];
         if(p[0]<leftPlane){
           const over=leftPlane-p[0];
-          p[0]=leftPlane-over*.18;
+          p[0]=leftPlane-over*.46;
           registerCut([-1,.120,-.035],over);
         }
         if(p[0]>rightPlane){
           const over=p[0]-rightPlane;
-          p[0]=rightPlane+over*.18;
+          p[0]=rightPlane+over*.46;
           registerCut([1,.085,-.025],over);
         }
         if(p[2]>frontPlane){
           const over=p[2]-frontPlane;
-          p[2]=frontPlane+over*.30;
+          p[2]=frontPlane+over*.56;
           registerCut([.025,.035,1],over);
         }
         if(p[2]<backPlane){
           const over=backPlane-p[2];
-          p[2]=backPlane-over*.34;
+          p[2]=backPlane-over*.56;
           registerCut([.018,.025,-1],over);
         }
 
@@ -918,7 +918,7 @@
     if(!auditMode){
       const centreX=.028,centreY=-.012;
       const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.505;
-      const bezelMajorX=.151,bezelMajorY=.116,bezelTube=.0026;
+      const bezelMajorX=.164,bezelMajorY=.124,bezelTube=.0017;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -943,9 +943,9 @@
       }
 
       const lensCenter=[centreX,centreY,.508];
-      const lensRadiusX=.154;
-      const lensRadiusY=.116;
-      const lensDepth=.043;
+      const lensRadiusX=.166;
+      const lensRadiusY=.126;
+      const lensDepth=.049;
       const radialSteps=software?15:mobile?18:20;
       const angularSteps=software?96:mobile?112:128;
       function lensVertex(radial,angle){
@@ -1630,7 +1630,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.050+ndl*.145+sideLight*.096);
+        float lift=sat(.058+ndl*.172+sideLight*.116);
         float facetTone=.994+.012*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
@@ -1638,10 +1638,10 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0030,.0044,.0050),vec3(.090,.102,.099),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0026,.0052,.0062),vec3(.098,.122,.121),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
-        col+=vec3(.96,.97,.92)*keySpec*.235;
-        col+=vec3(.42,.56,.57)*sideSpec*.185;
+        col+=vec3(.995,.998,.965)*keySpec*.305;
+        col+=vec3(.56,.72,.73)*sideSpec*.240;
         col+=vec3(.022,.078,.090)*fresnel*.150;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
@@ -1659,9 +1659,9 @@
         col+=vec3(.42,.46,.44)*pow(broadKey,3.20)*.046*bodyMask;
         col+=vec3(.12,.23,.24)*pow(broadSide,2.90)*.042*bodyMask;
         col+=vec3(.07,.044,.028)*pow(broadWarm,2.90)*.010*bodyMask;
-        col+=vec3(.99,1.00,.97)*studioStripeA*.090;
-        col+=vec3(.22,.48,.53)*studioStripeB*.025;
-        col+=vec3(.60,.82,.84)*studioStripeC*.032;
+        col+=vec3(1.00,1.00,.98)*studioStripeA*.200;
+        col+=vec3(.35,.62,.65)*studioStripeB*.072;
+        col+=vec3(.72,.92,.93)*studioStripeC*.080;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1768,6 +1768,7 @@
     root.dataset.fxNativeMagStudioR1877='authored-three-mass-crown-cleft-tight-softbox-smoked-sensor-optic';
     root.dataset.fxNativeMagStudioR1880='clear-dark-volume-restrained-software-softbox-smoked-sensor';
     root.dataset.fxNativeMagStudioR1882='solid-smoked-glass-low-fog-product-softbox-non-eye-sensor';
+    root.dataset.fxNativeMagStudioR1885='continuous-luxury-bioglass-soft-cuts-flush-optic-highlight-control';
     root.dataset.fxNativeMagStudioR1877='flush-smoked-optic-crisp-studio-ribbons-clean-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
