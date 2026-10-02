@@ -155,7 +155,6 @@ const DEFERRED_STYLE_PATHS = new Set([
   // R514: artifact-proven first-divergence owner; activate with the existing
   // R487 double-rAF scheduler after the first painted frame.
   '/scifi-ui/styles/formatx-critical-core-r227.css',
-  '/scifi-ui/styles/formatx-reference-production-r244.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
