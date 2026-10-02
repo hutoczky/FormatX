@@ -521,11 +521,11 @@
           const cutRear=1-.075*Math.pow(Math.max(0,Math.cos(a+2.10)),5.0);
           const cutSide=1-.068*Math.pow(Math.max(0,Math.cos(a-2.46)),6.0);
           const cutNotch=1-.048*Math.pow(Math.max(0,Math.cos(a+1.18)),8.0);
-          const upperMass=.072*Math.exp(-Math.pow((y-.43)/.31,2))*angularFalloff(a,Math.PI,.74);
-          const rightMass=.058*Math.exp(-Math.pow((y-.04)/.34,2))*angularFalloff(a,0,.68);
-          const lowerMass=.043*Math.exp(-Math.pow((y+.47)/.25,2))*angularFalloff(a,2.48,.66);
-          const quietWaist=.026*Math.exp(-Math.pow((y+.22)/.20,2))*angularFalloff(a,-.54,.82);
-          const socket=.060*Math.exp(-Math.pow((y-.015)/.205,2))*angularFalloff(a,Math.PI*.5,.48);
+          const upperMass=.112*Math.exp(-Math.pow((y-.43)/.31,2))*angularFalloff(a,Math.PI,.72);
+          const rightMass=.092*Math.exp(-Math.pow((y-.04)/.34,2))*angularFalloff(a,0,.66);
+          const lowerMass=.072*Math.exp(-Math.pow((y+.47)/.25,2))*angularFalloff(a,2.48,.64);
+          const quietWaist=.046*Math.exp(-Math.pow((y+.22)/.20,2))*angularFalloff(a,-.54,.80);
+          const socket=.082*Math.exp(-Math.pow((y-.015)/.205,2))*angularFalloff(a,Math.PI*.5,.46);
           const radialCut=cutFront*cutRear*cutSide*cutNotch;
           const sculpt=irregular*radialCut*(1+upperMass+rightMass+lowerMass-quietWaist);
           const x=ox+Math.cos(a)*rx*sculpt;
@@ -943,6 +943,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
+    stage.style.setProperty('background','radial-gradient(ellipse 54% 48% at 49% 45%,rgba(28,88,92,.105) 0%,rgba(10,31,36,.040) 44%,rgba(0,0,0,0) 74%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1613,6 +1614,7 @@
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
     root.dataset.fxNativeMagStudioR1836='narrow-specular-studio-stripes-no-gray-plane';
+    root.dataset.fxNativeMagStudioR1837='three-mass-single-sculpt-atmospheric-stage';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
