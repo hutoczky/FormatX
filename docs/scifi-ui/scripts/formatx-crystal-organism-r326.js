@@ -1414,6 +1414,11 @@
         col+=vec3(.030,.026,.022)*pow(planeFill,.90)*.060;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         col+=vec3(.016,.050,.058)*edgeTransmission*.26;
+        float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
+          *smoothstep(-.42,.72,vLocal.z)*bodyMask;
+        col+=vec3(.030,.070,.076)*iceVolume*(.040+.050*(1.0-facing));
+        float chromaSide=.5+.5*n.x;
+        col+=mix(vec3(.016,.044,.056),vec3(.030,.014,.044),chromaSide)*fresnel*bodyMask*.085;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1457,19 +1462,19 @@
         float coreFlash=exp(-pow(lensRadial/.074,2.0))*(.66+.34*sin(uTime*3.8));
         float lensGlint=exp(-pow((vUv.x-.34)/.060,2.0)-pow((vUv.y-.31)/.052,2.0));
         float lensPupil=1.0-smoothstep(.060,.125,lensRadial);
-        vec3 physicalLens=vec3(.001,.006,.009)
-          +vec3(.018,.095,.116)*(.28+.32*uEnergy)
-          +vec3(.94,1.00,.98)*softboxA*.24
-          +vec3(.48,.62,.66)*sideSpec*.14
-          +vec3(.12,.30,.36)*fresnel*.20
-          +vec3(.010,.16,.23)*lensInner*(.13+.12*uEnergy)
-          +vec3(.050,.50,.66)*lensRing*(.19+.12*uEnergy)
-          +vec3(.72,.96,1.00)*lensHot*(.26+.09*uEnergy)
-          +vec3(.08,.34,.44)*electric*(.14+.12*uEnergy)
-          +vec3(.91,.99,.98)*coreFlash*.30
-          +vec3(.90,1.00,1.00)*lensGlint*.48;
-        physicalLens=mix(physicalLens,vec3(.0005,.002,.0035),lensPupil*.82);
-        physicalLens+=vec3(.72,.94,.96)*lensGlint*.18*(1.0-lensPupil);
+        vec3 physicalLens=vec3(.002,.008,.010)
+          +vec3(.016,.070,.078)*(.24+.28*uEnergy)
+          +vec3(.94,.99,.97)*softboxA*.26
+          +vec3(.50,.61,.63)*sideSpec*.14
+          +vec3(.090,.22,.25)*fresnel*.17
+          +vec3(.010,.105,.130)*lensInner*(.11+.10*uEnergy)
+          +vec3(.075,.34,.40)*lensRing*(.15+.09*uEnergy)
+          +vec3(.74,.92,.91)*lensHot*(.20+.07*uEnergy)
+          +vec3(.050,.20,.24)*electric*(.10+.09*uEnergy)
+          +vec3(.88,.95,.92)*coreFlash*.20
+          +vec3(.92,1.00,1.00)*lensGlint*.52;
+        physicalLens=mix(physicalLens,vec3(.001,.004,.006),lensPupil*.52);
+        physicalLens+=vec3(.76,.94,.95)*lensGlint*.16*(1.0-lensPupil);
         col=mix(col,physicalLens,lensMeshMask*.997);
 
         float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1562,10 +1567,15 @@
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
         float glassHalo=pow(1.0-facing,1.35)*bodyMask;
         float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
+        float iceVolume=exp(-pow((vLocal.x+.10)/.50,2.0)-pow((vLocal.y-.08)/.62,2.0))
+          *smoothstep(-.42,.72,vLocal.z)*bodyMask;
         col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
+        col+=vec3(.030,.070,.074)*iceVolume*(.060+.050*(1.0-facing));
+        float chromaSide=.5+.5*n.x;
+        col+=mix(vec3(.016,.045,.055),vec3(.030,.014,.042),chromaSide)*fresnel*bodyMask*.085;
 
         vec3 bezel=vec3(.004,.008,.010)
           +vec3(.050,.065,.066)*(.18*ndl+.16*sideLight)
@@ -1592,15 +1602,15 @@
         float lensHot=exp(-pow(lensRadial/.082,2.0));
         float lensPupil=1.0-smoothstep(.055,.115,lensRadial);
         float lensGlint=exp(-pow((vUv.x-.34)/.065,2.0)-pow((vUv.y-.31)/.052,2.0));
-        vec3 optical=vec3(.001,.006,.009)
-          +vec3(.012,.145,.205)*lensInner
-          +vec3(.82,.88,.82)*keySpec*.180
-          +vec3(.028,.100,.116)*fresnel*.110
-          +vec3(.070,.50,.62)*lensRim*.210
-          +vec3(.76,.98,1.00)*lensHot*.300
-          +vec3(.92,1.00,1.00)*lensGlint*.42;
-        optical=mix(optical,vec3(.0005,.0015,.0025),lensPupil*.84);
-        optical+=vec3(.78,.98,1.00)*lensGlint*.16*(1.0-lensPupil);
+        vec3 optical=vec3(.002,.008,.010)
+          +vec3(.012,.095,.120)*lensInner
+          +vec3(.84,.89,.84)*keySpec*.195
+          +vec3(.024,.082,.095)*fresnel*.095
+          +vec3(.080,.32,.38)*lensRim*.170
+          +vec3(.74,.92,.90)*lensHot*.235
+          +vec3(.94,1.00,1.00)*lensGlint*.48;
+        optical=mix(optical,vec3(.001,.004,.006),lensPupil*.52);
+        optical+=vec3(.80,.96,.97)*lensGlint*.14*(1.0-lensPupil);
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
@@ -1633,6 +1643,7 @@
     root.dataset.fxNativeMagStudioR1843='authored-ice-block-silhouette-smaller-integrated-optic-broad-mineral-planes';
     root.dataset.fxNativeMagStudioR1844='faceted-ice-volume-subtle-chromatic-edge-smoked-optic';
     root.dataset.fxNativeMagStudioR1845='igloo-grade-cold-volume-spectral-edge-smoked-glass-lens';
+    root.dataset.fxNativeMagStudioR1846='cross-tier-cold-volume-smoked-optic-parity';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
