@@ -1034,17 +1034,17 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.38,.34,Math.PI,.82,.285);
-        const rightCentre=mass(.02,.38,0,.76,.218);
-        const lowerLeft=mass(-.43,.30,2.46,.76,.182);
-        const waist=mass(-.19,.24,-.54,.92,.138);
-        const rightLowerCut=mass(-.34,.20,-.12,.58,.092);
+        const upperLeft=mass(.38,.34,Math.PI,.84,.220);
+        const rightCentre=mass(.02,.38,0,.78,.170);
+        const lowerLeft=mass(-.43,.30,2.46,.78,.142);
+        const waist=mass(-.19,.24,-.54,.94,.118);
+        const rightLowerCut=mass(-.34,.20,-.12,.60,.072);
         const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-rightLowerCut;
         p.x*=sculpt;
         p.z*=sculpt;
 
-        p.x+=-.178*Math.pow(Math.max(n.y,0),1.55)+.088*Math.pow(Math.max(-n.y,0),1.45)
-          +Math.sin(az*1.55+el*.72)*.054*shoulder;
+        p.x+=-.142*Math.pow(Math.max(n.y,0),1.55)+.068*Math.pow(Math.max(-n.y,0),1.45)
+          +Math.sin(az*1.55+el*.72)*.032*shoulder;
         p.y+=Math.sin(az*1.88+el*.42)*.014*shoulder;
         p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
 
@@ -1062,10 +1062,10 @@
         if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.32;
         if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.36;
 
-        const socketX=(p.x-.068)/.255;
-        const socketY=(p.y+.018)/.198;
+        const socketX=(p.x-.064)/.270;
+        const socketY=(p.y+.018)/.208;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,n.z);
-        p.z-=.034*socket;
+        p.z-=.094*socket;
 
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
