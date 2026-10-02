@@ -51,7 +51,7 @@
   const ORGANISM_CORE_URL = '/scifi-ui/scripts/organism-core-interaction.js?v=20260824-r326-ask-only';
   const OWNER_STYLE_URL = '/scifi-ui/styles/formatx-control-owner-r264.css?v=20260824-native-orb-r250';
   const GUARD_URL = '/scifi-ui/scripts/formatx-geometry-guard-r286.js?v=20260822-r286-first-paint-geometry';
-  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20261002-r1822-atomic-control-handoff';
+  const CONTROLS_URL = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260824-native-orb-r250';
   const CONTROL_OWNER_URL = '/scifi-ui/scripts/formatx-control-owner-r268.js?v=20260920-r585-menu-scrolltop-reset';
   const NAV_OWNER_URL = '/scifi-ui/scripts/formatx-nav-state-owner-r265.js?v=20260822-r291-nav-state';
   const DIALOGUE_STYLE_URL = '/scifi-ui/styles/formatx-dialogue-open-r287.css?v=20260822-r287-open-state';
