@@ -152,6 +152,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1849='narrow-softbox-ice-reflections-silver-smoked-optic-low-bloom';
       document.documentElement.dataset.fxMagBirthVisualR1852='vertical-cut-silver-ice-monolith-recessed-smoked-optic-visible-dna-studio-depth';
       document.documentElement.dataset.fxMagBirthVisualR1874='calm-three-mass-ice-monolith-flush-optic-photographic-studio';
+      document.documentElement.dataset.fxMagBirthVisualR1876='minimal-genome-prologue-clean-product-film-no-wire-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
@@ -616,7 +617,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.52,.47,.028,.024,.24,.085,.075];
+      group.userData.baseOpacity=[.22,.20,.008,.007,.085,.026,.022];
       return group;
     }
 
@@ -628,7 +629,7 @@
         [1.34,-.88,.52,-.42,.56,-.22,-.38]
       ];
       this.dnas=[];
-      for(const [x,y,z,rz,sc,rx,ry] of placements.slice(0,this.lowPowerProfile?2:(this.mobileProfile?3:placements.length))){
+      for(const [x,y,z,rz,sc,rx,ry] of placements.slice(0,this.lowPowerProfile?1:(this.mobileProfile?1:2))){
         const h=this.createHelix(2.72,.185,2.72);
         h.position.set(x,y,z);
         h.rotation.set(rx,ry,rz);
@@ -1800,22 +1801,22 @@
     }
 
     updateDNA(t,time){
-      const fade=(1-smooth((t-2.42)/.72))*smooth(t/.28);
-      const intro=ease(t/.52);
+      const fade=(1-smooth((t-1.30)/.46))*smooth(t/.24);
+      const intro=ease(t/.44);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
-        h.position.x=b.x*.62*(1+fly*.12);
-        h.position.y=b.y*.62*(1+fly*.10);
-        h.position.z=b.z*.72+fly*.18;
+        h.position.x=b.x*.46*(1+fly*.08);
+        h.position.y=b.y*.46*(1+fly*.08);
+        h.position.z=b.z*.60+fly*.10;
         h.rotation.x=b.rx+Math.sin(time*.00022+b.phase)*.018;
         h.rotation.y=b.ry+Math.sin(time*.00019+b.phase)*.022;
         h.rotation.z=b.rz+time*.000018*(i%2?1:-1);
-        h.scale.setScalar(b.s*.54);
+        h.scale.setScalar(b.s*.42);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*.90;
+          m.opacity=(bases[mi]??.5)*fade*.22;
         });
       });
     }
