@@ -146,6 +146,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
+      document.documentElement.dataset.fxMagBirthVisualR1842='high-density-three-mass-studio-sculpt-integrated-optic-no-egg-no-hud-flash';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
       document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
@@ -291,9 +292,14 @@
         mobileSoftbox.target.position.set(.18,.10,0);
         this.scene.add(mobileSoftbox,mobileSoftbox.target);
         this.softboxLight=mobileSoftbox;
-        const mobileWarmRim=new T.PointLight(0xf0b26a,.38,7,2);
+        const mobileWarmRim=new T.PointLight(0xf0b26a,.30,7,2);
         mobileWarmRim.position.set(2.5,1.4,2.2);
         this.scene.add(mobileWarmRim);
+        const mobileEdgeSoftbox=new T.SpotLight(0xa8d9dc,1.05,11,Math.PI*.36,.98,1.70);
+        mobileEdgeSoftbox.position.set(4.2,.6,4.7);
+        mobileEdgeSoftbox.target.position.set(-.22,-.04,.1);
+        this.scene.add(mobileEdgeSoftbox,mobileEdgeSoftbox.target);
+        this.edgeSoftboxLight=mobileEdgeSoftbox;
       }
       this.coreLight=new T.PointLight(0x79dbe7,0,7,2);
       this.coreLight.position.set(0,0,2.0);
@@ -978,20 +984,44 @@
         const n=p.clone().normalize();
         const az=Math.atan2(n.z,n.x), el=Math.acos(Math.max(-1,Math.min(1,n.y)));
         const shoulder=Math.max(0,1-n.y*n.y);
-        const ax=.82+shoulder*.075+n.x*.038-n.z*.018;
-        const ay=1.04+shoulder*.050+n.y*.030+n.x*.018;
-        const azr=.69+shoulder*.065+n.z*.030-n.x*.016;
-        const exponent=1.58;
+        /* R1842 — smooth high-density sculpt, not an egg. A lower Lp exponent
+           gives broad shoulders and restrained mineral corners while the dense
+           geometry keeps reflections continuous. */
+        const ax=.88+shoulder*.105+n.x*.052-n.z*.022;
+        const ay=1.00+shoulder*.072+n.y*.028+n.x*.020;
+        const azr=.72+shoulder*.085+n.z*.038-n.x*.022;
+        const exponent=1.24;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
           Math.pow(Math.abs(n.y)/ay,exponent)+
           Math.pow(Math.abs(n.z)/azr,exponent);
         const radius=1/Math.pow(Math.max(.001,lp),1/exponent);
-        const livingBias=1+Math.sin(az*2.1+el*.8)*.010+Math.cos(az*4.0-el*1.3)*.005;
+        const livingBias=1+Math.sin(az*2.1+el*.8)*.006+Math.cos(az*4.0-el*1.3)*.003;
         p.set(n.x*radius*livingBias,n.y*radius*livingBias,n.z*radius*livingBias);
-        p.x+=-.055*Math.pow(Math.max(n.y,0),1.7)+.028*Math.pow(Math.max(-n.y,0),1.4);
-        p.y+=Math.sin(az*2.2+el*.5)*.018*shoulder;
-        p.z-=n.x*.018;
+
+        const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+        const mass=(cy,sy,ca,sa,amp)=>{
+          const dy=(n.y-cy)/sy;
+          const da=angleDelta(az,ca)/sa;
+          return amp*Math.exp(-(dy*dy+da*da));
+        };
+        const upperLeft=mass(.38,.34,Math.PI,.82,.105);
+        const rightCentre=mass(.02,.38,0,.76,.082);
+        const lowerLeft=mass(-.43,.30,2.46,.76,.060);
+        const waist=mass(-.19,.24,-.54,.92,.040);
+        const sculpt=1+upperLeft+rightCentre+lowerLeft-waist;
+        p.x*=sculpt;
+        p.z*=sculpt;
+
+        p.x+=-.095*Math.pow(Math.max(n.y,0),1.55)+.048*Math.pow(Math.max(-n.y,0),1.45)
+          +Math.sin(az*1.55+el*.72)*.026*shoulder;
+        p.y+=Math.sin(az*1.88+el*.42)*.012*shoulder;
+        p.z-=n.x*.024;
+
+        const topCap=.825+p.x*.085-p.z*.035;
+        const bottomCap=-.850-p.x*.045+p.z*.028;
+        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.10;
+        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.10;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
@@ -1746,7 +1776,7 @@
 
     updateCore(t,time){
       const birth=smooth((t-.12)/.72);
-      const seedHandoff=smooth((t-2.18)/.82);
+      const seedHandoff=smooth((t-1.08)/.54);
       const coreLife=birth;
       const seedShellLife=birth*(1-seedHandoff*.94);
       let sc=.001;
@@ -2040,15 +2070,15 @@
       const flash=smooth((t-9.05)/.11)*(1-smooth((t-9.58)/.24));
       const after=smooth((t-9.48)/.30);
       this.renderer.toneMappingExposure=1.10+flash*.055+after*.010+physicalImpulse*.006;
-      this.coreLight.intensity+=flash*1.10+after*.18;
+      this.coreLight.intensity+=flash*.48+after*.12;
       if(this.glowSprite){
-        const g=1+flash*.72;
+        const g=1+flash*.32;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.88,this.glowSprite.material.opacity+flash*.34);
+        this.glowSprite.material.opacity=Math.min(.22,this.glowSprite.material.opacity+flash*.10);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.22;
-        const burstScale=1.26+flash*.24;
+        this.flashBurst.material.opacity=flash*.045;
+        const burstScale=1.02+flash*.12;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
