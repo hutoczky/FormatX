@@ -152,6 +152,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1849='narrow-softbox-ice-reflections-silver-smoked-optic-low-bloom';
       document.documentElement.dataset.fxMagBirthVisualR1852='vertical-cut-silver-ice-monolith-recessed-smoked-optic-visible-dna-studio-depth';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
+      document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1854='world-space-three-quarter-pose-smoked-recessed-optic-no-hud-ring';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
@@ -515,9 +516,9 @@
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
-      const seg=this.lowPowerProfile?22:(this.mobileProfile?30:58);
-      const tubeRadial=this.lowPowerProfile?4:(this.mobileProfile?5:8);
-      const auraRadial=this.lowPowerProfile?3:(this.mobileProfile?4:6);
+      const seg=this.lowPowerProfile?26:(this.mobileProfile?38:68);
+      const tubeRadial=this.lowPowerProfile?5:(this.mobileProfile?7:10);
+      const auraRadial=this.lowPowerProfile?4:(this.mobileProfile?5:8);
       const aPts=[],bPts=[],rungPairs=[],beadA=[],beadB=[];
       for(let i=0;i<=seg;i++){
         const u=i/seg;
@@ -536,29 +537,31 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const ma=new T.MeshPhysicalMaterial({
-        color:0xb4c7c6,emissive:0x071012,emissiveIntensity:.026,
-        roughness:.26,metalness:.035,transparent:true,opacity:.96,
-        depthWrite:true,clearcoat:.42,clearcoatRoughness:.24,
-        transmission:.025,thickness:.14
+        color:0x8adce4,emissive:0x0a4c58,emissiveIntensity:.16,
+        roughness:.12,metalness:.0,transparent:true,opacity:.72,
+        depthWrite:false,clearcoat:.86,clearcoatRoughness:.06,
+        transmission:.62,thickness:.08,ior:1.47,
+        attenuationColor:new T.Color(0x0d5c68),attenuationDistance:.34
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0x9dabb2,emissive:0x07090b,emissiveIntensity:.022,
-        roughness:.28,metalness:.035,transparent:true,opacity:.95,
-        depthWrite:true,clearcoat:.38,clearcoatRoughness:.27,
-        transmission:.020,thickness:.14
+        color:0xa398d8,emissive:0x2a1f62,emissiveIntensity:.13,
+        roughness:.13,metalness:.0,transparent:true,opacity:.68,
+        depthWrite:false,clearcoat:.84,clearcoatRoughness:.07,
+        transmission:.60,thickness:.08,ior:1.47,
+        attenuationColor:new T.Color(0x332a73),attenuationDistance:.36
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x9ec7ca,transparent:true,opacity:.006,depthWrite:false,
-        blending:T.NormalBlending
+        color:0x75e7f3,transparent:true,opacity:.045,depthWrite:false,
+        blending:T.AdditiveBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x9994a0,transparent:true,opacity:.005,depthWrite:false,
-        blending:T.NormalBlending
+        color:0x9c8cff,transparent:true,opacity:.038,depthWrite:false,
+        blending:T.AdditiveBlending
       });
       const rungMat=new T.MeshPhysicalMaterial({
-        color:0xb6c2c2,emissive:0x030607,emissiveIntensity:.014,
-        roughness:.43,metalness:.01,transparent:true,opacity:.82,depthWrite:true,
-        clearcoat:.22,clearcoatRoughness:.32
+        color:0x6fabb1,emissive:0x07343d,emissiveIntensity:.10,
+        roughness:.22,metalness:.0,transparent:true,opacity:.42,depthWrite:false,
+        clearcoat:.64,clearcoatRoughness:.11,transmission:.24,thickness:.04
       });
       const mpa=new T.PointsMaterial({
         color:0xb7f3ff,size:.034,transparent:true,opacity:.42,
@@ -569,12 +572,12 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.034,tubeRadial,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.034,tubeRadial,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.040,auraRadial,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.040,auraRadial,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.020,tubeRadial,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.020,tubeRadial,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.028,auraRadial,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.028,auraRadial,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.010,.010,1,8,1,false);
+      const rungGeo=new T.CylinderGeometry(.0048,.0048,1,8,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -594,7 +597,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.96,.95,.008,.007,.82,.15,.14];
+      group.userData.baseOpacity=[.72,.68,.045,.038,.42,.13,.11];
       return group;
     }
 
@@ -809,13 +812,13 @@
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.172,.011,20,112),
+        new T.TorusGeometry(.176,.008,24,128),
         new T.MeshPhysicalMaterial({
-          color:0x58696a,metalness:.16,roughness:.145,
-          clearcoat:.90,clearcoatRoughness:.055,
-          emissive:0x010607,emissiveIntensity:.003,
-          specularIntensity:.88,specularColor:new T.Color(0xe9f7f7),
-          envMapIntensity:1.72
+          color:0x17272a,metalness:.08,roughness:.095,
+          clearcoat:.97,clearcoatRoughness:.038,
+          emissive:0x031116,emissiveIntensity:.018,
+          specularIntensity:1.0,specularColor:new T.Color(0xf3ffff),
+          envMapIntensity:2.28
         })
       );
       socketBezel.position.z=.306;
@@ -832,13 +835,13 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.132,72,44),lensMat);
-      lens.scale.set(1.18,.90,.30);
-      lens.position.set(-.018,.006,.342);
+      const lens=new T.Mesh(new T.SphereGeometry(.142,80,48),lensMat);
+      lens.scale.set(1.20,.92,.31);
+      lens.position.set(-.018,.006,.344);
       this.irisGroup.add(lens);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.021,48),
+        new T.CircleGeometry(.024,56),
         new T.MeshPhysicalMaterial({
           color:0x010305,metalness:.04,roughness:.10,
           clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
@@ -854,7 +857,7 @@
           clearcoat:.96,clearcoatRoughness:.034,
           emissive:0x041619,emissiveIntensity:.016,
           specularIntensity:.98,specularColor:new T.Color(0xf2ffff),
-          transparent:true,opacity:.22
+          transparent:true,opacity:.12
         })
       );
       glassRing.position.z=.376;
@@ -1794,7 +1797,7 @@
         h.scale.setScalar(b.s*.54);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*.24;
+          m.opacity=(bases[mi]??.5)*fade*.58;
         });
       });
     }
@@ -1821,8 +1824,8 @@
       this.mechanicalGroup.position.set(tx,ty,.02);
       this.tentacleGroup.position.set(tx,ty,-.04);
       this.coreGroup.scale.setScalar(sc*mix(1,.90,endMove));
-      this.coreGroup.rotation.y=Math.sin(time*.00016)*.012+this.interactionX*.030+this.interactionSpin;
-      this.coreGroup.rotation.x=Math.sin(time*.00019)*.008-this.interactionY*.022;
+      this.coreGroup.rotation.y=.235+Math.sin(time*.00016)*.010+this.interactionX*.030+this.interactionSpin;
+      this.coreGroup.rotation.x=-.030+Math.sin(time*.00019)*.006-this.interactionY*.022;
 
       const irisAwake=smooth((t-.70)/.80)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
@@ -1844,6 +1847,8 @@
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
+      this.organicGroup.rotation.y=.235+Math.sin(time*.00011)*.008+this.interactionX*.018;
+      this.organicGroup.rotation.x=-.030+Math.sin(time*.00013)*.005-this.interactionY*.014;
       const bodyScale=.001+visible*.999;
       const finalScale=this.mobileProfile?.99:1.10;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
@@ -1857,8 +1862,8 @@
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=0;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=0;
       if(this.organicHoodGroup){this.organicHoodGroup.visible=false;this.organicHoodGroup.scale.setScalar(.001);}
-      this.organicShell.rotation.y=Math.sin(time*.00014)*.010+this.interactionX*.022;
-      this.organicShell.rotation.x=Math.sin(time*.00016)*.006-this.interactionY*.016;
+      this.organicShell.rotation.y=Math.sin(time*.00014)*.006;
+      this.organicShell.rotation.x=Math.sin(time*.00016)*.004;
       const shellBase=this.organicShell.userData.baseScale;
       const shellPulse=1+this.interactionImpulse*.004+Math.sin(time*.0010)*.0035;
       if(shellBase)this.organicShell.scale.set(shellBase.x*shellPulse,shellBase.y*shellPulse,shellBase.z*shellPulse);
