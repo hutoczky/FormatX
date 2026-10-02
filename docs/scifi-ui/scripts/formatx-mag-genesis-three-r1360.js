@@ -149,6 +149,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1842='high-density-three-mass-studio-sculpt-integrated-optic-no-egg-no-hud-flash';
       document.documentElement.dataset.fxMagBirthVisualR1847='muted-blue-grey-ice-volume-smoked-optic-luxury-studio';
       document.documentElement.dataset.fxMagBirthVisualR1848='readable-blue-grey-ice-volume-soft-ambient-studio';
+      document.documentElement.dataset.fxMagBirthVisualR1849='narrow-softbox-ice-reflections-silver-smoked-optic-low-bloom';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
       document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
@@ -223,25 +224,25 @@
         x.fillRect(-1,-1,2,2);
         x.restore();
       };
-      glow(190,122,128,230,[
-        [0,'rgba(205,222,217,.34)'],
-        [.24,'rgba(146,167,164,.22)'],
-        [.62,'rgba(63,82,84,.10)'],
+      glow(184,116,96,224,[
+        [0,'rgba(236,244,239,.62)'],
+        [.18,'rgba(189,211,207,.42)'],
+        [.52,'rgba(85,116,118,.16)'],
         [1,'rgba(0,0,0,0)']
       ]);
-      glow(570,188,90,190,[
-        [0,'rgba(177,188,181,.24)'],
-        [.28,'rgba(111,124,120,.14)'],
-        [.66,'rgba(48,58,57,.06)'],
+      glow(582,184,72,176,[
+        [0,'rgba(195,221,218,.39)'],
+        [.24,'rgba(120,154,154,.24)'],
+        [.62,'rgba(48,78,82,.09)'],
         [1,'rgba(0,0,0,0)']
       ]);
-      glow(470,324,240,70,[
-        [0,'rgba(118,91,68,.22)'],
-        [.42,'rgba(61,47,37,.10)'],
+      glow(468,326,218,54,[
+        [0,'rgba(124,103,86,.15)'],
+        [.42,'rgba(66,54,45,.065)'],
         [1,'rgba(0,0,0,0)']
       ]);
       const ceiling=x.createLinearGradient(0,0,0,120);
-      ceiling.addColorStop(0,'rgba(170,190,188,.16)');
+      ceiling.addColorStop(0,'rgba(205,224,220,.26)');
       ceiling.addColorStop(1,'rgba(0,0,0,0)');
       x.fillStyle=ceiling;
       x.fillRect(0,0,c.width,120);
@@ -805,13 +806,14 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.158,.012,18,96),
         new T.MeshPhysicalMaterial({
-          color:0x182629,metalness:.05,roughness:.14,
-          clearcoat:.92,clearcoatRoughness:.045,
-          emissive:0x031015,emissiveIntensity:.018,
-          specularIntensity:1.0,specularColor:new T.Color(0xf1fbfb)
+          color:0x647779,metalness:.08,roughness:.12,
+          clearcoat:.94,clearcoatRoughness:.040,
+          emissive:0x041114,emissiveIntensity:.010,
+          specularIntensity:1.0,specularColor:new T.Color(0xffffff),
+          envMapIntensity:2.25
         })
       );
-      socketBezel.position.z=.302;
+      socketBezel.position.z=.306;
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -819,8 +821,8 @@
         clearcoat:.96,clearcoatRoughness:.028,
         transmission:.84,thickness:.48,ior:1.50,
         attenuationColor:new T.Color(0x0b4750),attenuationDistance:.26,
-        emissive:0x02161b,emissiveIntensity:.050,
-        envMapIntensity:2.10,
+        emissive:0x02161b,emissiveIntensity:.032,
+        envMapIntensity:2.28,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
@@ -860,7 +862,7 @@
         transparent:true,opacity:.018,depthWrite:false,
         blending:T.NormalBlending
       }));
-      this.irisCorona.scale.set(.62,.62,1);
+      this.irisCorona.scale.set(.48,.48,1);
       this.irisCorona.position.z=.305;
       this.irisGroup.add(this.irisCorona);
       this.coreGroup.add(this.irisGroup);
@@ -869,7 +871,7 @@
         map:this.makeGlowTexture(),color:0x9fc8cc,
         transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
-      this.glowSprite.scale.set(.86,.86,1);
+      this.glowSprite.scale.set(.60,.60,1);
       this.glowSprite.position.z=.29;
       this.coreGroup.add(this.glowSprite);
 
@@ -1809,10 +1811,10 @@
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=coreLife>.005;
       this.irisGroup.scale.setScalar((this.mobileProfile?1.05:.99)*(1+irisAwake*.035)*pulse);
-      if(this.irisCorona)this.irisCorona.material.opacity=.030*coreLife+.050*irisAwake;
-      this.glowSprite.material.opacity=(.012*coreLife+.028*irisAwake)*pulse;
-      this.glowSprite.scale.setScalar(.66+irisAwake*.08+this.interactionImpulse*.025);
-      this.coreInner.material.opacity=.022*coreLife+.044*irisAwake;
+      if(this.irisCorona)this.irisCorona.material.opacity=.010*coreLife+.018*irisAwake;
+      this.glowSprite.material.opacity=(.004*coreLife+.010*irisAwake)*pulse;
+      this.glowSprite.scale.setScalar(.48+irisAwake*.04+this.interactionImpulse*.015);
+      this.coreInner.material.opacity=.012*coreLife+.024*irisAwake;
       this.coreLight.intensity=.18*coreLife+irisAwake*.38+this.interactionImpulse*.10;
       if(this.coreLabel)this.coreLabel.material.opacity=0;
     }
