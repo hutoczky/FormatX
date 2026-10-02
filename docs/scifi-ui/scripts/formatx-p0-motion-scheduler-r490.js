@@ -35,11 +35,12 @@ root.dataset.fxP0MotionCacheR1778='mobile-monolith-dark-mineral-corrected-fallba
 root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendril';
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20260928-r1795-mobile-smoky-bioglass-airy';
+root.dataset.fxP0MotionCacheR1830='igloo-grade-fast-real-webgl-handoff';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261002-r1830-igloo-grade-bioglass';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=6500;
+const AUTO_DELAY_MS=900;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
