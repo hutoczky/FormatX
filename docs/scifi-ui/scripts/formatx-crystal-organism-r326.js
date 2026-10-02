@@ -491,11 +491,11 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.365*g(dir[0],dir[1],-.48,.36,.33,.27);
-        const rightMass=.285*g(dir[0],dir[1], .44,.02,.29,.30);
-        const lowerMass=.238*g(dir[0],dir[1],-.31,-.45,.33,.23);
-        const waistCut=.205*g(dir[0],dir[1], .14,-.17,.30,.18);
-        const rightLowerCut=.135*g(dir[0],dir[1], .39,-.36,.22,.19);
+        const upperMass=.440*g(dir[0],dir[1],-.48,.36,.31,.25);
+        const rightMass=.330*g(dir[0],dir[1], .44,.02,.27,.28);
+        const lowerMass=.285*g(dir[0],dir[1],-.31,-.45,.31,.22);
+        const waistCut=.285*g(dir[0],dir[1], .14,-.17,.28,.17);
+        const rightLowerCut=.180*g(dir[0],dir[1], .39,-.36,.21,.18);
         const crownNotch=.205*g(dir[0],dir[1],-.025,.72,.145,.105);
         const crownLeftLift=.112*g(dir[0],dir[1],-.35,.66,.24,.16);
         const crownRightLift=.084*g(dir[0],dir[1], .31,.62,.22,.17);
@@ -544,7 +544,7 @@
         }
         const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
         const crownCleftEase=crownCleftT*crownCleftT*(3-2*crownCleftT);
-        const crownCleft=.095*Math.exp(-Math.pow((p[0]+.020)/.135,2.0))*crownCleftEase;
+        const crownCleft=.165*Math.exp(-Math.pow((p[0]+.018)/.125,2.0))*crownCleftEase;
         p[1]-=crownCleft;
         p[0]+=Math.sign(p[0]+.020)*crownCleft*.20;
         const leftPlane=-.695+.120*p[1]-.035*p[2];
@@ -1228,7 +1228,7 @@
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.0045,.0065,.0075),vec3(.100,.108,.105),lift)*facetTone;
+        vec3 mineral=mix(vec3(.0055,.0065,.0070),vec3(.125,.132,.128),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
@@ -1266,7 +1266,7 @@
         mineral*=1.0-.13*sculptValleyA-.09*sculptValleyB;
         mineral+=vec3(.060,.118,.124)*sculptShoulder*.060;
         float iceCloud=.5+.5*sin(vLocal.x*6.2-vLocal.y*4.7+vLocal.z*5.4+sin(vLocal.y*3.2));
-        mineral+=vec3(.075,.112,.114)*iceVolume*(.058+.066*(1.0-facing))*(.72+.28*iceCloud);
+        mineral+=vec3(.098,.124,.122)*iceVolume*(.060+.068*(1.0-facing))*(.72+.28*iceCloud);
         float chromaSide=.5+.5*n.x;
         mineral+=mix(vec3(.026,.072,.085),vec3(.052,.023,.064),chromaSide)*fresnel*bodyMask*.12;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
@@ -1474,7 +1474,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0030,.0052,.0062),vec3(.052,.062,.062),lift);
+        vec3 col=mix(vec3(.0040,.0055,.0060),vec3(.078,.086,.083),lift);
         col*=.972+.028*smoke;
         col+=vec3(.004,.006,.0065)*strata*(.08+.16*lift);
         col-=vec3(.0016,.0022,.0025)*inclusion;
@@ -1503,16 +1503,16 @@
         col*=1.0-.17*sculptValleyA-.12*sculptValleyB;
         col+=vec3(.050,.118,.128)*sculptShoulder*.085;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
-        col+=vec3(.074,.148,.154)*iceVolume*(.125+.105*(1.0-facing));
-        col+=vec3(.090,.132,.134)*innerVeil*(.050+.070*facing);
+        col+=vec3(.105,.132,.130)*iceVolume*(.120+.100*(1.0-facing));
+        col+=vec3(.105,.124,.122)*innerVeil*(.050+.068*facing);
         col+=vec3(.026,.062,.068)*bodyMask*(.34+.66*facing);
         col+=vec3(.036,.082,.090)*strata*iceVolume*.050;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.72)*smoothstep(.06,.58,vLocal.z)*bodyMask;
-        col*=1.0-.22*socketShade;
-        col+=vec3(.010,.110,.145)*opticCaustic*(.055+.070*uEnergy);
+        col*=1.0-.075*socketShade;
+        col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.023,.065,.078),vec3(.045,.020,.058),chromaSide)*fresnel*bodyMask*.105;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
@@ -1540,12 +1540,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.042,.058,.060)
-          +vec3(.095,.118,.120)*(.12*ndl+.17*sideLight)
-          +vec3(.82,.87,.82)*softboxA*.175
-          +vec3(.40,.54,.55)*sideSpec*.150
-          +vec3(.040,.14,.155)*fresnel*.090
-          +vec3(.016,.010,.022)*subsurface*.020;
+        vec3 cartilage=vec3(.105,.115,.113)
+          +vec3(.115,.128,.127)*(.12*ndl+.17*sideLight)
+          +vec3(.94,.96,.91)*softboxA*.205
+          +vec3(.50,.60,.59)*sideSpec*.170
+          +vec3(.050,.11,.120)*fresnel*.060
+          +vec3(.012,.009,.015)*subsurface*.014;
         col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1638,7 +1638,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0035,.0058,.0068),vec3(.076,.086,.084),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0045,.0060,.0065),vec3(.105,.114,.110),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.96,.97,.92)*keySpec*.235;
         col+=vec3(.42,.56,.57)*sideSpec*.185;
@@ -1679,24 +1679,24 @@
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
-        col+=vec3(.078,.124,.128)*iceVolume*(.108+.085*(1.0-facing));
-        col+=vec3(.070,.106,.108)*innerVeil*(.045+.064*facing);
+        col+=vec3(.112,.130,.128)*iceVolume*(.108+.085*(1.0-facing));
+        col+=vec3(.095,.112,.110)*innerVeil*(.045+.064*facing);
         col+=vec3(.018,.047,.052)*bodyMask*(.30+.70*facing);
         col+=vec3(.030,.070,.076)*grain*iceVolume*.032;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.70)*smoothstep(.04,.58,vLocal.z)*bodyMask;
-        col*=1.0-.20*socketShade;
-        col+=vec3(.012,.120,.155)*opticCaustic*(.060+.070*uEnergy);
+        col*=1.0-.070*socketShade;
+        col+=vec3(.022,.090,.110)*opticCaustic*(.042+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.052,.072,.074)
-          +vec3(.105,.130,.132)*(.10*ndl+.11*sideLight)
-          +vec3(.86,.90,.85)*keySpec*.170
-          +vec3(.040,.13,.14)*fresnel*.060
-          +vec3(.060,.078,.078)*(.10+.08*facing);
+        vec3 bezel=vec3(.130,.140,.137)
+          +vec3(.135,.148,.145)*(.10*ndl+.11*sideLight)
+          +vec3(.96,.98,.93)*keySpec*.205
+          +vec3(.045,.10,.11)*fresnel*.045
+          +vec3(.078,.088,.086)*(.10+.08*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1768,6 +1768,7 @@
     root.dataset.fxNativeMagStudioR1869='anti-aliased-clear-optic-edge-silver-recess-no-black-halo';
     root.dataset.fxNativeMagStudioR1870='smoked-silver-ice-crown-cleft-neutral-studio-cyan-optic-only-accent';
     root.dataset.fxNativeMagStudioR1872='runtime-safe-crown-ease-smoked-silver-bioglass';
+    root.dataset.fxNativeMagStudioR1873='igloo-silver-three-mass-deep-cleft-flush-optic-low-chroma';
     root.dataset.fxNativeMagStudioR1853='sealed-raster-seams-silver-ice-midtone-internal-striation-optic-parity';
     root.dataset.fxNativeMagStudioR1855='bright-silver-ice-midtone-uncrushed-oled-studio-compositor';
     root.dataset.fxNativeMagStudioR1856='crease-aware-mineral-planes-smooth-optic-teal-volume';
