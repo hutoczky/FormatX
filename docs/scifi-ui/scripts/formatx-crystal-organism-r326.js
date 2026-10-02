@@ -496,8 +496,11 @@
         const lowerMass=.238*g(dir[0],dir[1],-.31,-.45,.33,.23);
         const waistCut=.205*g(dir[0],dir[1], .14,-.17,.30,.18);
         const rightLowerCut=.135*g(dir[0],dir[1], .39,-.36,.22,.19);
+        const crownNotch=.080*g(dir[0],dir[1],-.06,.58,.18,.13);
+        const opticShoulder=.048*g(dir[0],dir[1], .12,.19,.20,.20);
 
-        radius*=upperTaper*lowerTaper*(1+upperMass+rightMass+lowerMass-waistCut-rightLowerCut);
+        radius*=upperTaper*lowerTaper*
+          (1+upperMass+rightMass+lowerMass+opticShoulder-waistCut-rightLowerCut-crownNotch);
 
         const lowFreq=
           1
@@ -906,9 +909,9 @@
     }
 
     if(!auditMode){
-      const centreX=.052,centreY=-.018;
-      const bezelSteps=software?72:mobile?88:104,bezelTubeSteps=software?7:mobile?8:10,bezelZ=.558;
-      const bezelMajorX=.162,bezelMajorY=.134,bezelTube=.0058;
+      const centreX=.034,centreY=-.008;
+      const bezelSteps=software?72:mobile?88:104,bezelTubeSteps=software?7:mobile?8:10,bezelZ=.548;
+      const bezelMajorX=.148,bezelMajorY=.120,bezelTube=.0052;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -932,10 +935,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.568];
-      const lensRadiusX=.188;
-      const lensRadiusY=.148;
-      const lensDepth=.122;
+      const lensCenter=[centreX,centreY,.553];
+      const lensRadiusX=.164;
+      const lensRadiusY=.128;
+      const lensDepth=.096;
       const radialSteps=software?11:mobile?12:14;
       const angularSteps=software?72:mobile?88:104;
       function lensVertex(radial,angle){
@@ -1118,9 +1121,9 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*.038*uLayer;
-        float yaw=.54+uRotation.y+uPointer.x*.15+uTime*.010;
-        float pitch=-.102+uRotation.x-uPointer.y*.09+.007*sin(uTime*.19);
-        float roll=-.058+uRotation.z+uPointer.x*uPointer.y*.026+.006*sin(uTime*.23);
+        float yaw=.405+uRotation.y+uPointer.x*.14+uTime*.009;
+        float pitch=-.070+uRotation.x-uPointer.y*.085+.006*sin(uTime*.19);
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*.022+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -1133,9 +1136,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.685':'.825'};
-        projected.x+=${mobile?'.012':'.052'};
-        projected.y+=${mobile?'.034':'.002'};
+        projected*= ${mobile?'.720':'.838'};
+        projected.x+=${mobile?'.002':'.040'};
+        projected.y+=${mobile?'.022':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1737,6 +1740,7 @@
     root.dataset.fxNativeMagStudioR1846='cross-tier-cold-volume-smoked-optic-parity';
     root.dataset.fxNativeMagStudioR1850='silver-optic-bezel-readable-ice-depth-cross-tier';
     root.dataset.fxNativeMagStudioR1851='vertical-cut-ice-sculpt-larger-recessed-silver-optic-crisp-studio-bands';
+    root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1853='sealed-raster-seams-silver-ice-midtone-internal-striation-optic-parity';
     root.dataset.fxNativeMagStudioR1855='bright-silver-ice-midtone-uncrushed-oled-studio-compositor';
     root.dataset.fxNativeMagStudioR1856='crease-aware-mineral-planes-smooth-optic-teal-volume';
