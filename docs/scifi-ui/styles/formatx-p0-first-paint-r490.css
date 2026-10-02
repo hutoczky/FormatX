@@ -1135,3 +1135,27 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+
+/* R1821 — lock the settled title material in the render-blocking owner.
+   R1820 fixed geometry, but deferred Design System / Transcend CSS could still
+   repaint the largest text by changing its gradient/text material after FCP.
+   The first painted FORMATX is now the settled visual FORMATX. */
+html:root:root:root body.living-architecture #hero .hero-title-main {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  background:
+    linear-gradient(108deg,#fff 4%,#c7f7ff 30%,#79dff1 52%,#b29dff 76%,#ffe0ae 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  text-shadow:0 28px 90px rgba(0,0,0,.32)!important;
+  filter:none!important;
+}
+html:root:root:root body.living-architecture #hero .hero-title-sub {
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  -webkit-text-stroke:1px rgba(235,248,254,.72)!important;
+  text-shadow:0 4px 20px rgba(0,0,0,.74)!important;
+  filter:none!important;
+}
+/* production-r1821-final-title-material-lcp-lock */
