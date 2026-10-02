@@ -1135,3 +1135,163 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+
+/* R1821 — minimal geometry extracted from critical-core-r227.
+   The full 144KB core bundle can activate after FCP only if every first-frame
+   box that affects hero readability already has its final physical geometry. */
+@media (min-width:901px){
+  html:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204{
+    position:absolute!important;
+    inset:auto auto 20px 50%!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:calc(100% - 28px)!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    column-gap:14px!important;
+    row-gap:0!important;
+    overflow:visible!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+  }
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail{
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    border-radius:50%!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound{grid-column:1!important;grid-row:1!important}
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask{grid-column:2!important;grid-row:1!important}
+  html:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{grid-column:3!important;grid-row:1!important}
+
+  html:root:root body.living-architecture #hero .fx-organism-map{
+    position:absolute!important;
+    z-index:8!important;
+    top:50%!important;
+    left:50%!important;
+    width:min(35vw,510px)!important;
+    height:min(35vw,510px)!important;
+    margin:0!important;
+    transform:translate(-50%,-50%) rotate(-8deg)!important;
+  }
+  html:root:root body.living-architecture #hero .fx-organism-map a{
+    position:absolute!important;
+    left:50%!important;
+    box-sizing:border-box!important;
+    width:clamp(128px,13vw,178px)!important;
+    min-height:52px!important;
+    transform:translateX(-50%) rotate(8deg)!important;
+  }
+  html:root:root body.living-architecture #hero .fx-organism-map a:nth-of-type(1){top:4%!important;margin-left:-24%!important}
+  html:root:root body.living-architecture #hero .fx-organism-map a:nth-of-type(2){top:21%!important;margin-left:24%!important}
+  html:root:root body.living-architecture #hero .fx-organism-map a:nth-of-type(3){top:38%!important;margin-left:-27%!important}
+  html:root:root body.living-architecture #hero .fx-organism-map a:nth-of-type(4){top:55%!important;margin-left:27%!important}
+  html:root:root body.living-architecture #hero .fx-organism-map a:nth-of-type(5){top:72%!important;margin-left:-22%!important}
+  html:root:root body.living-architecture #hero .fx-organism-map a:nth-of-type(6){top:89%!important;margin-left:20%!important;transform:translate(-50%,-100%) rotate(8deg)!important}
+}
+
+@media (min-width:1100px) and (pointer:fine){
+  html:root:root body.living-architecture #hero .hero-copy{
+    display:grid!important;
+    grid-template-rows:repeat(7,auto)!important;
+    row-gap:clamp(7px,1.05vh,14px)!important;
+    align-content:center!important;
+    align-self:center!important;
+    width:min(700px,100%)!important;
+    max-width:none!important;
+    min-height:0!important;
+    margin:0!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+  html:root:root body.living-architecture #hero .hero-copy > .kicker{grid-row:1!important;margin-bottom:0!important}
+  html:root:root body.living-architecture #hero .hero-copy > .fx-category-definition{
+    grid-row:2!important;
+    align-self:start!important;
+    width:min(620px,100%)!important;
+    max-width:620px!important;
+    margin:0!important;
+    overflow:visible!important;
+  }
+  html:root:root body.living-architecture #hero .hero-copy > #hero-title{grid-row:3!important;margin-block:clamp(2px,.5vh,8px)!important}
+  html:root:root body.living-architecture #hero .hero-copy > .hero-lead{grid-row:4!important}
+  html:root:root body.living-architecture #hero .hero-copy > .fx-method-inline{
+    grid-row:5!important;
+    align-self:start!important;
+    margin-block:clamp(4px,.7vh,10px)!important;
+    overflow:visible!important;
+  }
+  html:root:root body.living-architecture #hero .hero-copy > .hero-actions{grid-row:6!important}
+  html:root:root body.living-architecture #hero .hero-copy > .hero-facts{grid-row:7!important}
+  html:root:root body.living-architecture #hero .hero-lead{
+    max-width:620px!important;
+    margin-top:clamp(8px,1.2vh,16px)!important;
+    font-size:clamp(15px,1.05vw,18px)!important;
+    line-height:1.58!important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions{
+    display:flex!important;
+    width:min(620px,100%)!important;
+    margin-top:clamp(10px,1.5vh,20px)!important;
+    flex-wrap:wrap!important;
+    gap:12px!important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions .button{min-height:48px!important}
+  html:root:root body.living-architecture #hero .hero-facts{
+    display:flex!important;
+    width:min(620px,100%)!important;
+    margin-top:clamp(8px,1.2vh,16px)!important;
+    flex-wrap:wrap!important;
+  }
+}
+@media (min-width:1100px) and (max-height:820px) and (pointer:fine){
+  html:root:root body.living-architecture #hero .hero-copy{row-gap:6px!important}
+  html:root:root body.living-architecture #hero .hero-lead{margin-top:4px!important;line-height:1.45!important}
+  html:root:root body.living-architecture #hero .hero-actions{margin-top:6px!important}
+  html:root:root body.living-architecture #hero .hero-facts{margin-top:4px!important}
+}
+/* production-r1821-deferred-core-geometry-parity */
