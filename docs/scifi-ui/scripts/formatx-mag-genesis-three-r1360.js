@@ -96,7 +96,7 @@
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
-        alpha:this.mobileProfile,
+        alpha:true,
         antialias:!this.lowPowerProfile && (!this.mobileProfile || (devicePixelRatio||1)<=3.5),
         depth:true,
         stencil:false,
@@ -145,18 +145,19 @@
       document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
+      document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
       document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
       document.documentElement.dataset.fxMagBirthSharpnessR1723='native-pixel-css-zero-resample-mobile-2.15x-adaptive';
       document.documentElement.dataset.fxMagBirthContinuityR1723='organic-cells-tendrils-persist-through-10s-handoff';
-      this.renderer.setClearColor(0x020811,this.mobileProfile?0:1);
+      this.renderer.setClearColor(0x020811,0);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure=1.02;
 
       this.scene=new THREE.Scene();
-      this.scene.background=this.mobileProfile?null:new THREE.Color(0x010405);
+      this.scene.background=null;
       this.scene.fog=new THREE.FogExp2(0x020405,0.0087);
       this.studioEnvironment=this.makeStudioEnvironment();
       this.scene.environment=this.studioEnvironment;
@@ -407,16 +408,16 @@
          while the birth environment reads as a biological ecosystem, not a room. */
       const tissueMat=new T.MeshPhysicalMaterial({
         color:0x3b2948,roughness:.46,metalness:0,
-        emissive:0x0d2030,emissiveIntensity:.13,
+        emissive:0x071118,emissiveIntensity:.035,
         clearcoat:.24,clearcoatRoughness:.34,
-        transparent:true,opacity:.42,
-        sheen:.22,sheenColor:new T.Color(0x286078),sheenRoughness:.56
+        transparent:true,opacity:.065,
+        sheen:.12,sheenColor:new T.Color(0x286078),sheenRoughness:.62
       });
       const vesselMat=new T.MeshPhysicalMaterial({
         color:0x1d5666,roughness:.28,metalness:0,
-        emissive:0x08748b,emissiveIntensity:.38,
-        clearcoat:.38,clearcoatRoughness:.18,
-        transparent:true,opacity:.58
+        emissive:0x06343e,emissiveIntensity:.060,
+        clearcoat:.28,clearcoatRoughness:.22,
+        transparent:true,opacity:.090
       });
       const sacGeo=new T.SphereGeometry(1,18,12);
       const sacDefs=[
