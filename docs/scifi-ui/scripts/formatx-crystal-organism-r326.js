@@ -1266,7 +1266,7 @@
         mineral*=1.0-.13*sculptValleyA-.09*sculptValleyB;
         mineral+=vec3(.052,.104,.110)*sculptShoulder*.034;
         float iceCloud=.5+.5*sin(vLocal.x*6.2-vLocal.y*4.7+vLocal.z*5.4+sin(vLocal.y*3.2));
-        mineral+=vec3(.074,.096,.096)*iceVolume*(.024+.030*(1.0-facing))*(.82+.18*iceCloud);
+        mineral+=vec3(.068,.088,.088)*iceVolume*(.012+.016*(1.0-facing))*(.86+.14*iceCloud);
         float chromaSide=.5+.5*n.x;
         mineral+=mix(vec3(.026,.072,.085),vec3(.052,.023,.064),chromaSide)*fresnel*bodyMask*.12;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
@@ -1398,7 +1398,7 @@
         physicalLens+=vec3(.86,.94,.91)*coreFlash*.15;
         physicalLens+=vec3(.90,.99,1.00)*lensGlint*.42;
         physicalLens+=vec3(.52,.70,.70)*lensEdge*(.10+.12*softboxA+.08*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.003,.010,.014),lensPupil*.34);
+        physicalLens=mix(physicalLens,vec3(.006,.019,.024),lensPupil*.10);
         physicalLens+=vec3(.66,.90,.93)*lensGlint*.10*(1.0-lensPupil);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
@@ -1474,17 +1474,17 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0028,.0040,.0046),vec3(.066,.076,.074),lift);
+        vec3 col=mix(vec3(.0028,.0040,.0046),vec3(.078,.090,.087),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(.99,.99,.96)*keySpec*.205;
         col+=vec3(.72,.82,.82)*sideSpec*.175;
-        col+=vec3(.98,1.00,.98)*softboxA*.205;
-        col+=vec3(.50,.66,.67)*softboxB*.070;
-        col+=vec3(1.00,1.00,.98)*studioRibbonA*.195;
-        col+=vec3(.40,.27,.18)*studioRibbonB*.012;
-        col+=vec3(.68,.89,.90)*studioRibbonC*.105;
+        col+=vec3(.98,1.00,.98)*softboxA*.160;
+        col+=vec3(.50,.66,.67)*softboxB*.052;
+        col+=vec3(1.00,1.00,.98)*studioRibbonA*.145;
+        col+=vec3(.40,.27,.18)*studioRibbonB*.009;
+        col+=vec3(.68,.89,.90)*studioRibbonC*.072;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
         col+=vec3(.032,.112,.132)*fresnel*.105;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1503,10 +1503,10 @@
         col*=1.0-.17*sculptValleyA-.12*sculptValleyB;
         col+=vec3(.046,.104,.113)*sculptShoulder*.048;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
-        col+=vec3(.068,.090,.090)*iceVolume*(.030+.026*(1.0-facing));
-        col+=vec3(.070,.088,.087)*innerVeil*(.012+.016*facing);
-        col+=vec3(.020,.052,.058)*bodyMask*(.28+.72*facing);
-        col+=vec3(.026,.064,.071)*strata*iceVolume*.024;
+        col+=vec3(.060,.080,.080)*iceVolume*(.014+.012*(1.0-facing));
+        col+=vec3(.062,.078,.077)*innerVeil*(.005+.007*facing);
+        col+=vec3(.015,.041,.046)*bodyMask*(.30+.70*facing);
+        col+=vec3(.022,.052,.058)*strata*iceVolume*.010;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
@@ -1571,7 +1571,7 @@
           +vec3(.88,.95,.92)*coreFlash*.20
           +vec3(.92,1.00,1.00)*lensGlint*.52
           +vec3(.58,.76,.75)*lensEdge*(.12+.14*softboxA+.08*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.003,.012,.016),lensPupil*.32);
+        physicalLens=mix(physicalLens,vec3(.006,.020,.025),lensPupil*.10);
         physicalLens+=vec3(.76,.94,.95)*lensGlint*.16*(1.0-lensPupil);
         col=mix(col,physicalLens,lensMeshMask*.997);
 
@@ -1630,7 +1630,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.038+ndl*.135+sideLight*.090);
+        float lift=sat(.050+ndl*.145+sideLight*.096);
         float facetTone=.994+.012*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
@@ -1638,7 +1638,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0028,.0042,.0048),vec3(.070,.082,.080),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0030,.0044,.0050),vec3(.090,.102,.099),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.96,.97,.92)*keySpec*.235;
         col+=vec3(.42,.56,.57)*sideSpec*.185;
@@ -1659,9 +1659,9 @@
         col+=vec3(.42,.46,.44)*pow(broadKey,3.20)*.046*bodyMask;
         col+=vec3(.12,.23,.24)*pow(broadSide,2.90)*.042*bodyMask;
         col+=vec3(.07,.044,.028)*pow(broadWarm,2.90)*.010*bodyMask;
-        col+=vec3(.99,1.00,.97)*studioStripeA*.165;
-        col+=vec3(.22,.48,.53)*studioStripeB*.045;
-        col+=vec3(.60,.82,.84)*studioStripeC*.055;
+        col+=vec3(.99,1.00,.97)*studioStripeA*.090;
+        col+=vec3(.22,.48,.53)*studioStripeB*.025;
+        col+=vec3(.60,.82,.84)*studioStripeC*.032;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1679,10 +1679,10 @@
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
-        col+=vec3(.090,.108,.106)*iceVolume*(.032+.028*(1.0-facing));
-        col+=vec3(.082,.098,.096)*innerVeil*(.012+.016*facing);
-        col+=vec3(.014,.038,.043)*bodyMask*(.26+.74*facing);
-        col+=vec3(.026,.060,.066)*grain*iceVolume*.012;
+        col+=vec3(.076,.092,.090)*iceVolume*(.010+.010*(1.0-facing));
+        col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
+        col+=vec3(.016,.042,.047)*bodyMask*(.28+.72*facing);
+        col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
@@ -1726,14 +1726,14 @@
           +vec3(.80,.97,.96)*lensHot*.270
           +vec3(.96,1.00,1.00)*lensGlint*.54
           +vec3(.60,.78,.76)*lensEdge*(.12+.16*keySpec+.10*sideSpec);
-        optical=mix(optical,vec3(.003,.012,.016),lensPupil*.32);
+        optical=mix(optical,vec3(.006,.020,.025),lensPupil*.10);
         optical+=vec3(.80,.96,.97)*lensGlint*.14*(1.0-lensPupil);
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.36),clamp(alpha,.985,1.0));
+        ${outputName}=vec4(tone(col*2.28),clamp(alpha,.985,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1767,6 +1767,7 @@
     root.dataset.fxNativeMagStudioR1875='microfaceted-high-density-ice-cut-dark-body-controlled-softbox';
     root.dataset.fxNativeMagStudioR1877='authored-three-mass-crown-cleft-tight-softbox-smoked-sensor-optic';
     root.dataset.fxNativeMagStudioR1880='clear-dark-volume-restrained-software-softbox-smoked-sensor';
+    root.dataset.fxNativeMagStudioR1882='solid-smoked-glass-low-fog-product-softbox-non-eye-sensor';
     root.dataset.fxNativeMagStudioR1877='flush-smoked-optic-crisp-studio-ribbons-clean-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
