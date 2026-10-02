@@ -1192,9 +1192,10 @@
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
         float iceVolume=exp(-pow((vLocal.x+.10)/.46,2.0)-pow((vLocal.y-.08)/.58,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        mineral+=vec3(.035,.080,.086)*iceVolume*(.045+.055*(1.0-facing));
+        float iceCloud=.5+.5*sin(vLocal.x*6.2-vLocal.y*4.7+vLocal.z*5.4+sin(vLocal.y*3.2));
+        mineral+=vec3(.050,.110,.116)*iceVolume*(.060+.070*(1.0-facing))*(.72+.28*iceCloud);
         float chromaSide=.5+.5*n.x;
-        mineral+=mix(vec3(.018,.050,.063),vec3(.034,.016,.050),chromaSide)*fresnel*bodyMask*.105;
+        mineral+=mix(vec3(.026,.072,.085),vec3(.052,.023,.064),chromaSide)*fresnel*bodyMask*.12;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
         float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
@@ -1290,13 +1291,13 @@
         livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
         mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.020,.012,.031);
-        cartilage+=vec3(.095,.080,.125)*(.18*ndl+.24*sideLight);
-        cartilage+=vec3(.38,.48,.50)*softboxA*.12;
-        cartilage+=vec3(.20,.33,.38)*sideSpec*.10;
-        cartilage+=vec3(.035,.20,.25)*fresnel*.28;
-        cartilage+=vec3(.12,.035,.16)*subsurface*.30;
-        cartilage+=vec3(.020,.18,.22)*vascular*.20;
+        vec3 cartilage=vec3(.026,.035,.037);
+        cartilage+=vec3(.145,.160,.158)*(.18*ndl+.24*sideLight);
+        cartilage+=vec3(.78,.84,.81)*softboxA*.20;
+        cartilage+=vec3(.36,.47,.49)*sideSpec*.14;
+        cartilage+=vec3(.045,.16,.18)*fresnel*.18;
+        cartilage+=vec3(.060,.032,.070)*subsurface*.12;
+        cartilage+=vec3(.018,.10,.12)*vascular*.10;
         mineral=mix(mineral,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1416,9 +1417,9 @@
         col+=vec3(.016,.050,.058)*edgeTransmission*.26;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        col+=vec3(.030,.070,.076)*iceVolume*(.040+.050*(1.0-facing));
+        col+=vec3(.050,.108,.114)*iceVolume*(.065+.065*(1.0-facing));
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.016,.044,.056),vec3(.030,.014,.044),chromaSide)*fresnel*bodyMask*.085;
+        col+=mix(vec3(.023,.065,.078),vec3(.045,.020,.058),chromaSide)*fresnel*bodyMask*.105;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1444,12 +1445,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.003,.007,.010)
-          +vec3(.055,.070,.076)*(.16*ndl+.22*sideLight)
-          +vec3(.74,.82,.80)*softboxA*.19
-          +vec3(.24,.38,.42)*sideSpec*.12
-          +vec3(.028,.15,.18)*fresnel*.20
-          +vec3(.06,.022,.07)*subsurface*.16;
+        vec3 cartilage=vec3(.024,.033,.035)
+          +vec3(.125,.145,.145)*(.16*ndl+.22*sideLight)
+          +vec3(.82,.88,.84)*softboxA*.23
+          +vec3(.34,.46,.48)*sideSpec*.15
+          +vec3(.040,.14,.16)*fresnel*.15
+          +vec3(.045,.026,.052)*subsurface*.09;
         col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1573,15 +1574,15 @@
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
-        col+=vec3(.030,.070,.074)*iceVolume*(.060+.050*(1.0-facing));
+        col+=vec3(.055,.120,.124)*iceVolume*(.085+.075*(1.0-facing));
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.016,.045,.055),vec3(.030,.014,.042),chromaSide)*fresnel*bodyMask*.085;
+        col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.004,.008,.010)
-          +vec3(.050,.065,.066)*(.18*ndl+.16*sideLight)
-          +vec3(.86,.88,.82)*keySpec*.265
-          +vec3(.045,.120,.126)*fresnel*.145
-          +vec3(.022,.030,.030)*(.14+.12*facing);
+        vec3 bezel=vec3(.032,.041,.042)
+          +vec3(.150,.170,.166)*(.18*ndl+.16*sideLight)
+          +vec3(.96,.98,.92)*keySpec*.34
+          +vec3(.055,.145,.148)*fresnel*.12
+          +vec3(.060,.072,.070)*(.14+.12*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1644,6 +1645,7 @@
     root.dataset.fxNativeMagStudioR1844='faceted-ice-volume-subtle-chromatic-edge-smoked-optic';
     root.dataset.fxNativeMagStudioR1845='igloo-grade-cold-volume-spectral-edge-smoked-glass-lens';
     root.dataset.fxNativeMagStudioR1846='cross-tier-cold-volume-smoked-optic-parity';
+    root.dataset.fxNativeMagStudioR1850='silver-optic-bezel-readable-ice-depth-cross-tier';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
