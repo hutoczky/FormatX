@@ -97,6 +97,10 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-public-browser/node_modules
           FORMATX_PUBLIC_ORIGIN: http://127.0.0.1:4178
         run: node .github/scripts/validate-legal-language-browser.cjs
+      - name: Validate idempotent live metadata reconciliation
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-public-browser/node_modules
+        run: node .github/scripts/validate-content-finalizer-r863.cjs
       - name: Publish public-site integrity status
         if: always() && github.event_name == 'push'
         env:

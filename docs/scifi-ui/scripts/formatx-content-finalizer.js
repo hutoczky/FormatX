@@ -2,7 +2,16 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const AUDIT_MODE = new URLSearchParams(location.search).get('lighthouse') === '1';
+
+  // Metadata notifications may repeat or arrive after the UI is already ready.
+  // Reconcile actual changes without replacing text nodes or waking observers.
+  function setAttributeIfChanged(element, name, value) {
+    if (element && element.getAttribute(name) !== value) element.setAttribute(name, value);
+  }
+
+  function setTextIfChanged(element, value) {
+    if (element && element.textContent !== value) element.textContent = value;
+  }
 
   function language() {
     return ROOT.lang === 'en' ? 'en' : 'hu';
@@ -10,9 +19,9 @@
 
   function bilingual(element, hu, en) {
     if (!element) return;
-    element.dataset.hu = hu;
-    element.dataset.en = en;
-    element.textContent = language() === 'en' ? en : hu;
+    setAttributeIfChanged(element, 'data-hu', hu);
+    setAttributeIfChanged(element, 'data-en', en);
+    setTextIfChanged(element, language() === 'en' ? en : hu);
   }
 
   function release() {
@@ -41,7 +50,10 @@
   }
 
   function setImportant(element, property, value) {
-    element?.style.setProperty(property, value, 'important');
+    if (element && (element.style.getPropertyValue(property) !== value
+      || element.style.getPropertyPriority(property) !== 'important')) {
+      element.style.setProperty(property, value, 'important');
+    }
   }
 
   function ensureCrawlableHeroLinks() {
@@ -62,7 +74,7 @@
         link.href = destinations[index] || '#hero';
       }
     });
-    ROOT.dataset.fxCrawlableHeroLinks = 'ready-v1';
+    setAttributeIfChanged(ROOT, 'data-fx-crawlable-hero-links', 'ready-v1');
   }
 
   function ensureMobileCoreButton(languageContainer, languageToggle) {
@@ -101,11 +113,11 @@
     }
 
     bilingual(coreButton, 'MAG', 'CORE');
-    coreButton.setAttribute(
+    setAttributeIfChanged(coreButton,
       'aria-label',
       language() === 'en' ? 'Return to the FormatX core' : 'Vissza a FormatX Maghoz'
     );
-    coreButton.title = language() === 'en' ? 'FormatX core' : 'FormatX Mag';
+    setAttributeIfChanged(coreButton, 'title', language() === 'en' ? 'FormatX core' : 'FormatX Mag');
 
     setImportant(coreButton, 'position', 'relative');
     setImportant(coreButton, 'display', 'inline-flex');
@@ -140,7 +152,7 @@
       document.body.appendChild(languageContainer);
     }
     if (languageContainer instanceof HTMLElement) {
-      languageContainer.hidden = false;
+      if (languageContainer.hidden) languageContainer.hidden = false;
       languageContainer.removeAttribute('aria-hidden');
       setImportant(languageContainer, 'display', 'inline-flex');
       setImportant(languageContainer, 'align-items', 'center');
@@ -157,7 +169,7 @@
 
     const languageToggle = document.querySelector('.fx-language-toggle');
     if (languageToggle instanceof HTMLElement) {
-      languageToggle.hidden = false;
+      if (languageToggle.hidden) languageToggle.hidden = false;
       setImportant(languageToggle, 'display', 'inline-flex');
       setImportant(languageToggle, 'visibility', 'visible');
       setImportant(languageToggle, 'opacity', '1');
@@ -230,25 +242,25 @@
       if (!values[index]) return;
       const value = fact.querySelector('b');
       const label = fact.querySelector('small');
-      if (value) value.textContent = values[index][0];
-      if (label) label.textContent = values[index][1];
-      fact.dataset.state = values[index][0] === '—' ? 'unavailable' : 'available';
+      setTextIfChanged(value, values[index][0]);
+      setTextIfChanged(label, values[index][1]);
+      setAttributeIfChanged(fact, 'data-state', values[index][0] === '—' ? 'unavailable' : 'available');
     });
 
     const labels = document.querySelectorAll('#hero .hero-label');
     if (labels[0]) {
-      labels[0].querySelector('span').textContent = '01/04';
-      labels[0].querySelector('b').textContent = 'METHOD STEP';
+      setTextIfChanged(labels[0].querySelector('span'), '01/04');
+      setTextIfChanged(labels[0].querySelector('b'), 'METHOD STEP');
     }
     if (labels[1]) {
-      labels[1].querySelector('span').textContent = 'FULL';
-      labels[1].querySelector('b').textContent = 'PUBLIC RELEASE';
+      setTextIfChanged(labels[1].querySelector('span'), 'FULL');
+      setTextIfChanged(labels[1].querySelector('b'), 'PUBLIC RELEASE');
     }
     if (labels[2]) {
-      labels[2].querySelector('span').textContent = issues == null
+      setTextIfChanged(labels[2].querySelector('span'), issues == null
         ? '—'
-        : String(issues).padStart(2, '0');
-      labels[2].querySelector('b').textContent = 'KNOWN LIMITS';
+        : String(issues).padStart(2, '0'));
+      setTextIfChanged(labels[2].querySelector('b'), 'KNOWN LIMITS');
     }
   }
 
@@ -265,18 +277,19 @@
       'Teljes multiplatform verzió letöltése',
       'Download full multiplatform version'
     );
-    label.dataset.releaseDownloadLabel = 'true';
-    link.dataset.releaseDownload = 'multiplatform';
-    link.dataset.releaseChannel = 'multiplatform';
+    setAttributeIfChanged(label, 'data-release-download-label', 'true');
+    setAttributeIfChanged(link, 'data-release-download', 'multiplatform');
+    setAttributeIfChanged(link, 'data-release-channel', 'multiplatform');
     link.removeAttribute('download');
 
     if (asset?.available === true && allowed(asset.download_url)) {
-      link.href = asset.download_url;
-      link.classList.remove('is-metadata-fallback', 'is-disabled');
+      setAttributeIfChanged(link, 'href', asset.download_url);
+      link.classList.toggle('is-metadata-fallback', false);
+      link.classList.toggle('is-disabled', false);
       link.removeAttribute('aria-disabled');
     } else {
-      link.href = '/scifi-ui/downloads/';
-      link.classList.add('is-metadata-fallback');
+      setAttributeIfChanged(link, 'href', '/scifi-ui/downloads/');
+      link.classList.toggle('is-metadata-fallback', true);
     }
   }
 
@@ -316,7 +329,7 @@
     updateTelemetry();
     ensureLicenceLink();
     finalizeMobileControls();
-    ROOT.dataset.fxContentFinalizer = 'ready-v4';
+    setAttributeIfChanged(ROOT, 'data-fx-content-finalizer', 'ready-v4');
   }
 
   [
@@ -333,11 +346,6 @@
     apply();
   }
 
-  if (AUDIT_MODE) {
-    setTimeout(ensureCrawlableHeroLinks, 350);
-    setTimeout(ensureCrawlableHeroLinks, 1200);
-  } else {
-    setTimeout(apply, 1200);
-    setTimeout(apply, 3600);
-  }
+  setTimeout(apply, 1200);
+  setTimeout(apply, 3600);
 }());
