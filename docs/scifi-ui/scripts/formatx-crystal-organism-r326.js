@@ -906,9 +906,9 @@
     }
 
     if(!auditMode){
-      const centreX=.046,centreY=-.016;
+      const centreX=.052,centreY=-.018;
       const bezelSteps=software?72:mobile?88:104,bezelTubeSteps=software?7:mobile?8:10,bezelZ=.558;
-      const bezelMajorX=.143,bezelMajorY=.118,bezelTube=.0065;
+      const bezelMajorX=.162,bezelMajorY=.134,bezelTube=.0058;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -932,10 +932,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.566];
-      const lensRadiusX=.166;
-      const lensRadiusY=.130;
-      const lensDepth=.116;
+      const lensCenter=[centreX,centreY,.568];
+      const lensRadiusX=.188;
+      const lensRadiusY=.148;
+      const lensDepth=.122;
       const radialSteps=software?11:mobile?12:14;
       const angularSteps=software?72:mobile?88:104;
       function lensVertex(radial,angle){
@@ -1618,7 +1618,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0025,.0060,.0075),vec3(.043,.061,.062),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0028,.0064,.0080),vec3(.052,.073,.074),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.96,.97,.92)*keySpec*.235;
         col+=vec3(.42,.56,.57)*sideSpec*.185;
@@ -1633,13 +1633,13 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        float studioStripeA=exp(-pow((vLocal.x+.28)/.072,2.0))*smoothstep(-.88,.78,vLocal.y)*bodyMask;
-        float studioStripeB=exp(-pow((vLocal.x-.36)/.062,2.0))*smoothstep(-.72,.84,vLocal.y)*bodyMask;
+        float studioStripeA=exp(-pow((vLocal.x+.28)/.050,2.0))*smoothstep(-.84,.76,vLocal.y)*bodyMask;
+        float studioStripeB=exp(-pow((vLocal.x-.36)/.052,2.0))*smoothstep(-.70,.82,vLocal.y)*bodyMask;
         col+=vec3(.42,.46,.44)*pow(broadKey,3.20)*.046*bodyMask;
         col+=vec3(.12,.23,.24)*pow(broadSide,2.90)*.042*bodyMask;
         col+=vec3(.07,.044,.028)*pow(broadWarm,2.90)*.010*bodyMask;
-        col+=vec3(.98,1.00,.96)*studioStripeA*.315;
-        col+=vec3(.25,.50,.54)*studioStripeB*.145;
+        col+=vec3(.98,1.00,.96)*studioStripeA*.205;
+        col+=vec3(.25,.50,.54)*studioStripeB*.105;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1650,7 +1650,7 @@
         float sculptValleyA=exp(-pow((vLocal.x+.035)/.112,2.0)-pow((vLocal.y-.22)/.44,2.0))*bodyMask;
         float sculptValleyB=exp(-pow((vLocal.x-.19)/.102,2.0)-pow((vLocal.y+.30)/.27,2.0))*bodyMask;
         float sculptShoulder=exp(-pow((vLocal.x+.34)/.23,2.0)-pow((vLocal.y-.38)/.27,2.0))*bodyMask;
-        col*=1.0-.20*sculptValleyA-.14*sculptValleyB;
+        col*=1.0-.24*sculptValleyA-.17*sculptValleyB;
         col+=vec3(.044,.110,.121)*sculptShoulder*.095;
         col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
         col+=vec3(.024,.090,.100)*glassEdge*.245;
@@ -1747,6 +1747,7 @@
     root.dataset.fxNativeMagStudioR1861='three-mass-smoky-glass-sculpt-narrow-softboxes-deep-optic';
     root.dataset.fxNativeMagStudioR1862='lobed-smoky-glass-sculpt-embedded-optic-dimensional-studio-chamber';
     root.dataset.fxNativeMagStudioR1863='soft-sculpt-creases-lobed-volume-photographic-depth';
+    root.dataset.fxNativeMagStudioR1864='larger-recessed-optic-narrow-softbox-deeper-sculpt-valleys';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
