@@ -973,8 +973,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.03) contrast(1.16) saturate(.96)'
-      : 'brightness(1.05) contrast(1.10) saturate(.98)';
+      ? 'brightness(1.06) contrast(1.12) saturate(.94)'
+      : 'brightness(1.06) contrast(1.08) saturate(.96)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1427,8 +1427,8 @@
         col+=vec3(.016,.050,.058)*edgeTransmission*.26;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        col+=vec3(.066,.128,.132)*iceVolume*(.090+.078*(1.0-facing));
-        col+=vec3(.020,.029,.029)*bodyMask*(.30+.70*facing);
+        col+=vec3(.082,.144,.146)*iceVolume*(.105+.085*(1.0-facing));
+        col+=vec3(.038,.046,.044)*bodyMask*(.34+.66*facing);
         col+=vec3(.040,.075,.078)*strata*iceVolume*.050;
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.023,.065,.078),vec3(.045,.020,.058),chromaSide)*fresnel*bodyMask*.105;
@@ -1586,8 +1586,8 @@
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
-        col+=vec3(.088,.158,.160)*iceVolume*(.120+.095*(1.0-facing));
-        col+=vec3(.024,.033,.032)*bodyMask*(.30+.70*facing);
+        col+=vec3(.105,.174,.176)*iceVolume*(.135+.100*(1.0-facing));
+        col+=vec3(.045,.053,.051)*bodyMask*(.34+.66*facing);
         col+=vec3(.050,.082,.083)*grain*iceVolume*.055;
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
@@ -1662,6 +1662,7 @@
     root.dataset.fxNativeMagStudioR1850='silver-optic-bezel-readable-ice-depth-cross-tier';
     root.dataset.fxNativeMagStudioR1851='vertical-cut-ice-sculpt-larger-recessed-silver-optic-crisp-studio-bands';
     root.dataset.fxNativeMagStudioR1853='sealed-raster-seams-silver-ice-midtone-internal-striation-optic-parity';
+    root.dataset.fxNativeMagStudioR1855='bright-silver-ice-midtone-uncrushed-oled-studio-compositor';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
