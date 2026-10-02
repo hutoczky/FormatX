@@ -491,10 +491,10 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.238*g(dir[0],dir[1],-.44,.34,.34,.28);
-        const rightMass=.168*g(dir[0],dir[1], .40,.02,.30,.31);
-        const lowerMass=.152*g(dir[0],dir[1],-.28,-.43,.34,.24);
-        const waistCut=.122*g(dir[0],dir[1], .14,-.18,.32,.19);
+        const upperMass=.310*g(dir[0],dir[1],-.46,.35,.34,.28);
+        const rightMass=.226*g(dir[0],dir[1], .42,.02,.30,.31);
+        const lowerMass=.198*g(dir[0],dir[1],-.30,-.44,.34,.24);
+        const waistCut=.166*g(dir[0],dir[1], .15,-.18,.31,.18);
 
         radius*=upperTaper*lowerTaper*(1+upperMass+rightMass+lowerMass-waistCut);
 
@@ -512,8 +512,8 @@
         ];
 
         /* Art-directed lean, three-mass silhouette and shallow planar caps. */
-        p[0]+=-.086+.150*cp-.066*Math.pow(Math.max(-cp,0),1.34)
-          +.040*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[0]+=-.102+.176*cp-.080*Math.pow(Math.max(-cp,0),1.34)
+          +.048*Math.sin(theta*1.35+phi*.42)*shoulder;
         p[1]+=.012*Math.sin(theta+0.4)*shoulder;
         p[2]-=.032*dir[0]+.012*Math.sin(theta*2.0)*shoulder;
 
@@ -907,7 +907,7 @@
     if(!auditMode){
       const centreX=.046,centreY=-.016;
       const bezelSteps=software?72:mobile?88:104,bezelTubeSteps=software?7:mobile?8:10,bezelZ=.558;
-      const bezelMajorX=.139,bezelMajorY=.116,bezelTube=.0105;
+      const bezelMajorX=.143,bezelMajorY=.118,bezelTube=.0065;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -931,10 +931,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.568];
-      const lensRadiusX=.162;
-      const lensRadiusY=.127;
-      const lensDepth=.108;
+      const lensCenter=[centreX,centreY,.566];
+      const lensRadiusX=.166;
+      const lensRadiusY=.130;
+      const lensDepth=.116;
       const radialSteps=software?11:mobile?12:14;
       const angularSteps=software?72:mobile?88:104;
       function lensVertex(radial,angle){
@@ -1117,8 +1117,8 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*.038*uLayer;
-        float yaw=.46+uRotation.y+uPointer.x*.16+uTime*.012;
-        float pitch=-.082+uRotation.x-uPointer.y*.10+.008*sin(uTime*.19);
+        float yaw=.54+uRotation.y+uPointer.x*.15+uTime*.010;
+        float pitch=-.102+uRotation.x-uPointer.y*.09+.007*sin(uTime*.19);
         float roll=-.058+uRotation.z+uPointer.x*uPointer.y*.026+.006*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
@@ -1132,9 +1132,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.675':'.825'};
-        projected.x+=${mobile?'.008':'.052'};
-        projected.y+=${mobile?'.038':'.002'};
+        projected*= ${mobile?'.685':'.825'};
+        projected.x+=${mobile?'.012':'.052'};
+        projected.y+=${mobile?'.034':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1599,7 +1599,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.055+ndl*.190+sideLight*.125);
+        float lift=sat(.038+ndl*.140+sideLight*.090);
         float facetTone=.994+.012*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
@@ -1607,10 +1607,10 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0045,.0090,.0110),vec3(.070,.088,.088),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0025,.0060,.0075),vec3(.043,.061,.062),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
-        col+=vec3(.94,.95,.90)*keySpec*.310;
-        col+=vec3(.48,.60,.60)*sideSpec*.255;
+        col+=vec3(.96,.97,.92)*keySpec*.235;
+        col+=vec3(.42,.56,.57)*sideSpec*.185;
         col+=vec3(.022,.078,.090)*fresnel*.150;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
@@ -1622,13 +1622,13 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        float studioStripeA=exp(-pow((vLocal.x+.24)/.105,2.0))*smoothstep(-.86,.76,vLocal.y)*bodyMask;
-        float studioStripeB=exp(-pow((vLocal.x-.32)/.090,2.0))*smoothstep(-.70,.82,vLocal.y)*bodyMask;
-        col+=vec3(.50,.54,.52)*pow(broadKey,2.90)*.080*bodyMask;
-        col+=vec3(.15,.27,.28)*pow(broadSide,2.55)*.070*bodyMask;
-        col+=vec3(.08,.050,.032)*pow(broadWarm,2.60)*.016*bodyMask;
-        col+=vec3(.94,.99,.96)*studioStripeA*.245;
-        col+=vec3(.30,.52,.55)*studioStripeB*.110;
+        float studioStripeA=exp(-pow((vLocal.x+.28)/.072,2.0))*smoothstep(-.88,.78,vLocal.y)*bodyMask;
+        float studioStripeB=exp(-pow((vLocal.x-.36)/.062,2.0))*smoothstep(-.72,.84,vLocal.y)*bodyMask;
+        col+=vec3(.42,.46,.44)*pow(broadKey,3.20)*.046*bodyMask;
+        col+=vec3(.12,.23,.24)*pow(broadSide,2.90)*.042*bodyMask;
+        col+=vec3(.07,.044,.028)*pow(broadWarm,2.90)*.010*bodyMask;
+        col+=vec3(.98,1.00,.96)*studioStripeA*.315;
+        col+=vec3(.25,.50,.54)*studioStripeB*.145;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1640,9 +1640,9 @@
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
-        col+=vec3(.085,.185,.198)*iceVolume*(.165+.115*(1.0-facing));
-        col+=vec3(.030,.066,.071)*bodyMask*(.34+.66*facing);
-        col+=vec3(.044,.090,.096)*grain*iceVolume*.055;
+        col+=vec3(.052,.132,.145)*iceVolume*(.110+.085*(1.0-facing));
+        col+=vec3(.018,.047,.052)*bodyMask*(.30+.70*facing);
+        col+=vec3(.030,.070,.076)*grain*iceVolume*.032;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
@@ -1652,11 +1652,11 @@
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.003,.008,.010)
-          +vec3(.038,.052,.054)*(.12*ndl+.12*sideLight)
-          +vec3(.46,.50,.47)*keySpec*.12
-          +vec3(.022,.085,.096)*fresnel*.065
-          +vec3(.014,.022,.022)*(.10+.08*facing);
+        vec3 bezel=vec3(.008,.018,.020)
+          +vec3(.042,.060,.062)*(.10*ndl+.11*sideLight)
+          +vec3(.34,.39,.37)*keySpec*.075
+          +vec3(.020,.074,.084)*fresnel*.050
+          +vec3(.020,.030,.030)*(.10+.08*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1691,7 +1691,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.92,isLensMesh);
-        ${outputName}=vec4(tone(col*2.92),clamp(alpha,.985,1.0));
+        ${outputName}=vec4(tone(col*2.58),clamp(alpha,.985,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1728,6 +1728,7 @@
     root.dataset.fxNativeMagStudioR1858='recessed-optic-caustic-dark-bezel-teal-bioglass';
     root.dataset.fxNativeMagStudioR1859='proof-buffer-parity-for-zero-idle-mobile-capture';
     root.dataset.fxNativeMagStudioR1860='high-density-three-quarter-monolith-dark-integrated-optic';
+    root.dataset.fxNativeMagStudioR1861='three-mass-smoky-glass-sculpt-narrow-softboxes-deep-optic';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
