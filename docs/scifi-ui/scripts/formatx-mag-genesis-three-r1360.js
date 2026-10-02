@@ -155,6 +155,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1876='minimal-genome-prologue-clean-product-film-no-wire-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1878='crown-cleft-three-mass-product-sculpt-embedded-smoked-sensor-optic';
       document.documentElement.dataset.fxMagBirthVisualR1879='clean-elliptical-optic-recess-zero-seed-shell-crescents';
+      document.documentElement.dataset.fxMagBirthVisualR1883='mineral-product-glass-flush-elliptical-sensor-low-bloom-no-eye';
       document.documentElement.dataset.fxMagBirthVisualR1878='readable-genome-prologue-delayed-body-reveal-flush-product-optic';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
@@ -820,46 +821,46 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.198,104),
+        new T.CircleGeometry(.180,104),
         new T.MeshPhysicalMaterial({
-          color:0x07171b,metalness:.01,roughness:.10,
-          clearcoat:.92,clearcoatRoughness:.040,
-          emissive:0x021116,emissiveIntensity:.018,
-          specularIntensity:.94,specularColor:new T.Color(0xd8f6f7),
-          transparent:true,opacity:.99,side:T.DoubleSide
+          color:0x0b1b1e,metalness:.01,roughness:.14,
+          clearcoat:.82,clearcoatRoughness:.070,
+          emissive:0x01090b,emissiveIntensity:.006,
+          specularIntensity:.84,specularColor:new T.Color(0xd8f6f7),
+          transparent:true,opacity:.30,side:T.DoubleSide
         })
       );
       socketBack.position.z=.258;
-      socketBack.scale.set(1.12,.86,1);
+      socketBack.scale.set(1.26,.72,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.180,.0034,28,160),
+        new T.TorusGeometry(.164,.0026,28,160),
         new T.MeshPhysicalMaterial({
-          color:0x98aaa9,metalness:.12,roughness:.074,
-          clearcoat:.98,clearcoatRoughness:.030,
-          emissive:0x010607,emissiveIntensity:.004,
-          specularIntensity:1.0,specularColor:new T.Color(0xf6ffff),
-          envMapIntensity:2.70,transparent:true,opacity:.58
+          color:0x91a5a4,metalness:.10,roughness:.095,
+          clearcoat:.92,clearcoatRoughness:.050,
+          emissive:0x010506,emissiveIntensity:.002,
+          specularIntensity:.96,specularColor:new T.Color(0xf6ffff),
+          envMapIntensity:2.20,transparent:true,opacity:.32
         })
       );
       socketBezel.position.z=.274;
-      socketBezel.scale.set(1.10,.84,1);
+      socketBezel.scale.set(1.28,.70,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x03161b,metalness:0,roughness:.032,
-        clearcoat:.995,clearcoatRoughness:.018,
-        transmission:.76,thickness:.42,ior:1.51,
-        attenuationColor:new T.Color(0x07505f),attenuationDistance:.26,
-        emissive:0x03252d,emissiveIntensity:.030,
-        envMapIntensity:2.90,
+        color:0x06191d,metalness:0,roughness:.045,
+        clearcoat:.96,clearcoatRoughness:.032,
+        transmission:.64,thickness:.38,ior:1.50,
+        attenuationColor:new T.Color(0x06414d),attenuationDistance:.22,
+        emissive:0x02171c,emissiveIntensity:.014,
+        envMapIntensity:2.55,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.166,104,60),lensMat);
-      lens.scale.set(1.22,.93,.19);
+      const lens=new T.Mesh(new T.SphereGeometry(.158,104,60),lensMat);
+      lens.scale.set(1.42,.74,.18);
       lens.position.set(-.014,.004,.284);
       this.irisGroup.add(lens);
 
@@ -871,20 +872,21 @@
         })
       );
       aperture.position.z=.316;
+      aperture.visible=false;
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
-        new T.TorusGeometry(.122,.0034,18,128),
+        new T.TorusGeometry(.110,.0024,18,128),
         new T.MeshPhysicalMaterial({
-          color:0x9fb4b3,metalness:.08,roughness:.064,
-          clearcoat:.99,clearcoatRoughness:.022,
-          emissive:0x06313a,emissiveIntensity:.030,
-          specularIntensity:1.0,specularColor:new T.Color(0xf7ffff),
-          transparent:true,opacity:.46
+          color:0x789697,metalness:.06,roughness:.095,
+          clearcoat:.90,clearcoatRoughness:.055,
+          emissive:0x021216,emissiveIntensity:.008,
+          specularIntensity:.92,specularColor:new T.Color(0xf7ffff),
+          transparent:true,opacity:.18
         })
       );
       glassRing.position.z=.314;
-      glassRing.scale.set(1.12,.86,1);
+      glassRing.scale.set(1.34,.68,1);
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
@@ -984,14 +986,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x31484b,roughness:.072,metalness:.001,
-        clearcoat:.995,clearcoatRoughness:.020,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00046,
+        color:0x2b4043,roughness:.112,metalness:.001,
+        clearcoat:.90,clearcoatRoughness:.060,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00135,
         transparent:true,opacity:0,
-        transmission:.18,thickness:.64,ior:1.49,
-        attenuationColor:new T.Color(0x12373d),attenuationDistance:.42,
-        emissive:0x030c0f,emissiveIntensity:.006,
-        envMapIntensity:3.24,
+        transmission:.10,thickness:.70,ior:1.48,
+        attenuationColor:new T.Color(0x102d32),attenuationDistance:.34,
+        emissive:0x02090b,emissiveIntensity:.003,
+        envMapIntensity:2.82,
         specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
         sheen:.012,sheenColor:new T.Color(0x789294),sheenRoughness:.34,
         depthWrite:true
@@ -1869,8 +1871,8 @@
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=irisAwake>.004;
       this.irisGroup.scale.setScalar((this.mobileProfile?1.34:1.30)*(1+irisAwake*.022)*pulse);
-      if(this.irisCorona)this.irisCorona.material.opacity=.012*irisAwake;
-      this.glowSprite.material.opacity=(.0015+.005*irisAwake)*irisAwake*pulse;
+      if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
+      this.glowSprite.material.opacity=(.0006+.0018*irisAwake)*irisAwake*pulse;
       this.glowSprite.scale.setScalar(.46+irisAwake*.05+this.interactionImpulse*.012);
       this.coreInner.material.opacity=.016*irisAwake*(1-seedHandoff);
       this.coreLight.intensity=.06*coreLife+irisAwake*.32+this.interactionImpulse*.06;
@@ -1882,7 +1884,7 @@
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.rotation.y=(this.mobileProfile?.34:.30)+Math.sin(time*.00011)*.008+this.interactionX*.014;
+      this.organicGroup.rotation.y=(this.mobileProfile?.30:.27)+Math.sin(time*.00011)*.007+this.interactionX*.012;
       this.organicGroup.rotation.x=-.080+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
       const finalScale=this.mobileProfile?1.20:1.30;
