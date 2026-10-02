@@ -9,8 +9,8 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261002-r1875-microfacet-ice';
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-zYPdLmBmqbpiLfIO+1K6XoFLs1t1lXK0gzh2X4ERFU0='";
+const STARTUP_REVISION = '20261002-r1876-minimal-genome-prologue';
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-TYj76ycJ9j8buBY4+QdO0oAOWEJgPc9qN73PcMlWxkc='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -171,7 +171,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1856-genome-glass-three-quarter',
-    rewrites: [[/formatx-mag-genesis-three-r1360\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1360.js?v=20261002-r1874-flush-optic-studio']],
+    rewrites: [[/formatx-mag-genesis-three-r1360\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1360.js?v=20261002-r1876-minimal-genome-prologue']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
