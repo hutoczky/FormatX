@@ -405,7 +405,7 @@
         crystalNormal = crystalNormal.map(value => -value);
       }
       const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-      const bodySeamOverlap=(software||mobile)&&facet<2.0?.0110:0;
+      const bodySeamOverlap=facet<2.0?(software?.0180:(mobile?.0140:0)):0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
@@ -1427,7 +1427,9 @@
         col+=vec3(.016,.050,.058)*edgeTransmission*.26;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        col+=vec3(.050,.108,.114)*iceVolume*(.065+.065*(1.0-facing));
+        col+=vec3(.066,.128,.132)*iceVolume*(.090+.078*(1.0-facing));
+        col+=vec3(.020,.029,.029)*bodyMask*(.30+.70*facing);
+        col+=vec3(.040,.075,.078)*strata*iceVolume*.050;
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.023,.065,.078),vec3(.045,.020,.058),chromaSide)*fresnel*bodyMask*.105;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
@@ -1455,8 +1457,8 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.050,.058,.058)
-          +vec3(.185,.205,.198)*(.16*ndl+.22*sideLight)
+        vec3 cartilage=vec3(.072,.082,.080)
+          +vec3(.210,.228,.218)*(.16*ndl+.22*sideLight)
           +vec3(.94,.96,.91)*softboxA*.26
           +vec3(.42,.53,.54)*sideSpec*.18
           +vec3(.040,.13,.145)*fresnel*.12
@@ -1584,12 +1586,14 @@
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
         col+=vec3(.010,.024,.026)*frontDepth*.040;
-        col+=vec3(.075,.145,.148)*iceVolume*(.105+.090*(1.0-facing));
+        col+=vec3(.088,.158,.160)*iceVolume*(.120+.095*(1.0-facing));
+        col+=vec3(.024,.033,.032)*bodyMask*(.30+.70*facing);
+        col+=vec3(.050,.082,.083)*grain*iceVolume*.055;
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.060,.070,.069)
-          +vec3(.220,.238,.228)*(.18*ndl+.16*sideLight)
+        vec3 bezel=vec3(.095,.108,.104)
+          +vec3(.245,.265,.252)*(.18*ndl+.16*sideLight)
           +vec3(1.00,1.00,.96)*keySpec*.42
           +vec3(.050,.130,.138)*fresnel*.10
           +vec3(.095,.108,.103)*(.14+.12*facing);
@@ -1657,6 +1661,7 @@
     root.dataset.fxNativeMagStudioR1846='cross-tier-cold-volume-smoked-optic-parity';
     root.dataset.fxNativeMagStudioR1850='silver-optic-bezel-readable-ice-depth-cross-tier';
     root.dataset.fxNativeMagStudioR1851='vertical-cut-ice-sculpt-larger-recessed-silver-optic-crisp-studio-bands';
+    root.dataset.fxNativeMagStudioR1853='sealed-raster-seams-silver-ice-midtone-internal-striation-optic-parity';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
