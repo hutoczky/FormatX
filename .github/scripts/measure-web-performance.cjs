@@ -14,46 +14,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
     window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
-    const fxCssSnapshot = node => {
-      if (!(node instanceof Element)) return null;
-      const rect = node.getBoundingClientRect();
-      const cs = getComputedStyle(node);
-      const matched = [];
-      const visit = (rules, source, active = true) => {
-        for (const rule of Array.from(rules || [])) {
-          if (rule instanceof CSSMediaRule) {
-            visit(rule.cssRules, source, active && matchMedia(rule.conditionText).matches);
-            continue;
-          }
-          if (rule instanceof CSSSupportsRule) {
-            let ok = false;
-            try { ok = CSS.supports(rule.conditionText); } catch (_) {}
-            visit(rule.cssRules, source, active && ok);
-            continue;
-          }
-          if (!(rule instanceof CSSStyleRule) || !active) continue;
-          let yes = false;
-          try { yes = node.matches(rule.selectorText); } catch (_) {}
-          if (!yes) continue;
-          const d = {};
-          for (const name of ['position','display','width','min-width','max-width','height','min-height','max-height','padding','inset','top','right','bottom','left','aspect-ratio','box-sizing','transform']) {
-            const value = rule.style.getPropertyValue(name);
-            if (value) d[name] = value + (rule.style.getPropertyPriority(name) ? ' !important' : '');
-          }
-          if (Object.keys(d).length) matched.push({ source, selector: rule.selectorText, declarations: d });
-        }
-      };
-      for (const sheet of Array.from(document.styleSheets)) {
-        let rules;
-        try { rules = sheet.cssRules; } catch (_) { continue; }
-        visit(rules, sheet.href || 'inline');
-      }
-      return {
-        rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
-        computed:{position:cs.position,display:cs.display,width:cs.width,minWidth:cs.minWidth,maxWidth:cs.maxWidth,height:cs.height,minHeight:cs.minHeight,maxHeight:cs.maxHeight,padding:cs.padding,boxSizing:cs.boxSizing,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,transform:cs.transform},
-        matched
-      };
-    };
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -78,8 +38,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
             sources: (entry.sources || []).map(source => ({
               selector: selector(source.node),
               previousRect: source.previousRect,
-              currentRect: source.currentRect,
-              css: /fx-three-sound|fx-reference-ask|fx-reference-controls-r204/.test(selector(source.node)) ? fxCssSnapshot(source.node) : null
+              currentRect: source.currentRect
             }))
           });
         }
@@ -90,47 +49,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
         for (const entry of list.getEntries()) window.__fxPerf.longTaskMs += entry.duration;
       }).observe({ type: 'longtask', buffered: true });
     } catch (_) {}
-    window.__fxPerf.controlTimeline = [];
-    const captureControlFrame = label => {
-      const sound = document.querySelector('#hero .fx-three-sound');
-      const ask = document.querySelector('#hero .fx-reference-ask');
-      const controls = document.querySelector('#hero .fx-reference-controls-r204');
-      const snap = element => {
-        if (!(element instanceof HTMLElement)) return null;
-        const r = element.getBoundingClientRect();
-        const cs = getComputedStyle(element);
-        return {
-          parent: element.parentElement?.className || '',
-          x:+r.x.toFixed(2), y:+r.y.toFixed(2), width:+r.width.toFixed(2), height:+r.height.toFixed(2),
-          position:cs.position, display:cs.display, visibility:cs.visibility, opacity:cs.opacity,
-          widthCss:cs.width, heightCss:cs.height, transform:cs.transform
-        };
-      };
-      window.__fxPerf.controlTimeline.push({
-        label, at:+performance.now().toFixed(2),
-        sound:snap(sound), ask:snap(ask), controls:snap(controls),
-        sheets:Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link=>({
-          href:link.getAttribute('href')||'', media:link.media||'', disabled:Boolean(link.disabled)
-        }))
-      });
-    };
-    const scheduleCapture = () => {
-      captureControlFrame('sync');
-      requestAnimationFrame(() => {
-        captureControlFrame('raf1');
-        requestAnimationFrame(() => captureControlFrame('raf2'));
-      });
-      for (const delay of [25,50,75,100,150,200,250,300,350,400,450,500,650]) {
-        setTimeout(() => captureControlFrame('t'+delay), delay);
-      }
-    };
-    document.addEventListener('DOMContentLoaded', scheduleCapture, { once:true });
-    document.addEventListener('formatx:controlownerready', () => captureControlFrame('controlownerready'));
-    new MutationObserver(mutations => {
-      if (!mutations.some(m => m.type === 'attributes' && m.target instanceof HTMLLinkElement)) return;
-      captureControlFrame('stylesheet-mutation');
-    }).observe(document.documentElement, { subtree:true, attributes:true, attributeFilter:['media','disabled'] });
-
     document.addEventListener('formatx:introcomplete', () => {
       window.__fxPerf.introComplete = performance.now();
     }, { once: true });
@@ -192,53 +110,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     });
   });
 
-  const controlCssDiagnostic = await page.evaluate(() => {
-    const element = document.querySelector('#hero .fx-three-sound');
-    if (!(element instanceof HTMLElement)) return null;
-    const rect = element.getBoundingClientRect();
-    const computed = getComputedStyle(element);
-    const matches = [];
-    const visit = (rules, source, active = true) => {
-      for (const rule of Array.from(rules || [])) {
-        if (rule instanceof CSSMediaRule) {
-          const mediaActive = active && matchMedia(rule.conditionText).matches;
-          visit(rule.cssRules, source, mediaActive);
-          continue;
-        }
-        if (rule instanceof CSSSupportsRule) {
-          let supports = false;
-          try { supports = CSS.supports(rule.conditionText); } catch (_) {}
-          visit(rule.cssRules, source, active && supports);
-          continue;
-        }
-        if (!(rule instanceof CSSStyleRule) || !active) continue;
-        let matched = false;
-        try { matched = element.matches(rule.selectorText); } catch (_) {}
-        if (!matched) continue;
-        const interesting = {};
-        for (const name of ['position','display','width','min-width','max-width','height','min-height','max-height','padding','inset','top','right','bottom','left','aspect-ratio','box-sizing','transform']) {
-          const value = rule.style.getPropertyValue(name);
-          if (value) interesting[name] = value + (rule.style.getPropertyPriority(name) ? ' !important' : '');
-        }
-        if (Object.keys(interesting).length) matches.push({ source, selector: rule.selectorText, declarations: interesting });
-      }
-    };
-    for (const sheet of Array.from(document.styleSheets)) {
-      let rules;
-      try { rules = sheet.cssRules; } catch (_) { continue; }
-      visit(rules, sheet.href || 'inline');
-    }
-    return {
-      rect: { x:rect.x,y:rect.y,width:rect.width,height:rect.height },
-      computed: {
-        position:computed.position,display:computed.display,width:computed.width,minWidth:computed.minWidth,maxWidth:computed.maxWidth,
-        height:computed.height,minHeight:computed.minHeight,maxHeight:computed.maxHeight,padding:computed.padding,boxSizing:computed.boxSizing,
-        top:computed.top,right:computed.right,bottom:computed.bottom,left:computed.left,transform:computed.transform
-      },
-      matches
-    };
-  });
-
   const beforeResize = await page.evaluate(() => ({ width: innerWidth, height: innerHeight, scrollWidth: document.documentElement.scrollWidth }));
   await page.setViewportSize({ width: 900, height: 1440 });
   await page.waitForTimeout(350);
@@ -263,7 +134,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       largestContentfulPaint: window.__fxPerf.lcp,
       cumulativeLayoutShift: window.__fxPerf.cls,
       layoutShifts: window.__fxPerf.shifts,
-      controlTimeline: window.__fxPerf.controlTimeline,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
       introComplete: window.__fxPerf.introComplete,
       renderer: document.documentElement.dataset.fxRenderer || null,
@@ -290,7 +160,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
     metrics,
     interaction_response_ms: interaction,
     scroll_sample: scrollSample,
-    control_css_diagnostic: controlCssDiagnostic,
     viewport_change: { before: beforeResize, after: afterResize },
     background_restore_ms: backgroundRestoreMs,
     interpretation: 'Raw CI measurement only. Do not present as phone, customer or production performance without a matching environment record.'
