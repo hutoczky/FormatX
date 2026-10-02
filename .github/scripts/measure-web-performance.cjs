@@ -14,6 +14,46 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
     window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
+    const fxCssSnapshot = node => {
+      if (!(node instanceof Element)) return null;
+      const rect = node.getBoundingClientRect();
+      const cs = getComputedStyle(node);
+      const matched = [];
+      const visit = (rules, source, active = true) => {
+        for (const rule of Array.from(rules || [])) {
+          if (rule instanceof CSSMediaRule) {
+            visit(rule.cssRules, source, active && matchMedia(rule.conditionText).matches);
+            continue;
+          }
+          if (rule instanceof CSSSupportsRule) {
+            let ok = false;
+            try { ok = CSS.supports(rule.conditionText); } catch (_) {}
+            visit(rule.cssRules, source, active && ok);
+            continue;
+          }
+          if (!(rule instanceof CSSStyleRule) || !active) continue;
+          let yes = false;
+          try { yes = node.matches(rule.selectorText); } catch (_) {}
+          if (!yes) continue;
+          const d = {};
+          for (const name of ['position','display','width','min-width','max-width','height','min-height','max-height','padding','inset','top','right','bottom','left','aspect-ratio','box-sizing','transform']) {
+            const value = rule.style.getPropertyValue(name);
+            if (value) d[name] = value + (rule.style.getPropertyPriority(name) ? ' !important' : '');
+          }
+          if (Object.keys(d).length) matched.push({ source, selector: rule.selectorText, declarations: d });
+        }
+      };
+      for (const sheet of Array.from(document.styleSheets)) {
+        let rules;
+        try { rules = sheet.cssRules; } catch (_) { continue; }
+        visit(rules, sheet.href || 'inline');
+      }
+      return {
+        rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
+        computed:{position:cs.position,display:cs.display,width:cs.width,minWidth:cs.minWidth,maxWidth:cs.maxWidth,height:cs.height,minHeight:cs.minHeight,maxHeight:cs.maxHeight,padding:cs.padding,boxSizing:cs.boxSizing,top:cs.top,right:cs.right,bottom:cs.bottom,left:cs.left,transform:cs.transform},
+        matched
+      };
+    };
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -38,7 +78,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
             sources: (entry.sources || []).map(source => ({
               selector: selector(source.node),
               previousRect: source.previousRect,
-              currentRect: source.currentRect
+              currentRect: source.currentRect,
+              css: /fx-three-sound|fx-reference-ask|fx-reference-controls-r204/.test(selector(source.node)) ? fxCssSnapshot(source.node) : null
             }))
           });
         }
