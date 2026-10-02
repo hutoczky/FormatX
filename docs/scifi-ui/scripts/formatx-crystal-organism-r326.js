@@ -477,9 +477,9 @@
         /* R1843 — authored ice-block envelope. A sub-quadratic superellipsoid
            keeps the body smooth while giving it broad mineral shoulders and
            cut corners instead of the previous oval/egg read. */
-        const ax=.565+.132*shoulder;
-        const ay=1.035+.038*shoulder;
-        const az=.505+.098*shoulder;
+        const ax=.645+.118*shoulder;
+        const ay=1.025+.035*shoulder;
+        const az=.535+.095*shoulder;
         const exponent=1.62;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
@@ -487,20 +487,25 @@
           Math.pow(Math.abs(dir[2])/az,exponent);
         let radius=1/Math.pow(Math.max(.001,lp),1/exponent);
 
-        const g=(x,y,cx,cy,sx,sy)=>{
-          const dx=(x-cx)/sx,dy=(y-cy)/sy;
-          return Math.exp(-(dx*dx+dy*dy));
+        const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+        const mass=(cy,sy,ca,sa,amp)=>{
+          const dy=(dir[1]-cy)/sy;
+          const da=angleDelta(theta,ca)/sa;
+          return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperMass=.405*g(dir[0],dir[1],-.46,.36,.35,.29);
-        const rightMass=.345*g(dir[0],dir[1], .46,.05,.32,.31);
-        const lowerMass=.285*g(dir[0],dir[1],-.31,-.45,.34,.25);
-        const waistCut=.255*g(dir[0],dir[1], .10,-.16,.33,.21);
-        const leftWaistCut=.165*g(dir[0],dir[1],-.67,-.03,.23,.17);
-        const rightLowerCut=.165*g(dir[0],dir[1], .48,-.35,.24,.19);
-        const crownNotch=.188*g(dir[0],dir[1],-.018,.72,.160,.122);
-        const crownLeftLift=.078*g(dir[0],dir[1],-.35,.65,.28,.20);
-        const crownRightLift=.062*g(dir[0],dir[1], .31,.62,.27,.20);
-        const opticShoulder=.034*g(dir[0],dir[1], .10,.18,.26,.24);
+        /* R1894 — angular mass field matches the cinematic sculpt instead of
+           scaling the whole radius from x/y alone. This makes the three fused
+           lobes readable in silhouette from the production camera. */
+        const upperMass=mass(.39,.33,Math.PI,.82,.360);
+        const rightMass=mass(.03,.38,0,.76,.300);
+        const lowerMass=mass(-.44,.29,2.46,.76,.245);
+        const waistCut=mass(-.17,.24,-.54,.88,.215);
+        const leftWaistCut=mass(-.02,.18,Math.PI,.52,.115);
+        const rightLowerCut=mass(-.34,.21,-.12,.58,.115);
+        const crownNotch=mass(.72,.12,Math.PI,.46,.135);
+        const crownLeftLift=mass(.65,.20,Math.PI*.88,.62,.055);
+        const crownRightLift=mass(.62,.20,.22,.60,.045);
+        const opticShoulder=mass(.18,.24,Math.PI*.50,.58,.025);
 
         radius*=upperTaper*lowerTaper*
           (1+upperMass+rightMass+lowerMass+crownLeftLift+crownRightLift+opticShoulder-waistCut-leftWaistCut-rightLowerCut-crownNotch);
@@ -519,11 +524,11 @@
         ];
 
         /* Art-directed lean, three-mass silhouette and shallow planar caps. */
-        p[0]+=-.070+.100*cp-.042*Math.pow(Math.max(-cp,0),1.34)
-          -.042*upperMass+.050*rightMass-.028*lowerMass
-          +.014*Math.sin(theta*1.35+phi*.42)*shoulder;
-        p[1]+=.042*upperMass-.026*lowerMass+.012*Math.sin(theta+0.4)*shoulder;
-        p[2]-=.044*dir[0]+.020*Math.sin(theta*2.0+phi*.55)*shoulder;
+        p[0]+=-.072+.094*cp-.040*Math.pow(Math.max(-cp,0),1.34)
+          -.050*upperMass+.054*rightMass-.030*lowerMass
+          +.012*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[1]+=.040*upperMass-.026*lowerMass+.010*Math.sin(theta+0.4)*shoulder;
+        p[2]-=.040*dir[0]+.014*Math.sin(theta*2.0+phi*.55)*shoulder;
 
         /* Broad soft-cut planes turn the volume into a designed mineral object
            while keeping enough curvature for continuous studio reflections. */
@@ -918,7 +923,7 @@
     }
 
     {
-      const centreX=-.105,centreY=.018;
+      const centreX=-.090,centreY=.040;
       const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.492;
       const bezelMajorX=.190,bezelMajorY=.145,bezelTube=.0019;
       const bezelVertex=(angle,tubeAngle)=>{
@@ -1145,7 +1150,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.680':'.846'};
+        projected*= ${mobile?'.640':'.846'};
         projected.x+=${mobile?'.002':'.040'};
         projected.y+=${mobile?'.016':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
@@ -1570,8 +1575,8 @@
           +vec3(.50,.61,.63)*sideSpec*.14
           +vec3(.090,.22,.25)*fresnel*.17
           +vec3(.010,.105,.130)*lensInner*(.11+.10*uEnergy)
-          +vec3(.070,.40,.49)*lensRing*(.18+.10*uEnergy)
-          +vec3(.025,.31,.38)*lensIris*(.22+.14*uEnergy)
+          +vec3(.085,.50,.60)*lensRing*(.22+.12*uEnergy)
+          +vec3(.045,.52,.62)*lensIris*(.30+.17*uEnergy)
           +vec3(.76,.94,.93)*lensHot*(.17+.05*uEnergy)
           +vec3(.050,.20,.24)*electric*(.10+.09*uEnergy)
           +vec3(.88,.95,.92)*coreFlash*.20
@@ -1760,6 +1765,7 @@
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
     root.dataset.fxNativeMagStudioR1892='audit-parity-recessed-optic-soft-trilobate-silhouette';
+    root.dataset.fxNativeMagStudioR1894='cinematic-angular-mass-parity-breathing-room-living-iris';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
