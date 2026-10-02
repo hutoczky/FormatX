@@ -480,7 +480,7 @@
         const ax=.600+.145*shoulder;
         const ay=.975+.030*shoulder;
         const az=.520+.100*shoulder;
-        const exponent=1.34;
+        const exponent=1.30;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
           Math.pow(Math.abs(dir[1])/ay,exponent)+
@@ -491,12 +491,13 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.310*g(dir[0],dir[1],-.46,.35,.34,.28);
-        const rightMass=.226*g(dir[0],dir[1], .42,.02,.30,.31);
-        const lowerMass=.198*g(dir[0],dir[1],-.30,-.44,.34,.24);
-        const waistCut=.166*g(dir[0],dir[1], .15,-.18,.31,.18);
+        const upperMass=.365*g(dir[0],dir[1],-.48,.36,.33,.27);
+        const rightMass=.285*g(dir[0],dir[1], .44,.02,.29,.30);
+        const lowerMass=.238*g(dir[0],dir[1],-.31,-.45,.33,.23);
+        const waistCut=.205*g(dir[0],dir[1], .14,-.17,.30,.18);
+        const rightLowerCut=.135*g(dir[0],dir[1], .39,-.36,.22,.19);
 
-        radius*=upperTaper*lowerTaper*(1+upperMass+rightMass+lowerMass-waistCut);
+        radius*=upperTaper*lowerTaper*(1+upperMass+rightMass+lowerMass-waistCut-rightLowerCut);
 
         const lowFreq=
           1
@@ -512,10 +513,10 @@
         ];
 
         /* Art-directed lean, three-mass silhouette and shallow planar caps. */
-        p[0]+=-.102+.176*cp-.080*Math.pow(Math.max(-cp,0),1.34)
-          +.048*Math.sin(theta*1.35+phi*.42)*shoulder;
-        p[1]+=.012*Math.sin(theta+0.4)*shoulder;
-        p[2]-=.032*dir[0]+.012*Math.sin(theta*2.0)*shoulder;
+        p[0]+=-.118+.196*cp-.090*Math.pow(Math.max(-cp,0),1.34)
+          +.054*Math.sin(theta*1.35+phi*.42)*shoulder;
+        p[1]+=.014*Math.sin(theta+0.4)*shoulder;
+        p[2]-=.044*dir[0]+.020*Math.sin(theta*2.0+phi*.55)*shoulder;
 
         /* Broad soft-cut planes turn the volume into a designed mineral object
            while keeping enough curvature for continuous studio reflections. */
@@ -1007,7 +1008,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 58% 52% at 49% 44%,rgba(118,172,176,.105) 0%,rgba(36,73,78,.052) 38%,rgba(5,16,20,.016) 62%,rgba(0,0,0,0) 78%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 62% 56% at 48% 43%,rgba(111,176,181,.145) 0%,rgba(35,79,85,.070) 34%,rgba(8,27,32,.030) 56%,rgba(0,0,0,0) 79%),radial-gradient(ellipse 40% 26% at 54% 78%,rgba(66,50,72,.035),rgba(0,0,0,0) 72%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1652,11 +1653,11 @@
         float chromaSide=.5+.5*n.x;
         col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
 
-        vec3 bezel=vec3(.008,.018,.020)
-          +vec3(.042,.060,.062)*(.10*ndl+.11*sideLight)
-          +vec3(.34,.39,.37)*keySpec*.075
-          +vec3(.020,.074,.084)*fresnel*.050
-          +vec3(.020,.030,.030)*(.10+.08*facing);
+        vec3 bezel=vec3(.012,.026,.028)
+          +vec3(.046,.066,.068)*(.10*ndl+.11*sideLight)
+          +vec3(.30,.36,.35)*keySpec*.060
+          +vec3(.018,.066,.076)*fresnel*.040
+          +vec3(.024,.036,.036)*(.10+.08*facing);
         col=mix(col,bezel,armorMask*.985);
 
         float pulse=0.0;
@@ -1677,8 +1678,8 @@
         float lensHot=exp(-pow(lensRadial/.082,2.0));
         float lensPupil=1.0-smoothstep(.055,.115,lensRadial);
         float lensGlint=exp(-pow((vUv.x-.34)/.065,2.0)-pow((vUv.y-.31)/.052,2.0));
-        vec3 optical=vec3(.0015,.006,.008)
-          +vec3(.010,.105,.135)*lensInner
+        vec3 optical=vec3(.0010,.0045,.0065)
+          +vec3(.008,.092,.122)*lensInner
           +vec3(.92,.96,.91)*keySpec*.225
           +vec3(.020,.072,.086)*fresnel*.085
           +vec3(.075,.38,.46)*lensRim*.205
@@ -1729,6 +1730,7 @@
     root.dataset.fxNativeMagStudioR1859='proof-buffer-parity-for-zero-idle-mobile-capture';
     root.dataset.fxNativeMagStudioR1860='high-density-three-quarter-monolith-dark-integrated-optic';
     root.dataset.fxNativeMagStudioR1861='three-mass-smoky-glass-sculpt-narrow-softboxes-deep-optic';
+    root.dataset.fxNativeMagStudioR1862='lobed-smoky-glass-sculpt-embedded-optic-dimensional-studio-chamber';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
