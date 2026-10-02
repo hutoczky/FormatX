@@ -976,14 +976,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x355e64,roughness:.068,metalness:.001,
+        color:0x26484f,roughness:.082,metalness:.001,
         clearcoat:.99,clearcoatRoughness:.024,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00105,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00046,
         transparent:true,opacity:0,
-        transmission:.42,thickness:.56,ior:1.49,
-        attenuationColor:new T.Color(0x16454c),attenuationDistance:.42,
+        transmission:.28,thickness:.60,ior:1.49,
+        attenuationColor:new T.Color(0x153f46),attenuationDistance:.50,
         emissive:0x041114,emissiveIntensity:.010,
-        envMapIntensity:3.38,
+        envMapIntensity:3.10,
         specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
         sheen:.012,sheenColor:new T.Color(0x789294),sheenRoughness:.34,
         depthWrite:true
