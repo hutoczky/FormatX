@@ -972,48 +972,20 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
-    inset:1% 3% 0!important;
-    clip-path:polygon(
-      43% 1%,
-      58% 0,
-      72% 8%,
-      84% 21%,
-      92% 39%,
-      90% 55%,
-      80% 70%,
-      67% 83%,
-      54% 98%,
-      41% 94%,
-      27% 84%,
-      15% 68%,
-      8% 50%,
-      10% 34%,
-      19% 18%,
-      31% 7%
-    )!important;
+    inset:1% 4% 0!important;
+    clip-path:none!important;
+    border-radius:44% 56% 50% 50% / 39% 43% 57% 61%!important;
+    transform:rotate(-5deg) skewX(-1.5deg)!important;
     background:
-      radial-gradient(ellipse 34% 62% at 31% 22%,rgba(226,239,235,.34),rgba(122,143,139,.13) 32%,transparent 66%),
-      radial-gradient(ellipse 31% 54% at 79% 68%,rgba(57,91,94,.24),transparent 68%),
-      linear-gradient(151deg,transparent 0 25%,rgba(196,212,207,.11) 26% 30%,transparent 31% 100%),
-      linear-gradient(31deg,transparent 0 45%,rgba(6,16,20,.78) 46% 51%,transparent 52% 100%),
-      linear-gradient(101deg,transparent 0 58%,rgba(92,121,120,.14) 59% 62%,transparent 63% 100%),
-      conic-gradient(
-        from 17deg at 47% 48%,
-        rgba(48,67,67,.98),
-        rgba(19,32,34,.99) 12%,
-        rgba(67,87,85,.96) 25%,
-        rgba(15,27,30,.995) 40%,
-        rgba(58,79,78,.97) 53%,
-        rgba(18,31,33,.995) 67%,
-        rgba(76,94,90,.95) 81%,
-        rgba(14,25,28,.995) 92%,
-        rgba(43,62,62,.98)
-      )!important;
+      radial-gradient(ellipse 24% 62% at 25% 27%,rgba(232,246,241,.26),rgba(123,149,145,.10) 38%,transparent 72%),
+      radial-gradient(ellipse 20% 58% at 67% 40%,rgba(112,160,160,.16),transparent 70%),
+      radial-gradient(ellipse 72% 68% at 45% 54%,rgba(41,66,66,.24),rgba(7,15,18,.96) 70%,rgba(2,7,9,.995) 100%),
+      linear-gradient(132deg,rgba(76,103,100,.42),rgba(10,20,22,.92) 42%,rgba(3,9,12,.99) 76%)!important;
     box-shadow:
-      inset 12px -18px 30px rgba(0,4,7,.56),
-      inset -8px 10px 24px rgba(193,215,208,.055),
-      inset 1px 0 0 rgba(215,237,231,.08),
-      0 24px 48px rgba(0,0,0,.48)!important;
+      inset 16px -20px 34px rgba(0,3,6,.58),
+      inset -14px 12px 30px rgba(208,230,223,.045),
+      inset 1px 0 0 rgba(222,240,235,.055),
+      0 26px 52px rgba(0,0,0,.50)!important;
     opacity:.99!important;
   }
 
@@ -1033,6 +1005,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 }
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
 /* production-r1830-igloo-grade-dark-bioglass-first-paint */
+/* production-r1842-smooth-studio-organism-first-paint */
 
 
 /* R1820 — final hero typography is owned by the blocking P0 layer.
