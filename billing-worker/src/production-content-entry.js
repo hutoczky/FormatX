@@ -155,6 +155,7 @@ const DEFERRED_STYLE_PATHS = new Set([
   // R514: artifact-proven first-divergence owner; activate with the existing
   // R487 double-rAF scheduler after the first painted frame.
   '/scifi-ui/styles/formatx-critical-core-r227.css',
+  '/scifi-ui/styles/formatx-reference-production-r244.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
@@ -345,7 +346,7 @@ async function stabilizePublicResponse(request, url, response) {
   headers.set('Alt-Svc', 'clear');
   headers.set('X-FormatX-Transport-Stability', 'r514-critical-core-post-first-paint');
   headers.set('X-FormatX-Edge-Stability', `r514-critical-core:${STARTUP_REVISION}`);
-  headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
+  headers.set('X-FormatX-CSS-Scheduler', 'r1821-critical-core-reference-r487-post-first-paint');
   headers.set('X-FormatX-Motion-Scheduler', 'r507-single-css-animation-clock-owner');
   headers.set('X-FormatX-Mag-Clock-Owner', 'shape-sync-r476-only');
   if (request.method === 'HEAD') {
