@@ -17,7 +17,7 @@
     }
     if (!document.querySelector('script[data-fx-wda-hardening-r198]')) {
       const script = document.createElement('script');
-      script.src = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20261002-r1822-atomic-control-handoff';
+      script.src = '/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20260817-r198';
       script.defer = true;
       script.dataset.fxWdaHardeningR198 = 'true';
       document.head.appendChild(script);
