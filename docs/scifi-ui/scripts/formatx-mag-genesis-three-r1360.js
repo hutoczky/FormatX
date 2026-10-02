@@ -152,6 +152,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1849='narrow-softbox-ice-reflections-silver-smoked-optic-low-bloom';
       document.documentElement.dataset.fxMagBirthVisualR1852='vertical-cut-silver-ice-monolith-recessed-smoked-optic-visible-dna-studio-depth';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
+      document.documentElement.dataset.fxMagBirthVisualR1854='world-space-three-quarter-pose-smoked-recessed-optic-no-hud-ring';
       document.documentElement.dataset.fxMagBirthVisualR1854='neutral-silver-ice-asymmetric-cut-shallow-optic-socket-low-halo';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
@@ -810,11 +811,11 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.172,.011,20,112),
         new T.MeshPhysicalMaterial({
-          color:0x9aa8a5,metalness:.12,roughness:.095,
-          clearcoat:.98,clearcoatRoughness:.028,
-          emissive:0x020809,emissiveIntensity:.006,
-          specularIntensity:1.0,specularColor:new T.Color(0xffffff),
-          envMapIntensity:2.70
+          color:0x58696a,metalness:.16,roughness:.145,
+          clearcoat:.90,clearcoatRoughness:.055,
+          emissive:0x010607,emissiveIntensity:.003,
+          specularIntensity:.88,specularColor:new T.Color(0xe9f7f7),
+          envMapIntensity:1.72
         })
       );
       socketBezel.position.z=.306;
@@ -837,7 +838,7 @@
       this.irisGroup.add(lens);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.017,40),
+        new T.CircleGeometry(.021,48),
         new T.MeshPhysicalMaterial({
           color:0x010305,metalness:.04,roughness:.10,
           clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
@@ -2015,8 +2016,9 @@
          inertia. This is scene-space parallax, not a UI transform. */
       this.world.position.x=this.interactionX*.012+this.interactionVelocityX*.006;
       this.world.position.y=-this.interactionY*.009-this.interactionVelocityY*.004;
-      this.world.rotation.x=-this.interactionY*.004;
-      this.world.rotation.y=this.interactionX*.006;
+      this.world.rotation.x=.028-this.interactionY*.004;
+      this.world.rotation.y=-.185+Math.sin(time*.00008)*.012+this.interactionX*.010;
+      this.world.rotation.z=-.018+Math.sin(time*.00006)*.004;
       this.scene.fog.density=.021+Math.min(1,this.interactionImpulse)*.00045;
 
       /* R1695 — physically plausible input response. Existing lights move by
