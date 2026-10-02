@@ -428,7 +428,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.94:(mobile?.985:(constrained?.975:.98));
+        const smoothWeight=software?.90:(mobile?.965:(constrained?.950:.965));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1638,7 +1638,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0045,.0060,.0065),vec3(.105,.114,.110),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0032,.0048,.0054),vec3(.082,.094,.092),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.96,.97,.92)*keySpec*.235;
         col+=vec3(.42,.56,.57)*sideSpec*.185;
@@ -1659,9 +1659,9 @@
         col+=vec3(.42,.46,.44)*pow(broadKey,3.20)*.046*bodyMask;
         col+=vec3(.12,.23,.24)*pow(broadSide,2.90)*.042*bodyMask;
         col+=vec3(.07,.044,.028)*pow(broadWarm,2.90)*.010*bodyMask;
-        col+=vec3(.98,1.00,.96)*studioStripeA*.190;
-        col+=vec3(.25,.50,.54)*studioStripeB*.088;
-        col+=vec3(.66,.86,.86)*studioStripeC*.110;
+        col+=vec3(.99,1.00,.97)*studioStripeA*.235;
+        col+=vec3(.22,.48,.53)*studioStripeB*.072;
+        col+=vec3(.60,.82,.84)*studioStripeC*.088;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1764,6 +1764,7 @@
     root.dataset.fxNativeMagStudioR1850='silver-optic-bezel-readable-ice-depth-cross-tier';
     root.dataset.fxNativeMagStudioR1851='vertical-cut-ice-sculpt-larger-recessed-silver-optic-crisp-studio-bands';
     root.dataset.fxNativeMagStudioR1874='calm-authored-silhouette-deep-flush-optic-premium-ice-volume';
+    root.dataset.fxNativeMagStudioR1875='microfaceted-high-density-ice-cut-dark-body-controlled-softbox';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
     root.dataset.fxNativeMagStudioR1869='anti-aliased-clear-optic-edge-silver-recess-no-black-halo';
