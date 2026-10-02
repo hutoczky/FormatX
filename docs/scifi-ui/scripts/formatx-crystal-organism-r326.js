@@ -472,7 +472,7 @@
 
         const shoulder=Math.pow(Math.max(0,1-cp*cp),.66);
         const upperTaper=1-.070*Math.pow(Math.max(cp,0),2.7);
-        const lowerTaper=1-.190*Math.pow(Math.max(-cp,0),1.95);
+        const lowerTaper=1-.125*Math.pow(Math.max(-cp,0),1.95);
 
         /* R1843 — authored ice-block envelope. A sub-quadratic superellipsoid
            keeps the body smooth while giving it broad mineral shoulders and
@@ -491,12 +491,12 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.355*g(dir[0],dir[1],-.46,.36,.36,.30);
-        const rightMass=.305*g(dir[0],dir[1], .46,.04,.33,.32);
-        const lowerMass=.245*g(dir[0],dir[1],-.31,-.44,.35,.26);
-        const waistCut=.215*g(dir[0],dir[1], .10,-.16,.34,.22);
-        const leftWaistCut=.128*g(dir[0],dir[1],-.67,-.02,.24,.18);
-        const rightLowerCut=.132*g(dir[0],dir[1], .48,-.34,.25,.20);
+        const upperMass=.405*g(dir[0],dir[1],-.46,.36,.35,.29);
+        const rightMass=.345*g(dir[0],dir[1], .46,.05,.32,.31);
+        const lowerMass=.285*g(dir[0],dir[1],-.31,-.45,.34,.25);
+        const waistCut=.255*g(dir[0],dir[1], .10,-.16,.33,.21);
+        const leftWaistCut=.165*g(dir[0],dir[1],-.67,-.03,.23,.17);
+        const rightLowerCut=.165*g(dir[0],dir[1], .48,-.35,.24,.19);
         const crownNotch=.188*g(dir[0],dir[1],-.018,.72,.160,.122);
         const crownLeftLift=.078*g(dir[0],dir[1],-.35,.65,.28,.20);
         const crownRightLift=.062*g(dir[0],dir[1], .31,.62,.27,.20);
@@ -533,7 +533,7 @@
           if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
         };
         const topCap=.805+p[0]*.130-p[2]*.045;
-        const bottomCap=-.825-p[0]*.075+p[2]*.034;
+        const bottomCap=-.875-p[0]*.064+p[2]*.030;
         if(p[1]>topCap){
           const over=p[1]-topCap;
           p[1]=topCap+over*.52;
@@ -541,12 +541,12 @@
         }
         if(p[1]<bottomCap){
           const over=bottomCap-p[1];
-          p[1]=bottomCap-over*.52;
+          p[1]=bottomCap-over*.66;
           registerCut([-.075,-1,.034],over);
         }
         const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
         const crownCleftEase=crownCleftT*crownCleftT*(3-2*crownCleftT);
-        const crownCleft=.112*Math.exp(-Math.pow((p[0]+.018)/.165,2.0))*crownCleftEase;
+        const crownCleft=.158*Math.exp(-Math.pow((p[0]+.018)/.158,2.0))*crownCleftEase;
         p[1]-=crownCleft;
         p[0]+=Math.sign(p[0]+.020)*crownCleft*.24;
         const leftPlane=-.695+.120*p[1]-.035*p[2];
@@ -555,22 +555,22 @@
         const backPlane=-.505+.025*p[1]+.018*p[0];
         if(p[0]<leftPlane){
           const over=leftPlane-p[0];
-          p[0]=leftPlane-over*.68;
+          p[0]=leftPlane-over*.80;
           registerCut([-1,.120,-.035],over);
         }
         if(p[0]>rightPlane){
           const over=p[0]-rightPlane;
-          p[0]=rightPlane+over*.68;
+          p[0]=rightPlane+over*.80;
           registerCut([1,.085,-.025],over);
         }
         if(p[2]>frontPlane){
           const over=p[2]-frontPlane;
-          p[2]=frontPlane+over*.72;
+          p[2]=frontPlane+over*.84;
           registerCut([.025,.035,1],over);
         }
         if(p[2]<backPlane){
           const over=backPlane-p[2];
-          p[2]=backPlane-over*.72;
+          p[2]=backPlane-over*.84;
           registerCut([.018,.025,-1],over);
         }
 
@@ -917,9 +917,9 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(!auditMode){
-      const centreX=-.105,centreY=-.010;
-      const bezelSteps=software?96:mobile?112:128,bezelTubeSteps=software?8:mobile?10:12,bezelZ=.505;
+    {
+      const centreX=-.105,centreY=.018;
+      const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.492;
       const bezelMajorX=.190,bezelMajorY=.145,bezelTube=.0019;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -944,12 +944,12 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.508];
+      const lensCenter=[centreX,centreY,.498];
       const lensRadiusX=.194;
       const lensRadiusY=.148;
-      const lensDepth=.054;
-      const radialSteps=software?15:mobile?18:20;
-      const angularSteps=software?96:mobile?112:128;
+      const lensDepth=.038;
+      const radialSteps=auditMode?11:(software?15:mobile?18:20);
+      const angularSteps=auditMode?72:(software?96:mobile?112:128);
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -1031,7 +1031,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.035) contrast(1.18) saturate(.98)'
+      ? 'brightness(1.075) contrast(1.13) saturate(.98)'
       : 'brightness(1.07) contrast(1.10) saturate(.92)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
@@ -1478,7 +1478,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0018,.0030,.0038),vec3(.052,.066,.066),lift);
+        vec3 col=mix(vec3(.0024,.0042,.0052),vec3(.066,.083,.082),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
@@ -1759,6 +1759,7 @@
     root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
+    root.dataset.fxNativeMagStudioR1892='audit-parity-recessed-optic-soft-trilobate-silhouette';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
