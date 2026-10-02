@@ -154,6 +154,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1874='calm-three-mass-ice-monolith-flush-optic-photographic-studio';
       document.documentElement.dataset.fxMagBirthVisualR1876='minimal-genome-prologue-clean-product-film-no-wire-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1878='crown-cleft-three-mass-product-sculpt-embedded-smoked-sensor-optic';
+      document.documentElement.dataset.fxMagBirthVisualR1879='clean-elliptical-optic-recess-zero-seed-shell-crescents';
       document.documentElement.dataset.fxMagBirthVisualR1878='readable-genome-prologue-delayed-body-reveal-flush-product-optic';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
@@ -819,16 +820,17 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.248,104),
+        new T.CircleGeometry(.198,104),
         new T.MeshPhysicalMaterial({
-          color:0x02090c,metalness:.01,roughness:.12,
-          clearcoat:.88,clearcoatRoughness:.045,
-          emissive:0x03232a,emissiveIntensity:.055,
+          color:0x07171b,metalness:.01,roughness:.10,
+          clearcoat:.92,clearcoatRoughness:.040,
+          emissive:0x021116,emissiveIntensity:.018,
           specularIntensity:.94,specularColor:new T.Color(0xd8f6f7),
           transparent:true,opacity:.99,side:T.DoubleSide
         })
       );
       socketBack.position.z=.258;
+      socketBack.scale.set(1.12,.86,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
@@ -842,6 +844,7 @@
         })
       );
       socketBezel.position.z=.274;
+      socketBezel.scale.set(1.10,.84,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -881,6 +884,7 @@
         })
       );
       glassRing.position.z=.314;
+      glassRing.scale.set(1.12,.86,1);
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
@@ -1832,7 +1836,7 @@
       const birth=smooth((t-.12)/.72);
       const seedHandoff=smooth((t-1.72)/.62);
       const coreLife=birth;
-      const seedShellLife=birth*(1-seedHandoff*.94);
+      const seedShellLife=birth*(1-seedHandoff);
       let sc=.001;
       if(t<.12)sc=.001;
       else if(t<1.10)sc=mix(.42,.72,ease((t-.12)/.98));
@@ -1858,8 +1862,10 @@
 
       const irisAwake=smooth((t-2.05)/1.00)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
-      this.coreShell.material.opacity=.82*seedShellLife;
-      this.coreGlass.material.opacity=.030*seedShellLife;
+      this.coreShell.material.opacity=.72*seedShellLife;
+      this.coreGlass.material.opacity=.022*seedShellLife;
+      this.coreShell.visible=seedShellLife>.002;
+      this.coreGlass.visible=seedShellLife>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=irisAwake>.004;
       this.irisGroup.scale.setScalar((this.mobileProfile?1.34:1.30)*(1+irisAwake*.022)*pulse);
