@@ -815,29 +815,29 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.270,96),
+        new T.CircleGeometry(.258,96),
         new T.MeshPhysicalMaterial({
-          color:0x06252b,metalness:.01,roughness:.14,
-          clearcoat:.82,clearcoatRoughness:.060,
-          emissive:0x07596a,emissiveIntensity:.18,
+          color:0x02090c,metalness:.01,roughness:.12,
+          clearcoat:.88,clearcoatRoughness:.045,
+          emissive:0x03232a,emissiveIntensity:.055,
           specularIntensity:.94,specularColor:new T.Color(0xd8f6f7),
           transparent:true,opacity:.99,side:T.DoubleSide
         })
       );
-      socketBack.position.z=.285;
+      socketBack.position.z=.258;
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.202,.0065,28,144),
+        new T.TorusGeometry(.196,.0042,28,144),
         new T.MeshPhysicalMaterial({
-          color:0x8aa0a1,metalness:.12,roughness:.070,
-          clearcoat:.99,clearcoatRoughness:.024,
-          emissive:0x021013,emissiveIntensity:.010,
+          color:0xa9bbba,metalness:.10,roughness:.082,
+          clearcoat:.98,clearcoatRoughness:.030,
+          emissive:0x010607,emissiveIntensity:.004,
           specularIntensity:1.0,specularColor:new T.Color(0xf6ffff),
-          envMapIntensity:2.95,transparent:true,opacity:.76
+          envMapIntensity:2.70,transparent:true,opacity:.58
         })
       );
-      socketBezel.position.z=.306;
+      socketBezel.position.z=.274;
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
