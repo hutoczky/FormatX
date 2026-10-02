@@ -3,8 +3,8 @@
 
   const root = document.documentElement;
   const VERSION = 'crystal-organism-r326';
-  const REVISION = 'studio-smoky-bioglass-organism-r1830';
-  const CANONICAL_REVISION = 'igloo-grade-monolithic-organism-r1830';
+  const REVISION = 'living-luminous-electric-crystal-r454';
+  const CANONICAL_REVISION = 'fully-living-organism-r1723';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
