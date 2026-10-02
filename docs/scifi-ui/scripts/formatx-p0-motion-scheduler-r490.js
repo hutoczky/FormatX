@@ -36,7 +36,7 @@ root.dataset.fxP0MotionCacheR1779='mobile-obsidian-proof-broad-facet-zero-tendri
 root.dataset.fxP0MotionCacheR1781='clean-photographic-facet-surface';
 root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
 root.dataset.fxP0MotionCacheR1830='igloo-grade-fast-real-webgl-handoff';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261002-r1833-black-bioglass-optic';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261002-r1840-black-bioglass-sculpt';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
