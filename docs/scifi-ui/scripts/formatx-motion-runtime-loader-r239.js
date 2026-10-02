@@ -54,7 +54,7 @@ const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?
 const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261002-r1830-igloo-grade-bioglass';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
-const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20261002-r1830-studio-bioglass';
+const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
 const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-deterministic-semantic-sweep';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260925-r1747-p0-owned-open';
