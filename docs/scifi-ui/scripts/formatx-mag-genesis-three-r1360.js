@@ -159,6 +159,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1878='readable-genome-prologue-delayed-body-reveal-flush-product-optic';
       document.documentElement.dataset.fxMagBirthVisualR1885='calm-continuous-luxury-bioglass-sculpt-three-quarter-product-film';
       document.documentElement.dataset.fxMagBirthVisualR1886='fused-trilobate-bioglass-product-sculpt-smooth-specular-cinematic';
+      document.documentElement.dataset.fxMagBirthVisualR1888='readable-dna-seed-premium-dark-bioglass-genesis';
       document.documentElement.dataset.fxMagBirthVisualR1853='three-quarter-premium-ice-monolith-larger-framing-dark-volume';
       document.documentElement.dataset.fxMagBirthVisualR1856='luminous-genome-glass-three-quarter-integrated-smoked-optic';
       document.documentElement.dataset.fxMagBirthVisualR1860='studio-genome-to-three-quarter-bioglass-monolith-integrated-dark-optic';
@@ -1828,10 +1829,10 @@
         h.rotation.x=b.rx+Math.sin(time*.00022+b.phase)*.018;
         h.rotation.y=b.ry+Math.sin(time*.00019+b.phase)*.022;
         h.rotation.z=b.rz+time*.000018*(i%2?1:-1);
-        h.scale.setScalar(b.s*(this.mobileProfile?.60:.56));
+        h.scale.setScalar(b.s*(this.mobileProfile?.68:.64));
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*(this.mobileProfile?.42:.34);
+          m.opacity=(bases[mi]??.5)*fade*(this.mobileProfile?.60:.48);
         });
       });
     }
@@ -1843,7 +1844,7 @@
       const seedShellLife=birth*(1-seedHandoff);
       let sc=.001;
       if(t<.12)sc=.001;
-      else if(t<1.10)sc=mix(.42,.72,ease((t-.12)/.98));
+      else if(t<1.10)sc=mix(.52,.82,ease((t-.12)/.98));
       else if(t<5.90)sc=.86+Math.sin(time*.0010)*.003;
       else sc=mix(.86,.82,smooth((t-5.90)/1.40));
 
@@ -1866,8 +1867,8 @@
 
       const irisAwake=smooth((t-2.05)/1.00)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
-      this.coreShell.material.opacity=.72*seedShellLife;
-      this.coreGlass.material.opacity=.022*seedShellLife;
+      this.coreShell.material.opacity=.82*seedShellLife;
+      this.coreGlass.material.opacity=.035*seedShellLife;
       this.coreShell.visible=seedShellLife>.002;
       this.coreGlass.visible=seedShellLife>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
@@ -1877,7 +1878,7 @@
       this.glowSprite.material.opacity=(.0006+.0018*irisAwake)*irisAwake*pulse;
       this.glowSprite.scale.setScalar(.46+irisAwake*.05+this.interactionImpulse*.012);
       this.coreInner.material.opacity=.016*irisAwake*(1-seedHandoff);
-      this.coreLight.intensity=.06*coreLife+irisAwake*.32+this.interactionImpulse*.06;
+      this.coreLight.intensity=.10*coreLife+irisAwake*.34+this.interactionImpulse*.06;
       if(this.coreLabel)this.coreLabel.material.opacity=0;
     }
 
