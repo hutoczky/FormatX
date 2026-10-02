@@ -480,7 +480,7 @@
         const ax=.600+.145*shoulder;
         const ay=.975+.030*shoulder;
         const az=.520+.100*shoulder;
-        const exponent=1.30;
+        const exponent=1.62;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
           Math.pow(Math.abs(dir[1])/ay,exponent)+
@@ -491,10 +491,10 @@
           const dx=(x-cx)/sx,dy=(y-cy)/sy;
           return Math.exp(-(dx*dx+dy*dy));
         };
-        const upperMass=.220*g(dir[0],dir[1],-.45,.34,.35,.30);
-        const rightMass=.170*g(dir[0],dir[1], .42,.02,.32,.32);
-        const lowerMass=.145*g(dir[0],dir[1],-.29,-.43,.35,.26);
-        const waistCut=.125*g(dir[0],dir[1], .12,-.17,.34,.22);
+        const upperMass=.275*g(dir[0],dir[1],-.45,.34,.37,.31);
+        const rightMass=.205*g(dir[0],dir[1], .42,.02,.34,.33);
+        const lowerMass=.170*g(dir[0],dir[1],-.29,-.43,.37,.27);
+        const waistCut=.155*g(dir[0],dir[1], .12,-.17,.36,.23);
         const rightLowerCut=.072*g(dir[0],dir[1], .38,-.35,.26,.23);
         const crownNotch=.118*g(dir[0],dir[1],-.020,.71,.178,.132);
         const crownLeftLift=.054*g(dir[0],dir[1],-.34,.65,.29,.21);
@@ -506,9 +506,9 @@
 
         const lowFreq=
           1
-          +Math.sin(theta*2.0+phi*.55)*.014*shoulder
-          +Math.cos(theta*3.0-phi*.42)*.0075*shoulder
-          +Math.sin(theta+phi*.31)*.005*shoulder;
+          +Math.sin(theta*2.0+phi*.55)*.007*shoulder
+          +Math.cos(theta*3.0-phi*.42)*.0035*shoulder
+          +Math.sin(theta+phi*.31)*.0025*shoulder;
         radius*=lowFreq;
 
         const p=[
@@ -534,12 +534,12 @@
         const bottomCap=-.825-p[0]*.075+p[2]*.034;
         if(p[1]>topCap){
           const over=p[1]-topCap;
-          p[1]=topCap+over*.30;
+          p[1]=topCap+over*.52;
           registerCut([-.130,1,.045],over);
         }
         if(p[1]<bottomCap){
           const over=bottomCap-p[1];
-          p[1]=bottomCap-over*.30;
+          p[1]=bottomCap-over*.52;
           registerCut([-.075,-1,.034],over);
         }
         const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
@@ -553,22 +553,22 @@
         const backPlane=-.505+.025*p[1]+.018*p[0];
         if(p[0]<leftPlane){
           const over=leftPlane-p[0];
-          p[0]=leftPlane-over*.46;
+          p[0]=leftPlane-over*.68;
           registerCut([-1,.120,-.035],over);
         }
         if(p[0]>rightPlane){
           const over=p[0]-rightPlane;
-          p[0]=rightPlane+over*.46;
+          p[0]=rightPlane+over*.68;
           registerCut([1,.085,-.025],over);
         }
         if(p[2]>frontPlane){
           const over=p[2]-frontPlane;
-          p[2]=frontPlane+over*.56;
+          p[2]=frontPlane+over*.72;
           registerCut([.025,.035,1],over);
         }
         if(p[2]<backPlane){
           const over=backPlane-p[2];
-          p[2]=backPlane-over*.56;
+          p[2]=backPlane-over*.72;
           registerCut([.018,.025,-1],over);
         }
 
@@ -1769,6 +1769,7 @@
     root.dataset.fxNativeMagStudioR1880='clear-dark-volume-restrained-software-softbox-smoked-sensor';
     root.dataset.fxNativeMagStudioR1882='solid-smoked-glass-low-fog-product-softbox-non-eye-sensor';
     root.dataset.fxNativeMagStudioR1885='continuous-luxury-bioglass-soft-cuts-flush-optic-highlight-control';
+    root.dataset.fxNativeMagStudioR1886='fused-trilobate-bioglass-sculpt-continuous-specular-surface';
     root.dataset.fxNativeMagStudioR1877='flush-smoked-optic-crisp-studio-ribbons-clean-ice-volume';
     root.dataset.fxNativeMagStudioR1866='crown-cleft-three-mass-sculpt-integrated-smoked-optic-three-quarter-view';
     root.dataset.fxNativeMagStudioR1867='dual-softbox-internal-veil-silver-integrated-optic-authored-crown-cleft';
