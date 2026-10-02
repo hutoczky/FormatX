@@ -1190,6 +1190,11 @@
         mineral+=vec3(.040,.072,.073)*internalCaustic*.46;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
         mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
+        float iceVolume=exp(-pow((vLocal.x+.10)/.46,2.0)-pow((vLocal.y-.08)/.58,2.0))
+          *smoothstep(-.42,.72,vLocal.z)*bodyMask;
+        mineral+=vec3(.035,.080,.086)*iceVolume*(.045+.055*(1.0-facing));
+        float chromaSide=.5+.5*n.x;
+        mineral+=mix(vec3(.018,.050,.063),vec3(.034,.016,.050),chromaSide)*fresnel*bodyMask*.105;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
         float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
@@ -1305,17 +1310,17 @@
         float electric=max(electricBranch,electricBranch2);
         float coreFlash=exp(-pow(lensRadial/.072,2.0))*(.62+.38*sin(uTime*4.0));
         float lensGlint=exp(-pow((vUv.x-.34)/.075,2.0)-pow((vUv.y-.31)/.060,2.0));
-        vec3 physicalLens=vec3(.002,.008,.011);
-        physicalLens+=vec3(.018,.070,.078)*(.18+.22*uEnergy);
-        physicalLens+=vec3(.94,.99,.96)*softboxA*.18;
-        physicalLens+=vec3(.48,.58,.60)*sideSpec*.10;
-        physicalLens+=vec3(.12,.28,.34)*fresnel*.18;
-        physicalLens+=vec3(.010,.135,.178)*lensInner*(.12+.12*uEnergy);
-        physicalLens+=vec3(.070,.48,.62)*lensRing*(.15+.10*uEnergy);
-        physicalLens+=vec3(.70,.94,.96)*lensHot*(.16+.06*uEnergy);
-        physicalLens+=vec3(.060,.29,.34)*electric*(.11+.09*uEnergy);
-        physicalLens+=vec3(.86,.96,.94)*coreFlash*.22;
-        physicalLens+=vec3(.82,.98,1.00)*lensGlint*.34;
+        vec3 physicalLens=vec3(.003,.009,.011);
+        physicalLens+=vec3(.020,.060,.064)*(.18+.20*uEnergy);
+        physicalLens+=vec3(.94,.98,.95)*softboxA*.20;
+        physicalLens+=vec3(.52,.60,.60)*sideSpec*.11;
+        physicalLens+=vec3(.085,.19,.22)*fresnel*.15;
+        physicalLens+=vec3(.012,.095,.115)*lensInner*(.10+.10*uEnergy);
+        physicalLens+=vec3(.090,.31,.35)*lensRing*(.12+.08*uEnergy);
+        physicalLens+=vec3(.76,.92,.90)*lensHot*(.15+.05*uEnergy);
+        physicalLens+=vec3(.035,.17,.19)*electric*(.08+.07*uEnergy);
+        physicalLens+=vec3(.86,.94,.91)*coreFlash*.15;
+        physicalLens+=vec3(.90,.98,.98)*lensGlint*.40;
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -1627,6 +1632,7 @@
     root.dataset.fxNativeMagStudioR1837='three-mass-single-sculpt-atmospheric-stage';
     root.dataset.fxNativeMagStudioR1843='authored-ice-block-silhouette-smaller-integrated-optic-broad-mineral-planes';
     root.dataset.fxNativeMagStudioR1844='faceted-ice-volume-subtle-chromatic-edge-smoked-optic';
+    root.dataset.fxNativeMagStudioR1845='igloo-grade-cold-volume-spectral-edge-smoked-glass-lens';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
