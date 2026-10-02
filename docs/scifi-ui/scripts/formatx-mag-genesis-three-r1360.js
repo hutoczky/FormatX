@@ -69,9 +69,9 @@
          protect interaction before sacrificing the 3D identity. */
       // Legacy R1724 visual-proof compatibility marker only; active low-power scale remains 0.52.
       // this.qualityScale=this.lowPowerProfile?.74:(this.mobileProfile?1.00:.96)
-      this.qualityScale=this.lowPowerProfile?.52:(this.mobileProfile?1.00:.96);
-      this.qualityCeiling=this.lowPowerProfile?.72:(this.mobileProfile?1.00:1.00);
-      this.qualityFloor=this.lowPowerProfile?.28:(this.mobileProfile?.62:.34);
+      this.qualityScale=this.lowPowerProfile?.58:(this.mobileProfile?1.00:.96);
+      this.qualityCeiling=this.lowPowerProfile?.78:(this.mobileProfile?1.02:1.00);
+      this.qualityFloor=this.lowPowerProfile?.36:(this.mobileProfile?.68:.34);
       this.lastQualityAdjust=0;
       this.renderPeak=0;
       this.framePeak=this.targetFrameMs;
@@ -97,7 +97,7 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:this.mobileProfile,
-        antialias:!this.mobileProfile && !this.lowPowerProfile,
+        antialias:!this.lowPowerProfile && (!this.mobileProfile || (devicePixelRatio||1)<=3.5),
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -142,6 +142,7 @@
       document.documentElement.dataset.fxMagBirthMaterialR1776='roughness-textured-transmissive-biocrystal-low-emission-studio-depth';
       document.documentElement.dataset.fxMagBirthSilhouetteR1776='unified-asymmetric-overlapping-crystal-anatomy-no-round-pod';
       document.documentElement.dataset.fxMagBirthVisualR1777='cinematic-black-mineral-bioglass-natural-softbox-depth';
+      document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
       document.documentElement.dataset.fxMagBirthMaterialR1777='low-emission-dielectric-transmission-microtexture-photographic-optic';
       document.documentElement.dataset.fxMagBirthLightingR1777='directional-neutral-key-dark-fill-warm-floor-cyan-internal-caustic';
       document.documentElement.dataset.fxMagBirthLightingR1775='neutral-key-warm-bounce-cyan-physiology-filmic-highlight-rolloff';
@@ -960,8 +961,8 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
 
-      const shellWidth=this.deterministicFrame||this.highDetail?42:(this.lowPowerProfile?18:(this.mobileProfile?24:32));
-      const shellHeight=this.deterministicFrame||this.highDetail?26:(this.lowPowerProfile?12:(this.mobileProfile?16:20));
+      const shellWidth=this.deterministicFrame||this.highDetail?48:(this.lowPowerProfile?22:(this.mobileProfile?36:36));
+      const shellHeight=this.deterministicFrame||this.highDetail?30:(this.lowPowerProfile?14:(this.mobileProfile?22:22));
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       for(let i=0;i<shellPos.count;i++){
@@ -969,10 +970,10 @@
         const n=p.clone().normalize();
         const az=Math.atan2(n.z,n.x), el=Math.acos(Math.max(-1,Math.min(1,n.y)));
         const shoulder=Math.max(0,1-n.y*n.y);
-        const ax=.78+shoulder*.08+n.x*.035-n.z*.018;
-        const ay=1.10+shoulder*.04+n.y*.025+n.x*.015;
-        const azr=.67+shoulder*.06+n.z*.025-n.x*.015;
-        const exponent=1.18;
+        const ax=.82+shoulder*.075+n.x*.038-n.z*.018;
+        const ay=1.04+shoulder*.050+n.y*.030+n.x*.018;
+        const azr=.69+shoulder*.065+n.z*.030-n.x*.016;
+        const exponent=1.38;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
           Math.pow(Math.abs(n.y)/ay,exponent)+
@@ -987,8 +988,8 @@
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.78,.91,.68);
-      shell.position.set(-.055,.012,-.018);
+      shell.scale.set(.88,.94,.78);
+      shell.position.set(-.042,.006,-.016);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
       this.organicGroup.add(shell);
@@ -1003,8 +1004,8 @@
         envMapIntensity:1.28,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.795,.928,.695);
-      this.organicMembrane.position.set(-.055,.012,-.002);
+      this.organicMembrane.scale.set(.895,.958,.795);
+      this.organicMembrane.position.set(-.042,.006,-.001);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
@@ -1766,7 +1767,7 @@
       this.coreGlass.material.opacity=.030*seedShellLife;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=coreLife>.005;
-      this.irisGroup.scale.setScalar((.84+irisAwake*.05)*pulse);
+      this.irisGroup.scale.setScalar((this.mobileProfile?1.03:.88)*(1+irisAwake*.045)*pulse);
       if(this.irisCorona)this.irisCorona.material.opacity=.030*coreLife+.050*irisAwake;
       this.glowSprite.material.opacity=(.012*coreLife+.028*irisAwake)*pulse;
       this.glowSprite.scale.setScalar(.66+irisAwake*.08+this.interactionImpulse*.025);
@@ -1783,9 +1784,9 @@
       const bodyScale=.001+visible*.999;
       this.organicGroup.scale.set(bodyScale*.84,bodyScale*.84,bodyScale*.84);
 
-      this.organicShellMaterial.opacity=(.40+.075*maturity)*visible;
-      this.organicLobeMaterial.opacity=(.11+.06*maturity)*visible;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.075+.040*maturity)*visible;
+      this.organicShellMaterial.opacity=(this.mobileProfile?(.78+.08*maturity):(.48+.09*maturity))*visible;
+      this.organicLobeMaterial.opacity=this.mobileProfile?0:(.09+.05*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(this.mobileProfile?(.055+.025*maturity):(.070+.035*maturity))*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=(.12+.12*maturity)*visible;
       this.organicHoodMaterial.opacity=0;
@@ -1803,7 +1804,7 @@
         if(mb)this.organicMembrane.scale.set(mb.x*shellPulse,mb.y*shellPulse,mb.z*shellPulse);
       }
       if(this.guardianAnatomy){
-        this.guardianAnatomy.visible=visible>.002;
+        this.guardianAnatomy.visible=!this.mobileProfile && visible>.002;
         this.guardianAnatomy.rotation.y=-.04+Math.sin(time*.00015)*.009+this.interactionX*.030;
         this.guardianAnatomy.rotation.x=Math.sin(time*.00013)*.006-this.interactionY*.020;
         this.guardianAnatomy.rotation.z=Math.sin(time*.00010)*.004+this.interactionSpin*.11;
@@ -1818,9 +1819,9 @@
           if(base)membrane.scale.set(base.x*q,base.y*q,1);
         });
       }
-      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=(.72+.16*maturity)*visible;
-      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=(.045+.035*maturity)*visible;
-      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=(.075+.045*maturity)*visible;
+      if(this.guardianPlateMaterial)this.guardianPlateMaterial.opacity=this.mobileProfile?0:(.62+.14*maturity)*visible;
+      if(this.guardianGoldMaterial)this.guardianGoldMaterial.opacity=this.mobileProfile?0:(.035+.025*maturity)*visible;
+      if(this.guardianMembraneMaterial)this.guardianMembraneMaterial.opacity=this.mobileProfile?0:(.060+.035*maturity)*visible;
       this.organicLobes.forEach((lobe,i)=>{
         const q=1+Math.sin(time*.00072+lobe.userData.phase)*.009*visible;
         const b=lobe.userData.baseScale;
@@ -1837,7 +1838,7 @@
     updateCells(t,time){
       const grow=smooth((t-3.10)/1.20);
       const awake=smooth((t-5.35)/1.35);
-      const visible=grow;
+      const visible=this.mobileProfile?0:grow;
       this.cellGroup.visible=visible>.002;
       const base=.001+visible*.999;
       this.cellGroup.scale.setScalar(base*.96);
@@ -1880,9 +1881,9 @@
 
     updateTentacles(t,time){
       const grow=smooth((t-5.42)/1.05);
-      const visible=grow;
+      const visible=this.mobileProfile?0:grow;
       this.tentacleGroup.visible=visible>.002;
-      this.tentacleMaterial.opacity=.82*visible;
+      this.tentacleMaterial.opacity=.72*visible;
       this.tentacleEdgeMaterial.opacity=0;
       this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
