@@ -1500,6 +1500,8 @@
         keySpec*=keySpec;keySpec*=keySpec;keySpec*=keySpec;
         float sideSpec=max(dot(n,normalize(side+view)),0.0);
         sideSpec*=sideSpec;sideSpec*=sideSpec;sideSpec*=sideSpec;
+        keySpec*=keySpec;
+        sideSpec*=sideSpec;
 
         float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
         float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
@@ -1533,9 +1535,13 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        col+=vec3(.78,.81,.77)*pow(broadKey,2.30)*.170*bodyMask;
-        col+=vec3(.20,.32,.33)*pow(broadSide,2.10)*.125*bodyMask;
-        col+=vec3(.12,.070,.040)*pow(broadWarm,2.20)*.030*bodyMask;
+        float studioStripeA=exp(-pow((vLocal.x+.20)/.17,2.0))*smoothstep(-.92,.74,vLocal.y)*bodyMask;
+        float studioStripeB=exp(-pow((vLocal.x-.36)/.13,2.0))*smoothstep(-.76,.84,vLocal.y)*bodyMask;
+        col+=vec3(.60,.63,.60)*pow(broadKey,2.60)*.095*bodyMask;
+        col+=vec3(.16,.27,.28)*pow(broadSide,2.35)*.075*bodyMask;
+        col+=vec3(.10,.060,.036)*pow(broadWarm,2.45)*.020*bodyMask;
+        col+=vec3(.82,.88,.84)*studioStripeA*.235;
+        col+=vec3(.22,.38,.40)*studioStripeB*.105;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1606,6 +1612,7 @@
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
+    root.dataset.fxNativeMagStudioR1836='narrow-specular-studio-stripes-no-gray-plane';
     root.dataset.fxNativeMagVisualR1719='healthy-smooth-biomechanical-organism-large-energy-heart-living-tendrils';
     root.dataset.fxNativeMagGeometryR1719='smooth-tensioned-body-no-sawtooth-rings';
     root.dataset.fxNativeMagVisualR1720='ultra-sharp-cellular-biomech-body-electric-vascular-network-large-core';
