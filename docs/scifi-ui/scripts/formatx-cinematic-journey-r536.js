@@ -524,11 +524,23 @@
      and observers during DOMContentLoaded only creates avoidable hero CLS.
      Forced cinema/validation paths stay immediate; normal visitors activate
      the journey on real intent or after the full MAG birth handoff. */
-  let bootStarted=false;
+  let bootStarted=false,scrollIntentBootTimer=0;
+  const scheduleScrollIntentBoot=source=>{
+    if(bootStarted)return;
+    clearTimeout(scrollIntentBootTimer);
+    root.dataset.fxCinematicJourneyScrollBootR1831='pending-'+source;
+    scrollIntentBootTimer=setTimeout(()=>{
+      scrollIntentBootTimer=0;
+      root.dataset.fxCinematicJourneyScrollBootR1831='settled-'+source;
+      startBoot('scroll-settled-r1831-'+source);
+    },180);
+  };
   const startBoot=source=>{
     if(bootStarted)return;
     bootStarted=true;
+    clearTimeout(scrollIntentBootTimer);scrollIntentBootTimer=0;
     root.dataset.fxCinematicJourneyStartR1737=source;
+    root.dataset.fxCinematicJourneyPerformanceR1831='scroll-signals-settle-before-heavy-boot';
     boot();
     for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
       removeEventListener(type,intentBoot,true);
@@ -536,7 +548,13 @@
   };
   const intentBoot=event=>{
     if(event?.type==='keydown' && event.repeat)return;
-    startBoot('intent-'+(event?.type||'unknown'));
+    const type=event?.type||'unknown';
+    const touchPointer=type==='pointerdown'&&event?.pointerType==='touch';
+    if(type==='scroll'||type==='wheel'||type==='touchstart'||touchPointer){
+      scheduleScrollIntentBoot(type);
+      return;
+    }
+    startBoot('intent-'+type);
   };
 
   if(FORCE){
@@ -558,6 +576,7 @@
     clearTimeout(coreSettleTimer);
     clearTimeout(sceneCommitTimer);
     clearTimeout(refreshTimer);
+    clearTimeout(scrollIntentBootTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
     removeEventListener('pointermove',onCinematicPointerMove);
