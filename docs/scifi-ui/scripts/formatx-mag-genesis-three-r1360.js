@@ -150,6 +150,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1898='elliptic-smoked-sensor-single-cyan-iris-arc-black-pupil';
       document.documentElement.dataset.fxMagBirthVisualR1900='tall-fused-bioglass-studio-sculpt-visible-flush-optic-handoff-parity';
       document.documentElement.dataset.fxMagBirthVisualR1901='slender-studio-bioglass-subtle-silver-sensor-single-living-iris';
+      document.documentElement.dataset.fxMagBirthVisualR1902='smooth-glass-genome-seed-no-low-poly-first-frame';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -771,14 +772,14 @@
         envMapIntensity:1.86
       });
 
-      const seedGeo=new T.IcosahedronGeometry(.84,(this.deterministicFrame||!this.lowPowerProfile)?3:2);
+      const seedGeo=new T.IcosahedronGeometry(.84,this.deterministicFrame?5:(this.lowPowerProfile?3:(this.mobileProfile?4:5)));
       const seedPos=seedGeo.attributes.position;
       const seedV=new T.Vector3();
       for(let i=0;i<seedPos.count;i++){
         seedV.fromBufferAttribute(seedPos,i);
         const n=seedV.clone().normalize();
         const a=Math.atan2(n.z,n.x);
-        const warp=1+Math.sin(a*2.4+n.y*3.2)*.045+Math.cos(a*4.1-n.y*1.7)*.024;
+        const warp=1+Math.sin(a*2.4+n.y*3.2)*.022+Math.cos(a*4.1-n.y*1.7)*.010;
         seedV.multiplyScalar(warp);
         seedV.x*=.78;seedV.y*=1.02;seedV.z*=.60;
         seedV.x+=n.y*.035;seedV.z-=n.x*.018;
@@ -1893,8 +1894,8 @@
 
       const irisAwake=smooth((t-2.05)/1.00)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
-      this.coreShell.material.opacity=.82*seedShellLife;
-      this.coreGlass.material.opacity=.035*seedShellLife;
+      this.coreShell.material.opacity=.58*seedShellLife;
+      this.coreGlass.material.opacity=.14*seedShellLife;
       this.coreShell.visible=seedShellLife>.002;
       this.coreGlass.visible=seedShellLife>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
