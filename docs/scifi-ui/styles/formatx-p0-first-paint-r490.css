@@ -974,8 +974,8 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
     inset:1% 4% 0!important;
     clip-path:none!important;
-    border-radius:44% 56% 50% 50% / 39% 43% 57% 61%!important;
-    transform:rotate(-5deg) skewX(-1.5deg)!important;
+    border-radius:40% 58% 48% 52% / 34% 42% 60% 64%!important;
+    transform:rotate(-4deg) skewX(-2.2deg) scaleX(.91)!important;
     background:
       radial-gradient(ellipse 24% 62% at 25% 27%,rgba(232,246,241,.26),rgba(123,149,145,.10) 38%,transparent 72%),
       radial-gradient(ellipse 20% 58% at 67% 40%,rgba(112,160,160,.16),transparent 70%),
@@ -990,8 +990,8 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:45% 36.5% 42% 36.5%!important;
-    border-radius:46% 54% 48% 52%!important;
+    inset:51% 28% 36% 45%!important;
+    border-radius:48% 52% 44% 56%!important;
     border:1px solid rgba(76,184,194,.42)!important;
     background:
       radial-gradient(circle at 39% 34%,rgba(230,255,252,.96) 0 4%,rgba(117,219,221,.78) 8%,rgba(21,102,116,.64) 18%,rgba(3,27,34,.97) 43%,rgba(0,7,11,.995) 74%),
@@ -1006,6 +1006,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
 /* production-r1830-igloo-grade-dark-bioglass-first-paint */
 /* production-r1842-smooth-studio-organism-first-paint */
+/* production-r1904-asymmetric-gallery-proxy-parity */
 
 
 /* R1820 — final hero typography is owned by the blocking P0 layer.
