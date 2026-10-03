@@ -4,6 +4,7 @@
   --fx-live-magenta: #ff4cbd;
   --fx-live-amber: #ffba4a;
   position: relative;
+  box-sizing: border-box;
   isolation: isolate;
   margin: clamp(5rem, 10vw, 10rem) auto;
   padding: clamp(1rem, 2vw, 1.75rem);
@@ -16,7 +17,7 @@
   box-shadow: 0 32px 120px rgba(0, 0, 0, .38), inset 0 1px rgba(255, 255, 255, .04);
   color: #eef8ff;
   content-visibility: auto;
-  contain-intrinsic-size: 1100px;
+  contain-intrinsic-size: auto 1100px;
   overflow: clip;
 }
 

@@ -270,7 +270,7 @@
 
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = './styles/formatx-live-os.css?v=20260806-live-os-1';
+    stylesheet.href = './styles/formatx-live-os.css?v=20260806-live-os-1&rev=20261003-r867-panel-border-box';
     stylesheet.dataset.fxLiveOsStyle = 'true';
     document.head.appendChild(stylesheet);
 

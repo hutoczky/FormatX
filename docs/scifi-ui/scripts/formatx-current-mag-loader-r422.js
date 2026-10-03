@@ -88,7 +88,7 @@ async function start(){
   root.dataset.fxCurrentMagStartupR442='layout-style-before-renderer-noncritical-post-intro';
   root.dataset.fxCurrentMagStartupR549='superseded-r767-semantic-first-post-intro-heart';
 
-  const rendererReady=await rendererStart;
+  let rendererReady=await rendererStart;
   const nonCriticalStyles=Promise.all([
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
     addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459'),
@@ -109,14 +109,30 @@ async function start(){
   root.dataset.fxCoreMobileIdlePolicyR426=mobile?'periodic-surface-bursts-between-zero-idle':'desktop-periodic-surface-bursts-between-zero-idle';
   root.dataset.fxMiniMagBootstrapR459='requested-post-intro-renderer-ready';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
-  if(rendererReady){
-    if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    await addScript(LIFE+'&rev=20261003-r865-renderer-adoption','data-fx-core-life-r455');
-    await addScript('./scripts/formatx-mag-semantic-light-r866.js?v=20261003-r866-dielectric-semantic-light','data-fx-mag-semantic-light-r866');
-    root.dataset.fxCoreRendererSelection=`r326-direct-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
-    root.dataset.fxCoreReferenceLockLoad='ready-v69-r767';
-    root.dataset.fxCurrentMagRuntimeR422='ready';
-  }else root.dataset.fxCurrentMagRuntimeR422='renderer-timeout';
+  // The bounded startup wait is an observation, not the renderer's lifetime.
+  // A valid late worker/fallback must receive the same life and input adapters.
+  let enhancementTask=null;
+  const adoptRenderer=()=>{
+    if(enhancementTask)return enhancementTask;
+    const api=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+    if(root.dataset.fxCrystalOrganismR326!=='ready'||!api?.stage?.isConnected)return null;
+    removeEventListener('formatx:real3dready',onRendererReady);
+    enhancementTask=(async()=>{
+      if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
+      await addScript(LIFE+'&rev=20261003-r865-renderer-adoption','data-fx-core-life-r455');
+      await addScript('./scripts/formatx-mag-semantic-light-r866.js?v=20261003-r866-dielectric-semantic-light','data-fx-mag-semantic-light-r866');
+      root.dataset.fxCoreRendererSelection=`r326-direct-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
+      root.dataset.fxCoreReferenceLockLoad='ready-v69-r767';
+      root.dataset.fxCurrentMagRuntimeR422='ready';
+    })();
+    return enhancementTask;
+  };
+  const onRendererReady=()=>{void adoptRenderer();};
+  addEventListener('formatx:real3dready',onRendererReady,{passive:true});
+  addEventListener('pagehide',()=>removeEventListener('formatx:real3dready',onRendererReady),{once:true});
+  const currentRenderer=adoptRenderer();
+  if(currentRenderer){await currentRenderer;rendererReady=true;}
+  else root.dataset.fxCurrentMagRuntimeR422='awaiting-canonical-renderer';
   root.dataset.fxCoreCriticalPathR422=`direct-r326-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-native-touch`;
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';
   dispatchEvent(new CustomEvent('formatx:currentmagready',{detail:{version:VERSION,mobile,rendererReady,miniMag:true,legacyCleanup:true,energySweep:true,optics:'r767-post-intro',heart:'r767-shared-post-intro-scheduler',startup:'r767-semantic-first-post-intro-enhancements'}}));

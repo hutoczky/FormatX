@@ -10,17 +10,20 @@ fs.mkdirSync(OUT,{recursive:true});
  const reports=[];
  try{
   for(const [name,width,height,mobile] of [['desktop',1440,900,false],['mobile',390,844,true]]){
-   for(const failure of ['context-unavailable','script-unavailable']){
+   for(const failure of ['context-unavailable','script-unavailable','late-script-unavailable']){
     const context=await browser.newContext({viewport:{width,height},isMobile:mobile,hasTouch:mobile});
     // Network and capability faults exercise the real product recovery path.
     // This does not inject a renderer, readiness event or readiness attribute.
     await context.route('**/formatx-crystal-worker-r564.js*',route=>route.abort());
-    if(failure==='script-unavailable')await context.route('**/formatx-crystal-bounded-fallback-r727.js*',route=>route.abort());
+    if(failure.endsWith('script-unavailable'))await context.route('**/formatx-crystal-bounded-fallback-r727.js*',async route=>{
+     if(failure==='late-script-unavailable')await new Promise(resolve=>setTimeout(resolve,8500));
+     await route.abort();
+    });
     await context.addInitScript(({failure})=>{
      const original=HTMLCanvasElement.prototype.getContext;
      HTMLCanvasElement.prototype.getContext=function(type,...args){return failure==='context-unavailable'&&['webgl','webgl2','experimental-webgl'].includes(type)?null:original.call(this,type,...args);};
      window.__semanticReady=[];
-     addEventListener('formatx:real3dready',()=>window.__semanticReady.push({stage:window.FormatXLivingCore?.stage?.isConnected,api:window.FormatXLivingCore?.revision,svg:Boolean(window.FormatXLivingCore?.stage?.querySelector('svg'))}));
+     addEventListener('formatx:real3dready',()=>window.__semanticReady.push({at:performance.now(),stage:window.FormatXLivingCore?.stage?.isConnected,api:window.FormatXLivingCore?.revision,svg:Boolean(window.FormatXLivingCore?.stage?.querySelector('svg'))}));
     },{failure});
     const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
     await page.goto(URL,{waitUntil:'domcontentloaded'});
@@ -28,6 +31,8 @@ fs.mkdirSync(OUT,{recursive:true});
     const before=await page.evaluate(()=>({revision:window.FormatXLivingCore.revision,stage:window.FormatXLivingCore.stage.isConnected,ready:document.documentElement.dataset.fxCrystalOrganismR326,dimension:document.documentElement.dataset.fxCoreDimension,stages:document.querySelectorAll('#hero .fx-core-mobile-v55-stage').length,canvases:document.querySelectorAll('#hero canvas').length,events:window.__semanticReady}));
     assert.equal(before.stage,true);assert.equal(before.ready,'ready');assert.equal(before.stages,1);assert.equal(before.canvases,0);assert.equal(before.dimension,'semantic-static-representation');
     assert.ok(before.events.length>=1&&before.events.every(e=>e.stage&&e.svg&&e.api==='r866-static-semantic-fallback'),'readiness must follow a connected representation and real API');
+    assert.equal(await page.locator('script[data-fx-core-life-r455]').count(),1,'one life adapter must adopt the real renderer');
+    if(failure==='late-script-unavailable')assert.ok(before.events[0].at>8500,'exercise actual readiness after the bounded initial startup wait');
     const transitions=await page.evaluate(()=>{
      const api=window.FormatXLivingCore;
      const read=()=>({shape:api.shape,crystal:getComputedStyle(api.stage.querySelector('[data-static-crystal]')).display,sphere:getComputedStyle(api.stage.querySelector('[data-static-sphere]')).display,accent:api.stage.querySelector('[data-static-accent]').getAttribute('stop-color'),attention:api.stage.querySelector('[data-static-energy]').getAttribute('opacity')});
