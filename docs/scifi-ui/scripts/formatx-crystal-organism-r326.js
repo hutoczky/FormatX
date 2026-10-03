@@ -496,13 +496,13 @@
         /* R1894 — angular mass field matches the cinematic sculpt instead of
            scaling the whole radius from x/y alone. This makes the three fused
            lobes readable in silhouette from the production camera. */
-        const upperMass=mass(.40,.30,Math.PI,.76,.210);
-        const rightMass=mass(.05,.33,0,.70,.165);
-        const lowerMass=mass(-.46,.26,2.46,.70,.130);
-        const waistCut=mass(-.17,.22,-.54,.80,.145);
-        const leftWaistCut=mass(-.02,.17,Math.PI,.50,.078);
-        const rightLowerCut=mass(-.35,.20,-.12,.56,.080);
-        const crownNotch=mass(.73,.115,Math.PI,.44,.085);
+        const upperMass=mass(.40,.30,Math.PI,.76,.180);
+        const rightMass=mass(.05,.33,0,.70,.138);
+        const lowerMass=mass(-.46,.26,2.46,.70,.105);
+        const waistCut=mass(-.17,.22,-.54,.80,.118);
+        const leftWaistCut=mass(-.02,.17,Math.PI,.50,.058);
+        const rightLowerCut=mass(-.35,.20,-.12,.56,.060);
+        const crownNotch=mass(.73,.115,Math.PI,.44,.072);
         const crownLeftLift=mass(.66,.18,Math.PI*.88,.58,.035);
         const crownRightLift=mass(.63,.18,.22,.56,.030);
         const opticShoulder=mass(.18,.22,Math.PI*.50,.54,.015);
@@ -1025,7 +1025,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 62% 56% at 48% 43%,rgba(111,176,181,.145) 0%,rgba(35,79,85,.070) 34%,rgba(8,27,32,.030) 56%,rgba(0,0,0,0) 79%),radial-gradient(ellipse 40% 26% at 54% 78%,rgba(66,50,72,.035),rgba(0,0,0,0) 72%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 64% 58% at 48% 43%,rgba(118,181,184,.190) 0%,rgba(43,88,92,.095) 34%,rgba(10,30,35,.040) 58%,rgba(0,0,0,0) 80%),radial-gradient(ellipse 46% 30% at 54% 80%,rgba(73,58,80,.045),rgba(0,0,0,0) 74%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1036,8 +1036,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.96)'
-      : 'brightness(1.07) contrast(1.11) saturate(.94)';
+      ? 'brightness(1.08) contrast(1.08) saturate(.94)'
+      : 'brightness(1.07) contrast(1.07) saturate(.93)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1394,13 +1394,13 @@
         livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
         mineral=mix(mineral,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.020,.030,.032);
-        cartilage+=vec3(.090,.108,.108)*(.16*ndl+.20*sideLight);
-        cartilage+=vec3(.72,.78,.74)*softboxA*.155;
-        cartilage+=vec3(.34,.46,.46)*sideSpec*.135;
-        cartilage+=vec3(.040,.15,.16)*fresnel*.125;
-        cartilage+=vec3(.035,.018,.042)*subsurface*.050;
-        cartilage+=vec3(.012,.060,.070)*vascular*.055;
+        vec3 cartilage=vec3(.034,.042,.043);
+        cartilage+=vec3(.105,.122,.120)*(.16*ndl+.20*sideLight);
+        cartilage+=vec3(.88,.92,.88)*softboxA*.205;
+        cartilage+=vec3(.42,.54,.54)*sideSpec*.150;
+        cartilage+=vec3(.050,.16,.17)*fresnel*.110;
+        cartilage+=vec3(.030,.018,.038)*subsurface*.038;
+        cartilage+=vec3(.012,.055,.064)*vascular*.045;
         mineral=mix(mineral,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1503,23 +1503,23 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.060+ndl*.180+sideLight*.112+fillLight*.060);
+        float lift=sat(.082+ndl*.196+sideLight*.126+fillLight*.072);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0035,.0075,.0095),vec3(.072,.092,.094),lift);
+        vec3 col=mix(vec3(.0048,.0100,.0122),vec3(.088,.110,.112),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(.99,.99,.96)*keySpec*.185;
         col+=vec3(.66,.78,.79)*sideSpec*.150;
-        col+=vec3(.98,1.00,.98)*softboxA*.155;
+        col+=vec3(.98,1.00,.98)*softboxA*.178;
         col+=vec3(.46,.66,.69)*softboxB*.062;
-        col+=vec3(1.00,1.00,.98)*studioRibbonA*.148;
+        col+=vec3(1.00,1.00,.98)*studioRibbonA*.168;
         col+=vec3(.40,.27,.18)*studioRibbonB*.009;
-        col+=vec3(.68,.89,.90)*studioRibbonC*.072;
+        col+=vec3(.68,.89,.90)*studioRibbonC*.086;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
-        col+=vec3(.032,.112,.132)*fresnel*.105;
+        col+=vec3(.034,.120,.138)*fresnel*.128;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1573,12 +1573,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.022,.030,.031)
-          +vec3(.055,.070,.071)*(.12*ndl+.17*sideLight)
-          +vec3(.90,.96,.93)*softboxA*.135
-          +vec3(.40,.54,.54)*sideSpec*.115
-          +vec3(.038,.120,.132)*fresnel*.070
-          +vec3(.010,.008,.012)*subsurface*.010;
+        vec3 cartilage=vec3(.040,.048,.048)
+          +vec3(.070,.086,.086)*(.12*ndl+.17*sideLight)
+          +vec3(.94,.98,.95)*softboxA*.205
+          +vec3(.48,.60,.59)*sideSpec*.145
+          +vec3(.045,.132,.142)*fresnel*.080
+          +vec3(.010,.008,.012)*subsurface*.008;
         col=mix(col,cartilage,armorMask*.985);
 
         float lensRadial=length(vUv-vec2(.5));
@@ -1621,7 +1621,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.06),clamp(outAlpha,.94,1.0));
+        ${outputName}=vec4(filmic(col*1.98),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1802,6 +1802,7 @@
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
     root.dataset.fxNativeMagStudioR1901='slender-studio-bioglass-premium-sensor-silver-teal-flush-optic';
+    root.dataset.fxNativeMagStudioR1903='gallery-grade-dark-bioglass-sculpt-lifted-midtone-satin-sensor';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
