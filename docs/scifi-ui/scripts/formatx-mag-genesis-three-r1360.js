@@ -151,6 +151,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1900='tall-fused-bioglass-studio-sculpt-visible-flush-optic-handoff-parity';
       document.documentElement.dataset.fxMagBirthVisualR1901='slender-studio-bioglass-subtle-silver-sensor-single-living-iris';
       document.documentElement.dataset.fxMagBirthVisualR1902='smooth-glass-genome-seed-no-low-poly-first-frame';
+      document.documentElement.dataset.fxMagBirthVisualR1903='cinematic-glass-genome-prologue-polished-bioglass-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -632,7 +633,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.22,.20,.008,.007,.085,.026,.022];
+      group.userData.baseOpacity=[.52,.46,.014,.012,.18,.050,.045];
       return group;
     }
 
@@ -772,7 +773,9 @@
         envMapIntensity:1.86
       });
 
-      const seedGeo=new T.IcosahedronGeometry(.84,this.deterministicFrame?5:(this.lowPowerProfile?3:(this.mobileProfile?4:5)));
+      const seedWidth=this.deterministicFrame?72:(this.lowPowerProfile?36:(this.mobileProfile?54:64));
+      const seedHeight=this.deterministicFrame?48:(this.lowPowerProfile?24:(this.mobileProfile?36:42));
+      const seedGeo=new T.SphereGeometry(.84,seedWidth,seedHeight);
       const seedPos=seedGeo.attributes.position;
       const seedV=new T.Vector3();
       for(let i=0;i<seedPos.count;i++){
@@ -1850,16 +1853,16 @@
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
-        h.position.x=b.x*.34*(1+fly*.06);
-        h.position.y=b.y*.34*(1+fly*.06);
-        h.position.z=b.z*.58+fly*.08;
+        h.position.x=b.x*.52*(1+fly*.10);
+        h.position.y=b.y*.48*(1+fly*.08);
+        h.position.z=b.z*.72+fly*.16;
         h.rotation.x=b.rx+Math.sin(time*.00022+b.phase)*.018;
         h.rotation.y=b.ry+Math.sin(time*.00019+b.phase)*.022;
         h.rotation.z=b.rz+time*.000018*(i%2?1:-1);
-        h.scale.setScalar(b.s*(this.mobileProfile?.68:.64));
+        h.scale.setScalar(b.s*(this.mobileProfile?.92:.86));
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*(this.mobileProfile?.60:.48);
+          m.opacity=(bases[mi]??.5)*fade*(this.mobileProfile?.82:.74);
         });
       });
     }
@@ -1894,10 +1897,11 @@
 
       const irisAwake=smooth((t-2.05)/1.00)*coreLife;
       const pulse=.988+.012*Math.sin(time*.0042);
-      this.coreShell.material.opacity=.58*seedShellLife;
-      this.coreGlass.material.opacity=.14*seedShellLife;
-      this.coreShell.visible=seedShellLife>.002;
-      this.coreGlass.visible=seedShellLife>.002;
+      const seedVisual=smooth((t-.46)/.66);
+      this.coreShell.material.opacity=.34*seedShellLife*seedVisual;
+      this.coreGlass.material.opacity=.085*seedShellLife*seedVisual;
+      this.coreShell.visible=seedShellLife*seedVisual>.002;
+      this.coreGlass.visible=seedShellLife*seedVisual>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=irisAwake>.004;
       this.irisGroup.scale.setScalar((this.mobileProfile?1.24:1.22)*(1+irisAwake*.018)*pulse);
@@ -2129,9 +2133,9 @@
         this.mechEnergyMaterial.envMapIntensity=1.76+physicalImpulse*.11;
       }
       if(this.organicShellMaterial){
-        this.organicShellMaterial.roughness=.35+Math.abs(this.interactionY)*.014;
-        this.organicShellMaterial.clearcoatRoughness=.20+Math.abs(this.interactionX)*.010;
-        this.organicShellMaterial.envMapIntensity=1.54+physicalImpulse*.07;
+        this.organicShellMaterial.roughness=.108+Math.abs(this.interactionY)*.010;
+        this.organicShellMaterial.clearcoatRoughness=.052+Math.abs(this.interactionX)*.007;
+        this.organicShellMaterial.envMapIntensity=2.48+physicalImpulse*.10;
       }
       if(this.mechMaterial){
         this.mechMaterial.roughness=.245+Math.abs(this.interactionY)*.014;
