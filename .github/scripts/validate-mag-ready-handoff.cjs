@@ -6,13 +6,13 @@ const URL=process.env.FORMATX_TEST_URL||'https://formatxsuite.com/';
 const OUT=process.env.FORMATX_HANDOFF_EVIDENCE_DIR||'artifacts/mag-ready-handoff';
 fs.mkdirSync(OUT,{recursive:true});
 
-async function verify(browser,profile,staticFallback){
- const route=staticFallback==='script'?'script-unavailable':staticFallback?'static':'webgl';
+async function verify(browser,profile,staticFallback,workerUnavailable=false){
+ const route=workerUnavailable?'worker-script-unavailable':staticFallback==='script'?'script-unavailable':staticFallback?'static':'webgl';
  console.log('MAG_READY_HANDOFF_START',profile.name,route);
  const context=await browser.newContext({viewport:profile.viewport,isMobile:profile.mobile,hasTouch:profile.mobile,reducedMotion:profile.reduced?'reduce':'no-preference'});
  await context.addInitScript(({staticFallback})=>{
   const NativeWorker=window.Worker;
-  window.__handoff={workers:[],posts:0,oldPulseCalls:0,newPulseCalls:0,events:[],glWork:[]};
+  window.__handoff={workers:[],capabilities:[],posts:0,oldPulseCalls:0,newPulseCalls:0,events:[],glWork:[]};
   const originalContext=HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext=function(type,...args){
    const start=performance.now(),context=staticFallback===true&&['webgl','webgl2','experimental-webgl'].includes(type)?null:originalContext.call(this,type,...args);
@@ -24,11 +24,12 @@ async function verify(browser,profile,staticFallback){
    WebGLRenderingContext.prototype[name]=function(...args){const start=performance.now(),result=original.apply(this,args);window.__handoff.glWork.push({phase:name,at:start,ms:performance.now()-start});return result;};
   }
   window.Worker=class extends NativeWorker{
-   constructor(url,options){super(url,options);if(String(url).includes('formatx-crystal-worker'))window.__handoff.workers.push(this);}
+   constructor(url,options){super(url,options);if(String(url).includes('formatx-crystal-worker')){window.__handoff.workers.push(this);this.addEventListener('message',event=>{if(event.data?.type==='capability')window.__handoff.capabilities.push(event.data);});}}
    postMessage(message,...args){if(message?.type==='state')window.__handoff.posts++;return super.postMessage(message,...args);}
   };
   addEventListener('formatx:real3dready',event=>window.__handoff.events.push({renderer:event.detail?.renderer,at:performance.now()}));
  },{staticFallback});
+ if(workerUnavailable)await context.route('**/formatx-crystal-worker-r564.js*',request=>request.abort());
  if(staticFallback==='script')await context.route('**/formatx-crystal-bounded-fallback-r727.js*',request=>request.abort());
  const page=await context.newPage(),errors=[];
  page.on('pageerror',error=>errors.push(String(error)));
@@ -43,7 +44,7 @@ async function verify(browser,profile,staticFallback){
   posts:window.__handoff.posts,
   oldPulseCalls:window.__handoff.oldPulseCalls,newPulseCalls:window.__handoff.newPulseCalls,
   retiredCanvasReference:Boolean(window.__handoff.oldApi?.canvas),retiredStageCanvases:window.__handoff.oldStage?.querySelectorAll('canvas').length||0,
-  events:window.__handoff.events,glWork:window.__handoff.glWork,terminatedAt:window.__handoff.terminatedAt,
+  events:window.__handoff.events,capabilities:window.__handoff.capabilities,glWork:window.__handoff.glWork,terminatedAt:window.__handoff.terminatedAt,recoveryPolicy:document.documentElement.dataset.fxMagRecoveryPolicyR868,
   overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
  }));
  try{
@@ -57,6 +58,11 @@ async function verify(browser,profile,staticFallback){
    assert.equal(before.ready,'ready');assert.equal(before.stages,1);
    assert.ok(before.canvases<=1&&before.visibleCanvases<=1);
    assert.match(before.revision,/fallback/,'startup recovery must use a real fallback owner');
+   if(workerUnavailable){
+    assert.match(before.revision,/normal-lit-main-thread-fallback/,'an unavailable worker script must still reach real main-thread WebGL');
+    assert.equal(before.canvases,1);assert.equal(before.visibleCanvases,1);
+    assert.ok(before.glWork.some(work=>work.phase==='context'),'main-thread context must actually be acquired');
+   }
    assert.match(before.handoff,/^candidate-ready-worker-retired-/,'primary ownership must retire before startup recovery');
    await page.waitForFunction(()=>document.documentElement.dataset.fxCoreLifeVisibilityR455==='visible',null,{timeout:5000});
    await page.evaluate(()=>{
@@ -75,10 +81,12 @@ async function verify(browser,profile,staticFallback){
    if(staticFallback)assert.equal(await page.locator('#hero .fx-core-static-semantic-r866 svg').count(),1,'semantic readiness requires a real fallback representation');
    const name=profile.name+'-'+route+'-startup-recovery';
    await page.screenshot({path:path.join(OUT,name+'.png')});
-   return {name,profile:profile.name,mode:'startup-recovery',before,after};
+   return {name,profile:profile.name,mode:'startup-recovery',workerUnavailable,before,after};
   }
   assert.equal(before.canvases,1,'primary must produce a useful canvas before failure');
   assert.equal(before.ready,'ready');
+  const softwareDevice=before.capabilities.some(c=>c.rendererClass==='software'&&/swiftshader|llvmpipe|software|softpipe|mesa offscreen/i.test(c.device));
+  const expectedStatic=Boolean(staticFallback||softwareDevice);
   // Capture the composited primary frame before injecting the post-paint fault.
   // A queued WebGL command alone is insufficient evidence of that precondition.
   await page.screenshot({path:path.join(OUT,profile.name+'-primary-before-failure.png')});
@@ -100,11 +108,16 @@ async function verify(browser,profile,staticFallback){
   assert.equal(recovered.stages,1,'retired primary stage must be removed');
   assert.equal(recovered.retiredCanvasReference,false,'late consumers of the retired API must not retain its transferred canvas');
   assert.equal(recovered.retiredStageCanvases,0,'the retired stage must release the transferred canvas before replacement context acquisition');
-  assert.equal(recovered.canvases,staticFallback?0:1,'one canonical canvas after handoff');
-  assert.equal(recovered.visibleCanvases,staticFallback?0:1);
+  assert.equal(recovered.canvases,expectedStatic?0:1,'one canonical canvas after handoff');
+  assert.equal(recovered.visibleCanvases,expectedStatic?0:1);
   assert.ok(recovered.glWork.filter(work=>work.phase==='context').every(work=>!work.previousStageConnected),'failed transferred canvas must retire before recovery requests its context');
-  assert.match(recovered.revision,staticFallback?/static-semantic/:/normal-lit-main-thread-fallback/);
-  if(staticFallback)assert.equal(await page.locator('#hero .fx-core-static-semantic-r866 svg').count(),1,'semantic readiness requires a real fallback representation');
+  assert.match(recovered.revision,expectedStatic?/static-semantic/:/normal-lit-main-thread-fallback/);
+  if(expectedStatic)assert.equal(await page.locator('#hero .fx-core-static-semantic-r866 svg').count(),1,'semantic readiness requires a real fallback representation');
+  if(softwareDevice){
+   assert.equal(recovered.recoveryPolicy,'failed-ready-software-device-semantic');
+   assert.equal(recovered.glWork.filter(work=>work.phase==='context').length,0,'failed software device must not block the UI with a replacement context');
+   assert.ok(recovered.events.at(-1).at-recovered.terminatedAt<1000,'actual connected semantic recovery must publish within one second');
+  }
   assert.ok(recovered.events.length>=2,'replacement must publish actual readiness');
   await page.evaluate(()=>{
    const api=window.FormatXLivingCore,original=api.surfacePulse;
@@ -136,10 +149,12 @@ async function verify(browser,profile,staticFallback){
   for(const profile of [{name:'desktop',viewport:{width:1440,height:900},mobile:false},{name:'mobile',viewport:{width:390,height:844},mobile:true}]){
    reports.push(await verify(browser,profile,false));reports.push(await verify(browser,profile,true));
    reports.push(await verify(browser,profile,'script'));
+   reports.push(await verify(browser,profile,false,true));
   }
   reports.push(await verify(browser,{name:'desktop-reduced',viewport:{width:1440,height:900},mobile:false,reduced:true},false));
   fs.writeFileSync(path.join(OUT,'report.json'),JSON.stringify({auditedSha:process.env.AUDITED_SHA||'',origin:URL,reports},null,2));
   for(const profile of ['desktop','mobile'])assert.ok(reports.some(report=>report.profile===profile&&report.mode==='ready-worker-failure'),profile+': a genuine already-ready worker must be failed and recovered; startup fallback alone cannot certify this contract');
+  for(const profile of ['desktop','mobile'])assert.ok(reports.some(report=>report.profile===profile&&report.workerUnavailable&&report.before.revision==='r866-normal-lit-main-thread-fallback'),profile+': real main-thread WebGL recovery must also execute');
   console.log('MAG_READY_HANDOFF_PASS',reports.map(report=>report.name).join(', '));
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

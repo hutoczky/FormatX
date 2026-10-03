@@ -67,7 +67,7 @@ async function start(){
   const rendererStart=layoutStyle.then(async()=>{
     root.dataset.fxCurrentMagRendererStartR559='starting-layout-ready-under-intro';
     root.dataset.fxCurrentMagRendererStartR561='starting-context-policy-under-intro';
-    await addScript(CONTEXT_POLICY+'&rev=20261003-r866-dielectric-semantic-light','data-fx-mag-context-policy-r561');
+    await addScript(CONTEXT_POLICY+'&rev=20261003-r868-gpu-failure-recovery','data-fx-mag-context-policy-r561');
     if(root.dataset.fxCrystalOrganismR326==='booting'){
       root.dataset.fxCurrentMagMainThreadFallbackR614='deferred-offscreen-owner-active';
     }else{
@@ -88,7 +88,7 @@ async function start(){
   root.dataset.fxCurrentMagStartupR442='layout-style-before-renderer-noncritical-post-intro';
   root.dataset.fxCurrentMagStartupR549='superseded-r767-semantic-first-post-intro-heart';
 
-  let rendererReady=await rendererStart;
+  const rendererReady=await rendererStart;
   const nonCriticalStyles=Promise.all([
     addStyle(OPTICS,'data-fx-core-shapeshifter-r337'),
     addStyle(MINI_STYLE,'data-fx-mini-mag-assistant-r459'),
@@ -119,7 +119,7 @@ async function start(){
     removeEventListener('formatx:real3dready',onRendererReady);
     enhancementTask=(async()=>{
       if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-      await addScript(LIFE+'&rev=20261003-r865-renderer-adoption','data-fx-core-life-r455');
+      await addScript(LIFE+'&rev=20261003-r868-owner-visibility','data-fx-core-life-r455');
       await addScript('./scripts/formatx-mag-semantic-light-r866.js?v=20261003-r866-dielectric-semantic-light','data-fx-mag-semantic-light-r866');
       root.dataset.fxCoreRendererSelection=`r326-direct-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
       root.dataset.fxCoreReferenceLockLoad='ready-v69-r767';
@@ -131,7 +131,7 @@ async function start(){
   addEventListener('formatx:real3dready',onRendererReady,{passive:true});
   addEventListener('pagehide',()=>removeEventListener('formatx:real3dready',onRendererReady),{once:true});
   const currentRenderer=adoptRenderer();
-  if(currentRenderer){await currentRenderer;rendererReady=true;}
+  if(currentRenderer)await currentRenderer;
   else root.dataset.fxCurrentMagRuntimeR422='awaiting-canonical-renderer';
   root.dataset.fxCoreCriticalPathR422=`direct-r326-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-native-touch`;
   root.dataset.fxCurrentMagLifecycleR536='navigation-owned-automatic-lifecycle';

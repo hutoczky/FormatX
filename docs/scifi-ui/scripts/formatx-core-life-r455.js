@@ -17,7 +17,7 @@
   function onCoreInteraction(event) { const phase = event.detail?.phase || ''; if (phase === 'press' || phase === 'release') fireSurfacePulse(`core-${phase}`); }
   function onPointerDown() { queueMicrotask(() => fireSurfacePulse('direct-interaction')); }
   function onKeyDown(event) { if (!event.isTrusted || !['Enter', ' '].includes(event.key)) return; const target = event.target instanceof Element ? event.target : null; if (!target?.closest('#hero .hero-space,.fx-reference-mag-button')) return; queueMicrotask(() => fireSurfacePulse('keyboard-interaction')); }
-  function retireOwner() { ownerLifecycle?.abort(); observer?.disconnect(); visible = false; }
+  function retireOwner() { ownerLifecycle?.abort(); observer?.disconnect(); visible = false; root.dataset.fxCoreLifeVisibilityR455 = 'retired'; }
   function bind() {
     const nextApi = window.FormatXLivingCore || window.FormatXCoreMobileV69 || null;
     const nextStage = nextApi?.stage || document.querySelector('#hero .fx-crystal-organism-r326-stage, #hero .fx-core-mobile-v55-stage');
@@ -28,6 +28,7 @@
     if (api === nextApi && stage === nextStage && ownerLifecycle && !ownerLifecycle.signal.aborted) return true;
     retireOwner();
     api = nextApi; stage = nextStage; hero = nextHero; visible = false;
+    root.dataset.fxCoreLifeVisibilityR455 = 'pending-observation';
     ownerLifecycle = new AbortController();
     const options = { passive: true, signal: ownerLifecycle.signal };
     observer = new IntersectionObserver(entries => { const entry = entries[0]; visible = Boolean(entry?.isIntersecting && entry.intersectionRatio > .04); root.dataset.fxCoreLifeVisibilityR455 = visible ? 'visible' : 'offscreen'; }, { threshold: [0, .04, .2, .55] });
