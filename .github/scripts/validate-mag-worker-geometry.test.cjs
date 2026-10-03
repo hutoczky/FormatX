@@ -40,3 +40,24 @@ test('worker crystal and sphere remain closed, outward and within the surface bu
     assert.ok([...edges.values()].every(n => n === 2), 'each closed-volume edge must have two faces');
   }
 });
+
+test('main-thread recovery preserves the same closed surface and normal-lit optics', () => {
+  const worker = fs.readFileSync(path.join(__dirname, '../../docs/scifi-ui/scripts/formatx-crystal-worker-r564.js'), 'utf8');
+  const fallback = fs.readFileSync(path.join(__dirname, '../../docs/scifi-ui/scripts/formatx-crystal-bounded-fallback-r727.js'), 'utf8');
+  const evaluate = source => {
+    const shaders = [];
+    const gl = { VERTEX_SHADER: 1, FRAGMENT_SHADER: 2, LINK_STATUS: 3, createProgram: () => ({}), attachShader() {}, bindAttribLocation() {}, linkProgram() {}, deleteShader() {}, getProgramParameter: () => true };
+    const context = vm.createContext({ gl, shader: (type, code) => { shaders.push({ type, code }); return {}; } });
+    const program = source.slice(source.indexOf('function buildProgram(){'), source.indexOf('function geometry(){'));
+    // geometry contains nested helpers; evaluate it up to the following top-level
+    // upload/resize function, rather than ending at a nested function declaration.
+    const end = source.includes('function upload(') ? source.indexOf('function upload(') : source.indexOf('function resize(){');
+    const mesh = source.slice(source.indexOf('function geometry(){'), end);
+    vm.runInContext(program + mesh + '\nthis.mesh=geometry();buildProgram();', context);
+    return { shaders, count: context.mesh.count, arrays: Array.from(context.mesh.arrays, array => Array.from(array)) };
+  };
+  const primary = evaluate(worker), recovery = evaluate(fallback);
+  assert.equal(recovery.count, 1584);
+  assert.deepEqual(recovery.arrays, primary.arrays, 'fallback must retain the complete closed normal-lit surface');
+  assert.deepEqual(recovery.shaders, primary.shaders, 'photometric material must survive worker recovery');
+});

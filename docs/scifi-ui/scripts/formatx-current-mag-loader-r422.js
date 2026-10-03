@@ -67,7 +67,7 @@ async function start(){
   const rendererStart=layoutStyle.then(async()=>{
     root.dataset.fxCurrentMagRendererStartR559='starting-layout-ready-under-intro';
     root.dataset.fxCurrentMagRendererStartR561='starting-context-policy-under-intro';
-    await addScript(CONTEXT_POLICY+'&rev=20261003-r864-normal-lit-front-surface','data-fx-mag-context-policy-r561');
+    await addScript(CONTEXT_POLICY+'&rev=20261003-r865-ready-worker-optics-handoff','data-fx-mag-context-policy-r561');
     if(root.dataset.fxCrystalOrganismR326==='booting'){
       root.dataset.fxCurrentMagMainThreadFallbackR614='deferred-offscreen-owner-active';
     }else{
@@ -111,7 +111,7 @@ async function start(){
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
   if(rendererReady){
     if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-    await addScript(LIFE,'data-fx-core-life-r455');
+    await addScript(LIFE+'&rev=20261003-r865-renderer-adoption','data-fx-core-life-r455');
     root.dataset.fxCoreRendererSelection=`r326-direct-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
     root.dataset.fxCoreReferenceLockLoad='ready-v69-r767';
     root.dataset.fxCurrentMagRuntimeR422='ready';

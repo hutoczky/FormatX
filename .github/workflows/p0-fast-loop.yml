@@ -123,6 +123,12 @@ jobs:
           FORMATX_SEMANTIC_EVIDENCE_DIR: artifacts/r522-semantic-mag
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-r522-semantic-mag.cjs
+      - name: Verify active-worker failure and renderer handoff
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_HANDOFF_EVIDENCE_DIR: artifacts/mag-ready-handoff
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-mag-ready-handoff.cjs
       - name: Run current hero visual contract
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -138,6 +144,7 @@ jobs:
             artifacts/r533-preloader-timing/
             artifacts/p0-fast-loop/
             artifacts/r522-semantic-mag/
+            artifacts/mag-ready-handoff/
             artifacts/content-visuals/
           if-no-files-found: warn
           retention-days: 30
