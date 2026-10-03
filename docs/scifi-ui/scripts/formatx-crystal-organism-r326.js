@@ -1042,6 +1042,29 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
+    /* R1902 — desktop living-system compositor heartbeat.
+       The shader/geometry remain the only visual renderer. WAAPI advances a
+       microscopic opacity timeline so the desktop MAG is measurably alive
+       without adding a JS RAF loop or changing shape/position. */
+    if(!reduced.matches && !mobile && typeof canvas.animate==='function'){
+      const desktopLivingTimeline=canvas.animate(
+        [
+          {opacity:.986,offset:0},
+          {opacity:1,offset:.42},
+          {opacity:.990,offset:.70},
+          {opacity:.986,offset:1}
+        ],
+        {
+          duration:6400,
+          iterations:Infinity,
+          easing:'cubic-bezier(.36,0,.20,1)',
+          fill:'both'
+        }
+      );
+      desktopLivingTimeline.id='fx-primary-mag-desktop-heart-r1902';
+      root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
+    }
+
     const options = {
       alpha:true,
       /* R1626: mobile/coarse displays get temporal smoothness from native
