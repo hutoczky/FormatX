@@ -147,6 +147,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1893='embedded-optic-studio-bioglass-handoff-parity';
       document.documentElement.dataset.fxMagBirthVisualR1895='flush-living-optic-cinematic-final-attachment';
       document.documentElement.dataset.fxMagBirthVisualR1897='cinematic-smoked-optic-single-iris-black-pupil-flush-integration';
+      document.documentElement.dataset.fxMagBirthVisualR1898='elliptic-smoked-sensor-single-cyan-iris-arc-black-pupil';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -872,7 +873,7 @@
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.TorusGeometry(.094,.0065,24,144),
+        new T.TorusGeometry(.094,.0065,24,144,Math.PI*1.48),
         new T.MeshPhysicalMaterial({
           color:0x78d8dc,metalness:0,roughness:.075,
           clearcoat:.91,clearcoatRoughness:.040,
@@ -887,7 +888,7 @@
       this.irisGroup.add(livingIris);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.017,64),
+        new T.CircleGeometry(.023,64),
         new T.MeshPhysicalMaterial({
           color:0x00080b,metalness:.02,roughness:.06,
           clearcoat:.92,clearcoatRoughness:.045,
@@ -895,7 +896,7 @@
           side:T.DoubleSide
         })
       );
-      aperture.position.z=.314;
+      aperture.position.z=.318;
       aperture.visible=true;
       this.irisGroup.add(aperture);
 
@@ -1899,7 +1900,7 @@
       this.irisGroup.scale.setScalar((this.mobileProfile?1.31:1.29)*(1+irisAwake*.016)*pulse);
       if(this.livingIris){
         this.livingIris.material.opacity=(.20+.25*irisAwake)*irisAwake;
-        this.livingIris.rotation.z=.08+Math.sin(time*.00055)*.018;
+        this.livingIris.rotation.z=-.66+Math.sin(time*.00055)*.018;
       }
       if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
       this.glowSprite.material.opacity=(.0006+.0018*irisAwake)*irisAwake*pulse;
