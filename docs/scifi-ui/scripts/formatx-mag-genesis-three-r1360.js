@@ -149,6 +149,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1897='cinematic-smoked-optic-single-iris-black-pupil-flush-integration';
       document.documentElement.dataset.fxMagBirthVisualR1898='elliptic-smoked-sensor-single-cyan-iris-arc-black-pupil';
       document.documentElement.dataset.fxMagBirthVisualR1900='tall-fused-bioglass-studio-sculpt-visible-flush-optic-handoff-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1901='slender-studio-bioglass-subtle-silver-sensor-single-living-iris';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -830,31 +831,31 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.204,112),
+        new T.CircleGeometry(.172,112),
         new T.MeshPhysicalMaterial({
           color:0x0b1b1e,metalness:.01,roughness:.14,
           clearcoat:.82,clearcoatRoughness:.070,
           emissive:0x01090b,emissiveIntensity:.006,
           specularIntensity:.84,specularColor:new T.Color(0xd8f6f7),
-          transparent:true,opacity:.18,side:T.DoubleSide
+          transparent:true,opacity:.085,side:T.DoubleSide
         })
       );
       socketBack.position.z=.248;
-      socketBack.scale.set(1.30,.73,1);
+      socketBack.scale.set(1.28,.72,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.184,.0030,28,176),
+        new T.TorusGeometry(.154,.0026,28,176),
         new T.MeshPhysicalMaterial({
           color:0x6f8585,metalness:.06,roughness:.075,
           clearcoat:.95,clearcoatRoughness:.038,
           emissive:0x010506,emissiveIntensity:.001,
           specularIntensity:.98,specularColor:new T.Color(0xf8ffff),
-          envMapIntensity:2.35,transparent:true,opacity:.31
+          envMapIntensity:2.35,transparent:true,opacity:.24
         })
       );
       socketBezel.position.z=.258;
-      socketBezel.scale.set(1.30,.71,1);
+      socketBezel.scale.set(1.28,.70,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -868,13 +869,13 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.178,112,64),lensMat);
-      lens.scale.set(1.43,.74,.16);
-      lens.position.set(-.014,.004,.266);
+      const lens=new T.Mesh(new T.SphereGeometry(.152,112,64),lensMat);
+      lens.scale.set(1.38,.72,.20);
+      lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.TorusGeometry(.094,.0065,24,144,Math.PI*1.48),
+        new T.TorusGeometry(.080,.0055,24,144,Math.PI*1.44),
         new T.MeshPhysicalMaterial({
           color:0x78d8dc,metalness:0,roughness:.075,
           clearcoat:.91,clearcoatRoughness:.040,
@@ -883,13 +884,13 @@
           blending:T.AdditiveBlending
         })
       );
-      livingIris.position.z=.302;
-      livingIris.scale.set(1.28,.65,1);
+      livingIris.position.z=.314;
+      livingIris.scale.set(1.26,.64,1);
       this.livingIris=livingIris;
       this.irisGroup.add(livingIris);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.023,64),
+        new T.CircleGeometry(.019,64),
         new T.MeshPhysicalMaterial({
           color:0x00080b,metalness:.02,roughness:.06,
           clearcoat:.92,clearcoatRoughness:.045,
@@ -897,12 +898,12 @@
           side:T.DoubleSide
         })
       );
-      aperture.position.z=.318;
+      aperture.position.z=.328;
       aperture.visible=true;
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
-        new T.TorusGeometry(.110,.0024,18,128),
+        new T.TorusGeometry(.094,.0022,18,128),
         new T.MeshPhysicalMaterial({
           color:0x789697,metalness:.06,roughness:.095,
           clearcoat:.90,clearcoatRoughness:.055,
@@ -911,8 +912,8 @@
           transparent:true,opacity:.11
         })
       );
-      glassRing.position.z=.300;
-      glassRing.scale.set(1.34,.68,1);
+      glassRing.position.z=.310;
+      glassRing.scale.set(1.30,.66,1);
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
@@ -1052,9 +1053,9 @@
         /* R1842 — smooth high-density sculpt, not an egg. A lower Lp exponent
            gives broad shoulders and restrained mineral corners while the dense
            geometry keeps reflections continuous. */
-        const ax=.675+shoulder*.090+n.x*.032-n.z*.014;
-        const ay=1.225+shoulder*.042+n.y*.020+n.x*.012;
-        const azr=.565+shoulder*.072+n.z*.026-n.x*.014;
+        const ax=.640+shoulder*.080+n.x*.028-n.z*.012;
+        const ay=1.245+shoulder*.040+n.y*.018+n.x*.010;
+        const azr=.520+shoulder*.062+n.z*.022-n.x*.012;
         const exponent=1.62;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
@@ -1070,10 +1071,10 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.40,.31,Math.PI,.78,.235);
-        const rightCentre=mass(.04,.34,0,.72,.180);
-        const lowerLeft=mass(-.45,.27,2.46,.72,.145);
-        const waist=mass(-.17,.23,-.54,.82,.135);
+        const upperLeft=mass(.40,.30,Math.PI,.76,.210);
+        const rightCentre=mass(.05,.33,0,.70,.165);
+        const lowerLeft=mass(-.46,.26,2.46,.70,.130);
+        const waist=mass(-.17,.22,-.54,.80,.145);
         const leftWaist=mass(-.02,.17,Math.PI,.50,.078);
         const rightLowerCut=mass(-.35,.20,-.12,.56,.080);
         const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-leftWaist-rightLowerCut;
@@ -1086,20 +1087,20 @@
         p.y+=.040*upperLeft-.026*lowerLeft+Math.sin(az*1.88+el*.42)*.011*shoulder;
         p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
 
-        const topCap=.865+p.x*.092-p.z*.034;
-        const bottomCap=-.895-p.x*.050+p.z*.026;
+        const topCap=.885+p.x*.084-p.z*.030;
+        const bottomCap=-.915-p.x*.045+p.z*.022;
         if(p.y>topCap)p.y=topCap+(p.y-topCap)*.52;
         if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.52;
         const crownT=Math.max(0,Math.min(1,(p.y-.48)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.105*Math.exp(-Math.pow((p.x+.010)/.142,2.0))*crownEase;
+        const crownCleft=.090*Math.exp(-Math.pow((p.x+.008)/.136,2.0))*crownEase;
         p.y-=crownCleft;
         p.x+=Math.sign(p.x+.018)*crownCleft*.22;
 
-        const leftPlane=-.685+.092*p.y-.026*p.z;
-        const rightPlane=.610-.066*p.y+.018*p.z;
-        const frontPlane=.565-.026*p.y-.016*p.x;
-        const backPlane=-.515+.018*p.y+.014*p.x;
+        const leftPlane=-.650+.082*p.y-.022*p.z;
+        const rightPlane=.575-.058*p.y+.016*p.z;
+        const frontPlane=.535-.022*p.y-.014*p.x;
+        const backPlane=-.485+.016*p.y+.012*p.x;
         if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.80;
         if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.80;
         if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.84;
@@ -1114,7 +1115,7 @@
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.925,1.105,.820);
+      shell.scale.set(.900,1.125,.790);
       shell.position.set(-.040,.004,-.012);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
@@ -1130,7 +1131,7 @@
         envMapIntensity:2.54,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.900,1.070,.786);
+      this.organicMembrane.scale.set(.875,1.092,.760);
       this.organicMembrane.position.set(-.040,.004,-.018);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
