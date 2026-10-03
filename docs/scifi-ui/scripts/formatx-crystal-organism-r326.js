@@ -924,7 +924,7 @@
 
     {
       const centreX=-.055,centreY=.012;
-      const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.602;
+      const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.565;
       const bezelMajorX=.202,bezelMajorY=.116,bezelTube=.0015;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -949,10 +949,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.608];
+      const lensCenter=[centreX,centreY,.570];
       const lensRadiusX=.205;
       const lensRadiusY=.108;
-      const lensDepth=.024;
+      const lensDepth=.018;
       const radialSteps=auditMode?11:(software?15:mobile?18:20);
       const angularSteps=auditMode?72:(software?96:mobile?112:128);
       function lensVertex(radial,angle){
@@ -1384,7 +1384,7 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.435)/.024,2.0));
         float lensIris=exp(-pow((lensRadial-.245)/.026,2.0));
-        float lensIrisArc=lensIris*(.18+.82*smoothstep(-.28,.78,cos(lensAngle+.72)));
+        float lensIrisArc=lensIris*smoothstep(.18,.80,cos(lensAngle+.72));
         float lensHot=exp(-pow(lensRadial/.095,2.0));
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1562,7 +1562,7 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.435)/.024,2.0));
         float lensIris=exp(-pow((lensRadial-.245)/.026,2.0));
-        float lensIrisArc=lensIris*(.18+.82*smoothstep(-.28,.78,cos(lensAngle+.72)));
+        float lensIrisArc=lensIris*smoothstep(.18,.80,cos(lensAngle+.72));
         float lensHot=exp(-pow(lensRadial/.095,2.0));
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1666,15 +1666,15 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        float studioStripeA=exp(-pow((vLocal.x+.285)/.034,2.0))*smoothstep(-.82,.74,vLocal.y)*bodyMask;
-        float studioStripeB=exp(-pow((vLocal.x-.355)/.038,2.0))*smoothstep(-.68,.80,vLocal.y)*bodyMask;
-        float studioStripeC=exp(-pow((vLocal.x+.012+vLocal.y*.10)/.050,2.0))*smoothstep(-.78,.78,vLocal.y)*bodyMask;
-        col+=vec3(.34,.38,.37)*pow(broadKey,3.65)*.026*bodyMask;
-        col+=vec3(.10,.20,.21)*pow(broadSide,3.30)*.025*bodyMask;
+        float studioStripeA=exp(-pow((vLocal.x+.285)/.027,2.0))*smoothstep(-.82,.74,vLocal.y)*bodyMask;
+        float studioStripeB=exp(-pow((vLocal.x-.355)/.031,2.0))*smoothstep(-.68,.80,vLocal.y)*bodyMask;
+        float studioStripeC=exp(-pow((vLocal.x+.012+vLocal.y*.10)/.042,2.0))*smoothstep(-.78,.78,vLocal.y)*bodyMask;
+        col+=vec3(.34,.38,.37)*pow(broadKey,3.65)*.014*bodyMask;
+        col+=vec3(.10,.20,.21)*pow(broadSide,3.30)*.014*bodyMask;
         col+=vec3(.06,.038,.024)*pow(broadWarm,3.20)*.006*bodyMask;
-        col+=vec3(1.00,1.00,.98)*studioStripeA*.235;
-        col+=vec3(.32,.60,.64)*studioStripeB*.082;
-        col+=vec3(.70,.94,.95)*studioStripeC*.096;
+        col+=vec3(1.00,1.00,.98)*studioStripeA*.185;
+        col+=vec3(.32,.60,.64)*studioStripeB*.060;
+        col+=vec3(.70,.94,.95)*studioStripeC*.072;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1686,7 +1686,7 @@
         float sculptValleyB=exp(-pow((vLocal.x-.19)/.102,2.0)-pow((vLocal.y+.30)/.27,2.0))*bodyMask;
         float sculptShoulder=exp(-pow((vLocal.x+.34)/.23,2.0)-pow((vLocal.y-.38)/.27,2.0))*bodyMask;
         col*=1.0-.24*sculptValleyA-.17*sculptValleyB;
-        col+=vec3(.040,.096,.106)*sculptShoulder*.055;
+        col+=vec3(.040,.096,.106)*sculptShoulder*.026;
         col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
         col+=vec3(.024,.090,.100)*glassEdge*.245;
         col+=vec3(.014,.050,.057)*glassHalo*.082;
@@ -1694,7 +1694,7 @@
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
         col+=vec3(.076,.092,.090)*iceVolume*(.010+.010*(1.0-facing));
         col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
-        col+=vec3(.016,.042,.047)*bodyMask*(.28+.72*facing);
+        col+=vec3(.008,.022,.025)*bodyMask*(.24+.76*facing);
         col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
         vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
         float socketD=length(socketQ);
@@ -1729,27 +1729,27 @@
         float lensRim=exp(-pow((lensRadial-.435)/.026,2.0));
         float lensIris=exp(-pow((lensRadial-.245)/.030,2.0));
         float lensAngle=atan(vUv.y-.5,vUv.x-.5);
-        float lensIrisArc=lensIris*(.18+.82*smoothstep(-.28,.78,cos(lensAngle+.72)));
+        float lensIrisArc=lensIris*smoothstep(.18,.80,cos(lensAngle+.72));
         float lensHot=exp(-pow(lensRadial/.098,2.0));
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
         float lensGlint=exp(-pow((vUv.x-.34)/.065,2.0)-pow((vUv.y-.31)/.052,2.0));
-        vec3 optical=vec3(.006,.015,.018)
-          +vec3(.004,.024,.034)*lensInner
+        vec3 optical=vec3(.010,.021,.023)
+          +vec3(.003,.018,.024)*lensInner
           +vec3(.84,.92,.89)*keySpec*.095
           +vec3(.010,.038,.050)*fresnel*.042
-          +vec3(.28,.36,.36)*lensRim*.032
+          +vec3(.24,.29,.29)*lensRim*.018
           +vec3(.018,.59,.68)*lensIrisArc*.420
           +vec3(.68,.90,.90)*lensHot*.060
           +vec3(.96,1.00,1.00)*lensGlint*.34
-          +vec3(.22,.34,.35)*lensEdge*(.038+.060*keySpec+.030*sideSpec);
+          +vec3(.18,.27,.28)*lensEdge*(.018+.035*keySpec+.018*sideSpec);
         optical=mix(optical,vec3(.0010,.004,.006),lensPupil*.70);
         optical+=vec3(.78,.96,.97)*lensGlint*.09*(1.0-lensPupil);
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
-        alpha=mix(alpha,.92,isLensMesh);
+        alpha=mix(alpha,.97,isLensMesh);
         ${outputName}=vec4(tone(col*2.12),clamp(alpha,.99,1.0));
       }`;
 
@@ -1776,6 +1776,7 @@
     root.dataset.fxNativeMagStudioR1897='cinematic-sculpt-parity-flush-smoked-optic-single-iris';
     root.dataset.fxNativeMagStudioR1897b='front-surface-optic-depth-corrected-visible-single-iris';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
+    root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
