@@ -924,7 +924,7 @@
 
     {
       const centreX=-.055,centreY=.012;
-      const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.526;
+      const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.602;
       const bezelMajorX=.198,bezelMajorY=.142,bezelTube=.0016;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -949,10 +949,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.530];
+      const lensCenter=[centreX,centreY,.608];
       const lensRadiusX=.202;
       const lensRadiusY=.146;
-      const lensDepth=.026;
+      const lensDepth=.024;
       const radialSteps=auditMode?11:(software?15:mobile?18:20);
       const angularSteps=auditMode?72:(software?96:mobile?112:128);
       function lensVertex(radial,angle){
@@ -1770,6 +1770,7 @@
     root.dataset.fxNativeMagStudioR1894='cinematic-angular-mass-parity-breathing-room-living-iris';
     root.dataset.fxNativeMagStudioR1896='cross-tier-cyan-iris-smoked-silver-bezel-proof-parity';
     root.dataset.fxNativeMagStudioR1897='cinematic-sculpt-parity-flush-smoked-optic-single-iris';
+    root.dataset.fxNativeMagStudioR1897b='front-surface-optic-depth-corrected-visible-single-iris';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
