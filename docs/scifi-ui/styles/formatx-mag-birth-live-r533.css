@@ -2218,10 +2218,10 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 .fx-mag-birth-r533[data-fx-renderer="three"],
 .fx-mag-birth-r533[data-fx-renderer="three-loading"]{
   background:
-    radial-gradient(ellipse 48% 52% at 48% 44%,rgba(142,169,168,.155) 0%,rgba(68,101,102,.090) 30%,rgba(18,43,47,.045) 56%,transparent 74%),
-    radial-gradient(ellipse 108% 34% at 50% 103%,rgba(134,151,145,.110) 0%,rgba(47,61,59,.055) 34%,transparent 70%),
-    radial-gradient(ellipse 34% 40% at 78% 32%,rgba(96,87,94,.045) 0%,transparent 75%),
-    linear-gradient(180deg,#020506 0%,#03090b 46%,#010405 100%)!important;
+    radial-gradient(ellipse 52% 56% at 48% 44%,rgba(148,179,178,.205) 0%,rgba(73,110,111,.118) 30%,rgba(19,48,52,.056) 58%,transparent 76%),
+    radial-gradient(ellipse 112% 36% at 50% 103%,rgba(142,159,153,.145) 0%,rgba(52,69,67,.070) 35%,transparent 72%),
+    radial-gradient(ellipse 38% 44% at 79% 31%,rgba(103,91,100,.052) 0%,transparent 76%),
+    linear-gradient(180deg,#020607 0%,#040b0d 46%,#010405 100%)!important;
 }
 html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-veil,
 .fx-mag-birth-r533[data-fx-renderer="three"] .fxb-veil{
@@ -2251,3 +2251,4 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1862-deep-photographic-studio-chamber */
 
 /* production-r1871-silver-ice-studio-horizon */
+/* production-r1903-gallery-studio-bioglass-depth */
