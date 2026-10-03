@@ -148,6 +148,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1895='flush-living-optic-cinematic-final-attachment';
       document.documentElement.dataset.fxMagBirthVisualR1897='cinematic-smoked-optic-single-iris-black-pupil-flush-integration';
       document.documentElement.dataset.fxMagBirthVisualR1898='elliptic-smoked-sensor-single-cyan-iris-arc-black-pupil';
+      document.documentElement.dataset.fxMagBirthVisualR1900='tall-fused-bioglass-studio-sculpt-visible-flush-optic-handoff-parity';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1051,9 +1052,9 @@
         /* R1842 — smooth high-density sculpt, not an egg. A lower Lp exponent
            gives broad shoulders and restrained mineral corners while the dense
            geometry keeps reflections continuous. */
-        const ax=.735+shoulder*.112+n.x*.040-n.z*.018;
-        const ay=1.145+shoulder*.050+n.y*.022+n.x*.014;
-        const azr=.615+shoulder*.088+n.z*.030-n.x*.018;
+        const ax=.675+shoulder*.090+n.x*.032-n.z*.014;
+        const ay=1.225+shoulder*.042+n.y*.020+n.x*.012;
+        const azr=.565+shoulder*.072+n.z*.026-n.x*.014;
         const exponent=1.62;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
@@ -1069,51 +1070,51 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.39,.33,Math.PI,.82,.340);
-        const rightCentre=mass(.03,.38,0,.76,.285);
-        const lowerLeft=mass(-.44,.29,2.46,.76,.225);
-        const waist=mass(-.17,.24,-.54,.88,.205);
-        const leftWaist=mass(-.02,.18,Math.PI,.52,.105);
-        const rightLowerCut=mass(-.34,.21,-.12,.58,.108);
+        const upperLeft=mass(.40,.31,Math.PI,.78,.235);
+        const rightCentre=mass(.04,.34,0,.72,.180);
+        const lowerLeft=mass(-.45,.27,2.46,.72,.145);
+        const waist=mass(-.17,.23,-.54,.82,.135);
+        const leftWaist=mass(-.02,.17,Math.PI,.50,.078);
+        const rightLowerCut=mass(-.35,.20,-.12,.56,.080);
         const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-leftWaist-rightLowerCut;
         p.x*=sculpt;
         p.z*=sculpt;
 
-        p.x+=-.082*Math.pow(Math.max(n.y,0),1.55)+.040*Math.pow(Math.max(-n.y,0),1.45)
-          -.052*upperLeft+.055*rightCentre-.030*lowerLeft
-          +Math.sin(az*1.55+el*.72)*.013*shoulder;
+        p.x+=-.060*Math.pow(Math.max(n.y,0),1.55)+.030*Math.pow(Math.max(-n.y,0),1.45)
+          -.034*upperLeft+.040*rightCentre-.020*lowerLeft
+          +Math.sin(az*1.55+el*.72)*.009*shoulder;
         p.y+=.040*upperLeft-.026*lowerLeft+Math.sin(az*1.88+el*.42)*.011*shoulder;
         p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
 
-        const topCap=.805+p.x*.110-p.z*.042;
-        const bottomCap=-.825-p.x*.062+p.z*.032;
+        const topCap=.865+p.x*.092-p.z*.034;
+        const bottomCap=-.895-p.x*.050+p.z*.026;
         if(p.y>topCap)p.y=topCap+(p.y-topCap)*.52;
         if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.52;
         const crownT=Math.max(0,Math.min(1,(p.y-.48)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.158*Math.exp(-Math.pow((p.x+.012)/.154,2.0))*crownEase;
+        const crownCleft=.105*Math.exp(-Math.pow((p.x+.010)/.142,2.0))*crownEase;
         p.y-=crownCleft;
         p.x+=Math.sign(p.x+.018)*crownCleft*.22;
 
-        const leftPlane=-.735+.118*p.y-.032*p.z;
-        const rightPlane=.665-.082*p.y+.022*p.z;
-        const frontPlane=.600-.030*p.y-.020*p.x;
-        const backPlane=-.555+.022*p.y+.016*p.x;
+        const leftPlane=-.685+.092*p.y-.026*p.z;
+        const rightPlane=.610-.066*p.y+.018*p.z;
+        const frontPlane=.565-.026*p.y-.016*p.x;
+        const backPlane=-.515+.018*p.y+.014*p.x;
         if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.80;
         if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.80;
         if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.84;
         if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.84;
 
-        const socketX=(p.x+.055)/.300;
-        const socketY=(p.y+.012)/.215;
+        const socketX=(p.x+.040)/.255;
+        const socketY=(p.y+.010)/.178;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,n.z);
-        p.z-=.122*socket;
+        p.z-=.155*socket;
 
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.955,1.075,.845);
+      shell.scale.set(.925,1.105,.820);
       shell.position.set(-.040,.004,-.012);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
@@ -1129,7 +1130,7 @@
         envMapIntensity:2.54,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.925,1.035,.808);
+      this.organicMembrane.scale.set(.900,1.070,.786);
       this.organicMembrane.position.set(-.040,.004,-.018);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
@@ -1877,7 +1878,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx-.040*chestEmbed,ty-.008*chestEmbed,.40-.120*chestEmbed);
+      this.coreGroup.position.set(tx-.032*chestEmbed,ty-.006*chestEmbed,.43-.070*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1897,9 +1898,9 @@
       this.coreGlass.visible=seedShellLife>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=irisAwake>.004;
-      this.irisGroup.scale.setScalar((this.mobileProfile?1.31:1.29)*(1+irisAwake*.016)*pulse);
+      this.irisGroup.scale.setScalar((this.mobileProfile?1.24:1.22)*(1+irisAwake*.018)*pulse);
       if(this.livingIris){
-        this.livingIris.material.opacity=(.20+.25*irisAwake)*irisAwake;
+        this.livingIris.material.opacity=(.26+.30*irisAwake)*irisAwake;
         this.livingIris.rotation.z=-.66+Math.sin(time*.00055)*.018;
       }
       if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
