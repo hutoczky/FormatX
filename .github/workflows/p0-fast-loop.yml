@@ -129,6 +129,15 @@ jobs:
           FORMATX_HANDOFF_EVIDENCE_DIR: artifacts/mag-ready-handoff
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-mag-ready-handoff.cjs
+      - name: Verify canonical static fallback and semantic light
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_STATIC_MAG_EVIDENCE_DIR: artifacts/mag-static-fallback
+          FORMATX_SEMANTIC_LIGHT_EVIDENCE_DIR: artifacts/mag-semantic-light
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          node .github/scripts/validate-mag-static-fallback.cjs
+          node .github/scripts/validate-mag-semantic-light.cjs
       - name: Run current hero visual contract
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -145,6 +154,8 @@ jobs:
             artifacts/p0-fast-loop/
             artifacts/r522-semantic-mag/
             artifacts/mag-ready-handoff/
+            artifacts/mag-static-fallback/
+            artifacts/mag-semantic-light/
             artifacts/content-visuals/
           if-no-files-found: warn
           retention-days: 30
