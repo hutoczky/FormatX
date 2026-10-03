@@ -152,6 +152,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1901='slender-studio-bioglass-subtle-silver-sensor-single-living-iris';
       document.documentElement.dataset.fxMagBirthVisualR1902='smooth-glass-genome-seed-no-low-poly-first-frame';
       document.documentElement.dataset.fxMagBirthVisualR1903='cinematic-glass-genome-prologue-polished-bioglass-sculpt';
+      document.documentElement.dataset.fxMagBirthVisualR1904='asymmetric-slender-gallery-sculpt-off-axis-flush-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1057,9 +1058,9 @@
         /* R1842 — smooth high-density sculpt, not an egg. A lower Lp exponent
            gives broad shoulders and restrained mineral corners while the dense
            geometry keeps reflections continuous. */
-        const ax=.640+shoulder*.080+n.x*.028-n.z*.012;
-        const ay=1.245+shoulder*.040+n.y*.018+n.x*.010;
-        const azr=.520+shoulder*.062+n.z*.022-n.x*.012;
+        const ax=.592+shoulder*.072+n.x*.024-n.z*.010;
+        const ay=1.285+shoulder*.036+n.y*.016+n.x*.008;
+        const azr=.505+shoulder*.056+n.z*.020-n.x*.010;
         const exponent=1.62;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
@@ -1091,15 +1092,15 @@
         p.y+=.040*upperLeft-.026*lowerLeft+Math.sin(az*1.88+el*.42)*.011*shoulder;
         p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
 
-        const topCap=.885+p.x*.084-p.z*.030;
-        const bottomCap=-.915-p.x*.045+p.z*.022;
+        const topCap=.905-p.x*.115-p.z*.026;
+        const bottomCap=-.930-p.x*.032+p.z*.018;
         if(p.y>topCap)p.y=topCap+(p.y-topCap)*.52;
         if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.52;
-        const crownT=Math.max(0,Math.min(1,(p.y-.48)/.34));
+        const crownT=Math.max(0,Math.min(1,(p.y-.50)/.32));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.090*Math.exp(-Math.pow((p.x+.008)/.136,2.0))*crownEase;
+        const crownCleft=.034*Math.exp(-Math.pow((p.x+.180)/.125,2.0))*crownEase;
         p.y-=crownCleft;
-        p.x+=Math.sign(p.x+.018)*crownCleft*.22;
+        p.x+=crownCleft*.10;
 
         const leftPlane=-.650+.082*p.y-.022*p.z;
         const rightPlane=.575-.058*p.y+.016*p.z;
@@ -1110,10 +1111,10 @@
         if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.84;
         if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.84;
 
-        const socketX=(p.x+.040)/.255;
-        const socketY=(p.y+.010)/.178;
+        const socketX=(p.x-.060)/.230;
+        const socketY=(p.y+.078)/.158;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,n.z);
-        p.z-=.155*socket;
+        p.z-=.142*socket;
 
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
@@ -1883,7 +1884,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx-.032*chestEmbed,ty-.006*chestEmbed,.43-.070*chestEmbed);
+      this.coreGroup.position.set(tx+.060*chestEmbed,ty-.078*chestEmbed,.43-.070*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
