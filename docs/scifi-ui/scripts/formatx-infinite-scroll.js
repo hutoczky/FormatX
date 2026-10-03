@@ -470,7 +470,7 @@
     waitForDesktopGeometryStyles().then(() => {
       root.dataset.fxDesktopLoopLayoutR613 = 'waiting-canonical-deferred-geometry-r812';
       return waitForCanonicalDesktopGeometryReady();
-    }).then(() => {
+    }).then(() => window.FormatXContentRuntime?.prepareDesktopGeometry()).then(() => {
       root.dataset.fxDesktopLoopLayoutR613 = 'realising-discovered-document-after-canonical-css-r812';
       realiseDesktopDocumentGeometry('pre-guard-r812');
       return ensureDesktopRuntimeGuardStyle();

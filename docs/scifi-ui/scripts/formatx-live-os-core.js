@@ -207,7 +207,8 @@
     state.section = section;
     wire(section);
     renderLanguage();
-    runDiagnostics(false);
+    // These initial measured cards contribute to the section's document flow.
+    window.FormatXLiveOsDiagnosticsReady = runDiagnostics(false);
     observeVisibility();
     root.dataset.fxLiveOsState = 'ready';
     dispatchEvent(new CustomEvent('formatx:liveosready'));

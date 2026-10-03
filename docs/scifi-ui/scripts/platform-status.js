@@ -2,6 +2,7 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  if (window.FormatXPlatformStatusReady) return;
   if (ROOT.dataset.fxPlatformStatus === 'ready') return;
   ROOT.dataset.fxPlatformStatus = 'loading';
 
@@ -11,13 +12,20 @@
     return ROOT.lang === 'en' ? 'en' : 'hu';
   }
 
+  let styleReady = null;
   function ensureStyle() {
-    if (document.querySelector('link[data-fx-platform-status-style]')) return;
+    if (styleReady) return styleReady;
+    if (document.querySelector('link[data-fx-platform-status-style]')) return Promise.resolve();
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = '/scifi-ui/styles/platform-status.css';
     link.dataset.fxPlatformStatusStyle = 'true';
-    document.head.appendChild(link);
+    styleReady = new Promise(resolve => {
+      link.addEventListener('load', resolve, { once: true });
+      link.addEventListener('error', resolve, { once: true });
+      document.head.appendChild(link);
+    });
+    return styleReady;
   }
 
   function text(value, lang) {
@@ -323,6 +331,7 @@
       if (!response.ok) throw new Error('status ' + response.status);
       const data = await response.json();
       ROOT.__FORMATX_PLATFORM_STATUS__ = data;
+      await styleReady;
       installDefaultTargets(data);
       ROOT.dataset.fxPlatformStatus = 'ready';
       dispatchEvent(new CustomEvent('formatx:platformstatusready', { detail: data }));
@@ -340,6 +349,7 @@
     installCheckoutConsents();
   });
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load, { once: true });
-  else load();
+  window.FormatXPlatformStatusReady = document.readyState === 'loading'
+    ? new Promise(resolve => document.addEventListener('DOMContentLoaded', () => load().then(resolve), { once: true }))
+    : load();
 }());

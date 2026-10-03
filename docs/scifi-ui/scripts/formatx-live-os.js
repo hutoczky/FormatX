@@ -24,8 +24,9 @@
     });
   }
 
-  load('./scripts/formatx-live-os-core.js', 'core')
+  window.FormatXLiveOsReady = load('./scripts/formatx-live-os-core.js', 'core')
     .catch(error => console.warn('[FormatX Live OS] core load failed', error))
     .finally(() => load('./scripts/formatx-live-os-fallback.js', 'fallback')
-      .catch(error => console.warn('[FormatX Live OS] fallback load failed', error)));
+      .catch(error => console.warn('[FormatX Live OS] fallback load failed', error)))
+    .then(() => window.FormatXLiveOsDiagnosticsReady);
 }());

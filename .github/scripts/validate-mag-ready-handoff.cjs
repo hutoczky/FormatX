@@ -12,7 +12,7 @@ async function verify(browser,profile,staticFallback,workerUnavailable=false){
  const context=await browser.newContext({viewport:profile.viewport,isMobile:profile.mobile,hasTouch:profile.mobile,reducedMotion:profile.reduced?'reduce':'no-preference'});
  await context.addInitScript(({staticFallback})=>{
   const NativeWorker=window.Worker;
-  window.__handoff={workers:[],capabilities:[],posts:0,oldPulseCalls:0,newPulseCalls:0,events:[],glWork:[]};
+  window.__handoff={workers:[],capabilities:[],workerPhases:[],posts:0,oldPulseCalls:0,newPulseCalls:0,events:[],glWork:[]};
   const originalContext=HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext=function(type,...args){
    const start=performance.now(),context=staticFallback===true&&['webgl','webgl2','experimental-webgl'].includes(type)?null:originalContext.call(this,type,...args);
@@ -24,7 +24,7 @@ async function verify(browser,profile,staticFallback,workerUnavailable=false){
    WebGLRenderingContext.prototype[name]=function(...args){const start=performance.now(),result=original.apply(this,args);window.__handoff.glWork.push({phase:name,at:start,ms:performance.now()-start});return result;};
   }
   window.Worker=class extends NativeWorker{
-   constructor(url,options){super(url,options);if(String(url).includes('formatx-crystal-worker')){window.__handoff.workers.push(this);this.addEventListener('message',event=>{if(event.data?.type==='capability')window.__handoff.capabilities.push(event.data);});}}
+   constructor(url,options){super(url,options);if(String(url).includes('formatx-crystal-worker')){window.__handoff.workers.push(this);this.addEventListener('message',event=>{if(event.data?.type==='capability')window.__handoff.capabilities.push(event.data);if(event.data?.type==='phase')window.__handoff.workerPhases.push({...event.data,receivedAt:performance.now()});});}}
    postMessage(message,...args){if(message?.type==='state')window.__handoff.posts++;return super.postMessage(message,...args);}
   };
   addEventListener('formatx:real3dready',event=>window.__handoff.events.push({renderer:event.detail?.renderer,at:performance.now()}));
@@ -37,6 +37,10 @@ async function verify(browser,profile,staticFallback,workerUnavailable=false){
   at:performance.now(),ready:document.documentElement.dataset.fxCrystalOrganismR326,
   handoff:document.documentElement.dataset.fxCoreFallbackHandoffR753,
   revision:window.FormatXLivingCore?.revision,
+  life:document.documentElement.dataset.fxCoreLifeR455,
+  lifeVisibility:document.documentElement.dataset.fxCoreLifeVisibilityR455,
+  scrollY,hidden:document.hidden,
+  stageGeometry:(()=>{const node=window.FormatXLivingCore?.stage;if(!node)return null;const style=getComputedStyle(node);return {rect:node.getBoundingClientRect().toJSON(),display:style.display,visibility:style.visibility,opacity:style.opacity,position:style.position};})(),
   shape:window.FormatXLivingCore?.shape,
   stages:document.querySelectorAll('#hero .fx-core-mobile-v55-stage').length,
   canvases:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
@@ -44,7 +48,7 @@ async function verify(browser,profile,staticFallback,workerUnavailable=false){
   posts:window.__handoff.posts,
   oldPulseCalls:window.__handoff.oldPulseCalls,newPulseCalls:window.__handoff.newPulseCalls,
   retiredCanvasReference:Boolean(window.__handoff.oldApi?.canvas),retiredStageCanvases:window.__handoff.oldStage?.querySelectorAll('canvas').length||0,
-  events:window.__handoff.events,capabilities:window.__handoff.capabilities,glWork:window.__handoff.glWork,terminatedAt:window.__handoff.terminatedAt,recoveryPolicy:document.documentElement.dataset.fxMagRecoveryPolicyR868,
+  events:window.__handoff.events,capabilities:window.__handoff.capabilities,workerPhases:window.__handoff.workerPhases,glWork:window.__handoff.glWork,terminatedAt:window.__handoff.terminatedAt,recoveryPolicy:document.documentElement.dataset.fxMagRecoveryPolicyR868,
   overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
  }));
  try{

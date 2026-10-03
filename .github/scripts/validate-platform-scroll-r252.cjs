@@ -82,6 +82,11 @@ async function state(page) {
       desktopStableBoundary: root.dataset.fxDesktopLoopStableBoundaryR618 || '',
       desktopStableSettle: root.dataset.fxDesktopLoopStableSettleR663 || '',
       desktopRetry: root.dataset.fxDesktopLoopRetryR650 || '',
+      documentSections: root.dataset.fxDocumentSectionsR869 || '',
+      sections: Array.from(document.querySelectorAll('#main-content > *, body > footer')).map(node => {
+        const rect = node.getBoundingClientRect();
+        return { id: node.id || node.className, top: Math.round(rect.top + scrollY), height: Math.round(rect.height) };
+      }),
       organismRepair: root.dataset.fxLoopOrganismRepairR609 || '',
       mirrorCapture: root.dataset.fxLoopMirrorCaptureR609 || '',
       hitExists: hit instanceof HTMLButtonElement,
@@ -221,10 +226,27 @@ async function verifyMobile(browser) {
   await context.close();
 }
 
-async function verifyDesktop(browser) {
+async function verifyDesktop(browser, delayedSections = false) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'hu-HU', colorScheme: 'dark' });
+  if (delayedSections) {
+    // Real section resources arrive after the old bridge's first measurement.
+    // Keep every original interaction assertion and deadline in this profile.
+    await context.route(/\/formatx-(?:product-showcase|live-os(?:-core)?)\.js(?:\?|$)/, async route => {
+      await new Promise(resolve => setTimeout(resolve, 1600));
+      await route.continue();
+    });
+  }
   const page = await context.newPage();
   await prepare(page);
+  if (delayedSections) {
+    const sectionState = await page.evaluate(() => ({
+      product: document.documentElement.dataset.fxProductShowcaseLoadState,
+      live: document.documentElement.dataset.fxLiveOsState,
+      cards: document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length
+    }));
+    assert(sectionState.product === 'ready' && sectionState.live === 'ready' && sectionState.cards >= 8,
+      `desktop bridge measured before actual delayed sections/diagnostic cards: ${JSON.stringify(sectionState)}`);
+  }
   const initial = await state(page);
   assert(initial.controller === 'seamless-v7', `desktop seamless controller missing: ${JSON.stringify(initial)}`);
   assert(initial.bridgeCount === 1 && initial.mirrorCount === 1, `desktop inert reference mirror contract changed: ${JSON.stringify(initial)}`);
@@ -252,7 +274,7 @@ async function verifyDesktop(browser) {
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);
   assert(!/^heart-core-/.test(after.loopSource), `desktop was incorrectly routed through mobile heart transfer: ${JSON.stringify(after)}`);
-  console.log('PASS desktop seamless-v7 preserved + trusted physical MAG interaction');
+  console.log(`PASS desktop${delayedSections ? ' delayed-section' : ''} seamless-v7 preserved + trusted physical MAG interaction`);
   await context.close();
 }
 
@@ -261,6 +283,7 @@ async function verifyDesktop(browser) {
   try {
     await verifyMobile(browser);
     await verifyDesktop(browser);
+    await verifyDesktop(browser, true);
     console.log('PASS FormatX r546 platform scroll and living MAG interaction contract');
   } finally {
     await browser.close();

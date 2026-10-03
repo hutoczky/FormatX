@@ -156,7 +156,9 @@
 
     if (spec.id === 'resources') {
       const footer = document.querySelector('.site-footer');
-      if (footer) panel.appendChild(footer);
+      // The scroll owner already placed this footer in document flow. Adopting
+      // the console later must not move its boundary into a hidden panel.
+      if (footer && footer.dataset.fxFooterFlow !== 'document') panel.appendChild(footer);
     }
 
     const trigger = buildTrigger(spec);

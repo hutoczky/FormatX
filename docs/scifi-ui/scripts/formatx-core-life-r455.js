@@ -27,8 +27,19 @@
     // its renderer. A fallback can be ready without changing that durable flag.
     if (api === nextApi && stage === nextStage && ownerLifecycle && !ownerLifecycle.signal.aborted) return true;
     retireOwner();
-    api = nextApi; stage = nextStage; hero = nextHero; visible = false;
-    root.dataset.fxCoreLifeVisibilityR455 = 'pending-observation';
+    api = nextApi; stage = nextStage; hero = nextHero;
+    // Establish the replacement's actual viewport exposure once, at adoption.
+    // A static recovery can otherwise wait for the next intersection delivery
+    // before its first physical interaction. The observer owns later changes.
+    const rect = stage.getBoundingClientRect();
+    const exposedWidth = Math.max(0, Math.min(innerWidth, rect.right) - Math.max(0, rect.left));
+    const exposedHeight = Math.max(0, Math.min(innerHeight, rect.bottom) - Math.max(0, rect.top));
+    const style = getComputedStyle(stage);
+    visible = rect.width > 0 && rect.height > 0
+      && exposedWidth * exposedHeight / (rect.width * rect.height) > .04
+      && style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0
+      && stage.checkVisibility?.({ checkVisibilityCSS: true, checkOpacity: true }) !== false;
+    root.dataset.fxCoreLifeVisibilityR455 = visible ? 'visible' : 'offscreen';
     ownerLifecycle = new AbortController();
     const options = { passive: true, signal: ownerLifecycle.signal };
     observer = new IntersectionObserver(entries => { const entry = entries[0]; visible = Boolean(entry?.isIntersecting && entry.intersectionRatio > .04); root.dataset.fxCoreLifeVisibilityR455 = visible ? 'visible' : 'offscreen'; }, { threshold: [0, .04, .2, .55] });

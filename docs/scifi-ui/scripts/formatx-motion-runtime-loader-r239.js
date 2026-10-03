@@ -51,7 +51,7 @@ const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260831-r484-
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260831-r475-canonical-ask-surface';
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260906-r537-automatic-lifecycle';
-const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner';
+const PLATFORM_SCROLL='/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260906-r535-scroll-intent-owner&rev=20261003-r869-settled-document-sections';
 const DESIGN_SYSTEM='/scifi-ui/styles/formatx-design-system.css?v=20260728-ds2';
 const CONTROL_GEOMETRY='/scifi-ui/styles/formatx-control-critical-r780.css?v=20260912-r780-render-critical-two-control';
 const SCROLL_KEYS=new Set(['ArrowDown','ArrowUp','PageDown','PageUp','End','Home',' ']);
@@ -132,7 +132,7 @@ function ensureSoundControl(){
 function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
-  const script=document.createElement('script');script.src=CURRENT_MAG+'&rev=20261003-r868-gpu-failure-recovery';script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
+  const script=document.createElement('script');script.src=CURRENT_MAG+'&rev=20261003-r869-context-phase-evidence';script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 function ensureStaticMotionCss(){

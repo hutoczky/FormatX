@@ -199,7 +199,7 @@
     try {
       ROOT.dataset.fxThreeLoader = 'loading-interface-r554';
       await loadScriptOrdered(
-        './scripts/organism-interface.js?v=20260906-r554-idempotent-handoff',
+        './scripts/organism-interface.js?v=20261003-r869-document-footer-owner',
         'data-fx-organism-interface-script',
         () => ROOT.dataset.fxOrganismInterface === 'ready'
       );
@@ -220,7 +220,7 @@
       await waitForCanonicalMagSettlement();
       ROOT.dataset.fxThreeLoader = 'loading-enhancements-after-mag-r797';
       await loadScriptOrdered(
-        './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20260906-r554-idempotent-handoff',
+        './scripts/igloo-parity.js?v=20260820-reference-loop-r246&rev=20261003-r869-settled-document-sections',
         'data-fx-cryosphere-script',
         () => ROOT.dataset.fxTranscendLoader === 'safe-ready-v28'
       );

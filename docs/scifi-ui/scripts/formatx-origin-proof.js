@@ -1,3 +1,14 @@
+// Actual load promises retain section readiness for late geometry consumers.
+(function () {
+  'use strict';
+  if (window.FormatXDocumentSections) return;
+  const owners = new Map();
+  window.FormatXDocumentSections = Object.freeze({
+    register(name, prepare) { owners.set(name, prepare); },
+    prepare() { return Promise.all(Array.from(owners.values(), prepare => prepare())); }
+  });
+}());
+
 (function () {
   'use strict';
 
@@ -128,9 +139,10 @@
   let observer = null;
   let targetRetry = 0;
   let loaded = false;
+  let loadTask = null;
 
   function inject() {
-    if (loaded) return;
+    if (loaded) return loadTask;
     loaded = true;
     root.dataset.fxProductShowcaseLoadState = 'loading';
     if (observer) observer.disconnect();
@@ -140,16 +152,25 @@
     stylesheet.rel = 'stylesheet';
     stylesheet.href = './styles/formatx-product-showcase.css?v=20260806-real-product-1';
     stylesheet.dataset.fxProductShowcaseStyle = 'true';
-    document.head.appendChild(stylesheet);
+    const styleReady = new Promise(resolve => {
+      stylesheet.addEventListener('load', resolve, { once: true });
+      stylesheet.addEventListener('error', resolve, { once: true });
+      document.head.appendChild(stylesheet);
+    });
 
     const script = document.createElement('script');
     script.src = './scripts/formatx-product-showcase.js?v=20260806-real-product-1';
     script.async = true;
     script.dataset.fxProductShowcaseScript = 'true';
-    script.addEventListener('load', () => { root.dataset.fxProductShowcaseLoadState = 'ready'; }, { once: true });
-    script.addEventListener('error', () => { root.dataset.fxProductShowcaseLoadState = 'error'; }, { once: true });
-    document.head.appendChild(script);
+    const scriptReady = new Promise(resolve => {
+      script.addEventListener('load', () => { root.dataset.fxProductShowcaseLoadState = 'ready'; resolve(); }, { once: true });
+      script.addEventListener('error', () => { root.dataset.fxProductShowcaseLoadState = 'error'; resolve(); }, { once: true });
+      document.head.appendChild(script);
+    });
+    loadTask = Promise.all([styleReady, scriptReady]);
+    return loadTask;
   }
+  window.FormatXDocumentSections.register('product-showcase', inject);
 
   function findTrigger() {
     const candidates = Array.from(document.querySelectorAll('section#capabilities, section[data-organ="organs"]'));
@@ -217,6 +238,7 @@
   let loaded = false;
   let observer = null;
   let retryTimer = 0;
+  let loadTask = null;
 
   function launcherLabel() {
     return root.lang === 'en'
@@ -262,7 +284,7 @@
   }
 
   function inject() {
-    if (loaded) return;
+    if (loaded) return loadTask;
     loaded = true;
     if (observer) observer.disconnect();
     clearInterval(retryTimer);
@@ -272,20 +294,30 @@
     stylesheet.rel = 'stylesheet';
     stylesheet.href = './styles/formatx-live-os.css?v=20260806-live-os-1&rev=20261003-r867-panel-border-box';
     stylesheet.dataset.fxLiveOsStyle = 'true';
-    document.head.appendChild(stylesheet);
+    const styleReady = new Promise(resolve => {
+      stylesheet.addEventListener('load', resolve, { once: true });
+      stylesheet.addEventListener('error', resolve, { once: true });
+      document.head.appendChild(stylesheet);
+    });
 
     const script = document.createElement('script');
-    script.src = './scripts/formatx-live-os.js?v=20260806-live-os-1';
+    script.src = './scripts/formatx-live-os.js?v=20260806-live-os-1&rev=20261003-r869-settled-document-sections';
     script.async = true;
     script.dataset.fxLiveOsScript = 'true';
-    script.addEventListener('load', () => {
-      root.dataset.fxLiveOsLoadState = 'ready';
-      ensureLauncher();
-      dispatchEvent(new CustomEvent('formatx:open-live-os-ready'));
-    }, { once: true });
-    script.addEventListener('error', () => { root.dataset.fxLiveOsLoadState = 'error'; }, { once: true });
-    document.head.appendChild(script);
+    const scriptReady = new Promise(resolve => {
+      script.addEventListener('load', () => {
+        root.dataset.fxLiveOsLoadState = 'ready';
+        ensureLauncher();
+        dispatchEvent(new CustomEvent('formatx:open-live-os-ready'));
+        Promise.resolve(window.FormatXLiveOsReady).then(resolve);
+      }, { once: true });
+      script.addEventListener('error', () => { root.dataset.fxLiveOsLoadState = 'error'; resolve(); }, { once: true });
+      document.head.appendChild(script);
+    });
+    loadTask = Promise.all([styleReady, scriptReady]);
+    return loadTask;
   }
+  window.FormatXDocumentSections.register('live-os', inject);
 
   function triggerTarget() {
     return document.getElementById('product-showcase')

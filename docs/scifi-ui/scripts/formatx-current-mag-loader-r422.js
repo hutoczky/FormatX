@@ -67,7 +67,7 @@ async function start(){
   const rendererStart=layoutStyle.then(async()=>{
     root.dataset.fxCurrentMagRendererStartR559='starting-layout-ready-under-intro';
     root.dataset.fxCurrentMagRendererStartR561='starting-context-policy-under-intro';
-    await addScript(CONTEXT_POLICY+'&rev=20261003-r868-gpu-failure-recovery','data-fx-mag-context-policy-r561');
+    await addScript(CONTEXT_POLICY+'&rev=20261003-r869-context-phase-evidence','data-fx-mag-context-policy-r561');
     if(root.dataset.fxCrystalOrganismR326==='booting'){
       root.dataset.fxCurrentMagMainThreadFallbackR614='deferred-offscreen-owner-active';
     }else{
@@ -119,7 +119,7 @@ async function start(){
     removeEventListener('formatx:real3dready',onRendererReady);
     enhancementTask=(async()=>{
       if(mobile)await addScript(GOVERNOR,'data-fx-mobile-render-governor-r426');
-      await addScript(LIFE+'&rev=20261003-r868-owner-visibility','data-fx-core-life-r455');
+      await addScript(LIFE+'&rev=20261003-r869-adopt-actual-viewport','data-fx-core-life-r455');
       await addScript('./scripts/formatx-mag-semantic-light-r866.js?v=20261003-r866-dielectric-semantic-light','data-fx-mag-semantic-light-r866');
       root.dataset.fxCoreRendererSelection=`r326-direct-r767-${mobile?'mobile':'desktop'}-offscreen-webgl1-zero-idle`;
       root.dataset.fxCoreReferenceLockLoad='ready-v69-r767';

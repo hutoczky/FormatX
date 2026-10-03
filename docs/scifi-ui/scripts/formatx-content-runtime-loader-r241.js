@@ -1,7 +1,7 @@
 /* FormatX R538 — semantic-first, interaction-deferred content enhancements.
    Production owns every layout-critical stylesheet before first paint. This
-   loader may mount enhancement scripts after explicit intent, but it must never
-   mutate stylesheet media and therefore cannot change document geometry. */
+   loader mounts enhancement scripts after explicit intent without changing
+   stylesheet media. Desktop scroll geometry awaits the real section owners. */
 (function () {
   'use strict';
 
@@ -15,8 +15,10 @@
   }
 
   const specs = Array.from(template.content.querySelectorAll('script[src]'));
-  const mounted = new Set();
+  const loadTasks = new Map();
   let started = false;
+  let contentReady = Promise.resolve([]);
+  let metadataReady = Promise.resolve([]);
   const passive = { passive: true };
   const listeners = [
     ['wheel', passive],
@@ -27,19 +29,25 @@
 
   function mount(spec) {
     const raw = spec.getAttribute('src');
-    if (!raw) return;
+    if (!raw) return Promise.resolve('missing-source');
     const absolute = new URL(raw, document.baseURI).href;
-    if (mounted.has(absolute) || Array.from(document.scripts).some(script => script.src === absolute)) return;
+    if (loadTasks.has(absolute)) return loadTasks.get(absolute);
+    if (Array.from(document.scripts).some(script => script.src === absolute)) return Promise.resolve('existing');
 
-    mounted.add(absolute);
     const script = document.createElement('script');
     script.async = false;
     for (const attribute of spec.attributes) {
       if (attribute.name === 'defer' || attribute.name === 'src') continue;
       script.setAttribute(attribute.name, attribute.value);
     }
-    script.src = raw;
-    document.head.appendChild(script);
+    const task = new Promise(resolve => {
+      script.addEventListener('load', () => resolve('loaded'), { once: true });
+      script.addEventListener('error', () => resolve('failed'), { once: true });
+      script.src = raw;
+      document.head.appendChild(script);
+    });
+    loadTasks.set(absolute, task);
+    return task;
   }
 
   // R862: server-rendered homepage content is useful before live metadata
@@ -53,10 +61,11 @@
     if (root.dataset.fxPreloaderR531 !== 'done' && root.dataset.fxIntroCompletionR769 !== 'done') return;
     metadataScheduled = true;
     document.removeEventListener('formatx:preloadercomplete', startMetadata);
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      Array.from(metadata.content.querySelectorAll('script[src]')).forEach(mount);
+    metadataReady = new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => {
+      const tasks = Array.from(metadata.content.querySelectorAll('script[src]')).map(mount);
       root.dataset.fxMetadataRuntimeR862 = 'requested-after-intro-paint';
-    }));
+      Promise.all(tasks).then(resolve);
+    })));
   }
   if (metadata instanceof HTMLTemplateElement) {
     document.addEventListener('formatx:preloadercomplete', startMetadata);
@@ -82,7 +91,7 @@
     if (started) return;
     started = true;
     disarm();
-    specs.forEach(mount);
+    contentReady = Promise.all(specs.map(mount));
     root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r538';
     root.dataset.fxContentRuntimeR241 = 'requested-r538-user-intent';
   }
@@ -93,6 +102,18 @@
   root.dataset.fxContentRuntimeR241 = 'armed-r538-user-intent';
   root.dataset.fxDeferredVisualStylesR300 = 'production-css-owned-r538';
   root.dataset.fxFirstFrameStabilityR283 = 'immutable-css-r538';
+  // Native input remains usable while the optional desktop loop prepares the
+  // sections whose real content contributes to its document coordinates.
+  window.FormatXContentRuntime = Object.freeze({
+    async prepareDesktopGeometry() {
+      start();
+      startMetadata();
+      await Promise.all([contentReady, metadataReady]);
+      await window.FormatXPlatformStatusReady;
+      if (window.FormatXDocumentSections) await window.FormatXDocumentSections.prepare();
+      root.dataset.fxDocumentSectionsR869 = 'settled-before-desktop-bridge';
+    }
+  });
   for (const [type, options] of listeners) addEventListener(type, onIntent, options);
 
   // Deep links and the explicit immersive action are deliberate navigation
