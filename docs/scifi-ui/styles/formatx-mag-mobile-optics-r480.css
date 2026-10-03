@@ -145,3 +145,17 @@
 /* production-r1408-mobile-crystal-pixel-stable-no-canvas-scale */
 
 /* production-r1410-sculpted-mobile-crystal-optics */
+
+
+/* R1902 — canonical desktop living timeline.
+   The native WebGL renderer remains the visual owner. This tiny compositor-only
+   opacity heartbeat keeps the living-system timeline measurable on desktop too,
+   while reduced-motion still disables it completely. */
+@media (prefers-reduced-motion:no-preference) and (min-width:901px) and (pointer:fine) {
+  html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    animation: fx-primary-mag-mobile-heart-r488 6.4s cubic-bezier(.36,0,.20,1) infinite !important;
+    will-change: opacity !important;
+  }
+}
+/* production-r1902-desktop-living-timeline */
