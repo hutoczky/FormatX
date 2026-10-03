@@ -146,6 +146,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1891='fused-trilobate-dark-bioglass-centered-living-optic';
       document.documentElement.dataset.fxMagBirthVisualR1893='embedded-optic-studio-bioglass-handoff-parity';
       document.documentElement.dataset.fxMagBirthVisualR1895='flush-living-optic-cinematic-final-attachment';
+      document.documentElement.dataset.fxMagBirthVisualR1897='cinematic-smoked-optic-single-iris-black-pupil-flush-integration';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -843,11 +844,11 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.184,.0030,28,176),
         new T.MeshPhysicalMaterial({
-          color:0x91a5a4,metalness:.10,roughness:.095,
-          clearcoat:.92,clearcoatRoughness:.050,
-          emissive:0x010506,emissiveIntensity:.002,
-          specularIntensity:.96,specularColor:new T.Color(0xf6ffff),
-          envMapIntensity:2.20,transparent:true,opacity:.22
+          color:0x6f8585,metalness:.06,roughness:.075,
+          clearcoat:.95,clearcoatRoughness:.038,
+          emissive:0x010506,emissiveIntensity:.001,
+          specularIntensity:.98,specularColor:new T.Color(0xf8ffff),
+          envMapIntensity:2.35,transparent:true,opacity:.31
         })
       );
       socketBezel.position.z=.258;
@@ -855,28 +856,28 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x06191d,metalness:0,roughness:.045,
-        clearcoat:.96,clearcoatRoughness:.032,
-        transmission:.64,thickness:.38,ior:1.50,
-        attenuationColor:new T.Color(0x06414d),attenuationDistance:.22,
-        emissive:0x02171c,emissiveIntensity:.014,
-        envMapIntensity:2.55,
+        color:0x041216,metalness:0,roughness:.032,
+        clearcoat:.985,clearcoatRoughness:.022,
+        transmission:.48,thickness:.30,ior:1.49,
+        attenuationColor:new T.Color(0x06353d),attenuationDistance:.18,
+        emissive:0x01090c,emissiveIntensity:.006,
+        envMapIntensity:2.75,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.178,112,64),lensMat);
-      lens.scale.set(1.46,.76,.20);
-      lens.position.set(-.014,.004,.270);
+      lens.scale.set(1.43,.74,.16);
+      lens.position.set(-.014,.004,.266);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.TorusGeometry(.094,.0085,24,144),
+        new T.TorusGeometry(.094,.0065,24,144),
         new T.MeshPhysicalMaterial({
-          color:0x59cbd3,metalness:0,roughness:.10,
-          clearcoat:.86,clearcoatRoughness:.055,
-          emissive:0x0b6672,emissiveIntensity:.42,
-          transparent:true,opacity:.22,depthWrite:false,
+          color:0x78d8dc,metalness:0,roughness:.075,
+          clearcoat:.91,clearcoatRoughness:.040,
+          emissive:0x0a6c76,emissiveIntensity:.34,
+          transparent:true,opacity:.28,depthWrite:false,
           blending:T.AdditiveBlending
         })
       );
@@ -886,14 +887,16 @@
       this.irisGroup.add(livingIris);
 
       const aperture=new T.Mesh(
-        new T.CircleGeometry(.010,64),
+        new T.CircleGeometry(.017,64),
         new T.MeshPhysicalMaterial({
-          color:0x061419,metalness:.03,roughness:.08,
-          clearcoat:.88,clearcoatRoughness:.06,side:T.DoubleSide
+          color:0x00080b,metalness:.02,roughness:.06,
+          clearcoat:.92,clearcoatRoughness:.045,
+          specularIntensity:.72,specularColor:new T.Color(0xd8fbff),
+          side:T.DoubleSide
         })
       );
-      aperture.position.z=.316;
-      aperture.visible=false;
+      aperture.position.z=.314;
+      aperture.visible=true;
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
@@ -903,7 +906,7 @@
           clearcoat:.90,clearcoatRoughness:.055,
           emissive:0x021216,emissiveIntensity:.008,
           specularIntensity:.92,specularColor:new T.Color(0xf7ffff),
-          transparent:true,opacity:.18
+          transparent:true,opacity:.11
         })
       );
       glassRing.position.z=.300;
@@ -1873,7 +1876,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx-.040*chestEmbed,ty-.008*chestEmbed,.40-.105*chestEmbed);
+      this.coreGroup.position.set(tx-.040*chestEmbed,ty-.008*chestEmbed,.40-.120*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1895,7 +1898,7 @@
       this.irisGroup.visible=irisAwake>.004;
       this.irisGroup.scale.setScalar((this.mobileProfile?1.31:1.29)*(1+irisAwake*.016)*pulse);
       if(this.livingIris){
-        this.livingIris.material.opacity=(.15+.16*irisAwake)*irisAwake;
+        this.livingIris.material.opacity=(.20+.25*irisAwake)*irisAwake;
         this.livingIris.rotation.z=.08+Math.sin(time*.00055)*.018;
       }
       if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
