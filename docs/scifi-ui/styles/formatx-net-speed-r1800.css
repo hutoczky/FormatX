@@ -278,3 +278,20 @@
   .fx-net-console::before,.fx-net-metric{transition:none}
 }
 /* production-r1800-network-sensor-user-initiated-no-idle-traffic */
+
+
+/* R1902 — coarse-pointer accessibility/P0 gate.
+   External comparison remains visually compact but exposes a full 44px hit area. */
+.fx-net-meta a {
+  display:inline-flex;
+  align-items:center;
+  min-block-size:44px;
+  padding-block:6px;
+  box-sizing:border-box;
+}
+@media (pointer:coarse), (max-width:900px) {
+  .fx-net-meta a {
+    min-height:44px;
+  }
+}
+/* production-r1902-net-meta-touch-target */
