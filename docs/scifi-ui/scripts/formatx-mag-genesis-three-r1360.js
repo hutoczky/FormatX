@@ -154,6 +154,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1903='cinematic-glass-genome-prologue-polished-bioglass-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1904='asymmetric-slender-gallery-sculpt-off-axis-flush-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1905='centered-crystal-genome-to-cut-gallery-shard-smoked-sensor';
+      document.documentElement.dataset.fxMagBirthVisualR1906='sleek-profile-ice-shard-centered-genome-broad-softbox-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1018,14 +1019,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x12363c,roughness:.072,metalness:.001,
+        color:0x1b4247,roughness:.052,metalness:.001,
         clearcoat:.97,clearcoatRoughness:.032,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00028,
         transparent:true,opacity:0,
-        transmission:.42,thickness:.74,ior:1.50,
+        transmission:.56,thickness:.68,ior:1.50,
         attenuationColor:new T.Color(0x062a31),attenuationDistance:.27,
         emissive:0x010708,emissiveIntensity:.0015,
-        envMapIntensity:3.18,
+        envMapIntensity:3.55,
         specularIntensity:1.0,specularColor:new T.Color(0xffffff),
         sheen:.018,sheenColor:new T.Color(0x8fb9bc),sheenRoughness:.28,
         depthWrite:true
@@ -1051,21 +1052,22 @@
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       const profileR1905=[
-        [ 1.00,.070,.055,-.105,-.012],
-        [ .90,.185,.128,-.145,-.010],
-        [ .77,.340,.228,-.145,-.006],
-        [ .62,.485,.326,-.095,-.002],
-        [ .47,.575,.388,-.018, .004],
-        [ .31,.535,.365, .070, .006],
-        [ .15,.620,.420, .125, .004],
-        [-.02,.575,.395, .100, .002],
-        [-.18,.455,.322, .018, .006],
-        [-.34,.505,.346,-.075, .002],
-        [-.50,.475,.320,-.118,-.004],
-        [-.66,.365,.246,-.092,-.008],
-        [-.81,.238,.158,-.050,-.010],
-        [-.93,.108,.074,-.018,-.008],
-        [-1.00,.045,.032, .000,-.004]
+        [ 1.00,.052,.042,-.060,-.008],
+        [ .91,.142,.100,-.092,-.008],
+        [ .79,.285,.195,-.115,-.006],
+        [ .66,.410,.282,-.102,-.003],
+        [ .52,.505,.344,-.055, .001],
+        [ .38,.535,.365, .015, .004],
+        [ .23,.575,.392, .075, .006],
+        [ .08,.595,.405, .105, .005],
+        [-.07,.550,.380, .082, .004],
+        [-.22,.475,.332, .030, .003],
+        [-.38,.420,.292,-.018, .000],
+        [-.54,.350,.242,-.038,-.003],
+        [-.69,.274,.188,-.030,-.005],
+        [-.82,.195,.132,-.014,-.006],
+        [-.93,.098,.068,-.002,-.006],
+        [-1.00,.034,.026, .006,-.004]
       ];
       const sampleProfile=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -1093,23 +1095,23 @@
         const theta0=Math.atan2(n.z,n.x);
         const theta=theta0+y*.075+Math.sin(y*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=2.85;
+        const superN=3.45;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const upperLeft=field(y,theta,.55,.23,Math.PI,.72,.070);
-        const rightShoulder=field(y,theta,.17,.25,0,.62,.092);
-        const lowerLeft=field(y,theta,-.46,.22,2.62,.70,.060);
-        const leftWaist=field(y,theta,-.12,.17,Math.PI,.58,.150);
-        const rightWaist=field(y,theta,-.22,.18,-.20,.58,.082);
-        const rearCut=field(y,theta,.06,.34,-Math.PI*.50,.66,.050);
+        const upperLeft=field(y,theta,.57,.24,Math.PI,.74,.045);
+        const rightShoulder=field(y,theta,.18,.27,0,.68,.052);
+        const lowerLeft=field(y,theta,-.42,.24,2.62,.74,.022);
+        const leftWaist=field(y,theta,-.12,.19,Math.PI,.62,.070);
+        const rightWaist=field(y,theta,-.24,.20,-.20,.62,.040);
+        const rearCut=field(y,theta,.05,.36,-Math.PI*.50,.72,.030);
         const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
         rx*=radial;
-        rz*=1+upperLeft*.48+rightShoulder*.38+lowerLeft*.28-leftWaist*.20-rearCut;
+        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.12-leftWaist*.10-rearCut*.60;
 
         p.set(ox+cx*rx,y*.972,oz+cz*rz);
-        p.x+=-.045*y+.026*Math.sin((y+.15)*Math.PI)
-          -.022*upperLeft+.034*rightShoulder-.018*lowerLeft;
+        p.x+=-.032*y+.018*Math.sin((y+.15)*Math.PI)
+          -.012*upperLeft+.018*rightShoulder-.008*lowerLeft;
         p.z+=-.030*p.x+.010*Math.sin(theta*2.0)*(1-Math.abs(y));
 
         const topPlane=.925-p.x*.16-p.z*.050;
@@ -1128,7 +1130,7 @@
 
         const crownT=Math.max(0,Math.min(1,(p.y-.56)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.115*Math.exp(-Math.pow((p.x+.055)/.105,2.0))*crownEase;
+        const crownCleft=.082*Math.exp(-Math.pow((p.x+.035)/.095,2.0))*crownEase;
         p.y-=crownCleft;
         p.x+=crownCleft*.11;
 
@@ -1950,7 +1952,7 @@
       this.organicGroup.rotation.y=(this.mobileProfile?.405:.355)+Math.sin(time*.00011)*.006+this.interactionX*.012;
       this.organicGroup.rotation.x=-.080+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?1.22:1.30;
+      const finalScale=this.mobileProfile?1.18:1.25;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
