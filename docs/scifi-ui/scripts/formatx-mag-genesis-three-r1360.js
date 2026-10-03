@@ -1075,12 +1075,12 @@
           const da=angleDelta(az,ca)/sa;
           return amp*Math.exp(-(dy*dy+da*da));
         };
-        const upperLeft=mass(.40,.30,Math.PI,.76,.210);
-        const rightCentre=mass(.05,.33,0,.70,.165);
-        const lowerLeft=mass(-.46,.26,2.46,.70,.130);
-        const waist=mass(-.17,.22,-.54,.80,.145);
-        const leftWaist=mass(-.02,.17,Math.PI,.50,.078);
-        const rightLowerCut=mass(-.35,.20,-.12,.56,.080);
+        const upperLeft=mass(.40,.30,Math.PI,.76,.180);
+        const rightCentre=mass(.05,.33,0,.70,.138);
+        const lowerLeft=mass(-.46,.26,2.46,.70,.105);
+        const waist=mass(-.17,.22,-.54,.80,.118);
+        const leftWaist=mass(-.02,.17,Math.PI,.50,.058);
+        const rightLowerCut=mass(-.35,.20,-.12,.56,.060);
         const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-leftWaist-rightLowerCut;
         p.x*=sculpt;
         p.z*=sculpt;
