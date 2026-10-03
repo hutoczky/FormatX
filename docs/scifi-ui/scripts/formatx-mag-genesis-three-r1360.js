@@ -153,6 +153,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1902='smooth-glass-genome-seed-no-low-poly-first-frame';
       document.documentElement.dataset.fxMagBirthVisualR1903='cinematic-glass-genome-prologue-polished-bioglass-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1904='asymmetric-slender-gallery-sculpt-off-axis-flush-sensor';
+      document.documentElement.dataset.fxMagBirthVisualR1905='centered-crystal-genome-to-cut-gallery-shard-smoked-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -299,7 +300,7 @@
       const T=this.THREE;
       // R1583 — softer photographic studio lighting plus procedural environment reflections.
       this.scene.add(new T.HemisphereLight(0xe2eae6,0x010304,1.02));
-      this.scene.add(new T.AmbientLight(0x748f91,.26));
+      this.scene.add(new T.AmbientLight(0x78989b,.34));
       const key=new T.DirectionalLight(0xfffbf1,2.72);
       key.position.set(-3.4,4.9,6.6);
       this.scene.add(key);
@@ -308,7 +309,7 @@
       rim.position.set(3.4,-1.7,3.6);
       this.scene.add(rim);
       this.rimLight=rim;
-      const frontFill=new T.PointLight(0x91b8ba,this.mobileProfile?.88:1.32,9,2);
+      const frontFill=new T.PointLight(0xa8d0d2,this.mobileProfile?1.18:1.62,9,2);
       frontFill.position.set(-.30,.18,4.8);
       this.scene.add(frontFill);
       this.frontFillLight=frontFill;
@@ -634,20 +635,19 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.52,.46,.014,.012,.18,.050,.045];
+      group.userData.baseOpacity=[.70,.62,.030,.026,.30,.105,.090];
       return group;
     }
 
     makeDNAField(){
       const placements=[
-        [-1.48,.88,.62,-.58,.66,.20,-.36],
-        [1.42,.80,.40,.62,.62,-.18,.44],
-        [-1.26,-.94,.28,.38,.58,.16,.32],
-        [1.34,-.88,.52,-.42,.56,-.22,-.38]
+        [0.00,.06,.54,-.10,1.08,.08,-.12],
+        [1.72,-.84,-.08,.44,.46,-.18,.34],
+        [-1.70,.92,-.22,-.48,.44,.16,-.30]
       ];
       this.dnas=[];
       for(const [x,y,z,rz,sc,rx,ry] of placements.slice(0,this.lowPowerProfile?1:(this.mobileProfile?1:2))){
-        const h=this.createHelix(2.72,.185,2.72);
+        const h=this.createHelix(i===0?3.55:2.54,i===0?.225:.170,i===0?3.20:2.55);
         h.position.set(x,y,z);
         h.rotation.set(rx,ry,rz);
         h.scale.setScalar(sc);
@@ -836,7 +836,7 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.172,112),
+        new T.CircleGeometry(.190,128),
         new T.MeshPhysicalMaterial({
           color:0x0b1b1e,metalness:.01,roughness:.14,
           clearcoat:.82,clearcoatRoughness:.070,
@@ -846,11 +846,11 @@
         })
       );
       socketBack.position.z=.248;
-      socketBack.scale.set(1.28,.72,1);
+      socketBack.scale.set(1.22,.66,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.154,.0026,28,176),
+        new T.TorusGeometry(.171,.0022,28,192),
         new T.MeshPhysicalMaterial({
           color:0x6f8585,metalness:.06,roughness:.075,
           clearcoat:.95,clearcoatRoughness:.038,
@@ -860,7 +860,7 @@
         })
       );
       socketBezel.position.z=.258;
-      socketBezel.scale.set(1.28,.70,1);
+      socketBezel.scale.set(1.20,.65,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -874,18 +874,18 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.152,112,64),lensMat);
-      lens.scale.set(1.38,.72,.20);
+      const lens=new T.Mesh(new T.SphereGeometry(.168,128,72),lensMat);
+      lens.scale.set(1.28,.66,.16);
       lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.TorusGeometry(.080,.0055,24,144,Math.PI*1.44),
+        new T.TorusGeometry(.092,.0042,24,160,Math.PI*1.30),
         new T.MeshPhysicalMaterial({
           color:0x78d8dc,metalness:0,roughness:.075,
           clearcoat:.91,clearcoatRoughness:.040,
-          emissive:0x0a6c76,emissiveIntensity:.34,
-          transparent:true,opacity:.28,depthWrite:false,
+          emissive:0x07525a,emissiveIntensity:.16,
+          transparent:true,opacity:.20,depthWrite:false,
           blending:T.AdditiveBlending
         })
       );
@@ -1018,16 +1018,16 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x0b2429,roughness:.094,metalness:.001,
-        clearcoat:.91,clearcoatRoughness:.048,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00055,
+        color:0x12363c,roughness:.072,metalness:.001,
+        clearcoat:.97,clearcoatRoughness:.032,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00028,
         transparent:true,opacity:0,
-        transmission:.30,thickness:.82,ior:1.49,
-        attenuationColor:new T.Color(0x07333a),attenuationDistance:.34,
-        emissive:0x02090b,emissiveIntensity:.002,
-        envMapIntensity:2.88,
-        specularIntensity:1.0,specularColor:new T.Color(0xfbfcf8),
-        sheen:.012,sheenColor:new T.Color(0x789294),sheenRoughness:.34,
+        transmission:.42,thickness:.74,ior:1.50,
+        attenuationColor:new T.Color(0x062a31),attenuationDistance:.27,
+        emissive:0x010708,emissiveIntensity:.0015,
+        envMapIntensity:3.18,
+        specularIntensity:1.0,specularColor:new T.Color(0xffffff),
+        sheen:.018,sheenColor:new T.Color(0x8fb9bc),sheenRoughness:.28,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -1046,82 +1046,102 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
 
-      const shellWidth=this.deterministicFrame||this.highDetail?76:(this.lowPowerProfile?40:(this.mobileProfile?64:68));
-      const shellHeight=this.deterministicFrame||this.highDetail?50:(this.lowPowerProfile?28:(this.mobileProfile?42:46));
+      const shellWidth=this.deterministicFrame||this.highDetail?84:(this.lowPowerProfile?44:(this.mobileProfile?72:76));
+      const shellHeight=this.deterministicFrame||this.highDetail?58:(this.lowPowerProfile?32:(this.mobileProfile?48:52));
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
+      const profileR1905=[
+        [ 1.00,.070,.055,-.105,-.012],
+        [ .90,.185,.128,-.145,-.010],
+        [ .77,.340,.228,-.145,-.006],
+        [ .62,.485,.326,-.095,-.002],
+        [ .47,.575,.388,-.018, .004],
+        [ .31,.535,.365, .070, .006],
+        [ .15,.620,.420, .125, .004],
+        [-.02,.575,.395, .100, .002],
+        [-.18,.455,.322, .018, .006],
+        [-.34,.505,.346,-.075, .002],
+        [-.50,.475,.320,-.118,-.004],
+        [-.66,.365,.246,-.092,-.008],
+        [-.81,.238,.158,-.050,-.010],
+        [-.93,.108,.074,-.018,-.008],
+        [-1.00,.045,.032, .000,-.004]
+      ];
+      const sampleProfile=y=>{
+        if(y>=profileR1905[0][0])return profileR1905[0];
+        if(y<=profileR1905[profileR1905.length-1][0])return profileR1905[profileR1905.length-1];
+        for(let j=0;j<profileR1905.length-1;j++){
+          const a=profileR1905[j],b=profileR1905[j+1];
+          if(y<=a[0]&&y>=b[0]){
+            const q=(a[0]-y)/Math.max(.0001,a[0]-b[0]);
+            return [y,a[1]+(b[1]-a[1])*q,a[2]+(b[2]-a[2])*q,a[3]+(b[3]-a[3])*q,a[4]+(b[4]-a[4])*q];
+          }
+        }
+        return profileR1905[profileR1905.length-1];
+      };
+      const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+      const field=(y,theta,cy,sy,ca,sa,amp)=>{
+        const dy=(y-cy)/sy,da=angleDelta(theta,ca)/sa;
+        return amp*Math.exp(-(dy*dy+da*da));
+      };
       for(let i=0;i<shellPos.count;i++){
         const p=new T.Vector3().fromBufferAttribute(shellPos,i);
         const n=p.clone().normalize();
-        const az=Math.atan2(n.z,n.x), el=Math.acos(Math.max(-1,Math.min(1,n.y)));
-        const shoulder=Math.max(0,1-n.y*n.y);
-        /* R1842 — smooth high-density sculpt, not an egg. A lower Lp exponent
-           gives broad shoulders and restrained mineral corners while the dense
-           geometry keeps reflections continuous. */
-        const ax=.592+shoulder*.072+n.x*.024-n.z*.010;
-        const ay=1.285+shoulder*.036+n.y*.016+n.x*.008;
-        const azr=.505+shoulder*.056+n.z*.020-n.x*.010;
-        const exponent=1.62;
-        const lp=
-          Math.pow(Math.abs(n.x)/ax,exponent)+
-          Math.pow(Math.abs(n.y)/ay,exponent)+
-          Math.pow(Math.abs(n.z)/azr,exponent);
-        const radius=1/Math.pow(Math.max(.001,lp),1/exponent);
-        const livingBias=1+Math.sin(az*2.1+el*.8)*.0035+Math.cos(az*4.0-el*1.3)*.0018;
-        p.set(n.x*radius*livingBias,n.y*radius*livingBias,n.z*radius*livingBias);
+        const y=n.y;
+        const profile=sampleProfile(y);
+        let rx=profile[1],rz=profile[2],ox=profile[3],oz=profile[4];
+        const theta0=Math.atan2(n.z,n.x);
+        const theta=theta0+y*.075+Math.sin(y*Math.PI)*.020;
+        const c=Math.cos(theta),zs=Math.sin(theta);
+        const superN=2.85;
+        const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
+        const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
-        const mass=(cy,sy,ca,sa,amp)=>{
-          const dy=(n.y-cy)/sy;
-          const da=angleDelta(az,ca)/sa;
-          return amp*Math.exp(-(dy*dy+da*da));
-        };
-        const upperLeft=mass(.40,.30,Math.PI,.76,.180);
-        const rightCentre=mass(.05,.33,0,.70,.138);
-        const lowerLeft=mass(-.46,.26,2.46,.70,.105);
-        const waist=mass(-.17,.22,-.54,.80,.118);
-        const leftWaist=mass(-.02,.17,Math.PI,.50,.058);
-        const rightLowerCut=mass(-.35,.20,-.12,.56,.060);
-        const sculpt=1+upperLeft+rightCentre+lowerLeft-waist-leftWaist-rightLowerCut;
-        p.x*=sculpt;
-        p.z*=sculpt;
+        const upperLeft=field(y,theta,.55,.23,Math.PI,.72,.070);
+        const rightShoulder=field(y,theta,.17,.25,0,.62,.092);
+        const lowerLeft=field(y,theta,-.46,.22,2.62,.70,.060);
+        const leftWaist=field(y,theta,-.12,.17,Math.PI,.58,.150);
+        const rightWaist=field(y,theta,-.22,.18,-.20,.58,.082);
+        const rearCut=field(y,theta,.06,.34,-Math.PI*.50,.66,.050);
+        const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
+        rx*=radial;
+        rz*=1+upperLeft*.48+rightShoulder*.38+lowerLeft*.28-leftWaist*.20-rearCut;
 
-        p.x+=-.060*Math.pow(Math.max(n.y,0),1.55)+.030*Math.pow(Math.max(-n.y,0),1.45)
-          -.034*upperLeft+.040*rightCentre-.020*lowerLeft
-          +Math.sin(az*1.55+el*.72)*.009*shoulder;
-        p.y+=.040*upperLeft-.026*lowerLeft+Math.sin(az*1.88+el*.42)*.011*shoulder;
-        p.z-=n.x*.040-Math.sin(az*2.0+el*.5)*.014*shoulder;
+        p.set(ox+cx*rx,y*.972,oz+cz*rz);
+        p.x+=-.045*y+.026*Math.sin((y+.15)*Math.PI)
+          -.022*upperLeft+.034*rightShoulder-.018*lowerLeft;
+        p.z+=-.030*p.x+.010*Math.sin(theta*2.0)*(1-Math.abs(y));
 
-        const topCap=.905-p.x*.115-p.z*.026;
-        const bottomCap=-.930-p.x*.032+p.z*.018;
-        if(p.y>topCap)p.y=topCap+(p.y-topCap)*.52;
-        if(p.y<bottomCap)p.y=bottomCap+(p.y-bottomCap)*.52;
-        const crownT=Math.max(0,Math.min(1,(p.y-.50)/.32));
+        const topPlane=.925-p.x*.16-p.z*.050;
+        const bottomPlane=-.948-p.x*.045+p.z*.026;
+        if(p.y>topPlane)p.y=topPlane+(p.y-topPlane)*.24;
+        if(p.y<bottomPlane)p.y=bottomPlane+(p.y-bottomPlane)*.30;
+
+        const leftPlane=-.585+.145*p.y-.030*p.z;
+        const rightPlane=.565-.080*p.y+.024*p.z;
+        const frontPlane=.470-.048*p.y-.040*p.x;
+        const backPlane=-.430+.025*p.y+.020*p.x;
+        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.30;
+        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.28;
+        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.38;
+        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.36;
+
+        const crownT=Math.max(0,Math.min(1,(p.y-.56)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.034*Math.exp(-Math.pow((p.x+.180)/.125,2.0))*crownEase;
+        const crownCleft=.115*Math.exp(-Math.pow((p.x+.055)/.105,2.0))*crownEase;
         p.y-=crownCleft;
-        p.x+=crownCleft*.10;
+        p.x+=crownCleft*.11;
 
-        const leftPlane=-.650+.082*p.y-.022*p.z;
-        const rightPlane=.575-.058*p.y+.016*p.z;
-        const frontPlane=.535-.022*p.y-.014*p.x;
-        const backPlane=-.485+.016*p.y+.012*p.x;
-        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.80;
-        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.80;
-        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.84;
-        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.84;
-
-        const socketX=(p.x-.060)/.230;
-        const socketY=(p.y+.078)/.158;
-        const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,n.z);
-        p.z-=.142*socket;
-
+        const socketX=(p.x-.105)/.245;
+        const socketY=(p.y+.035)/.160;
+        const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,zs);
+        p.z-=.118*socket;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
       const shell=new T.Mesh(shellGeo,this.organicShellMaterial);
-      shell.scale.set(.900,1.125,.790);
-      shell.position.set(-.040,.004,-.012);
+      shell.scale.set(.985,1.035,.965);
+      shell.position.set(-.010,.000,-.018);
       shell.userData.baseScale=shell.scale.clone();
       this.organicShell=shell;
       this.organicGroup.add(shell);
@@ -1136,8 +1156,8 @@
         envMapIntensity:2.54,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
-      this.organicMembrane.scale.set(.875,1.092,.760);
-      this.organicMembrane.position.set(-.040,.004,-.018);
+      this.organicMembrane.scale.set(.958,1.008,.938);
+      this.organicMembrane.position.set(-.010,.000,-.026);
       this.organicMembrane.userData.baseScale=this.organicMembrane.scale.clone();
       this.organicGroup.add(this.organicMembrane);
 
@@ -1854,16 +1874,20 @@
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
-        h.position.x=b.x*.52*(1+fly*.10);
-        h.position.y=b.y*.48*(1+fly*.08);
-        h.position.z=b.z*.72+fly*.16;
-        h.rotation.x=b.rx+Math.sin(time*.00022+b.phase)*.018;
-        h.rotation.y=b.ry+Math.sin(time*.00019+b.phase)*.022;
-        h.rotation.z=b.rz+time*.000018*(i%2?1:-1);
-        h.scale.setScalar(b.s*(this.mobileProfile?.92:.86));
+        const primary=i===0;
+        const collapse=smooth((t-1.52)/1.36);
+        h.position.x=primary?0:b.x*.62*(1+fly*.06);
+        h.position.y=primary?.025:b.y*.58*(1+fly*.06);
+        h.position.z=primary?(.50-.18*collapse):b.z*.72+fly*.12;
+        h.rotation.x=b.rx+Math.sin(time*.00022+b.phase)*(primary?.012:.018);
+        h.rotation.y=b.ry+Math.sin(time*.00019+b.phase)*(primary?.014:.022);
+        h.rotation.z=b.rz+time*.000020*(i%2?1:-1);
+        const primaryScale=b.s*(this.mobileProfile?1.04:.96)*mix(1,.58,collapse);
+        h.scale.setScalar(primary?primaryScale:b.s*(this.mobileProfile?.78:.72));
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*(this.mobileProfile?.82:.74);
+          const emphasis=primary?1.0:.38;
+          m.opacity=(bases[mi]??.5)*fade*emphasis*(this.mobileProfile?.96:.90);
         });
       });
     }
@@ -1884,7 +1908,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx+.060*chestEmbed,ty-.078*chestEmbed,.43-.070*chestEmbed);
+      this.coreGroup.position.set(tx+.105*chestEmbed,ty-.035*chestEmbed,.405-.060*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1923,10 +1947,10 @@
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.rotation.y=(this.mobileProfile?.31:.29)+Math.sin(time*.00011)*.006+this.interactionX*.012;
+      this.organicGroup.rotation.y=(this.mobileProfile?.405:.355)+Math.sin(time*.00011)*.006+this.interactionX*.012;
       this.organicGroup.rotation.x=-.080+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?1.29:1.39;
+      const finalScale=this.mobileProfile?1.22:1.30;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
