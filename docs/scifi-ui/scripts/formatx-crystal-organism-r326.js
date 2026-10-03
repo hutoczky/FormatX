@@ -1317,7 +1317,7 @@
         float iceCloud=.5+.5*sin(vLocal.x*6.2-vLocal.y*4.7+vLocal.z*5.4+sin(vLocal.y*3.2));
         mineral+=vec3(.068,.088,.088)*iceVolume*(.012+.016*(1.0-facing))*(.86+.14*iceCloud);
         float chromaSide=.5+.5*n.x;
-        mineral+=mix(vec3(.026,.072,.085),vec3(.052,.023,.064),chromaSide)*fresnel*bodyMask*.12;
+        mineral+=mix(vec3(.024,.150,.178),vec3(.145,.040,.170),chromaSide)*fresnel*bodyMask*.145;
         float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
         float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
         mineral+=vec3(.025,.052,.058)*backScatter*.36;
@@ -1427,8 +1427,8 @@
         float lensAngle=atan(lensVector.y,lensVector.x);
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.420)/.026,2.0));
-        float lensIris=exp(-pow((lensRadial-.285)/.040,2.0));
-        float lensIrisArc=lensIris*(.38+.62*smoothstep(-.45,.82,cos(lensAngle+.52)));
+        float lensIris=exp(-pow((lensRadial-.305)/.032,2.0));
+        float lensIrisArc=lensIris*smoothstep(.56,.93,cos(lensAngle+.52));
         float lensHot=exp(-pow(lensRadial/.115,2.0));
         float electricBranch=pow(.5+.5*sin(lensAngle*14.0+lensRadial*86.0-uTime*2.3+sin(lensAngle*5.0)*1.7),18.0)*lensInner;
         float electricBranch2=pow(.5+.5*sin(lensAngle*9.0-lensRadial*67.0+uTime*1.7),22.0)*lensInner;
@@ -1444,13 +1444,13 @@
         physicalLens+=vec3(.085,.19,.22)*fresnel*.15;
         physicalLens+=vec3(.012,.095,.115)*lensInner*(.10+.10*uEnergy);
         physicalLens+=vec3(.080,.310,.350)*lensRing*(.13+.075*uEnergy);
-        physicalLens+=vec3(.020,.160,.205)*lensIrisArc*(.14+.10*uEnergy);
+        physicalLens+=vec3(.020,.150,.185)*lensIrisArc*(.075+.060*uEnergy);
         physicalLens+=vec3(.72,.90,.89)*lensHot*(.12+.04*uEnergy);
         physicalLens+=vec3(.035,.17,.19)*electric*(.08+.07*uEnergy);
         physicalLens+=vec3(.86,.94,.91)*coreFlash*.15;
         physicalLens+=vec3(.90,.99,1.00)*lensGlint*.42;
         physicalLens+=vec3(.52,.70,.70)*lensEdge*(.10+.12*softboxA+.08*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.006,.019,.024),lensPupil*.10);
+        physicalLens=mix(physicalLens,vec3(.006,.019,.024),lensPupil*.05);
         physicalLens+=vec3(.66,.90,.93)*lensGlint*.10*(1.0-lensPupil);
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
@@ -1566,7 +1566,7 @@
         col*=1.0-.075*socketShade;
         col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.023,.065,.078),vec3(.045,.020,.058),chromaSide)*fresnel*bodyMask*.105;
+        col+=mix(vec3(.020,.135,.160),vec3(.125,.035,.150),chromaSide)*fresnel*bodyMask*.125;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1605,8 +1605,8 @@
         float lensAngle=atan(lensVector.y,lensVector.x);
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.420)/.026,2.0));
-        float lensIris=exp(-pow((lensRadial-.285)/.040,2.0));
-        float lensIrisArc=lensIris*(.38+.62*smoothstep(-.45,.82,cos(lensAngle+.52)));
+        float lensIris=exp(-pow((lensRadial-.305)/.032,2.0));
+        float lensIrisArc=lensIris*smoothstep(.56,.93,cos(lensAngle+.52));
         float lensHot=exp(-pow(lensRadial/.115,2.0));
         float electric=pow(.5+.5*sin(lensAngle*12.0+lensRadial*72.0-uTime*2.0),16.0)*lensInner;
         float coreFlash=exp(-pow(lensRadial/.074,2.0))*(.66+.34*sin(uTime*3.8));
@@ -1620,13 +1620,13 @@
           +vec3(.040,.11,.13)*fresnel*.085
           +vec3(.005,.045,.056)*lensInner*(.08+.07*uEnergy)
           +vec3(.48,.56,.55)*lensRing*.055
-          +vec3(.020,.42,.50)*lensIrisArc*(.32+.16*uEnergy)
+          +vec3(.022,.34,.40)*lensIrisArc*(.115+.075*uEnergy)
           +vec3(.82,.98,.97)*lensHot*(.105+.028*uEnergy)
           +vec3(.020,.10,.12)*electric*.012
           +vec3(.64,.76,.74)*coreFlash*.045
           +vec3(.96,1.00,1.00)*lensGlint*.36
           +vec3(.24,.35,.36)*lensEdge*(.038+.055*softboxA+.030*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.0010,.003,.0045),lensPupil*.42);
+        physicalLens=mix(physicalLens,vec3(.0015,.006,.008),lensPupil*.16);
         physicalLens+=vec3(.72,.94,.95)*lensGlint*.10*(1.0-lensPupil);
         col=mix(col,physicalLens,lensMeshMask*.997);
 
