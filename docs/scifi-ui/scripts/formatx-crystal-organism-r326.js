@@ -925,7 +925,7 @@
     {
       const centreX=-.055,centreY=.012;
       const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?7:(software?8:mobile?10:12),bezelZ=.602;
-      const bezelMajorX=.198,bezelMajorY=.142,bezelTube=.0016;
+      const bezelMajorX=.202,bezelMajorY=.116,bezelTube=.0015;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -950,8 +950,8 @@
       }
 
       const lensCenter=[centreX,centreY,.608];
-      const lensRadiusX=.202;
-      const lensRadiusY=.146;
+      const lensRadiusX=.205;
+      const lensRadiusY=.108;
       const lensDepth=.024;
       const radialSteps=auditMode?11:(software?15:mobile?18:20);
       const angularSteps=auditMode?72:(software?96:mobile?112:128);
@@ -1036,8 +1036,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.075) contrast(1.13) saturate(.98)'
-      : 'brightness(1.07) contrast(1.10) saturate(.92)';
+      ? 'brightness(1.02) contrast(1.18) saturate(.95)'
+      : 'brightness(1.05) contrast(1.13) saturate(.92)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1384,6 +1384,7 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.435)/.024,2.0));
         float lensIris=exp(-pow((lensRadial-.245)/.026,2.0));
+        float lensIrisArc=lensIris*(.18+.82*smoothstep(-.28,.78,cos(lensAngle+.72)));
         float lensHot=exp(-pow(lensRadial/.095,2.0));
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1483,7 +1484,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0024,.0042,.0052),vec3(.066,.083,.082),lift);
+        vec3 col=mix(vec3(.0018,.0036,.0046),vec3(.050,.066,.067),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
@@ -1561,6 +1562,7 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRing=exp(-pow((lensRadial-.435)/.024,2.0));
         float lensIris=exp(-pow((lensRadial-.245)/.026,2.0));
+        float lensIrisArc=lensIris*(.18+.82*smoothstep(-.28,.78,cos(lensAngle+.72)));
         float lensHot=exp(-pow(lensRadial/.095,2.0));
         vec2 lensVector=vUv-vec2(.5);
         float lensAngle=atan(lensVector.y,lensVector.x);
@@ -1569,20 +1571,20 @@
         float lensGlint=exp(-pow((vUv.x-.34)/.060,2.0)-pow((vUv.y-.31)/.052,2.0));
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
-        vec3 physicalLens=vec3(.0015,.006,.008)
-          +vec3(.009,.038,.044)*(.24+.24*uEnergy)
-          +vec3(.91,.97,.95)*softboxA*.19
-          +vec3(.40,.52,.54)*sideSpec*.095
-          +vec3(.050,.14,.16)*fresnel*.11
-          +vec3(.006,.060,.074)*lensInner*(.10+.08*uEnergy)
-          +vec3(.16,.23,.24)*lensRing*.065
-          +vec3(.020,.55,.64)*lensIris*(.36+.18*uEnergy)
-          +vec3(.70,.90,.89)*lensHot*(.075+.025*uEnergy)
-          +vec3(.025,.12,.14)*electric*.024
-          +vec3(.70,.82,.80)*coreFlash*.075
-          +vec3(.94,1.00,1.00)*lensGlint*.40
-          +vec3(.30,.42,.43)*lensEdge*(.055+.075*softboxA+.045*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.0015,.006,.009),lensPupil*.58);
+        vec3 physicalLens=vec3(.007,.016,.019)
+          +vec3(.008,.032,.038)*(.22+.22*uEnergy)
+          +vec3(.88,.95,.93)*softboxA*.16
+          +vec3(.34,.46,.48)*sideSpec*.080
+          +vec3(.040,.11,.13)*fresnel*.085
+          +vec3(.005,.045,.056)*lensInner*(.08+.07*uEnergy)
+          +vec3(.30,.38,.38)*lensRing*.032
+          +vec3(.018,.57,.66)*lensIrisArc*(.40+.18*uEnergy)
+          +vec3(.62,.82,.82)*lensHot*(.050+.018*uEnergy)
+          +vec3(.020,.10,.12)*electric*.012
+          +vec3(.64,.76,.74)*coreFlash*.045
+          +vec3(.96,1.00,1.00)*lensGlint*.36
+          +vec3(.24,.35,.36)*lensEdge*(.038+.055*softboxA+.030*sideSpec);
+        physicalLens=mix(physicalLens,vec3(.0010,.004,.006),lensPupil*.68);
         physicalLens+=vec3(.72,.94,.95)*lensGlint*.10*(1.0-lensPupil);
         col=mix(col,physicalLens,lensMeshMask*.997);
 
@@ -1649,7 +1651,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.78+.22*facing;
-        vec3 col=mix(vec3(.0018,.0038,.0048),vec3(.064,.082,.083),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0014,.0030,.0038),vec3(.042,.058,.059),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(.995,.998,.970)*keySpec*.255;
         col+=vec3(.50,.68,.70)*sideSpec*.205;
@@ -1726,20 +1728,22 @@
         float lensInner=1.0-smoothstep(.20,.47,lensRadial);
         float lensRim=exp(-pow((lensRadial-.435)/.026,2.0));
         float lensIris=exp(-pow((lensRadial-.245)/.030,2.0));
+        float lensAngle=atan(vUv.y-.5,vUv.x-.5);
+        float lensIrisArc=lensIris*(.18+.82*smoothstep(-.28,.78,cos(lensAngle+.72)));
         float lensHot=exp(-pow(lensRadial/.098,2.0));
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
         float lensGlint=exp(-pow((vUv.x-.34)/.065,2.0)-pow((vUv.y-.31)/.052,2.0));
-        vec3 optical=vec3(.0007,.0028,.0040)
-          +vec3(.004,.030,.043)*lensInner
-          +vec3(.86,.94,.91)*keySpec*.115
-          +vec3(.012,.045,.058)*fresnel*.050
-          +vec3(.14,.22,.23)*lensRim*.055
-          +vec3(.020,.57,.66)*lensIris*.390
-          +vec3(.74,.94,.94)*lensHot*.090
-          +vec3(.96,1.00,1.00)*lensGlint*.42
-          +vec3(.28,.44,.45)*lensEdge*(.055+.085*keySpec+.045*sideSpec);
-        optical=mix(optical,vec3(.0015,.006,.009),lensPupil*.60);
+        vec3 optical=vec3(.006,.015,.018)
+          +vec3(.004,.024,.034)*lensInner
+          +vec3(.84,.92,.89)*keySpec*.095
+          +vec3(.010,.038,.050)*fresnel*.042
+          +vec3(.28,.36,.36)*lensRim*.032
+          +vec3(.018,.59,.68)*lensIrisArc*.420
+          +vec3(.68,.90,.90)*lensHot*.060
+          +vec3(.96,1.00,1.00)*lensGlint*.34
+          +vec3(.22,.34,.35)*lensEdge*(.038+.060*keySpec+.030*sideSpec);
+        optical=mix(optical,vec3(.0010,.004,.006),lensPupil*.70);
         optical+=vec3(.78,.96,.97)*lensGlint*.09*(1.0-lensPupil);
         col=mix(col,optical,lensMeshMask*.997);
 
@@ -1771,6 +1775,7 @@
     root.dataset.fxNativeMagStudioR1896='cross-tier-cyan-iris-smoked-silver-bezel-proof-parity';
     root.dataset.fxNativeMagStudioR1897='cinematic-sculpt-parity-flush-smoked-optic-single-iris';
     root.dataset.fxNativeMagStudioR1897b='front-surface-optic-depth-corrected-visible-single-iris';
+    root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
