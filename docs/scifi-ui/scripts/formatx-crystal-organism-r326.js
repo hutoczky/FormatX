@@ -477,9 +477,9 @@
         /* R1843 — authored ice-block envelope. A sub-quadratic superellipsoid
            keeps the body smooth while giving it broad mineral shoulders and
            cut corners instead of the previous oval/egg read. */
-        const ax=.640+.080*shoulder+dir[0]*.028-dir[2]*.012;
-        const ay=1.245+.040*shoulder+dir[1]*.018+dir[0]*.010;
-        const az=.520+.062*shoulder+dir[2]*.022-dir[0]*.012;
+        const ax=.592+.072*shoulder+dir[0]*.024-dir[2]*.010;
+        const ay=1.285+.036*shoulder+dir[1]*.016+dir[0]*.008;
+        const az=.505+.056*shoulder+dir[2]*.020-dir[0]*.010;
         const exponent=1.62;
         const lp=
           Math.pow(Math.abs(dir[0])/ax,exponent)+
@@ -537,8 +537,8 @@
           const w=Math.min(.46,.20+Math.max(0,overshoot)*.92);
           if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
         };
-        const topCap=.885+p[0]*.084-p[2]*.030;
-        const bottomCap=-.915-p[0]*.045+p[2]*.022;
+        const topCap=.905-p[0]*.115-p[2]*.026;
+        const bottomCap=-.930-p[0]*.032+p[2]*.018;
         if(p[1]>topCap){
           const over=p[1]-topCap;
           p[1]=topCap+over*.52;
@@ -549,11 +549,11 @@
           p[1]=bottomCap-over*.66;
           registerCut([-.075,-1,.034],over);
         }
-        const crownCleftT=Math.max(0,Math.min(1,(p[1]-.48)/.34));
+        const crownCleftT=Math.max(0,Math.min(1,(p[1]-.50)/.32));
         const crownCleftEase=crownCleftT*crownCleftT*(3-2*crownCleftT);
-        const crownCleft=.090*Math.exp(-Math.pow((p[0]+.008)/.136,2.0))*crownCleftEase;
+        const crownCleft=.034*Math.exp(-Math.pow((p[0]+.180)/.125,2.0))*crownCleftEase;
         p[1]-=crownCleft;
-        p[0]+=Math.sign(p[0]+.018)*crownCleft*.22;
+        p[0]+=crownCleft*.10;
         const leftPlane=-.650+.082*p[1]-.022*p[2];
         const rightPlane=.575-.058*p[1]+.016*p[2];
         const frontPlane=.535-.022*p[1]-.014*p[0];
@@ -580,10 +580,10 @@
         }
 
         /* Recess the smoked optical organ into the front plane. */
-        const socketX=(p[0]+.040)/.255;
-        const socketY=(p[1]+.010)/.178;
+        const socketX=(p[0]-.060)/.230;
+        const socketY=(p[1]+.078)/.158;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,dir[2]);
-        p[2]-=.155*socket;
+        p[2]-=.142*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -923,9 +923,9 @@
     }
 
     {
-      const centreX=-.032,centreY=.008;
+      const centreX=.060,centreY=-.078;
       const bezelSteps=auditMode?72:(software?96:mobile?112:128),bezelTubeSteps=auditMode?8:(software?9:mobile?11:12),bezelZ=.626;
-      const bezelMajorX=.158,bezelMajorY=.096,bezelTube=.007;
+      const bezelMajorX=.154,bezelMajorY=.088,bezelTube=.0065;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -950,9 +950,9 @@
       }
 
       const lensCenter=[centreX,centreY,.638];
-      const lensRadiusX=.150;
-      const lensRadiusY=.090;
-      const lensDepth=.050;
+      const lensRadiusX=.146;
+      const lensRadiusY=.083;
+      const lensDepth=.047;
       const radialSteps=auditMode?11:(software?15:mobile?18:20);
       const angularSteps=auditMode?72:(software?96:mobile?112:128);
       function lensVertex(radial,angle){
@@ -1349,7 +1349,7 @@
 
         /* R1593 — a physical smoked-glass lens, not a glowing eye or HUD.
            Its shading is driven by the same studio reflections as the obsidian. */
-        vec2 lq=vec2((q.x+.034)*1.28,(q.y-.018)*1.12);
+        vec2 lq=vec2((q.x-.060)*1.32,(q.y+.078)*1.18);
         float lensD=length(lq);
         float lensOuter=(1.0-smoothstep(.126,.184,lensD))*front;
         float lensGlass=(1.0-smoothstep(.078,.132,lensD))*front;
@@ -1540,7 +1540,7 @@
         col+=vec3(.062,.078,.077)*innerVeil*(.005+.007*facing);
         col+=vec3(.020,.052,.058)*bodyMask*(.34+.66*facing);
         col+=vec3(.022,.052,.058)*strata*iceVolume*.010;
-        vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
+        vec2 socketQ=vec2((vLocal.x-.060)/.205,(vLocal.y+.078)/.155);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.72)*smoothstep(.06,.58,vLocal.z)*bodyMask;
@@ -1719,7 +1719,7 @@
         col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
         col+=vec3(.008,.022,.025)*bodyMask*(.24+.76*facing);
         col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
-        vec2 socketQ=vec2((vLocal.x-.040)/.225,(vLocal.y+.018)/.175);
+        vec2 socketQ=vec2((vLocal.x-.060)/.205,(vLocal.y+.078)/.155);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.70)*smoothstep(.04,.58,vLocal.z)*bodyMask;
@@ -1803,6 +1803,7 @@
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
     root.dataset.fxNativeMagStudioR1901='slender-studio-bioglass-premium-sensor-silver-teal-flush-optic';
     root.dataset.fxNativeMagStudioR1903='gallery-grade-dark-bioglass-sculpt-lifted-midtone-satin-sensor';
+    root.dataset.fxNativeMagStudioR1904='asymmetric-slender-gallery-monolith-off-axis-flush-sensor';
     root.dataset.fxNativeMagStudioR1832='continuous-metaball-superellipsoid-no-lowpoly-rock-premium-optic';
     root.dataset.fxNativeMagStudioR1833='black-bioglass-specular-studio-ribbons-optical-pupil';
     root.dataset.fxNativeMagStudioR1834='software-parity-black-glass-studio-reflections-optical-pupil';
