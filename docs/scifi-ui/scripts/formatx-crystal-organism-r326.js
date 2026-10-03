@@ -1044,7 +1044,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 64% 58% at 48% 43%,rgba(118,181,184,.190) 0%,rgba(43,88,92,.095) 34%,rgba(10,30,35,.040) 58%,rgba(0,0,0,0) 80%),radial-gradient(ellipse 46% 30% at 54% 80%,rgba(73,58,80,.045),rgba(0,0,0,0) 74%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 56% 52% at 48% 42%,rgba(72,166,176,.125) 0%,rgba(27,75,82,.070) 36%,rgba(7,24,29,.026) 61%,rgba(0,0,0,0) 82%),radial-gradient(ellipse 42% 28% at 61% 63%,rgba(72,43,101,.050),rgba(0,0,0,0) 72%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1177,7 +1177,7 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*.038*uLayer;
-        float yaw=${mobile?'.405':'.355'}+uRotation.y+uPointer.x*.13+uTime*.008;
+        float yaw=${mobile?'.455':'.390'}+uRotation.y+uPointer.x*.13+uTime*.008;
         float pitch=-.070+uRotation.x-uPointer.y*.085+.006*sin(uTime*.19);
         float roll=-.045+uRotation.z+uPointer.x*uPointer.y*.022+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
@@ -1192,7 +1192,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.610':'.805'};
+        projected*= ${mobile?'.565':'.770'};
         projected.x+=${mobile?'.002':'.040'};
         projected.y+=${mobile?'.016':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
@@ -1693,11 +1693,11 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.84+.16*facing;
-        vec3 col=mix(vec3(.004,.010,.013),vec3(.085,.118,.121),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0025,.009,.014),vec3(.052,.098,.108),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
-        col+=vec3(.995,.998,.970)*keySpec*.255;
-        col+=vec3(.50,.68,.70)*sideSpec*.205;
-        col+=vec3(.022,.078,.090)*fresnel*.150;
+        col+=vec3(.94,.99,.99)*keySpec*.170;
+        col+=vec3(.32,.62,.67)*sideSpec*.155;
+        col+=vec3(.020,.125,.150)*fresnel*.185;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
         col+=vec3(.022,.030,.030)*ndl*.026;
@@ -1713,14 +1713,14 @@
         float studioStripeC=exp(-pow((vLocal.x+.005+vLocal.y*.08)/.070,2.0))*smoothstep(-.78,.78,vLocal.y)*bodyMask;
         float studioFaceA=pow(max(dot(n,normalize(vec3(-.28,.34,.90))),0.0),5.0)*bodyMask;
         float studioFaceB=pow(max(dot(n,normalize(vec3(.50,-.04,.86))),0.0),7.0)*bodyMask;
-        col+=vec3(.52,.58,.57)*pow(broadKey,2.20)*.080*bodyMask;
-        col+=vec3(.16,.33,.35)*pow(broadSide,2.35)*.055*bodyMask;
-        col+=vec3(.07,.045,.028)*pow(broadWarm,2.60)*.010*bodyMask;
-        col+=vec3(.92,.98,.96)*studioFaceA*.155;
-        col+=vec3(.38,.70,.73)*studioFaceB*.090;
-        col+=vec3(.92,.98,.96)*studioStripeA*.070;
-        col+=vec3(.28,.54,.58)*studioStripeB*.045;
-        col+=vec3(.50,.78,.80)*studioStripeC*.035;
+        col+=vec3(.34,.42,.42)*pow(broadKey,2.35)*.050*bodyMask;
+        col+=vec3(.11,.28,.31)*pow(broadSide,2.45)*.044*bodyMask;
+        col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
+        col+=vec3(.86,.98,.98)*studioFaceA*.118;
+        col+=vec3(.24,.66,.72)*studioFaceB*.075;
+        col+=vec3(.90,.99,.98)*studioStripeA*.052;
+        col+=vec3(.22,.55,.62)*studioStripeB*.038;
+        col+=vec3(.44,.76,.82)*studioStripeC*.030;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1749,7 +1749,10 @@
         col*=1.0-.070*socketShade;
         col+=vec3(.022,.090,.110)*opticCaustic*(.042+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.024,.070,.082),vec3(.050,.022,.062),chromaSide)*fresnel*bodyMask*.11;
+        vec3 spectralEdge=mix(vec3(.020,.190,.225),vec3(.180,.045,.210),chromaSide);
+        col+=spectralEdge*fresnel*bodyMask*.145;
+        float refractRibbon=exp(-pow((vLocal.x+.11-vLocal.y*.16)/.115,2.0))*smoothstep(-.62,.66,vLocal.y)*frontDepth;
+        col+=vec3(.055,.185,.205)*refractRibbon*(.045+.055*(1.0-facing));
 
         vec3 bezel=vec3(.022,.030,.031)
           +vec3(.055,.070,.069)*(.11*ndl+.12*sideLight)
@@ -1773,30 +1776,30 @@
         float lensRadial=length(vUv-vec2(.5));
         float lensInner=1.0-smoothstep(.20,.47,lensRadial);
         float lensRim=exp(-pow((lensRadial-.420)/.030,2.0));
-        float lensIris=exp(-pow((lensRadial-.290)/.040,2.0));
+        float lensIris=exp(-pow((lensRadial-.305)/.032,2.0));
         float lensAngle=atan(vUv.y-.5,vUv.x-.5);
-        float lensIrisArc=lensIris*smoothstep(.32,.88,cos(lensAngle+.58));
+        float lensIrisArc=lensIris*smoothstep(.56,.93,cos(lensAngle+.52));
         float lensHot=exp(-pow(lensRadial/.098,2.0));
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
         float lensGlint=exp(-pow((vUv.x-.34)/.065,2.0)-pow((vUv.y-.31)/.052,2.0));
-        vec3 optical=vec3(.012,.030,.034)
-          +vec3(.005,.030,.038)*lensInner
-          +vec3(.84,.92,.89)*keySpec*.095
-          +vec3(.010,.038,.050)*fresnel*.042
-          +vec3(.34,.40,.40)*lensRim*.028
-          +vec3(.025,.42,.48)*lensIrisArc*.210
-          +vec3(.80,.98,.97)*lensHot*.090
-          +vec3(.96,1.00,1.00)*lensGlint*.34
-          +vec3(.18,.27,.28)*lensEdge*(.018+.035*keySpec+.018*sideSpec);
-        optical=mix(optical,vec3(.0015,.006,.008),lensPupil*.38);
-        optical+=vec3(.78,.96,.97)*lensGlint*.09*(1.0-lensPupil);
+        vec3 optical=vec3(.004,.014,.018)
+          +vec3(.004,.022,.030)*lensInner
+          +vec3(.80,.90,.88)*keySpec*.060
+          +vec3(.012,.060,.072)*fresnel*.055
+          +vec3(.40,.50,.49)*lensRim*.040
+          +vec3(.030,.37,.42)*lensIrisArc*.095
+          +vec3(.44,.70,.71)*lensHot*.032
+          +vec3(.96,1.00,1.00)*lensGlint*.235
+          +vec3(.20,.31,.32)*lensEdge*(.022+.028*keySpec+.016*sideSpec);
+        optical=mix(optical,vec3(.0015,.006,.008),lensPupil*.18);
+        optical+=vec3(.72,.94,.95)*lensGlint*.055*(1.0-lensPupil);
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.97,isLensMesh);
-        ${outputName}=vec4(tone(col*2.70),clamp(alpha,.99,1.0));
+        ${outputName}=vec4(tone(col*2.95),clamp(alpha,.99,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1823,6 +1826,7 @@
     root.dataset.fxNativeMagStudioR1897b='front-surface-optic-depth-corrected-visible-single-iris';
     root.dataset.fxNativeMagStudioR1905='gallery-shard-profile-cut-planes-smoked-sensor-no-potato-bulges';
     root.dataset.fxNativeMagStudioR1906='sleek-cut-ice-shard-broad-softbox-smoked-sensor-proof-parity';
+    root.dataset.fxNativeMagStudioR1907='spectral-smoked-ice-gallery-shard-understated-glass-aperture';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
