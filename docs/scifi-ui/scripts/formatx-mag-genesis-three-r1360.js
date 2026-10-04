@@ -171,6 +171,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1923='continuous-living-bioglass-organism-premium-optic-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1924='crystalline-superellipse-silver-optic-clear-ice-cinematic';
+      document.documentElement.dataset.fxMagBirthVisualR1925='clear-ice-correct-flush-optic-proportions-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -855,7 +856,7 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.132,128),
+        new T.CircleGeometry(.118,128),
         new T.MeshPhysicalMaterial({
           color:0x071317,metalness:.01,roughness:.10,
           clearcoat:.92,clearcoatRoughness:.052,
@@ -865,11 +866,11 @@
         })
       );
       socketBack.position.z=.248;
-      socketBack.scale.set(.92,.82,1);
+      socketBack.scale.set(.98,.88,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.118,.0020,28,192),
+        new T.TorusGeometry(.115,.0020,28,192),
         new T.MeshPhysicalMaterial({
           color:0xd5dfdc,metalness:.035,roughness:.042,
           clearcoat:.98,clearcoatRoughness:.030,
@@ -879,7 +880,7 @@
         })
       );
       socketBezel.position.z=.258;
-      socketBezel.scale.set(1.02,.88,1);
+      socketBezel.scale.set(1.00,.90,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -893,13 +894,13 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.152,128,72),lensMat);
-      lens.scale.set(1.02,.90,.16);
+      const lens=new T.Mesh(new T.SphereGeometry(.100,128,72),lensMat);
+      lens.scale.set(1.00,.88,.20);
       lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.PlaneGeometry(.040,.018),
+        new T.PlaneGeometry(.028,.014),
         new T.MeshPhysicalMaterial({
           color:0x8de8e7,metalness:0,roughness:.060,
           clearcoat:.95,clearcoatRoughness:.032,
@@ -948,7 +949,7 @@
         transparent:true,opacity:.018,depthWrite:false,
         blending:T.NormalBlending
       }));
-      this.irisCorona.scale.set(.34,.32,1);
+      this.irisCorona.scale.set(.28,.26,1);
       this.irisCorona.position.z=.305;
       this.irisGroup.add(this.irisCorona);
       this.coreGroup.add(this.irisGroup);
@@ -957,7 +958,7 @@
         map:this.makeGlowTexture(),color:0x9fc8cc,
         transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
-      this.glowSprite.scale.set(.40,.36,1);
+      this.glowSprite.scale.set(.32,.29,1);
       this.glowSprite.position.z=.29;
       this.coreGroup.add(this.glowSprite);
 
