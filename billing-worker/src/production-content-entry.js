@@ -11,7 +11,7 @@ import productionBase from './production-content-entry-r369-base.js';
 // production-r1776-immediate-visible-intro-edge-wire
 const STARTUP_REVISION = '20261004-r1908-csp-genome-runtime-fix';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-pQAqf0N8CX7SMGKx5YUo+2bPoBkrqE4wcHPPnh1CbF0='";
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-qV/eChRNqJxk116s/FTN5YMFFDHJj2MBA+UgSP2NVvs='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
