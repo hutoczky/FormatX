@@ -479,14 +479,14 @@
         [ .69,.320,.214,-.120,-.004],
         [ .56,.455,.300,-.102,-.001],
         [ .43,.530,.344,-.052, .002],
-        [ .30,.560,.360, .012, .004],
-        [ .17,.535,.346, .064, .005],
-        [ .03,.500,.326, .086, .005],
-        [-.11,.468,.300, .076, .004],
-        [-.25,.438,.276, .038, .002],
-        [-.40,.392,.242,-.010, .000],
-        [-.55,.310,.184,-.046,-.003],
-        [-.70,.216,.128,-.052,-.005],
+        [ .30,.575,.370, .020, .004],
+        [ .17,.545,.352, .070, .005],
+        [ .03,.505,.330, .090, .005],
+        [-.11,.470,.302, .060, .004],
+        [-.25,.452,.286,-.005, .002],
+        [-.40,.425,.258,-.065, .000],
+        [-.55,.340,.202,-.085,-.003],
+        [-.70,.232,.138,-.062,-.005],
         [-.84,.128,.074,-.032,-.006],
         [-.94,.056,.032,-.012,-.005],
         [-1.00,.016,.011, .000,-.003]
@@ -530,11 +530,11 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.57,.25,Math.PI,.72,.088);
-        const rightShoulder=field(.25,.25,0,.64,.092);
-        const lowerLeft=field(-.42,.24,2.58,.70,.064);
-        const rightNeck=field(.53,.13,.04,.54,.070);
-        const leftNeck=field(-.22,.14,Math.PI,.58,.046);
+        const upperLeft=field(.57,.25,Math.PI,.72,.108);
+        const rightShoulder=field(.25,.24,0,.62,.108);
+        const lowerLeft=field(-.43,.23,2.58,.68,.102);
+        const rightNeck=field(.53,.13,.04,.52,.094);
+        const leftNeck=field(-.20,.14,Math.PI,.56,.070);
         const leftWaist=field(.04,.21,Math.PI,.70,.030);
         const rightWaist=field(.03,.21,-.10,.68,.038);
         const rearCut=field(.04,.38,-Math.PI*.50,.72,.022);
@@ -1170,9 +1170,14 @@
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
         float cortex=(cortexA*.62+cortexB*.38)*.0058*cortexEnvelope;
         float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0009*cortexEnvelope;
+        /* R1917 — two broad sculptural valleys bend the reflection field without
+           drawing decorative lines. Geometry stays one continuous living volume. */
+        float creaseA=exp(-pow((base.x+.075+base.y*.18)/.105,2.0))*smoothstep(.12,.92,1.0-abs(base.y));
+        float creaseB=exp(-pow((base.x-.205-base.y*.10)/.090,2.0))*smoothstep(.18,.88,1.0-abs(base.y));
+        float sculptValley=(-.030*creaseA-.020*creaseB)*bodyVertexMask;
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        vec3 local=(base+normal*(living+cortex+microFold+sculptValley))*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
@@ -1710,8 +1715,8 @@
         float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
         float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
         float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        float studioStripeA=exp(-pow((vLocal.x+.245)/.080,2.0))*smoothstep(-.82,.74,vLocal.y)*bodyMask;
-        float studioStripeB=exp(-pow((vLocal.x-.315)/.095,2.0))*smoothstep(-.68,.80,vLocal.y)*bodyMask;
+        float studioStripeA=exp(-pow((vLocal.x+.245)/.052,2.0))*smoothstep(-.82,.74,vLocal.y)*bodyMask;
+        float studioStripeB=exp(-pow((vLocal.x-.315)/.066,2.0))*smoothstep(-.68,.80,vLocal.y)*bodyMask;
         float studioStripeC=exp(-pow((vLocal.x+.005+vLocal.y*.08)/.070,2.0))*smoothstep(-.78,.78,vLocal.y)*bodyMask;
         float studioFaceA=pow(max(dot(n,normalize(vec3(-.28,.34,.90))),0.0),5.0)*bodyMask;
         float studioFaceB=pow(max(dot(n,normalize(vec3(.50,-.04,.86))),0.0),7.0)*bodyMask;
@@ -1720,9 +1725,9 @@
         col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
         col+=vec3(.98,1.00,.99)*studioFaceA*.074;
         col+=vec3(.30,.72,.78)*studioFaceB*.052;
-        col+=vec3(1.00,1.00,.99)*studioStripeA*.082;
-        col+=vec3(.25,.62,.69)*studioStripeB*.032;
-        col+=vec3(.58,.90,.93)*studioStripeC*.046;
+        col+=vec3(1.00,1.00,.99)*studioStripeA*.145;
+        col+=vec3(.25,.62,.69)*studioStripeB*.052;
+        col+=vec3(.58,.90,.93)*studioStripeC*.058;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1841,6 +1846,7 @@
     root.dataset.fxNativeMagStudioR1914b='software-visible-parity-flush-aperture-proof-safe';
     root.dataset.fxNativeMagStudioR1915='igloo-grade-three-mass-dark-glass-deep-crown-flush-aperture';
     root.dataset.fxNativeMagStudioR1916='sculpted-three-mass-side-neck-horizontal-glass-sensor';
+    root.dataset.fxNativeMagStudioR1917='asymmetric-three-lobe-sculpt-reflection-valleys-premium-black-glass';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
