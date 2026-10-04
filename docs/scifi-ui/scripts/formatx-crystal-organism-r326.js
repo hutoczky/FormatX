@@ -469,24 +469,25 @@
          cross-sections: one monolithic object with a crown cleft, narrow waist,
          unequal shoulders and deliberate cut planes. */
       const profileR1905=[
-        /* R1910 — fused living-ice silhouette. Two broad masses are joined by
-           a quiet waist so the form reads as designed anatomy, not a rock. */
-        [ 1.00,.026,.022,-.035,-.008],
-        [ .91,.078,.055,-.065,-.008],
-        [ .79,.180,.125,-.095,-.006],
-        [ .66,.305,.210,-.100,-.004],
-        [ .52,.425,.290,-.070, .000],
-        [ .38,.505,.342,-.015, .003],
-        [ .23,.475,.326, .040, .004],
-        [ .08,.395,.275, .078, .004],
-        [-.07,.445,.305, .070, .003],
-        [-.22,.475,.324, .025, .002],
-        [-.38,.390,.266,-.015, .000],
-        [-.54,.290,.196,-.028,-.003],
-        [-.69,.215,.145,-.024,-.005],
-        [-.82,.145,.096,-.012,-.006],
-        [-.93,.068,.046, .000,-.006],
-        [-1.00,.022,.016, .006,-.004]
+        /* R1912 — elegant continuous living-glass profile.
+           The old centre pinch produced an insect/rock silhouette. This keeps
+           asymmetry, but the three masses now flow into one premium sculpture. */
+        [ 1.00,.026,.022,-.030,-.006],
+        [ .91,.082,.058,-.052,-.006],
+        [ .79,.188,.132,-.072,-.004],
+        [ .66,.310,.216,-.074,-.002],
+        [ .52,.420,.292,-.054, .000],
+        [ .38,.486,.334,-.010, .003],
+        [ .23,.505,.346, .032, .004],
+        [ .08,.492,.338, .050, .004],
+        [-.07,.482,.330, .048, .003],
+        [-.22,.448,.305, .020, .002],
+        [-.38,.382,.258,-.010, .000],
+        [-.54,.292,.198,-.020,-.002],
+        [-.69,.214,.145,-.016,-.004],
+        [-.82,.142,.094,-.008,-.005],
+        [-.93,.066,.044, .000,-.005],
+        [-1.00,.022,.016, .005,-.003]
       ];
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -527,12 +528,12 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.57,.24,Math.PI,.74,.030);
-        const rightShoulder=field(.31,.25,0,.68,.043);
-        const lowerLeft=field(-.30,.24,2.62,.74,.030);
-        const leftWaist=field(.06,.18,Math.PI,.62,.055);
-        const rightWaist=field(.05,.18,-.12,.62,.072);
-        const rearCut=field(.05,.36,-Math.PI*.50,.72,.022);
+        const upperLeft=field(.57,.24,Math.PI,.74,.024);
+        const rightShoulder=field(.31,.25,0,.68,.032);
+        const lowerLeft=field(-.30,.24,2.62,.74,.022);
+        const leftWaist=field(.06,.20,Math.PI,.68,.016);
+        const rightWaist=field(.05,.20,-.12,.68,.021);
+        const rearCut=field(.05,.36,-Math.PI*.50,.72,.012);
         const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
 
         rx*=radial;
@@ -594,7 +595,7 @@
 
         const crownT=Math.max(0,Math.min(1,(p[1]-.56)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.060*Math.exp(-Math.pow((p[0]+.025)/.082,2.0))*crownEase;
+        const crownCleft=.030*Math.exp(-Math.pow((p[0]+.025)/.100,2.0))*crownEase;
         p[1]-=crownCleft;
         p[0]+=crownCleft*.11;
 
@@ -602,7 +603,7 @@
         const socketY=(p[1]+.025)/.145;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p[2]-=.082*socket;
+        p[2]-=.060*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -1521,21 +1522,21 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.030+ndl*.090+sideLight*.060+fillLight*.022);
+        float lift=sat(.065+ndl*.125+sideLight*.085+fillLight*.040);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0008,.0018,.0028),vec3(.020,.032,.035),lift);
+        vec3 col=mix(vec3(.0030,.0060,.0080),vec3(.055,.072,.074),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(1.00,1.00,.99)*keySpec*.150;
         col+=vec3(.58,.72,.74)*sideSpec*.110;
-        col+=vec3(1.00,1.00,.99)*softboxA*.155;
+        col+=vec3(1.00,1.00,.99)*softboxA*.205;
         col+=vec3(.46,.66,.69)*softboxB*.062;
-        col+=vec3(1.00,1.00,.99)*studioRibbonA*.165;
+        col+=vec3(1.00,1.00,.99)*studioRibbonA*.205;
         col+=vec3(.40,.27,.18)*studioRibbonB*.009;
-        col+=vec3(.64,.91,.94)*studioRibbonC*.080;
+        col+=vec3(.64,.91,.94)*studioRibbonC*.105;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
         col+=vec3(.034,.120,.138)*fresnel*.128;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1556,7 +1557,7 @@
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
         col+=vec3(.060,.080,.080)*iceVolume*(.014+.012*(1.0-facing));
         col+=vec3(.062,.078,.077)*innerVeil*(.005+.007*facing);
-        col+=vec3(.007,.018,.022)*bodyMask*(.16+.34*facing);
+        col+=vec3(.014,.030,.034)*bodyMask*(.24+.38*facing);
         col+=vec3(.018,.044,.050)*strata*iceVolume*.006;
         float glassRibbon=exp(-pow((vLocal.x+.145-vLocal.y*.070)/.052,2.0))*smoothstep(-.74,.78,vLocal.y)*bodyMask;
         float innerPulse=exp(-pow((vLocal.x-.018)/.22,2.0)-pow((vLocal.y+.02)/.48,2.0))*smoothstep(.05,.62,vLocal.z)*bodyMask;
@@ -1643,7 +1644,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*1.72),clamp(outAlpha,.94,1.0));
+        ${outputName}=vec4(filmic(col*1.90),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1833,6 +1834,7 @@
     root.dataset.fxNativeMagStudioR1909='igloo-grade-slender-smoked-ice-monolith-integrated-silver-cyan-aperture';
     root.dataset.fxNativeMagStudioR1910='fused-living-ice-dual-mass-dark-gallery-glass-visible-cyan-aperture';
     root.dataset.fxNativeMagStudioR1911='silver-flush-aperture-black-ice-gallery-material';
+    root.dataset.fxNativeMagStudioR1912='elegant-continuous-living-glass-no-insect-waist-readable-studio-volume';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
