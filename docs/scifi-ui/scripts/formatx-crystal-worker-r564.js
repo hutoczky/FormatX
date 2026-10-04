@@ -86,11 +86,17 @@ function init(data){canvas=data.canvas;
  // The first useful frame still uses the measured full-quality dimensions below.
  canvas.width=2;canvas.height=2;
  const contextAt=performance.now();postMessage({type:'phase',phase:'context-enter',at:contextAt,width:canvas.width,height:canvas.height});gl=canvas.getContext('webgl',{alpha:true,antialias:false,depth:true,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});postMessage({type:'phase',phase:'context-return',at:performance.now(),elapsed:performance.now()-contextAt,available:Boolean(gl)});if(!gl)throw new Error('offscreen webgl unavailable');
- // Report the actual GPU capability separately from readiness. A failed software
- // device must not be synchronously allocated again on the UI thread.
- const debug=gl.getExtension('WEBGL_debug_renderer_info');
- const device=String(debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'');
- const rendererClass=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/i.test(device)?'software':debug?'hardware':'unknown';
- postMessage({type:'capability',rendererClass,device});
- program=buildProgram();const g=geometry();count=g.count;gl.useProgram(program);g.arrays.forEach((a,i)=>upload(i,a));['uMorph','uAspect','uRotationY','uBreath','uPointer','uEnergy','uSurfacePulse','uScene','uAttention'].forEach(n=>uniforms[n]=gl.getUniformLocation(program,n));gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);resize(data.width,data.height);render();postMessage({type:'ready',count,context:'webgl1-offscreen',revision:'r866-dielectric-semantic-light'});}
+ // Device identity is optional diagnostics. A synchronous driver query must
+ // never become a prerequisite for drawing the real full-size first frame.
+ postMessage({type:'phase',phase:'program-enter',at:performance.now()});
+ program=buildProgram();postMessage({type:'phase',phase:'program-return',at:performance.now()});const g=geometry();count=g.count;gl.useProgram(program);g.arrays.forEach((a,i)=>upload(i,a));['uMorph','uAspect','uRotationY','uBreath','uPointer','uEnergy','uSurfacePulse','uScene','uAttention'].forEach(n=>uniforms[n]=gl.getUniformLocation(program,n));gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.clearColor(0,0,0,0);resize(data.width,data.height);postMessage({type:'phase',phase:'first-frame-enter',at:performance.now(),width,height});render();postMessage({type:'phase',phase:'first-frame-return',at:performance.now(),width,height});postMessage({type:'ready',count,context:'webgl1-offscreen',revision:'r866-dielectric-semantic-light'});
+ setTimeout(()=>{if(!gl)return;try{
+  const started=performance.now();postMessage({type:'phase',phase:'device-identity-enter',at:started});
+  const debug=gl.getExtension('WEBGL_debug_renderer_info');
+  const device=String(debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'');
+  const rendererClass=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/i.test(device)?'software':debug?'hardware':'unknown';
+  postMessage({type:'phase',phase:'device-identity-return',at:performance.now(),elapsed:performance.now()-started});
+  postMessage({type:'capability',rendererClass,device});
+ }catch(_){postMessage({type:'capability',rendererClass:'unknown',device:''});}},0);
+}
 onmessage=event=>{const d=event.data||{};try{if(d.type==='init'){init(d);return;}if(d.type==='resize'){resize(d.width,d.height);render();return;}if(d.type==='state'){if(Number.isFinite(d.morph))morph=Math.max(0,Math.min(1,d.morph));if(Number.isFinite(d.energy))energy=d.energy;if(Number.isFinite(d.breath))breath=d.breath;if(Number.isFinite(d.pointerX))pointerX=d.pointerX;if(Number.isFinite(d.pointerY))pointerY=d.pointerY;if(Number.isFinite(d.rotationY))rotationY=d.rotationY;if(Number.isFinite(d.surfacePulse))surfacePulse=d.surfacePulse;if(Number.isFinite(d.scene))scene=Math.max(0,Math.min(5,Math.round(d.scene)));if(Number.isFinite(d.attention))attention=Math.max(0,Math.min(1,d.attention));render();return;}if(d.type==='destroy'){buffers.forEach(b=>gl?.deleteBuffer(b));if(program)gl?.deleteProgram(program);close();}}catch(error){postMessage({type:'error',message:String(error?.message||error)});}};
