@@ -169,6 +169,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1920='three-distinct-fused-masses-smoked-silver-ice-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic-cinematic';
+      document.documentElement.dataset.fxMagBirthVisualR1923='continuous-living-bioglass-organism-premium-optic-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -891,8 +892,8 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.118,128,72),lensMat);
-      lens.scale.set(.96,.86,.15);
+      const lens=new T.Mesh(new T.SphereGeometry(.152,128,72),lensMat);
+      lens.scale.set(1.02,.90,.16);
       lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
@@ -1036,12 +1037,12 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x24474d,roughness:.052,metalness:.001,
+        color:0x142a2f,roughness:.068,metalness:.001,
         clearcoat:.988,clearcoatRoughness:.026,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000018,
         transparent:true,opacity:0,
-        transmission:this.mobileProfile?.16:.30,thickness:.42,ior:1.47,
-        attenuationColor:new T.Color(0x0c343a),attenuationDistance:.96,
+        transmission:this.mobileProfile?.24:.40,thickness:.34,ior:1.46,
+        attenuationColor:new T.Color(0x071d22),attenuationDistance:.72,
         emissive:0x020708,emissiveIntensity:.0016,
         envMapIntensity:this.mobileProfile?3.22:3.42,
         specularIntensity:1.0,specularColor:new T.Color(0xfcffff),
@@ -1069,31 +1070,30 @@
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       const profileR1905=[
-        /* R1921 — exact cinematic parity with the sculptural S three-mass body. */
-        [ 1.00,.016,.012,-.070,-.008],
-        [ .93,.080,.052,-.125,-.008],
-        [ .84,.225,.145,-.205,-.006],
-        [ .74,.430,.275,-.255,-.004],
-        [ .64,.590,.365,-.250,-.002],
-        [ .55,.650,.395,-.205, .000],
-        [ .47,.575,.348,-.125, .002],
-        [ .39,.445,.278,-.030, .003],
-        [ .31,.410,.258, .055, .004],
-        [ .23,.525,.330, .145, .006],
-        [ .14,.665,.410, .205, .008],
-        [ .04,.700,.430, .215, .008],
-        [-.06,.605,.375, .140, .007],
-        [-.15,.465,.286, .025, .004],
-        [-.23,.410,.258,-.060, .002],
-        [-.32,.500,.310,-.150, .000],
-        [-.42,.615,.365,-.220,-.002],
-        [-.52,.630,.360,-.235,-.004],
-        [-.62,.535,.305,-.200,-.005],
-        [-.72,.390,.225,-.140,-.006],
-        [-.82,.235,.138,-.080,-.006],
-        [-.91,.105,.064,-.035,-.006],
-        [-.97,.040,.025,-.012,-.004],
-        [-1.00,.014,.009, .000,-.003]
+        /* R1923 — exact parity with the continuous living bioglass MAG. */
+        [ 1.00,.018,.012,-.050,-.008],
+        [ .93,.105,.068,-.082,-.008],
+        [ .84,.255,.166,-.112,-.006],
+        [ .74,.410,.265,-.128,-.004],
+        [ .64,.535,.342,-.118,-.002],
+        [ .54,.610,.388,-.090, .000],
+        [ .44,.646,.410,-.048, .002],
+        [ .34,.640,.405,-.002, .004],
+        [ .24,.607,.382, .040, .006],
+        [ .14,.568,.360, .070, .008],
+        [ .04,.552,.352, .082, .008],
+        [-.06,.565,.358, .076, .007],
+        [-.16,.596,.374, .052, .004],
+        [-.26,.620,.386, .016, .002],
+        [-.36,.618,.382,-.026, .000],
+        [-.46,.585,.360,-.062,-.002],
+        [-.56,.520,.318,-.086,-.004],
+        [-.66,.430,.262,-.094,-.005],
+        [-.76,.330,.202,-.080,-.006],
+        [-.85,.225,.140,-.056,-.006],
+        [-.92,.122,.076,-.030,-.005],
+        [-.97,.052,.032,-.012,-.004],
+        [-1.00,.016,.010, .000,-.003]
       ];
       const sampleProfile=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -1133,52 +1133,49 @@
         const theta0=Math.atan2(n.z,n.x);
         const theta=theta0+y*.075+Math.sin(y*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=3.45;
+        const superN=2.62;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const upperLeft=field(y,theta,.60,.31,Math.PI,.86,.050);
-        const rightShoulder=field(y,theta,.10,.31,.02,.84,.048);
-        const lowerLeft=field(y,theta,-.46,.31,2.58,.86,.046);
-        const rightNeck=field(y,theta,.37,.14,.06,.72,.020);
-        const leftNeck=field(y,theta,-.20,.14,Math.PI,.72,.018);
-        const leftWaist=field(y,theta,.03,.28,Math.PI,.88,.006);
-        const rightWaist=field(y,theta,.02,.28,-.08,.88,.007);
-        const rearCut=field(y,theta,.02,.44,-Math.PI*.50,.86,.008);
-        const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
+        const upperLeft=field(y,theta,.54,.36,Math.PI,.95,.028);
+        const rightShoulder=field(y,theta,.10,.38,.04,.96,.024);
+        const lowerLeft=field(y,theta,-.42,.36,2.62,.96,.020);
+        const frontChest=field(y,theta,.02,.44,Math.PI*.50,.92,.018);
+        const rearCut=field(y,theta,.02,.50,-Math.PI*.50,1.02,.010);
+        const radial=1+upperLeft+rightShoulder+lowerLeft+frontChest-rearCut;
         rx*=radial;
-        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.16-rightNeck*.12-leftNeck*.08-leftWaist*.10-rearCut*.60;
+        rz*=1+upperLeft*.20+rightShoulder*.16+lowerLeft*.10+frontChest*.12-rearCut*.30;
 
         p.set(ox+cx*rx,y*.972,oz+cz*rz);
-        p.x+=-.014*y+.012*Math.sin((y+.12)*Math.PI)
-          -.006*upperLeft+.008*rightShoulder-.006*lowerLeft;
+        p.x+=-.012*y+.010*Math.sin((y+.10)*Math.PI)
+          -.004*upperLeft+.006*rightShoulder-.003*lowerLeft;
         p.z+=-.016*p.x+.005*Math.sin(theta*2.0)*(1-Math.abs(y));
 
-        const topPlane=.925-p.x*.16-p.z*.050;
-        const bottomPlane=-.948-p.x*.045+p.z*.026;
+        const topPlane=.948-p.x*.085-p.z*.028;
+        const bottomPlane=-.962-p.x*.028+p.z*.018;
         if(p.y>topPlane)p.y=topPlane+(p.y-topPlane)*.24;
         if(p.y<bottomPlane)p.y=bottomPlane+(p.y-bottomPlane)*.30;
 
-        const leftPlane=-.585+.145*p.y-.030*p.z;
-        const rightPlane=.565-.080*p.y+.024*p.z;
-        const frontPlane=.470-.048*p.y-.040*p.x;
-        const backPlane=-.430+.025*p.y+.020*p.x;
+        const leftPlane=-.620+.082*p.y-.020*p.z;
+        const rightPlane=.610-.048*p.y+.018*p.z;
+        const frontPlane=.500-.030*p.y-.026*p.x;
+        const backPlane=-.458+.018*p.y+.014*p.x;
         if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.30;
         if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.28;
         if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.38;
         if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.36;
 
-        const crownT=Math.max(0,Math.min(1,(p.y-.56)/.34));
+        const crownT=Math.max(0,Math.min(1,(p.y-.62)/.28));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.092*Math.exp(-Math.pow((p.x+.018)/.125,2.0))*crownEase;
+        const crownCleft=.026*Math.exp(-Math.pow((p.x+.010)/.180,2.0))*crownEase;
         p.y-=crownCleft;
-        p.x+=crownCleft*.11;
+        p.x+=crownCleft*.06;
 
-        const socketX=(p.x-.155)/.150;
-        const socketY=(p.y-.070)/.132;
+        const socketX=(p.x-.115)/.205;
+        const socketY=(p.y-.040)/.180;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p.z-=.064*socket;
+        p.z-=.082*socket;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
