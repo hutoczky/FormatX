@@ -754,16 +754,13 @@ html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-
 }
 .fx-mag-first-paint-r1756::before{
   inset:7% 12%;
-  clip-path:polygon(49% 0,61% 5%,71% 3%,80% 10%,90% 14%,94% 25%,100% 34%,96% 46%,100% 57%,93% 68%,90% 79%,78% 83%,70% 94%,58% 92%,48% 100%,38% 94%,27% 97%,19% 87%,8% 82%,10% 69%,2% 58%,7% 47%,0 36%,9% 27%,12% 16%,25% 12%,35% 3%);
+  clip-path:polygon(42% 1%,56% 0,67% 5%,78% 12%,88% 24%,94% 38%,92% 52%,86% 64%,76% 74%,69% 88%,58% 97%,46% 94%,35% 88%,25% 79%,16% 66%,10% 52%,11% 39%,17% 27%,25% 17%,31% 8%);
   background:
-    linear-gradient(29deg,transparent 0 28%,rgba(76,218,232,.54) 29% 30.6%,transparent 31.5% 100%),
-    linear-gradient(67deg,transparent 0 39%,rgba(119,231,239,.31) 40% 41.2%,transparent 42% 100%),
-    linear-gradient(111deg,transparent 0 46%,rgba(44,188,211,.48) 47% 48.2%,transparent 49% 100%),
-    linear-gradient(151deg,transparent 0 56%,rgba(154,241,244,.28) 57% 58.4%,transparent 59.3% 100%),
-    radial-gradient(circle at 49% 50%,rgba(8,25,33,.92) 0 15%,rgba(47,180,199,.36) 16%,transparent 24%),
-    radial-gradient(ellipse at 34% 22%,rgba(251,255,255,.96),rgba(202,228,230,.77) 23%,transparent 49%),
-    radial-gradient(ellipse at 72% 74%,rgba(75,105,113,.44),transparent 54%),
-    conic-gradient(from 18deg at 49% 48%,rgba(223,241,240,.93),rgba(92,125,133,.90) 12%,rgba(218,236,235,.86) 24%,rgba(52,78,88,.94) 37%,rgba(185,211,214,.88) 51%,rgba(80,110,118,.91) 64%,rgba(231,245,244,.84) 77%,rgba(46,67,77,.96) 89%,rgba(208,229,230,.90));
+    linear-gradient(103deg,transparent 0 28%,rgba(232,249,246,.26) 33%,rgba(154,197,198,.08) 42%,transparent 51% 100%),
+    linear-gradient(79deg,transparent 0 54%,rgba(115,184,187,.10) 59%,transparent 66% 100%),
+    radial-gradient(ellipse 42% 55% at 34% 28%,rgba(191,221,218,.22),rgba(85,126,127,.07) 44%,transparent 68%),
+    radial-gradient(ellipse 30% 46% at 77% 62%,rgba(46,89,96,.18),transparent 70%),
+    conic-gradient(from 16deg at 48% 48%,rgba(24,47,51,.98),rgba(9,24,28,.995) 16%,rgba(39,66,68,.96) 31%,rgba(7,20,24,.998) 47%,rgba(32,58,60,.97) 62%,rgba(10,25,29,.995) 78%,rgba(42,67,67,.95) 91%,rgba(18,38,42,.99));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.42),
     inset 9px -12px 22px rgba(8,26,33,.22),
@@ -774,12 +771,12 @@ html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-
   opacity:.98;
 }
 .fx-mag-first-paint-r1756::after{
-  inset:36.2% 38%;
-  border-radius:50%;
+  inset:38.5% 34.5% 42.5% 47.5%;
+  border-radius:46% 54% 48% 52% / 52% 48% 52% 48%;
   border:1px solid rgba(128,225,233,.42);
   background:
-    radial-gradient(circle at 44% 38%,rgba(180,249,249,.92) 0 4%,rgba(62,191,207,.72) 8%,rgba(12,71,86,.70) 18%,rgba(3,15,24,.98) 43%,rgba(0,5,10,.99) 72%),
-    radial-gradient(circle at 50% 50%,rgba(74,211,224,.24),transparent 66%);
+    radial-gradient(ellipse at 42% 36%,rgba(222,255,252,.88) 0 4%,rgba(76,191,199,.48) 9%,rgba(11,64,76,.68) 25%,rgba(2,15,21,.99) 52%,rgba(0,5,9,.995) 78%),
+    radial-gradient(ellipse at 55% 56%,rgba(70,203,211,.16),transparent 70%);
   box-shadow:
     0 0 0 7px rgba(4,12,19,.83),
     0 0 20px rgba(64,201,217,.20),
@@ -807,23 +804,20 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
   }
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
     inset:7% 13%!important;
-    clip-path:polygon(49% 0,60% 4%,70% 2%,79% 9%,89% 13%,94% 24%,100% 34%,96% 45%,100% 57%,93% 68%,89% 79%,78% 84%,69% 94%,58% 92%,48% 100%,38% 94%,28% 98%,19% 87%,8% 82%,10% 69%,2% 58%,7% 47%,0 36%,9% 27%,12% 16%,25% 12%,35% 3%)!important;
+    clip-path:polygon(42% 1%,56% 0,67% 5%,78% 12%,88% 24%,94% 38%,92% 52%,86% 64%,76% 74%,69% 88%,58% 97%,46% 94%,35% 88%,25% 79%,16% 66%,10% 52%,11% 39%,17% 27%,25% 17%,31% 8%)!important;
     background:
-      linear-gradient(27deg,transparent 0 27%,rgba(75,224,236,.66) 28% 29.5%,transparent 30.5% 100%),
-      linear-gradient(67deg,transparent 0 38%,rgba(131,238,242,.38) 39% 40.5%,transparent 41.5% 100%),
-      linear-gradient(111deg,transparent 0 46%,rgba(49,198,218,.57) 47% 48.4%,transparent 49.4% 100%),
-      linear-gradient(153deg,transparent 0 56%,rgba(170,246,247,.34) 57% 58.4%,transparent 59.4% 100%),
-      radial-gradient(circle at 49% 50%,rgba(7,23,31,.94) 0 15%,rgba(50,187,205,.43) 16%,transparent 24%),
-      radial-gradient(ellipse at 34% 21%,rgba(251,255,255,.98),rgba(207,232,233,.83) 23%,transparent 49%),
-      radial-gradient(ellipse at 74% 76%,rgba(71,103,112,.48),transparent 55%),
-      conic-gradient(from 18deg at 49% 48%,rgba(231,246,245,.96),rgba(105,142,149,.91) 12%,rgba(224,240,239,.91) 24%,rgba(54,82,91,.96) 37%,rgba(194,218,220,.92) 51%,rgba(85,116,124,.93) 64%,rgba(236,248,247,.89) 77%,rgba(48,70,79,.97) 89%,rgba(215,234,234,.93))!important;
+      linear-gradient(103deg,transparent 0 27%,rgba(238,252,249,.32) 33%,rgba(154,201,202,.10) 42%,transparent 52% 100%),
+      linear-gradient(79deg,transparent 0 53%,rgba(126,196,198,.12) 59%,transparent 67% 100%),
+      radial-gradient(ellipse 44% 57% at 34% 27%,rgba(199,226,223,.26),rgba(88,132,133,.08) 44%,transparent 69%),
+      radial-gradient(ellipse 32% 48% at 78% 63%,rgba(49,96,103,.20),transparent 72%),
+      conic-gradient(from 16deg at 48% 48%,rgba(29,55,58,.99),rgba(9,24,28,.995) 16%,rgba(45,73,74,.97) 31%,rgba(7,20,24,.998) 47%,rgba(36,64,65,.98) 62%,rgba(10,25,29,.995) 78%,rgba(48,75,74,.96) 91%,rgba(20,42,45,.99))!important;
     opacity:.99!important;
   }
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:36.5% 38.5%!important;
-    border:2px solid rgba(134,228,235,.44)!important;
+    inset:38.5% 34.5% 42.5% 47.5%!important;
+    border:1px solid rgba(146,222,226,.34)!important;
     background:
-      radial-gradient(circle at 44% 37%,rgba(188,251,250,.95) 0 4%,rgba(70,201,214,.78) 8%,rgba(14,78,92,.72) 18%,rgba(3,16,25,.98) 44%,rgba(0,5,10,.99) 72%)!important;
+      radial-gradient(ellipse at 42% 36%,rgba(224,255,252,.90) 0 4%,rgba(80,199,207,.54) 9%,rgba(12,68,80,.72) 25%,rgba(2,16,22,.99) 52%,rgba(0,5,9,.995) 78%)!important;
     box-shadow:
       0 0 0 7px rgba(4,12,19,.84),
       0 0 0 9px rgba(126,221,228,.11),
@@ -1018,6 +1012,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* production-r1910-fused-living-ice-first-paint-parity */
 /* production-r1912-elegant-continuous-living-glass-first-paint-parity */
 /* production-r1913-first-webgl-frame-safe-igloo-grade-proxy-handoff */
+/* production-r1919-smoked-ice-three-mass-offset-oval-aperture-first-paint */
 
 
 /* R1820 — final hero typography is owned by the blocking P0 layer.
