@@ -235,11 +235,11 @@
       ctx.save();ctx.translate(cx,cy);
       {
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
-        body.addColorStop(0,'rgba(191,204,198,.46)');
-        body.addColorStop(.18,'rgba(112,132,128,.72)');
-        body.addColorStop(.42,'rgba(51,70,69,.94)');
-        body.addColorStop(.70,'rgba(19,31,33,.995)');
-        body.addColorStop(1,'rgba(3,7,9,1)');
+        body.addColorStop(0,'rgba(214,226,221,.54)');
+        body.addColorStop(.18,'rgba(137,160,157,.78)');
+        body.addColorStop(.42,'rgba(65,91,91,.95)');
+        body.addColorStop(.70,'rgba(22,39,42,.995)');
+        body.addColorStop(1,'rgba(3,8,10,1)');
         ctx.fillStyle=body;
         /* R1724: FormatX Living Crystal Organism fallback silhouette.
            Angular living anatomy replaces the old egg/blob body. */
@@ -277,9 +277,9 @@
         ctx.stroke();
         ctx.restore();
       }
-      const lensR=Math.max(28,R*.255);
-      const lensRx=lensR*.94,lensRy=lensR*.46;
-      const lensOX=R*.070,lensOY=R*.035;
+      const lensR=Math.max(27,R*.235);
+      const lensRx=lensR*.84,lensRy=lensR*.66;
+      const lensOX=R*.135,lensOY=-R*.070;
       const lens=ctx.createRadialGradient(lensOX-lensR*.22,lensOY-lensR*.25,1,lensOX,lensOY,lensR);
       lens.addColorStop(0,'rgba(232,236,232,.70)');
       lens.addColorStop(.12,'rgba(156,178,176,.80)');
@@ -406,6 +406,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1914-igloo-grade-flush-aperture-dark-ice-intro'
+    visualRevision:'r1919-igloo-smoked-ice-three-mass-offset-oval-aperture'
   };
 })();
