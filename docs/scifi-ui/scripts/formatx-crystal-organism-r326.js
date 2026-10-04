@@ -469,27 +469,30 @@
          cross-sections: one monolithic object with a crown cleft, narrow waist,
          unequal shoulders and deliberate cut planes. */
       const profileR1905=[
-        /* R1915 — Igloo-grade living monolith.
-           One continuous body, but with three deliberate masses, a deeper crown
-           split and a tighter lower taper. This removes the polished potato/egg
-           read while keeping the silhouette premium and non-creature-like. */
-        [ 1.00,.020,.016,-.050,-.008],
-        [ .92,.074,.050,-.078,-.008],
-        [ .81,.176,.118,-.108,-.006],
-        [ .69,.320,.214,-.120,-.004],
-        [ .56,.455,.300,-.102,-.001],
-        [ .43,.530,.344,-.052, .002],
-        [ .30,.575,.370, .020, .004],
-        [ .17,.545,.352, .070, .005],
-        [ .03,.505,.330, .090, .005],
-        [-.11,.470,.302, .060, .004],
-        [-.25,.452,.286,-.005, .002],
-        [-.40,.425,.258,-.065, .000],
-        [-.55,.340,.202,-.085,-.003],
-        [-.70,.232,.138,-.062,-.005],
-        [-.84,.128,.074,-.032,-.006],
-        [-.94,.056,.032,-.012,-.005],
-        [-1.00,.016,.011, .000,-.003]
+        /* R1920 — asymmetric three-mass gallery sculpt.
+           The profile itself carries the silhouette now: upper-left mass,
+           right-centre mass and lower-left mass are fused by two narrow necks.
+           This removes the single stretched slab / potato read in mobile proof. */
+        [ 1.00,.018,.014,-.055,-.008],
+        [ .92,.086,.056,-.105,-.008],
+        [ .82,.220,.145,-.170,-.006],
+        [ .72,.382,.252,-.205,-.004],
+        [ .62,.505,.330,-.185,-.002],
+        [ .52,.540,.350,-.125, .000],
+        [ .42,.500,.322,-.050, .002],
+        [ .32,.548,.352, .055, .004],
+        [ .20,.625,.402, .145, .006],
+        [ .08,.600,.390, .155, .006],
+        [-.04,.515,.338, .080, .005],
+        [-.16,.470,.305,-.015, .003],
+        [-.28,.535,.340,-.110, .001],
+        [-.40,.555,.345,-.165,-.001],
+        [-.52,.470,.285,-.155,-.003],
+        [-.64,.350,.210,-.110,-.005],
+        [-.76,.235,.140,-.070,-.006],
+        [-.88,.115,.070,-.030,-.006],
+        [-.96,.045,.028,-.010,-.004],
+        [-1.00,.015,.010, .000,-.003]
       ];
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -530,14 +533,14 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.58,.27,Math.PI,.76,.148);
-        const rightShoulder=field(.24,.26,.02,.70,.142);
-        const lowerLeft=field(-.42,.25,2.54,.74,.126);
-        const rightNeck=field(.52,.15,.04,.58,.080);
-        const leftNeck=field(-.20,.16,Math.PI,.64,.052);
-        const leftWaist=field(.03,.24,Math.PI,.78,.018);
-        const rightWaist=field(.04,.23,-.08,.76,.022);
-        const rearCut=field(.04,.40,-Math.PI*.50,.78,.016);
+        const upperLeft=field(.59,.29,Math.PI,.82,.092);
+        const rightShoulder=field(.18,.28,.02,.78,.088);
+        const lowerLeft=field(-.39,.28,2.56,.80,.084);
+        const rightNeck=field(.43,.15,.06,.68,.045);
+        const leftNeck=field(-.10,.16,Math.PI,.70,.038);
+        const leftWaist=field(.04,.26,Math.PI,.84,.012);
+        const rightWaist=field(.02,.25,-.08,.82,.014);
+        const rearCut=field(.02,.42,-Math.PI*.50,.82,.012);
         const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
 
         rx*=radial;
@@ -549,9 +552,9 @@
           oz+cz*rz
         ];
 
-        p[0]+=-.028*cp+.020*Math.sin((cp+.15)*Math.PI)
-          -.020*upperLeft+.026*rightShoulder-.014*lowerLeft;
-        p[2]+=-.026*p[0]+.010*Math.sin(theta*2.0)*(1-Math.abs(cp));
+        p[0]+=-.020*cp+.016*Math.sin((cp+.12)*Math.PI)
+          -.010*upperLeft+.014*rightShoulder-.010*lowerLeft;
+        p[2]+=-.020*p[0]+.007*Math.sin(theta*2.0)*(1-Math.abs(cp));
 
         let cutNormal=null,cutWeight=0;
         const registerCut=(normal,overshoot,base=.62)=>{
@@ -1062,8 +1065,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.055) contrast(1.10) saturate(.92)'
-      : 'brightness(1.035) contrast(1.09) saturate(.94)';
+      ? 'brightness(1.10) contrast(1.045) saturate(.90)'
+      : 'brightness(1.07) contrast(1.055) saturate(.92)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1289,7 +1292,7 @@
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.006,.011,.014),vec3(.128,.154,.154),lift)*facetTone;
+        vec3 mineral=mix(vec3(.010,.018,.022),vec3(.188,.220,.218),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
@@ -1477,7 +1480,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*1.98),clamp(outAlpha,.84,1.0));
+        ${outputName}=vec4(filmic(mineral*2.18),clamp(outAlpha,.86,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1534,7 +1537,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.009,.017,.021),vec3(.145,.180,.183),lift);
+        vec3 col=mix(vec3(.013,.024,.030),vec3(.205,.238,.238),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
@@ -1604,12 +1607,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.075,.084,.082)
-          +vec3(.105,.122,.120)*(.12*ndl+.17*sideLight)
-          +vec3(1.00,1.00,.98)*softboxA*.250
-          +vec3(.58,.69,.67)*sideSpec*.170
-          +vec3(.055,.165,.175)*fresnel*.095
-          +vec3(.010,.008,.012)*subsurface*.008;
+        vec3 cartilage=vec3(.105,.118,.116)
+          +vec3(.145,.162,.158)*(.12*ndl+.17*sideLight)
+          +vec3(1.00,1.00,.99)*softboxA*.300
+          +vec3(.64,.75,.73)*sideSpec*.190
+          +vec3(.060,.172,.182)*fresnel*.090
+          +vec3(.010,.008,.012)*subsurface*.006;
         col=mix(col,cartilage,armorMask*.985);
 
         vec2 lensVector=vUv-vec2(.5);
@@ -1650,7 +1653,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.28),clamp(outAlpha,.94,1.0));
+        ${outputName}=vec4(filmic(col*2.48),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1852,6 +1855,7 @@
     root.dataset.fxNativeMagStudioR1917='asymmetric-three-lobe-sculpt-reflection-valleys-premium-black-glass';
     root.dataset.fxNativeMagStudioR1918='dim-sensor-bezel-continuity-ready';
     root.dataset.fxNativeMagStudioR1919='igloo-ice-gallery-three-mass-visible-volume-offset-oval-aperture';
+    root.dataset.fxNativeMagStudioR1920='three-distinct-fused-masses-smoked-silver-ice-readable-mobile-volume';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
