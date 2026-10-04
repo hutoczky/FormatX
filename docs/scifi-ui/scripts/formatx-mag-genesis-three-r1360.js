@@ -166,6 +166,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1916='sculpted-side-neck-horizontal-glass-sensor-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1917='three-lobe-sculptural-valleys-premium-black-glass-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1919='igloo-ice-gallery-visible-volume-offset-oval-aperture-cinematic';
+      document.documentElement.dataset.fxMagBirthVisualR1920='three-distinct-fused-masses-smoked-silver-ice-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1033,14 +1034,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x1b363a,roughness:.072,metalness:.001,
-        clearcoat:.985,clearcoatRoughness:.030,
+        color:0x294b50,roughness:.060,metalness:.001,
+        clearcoat:.988,clearcoatRoughness:.026,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000018,
         transparent:true,opacity:0,
         transmission:this.mobileProfile?.10:.26,thickness:.44,ior:1.47,
-        attenuationColor:new T.Color(0x0b3037),attenuationDistance:.82,
-        emissive:0x010607,emissiveIntensity:.0012,
-        envMapIntensity:this.mobileProfile?3.05:3.28,
+        attenuationColor:new T.Color(0x0c343a),attenuationDistance:.96,
+        emissive:0x020708,emissiveIntensity:.0016,
+        envMapIntensity:this.mobileProfile?3.22:3.42,
         specularIntensity:1.0,specularColor:new T.Color(0xfcffff),
         sheen:.018,sheenColor:new T.Color(0xc1d7d5),sheenRoughness:.26,
         depthWrite:true
@@ -1066,24 +1067,27 @@
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       const profileR1905=[
-        /* R1915 — exact cinematic parity with the Igloo-grade living monolith. */
-        [ 1.00,.020,.016,-.050,-.008],
-        [ .92,.074,.050,-.078,-.008],
-        [ .81,.176,.118,-.108,-.006],
-        [ .69,.320,.214,-.120,-.004],
-        [ .56,.455,.300,-.102,-.001],
-        [ .43,.530,.344,-.052, .002],
-        [ .30,.575,.370, .020, .004],
-        [ .17,.545,.352, .070, .005],
-        [ .03,.505,.330, .090, .005],
-        [-.11,.470,.302, .060, .004],
-        [-.25,.452,.286,-.005, .002],
-        [-.40,.425,.258,-.065, .000],
-        [-.55,.340,.202,-.085,-.003],
-        [-.70,.232,.138,-.062,-.005],
-        [-.84,.128,.074,-.032,-.006],
-        [-.94,.056,.032,-.012,-.005],
-        [-1.00,.016,.011, .000,-.003]
+        /* R1920 — exact cinematic parity with the three-mass gallery sculpt. */
+        [ 1.00,.018,.014,-.055,-.008],
+        [ .92,.086,.056,-.105,-.008],
+        [ .82,.220,.145,-.170,-.006],
+        [ .72,.382,.252,-.205,-.004],
+        [ .62,.505,.330,-.185,-.002],
+        [ .52,.540,.350,-.125, .000],
+        [ .42,.500,.322,-.050, .002],
+        [ .32,.548,.352, .055, .004],
+        [ .20,.625,.402, .145, .006],
+        [ .08,.600,.390, .155, .006],
+        [-.04,.515,.338, .080, .005],
+        [-.16,.470,.305,-.015, .003],
+        [-.28,.535,.340,-.110, .001],
+        [-.40,.555,.345,-.165,-.001],
+        [-.52,.470,.285,-.155,-.003],
+        [-.64,.350,.210,-.110,-.005],
+        [-.76,.235,.140,-.070,-.006],
+        [-.88,.115,.070,-.030,-.006],
+        [-.96,.045,.028,-.010,-.004],
+        [-1.00,.015,.010, .000,-.003]
       ];
       const sampleProfile=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -1115,22 +1119,22 @@
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const upperLeft=field(y,theta,.58,.27,Math.PI,.76,.148);
-        const rightShoulder=field(y,theta,.24,.26,.02,.70,.142);
-        const lowerLeft=field(y,theta,-.42,.25,2.54,.74,.126);
-        const rightNeck=field(y,theta,.52,.15,.04,.58,.080);
-        const leftNeck=field(y,theta,-.20,.16,Math.PI,.64,.052);
-        const leftWaist=field(y,theta,.03,.24,Math.PI,.78,.018);
-        const rightWaist=field(y,theta,.04,.23,-.08,.76,.022);
-        const rearCut=field(y,theta,.04,.40,-Math.PI*.50,.78,.016);
+        const upperLeft=field(y,theta,.59,.29,Math.PI,.82,.092);
+        const rightShoulder=field(y,theta,.18,.28,.02,.78,.088);
+        const lowerLeft=field(y,theta,-.39,.28,2.56,.80,.084);
+        const rightNeck=field(y,theta,.43,.15,.06,.68,.045);
+        const leftNeck=field(y,theta,-.10,.16,Math.PI,.70,.038);
+        const leftWaist=field(y,theta,.04,.26,Math.PI,.84,.012);
+        const rightWaist=field(y,theta,.02,.25,-.08,.82,.014);
+        const rearCut=field(y,theta,.02,.42,-Math.PI*.50,.82,.012);
         const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
         rx*=radial;
         rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.16-rightNeck*.12-leftNeck*.08-leftWaist*.10-rearCut*.60;
 
         p.set(ox+cx*rx,y*.972,oz+cz*rz);
-        p.x+=-.028*y+.020*Math.sin((y+.15)*Math.PI)
-          -.020*upperLeft+.026*rightShoulder-.014*lowerLeft;
-        p.z+=-.026*p.x+.010*Math.sin(theta*2.0)*(1-Math.abs(y));
+        p.x+=-.020*y+.016*Math.sin((y+.12)*Math.PI)
+          -.010*upperLeft+.014*rightShoulder-.010*lowerLeft;
+        p.z+=-.020*p.x+.007*Math.sin(theta*2.0)*(1-Math.abs(y));
 
         const topPlane=.925-p.x*.16-p.z*.050;
         const bottomPlane=-.948-p.x*.045+p.z*.026;
@@ -1974,7 +1978,7 @@
       this.organicGroup.rotation.y=(this.mobileProfile?.405:.355)+Math.sin(time*.00011)*.006+this.interactionX*.012;
       this.organicGroup.rotation.x=-.080+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
-      const finalScale=this.mobileProfile?1.22:1.29;
+      const finalScale=this.mobileProfile?1.24:1.30;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
       this.organicShellMaterial.opacity=(.94+.05*maturity)*visible;
