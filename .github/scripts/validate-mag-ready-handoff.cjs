@@ -39,6 +39,7 @@ async function verify(browser,profile,staticFallback,workerUnavailable=false){
   revision:window.FormatXLivingCore?.revision,
   life:document.documentElement.dataset.fxCoreLifeR455,
   lifeVisibility:document.documentElement.dataset.fxCoreLifeVisibilityR455,
+  startup:Object.fromEntries(Object.entries(document.documentElement.dataset).filter(([key])=>/^fxMag(?:Worker|Offscreen|Fallback|Gpu|Material|First)/.test(key))),
   scrollY,hidden:document.hidden,
   stageGeometry:(()=>{const node=window.FormatXLivingCore?.stage;if(!node)return null;const style=getComputedStyle(node);return {rect:node.getBoundingClientRect().toJSON(),display:style.display,visibility:style.visibility,opacity:style.opacity,position:style.position};})(),
   shape:window.FormatXLivingCore?.shape,
@@ -157,6 +158,11 @@ async function verify(browser,profile,staticFallback,workerUnavailable=false){
   }
   reports.push(await verify(browser,{name:'desktop-reduced',viewport:{width:1440,height:900},mobile:false,reduced:true},false));
   fs.writeFileSync(path.join(OUT,'report.json'),JSON.stringify({auditedSha:process.env.AUDITED_SHA||'',origin:URL,reports},null,2));
+  // Preserve actual per-case GPU phases in the log when the final primary
+  // coverage assertion fails, as well as in the existing artifact.
+  if(['desktop','mobile'].some(profile=>!reports.some(report=>report.profile===profile&&report.mode==='ready-worker-failure'))){
+   console.error('MAG_READY_HANDOFF_PRIMARY_COVERAGE',JSON.stringify({auditedSha:process.env.AUDITED_SHA||'',origin:URL,reports}));
+  }
   for(const profile of ['desktop','mobile'])assert.ok(reports.some(report=>report.profile===profile&&report.mode==='ready-worker-failure'),profile+': a genuine already-ready worker must be failed and recovered; startup fallback alone cannot certify this contract');
   for(const profile of ['desktop','mobile'])assert.ok(reports.some(report=>report.profile===profile&&report.workerUnavailable&&report.before.revision==='r866-normal-lit-main-thread-fallback'),profile+': real main-thread WebGL recovery must also execute');
   console.log('MAG_READY_HANDOFF_PASS',reports.map(report=>report.name).join(', '));
