@@ -531,15 +531,17 @@
         };
 
         const upperLeft=field(.57,.25,Math.PI,.72,.088);
-        const rightShoulder=field(.28,.27,0,.66,.074);
-        const lowerLeft=field(-.32,.26,2.62,.72,.052);
+        const rightShoulder=field(.25,.25,0,.64,.092);
+        const lowerLeft=field(-.42,.24,2.58,.70,.064);
+        const rightNeck=field(.53,.13,.04,.54,.070);
+        const leftNeck=field(-.22,.14,Math.PI,.58,.046);
         const leftWaist=field(.04,.21,Math.PI,.70,.030);
         const rightWaist=field(.03,.21,-.10,.68,.038);
         const rearCut=field(.04,.38,-Math.PI*.50,.72,.022);
-        const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
+        const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
 
         rx*=radial;
-        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.12-leftWaist*.10-rearCut*.60;
+        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.16-rightNeck*.12-leftNeck*.08-leftWaist*.10-rearCut*.60;
 
         let p=[
           ox+cx*rx,
@@ -946,7 +948,7 @@
     {
       const centreX=.075,centreY=-.030;
       const bezelSteps=auditMode?88:(software?104:mobile?128:144),bezelTubeSteps=auditMode?10:(software?10:mobile?12:14),bezelZ=.602;
-      const bezelMajorX=.148,bezelMajorY=.066,bezelTube=.0032;
+      const bezelMajorX=.150,bezelMajorY=.044,bezelTube=.0024;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -971,9 +973,9 @@
       }
 
       const lensCenter=[centreX,centreY,.614];
-      const lensRadiusX=.142;
-      const lensRadiusY=.060;
-      const lensDepth=.032;
+      const lensRadiusX=.144;
+      const lensRadiusY=.039;
+      const lensDepth=.022;
       const radialSteps=auditMode?14:(software?16:mobile?20:22);
       const angularSteps=auditMode?96:(software?112:mobile?128:144);
       function lensVertex(radial,angle){
@@ -1841,6 +1843,7 @@
     root.dataset.fxNativeMagStudioR1914='flush-silver-glass-aperture-no-eye-dark-dichroic-ice-chamber';
     root.dataset.fxNativeMagStudioR1914b='software-visible-parity-flush-aperture-proof-safe';
     root.dataset.fxNativeMagStudioR1915='igloo-grade-three-mass-dark-glass-deep-crown-flush-aperture';
+    root.dataset.fxNativeMagStudioR1916='sculpted-three-mass-side-neck-horizontal-glass-sensor';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
