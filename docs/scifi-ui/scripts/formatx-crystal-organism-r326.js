@@ -1449,7 +1449,7 @@
         physicalLens+=vec3(.50,.58,.58)*sideSpec*.10;
         physicalLens+=vec3(.055,.14,.17)*fresnel*.12;
         physicalLens+=vec3(.008,.065,.080)*lensInner*(.09+.08*uEnergy);
-        physicalLens+=vec3(.64,.70,.68)*lensRim*.085;
+        physicalLens+=vec3(.64,.70,.68)*lensRim*.050;
         physicalLens+=vec3(.018,.32,.38)*sensorLine*(.15+.10*uEnergy);
         physicalLens+=vec3(.62,.94,.96)*sensorCore*(.16+.08*uEnergy);
         physicalLens+=vec3(.62,.82,.82)*lensHot*.055;
@@ -1627,7 +1627,7 @@
           +vec3(.46,.60,.60)*sideSpec*.09
           +vec3(.028,.12,.15)*fresnel*.075
           +vec3(.008,.075,.090)*lensInner*(.10+.08*uEnergy)
-          +vec3(.66,.72,.69)*lensRim*.090
+          +vec3(.66,.72,.69)*lensRim*.052
           +vec3(.020,.42,.47)*sensorLine*(.16+.10*uEnergy)
           +vec3(.68,.98,.98)*sensorCore*(.19+.08*uEnergy)
           +vec3(.74,.92,.90)*lensHot*.060
@@ -1796,7 +1796,7 @@
           +vec3(.008,.050,.060)*lensInner
           +vec3(.94,.99,.97)*keySpec*.070
           +vec3(.014,.070,.084)*fresnel*.060
-          +vec3(.58,.66,.64)*lensRim*.070
+          +vec3(.58,.66,.64)*lensRim*.040
           +vec3(.018,.34,.39)*sensorLine*.090
           +vec3(.62,.92,.94)*sensorCore*.120
           +vec3(.68,.86,.84)*lensHot*.042
@@ -1847,6 +1847,7 @@
     root.dataset.fxNativeMagStudioR1915='igloo-grade-three-mass-dark-glass-deep-crown-flush-aperture';
     root.dataset.fxNativeMagStudioR1916='sculpted-three-mass-side-neck-horizontal-glass-sensor';
     root.dataset.fxNativeMagStudioR1917='asymmetric-three-lobe-sculpt-reflection-valleys-premium-black-glass';
+    root.dataset.fxNativeMagStudioR1918='dim-sensor-bezel-continuity-ready';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
