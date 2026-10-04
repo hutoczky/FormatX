@@ -957,7 +957,7 @@
     {
       const centreX=.115,centreY=.040;
       const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.606;
-      const bezelMajorX=.102,bezelMajorY=.084,bezelTube=.0034;
+      const bezelMajorX=.112,bezelMajorY=.094,bezelTube=.0030;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -982,9 +982,9 @@
       }
 
       const lensCenter=[centreX,centreY,.614];
-      const lensRadiusX=.142;
-      const lensRadiusY=.112;
-      const lensDepth=.050;
+      const lensRadiusX=.096;
+      const lensRadiusY=.079;
+      const lensDepth=.038;
       const radialSteps=auditMode?14:(software?16:mobile?20:22);
       const angularSteps=auditMode?96:(software?112:mobile?128:144);
       function lensVertex(radial,angle){
@@ -1568,9 +1568,9 @@
         float sculptShoulder=exp(-pow((vLocal.x+.30)/.26,2.0)-pow((vLocal.y-.34)/.30,2.0))*bodyMask;
         col+=vec3(.055,.125,.134)*sculptShoulder*.045;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
-        col+=vec3(.095,.170,.176)*iceVolume*(.045+.030*(1.0-facing));
-        col+=vec3(.090,.126,.126)*innerVeil*(.018+.016*facing);
-        col+=vec3(.022,.048,.054)*bodyMask*(.34+.44*facing);
+        col+=vec3(.120,.235,.245)*iceVolume*(.080+.055*(1.0-facing));
+        col+=vec3(.110,.165,.168)*innerVeil*(.028+.024*facing);
+        col+=vec3(.012,.030,.036)*bodyMask*(.20+.30*facing);
         col+=vec3(.018,.044,.050)*strata*iceVolume*.006;
         float glassRibbon=exp(-pow((vLocal.x+.145-vLocal.y*.070)/.052,2.0))*smoothstep(-.74,.78,vLocal.y)*bodyMask;
         float innerPulse=exp(-pow((vLocal.x-.018)/.22,2.0)-pow((vLocal.y+.02)/.48,2.0))*smoothstep(.05,.62,vLocal.z)*bodyMask;
@@ -1654,10 +1654,10 @@
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
-        float bodyGlassAlpha=.885+.075*facing;
+        float bodyGlassAlpha=.72+.16*facing;
         outAlpha=mix(outAlpha,bodyGlassAlpha,bodyMask);
-        outAlpha=mix(outAlpha,.94,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.42),clamp(outAlpha,.87,1.0));
+        outAlpha=mix(outAlpha,.975,lensMeshMask);
+        ${outputName}=vec4(filmic(col*2.50),clamp(outAlpha,.70,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1864,6 +1864,7 @@
     root.dataset.fxNativeMagStudioR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic';
     root.dataset.fxNativeMagStudioR1923='crease-free-cubic-smoked-ice-translucent-body';
     root.dataset.fxNativeMagStudioR1924='crystalline-superellipse-faceted-normals-silver-optic-ice-halo';
+    root.dataset.fxNativeMagStudioR1925='clear-ice-transmission-correct-flush-optic-proportions';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
