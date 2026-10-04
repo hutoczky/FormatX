@@ -67,7 +67,7 @@ async function start(){
   const rendererStart=layoutStyle.then(async()=>{
     root.dataset.fxCurrentMagRendererStartR559='starting-layout-ready-under-intro';
     root.dataset.fxCurrentMagRendererStartR561='starting-context-policy-under-intro';
-    await addScript(CONTEXT_POLICY+'&rev=20261004-r871-first-frame-before-device-diagnostics','data-fx-mag-context-policy-r561');
+    await addScript(CONTEXT_POLICY+'&rev=20261004-r872-small-transfer-before-device-allocation','data-fx-mag-context-policy-r561');
     if(root.dataset.fxCrystalOrganismR326==='booting'){
       root.dataset.fxCurrentMagMainThreadFallbackR614='deferred-offscreen-owner-active';
     }else{

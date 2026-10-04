@@ -85,7 +85,7 @@ const DEFERRED_STYLE_PATHS = new Set([
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
     marker: 'scheduler-to-loader-r505',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261004-r871-first-frame-before-device-diagnostics']],
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261004-r872-small-transfer-before-device-allocation']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r505',

@@ -132,7 +132,7 @@ function ensureSoundControl(){
 function ensureCurrentMag(){
   if(currentRequested||document.querySelector('script[data-fx-current-mag-loader-r422]'))return;
   currentRequested=true;
-  const script=document.createElement('script');script.src=CURRENT_MAG+'&rev=20261004-r871-first-frame-before-device-diagnostics';script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
+  const script=document.createElement('script');script.src=CURRENT_MAG+'&rev=20261004-r872-small-transfer-before-device-allocation';script.async=false;script.dataset.fxCurrentMagLoaderR422='true';document.head.appendChild(script);
   root.dataset.fxMotionRuntimeRequestedR271='1';
 }
 function ensureStaticMotionCss(){
