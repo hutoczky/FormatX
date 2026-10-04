@@ -26,7 +26,8 @@ function publishStatic(reason){
  return publish(reason);
 }
 function fail(reason){try{stage?.remove();}catch(_){}publishStatic(reason);}
-function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const message=gl.getShaderInfoLog(s)||'shader-compile';gl.deleteShader(s);throw new Error(message);}return s;}
+// Recovery uses the same batched compilation and one validated program.
+function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);return s;}
 function buildProgram(){
   const vs=shader(gl.VERTEX_SHADER,`precision mediump float;
     attribute vec3 aCrystal,aSphere,aCrystalNormal,aSphereNormal;
@@ -93,8 +94,11 @@ function buildProgram(){
     }`);
   const p=gl.createProgram();gl.attachShader(p,vs);gl.attachShader(p,fs);
   ['aCrystal','aSphere','aCrystalNormal','aSphereNormal'].forEach((name,index)=>gl.bindAttribLocation(p,index,name));
-  gl.linkProgram(p);gl.deleteShader(vs);gl.deleteShader(fs);
-  if(!gl.getProgramParameter(p,gl.LINK_STATUS)){const e=gl.getProgramInfoLog(p)||'program link failed';gl.deleteProgram(p);throw new Error(e);}return p;
+  gl.linkProgram(p);
+  const linked=gl.getProgramParameter(p,gl.LINK_STATUS);
+  const error=linked?'':[gl.getProgramInfoLog(p),gl.getShaderInfoLog(vs),gl.getShaderInfoLog(fs)].filter(Boolean).join('\n')||'program link failed';
+  gl.deleteShader(vs);gl.deleteShader(fs);
+  if(!linked){gl.deleteProgram(p);throw new Error(error);}return p;
 }
 function geometry(){const latSeg=12,lonSeg=24,crystal=[],sphere=[],crystalNormals=[],sphereNormals=[];function vertex(la,lo){const phi=(la/latSeg)*Math.PI,theta=(lo/lonSeg)*Math.PI*2,s=Math.sin(phi),d=[s*Math.cos(theta),Math.cos(phi),s*Math.sin(theta)],ax=d[0]>=0?.88:.86,ay=d[1]>=0?1.09:.97,az=d[2]>=0?.64:.43,e=.78,t=Math.pow(Math.abs(d[0])/ax,e)+Math.pow(Math.abs(d[1])/ay,e)+Math.pow(Math.abs(d[2])/az,e),r=1/Math.pow(Math.max(.0001,t),1/e);return{c:d.map(x=>x*r),s:d.map(x=>x*.91),n:d};}function tri(a,b,c){const u=b.c.map((v,i)=>v-a.c[i]),v=c.c.map((q,i)=>q-a.c[i]),n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],length=Math.hypot(...n),normal=n.map(q=>q/length);for(const q of[a,b,c]){crystal.push(...q.c);sphere.push(...q.s);crystalNormals.push(...normal);sphereNormals.push(...q.n);}}for(let la=0;la<latSeg;la++)for(let lo=0;lo<lonSeg;lo++){const a=vertex(la,lo),b=vertex(la,lo+1),c=vertex(la+1,lo),d=vertex(la+1,lo+1);if(la>0)tri(a,b,c);if(la<latSeg-1)tri(b,d,c);}return{arrays:[crystal,sphere,crystalNormals,sphereNormals].map(a=>new Float32Array(a)),count:crystal.length/3};}
 function resize(){if(!stage||!canvas||!gl)return false;const r=stage.getBoundingClientRect();if(r.width<2||r.height<2)return false;const dpr=Math.min(devicePixelRatio||1,1.15),budget=520000;let w=Math.max(2,Math.round(r.width*dpr)),h=Math.max(2,Math.round(r.height*dpr));if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.max(2,Math.round(w*k));h=Math.max(2,Math.round(h*k));}if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;gl.viewport(0,0,w,h);root.dataset.fxCoreReal3dResolution=`${w}x${h}`;root.dataset.fxCoreReal3dScale=(w/Math.max(1,r.width)).toFixed(2);return r.width/Math.max(1,r.height);}
