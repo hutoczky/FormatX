@@ -974,9 +974,9 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
     inset:0 13% 0 12%!important;
     clip-path:polygon(
-      43% 0,54% 3%,64% 11%,72% 23%,78% 38%,75% 50%,
-      82% 59%,75% 69%,66% 78%,60% 90%,50% 100%,42% 91%,
-      34% 82%,27% 70%,29% 58%,23% 46%,27% 32%,34% 16%
+      44% 0,54% 3%,64% 12%,73% 24%,79% 37%,73% 48%,
+      77% 58%,72% 69%,63% 79%,57% 91%,49% 100%,41% 91%,
+      34% 82%,27% 70%,31% 59%,25% 49%,29% 37%,35% 21%
     )!important;
     border-radius:0!important;
     transform:rotate(-2deg) skewX(-.5deg) scaleX(.88)!important;
@@ -1014,6 +1014,7 @@ html:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.
 /* production-r1904-asymmetric-gallery-proxy-parity */
 /* production-r1906-cut-ice-shard-first-paint-parity */
 /* production-r1909-slender-smoked-ice-first-paint-parity */
+/* production-r1910-fused-living-ice-first-paint-parity */
 
 
 /* R1820 — final hero typography is owned by the blocking P0 layer.
