@@ -428,7 +428,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.955:(mobile?.990:(constrained?.980:.988));
+        const smoothWeight=software?.945:(mobile?.972:(constrained?.965:.982));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -531,7 +531,7 @@
 
         const theta=theta0+cp*.075+Math.sin(cp*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=2.62;
+        const superN=3.12;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
@@ -1057,7 +1057,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 50% 44% at 50% 43%,rgba(125,184,190,.145) 0%,rgba(46,81,86,.072) 36%,rgba(8,19,22,.025) 66%,rgba(0,0,0,0) 83%),radial-gradient(ellipse 38% 28% at 64% 64%,rgba(92,70,132,.050),rgba(0,0,0,0) 72%),radial-gradient(ellipse 84% 72% at 50% 51%,rgba(7,20,23,.25),rgba(0,0,0,0) 79%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 52% 46% at 50% 43%,rgba(145,205,208,.185) 0%,rgba(55,94,99,.090) 36%,rgba(10,23,26,.030) 67%,rgba(0,0,0,0) 84%),radial-gradient(ellipse 38% 28% at 64% 64%,rgba(96,74,136,.052),rgba(0,0,0,0) 72%),radial-gradient(ellipse 84% 72% at 50% 51%,rgba(7,20,23,.26),rgba(0,0,0,0) 79%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1565,11 +1565,8 @@
         col+=vec3(.070,.220,.245)*glassEdge*.25;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        float sculptValleyA=exp(-pow((vLocal.x+.035)/.110,2.0)-pow((vLocal.y-.22)/.43,2.0))*bodyMask;
-        float sculptValleyB=exp(-pow((vLocal.x-.19)/.100,2.0)-pow((vLocal.y+.30)/.26,2.0))*bodyMask;
-        float sculptShoulder=exp(-pow((vLocal.x+.34)/.22,2.0)-pow((vLocal.y-.38)/.26,2.0))*bodyMask;
-        col*=1.0-.17*sculptValleyA-.12*sculptValleyB;
-        col+=vec3(.046,.104,.113)*sculptShoulder*.048;
+        float sculptShoulder=exp(-pow((vLocal.x+.30)/.26,2.0)-pow((vLocal.y-.34)/.30,2.0))*bodyMask;
+        col+=vec3(.055,.125,.134)*sculptShoulder*.045;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
         col+=vec3(.095,.170,.176)*iceVolume*(.045+.030*(1.0-facing));
         col+=vec3(.090,.126,.126)*innerVeil*(.018+.016*facing);
@@ -1579,7 +1576,7 @@
         float innerPulse=exp(-pow((vLocal.x-.018)/.22,2.0)-pow((vLocal.y+.02)/.48,2.0))*smoothstep(.05,.62,vLocal.z)*bodyMask;
         col+=vec3(.82,.94,.93)*glassRibbon*.105;
         col+=vec3(.012,.092,.108)*innerPulse*(.030+.045*uEnergy);
-        vec2 socketQ=vec2((vLocal.x-.155)/.150,(vLocal.y-.070)/.132);
+        vec2 socketQ=vec2((vLocal.x-.115)/.165,(vLocal.y-.040)/.145);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.72)*smoothstep(.06,.58,vLocal.z)*bodyMask;
@@ -1612,12 +1609,12 @@
           +vec3(.075,.055,.085)*subsurface*.18;
         col=mix(col,livingMembrane,glassFinMask*.965);
 
-        vec3 cartilage=vec3(.105,.118,.116)
-          +vec3(.145,.162,.158)*(.12*ndl+.17*sideLight)
-          +vec3(1.00,1.00,.99)*softboxA*.300
-          +vec3(.64,.75,.73)*sideSpec*.190
-          +vec3(.060,.172,.182)*fresnel*.090
-          +vec3(.010,.008,.012)*subsurface*.006;
+        vec3 cartilage=vec3(.150,.164,.160)
+          +vec3(.180,.198,.192)*(.12*ndl+.17*sideLight)
+          +vec3(1.00,1.00,.99)*softboxA*.360
+          +vec3(.70,.82,.80)*sideSpec*.220
+          +vec3(.070,.190,.198)*fresnel*.105
+          +vec3(.010,.008,.012)*subsurface*.004;
         col=mix(col,cartilage,armorMask*.985);
 
         vec2 lensVector=vUv-vec2(.5);
@@ -1631,20 +1628,20 @@
         float lensHot=exp(-pow(lensVector.x/.190,2.0)-pow(lensVector.y/.190,2.0));
         float lensGlint=exp(-pow((vUv.x-.31)/.060,2.0)-pow((vUv.y-.27)/.050,2.0));
         float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
-        vec3 physicalLens=vec3(.005,.020,.025)
-          +vec3(.008,.055,.068)*(.20+.20*uEnergy)
+        vec3 physicalLens=vec3(.006,.028,.034)
+          +vec3(.012,.095,.112)*(.24+.22*uEnergy)
           +vec3(.98,1.00,.99)*softboxA*.22
           +vec3(.46,.60,.60)*sideSpec*.09
           +vec3(.028,.12,.15)*fresnel*.075
-          +vec3(.008,.075,.090)*lensInner*(.10+.08*uEnergy)
-          +vec3(.66,.72,.69)*lensRim*.052
+          +vec3(.014,.125,.145)*lensInner*(.14+.10*uEnergy)
+          +vec3(.84,.90,.87)*lensRim*.090
           +vec3(.018,.22,.26)*sensorHalo*(.09+.07*uEnergy)
           +vec3(.34,.84,.88)*sensorArc*(.12+.08*uEnergy)
-          +vec3(.72,.98,.98)*sensorCore*(.14+.06*uEnergy)
-          +vec3(.74,.92,.90)*lensHot*.060
+          +vec3(.76,1.00,1.00)*sensorCore*(.22+.08*uEnergy)
+          +vec3(.80,.96,.94)*lensHot*.095
           +vec3(1.00,1.00,1.00)*lensGlint*.48
           +vec3(.40,.52,.52)*lensEdge*(.055+.060*softboxA+.035*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.003,.014,.018),lensDepthShade*.080);
+        physicalLens=mix(physicalLens,vec3(.004,.022,.028),lensDepthShade*.045);
         physicalLens+=vec3(.64,.88,.90)*lensGlint*.10;
         col=mix(col,physicalLens,lensMeshMask*.997);
 
@@ -1762,7 +1759,7 @@
         col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
         col+=vec3(.013,.030,.035)*bodyMask*(.34+.40*facing);
         col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
-        vec2 socketQ=vec2((vLocal.x-.155)/.150,(vLocal.y-.070)/.132);
+        vec2 socketQ=vec2((vLocal.x-.115)/.165,(vLocal.y-.040)/.145);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.70)*smoothstep(.04,.58,vLocal.z)*bodyMask;
@@ -1866,6 +1863,7 @@
     root.dataset.fxNativeMagStudioR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic';
     root.dataset.fxNativeMagStudioR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic';
     root.dataset.fxNativeMagStudioR1923='crease-free-cubic-smoked-ice-translucent-body';
+    root.dataset.fxNativeMagStudioR1924='crystalline-superellipse-faceted-normals-silver-optic-ice-halo';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
