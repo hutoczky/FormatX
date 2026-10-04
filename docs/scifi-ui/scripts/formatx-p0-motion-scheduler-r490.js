@@ -41,9 +41,10 @@ root.dataset.fxP0MotionCacheR1920='three-mass-silver-ice-fast-real-webgl-handoff
 root.dataset.fxP0MotionCacheR1921='sculptural-s-round-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1922='cubic-clean-ice-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
+root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261005-r1924-continuous-living-bioglass';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261005-r1925-clear-ice-flush-optic';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
