@@ -160,6 +160,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1910='single-genome-to-fused-living-ice-gallery-organism-visible-aperture';
       document.documentElement.dataset.fxMagBirthVisualR1911='vertical-ice-genome-clean-dissolve-flush-aperture-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1912='genome-first-delayed-elegant-living-glass-reveal-readable-studio-volume';
+      document.documentElement.dataset.fxMagBirthVisualR1913='igloo-grade-visible-smoked-ice-volume-silver-cyan-aperture';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -194,7 +195,7 @@
       this.renderer.setClearColor(0x020811,0);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.02;
+      this.renderer.toneMappingExposure=1.12;
 
       this.scene=new THREE.Scene();
       this.scene.background=null;
@@ -860,11 +861,11 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.171,.0022,28,192),
         new T.MeshPhysicalMaterial({
-          color:0xc0cbc7,metalness:.025,roughness:.050,
+          color:0xd5dfdc,metalness:.035,roughness:.042,
           clearcoat:.98,clearcoatRoughness:.030,
           emissive:0x010506,emissiveIntensity:.001,
           specularIntensity:.98,specularColor:new T.Color(0xf8ffff),
-          envMapIntensity:2.35,transparent:true,opacity:.24
+          envMapIntensity:2.65,transparent:true,opacity:.34
         })
       );
       socketBezel.position.z=.258;
@@ -872,12 +873,12 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x081b21,metalness:0,roughness:.020,
+        color:0x0a252c,metalness:0,roughness:.018,
         clearcoat:.995,clearcoatRoughness:.018,
         transmission:.62,thickness:.24,ior:1.49,
         attenuationColor:new T.Color(0x052a31),attenuationDistance:.15,
         emissive:0x01090c,emissiveIntensity:.006,
-        envMapIntensity:2.75,
+        envMapIntensity:3.05,
         specularIntensity:1.0,specularColor:new T.Color(0xf2ffff),
         transparent:true,opacity:.99
       });
@@ -892,8 +893,8 @@
         new T.MeshPhysicalMaterial({
           color:0x8de8e7,metalness:0,roughness:.060,
           clearcoat:.95,clearcoatRoughness:.032,
-          emissive:0x08636b,emissiveIntensity:.16,
-          transparent:true,opacity:.22,depthWrite:false,
+          emissive:0x08636b,emissiveIntensity:.20,
+          transparent:true,opacity:.30,depthWrite:false,
           blending:T.AdditiveBlending
         })
       );
@@ -1026,16 +1027,16 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x1b2a2d,roughness:.075,metalness:.001,
-        clearcoat:.96,clearcoatRoughness:.050,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000035,
+        color:0x24383c,roughness:.090,metalness:.001,
+        clearcoat:.97,clearcoatRoughness:.045,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000025,
         transparent:true,opacity:0,
-        transmission:.34,thickness:.34,ior:1.47,
-        attenuationColor:new T.Color(0x0b252b),attenuationDistance:.72,
-        emissive:0x010405,emissiveIntensity:.0005,
-        envMapIntensity:2.85,
-        specularIntensity:1.0,specularColor:new T.Color(0xf8ffff),
-        sheen:.010,sheenColor:new T.Color(0x9fb9b8),sheenRoughness:.28,
+        transmission:.26,thickness:.42,ior:1.47,
+        attenuationColor:new T.Color(0x102f35),attenuationDistance:.82,
+        emissive:0x010506,emissiveIntensity:.0010,
+        envMapIntensity:3.15,
+        specularIntensity:1.0,specularColor:new T.Color(0xfbffff),
+        sheen:.014,sheenColor:new T.Color(0xb1c8c7),sheenRoughness:.30,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -1157,13 +1158,13 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x0b1d22,roughness:.026,metalness:0,
+        color:0x10272d,roughness:.032,metalness:0,
         clearcoat:.995,clearcoatRoughness:.018,
-        transmission:.88,thickness:.11,ior:1.48,
-        attenuationColor:new T.Color(0x061b20),attenuationDistance:.20,
+        transmission:.82,thickness:.13,ior:1.48,
+        attenuationColor:new T.Color(0x072028),attenuationDistance:.24,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000020,
-        envMapIntensity:3.10,side:T.FrontSide
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000018,
+        envMapIntensity:3.20,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
       this.organicMembrane.scale.set(.958,1.008,.938);
@@ -1941,7 +1942,7 @@
       this.irisGroup.visible=irisAwake>.004;
       this.irisGroup.scale.setScalar((this.mobileProfile?.88:.90)*(1+irisAwake*.012)*pulse);
       if(this.livingIris){
-        this.livingIris.material.opacity=(.34+.34*irisAwake)*irisAwake;
+        this.livingIris.material.opacity=(.42+.38*irisAwake)*irisAwake;
         this.livingIris.rotation.z=-.66+Math.sin(time*.00055)*.018;
       }
       if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
@@ -1963,9 +1964,9 @@
       const finalScale=this.mobileProfile?1.18:1.25;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
-      this.organicShellMaterial.opacity=(.82+.12*maturity)*visible;
+      this.organicShellMaterial.opacity=(.90+.08*maturity)*visible;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.080+.035*maturity)*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(.095+.030*maturity)*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=0;
       this.organicHoodMaterial.opacity=0;
