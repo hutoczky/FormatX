@@ -469,24 +469,24 @@
          cross-sections: one monolithic object with a crown cleft, narrow waist,
          unequal shoulders and deliberate cut planes. */
       const profileR1905=[
-        /* R1909 — slender gallery monolith. Narrow crown and foot, restrained
-           asymmetry and one integrated aperture; no potato, petals or logo-diamond. */
-        [ 1.00,.034,.028,-.040,-.008],
-        [ .91,.095,.070,-.070,-.008],
-        [ .79,.205,.145,-.096,-.006],
-        [ .66,.315,.220,-.088,-.004],
-        [ .52,.405,.282,-.054, .000],
-        [ .38,.462,.318, .002, .003],
-        [ .23,.492,.340, .048, .004],
-        [ .08,.500,.346, .068, .004],
-        [-.07,.472,.330, .056, .003],
-        [-.22,.420,.294, .024, .002],
-        [-.38,.355,.246,-.010, .000],
-        [-.54,.292,.201,-.024,-.003],
-        [-.69,.222,.150,-.022,-.005],
-        [-.82,.154,.102,-.010,-.006],
-        [-.93,.074,.050, .000,-.006],
-        [-1.00,.024,.018, .006,-.004]
+        /* R1910 — fused living-ice silhouette. Two broad masses are joined by
+           a quiet waist so the form reads as designed anatomy, not a rock. */
+        [ 1.00,.026,.022,-.035,-.008],
+        [ .91,.078,.055,-.065,-.008],
+        [ .79,.180,.125,-.095,-.006],
+        [ .66,.305,.210,-.100,-.004],
+        [ .52,.425,.290,-.070, .000],
+        [ .38,.505,.342,-.015, .003],
+        [ .23,.475,.326, .040, .004],
+        [ .08,.395,.275, .078, .004],
+        [-.07,.445,.305, .070, .003],
+        [-.22,.475,.324, .025, .002],
+        [-.38,.390,.266,-.015, .000],
+        [-.54,.290,.196,-.028,-.003],
+        [-.69,.215,.145,-.024,-.005],
+        [-.82,.145,.096,-.012,-.006],
+        [-.93,.068,.046, .000,-.006],
+        [-1.00,.022,.016, .006,-.004]
       ];
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -527,12 +527,12 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.57,.24,Math.PI,.74,.035);
-        const rightShoulder=field(.18,.27,0,.68,.040);
-        const lowerLeft=field(-.42,.24,2.62,.74,.015);
-        const leftWaist=field(-.12,.19,Math.PI,.62,.050);
-        const rightWaist=field(-.24,.20,-.20,.62,.028);
-        const rearCut=field(.05,.36,-Math.PI*.50,.72,.024);
+        const upperLeft=field(.57,.24,Math.PI,.74,.030);
+        const rightShoulder=field(.31,.25,0,.68,.043);
+        const lowerLeft=field(-.30,.24,2.62,.74,.030);
+        const leftWaist=field(.06,.18,Math.PI,.62,.055);
+        const rightWaist=field(.05,.18,-.12,.62,.072);
+        const rearCut=field(.05,.36,-Math.PI*.50,.72,.022);
         const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
 
         rx*=radial;
@@ -1521,21 +1521,21 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.048+ndl*.128+sideLight*.086+fillLight*.038);
+        float lift=sat(.030+ndl*.090+sideLight*.060+fillLight*.022);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.0012,.0030,.0042),vec3(.034,.052,.055),lift);
+        vec3 col=mix(vec3(.0008,.0018,.0028),vec3(.020,.032,.035),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
-        col+=vec3(.99,.99,.96)*keySpec*.185;
-        col+=vec3(.66,.78,.79)*sideSpec*.150;
-        col+=vec3(1.00,1.00,.99)*softboxA*.305;
+        col+=vec3(1.00,1.00,.99)*keySpec*.150;
+        col+=vec3(.58,.72,.74)*sideSpec*.110;
+        col+=vec3(1.00,1.00,.99)*softboxA*.155;
         col+=vec3(.46,.66,.69)*softboxB*.062;
-        col+=vec3(1.00,1.00,.99)*studioRibbonA*.285;
+        col+=vec3(1.00,1.00,.99)*studioRibbonA*.165;
         col+=vec3(.40,.27,.18)*studioRibbonB*.009;
-        col+=vec3(.74,.96,.98)*studioRibbonC*.135;
+        col+=vec3(.64,.91,.94)*studioRibbonC*.080;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
         col+=vec3(.034,.120,.138)*fresnel*.128;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1556,8 +1556,12 @@
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
         col+=vec3(.060,.080,.080)*iceVolume*(.014+.012*(1.0-facing));
         col+=vec3(.062,.078,.077)*innerVeil*(.005+.007*facing);
-        col+=vec3(.010,.030,.036)*bodyMask*(.22+.48*facing);
-        col+=vec3(.022,.052,.058)*strata*iceVolume*.010;
+        col+=vec3(.007,.018,.022)*bodyMask*(.16+.34*facing);
+        col+=vec3(.018,.044,.050)*strata*iceVolume*.006;
+        float glassRibbon=exp(-pow((vLocal.x+.145-vLocal.y*.070)/.052,2.0))*smoothstep(-.74,.78,vLocal.y)*bodyMask;
+        float innerPulse=exp(-pow((vLocal.x-.018)/.22,2.0)-pow((vLocal.y+.02)/.48,2.0))*smoothstep(.05,.62,vLocal.z)*bodyMask;
+        col+=vec3(.82,.94,.93)*glassRibbon*.105;
+        col+=vec3(.012,.092,.108)*innerPulse*(.030+.045*uEnergy);
         vec2 socketQ=vec2((vLocal.x-.055)/.205,(vLocal.y+.025)/.142);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
@@ -1565,7 +1569,7 @@
         col*=1.0-.075*socketShade;
         col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.015,.110,.132),vec3(.095,.028,.116),chromaSide)*fresnel*bodyMask*.095;
+        col+=mix(vec3(.018,.145,.168),vec3(.105,.030,.132),chromaSide)*fresnel*bodyMask*.120;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1612,20 +1616,20 @@
         float lensGlint=exp(-pow((vUv.x-.34)/.060,2.0)-pow((vUv.y-.31)/.052,2.0));
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
-        vec3 physicalLens=vec3(.004,.016,.020)
-          +vec3(.008,.060,.074)*(.24+.24*uEnergy)
-          +vec3(.98,1.00,.98)*softboxA*.21
-          +vec3(.42,.58,.60)*sideSpec*.095
-          +vec3(.036,.12,.145)*fresnel*.075
-          +vec3(.006,.070,.088)*lensInner*(.10+.08*uEnergy)
-          +vec3(.66,.74,.72)*lensRing*.080
-          +vec3(.024,.44,.50)*lensIrisArc*(.15+.085*uEnergy)
-          +vec3(.86,1.00,.99)*lensHot*(.13+.035*uEnergy)
-          +vec3(.018,.10,.12)*electric*.008
-          +vec3(.72,.84,.82)*coreFlash*.055
-          +vec3(1.00,1.00,1.00)*lensGlint*.46
-          +vec3(.34,.47,.48)*lensEdge*(.050+.065*softboxA+.035*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.002,.008,.010),lensPupil*.08);
+        vec3 physicalLens=vec3(.010,.032,.038)
+          +vec3(.010,.082,.098)*(.24+.25*uEnergy)
+          +vec3(1.00,1.00,.99)*softboxA*.25
+          +vec3(.50,.66,.66)*sideSpec*.105
+          +vec3(.040,.15,.17)*fresnel*.090
+          +vec3(.010,.105,.122)*lensInner*(.11+.09*uEnergy)
+          +vec3(.78,.86,.82)*lensRing*.120
+          +vec3(.025,.60,.64)*lensIrisArc*(.19+.10*uEnergy)
+          +vec3(.92,1.00,.98)*lensHot*(.16+.04*uEnergy)
+          +vec3(.018,.10,.12)*electric*.006
+          +vec3(.78,.90,.87)*coreFlash*.065
+          +vec3(1.00,1.00,1.00)*lensGlint*.58
+          +vec3(.46,.58,.57)*lensEdge*(.065+.075*softboxA+.040*sideSpec);
+        physicalLens=mix(physicalLens,vec3(.004,.014,.017),lensPupil*.035);
         physicalLens+=vec3(.72,.94,.95)*lensGlint*.10*(1.0-lensPupil);
         col=mix(col,physicalLens,lensMeshMask*.997);
 
@@ -1639,7 +1643,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*1.98),clamp(outAlpha,.94,1.0));
+        ${outputName}=vec4(filmic(col*1.72),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1684,7 +1688,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.085+ndl*.235+sideLight*.175);
+        float lift=sat(.040+ndl*.120+sideLight*.090);
         float facetTone=.996+.008*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
@@ -1692,10 +1696,10 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.84+.16*facing;
-        vec3 col=mix(vec3(.0015,.0045,.0065),vec3(.036,.064,.069),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.0008,.0022,.0032),vec3(.020,.038,.042),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
-        col+=vec3(.94,.99,.99)*keySpec*.170;
-        col+=vec3(.32,.62,.67)*sideSpec*.155;
+        col+=vec3(1.00,1.00,.99)*keySpec*.135;
+        col+=vec3(.26,.54,.59)*sideSpec*.105;
         col+=vec3(.020,.125,.150)*fresnel*.185;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
         col+=vec3(.032,.066,.072)*coolPlane*.055;
@@ -1712,14 +1716,14 @@
         float studioStripeC=exp(-pow((vLocal.x+.005+vLocal.y*.08)/.070,2.0))*smoothstep(-.78,.78,vLocal.y)*bodyMask;
         float studioFaceA=pow(max(dot(n,normalize(vec3(-.28,.34,.90))),0.0),5.0)*bodyMask;
         float studioFaceB=pow(max(dot(n,normalize(vec3(.50,-.04,.86))),0.0),7.0)*bodyMask;
-        col+=vec3(.34,.42,.42)*pow(broadKey,2.35)*.050*bodyMask;
+        col+=vec3(.30,.38,.38)*pow(broadKey,2.65)*.026*bodyMask;
         col+=vec3(.11,.28,.31)*pow(broadSide,2.45)*.044*bodyMask;
         col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
-        col+=vec3(.86,.98,.98)*studioFaceA*.118;
+        col+=vec3(.94,1.00,.99)*studioFaceA*.070;
         col+=vec3(.24,.66,.72)*studioFaceB*.075;
-        col+=vec3(.90,.99,.98)*studioStripeA*.052;
+        col+=vec3(.98,1.00,.99)*studioStripeA*.085;
         col+=vec3(.22,.55,.62)*studioStripeB*.038;
-        col+=vec3(.44,.76,.82)*studioStripeC*.030;
+        col+=vec3(.52,.84,.88)*studioStripeC*.045;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1739,7 +1743,7 @@
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
         col+=vec3(.076,.092,.090)*iceVolume*(.010+.010*(1.0-facing));
         col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
-        col+=vec3(.020,.050,.056)*bodyMask*(.32+.50*facing);
+        col+=vec3(.008,.024,.029)*bodyMask*(.22+.38*facing);
         col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
         vec2 socketQ=vec2((vLocal.x-.055)/.205,(vLocal.y+.025)/.142);
         float socketD=length(socketQ);
@@ -1749,7 +1753,7 @@
         col+=vec3(.022,.090,.110)*opticCaustic*(.042+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
         vec3 spectralEdge=mix(vec3(.015,.140,.168),vec3(.120,.032,.148),chromaSide);
-        col+=spectralEdge*fresnel*bodyMask*.100;
+        col+=spectralEdge*fresnel*bodyMask*.135;
         float refractRibbon=exp(-pow((vLocal.x+.11-vLocal.y*.16)/.115,2.0))*smoothstep(-.62,.66,vLocal.y)*frontDepth;
         col+=vec3(.055,.185,.205)*refractRibbon*(.045+.055*(1.0-facing));
 
@@ -1782,23 +1786,23 @@
         float lensPupil=1.0-smoothstep(.040,.086,lensRadial);
         float lensEdge=smoothstep(.405,.485,lensRadial);
         float lensGlint=exp(-pow((vUv.x-.34)/.065,2.0)-pow((vUv.y-.31)/.052,2.0));
-        vec3 optical=vec3(.004,.014,.018)
-          +vec3(.004,.022,.030)*lensInner
-          +vec3(.80,.90,.88)*keySpec*.060
-          +vec3(.012,.060,.072)*fresnel*.055
-          +vec3(.40,.50,.49)*lensRim*.040
-          +vec3(.030,.37,.42)*lensIrisArc*.095
-          +vec3(.44,.70,.71)*lensHot*.032
-          +vec3(.96,1.00,1.00)*lensGlint*.235
-          +vec3(.20,.31,.32)*lensEdge*(.022+.028*keySpec+.016*sideSpec);
-        optical=mix(optical,vec3(.0015,.006,.008),lensPupil*.08);
-        optical+=vec3(.72,.94,.95)*lensGlint*.055*(1.0-lensPupil);
+        vec3 optical=vec3(.012,.040,.048)
+          +vec3(.010,.070,.085)*lensInner
+          +vec3(.96,1.00,.97)*keySpec*.095
+          +vec3(.018,.095,.108)*fresnel*.080
+          +vec3(.62,.72,.70)*lensRim*.095
+          +vec3(.028,.58,.62)*lensIrisArc*.145
+          +vec3(.78,.96,.93)*lensHot*.070
+          +vec3(1.00,1.00,1.00)*lensGlint*.38
+          +vec3(.36,.48,.48)*lensEdge*(.040+.040*keySpec+.020*sideSpec);
+        optical=mix(optical,vec3(.003,.012,.015),lensPupil*.035);
+        optical+=vec3(.82,.98,.98)*lensGlint*.085*(1.0-lensPupil);
         col=mix(col,optical,lensMeshMask*.997);
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.97,isLensMesh);
-        ${outputName}=vec4(tone(col*2.95),clamp(alpha,.99,1.0));
+        ${outputName}=vec4(tone(col*1.95),clamp(alpha,.99,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1827,6 +1831,7 @@
     root.dataset.fxNativeMagStudioR1906='sleek-cut-ice-shard-broad-softbox-smoked-sensor-proof-parity';
     root.dataset.fxNativeMagStudioR1907='spectral-smoked-ice-gallery-shard-understated-glass-aperture';
     root.dataset.fxNativeMagStudioR1909='igloo-grade-slender-smoked-ice-monolith-integrated-silver-cyan-aperture';
+    root.dataset.fxNativeMagStudioR1910='fused-living-ice-dual-mass-dark-gallery-glass-visible-cyan-aperture';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
