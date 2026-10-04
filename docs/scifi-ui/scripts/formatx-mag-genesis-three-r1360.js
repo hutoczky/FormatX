@@ -158,6 +158,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1908='runtime-fixed-single-crystal-genome-gallery-sequence';
       document.documentElement.dataset.fxMagBirthVisualR1909='igloo-grade-single-genome-to-slender-smoked-ice-monolith';
       document.documentElement.dataset.fxMagBirthVisualR1910='single-genome-to-fused-living-ice-gallery-organism-visible-aperture';
+      document.documentElement.dataset.fxMagBirthVisualR1911='vertical-ice-genome-clean-dissolve-flush-aperture-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -559,8 +560,8 @@
       const T=this.THREE;
       const group=new T.Group();
       const seg=this.lowPowerProfile?30:(this.mobileProfile?46:72);
-      const tubeRadial=this.lowPowerProfile?6:(this.mobileProfile?8:10);
-      const auraRadial=this.lowPowerProfile?5:(this.mobileProfile?6:8);
+      const tubeRadial=this.lowPowerProfile?8:(this.mobileProfile?10:14);
+      const auraRadial=this.lowPowerProfile?6:(this.mobileProfile?8:10);
       const aPts=[],bPts=[],rungPairs=[],beadA=[],beadB=[];
       for(let i=0;i<=seg;i++){
         const u=i/seg;
@@ -614,12 +615,12 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.020,tubeRadial,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.020,tubeRadial,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.028,auraRadial,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.028,auraRadial,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.014,tubeRadial,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.014,tubeRadial,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.022,auraRadial,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.022,auraRadial,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.0048,.0048,1,8,1,false);
+      const rungGeo=new T.CylinderGeometry(.0032,.0032,1,10,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -639,13 +640,13 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.70,.62,.030,.026,.30,.105,.090];
+      group.userData.baseOpacity=[.50,.44,.018,.016,.18,.060,.052];
       return group;
     }
 
     makeDNAField(){
       const placements=[
-        [0.00,.06,.54,-.10,1.08,.08,-.12],
+        [0.00,.00,.28,1.36,.82,.02,-.06],
         [1.72,-.84,-.08,.44,.46,-.18,.34],
         [-1.70,.92,-.22,-.48,.44,.16,-.30]
       ];
@@ -653,7 +654,7 @@
       const visiblePlacements=placements.slice(0,1);
       for(const [i,[x,y,z,rz,sc,rx,ry]] of visiblePlacements.entries()){
         const primary=i===0;
-        const h=this.createHelix(primary?3.55:2.54,primary?.225:.170,primary?3.20:2.55);
+        const h=this.createHelix(primary?3.00:2.54,primary?.180:.170,primary?2.70:2.55);
         h.position.set(x,y,z);
         h.rotation.set(rx,ry,rz);
         h.scale.setScalar(sc);
@@ -1876,21 +1877,21 @@
     }
 
     updateDNA(t,time){
-      const fade=(1-smooth((t-2.55)/.72))*smooth(t/.28);
+      const fade=(1-smooth((t-1.38)/.58))*smooth(t/.22);
       const intro=ease(t/.62);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
         const primary=i===0;
-        const collapse=smooth((t-1.52)/1.36);
+        const collapse=smooth((t-.72)/.72);
         h.position.x=primary?0:b.x*.62*(1+fly*.06);
-        h.position.y=primary?.025:b.y*.58*(1+fly*.06);
-        h.position.z=primary?(.50-.18*collapse):b.z*.72+fly*.12;
+        h.position.y=primary?.00:b.y*.58*(1+fly*.06);
+        h.position.z=primary?(.28-.10*collapse):b.z*.72+fly*.12;
         h.rotation.x=b.rx+Math.sin(time*.00022+b.phase)*(primary?.012:.018);
         h.rotation.y=b.ry+Math.sin(time*.00019+b.phase)*(primary?.014:.022);
         h.rotation.z=b.rz+time*.000020*(i%2?1:-1);
-        const primaryScale=b.s*(this.mobileProfile?1.04:.96)*mix(1,.58,collapse);
+        const primaryScale=b.s*(this.mobileProfile?1.00:.94)*mix(1,.34,collapse);
         h.scale.setScalar(primary?primaryScale:b.s*(this.mobileProfile?.78:.72));
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
@@ -1901,13 +1902,13 @@
     }
 
     updateCore(t,time){
-      const birth=smooth((t-.12)/.72);
-      const seedHandoff=smooth((t-1.72)/.62);
+      const birth=smooth((t-.96)/.55);
+      const seedHandoff=smooth((t-1.48)/.46);
       const coreLife=birth;
       const seedShellLife=birth*(1-seedHandoff);
       let sc=.001;
-      if(t<.12)sc=.001;
-      else if(t<1.10)sc=mix(.52,.82,ease((t-.12)/.98));
+      if(t<.96)sc=.001;
+      else if(t<1.55)sc=mix(.42,.80,ease((t-.96)/.59));
       else if(t<5.90)sc=.86+Math.sin(time*.0010)*.003;
       else sc=mix(.86,.82,smooth((t-5.90)/1.40));
 
@@ -1916,7 +1917,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx+.055*chestEmbed,ty-.025*chestEmbed,.405-.050*chestEmbed);
+      this.coreGroup.position.set(tx+.055*chestEmbed,ty-.025*chestEmbed,.205-.040*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1937,7 +1938,7 @@
       this.coreGlass.visible=seedShellLife*seedVisual>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
       this.irisGroup.visible=irisAwake>.004;
-      this.irisGroup.scale.setScalar((this.mobileProfile?1.06:1.08)*(1+irisAwake*.014)*pulse);
+      this.irisGroup.scale.setScalar((this.mobileProfile?.88:.90)*(1+irisAwake*.012)*pulse);
       if(this.livingIris){
         this.livingIris.material.opacity=(.34+.34*irisAwake)*irisAwake;
         this.livingIris.rotation.z=-.66+Math.sin(time*.00055)*.018;
@@ -1951,7 +1952,7 @@
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-1.72)/1.18);
+      const grow=smooth((t-1.48)/1.02);
       const maturity=smooth((t-4.40)/1.70);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
