@@ -18,7 +18,7 @@ const profile=mobile?'mobile':'desktop';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const WORKER='/scifi-ui/scripts/formatx-crystal-worker-r564.js?v=20261004-r873-batched-shader-compilation';
-const FALLBACK='/scifi-ui/scripts/formatx-crystal-bounded-fallback-r727.js?v=20261003-r866-dielectric-semantic-light';
+const FALLBACK='/scifi-ui/scripts/formatx-crystal-bounded-fallback-r727.js?v=20261004-r873-batched-shader-compilation';
 root.dataset.fxMagContextPolicyR561=`armed-${profile}-offscreen-webgl1`;
 root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';
 root.dataset.fxCurrentMagRequestR530=`navigation-owned-r753-${profile}-semantic-request-post-intro-materialisation`;

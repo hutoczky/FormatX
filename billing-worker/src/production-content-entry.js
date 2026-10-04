@@ -85,7 +85,7 @@ const DEFERRED_STYLE_PATHS = new Set([
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
     marker: 'scheduler-to-loader-r505',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261004-r873-batched-shader-compilation']],
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261004-r875-fallback-shader-cache-parity']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r505',

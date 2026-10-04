@@ -15,7 +15,7 @@ const P0_SCHEDULER_PATH='/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js';
 const P0_MOTION_SCHEDULER_RE=/formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g;
 const P0_MOTION_SCHEDULER_URL='formatx-p0-motion-scheduler-r490.js?v=20260927-r861-canonical-release-adoption';
 const MOTION_RUNTIME_RE=/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g;
-const MOTION_RUNTIME_URL='formatx-motion-runtime-loader-r239.js?v=20261004-r873-batched-shader-compilation';
+const MOTION_RUNTIME_URL='formatx-motion-runtime-loader-r239.js?v=20261004-r875-fallback-shader-cache-parity';
 const CONTENT_RUNTIME_RE=/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g;
 const CONTENT_RUNTIME_URL='formatx-content-runtime-loader-r241.js?v=20261003-r869-settled-document-sections';
 const CONTENT_STANDARD_RE=/formatx-content-standard\.css(?:\?v=[^"']+)?/g;
