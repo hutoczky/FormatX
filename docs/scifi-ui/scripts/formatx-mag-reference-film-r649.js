@@ -277,9 +277,9 @@
         ctx.stroke();
         ctx.restore();
       }
-      const lensR=Math.max(31,R*.285);
-      const lensRx=lensR*.94,lensRy=lensR*.72;
-      const lensOX=-lensR*.10,lensOY=lensR*.05;
+      const lensR=Math.max(28,R*.255);
+      const lensRx=lensR*.94,lensRy=lensR*.46;
+      const lensOX=R*.070,lensOY=R*.035;
       const lens=ctx.createRadialGradient(lensOX-lensR*.22,lensOY-lensR*.25,1,lensOX,lensOY,lensR);
       lens.addColorStop(0,'rgba(232,236,232,.70)');
       lens.addColorStop(.12,'rgba(156,178,176,.80)');
@@ -291,7 +291,7 @@
       ctx.strokeStyle='rgba(145,188,190,.24)';ctx.lineWidth=1.8;ctx.stroke();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
       ctx.fillStyle='rgba(61,117,123,.060)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.34,lensRy*.34,-.11,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(2,14,17,.92)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.22,lensRy*.22,-.11,0,TAU);ctx.fill();
+      ctx.fillStyle='rgba(7,30,35,.34)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.48,lensRy*.50,-.11,0,TAU);ctx.fill();
       ctx.save();ctx.globalCompositeOperation='screen';
       ctx.fillStyle='rgba(198,244,242,.42)';
       ctx.beginPath();ctx.ellipse(lensOX-lensRx*.28,lensOY-lensRy*.30,lensRx*.12,lensRy*.09,-.28,0,TAU);ctx.fill();
@@ -406,6 +406,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1830-igloo-grade-clean-monolithic-bioglass-intro'
+    visualRevision:'r1914-igloo-grade-flush-aperture-dark-ice-intro'
   };
 })();
