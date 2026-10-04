@@ -1689,7 +1689,7 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.105+ndl*.185+sideLight*.135);
+        float lift=sat(.135+ndl*.220+sideLight*.165);
         float facetTone=.996+.008*fract(vFacet*5.73+.23);
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
@@ -1697,7 +1697,7 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.84+.16*facing;
-        vec3 col=mix(vec3(.004,.010,.013),vec3(.078,.106,.112),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.006,.012,.015),vec3(.110,.142,.145),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
         col+=vec3(1.00,1.00,.99)*keySpec*.135;
         col+=vec3(.26,.54,.59)*sideSpec*.105;
@@ -1722,9 +1722,9 @@
         col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
         col+=vec3(.98,1.00,.99)*studioFaceA*.150;
         col+=vec3(.30,.72,.78)*studioFaceB*.115;
-        col+=vec3(1.00,1.00,.99)*studioStripeA*.215;
-        col+=vec3(.30,.70,.78)*studioStripeB*.092;
-        col+=vec3(.68,.95,.98)*studioStripeC*.125;
+        col+=vec3(1.00,1.00,.99)*studioStripeA*.175;
+        col+=vec3(.25,.62,.69)*studioStripeB*.072;
+        col+=vec3(.58,.90,.93)*studioStripeC*.095;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1744,7 +1744,7 @@
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
         col+=vec3(.076,.092,.090)*iceVolume*(.010+.010*(1.0-facing));
         col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
-        col+=vec3(.020,.048,.055)*bodyMask*(.32+.42*facing);
+        col+=vec3(.028,.055,.061)*bodyMask*(.42+.44*facing);
         col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
         vec2 socketQ=vec2((vLocal.x-.055)/.205,(vLocal.y+.025)/.142);
         float socketD=length(socketQ);
@@ -1803,7 +1803,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.97,isLensMesh);
-        ${outputName}=vec4(tone(col*2.42),clamp(alpha,.99,1.0));
+        ${outputName}=vec4(tone(col*2.55),clamp(alpha,.99,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1837,6 +1837,7 @@
     root.dataset.fxNativeMagStudioR1912='elegant-continuous-living-glass-no-insect-waist-readable-studio-volume';
     root.dataset.fxNativeMagStudioR1913='igloo-grade-visible-dark-ice-volume-first-frame-safe-premium-aperture';
     root.dataset.fxNativeMagStudioR1914='flush-silver-glass-aperture-no-eye-dark-dichroic-ice-chamber';
+    root.dataset.fxNativeMagStudioR1914b='software-visible-parity-flush-aperture-proof-safe';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
