@@ -167,6 +167,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1917='three-lobe-sculptural-valleys-premium-black-glass-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1919='igloo-ice-gallery-visible-volume-offset-oval-aperture-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1920='three-distinct-fused-masses-smoked-silver-ice-cinematic-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -861,7 +862,7 @@
         })
       );
       socketBack.position.z=.248;
-      socketBack.scale.set(1.08,.58,1);
+      socketBack.scale.set(.92,.82,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
@@ -875,7 +876,7 @@
         })
       );
       socketBezel.position.z=.258;
-      socketBezel.scale.set(1.20,.60,1);
+      socketBezel.scale.set(1.02,.88,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -890,12 +891,12 @@
       });
       this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.118,128,72),lensMat);
-      lens.scale.set(1.12,.58,.13);
+      lens.scale.set(.96,.86,.15);
       lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.PlaneGeometry(.070,.016),
+        new T.PlaneGeometry(.040,.018),
         new T.MeshPhysicalMaterial({
           color:0x8de8e7,metalness:0,roughness:.060,
           clearcoat:.95,clearcoatRoughness:.032,
@@ -934,7 +935,7 @@
         })
       );
       glassRing.position.z=.310;
-      glassRing.scale.set(1.18,.60,1);
+      glassRing.scale.set(1.00,.88,1);
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
@@ -944,7 +945,7 @@
         transparent:true,opacity:.018,depthWrite:false,
         blending:T.NormalBlending
       }));
-      this.irisCorona.scale.set(.44,.30,1);
+      this.irisCorona.scale.set(.34,.32,1);
       this.irisCorona.position.z=.305;
       this.irisGroup.add(this.irisCorona);
       this.coreGroup.add(this.irisGroup);
@@ -953,7 +954,7 @@
         map:this.makeGlowTexture(),color:0x9fc8cc,
         transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
-      this.glowSprite.scale.set(.50,.32,1);
+      this.glowSprite.scale.set(.40,.36,1);
       this.glowSprite.position.z=.29;
       this.coreGroup.add(this.glowSprite);
 
@@ -1067,27 +1068,31 @@
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       const profileR1905=[
-        /* R1920 — exact cinematic parity with the three-mass gallery sculpt. */
-        [ 1.00,.018,.014,-.055,-.008],
-        [ .92,.086,.056,-.105,-.008],
-        [ .82,.220,.145,-.170,-.006],
-        [ .72,.382,.252,-.205,-.004],
-        [ .62,.505,.330,-.185,-.002],
-        [ .52,.540,.350,-.125, .000],
-        [ .42,.500,.322,-.050, .002],
-        [ .32,.548,.352, .055, .004],
-        [ .20,.625,.402, .145, .006],
-        [ .08,.600,.390, .155, .006],
-        [-.04,.515,.338, .080, .005],
-        [-.16,.470,.305,-.015, .003],
-        [-.28,.535,.340,-.110, .001],
-        [-.40,.555,.345,-.165,-.001],
-        [-.52,.470,.285,-.155,-.003],
-        [-.64,.350,.210,-.110,-.005],
-        [-.76,.235,.140,-.070,-.006],
-        [-.88,.115,.070,-.030,-.006],
-        [-.96,.045,.028,-.010,-.004],
-        [-1.00,.015,.010, .000,-.003]
+        /* R1921 — exact cinematic parity with the sculptural S three-mass body. */
+        [ 1.00,.016,.012,-.070,-.008],
+        [ .93,.080,.052,-.125,-.008],
+        [ .84,.225,.145,-.205,-.006],
+        [ .74,.430,.275,-.255,-.004],
+        [ .64,.590,.365,-.250,-.002],
+        [ .55,.650,.395,-.205, .000],
+        [ .47,.575,.348,-.125, .002],
+        [ .39,.405,.255,-.030, .003],
+        [ .31,.360,.235, .055, .004],
+        [ .23,.525,.330, .145, .006],
+        [ .14,.665,.410, .205, .008],
+        [ .04,.700,.430, .215, .008],
+        [-.06,.605,.375, .140, .007],
+        [-.15,.430,.270, .025, .004],
+        [-.23,.360,.235,-.060, .002],
+        [-.32,.500,.310,-.150, .000],
+        [-.42,.615,.365,-.220,-.002],
+        [-.52,.630,.360,-.235,-.004],
+        [-.62,.535,.305,-.200,-.005],
+        [-.72,.390,.225,-.140,-.006],
+        [-.82,.235,.138,-.080,-.006],
+        [-.91,.105,.064,-.035,-.006],
+        [-.97,.040,.025,-.012,-.004],
+        [-1.00,.014,.009, .000,-.003]
       ];
       const sampleProfile=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -1119,22 +1124,22 @@
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const upperLeft=field(y,theta,.59,.29,Math.PI,.82,.092);
-        const rightShoulder=field(y,theta,.18,.28,.02,.78,.088);
-        const lowerLeft=field(y,theta,-.39,.28,2.56,.80,.084);
-        const rightNeck=field(y,theta,.43,.15,.06,.68,.045);
-        const leftNeck=field(y,theta,-.10,.16,Math.PI,.70,.038);
-        const leftWaist=field(y,theta,.04,.26,Math.PI,.84,.012);
-        const rightWaist=field(y,theta,.02,.25,-.08,.82,.014);
-        const rearCut=field(y,theta,.02,.42,-Math.PI*.50,.82,.012);
+        const upperLeft=field(y,theta,.60,.31,Math.PI,.86,.050);
+        const rightShoulder=field(y,theta,.10,.31,.02,.84,.048);
+        const lowerLeft=field(y,theta,-.46,.31,2.58,.86,.046);
+        const rightNeck=field(y,theta,.37,.14,.06,.72,.020);
+        const leftNeck=field(y,theta,-.20,.14,Math.PI,.72,.018);
+        const leftWaist=field(y,theta,.03,.28,Math.PI,.88,.006);
+        const rightWaist=field(y,theta,.02,.28,-.08,.88,.007);
+        const rearCut=field(y,theta,.02,.44,-Math.PI*.50,.86,.008);
         const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
         rx*=radial;
         rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.16-rightNeck*.12-leftNeck*.08-leftWaist*.10-rearCut*.60;
 
         p.set(ox+cx*rx,y*.972,oz+cz*rz);
-        p.x+=-.020*y+.016*Math.sin((y+.12)*Math.PI)
-          -.010*upperLeft+.014*rightShoulder-.010*lowerLeft;
-        p.z+=-.020*p.x+.007*Math.sin(theta*2.0)*(1-Math.abs(y));
+        p.x+=-.014*y+.012*Math.sin((y+.12)*Math.PI)
+          -.006*upperLeft+.008*rightShoulder-.006*lowerLeft;
+        p.z+=-.016*p.x+.005*Math.sin(theta*2.0)*(1-Math.abs(y));
 
         const topPlane=.925-p.x*.16-p.z*.050;
         const bottomPlane=-.948-p.x*.045+p.z*.026;
@@ -1156,8 +1161,8 @@
         p.y-=crownCleft;
         p.x+=crownCleft*.11;
 
-        const socketX=(p.x-.120)/.185;
-        const socketY=(p.y-.055)/.125;
+        const socketX=(p.x-.155)/.150;
+        const socketY=(p.y-.070)/.132;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
         p.z-=.072*socket;
@@ -1936,7 +1941,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx+.120*chestEmbed,ty+.055*chestEmbed,.205-.040*chestEmbed);
+      this.coreGroup.position.set(tx+.155*chestEmbed,ty+.070*chestEmbed,.205-.040*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
@@ -1975,7 +1980,7 @@
       const maturity=smooth((t-4.25)/1.85);
       const visible=grow;
       this.organicGroup.visible=visible>.002;
-      this.organicGroup.rotation.y=(this.mobileProfile?.405:.355)+Math.sin(time*.00011)*.006+this.interactionX*.012;
+      this.organicGroup.rotation.y=(this.mobileProfile?.330:.310)+Math.sin(time*.00011)*.005+this.interactionX*.011;
       this.organicGroup.rotation.x=-.080+Math.sin(time*.00013)*.005-this.interactionY*.010;
       const bodyScale=.001+visible*.999;
       const finalScale=this.mobileProfile?1.24:1.30;
