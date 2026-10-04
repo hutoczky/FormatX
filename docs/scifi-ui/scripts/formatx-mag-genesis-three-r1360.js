@@ -170,6 +170,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1923='continuous-living-bioglass-organism-premium-optic-cinematic-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1924='crystalline-superellipse-silver-optic-clear-ice-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1037,14 +1038,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x142a2f,roughness:.068,metalness:.001,
-        clearcoat:.988,clearcoatRoughness:.026,
+        color:0x173238,roughness:.050,metalness:.001,
+        clearcoat:.992,clearcoatRoughness:.019,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000018,
         transparent:true,opacity:0,
-        transmission:this.mobileProfile?.24:.40,thickness:.34,ior:1.46,
-        attenuationColor:new T.Color(0x071d22),attenuationDistance:.72,
+        transmission:this.mobileProfile?.30:.46,thickness:.31,ior:1.46,
+        attenuationColor:new T.Color(0x08262c),attenuationDistance:.88,
         emissive:0x020708,emissiveIntensity:.0016,
-        envMapIntensity:this.mobileProfile?3.22:3.42,
+        envMapIntensity:this.mobileProfile?3.52:3.68,
         specularIntensity:1.0,specularColor:new T.Color(0xfcffff),
         sheen:.018,sheenColor:new T.Color(0xc1d7d5),sheenRoughness:.26,
         depthWrite:true
@@ -1133,7 +1134,7 @@
         const theta0=Math.atan2(n.z,n.x);
         const theta=theta0+y*.075+Math.sin(y*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=2.62;
+        const superN=3.12;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
@@ -1948,7 +1949,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx+.155*chestEmbed,ty+.070*chestEmbed,.205-.040*chestEmbed);
+      this.coreGroup.position.set(tx+.115*chestEmbed,ty+.040*chestEmbed,.205-.040*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
