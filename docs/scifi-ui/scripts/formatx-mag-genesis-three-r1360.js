@@ -157,6 +157,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1906='sleek-profile-ice-shard-centered-genome-broad-softbox-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1908='runtime-fixed-single-crystal-genome-gallery-sequence';
       document.documentElement.dataset.fxMagBirthVisualR1909='igloo-grade-single-genome-to-slender-smoked-ice-monolith';
+      document.documentElement.dataset.fxMagBirthVisualR1910='single-genome-to-fused-living-ice-gallery-organism-visible-aperture';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -857,7 +858,7 @@
       const socketBezel=new T.Mesh(
         new T.TorusGeometry(.171,.0022,28,192),
         new T.MeshPhysicalMaterial({
-          color:0x9aa9a6,metalness:.035,roughness:.060,
+          color:0xc0cbc7,metalness:.025,roughness:.050,
           clearcoat:.98,clearcoatRoughness:.030,
           emissive:0x010506,emissiveIntensity:.001,
           specularIntensity:.98,specularColor:new T.Color(0xf8ffff),
@@ -869,7 +870,7 @@
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
-        color:0x06151a,metalness:0,roughness:.024,
+        color:0x081b21,metalness:0,roughness:.020,
         clearcoat:.995,clearcoatRoughness:.018,
         transmission:.62,thickness:.24,ior:1.49,
         attenuationColor:new T.Color(0x052a31),attenuationDistance:.15,
@@ -889,7 +890,7 @@
         new T.MeshPhysicalMaterial({
           color:0x8de8e7,metalness:0,roughness:.060,
           clearcoat:.95,clearcoatRoughness:.032,
-          emissive:0x07515a,emissiveIntensity:.11,
+          emissive:0x08636b,emissiveIntensity:.16,
           transparent:true,opacity:.22,depthWrite:false,
           blending:T.AdditiveBlending
         })
@@ -1023,16 +1024,16 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x0b1b20,roughness:.035,metalness:.001,
-        clearcoat:.99,clearcoatRoughness:.024,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00016,
+        color:0x071116,roughness:.026,metalness:.001,
+        clearcoat:.995,clearcoatRoughness:.018,
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.00010,
         transparent:true,opacity:0,
-        transmission:.66,thickness:.62,ior:1.50,
-        attenuationColor:new T.Color(0x061f25),attenuationDistance:.23,
-        emissive:0x010506,emissiveIntensity:.0008,
-        envMapIntensity:3.85,
+        transmission:.72,thickness:.58,ior:1.50,
+        attenuationColor:new T.Color(0x05171c),attenuationDistance:.19,
+        emissive:0x010405,emissiveIntensity:.0005,
+        envMapIntensity:4.10,
         specularIntensity:1.0,specularColor:new T.Color(0xffffff),
-        sheen:.010,sheenColor:new T.Color(0x77999b),sheenRoughness:.24,
+        sheen:.006,sheenColor:new T.Color(0x6f9194),sheenRoughness:.20,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
@@ -1056,23 +1057,23 @@
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
       const profileR1905=[
-        /* R1909 — exact cinematic parity with the permanent slender monolith. */
-        [ 1.00,.034,.028,-.040,-.008],
-        [ .91,.095,.070,-.070,-.008],
-        [ .79,.205,.145,-.096,-.006],
-        [ .66,.315,.220,-.088,-.004],
-        [ .52,.405,.282,-.054, .000],
-        [ .38,.462,.318, .002, .003],
-        [ .23,.492,.340, .048, .004],
-        [ .08,.500,.346, .068, .004],
-        [-.07,.472,.330, .056, .003],
-        [-.22,.420,.294, .024, .002],
-        [-.38,.355,.246,-.010, .000],
-        [-.54,.292,.201,-.024,-.003],
-        [-.69,.222,.150,-.022,-.005],
-        [-.82,.154,.102,-.010,-.006],
-        [-.93,.074,.050, .000,-.006],
-        [-1.00,.024,.018, .006,-.004]
+        /* R1910 — exact cinematic parity with the fused living-ice MAG. */
+        [ 1.00,.026,.022,-.035,-.008],
+        [ .91,.078,.055,-.065,-.008],
+        [ .79,.180,.125,-.095,-.006],
+        [ .66,.305,.210,-.100,-.004],
+        [ .52,.425,.290,-.070, .000],
+        [ .38,.505,.342,-.015, .003],
+        [ .23,.475,.326, .040, .004],
+        [ .08,.395,.275, .078, .004],
+        [-.07,.445,.305, .070, .003],
+        [-.22,.475,.324, .025, .002],
+        [-.38,.390,.266,-.015, .000],
+        [-.54,.290,.196,-.028,-.003],
+        [-.69,.215,.145,-.024,-.005],
+        [-.82,.145,.096,-.012,-.006],
+        [-.93,.068,.046, .000,-.006],
+        [-1.00,.022,.016, .006,-.004]
       ];
       const sampleProfile=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -1104,12 +1105,12 @@
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const upperLeft=field(y,theta,.57,.24,Math.PI,.74,.035);
-        const rightShoulder=field(y,theta,.18,.27,0,.68,.040);
-        const lowerLeft=field(y,theta,-.42,.24,2.62,.74,.015);
-        const leftWaist=field(y,theta,-.12,.19,Math.PI,.62,.050);
-        const rightWaist=field(y,theta,-.24,.20,-.20,.62,.028);
-        const rearCut=field(y,theta,.05,.36,-Math.PI*.50,.72,.024);
+        const upperLeft=field(y,theta,.57,.24,Math.PI,.74,.030);
+        const rightShoulder=field(y,theta,.31,.25,0,.68,.043);
+        const lowerLeft=field(y,theta,-.30,.24,2.62,.74,.030);
+        const leftWaist=field(y,theta,.06,.18,Math.PI,.62,.055);
+        const rightWaist=field(y,theta,.05,.18,-.12,.62,.072);
+        const rearCut=field(y,theta,.05,.36,-Math.PI*.50,.72,.022);
         const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
         rx*=radial;
         rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.12-leftWaist*.10-rearCut*.60;
@@ -1154,13 +1155,13 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x10262a,roughness:.038,metalness:0,
-        clearcoat:.99,clearcoatRoughness:.022,
-        transmission:.82,thickness:.14,ior:1.48,
-        attenuationColor:new T.Color(0x08262b),attenuationDistance:.24,
+        color:0x0b1d22,roughness:.026,metalness:0,
+        clearcoat:.995,clearcoatRoughness:.018,
+        transmission:.88,thickness:.11,ior:1.48,
+        attenuationColor:new T.Color(0x061b20),attenuationDistance:.20,
         transparent:true,opacity:0,depthWrite:false,
-        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000035,
-        envMapIntensity:2.85,side:T.FrontSide
+        roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000020,
+        envMapIntensity:3.10,side:T.FrontSide
       });
       this.organicMembrane=new T.Mesh(shellGeo.clone(),this.organicMembraneMaterial);
       this.organicMembrane.scale.set(.958,1.008,.938);
@@ -1938,11 +1939,11 @@
       this.irisGroup.visible=irisAwake>.004;
       this.irisGroup.scale.setScalar((this.mobileProfile?1.06:1.08)*(1+irisAwake*.014)*pulse);
       if(this.livingIris){
-        this.livingIris.material.opacity=(.26+.30*irisAwake)*irisAwake;
+        this.livingIris.material.opacity=(.34+.34*irisAwake)*irisAwake;
         this.livingIris.rotation.z=-.66+Math.sin(time*.00055)*.018;
       }
       if(this.irisCorona)this.irisCorona.material.opacity=.0035*irisAwake;
-      this.glowSprite.material.opacity=(.0006+.0018*irisAwake)*irisAwake*pulse;
+      this.glowSprite.material.opacity=(.0010+.0024*irisAwake)*irisAwake*pulse;
       this.glowSprite.scale.setScalar(.46+irisAwake*.05+this.interactionImpulse*.012);
       this.coreInner.material.opacity=.016*irisAwake*(1-seedHandoff);
       this.coreLight.intensity=.10*coreLife+irisAwake*.34+this.interactionImpulse*.06;
