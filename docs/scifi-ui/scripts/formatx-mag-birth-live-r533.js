@@ -512,7 +512,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261005-r1924-continuous-living-bioglass';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261005-r1925-clear-ice-flush-optic';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
