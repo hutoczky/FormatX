@@ -164,6 +164,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1914='flush-silver-glass-sensor-no-eye-deeper-crown-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1915='overlapped-genome-seed-to-three-mass-dark-glass-no-dead-zone';
       document.documentElement.dataset.fxMagBirthVisualR1916='sculpted-side-neck-horizontal-glass-sensor-cinematic-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1917='three-lobe-sculptural-valleys-premium-black-glass-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1071,14 +1072,14 @@
         [ .69,.320,.214,-.120,-.004],
         [ .56,.455,.300,-.102,-.001],
         [ .43,.530,.344,-.052, .002],
-        [ .30,.560,.360, .012, .004],
-        [ .17,.535,.346, .064, .005],
-        [ .03,.500,.326, .086, .005],
-        [-.11,.468,.300, .076, .004],
-        [-.25,.438,.276, .038, .002],
-        [-.40,.392,.242,-.010, .000],
-        [-.55,.310,.184,-.046,-.003],
-        [-.70,.216,.128,-.052,-.005],
+        [ .30,.575,.370, .020, .004],
+        [ .17,.545,.352, .070, .005],
+        [ .03,.505,.330, .090, .005],
+        [-.11,.470,.302, .060, .004],
+        [-.25,.452,.286,-.005, .002],
+        [-.40,.425,.258,-.065, .000],
+        [-.55,.340,.202,-.085,-.003],
+        [-.70,.232,.138,-.062,-.005],
         [-.84,.128,.074,-.032,-.006],
         [-.94,.056,.032,-.012,-.005],
         [-1.00,.016,.011, .000,-.003]
@@ -1113,11 +1114,11 @@
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
-        const upperLeft=field(y,theta,.57,.25,Math.PI,.72,.088);
-        const rightShoulder=field(y,theta,.25,.25,0,.64,.092);
-        const lowerLeft=field(y,theta,-.42,.24,2.58,.70,.064);
-        const rightNeck=field(y,theta,.53,.13,.04,.54,.070);
-        const leftNeck=field(y,theta,-.22,.14,Math.PI,.58,.046);
+        const upperLeft=field(y,theta,.57,.25,Math.PI,.72,.108);
+        const rightShoulder=field(y,theta,.25,.24,0,.62,.108);
+        const lowerLeft=field(y,theta,-.43,.23,2.58,.68,.102);
+        const rightNeck=field(y,theta,.53,.13,.04,.52,.094);
+        const leftNeck=field(y,theta,-.20,.14,Math.PI,.56,.070);
         const leftWaist=field(y,theta,.04,.21,Math.PI,.70,.030);
         const rightWaist=field(y,theta,.03,.21,-.10,.68,.038);
         const rearCut=field(y,theta,.04,.38,-Math.PI*.50,.72,.022);
@@ -1154,6 +1155,9 @@
         const socketY=(p.y+.030)/.110;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,zs);
         p.z-=.082*socket;
+        const creaseA=Math.exp(-Math.pow((p.x+.075+p.y*.18)/.105,2.0))*Math.max(0,1-Math.abs(p.y));
+        const creaseB=Math.exp(-Math.pow((p.x-.205-p.y*.10)/.090,2.0))*Math.max(0,1-Math.abs(p.y));
+        p.z-=.024*creaseA+.016*creaseB;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
