@@ -38,7 +38,7 @@ root.dataset.fxP0MotionCacheR1774='phase2-fetch-only-final-mag-prewarm';
 root.dataset.fxP0MotionCacheR1830='igloo-grade-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261004-r1914b-flush-aperture-visible';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261004-r1915-igloo-three-mass-dark-glass';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
