@@ -469,30 +469,33 @@
          cross-sections: one monolithic object with a crown cleft, narrow waist,
          unequal shoulders and deliberate cut planes. */
       const profileR1905=[
-        /* R1920 — asymmetric three-mass gallery sculpt.
-           The profile itself carries the silhouette now: upper-left mass,
-           right-centre mass and lower-left mass are fused by two narrow necks.
-           This removes the single stretched slab / potato read in mobile proof. */
-        [ 1.00,.018,.014,-.055,-.008],
-        [ .92,.086,.056,-.105,-.008],
-        [ .82,.220,.145,-.170,-.006],
-        [ .72,.382,.252,-.205,-.004],
-        [ .62,.505,.330,-.185,-.002],
-        [ .52,.540,.350,-.125, .000],
-        [ .42,.500,.322,-.050, .002],
-        [ .32,.548,.352, .055, .004],
-        [ .20,.625,.402, .145, .006],
-        [ .08,.600,.390, .155, .006],
-        [-.04,.515,.338, .080, .005],
-        [-.16,.470,.305,-.015, .003],
-        [-.28,.535,.340,-.110, .001],
-        [-.40,.555,.345,-.165,-.001],
-        [-.52,.470,.285,-.155,-.003],
-        [-.64,.350,.210,-.110,-.005],
-        [-.76,.235,.140,-.070,-.006],
-        [-.88,.115,.070,-.030,-.006],
-        [-.96,.045,.028,-.010,-.004],
-        [-1.00,.015,.010, .000,-.003]
+        /* R1921 — three visibly separated fused ice masses.
+           Deep but rounded necks create a sculptural S silhouette. The object
+           stays a single watertight mesh; separation is purely authored volume. */
+        [ 1.00,.016,.012,-.070,-.008],
+        [ .93,.080,.052,-.125,-.008],
+        [ .84,.225,.145,-.205,-.006],
+        [ .74,.430,.275,-.255,-.004],
+        [ .64,.590,.365,-.250,-.002],
+        [ .55,.650,.395,-.205, .000],
+        [ .47,.575,.348,-.125, .002],
+        [ .39,.405,.255,-.030, .003],
+        [ .31,.360,.235, .055, .004],
+        [ .23,.525,.330, .145, .006],
+        [ .14,.665,.410, .205, .008],
+        [ .04,.700,.430, .215, .008],
+        [-.06,.605,.375, .140, .007],
+        [-.15,.430,.270, .025, .004],
+        [-.23,.360,.235,-.060, .002],
+        [-.32,.500,.310,-.150, .000],
+        [-.42,.615,.365,-.220,-.002],
+        [-.52,.630,.360,-.235,-.004],
+        [-.62,.535,.305,-.200,-.005],
+        [-.72,.390,.225,-.140,-.006],
+        [-.82,.235,.138,-.080,-.006],
+        [-.91,.105,.064,-.035,-.006],
+        [-.97,.040,.025,-.012,-.004],
+        [-1.00,.014,.009, .000,-.003]
       ];
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -533,14 +536,14 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.59,.29,Math.PI,.82,.092);
-        const rightShoulder=field(.18,.28,.02,.78,.088);
-        const lowerLeft=field(-.39,.28,2.56,.80,.084);
-        const rightNeck=field(.43,.15,.06,.68,.045);
-        const leftNeck=field(-.10,.16,Math.PI,.70,.038);
-        const leftWaist=field(.04,.26,Math.PI,.84,.012);
-        const rightWaist=field(.02,.25,-.08,.82,.014);
-        const rearCut=field(.02,.42,-Math.PI*.50,.82,.012);
+        const upperLeft=field(.60,.31,Math.PI,.86,.050);
+        const rightShoulder=field(.10,.31,.02,.84,.048);
+        const lowerLeft=field(-.46,.31,2.58,.86,.046);
+        const rightNeck=field(.37,.14,.06,.72,.020);
+        const leftNeck=field(-.20,.14,Math.PI,.72,.018);
+        const leftWaist=field(.03,.28,Math.PI,.88,.006);
+        const rightWaist=field(.02,.28,-.08,.88,.007);
+        const rearCut=field(.02,.44,-Math.PI*.50,.86,.008);
         const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
 
         rx*=radial;
@@ -552,9 +555,9 @@
           oz+cz*rz
         ];
 
-        p[0]+=-.020*cp+.016*Math.sin((cp+.12)*Math.PI)
-          -.010*upperLeft+.014*rightShoulder-.010*lowerLeft;
-        p[2]+=-.020*p[0]+.007*Math.sin(theta*2.0)*(1-Math.abs(cp));
+        p[0]+=-.014*cp+.012*Math.sin((cp+.12)*Math.PI)
+          -.006*upperLeft+.008*rightShoulder-.006*lowerLeft;
+        p[2]+=-.016*p[0]+.005*Math.sin(theta*2.0)*(1-Math.abs(cp));
 
         let cutNormal=null,cutWeight=0;
         const registerCut=(normal,overshoot,base=.62)=>{
@@ -952,9 +955,9 @@
     }
 
     {
-      const centreX=.120,centreY=.055;
+      const centreX=.155,centreY=.070;
       const bezelSteps=auditMode?88:(software?104:mobile?128:144),bezelTubeSteps=auditMode?10:(software?10:mobile?12:14),bezelZ=.602;
-      const bezelMajorX=.132,bezelMajorY=.072,bezelTube=.0031;
+      const bezelMajorX=.102,bezelMajorY=.084,bezelTube=.0034;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -979,9 +982,9 @@
       }
 
       const lensCenter=[centreX,centreY,.614];
-      const lensRadiusX=.124;
-      const lensRadiusY=.064;
-      const lensDepth=.028;
+      const lensRadiusX=.094;
+      const lensRadiusY=.076;
+      const lensDepth=.031;
       const radialSteps=auditMode?14:(software?16:mobile?20:22);
       const angularSteps=auditMode?96:(software?112:mobile?128:144);
       function lensVertex(radial,angle){
@@ -1065,8 +1068,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.10) contrast(1.045) saturate(.90)'
-      : 'brightness(1.07) contrast(1.055) saturate(.92)';
+      ? 'brightness(1.08) contrast(1.08) saturate(.94)'
+      : 'brightness(1.06) contrast(1.07) saturate(.95)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1192,7 +1195,7 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*.038*uLayer;
-        float yaw=${mobile?'.515':'.445'}+uRotation.y+uPointer.x*.13+uTime*.008;
+        float yaw=${mobile?'.405':'.365'}+uRotation.y+uPointer.x*.12+uTime*.007;
         float pitch=-.070+uRotation.x-uPointer.y*.085+.006*sin(uTime*.19);
         float roll=-.045+uRotation.z+uPointer.x*uPointer.y*.022+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
@@ -1442,10 +1445,10 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
         float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorHalo=exp(-pow(lensVector.x/.255,2.0)-pow(lensVector.y/.205,2.0));
-        float sensorCore=exp(-pow(lensVector.x/.120,2.0)-pow(lensVector.y/.100,2.0));
-        float sensorArc=exp(-pow((lensRadial-.235)/.055,2.0))*smoothstep(.18,.82,vUv.x);
-        float lensHot=exp(-pow(lensVector.x/.225,2.0)-pow(lensVector.y/.165,2.0));
+        float sensorHalo=exp(-pow(lensVector.x/.230,2.0)-pow(lensVector.y/.230,2.0));
+        float sensorCore=exp(-pow(lensVector.x/.105,2.0)-pow(lensVector.y/.105,2.0));
+        float sensorArc=exp(-pow((lensRadial-.255)/.045,2.0));
+        float lensHot=exp(-pow(lensVector.x/.190,2.0)-pow(lensVector.y/.190,2.0));
         float lensGlint=exp(-pow((vUv.x-.31)/.060,2.0)-pow((vUv.y-.27)/.050,2.0));
         float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
         vec3 physicalLens=vec3(.0012,.005,.007);
@@ -1533,21 +1536,21 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.115+ndl*.205+sideLight*.150+fillLight*.080);
+        float lift=sat(.075+ndl*.160+sideLight*.120+fillLight*.060);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.013,.024,.030),vec3(.205,.238,.238),lift);
+        vec3 col=mix(vec3(.004,.010,.014),vec3(.092,.126,.132),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(1.00,1.00,.99)*keySpec*.150;
         col+=vec3(.58,.72,.74)*sideSpec*.110;
-        col+=vec3(1.00,1.00,.99)*softboxA*.285;
-        col+=vec3(.46,.66,.69)*softboxB*.062;
-        col+=vec3(1.00,1.00,.99)*studioRibbonA*.175;
-        col+=vec3(.40,.27,.18)*studioRibbonB*.009;
-        col+=vec3(.70,.95,.98)*studioRibbonC*.155;
+        col+=vec3(1.00,1.00,.99)*softboxA*.350;
+        col+=vec3(.50,.72,.74)*softboxB*.078;
+        col+=vec3(1.00,1.00,.99)*studioRibbonA*.245;
+        col+=vec3(.40,.27,.18)*studioRibbonB*.006;
+        col+=vec3(.72,.98,1.00)*studioRibbonC*.205;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
         col+=vec3(.034,.120,.138)*fresnel*.128;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1556,8 +1559,10 @@
         col+=vec3(.004,.006,.007)*(.10+.12*fillLight+.04*max(0.0,-n.y));
         col+=vec3(.050,.057,.056)*pow(planeKey,.82)*.105;
         col+=vec3(.030,.026,.022)*pow(planeFill,.90)*.060;
-        float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        col+=vec3(.016,.050,.058)*edgeTransmission*.26;
+        float edgeTransmission=pow(1.0-facing,2.15)*(1.0-sat(ndl*.48));
+        float glassEdge=pow(1.0-facing,1.38)*bodyMask;
+        col+=vec3(.024,.090,.104)*edgeTransmission*.44;
+        col+=vec3(.050,.180,.205)*glassEdge*.20;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
         float sculptValleyA=exp(-pow((vLocal.x+.035)/.110,2.0)-pow((vLocal.y-.22)/.43,2.0))*bodyMask;
@@ -1574,14 +1579,14 @@
         float innerPulse=exp(-pow((vLocal.x-.018)/.22,2.0)-pow((vLocal.y+.02)/.48,2.0))*smoothstep(.05,.62,vLocal.z)*bodyMask;
         col+=vec3(.82,.94,.93)*glassRibbon*.105;
         col+=vec3(.012,.092,.108)*innerPulse*(.030+.045*uEnergy);
-        vec2 socketQ=vec2((vLocal.x-.120)/.182,(vLocal.y-.055)/.126);
+        vec2 socketQ=vec2((vLocal.x-.155)/.150,(vLocal.y-.070)/.132);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.72)*smoothstep(.06,.58,vLocal.z)*bodyMask;
         col*=1.0-.075*socketShade;
         col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.018,.145,.168),vec3(.105,.030,.132),chromaSide)*fresnel*bodyMask*.120;
+        col+=mix(vec3(.018,.165,.190),vec3(.095,.028,.118),chromaSide)*fresnel*bodyMask*.105;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1620,10 +1625,10 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
         float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorHalo=exp(-pow(lensVector.x/.255,2.0)-pow(lensVector.y/.205,2.0));
-        float sensorCore=exp(-pow(lensVector.x/.120,2.0)-pow(lensVector.y/.100,2.0));
-        float sensorArc=exp(-pow((lensRadial-.235)/.055,2.0))*smoothstep(.18,.82,vUv.x);
-        float lensHot=exp(-pow(lensVector.x/.225,2.0)-pow(lensVector.y/.165,2.0));
+        float sensorHalo=exp(-pow(lensVector.x/.230,2.0)-pow(lensVector.y/.230,2.0));
+        float sensorCore=exp(-pow(lensVector.x/.105,2.0)-pow(lensVector.y/.105,2.0));
+        float sensorArc=exp(-pow((lensRadial-.255)/.045,2.0));
+        float lensHot=exp(-pow(lensVector.x/.190,2.0)-pow(lensVector.y/.190,2.0));
         float lensGlint=exp(-pow((vUv.x-.31)/.060,2.0)-pow((vUv.y-.27)/.050,2.0));
         float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
         vec3 physicalLens=vec3(.005,.020,.025)
@@ -1653,7 +1658,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
         outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.48),clamp(outAlpha,.94,1.0));
+        ${outputName}=vec4(filmic(col*2.42),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1755,7 +1760,7 @@
         col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
         col+=vec3(.013,.030,.035)*bodyMask*(.34+.40*facing);
         col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
-        vec2 socketQ=vec2((vLocal.x-.120)/.182,(vLocal.y-.055)/.126);
+        vec2 socketQ=vec2((vLocal.x-.155)/.150,(vLocal.y-.070)/.132);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
         float opticCaustic=exp(-dot(socketQ,socketQ)*.70)*smoothstep(.04,.58,vLocal.z)*bodyMask;
@@ -1856,6 +1861,7 @@
     root.dataset.fxNativeMagStudioR1918='dim-sensor-bezel-continuity-ready';
     root.dataset.fxNativeMagStudioR1919='igloo-ice-gallery-three-mass-visible-volume-offset-oval-aperture';
     root.dataset.fxNativeMagStudioR1920='three-distinct-fused-masses-smoked-silver-ice-readable-mobile-volume';
+    root.dataset.fxNativeMagStudioR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
