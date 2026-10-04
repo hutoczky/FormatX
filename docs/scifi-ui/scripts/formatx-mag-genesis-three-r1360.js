@@ -168,6 +168,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1919='igloo-ice-gallery-visible-volume-offset-oval-aperture-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1920='three-distinct-fused-masses-smoked-silver-ice-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic-cinematic-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -1035,11 +1036,11 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x294b50,roughness:.060,metalness:.001,
+        color:0x24474d,roughness:.052,metalness:.001,
         clearcoat:.988,clearcoatRoughness:.026,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000018,
         transparent:true,opacity:0,
-        transmission:this.mobileProfile?.10:.26,thickness:.44,ior:1.47,
+        transmission:this.mobileProfile?.16:.30,thickness:.42,ior:1.47,
         attenuationColor:new T.Color(0x0c343a),attenuationDistance:.96,
         emissive:0x020708,emissiveIntensity:.0016,
         envMapIntensity:this.mobileProfile?3.22:3.42,
@@ -1076,14 +1077,14 @@
         [ .64,.590,.365,-.250,-.002],
         [ .55,.650,.395,-.205, .000],
         [ .47,.575,.348,-.125, .002],
-        [ .39,.405,.255,-.030, .003],
-        [ .31,.360,.235, .055, .004],
+        [ .39,.445,.278,-.030, .003],
+        [ .31,.410,.258, .055, .004],
         [ .23,.525,.330, .145, .006],
         [ .14,.665,.410, .205, .008],
         [ .04,.700,.430, .215, .008],
         [-.06,.605,.375, .140, .007],
-        [-.15,.430,.270, .025, .004],
-        [-.23,.360,.235,-.060, .002],
+        [-.15,.465,.286, .025, .004],
+        [-.23,.410,.258,-.060, .002],
         [-.32,.500,.310,-.150, .000],
         [-.42,.615,.365,-.220,-.002],
         [-.52,.630,.360,-.235,-.004],
@@ -1097,11 +1098,23 @@
       const sampleProfile=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
         if(y<=profileR1905[profileR1905.length-1][0])return profileR1905[profileR1905.length-1];
+        const catmull=(p0,p1,p2,p3,t)=>{
+          const t2=t*t,t3=t2*t;
+          return .5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3);
+        };
         for(let j=0;j<profileR1905.length-1;j++){
           const a=profileR1905[j],b=profileR1905[j+1];
           if(y<=a[0]&&y>=b[0]){
             const q=(a[0]-y)/Math.max(.0001,a[0]-b[0]);
-            return [y,a[1]+(b[1]-a[1])*q,a[2]+(b[2]-a[2])*q,a[3]+(b[3]-a[3])*q,a[4]+(b[4]-a[4])*q];
+            const p0=profileR1905[Math.max(0,j-1)];
+            const p3=profileR1905[Math.min(profileR1905.length-1,j+2)];
+            return [
+              y,
+              Math.max(.008,catmull(p0[1],a[1],b[1],p3[1],q)),
+              Math.max(.006,catmull(p0[2],a[2],b[2],p3[2],q)),
+              catmull(p0[3],a[3],b[3],p3[3],q),
+              catmull(p0[4],a[4],b[4],p3[4],q)
+            ];
           }
         }
         return profileR1905[profileR1905.length-1];
@@ -1165,10 +1178,7 @@
         const socketY=(p.y-.070)/.132;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p.z-=.072*socket;
-        const creaseA=Math.exp(-Math.pow((p.x+.120+p.y*.16)/.105,2.0))*Math.exp(-Math.pow((p.y-.29)/.50,2.0))*frontness;
-        const creaseB=Math.exp(-Math.pow((p.x-.205-p.y*.10)/.092,2.0))*Math.exp(-Math.pow((p.y+.24)/.38,2.0))*frontness;
-        p.z-=.026*creaseA+.020*creaseB;
+        p.z-=.064*socket;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
