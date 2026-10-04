@@ -469,33 +469,33 @@
          cross-sections: one monolithic object with a crown cleft, narrow waist,
          unequal shoulders and deliberate cut planes. */
       const profileR1905=[
-        /* R1921 — three visibly separated fused ice masses.
-           Deep but rounded necks create a sculptural S silhouette. The object
-           stays a single watertight mesh; separation is purely authored volume. */
-        [ 1.00,.016,.012,-.070,-.008],
-        [ .93,.080,.052,-.125,-.008],
-        [ .84,.225,.145,-.205,-.006],
-        [ .74,.430,.275,-.255,-.004],
-        [ .64,.590,.365,-.250,-.002],
-        [ .55,.650,.395,-.205, .000],
-        [ .47,.575,.348,-.125, .002],
-        [ .39,.445,.278,-.030, .003],
-        [ .31,.410,.258, .055, .004],
-        [ .23,.525,.330, .145, .006],
-        [ .14,.665,.410, .205, .008],
-        [ .04,.700,.430, .215, .008],
-        [-.06,.605,.375, .140, .007],
-        [-.15,.465,.286, .025, .004],
-        [-.23,.410,.258,-.060, .002],
-        [-.32,.500,.310,-.150, .000],
-        [-.42,.615,.365,-.220,-.002],
-        [-.52,.630,.360,-.235,-.004],
-        [-.62,.535,.305,-.200,-.005],
-        [-.72,.390,.225,-.140,-.006],
-        [-.82,.235,.138,-.080,-.006],
-        [-.91,.105,.064,-.035,-.006],
-        [-.97,.040,.025,-.012,-.004],
-        [-1.00,.014,.009, .000,-.003]
+        /* R1923 — continuous living bioglass body.
+           The stacked three-lump silhouette is removed. One asymmetric,
+           tensioned volume now carries a soft crown, broad thorax, restrained
+           waist and tapered base without reading as an egg or mascot. */
+        [ 1.00,.018,.012,-.050,-.008],
+        [ .93,.105,.068,-.082,-.008],
+        [ .84,.255,.166,-.112,-.006],
+        [ .74,.410,.265,-.128,-.004],
+        [ .64,.535,.342,-.118,-.002],
+        [ .54,.610,.388,-.090, .000],
+        [ .44,.646,.410,-.048, .002],
+        [ .34,.640,.405,-.002, .004],
+        [ .24,.607,.382, .040, .006],
+        [ .14,.568,.360, .070, .008],
+        [ .04,.552,.352, .082, .008],
+        [-.06,.565,.358, .076, .007],
+        [-.16,.596,.374, .052, .004],
+        [-.26,.620,.386, .016, .002],
+        [-.36,.618,.382,-.026, .000],
+        [-.46,.585,.360,-.062,-.002],
+        [-.56,.520,.318,-.086,-.004],
+        [-.66,.430,.262,-.094,-.005],
+        [-.76,.330,.202,-.080,-.006],
+        [-.85,.225,.140,-.056,-.006],
+        [-.92,.122,.076,-.030,-.005],
+        [-.97,.052,.032,-.012,-.004],
+        [-1.00,.016,.010, .000,-.003]
       ];
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -531,7 +531,7 @@
 
         const theta=theta0+cp*.075+Math.sin(cp*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=3.45;
+        const superN=2.62;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
@@ -542,18 +542,15 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.60,.31,Math.PI,.86,.050);
-        const rightShoulder=field(.10,.31,.02,.84,.048);
-        const lowerLeft=field(-.46,.31,2.58,.86,.046);
-        const rightNeck=field(.37,.14,.06,.72,.020);
-        const leftNeck=field(-.20,.14,Math.PI,.72,.018);
-        const leftWaist=field(.03,.28,Math.PI,.88,.006);
-        const rightWaist=field(.02,.28,-.08,.88,.007);
-        const rearCut=field(.02,.44,-Math.PI*.50,.86,.008);
-        const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
+        const upperLeft=field(.54,.36,Math.PI,.95,.028);
+        const rightShoulder=field(.10,.38,.04,.96,.024);
+        const lowerLeft=field(-.42,.36,2.62,.96,.020);
+        const frontChest=field(.02,.44,Math.PI*.50,.92,.018);
+        const rearCut=field(.02,.50,-Math.PI*.50,1.02,.010);
+        const radial=1+upperLeft+rightShoulder+lowerLeft+frontChest-rearCut;
 
         rx*=radial;
-        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.16-rightNeck*.12-leftNeck*.08-leftWaist*.10-rearCut*.60;
+        rz*=1+upperLeft*.20+rightShoulder*.16+lowerLeft*.10+frontChest*.12-rearCut*.30;
 
         let p=[
           ox+cx*rx,
@@ -561,8 +558,8 @@
           oz+cz*rz
         ];
 
-        p[0]+=-.014*cp+.012*Math.sin((cp+.12)*Math.PI)
-          -.006*upperLeft+.008*rightShoulder-.006*lowerLeft;
+        p[0]+=-.012*cp+.010*Math.sin((cp+.10)*Math.PI)
+          -.004*upperLeft+.006*rightShoulder-.003*lowerLeft;
         p[2]+=-.016*p[0]+.005*Math.sin(theta*2.0)*(1-Math.abs(cp));
 
         let cutNormal=null,cutWeight=0;
@@ -571,8 +568,8 @@
           if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
         };
 
-        const topPlane=.925-p[0]*.16-p[2]*.050;
-        const bottomPlane=-.948-p[0]*.045+p[2]*.026;
+        const topPlane=.948-p[0]*.085-p[2]*.028;
+        const bottomPlane=-.962-p[0]*.028+p[2]*.018;
         if(p[1]>topPlane){
           const over=p[1]-topPlane;
           p[1]=topPlane+over*.24;
@@ -584,10 +581,10 @@
           registerCut([-.05,-1,.03],over,.66);
         }
 
-        const leftPlane=-.585+.145*p[1]-.030*p[2];
-        const rightPlane=.565-.080*p[1]+.024*p[2];
-        const frontPlane=.470-.048*p[1]-.040*p[0];
-        const backPlane=-.430+.025*p[1]+.020*p[0];
+        const leftPlane=-.620+.082*p[1]-.020*p[2];
+        const rightPlane=.610-.048*p[1]+.018*p[2];
+        const frontPlane=.500-.030*p[1]-.026*p[0];
+        const backPlane=-.458+.018*p[1]+.014*p[0];
         if(p[0]<leftPlane){
           const over=leftPlane-p[0];
           p[0]=leftPlane-over*.30;
@@ -609,17 +606,17 @@
           registerCut([.02,.03,-1],over,.56);
         }
 
-        const crownT=Math.max(0,Math.min(1,(p[1]-.56)/.34));
+        const crownT=Math.max(0,Math.min(1,(p[1]-.62)/.28));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.092*Math.exp(-Math.pow((p[0]+.018)/.125,2.0))*crownEase;
+        const crownCleft=.026*Math.exp(-Math.pow((p[0]+.010)/.180,2.0))*crownEase;
         p[1]-=crownCleft;
-        p[0]+=crownCleft*.11;
+        p[0]+=crownCleft*.06;
 
-        const socketX=(p[0]-.155)/.150;
-        const socketY=(p[1]-.070)/.132;
+        const socketX=(p[0]-.115)/.205;
+        const socketY=(p[1]-.040)/.180;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p[2]-=.064*socket;
+        p[2]-=.082*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -958,8 +955,8 @@
     }
 
     {
-      const centreX=.155,centreY=.070;
-      const bezelSteps=auditMode?88:(software?104:mobile?128:144),bezelTubeSteps=auditMode?10:(software?10:mobile?12:14),bezelZ=.602;
+      const centreX=.115,centreY=.040;
+      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.606;
       const bezelMajorX=.102,bezelMajorY=.084,bezelTube=.0034;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -985,9 +982,9 @@
       }
 
       const lensCenter=[centreX,centreY,.614];
-      const lensRadiusX=.094;
-      const lensRadiusY=.076;
-      const lensDepth=.031;
+      const lensRadiusX=.142;
+      const lensRadiusY=.112;
+      const lensDepth=.050;
       const radialSteps=auditMode?14:(software?16:mobile?20:22);
       const angularSteps=auditMode?96:(software?112:mobile?128:144);
       function lensVertex(radial,angle){
@@ -1213,7 +1210,7 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.640':'.790'};
+        projected*= ${mobile?'.665':'.805'};
         projected.x+=${mobile?'.002':'.040'};
         projected.y+=${mobile?'.016':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
