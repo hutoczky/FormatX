@@ -155,6 +155,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1904='asymmetric-slender-gallery-sculpt-off-axis-flush-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1905='centered-crystal-genome-to-cut-gallery-shard-smoked-sensor';
       document.documentElement.dataset.fxMagBirthVisualR1906='sleek-profile-ice-shard-centered-genome-broad-softbox-sensor';
+      document.documentElement.dataset.fxMagBirthVisualR1908='runtime-fixed-single-crystal-genome-gallery-sequence';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -647,8 +648,10 @@
         [-1.70,.92,-.22,-.48,.44,.16,-.30]
       ];
       this.dnas=[];
-      for(const [x,y,z,rz,sc,rx,ry] of placements.slice(0,this.lowPowerProfile?1:(this.mobileProfile?1:2))){
-        const h=this.createHelix(i===0?3.55:2.54,i===0?.225:.170,i===0?3.20:2.55);
+      const visiblePlacements=placements.slice(0,this.lowPowerProfile?1:(this.mobileProfile?1:2));
+      for(const [i,[x,y,z,rz,sc,rx,ry]] of visiblePlacements.entries()){
+        const primary=i===0;
+        const h=this.createHelix(primary?3.55:2.54,primary?.225:.170,primary?3.20:2.55);
         h.position.set(x,y,z);
         h.rotation.set(rx,ry,rz);
         h.scale.setScalar(sc);
