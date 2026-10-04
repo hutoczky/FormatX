@@ -1184,12 +1184,12 @@
         float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0009*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
-        float creaseA=exp(-pow((base.x+.075+base.y*.18)/.105,2.0))*smoothstep(.12,.92,1.0-abs(base.y));
-        float creaseB=exp(-pow((base.x-.205-base.y*.10)/.090,2.0))*smoothstep(.18,.88,1.0-abs(base.y));
-        float sculptValley=(-.030*creaseA-.020*creaseB)*bodyVertexMask;
+        /* R1923 — the smooth cubic body is now authoritative. The legacy
+           procedural face-grooves were still deforming the first WebGL frame
+           after geometry cleanup and created a mouth/visor-like horizontal seam. */
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold+sculptValley))*layerScale*heartbeat;
+        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
@@ -1660,8 +1660,10 @@
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
-        outAlpha=mix(outAlpha,.91,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.42),clamp(outAlpha,.94,1.0));
+        float bodyGlassAlpha=.885+.075*facing;
+        outAlpha=mix(outAlpha,bodyGlassAlpha,bodyMask);
+        outAlpha=mix(outAlpha,.94,lensMeshMask);
+        ${outputName}=vec4(filmic(col*2.42),clamp(outAlpha,.87,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1866,6 +1868,7 @@
     root.dataset.fxNativeMagStudioR1920='three-distinct-fused-masses-smoked-silver-ice-readable-mobile-volume';
     root.dataset.fxNativeMagStudioR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic';
     root.dataset.fxNativeMagStudioR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic';
+    root.dataset.fxNativeMagStudioR1923='crease-free-cubic-smoked-ice-translucent-body';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
