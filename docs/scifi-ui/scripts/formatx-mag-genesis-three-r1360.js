@@ -163,6 +163,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1913='igloo-grade-visible-smoked-ice-volume-silver-cyan-aperture';
       document.documentElement.dataset.fxMagBirthVisualR1914='flush-silver-glass-sensor-no-eye-deeper-crown-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1915='overlapped-genome-seed-to-three-mass-dark-glass-no-dead-zone';
+      document.documentElement.dataset.fxMagBirthVisualR1916='sculpted-side-neck-horizontal-glass-sensor-cinematic-parity';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -857,7 +858,7 @@
         })
       );
       socketBack.position.z=.248;
-      socketBack.scale.set(1.12,.50,1);
+      socketBack.scale.set(1.14,.34,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
@@ -871,7 +872,7 @@
         })
       );
       socketBezel.position.z=.258;
-      socketBezel.scale.set(1.25,.56,1);
+      socketBezel.scale.set(1.27,.36,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -886,22 +887,23 @@
       });
       this.introLensMaterial=lensMat;
       const lens=new T.Mesh(new T.SphereGeometry(.118,128,72),lensMat);
-      lens.scale.set(1.20,.52,.13);
+      lens.scale.set(1.22,.34,.10);
       lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.TorusGeometry(.066,.0034,24,160,Math.PI*1.30),
+        new T.PlaneGeometry(.100,.006),
         new T.MeshPhysicalMaterial({
           color:0x8de8e7,metalness:0,roughness:.060,
           clearcoat:.95,clearcoatRoughness:.032,
-          emissive:0x08636b,emissiveIntensity:.20,
-          transparent:true,opacity:.30,depthWrite:false,
-          blending:T.AdditiveBlending
+          emissive:0x08636b,emissiveIntensity:.16,
+          transparent:true,opacity:.26,depthWrite:false,
+          blending:T.AdditiveBlending,side:T.DoubleSide
         })
       );
-      livingIris.position.z=.314;
-      livingIris.scale.set(1.30,.56,1);
+      livingIris.position.set(-.008,.002,.314);
+      livingIris.rotation.z=-.035;
+      livingIris.scale.set(1,1,1);
       this.livingIris=livingIris;
       this.irisGroup.add(livingIris);
 
@@ -929,7 +931,7 @@
         })
       );
       glassRing.position.z=.310;
-      glassRing.scale.set(1.30,.56,1);
+      glassRing.scale.set(1.30,.36,1);
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
@@ -939,7 +941,7 @@
         transparent:true,opacity:.018,depthWrite:false,
         blending:T.NormalBlending
       }));
-      this.irisCorona.scale.set(.56,.56,1);
+      this.irisCorona.scale.set(.54,.20,1);
       this.irisCorona.position.z=.305;
       this.irisGroup.add(this.irisCorona);
       this.coreGroup.add(this.irisGroup);
@@ -948,7 +950,7 @@
         map:this.makeGlowTexture(),color:0x9fc8cc,
         transparent:true,opacity:.012,blending:T.NormalBlending,depthWrite:false
       }));
-      this.glowSprite.scale.set(.66,.66,1);
+      this.glowSprite.scale.set(.62,.22,1);
       this.glowSprite.position.z=.29;
       this.coreGroup.add(this.glowSprite);
 
@@ -1112,14 +1114,16 @@
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
         const upperLeft=field(y,theta,.57,.25,Math.PI,.72,.088);
-        const rightShoulder=field(y,theta,.28,.27,0,.66,.074);
-        const lowerLeft=field(y,theta,-.32,.26,2.62,.72,.052);
+        const rightShoulder=field(y,theta,.25,.25,0,.64,.092);
+        const lowerLeft=field(y,theta,-.42,.24,2.58,.70,.064);
+        const rightNeck=field(y,theta,.53,.13,.04,.54,.070);
+        const leftNeck=field(y,theta,-.22,.14,Math.PI,.58,.046);
         const leftWaist=field(y,theta,.04,.21,Math.PI,.70,.030);
         const rightWaist=field(y,theta,.03,.21,-.10,.68,.038);
         const rearCut=field(y,theta,.04,.38,-Math.PI*.50,.72,.022);
-        const radial=1+upperLeft+rightShoulder+lowerLeft-leftWaist-rightWaist-rearCut;
+        const radial=1+upperLeft+rightShoulder+lowerLeft-rightNeck-leftNeck-leftWaist-rightWaist-rearCut;
         rx*=radial;
-        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.12-leftWaist*.10-rearCut*.60;
+        rz*=1+upperLeft*.30+rightShoulder*.24+lowerLeft*.16-rightNeck*.12-leftNeck*.08-leftWaist*.10-rearCut*.60;
 
         p.set(ox+cx*rx,y*.972,oz+cz*rz);
         p.x+=-.032*y+.018*Math.sin((y+.15)*Math.PI)
