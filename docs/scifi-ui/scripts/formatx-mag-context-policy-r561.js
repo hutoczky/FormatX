@@ -17,7 +17,7 @@ const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27
 const profile=mobile?'mobile':'desktop';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const WORKER='/scifi-ui/scripts/formatx-crystal-worker-r564.js?v=20261003-r869-context-phase-evidence';
+const WORKER='/scifi-ui/scripts/formatx-crystal-worker-r564.js?v=20261004-r870-separate-device-surface-allocation';
 const FALLBACK='/scifi-ui/scripts/formatx-crystal-bounded-fallback-r727.js?v=20261003-r866-dielectric-semantic-light';
 root.dataset.fxMagContextPolicyR561=`armed-${profile}-offscreen-webgl1`;
 root.dataset.fxMagStartupContractR530='living-core-autostart-navigation-owned';

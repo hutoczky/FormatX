@@ -81,7 +81,11 @@ function resize(w,h){width=Math.max(2,w|0);height=Math.max(2,h|0);canvas.width=w
 function render(){if(!gl||!program)return;gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.uniform1f(uniforms.uMorph,morph);gl.uniform1f(uniforms.uAspect,width/Math.max(1,height));gl.uniform1f(uniforms.uRotationY,rotationY);gl.uniform1f(uniforms.uBreath,breath);gl.uniform2f(uniforms.uPointer,pointerX,pointerY);gl.uniform1f(uniforms.uEnergy,energy);gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);gl.uniform1f(uniforms.uScene,scene);gl.uniform1f(uniforms.uAttention,attention);gl.drawArrays(gl.TRIANGLES,0,count);gl.flush();}
 // Context creation can wait inside a device driver before any shader executes.
 // These actual phase notifications are diagnostics, never readiness signals.
-function init(data){canvas=data.canvas;const contextAt=performance.now();postMessage({type:'phase',phase:'context-enter',at:contextAt,width:canvas.width,height:canvas.height});gl=canvas.getContext('webgl',{alpha:true,antialias:false,depth:true,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});postMessage({type:'phase',phase:'context-return',at:performance.now(),elapsed:performance.now()-contextAt,available:Boolean(gl)});if(!gl)throw new Error('offscreen webgl unavailable');
+function init(data){canvas=data.canvas;
+ // Allocate the device before its presentation-sized colour/depth surfaces.
+ // The first useful frame still uses the measured full-quality dimensions below.
+ canvas.width=2;canvas.height=2;
+ const contextAt=performance.now();postMessage({type:'phase',phase:'context-enter',at:contextAt,width:canvas.width,height:canvas.height});gl=canvas.getContext('webgl',{alpha:true,antialias:false,depth:true,stencil:false,premultipliedAlpha:false,preserveDrawingBuffer:false,powerPreference:'low-power'});postMessage({type:'phase',phase:'context-return',at:performance.now(),elapsed:performance.now()-contextAt,available:Boolean(gl)});if(!gl)throw new Error('offscreen webgl unavailable');
  // Report the actual GPU capability separately from readiness. A failed software
  // device must not be synchronously allocated again on the UI thread.
  const debug=gl.getExtension('WEBGL_debug_renderer_info');
