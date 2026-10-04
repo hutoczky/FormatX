@@ -479,14 +479,14 @@
         [ .64,.590,.365,-.250,-.002],
         [ .55,.650,.395,-.205, .000],
         [ .47,.575,.348,-.125, .002],
-        [ .39,.405,.255,-.030, .003],
-        [ .31,.360,.235, .055, .004],
+        [ .39,.445,.278,-.030, .003],
+        [ .31,.410,.258, .055, .004],
         [ .23,.525,.330, .145, .006],
         [ .14,.665,.410, .205, .008],
         [ .04,.700,.430, .215, .008],
         [-.06,.605,.375, .140, .007],
-        [-.15,.430,.270, .025, .004],
-        [-.23,.360,.235,-.060, .002],
+        [-.15,.465,.286, .025, .004],
+        [-.23,.410,.258,-.060, .002],
         [-.32,.500,.310,-.150, .000],
         [-.42,.615,.365,-.220,-.002],
         [-.52,.630,.360,-.235,-.004],
@@ -500,16 +500,22 @@
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
         if(y<=profileR1905[profileR1905.length-1][0])return profileR1905[profileR1905.length-1];
+        const catmull=(p0,p1,p2,p3,t)=>{
+          const t2=t*t,t3=t2*t;
+          return .5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3);
+        };
         for(let i=0;i<profileR1905.length-1;i++){
           const a=profileR1905[i],b=profileR1905[i+1];
           if(y<=a[0]&&y>=b[0]){
             const t=(a[0]-y)/Math.max(.0001,a[0]-b[0]);
+            const p0=profileR1905[Math.max(0,i-1)];
+            const p3=profileR1905[Math.min(profileR1905.length-1,i+2)];
             return [
               y,
-              a[1]+(b[1]-a[1])*t,
-              a[2]+(b[2]-a[2])*t,
-              a[3]+(b[3]-a[3])*t,
-              a[4]+(b[4]-a[4])*t
+              Math.max(.008,catmull(p0[1],a[1],b[1],p3[1],t)),
+              Math.max(.006,catmull(p0[2],a[2],b[2],p3[2],t)),
+              catmull(p0[3],a[3],b[3],p3[3],t),
+              catmull(p0[4],a[4],b[4],p3[4],t)
             ];
           }
         }
@@ -609,14 +615,11 @@
         p[1]-=crownCleft;
         p[0]+=crownCleft*.11;
 
-        const socketX=(p[0]-.120)/.185;
-        const socketY=(p[1]-.055)/.125;
+        const socketX=(p[0]-.155)/.150;
+        const socketY=(p[1]-.070)/.132;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p[2]-=.072*socket;
-        const creaseUpper=Math.exp(-Math.pow((p[0]+.120+p[1]*.16)/.105,2.0))*Math.exp(-Math.pow((p[1]-.29)/.50,2.0))*frontness;
-        const creaseLower=Math.exp(-Math.pow((p[0]-.205-p[1]*.10)/.092,2.0))*Math.exp(-Math.pow((p[1]+.24)/.38,2.0))*frontness;
-        p[2]-=.026*creaseUpper+.020*creaseLower;
+        p[2]-=.064*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -1540,7 +1543,7 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.004,.010,.014),vec3(.092,.126,.132),lift);
+        vec3 col=mix(vec3(.003,.008,.011),vec3(.068,.096,.104),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
@@ -1562,7 +1565,7 @@
         float edgeTransmission=pow(1.0-facing,2.15)*(1.0-sat(ndl*.48));
         float glassEdge=pow(1.0-facing,1.38)*bodyMask;
         col+=vec3(.024,.090,.104)*edgeTransmission*.44;
-        col+=vec3(.050,.180,.205)*glassEdge*.20;
+        col+=vec3(.070,.220,.245)*glassEdge*.25;
         float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
         float sculptValleyA=exp(-pow((vLocal.x+.035)/.110,2.0)-pow((vLocal.y-.22)/.43,2.0))*bodyMask;
@@ -1571,8 +1574,8 @@
         col*=1.0-.17*sculptValleyA-.12*sculptValleyB;
         col+=vec3(.046,.104,.113)*sculptShoulder*.048;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
-        col+=vec3(.060,.080,.080)*iceVolume*(.014+.012*(1.0-facing));
-        col+=vec3(.062,.078,.077)*innerVeil*(.005+.007*facing);
+        col+=vec3(.095,.170,.176)*iceVolume*(.045+.030*(1.0-facing));
+        col+=vec3(.090,.126,.126)*innerVeil*(.018+.016*facing);
         col+=vec3(.022,.048,.054)*bodyMask*(.34+.44*facing);
         col+=vec3(.018,.044,.050)*strata*iceVolume*.006;
         float glassRibbon=exp(-pow((vLocal.x+.145-vLocal.y*.070)/.052,2.0))*smoothstep(-.74,.78,vLocal.y)*bodyMask;
@@ -1862,6 +1865,7 @@
     root.dataset.fxNativeMagStudioR1919='igloo-ice-gallery-three-mass-visible-volume-offset-oval-aperture';
     root.dataset.fxNativeMagStudioR1920='three-distinct-fused-masses-smoked-silver-ice-readable-mobile-volume';
     root.dataset.fxNativeMagStudioR1921='sculptural-s-three-mass-clear-smoked-ice-round-optic';
+    root.dataset.fxNativeMagStudioR1922='c2-cubic-fused-masses-clean-surface-integrated-round-optic';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
