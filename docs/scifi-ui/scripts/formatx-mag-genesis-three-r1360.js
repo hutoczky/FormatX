@@ -161,6 +161,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1911='vertical-ice-genome-clean-dissolve-flush-aperture-cinematic';
       document.documentElement.dataset.fxMagBirthVisualR1912='genome-first-delayed-elegant-living-glass-reveal-readable-studio-volume';
       document.documentElement.dataset.fxMagBirthVisualR1913='igloo-grade-visible-smoked-ice-volume-silver-cyan-aperture';
+      document.documentElement.dataset.fxMagBirthVisualR1914='flush-silver-glass-sensor-no-eye-deeper-crown-sculpt';
       document.documentElement.dataset.fxMagBirthVisualR1832='studio-monolith-dark-bioglass-premium-optic-zero-creature-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1835='brighter-studio-volume-integrated-optic-cool-fill';
       document.documentElement.dataset.fxMagBirthVisualR1838='transparent-three-over-cinematic-gradient-subtle-habitat';
@@ -845,7 +846,7 @@
 
       this.irisGroup=new T.Group();
       const socketBack=new T.Mesh(
-        new T.CircleGeometry(.190,128),
+        new T.CircleGeometry(.132,128),
         new T.MeshPhysicalMaterial({
           color:0x071317,metalness:.01,roughness:.10,
           clearcoat:.92,clearcoatRoughness:.052,
@@ -855,11 +856,11 @@
         })
       );
       socketBack.position.z=.248;
-      socketBack.scale.set(1.22,.66,1);
+      socketBack.scale.set(1.12,.50,1);
       this.irisGroup.add(socketBack);
 
       const socketBezel=new T.Mesh(
-        new T.TorusGeometry(.171,.0022,28,192),
+        new T.TorusGeometry(.118,.0020,28,192),
         new T.MeshPhysicalMaterial({
           color:0xd5dfdc,metalness:.035,roughness:.042,
           clearcoat:.98,clearcoatRoughness:.030,
@@ -869,7 +870,7 @@
         })
       );
       socketBezel.position.z=.258;
-      socketBezel.scale.set(1.20,.65,1);
+      socketBezel.scale.set(1.25,.56,1);
       this.irisGroup.add(socketBezel);
 
       const lensMat=new T.MeshPhysicalMaterial({
@@ -883,13 +884,13 @@
         transparent:true,opacity:.99
       });
       this.introLensMaterial=lensMat;
-      const lens=new T.Mesh(new T.SphereGeometry(.168,128,72),lensMat);
-      lens.scale.set(1.28,.66,.16);
+      const lens=new T.Mesh(new T.SphereGeometry(.118,128,72),lensMat);
+      lens.scale.set(1.20,.52,.13);
       lens.position.set(-.010,.003,.274);
       this.irisGroup.add(lens);
 
       const livingIris=new T.Mesh(
-        new T.TorusGeometry(.092,.0042,24,160,Math.PI*1.30),
+        new T.TorusGeometry(.066,.0034,24,160,Math.PI*1.30),
         new T.MeshPhysicalMaterial({
           color:0x8de8e7,metalness:0,roughness:.060,
           clearcoat:.95,clearcoatRoughness:.032,
@@ -899,7 +900,7 @@
         })
       );
       livingIris.position.z=.314;
-      livingIris.scale.set(1.26,.64,1);
+      livingIris.scale.set(1.30,.56,1);
       this.livingIris=livingIris;
       this.irisGroup.add(livingIris);
 
@@ -913,11 +914,11 @@
         })
       );
       aperture.position.z=.328;
-      aperture.visible=true;
+      aperture.visible=false;
       this.irisGroup.add(aperture);
 
       const glassRing=new T.Mesh(
-        new T.TorusGeometry(.094,.0022,18,128),
+        new T.TorusGeometry(.068,.0019,18,128),
         new T.MeshPhysicalMaterial({
           color:0x789697,metalness:.06,roughness:.095,
           clearcoat:.90,clearcoatRoughness:.055,
@@ -927,7 +928,7 @@
         })
       );
       glassRing.position.z=.310;
-      glassRing.scale.set(1.30,.66,1);
+      glassRing.scale.set(1.30,.56,1);
       this.irisGroup.add(glassRing);
 
       this.irisRays=new T.Object3D();
@@ -1139,12 +1140,12 @@
 
         const crownT=Math.max(0,Math.min(1,(p.y-.56)/.34));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.030*Math.exp(-Math.pow((p.x+.025)/.100,2.0))*crownEase;
+        const crownCleft=.046*Math.exp(-Math.pow((p.x+.020)/.115,2.0))*crownEase;
         p.y-=crownCleft;
         p.x+=crownCleft*.11;
 
-        const socketX=(p.x-.055)/.215;
-        const socketY=(p.y+.025)/.145;
+        const socketX=(p.x-.075)/.190;
+        const socketY=(p.y+.030)/.110;
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*Math.max(0,zs);
         p.z-=.060*socket;
         shellPos.setXYZ(i,p.x,p.y,p.z);
@@ -1919,7 +1920,7 @@
       const tx=target.x*endMove,ty=target.y*endMove;
       const chestEmbed=smooth((t-3.10)/1.55);
       this.coreGroup.visible=coreLife>.002;
-      this.coreGroup.position.set(tx+.055*chestEmbed,ty-.025*chestEmbed,.205-.040*chestEmbed);
+      this.coreGroup.position.set(tx+.075*chestEmbed,ty-.030*chestEmbed,.205-.040*chestEmbed);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
       this.mechanicalGroup.position.set(tx,ty,.02);
