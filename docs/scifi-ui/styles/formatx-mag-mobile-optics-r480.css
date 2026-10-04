@@ -1,37 +1,25 @@
-/* FormatX R488/R502 — restrained mobile luminance, softer silhouette and compositor-safe pulse.
-   R326 remains the single WebGL/material owner and R484 keeps the periodic native
-   surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
-   PAUSE so the root playback governor freezes/resumes the same timeline object. */
+/* FormatX R876 — native mobile material clarity.
+   R326 remains the single WebGL/material owner and R484 keeps its native energy
+   sweep. Lighting, contrast and colour come from that renderer. The compositor
+   keeps the same bounded heartbeat scale without blurring or dimming the image. */
 
 @keyframes fx-primary-mag-mobile-heart-r488 {
-  0%,100% { scale: .987; opacity: .790; }
-  24% { scale: 1.000; opacity: .825; }
-  33% { scale: .994; opacity: .810; }
-  43% { scale: 1.006; opacity: .845; }
-  54% { scale: 1.000; opacity: .828; }
-  73% { scale: .990; opacity: .802; }
+  0%,100% { scale: .987; opacity: 1; }
+  24% { scale: 1.000; opacity: 1; }
+  33% { scale: .994; opacity: 1; }
+  43% { scale: 1.006; opacity: 1; }
+  54% { scale: 1.000; opacity: 1; }
+  73% { scale: .990; opacity: 1; }
 }
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
-  /* R488 phone tone: no synthetic outer drop-shadow. The WebGL material already
-     carries its own Fresnel/emission, so the compositor only feathers the native
-     edge and lowers peak energy. This directly addresses the over-extended aura
-     and razor-cut OLED edge visible in physical mobile captures. */
+  /* Preserve the shader's Fresnel, body depth and linear-light highlights.
+     Whole-canvas blur and luminance filters flatten those material cues. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .805 !important;
-    filter:
-      brightness(.895)
-      contrast(.805)
-      saturate(.975)
-      hue-rotate(-1deg)
-      blur(.82px) !important;
-    -webkit-filter:
-      brightness(.895)
-      contrast(.805)
-      saturate(.975)
-      hue-rotate(-1deg)
-      blur(.82px) !important;
+    opacity: 1 !important;
+    filter: none !important;
+    -webkit-filter: none !important;
     mix-blend-mode: normal !important;
     transform-origin: 50% 50% !important;
     scale: .992 !important;
@@ -51,14 +39,12 @@
 @media (prefers-reduced-motion:no-preference) and (max-width:900px),
        (prefers-reduced-motion:no-preference) and (pointer:coarse),
        (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25) {
-  /* R502 ownership invariant: keep the CSSAnimation declared continuously.
-     PAUSE/RESUME is owned only by the canonical root animation-play-state/WAAPI
-     governor; removing the animation rule on PAUSE would destroy its identity
-     and rewind/recreate the compositor timeline. */
+  /* Keep one continuous heartbeat timeline. The existing automatic background
+     lifecycle and reduced-motion owner still govern its playback. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-crystal-organism-r326="ready"]:not([data-fx-primary-mag-life-r482="steady"]) body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: fx-primary-mag-mobile-heart-r488 4.8s cubic-bezier(.36,0,.20,1) infinite !important;
-    will-change: scale, opacity !important;
+    will-change: scale !important;
   }
 }
 
@@ -67,7 +53,7 @@
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     animation: none !important;
     scale: 1 !important;
-    opacity: .82 !important;
+    opacity: 1 !important;
     will-change: auto !important;
   }
 }

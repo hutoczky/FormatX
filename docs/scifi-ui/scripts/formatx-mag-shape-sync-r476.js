@@ -14,12 +14,12 @@ if(root.dataset.fxMagShapeSyncR476==='ready-r634')return;
 root.dataset.fxMagShapeSyncR476='booting-r634';
 root.dataset.fxMagShapeSyncReleaseR775='armed-post-canonical-release';
 const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260906-r537-automatic-lifecycle';
-const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260901-r488-restrained-glow-soft-edge-compositor-pulse';
+const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260901-r488-restrained-glow-soft-edge-compositor-pulse&rev=20261004-r876-native-mobile-clarity';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260831-r482-spectrum-soft-edge';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let observer=null,pulseTimer=0,lastEnergyBolt='',lifecycleReady=false;
 function ensureStyle(){let link=document.querySelector('link[data-fx-mag-visual-sync-r476]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r537-automatic-lifecycle'))link.href=STYLE;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=STYLE;link.dataset.fxMagVisualSyncR476='true';document.head.appendChild(link);return link;}
-function ensureMobileOptics(){let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r488-restrained-glow-soft-edge-compositor-pulse'))link.href=MOBILE_OPTICS;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=MOBILE_OPTICS;link.dataset.fxMagMobileOpticsR480='true';document.head.appendChild(link);return link;}
+function ensureMobileOptics(){let link=document.querySelector('link[data-fx-mag-mobile-optics-r480]');if(link instanceof HTMLLinkElement){if(link.getAttribute('href')!==MOBILE_OPTICS)link.href=MOBILE_OPTICS;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=MOBILE_OPTICS;link.dataset.fxMagMobileOpticsR480='true';document.head.appendChild(link);return link;}
 function ensureLivingBalance(){let link=document.querySelector('link[data-fx-mag-living-balance-r481]');if(link instanceof HTMLLinkElement){if(!link.href.includes('r482-spectrum-soft-edge'))link.href=LIVING_BALANCE;return link;}link=document.createElement('link');link.rel='stylesheet';link.href=LIVING_BALANCE;link.dataset.fxMagLivingBalanceR481='true';document.head.appendChild(link);return link;}
 function currentShape(){const apiShape=typeof window.FormatXCoreShapeR337?.get==='function'?window.FormatXCoreShapeR337.get():'';const state=String(apiShape||root.dataset.fxCoreShapeR337||'crystal');return state==='sphere'?'sphere':'crystal';}
 function primaryCanvas(){const node=document.querySelector('#hero .fx-crystal-organism-r326-canvas');return node instanceof HTMLCanvasElement?node:null;}

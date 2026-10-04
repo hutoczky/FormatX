@@ -85,11 +85,11 @@ const DEFERRED_STYLE_PATHS = new Set([
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
     marker: 'scheduler-to-loader-r505',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261004-r875-fallback-shader-cache-parity']],
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261004-r876-native-mobile-clarity']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r505',
-    rewrites: [[/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock']],
+    rewrites: [[/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock&rev=20261004-r876-native-mobile-clarity']],
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo',
@@ -195,7 +195,7 @@ function cacheBustR502Runtime(html) {
   return String(html || '')
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260926-r858-adopt-critical-stylesheet')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20261003-r869-settled-document-sections')
-    .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock')
+    .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260903-r505-mag-resume-clock&rev=20261004-r876-native-mobile-clarity')
     .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20261003-r869-document-footer-owner')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20261003-r869-settled-document-sections')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
