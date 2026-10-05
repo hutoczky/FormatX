@@ -301,13 +301,13 @@
       x.beginPath();x.arc(0,0,118,0,Math.PI*2);x.fill();
 
       x.globalCompositeOperation='lighter';
-      for(let i=0;i<128;i++){
-        const a=i/128*Math.PI*2;
-        const inner=25+(i%7)*.8;
-        const outer=72+((i*17)%36);
-        const alpha=.09+((i*13)%23)/76;
-        x.strokeStyle='rgba(66,211,255,'+alpha.toFixed(3)+')';
-        x.lineWidth=i%9===0?1.7:.70;
+      for(let i=0;i<28;i++){
+        const a=i/28*Math.PI*2;
+        const inner=34+(i%4)*.55;
+        const outer=50+((i*7)%13);
+        const alpha=.020+((i*5)%9)/420;
+        x.strokeStyle='rgba(118,232,238,'+alpha.toFixed(3)+')';
+        x.lineWidth=i%7===0?.72:.42;
         x.beginPath();
         x.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
         x.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);
@@ -990,6 +990,7 @@
       crownL.rotation.z=-.10;
       this.mechanicalGroup.add(crownL);
       this.silverParts.push(crownL);
+      crownL.visible=false;
 
       const crownR=new T.Mesh(topPlateGeo,this.silverMaterial);
       crownR.scale.set(-.56,.90,.76);
@@ -997,6 +998,7 @@
       crownR.rotation.z=.10;
       this.mechanicalGroup.add(crownR);
       this.silverParts.push(crownR);
+      crownR.visible=false;
       this.crown=crownL;
 
       const sideShape=new T.Shape();
@@ -1018,6 +1020,7 @@
       left.rotation.z=.05;
       this.mechanicalGroup.add(left);
       this.plates.push(left);
+      left.visible=false;
 
       const right=new T.Mesh(sideGeo,this.silverMaterial);
       right.scale.set(-.66,.70,.74);
@@ -1025,6 +1028,7 @@
       right.rotation.z=-.05;
       this.mechanicalGroup.add(right);
       this.plates.push(right);
+      right.visible=false;
 
       const lowerShape=new T.Shape();
       lowerShape.moveTo(0,.24);
@@ -1045,6 +1049,7 @@
       this.jaw.position.set(0,-.39,.28);
       this.mechanicalGroup.add(this.jaw);
       this.plates.push(this.jaw);
+      this.jaw.visible=false;
 
       // Minimal internal seam energy; no external robotic rails in R1941.
       this.seamMaterial=new T.MeshBasicMaterial({
@@ -1076,12 +1081,12 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.43,.43,1);
+      this.mechEyeCorona.scale.set(.50,.50,1);
       this.mechEyeCorona.position.set(0,.01,.48);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.070,64),
+        new T.CircleGeometry(.082,64),
         new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
       );
       this.mechEyeCore.position.set(0,.01,.50);
@@ -1092,7 +1097,7 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.134,.006,8,72),
+        new T.TorusGeometry(.148,.0055,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.01,.49);
@@ -1369,10 +1374,10 @@
       this.mechMaterial.opacity=.92*grow;
       this.mechMidMaterial.opacity=.72*grow;
       this.silverMaterial.opacity=.42*grow;
-      this.mechEdgeMaterial.opacity=.038*grow;
-      this.mechInnerMaterial.opacity=.28*grow;
+      this.mechEdgeMaterial.opacity=.020*grow;
+      this.mechInnerMaterial.opacity=.22*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=.06*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.60*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.34*grow;
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=2.65*grow;
 
@@ -1466,8 +1471,8 @@
         this.flashBeam.scale.x=1+flash*.08;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.68,.58+flash*.06);
-        const q=1.04+flash*.05;
+        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
+        const q=1.00+flash*.04;
         this.mechEyeCorona.scale.set(q,q,1);
       }
       if(this.mechLight)this.mechLight.intensity+=flash*1.20;
@@ -1550,4 +1555,5 @@
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
+  document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
