@@ -1008,6 +1008,41 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 }
 /* production-r1941-signature-four-point-mag-first-paint */
 /* production-r1942-prism-depth-first-paint */
+
+/* R1945 — signature MAG header control from first paint.
+   Keep the accessible button text in the DOM, but paint the same four-point
+   optical identity as the hero MAG so no text-placeholder flash survives. */
+html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  font-size:0!important;
+  text-indent:-999px!important;
+  letter-spacing:0!important;
+  overflow:hidden!important;
+  border:1px solid rgba(121,202,229,.25)!important;
+  border-radius:16px!important;
+  background-color:rgba(3,17,29,.94)!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-size:30px 30px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3CradialGradient id='o' cx='44%25' cy='36%25' r='68%25'%3E%3Cstop offset='0' stop-color='%23f4ffff'/%3E%3Cstop offset='.15' stop-color='%2384f4f1'/%3E%3Cstop offset='.38' stop-color='%232592a5'/%3E%3Cstop offset='.70' stop-color='%230b3440'/%3E%3Cstop offset='1' stop-color='%23030c12'/%3E%3C/radialGradient%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%23a9d5d1' stop-opacity='.86'/%3E%3Cstop offset='.42' stop-color='%233d7f86' stop-opacity='.68'/%3E%3Cstop offset='1' stop-color='%23081319' stop-opacity='.96'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M20 2.5 25.2 14.8 37.5 20 25.2 25.2 20 37.5 14.8 25.2 2.5 20 14.8 14.8Z' fill='url(%23g)' stroke='%2375dce5' stroke-opacity='.40' stroke-width='.8'/%3E%3Ccircle cx='20' cy='20' r='7.1' fill='%23040e14' stroke='%2383e4e8' stroke-opacity='.55' stroke-width='1'/%3E%3Ccircle cx='20' cy='20' r='5.4' fill='url(%23o)'/%3E%3Ccircle cx='18.4' cy='18.2' r='1.15' fill='%23efffff'/%3E%3C/svg%3E")!important;
+  box-shadow:
+    inset 0 1px 0 rgba(225,249,255,.055),
+    inset 0 0 24px rgba(50,184,220,.040),
+    0 9px 24px rgba(0,0,0,.24)!important;
+}
+@media (hover:hover) and (pointer:fine){
+  html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+    background-size:27px 27px!important;
+  }
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+    background-size:32px 32px!important;
+  }
+}
+/* production-r1945-signature-header-mag-first-paint */
+
 /* R1941j — award-grade first-frame control skin.
    The render-blocking layer owns the same dark optical-glass language as the
    settled UI, so mobile never flashes browser-default links or grey buttons. */
