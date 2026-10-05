@@ -145,6 +145,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1930='igloo-grade-frosted-living-ice-slit-optic-slow-breath';
       document.documentElement.dataset.fxMagBirthVisualR1937='smoked-bioglass-cinematic-parity-no-diamond-star';
       document.documentElement.dataset.fxMagBirthVisualR1938='rounded-asymmetric-smoked-monolith-integrated-optic-parity';
+      document.documentElement.dataset.fxMagBirthVisualR1939='premium-rounded-bioglass-silver-smoked-optic-no-flat-caps';
       document.documentElement.dataset.fxMagBirthVisualR1932='p0-derived-seamless-living-crystal-no-eye-breathing-film';
       document.documentElement.dataset.fxMagBirthVisualR1933='frosted-cut-ice-living-depth-no-eye-parity';
       document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
@@ -1088,10 +1089,10 @@
         const phi=Math.acos(Math.max(-1,Math.min(1,y)));
         const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
         const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
-        const ax=.625+shoulder*.132+n.x*.026-n.z*.010;
-        const ay=.925+shoulder*.028+y*.028;
-        const az=.445+shoulder*.078+n.z*.018-n.x*.012;
-        const exponent=1.72;
+        const ax=.655+shoulder*.125+n.x*.024-n.z*.010;
+        const ay=.865+shoulder*.028+y*.022;
+        const az=.485+shoulder*.082+n.z*.016-n.x*.012;
+        const exponent=2.0;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
           Math.pow(Math.abs(n.y)/ay,exponent)+
@@ -1102,8 +1103,10 @@
           Math.sin(theta*2.0+phi*.74)*.012*shoulder+
           Math.cos(theta*3.0-phi*.93)*.006*shoulder;
         p.set(n.x*radius*life,n.y*radius*life,n.z*radius*life);
-        p.x+=-.052*Math.pow(smoothUp,1.8)+.026*Math.pow(smoothDown,1.6)
-          +Math.sin(theta*1.62+phi*.70)*.012*shoulder;
+        p.x+=-.072*Math.pow(smoothUp,1.8)+.034*Math.pow(smoothDown,1.6)
+          +Math.sin(theta*1.62+phi*.70)*.014*shoulder
+          -.030*Math.exp(-Math.pow((y-.34)/.24,2))
+          +.022*Math.exp(-Math.pow((y+.18)/.28,2));
         p.y+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
           +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
         p.z+=-n.x*.016+n.x*y*.010;
