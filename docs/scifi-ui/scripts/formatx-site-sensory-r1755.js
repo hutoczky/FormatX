@@ -18,7 +18,7 @@ root.dataset.fxSiteSensoryR1755='booting';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const coarse=matchMedia('(max-width:900px),(pointer:coarse)');
 const fine=matchMedia('(hover:hover) and (pointer:fine)');
-const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20261006-r1945-desktop-cinematic-interaction';
+const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20261006-r1945b-desktop-cinematic-interaction';
 let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0,activated=false,sectionObserver=null;
 let desktopTarget=null,desktopRect=null,desktopNX=0,desktopNY=0;
 const DESKTOP_TARGET_SELECTOR=[
