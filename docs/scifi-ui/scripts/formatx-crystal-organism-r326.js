@@ -947,9 +947,11 @@
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
-        vec3 key=normalize(vec3(-.53,.79,.31));
-        vec3 side=normalize(vec3(.77,.06,.64));
-        vec3 fill=normalize(vec3(-.61,-.31,.73));
+        float pointerLightX=uPointer.x*${mobile?'.020':'.115'};
+        float pointerLightY=uPointer.y*${mobile?'.014':'.085'};
+        vec3 key=normalize(vec3(-.53+pointerLightX*.34,.79+pointerLightY*.10,.31));
+        vec3 side=normalize(vec3(.77+pointerLightX*.20,.06-pointerLightY*.12,.64));
+        vec3 fill=normalize(vec3(-.61-pointerLightX*.10,-.31+pointerLightY*.08,.73));
         float ndl=max(dot(n,key),0.0);
         float sideLight=max(dot(n,side),0.0);
         float fillLight=max(dot(n,fill),0.0);
@@ -963,8 +965,8 @@
         float keySoft=pow(NoH,5.6);
         float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),42.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.25)/.235,2.0)-pow((refl.y-.30)/.46,2.0))*smoothstep(-.24,.50,refl.z);
-        float softboxB=exp(-pow((refl.x-.40)/.245,2.0)-pow((refl.y-.01)/.50,2.0))*smoothstep(-.28,.54,refl.z);
+        float softboxA=exp(-pow((refl.x+.25-pointerLightX*.16)/.235,2.0)-pow((refl.y-.30-pointerLightY*.12)/.46,2.0))*smoothstep(-.24,.50,refl.z);
+        float softboxB=exp(-pow((refl.x-.40-pointerLightX*.34)/.245,2.0)-pow((refl.y-.01-pointerLightY*.20)/.50,2.0))*smoothstep(-.28,.54,refl.z);
         float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
         float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
         float studioRibbonA=exp(-pow((refl.x+.18)/.070,2.0)-pow((refl.y-.18)/.64,2.0))*smoothstep(-.18,.66,refl.z);
@@ -1006,7 +1008,7 @@
         mineral+=vec3(.58,.72,.74)*sideSpec*.135;
         mineral+=vec3(1.00,1.00,.99)*softboxA*.012;
         mineral+=vec3(.57,.72,.71)*softboxB*.250;
-        float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
+        float softboxC2=exp(-pow((refl.x-.16-pointerLightX*.24)/.34,2.0)-pow((refl.y-.56-pointerLightY*.16)/.31,2.0))*smoothstep(-.18,.68,refl.z);
         mineral+=vec3(.79,.90,.86)*softboxC2*.215;
         mineral+=vec3(.94,1.00,.98)*studioRibbonA*.060;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
@@ -1250,17 +1252,19 @@
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
 
-        vec3 keyDir=normalize(vec3(-.50,.78,.38));
-        vec3 sideDir=normalize(vec3(.72,.08,.69));
-        vec3 fillDir=normalize(vec3(-.38,-.24,.89));
+        float pointerLightX=uPointer.x*${mobile?'.018':'.100'};
+        float pointerLightY=uPointer.y*${mobile?'.012':'.072'};
+        vec3 keyDir=normalize(vec3(-.50+pointerLightX*.30,.78+pointerLightY*.08,.38));
+        vec3 sideDir=normalize(vec3(.72+pointerLightX*.18,.08-pointerLightY*.10,.69));
+        vec3 fillDir=normalize(vec3(-.38-pointerLightX*.08,-.24+pointerLightY*.06,.89));
         float key=sat(dot(n,keyDir));
         float side=sat(dot(n,sideDir));
         float fill=sat(dot(n,fillDir));
         float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
 
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
-        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
+        float softboxA=exp(-pow((refl.x+.26-pointerLightX*.14)/.22,2.0)-pow((refl.y-.30-pointerLightY*.10)/.50,2.0))*smoothstep(-.20,.62,refl.z);
+        float softboxB=exp(-pow((refl.x-.42-pointerLightX*.30)/.27,2.0)-pow((refl.y+.02-pointerLightY*.18)/.54,2.0))*smoothstep(-.26,.62,refl.z);
         float ribbonA=exp(-pow((refl.x+.13)/.145,2.0)-pow((refl.y-.10)/.76,2.0))*smoothstep(-.10,.72,refl.z);
         float ribbonB=exp(-pow((refl.x-.31)/.085,2.0)-pow((refl.y+.10)/.62,2.0))*smoothstep(-.10,.70,refl.z);
 
@@ -1295,7 +1299,7 @@
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
         c+=vec3(.40,.66,.66)*softboxB*.315;
-        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
+        float softboxC=exp(-pow((refl.x-.18-pointerLightX*.22)/.31,2.0)-pow((refl.y-.56-pointerLightY*.14)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*.235;
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
@@ -1780,7 +1784,7 @@
     let rotationX=softwareRenderer?-.105:(mobile?-.090:-.070),rotationY=softwareRenderer?-.41:(mobile?-.40:-.32),rotationZ=softwareRenderer?-.020:.008;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     const desktopFine=matchMedia('(hover:hover) and (pointer:fine)');
-    let pointerTiltX=0,pointerTiltY=0,targetPointerTiltX=0,targetPointerTiltY=0;
+    let pointerTiltX=0,pointerTiltY=0,pointerTiltZ=0,targetPointerTiltX=0,targetPointerTiltY=0,targetPointerTiltZ=0;
     let ambientPointerFrame=0,pendingAmbientPointer=null;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
@@ -2011,6 +2015,7 @@
       const pointerTiltEase=1-Math.exp(-dt*(desktopFine.matches?.020:.014));
       pointerTiltX+=(targetPointerTiltX-pointerTiltX)*pointerTiltEase;
       pointerTiltY+=(targetPointerTiltY-pointerTiltY)*pointerTiltEase;
+      pointerTiltZ+=(targetPointerTiltZ-pointerTiltZ)*pointerTiltEase;
       if(Math.abs(angularVelocityY)>.00002){targetRotationY+=angularVelocityY*dt;angularVelocityY*=Math.exp(-dt*.010);}
       energy+=(targetEnergy-energy)*(1-Math.exp(-dt*.026));
       breath+=(targetBreath-breath)*(1-Math.exp(-dt*.032));
@@ -2024,7 +2029,7 @@
       cinematic.corePosition=[px*.055,-py*.045,.52+energy*.012];
       cinematic.morph=morph;
       cinematic.shape=shapeName();
-      cinematic.rotation=[rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ];
+      cinematic.rotation=[rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ+pointerTiltZ];
       cinematic.siteProgress=siteProgress;
       publishShape();
 
@@ -2035,7 +2040,7 @@
       gl.uniform1f(uniforms.uBreath,breath);
       gl.uniform1f(uniforms.uMorph,morph);
       gl.uniform2f(uniforms.uPointer,px,py);
-      gl.uniform3f(uniforms.uRotation,rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ);
+      gl.uniform3f(uniforms.uRotation,rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ+pointerTiltZ);
       gl.uniform1f(uniforms.uAspect,aspect);
       gl.uniform1f(uniforms.uSiteProgress,siteProgress);
       const surfacePulseElapsed=(now-surfacePulseStart)/SURFACE_PULSE_WINDOW_MS;
@@ -2143,6 +2148,7 @@
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1943='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+    root.dataset.fxNativeMagDesktopInteractionR1945='three-axis-pointer-parallax-dynamic-studio-light-coalesced-bounded-raf';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
@@ -2151,7 +2157,7 @@
     function settleAfterBurst(){
       px=tx;py=ty;
       rotationX=targetRotationX;rotationY=targetRotationY;rotationZ=targetRotationZ;
-      pointerTiltX=targetPointerTiltX;pointerTiltY=targetPointerTiltY;
+      pointerTiltX=targetPointerTiltX;pointerTiltY=targetPointerTiltY;pointerTiltZ=targetPointerTiltZ;
       angularVelocityY=0;
       energy=targetEnergy=IDLE_ENERGY;
       breath=targetBreath=.12;
@@ -2162,7 +2168,7 @@
       cinematic.corePosition=[px*.055,-py*.045,.52+energy*.012];
       cinematic.morph=morph;
       cinematic.shape=shapeName();
-      cinematic.rotation=[rotationX,rotationY,rotationZ];
+      cinematic.rotation=[rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ+pointerTiltZ];
       cinematic.siteProgress=siteProgress;
       publishShape('burst-settle-r442');
       root.dataset.fxCoreIdleRenderR441='zero-frame';
@@ -2311,14 +2317,16 @@
       if(desktopFine.matches&&!touch){
         /* R1943 desktop: absolute camera bias, independent of mouse polling rate.
            Velocity only adds a tiny impulse; it never accumulates orientation. */
-        targetPointerTiltY=clamp(q.x*.095 + dx*.020,-.12,.12);
-        targetPointerTiltX=clamp(-q.y*.070 - dy*.014,-.095,.095);
-        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.085+Math.min(.055,Math.hypot(dx,dy)*.12));
-        targetBreath=Math.max(targetBreath,.235);
-        schedule(4);
+        targetPointerTiltY=clamp(q.x*.125 + dx*.018,-.145,.145);
+        targetPointerTiltX=clamp(-q.y*.092 - dy*.012,-.110,.110);
+        targetPointerTiltZ=clamp(-q.x*q.y*.042 + dx*.008,-.052,.052);
+        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.090+Math.min(.060,Math.hypot(dx,dy)*.11));
+        targetBreath=Math.max(targetBreath,.250);
+        schedule(6);
       }else{
         targetPointerTiltY=clamp(q.x*.055,-.07,.07);
         targetPointerTiltX=clamp(-q.y*.045,-.06,.06);
+        targetPointerTiltZ=0;
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.090));
         targetBreath=Math.max(targetBreath,touch?.18:.23);
         schedule(mobile?1:2);
@@ -2462,7 +2470,7 @@
     listen(window,'pointerleave',()=>{
       ambientLastX=ambientLastY=0;
       tx=ty=0;
-      targetPointerTiltX=targetPointerTiltY=0;
+      targetPointerTiltX=targetPointerTiltY=targetPointerTiltZ=0;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.025);
       targetBreath=Math.max(targetBreath,.15);
       schedule(mobile?2:5);
