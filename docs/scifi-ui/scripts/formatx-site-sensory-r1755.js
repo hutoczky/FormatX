@@ -18,9 +18,20 @@ root.dataset.fxSiteSensoryR1755='booting';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const coarse=matchMedia('(max-width:900px),(pointer:coarse)');
 const fine=matchMedia('(hover:hover) and (pointer:fine)');
-const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20261005-r1944-desktop-premium-interaction';
+const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20261006-r1946-award-cinematic-interaction';
 let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0,activated=false,sectionObserver=null;
 let desktopTarget=null,desktopRect=null,desktopNX=0,desktopNY=0;
+const DESKTOP_TARGET_SELECTOR=[
+  '.magnetic','.button','.card','.price-card','.release-card','.fx-platform-card',
+  '.fx-category-grid>article','.fx-plan-qr-card','.fx-award-proof__grid a',
+  '.topbar a','.topbar button','.fx-language-toggle','.fx-reference-menu-button',
+  '.fx-reference-ask','.fx-three-sound'
+].join(',');
+function desktopTargetKind(node){
+  if(!(node instanceof Element))return 'surface';
+  return node.matches('.magnetic,.button,.topbar a,.topbar button,.fx-language-toggle,.fx-reference-menu-button,.fx-reference-ask,.fx-three-sound')
+    ? 'control' : 'surface';
+}
 const state={x:0,y:.12,vx:0,vy:0,energy:.18,press:0,scroll:0};
 
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
@@ -62,13 +73,18 @@ function commit(){
   setVar('--fx-sense-energy',clamp(state.energy,0,1).toFixed(3));
   setVar('--fx-sense-press',clamp(state.press,0,1).toFixed(3));
   if(fine.matches&&desktopTarget?.isConnected){
-    const isMagnetic=desktopTarget.matches('.magnetic,.button');
-    const mx=(desktopNX*(isMagnetic?8.5:2.8)).toFixed(2)+'px';
-    const my=(desktopNY*(isMagnetic?5.5:2.1)).toFixed(2)+'px';
+    const control=desktopTargetKind(desktopTarget)==='control';
+    const mx=(desktopNX*(control?6.4:2.0)).toFixed(2)+'px';
+    const my=(desktopNY*(control?4.2:1.5)).toFixed(2)+'px';
     desktopTarget.style.setProperty('--fx-pc-mx',mx);
     desktopTarget.style.setProperty('--fx-pc-my',my);
     desktopTarget.style.setProperty('--fx-pc-nx',desktopNX.toFixed(3));
     desktopTarget.style.setProperty('--fx-pc-ny',desktopNY.toFixed(3));
+    desktopTarget.style.setProperty('--fx-pc-light-x',((desktopNX*.5+.5)*100).toFixed(1)+'%');
+    desktopTarget.style.setProperty('--fx-pc-light-y',((desktopNY*.5+.5)*100).toFixed(1)+'%');
+    desktopTarget.style.setProperty('--fx-pc-press',clamp(state.press,0,1).toFixed(3));
+    root.style.setProperty('--fx-pc-global-x',((state.x*.5+.5)*100).toFixed(1)+'%');
+    root.style.setProperty('--fx-pc-global-y',((-state.y*.5+.5)*100).toFixed(1)+'%');
   }
 }
 function queue(){
@@ -111,7 +127,7 @@ function updateDesktopTarget(sample){
 }
 function setDesktopTarget(target){
   if(!fine.matches)return;
-  const next=target instanceof Element ? target.closest('.magnetic,.button,.card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a') : null;
+  const next=target instanceof Element ? target.closest(DESKTOP_TARGET_SELECTOR) : null;
   if(next===desktopTarget)return;
   if(desktopTarget){
     desktopTarget.dataset.fxPcReactiveR1944='false';
@@ -119,6 +135,12 @@ function setDesktopTarget(target){
     desktopTarget.style.removeProperty('--fx-pc-my');
     desktopTarget.style.removeProperty('--fx-pc-nx');
     desktopTarget.style.removeProperty('--fx-pc-ny');
+  desktopTarget.style.removeProperty('--fx-pc-light-x');
+  desktopTarget.style.removeProperty('--fx-pc-light-y');
+  desktopTarget.style.removeProperty('--fx-pc-press');
+    desktopTarget.style.removeProperty('--fx-pc-light-x');
+    desktopTarget.style.removeProperty('--fx-pc-light-y');
+    desktopTarget.style.removeProperty('--fx-pc-press');
   }
   desktopTarget=next;
   desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
@@ -152,7 +174,7 @@ function onPointerDown(event){
 }
 function onPointerOver(event){
   if(!fine.matches||!(event.target instanceof Element))return;
-  const next=event.target.closest('.magnetic,.button,.card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a');
+  const next=event.target.closest(DESKTOP_TARGET_SELECTOR);
   if(!next||next===desktopTarget)return;
   setDesktopTarget(next);
   desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
@@ -185,7 +207,13 @@ function semantic(kind,energy){
   pulse(kind,energy);
 }
 function onFocus(event){
-  if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))semantic('focus',.54);
+  if(!(event.target instanceof Element)||!event.target.matches('a,button,input,select,textarea,[tabindex]'))return;
+  semantic('focus',.54);
+  if(fine.matches){
+    setDesktopTarget(event.target);
+    desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
+    if(desktopTarget){desktopNX=0;desktopNY=0;queue();}
+  }
 }
 function onClick(event){
   if(!(event.target instanceof Element))return;
@@ -231,6 +259,7 @@ function activate(reason='intent'){
   root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
   root.dataset.fxSiteSensoryInputR1755='pointerover-pointermove-touch-scroll-wheel-key-focus-click-input-change-submit-orientation-desktop-magnetic-targets';
   root.dataset.fxDesktopInteractionR1944='fine-pointer-magnetic-local-response-polling-safe-minimal-style-writes-zero-idle-raf';
+  root.dataset.fxDesktopInteractionR1946='cinematic-fine-pointer-controls-surfaces-keyboard-focus-zero-idle-raf';
 }
 
 root.dataset.fxSiteSensoryR1755='armed-lazy-r1756';
@@ -247,6 +276,11 @@ addEventListener('pointerout',event=>{
   if(desktopTarget&&(!(to instanceof Node)||!desktopTarget.contains(to)))clearDesktopTarget();
 },{passive:true});
 addEventListener('blur',clearDesktopTarget,{passive:true});
+document.addEventListener('focusout',event=>{
+  if(!fine.matches||!desktopTarget)return;
+  const to=event.relatedTarget;
+  if(!(to instanceof Node)||!desktopTarget.contains(to))clearDesktopTarget();
+},{passive:true});
 addEventListener('scroll',()=>{
   if(desktopTarget)desktopRect=desktopTarget.getBoundingClientRect();
 },{passive:true});
