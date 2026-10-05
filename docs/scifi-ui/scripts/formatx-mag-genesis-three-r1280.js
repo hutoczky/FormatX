@@ -1396,15 +1396,15 @@
       this.mechMidMaterial.roughness=mix(.105,.125,finale);
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
-      this.mechMaterial.opacity=(.92+.035*finale)*grow;
-      this.mechMidMaterial.opacity=(.72+.070*finale)*grow;
-      this.silverMaterial.opacity=(.42+.070*finale)*grow;
+      this.mechMaterial.opacity=(.90+.028*finale)*grow;
+      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
+      this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.34+.030*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(2.65+.45*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1478,6 +1478,7 @@
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
       const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
+      /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
       const after=smooth((t-9.46)/.34);
       this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
       this.coreLight.intensity+=flash*.80+after*.25;
