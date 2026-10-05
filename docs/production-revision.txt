@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261005-r1944-desktop-precision-interaction
-base_master=3663e91111ba75df7be1f98b4eef6f7d2e2f66a8
-purpose=deploy the R1944 Signature MAG and premium desktop interaction surface with polling-rate independent pointer response and bounded cinematic inertia
-validation=production preflight, exact-revision deploy convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof and production Worker contracts
+token=20261005-r1945-desktop-signature-artdirection
+base_master=6ddef5a09106115d58637935b7c0a02e5e57365e
+purpose=validate and deploy the R1945 sharper desktop Signature MAG, first-frame core icon and R1944 precision interaction stack
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, desktop visual contracts and production Worker parity
