@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px),(pointer:coarse)').matches;
-if(r.dataset.fxIntroPrepaintOwnerR1611==='p0-r531-rollback'){r.dataset.fxIntroBootstrapRescueR1755='retired-by-p0-r1934';return;}
+r.dataset.fxIntroBootstrapRescueR1938='active-smoked-bioglass-cinematic';
 r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
@@ -30,7 +30,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261005-r1938-smoked-bioglass-cinematic';
 let retryCount=0,retryTimer=0;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){
