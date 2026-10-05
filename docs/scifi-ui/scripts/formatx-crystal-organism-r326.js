@@ -748,7 +748,7 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.08) contrast(1.08) saturate(.94)'
+      ? 'brightness(1.22) contrast(1.06) saturate(.98)'
       : 'brightness(1.06) contrast(1.07) saturate(.95)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
@@ -1396,6 +1396,7 @@
     root.dataset.fxNativeMagStudioR1930='single-sculpt-frosted-ice-horizontal-aperture-slow-breath-cross-tier-parity';
     root.dataset.fxNativeMagStudioR1932='p0-derived-seamless-living-crystal-no-eye-broad-internal-breath';
     root.dataset.fxNativeMagStudioR1933='frosted-cut-ice-two-pass-living-depth-no-eye';
+    root.dataset.fxNativeMagMobileR1935='lifted-readable-midtones-no-washout';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
