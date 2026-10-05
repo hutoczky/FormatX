@@ -321,8 +321,10 @@
       root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
       root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10 + velocity*-1.6).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7 + velocity*.8).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*18 + velocity*-1.6).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*12 + velocity*.8).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*1.15).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*1.55).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
       scenes.forEach(scene=>{
@@ -514,6 +516,7 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
+    root.dataset.fxDesktopInteractionR1943='fine-pointer-depth-parallax-perspective-zero-idle-raf';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();

@@ -50,7 +50,7 @@ jobs:
             current_mag_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy'
             renderer_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.css 'https://formatxsuite.com/scifi-ui/styles/formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor'
+            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.css 'https://formatxsuite.com/scifi-ui/styles/formatx-net-speed-r1800.css?v=20261004-r1902-touch-target'
             net_css_status=$?
             curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream'
             net_js_status=$?
@@ -69,7 +69,7 @@ jobs:
                && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/home.html \
                && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
                && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
-               && grep -Fq 'formatx-net-speed-r1800.css?v=20260928-r1800-network-sensor' live-probe/home.html \
+               && grep -Fq 'formatx-net-speed-r1800.css?v=20261004-r1902-touch-target' live-probe/home.html \
                && grep -Fq 'formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream' live-probe/home.html \
                && grep -Fq 'production-r1773-compositor-promoted-biocrystal-proxy' live-probe/p0.css \
                && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \

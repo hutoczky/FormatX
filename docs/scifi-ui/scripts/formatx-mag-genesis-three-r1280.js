@@ -896,27 +896,27 @@
     makeMechanicalLayer(){
       const T=this.THREE;
 
-      /* R1941 — final intro object uses the same smoked bioglass / silver-ice
-         language as the permanent Signature MAG. Low emission, physical depth. */
+      /* R1942 — intro finale matches the permanent prism-depth Signature MAG:
+         neutral smoked-silver bioglass, internal ice facets and recessed optic. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x07161d,metalness:.18,roughness:.13,
-        transmission:.22,thickness:.34,ior:1.43,
-        emissive:0x06141a,emissiveIntensity:.10,
-        clearcoat:.96,clearcoatRoughness:.08,
+        color:0x08171b,metalness:.10,roughness:.115,
+        transmission:.32,thickness:.42,ior:1.45,
+        emissive:0x041216,emissiveIntensity:.065,
+        clearcoat:.98,clearcoatRoughness:.065,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x0a222b,metalness:.16,roughness:.12,
-        transmission:.28,thickness:.28,ior:1.44,
-        emissive:0x06212a,emissiveIntensity:.12,
-        clearcoat:.94,clearcoatRoughness:.08,
+        color:0x0a2025,metalness:.08,roughness:.105,
+        transmission:.38,thickness:.32,ior:1.46,
+        emissive:0x04191d,emissiveIntensity:.075,
+        clearcoat:.98,clearcoatRoughness:.060,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0xa9c5c7,metalness:.22,roughness:.10,
-        transmission:.18,thickness:.20,ior:1.40,
-        emissive:0x102c34,emissiveIntensity:.10,
-        clearcoat:.98,clearcoatRoughness:.065,
+        color:0xb8c8c6,metalness:.12,roughness:.085,
+        transmission:.28,thickness:.22,ior:1.42,
+        emissive:0x0a252b,emissiveIntensity:.070,
+        clearcoat:1.0,clearcoatRoughness:.050,
         transparent:true,opacity:0
       });
       this.mechEdgeMaterial=new T.LineBasicMaterial({
@@ -1067,38 +1067,38 @@
         this.seams.push(spine);
       }
 
-      // Large optical eye, owned by the final pod itself.
+      // R1942 recessed optical organ: compact, bright inside, never a black HUD disc.
       this.mechEyeCorona=new T.Sprite(new T.SpriteMaterial({
         map:this.makeIrisTexture(),
-        color:0x73e5ff,
+        color:0x8feff4,
         transparent:true,
         opacity:0,
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.54,.54,1);
+      this.mechEyeCorona.scale.set(.43,.43,1);
       this.mechEyeCorona.position.set(0,.01,.48);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
         new T.CircleGeometry(.070,64),
-        new T.MeshBasicMaterial({color:0x07131a,side:T.DoubleSide})
+        new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
       );
       this.mechEyeCore.position.set(0,.01,.50);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
-        color:0x71e9ff,transparent:true,opacity:0,
+        color:0x8af6f5,transparent:true,opacity:0,
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.155,.008,8,72),
+        new T.TorusGeometry(.134,.006,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.01,.49);
       this.mechanicalGroup.add(this.mechInnerRing);
 
-      this.mechLight=new T.PointLight(0x6eeeff,0,4.8,2);
+      this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
 
@@ -1366,13 +1366,13 @@
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
-      this.mechMaterial.opacity=.94*grow;
-      this.mechMidMaterial.opacity=.82*grow;
-      this.silverMaterial.opacity=.58*grow;
-      this.mechEdgeMaterial.opacity=.055*grow;
-      this.mechInnerMaterial.opacity=.34*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=.10*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.72*grow;
+      this.mechMaterial.opacity=.92*grow;
+      this.mechMidMaterial.opacity=.72*grow;
+      this.silverMaterial.opacity=.42*grow;
+      this.mechEdgeMaterial.opacity=.038*grow;
+      this.mechInnerMaterial.opacity=.28*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=.06*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.60*grow;
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=8.8*grow;
 
@@ -1466,7 +1466,7 @@
         this.flashBeam.scale.x=1+flash*.65;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(1,.88+flash*.12);
+        this.mechEyeCorona.material.opacity=Math.min(.82,.62+flash*.14);
         const q=1.12+flash*.30;
         this.mechEyeCorona.scale.set(q,q,1);
       }
@@ -1548,4 +1548,5 @@
   window.FormatXMagGenesisThreeR1360=window.FormatXMagGenesisThreeR1280;
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
+  document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
 })();
