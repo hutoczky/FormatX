@@ -246,6 +246,38 @@ html body.living-architecture :is(
 /* production-r1944-fine-pointer-premium-magnetic-interaction */
 /* production-r1946-award-cinematic-perspective-focus-parity */
 
+/* R1946b — final desktop control ownership.
+   The production geometry sheets intentionally pin these controls with
+   transform:none!important. This reactive-only layer has higher specificity,
+   changes transform/transition only and leaves every positioning property
+   under the canonical layout owner. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html:root:root[data-fx-reference-production-r244="desktop"] body.living-architecture
+  .topbar :is(.fx-language-toggle,.fx-reference-menu-button)[data-fx-pc-reactive-r1944="true"]{
+    transform:translate3d(var(--fx-pc-mx),var(--fx-pc-my),0)!important;
+    transition:
+      transform 70ms cubic-bezier(.12,.72,.18,1),
+      scale 95ms cubic-bezier(.16,.84,.22,1),
+      border-color 135ms ease,
+      box-shadow 150ms ease!important;
+  }
+
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"] body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound[data-fx-pc-reactive-r1944="true"],
+  html:root:root:root:root[data-fx-reference-production-r244="desktop"] body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask[data-fx-pc-reactive-r1944="true"]{
+    transform:translate3d(var(--fx-pc-mx),var(--fx-pc-my),0)!important;
+    translate:none!important;
+    transition:
+      transform 70ms cubic-bezier(.12,.72,.18,1),
+      scale 95ms cubic-bezier(.16,.84,.22,1),
+      border-color 135ms ease,
+      box-shadow 150ms ease!important;
+  }
+}
+/* production-r1946b-final-desktop-control-transform-ownership */
+
+
 /* R1755c — scroll is a frame-budget critical interaction. The MAG remains
    reactive, but autonomous atmosphere motion yields until scrolling settles. */
 html[data-fx-scroll-pressure-r1755="true"] body.living-architecture::before,
