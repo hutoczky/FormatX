@@ -116,7 +116,7 @@ function setDesktopTarget(target){
   const next=target instanceof Element ? target.closest('.magnetic,.button,.card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a') : null;
   if(next===desktopTarget)return;
   if(desktopTarget){
-    desktopTarget.dataset.fxPcReactiveR1943='false';
+    desktopTarget.dataset.fxPcReactiveR1944='false';
     desktopTarget.style.removeProperty('--fx-pc-mx');
     desktopTarget.style.removeProperty('--fx-pc-my');
     desktopTarget.style.removeProperty('--fx-pc-nx');
@@ -127,11 +127,11 @@ function setDesktopTarget(target){
   desktopTarget=next;
   desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
   desktopNX=0;desktopNY=0;
-  if(desktopTarget)desktopTarget.dataset.fxPcReactiveR1943='true';
+  if(desktopTarget)desktopTarget.dataset.fxPcReactiveR1944='true';
 }
 function clearDesktopTarget(){
   if(!desktopTarget)return;
-  desktopTarget.dataset.fxPcReactiveR1943='false';
+  desktopTarget.dataset.fxPcReactiveR1944='false';
   desktopTarget.style.removeProperty('--fx-pc-mx');
   desktopTarget.style.removeProperty('--fx-pc-my');
   desktopTarget.style.removeProperty('--fx-pc-nx');
