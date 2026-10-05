@@ -1255,49 +1255,71 @@
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.34;
-        c+=vec3(.28,.52,.55)*softboxB*.16;
+        c+=vec3(.98,1.00,.97)*softboxA*.215;
+        c+=vec3(.32,.58,.60)*softboxB*.205;
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.70,.82,.80)*softboxC*.105;
-        c+=vec3(.92,.98,.96)*ribbonA*.175;
+        c+=vec3(.74,.86,.83)*softboxC*.145;
+        c+=vec3(.92,.98,.96)*ribbonA*.105;
         c+=vec3(.16,.45,.50)*ribbonB*.13;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.016;
 
-        /* Two restrained refractive diagonals reveal internal crystalline depth
-           without drawing polygon borders or a logo-like central cross. */
-        float innerDiagonal=exp(-pow((abs(vLocal.x)-(.17+.22*abs(vLocal.y)))/.070,2.0))*frontDepth;
-        float innerDiagonal2=exp(-pow((abs(vLocal.x)-(.31-.12*abs(vLocal.y)))/.095,2.0))*frontDepth;
-        c+=vec3(.12,.29,.31)*innerDiagonal*.040;
-        c+=vec3(.30,.39,.38)*innerDiagonal2*.020;
+        /* R1942 — internal prism architecture.
+           Four broad refractive planes run toward the signature tips. They are
+           volumetric tonal events, not drawn borders, so the object keeps a
+           single continuous glass skin. */
+        float polar=atan(vLocal.y,vLocal.x);
+        float radialXY=length(vLocal.xy);
+        float prismEnvelope=
+          smoothstep(.075,.22,radialXY)*
+          (1.0-smoothstep(.44,.72,radialXY))*
+          frontDepth;
+        float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
+        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
+        float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
+        c+=vec3(.105,.245,.255)*axisRidge*(.040+.020*prismSweep);
+        c+=vec3(.36,.43,.41)*axisRidge*softboxB*.032;
+        c*=1.0-.055*diagonalValley;
+        c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
+
+        /* A second, deeper pane creates parallax-like density behind the skin. */
+        float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
+          *smoothstep(.04,.52,frontDepth);
+        c+=vec3(.070,.170,.182)*innerPane*.030;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.050,.280,.320)*deepEdge*.20;
+        c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(.08+.07*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
-        /* One integrated optical organ. No black bezel, no HUD ring. */
+        /* R1942 — recessed optical organ.
+           A soft smoked cavity precedes the lens, giving the centre actual depth
+           instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
         vec2 oq=vec2(vLocal.x/.135,vLocal.y/.135);
         float od=length(oq);
+        float cavity=(1.0-smoothstep(.92,1.34,od))*front;
+        float cavityCore=exp(-od*od*2.3)*front;
+        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
+        c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.095,2.0))*front;
+        float rim=exp(-pow((od-.74)/.060,2.0))*front;
         float iris=exp(-od*od*4.8)*front;
-        float core=exp(-od*od*15.0)*front;
-        float hot=exp(-od*od*58.0)*front;
+        float core=exp(-od*od*18.5)*front;
+        float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.34,lens*.27);
-        c+=vec3(.68,.82,.80)*rim*.095;
-        c+=vec3(.030,.31,.36)*iris*(.13+.09*uEnergy);
-        c+=vec3(.24,.88,.91)*core*(.31+.16*uEnergy);
-        c+=vec3(.96,1.00,.99)*hot*(.54+.11*uEnergy);
+        c=mix(c,opticBase+c*.42,lens*.22);
+        c+=vec3(.78,.88,.84)*rim*.125;
+        c+=vec3(.028,.28,.33)*iris*(.115+.085*uEnergy);
+        c+=vec3(.26,.92,.94)*core*(.34+.17*uEnergy);
+        c+=vec3(.98,1.00,.99)*hot*(.64+.12*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -1495,6 +1517,7 @@
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
+    root.dataset.fxNativeMagStudioR1942='signature-four-point-internal-prism-recessed-optic-multisoftbox-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
