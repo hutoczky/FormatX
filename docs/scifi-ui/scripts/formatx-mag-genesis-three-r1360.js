@@ -144,6 +144,7 @@
       document.documentElement.dataset.fxMagBirthVisualR1777='cinematic-black-mineral-bioglass-natural-softbox-depth';
       document.documentElement.dataset.fxMagBirthVisualR1930='igloo-grade-frosted-living-ice-slit-optic-slow-breath';
       document.documentElement.dataset.fxMagBirthVisualR1932='p0-derived-seamless-living-crystal-no-eye-breathing-film';
+      document.documentElement.dataset.fxMagBirthVisualR1933='frosted-cut-ice-living-depth-no-eye-parity';
       document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1891='fused-trilobate-dark-bioglass-centered-living-optic';
       document.documentElement.dataset.fxMagBirthVisualR1893='embedded-optic-studio-bioglass-handoff-parity';
@@ -1085,10 +1086,10 @@
         const phi=Math.acos(Math.max(-1,Math.min(1,y)));
         const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
         const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
-        const ax=.600+shoulder*.145+n.x*.024-n.z*.010;
+        const ax=.625+shoulder*.132+n.x*.026-n.z*.010;
         const ay=.925+shoulder*.028+y*.028;
-        const az=.430+shoulder*.082+n.z*.018-n.x*.010;
-        const exponent=1.28;
+        const az=.445+shoulder*.078+n.z*.018-n.x*.012;
+        const exponent=1.48;
         const lp=
           Math.pow(Math.abs(n.x)/ax,exponent)+
           Math.pow(Math.abs(n.y)/ay,exponent)+
@@ -1104,8 +1105,8 @@
         p.y+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
           +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
         p.z+=-n.x*.016+n.x*y*.010;
-        const top=.878-p.x*.060-p.z*.020;
-        const bottom=-.892-p.x*.026+p.z*.014;
+        const top=.790-p.x*.075-p.z*.026;
+        const bottom=-.815-p.x*.035+p.z*.018;
         if(p.y>top)p.y=top+(p.y-top)*.18;
         if(p.y<bottom)p.y=bottom+(p.y-bottom)*.22;
         shellPos.setXYZ(i,p.x,p.y,p.z);
