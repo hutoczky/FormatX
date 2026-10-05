@@ -896,213 +896,226 @@
     makeMechanicalLayer(){
       const T=this.THREE;
 
-      /* R1941 — final intro object uses the same smoked bioglass / silver-ice
-         language as the permanent Signature MAG. Low emission, physical depth. */
+      /* R1942 — intro finale is the same Signature MAG as the permanent hero.
+         No separate armour pod, no silver petals, no robotic rails. One closed
+         four-point smoked-bioglass organism owns the final cinematic frame. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x07161d,metalness:.18,roughness:.13,
-        transmission:.22,thickness:.34,ior:1.43,
-        emissive:0x06141a,emissiveIntensity:.10,
-        clearcoat:.96,clearcoatRoughness:.08,
-        transparent:true,opacity:0
+        color:0x15343b,
+        metalness:.035,
+        roughness:.19,
+        transmission:.18,
+        thickness:.52,
+        ior:1.43,
+        emissive:0x03151b,
+        emissiveIntensity:.10,
+        clearcoat:.98,
+        clearcoatRoughness:.075,
+        transparent:true,
+        opacity:0,
+        side:T.DoubleSide
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x0a222b,metalness:.16,roughness:.12,
-        transmission:.28,thickness:.28,ior:1.44,
-        emissive:0x06212a,emissiveIntensity:.12,
-        clearcoat:.94,clearcoatRoughness:.08,
-        transparent:true,opacity:0
+        color:0x0a2a32,
+        metalness:.02,
+        roughness:.22,
+        transmission:.32,
+        thickness:.34,
+        ior:1.42,
+        emissive:0x04252d,
+        emissiveIntensity:.16,
+        clearcoat:.92,
+        clearcoatRoughness:.10,
+        transparent:true,
+        opacity:0,
+        side:T.DoubleSide,
+        depthWrite:false
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0xa9c5c7,metalness:.22,roughness:.10,
-        transmission:.18,thickness:.20,ior:1.40,
-        emissive:0x102c34,emissiveIntensity:.10,
-        clearcoat:.98,clearcoatRoughness:.065,
+        color:0x9fb9bb,metalness:.08,roughness:.16,
         transparent:true,opacity:0
       });
       this.mechEdgeMaterial=new T.LineBasicMaterial({
-        color:0x9fe7e7,transparent:true,opacity:0,
-        blending:T.AdditiveBlending,depthWrite:false
+        color:0x9fe7e7,transparent:true,opacity:0,depthWrite:false
       });
 
       this.plates=[];
       this.silverParts=[];
       this.mechBodyParts=[];
+      this.seams=[];
 
-      // R1941 Signature body: four authored points with recessed curved valleys.
-      const baseShape=new T.Shape();
-      baseShape.moveTo(0,1.08);
-      baseShape.bezierCurveTo(.08,.76,.17,.42,.24,.25);
-      baseShape.bezierCurveTo(.43,.18,.74,.08,.99,0);
-      baseShape.bezierCurveTo(.72,-.08,.42,-.18,.23,-.26);
-      baseShape.bezierCurveTo(.16,-.45,.08,-.78,0,-1.03);
-      baseShape.bezierCurveTo(-.08,-.78,-.16,-.45,-.23,-.26);
-      baseShape.bezierCurveTo(-.42,-.18,-.72,-.08,-.99,0);
-      baseShape.bezierCurveTo(-.74,.08,-.43,.18,-.24,.25);
-      baseShape.bezierCurveTo(-.17,.42,-.08,.76,0,1.08);
-      const baseGeo=new T.ExtrudeGeometry(baseShape,{
-        depth:.40,bevelEnabled:true,bevelSegments:6,steps:1,
-        bevelSize:.060,bevelThickness:.078,curveSegments:28
-      });
-      baseGeo.center();
-      this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
-      this.mechBody.scale.set(1.02,1.02,1.00);
-      this.mechBody.position.z=-.03;
+      const latitudeSegments=40;
+      const longitudeSegments=80;
+      const positions=[];
+      const normals=[];
+      const uvs=[];
+      const indices=[];
+
+      for(let iy=0;iy<=latitudeSegments;iy++){
+        const latitude=iy/latitudeSegments;
+        const phi=latitude*Math.PI;
+        const sinPhi=Math.sin(phi);
+        const cosPhi=Math.cos(phi);
+
+        for(let ix=0;ix<=longitudeSegments;ix++){
+          const longitude=ix/longitudeSegments;
+          const theta=longitude*Math.PI*2;
+          const dx=sinPhi*Math.cos(theta);
+          const dy=cosPhi;
+          const dz=sinPhi*Math.sin(theta);
+
+          const axisX=dx>=0?.88:.86;
+          const axisY=dy>=0?1.09:.97;
+          const axisZ=dz>=0?.64:.43;
+          const exponent=.78;
+          const terms=
+            Math.pow(Math.abs(dx)/axisX,exponent)+
+            Math.pow(Math.abs(dy)/axisY,exponent)+
+            Math.pow(Math.abs(dz)/axisZ,exponent);
+          const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
+
+          /* Pole-safe asymmetry: all longitudes still collapse to one clean
+             top/bottom apex, matching the permanent R1941k renderer. */
+          const poleFade=sinPhi*sinPhi;
+          const organic=
+            1+
+            .020*Math.sin(theta*4+phi*1.7)*poleFade+
+            .007*Math.sin(theta*7-phi*3.1)*poleFade;
+
+          positions.push(
+            dx*radial*organic,
+            dy*radial*organic,
+            dz*radial*organic
+          );
+
+          const nx=dx/axisX;
+          const ny=dy/axisY;
+          const nz=dz/axisZ;
+          const nl=Math.hypot(nx,ny,nz)||1;
+          normals.push(nx/nl,ny/nl,nz/nl);
+          uvs.push(longitude,1-latitude);
+        }
+      }
+
+      const row=longitudeSegments+1;
+      for(let iy=0;iy<latitudeSegments;iy++){
+        for(let ix=0;ix<longitudeSegments;ix++){
+          const a=iy*row+ix;
+          const b=a+1;
+          const c=(iy+1)*row+ix;
+          const d=c+1;
+          if(iy>0)indices.push(a,c,b);
+          if(iy<latitudeSegments-1)indices.push(b,c,d);
+        }
+      }
+
+      const signatureGeo=new T.BufferGeometry();
+      signatureGeo.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+      signatureGeo.setAttribute('normal',new T.Float32BufferAttribute(normals,3));
+      signatureGeo.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));
+      signatureGeo.setIndex(indices);
+      signatureGeo.computeBoundingSphere();
+
+      this.mechBody=new T.Mesh(signatureGeo,this.mechMaterial);
+      this.mechBody.scale.set(1.06,1.06,1.02);
+      this.mechBody.rotation.set(-.085,-.39,.008);
+      this.mechBody.userData.baseRotation={x:-.085,y:-.39,z:.008};
+      this.mechBody.position.z=-.02;
+      this.mechBody.renderOrder=2;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
-      // Central smoked optical cradle, fused visually into the glass body.
-      const cradleShape=new T.Shape();
-      cradleShape.moveTo(0,.43);
-      cradleShape.bezierCurveTo(.18,.31,.36,.16,.43,0);
-      cradleShape.bezierCurveTo(.34,-.17,.18,-.33,0,-.43);
-      cradleShape.bezierCurveTo(-.18,-.33,-.34,-.17,-.43,0);
-      cradleShape.bezierCurveTo(-.36,.16,-.18,.31,0,.43);
-      const cradleGeo=new T.ExtrudeGeometry(cradleShape,{
-        depth:.14,bevelEnabled:true,bevelSegments:5,steps:1,
-        bevelSize:.024,bevelThickness:.032,curveSegments:20
-      });
-      cradleGeo.center();
-      this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(.92,.92,.76);
-      this.mechCradle.position.z=.24;
+      /* Inner smoked volume gives the same layered depth the hero shader paints,
+         without adding petals or a second silhouette. */
+      this.mechCradle=new T.Mesh(signatureGeo.clone(),this.mechMidMaterial);
+      this.mechCradle.scale.set(.84,.84,.82);
+      this.mechCradle.rotation.copy(this.mechBody.rotation);
+      this.mechCradle.userData.baseRotation={x:-.085,y:-.39,z:.008};
+      this.mechCradle.position.z=-.045;
+      this.mechCradle.renderOrder=1;
       this.mechanicalGroup.add(this.mechCradle);
 
-      // Four internal silver-ice facets reinforce the signature points.
-      const topPlateShape=new T.Shape();
-      topPlateShape.moveTo(0,.82);
-      topPlateShape.lineTo(.10,.58);
-      topPlateShape.lineTo(.44,.08);
-      topPlateShape.lineTo(.18,-.04);
-      topPlateShape.lineTo(0,.16);
-      topPlateShape.lineTo(-.18,-.04);
-      topPlateShape.lineTo(-.44,.08);
-      topPlateShape.lineTo(-.10,.58);
-      topPlateShape.closePath();
-      const topPlateGeo=new T.ExtrudeGeometry(topPlateShape,{
-        depth:.14,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.030,bevelThickness:.040,curveSegments:8
-      });
-      topPlateGeo.center();
-
-      const crownL=new T.Mesh(topPlateGeo,this.silverMaterial);
-      crownL.scale.set(.56,.90,.76);
-      crownL.position.set(-.14,.40,.31);
-      crownL.rotation.z=-.10;
-      this.mechanicalGroup.add(crownL);
-      this.silverParts.push(crownL);
-
-      const crownR=new T.Mesh(topPlateGeo,this.silverMaterial);
-      crownR.scale.set(-.56,.90,.76);
-      crownR.position.set(.14,.40,.31);
-      crownR.rotation.z=.10;
-      this.mechanicalGroup.add(crownR);
-      this.silverParts.push(crownR);
-      this.crown=crownL;
-
-      const sideShape=new T.Shape();
-      sideShape.moveTo(0,.46);
-      sideShape.lineTo(.54,.12);
-      sideShape.lineTo(.46,-.20);
-      sideShape.lineTo(.16,-.08);
-      sideShape.lineTo(-.04,.10);
-      sideShape.closePath();
-      const sideGeo=new T.ExtrudeGeometry(sideShape,{
-        depth:.14,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.026,bevelThickness:.034,curveSegments:8
-      });
-      sideGeo.center();
-
-      const left=new T.Mesh(sideGeo,this.silverMaterial);
-      left.scale.set(.66,.70,.74);
-      left.position.set(-.48,.00,.28);
-      left.rotation.z=.05;
-      this.mechanicalGroup.add(left);
-      this.plates.push(left);
-
-      const right=new T.Mesh(sideGeo,this.silverMaterial);
-      right.scale.set(-.66,.70,.74);
-      right.position.set(.48,.00,.28);
-      right.rotation.z=-.05;
-      this.mechanicalGroup.add(right);
-      this.plates.push(right);
-
-      const lowerShape=new T.Shape();
-      lowerShape.moveTo(0,.24);
-      lowerShape.lineTo(.34,.04);
-      lowerShape.lineTo(.22,-.54);
-      lowerShape.lineTo(.08,-.80);
-      lowerShape.lineTo(-.08,-.80);
-      lowerShape.lineTo(-.22,-.54);
-      lowerShape.lineTo(-.34,.04);
-      lowerShape.closePath();
-      const lowerGeo=new T.ExtrudeGeometry(lowerShape,{
-        depth:.15,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.025,bevelThickness:.034,curveSegments:8
-      });
-      lowerGeo.center();
-      this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
-      this.jaw.scale.set(.84,.86,.76);
-      this.jaw.position.set(0,-.39,.28);
-      this.mechanicalGroup.add(this.jaw);
-      this.plates.push(this.jaw);
-
-      // Minimal internal seam energy; no external robotic rails in R1941.
       this.seamMaterial=new T.MeshBasicMaterial({
-        color:0x52d9ef,transparent:true,opacity:0,
-        depthWrite:false,blending:T.AdditiveBlending
+        color:0x52d9ef,transparent:true,opacity:0,depthWrite:false
       });
-      const railGeo=new T.BoxGeometry(.27,.024,.070);
-      this.seams=[];
-      for(const x of []){
-        const rail=new T.Mesh(railGeo,this.seamMaterial);
-        rail.position.set(x,.00,.43);
-        this.mechanicalGroup.add(rail);
-        this.seams.push(rail);
-      }
-      const spineGeo=new T.BoxGeometry(.034,.25,.070);
-      for(const x of []){
-        const spine=new T.Mesh(spineGeo,this.seamMaterial);
-        spine.position.set(x,-.64,.38);
-        this.mechanicalGroup.add(spine);
-        this.seams.push(spine);
-      }
 
-      // Large optical eye, owned by the final pod itself.
+      /* Integrated optical organ: small smoked lens, not a separate HUD eye. */
       this.mechEyeCorona=new T.Sprite(new T.SpriteMaterial({
         map:this.makeIrisTexture(),
-        color:0x73e5ff,
+        color:0x9ef4ff,
         transparent:true,
         opacity:0,
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.54,.54,1);
-      this.mechEyeCorona.position.set(0,.01,.48);
+      this.mechEyeCorona.scale.set(.34,.34,1);
+      this.mechEyeCorona.position.set(0,.006,.585);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.070,64),
-        new T.MeshBasicMaterial({color:0x07131a,side:T.DoubleSide})
+        new T.CircleGeometry(.060,64),
+        new T.MeshPhysicalMaterial({
+          color:0x0b5965,
+          metalness:.02,
+          roughness:.12,
+          transmission:.20,
+          thickness:.10,
+          emissive:0x0a6674,
+          emissiveIntensity:.32,
+          transparent:true,
+          opacity:0,
+          side:T.DoubleSide,
+          depthWrite:false
+        })
       );
-      this.mechEyeCore.position.set(0,.01,.50);
+      this.mechEyeCore.position.set(0,.006,.595);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
-        color:0x71e9ff,transparent:true,opacity:0,
-        depthWrite:false,blending:T.AdditiveBlending
+        color:0x8cf6ff,
+        transparent:true,
+        opacity:0,
+        depthWrite:false,
+        blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.155,.008,8,72),
+        new T.TorusGeometry(.086,.0055,8,72),
         this.mechInnerMaterial
       );
-      this.mechInnerRing.position.set(0,.01,.49);
+      this.mechInnerRing.position.set(0,.006,.602);
       this.mechanicalGroup.add(this.mechInnerRing);
 
-      this.mechLight=new T.PointLight(0x6eeeff,0,4.8,2);
-      this.mechLight.position.set(0,0,.90);
+      this.mechPupil=new T.Mesh(
+        new T.CircleGeometry(.016,40),
+        new T.MeshBasicMaterial({
+          color:0xf4ffff,
+          transparent:true,
+          opacity:0,
+          depthWrite:false,
+          blending:T.AdditiveBlending
+        })
+      );
+      this.mechPupil.position.set(0,.006,.608);
+      this.mechanicalGroup.add(this.mechPupil);
+
+      this.mechGlint=new T.Mesh(
+        new T.CircleGeometry(.009,32),
+        new T.MeshBasicMaterial({
+          color:0xffffff,
+          transparent:true,
+          opacity:0,
+          depthWrite:false,
+          blending:T.AdditiveBlending
+        })
+      );
+      this.mechGlint.position.set(-.024,.030,.611);
+      this.mechanicalGroup.add(this.mechGlint);
+
+      this.mechLight=new T.PointLight(0x8ef4ff,0,4.4,2);
+      this.mechLight.position.set(0,.02,.92);
       this.mechanicalGroup.add(this.mechLight);
 
       this.mechanicalGroup.scale.setScalar(.001);
+      document.documentElement.dataset.fxIntroSignatureR1942='same-four-point-geometry-as-hero';
     }
 
     createTaperedTube(curve,segments=44,radial=7,r0=.078,r1=.012){
@@ -1366,24 +1379,33 @@
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
-      this.mechMaterial.opacity=.94*grow;
-      this.mechMidMaterial.opacity=.82*grow;
-      this.silverMaterial.opacity=.58*grow;
-      this.mechEdgeMaterial.opacity=.055*grow;
-      this.mechInnerMaterial.opacity=.34*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=.10*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.72*grow;
-      this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=8.8*grow;
+      this.mechMaterial.opacity=.96*grow;
+      this.mechMidMaterial.opacity=.18*grow;
+      this.silverMaterial.opacity=0;
+      this.mechEdgeMaterial.opacity=0;
+      this.mechInnerMaterial.opacity=.22*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=0;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.42*grow;
+      if(this.mechEyeCore)this.mechEyeCore.material.opacity=.76*grow;
+      if(this.mechPupil)this.mechPupil.material.opacity=.78*grow;
+      if(this.mechGlint)this.mechGlint.material.opacity=.58*grow;
+      this.mechInnerRing.rotation.z=time*.00010;
+      if(this.mechLight)this.mechLight.intensity=2.8*grow;
 
+      const breathe=.996+.004*Math.sin(time*.00092);
       if(this.mechBody){
-        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
-        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
+        const b=this.mechBody.userData.baseRotation||{x:-.085,y:-.39,z:.008};
+        this.mechBody.rotation.x=b.x+Math.sin(time*.00015)*.004*grow;
+        this.mechBody.rotation.y=b.y+Math.sin(time*.00018)*.007*grow;
+        this.mechBody.rotation.z=b.z+Math.sin(time*.00013)*.002*grow;
+        this.mechBody.scale.set(1.06*breathe,1.06*breathe,1.02);
       }
-      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
-      this.silverParts.forEach((p,i)=>{
-        p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
-      });
+      if(this.mechCradle){
+        const b=this.mechCradle.userData.baseRotation||{x:-.085,y:-.39,z:.008};
+        this.mechCradle.rotation.x=b.x+Math.sin(time*.00014+.4)*.003*grow;
+        this.mechCradle.rotation.y=b.y+Math.sin(time*.00017+.7)*.005*grow;
+        this.mechCradle.rotation.z=b.z;
+      }
     }
 
     updateTentacles(t,time){
@@ -1540,7 +1562,7 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1941-signature-four-point-bioglass-central-optic-studio'
+    revision:'r1942-intro-hero-signature-geometry-parity'
   };
   /* R1940 — the user-selected reference visual is the R1280 armored living
      pod. Keep the existing R1360 loader contract intact by exposing R1280 as
@@ -1548,4 +1570,5 @@
   window.FormatXMagGenesisThreeR1360=window.FormatXMagGenesisThreeR1280;
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
+  document.documentElement.dataset.fxMagSignatureR1942='intro-finale-matches-permanent-four-point-signature-mag';
 })();
