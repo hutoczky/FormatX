@@ -1004,6 +1004,199 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
   }
 }
 /* production-r1941-signature-four-point-mag-first-paint */
+/* R1941j — award-grade first-frame control skin.
+   The render-blocking layer owns the same dark optical-glass language as the
+   settled UI, so mobile never flashes browser-default links or grey buttons. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture .topbar{
+    background:
+      linear-gradient(180deg,rgba(2,8,12,.985),rgba(1,7,11,.955))!important;
+    border-bottom:1px solid rgba(93,194,214,.16)!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.22)!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .brand{
+    color:#f5fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    text-decoration:none!important;
+    border:0!important;
+    background:none!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand:link,
+  html:root:root body.living-architecture .topbar > .brand:visited{
+    color:#f5fbff!important;
+    text-decoration:none!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand img{
+    display:block!important;
+    width:46px!important;
+    height:46px!important;
+    object-fit:contain!important;
+    filter:drop-shadow(0 0 12px rgba(52,217,238,.16))!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand span{
+    display:grid!important;
+    align-content:center!important;
+    gap:5px!important;
+    min-width:0!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand strong{
+    color:#f6fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    font:800 13px/1.05 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+    letter-spacing:.16em!important;
+    text-decoration:none!important;
+    white-space:nowrap!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand small{
+    color:rgba(174,207,219,.82)!important;
+    -webkit-text-fill-color:currentColor!important;
+    font:650 7px/1 ui-monospace,SFMono-Regular,Consolas,monospace!important;
+    letter-spacing:.24em!important;
+    text-decoration:none!important;
+    white-space:nowrap!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-language-toggle{
+    color:#f1fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    border:1px solid rgba(121,202,229,.25)!important;
+    border-radius:15px!important;
+    background:
+      radial-gradient(circle at 50% 12%,rgba(48,124,151,.14),transparent 54%),
+      linear-gradient(180deg,rgba(5,20,31,.96),rgba(2,12,20,.985))!important;
+    box-shadow:
+      inset 0 1px 0 rgba(225,249,255,.055),
+      inset 0 0 24px rgba(50,184,220,.040),
+      0 9px 24px rgba(0,0,0,.24)!important;
+    font-size:0!important;
+    text-decoration:none!important;
+    overflow:hidden!important;
+  }
+  html[lang="hu"] body.living-architecture .topbar > .fx-language-toggle::before{
+    content:"🇭🇺"!important;
+  }
+  html[lang="en"] body.living-architecture .topbar > .fx-language-toggle::before{
+    content:"🇬🇧"!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-language-toggle::before{
+    display:block!important;
+    font:400 18px/1 "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif!important;
+    filter:none!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-language-toggle::after{
+    content:""!important;
+    position:absolute!important;
+    right:6px!important;
+    bottom:5px!important;
+    width:3px!important;
+    height:3px!important;
+    border-radius:50%!important;
+    background:#67dcff!important;
+    box-shadow:0 0 8px rgba(103,220,255,.72)!important;
+  }
+
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > #menu-toggle{
+    color:#eaf8ff!important;
+    -webkit-text-fill-color:currentColor!important;
+    border:1px solid rgba(121,202,229,.24)!important;
+    border-radius:17px!important;
+    background:
+      radial-gradient(circle at 50% 8%,rgba(56,137,164,.12),transparent 52%),
+      linear-gradient(180deg,rgba(5,20,31,.96),rgba(2,12,20,.985))!important;
+    box-shadow:
+      inset 0 1px 0 rgba(225,249,255,.050),
+      inset 0 0 24px rgba(50,184,220,.035),
+      0 9px 24px rgba(0,0,0,.24)!important;
+    font-size:0!important;
+    overflow:hidden!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button b,
+  html:root:root body.living-architecture .topbar > #menu-toggle b{
+    display:none!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button span,
+  html:root:root body.living-architecture .topbar > #menu-toggle span{
+    position:absolute!important;
+    left:50%!important;
+    display:block!important;
+    height:1.5px!important;
+    border-radius:999px!important;
+    background:rgba(232,247,252,.92)!important;
+    box-shadow:0 0 8px rgba(92,211,239,.12)!important;
+    transform:translateX(-50%)!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button span:first-child,
+  html:root:root body.living-architecture .topbar > #menu-toggle span:first-child{
+    top:20px!important;
+    width:24px!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button span:last-child,
+  html:root:root body.living-architecture .topbar > #menu-toggle span:last-child{
+    top:29px!important;
+    width:17px!important;
+  }
+
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask{
+    border:1px solid rgba(122,211,236,.28)!important;
+    border-radius:50%!important;
+    color:#e9f9ff!important;
+    background:
+      radial-gradient(circle at 38% 24%,rgba(39,91,112,.30),transparent 48%),
+      radial-gradient(circle at 50% 65%,rgba(5,20,31,.98),rgba(1,9,15,.995) 74%)!important;
+    box-shadow:
+      inset 0 1px 0 rgba(233,250,255,.07),
+      inset 0 0 22px rgba(61,193,225,.045),
+      0 12px 28px rgba(0,0,0,.30)!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound .fx-wda-sound-icon,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound svg{
+    display:block!important;
+    width:22px!important;
+    height:22px!important;
+    color:#edfaff!important;
+    opacity:1!important;
+    visibility:visible!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask i{
+    position:relative!important;
+    display:block!important;
+    width:17px!important;
+    height:17px!important;
+    border-radius:50%!important;
+    background:radial-gradient(circle at 35% 30%,#fff 0 24%,#e8ebff 27% 49%,#c8baff 53% 70%,rgba(151,119,255,.34) 73% 100%)!important;
+    box-shadow:
+      -8px 5px 0 -2px rgba(241,247,255,.96),
+      7px 4px 0 -3px rgba(226,220,255,.95),
+      0 0 12px rgba(194,169,255,.76),
+      0 0 20px rgba(78,211,244,.22)!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask i::before,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask i::after{
+    content:""!important;
+    position:absolute!important;
+    display:block!important;
+    border-radius:50%!important;
+    background:#f7f8ff!important;
+    box-shadow:0 0 9px rgba(207,191,255,.70)!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask i::before{
+    width:8px!important;height:8px!important;left:9px!important;top:-5px!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask i::after{
+    width:7px!important;height:7px!important;left:-5px!important;top:2px!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask > span{
+    color:rgba(239,248,252,.92)!important;
+    font:740 9px/1 ui-monospace,SFMono-Regular,Consolas,monospace!important;
+    letter-spacing:.065em!important;
+    text-shadow:0 0 12px rgba(112,211,232,.08)!important;
+  }
+}
+/* production-r1941j-award-first-frame-control-skin */
+
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
 /* production-r1830-igloo-grade-dark-bioglass-first-paint */
 /* production-r1842-smooth-studio-organism-first-paint */
