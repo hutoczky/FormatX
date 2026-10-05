@@ -103,7 +103,7 @@ jobs:
               -H 'Accept: application/json' \
               --data "$PAYLOAD" || true)"
             asset_code="$(curl -sS --max-time 20 -o /tmp/fx-asset.svg -w '%{http_code}' "$ASSET" || true)"
-            home_code="$(curl -sS --max-time 20 -D /tmp/fx-home.headers -o /tmp/fx-home.html -w '%{http_code}' "$HOME" || true)"
+            home_code="$(curl -sSL --max-time 20 -D /tmp/fx-home.headers -o /tmp/fx-home.html -w '%{http_code}' "$HOME" || true)"
             home_ready=false
             if [[ "$home_code" == '200' ]]               && grep -Fq "$EXPECTED_CSP_HASH" /tmp/fx-home.headers               && grep -Fq "$EXPECTED_RUNTIME" /tmp/fx-home.html; then
               home_ready=true
