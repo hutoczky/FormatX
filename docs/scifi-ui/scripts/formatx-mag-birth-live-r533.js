@@ -26,7 +26,7 @@
   if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
   const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
   const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
-  const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)').matches;
+  const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
@@ -514,7 +514,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1942-prism-depth-studio-finale';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1945l-controlled-studio-handoff';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;

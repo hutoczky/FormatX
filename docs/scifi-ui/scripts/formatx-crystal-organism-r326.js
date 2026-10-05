@@ -7,7 +7,7 @@
   const CANONICAL_REVISION = 'fully-living-organism-r1723';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
-  const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
+  const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
@@ -302,10 +302,21 @@
          Restore the exact R1934–R1936 P0 diamond grammar selected by the user:
          asymmetric four-direction crystal, compact valleys, deeper rear volume.
          The silhouette is original; only shading/topology are modernised. */
-      const axisX=direction[0]>=0?.88:.86;
-      const axisY=direction[1]>=0?1.09:.97;
-      const axisZ=direction[2]>=0?.64:.43;
-      const exponent=.78;
+      /* R1945 — desktop signature silhouette.
+         Mobile already reads as the intended four-point mark. Desktop needed a
+         stronger planar pinch because the larger photographic softbox response
+         visually rounded the same mesh into a pod. Keep mobile untouched and
+         sharpen only the desktop anisotropy/depth field. */
+      const axisX=mobile
+        ? (direction[0]>=0?.88:.86)
+        : (direction[0]>=0?1.02:.98);
+      const axisY=mobile
+        ? (direction[1]>=0?1.09:.97)
+        : (direction[1]>=0?1.18:1.06);
+      const axisZ=mobile
+        ? (direction[2]>=0?.64:.43)
+        : (direction[2]>=0?.49:.34);
+      const exponent=mobile?.78:.61;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
@@ -381,7 +392,7 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?1:(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -895,7 +906,7 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.365'}+uRotation.y+uPointer.x*${mobile?'.12':'.19'}+uTime*.007;
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
         float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
         float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
@@ -910,9 +921,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.735'};
-        projected.x+=${mobile?'.002':'.040'};
-        projected.y+=${mobile?'.010':'.002'};
+        projected*= ${mobile?'.585':'.790'};
+        projected.x+=${mobile?'.002':'.018'};
+        projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1279,24 +1290,31 @@
 
         /* Smoked blue-silver glass volume. */
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
-        float facetTone=.955+.090*facetRand;
+        float macroAngle=atan(vLocal.y,vLocal.x);
+        float macroRadius=length(vLocal.xy);
+        float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
+        float macroFacetB=.5+.5*cos(macroAngle*2.0-macroRadius*4.1+vLocal.z*1.4);
+        float macroFacet=mix(macroFacetA,macroFacetB,.34);
+        float facetTone=${mobile
+          ? '.962+.050*macroFacet'
+          : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
         c*=.93+.07*volume;
-        /* Broad facet separation comes from tonal response, not dark polygon
-           borders. This keeps the crystal authored and photographic. */
-        float facetSilver=smoothstep(.58,.96,facetRand)*frontDepth;
-        float facetCool=smoothstep(.08,.44,1.0-facetRand)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*.050;
-        c+=vec3(.010,.065,.076)*facetCool*.034;
+        /* R1945j — one continuous macro-facet field across all tiers.
+           Per-triangle random tone created tiny dark mosaic cells that read as
+           black pin-speckles in proof captures. Geometry stays untouched. */
+        float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
+        float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
+        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
+        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*.315;
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*.235;
+        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
@@ -1307,8 +1325,8 @@
            Four broad refractive planes run toward the signature tips. They are
            volumetric tonal events, not drawn borders, so the object keeps a
            single continuous glass skin. */
-        float polar=atan(vLocal.y,vLocal.x);
-        float radialXY=length(vLocal.xy);
+        float polar=macroAngle;
+        float radialXY=macroRadius;
         float prismEnvelope=
           smoothstep(.075,.22,radialXY)*
           (1.0-smoothstep(.44,.72,radialXY))*
@@ -1332,8 +1350,8 @@
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
         float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
         float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(.095+.035*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(.070+.030*fresnel);
+        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
+        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
         c*=1.0-.020*prismShellB;
 
         /* R1942d — four authored fold ridges from optic to signature tips.
@@ -1346,25 +1364,25 @@
         float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*.115;
-        c+=vec3(.055,.205,.220)*foldSecondary*.060;
-        c*=1.0-.085*foldValley;
-        c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
-        c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
+        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
+        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
+        c*=1.0-${mobile?'.085':'.110'}*foldValley;
+        c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
+        c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.180,.205)*fresnel*.34;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(.08+.07*uEnergy);
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/.135,vLocal.y/.135);
+        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1378,10 +1396,10 @@
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*.125;
-        c+=vec3(.028,.28,.33)*iris*(.115+.085*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(.34+.17*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(.64+.12*uEnergy);
+        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
+        c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
+        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
+        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -1396,7 +1414,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*3.08),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1580,6 +1598,12 @@
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
+    root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
+    root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
+    root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
+    root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
+    root.dataset.fxNativeMagStudioR1945e='desktop-cut-face-normal-blend-larger-optic-preserved-contrast';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -2046,8 +2070,9 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      /* R1941b — closed signature shell is rendered two-sided to eliminate
-         pole/wrap pinholes on mobile GPUs. Depth still resolves the front skin. */
+      /* R1945j — retain the proven two-sided closed shell. The R1945i culling
+         experiment increased pinholes; the actual speckle source was the
+         per-triangle material randomization, now removed above. */
       gl.disable(gl.CULL_FACE);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
