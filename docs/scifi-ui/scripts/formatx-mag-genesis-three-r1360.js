@@ -143,6 +143,7 @@
       document.documentElement.dataset.fxMagBirthSilhouetteR1776='unified-asymmetric-overlapping-crystal-anatomy-no-round-pod';
       document.documentElement.dataset.fxMagBirthVisualR1777='cinematic-black-mineral-bioglass-natural-softbox-depth';
       document.documentElement.dataset.fxMagBirthVisualR1930='igloo-grade-frosted-living-ice-slit-optic-slow-breath';
+      document.documentElement.dataset.fxMagBirthVisualR1937='smoked-bioglass-cinematic-parity-no-diamond-star';
       document.documentElement.dataset.fxMagBirthVisualR1932='p0-derived-seamless-living-crystal-no-eye-breathing-film';
       document.documentElement.dataset.fxMagBirthVisualR1933='frosted-cut-ice-living-depth-no-eye-parity';
       document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
@@ -1043,14 +1044,14 @@
       this.organicSurfaceTexture=organicSurface;
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x6b8182,roughness:.16,metalness:0,
-        clearcoat:.54,clearcoatRoughness:.12,
+        color:0x26383a,roughness:.19,metalness:0,
+        clearcoat:.62,clearcoatRoughness:.11,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000010,
         transparent:true,opacity:0,
-        transmission:this.mobileProfile?.66:.74,thickness:.22,ior:1.45,
-        attenuationColor:new T.Color(0x2f4b4e),attenuationDistance:1.85,
+        transmission:this.mobileProfile?.30:.38,thickness:.28,ior:1.46,
+        attenuationColor:new T.Color(0x10272b),attenuationDistance:1.12,
         emissive:0x010405,emissiveIntensity:.0008,
-        envMapIntensity:this.mobileProfile?1.72:1.88,
+        envMapIntensity:this.mobileProfile?1.95:2.08,
         specularIntensity:.88,specularColor:new T.Color(0xf5ffff),
         sheen:.010,sheenColor:new T.Color(0xb8cfcc),sheenRoughness:.38,
         depthWrite:true
@@ -1120,10 +1121,10 @@
       this.organicGroup.add(shell);
 
       this.organicMembraneMaterial=new T.MeshPhysicalMaterial({
-        color:0x49696d,roughness:.14,metalness:0,
-        clearcoat:.58,clearcoatRoughness:.10,
-        transmission:this.mobileProfile?.70:.78,thickness:.08,ior:1.46,
-        attenuationColor:new T.Color(0x18434c),attenuationDistance:.62,
+        color:0x17363a,roughness:.17,metalness:0,
+        clearcoat:.62,clearcoatRoughness:.10,
+        transmission:this.mobileProfile?.26:.34,thickness:.10,ior:1.46,
+        attenuationColor:new T.Color(0x0b3037),attenuationDistance:.52,
         transparent:true,opacity:0,depthWrite:false,
         roughnessMap:organicSurface,bumpMap:organicSurface,bumpScale:.000012,
         envMapIntensity:this.mobileProfile?1.42:1.58,side:T.FrontSide
@@ -1926,9 +1927,9 @@
       const finalScale=this.mobileProfile?.91:.99;
       this.organicGroup.scale.setScalar(bodyScale*finalScale);
 
-      this.organicShellMaterial.opacity=(.88+.06*maturity)*visible;
+      this.organicShellMaterial.opacity=(.94+.035*maturity)*visible;
       this.organicLobeMaterial.opacity=0;
-      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(this.mobileProfile?(.030+.012*maturity):(.045+.016*maturity))*visible;
+      if(this.organicMembraneMaterial)this.organicMembraneMaterial.opacity=(this.mobileProfile?(.018+.008*maturity):(.026+.010*maturity))*visible;
       this.organicWireMaterial.opacity=0;
       this.organicVeinMaterial.opacity=0;
       this.organicHoodMaterial.opacity=0;
