@@ -1290,7 +1290,6 @@
 
         /* Smoked blue-silver glass volume. */
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
         float macroAngle=atan(vLocal.y,vLocal.x);
         float macroRadius=length(vLocal.xy);
         float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
@@ -1326,8 +1325,8 @@
            Four broad refractive planes run toward the signature tips. They are
            volumetric tonal events, not drawn borders, so the object keeps a
            single continuous glass skin. */
-        float polar=atan(vLocal.y,vLocal.x);
-        float radialXY=length(vLocal.xy);
+        float polar=macroAngle;
+        float radialXY=macroRadius;
         float prismEnvelope=
           smoothstep(.075,.22,radialXY)*
           (1.0-smoothstep(.44,.72,radialXY))*
