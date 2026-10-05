@@ -109,8 +109,9 @@ html body.living-architecture :is(
   }
 }
 
-/* R1943 — fine-pointer desktop interaction.
-   Compositor-only movement, no custom cursor and no idle animation loop. */
+/* R1945 — fine-pointer desktop cinematic interaction.
+   All pointer response stays compositor-owned: no custom cursor, no layout
+   reads inside the hot frame and no autonomous RAF loop. */
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
   html body.living-architecture .magnetic{
     --fx-pc-mx:0px;
@@ -126,8 +127,8 @@ html body.living-architecture :is(
   }
   html body.living-architecture .magnetic[data-fx-pc-reactive-r1943="true"]{
     transition:
-      transform 62ms linear,
-      scale 110ms cubic-bezier(.16,.84,.22,1),
+      transform 72ms cubic-bezier(.12,.72,.18,1),
+      scale 115ms cubic-bezier(.16,.84,.22,1),
       border-color 150ms ease,
       box-shadow 160ms ease,
       background-color 160ms ease;
@@ -143,6 +144,7 @@ html body.living-architecture :is(
     --fx-pc-light-y:50%;
     translate:var(--fx-pc-mx) var(--fx-pc-my);
     scale:1;
+    transform-origin:var(--fx-pc-light-x) var(--fx-pc-light-y);
     transition:
       translate 150ms cubic-bezier(.18,.82,.2,1),
       scale 180ms cubic-bezier(.18,.82,.2,1),
@@ -154,37 +156,75 @@ html body.living-architecture :is(
     .card,.price-card,.release-card,.fx-platform-card,
     .fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a
   )[data-fx-pc-reactive-r1943="true"]{
-    scale:1.003;
-    border-color:rgba(164,235,240,.32)!important;
+    scale:1.004;
+    border-color:rgba(164,235,240,.34)!important;
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.050),
       inset 0 0 44px rgba(74,203,224,.032),
       0 26px 74px rgba(0,0,0,.255),
       0 0 30px rgba(83,203,219,.055)!important;
     transition:
-      translate 64ms linear,
-      scale 120ms cubic-bezier(.18,.82,.2,1),
+      translate 74ms cubic-bezier(.12,.72,.18,1),
+      scale 125ms cubic-bezier(.18,.82,.2,1),
       border-color 145ms ease,
       box-shadow 165ms ease;
   }
 
-  html body.living-architecture :is(.button,.magnetic){
+  html body.living-architecture :is(
+    .button,.magnetic,
+    .topbar a,.topbar button,.fx-language-toggle,.fx-reference-menu-button,
+    .fx-reference-ask,.fx-three-sound
+  ){
+    --fx-pc-mx:0px;
+    --fx-pc-my:0px;
     --fx-pc-light-x:50%;
     --fx-pc-light-y:50%;
-    scale:1;
+    --fx-pc-press:0;
+    transform-origin:var(--fx-pc-light-x) var(--fx-pc-light-y);
+    transition:
+      transform 155ms cubic-bezier(.16,.84,.22,1),
+      scale 150ms cubic-bezier(.16,.84,.22,1),
+      border-color 150ms ease,
+      box-shadow 165ms ease,
+      opacity 150ms ease;
   }
-  html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1943="true"]{
-    scale:1.012;
-    border-color:rgba(171,239,244,.44)!important;
+
+  html body.living-architecture :is(
+    .topbar a,.topbar button,.fx-language-toggle,.fx-reference-menu-button,
+    .fx-reference-ask,.fx-three-sound
+  ){
+    transform:translate3d(var(--fx-pc-mx),var(--fx-pc-my),0);
+  }
+  html body.living-architecture :is(
+    .button,.magnetic,
+    .topbar a,.topbar button,.fx-language-toggle,.fx-reference-menu-button,
+    .fx-reference-ask,.fx-three-sound
+  )[data-fx-pc-reactive-r1943="true"]{
+    scale:calc(1.012 - var(--fx-pc-press) * .006);
+    border-color:rgba(171,239,244,.46)!important;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.085),
-      inset 0 0 22px rgba(78,214,232,.025),
-      0 11px 36px rgba(0,0,0,.25),
-      0 0 25px rgba(88,211,230,.082)!important;
+      inset 0 1px 0 rgba(255,255,255,.09),
+      inset 0 0 24px rgba(78,214,232,.030),
+      0 12px 38px rgba(0,0,0,.26),
+      0 0 27px rgba(88,211,230,.088)!important;
+    transition:
+      transform 70ms cubic-bezier(.12,.72,.18,1),
+      scale 95ms cubic-bezier(.16,.84,.22,1),
+      border-color 135ms ease,
+      box-shadow 150ms ease;
+    will-change:transform;
+  }
+
+  html body.living-architecture :is(
+    .card,.price-card,.release-card,.fx-platform-card,
+    .fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a
+  )[data-fx-pc-reactive-r1943="true"]{
+    will-change:translate,scale;
   }
 }
 
 /* production-r1944-fine-pointer-premium-magnetic-interaction */
+/* production-r1945-desktop-cinematic-magnetic-focus-interaction */
 
 /* R1755c — scroll is a frame-budget critical interaction. The MAG remains
    reactive, but autonomous atmosphere motion yields until scrolling settles. */
