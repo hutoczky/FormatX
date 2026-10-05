@@ -288,103 +288,53 @@
     }
 
     function vertex(latitudeIndex, longitudeIndex) {
-      const latitude = latitudeIndex / latitudeSegments;
-      const longitude = longitudeIndex / longitudeSegments;
-      const phi = latitude * Math.PI;
-      const theta = longitude * Math.PI * 2;
-      const sinPhi = Math.sin(phi);
-      const direction = [sinPhi * Math.cos(theta), Math.cos(phi), sinPhi * Math.sin(theta)];
-      /* R1404 compatibility endpoint: internal id remains "sphere" for
-         existing controls/tests, but visually it is a softer irregular crystal.
-         The hero therefore never falls back to a round/egg silhouette. */
-      const softAx=.82,softAy=.88,softAz=.72;
-      const softL1=Math.abs(direction[0])/softAx+Math.abs(direction[1])/softAy+Math.abs(direction[2])/softAz;
-      const softRadius=1/Math.max(.001,softL1);
-      const softBias=1
-        +Math.sin(theta*2.73+phi*1.17)*.032
-        +Math.cos(theta*4.61-phi*2.09)*.020;
-      const spherePosition=[
-        direction[0]*softRadius*1.04*softBias,
-        direction[1]*softRadius*1.06*softBias+Math.pow(Math.max(direction[1],0),6.0)*.045,
-        direction[2]*softRadius*.96*softBias
-      ];
+      const latitude=latitudeIndex/latitudeSegments;
+      const longitude=longitudeIndex/longitudeSegments;
+      const phi=latitude*Math.PI;
+      const theta=longitude*Math.PI*2;
+      const sinPhi=Math.sin(phi);
+      const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
 
-      /* R614 compatibility contract retained. R730 maps the same closed
-         topology to the supplied final MAG reference: a compact, opaque,
-         rounded-diamond armored pod with a tall crown and broad shoulders. */
-      /* R1080: reference-locked closed armored diamond-pod.
-         Keep one native topology, but use a sub-L1 superellipsoid so the hero
-         reads as the supplied tall rhombic machine rather than an egg. */
-      /* R1400 — irregular crystal, not an orb.
-         The closed sphere topology intersects an asymmetric octahedral envelope,
-         then receives restrained biological distortion. This keeps the MAG alive
-         while the silhouette reads as a unique faceted crystal from every angle. */
-      /* R1470 — coherent obsidian cut crystal.
-         p≈1 keeps a true rhombic/crystalline silhouette. Broad low-frequency
-         asymmetry prevents a logo-perfect diamond without falling back to a
-         swollen egg or a pile of torn shards. */
-      /* R1558 — continuous anisotropic envelope. The previous upper/lower
-         quadrant switch created a visible equatorial seam. These radii vary
-         smoothly with direction so the body keeps broad mineral planes without
-         looking like two diamond halves joined together. */
+      /* R1931 — deliberate rollback to the clean P0 crystal grammar, rebuilt
+         inside the current renderer/API. One continuous anisotropic volume,
+         restrained asymmetry, no stacked blob masses. */
       const y=direction[1];
-      const shoulderBase=Math.max(0,1-y*y);
-      const smoothUp=.5*(y+Math.sqrt(y*y+.0036));
-      const smoothDown=.5*(-y+Math.sqrt(y*y+.0036));
-      // R1572 — photographic smoky-obsidian seed. One continuous asymmetric
-      // mineral volume replaces the four-petal mechanical pod. The silhouette
-      // is elongated, subtly leaning and never resolves into a logo-perfect diamond.
-      const ax=.735 + shoulderBase*.080 + direction[0]*.050 - direction[2]*.018
-        + Math.sin(theta*2.08+phi*.74)*.018;
-      const ay=.965 + shoulderBase*.055 + y*.036 + direction[0]*.020
-        + Math.cos(theta*1.72-phi*1.09)*.014;
-      const az=.625 + shoulderBase*.060 + direction[2]*.034 - direction[0]*.020
-        + Math.sin(theta*2.82+phi*.59)*.014;
-      const p=1.46;
+      const shoulder=Math.max(0,1-y*y);
+      const ax=.72+shoulder*.075+(direction[0]>0?.025:-.018);
+      const ay=(y>=0?1.01:.94)+shoulder*.035;
+      const az=(direction[2]>=0?.48:.40)+shoulder*.050;
+      const p=.92;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
         Math.pow(Math.abs(direction[2])/az,p);
-      const baseRadius=1/Math.pow(Math.max(.001,lp),1/p);
-      const broadBias=
-        1
-        +Math.sin(theta*2.03+phi*.86)*.031
-        +Math.cos(theta*3.11-phi*1.23)*.019
-        +Math.sin(theta*4.42+phi*.48)*.010
-        +Math.cos(theta*.93+phi*2.37)*.008;
-      const cutA=Math.pow(Math.max(0,direction[0]*.74+direction[1]*.44+direction[2]*.18),3.1);
-      const cutB=Math.pow(Math.max(0,-direction[0]*.66+direction[1]*.24+direction[2]*.52),3.3);
-      const cutC=Math.pow(Math.max(0,direction[0]*.18-direction[1]*.72+direction[2]*.46),3.5);
-      const cutD=Math.pow(Math.max(0,-direction[0]*.36-direction[1]*.18+direction[2]*.80),3.6);
-      const crystalRadius=baseRadius*broadBias*(1-.112*cutA-.086*cutB-.071*cutC-.056*cutD);
+      const radius=1/Math.pow(Math.max(.0001,lp),1/p);
+      const life=
+        1+
+        Math.sin(theta*3.0+phi*.80)*.010*shoulder+
+        Math.cos(theta*5.0-phi*1.20)*.005*shoulder;
       const crystalPosition=[
-        direction[0]*crystalRadius*1.06,
-        direction[1]*crystalRadius*1.08,
-        direction[2]*crystalRadius*.99
+        direction[0]*radius*life,
+        direction[1]*radius*life,
+        direction[2]*radius*life
       ];
-      const shoulder=Math.pow(shoulderBase,1.38);
-      crystalPosition[0]+=-.132*Math.pow(smoothUp,1.85)+.061*Math.pow(smoothDown,1.55)
-        +Math.sin(theta*1.64+phi*.77)*.037*shoulder
-        +direction[2]*y*.018;
-      crystalPosition[1]+=Math.pow(smoothUp,3.9)*.082
-        -Math.pow(smoothDown,3.25)*.032
-        +direction[0]*direction[2]*.014
-        +Math.sin(theta*2.38+phi*.48)*.028*shoulder;
-      crystalPosition[2]+=direction[0]*y*.019
-        +Math.pow(Math.max(direction[2],0),3.7)*.024
-        -direction[0]*.031
-        +Math.sin(theta*3.72-phi*.63)*.012*shoulder;
-      /* R1575: truncate both poles on slightly oblique planes. The lat/long
-         topology no longer resolves into an egg or logo-perfect diamond. */
-      const topCap=.735+crystalPosition[0]*.125-crystalPosition[2]*.052;
-      const bottomCap=-.765-crystalPosition[0]*.064+crystalPosition[2]*.041;
-      if(crystalPosition[1]>topCap)crystalPosition[1]=topCap+(crystalPosition[1]-topCap)*.075;
-      if(crystalPosition[1]<bottomCap)crystalPosition[1]=bottomCap+(crystalPosition[1]-bottomCap)*.075;
-      return {
-        sphere: spherePosition,
-        crystal: crystalPosition,
-        sphereNormal: direction,
-        uv: [longitude, latitude]
+
+      crystalPosition[0]+=-.060*Math.pow(Math.max(y,0),1.8)+.034*Math.pow(Math.max(-y,0),1.7);
+      crystalPosition[1]+=Math.sin(theta*2.0+phi*.4)*.010*shoulder;
+      crystalPosition[2]-=direction[0]*.018;
+
+      const top=.885-crystalPosition[0]*.070-crystalPosition[2]*.025;
+      const bottom=-.895-crystalPosition[0]*.030+crystalPosition[2]*.018;
+      if(crystalPosition[1]>top)crystalPosition[1]=top+(crystalPosition[1]-top)*.18;
+      if(crystalPosition[1]<bottom)crystalPosition[1]=bottom+(crystalPosition[1]-bottom)*.22;
+
+      const spherePosition=direction.map(value=>value*.89);
+      return{
+        sphere:spherePosition,
+        crystal:crystalPosition,
+        sphereNormal:direction,
+        crystalNormal:direction,
+        uv:[longitude,latitude]
       };
     }
 
@@ -428,7 +378,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.945:(mobile?.972:(constrained?.965:.982));
+        const smoothWeight=software?.80:(mobile?.86:(constrained?.84:.90));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -442,268 +392,19 @@
       });
     }
 
-    /* R1699 — validation renders the same hand-cut production mineral body.
-       Audit/proof mode may lower backing resolution through the capability
-       governor, but it must never substitute a different low-poly silhouette. */
-    {
-      /* R1576 — hand-cut production body.
-         A small set of offset polygonal rings creates intentional broad mineral
-         planes. This removes the rounded-pot/egg silhouette produced by a
-         latitude sphere while preserving the same single WebGL draw and morph. */
-      /* R1589 — use the same hand-cut mineral envelope as the successful late
-         Three.js birth frames. The permanent MAG and cinematic handoff now share
-         one silhouette language instead of drifting into a rounded pebble. */
-      /* R1632 mobile LOD: the phone backing buffer is deliberately low-DPR,
-         so 46 circumferential body slices add startup cost without visible
-         silhouette gain. Keep desktop hand-cut density, reduce mobile only. */
-      const sideCount = software ? 64 : mobile ? 104 : constrained ? 84 : 112;
-      const bodyRingCount = software ? 34 : mobile ? 58 : constrained ? 46 : 66;
-
-      /* R1832 — continuous studio organism.
-         The old hand-cut ring stack still read as a low-poly rock on phones.
-         This mesh is generated from one smooth superellipsoid field with three
-         broad asymmetrical masses. It remains a single native WebGL draw. */
-      /* R1905 — art-directed gallery shard.
-         The previous superellipsoid mass field was smooth but still read as a
-         potato. This uses a continuous vertical profile plus superellipse
-         cross-sections: one monolithic object with a crown cleft, narrow waist,
-         unequal shoulders and deliberate cut planes. */
-      const profileR1905=[
-        /* R1930 — calm living-ice silhouette.
-           One deliberate S-balanced volume: narrow crown, controlled shoulders,
-           quiet waist and tapered root. No mascot/blob lobes. */
-        [ 1.00,.012,.008,-.018, .000],
-        [ .94,.078,.052,-.050, .002],
-        [ .86,.205,.132,-.094, .005],
-        [ .76,.355,.220,-.130, .009],
-        [ .66,.475,.286,-.140, .012],
-        [ .55,.555,.328,-.118, .015],
-        [ .44,.595,.350,-.074, .016],
-        [ .33,.575,.338,-.014, .016],
-        [ .22,.515,.306, .045, .014],
-        [ .11,.462,.278, .086, .010],
-        [ .00,.438,.266, .104, .005],
-        [-.11,.470,.286, .090, .000],
-        [-.22,.528,.316, .050,-.005],
-        [-.34,.570,.338,-.010,-.010],
-        [-.46,.552,.326,-.064,-.012],
-        [-.58,.485,.286,-.098,-.012],
-        [-.70,.388,.228,-.104,-.010],
-        [-.81,.270,.160,-.080,-.007],
-        [-.90,.150,.090,-.045,-.004],
-        [-.97,.050,.030,-.015,-.002],
-        [-1.00,.010,.007, .000, .000]
-      ];
-      const sampleProfileR1905=y=>{
-        if(y>=profileR1905[0][0])return profileR1905[0];
-        if(y<=profileR1905[profileR1905.length-1][0])return profileR1905[profileR1905.length-1];
-        const catmull=(p0,p1,p2,p3,t)=>{
-          const t2=t*t,t3=t2*t;
-          return .5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3);
-        };
-        for(let i=0;i<profileR1905.length-1;i++){
-          const a=profileR1905[i],b=profileR1905[i+1];
-          if(y<=a[0]&&y>=b[0]){
-            const t=(a[0]-y)/Math.max(.0001,a[0]-b[0]);
-            const p0=profileR1905[Math.max(0,i-1)];
-            const p3=profileR1905[Math.min(profileR1905.length-1,i+2)];
-            return [
-              y,
-              Math.max(.008,catmull(p0[1],a[1],b[1],p3[1],t)),
-              Math.max(.006,catmull(p0[2],a[2],b[2],p3[2],t)),
-              catmull(p0[3],a[3],b[3],p3[3],t),
-              catmull(p0[4],a[4],b[4],p3[4],t)
-            ];
-          }
-        }
-        return profileR1905[profileR1905.length-1];
-      };
-      function bodyVertexR1832(v,u){
-        const phi=v*Math.PI;
-        const theta0=u*Math.PI*2;
-        const sp=Math.sin(phi),cp=Math.cos(phi);
-        const dir=[sp*Math.cos(theta0),cp,sp*Math.sin(theta0)];
-        const profile=sampleProfileR1905(cp);
-        let rx=profile[1],rz=profile[2],ox=profile[3],oz=profile[4];
-
-        const theta=theta0+cp*.075+Math.sin(cp*Math.PI)*.020;
-        const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=3.10;
-        const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
-        const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
-
-        const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
-        const field=(cy,sy,ca,sa,amp)=>{
-          const dy=(cp-cy)/sy;
-          const da=angleDelta(theta,ca)/sa;
-          return amp*Math.exp(-(dy*dy+da*da));
-        };
-
-        const upperLeft=field(.54,.34,Math.PI,.90,.026);
-        const rightShoulder=field(.10,.36,.04,.90,.022);
-        const lowerLeft=field(-.42,.32,2.62,.92,.018);
-        const frontChest=field(.02,.42,Math.PI*.50,.92,.014);
-        const rearCut=field(.02,.48,-Math.PI*.50,.96,.009);
-        const radial=1+upperLeft+rightShoulder+lowerLeft+frontChest-rearCut;
-
-        rx*=radial;
-        rz*=1+upperLeft*.20+rightShoulder*.16+lowerLeft*.10+frontChest*.12-rearCut*.30;
-
-        let p=[
-          ox+cx*rx,
-          cp*.972,
-          oz+cz*rz
-        ];
-
-        p[0]+=-.020*cp+.017*Math.sin((cp+.10)*Math.PI)
-          -.010*upperLeft+.014*rightShoulder-.008*lowerLeft;
-        p[2]+=-.026*p[0]+.009*Math.sin(theta*2.0)*(1-Math.abs(cp));
-
-        let cutNormal=null,cutWeight=0;
-        const registerCut=(normal,overshoot,base=.62)=>{
-          const w=Math.min(.82,base+Math.max(0,overshoot)*1.8);
-          if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
-        };
-
-        const topPlane=.958-p[0]*.070-p[2]*.030;
-        const bottomPlane=-.965-p[0]*.030+p[2]*.018;
-        if(p[1]>topPlane){
-          const over=p[1]-topPlane;
-          p[1]=topPlane+over*.24;
-          registerCut([-.16,1,.05],over,.70);
-        }
-        if(p[1]<bottomPlane){
-          const over=bottomPlane-p[1];
-          p[1]=bottomPlane-over*.30;
-          registerCut([-.05,-1,.03],over,.66);
-        }
-
-        const leftPlane=-.612+.070*p[1]-.018*p[2];
-        const rightPlane=.602-.052*p[1]+.018*p[2];
-        const frontPlane=.438-.028*p[1]-.020*p[0];
-        const backPlane=-.398+.018*p[1]+.014*p[0];
-        if(p[0]<leftPlane){
-          const over=leftPlane-p[0];
-          p[0]=leftPlane-over*.30;
-          registerCut([-1,.145,-.04],over);
-        }
-        if(p[0]>rightPlane){
-          const over=p[0]-rightPlane;
-          p[0]=rightPlane+over*.28;
-          registerCut([1,.095,-.03],over);
-        }
-        if(p[2]>frontPlane){
-          const over=p[2]-frontPlane;
-          p[2]=frontPlane+over*.38;
-          registerCut([.04,.04,1],over,.58);
-        }
-        if(p[2]<backPlane){
-          const over=backPlane-p[2];
-          p[2]=backPlane-over*.36;
-          registerCut([.02,.03,-1],over,.56);
-        }
-
-        const crownT=Math.max(0,Math.min(1,(p[1]-.66)/.24));
-        const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.026*Math.exp(-Math.pow((p[0]+.010)/.180,2.0))*crownEase;
-        p[1]-=crownCleft;
-        p[0]+=crownCleft*.06;
-
-        const socketX=(p[0]-.105)/.230;
-        const socketY=(p[1]-.025)/.070;
-        const frontness=Math.max(0,zs);
-        const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p[2]-=.072*socket;
-
-        return {
-          sphere:dir.map(value=>value*.89),
-          crystal:p,
-          sphereNormal:dir,
-          uv:[u,v],
-          cutNormal,
-          cutWeight
-        };
+    /* R1931 — clean P0-derived body topology.
+       Low, even facet density is intentional: the silhouette is authored by the
+       continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    for(let lat=0;lat<latitudeSegments;lat+=1){
+      for(let lon=0;lon<longitudeSegments;lon+=1){
+        const a=vertex(lat,lon);
+        const b=vertex(lat,lon+1);
+        const c=vertex(lat+1,lon);
+        const d=vertex(lat+1,lon+1);
+        const facet=.12+.28*random(lon+lat*17,lat*31+lon);
+        if(lat>0)triangle([a,b,c],facet);
+        if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
-      const bodyRings=[];
-      for(let ring=1;ring<bodyRingCount;ring+=1){
-        const v=ring/bodyRingCount;
-        bodyRings.push(Array.from({length:sideCount},(_,side)=>{
-          return bodyVertexR1832(v,side/sideCount);
-        }));
-      }
-      const top=bodyVertexR1832(.001,.5);
-      const bottom=bodyVertexR1832(.999,.5);
-
-      const bodyFaces=[];
-      const queueBodyFace=(vertices,facet)=>{
-        let faceNormal=normalize(cross(
-          subtract(vertices[1].crystal,vertices[0].crystal),
-          subtract(vertices[2].crystal,vertices[0].crystal)
-        ));
-        const centre=[0,1,2].map(axis=>
-          (vertices[0].crystal[axis]+vertices[1].crystal[axis]+vertices[2].crystal[axis])/3
-        );
-        if(dot(faceNormal,centre)<0){
-          vertices=[vertices[0],vertices[2],vertices[1]];
-          faceNormal=faceNormal.map(value=>-value);
-        }
-        bodyFaces.push({vertices,facet,faceNormal});
-      };
-
-      const first=bodyRings[0];
-      for(let side=0;side<sideCount;side+=1){
-        const next=(side+1)%sideCount;
-        queueBodyFace([top,first[next],first[side]],.18+.18*random(side,701));
-      }
-      for(let ring=0;ring<bodyRings.length-1;ring+=1){
-        for(let side=0;side<sideCount;side+=1){
-          const next=(side+1)%sideCount;
-          const a=bodyRings[ring][side];
-          const bb=bodyRings[ring][next];
-          const c=bodyRings[ring+1][side];
-          const d=bodyRings[ring+1][next];
-          const facet=.20+.16*random(side+ring*17,ring*43+side);
-          if((side+ring)%2===0){
-            queueBodyFace([a,bb,d],facet);
-            queueBodyFace([a,d,c],facet+.006);
-          }else{
-            queueBodyFace([a,bb,c],facet);
-            queueBodyFace([bb,d,c],facet+.006);
-          }
-        }
-      }
-      const last=bodyRings[bodyRings.length-1];
-      for(let side=0;side<sideCount;side+=1){
-        const next=(side+1)%sideCount;
-        queueBodyFace([last[side],last[next],bottom],.18+.18*random(side,907));
-      }
-
-      /* Shared averaged normals give broad continuous studio reflections.
-         Geometry remains asymmetrical; only the shading is deliberately smooth. */
-      const normalSums=new Map();
-      for(const face of bodyFaces){
-        for(const vertexRef of face.vertices){
-          const sum=normalSums.get(vertexRef)||[0,0,0];
-          sum[0]+=face.faceNormal[0];
-          sum[1]+=face.faceNormal[1];
-          sum[2]+=face.faceNormal[2];
-          normalSums.set(vertexRef,sum);
-        }
-      }
-      for(const [vertexRef,sum] of normalSums){
-        const smooth=normalize(sum);
-        if(vertexRef.cutNormal&&vertexRef.cutWeight>0){
-          const w=Math.min(.86,vertexRef.cutWeight*1.10);
-          vertexRef.crystalNormal=normalize([
-            smooth[0]*(1-w)+vertexRef.cutNormal[0]*w,
-            smooth[1]*(1-w)+vertexRef.cutNormal[1]*w,
-            smooth[2]*(1-w)+vertexRef.cutNormal[2]*w
-          ]);
-        }else{
-          vertexRef.crystalNormal=smooth;
-        }
-      }
-      for(const face of bodyFaces)triangle(face.vertices,face.facet);
     }
 
     /* The reference's cable/tentacle silhouette is still one native R326 draw.
@@ -951,7 +652,7 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    {
+    if(false){
       const centreX=.105,centreY=.025;
       const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
       const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
@@ -1575,7 +1276,7 @@
         vec2 socketQ=vec2((vLocal.x-.115)/.165,(vLocal.y-.040)/.145);
         float socketD=length(socketQ);
         float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
-        float opticCaustic=exp(-dot(socketQ,socketQ)*.72)*smoothstep(.06,.58,vLocal.z)*bodyMask;
+        float opticCaustic=0.0;
         col*=1.0-.075*socketShade;
         col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
