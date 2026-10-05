@@ -207,6 +207,7 @@
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
+  ROOT.dataset.fxMagBirthArtR1938='smoked-bioglass-cinematic-reenabled-first-visit';
   ROOT.dataset.fxMagBirthArtR651 = 'frame-matched-10s-dna-cellular-tentacle-flash-handoff';
   ROOT.dataset.fxMagBirthArtR657 = 'tubular-dna-diamond-iris-organic-shell-tapered-tendrils-reference-match';
   ROOT.dataset.fxMagBirthArtR660 = 'fine-dna-central-diamond-neural-cell-shell-mechanical-petals-nine-tendrils';
@@ -512,7 +513,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261005-r1937-smoked-bioglass-film';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261005-r1938-smoked-bioglass-cinematic';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
