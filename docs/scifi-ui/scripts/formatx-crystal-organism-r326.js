@@ -352,7 +352,9 @@
         crystalNormal = crystalNormal.map(value => -value);
       }
       const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-      const bodySeamOverlap=software&&facet<2.0?.0100:0;
+      /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
+         Removing overlap also removes software/mobile z-fighting speckles. */
+      const bodySeamOverlap=0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
@@ -1235,7 +1237,7 @@
 
         /* Smoked blue-silver glass volume. */
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        vec3 c=mix(vec3(.004,.018,.026),vec3(.115,.300,.335),lift);
+        vec3 c=mix(vec3(.004,.015,.023),vec3(.085,.245,.285),lift);
         c*=.93+.07*volume;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.018,.055,.066)*backDepth*.12;
@@ -1243,7 +1245,7 @@
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.34;
         c+=vec3(.28,.52,.55)*softboxB*.16;
-        c+=vec3(.86,.98,.96)*ribbonA*.30;
+        c+=vec3(.92,.99,.97)*ribbonA*.34;
         c+=vec3(.16,.45,.50)*ribbonB*.13;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
@@ -1251,6 +1253,8 @@
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.180,.205)*fresnel*.34;
         c+=vec3(.050,.280,.320)*deepEdge*.20;
+        float spectralSide=.5+.5*n.x;
+        c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(.08+.07*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
@@ -1464,7 +1468,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-clean-studio-bioglass-integrated-optic-no-speckle';
+    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-smoked-dichroic-studio-bioglass-integrated-optic-zero-speckle';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
