@@ -247,25 +247,17 @@ html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
     visibility:visible!important;
     opacity:1!important;
   }
-  /* R1830 — mobile cinematic is a real full-screen studio shot again.
-     The transparent R1745 composition exposed the page underneath and produced
-     the split black/grey rectangles visible in real phone captures. */
   html:root:root #fx-mag-birth-prepaint-r1606,
   html:root:root body>.fx-mag-birth-r533{
-    background:
-      radial-gradient(ellipse 54% 48% at 50% 45%,rgba(42,78,82,.16),transparent 66%),
-      radial-gradient(ellipse 88% 64% at 50% 104%,rgba(24,41,42,.22),transparent 64%),
-      linear-gradient(180deg,#010406 0%,#020709 46%,#010304 100%)!important;
+    background:transparent!important;
   }
   html:root:root #fx-mag-birth-prepaint-r1606>.fxb-particles,
   html:root:root body>.fx-mag-birth-r533>.fxb-particles{
     background:transparent!important;
   }
   html:root:root body>.fx-mag-birth-r533::after{
-    opacity:.055!important;
-    background:
-      radial-gradient(ellipse 52% 48% at 50% 43%,rgba(87,176,184,.10),transparent 70%),
-      linear-gradient(180deg,rgba(255,255,255,.012),transparent 24%,rgba(0,0,0,.10))!important;
+    opacity:.12!important;
+    background:radial-gradient(ellipse 56% 52% at 50% 42%,rgba(18,42,50,.16),transparent 74%)!important;
   }
 }
   html:root:root body>.fx-mag-birth-r533 .fxb-deep{
@@ -281,7 +273,6 @@ html[data-fx-mag-birth-live="active"] body>.fx-atmosphere{
     mask-image:none!important;
   }
 /* production-r1745-mobile-hero-integrated-ten-second-intro */
-/* production-r1830-mobile-opaque-studio-cinematic */
 
 
 /* R1756 — zero-delay skip ownership.
