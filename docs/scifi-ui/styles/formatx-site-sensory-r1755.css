@@ -139,8 +139,6 @@ html body.living-architecture :is(
   ){
     --fx-pc-mx:0px;
     --fx-pc-my:0px;
-    --fx-pc-light-x:50%;
-    --fx-pc-light-y:50%;
     translate:var(--fx-pc-mx) var(--fx-pc-my);
     scale:1;
     transition:
@@ -169,8 +167,6 @@ html body.living-architecture :is(
   }
 
   html body.living-architecture :is(.button,.magnetic){
-    --fx-pc-light-x:50%;
-    --fx-pc-light-y:50%;
     scale:1;
   }
   html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1944="true"]{
