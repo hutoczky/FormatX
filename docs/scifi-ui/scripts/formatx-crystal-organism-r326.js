@@ -1223,7 +1223,7 @@
         vec3 refl=reflect(-view,n);
         float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
         float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.11)/.055,2.0)-pow((refl.y-.08)/.72,2.0))*smoothstep(-.10,.72,refl.z);
+        float ribbonA=exp(-pow((refl.x+.13)/.145,2.0)-pow((refl.y-.10)/.76,2.0))*smoothstep(-.10,.72,refl.z);
         float ribbonB=exp(-pow((refl.x-.31)/.085,2.0)-pow((refl.y+.10)/.62,2.0))*smoothstep(-.10,.70,refl.z);
 
         float frontDepth=smoothstep(-.46,.58,vLocal.z);
@@ -1257,18 +1257,20 @@
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.34;
         c+=vec3(.28,.52,.55)*softboxB*.16;
-        c+=vec3(.92,.99,.97)*ribbonA*.34;
+        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
+        c+=vec3(.70,.82,.80)*softboxC*.105;
+        c+=vec3(.92,.98,.96)*ribbonA*.175;
         c+=vec3(.16,.45,.50)*ribbonB*.13;
-        float glassBlade=exp(-pow((vLocal.x+.165+vLocal.y*.045)/.082,2.0))*frontDepth
+        float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.82,.93,.90)*glassBlade*.052;
+        c+=vec3(.76,.88,.86)*glassBlade*.016;
 
         /* Two restrained refractive diagonals reveal internal crystalline depth
            without drawing polygon borders or a logo-like central cross. */
         float innerDiagonal=exp(-pow((abs(vLocal.x)-(.17+.22*abs(vLocal.y)))/.070,2.0))*frontDepth;
         float innerDiagonal2=exp(-pow((abs(vLocal.x)-(.31-.12*abs(vLocal.y)))/.095,2.0))*frontDepth;
-        c+=vec3(.12,.29,.31)*innerDiagonal*.050;
-        c+=vec3(.30,.39,.38)*innerDiagonal2*.025;
+        c+=vec3(.12,.29,.31)*innerDiagonal*.040;
+        c+=vec3(.30,.39,.38)*innerDiagonal2*.020;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
@@ -1492,7 +1494,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-smoked-silver-refractive-studio-bioglass';
+    root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
