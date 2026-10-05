@@ -1,5 +1,5 @@
 FormatX production revision
-token=20260930-r1819-r1818-strict-live-audit
-base_master=b59e039910707248ed8d83bb9731e59a2bc367a8
-purpose=deploy the current R1818 production surface and verify the unified strict Lighthouse audit path against the real production experience
-validation=production preflight, exact-revision deploy convergence, strict live Lighthouse 100x3 desktop/mobile, security and checkout invariants, current MAG and responsive runtime contracts
+token=20261005-r1944-desktop-precision-interaction
+base_master=3663e91111ba75df7be1f98b4eef6f7d2e2f66a8
+purpose=deploy the R1944 Signature MAG and premium desktop interaction surface with polling-rate independent pointer response and bounded cinematic inertia
+validation=production preflight, exact-revision deploy convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof and production Worker contracts
