@@ -392,7 +392,7 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?1:(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1375,7 +1375,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.175'},vLocal.y/${mobile?'.135':'.175'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1407,7 +1407,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*3.08),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1593,6 +1593,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1945e='desktop-cut-face-normal-blend-larger-optic-preserved-contrast';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
