@@ -298,44 +298,32 @@
       const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
 
-      /* R1941b — studio Signature MAG.
-         Build the front silhouette from a smooth four-lobe polar field instead
-         of an Lp diamond. This keeps the four iconic points but removes the hard
-         quadrant creases that read as four flat triangles on mobile. */
-      const xyLength=Math.max(.0001,Math.hypot(direction[0],direction[1]));
-      const frontAngle=Math.atan2(direction[1],direction[0]);
-      const axisWave=.5+.5*Math.cos(frontAngle*4.0);
-      const secondaryWave=.5+.5*Math.cos(frontAngle*8.0+.18);
-      const pointField=
-        .585+
-        .275*Math.pow(axisWave,1.55)+
-        .020*Math.pow(secondaryWave,2.2);
-      const depthFacing=1.0-Math.abs(direction[2]);
-      const asymmetry=
-        .010*Math.sin(frontAngle*3.0+.55)+
-        .007*Math.cos(frontAngle*5.0-.30);
-      const xyRadius=(pointField+asymmetry)*(.975+.025*depthFacing);
+      /* R1941c — source-locked Signature MAG.
+         Restore the exact R1934–R1936 P0 diamond grammar selected by the user:
+         asymmetric four-direction crystal, compact valleys, deeper rear volume.
+         The silhouette is original; only shading/topology are modernised. */
+      const axisX=direction[0]>=0?.88:.86;
+      const axisY=direction[1]>=0?1.09:.97;
+      const axisZ=direction[2]>=0?.64:.43;
+      const exponent=.78;
+      const terms=
+        Math.pow(Math.abs(direction[0])/axisX,exponent)+
+        Math.pow(Math.abs(direction[1])/axisY,exponent)+
+        Math.pow(Math.abs(direction[2])/axisZ,exponent);
+      const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
+      const organic=
+        1+
+        .022*Math.sin(theta*4+phi*1.7)*sinPhi*sinPhi+
+        .010*Math.sin(theta*7-phi*3.1);
 
-      const topBias=1.0+.075*Math.pow(Math.max(direction[1],0),4.0);
-      const lowerBias=1.0+.035*Math.pow(Math.max(-direction[1],0),4.0);
-      const sideBias=1.0+.032*Math.pow(Math.abs(direction[0]),4.0);
+      const crystalPosition=direction.map(value=>value*radial*organic);
 
-      const crystalPosition=[
-        direction[0]*xyRadius*1.185*sideBias,
-        direction[1]*xyRadius*1.205*topBias*lowerBias,
-        direction[2]*(.475+.115*Math.pow(axisWave,.68)+.055*xyLength)
-      ];
-
-      /* A tiny three-quarter bias gives the object authorship without turning
-         the silhouette into a mechanically perfect logo extrusion. */
-      crystalPosition[0]+=-.018*Math.pow(Math.max(direction[1],0),2.2)+.008*direction[2];
-      crystalPosition[1]+=.010*Math.sin(frontAngle*2.0)*depthFacing;
-      crystalPosition[2]+=-.010*direction[0]+.006*direction[1];
-
+      /* Keep the original crystalline outline, but smooth the studio response.
+         This prevents the four quadrants from reading as flat cardboard planes. */
       const crystalNormal=normalize([
-        direction[0]/1.16,
-        direction[1]/1.19,
-        direction[2]/.56
+        direction[0]/axisX,
+        direction[1]/axisY,
+        direction[2]/axisZ
       ]);
 
       return{
@@ -1095,23 +1083,23 @@
            It reads as smoked optical glass under studio light, not as a HUD decal. */
         vec2 lq=q;
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.138,.174,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.078,.126,lensD))*front;
-        float lensCore=(1.0-smoothstep(.026,.058,lensD))*front;
-        float lensPupil=(1.0-smoothstep(.006,.022,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.112,.146,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.064,.108,lensD))*front;
+        float lensCore=(1.0-smoothstep(.022,.052,lensD))*front;
+        float lensPupil=(1.0-smoothstep(.004,.016,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
-        float lensInnerRing=exp(-pow((lensD-.078)/.012,2.0))*front;
+        float lensInnerRing=exp(-pow((lensD-.066)/.010,2.0))*front;
         float lensHighlight=exp(-pow((lq.x+.040)/.030,2.0)-pow((lq.y-.046)/.034,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.030)/.060,2.0)-pow((lq.y+.052)/.040,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.105);
         float opticBreath=.94+.06*(.5+.5*sin(uTime*.72));
 
-        mineral=mix(mineral,vec3(.008,.025,.030),lensOuter*.22);
-        mineral+=vec3(.72,.82,.80)*lensRim*(.060+.100*sideLight+.060*fresnel);
-        mineral+=vec3(.014,.070,.082)*lensGlass*(.090+.080*softboxA+.055*sideSpec);
-        mineral+=vec3(.020,.20,.235)*lensInnerRing*(.12+.10*uEnergy);
-        mineral+=vec3(.18,.72,.78)*lensCore*(.17+.12*uEnergy)*opticBreath;
-        mineral+=vec3(.86,1.00,.98)*lensPupil*(.16+.08*uEnergy);
+        mineral=mix(mineral,vec3(.010,.035,.042),lensOuter*.080);
+        mineral+=vec3(.78,.90,.88)*lensRim*(.075+.115*sideLight+.070*fresnel);
+        mineral+=vec3(.020,.120,.138)*lensGlass*(.105+.095*softboxA+.060*sideSpec);
+        mineral+=vec3(.030,.34,.39)*lensInnerRing*(.15+.11*uEnergy);
+        mineral+=vec3(.28,.86,.90)*lensCore*(.21+.13*uEnergy)*opticBreath;
+        mineral+=vec3(.96,1.00,.99)*lensPupil*(.22+.09*uEnergy);
         mineral+=vec3(.82,.94,.91)*lensHighlight*.18;
         mineral+=vec3(.10,.15,.15)*lensLower*.032;
         mineral=mix(mineral,vec3(.002,.010,.013),lensDepth*.050*lensGlass);
@@ -1261,7 +1249,7 @@
         /* Integrated smoked optical organ. It is part of the surface, not a HUD
            ring and not a glowing sticker. */
         float front=smoothstep(.08,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/.155,vLocal.y/.155);
+        vec2 oq=vec2(vLocal.x/.135,vLocal.y/.135);
         float od=length(oq);
         float optic=(1.0-smoothstep(.90,1.02,od))*front;
         float opticRim=exp(-pow((od-.83)/.060,2.0))*front;
@@ -1464,7 +1452,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='signature-four-point-smooth-bioglass-central-optic-two-sided-studio-sculpt-no-cables';
+    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-bioglass-smooth-studio-normal-central-optic-no-cables';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
