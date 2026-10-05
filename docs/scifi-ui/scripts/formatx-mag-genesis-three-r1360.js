@@ -143,6 +143,7 @@
       document.documentElement.dataset.fxMagBirthSilhouetteR1776='unified-asymmetric-overlapping-crystal-anatomy-no-round-pod';
       document.documentElement.dataset.fxMagBirthVisualR1777='cinematic-black-mineral-bioglass-natural-softbox-depth';
       document.documentElement.dataset.fxMagBirthVisualR1930='igloo-grade-frosted-living-ice-slit-optic-slow-breath';
+      document.documentElement.dataset.fxMagBirthVisualR1932='p0-derived-seamless-living-crystal-no-eye-breathing-film';
       document.documentElement.dataset.fxMagBirthVisualR1830='igloo-grade-single-monolithic-smoky-bioglass-no-mobile-clutter';
       document.documentElement.dataset.fxMagBirthVisualR1891='fused-trilobate-dark-bioglass-centered-living-optic';
       document.documentElement.dataset.fxMagBirthVisualR1893='embedded-optic-studio-bioglass-handoff-parity';
@@ -1073,111 +1074,40 @@
       const shellHeight=this.deterministicFrame||this.highDetail?58:(this.lowPowerProfile?30:(this.mobileProfile?42:52));
       const shellGeo=new T.SphereGeometry(1.38,shellWidth,shellHeight);
       const shellPos=shellGeo.attributes.position;
-      const profileR1905=[
-        /* R1930 — exact parity with the calm living-ice permanent MAG. */
-        [ 1.00,.012,.008,-.018, .000],
-        [ .94,.078,.052,-.050, .002],
-        [ .86,.205,.132,-.094, .005],
-        [ .76,.355,.220,-.130, .009],
-        [ .66,.475,.286,-.140, .012],
-        [ .55,.555,.328,-.118, .015],
-        [ .44,.595,.350,-.074, .016],
-        [ .33,.575,.338,-.014, .016],
-        [ .22,.515,.306, .045, .014],
-        [ .11,.462,.278, .086, .010],
-        [ .00,.438,.266, .104, .005],
-        [-.11,.470,.286, .090, .000],
-        [-.22,.528,.316, .050,-.005],
-        [-.34,.570,.338,-.010,-.010],
-        [-.46,.552,.326,-.064,-.012],
-        [-.58,.485,.286,-.098,-.012],
-        [-.70,.388,.228,-.104,-.010],
-        [-.81,.270,.160,-.080,-.007],
-        [-.90,.150,.090,-.045,-.004],
-        [-.97,.050,.030,-.015,-.002],
-        [-1.00,.010,.007, .000, .000]
-      ];
-      const sampleProfile=y=>{
-        if(y>=profileR1905[0][0])return profileR1905[0];
-        if(y<=profileR1905[profileR1905.length-1][0])return profileR1905[profileR1905.length-1];
-        const catmull=(p0,p1,p2,p3,t)=>{
-          const t2=t*t,t3=t2*t;
-          return .5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3);
-        };
-        for(let j=0;j<profileR1905.length-1;j++){
-          const a=profileR1905[j],b=profileR1905[j+1];
-          if(y<=a[0]&&y>=b[0]){
-            const q=(a[0]-y)/Math.max(.0001,a[0]-b[0]);
-            const p0=profileR1905[Math.max(0,j-1)];
-            const p3=profileR1905[Math.min(profileR1905.length-1,j+2)];
-            return [
-              y,
-              Math.max(.008,catmull(p0[1],a[1],b[1],p3[1],q)),
-              Math.max(.006,catmull(p0[2],a[2],b[2],p3[2],q)),
-              catmull(p0[3],a[3],b[3],p3[3],q),
-              catmull(p0[4],a[4],b[4],p3[4],q)
-            ];
-          }
-        }
-        return profileR1905[profileR1905.length-1];
-      };
-      const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
-      const field=(y,theta,cy,sy,ca,sa,amp)=>{
-        const dy=(y-cy)/sy,da=angleDelta(theta,ca)/sa;
-        return amp*Math.exp(-(dy*dy+da*da));
-      };
+      /* R1932 — exact geometry language of the permanent P0-derived MAG.
+         One seamless living crystal; no stacked ring masses and no blob profile. */
       for(let i=0;i<shellPos.count;i++){
         const p=new T.Vector3().fromBufferAttribute(shellPos,i);
         const n=p.clone().normalize();
         const y=n.y;
-        const profile=sampleProfile(y);
-        let rx=profile[1],rz=profile[2],ox=profile[3],oz=profile[4];
-        const theta0=Math.atan2(n.z,n.x);
-        const theta=theta0+y*.075+Math.sin(y*Math.PI)*.020;
-        const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=3.10;
-        const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
-        const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
-
-        const upperLeft=field(y,theta,.54,.34,Math.PI,.90,.026);
-        const rightShoulder=field(y,theta,.10,.36,.04,.90,.022);
-        const lowerLeft=field(y,theta,-.42,.32,2.62,.92,.018);
-        const frontChest=field(y,theta,.02,.42,Math.PI*.50,.92,.014);
-        const rearCut=field(y,theta,.02,.48,-Math.PI*.50,.96,.009);
-        const radial=1+upperLeft+rightShoulder+lowerLeft+frontChest-rearCut;
-        rx*=radial;
-        rz*=1+upperLeft*.20+rightShoulder*.16+lowerLeft*.10+frontChest*.12-rearCut*.30;
-
-        p.set(ox+cx*rx,y*.972,oz+cz*rz);
-        p.x+=-.020*y+.017*Math.sin((y+.10)*Math.PI)
-          -.010*upperLeft+.014*rightShoulder-.008*lowerLeft;
-        p.z+=-.026*p.x+.009*Math.sin(theta*2.0)*(1-Math.abs(y));
-
-        const topPlane=.958-p.x*.070-p.z*.030;
-        const bottomPlane=-.965-p.x*.030+p.z*.018;
-        if(p.y>topPlane)p.y=topPlane+(p.y-topPlane)*.24;
-        if(p.y<bottomPlane)p.y=bottomPlane+(p.y-bottomPlane)*.30;
-
-        const leftPlane=-.612+.070*p.y-.018*p.z;
-        const rightPlane=.602-.052*p.y+.018*p.z;
-        const frontPlane=.438-.028*p.y-.020*p.x;
-        const backPlane=-.398+.018*p.y+.014*p.x;
-        if(p.x<leftPlane)p.x=leftPlane+(p.x-leftPlane)*.30;
-        if(p.x>rightPlane)p.x=rightPlane+(p.x-rightPlane)*.28;
-        if(p.z>frontPlane)p.z=frontPlane+(p.z-frontPlane)*.38;
-        if(p.z<backPlane)p.z=backPlane+(p.z-backPlane)*.36;
-
-        const crownT=Math.max(0,Math.min(1,(p.y-.66)/.24));
-        const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.026*Math.exp(-Math.pow((p.x+.010)/.180,2.0))*crownEase;
-        p.y-=crownCleft;
-        p.x+=crownCleft*.06;
-
-        const socketX=(p.x-.105)/.230;
-        const socketY=(p.y-.025)/.070;
-        const frontness=Math.max(0,zs);
-        const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p.z-=.072*socket;
+        const shoulder=Math.max(0,1-y*y);
+        const theta=Math.atan2(n.z,n.x);
+        const phi=Math.acos(Math.max(-1,Math.min(1,y)));
+        const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
+        const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
+        const ax=.600+shoulder*.145+n.x*.024-n.z*.010;
+        const ay=.925+shoulder*.028+y*.028;
+        const az=.430+shoulder*.082+n.z*.018-n.x*.010;
+        const exponent=1.28;
+        const lp=
+          Math.pow(Math.abs(n.x)/ax,exponent)+
+          Math.pow(Math.abs(n.y)/ay,exponent)+
+          Math.pow(Math.abs(n.z)/az,exponent);
+        const radius=1/Math.pow(Math.max(.0001,lp),1/exponent);
+        const life=
+          1+
+          Math.sin(theta*2.0+phi*.74)*.012*shoulder+
+          Math.cos(theta*3.0-phi*.93)*.006*shoulder;
+        p.set(n.x*radius*life,n.y*radius*life,n.z*radius*life);
+        p.x+=-.052*Math.pow(smoothUp,1.8)+.026*Math.pow(smoothDown,1.6)
+          +Math.sin(theta*1.62+phi*.70)*.012*shoulder;
+        p.y+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
+          +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
+        p.z+=-n.x*.016+n.x*y*.010;
+        const top=.878-p.x*.060-p.z*.020;
+        const bottom=-.892-p.x*.026+p.z*.014;
+        if(p.y>top)p.y=top+(p.y-top)*.18;
+        if(p.y<bottom)p.y=bottom+(p.y-bottom)*.22;
         shellPos.setXYZ(i,p.x,p.y,p.z);
       }
       shellGeo.computeVertexNormals();
@@ -1970,7 +1900,7 @@
       this.coreShell.visible=seedShellLife*seedVisual>.002;
       this.coreGlass.visible=seedShellLife*seedVisual>.002;
       if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
-      this.irisGroup.visible=irisAwake>.004;
+      this.irisGroup.visible=false;
       this.irisGroup.scale.setScalar((this.mobileProfile?.98:1.00)*(1+irisAwake*.010)*pulse);
       if(this.livingIris){
         this.livingIris.material.opacity=(.16+.18*irisAwake)*irisAwake;
