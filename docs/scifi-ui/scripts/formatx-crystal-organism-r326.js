@@ -302,10 +302,10 @@
       const shoulder=Math.max(0,1-y*y);
       const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
       const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
-      const ax=.600+shoulder*.145+direction[0]*.024-direction[2]*.010;
+      const ax=.625+shoulder*.132+direction[0]*.026-direction[2]*.010;
       const ay=.925+shoulder*.028+y*.028;
-      const az=.430+shoulder*.082+direction[2]*.018-direction[0]*.010;
-      const p=1.28;
+      const az=.445+shoulder*.078+direction[2]*.018-direction[0]*.012;
+      const p=1.48;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -326,8 +326,8 @@
         +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
       crystalPosition[2]+=-direction[0]*.016+direction[0]*y*.010;
 
-      const top=.878-crystalPosition[0]*.060-crystalPosition[2]*.020;
-      const bottom=-.892-crystalPosition[0]*.026+crystalPosition[2]*.014;
+      const top=.790-crystalPosition[0]*.075-crystalPosition[2]*.026;
+      const bottom=-.815-crystalPosition[0]*.035+crystalPosition[2]*.018;
       if(crystalPosition[1]>top)crystalPosition[1]=top+(crystalPosition[1]-top)*.18;
       if(crystalPosition[1]<bottom)crystalPosition[1]=bottom+(crystalPosition[1]-bottom)*.22;
 
@@ -1203,171 +1203,62 @@
       ${fragmentIn} vec3 vBary;
       ${fragmentIn} float vFacet;
       ${fragmentIn} float vMorph;
-      ${webgl2 ? 'out vec4 outColor;' : ''}
+      ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
-      vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
+      vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
-        vec3 key=normalize(vec3(-.53,.79,.31));
-        vec3 side=normalize(vec3(.77,.06,.64));
-        vec3 fill=normalize(vec3(-.61,-.31,.73));
+        vec3 view=normalize(vec3(-vLocal.xy,2.95-vLocal.z));
+        vec3 key=normalize(vec3(-.46,.78,.42));
+        vec3 side=normalize(vec3(.74,.10,.66));
         float ndl=max(dot(n,key),0.0);
         float sideLight=max(dot(n,side),0.0);
-        float fillLight=max(dot(n,fill),0.0);
         float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,2.05);
-        float keySpec=pow(max(dot(n,normalize(key+view)),0.0),72.0);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),38.0);
+        float fresnel=pow(1.0-facing,1.72);
+        float spec=pow(max(dot(n,normalize(key+view)),0.0),34.0);
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.25)/.235,2.0)-pow((refl.y-.30)/.46,2.0))*smoothstep(-.24,.50,refl.z);
-        float softboxB=exp(-pow((refl.x-.40)/.245,2.0)-pow((refl.y-.01)/.50,2.0))*smoothstep(-.28,.54,refl.z);
-        float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.18)/.070,2.0)-pow((refl.y-.18)/.64,2.0))*smoothstep(-.18,.66,refl.z);
-        float studioRibbonB=exp(-pow((refl.x-.30)/.098,2.0)-pow((refl.y+.06)/.56,2.0))*smoothstep(-.14,.68,refl.z);
-        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.040,2.0)-pow((refl.y-.04)/.72,2.0))*smoothstep(-.08,.74,refl.z);
-        float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
-        float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
-        float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
-        float isLensMesh=step(6.0,vFacet);
-        float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
-        float tendrilMask=isTendril*(1.0-vMorph);
-        float glassFinMask=isGlassFin*(1.0-vMorph);
-        float armorMask=isArmor*(1.0-vMorph);
-        float lensMeshMask=isLensMesh*(1.0-vMorph);
+        float softbox=exp(-pow((refl.x+.24)/.31,2.0)-pow((refl.y-.32)/.55,2.0));
+        float rimBox=exp(-pow((refl.x-.43)/.38,2.0)-pow((refl.y+.03)/.60,2.0));
 
-        float lift=sat(.160+ndl*.245+sideLight*.145+fillLight*.085);
-        float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
-        float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
-        float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.010,.020,.024),vec3(.210,.242,.238),lift);
-        col*=.984+.016*smoke;
-        col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
-        col-=vec3(.0012,.0018,.0020)*inclusion;
-        col+=vec3(1.00,1.00,.99)*keySpec*.150;
-        col+=vec3(.58,.72,.74)*sideSpec*.110;
-        col+=vec3(.96,1.00,.98)*softboxA*.205;
-        col+=vec3(.50,.68,.69)*softboxB*.060;
-        col+=vec3(.94,.98,.96)*studioRibbonA*.135;
-        col+=vec3(.40,.27,.18)*studioRibbonB*.006;
-        col+=vec3(.72,.94,.94)*studioRibbonC*.090;
-        col+=vec3(.050,.066,.066)*horizonBand*.095;
-        col+=vec3(.040,.105,.112)*fresnel*.115;
-        col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
-        float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
-        float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
-        col+=vec3(.004,.006,.007)*(.10+.12*fillLight+.04*max(0.0,-n.y));
-        col+=vec3(.050,.057,.056)*pow(planeKey,.82)*.105;
-        col+=vec3(.030,.026,.022)*pow(planeFill,.90)*.060;
-        float edgeTransmission=pow(1.0-facing,2.15)*(1.0-sat(ndl*.48));
-        float glassEdge=pow(1.0-facing,1.38)*bodyMask;
-        col+=vec3(.024,.090,.104)*edgeTransmission*.44;
-        col+=vec3(.070,.220,.245)*glassEdge*.25;
-        float iceVolume=exp(-pow((vLocal.x+.10)/.48,2.0)-pow((vLocal.y-.08)/.60,2.0))
-          *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        float sculptShoulder=exp(-pow((vLocal.x+.30)/.26,2.0)-pow((vLocal.y-.34)/.30,2.0))*bodyMask;
-        col+=vec3(.055,.125,.134)*sculptShoulder*.045;
-        float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
-        float internalLife=exp(-pow((vLocal.x+.015)/.30,2.0)-pow((vLocal.y+.035)/.43,2.0))
-          *smoothstep(-.08,.46,vLocal.z)*bodyMask;
-        float lifeBreath=.72+.28*sin(uTime*.92);
-        col+=vec3(.018,.070,.076)*internalLife*(.050+.040*lifeBreath+.026*uEnergy);
-        col+=vec3(.120,.235,.245)*iceVolume*(.080+.055*(1.0-facing));
-        col+=vec3(.110,.165,.168)*innerVeil*(.028+.024*facing);
-        col+=vec3(.012,.030,.036)*bodyMask*(.20+.30*facing);
-        col+=vec3(.018,.044,.050)*strata*iceVolume*.006;
-        float glassRibbon=exp(-pow((vLocal.x+.145-vLocal.y*.070)/.052,2.0))*smoothstep(-.74,.78,vLocal.y)*bodyMask;
-        float innerPulse=exp(-pow((vLocal.x-.018)/.22,2.0)-pow((vLocal.y+.02)/.48,2.0))*smoothstep(.05,.62,vLocal.z)*bodyMask;
-        col+=vec3(.82,.94,.93)*glassRibbon*.105;
-        col+=vec3(.012,.092,.108)*innerPulse*(.030+.045*uEnergy);
-        vec2 socketQ=vec2((vLocal.x-.115)/.165,(vLocal.y-.040)/.145);
-        float socketD=length(socketQ);
-        float socketShade=exp(-pow((socketD-1.0)/.18,2.0))*smoothstep(.16,.54,vLocal.z)*bodyMask;
-        float opticCaustic=0.0;
-        col*=1.0-.075*socketShade;
-        col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
-        float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.020,.090,.102),vec3(.032,.058,.070),chromaSide)*fresnel*bodyMask*.060;
-        float facetTone=.999+.002*fract(vFacet*7.13+.19);
-        float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
-        float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
-        col*=mix(1.0,facetTone,bodyMask*.08);
-        col+=vec3(.026,.033,.032)*pow(broadFacet,1.20)*.035*bodyMask;
-        col+=vec3(.040,.024,.016)*pow(warmFacet,1.20)*.025*bodyMask;
-        col+=vec3(.018,.047,.052)*fresnel*.080*bodyMask;
-
+        float bodyMask=1.0-step(2.0,vFacet);
         float pulse=0.0;
         if(uSurfacePulse>=0.0){
-          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
-          float head=mix(-.18,1.18,sat(uSurfacePulse));
-          pulse=exp(-pow((coordinate-head)/.064,2.0))*(.28+.72*fresnel);
+          float coordinate=.5+(vLocal.y*.64+vLocal.x*.14+vLocal.z*.16)*.5;
+          float head=mix(-.16,1.16,sat(uSurfacePulse));
+          pulse=exp(-pow((coordinate-head)/.080,2.0))*(.30+.70*fresnel);
         }
-        col+=vec3(.12,.27,.30)*pulse*.36;
-        col+=vec3(.48,.55,.54)*pulse*(.08+.18*softboxA);
 
-        float subsurface=pow(max(0.0,dot(-n,key)),1.7)*(1.0-facing);
-        vec3 livingMembrane=vec3(.008,.022,.030)
-          +vec3(.080,.17,.20)*(.12*ndl+.21*sideLight+.55*fresnel)
-          +vec3(.58,.78,.80)*softboxA*.24
-          +vec3(.26,.46,.51)*softboxB*.16
-          +vec3(.075,.055,.085)*subsurface*.18;
-        col=mix(col,livingMembrane,glassFinMask*.965);
+        float lifePhase=.5+.5*sin(uTime*.92+vLocal.y*2.2-vLocal.x*.7);
+        float inner=exp(-pow((vLocal.x+.015)/.32,2.0)-pow((vLocal.y+.02)/.44,2.0))
+          *smoothstep(-.30,.46,vLocal.z)*bodyMask;
+        float spine=exp(-pow((vLocal.x+.055+vLocal.y*.07)/.095,2.0))
+          *exp(-pow(vLocal.y/.56,4.0))*bodyMask;
 
-        vec3 cartilage=vec3(.150,.164,.160)
-          +vec3(.180,.198,.192)*(.12*ndl+.17*sideLight)
-          +vec3(1.00,1.00,.99)*softboxA*.360
-          +vec3(.70,.82,.80)*sideSpec*.220
-          +vec3(.070,.190,.198)*fresnel*.105
-          +vec3(.010,.008,.012)*subsurface*.004;
-        col=mix(col,cartilage,armorMask*.985);
+        if(uLayer>.5){
+          vec3 inside=vec3(.006,.020,.024);
+          inside+=vec3(.020,.105,.116)*inner*(.48+.30*lifePhase+.28*uEnergy);
+          inside+=vec3(.070,.160,.168)*spine*(.18+.12*lifePhase);
+          inside+=vec3(.16,.34,.36)*pulse*.52;
+          float a=.10+.16*inner+.08*spine+.10*pulse;
+          ${outputName}=vec4(filmic(inside*2.15),clamp(a,.08,.44));
+          return;
+        }
 
-        vec2 lensVector=vUv-vec2(.5);
-        float lensRadial=length(lensVector);
-        float lensInner=1.0-smoothstep(.205,.475,lensRadial);
-        float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
-        float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorHalo=exp(-pow(lensVector.x/.320,2.0)-pow(lensVector.y/.150,2.0));
-        float sensorCore=exp(-pow(lensVector.x/.250,2.0)-pow(lensVector.y/.060,2.0));
-        float sensorArc=0.0;
-        float lensHot=exp(-pow(lensVector.x/.290,2.0)-pow(lensVector.y/.085,2.0));
-        float lensGlint=exp(-pow((vUv.x-.29)/.085,2.0)-pow((vUv.y-.33)/.095,2.0));
-        float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
-        vec3 physicalLens=vec3(.003,.013,.016)
-          +vec3(.010,.060,.068)*(.18+.16*uEnergy)
-          +vec3(.94,.98,.96)*softboxA*.16
-          +vec3(.40,.50,.50)*sideSpec*.07
-          +vec3(.022,.085,.098)*fresnel*.060
-          +vec3(.008,.090,.102)*lensInner*(.10+.07*uEnergy)
-          +vec3(.74,.80,.78)*lensRim*.055
-          +vec3(.012,.080,.090)*sensorHalo*(.06+.04*uEnergy)
-          +vec3(.58,.88,.88)*sensorCore*(.18+.07*uEnergy)
-          +vec3(.56,.72,.70)*lensHot*.050
-          +vec3(.98,1.00,.99)*lensGlint*.24
-          +vec3(.32,.40,.40)*lensEdge*(.035+.040*softboxA+.025*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.004,.022,.028),lensDepthShade*.045);
-        physicalLens+=vec3(.64,.88,.90)*lensGlint*.10;
-        col=mix(col,physicalLens,lensMeshMask*.997);
+        float diffuse=.16+ndl*.42+sideLight*.20;
+        vec3 col=mix(vec3(.010,.021,.025),vec3(.170,.205,.202),sat(diffuse));
+        col+=vec3(.90,.96,.93)*softbox*.205;
+        col+=vec3(.34,.48,.49)*rimBox*.070;
+        col+=vec3(.96,1.00,.98)*spec*.160;
+        col+=vec3(.040,.120,.132)*fresnel*.22;
+        col+=vec3(.025,.085,.092)*inner*(.05+.05*lifePhase+.035*uEnergy);
+        col+=vec3(.040,.105,.108)*spine*.045;
+        col+=vec3(.13,.31,.33)*pulse*.36;
+        col+=vec3(.015,.020,.021)*(1.0-facing)*.15;
 
-        float segment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.006,.015,.018)+vec3(.09,.15,.16)*(.14*sideLight+.08*ndl+.40*fresnel);
-        tendon+=vec3(.016,.09,.11)*segment*.028;
-        tendon+=vec3(.72,.78,.75)*sideSpec*.11;
-        tendon+=vec3(.64,.69,.65)*softboxA*.095;
-        col=mix(col,tendon,tendrilMask*.995);
-
-        if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
-        float bodyGlassAlpha=.90+.07*facing;
-        outAlpha=mix(outAlpha,bodyGlassAlpha,bodyMask);
-        outAlpha=mix(outAlpha,.975,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.02),clamp(outAlpha,.90,1.0));
+        float alpha=.70+.17*facing+.08*ndl;
+        ${outputName}=vec4(filmic(col*2.08),clamp(alpha,.68,.96));
       }`;
 
-    /* R1678 — true software/very-low-GPU material.
-       Keep the same smoky obsidian + recessed optical lens identity, but remove
-       the high-cost per-fragment Gaussian studio reflections, procedural strata
-       and repeated transcendental micro-detail. Hardware retains the full
-       photographic shader. */
     const softwareFragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
@@ -1542,6 +1433,7 @@
     root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
     root.dataset.fxNativeMagStudioR1930='single-sculpt-frosted-ice-horizontal-aperture-slow-breath-cross-tier-parity';
     root.dataset.fxNativeMagStudioR1932='p0-derived-seamless-living-crystal-no-eye-broad-internal-breath';
+    root.dataset.fxNativeMagStudioR1933='frosted-cut-ice-two-pass-living-depth-no-eye';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
     root.dataset.fxNativeMagStudioR1892='audit-parity-recessed-optic-soft-trilobate-silhouette';
@@ -1995,22 +1887,17 @@
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
-      /* R1450 — one solid outer pass on every device.
-         The old additive inner/front passes made the crystal look translucent,
-         bruised and overexposed on desktop. All optical detail now lives in the
-         physically coherent outer shader, which is also cheaper and crisper. */
+      /* R1933 — two coherent passes restore real glass depth without the old
+         noisy neon stack. Inner life is additive and faint; the outer shell is
+         conventional alpha-blended frosted ice. */
+      gl.enable(gl.BLEND);
+      gl.disable(gl.CULL_FACE);
+      gl.depthMask(false);
+      gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+      gl.uniform1f(uniforms.uLayer,1);
+      gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       gl.depthMask(true);
-      /* R1557 is a genuinely opaque closed mineral. No alpha blending and no
-         back-face culling means bad mobile winding can never punch black holes
-         through the body, while the depth buffer still resolves the front shell. */
-      if(mobile){
-        gl.disable(gl.BLEND);
-        gl.disable(gl.CULL_FACE);
-      }else{
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-        gl.disable(gl.CULL_FACE);
-      }
+      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
