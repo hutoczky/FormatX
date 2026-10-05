@@ -1,4 +1,4 @@
-/* FormatX R536 — full cinematic journey.
+/* FormatX R536 / R1946 — full cinematic journey.
    One continuous visual world connects every existing information and action
    surface. It never duplicates the native MAG, never intercepts input and never
    changes document geometry. Motion is scroll/interaction driven; no idle loop. */
@@ -15,6 +15,11 @@ html[data-fx-cinematic-journey-r536="ready"]{
   --fx-c536-track-y:44%;
   --fx-c536-scene-shift:0px;
   --fx-c536-scene-scale:1;
+  --fx-c536-preview-x:0px;
+  --fx-c536-preview-y:0px;
+  --fx-c536-preview-scale:1;
+  --fx-c536-preview-velocity:0;
+  --fx-c536-preview-energy:0;
 }
 
 .fx-c536-stage{
@@ -28,6 +33,20 @@ html[data-fx-cinematic-journey-r536="ready"]{
 }
 
 .fx-c536-stage>*{pointer-events:none!important}
+
+.fx-c536-stage[data-fx-c536-scroll-preview="active"] :is(
+  .fx-c536-world,.fx-c536-iris,.fx-c536-track,.fx-c536-scan
+){
+  transition-duration:70ms!important;
+  transition-timing-function:cubic-bezier(.18,.72,.2,1)!important;
+}
+
+.fx-c536-stage[data-fx-c536-scroll-preview="settled"] :is(
+  .fx-c536-world,.fx-c536-iris,.fx-c536-track,.fx-c536-scan
+){
+  transition-duration:180ms!important;
+  transition-timing-function:cubic-bezier(.16,.84,.22,1)!important;
+}
 
 .fx-c536-world,
 .fx-c536-iris,
@@ -44,14 +63,21 @@ html[data-fx-cinematic-journey-r536="ready"]{
   aspect-ratio:1;
   left:var(--fx-c536-x);
   top:var(--fx-c536-y);
-  transform:translate(-50%,-50%) translate3d(calc(var(--fx-c536-velocity) * -12px),calc(var(--fx-c536-velocity) * 7px),0) scale(calc(.86 + var(--fx-c536-local) * .12));
+  transform:
+    translate(-50%,-50%)
+    translate3d(
+      calc(var(--fx-c536-velocity) * -12px + var(--fx-c536-preview-x)),
+      calc(var(--fx-c536-velocity) * 7px + var(--fx-c536-preview-y)),
+      0
+    )
+    scale(calc((.86 + var(--fx-c536-local) * .12) * var(--fx-c536-preview-scale)));
   border-radius:50%;
   background:
     radial-gradient(circle at 50% 50%,rgba(245,255,255,.042) 0 1%,rgba(var(--fx-c536-a),.072) 7%,rgba(var(--fx-c536-b),.04) 24%,transparent 58%),
     conic-gradient(from calc(var(--fx-c536-progress) * 300deg),transparent 0 10%,rgba(var(--fx-c536-a),.036) 14%,transparent 20% 38%,rgba(var(--fx-c536-b),.03) 44%,transparent 50% 72%,rgba(237,254,255,.024) 78%,transparent 84% 100%);
   -webkit-mask-image:radial-gradient(circle,#000 0 48%,rgba(0,0,0,.55) 66%,transparent 84%);
   mask-image:radial-gradient(circle,#000 0 48%,rgba(0,0,0,.55) 66%,transparent 84%);
-  opacity:calc(.16 + var(--fx-c536-energy) * .36);
+  opacity:calc(.16 + var(--fx-c536-energy) * .36 + var(--fx-c536-preview-energy) * .08);
   mix-blend-mode:screen;
   will-change:transform,opacity;
   transition:background .7s ease,opacity .5s ease;
@@ -62,13 +88,20 @@ html[data-fx-cinematic-journey-r536="ready"]{
   aspect-ratio:1;
   left:var(--fx-c536-x);
   top:var(--fx-c536-y);
-  transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18));
+  transform:
+    translate(-50%,-50%)
+    translate3d(
+      calc(var(--fx-c536-preview-x) * .52),
+      calc(var(--fx-c536-preview-y) * .52),
+      0
+    )
+    scale(calc((.72 + var(--fx-c536-local) * .18) * var(--fx-c536-preview-scale)));
   border:1px solid rgba(var(--fx-c536-a),.075);
   border-radius:50%;
   box-shadow:
     0 0 44px rgba(var(--fx-c536-a),.035),
     inset 0 0 54px rgba(var(--fx-c536-b),.025);
-  opacity:calc(.18 + var(--fx-c536-energy) * .24);
+  opacity:calc(.18 + var(--fx-c536-energy) * .24 + var(--fx-c536-preview-energy) * .05);
   transition:border-color .6s ease,box-shadow .6s ease;
 }
 
@@ -95,7 +128,7 @@ html[data-fx-cinematic-journey-r536="ready"]{
   background:linear-gradient(90deg,transparent,rgba(var(--fx-c536-a),.055) 15%,rgba(225,253,255,.28) 50%,rgba(var(--fx-c536-b),.08) 78%,transparent);
   box-shadow:0 0 16px rgba(var(--fx-c536-a),.08);
   opacity:calc(.05 + var(--fx-c536-energy) * .15);
-  transform:translateY(-50%);
+  transform:translate3d(0,calc(-50% + var(--fx-c536-preview-y) * .22),0);
 }
 
 .fx-c536-track::after{
@@ -118,7 +151,11 @@ html[data-fx-cinematic-journey-r536="ready"]{
   top:calc(var(--fx-c536-track-y) - 11vh);
   background:linear-gradient(180deg,transparent,rgba(var(--fx-c536-a),.025),rgba(var(--fx-c536-b),.018),transparent);
   opacity:calc(.04 + var(--fx-c536-energy) * .11);
-  transform:translate3d(0,calc(var(--fx-c536-velocity) * 9px),0);
+  transform:translate3d(
+    0,
+    calc(var(--fx-c536-velocity) * 9px + var(--fx-c536-preview-y) * .42),
+    0
+  );
 }
 
 .fx-c536-vignette{
@@ -1083,3 +1120,5 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 /* production-r1677-zero-fixed-cinematic-paint */
 
 /* production-r1943-desktop-pointer-perspective */
+
+/* production-r1946-continuous-scroll-preview */
