@@ -1606,6 +1606,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
+    root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagStudioR1945e='desktop-cut-face-normal-blend-larger-optic-preserved-contrast';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
@@ -2073,9 +2074,13 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      /* R1941b — closed signature shell is rendered two-sided to eliminate
-         pole/wrap pinholes on mobile GPUs. Depth still resolves the front skin. */
-      gl.disable(gl.CULL_FACE);
+      /* R1945i — the topology already corrects inward triangle winding.
+         Render the closed shell as a true front skin again: two-sided raster
+         allowed rear triangles to win equal-depth edge samples and produced the
+         black pin-speckles visible in both desktop and mobile proof captures. */
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      gl.frontFace(gl.CCW);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
