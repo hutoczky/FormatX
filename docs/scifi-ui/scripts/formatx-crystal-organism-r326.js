@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 12 : constrainedMobile ? 16 : mobile ? 18 : constrained ? 20 : 24;
-    const longitudeSegments = software ? 24 : constrainedMobile ? 32 : mobile ? 40 : constrained ? 42 : 52;
+    const latitudeSegments = software ? 16 : constrainedMobile ? 20 : mobile ? 24 : constrained ? 22 : 28;
+    const longitudeSegments = software ? 32 : constrainedMobile ? 40 : mobile ? 48 : constrained ? 46 : 56;
     const tendrilCount = (software||mobile) ? 0 : 10;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
@@ -295,15 +295,17 @@
       const sinPhi=Math.sin(phi);
       const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
 
-      /* R1931 — deliberate rollback to the clean P0 crystal grammar, rebuilt
-         inside the current renderer/API. One continuous anisotropic volume,
-         restrained asymmetry, no stacked blob masses. */
+      /* R1932 — gallery-grade living crystal derived from the P0 grammar.
+         Smooth anisotropy removes the R1931 equator seam, while a p=1.28
+         envelope keeps real cut-crystal character without becoming a diamond. */
       const y=direction[1];
       const shoulder=Math.max(0,1-y*y);
-      const ax=.72+shoulder*.075+(direction[0]>0?.025:-.018);
-      const ay=(y>=0?1.01:.94)+shoulder*.035;
-      const az=(direction[2]>=0?.48:.40)+shoulder*.050;
-      const p=.92;
+      const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
+      const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
+      const ax=.600+shoulder*.145+direction[0]*.024-direction[2]*.010;
+      const ay=.925+shoulder*.028+y*.028;
+      const az=.430+shoulder*.082+direction[2]*.018-direction[0]*.010;
+      const p=1.28;
       const lp=
         Math.pow(Math.abs(direction[0])/ax,p)+
         Math.pow(Math.abs(direction[1])/ay,p)+
@@ -311,20 +313,21 @@
       const radius=1/Math.pow(Math.max(.0001,lp),1/p);
       const life=
         1+
-        Math.sin(theta*3.0+phi*.80)*.010*shoulder+
-        Math.cos(theta*5.0-phi*1.20)*.005*shoulder;
+        Math.sin(theta*2.0+phi*.74)*.012*shoulder+
+        Math.cos(theta*3.0-phi*.93)*.006*shoulder;
       const crystalPosition=[
         direction[0]*radius*life,
         direction[1]*radius*life,
         direction[2]*radius*life
       ];
+      crystalPosition[0]+=-.052*Math.pow(smoothUp,1.8)+.026*Math.pow(smoothDown,1.6)
+        +Math.sin(theta*1.62+phi*.70)*.012*shoulder;
+      crystalPosition[1]+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
+        +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
+      crystalPosition[2]+=-direction[0]*.016+direction[0]*y*.010;
 
-      crystalPosition[0]+=-.060*Math.pow(Math.max(y,0),1.8)+.034*Math.pow(Math.max(-y,0),1.7);
-      crystalPosition[1]+=Math.sin(theta*2.0+phi*.4)*.010*shoulder;
-      crystalPosition[2]-=direction[0]*.018;
-
-      const top=.885-crystalPosition[0]*.070-crystalPosition[2]*.025;
-      const bottom=-.895-crystalPosition[0]*.030+crystalPosition[2]*.018;
+      const top=.878-crystalPosition[0]*.060-crystalPosition[2]*.020;
+      const bottom=-.892-crystalPosition[0]*.026+crystalPosition[2]*.014;
       if(crystalPosition[1]>top)crystalPosition[1]=top+(crystalPosition[1]-top)*.18;
       if(crystalPosition[1]<bottom)crystalPosition[1]=bottom+(crystalPosition[1]-bottom)*.22;
 
@@ -378,7 +381,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.80:(mobile?.86:(constrained?.84:.90));
+        const smoothWeight=software?.88:(mobile?.92:(constrained?.90:.94));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1265,6 +1268,10 @@
         float sculptShoulder=exp(-pow((vLocal.x+.30)/.26,2.0)-pow((vLocal.y-.34)/.30,2.0))*bodyMask;
         col+=vec3(.055,.125,.134)*sculptShoulder*.045;
         float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.09)/.19,2.0)-pow((vLocal.y-.04)/.58,2.0))*bodyMask;
+        float internalLife=exp(-pow((vLocal.x+.015)/.30,2.0)-pow((vLocal.y+.035)/.43,2.0))
+          *smoothstep(-.08,.46,vLocal.z)*bodyMask;
+        float lifeBreath=.72+.28*sin(uTime*.92);
+        col+=vec3(.018,.070,.076)*internalLife*(.050+.040*lifeBreath+.026*uEnergy);
         col+=vec3(.120,.235,.245)*iceVolume*(.080+.055*(1.0-facing));
         col+=vec3(.110,.165,.168)*innerVeil*(.028+.024*facing);
         col+=vec3(.012,.030,.036)*bodyMask*(.20+.30*facing);
@@ -1353,7 +1360,7 @@
         float bodyGlassAlpha=.90+.07*facing;
         outAlpha=mix(outAlpha,bodyGlassAlpha,bodyMask);
         outAlpha=mix(outAlpha,.975,lensMeshMask);
-        ${outputName}=vec4(filmic(col*1.82),clamp(outAlpha,.88,1.0));
+        ${outputName}=vec4(filmic(col*2.02),clamp(outAlpha,.90,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1534,6 +1541,7 @@
     root.dataset.fxNativeMagVisualR1718='mobile-sharp-readable-midtone-photoreal-organism';
     root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
     root.dataset.fxNativeMagStudioR1930='single-sculpt-frosted-ice-horizontal-aperture-slow-breath-cross-tier-parity';
+    root.dataset.fxNativeMagStudioR1932='p0-derived-seamless-living-crystal-no-eye-broad-internal-breath';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
     root.dataset.fxNativeMagStudioR1892='audit-parity-recessed-optic-soft-trilobate-silhouette';
