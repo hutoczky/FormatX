@@ -768,8 +768,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.13) contrast(1.12) saturate(1.03)'
-      : 'brightness(1.05) contrast(1.11) saturate(.99)';
+      ? 'brightness(1.10) contrast(1.16) saturate(.97)'
+      : 'brightness(1.04) contrast(1.14) saturate(.96)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1240,7 +1240,7 @@
 
         /* Smoked blue-silver glass volume. */
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        vec3 c=mix(vec3(.004,.015,.023),vec3(.085,.245,.285),lift);
+        vec3 c=mix(vec3(.003,.012,.020),vec3(.064,.185,.220),lift);
         c*=.93+.07*volume;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.018,.055,.066)*backDepth*.12;
@@ -1471,7 +1471,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-analytic-normal-smoked-dichroic-studio-bioglass';
+    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-three-quarter-smoked-silver-dichroic-studio-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -1667,7 +1667,7 @@
     let px=0,py=0,tx=0,ty=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=0,targetMorph=0;
-    let rotationX=softwareRenderer?-.110:(mobile?-.095:-.075),rotationY=softwareRenderer?-.35:(mobile?-.34:-.30),rotationZ=softwareRenderer?-.025:.010;
+    let rotationX=softwareRenderer?-.105:(mobile?-.090:-.070),rotationY=softwareRenderer?-.41:(mobile?-.40:-.32),rotationZ=softwareRenderer?-.020:.008;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
