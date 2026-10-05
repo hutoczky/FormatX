@@ -1205,19 +1205,19 @@
         vec3 violet=vec3(.65,.16,1.15);
         vec3 ice=vec3(.90,1.30,1.62);
         vec3 spectral=mix(cyan,violet,.18+.22*facet);
-        float visual=sat(.48+uEnergy*.60);
+        float visual=sat(.56+uEnergy*.52);
 
         if(uLayer>.5){
-          vec3 c=vec3(.025,.15,.38)+spectral*(.34+.30*visual)
-            +ice*(h*.58+nu*1.70+ring*.48)+cyan*sweep*.90;
-          float a=clamp(.18+.18*visual+.18*h+.28*nu+.12*ring+.10*sweep,.16,.84);
+          vec3 c=vec3(.040,.19,.40)+spectral*(.38+.32*visual)
+            +ice*(h*.66+nu*1.78+ring*.54)+cyan*sweep*.96;
+          float a=clamp(.28+.22*visual+.20*h+.28*nu+.14*ring+.10*sweep,.32,.92);
           ${outputName}=vec4(c/(vec3(1.0)+c),a);
           return;
         }
 
-        vec3 c=vec3(.035,.16,.38)+vec3(.04,.42,.72)*light
-          +spectral*f*(.75+.55*visual)+ice*nu*.28+(ice+cyan*.35)*sweep*.70;
-        float a=clamp(.33+.15*light+.24*f+.08*sweep,.30,.80);
+        vec3 c=vec3(.075,.22,.40)+vec3(.08,.50,.78)*light
+          +spectral*f*(.82+.56*visual)+ice*(nu*.34+.045+.070*f)+(ice+cyan*.35)*sweep*.72;
+        float a=clamp(.50+.18*light+.22*f+.08*sweep,.50,.94);
         ${outputName}=vec4(c/(vec3(1.0)+c),a);
       }`;
 
@@ -1396,7 +1396,7 @@
     root.dataset.fxNativeMagStudioR1930='single-sculpt-frosted-ice-horizontal-aperture-slow-breath-cross-tier-parity';
     root.dataset.fxNativeMagStudioR1932='p0-derived-seamless-living-crystal-no-eye-broad-internal-breath';
     root.dataset.fxNativeMagStudioR1933='frosted-cut-ice-two-pass-living-depth-no-eye';
-    root.dataset.fxNativeMagMobileR1935='lifted-readable-midtones-no-washout';
+    root.dataset.fxNativeMagMobileR1936='brighter-readable-body-higher-opacity-balanced-cyan';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
