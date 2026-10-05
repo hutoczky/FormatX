@@ -235,51 +235,74 @@
       ctx.save();ctx.translate(cx,cy);
       {
         const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
-        body.addColorStop(0,'rgba(214,226,221,.54)');
-        body.addColorStop(.18,'rgba(137,160,157,.78)');
-        body.addColorStop(.42,'rgba(65,91,91,.95)');
-        body.addColorStop(.70,'rgba(22,39,42,.995)');
-        body.addColorStop(1,'rgba(3,8,10,1)');
+        body.addColorStop(0,'rgba(231,232,226,.88)');
+        body.addColorStop(.18,'rgba(176,183,180,.95)');
+        body.addColorStop(.42,'rgba(93,105,106,.985)');
+        body.addColorStop(.68,'rgba(36,43,46,.995)');
+        body.addColorStop(1,'rgba(4,7,9,1)');
         ctx.fillStyle=body;
         /* R1724: FormatX Living Crystal Organism fallback silhouette.
            Angular living anatomy replaces the old egg/blob body. */
         const breathe=1+.008*Math.sin(time*.0024);
         ctx.scale(breathe,breathe);
         ctx.beginPath();
-        ctx.moveTo(-R*.42,-R*.96);
-        ctx.bezierCurveTo(-R*.18,-R*1.05,R*.15,-R*.98,R*.43,-R*.78);
-        ctx.lineTo(R*.68,-R*.49);
-        ctx.bezierCurveTo(R*.84,-R*.23,R*.86,R*.10,R*.73,R*.38);
-        ctx.lineTo(R*.51,R*.67);
-        ctx.bezierCurveTo(R*.32,R*.89,R*.08,R*1.02,-R*.17,R*.96);
-        ctx.lineTo(-R*.43,R*.80);
-        ctx.bezierCurveTo(-R*.66,R*.61,-R*.79,R*.33,-R*.80,R*.04);
-        ctx.bezierCurveTo(-R*.81,-R*.26,-R*.70,-R*.60,-R*.42,-R*.96);
+        ctx.moveTo(-R*.88,R*.08);
+        ctx.bezierCurveTo(-R*.98,-R*.19,-R*.82,-R*.48,-R*.56,-R*.60);
+        ctx.lineTo(-R*.72,-R*.86);
+        ctx.lineTo(-R*.40,-R*.70);
+        ctx.lineTo(-R*.29,-R*1.03);
+        ctx.lineTo(-R*.04,-R*.71);
+        ctx.bezierCurveTo(R*.12,-R*.78,R*.29,-R*.88,R*.46,-R*.78);
+        ctx.lineTo(R*.52,-R*1.08);
+        ctx.lineTo(R*.63,-R*.80);
+        ctx.lineTo(R*.78,-R*1.00);
+        ctx.lineTo(R*.79,-R*.70);
+        ctx.bezierCurveTo(R*.96,-R*.66,R*1.08,-R*.55,R*1.04,-R*.39);
+        ctx.bezierCurveTo(R*.95,-R*.31,R*.79,-R*.28,R*.62,-R*.24);
+        ctx.lineTo(R*.50,R*.02);
+        ctx.bezierCurveTo(R*.44,R*.25,R*.52,R*.49,R*.36,R*.73);
+        ctx.lineTo(R*.20,R*.96);
+        ctx.lineTo(R*.08,R*.71);
+        ctx.bezierCurveTo(-R*.04,R*.62,-R*.18,R*.59,-R*.33,R*.77);
+        ctx.lineTo(-R*.55,R*.91);
+        ctx.lineTo(-R*.58,R*.62);
+        ctx.bezierCurveTo(-R*.74,R*.49,-R*.87,R*.34,-R*.88,R*.08);
         ctx.closePath();
         ctx.fill();
-
-        /* R1830: broad studio reflections only. No polygon scribbles, veins or
-           faux HUD lines on the software fallback. */
-        ctx.save();
-        ctx.globalCompositeOperation='screen';
-        ctx.lineCap='round';
-        ctx.strokeStyle='rgba(225,237,232,.105)';
-        ctx.lineWidth=R*.115;
-        ctx.beginPath();
-        ctx.moveTo(-R*.46,-R*.66);
-        ctx.bezierCurveTo(-R*.31,-R*.44,-R*.27,-R*.08,-R*.12,R*.26);
-        ctx.stroke();
-        ctx.strokeStyle='rgba(87,154,158,.055)';
-        ctx.lineWidth=R*.072;
-        ctx.beginPath();
-        ctx.moveTo(R*.39,-R*.50);
-        ctx.bezierCurveTo(R*.51,-R*.18,R*.45,R*.18,R*.30,R*.46);
-        ctx.stroke();
+        ctx.save();ctx.globalCompositeOperation='screen';
+        for(let i=0;i<14;i++){
+          const a=i/14*TAU+.08;
+          const rr=R*(.28+(i%3)*.13);
+          const lx=Math.cos(a)*rr,ly=Math.sin(a)*rr*.78;
+          const pr=R*(.12+(i%4)*.010);
+          const warm=i%5===2;
+          ctx.fillStyle=warm?'rgba(211,162,104,.060)':'rgba(183,205,207,.075)';
+          ctx.strokeStyle=warm?'rgba(224,191,148,.10)':'rgba(154,193,198,.12)';
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(lx,ly-pr*.72);
+          ctx.lineTo(lx+pr*.78,ly-pr*.05);
+          ctx.lineTo(lx+pr*.18,ly+pr*.82);
+          ctx.lineTo(lx-pr*.72,ly+pr*.18);
+          ctx.closePath();ctx.fill();ctx.stroke();
+        }
         ctx.restore();
+        ctx.strokeStyle='rgba(103,174,184,.34)';ctx.lineWidth=1.35;ctx.shadowColor='rgba(72,142,153,.16)';ctx.shadowBlur=2;
+        for(let i=0;i<14;i++){
+          const a=i/14*TAU+.14;
+          const bend=.16*Math.sin(i*1.37+time*.0008);
+          ctx.beginPath();ctx.moveTo(Math.cos(a)*R*.24,Math.sin(a)*R*.20);
+          ctx.bezierCurveTo(
+            Math.cos(a+.20+bend)*R*.46,Math.sin(a+.20+bend)*R*.42,
+            Math.cos(a-.12-bend)*R*.68,Math.sin(a-.12-bend)*R*.63,
+            Math.cos(a+.05)*R*.86,Math.sin(a+.05)*R*.80
+          );
+          ctx.stroke();
+        }
       }
-      const lensR=Math.max(27,R*.235);
-      const lensRx=lensR*.84,lensRy=lensR*.66;
-      const lensOX=R*.135,lensOY=-R*.070;
+      const lensR=Math.max(27,R*.245);
+      const lensRx=lensR*.88,lensRy=lensR*.62;
+      const lensOX=-lensR*.22,lensOY=lensR*.08;
       const lens=ctx.createRadialGradient(lensOX-lensR*.22,lensOY-lensR*.25,1,lensOX,lensOY,lensR);
       lens.addColorStop(0,'rgba(232,236,232,.70)');
       lens.addColorStop(.12,'rgba(156,178,176,.80)');
@@ -291,18 +314,24 @@
       ctx.strokeStyle='rgba(145,188,190,.24)';ctx.lineWidth=1.8;ctx.stroke();
       ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
       ctx.fillStyle='rgba(61,117,123,.060)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.34,lensRy*.34,-.11,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(7,30,35,.34)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.48,lensRy*.50,-.11,0,TAU);ctx.fill();
-      ctx.save();ctx.globalCompositeOperation='screen';
-      ctx.fillStyle='rgba(198,244,242,.42)';
-      ctx.beginPath();ctx.ellipse(lensOX-lensRx*.28,lensOY-lensRy*.30,lensRx*.12,lensRy*.09,-.28,0,TAU);ctx.fill();
+      ctx.fillStyle='rgba(2,14,17,.92)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.22,lensRy*.22,-.11,0,TAU);ctx.fill();
+      ctx.save();ctx.globalCompositeOperation='screen';ctx.strokeStyle='rgba(118,181,188,.28)';ctx.lineCap='round';
+      for(let i=0;i<14;i++){
+        const a=i/14*TAU+Math.sin(time*.0009+i*.7)*.012;
+        const r0=lensR*.18,r1=lensR*(.52+.16*Math.sin(i*1.71+time*.0011));
+        ctx.globalAlpha=.08+.08*(.5+.5*Math.sin(time*.0018+i));
+        ctx.lineWidth=i%3===0?1.35:.8;
+        ctx.beginPath();ctx.moveTo(Math.cos(a)*r0,Math.sin(a)*r0*.78);
+        ctx.quadraticCurveTo(Math.cos(a+.10)*r1*.60,Math.sin(a+.10)*r1*.47,Math.cos(a)*r1,Math.sin(a)*r1*.78);ctx.stroke();
+      }
       ctx.restore();
       ctx.restore();
 
-      if(!MOBILE && t>6.10){
-        const tg=smooth((t-6.10)/1.10);
+      if(t>5.65){
+        const tg=smooth((t-5.65)/1.0);
         ctx.save();ctx.strokeStyle='rgba(100,163,171,'+(.34*tg)+')';ctx.lineWidth=3.0;ctx.shadowColor='rgba(56,132,143,.14)';ctx.shadowBlur=2;
-        for(let i=0;i<4;i++){
-          const a=i/4*TAU+.24;
+        for(let i=0;i<7;i++){
+          const a=i/7*TAU+.24;
           const sway=Math.sin(time*.0016+i*.91)*.08;
           ctx.beginPath();
           ctx.moveTo(cx+Math.cos(a)*R*.66,cy+Math.sin(a)*R*.62);
@@ -363,7 +392,7 @@
         if(panicSamples>=1){
           const previous=qualityScale;
           runtimeConstrained=true;
-          qualityScale=Math.min(qualityScale,sw<900?.46:.42);
+          qualityScale=Math.min(qualityScale,sw<900?.34:.38);
           if(Math.abs(previous-qualityScale)>.001 || cost>42){
             lastQualityAdjust=time;
             resize();
@@ -376,8 +405,8 @@
       if(time-lastQualityAdjust>520){
         const previous=qualityScale;
         const floor=runtimeConstrained
-          ? (sw<900?.40:.34)
-          : (sw<900?.64:.46);
+          ? (sw<900?.28:.30)
+          : (sw<900?.58:.42);
         const ceiling=runtimeConstrained
           ? (sw<900?.62:.64)
           : (sw<900?.96:.88);
@@ -399,13 +428,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-studio-monolithic-bioglass-fallback-r1830'
+      quality:'hidpi-photographic-irregular-mineral-bioglass-fallback-r1776'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1919-igloo-smoked-ice-three-mass-offset-oval-aperture'
+    visualRevision:'r1776-cinematic-irregular-mineral-bioglass-intro-world-parity'
   };
 })();
