@@ -1441,11 +1441,11 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
         float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorHalo=exp(-pow(lensVector.x/.230,2.0)-pow(lensVector.y/.230,2.0));
-        float sensorCore=exp(-pow(lensVector.x/.105,2.0)-pow(lensVector.y/.105,2.0));
-        float sensorArc=exp(-pow((lensRadial-.255)/.045,2.0));
-        float lensHot=exp(-pow(lensVector.x/.190,2.0)-pow(lensVector.y/.190,2.0));
-        float lensGlint=exp(-pow((vUv.x-.31)/.060,2.0)-pow((vUv.y-.27)/.050,2.0));
+        float sensorHalo=exp(-pow(lensVector.x/.320,2.0)-pow(lensVector.y/.150,2.0));
+        float sensorCore=exp(-pow(lensVector.x/.250,2.0)-pow(lensVector.y/.060,2.0));
+        float sensorArc=0.0;
+        float lensHot=exp(-pow(lensVector.x/.290,2.0)-pow(lensVector.y/.085,2.0));
+        float lensGlint=exp(-pow((vUv.x-.29)/.085,2.0)-pow((vUv.y-.33)/.095,2.0));
         float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
         vec3 physicalLens=vec3(.0012,.005,.007);
         physicalLens+=vec3(.010,.040,.047)*(.16+.17*uEnergy);
@@ -1532,23 +1532,23 @@
         float armorMask=isArmor*(1.0-vMorph);
         float lensMeshMask=isLensMesh*(1.0-vMorph);
 
-        float lift=sat(.075+ndl*.160+sideLight*.120+fillLight*.060);
+        float lift=sat(.160+ndl*.245+sideLight*.145+fillLight*.085);
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.004,.010,.014),vec3(.092,.128,.136),lift);
+        vec3 col=mix(vec3(.010,.020,.024),vec3(.210,.242,.238),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(1.00,1.00,.99)*keySpec*.150;
         col+=vec3(.58,.72,.74)*sideSpec*.110;
-        col+=vec3(1.00,1.00,.99)*softboxA*.430;
-        col+=vec3(.50,.72,.74)*softboxB*.078;
-        col+=vec3(1.00,1.00,.99)*studioRibbonA*.330;
+        col+=vec3(.96,1.00,.98)*softboxA*.205;
+        col+=vec3(.50,.68,.69)*softboxB*.060;
+        col+=vec3(.94,.98,.96)*studioRibbonA*.135;
         col+=vec3(.40,.27,.18)*studioRibbonB*.006;
-        col+=vec3(.78,1.00,1.00)*studioRibbonC*.290;
+        col+=vec3(.72,.94,.94)*studioRibbonC*.090;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
-        col+=vec3(.034,.120,.138)*fresnel*.128;
+        col+=vec3(.040,.105,.112)*fresnel*.115;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1579,7 +1579,7 @@
         col*=1.0-.075*socketShade;
         col+=vec3(.020,.090,.110)*opticCaustic*(.040+.055*uEnergy);
         float chromaSide=.5+.5*n.x;
-        col+=mix(vec3(.018,.165,.190),vec3(.095,.028,.118),chromaSide)*fresnel*bodyMask*.105;
+        col+=mix(vec3(.020,.090,.102),vec3(.032,.058,.070),chromaSide)*fresnel*bodyMask*.060;
         float facetTone=.999+.002*fract(vFacet*7.13+.19);
         float broadFacet=max(0.0,dot(n,normalize(vec3(-.28,.44,.85))));
         float warmFacet=max(0.0,dot(n,normalize(vec3(.58,-.18,.79))));
@@ -1618,25 +1618,24 @@
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
         float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
         float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorHalo=exp(-pow(lensVector.x/.230,2.0)-pow(lensVector.y/.230,2.0));
-        float sensorCore=exp(-pow(lensVector.x/.105,2.0)-pow(lensVector.y/.105,2.0));
-        float sensorArc=exp(-pow((lensRadial-.255)/.045,2.0));
-        float lensHot=exp(-pow(lensVector.x/.190,2.0)-pow(lensVector.y/.190,2.0));
-        float lensGlint=exp(-pow((vUv.x-.31)/.060,2.0)-pow((vUv.y-.27)/.050,2.0));
+        float sensorHalo=exp(-pow(lensVector.x/.320,2.0)-pow(lensVector.y/.150,2.0));
+        float sensorCore=exp(-pow(lensVector.x/.250,2.0)-pow(lensVector.y/.060,2.0));
+        float sensorArc=0.0;
+        float lensHot=exp(-pow(lensVector.x/.290,2.0)-pow(lensVector.y/.085,2.0));
+        float lensGlint=exp(-pow((vUv.x-.29)/.085,2.0)-pow((vUv.y-.33)/.095,2.0));
         float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
-        vec3 physicalLens=vec3(.006,.028,.034)
-          +vec3(.012,.095,.112)*(.24+.22*uEnergy)
-          +vec3(.98,1.00,.99)*softboxA*.22
-          +vec3(.46,.60,.60)*sideSpec*.09
-          +vec3(.028,.12,.15)*fresnel*.075
-          +vec3(.014,.125,.145)*lensInner*(.14+.10*uEnergy)
-          +vec3(.84,.90,.87)*lensRim*.090
-          +vec3(.018,.22,.26)*sensorHalo*(.09+.07*uEnergy)
-          +vec3(.34,.84,.88)*sensorArc*(.12+.08*uEnergy)
-          +vec3(.76,1.00,1.00)*sensorCore*(.22+.08*uEnergy)
-          +vec3(.80,.96,.94)*lensHot*.095
-          +vec3(1.00,1.00,1.00)*lensGlint*.48
-          +vec3(.40,.52,.52)*lensEdge*(.055+.060*softboxA+.035*sideSpec);
+        vec3 physicalLens=vec3(.003,.013,.016)
+          +vec3(.010,.060,.068)*(.18+.16*uEnergy)
+          +vec3(.94,.98,.96)*softboxA*.16
+          +vec3(.40,.50,.50)*sideSpec*.07
+          +vec3(.022,.085,.098)*fresnel*.060
+          +vec3(.008,.090,.102)*lensInner*(.10+.07*uEnergy)
+          +vec3(.74,.80,.78)*lensRim*.055
+          +vec3(.012,.080,.090)*sensorHalo*(.06+.04*uEnergy)
+          +vec3(.58,.88,.88)*sensorCore*(.18+.07*uEnergy)
+          +vec3(.56,.72,.70)*lensHot*.050
+          +vec3(.98,1.00,.99)*lensGlint*.24
+          +vec3(.32,.40,.40)*lensEdge*(.035+.040*softboxA+.025*sideSpec);
         physicalLens=mix(physicalLens,vec3(.004,.022,.028),lensDepthShade*.045);
         physicalLens+=vec3(.64,.88,.90)*lensGlint*.10;
         col=mix(col,physicalLens,lensMeshMask*.997);
@@ -1650,10 +1649,10 @@
 
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float outAlpha=1.0-tendrilMask*.34-glassFinMask*.68;
-        float bodyGlassAlpha=.72+.16*facing;
+        float bodyGlassAlpha=.90+.07*facing;
         outAlpha=mix(outAlpha,bodyGlassAlpha,bodyMask);
         outAlpha=mix(outAlpha,.975,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.58),clamp(outAlpha,.74,1.0));
+        ${outputName}=vec4(filmic(col*1.82),clamp(outAlpha,.88,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1744,7 +1743,7 @@
         float sculptValleyA=exp(-pow((vLocal.x+.035)/.112,2.0)-pow((vLocal.y-.22)/.44,2.0))*bodyMask;
         float sculptValleyB=exp(-pow((vLocal.x-.19)/.102,2.0)-pow((vLocal.y+.30)/.27,2.0))*bodyMask;
         float sculptShoulder=exp(-pow((vLocal.x+.34)/.23,2.0)-pow((vLocal.y-.38)/.27,2.0))*bodyMask;
-        col*=1.0-.24*sculptValleyA-.17*sculptValleyB;
+        col*=1.0-.075*sculptValleyA-.045*sculptValleyB;
         col+=vec3(.040,.096,.106)*sculptShoulder*.026;
         col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
         col+=vec3(.024,.090,.100)*glassEdge*.245;
