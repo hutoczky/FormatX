@@ -298,66 +298,51 @@
       const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
 
-      /* R1941 — FormatX Signature MAG.
-         The user-selected four-direction crystal returns as the canonical identity,
-         but with a softened photographic envelope rather than a flat logo diamond.
-         A sub-L1 core creates the iconic points; a rounded companion field keeps
-         the valleys and depth physically plausible under moving studio light. */
-      const y=direction[1];
-      const shoulder=Math.max(0,1-y*y);
-      const smoothUp=.5*(y+Math.sqrt(y*y+.0049));
-      const smoothDown=.5*(-y+Math.sqrt(y*y+.0049));
+      /* R1941b — studio Signature MAG.
+         Build the front silhouette from a smooth four-lobe polar field instead
+         of an Lp diamond. This keeps the four iconic points but removes the hard
+         quadrant creases that read as four flat triangles on mobile. */
+      const xyLength=Math.max(.0001,Math.hypot(direction[0],direction[1]));
+      const frontAngle=Math.atan2(direction[1],direction[0]);
+      const axisWave=.5+.5*Math.cos(frontAngle*4.0);
+      const secondaryWave=.5+.5*Math.cos(frontAngle*8.0+.18);
+      const pointField=
+        .585+
+        .275*Math.pow(axisWave,1.55)+
+        .020*Math.pow(secondaryWave,2.2);
+      const depthFacing=1.0-Math.abs(direction[2]);
+      const asymmetry=
+        .010*Math.sin(frontAngle*3.0+.55)+
+        .007*Math.cos(frontAngle*5.0-.30);
+      const xyRadius=(pointField+asymmetry)*(.975+.025*depthFacing);
 
-      const axisX=.770+shoulder*.058+direction[0]*.010-direction[2]*.008;
-      const axisY=.835+shoulder*.035+y*.016;
-      const axisZ=.505+shoulder*.070+direction[2]*.012-direction[0]*.008;
-
-      const signatureExponent=.82;
-      const signatureTerms=
-        Math.pow(Math.abs(direction[0])/axisX,signatureExponent)+
-        Math.pow(Math.abs(direction[1])/axisY,signatureExponent)+
-        Math.pow(Math.abs(direction[2])/axisZ,signatureExponent);
-      const signatureRadius=1/Math.pow(Math.max(.0001,signatureTerms),1/signatureExponent);
-
-      const softExponent=1.72;
-      const softTerms=
-        Math.pow(Math.abs(direction[0])/(axisX*.985),softExponent)+
-        Math.pow(Math.abs(direction[1])/(axisY*.985),softExponent)+
-        Math.pow(Math.abs(direction[2])/(axisZ*1.03),softExponent);
-      const softRadius=1/Math.pow(Math.max(.0001,softTerms),1/softExponent);
-
-      const radial=signatureRadius*.82+softRadius*.18;
-      const xPoint=Math.pow(Math.abs(direction[0]),5.2)*.078;
-      const yPoint=Math.pow(Math.abs(direction[1]),5.0)*.096;
-      const lowFrequency=
-        1+
-        Math.sin(theta*2.0+phi*.72)*.010*shoulder+
-        Math.cos(theta*3.0-phi*.90)*.005*shoulder;
+      const topBias=1.0+.075*Math.pow(Math.max(direction[1],0),4.0);
+      const lowerBias=1.0+.035*Math.pow(Math.max(-direction[1],0),4.0);
+      const sideBias=1.0+.032*Math.pow(Math.abs(direction[0]),4.0);
 
       const crystalPosition=[
-        direction[0]*(radial+xPoint)*1.145*lowFrequency,
-        direction[1]*(radial+yPoint)*1.105*lowFrequency,
-        direction[2]*radial*.965*lowFrequency
+        direction[0]*xyRadius*1.185*sideBias,
+        direction[1]*xyRadius*1.205*topBias*lowerBias,
+        direction[2]*(.475+.115*Math.pow(axisWave,.68)+.055*xyLength)
       ];
 
-      /* Small authored asymmetry prevents a sterile logo extrusion while keeping
-         the four signature points immediately readable from the front. */
-      crystalPosition[0]+=
-        -.024*Math.pow(smoothUp,1.8)+
-        .018*Math.pow(smoothDown,1.7)+
-        .012*Math.sin(theta*1.64+phi*.68)*shoulder;
-      crystalPosition[1]+=
-        .020*Math.pow(smoothUp,3.0)-
-        .012*Math.pow(smoothDown,2.8)+
-        .006*Math.sin(theta*2.1+phi*.42)*shoulder;
-      crystalPosition[2]+=
-        -.012*direction[0]+
-        .008*direction[0]*y;
+      /* A tiny three-quarter bias gives the object authorship without turning
+         the silhouette into a mechanically perfect logo extrusion. */
+      crystalPosition[0]+=-.018*Math.pow(Math.max(direction[1],0),2.2)+.008*direction[2];
+      crystalPosition[1]+=.010*Math.sin(frontAngle*2.0)*depthFacing;
+      crystalPosition[2]+=-.010*direction[0]+.006*direction[1];
+
+      const crystalNormal=normalize([
+        direction[0]/1.16,
+        direction[1]/1.19,
+        direction[2]/.56
+      ]);
 
       return{
         sphere:spherePosition,
         crystal:crystalPosition,
         sphereNormal:direction,
+        crystalNormal,
         uv:[longitude,latitude]
       };
     }
@@ -779,7 +764,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 48% 42% at 50% 45%,rgba(132,174,176,.095) 0%,rgba(47,72,75,.038) 40%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 82% 70% at 50% 52%,rgba(5,14,17,.18),rgba(0,0,0,0) 80%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1007,7 +992,7 @@
         float microG=geometrySchlickGGX(NoV,microRoughness)*geometrySchlickGGX(max(ndl,.001),microRoughness);
         vec3 microF=fresnelSchlick(max(dot(halfKey,view),0.0),vec3(.039,.041,.043));
         vec3 microSpec=min(vec3(1.8),(microD*microG*microF)/max(4.0*NoV*max(ndl,.001),.001));
-        float lift=sat(.105+ndl*.240+sideLight*.175+fillLight*.095);
+        float lift=sat(.205+ndl*.330+sideLight*.245+fillLight*.145);
         float facetTone=mix(.999,1.0015,facetRand);
         float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
@@ -1016,23 +1001,23 @@
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.008,.018,.024),vec3(.215,.252,.250),lift)*facetTone;
+        vec3 mineral=mix(vec3(.006,.018,.025),vec3(.205,.335,.360),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
-        mineral+=vec3(.92,.90,.84)*keySpec*.074;
+        mineral+=vec3(.96,.98,.94)*keySpec*.110;
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
-        mineral+=vec3(.52,.58,.59)*sideSpec*.096;
-        mineral+=vec3(1.00,1.00,.99)*softboxA*.345;
+        mineral+=vec3(.58,.72,.74)*sideSpec*.135;
+        mineral+=vec3(1.00,1.00,.99)*softboxA*.420;
         mineral+=vec3(.46,.53,.53)*softboxB*.082;
-        mineral+=vec3(1.00,1.00,.99)*studioRibbonA*.350;
+        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.455;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
-        mineral+=vec3(.72,.96,.98)*studioRibbonC*.145;
+        mineral+=vec3(.68,.97,1.00)*studioRibbonC*.205;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.050,.126,.144)*fresnel*.145;
+        mineral+=vec3(.055,.185,.210)*fresnel*.220;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1045,7 +1030,7 @@
         float internalCaustic=pow(1.0-facing,2.35)*(.35+.65*smokyDepth)*(1.0-.55*ndl);
         mineral+=vec3(.040,.072,.073)*internalCaustic*.46;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        mineral+=vec3(.032,.066,.072)*edgeTransmission*.54;
+        mineral+=vec3(.045,.150,.170)*edgeTransmission*.72;
         float iceVolume=exp(-pow((vLocal.x+.10)/.46,2.0)-pow((vLocal.y-.08)/.58,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
         float sculptValleyA=exp(-pow((vLocal.x+.035)/.105,2.0)-pow((vLocal.y-.22)/.42,2.0))*bodyMask;
@@ -1072,7 +1057,7 @@
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
         float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
-        mineral=mix(mineral,vec3(.012,.015,.019),cortexValley*.16);
+        mineral=mix(mineral,vec3(.014,.025,.031),cortexValley*.050);
         mineral+=vec3(.066,.082,.090)*cortexRidge*.035;
         mineral+=vec3(.020,.082,.096)*cortexRidge*vascular*.12;
 
@@ -1091,7 +1076,7 @@
         ivory+=vec3(.42,.27,.17)*studioRibbonB*.036;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.06);
         mineral=mix(mineral,ivory,plateMask*.065);
-        mineral=mix(mineral,vec3(.004,.007,.010),livingSeam*.40);
+        mineral=mix(mineral,vec3(.006,.018,.023),livingSeam*.115);
         mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
@@ -1101,7 +1086,7 @@
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
         float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
-        mineral=mix(mineral,vec3(.003,.008,.010),fissureHalo*.10);
+        mineral=mix(mineral,vec3(.006,.017,.021),fissureHalo*.035);
         mineral+=vec3(.18,.30,.31)*fissure*.072;
         mineral+=vec3(.66,.67,.62)*fissure*.030;
 
@@ -1110,23 +1095,23 @@
            It reads as smoked optical glass under studio light, not as a HUD decal. */
         vec2 lq=q;
         float lensD=length(lq);
-        float lensOuter=(1.0-smoothstep(.170,.215,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.092,.152,lensD))*front;
-        float lensCore=(1.0-smoothstep(.030,.068,lensD))*front;
-        float lensPupil=(1.0-smoothstep(.008,.030,lensD))*front;
+        float lensOuter=(1.0-smoothstep(.138,.174,lensD))*front;
+        float lensGlass=(1.0-smoothstep(.078,.126,lensD))*front;
+        float lensCore=(1.0-smoothstep(.026,.058,lensD))*front;
+        float lensPupil=(1.0-smoothstep(.006,.022,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
-        float lensInnerRing=exp(-pow((lensD-.092)/.014,2.0))*front;
+        float lensInnerRing=exp(-pow((lensD-.078)/.012,2.0))*front;
         float lensHighlight=exp(-pow((lq.x+.040)/.030,2.0)-pow((lq.y-.046)/.034,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.030)/.060,2.0)-pow((lq.y+.052)/.040,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.105);
         float opticBreath=.94+.06*(.5+.5*sin(uTime*.72));
 
-        mineral=mix(mineral,vec3(.0025,.008,.011),lensOuter*.52);
-        mineral+=vec3(.62,.70,.70)*lensRim*(.045+.080*sideLight+.050*fresnel);
-        mineral+=vec3(.010,.040,.048)*lensGlass*(.070+.065*softboxA+.045*sideSpec);
+        mineral=mix(mineral,vec3(.008,.025,.030),lensOuter*.22);
+        mineral+=vec3(.72,.82,.80)*lensRim*(.060+.100*sideLight+.060*fresnel);
+        mineral+=vec3(.014,.070,.082)*lensGlass*(.090+.080*softboxA+.055*sideSpec);
         mineral+=vec3(.020,.20,.235)*lensInnerRing*(.12+.10*uEnergy);
-        mineral+=vec3(.16,.58,.64)*lensCore*(.14+.10*uEnergy)*opticBreath;
-        mineral+=vec3(.74,.95,.94)*lensPupil*(.12+.07*uEnergy);
+        mineral+=vec3(.18,.72,.78)*lensCore*(.17+.12*uEnergy)*opticBreath;
+        mineral+=vec3(.86,1.00,.98)*lensPupil*(.16+.08*uEnergy);
         mineral+=vec3(.82,.94,.91)*lensHighlight*.18;
         mineral+=vec3(.10,.15,.15)*lensLower*.032;
         mineral=mix(mineral,vec3(.002,.010,.013),lensDepth*.050*lensGlass);
@@ -1200,7 +1185,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.28),clamp(outAlpha,.88,1.0));
+        ${outputName}=vec4(filmic(mineral*2.58),clamp(outAlpha,.92,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1252,14 +1237,14 @@
           return;
         }
 
-        vec3 c=vec3(.006,.010,.012);
-        c+=vec3(.028,.036,.036)*(.22+.78*key);
-        c+=vec3(.040,.055,.054)*side*.22;
+        vec3 c=vec3(.008,.018,.023);
+        c+=vec3(.048,.078,.082)*(.28+.72*key);
+        c+=vec3(.055,.105,.110)*side*.28;
         c+=vec3(.055,.061,.058)*top*.10;
         c+=vec3(.82,.88,.84)*softA*.31;
         c+=vec3(.31,.46,.46)*softB*.115;
         c+=vec3(.44,.48,.45)*softTop*.055;
-        c+=vec3(.020,.078,.088)*fresnel*.21;
+        c+=vec3(.028,.145,.165)*fresnel*.30;
         c+=vec3(.010,.017,.018)*grain*.030;
         c+=vec3(.011,.022,.023)*broadVeil*.038;
         c+=vec3(.010,.020,.021)*back*.050;
@@ -1276,7 +1261,7 @@
         /* Integrated smoked optical organ. It is part of the surface, not a HUD
            ring and not a glowing sticker. */
         float front=smoothstep(.08,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/.175,vLocal.y/.175);
+        vec2 oq=vec2(vLocal.x/.155,vLocal.y/.155);
         float od=length(oq);
         float optic=(1.0-smoothstep(.90,1.02,od))*front;
         float opticRim=exp(-pow((od-.83)/.060,2.0))*front;
@@ -1297,7 +1282,7 @@
         c+=vec3(.58,.66,.63)*sweep*softA*.075;
 
         float alpha=1.0;
-        ${outputName}=vec4(tone(c*2.62),alpha);
+        ${outputName}=vec4(tone(c*2.86),alpha);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1479,7 +1464,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='signature-four-point-bioglass-central-optic-studio-sculpt-no-cables';
+    root.dataset.fxNativeMagStudioR1941='signature-four-point-smooth-bioglass-central-optic-two-sided-studio-sculpt-no-cables';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -1938,8 +1923,9 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      gl.enable(gl.CULL_FACE);
-      gl.cullFace(gl.BACK);
+      /* R1941b — closed signature shell is rendered two-sided to eliminate
+         pole/wrap pinholes on mobile GPUs. Depth still resolves the front skin. */
+      gl.disable(gl.CULL_FACE);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
