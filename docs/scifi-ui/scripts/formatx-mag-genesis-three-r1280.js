@@ -284,6 +284,34 @@
       return tex;
     }
 
+    makeSignatureLensTexture(){
+      const c=document.createElement('canvas');
+      c.width=c.height=128;
+      const x=c.getContext('2d');
+      const g=x.createRadialGradient(64,64,1,64,64,62);
+      g.addColorStop(0,'rgba(248,255,255,.98)');
+      g.addColorStop(.06,'rgba(188,253,255,.90)');
+      g.addColorStop(.16,'rgba(83,226,236,.62)');
+      g.addColorStop(.30,'rgba(26,136,154,.30)');
+      g.addColorStop(.48,'rgba(13,67,78,.12)');
+      g.addColorStop(.72,'rgba(4,22,28,.025)');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      x.fillStyle=g;
+      x.fillRect(0,0,128,128);
+
+      /* One tiny off-axis softbox catchlight. No rays, spokes or HUD ring. */
+      const h=x.createRadialGradient(50,47,0,50,47,18);
+      h.addColorStop(0,'rgba(255,255,255,.72)');
+      h.addColorStop(.22,'rgba(222,255,255,.34)');
+      h.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=h;
+      x.fillRect(28,25,44,44);
+
+      const tex=new this.THREE.CanvasTexture(c);
+      tex.colorSpace=this.THREE.SRGBColorSpace;
+      return tex;
+    }
+
     makeIrisTexture(){
       const c=document.createElement('canvas');
       c.width=c.height=256;
@@ -900,14 +928,14 @@
          No separate armour pod, no silver petals, no robotic rails. One closed
          four-point smoked-bioglass organism owns the final cinematic frame. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x15343b,
+        color:0x28515a,
         metalness:.035,
-        roughness:.19,
-        transmission:.18,
+        roughness:.17,
+        transmission:.14,
         thickness:.52,
         ior:1.43,
-        emissive:0x03151b,
-        emissiveIntensity:.10,
+        emissive:0x08242a,
+        emissiveIntensity:.16,
         clearcoat:.98,
         clearcoatRoughness:.075,
         transparent:true,
@@ -915,7 +943,7 @@
         side:T.DoubleSide
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x0a2a32,
+        color:0x153b43,
         metalness:.02,
         roughness:.22,
         transmission:.32,
@@ -1040,19 +1068,19 @@
 
       /* Integrated optical organ: small smoked lens, not a separate HUD eye. */
       this.mechEyeCorona=new T.Sprite(new T.SpriteMaterial({
-        map:this.makeIrisTexture(),
+        map:this.makeSignatureLensTexture(),
         color:0x9ef4ff,
         transparent:true,
         opacity:0,
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.34,.34,1);
+      this.mechEyeCorona.scale.set(.22,.22,1);
       this.mechEyeCorona.position.set(0,.006,.585);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.060,64),
+        new T.CircleGeometry(.050,64),
         new T.MeshPhysicalMaterial({
           color:0x0b5965,
           metalness:.02,
@@ -1078,14 +1106,14 @@
         blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.086,.0055,8,72),
+        new T.TorusGeometry(.068,.0042,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.006,.602);
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechPupil=new T.Mesh(
-        new T.CircleGeometry(.016,40),
+        new T.CircleGeometry(.012,40),
         new T.MeshBasicMaterial({
           color:0xf4ffff,
           transparent:true,
@@ -1098,7 +1126,7 @@
       this.mechanicalGroup.add(this.mechPupil);
 
       this.mechGlint=new T.Mesh(
-        new T.CircleGeometry(.009,32),
+        new T.CircleGeometry(.0065,32),
         new T.MeshBasicMaterial({
           color:0xffffff,
           transparent:true,
@@ -1107,15 +1135,15 @@
           blending:T.AdditiveBlending
         })
       );
-      this.mechGlint.position.set(-.024,.030,.611);
+      this.mechGlint.position.set(-.020,.024,.611);
       this.mechanicalGroup.add(this.mechGlint);
 
-      this.mechLight=new T.PointLight(0x8ef4ff,0,4.4,2);
+      this.mechLight=new T.PointLight(0xc6f4f2,0,5.2,2);
       this.mechLight.position.set(0,.02,.92);
       this.mechanicalGroup.add(this.mechLight);
 
       this.mechanicalGroup.scale.setScalar(.001);
-      document.documentElement.dataset.fxIntroSignatureR1942='same-four-point-geometry-as-hero';
+      document.documentElement.dataset.fxIntroSignatureR1942='same-four-point-geometry-small-ray-free-optic-as-hero';
     }
 
     createTaperedTube(curve,segments=44,radial=7,r0=.078,r1=.012){
@@ -1385,12 +1413,12 @@
       this.mechEdgeMaterial.opacity=0;
       this.mechInnerMaterial.opacity=.22*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=0;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.42*grow;
-      if(this.mechEyeCore)this.mechEyeCore.material.opacity=.76*grow;
-      if(this.mechPupil)this.mechPupil.material.opacity=.78*grow;
-      if(this.mechGlint)this.mechGlint.material.opacity=.58*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.18*grow;
+      if(this.mechEyeCore)this.mechEyeCore.material.opacity=.52*grow;
+      if(this.mechPupil)this.mechPupil.material.opacity=.58*grow;
+      if(this.mechGlint)this.mechGlint.material.opacity=.42*grow;
       this.mechInnerRing.rotation.z=time*.00010;
-      if(this.mechLight)this.mechLight.intensity=2.8*grow;
+      if(this.mechLight)this.mechLight.intensity=4.6*grow;
 
       const breathe=.996+.004*Math.sin(time*.00092);
       if(this.mechBody){
@@ -1469,30 +1497,30 @@
       }
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
-      const flash=smooth((t-9.12)/.10)*(1-smooth((t-9.58)/.24));
-      const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.12+flash*.06+after*.010;
-      this.coreLight.intensity+=flash*5+after*1.5;
+      const flash=smooth((t-9.12)/.14)*(1-smooth((t-9.52)/.24));
+      const after=smooth((t-9.46)/.34);
+      /* R1942b — cinematic handoff pulse: a small exposure lift and local
+         optical response only. No radial burst, spokes or horizontal HUD beam. */
+      this.renderer.toneMappingExposure=1.12+flash*.025+after*.008;
+      this.coreLight.intensity+=flash*.30+after*.18;
       if(this.glowSprite){
-        const g=1+flash*.72;
-        this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(1,this.glowSprite.material.opacity+flash*.42);
+        this.glowSprite.material.opacity=Math.min(.018,this.glowSprite.material.opacity+flash*.006);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.94;
-        const burstScale=2.35+flash*1.50;
-        this.flashBurst.scale.set(burstScale,burstScale,1);
+        this.flashBurst.material.opacity=0;
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.42;
-        this.flashBeam.scale.x=1+flash*.65;
+        this.flashBeam.material.opacity=0;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(1,.88+flash*.12);
-        const q=1.12+flash*.30;
+        this.mechEyeCorona.material.opacity=.18+flash*.08;
+        const q=.22+flash*.025;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*12;
+      if(this.mechEyeCore)this.mechEyeCore.material.opacity=.52+flash*.10;
+      if(this.mechPupil)this.mechPupil.material.opacity=.58+flash*.16;
+      if(this.mechGlint)this.mechGlint.material.opacity=.42+flash*.18;
+      if(this.mechLight)this.mechLight.intensity+=flash*1.4;
 
       this.renderer.render(this.scene,this.camera);
     }
