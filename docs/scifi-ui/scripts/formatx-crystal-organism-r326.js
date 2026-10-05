@@ -995,7 +995,7 @@
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.006,.018,.025),vec3(.205,.335,.360),lift)*facetTone;
+        vec3 mineral=mix(vec3(.006,.014,.019),vec3(.135,.215,.225),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
@@ -1004,14 +1004,16 @@
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.58,.72,.74)*sideSpec*.135;
-        mineral+=vec3(1.00,1.00,.99)*softboxA*.420;
-        mineral+=vec3(.46,.53,.53)*softboxB*.082;
-        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.455;
+        mineral+=vec3(1.00,1.00,.99)*softboxA*.270;
+        mineral+=vec3(.52,.66,.66)*softboxB*.145;
+        float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
+        mineral+=vec3(.72,.84,.82)*softboxC2*.125;
+        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.165;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
-        mineral+=vec3(.68,.97,1.00)*studioRibbonC*.205;
+        mineral+=vec3(.68,.97,1.00)*studioRibbonC*.105;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.055,.185,.210)*fresnel*.220;
+        mineral+=vec3(.055,.175,.195)*fresnel*.190;
         mineral+=vec3(.034,.022,.016)*floorBounce*.055;
         float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
         float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
@@ -1024,7 +1026,7 @@
         float internalCaustic=pow(1.0-facing,2.35)*(.35+.65*smokyDepth)*(1.0-.55*ndl);
         mineral+=vec3(.040,.072,.073)*internalCaustic*.46;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        mineral+=vec3(.045,.150,.170)*edgeTransmission*.72;
+        mineral+=vec3(.055,.185,.200)*edgeTransmission*.76;
         float iceVolume=exp(-pow((vLocal.x+.10)/.46,2.0)-pow((vLocal.y-.08)/.58,2.0))
           *smoothstep(-.42,.72,vLocal.z)*bodyMask;
         float sculptValleyA=exp(-pow((vLocal.x+.035)/.105,2.0)-pow((vLocal.y-.22)/.42,2.0))*bodyMask;
@@ -1076,6 +1078,24 @@
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
+
+        /* R1942 — desktop/internal prism parity with the mobile studio shader. */
+        float polar=atan(q.y,q.x);
+        float radialXY=length(q);
+        float prismEnvelope=
+          smoothstep(.070,.22,radialXY)*
+          (1.0-smoothstep(.44,.72,radialXY))*
+          front;
+        float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
+        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
+        float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
+        mineral+=vec3(.095,.220,.230)*axisRidge*(.034+.018*prismSweep);
+        mineral+=vec3(.34,.42,.40)*axisRidge*softboxB*.028;
+        mineral*=1.0-.048*diagonalValley;
+        mineral+=vec3(.018,.072,.084)*diagonalValley*fresnel*.052;
+        float innerPane=exp(-pow((abs(q.x)-(.16+.16*abs(q.y)))/.085,2.0))
+          *smoothstep(.04,.52,front);
+        mineral+=vec3(.065,.155,.168)*innerPane*.027;
         float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
@@ -1084,28 +1104,30 @@
         mineral+=vec3(.18,.30,.31)*fissure*.072;
         mineral+=vec3(.66,.67,.62)*fissure*.030;
 
-        /* R1941 — central optical organ.
-           One recessed circular lens anchors the entire four-point silhouette.
-           It reads as smoked optical glass under studio light, not as a HUD decal. */
+        /* R1942 — central optical organ with a true recessed cavity. */
         vec2 lq=q;
         float lensD=length(lq);
+        float cavity=(1.0-smoothstep(.130,.188,lensD))*front;
+        float cavityCore=exp(-pow(lensD/.105,2.0))*front;
+        mineral=mix(mineral,vec3(.004,.016,.021)+mineral*.44,cavity*.10);
+        mineral+=vec3(.018,.070,.082)*cavityCore*.050;
         float lensOuter=(1.0-smoothstep(.112,.146,lensD))*front;
         float lensGlass=(1.0-smoothstep(.064,.108,lensD))*front;
         float lensCore=(1.0-smoothstep(.022,.052,lensD))*front;
         float lensPupil=(1.0-smoothstep(.004,.016,lensD))*front;
         float lensRim=max(0.0,lensOuter-lensGlass);
-        float lensInnerRing=exp(-pow((lensD-.066)/.010,2.0))*front;
+        float lensInnerRing=exp(-pow((lensD-.066)/.008,2.0))*front;
         float lensHighlight=exp(-pow((lq.x+.040)/.030,2.0)-pow((lq.y-.046)/.034,2.0))*lensGlass;
         float lensLower=exp(-pow((lq.x-.030)/.060,2.0)-pow((lq.y+.052)/.040,2.0))*lensGlass;
         float lensDepth=sat(1.0-lensD/.105);
         float opticBreath=.94+.06*(.5+.5*sin(uTime*.72));
 
-        mineral=mix(mineral,vec3(.010,.035,.042),lensOuter*.080);
-        mineral+=vec3(.78,.90,.88)*lensRim*(.075+.115*sideLight+.070*fresnel);
-        mineral+=vec3(.020,.120,.138)*lensGlass*(.105+.095*softboxA+.060*sideSpec);
-        mineral+=vec3(.030,.34,.39)*lensInnerRing*(.15+.11*uEnergy);
-        mineral+=vec3(.28,.86,.90)*lensCore*(.21+.13*uEnergy)*opticBreath;
-        mineral+=vec3(.96,1.00,.99)*lensPupil*(.22+.09*uEnergy);
+        mineral=mix(mineral,vec3(.012,.036,.041)+mineral*.42,lensOuter*.055);
+        mineral+=vec3(.84,.93,.89)*lensRim*(.090+.125*sideLight+.074*fresnel);
+        mineral+=vec3(.020,.105,.120)*lensGlass*(.095+.080*softboxA+.065*sideSpec);
+        mineral+=vec3(.030,.38,.42)*lensInnerRing*(.17+.12*uEnergy);
+        mineral+=vec3(.30,.91,.93)*lensCore*(.25+.14*uEnergy)*opticBreath;
+        mineral+=vec3(.98,1.00,.99)*lensPupil*(.28+.10*uEnergy);
         mineral+=vec3(.82,.94,.91)*lensHighlight*.18;
         mineral+=vec3(.10,.15,.15)*lensLower*.032;
         mineral=mix(mineral,vec3(.002,.010,.013),lensDepth*.050*lensGlass);
