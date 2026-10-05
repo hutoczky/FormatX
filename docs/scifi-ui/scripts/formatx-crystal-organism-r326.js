@@ -7,7 +7,7 @@
   const CANONICAL_REVISION = 'fully-living-organism-r1723';
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
-  const mobile = matchMedia('(max-width:900px),(pointer:coarse)').matches;
+  const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
