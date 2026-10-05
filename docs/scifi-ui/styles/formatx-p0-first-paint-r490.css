@@ -1216,6 +1216,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* production-r1938-smooth-bioglass-first-paint */
 
 
+/* production-r1943b-desktop-lcp-final-material-first-paint */
 /* R1820 — final hero typography is owned by the blocking P0 layer.
    Deferred visual bundles may add material around the hero, but they must not
    change the largest readable text after first paint. This keeps the real user
@@ -1257,6 +1258,12 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     line-height:.88!important;
     letter-spacing:-.075em!important;
     white-space:nowrap!important;
+    color:transparent!important;
+    -webkit-text-fill-color:transparent!important;
+    background:linear-gradient(115deg,#fff 0%,#c6f6ff 38%,#86caff 62%,#c8bcff 86%,#fff 100%)!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    text-shadow:none!important;
   }
   html:root:root:root body.living-architecture #hero .hero-title-sub {
     display:block!important;
