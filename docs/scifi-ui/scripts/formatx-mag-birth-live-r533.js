@@ -513,7 +513,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261005-r1939-rounded-bioglass-cinematic';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1940-user-reference-pod';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -762,7 +762,7 @@
     if(window.FormatXMagGenesisThreeR1360?.attach)return;
     if(threeOwnerRequested)return;
     threeOwnerRequested=true;
-    const existing=[...document.scripts].find(s=>/formatx-mag-genesis-three-r1360\.js/.test(s.src));
+    const existing=[...document.scripts].find(s=>/formatx-mag-genesis-three-r1280\.js/.test(s.src));
     if(existing){
       ROOT.dataset.fxMagBirthThreeLoaderR1608='existing-owner-wait';
       existing.addEventListener?.('load',()=>sizeCanvas(),{once:true});
