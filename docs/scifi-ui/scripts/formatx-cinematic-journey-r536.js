@@ -60,7 +60,10 @@
   let velocity = 0;
   let pointerNX = 0;
   let pointerNY = 0;
-  const finePointer = matchMedia('(pointer:fine)').matches;
+  let pointerTargetNX = 0;
+  let pointerTargetNY = 0;
+  let pointerTailFrames = 0;
+  const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
@@ -288,6 +291,11 @@
 
     const y = scrollY;
     const dt = Math.max(16,Math.min(180,now-lastT));
+    if(finePointer){
+      const pointerEase=1-Math.exp(-dt*.018);
+      pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
+      pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
+    }
     const rawV = clamp((y-lastY)/dt,-2.2,2.2);
     velocity += (rawV-velocity)*.35;
     lastY = y;
@@ -321,10 +329,10 @@
       root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
       root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*18 + velocity*-1.6).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*12 + velocity*.8).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*1.15).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*1.55).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*11.5 + velocity*-1.35).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7.5 + velocity*.65).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.72).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
       scenes.forEach(scene=>{
@@ -342,6 +350,11 @@
     if(stage?.dataset.fxC536Primed!=='true'){
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
+    }
+    if(finePointer&&pointerTailFrames>0){
+      pointerTailFrames-=1;
+      if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
+      else pointerTailFrames=0;
     }
   }
 
@@ -422,17 +435,21 @@
 
   function onCinematicPointerMove(event) {
     if (!finePointer || event.pointerType === 'touch') return;
-    pointerNX = clamp((event.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
-    pointerNY = clamp((event.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    root.dataset.fxCinematicPointerR617 = 'active';
+    const batch=typeof event.getCoalescedEvents==='function'?event.getCoalescedEvents():null;
+    const sample=batch?.length?batch[batch.length-1]:event;
+    pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
+    pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
+    pointerTailFrames=6;
+    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
     schedule();
   }
 
   function onCinematicPointerLeave() {
     if (!finePointer) return;
-    pointerNX = 0;
-    pointerNY = 0;
-    root.dataset.fxCinematicPointerR617 = 'rest';
+    pointerTargetNX = 0;
+    pointerTargetNY = 0;
+    pointerTailFrames=8;
+    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
     schedule();
   }
 
@@ -516,7 +533,7 @@
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
-    root.dataset.fxDesktopInteractionR1943='fine-pointer-depth-parallax-perspective-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
