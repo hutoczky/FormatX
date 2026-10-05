@@ -342,10 +342,19 @@
         +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
       crystalPosition[2]+=-direction[0]*.016+direction[0]*y*.010;
 
+      /* R1940 — analytic smooth normal for the continuous bioglass field.
+         R1939 still fed per-triangle face normals into the mobile shader, which
+         exposed every latitude/longitude cell as visible CGI banding. */
+      const smoothCrystalNormal=normalize([
+        direction[0]/Math.max(.001,axisX*axisX),
+        direction[1]/Math.max(.001,axisY*axisY),
+        direction[2]/Math.max(.001,axisZ*axisZ)
+      ]);
       return{
         sphere:spherePosition,
         crystal:crystalPosition,
         sphereNormal:direction,
+        crystalNormal:smoothCrystalNormal,
         uv:[longitude,latitude]
       };
     }
@@ -367,7 +376,7 @@
         crystalNormal = crystalNormal.map(value => -value);
       }
       const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
-      const bodySeamOverlap=software&&facet<2.0?.0100:0;
+      const bodySeamOverlap=(software||mobile||constrained)&&facet<2.0?.0045:0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
@@ -1471,6 +1480,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
+    root.dataset.fxNativeMagStudioR1940='analytic-smooth-normal-seam-overlap-double-sided-opaque-studio-shell';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -1929,8 +1939,10 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      gl.enable(gl.CULL_FACE);
-      gl.cullFace(gl.BACK);
+      /* R1940 — the shell is opaque, so double-sided rasterization costs little
+         at this mesh size and removes mobile sub-pixel pinholes at duplicated
+         triangle boundaries. Depth testing still selects the front surface. */
+      gl.disable(gl.CULL_FACE);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
