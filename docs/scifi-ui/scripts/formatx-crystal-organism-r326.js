@@ -1291,15 +1291,27 @@
         /* Smoked blue-silver glass volume. */
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
         float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
-        float facetTone=${mobile?'.955':'.930'}+${mobile?'.090':'.135'}*facetRand;
+        float macroAngle=atan(vLocal.y,vLocal.x);
+        float macroRadius=length(vLocal.xy);
+        float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
+        float macroFacetB=.5+.5*cos(macroAngle*2.0-macroRadius*4.1+vLocal.z*1.4);
+        float macroFacet=mix(macroFacetA,macroFacetB,.34);
+        float facetTone=${mobile
+          ? "'.955+.090*facetRand'"
+          : "'.955+.018*facetRand+.070*macroFacet'"}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
         c*=.93+.07*volume;
-        /* Broad facet separation comes from tonal response, not dark polygon
-           borders. This keeps the crystal authored and photographic. */
-        float facetSilver=smoothstep(.58,.96,facetRand)*frontDepth;
-        float facetCool=smoothstep(.08,.44,1.0-facetRand)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*.050;
-        c+=vec3(.010,.065,.076)*facetCool*.034;
+        /* R1945f — desktop uses broad continuous planes instead of per-triangle
+           random contrast. That removes the pin-speckle/CGI mosaic while keeping
+           a cut-glass studio response. Mobile keeps its proven facet cadence. */
+        float facetSilver=${mobile
+          ? "'smoothstep(.58,.96,facetRand)*frontDepth'"
+          : "'smoothstep(.56,.94,macroFacet)*frontDepth'"}; 
+        float facetCool=${mobile
+          ? "'smoothstep(.08,.44,1.0-facetRand)*frontDepth'"
+          : "'smoothstep(.10,.48,1.0-macroFacet)*frontDepth'"}; 
+        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.050':'.072'};
+        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.034':'.046'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
@@ -1593,6 +1605,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagStudioR1945e='desktop-cut-face-normal-blend-larger-optic-preserved-contrast';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
