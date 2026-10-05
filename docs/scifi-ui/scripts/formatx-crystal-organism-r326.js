@@ -1184,6 +1184,10 @@
        language with fewer highlights; software/mobile proof must not fall back
        to a gray translucent surrogate. */
 
+    /* R1941d — canonical cross-tier studio bioglass shader.
+       One clean material, no procedural dirt/speckles, no black button optic.
+       The four-point silhouette carries the identity; the shader only gives it
+       physical depth, broad softbox reflections and restrained living energy. */
     const constrainedFragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
@@ -1198,79 +1202,87 @@
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
+        vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
-        float fresnel=1.0-facing;fresnel*=fresnel;
+        float fresnel=pow(1.0-facing,1.72);
 
-        float key=sat(dot(n,normalize(vec3(-.52,.75,.41))));
-        float side=sat(dot(n,normalize(vec3(.70,.04,.71))));
-        float top=sat(dot(n,normalize(vec3(-.20,.94,.28))));
-        float back=sat(dot(n,normalize(vec3(.08,-.32,.94))));
-        float softA=pow(key,4.6);
-        float softB=pow(side,5.4);
-        float softTop=pow(top,3.6);
+        vec3 keyDir=normalize(vec3(-.50,.78,.38));
+        vec3 sideDir=normalize(vec3(.72,.08,.69));
+        vec3 fillDir=normalize(vec3(-.38,-.24,.89));
+        float key=sat(dot(n,keyDir));
+        float side=sat(dot(n,sideDir));
+        float fill=sat(dot(n,fillDir));
+        float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
 
-        float grain=.5+.5*sin(vLocal.x*17.0-vLocal.y*13.0+vLocal.z*15.0);
-        float broadVeil=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.2-vLocal.z*2.7);
-        float sweep=0.0;
-        if(uSurfacePulse>=0.0){
-          float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
-          float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.28+.72*fresnel);
-        }
+        vec3 refl=reflect(-view,n);
+        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
+        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
+        float ribbonA=exp(-pow((refl.x+.11)/.055,2.0)-pow((refl.y-.08)/.72,2.0))*smoothstep(-.10,.72,refl.z);
+        float ribbonB=exp(-pow((refl.x-.31)/.085,2.0)-pow((refl.y+.10)/.62,2.0))*smoothstep(-.10,.70,refl.z);
 
-        /* Single solid shell: no full-body additive cyan layer. */
+        float frontDepth=smoothstep(-.46,.58,vLocal.z);
+        float backDepth=1.0-frontDepth;
+        float edge=pow(1.0-facing,2.20);
+        float deepEdge=pow(1.0-facing,3.20);
+        float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
+        float strata=.5+.5*sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4);
+        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+
         if(uLayer>.5){
           ${outputName}=vec4(0.0,0.0,0.0,0.0);
           return;
         }
 
-        vec3 c=vec3(.008,.018,.023);
-        c+=vec3(.048,.078,.082)*(.28+.72*key);
-        c+=vec3(.055,.105,.110)*side*.28;
-        c+=vec3(.055,.061,.058)*top*.10;
-        c+=vec3(.82,.88,.84)*softA*.31;
-        c+=vec3(.31,.46,.46)*softB*.115;
-        c+=vec3(.44,.48,.45)*softTop*.055;
-        c+=vec3(.028,.145,.165)*fresnel*.30;
-        c+=vec3(.010,.017,.018)*grain*.030;
-        c+=vec3(.011,.022,.023)*broadVeil*.038;
-        c+=vec3(.010,.020,.021)*back*.050;
+        /* Smoked blue-silver glass volume. */
+        float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
+        vec3 c=mix(vec3(.004,.018,.026),vec3(.115,.300,.335),lift);
+        c*=.93+.07*volume;
+        c+=vec3(.030,.060,.064)*strata*.10;
+        c+=vec3(.018,.055,.066)*backDepth*.12;
 
-        /* Narrow studio reflection ribbons sell real glass without making the
-           surface look metallic or low-poly. */
-        float ribbonA=exp(-pow((vLocal.x+.18+vLocal.y*.06)/.085,2.0))
-          *smoothstep(-.76,.78,vLocal.y);
-        float ribbonB=exp(-pow((vLocal.x-.30-vLocal.y*.04)/.11,2.0))
-          *smoothstep(-.66,.80,vLocal.y);
-        c+=vec3(.88,.93,.89)*ribbonA*.095;
-        c+=vec3(.20,.37,.39)*ribbonB*.060;
+        /* Large photographic light sources. */
+        c+=vec3(.98,1.00,.97)*softboxA*.34;
+        c+=vec3(.28,.52,.55)*softboxB*.16;
+        c+=vec3(.86,.98,.96)*ribbonA*.30;
+        c+=vec3(.16,.45,.50)*ribbonB*.13;
+        c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
+        c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
-        /* Integrated smoked optical organ. It is part of the surface, not a HUD
-           ring and not a glowing sticker. */
-        float front=smoothstep(.08,.50,vLocal.z);
+        /* Optical transmission at the silhouette and restrained inner cyan. */
+        c+=vec3(.030,.180,.205)*fresnel*.34;
+        c+=vec3(.050,.280,.320)*deepEdge*.20;
+        c+=vec3(.025,.110,.128)*centreHaze*(.08+.07*uEnergy);
+        c+=vec3(.015,.050,.060)*frontDepth*.10;
+
+        /* One integrated optical organ. No black bezel, no HUD ring. */
+        float front=smoothstep(.06,.50,vLocal.z);
         vec2 oq=vec2(vLocal.x/.135,vLocal.y/.135);
         float od=length(oq);
-        float optic=(1.0-smoothstep(.90,1.02,od))*front;
-        float opticRim=exp(-pow((od-.83)/.060,2.0))*front;
-        float opticInner=exp(-od*od*3.4)*front;
-        float opticCore=exp(-od*od*13.5)*front;
-        float opticPupil=exp(-od*od*38.0)*front;
-        float opticGlint=exp(-pow((oq.x+.34)/.14,2.0)-pow((oq.y-.31)/.12,2.0))*front;
-        vec3 opticColor=vec3(.0015,.005,.0065);
-        opticColor+=vec3(.010,.022,.024)*opticInner;
-        opticColor+=vec3(.42,.48,.46)*opticRim*.12;
-        opticColor+=vec3(.020,.18,.205)*opticCore*(.075+.055*uEnergy);
-        opticColor+=vec3(.42,.86,.88)*opticPupil*(.090+.055*uEnergy);
-        opticColor+=vec3(.96,.99,.97)*opticGlint*.42;
-        c=mix(c,opticColor,optic*.86);
-        c+=vec3(.48,.54,.52)*opticRim*.035;
+        float lens=(1.0-smoothstep(.84,1.02,od))*front;
+        float rim=exp(-pow((od-.76)/.070,2.0))*front;
+        float iris=exp(-od*od*4.8)*front;
+        float core=exp(-od*od*15.0)*front;
+        float hot=exp(-od*od*58.0)*front;
+        float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
+        vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
+        c=mix(c,opticBase+c*.24,lens*.38);
+        c+=vec3(.60,.82,.81)*rim*.16;
+        c+=vec3(.030,.35,.41)*iris*(.16+.10*uEnergy);
+        c+=vec3(.22,.82,.88)*core*(.20+.12*uEnergy);
+        c+=vec3(.92,1.00,.98)*hot*(.26+.08*uEnergy);
+        c+=vec3(.98,1.00,.98)*glint*.26;
 
-        c+=vec3(.10,.24,.26)*sweep*.22;
-        c+=vec3(.58,.66,.63)*sweep*softA*.075;
+        /* Interaction/surface sweep remains physical and brief. */
+        float sweep=0.0;
+        if(uSurfacePulse>=0.0){
+          float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
+          float head=-.16+1.32*sat(uSurfacePulse);
+          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+        }
+        c+=vec3(.08,.30,.34)*sweep*.24;
+        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        float alpha=1.0;
-        ${outputName}=vec4(tone(c*2.86),alpha);
+        ${outputName}=vec4(tone(c*3.05),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1452,7 +1464,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-bioglass-smooth-studio-normal-central-optic-no-cables';
+    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-clean-studio-bioglass-integrated-optic-no-speckle';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
