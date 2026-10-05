@@ -302,10 +302,21 @@
          Restore the exact R1934–R1936 P0 diamond grammar selected by the user:
          asymmetric four-direction crystal, compact valleys, deeper rear volume.
          The silhouette is original; only shading/topology are modernised. */
-      const axisX=direction[0]>=0?.88:.86;
-      const axisY=direction[1]>=0?1.09:.97;
-      const axisZ=direction[2]>=0?.64:.43;
-      const exponent=.78;
+      /* R1945 — desktop signature silhouette.
+         Mobile already reads as the intended four-point mark. Desktop needed a
+         stronger planar pinch because the larger photographic softbox response
+         visually rounded the same mesh into a pod. Keep mobile untouched and
+         sharpen only the desktop anisotropy/depth field. */
+      const axisX=mobile
+        ? (direction[0]>=0?.88:.86)
+        : (direction[0]>=0?1.02:.98);
+      const axisY=mobile
+        ? (direction[1]>=0?1.09:.97)
+        : (direction[1]>=0?1.18:1.06);
+      const axisZ=mobile
+        ? (direction[2]>=0?.64:.43)
+        : (direction[2]>=0?.49:.34);
+      const exponent=mobile?.78:.61;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
@@ -895,7 +906,7 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.365'}+uRotation.y+uPointer.x*${mobile?'.12':'.19'}+uTime*.007;
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
         float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
         float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
@@ -910,9 +921,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.735'};
-        projected.x+=${mobile?'.002':'.040'};
-        projected.y+=${mobile?'.010':'.002'};
+        projected*= ${mobile?'.585':'.790'};
+        projected.x+=${mobile?'.002':'.018'};
+        projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1580,6 +1591,7 @@
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
+    root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
