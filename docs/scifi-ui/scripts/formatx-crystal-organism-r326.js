@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 16 : constrainedMobile ? 18 : mobile ? 22 : constrained ? 24 : 34;
-    const longitudeSegments = software ? 32 : constrainedMobile ? 36 : mobile ? 44 : constrained ? 48 : 64;
+    const latitudeSegments = software ? 20 : constrainedMobile ? 24 : mobile ? 32 : constrained ? 30 : 40;
+    const longitudeSegments = software ? 40 : constrainedMobile ? 48 : mobile ? 64 : constrained ? 60 : 80;
     const tendrilCount = (software||mobile) ? 0 : 10;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
@@ -307,7 +307,7 @@
       const axisX=.625+shoulder*.132+direction[0]*.026-direction[2]*.010;
       const axisY=.925+shoulder*.028+y*.028;
       const axisZ=.445+shoulder*.078+direction[2]*.018-direction[0]*.012;
-      const exponent=1.48;
+      const exponent=1.72;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
@@ -315,13 +315,13 @@
       const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
 
       const upperLeft=
-        .048*Math.exp(-Math.pow((y-.38)/.34,2))*
+        .060*Math.exp(-Math.pow((y-.40)/.34,2))*
         Math.max(0,.5-.5*Math.cos(theta));
       const rightMid=
-        .034*Math.exp(-Math.pow((y-.02)/.40,2))*
+        .044*Math.exp(-Math.pow((y-.02)/.42,2))*
         Math.max(0,.5+.5*Math.cos(theta));
       const lowerLeft=
-        .028*Math.exp(-Math.pow((y+.42)/.30,2))*
+        .036*Math.exp(-Math.pow((y+.40)/.32,2))*
         Math.max(0,.5-.5*Math.cos(theta-.34));
       const life=
         1+
@@ -339,11 +339,6 @@
       crystalPosition[1]+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
         +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
       crystalPosition[2]+=-direction[0]*.016+direction[0]*y*.010;
-
-      const top=.790-crystalPosition[0]*.075-crystalPosition[2]*.026;
-      const bottom=-.815-crystalPosition[0]*.035+crystalPosition[2]*.018;
-      if(crystalPosition[1]>top)crystalPosition[1]=top+(crystalPosition[1]-top)*.18;
-      if(crystalPosition[1]<bottom)crystalPosition[1]=bottom+(crystalPosition[1]-bottom)*.22;
 
       return{
         sphere:spherePosition,
@@ -393,7 +388,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.92:(mobile?.975:(constrained?.955:.965));
+        const smoothWeight=software?.95:(mobile?.985:(constrained?.972:.978));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1220,58 +1215,78 @@
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.85-vLocal.z));
+        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=1.0-facing;fresnel*=fresnel;
 
-        float key=sat(dot(n,normalize(vec3(-.46,.72,.52))));
-        float side=sat(dot(n,normalize(vec3(.66,.08,.74))));
-        float top=sat(dot(n,normalize(vec3(-.18,.92,.34))));
-        float softA=pow(key,4.2);
-        float softB=pow(side,5.0);
-        float softTop=pow(top,3.2);
+        float key=sat(dot(n,normalize(vec3(-.52,.75,.41))));
+        float side=sat(dot(n,normalize(vec3(.70,.04,.71))));
+        float top=sat(dot(n,normalize(vec3(-.20,.94,.28))));
+        float back=sat(dot(n,normalize(vec3(.08,-.32,.94))));
+        float softA=pow(key,4.6);
+        float softB=pow(side,5.4);
+        float softTop=pow(top,3.6);
 
-        vec2 q=vec2((vLocal.x-.035)/.23,(vLocal.y-.015)/.18);
-        float coreD=length(q);
-        float core=exp(-coreD*coreD*3.8);
-        float coreHot=exp(-coreD*coreD*12.0);
-        float breath=.5+.5*sin(uTime*.82);
-        float grain=.5+.5*sin(vLocal.x*18.0-vLocal.y*13.0+vLocal.z*15.0);
-
+        float grain=.5+.5*sin(vLocal.x*17.0-vLocal.y*13.0+vLocal.z*15.0);
+        float broadVeil=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.2-vLocal.z*2.7);
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
-          float pos=.5+(vLocal.y*.62+vLocal.x*.15+vLocal.z*.10)*.5;
-          float head=-.14+1.28*sat(uSurfacePulse);
-          sweep=exp(-pow((pos-head)/.075,2.0))*(.30+.70*fresnel);
+          float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
+          float head=-.16+1.32*sat(uSurfacePulse);
+          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.28+.72*fresnel);
         }
 
-        /* Inner life is deliberately subtle. The previous additive full-body
-           cyan pass was the main cause of the translucent four-point star. */
+        /* Single solid shell: no full-body additive cyan layer. */
         if(uLayer>.5){
-          vec3 inner=vec3(.002,.010,.013)
-            +vec3(.010,.105,.126)*core*(.10+.12*uEnergy+.025*breath)
-            +vec3(.34,.72,.76)*coreHot*(.025+.035*uEnergy)
-            +vec3(.020,.16,.19)*sweep*.20;
-          float a=clamp(.025+core*.050+coreHot*.045+sweep*.035,.02,.12);
-          ${outputName}=vec4(tone(inner),a);
+          ${outputName}=vec4(0.0,0.0,0.0,0.0);
           return;
         }
 
-        vec3 c=vec3(.006,.011,.013);
-        c+=vec3(.026,.038,.039)*(.30+.70*key);
-        c+=vec3(.040,.060,.061)*side*.28;
-        c+=vec3(.055,.063,.061)*softTop*.10;
-        c+=vec3(.82,.88,.85)*softA*.27;
-        c+=vec3(.26,.46,.48)*softB*.12;
-        c+=vec3(.026,.105,.120)*fresnel*.26;
-        c+=vec3(.012,.024,.026)*grain*.045;
-        c+=vec3(.010,.065,.078)*core*(.035+.055*uEnergy);
-        c+=vec3(.40,.74,.76)*coreHot*(.018+.026*uEnergy);
-        c+=vec3(.12,.27,.29)*sweep*.26;
-        c+=vec3(.66,.74,.72)*sweep*softA*.08;
+        vec3 c=vec3(.006,.010,.012);
+        c+=vec3(.028,.036,.036)*(.22+.78*key);
+        c+=vec3(.040,.055,.054)*side*.22;
+        c+=vec3(.055,.061,.058)*top*.10;
+        c+=vec3(.82,.88,.84)*softA*.31;
+        c+=vec3(.31,.46,.46)*softB*.115;
+        c+=vec3(.44,.48,.45)*softTop*.055;
+        c+=vec3(.020,.078,.088)*fresnel*.21;
+        c+=vec3(.010,.017,.018)*grain*.030;
+        c+=vec3(.011,.022,.023)*broadVeil*.038;
+        c+=vec3(.010,.020,.021)*back*.050;
 
-        float a=clamp(.955+.020*key+.012*side+.010*(1.0-fresnel),.955,.992);
-        ${outputName}=vec4(tone(c*2.45),a);
+        /* Narrow studio reflection ribbons sell real glass without making the
+           surface look metallic or low-poly. */
+        float ribbonA=exp(-pow((vLocal.x+.18+vLocal.y*.06)/.085,2.0))
+          *smoothstep(-.76,.78,vLocal.y);
+        float ribbonB=exp(-pow((vLocal.x-.30-vLocal.y*.04)/.11,2.0))
+          *smoothstep(-.66,.80,vLocal.y);
+        c+=vec3(.88,.93,.89)*ribbonA*.095;
+        c+=vec3(.20,.37,.39)*ribbonB*.060;
+
+        /* Integrated smoked optical organ. It is part of the surface, not a HUD
+           ring and not a glowing sticker. */
+        float front=smoothstep(.08,.50,vLocal.z);
+        vec2 oq=vec2((vLocal.x-.015)/.205,(vLocal.y+.005)/.150);
+        float od=length(oq);
+        float optic=(1.0-smoothstep(.92,1.03,od))*front;
+        float opticRim=exp(-pow((od-.82)/.075,2.0))*front;
+        float opticCore=exp(-od*od*9.5)*front;
+        float opticPupil=exp(-od*od*24.0)*front;
+        float opticGlint=exp(-pow((oq.x+.34)/.16,2.0)-pow((oq.y-.30)/.14,2.0))*front;
+        vec3 opticColor=vec3(.002,.008,.010);
+        opticColor+=vec3(.014,.060,.070)*optic;
+        opticColor+=vec3(.22,.52,.54)*opticRim*.16;
+        opticColor+=vec3(.10,.62,.68)*opticCore*(.10+.08*uEnergy);
+        opticColor+=vec3(.68,.92,.91)*opticPupil*(.08+.06*uEnergy);
+        opticColor+=vec3(.92,.98,.96)*opticGlint*.38;
+        c=mix(c,opticColor,optic*.72);
+        c+=vec3(.16,.44,.48)*opticRim*.055;
+
+        c+=vec3(.10,.24,.26)*sweep*.22;
+        c+=vec3(.58,.66,.63)*sweep*softA*.075;
+
+        float alpha=clamp(.975+.012*key+.008*side,.975,.995);
+        ${outputName}=vec4(tone(c*2.55),alpha);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1451,6 +1466,7 @@
     root.dataset.fxNativeMagStudioR1933='frosted-cut-ice-two-pass-living-depth-no-eye';
     root.dataset.fxNativeMagMobileR1936='brighter-readable-body-higher-opacity-balanced-cyan';
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
+    root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -1905,19 +1921,14 @@
       const surfacePulse=surfacePulseElapsed>=0&&surfacePulseElapsed<=1?surfacePulseElapsed:-1;
       gl.uniform1f(uniforms.uSurfacePulse,surfacePulse);
 
-      /* R1934 — restore the proven P0 glass pass order.
-         Mobile keeps the inner luminous organism plus one conventional outer
-         shell; desktop keeps the same visual owner for cross-tier parity. */
+      /* R1938 — one opaque photographic pass.
+         This removes the additive back-face wash that turned the living MAG into
+         a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.enable(gl.BLEND);
-      gl.disable(gl.CULL_FACE);
-      gl.depthMask(false);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
-      gl.uniform1f(uniforms.uLayer,1);
-      gl.drawArrays(gl.TRIANGLES,0,geometry.count);
-      gl.depthMask(true);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.CULL_FACE);
       gl.cullFace(gl.BACK);
+      gl.depthMask(true);
+      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
