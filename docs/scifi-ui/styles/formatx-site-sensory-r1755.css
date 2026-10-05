@@ -108,6 +108,63 @@ html body.living-architecture :is(
   }
 }
 
+/* R1943 — fine-pointer desktop interaction.
+   Compositor-only movement, no custom cursor and no idle animation loop. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html body.living-architecture .magnetic{
+    --fx-pc-mx:0px;
+    --fx-pc-my:0px;
+    transform:translate3d(var(--fx-pc-mx),var(--fx-pc-my),0);
+    transition:
+      transform 140ms cubic-bezier(.2,.82,.2,1),
+      border-color 160ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+    will-change:transform;
+  }
+  html body.living-architecture .magnetic[data-fx-pc-reactive-r1943="true"]{
+    transition:
+      transform 58ms linear,
+      border-color 150ms ease,
+      box-shadow 160ms ease,
+      background-color 160ms ease;
+  }
+
+  html body.living-architecture :is(
+    .card,.price-card,.release-card,.fx-platform-card,
+    .fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a
+  ){
+    --fx-pc-mx:0px;
+    --fx-pc-my:0px;
+    translate:var(--fx-pc-mx) var(--fx-pc-my);
+  }
+  html body.living-architecture :is(
+    .card,.price-card,.release-card,.fx-platform-card,
+    .fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a
+  )[data-fx-pc-reactive-r1943="true"]{
+    border-color:rgba(164,235,240,.30)!important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.045),
+      inset 0 0 42px rgba(74,203,224,.030),
+      0 24px 72px rgba(0,0,0,.25),
+      0 0 30px rgba(83,203,219,.050)!important;
+    transition:
+      translate 70ms linear,
+      border-color 150ms ease,
+      box-shadow 170ms ease;
+  }
+
+  html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1943="true"]{
+    border-color:rgba(171,239,244,.42)!important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.075),
+      0 10px 34px rgba(0,0,0,.25),
+      0 0 24px rgba(88,211,230,.075)!important;
+  }
+}
+
+/* production-r1943-fine-pointer-compositor-interaction */
+
 /* R1755c — scroll is a frame-budget critical interaction. The MAG remains
    reactive, but autonomous atmosphere motion yields until scrolling settles. */
 html[data-fx-scroll-pressure-r1755="true"] body.living-architecture::before,
