@@ -1663,7 +1663,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
-    root.dataset.fxNativeMagDesktopInteractionR1943='fine-pointer-delta-rotation-stronger-optical-parallax-no-idle-loop';
+    root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagOrganismR1724='asymmetric-living-crystal-rhombic-cortical-silhouette';
@@ -1779,6 +1779,9 @@
     let morph=0,targetMorph=0;
     let rotationX=softwareRenderer?-.105:(mobile?-.090:-.070),rotationY=softwareRenderer?-.41:(mobile?-.40:-.32),rotationZ=softwareRenderer?-.020:.008;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
+    const desktopFine=matchMedia('(hover:hover) and (pointer:fine)');
+    let pointerTiltX=0,pointerTiltY=0,targetPointerTiltX=0,targetPointerTiltY=0;
+    let ambientPointerFrame=0,pendingAmbientPointer=null;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
@@ -2005,6 +2008,9 @@
       rotationX+=(targetRotationX-rotationX)*rotationEase;
       rotationY+=(targetRotationY-rotationY)*rotationEase;
       rotationZ+=(targetRotationZ-rotationZ)*rotationEase;
+      const pointerTiltEase=1-Math.exp(-dt*(desktopFine.matches?.020:.014));
+      pointerTiltX+=(targetPointerTiltX-pointerTiltX)*pointerTiltEase;
+      pointerTiltY+=(targetPointerTiltY-pointerTiltY)*pointerTiltEase;
       if(Math.abs(angularVelocityY)>.00002){targetRotationY+=angularVelocityY*dt;angularVelocityY*=Math.exp(-dt*.010);}
       energy+=(targetEnergy-energy)*(1-Math.exp(-dt*.026));
       breath+=(targetBreath-breath)*(1-Math.exp(-dt*.032));
@@ -2018,7 +2024,7 @@
       cinematic.corePosition=[px*.055,-py*.045,.52+energy*.012];
       cinematic.morph=morph;
       cinematic.shape=shapeName();
-      cinematic.rotation=[rotationX,rotationY,rotationZ];
+      cinematic.rotation=[rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ];
       cinematic.siteProgress=siteProgress;
       publishShape();
 
@@ -2029,7 +2035,7 @@
       gl.uniform1f(uniforms.uBreath,breath);
       gl.uniform1f(uniforms.uMorph,morph);
       gl.uniform2f(uniforms.uPointer,px,py);
-      gl.uniform3f(uniforms.uRotation,rotationX,rotationY,rotationZ);
+      gl.uniform3f(uniforms.uRotation,rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ);
       gl.uniform1f(uniforms.uAspect,aspect);
       gl.uniform1f(uniforms.uSiteProgress,siteProgress);
       const surfacePulseElapsed=(now-surfacePulseStart)/SURFACE_PULSE_WINDOW_MS;
@@ -2136,6 +2142,7 @@
       root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
+      root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
@@ -2144,6 +2151,7 @@
     function settleAfterBurst(){
       px=tx;py=ty;
       rotationX=targetRotationX;rotationY=targetRotationY;rotationZ=targetRotationZ;
+      pointerTiltX=targetPointerTiltX;pointerTiltY=targetPointerTiltY;
       angularVelocityY=0;
       energy=targetEnergy=IDLE_ENERGY;
       breath=targetBreath=.12;
@@ -2207,7 +2215,15 @@
       if(rect.width<2||rect.height<2)return null;
       return{x:clamp(((event.clientX-rect.left)/rect.width-.5)*2,-1,1),y:clamp(-((event.clientY-rect.top)/rect.height-.5)*2,-1,1)};
     }
-    function onMove(event){if(event.pointerType==='touch')return;const q=point(event);if(!q)return;tx=q.x;ty=q.y;targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);schedule(2);}
+    function onMove(event){
+      if(event.pointerType==='touch')return;
+      const batch=typeof event.getCoalescedEvents==='function'?event.getCoalescedEvents():null;
+      const sample=batch?.length?batch[batch.length-1]:event;
+      const q=point(sample);if(!q)return;
+      tx=q.x*(desktopFine.matches?.72:1);ty=q.y*(desktopFine.matches?.72:1);
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.105);
+      schedule(desktopFine.matches?4:2);
+    }
     function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,mobile?4:6);}
     function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(2);}
     function pulse(detail){
@@ -2282,17 +2298,41 @@
         y:clamp(-((((Number(event?.clientY)||innerHeight*.5)/Math.max(1,innerHeight))-.5)*2),-1,1)
       };
     }
-    function onAmbientMove(event){
-      const q=globalPoint(event);
-      const touch=event.pointerType==='touch';
+    function applyAmbientPointer(event){
+      ambientPointerFrame=0;
+      const batch=typeof event?.getCoalescedEvents==='function'?event.getCoalescedEvents():null;
+      const sample=batch?.length?batch[batch.length-1]:event;
+      const q=globalPoint(sample);
+      const touch=sample?.pointerType==='touch';
       const dx=q.x-ambientLastX,dy=q.y-ambientLastY;
       ambientLastX=q.x;ambientLastY=q.y;
-      tx=q.x*(touch?.46:.84);ty=q.y*(touch?.46:.84);
-      targetRotationY+=dx*(touch?.055:.145);
-      targetRotationX=clamp(targetRotationX-dy*(touch?.045:.105),-1.02,1.02);
-      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.095));
-      targetBreath=Math.max(targetBreath,touch?.18:.25);
-      schedule(mobile?1:3);
+      tx=q.x*(touch?.46:.72);ty=q.y*(touch?.46:.72);
+
+      if(desktopFine.matches&&!touch){
+        /* R1943 desktop: absolute camera bias, independent of mouse polling rate.
+           Velocity only adds a tiny impulse; it never accumulates orientation. */
+        targetPointerTiltY=clamp(q.x*.095 + dx*.020,-.12,.12);
+        targetPointerTiltX=clamp(-q.y*.070 - dy*.014,-.095,.095);
+        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.085+Math.min(.055,Math.hypot(dx,dy)*.12));
+        targetBreath=Math.max(targetBreath,.235);
+        schedule(4);
+      }else{
+        targetPointerTiltY=clamp(q.x*.055,-.07,.07);
+        targetPointerTiltX=clamp(-q.y*.045,-.06,.06);
+        targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.090));
+        targetBreath=Math.max(targetBreath,touch?.18:.23);
+        schedule(mobile?1:2);
+      }
+    }
+    function onAmbientMove(event){
+      pendingAmbientPointer=event;
+      if(ambientPointerFrame)return;
+      ambientPointerFrame=requestAnimationFrame(()=>{
+        const sample=pendingAmbientPointer;
+        pendingAmbientPointer=null;
+        if(sample)applyAmbientPointer(sample);
+        else ambientPointerFrame=0;
+      });
     }
     function onAmbientPress(event){
       const q=globalPoint(event);
@@ -2422,7 +2462,10 @@
     listen(window,'pointerleave',()=>{
       ambientLastX=ambientLastY=0;
       tx=ty=0;
-      boost(.16,mobile?1:2);
+      targetPointerTiltX=targetPointerTiltY=0;
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.025);
+      targetBreath=Math.max(targetBreath,.15);
+      schedule(mobile?2:5);
     },{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
     listen(document,'visibilitychange',()=>{
@@ -2474,6 +2517,7 @@
       if(disposed)return;disposed=true;
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
+      if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
       stage.remove();

@@ -18,7 +18,7 @@ root.dataset.fxSiteSensoryR1755='booting';
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const coarse=matchMedia('(max-width:900px),(pointer:coarse)');
 const fine=matchMedia('(hover:hover) and (pointer:fine)');
-const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20261005-r1943-desktop-magnetic-interaction';
+const STYLE='/scifi-ui/styles/formatx-site-sensory-r1755.css?v=20261005-r1944-desktop-premium-interaction';
 let field=null,raf=0,actionTimer=0,scrollSettleTimer=0,lastX=innerWidth*.5,lastY=innerHeight*.38,lastScroll=scrollY||0,activated=false,sectionObserver=null;
 let desktopTarget=null,desktopRect=null,desktopNX=0,desktopNY=0;
 const state={x:0,y:.12,vx:0,vy:0,energy:.18,press:0,scroll:0};
@@ -62,8 +62,9 @@ function commit(){
   setVar('--fx-sense-energy',clamp(state.energy,0,1).toFixed(3));
   setVar('--fx-sense-press',clamp(state.press,0,1).toFixed(3));
   if(fine.matches&&desktopTarget?.isConnected){
-    const mx=(desktopNX*(desktopTarget.matches('.magnetic')?6.0:2.0)).toFixed(2)+'px';
-    const my=(desktopNY*(desktopTarget.matches('.magnetic')?4.0:1.6)).toFixed(2)+'px';
+    const isMagnetic=desktopTarget.matches('.magnetic,.button');
+    const mx=(desktopNX*(isMagnetic?8.5:2.8)).toFixed(2)+'px';
+    const my=(desktopNY*(isMagnetic?5.5:2.1)).toFixed(2)+'px';
     desktopTarget.style.setProperty('--fx-pc-mx',mx);
     desktopTarget.style.setProperty('--fx-pc-my',my);
     desktopTarget.style.setProperty('--fx-pc-nx',desktopNX.toFixed(3));
@@ -113,7 +114,7 @@ function setDesktopTarget(target){
   const next=target instanceof Element ? target.closest('.magnetic,.button,.card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a') : null;
   if(next===desktopTarget)return;
   if(desktopTarget){
-    desktopTarget.dataset.fxPcReactiveR1943='false';
+    desktopTarget.dataset.fxPcReactiveR1944='false';
     desktopTarget.style.removeProperty('--fx-pc-mx');
     desktopTarget.style.removeProperty('--fx-pc-my');
     desktopTarget.style.removeProperty('--fx-pc-nx');
@@ -122,11 +123,11 @@ function setDesktopTarget(target){
   desktopTarget=next;
   desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
   desktopNX=0;desktopNY=0;
-  if(desktopTarget)desktopTarget.dataset.fxPcReactiveR1943='true';
+  if(desktopTarget)desktopTarget.dataset.fxPcReactiveR1944='true';
 }
 function clearDesktopTarget(){
   if(!desktopTarget)return;
-  desktopTarget.dataset.fxPcReactiveR1943='false';
+  desktopTarget.dataset.fxPcReactiveR1944='false';
   desktopTarget.style.removeProperty('--fx-pc-mx');
   desktopTarget.style.removeProperty('--fx-pc-my');
   desktopTarget.style.removeProperty('--fx-pc-nx');
@@ -138,7 +139,8 @@ function onPointerMove(event){
   const sample=batch?.length?batch[batch.length-1]:event;
   point(Number(sample.clientX)||innerWidth*.5,Number(sample.clientY)||innerHeight*.4,event.pointerType==='touch' ? .28 : .25);
   if(event.pointerType!=='touch'){
-    setDesktopTarget(event.target);
+    const sameTarget=desktopTarget && event.target instanceof Node && desktopTarget.contains(event.target);
+    if(!sameTarget)setDesktopTarget(event.target);
     updateDesktopTarget(sample);
     queue();
   }
@@ -147,6 +149,15 @@ function onPointerDown(event){
   state.press=1;
   point(Number(event.clientX)||innerWidth*.5,Number(event.clientY)||innerHeight*.4,.86);
   pulse('press',.86);
+}
+function onPointerOver(event){
+  if(!fine.matches||!(event.target instanceof Element))return;
+  const next=event.target.closest('.magnetic,.button,.card,.price-card,.release-card,.fx-platform-card,.fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a');
+  if(!next||next===desktopTarget)return;
+  setDesktopTarget(next);
+  desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
+  state.energy=Math.max(state.energy,.30);
+  queue();
 }
 function onPointerUp(event){
   state.press=0;
@@ -218,13 +229,14 @@ function activate(reason='intent'){
   root.dataset.fxSiteSensoryActivationR1756=String(reason);
   root.dataset.fxSiteSensorySchedulerR1755='lazy-intent-single-coalesced-raf-zero-idle';
   root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
-  root.dataset.fxSiteSensoryInputR1755='pointer-touch-scroll-wheel-key-focus-click-input-change-submit-orientation-desktop-magnetic-targets';
-  root.dataset.fxDesktopInteractionR1943='fine-pointer-magnetic-local-response-zero-idle-raf';
+  root.dataset.fxSiteSensoryInputR1755='pointerover-pointermove-touch-scroll-wheel-key-focus-click-input-change-submit-orientation-desktop-magnetic-targets';
+  root.dataset.fxDesktopInteractionR1944='fine-pointer-magnetic-local-response-polling-safe-minimal-style-writes-zero-idle-raf';
 }
 
 root.dataset.fxSiteSensoryR1755='armed-lazy-r1756';
 root.dataset.fxSiteSensorySchedulerR1755='zero-first-paint-lazy-intent';
 
+addEventListener('pointerover',onPointerOver,{passive:true});
 addEventListener('pointermove',onPointerMove,{passive:true});
 addEventListener('pointerdown',onPointerDown,{passive:true});
 addEventListener('pointerup',onPointerUp,{passive:true});

@@ -105,6 +105,7 @@ html body.living-architecture :is(
   ){
     transition:none!important;
     translate:none!important;
+    scale:none!important;
   }
 }
 
@@ -116,15 +117,17 @@ html body.living-architecture :is(
     --fx-pc-my:0px;
     transform:translate3d(var(--fx-pc-mx),var(--fx-pc-my),0);
     transition:
-      transform 140ms cubic-bezier(.2,.82,.2,1),
+      transform 165ms cubic-bezier(.16,.84,.22,1),
+      scale 180ms cubic-bezier(.16,.84,.22,1),
       border-color 160ms ease,
       box-shadow 180ms ease,
       background-color 180ms ease;
     will-change:transform;
   }
-  html body.living-architecture .magnetic[data-fx-pc-reactive-r1943="true"]{
+  html body.living-architecture .magnetic[data-fx-pc-reactive-r1944="true"]{
     transition:
-      transform 58ms linear,
+      transform 62ms linear,
+      scale 110ms cubic-bezier(.16,.84,.22,1),
       border-color 150ms ease,
       box-shadow 160ms ease,
       background-color 160ms ease;
@@ -137,33 +140,47 @@ html body.living-architecture :is(
     --fx-pc-mx:0px;
     --fx-pc-my:0px;
     translate:var(--fx-pc-mx) var(--fx-pc-my);
+    scale:1;
+    transition:
+      translate 150ms cubic-bezier(.18,.82,.2,1),
+      scale 180ms cubic-bezier(.18,.82,.2,1),
+      border-color 150ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
   }
   html body.living-architecture :is(
     .card,.price-card,.release-card,.fx-platform-card,
     .fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a
-  )[data-fx-pc-reactive-r1943="true"]{
-    border-color:rgba(164,235,240,.30)!important;
+  )[data-fx-pc-reactive-r1944="true"]{
+    scale:1.003;
+    border-color:rgba(164,235,240,.32)!important;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.045),
-      inset 0 0 42px rgba(74,203,224,.030),
-      0 24px 72px rgba(0,0,0,.25),
-      0 0 30px rgba(83,203,219,.050)!important;
+      inset 0 1px 0 rgba(255,255,255,.050),
+      inset 0 0 44px rgba(74,203,224,.032),
+      0 26px 74px rgba(0,0,0,.255),
+      0 0 30px rgba(83,203,219,.055)!important;
     transition:
-      translate 70ms linear,
-      border-color 150ms ease,
-      box-shadow 170ms ease;
+      translate 64ms linear,
+      scale 120ms cubic-bezier(.18,.82,.2,1),
+      border-color 145ms ease,
+      box-shadow 165ms ease;
   }
 
-  html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1943="true"]{
-    border-color:rgba(171,239,244,.42)!important;
+  html body.living-architecture :is(.button,.magnetic){
+    scale:1;
+  }
+  html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1944="true"]{
+    scale:1.012;
+    border-color:rgba(171,239,244,.44)!important;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.075),
-      0 10px 34px rgba(0,0,0,.25),
-      0 0 24px rgba(88,211,230,.075)!important;
+      inset 0 1px 0 rgba(255,255,255,.085),
+      inset 0 0 22px rgba(78,214,232,.025),
+      0 11px 36px rgba(0,0,0,.25),
+      0 0 25px rgba(88,211,230,.082)!important;
   }
 }
 
-/* production-r1943-fine-pointer-compositor-interaction */
+/* production-r1944-fine-pointer-premium-magnetic-interaction */
 
 /* R1755c — scroll is a frame-budget critical interaction. The MAG remains
    reactive, but autonomous atmosphere motion yields until scrolling settles. */
