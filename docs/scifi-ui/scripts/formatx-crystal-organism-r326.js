@@ -1004,7 +1004,7 @@
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.58,.72,.74)*sideSpec*.135;
-        mineral+=vec3(1.00,1.00,.99)*softboxA*.040;
+        mineral+=vec3(1.00,1.00,.99)*softboxA*.012;
         mineral+=vec3(.57,.72,.71)*softboxB*.250;
         float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
         mineral+=vec3(.79,.90,.86)*softboxC2*.215;
@@ -1099,9 +1099,19 @@
         float l1Prism=abs(q.x)*.90+abs(q.y)*.72;
         float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*front;
         float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*front;
-        mineral+=vec3(.36,.50,.48)*prismShellA*(.046+.026*softboxB);
-        mineral+=vec3(.042,.150,.168)*prismShellB*(.034+.023*fresnel);
+        mineral+=vec3(.40,.54,.51)*prismShellA*(.088+.032*softboxB);
+        mineral+=vec3(.048,.178,.192)*prismShellB*(.064+.028*fresnel);
         mineral*=1.0-.018*prismShellB;
+        float foldEnvelope=
+          smoothstep(.075,.19,radialXY)*
+          (1.0-smoothstep(.55,.76,radialXY))*
+          front;
+        float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
+        float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
+        float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
+        mineral+=vec3(.28,.43,.42)*foldRidge*.105;
+        mineral+=vec3(.050,.188,.202)*foldSecondary*.054;
+        mineral*=1.0-.078*foldValley;
         float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
@@ -1277,13 +1287,13 @@
            borders. This keeps the crystal authored and photographic. */
         float facetSilver=smoothstep(.58,.96,facetRand)*frontDepth;
         float facetCool=smoothstep(.08,.44,1.0-facetRand)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*.080;
+        c+=vec3(.120,.136,.130)*facetSilver*.050;
         c+=vec3(.010,.065,.076)*facetCool*.034;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.024;
+        c+=vec3(.98,1.00,.97)*softboxA*.006;
         c+=vec3(.40,.66,.66)*softboxB*.315;
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*.235;
@@ -1291,7 +1301,7 @@
         c+=vec3(.18,.47,.50)*ribbonB*.175;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.016;
+        c+=vec3(.76,.88,.86)*glassBlade*.004;
 
         /* R1942 — internal prism architecture.
            Four broad refractive planes run toward the signature tips. They are
@@ -1322,9 +1332,23 @@
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
         float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
         float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.38,.52,.50)*prismShellA*(.050+.028*softboxB);
-        c+=vec3(.045,.165,.182)*prismShellB*(.038+.025*fresnel);
+        c+=vec3(.42,.56,.53)*prismShellA*(.095+.035*softboxB);
+        c+=vec3(.050,.190,.205)*prismShellB*(.070+.030*fresnel);
         c*=1.0-.020*prismShellB;
+
+        /* R1942d — four authored fold ridges from optic to signature tips.
+           This is the structural cue that made the historic MAG read as a
+           layered crystal instead of a smooth diamond. */
+        float foldEnvelope=
+          smoothstep(.075,.19,radialXY)*
+          (1.0-smoothstep(.55,.76,radialXY))*
+          frontDepth;
+        float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
+        float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
+        float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
+        c+=vec3(.30,.46,.45)*foldRidge*.115;
+        c+=vec3(.055,.205,.220)*foldSecondary*.060;
+        c*=1.0-.085*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
@@ -1555,7 +1579,7 @@
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
-    root.dataset.fxNativeMagStudioR1942='signature-four-point-nested-prism-shells-side-lit-recessed-optic-bioglass';
+    root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
