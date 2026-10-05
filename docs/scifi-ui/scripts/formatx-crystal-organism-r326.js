@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 12 : constrainedMobile ? 12 : mobile ? 12 : constrained ? 20 : 30;
-    const longitudeSegments = software ? 24 : constrainedMobile ? 24 : mobile ? 24 : constrained ? 42 : 56;
+    const latitudeSegments = software ? 16 : constrainedMobile ? 18 : mobile ? 22 : constrained ? 24 : 34;
+    const longitudeSegments = software ? 32 : constrainedMobile ? 36 : mobile ? 44 : constrained ? 48 : 64;
     const tendrilCount = (software||mobile) ? 0 : 10;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
@@ -296,25 +296,58 @@
       const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
 
-      /* R1934 — exact P0 27/28 visual fallback geometry inside the current
-         lifecycle/API. This is the last known-good crystal grammar requested by
-         the user: four-direction asymmetry, compact facets, no blob masses. */
-      const axisX=direction[0]>=0?.88:.86;
-      const axisY=direction[1]>=0?1.09:.97;
-      const axisZ=direction[2]>=0?.64:.43;
-      const exponent=.78;
+      /* R1937 — continuous cinematic bioglass body.
+         The R1934 p<1 fallback created the four-point diamond visible on real
+         phones. Use the same smooth superellipsoid language as the intro, then
+         add only low-frequency asymmetric living mass. */
+      const y=direction[1];
+      const shoulder=Math.max(0,1-y*y);
+      const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
+      const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
+      const axisX=.625+shoulder*.132+direction[0]*.026-direction[2]*.010;
+      const axisY=.925+shoulder*.028+y*.028;
+      const axisZ=.445+shoulder*.078+direction[2]*.018-direction[0]*.012;
+      const exponent=1.48;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
         Math.pow(Math.abs(direction[2])/axisZ,exponent);
       const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
-      const organic=
+
+      const upperLeft=
+        .048*Math.exp(-Math.pow((y-.38)/.34,2))*
+        Math.max(0,.5-.5*Math.cos(theta));
+      const rightMid=
+        .034*Math.exp(-Math.pow((y-.02)/.40,2))*
+        Math.max(0,.5+.5*Math.cos(theta));
+      const lowerLeft=
+        .028*Math.exp(-Math.pow((y+.42)/.30,2))*
+        Math.max(0,.5-.5*Math.cos(theta-.34));
+      const life=
         1+
-        .022*Math.sin(theta*4+phi*1.7)*sinPhi*sinPhi+
-        .010*Math.sin(theta*7-phi*3.1);
+        upperLeft+rightMid+lowerLeft+
+        Math.sin(theta*2.0+phi*.74)*.012*shoulder+
+        Math.cos(theta*3.0-phi*.93)*.006*shoulder;
+
+      const crystalPosition=[
+        direction[0]*radial*life,
+        direction[1]*radial*life,
+        direction[2]*radial*life
+      ];
+      crystalPosition[0]+=-.052*Math.pow(smoothUp,1.8)+.026*Math.pow(smoothDown,1.6)
+        +Math.sin(theta*1.62+phi*.70)*.012*shoulder;
+      crystalPosition[1]+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
+        +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
+      crystalPosition[2]+=-direction[0]*.016+direction[0]*y*.010;
+
+      const top=.790-crystalPosition[0]*.075-crystalPosition[2]*.026;
+      const bottom=-.815-crystalPosition[0]*.035+crystalPosition[2]*.018;
+      if(crystalPosition[1]>top)crystalPosition[1]=top+(crystalPosition[1]-top)*.18;
+      if(crystalPosition[1]<bottom)crystalPosition[1]=bottom+(crystalPosition[1]-bottom)*.22;
+
       return{
         sphere:spherePosition,
-        crystal:direction.map(value=>value*radial*organic),
+        crystal:crystalPosition,
         sphereNormal:direction,
         uv:[longitude,latitude]
       };
@@ -360,7 +393,7 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.88:(mobile?.92:(constrained?.90:.94));
+        const smoothWeight=software?.92:(mobile?.975:(constrained?.955:.965));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1184,41 +1217,61 @@
       ${fragmentIn} float vMorph;
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
+      vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
-        float facing=sat(abs(n.z));
-        float f=1.0-facing;f=f*f;
-        float light=sat(dot(n,normalize(vec3(-.42,.73,.54))));
-        float facet=.5+.5*sin(vFacet*8.0+uTime*.25);
-        vec2 hp=vec2(vLocal.x,vLocal.y)-uPointer*.035;
-        float r=length(hp);
-        float h=sat(1.0-r/.42);h=h*h;
-        float nu=sat(1.0-r/.15);nu=nu*nu*nu;
-        float ring=1.0-smoothstep(.018,.045,abs(r-.20));
+        vec3 view=normalize(vec3(-vLocal.xy,2.85-vLocal.z));
+        float facing=sat(abs(dot(n,view)));
+        float fresnel=1.0-facing;fresnel*=fresnel;
+
+        float key=sat(dot(n,normalize(vec3(-.46,.72,.52))));
+        float side=sat(dot(n,normalize(vec3(.66,.08,.74))));
+        float top=sat(dot(n,normalize(vec3(-.18,.92,.34))));
+        float softA=pow(key,4.2);
+        float softB=pow(side,5.0);
+        float softTop=pow(top,3.2);
+
+        vec2 q=vec2((vLocal.x-.035)/.23,(vLocal.y-.015)/.18);
+        float coreD=length(q);
+        float core=exp(-coreD*coreD*3.8);
+        float coreHot=exp(-coreD*coreD*12.0);
+        float breath=.5+.5*sin(uTime*.82);
+        float grain=.5+.5*sin(vLocal.x*18.0-vLocal.y*13.0+vLocal.z*15.0);
+
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
-          float pos=.5+(vLocal.y*.64+vLocal.x*.18)*.5;
-          float head=-.15+1.30*sat(uSurfacePulse);
-          sweep=sat(1.0-abs(pos-head)*12.0)*(.45+.55*f);
+          float pos=.5+(vLocal.y*.62+vLocal.x*.15+vLocal.z*.10)*.5;
+          float head=-.14+1.28*sat(uSurfacePulse);
+          sweep=exp(-pow((pos-head)/.075,2.0))*(.30+.70*fresnel);
         }
-        vec3 cyan=vec3(.03,1.05,1.55);
-        vec3 violet=vec3(.65,.16,1.15);
-        vec3 ice=vec3(.90,1.30,1.62);
-        vec3 spectral=mix(cyan,violet,.18+.22*facet);
-        float visual=sat(.56+uEnergy*.52);
 
+        /* Inner life is deliberately subtle. The previous additive full-body
+           cyan pass was the main cause of the translucent four-point star. */
         if(uLayer>.5){
-          vec3 c=vec3(.040,.19,.40)+spectral*(.38+.32*visual)
-            +ice*(h*.66+nu*1.78+ring*.54)+cyan*sweep*.96;
-          float a=clamp(.28+.22*visual+.20*h+.28*nu+.14*ring+.10*sweep,.32,.92);
-          ${outputName}=vec4(c/(vec3(1.0)+c),a);
+          vec3 inner=vec3(.002,.010,.013)
+            +vec3(.010,.105,.126)*core*(.10+.12*uEnergy+.025*breath)
+            +vec3(.34,.72,.76)*coreHot*(.025+.035*uEnergy)
+            +vec3(.020,.16,.19)*sweep*.20;
+          float a=clamp(.025+core*.050+coreHot*.045+sweep*.035,.02,.12);
+          ${outputName}=vec4(tone(inner),a);
           return;
         }
 
-        vec3 c=vec3(.075,.22,.40)+vec3(.08,.50,.78)*light
-          +spectral*f*(.82+.56*visual)+ice*(nu*.34+.045+.070*f)+(ice+cyan*.35)*sweep*.72;
-        float a=clamp(.50+.18*light+.22*f+.08*sweep,.50,.94);
-        ${outputName}=vec4(c/(vec3(1.0)+c),a);
+        vec3 c=vec3(.006,.011,.013);
+        c+=vec3(.026,.038,.039)*(.30+.70*key);
+        c+=vec3(.040,.060,.061)*side*.28;
+        c+=vec3(.055,.063,.061)*softTop*.10;
+        c+=vec3(.82,.88,.85)*softA*.27;
+        c+=vec3(.26,.46,.48)*softB*.12;
+        c+=vec3(.026,.105,.120)*fresnel*.26;
+        c+=vec3(.012,.024,.026)*grain*.045;
+        c+=vec3(.010,.065,.078)*core*(.035+.055*uEnergy);
+        c+=vec3(.40,.74,.76)*coreHot*(.018+.026*uEnergy);
+        c+=vec3(.12,.27,.29)*sweep*.26;
+        c+=vec3(.66,.74,.72)*sweep*softA*.08;
+
+        float a=clamp(.955+.020*key+.012*side+.010*(1.0-fresnel),.955,.992);
+        ${outputName}=vec4(tone(c*2.45),a);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1397,6 +1450,7 @@
     root.dataset.fxNativeMagStudioR1932='p0-derived-seamless-living-crystal-no-eye-broad-internal-breath';
     root.dataset.fxNativeMagStudioR1933='frosted-cut-ice-two-pass-living-depth-no-eye';
     root.dataset.fxNativeMagMobileR1936='brighter-readable-body-higher-opacity-balanced-cyan';
+    root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -1862,6 +1916,8 @@
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       gl.depthMask(true);
       gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
