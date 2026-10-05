@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261005-r1945c-controlled-optical-signature-finale
+token=20261005-r1945f-macro-facet-signature
 base_master=6ddef5a09106115d58637935b7c0a02e5e57365e
-purpose=validate and deploy the R1945 sharper desktop Signature MAG, first-frame core icon, controlled no-whiteout intro finale and R1944 precision interaction stack
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, intro keyframe proof, mobile MAG proof, desktop visual contracts and production Worker parity
+purpose=validate and deploy the R1945f sharper desktop Signature MAG with macro cut-glass facets, first-frame core icon, controlled no-whiteout intro finale and R1944 precision interaction stack
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, desktop visual contracts and production Worker parity
