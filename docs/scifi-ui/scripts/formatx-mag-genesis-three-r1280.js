@@ -896,26 +896,31 @@
     makeMechanicalLayer(){
       const T=this.THREE;
 
+      /* R1941 — final intro object uses the same smoked bioglass / silver-ice
+         language as the permanent Signature MAG. Low emission, physical depth. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x07131d,metalness:.92,roughness:.18,
-        emissive:0x061923,emissiveIntensity:.16,
-        clearcoat:.84,clearcoatRoughness:.10,
+        color:0x07161d,metalness:.18,roughness:.13,
+        transmission:.22,thickness:.34,ior:1.43,
+        emissive:0x06141a,emissiveIntensity:.10,
+        clearcoat:.96,clearcoatRoughness:.08,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x102c38,metalness:.84,roughness:.20,
-        emissive:0x082b35,emissiveIntensity:.22,
-        clearcoat:.76,clearcoatRoughness:.12,
+        color:0x0a222b,metalness:.16,roughness:.12,
+        transmission:.28,thickness:.28,ior:1.44,
+        emissive:0x06212a,emissiveIntensity:.12,
+        clearcoat:.94,clearcoatRoughness:.08,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0xc0cdd2,metalness:.94,roughness:.14,
-        emissive:0x183b46,emissiveIntensity:.18,
-        clearcoat:.86,clearcoatRoughness:.09,
+        color:0xa9c5c7,metalness:.22,roughness:.10,
+        transmission:.18,thickness:.20,ior:1.40,
+        emissive:0x102c34,emissiveIntensity:.10,
+        clearcoat:.98,clearcoatRoughness:.065,
         transparent:true,opacity:0
       });
       this.mechEdgeMaterial=new T.LineBasicMaterial({
-        color:0x9bd8e1,transparent:true,opacity:0,
+        color:0x9fe7e7,transparent:true,opacity:0,
         blending:T.AdditiveBlending,depthWrite:false
       });
 
@@ -923,52 +928,54 @@
       this.silverParts=[];
       this.mechBodyParts=[];
 
-      // Compact support body, mostly hidden by layered armor.
+      // R1941 Signature body: four authored points with recessed curved valleys.
       const baseShape=new T.Shape();
-      baseShape.moveTo(0,.96);
-      baseShape.bezierCurveTo(.20,.82,.50,.54,.64,.30);
-      baseShape.bezierCurveTo(.72,.12,.66,-.16,.54,-.38);
-      baseShape.bezierCurveTo(.40,-.58,.18,-.76,0,-.86);
-      baseShape.bezierCurveTo(-.18,-.76,-.40,-.58,-.54,-.38);
-      baseShape.bezierCurveTo(-.66,-.16,-.72,.12,-.64,.30);
-      baseShape.bezierCurveTo(-.50,.54,-.20,.82,0,.96);
+      baseShape.moveTo(0,1.08);
+      baseShape.bezierCurveTo(.08,.76,.17,.42,.24,.25);
+      baseShape.bezierCurveTo(.43,.18,.74,.08,.99,0);
+      baseShape.bezierCurveTo(.72,-.08,.42,-.18,.23,-.26);
+      baseShape.bezierCurveTo(.16,-.45,.08,-.78,0,-1.03);
+      baseShape.bezierCurveTo(-.08,-.78,-.16,-.45,-.23,-.26);
+      baseShape.bezierCurveTo(-.42,-.18,-.72,-.08,-.99,0);
+      baseShape.bezierCurveTo(-.74,.08,-.43,.18,-.24,.25);
+      baseShape.bezierCurveTo(-.17,.42,-.08,.76,0,1.08);
       const baseGeo=new T.ExtrudeGeometry(baseShape,{
-        depth:.34,bevelEnabled:true,bevelSegments:4,steps:1,
-        bevelSize:.055,bevelThickness:.070,curveSegments:20
+        depth:.40,bevelEnabled:true,bevelSegments:6,steps:1,
+        bevelSize:.060,bevelThickness:.078,curveSegments:28
       });
       baseGeo.center();
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
-      this.mechBody.scale.set(1.08,1.08,.94);
-      this.mechBody.position.z=-.02;
+      this.mechBody.scale.set(1.02,1.02,1.00);
+      this.mechBody.position.z=-.03;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
-      // Central recessed diamond cradle.
+      // Central smoked optical cradle, fused visually into the glass body.
       const cradleShape=new T.Shape();
-      cradleShape.moveTo(0,.66);
-      cradleShape.lineTo(.58,0);
-      cradleShape.lineTo(0,-.66);
-      cradleShape.lineTo(-.58,0);
-      cradleShape.closePath();
+      cradleShape.moveTo(0,.43);
+      cradleShape.bezierCurveTo(.18,.31,.36,.16,.43,0);
+      cradleShape.bezierCurveTo(.34,-.17,.18,-.33,0,-.43);
+      cradleShape.bezierCurveTo(-.18,-.33,-.34,-.17,-.43,0);
+      cradleShape.bezierCurveTo(-.36,.16,-.18,.31,0,.43);
       const cradleGeo=new T.ExtrudeGeometry(cradleShape,{
-        depth:.16,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.028,bevelThickness:.036,curveSegments:10
+        depth:.14,bevelEnabled:true,bevelSegments:5,steps:1,
+        bevelSize:.024,bevelThickness:.032,curveSegments:20
       });
       cradleGeo.center();
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(.92,.92,.74);
-      this.mechCradle.position.z=.22;
+      this.mechCradle.scale.set(.92,.92,.76);
+      this.mechCradle.position.z=.24;
       this.mechanicalGroup.add(this.mechCradle);
 
-      // Four armor petals around the optical core.
+      // Four internal silver-ice facets reinforce the signature points.
       const topPlateShape=new T.Shape();
-      topPlateShape.moveTo(0,.76);
+      topPlateShape.moveTo(0,.82);
       topPlateShape.lineTo(.10,.58);
-      topPlateShape.lineTo(.52,.10);
+      topPlateShape.lineTo(.44,.08);
       topPlateShape.lineTo(.18,-.04);
       topPlateShape.lineTo(0,.16);
       topPlateShape.lineTo(-.18,-.04);
-      topPlateShape.lineTo(-.52,.10);
+      topPlateShape.lineTo(-.44,.08);
       topPlateShape.lineTo(-.10,.58);
       topPlateShape.closePath();
       const topPlateGeo=new T.ExtrudeGeometry(topPlateShape,{
@@ -978,15 +985,15 @@
       topPlateGeo.center();
 
       const crownL=new T.Mesh(topPlateGeo,this.silverMaterial);
-      crownL.scale.set(.70,.98,.86);
-      crownL.position.set(-.18,.36,.34);
+      crownL.scale.set(.56,.90,.76);
+      crownL.position.set(-.14,.40,.31);
       crownL.rotation.z=-.10;
       this.mechanicalGroup.add(crownL);
       this.silverParts.push(crownL);
 
       const crownR=new T.Mesh(topPlateGeo,this.silverMaterial);
-      crownR.scale.set(-.70,.98,.86);
-      crownR.position.set(.18,.36,.34);
+      crownR.scale.set(-.56,.90,.76);
+      crownR.position.set(.14,.40,.31);
       crownR.rotation.z=.10;
       this.mechanicalGroup.add(crownR);
       this.silverParts.push(crownR);
@@ -1006,15 +1013,15 @@
       sideGeo.center();
 
       const left=new T.Mesh(sideGeo,this.silverMaterial);
-      left.scale.set(.76,.78,.84);
-      left.position.set(-.44,.02,.30);
+      left.scale.set(.66,.70,.74);
+      left.position.set(-.48,.00,.28);
       left.rotation.z=.05;
       this.mechanicalGroup.add(left);
       this.plates.push(left);
 
       const right=new T.Mesh(sideGeo,this.silverMaterial);
-      right.scale.set(-.76,.78,.84);
-      right.position.set(.44,.02,.30);
+      right.scale.set(-.66,.70,.74);
+      right.position.set(.48,.00,.28);
       right.rotation.z=-.05;
       this.mechanicalGroup.add(right);
       this.plates.push(right);
@@ -1034,26 +1041,26 @@
       });
       lowerGeo.center();
       this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
-      this.jaw.scale.set(1.00,.92,.84);
-      this.jaw.position.set(0,-.34,.30);
+      this.jaw.scale.set(.84,.86,.76);
+      this.jaw.position.set(0,-.39,.28);
       this.mechanicalGroup.add(this.jaw);
       this.plates.push(this.jaw);
 
-      // Horizontal shoulder rails with cyan seams.
+      // Minimal internal seam energy; no external robotic rails in R1941.
       this.seamMaterial=new T.MeshBasicMaterial({
         color:0x52d9ef,transparent:true,opacity:0,
         depthWrite:false,blending:T.AdditiveBlending
       });
       const railGeo=new T.BoxGeometry(.27,.024,.070);
       this.seams=[];
-      for(const x of [-.68,.68]){
+      for(const x of []){
         const rail=new T.Mesh(railGeo,this.seamMaterial);
         rail.position.set(x,.00,.43);
         this.mechanicalGroup.add(rail);
         this.seams.push(rail);
       }
       const spineGeo=new T.BoxGeometry(.034,.25,.070);
-      for(const x of [-.075,.075]){
+      for(const x of []){
         const spine=new T.Mesh(spineGeo,this.seamMaterial);
         spine.position.set(x,-.64,.38);
         this.mechanicalGroup.add(spine);
@@ -1069,12 +1076,12 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.76,.76,1);
+      this.mechEyeCorona.scale.set(.54,.54,1);
       this.mechEyeCorona.position.set(0,.01,.48);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.095,64),
+        new T.CircleGeometry(.070,64),
         new T.MeshBasicMaterial({color:0x07131a,side:T.DoubleSide})
       );
       this.mechEyeCore.position.set(0,.01,.50);
@@ -1085,7 +1092,7 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.225,.010,8,72),
+        new T.TorusGeometry(.155,.008,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.01,.49);
@@ -1357,15 +1364,15 @@
     updateMechanical(t,time){
       const grow=smooth((t-6.25)/.90);
       this.mechanicalGroup.visible=grow>.002;
-      this.mechanicalGroup.scale.set(.001+grow*1.02,.001+grow*1.16,.001+grow*1.02);
+      this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
-      this.mechMaterial.opacity=.995*grow;
-      this.mechMidMaterial.opacity=.985*grow;
-      this.silverMaterial.opacity=.99*grow;
-      this.mechEdgeMaterial.opacity=.12*grow;
-      this.mechInnerMaterial.opacity=.48*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=.60*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=1.00*grow;
+      this.mechMaterial.opacity=.94*grow;
+      this.mechMidMaterial.opacity=.82*grow;
+      this.silverMaterial.opacity=.58*grow;
+      this.mechEdgeMaterial.opacity=.055*grow;
+      this.mechInnerMaterial.opacity=.34*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=.10*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.72*grow;
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=8.8*grow;
 
@@ -1380,21 +1387,14 @@
     }
 
     updateTentacles(t,time){
-      const grow=smooth((t-5.55)/1.00);
-      const flashFade=1-smooth((t-9.70)/.20)*.08;
-      this.tentacleGroup.visible=grow>.002;
-      this.tentacleMaterial.opacity=.82*grow*flashFade;
-      this.tentacleEdgeMaterial.opacity=.010*grow;
-      this.tentacleNodeMaterial.opacity=.96*grow;
-      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=.22*grow;
-      if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=1.00*grow;
-      this.tentacles.forEach((g,i)=>{
-        const wave=1+Math.sin(time*.00062+g.userData.phase)*.006*grow;
-        const v=.001+grow*.999;
-        g.scale.set(v*wave,v*wave,v*wave);
-        g.rotation.z=Math.sin(time*.00030+g.userData.phase)*.011*grow;
-        g.rotation.x=Math.sin(time*.00024+g.userData.phase)*.007*grow;
-      });
+      /* R1941 — the award hero ends as one uninterrupted signature object.
+         The old segmented cables made the final frame read as a robot prop. */
+      this.tentacleGroup.visible=false;
+      if(this.tentacleMaterial)this.tentacleMaterial.opacity=0;
+      if(this.tentacleEdgeMaterial)this.tentacleEdgeMaterial.opacity=0;
+      if(this.tentacleNodeMaterial)this.tentacleNodeMaterial.opacity=0;
+      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
+      if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
     }
 
     updateCamera(t,time){
@@ -1540,11 +1540,12 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1280-armored-pod-eye-segmented-tendrils-reference'
+    revision:'r1941-signature-four-point-bioglass-central-optic-studio'
   };
   /* R1940 — the user-selected reference visual is the R1280 armored living
      pod. Keep the existing R1360 loader contract intact by exposing R1280 as
      its production owner instead of maintaining two divergent renderers. */
   window.FormatXMagGenesisThreeR1360=window.FormatXMagGenesisThreeR1280;
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
+  document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
 })();
