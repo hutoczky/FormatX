@@ -949,58 +949,48 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* production-r1763-mobile-first-paint-touch-target-lock */
 
 
-/* R1803 — mobile first-paint MAG must visually match the settled R1795
-   smoky-bioglass organism. The previous bright radial proxy looked like a
-   white flower and caused a large late visual delta when R326 became ready.
-   This is a static, zero-JS, zero-filter faceted mineral proxy. */
+/* R1933 — mobile first-paint proxy follows the restrained living-ice MAG.
+   One faceted frosted shard, no eye, no HUD rings and no bright flower flash. */
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:44%!important;
-    width:clamp(176px,47vw,218px)!important;
-    aspect-ratio:.64!important;
-    opacity:1!important;
+    width:clamp(158px,42vw,194px)!important;
+    aspect-ratio:.72!important;
+    opacity:.98!important;
     background:
-      radial-gradient(ellipse 76% 88% at 50% 48%,rgba(66,94,91,.055),transparent 72%),
-      radial-gradient(ellipse 44% 58% at 47% 46%,rgba(45,72,72,.055),transparent 68%)!important;
+      radial-gradient(ellipse 68% 82% at 50% 50%,rgba(78,108,108,.040),transparent 72%),
+      radial-gradient(ellipse 34% 50% at 47% 48%,rgba(92,132,132,.035),transparent 68%)!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
-    inset:0 13% 0 12%!important;
+    inset:3% 11% 2% 10%!important;
     clip-path:polygon(
-      44% 0,56% 2%,67% 10%,76% 22%,82% 37%,81% 51%,
-      76% 64%,68% 77%,58% 88%,49% 100%,39% 94%,31% 84%,
-      24% 72%,20% 58%,21% 44%,25% 31%,31% 18%,37% 7%
+      45% 0,58% 4%,71% 13%,82% 27%,88% 43%,84% 57%,
+      75% 70%,66% 82%,55% 96%,43% 100%,31% 91%,22% 78%,
+      14% 64%,11% 48%,15% 33%,24% 20%,34% 9%
     )!important;
-    border-radius:24% 30% 22% 28%!important;
-    transform:rotate(-1.8deg) scaleX(.96)!important;
+    border-radius:28% 34% 28% 32%!important;
+    transform:rotate(-1.2deg)!important;
     background:
-      radial-gradient(ellipse 9% 76% at 31% 30%,rgba(248,255,254,.78),rgba(175,205,201,.16) 30%,transparent 66%),
-      radial-gradient(ellipse 8% 58% at 66% 45%,rgba(108,224,232,.18),transparent 66%),
-      radial-gradient(ellipse 6% 52% at 73% 55%,rgba(164,92,203,.065),transparent 70%),
-      linear-gradient(104deg,transparent 0 45%,rgba(225,251,248,.13) 48%,transparent 52%),
-      radial-gradient(ellipse 78% 84% at 48% 50%,rgba(41,69,72,.42),rgba(5,16,20,.975) 67%,rgba(1,5,8,.998) 100%),
-      linear-gradient(144deg,rgba(102,128,125,.27),rgba(8,20,23,.94) 43%,rgba(1,5,8,.998) 84%)!important;
+      linear-gradient(101deg,transparent 0 30%,rgba(235,248,244,.28) 37%,rgba(156,190,188,.09) 45%,transparent 53%),
+      radial-gradient(ellipse 30% 64% at 28% 31%,rgba(196,220,216,.15),transparent 70%),
+      radial-gradient(ellipse 48% 68% at 61% 57%,rgba(51,82,84,.20),transparent 78%),
+      linear-gradient(148deg,rgba(69,96,95,.46),rgba(13,30,33,.94) 52%,rgba(4,12,15,.99) 100%)!important;
     box-shadow:
-      inset 14px -22px 36px rgba(0,3,7,.56),
-      inset -10px 12px 28px rgba(215,240,235,.090),
-      inset 2px 0 0 rgba(241,255,251,.18),
-      0 25px 52px rgba(0,0,0,.50)!important;
-    opacity:.99!important;
+      inset 10px -16px 28px rgba(0,4,7,.44),
+      inset -8px 9px 24px rgba(210,231,226,.055),
+      0 22px 48px rgba(0,0,0,.42)!important;
+    opacity:.97!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:48% 26% 40% 50%!important;
-    border-radius:52% 48% 50% 50%!important;
-    border:1px solid rgba(220,239,235,.42)!important;
+    inset:34% 29% 30% 27%!important;
+    border:0!important;
+    border-radius:48%!important;
     background:
-      radial-gradient(ellipse at 34% 27%,rgba(252,255,254,.95) 0 4%,rgba(126,220,221,.40) 8%,rgba(6,31,38,.96) 30%,rgba(1,8,11,.999) 71%),
-      conic-gradient(from 208deg,transparent 0 41%,rgba(82,222,224,.62) 45% 54%,transparent 58% 100%)!important;
-    box-shadow:
-      0 0 0 2px rgba(2,9,12,.92),
-      0 0 0 4px rgba(198,219,214,.08),
-      0 0 9px rgba(73,191,199,.12),
-      inset -4px -5px 13px rgba(0,2,6,.84),
-      inset 1px 1px 8px rgba(205,240,235,.18)!important;
+      radial-gradient(ellipse 58% 72% at 48% 52%,rgba(78,164,168,.12),rgba(28,83,88,.050) 42%,transparent 76%)!important;
+    box-shadow:none!important;
+    opacity:.72!important;
   }
 }
 /* production-r1803-mobile-smoky-mag-first-paint-parity */
@@ -1013,6 +1003,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* production-r1912-elegant-continuous-living-glass-first-paint-parity */
 /* production-r1913-first-webgl-frame-safe-igloo-grade-proxy-handoff */
 /* production-r1919-smoked-ice-three-mass-offset-oval-aperture-first-paint */
+/* production-r1933-p0-derived-frosted-living-ice-first-paint */
 
 
 /* R1820 — final hero typography is owned by the blocking P0 layer.
