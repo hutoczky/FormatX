@@ -956,10 +956,11 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
     top:44%!important;
     width:clamp(158px,42vw,194px)!important;
     aspect-ratio:.72!important;
-    opacity:.98!important;
+    opacity:1!important;
+    filter:brightness(1.10) contrast(1.03)!important;
     background:
-      radial-gradient(ellipse 68% 82% at 50% 50%,rgba(78,108,108,.040),transparent 72%),
-      radial-gradient(ellipse 34% 50% at 47% 48%,rgba(92,132,132,.035),transparent 68%)!important;
+      radial-gradient(ellipse 68% 82% at 50% 50%,rgba(96,132,132,.060),transparent 72%),
+      radial-gradient(ellipse 34% 50% at 47% 48%,rgba(118,158,158,.050),transparent 68%)!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
@@ -972,10 +973,10 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
     border-radius:28% 34% 28% 32%!important;
     transform:rotate(-1.2deg)!important;
     background:
-      linear-gradient(101deg,transparent 0 30%,rgba(235,248,244,.28) 37%,rgba(156,190,188,.09) 45%,transparent 53%),
-      radial-gradient(ellipse 30% 64% at 28% 31%,rgba(196,220,216,.15),transparent 70%),
-      radial-gradient(ellipse 48% 68% at 61% 57%,rgba(51,82,84,.20),transparent 78%),
-      linear-gradient(148deg,rgba(69,96,95,.46),rgba(13,30,33,.94) 52%,rgba(4,12,15,.99) 100%)!important;
+      linear-gradient(101deg,transparent 0 30%,rgba(245,252,249,.36) 37%,rgba(176,208,205,.13) 45%,transparent 53%),
+      radial-gradient(ellipse 30% 64% at 28% 31%,rgba(218,238,234,.22),transparent 70%),
+      radial-gradient(ellipse 48% 68% at 61% 57%,rgba(67,104,106,.27),transparent 78%),
+      linear-gradient(148deg,rgba(84,116,114,.58),rgba(18,38,41,.90) 52%,rgba(5,15,18,.98) 100%)!important;
     box-shadow:
       inset 10px -16px 28px rgba(0,4,7,.44),
       inset -8px 9px 24px rgba(210,231,226,.055),
@@ -1003,6 +1004,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* production-r1912-elegant-continuous-living-glass-first-paint-parity */
 /* production-r1913-first-webgl-frame-safe-igloo-grade-proxy-handoff */
 /* production-r1919-smoked-ice-three-mass-offset-oval-aperture-first-paint */
+/* production-r1935-mobile-lifted-readable-first-paint */
 /* production-r1933-p0-derived-frosted-living-ice-first-paint */
 
 
