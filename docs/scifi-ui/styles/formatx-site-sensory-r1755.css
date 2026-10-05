@@ -124,7 +124,7 @@ html body.living-architecture :is(
       background-color 180ms ease;
     will-change:transform;
   }
-  html body.living-architecture .magnetic[data-fx-pc-reactive-r1943="true"]{
+  html body.living-architecture .magnetic[data-fx-pc-reactive-r1944="true"]{
     transition:
       transform 62ms linear,
       scale 110ms cubic-bezier(.16,.84,.22,1),
@@ -153,7 +153,7 @@ html body.living-architecture :is(
   html body.living-architecture :is(
     .card,.price-card,.release-card,.fx-platform-card,
     .fx-category-grid>article,.fx-plan-qr-card,.fx-award-proof__grid a
-  )[data-fx-pc-reactive-r1943="true"]{
+  )[data-fx-pc-reactive-r1944="true"]{
     scale:1.003;
     border-color:rgba(164,235,240,.32)!important;
     box-shadow:
@@ -173,7 +173,7 @@ html body.living-architecture :is(
     --fx-pc-light-y:50%;
     scale:1;
   }
-  html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1943="true"]{
+  html body.living-architecture :is(.button,.magnetic)[data-fx-pc-reactive-r1944="true"]{
     scale:1.012;
     border-color:rgba(171,239,244,.44)!important;
     box-shadow:
