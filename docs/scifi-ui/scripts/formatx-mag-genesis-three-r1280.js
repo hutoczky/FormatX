@@ -896,7 +896,7 @@
     makeMechanicalLayer(){
       const T=this.THREE;
 
-      /* R1942 — intro finale matches the permanent prism-depth Signature MAG:
+      /* R1945g — intro finale material converges into the permanent Signature MAG:
          neutral smoked-silver bioglass, internal ice facets and recessed optic. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
         color:0x08171b,metalness:.10,roughness:.115,
@@ -1368,18 +1368,43 @@
 
     updateMechanical(t,time){
       const grow=smooth((t-6.25)/.90);
+      const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
-      this.mechMaterial.opacity=.92*grow;
-      this.mechMidMaterial.opacity=.72*grow;
-      this.silverMaterial.opacity=.42*grow;
-      this.mechEdgeMaterial.opacity=.020*grow;
-      this.mechInnerMaterial.opacity=.22*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=.06*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.34*grow;
+      /* R1945g — material convergence, not a flash.
+         The final 2.5 s gradually become the same smoked-silver/cyan bioglass
+         family as the permanent hero, so handoff reads as one continuous object. */
+      this.mechMaterial.color.setRGB(
+        mix(.031,.145,finale),
+        mix(.090,.245,finale),
+        mix(.106,.255,finale)
+      );
+      this.mechMidMaterial.color.setRGB(
+        mix(.039,.115,finale),
+        mix(.125,.235,finale),
+        mix(.145,.250,finale)
+      );
+      this.silverMaterial.color.setRGB(
+        mix(.480,.620,finale),
+        mix(.575,.690,finale),
+        mix(.565,.675,finale)
+      );
+      this.mechMaterial.transmission=mix(.32,.40,finale);
+      this.mechMidMaterial.transmission=mix(.38,.46,finale);
+      this.mechMaterial.roughness=mix(.115,.145,finale);
+      this.mechMidMaterial.roughness=mix(.105,.132,finale);
+      this.silverMaterial.roughness=mix(.085,.105,finale);
+
+      this.mechMaterial.opacity=(.92+.035*finale)*grow;
+      this.mechMidMaterial.opacity=(.72+.070*finale)*grow;
+      this.silverMaterial.opacity=(.42+.100*finale)*grow;
+      this.mechEdgeMaterial.opacity=(.020+.016*finale)*grow;
+      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.34+.055*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=2.65*grow;
+      if(this.mechLight)this.mechLight.intensity=(2.65+1.05*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
