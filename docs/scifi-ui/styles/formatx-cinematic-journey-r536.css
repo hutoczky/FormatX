@@ -583,13 +583,13 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
     perspective(1200px)
     translate(-50%,-50%)
     translate3d(
-      calc(var(--fx-c536-velocity) * -12px + var(--fx-c617-parallax-x)),
-      calc(var(--fx-c536-velocity) * 7px + var(--fx-c617-parallax-y)),
+      calc(var(--fx-c536-velocity) * -12px + var(--fx-c617-parallax-x) + var(--fx-c536-preview-x)),
+      calc(var(--fx-c536-velocity) * 7px + var(--fx-c617-parallax-y) + var(--fx-c536-preview-y)),
       0
     )
     rotateX(var(--fx-c617-tilt-x))
     rotateY(var(--fx-c617-tilt-y))
-    scale(calc(.86 + var(--fx-c536-local) * .12));
+    scale(calc((.86 + var(--fx-c536-local) * .12) * var(--fx-c536-preview-scale)));
   transform-style:preserve-3d;
   filter:saturate(1.08) contrast(1.03);
 }
@@ -628,11 +628,11 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
   transform:
     translate(-50%,-50%)
     translate3d(
-      calc(var(--fx-c617-parallax-x) * .55),
-      calc(var(--fx-c617-parallax-y) * .55),
+      calc(var(--fx-c617-parallax-x) * .55 + var(--fx-c536-preview-x) * .52),
+      calc(var(--fx-c617-parallax-y) * .55 + var(--fx-c536-preview-y) * .52),
       0
     )
-    scale(calc(.72 + var(--fx-c536-local) * .18));
+    scale(calc((.72 + var(--fx-c536-local) * .18) * var(--fx-c536-preview-scale)));
   border-radius:48% 52% 45% 55% / 54% 46% 56% 44%;
 }
 
@@ -1110,14 +1110,27 @@ html[data-fx-scroll-budget-r1660="fast"] body.living-architecture :is(
 /* R1677 — active scroll has one job: preserve input/frame cadence.
    The fixed cinematic atmosphere returns 120 ms after scrolling settles. */
 html[data-fx-scroll-budget-r1660="fast"] .fx-c536-stage{
+  visibility:visible!important;
+  opacity:1!important;
+  contain:strict!important;
+}
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-stage :is(
+  .fx-c536-vignette,.fx-c536-grain,.fx-c536-flare
+){
   visibility:hidden!important;
   opacity:0!important;
-  contain:strict!important;
+}
+html[data-fx-scroll-budget-r1660="fast"] .fx-c536-stage :is(
+  .fx-c536-world,.fx-c536-iris,.fx-c536-track,.fx-c536-scan
+){
+  visibility:visible!important;
 }
 html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
   visibility:visible;
+  opacity:1;
 }
 /* production-r1677-zero-fixed-cinematic-paint */
+/* production-r1946b-visible-lite-scroll-preview */
 
 /* production-r1943-desktop-pointer-perspective */
 
