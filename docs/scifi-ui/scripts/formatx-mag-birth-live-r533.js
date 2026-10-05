@@ -207,6 +207,7 @@
   ROOT.dataset.fxMagBirthArtR647 = 'reference-shot-match-fast-dna-orb-iris-tentacles-native-mag';
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
+  ROOT.dataset.fxMagBirthArtR1938='smoked-bioglass-cinematic-reenabled-first-visit';
   ROOT.dataset.fxMagBirthArtR651 = 'frame-matched-10s-dna-cellular-tentacle-flash-handoff';
   ROOT.dataset.fxMagBirthArtR657 = 'tubular-dna-diamond-iris-organic-shell-tapered-tendrils-reference-match';
   ROOT.dataset.fxMagBirthArtR660 = 'fine-dna-central-diamond-neural-cell-shell-mechanical-petals-nine-tendrils';
@@ -512,7 +513,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20260928-r1777-photographic-final-lighting';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1360.js?v=20261005-r1939-rounded-bioglass-cinematic';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1098,6 +1099,8 @@
     ROOT.dataset.fxMagBirthVisualR1775='photoreal-intro-core-material-continuity';
     ROOT.dataset.fxMagBirthVisualR1776='cinematic-irregular-crystal-deep-optic-continuity';
     ROOT.dataset.fxMagBirthVisualR1777='photographic-black-mineral-bioglass-final-lighting';
+    ROOT.dataset.fxMagBirthVisualR1908='runtime-fixed-centered-genome-to-single-gallery-shard';
+    ROOT.dataset.fxMagBirthVisualR1909='single-genome-to-slender-smoked-ice-monolith';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
