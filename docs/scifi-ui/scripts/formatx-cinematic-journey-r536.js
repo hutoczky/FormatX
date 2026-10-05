@@ -292,9 +292,16 @@
     const y = scrollY;
     const dt = Math.max(16,Math.min(180,now-lastT));
     if(finePointer){
-      const pointerEase=1-Math.exp(-dt*.018);
-      pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
-      pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
+      if(pointerTailFrames===1){
+        /* Final bounded frame lands exactly on target/rest so zero-idle never
+           preserves a residual parallax offset. */
+        pointerNX=pointerTargetNX;
+        pointerNY=pointerTargetNY;
+      }else{
+        const pointerEase=1-Math.exp(-dt*.018);
+        pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
+        pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
+      }
     }
     const rawV = clamp((y-lastY)/dt,-2.2,2.2);
     velocity += (rawV-velocity)*.35;
