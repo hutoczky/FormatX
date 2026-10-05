@@ -1004,10 +1004,10 @@
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.58,.72,.74)*sideSpec*.135;
-        mineral+=vec3(1.00,1.00,.99)*softboxA*.110;
-        mineral+=vec3(.55,.70,.69)*softboxB*.220;
+        mineral+=vec3(1.00,1.00,.99)*softboxA*.040;
+        mineral+=vec3(.57,.72,.71)*softboxB*.250;
         float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
-        mineral+=vec3(.76,.88,.84)*softboxC2*.185;
+        mineral+=vec3(.79,.90,.86)*softboxC2*.215;
         mineral+=vec3(.94,1.00,.98)*studioRibbonA*.060;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
         mineral+=vec3(.68,.97,1.00)*studioRibbonC*.105;
@@ -1096,6 +1096,12 @@
         float innerPane=exp(-pow((abs(q.x)-(.16+.16*abs(q.y)))/.085,2.0))
           *smoothstep(.04,.52,front);
         mineral+=vec3(.078,.180,.188)*innerPane*.040;
+        float l1Prism=abs(q.x)*.90+abs(q.y)*.72;
+        float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*front;
+        float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*front;
+        mineral+=vec3(.36,.50,.48)*prismShellA*(.046+.026*softboxB);
+        mineral+=vec3(.042,.150,.168)*prismShellB*(.034+.023*fresnel);
+        mineral*=1.0-.018*prismShellB;
         float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
@@ -1277,10 +1283,10 @@
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.082;
-        c+=vec3(.38,.64,.65)*softboxB*.285;
+        c+=vec3(.98,1.00,.97)*softboxA*.024;
+        c+=vec3(.40,.66,.66)*softboxB*.315;
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.78,.88,.84)*softboxC*.205;
+        c+=vec3(.80,.90,.86)*softboxC*.235;
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
@@ -1309,6 +1315,16 @@
         float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
           *smoothstep(.04,.52,frontDepth);
         c+=vec3(.082,.190,.198)*innerPane*.044;
+
+        /* R1942c — nested internal prism shells.
+           These echo the layered crystalline anatomy from the selected historic
+           MAG without adding geometry or a second render pass. */
+        float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
+        float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
+        float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
+        c+=vec3(.38,.52,.50)*prismShellA*(.050+.028*softboxB);
+        c+=vec3(.045,.165,.182)*prismShellB*(.038+.025*fresnel);
+        c*=1.0-.020*prismShellB;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
@@ -1356,7 +1372,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*3.02),1.0);
+        ${outputName}=vec4(tone(c*3.08),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1539,7 +1555,7 @@
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
-    root.dataset.fxNativeMagStudioR1942='signature-four-point-side-lit-prism-recessed-optic-smoked-silver-bioglass';
+    root.dataset.fxNativeMagStudioR1942='signature-four-point-nested-prism-shells-side-lit-recessed-optic-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
