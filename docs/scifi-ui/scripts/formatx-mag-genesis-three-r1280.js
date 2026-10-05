@@ -1374,7 +1374,7 @@
       if(this.seamMaterial)this.seamMaterial.opacity=.06*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=.60*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=8.8*grow;
+      if(this.mechLight)this.mechLight.intensity=2.65*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1447,30 +1447,30 @@
       }
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
-      const flash=smooth((t-9.12)/.10)*(1-smooth((t-9.58)/.24));
-      const after=smooth((t-9.48)/.30);
-      this.renderer.toneMappingExposure=1.12+flash*.06+after*.010;
-      this.coreLight.intensity+=flash*5+after*1.5;
+      const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
+      const after=smooth((t-9.46)/.34);
+      this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
+      this.coreLight.intensity+=flash*.80+after*.25;
       if(this.glowSprite){
-        const g=1+flash*.72;
+        const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(1,this.glowSprite.material.opacity+flash*.42);
+        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.94;
-        const burstScale=2.35+flash*1.50;
+        this.flashBurst.material.opacity=flash*.028;
+        const burstScale=2.18+flash*.18;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.42;
-        this.flashBeam.scale.x=1+flash*.65;
+        this.flashBeam.material.opacity=flash*.012;
+        this.flashBeam.scale.x=1+flash*.08;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.82,.62+flash*.14);
-        const q=1.12+flash*.30;
+        this.mechEyeCorona.material.opacity=Math.min(.68,.58+flash*.06);
+        const q=1.04+flash*.05;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*12;
+      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1549,4 +1549,5 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
 })();
