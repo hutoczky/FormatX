@@ -202,7 +202,7 @@
   function cut(){
     root.classList.remove('fx-c536-cut');
     if(cutRaf)cancelAnimationFrame(cutRaf);
-    if(scrollPreviewRaf)cancelAnimationFrame(scrollPreviewRaf);
+    if(scrollPreviewRaf){cancelAnimationFrame(scrollPreviewRaf);scrollPreviewRaf=0;}
     cutRaf=requestAnimationFrame(()=>{
       cutRaf=0;
       root.classList.add('fx-c536-cut');
