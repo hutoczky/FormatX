@@ -1297,21 +1297,17 @@
         float macroFacetB=.5+.5*cos(macroAngle*2.0-macroRadius*4.1+vLocal.z*1.4);
         float macroFacet=mix(macroFacetA,macroFacetB,.34);
         float facetTone=${mobile
-          ? '.955+.090*facetRand'
-          : '.955+.018*facetRand+.070*macroFacet'}; 
+          ? '.962+.050*macroFacet'
+          : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
         c*=.93+.07*volume;
-        /* R1945f — desktop uses broad continuous planes instead of per-triangle
-           random contrast. That removes the pin-speckle/CGI mosaic while keeping
-           a cut-glass studio response. Mobile keeps its proven facet cadence. */
-        float facetSilver=${mobile
-          ? 'smoothstep(.58,.96,facetRand)*frontDepth'
-          : 'smoothstep(.56,.94,macroFacet)*frontDepth'}; 
-        float facetCool=${mobile
-          ? 'smoothstep(.08,.44,1.0-facetRand)*frontDepth'
-          : 'smoothstep(.10,.48,1.0-macroFacet)*frontDepth'}; 
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.050':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.034':'.046'};
+        /* R1945j — one continuous macro-facet field across all tiers.
+           Per-triangle random tone created tiny dark mosaic cells that read as
+           black pin-speckles in proof captures. Geometry stays untouched. */
+        float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
+        float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
+        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
+        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
@@ -1607,6 +1603,7 @@
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
+    root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
     root.dataset.fxNativeMagStudioR1945e='desktop-cut-face-normal-blend-larger-optic-preserved-contrast';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
@@ -2074,13 +2071,10 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      /* R1945i — the topology already corrects inward triangle winding.
-         Render the closed shell as a true front skin again: two-sided raster
-         allowed rear triangles to win equal-depth edge samples and produced the
-         black pin-speckles visible in both desktop and mobile proof captures. */
-      gl.enable(gl.CULL_FACE);
-      gl.cullFace(gl.BACK);
-      gl.frontFace(gl.CCW);
+      /* R1945j — retain the proven two-sided closed shell. The R1945i culling
+         experiment increased pinholes; the actual speckle source was the
+         per-triangle material randomization, now removed above. */
+      gl.disable(gl.CULL_FACE);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
