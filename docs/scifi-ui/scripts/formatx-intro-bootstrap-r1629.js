@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px),(pointer:coarse)').matches;
+if(r.dataset.fxIntroPrepaintOwnerR1611==='p0-r531-rollback'){r.dataset.fxIntroBootstrapRescueR1755='retired-by-p0-r1934';return;}
 r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
