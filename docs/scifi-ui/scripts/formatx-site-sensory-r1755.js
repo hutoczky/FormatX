@@ -69,8 +69,6 @@ function commit(){
     desktopTarget.style.setProperty('--fx-pc-my',my);
     desktopTarget.style.setProperty('--fx-pc-nx',desktopNX.toFixed(3));
     desktopTarget.style.setProperty('--fx-pc-ny',desktopNY.toFixed(3));
-    desktopTarget.style.setProperty('--fx-pc-light-x',((desktopNX*.5+.5)*100).toFixed(1)+'%');
-    desktopTarget.style.setProperty('--fx-pc-light-y',((desktopNY*.5+.5)*100).toFixed(1)+'%');
   }
 }
 function queue(){
@@ -121,8 +119,6 @@ function setDesktopTarget(target){
     desktopTarget.style.removeProperty('--fx-pc-my');
     desktopTarget.style.removeProperty('--fx-pc-nx');
     desktopTarget.style.removeProperty('--fx-pc-ny');
-    desktopTarget.style.removeProperty('--fx-pc-light-x');
-    desktopTarget.style.removeProperty('--fx-pc-light-y');
   }
   desktopTarget=next;
   desktopRect=desktopTarget?.getBoundingClientRect?.()||null;
@@ -136,8 +132,6 @@ function clearDesktopTarget(){
   desktopTarget.style.removeProperty('--fx-pc-my');
   desktopTarget.style.removeProperty('--fx-pc-nx');
   desktopTarget.style.removeProperty('--fx-pc-ny');
-  desktopTarget.style.removeProperty('--fx-pc-light-x');
-  desktopTarget.style.removeProperty('--fx-pc-light-y');
   desktopTarget=null;desktopRect=null;desktopNX=desktopNY=0;
 }
 function onPointerMove(event){
@@ -236,7 +230,7 @@ function activate(reason='intent'){
   root.dataset.fxSiteSensorySchedulerR1755='lazy-intent-single-coalesced-raf-zero-idle';
   root.dataset.fxSiteSensoryBudgetR1755='16.67ms-target-no-extra-webgl-transform-opacity-only-scroll-atmosphere-shed';
   root.dataset.fxSiteSensoryInputR1755='pointerover-pointermove-touch-scroll-wheel-key-focus-click-input-change-submit-orientation-desktop-magnetic-targets';
-  root.dataset.fxDesktopInteractionR1944='fine-pointer-magnetic-local-response-polling-safe-light-position-zero-idle-raf';
+  root.dataset.fxDesktopInteractionR1944='fine-pointer-magnetic-local-response-polling-safe-minimal-style-writes-zero-idle-raf';
 }
 
 root.dataset.fxSiteSensoryR1755='armed-lazy-r1756';
