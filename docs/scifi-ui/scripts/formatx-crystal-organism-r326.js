@@ -469,33 +469,30 @@
          cross-sections: one monolithic object with a crown cleft, narrow waist,
          unequal shoulders and deliberate cut planes. */
       const profileR1905=[
-        /* R1923 — continuous living bioglass body.
-           The stacked three-lump silhouette is removed. One asymmetric,
-           tensioned volume now carries a soft crown, broad thorax, restrained
-           waist and tapered base without reading as an egg or mascot. */
-        [ 1.00,.018,.012,-.050,-.008],
-        [ .93,.105,.068,-.082,-.008],
-        [ .84,.255,.166,-.112,-.006],
-        [ .74,.410,.265,-.128,-.004],
-        [ .64,.535,.342,-.118,-.002],
-        [ .54,.610,.388,-.090, .000],
-        [ .44,.646,.410,-.048, .002],
-        [ .34,.640,.405,-.002, .004],
-        [ .24,.607,.382, .040, .006],
-        [ .14,.568,.360, .070, .008],
-        [ .04,.552,.352, .082, .008],
-        [-.06,.565,.358, .076, .007],
-        [-.16,.596,.374, .052, .004],
-        [-.26,.620,.386, .016, .002],
-        [-.36,.618,.382,-.026, .000],
-        [-.46,.585,.360,-.062,-.002],
-        [-.56,.520,.318,-.086,-.004],
-        [-.66,.430,.262,-.094,-.005],
-        [-.76,.330,.202,-.080,-.006],
-        [-.85,.225,.140,-.056,-.006],
-        [-.92,.122,.076,-.030,-.005],
-        [-.97,.052,.032,-.012,-.004],
-        [-1.00,.016,.010, .000,-.003]
+        /* R1930 — calm living-ice silhouette.
+           One deliberate S-balanced volume: narrow crown, controlled shoulders,
+           quiet waist and tapered root. No mascot/blob lobes. */
+        [ 1.00,.012,.008,-.018, .000],
+        [ .94,.078,.052,-.050, .002],
+        [ .86,.205,.132,-.094, .005],
+        [ .76,.355,.220,-.130, .009],
+        [ .66,.475,.286,-.140, .012],
+        [ .55,.555,.328,-.118, .015],
+        [ .44,.595,.350,-.074, .016],
+        [ .33,.575,.338,-.014, .016],
+        [ .22,.515,.306, .045, .014],
+        [ .11,.462,.278, .086, .010],
+        [ .00,.438,.266, .104, .005],
+        [-.11,.470,.286, .090, .000],
+        [-.22,.528,.316, .050,-.005],
+        [-.34,.570,.338,-.010,-.010],
+        [-.46,.552,.326,-.064,-.012],
+        [-.58,.485,.286,-.098,-.012],
+        [-.70,.388,.228,-.104,-.010],
+        [-.81,.270,.160,-.080,-.007],
+        [-.90,.150,.090,-.045,-.004],
+        [-.97,.050,.030,-.015,-.002],
+        [-1.00,.010,.007, .000, .000]
       ];
       const sampleProfileR1905=y=>{
         if(y>=profileR1905[0][0])return profileR1905[0];
@@ -531,7 +528,7 @@
 
         const theta=theta0+cp*.075+Math.sin(cp*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=4.65;
+        const superN=3.10;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
@@ -542,11 +539,11 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.54,.32,Math.PI,.82,.060);
-        const rightShoulder=field(.10,.34,.04,.82,.050);
-        const lowerLeft=field(-.42,.30,2.62,.84,.043);
-        const frontChest=field(.02,.40,Math.PI*.50,.80,.036);
-        const rearCut=field(.02,.46,-Math.PI*.50,.88,.018);
+        const upperLeft=field(.54,.34,Math.PI,.90,.026);
+        const rightShoulder=field(.10,.36,.04,.90,.022);
+        const lowerLeft=field(-.42,.32,2.62,.92,.018);
+        const frontChest=field(.02,.42,Math.PI*.50,.92,.014);
+        const rearCut=field(.02,.48,-Math.PI*.50,.96,.009);
         const radial=1+upperLeft+rightShoulder+lowerLeft+frontChest-rearCut;
 
         rx*=radial;
@@ -568,8 +565,8 @@
           if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
         };
 
-        const topPlane=.936-p[0]*.105-p[2]*.045;
-        const bottomPlane=-.950-p[0]*.045+p[2]*.025;
+        const topPlane=.958-p[0]*.070-p[2]*.030;
+        const bottomPlane=-.965-p[0]*.030+p[2]*.018;
         if(p[1]>topPlane){
           const over=p[1]-topPlane;
           p[1]=topPlane+over*.24;
@@ -581,10 +578,10 @@
           registerCut([-.05,-1,.03],over,.66);
         }
 
-        const leftPlane=-.596+.108*p[1]-.028*p[2];
-        const rightPlane=.584-.070*p[1]+.024*p[2];
-        const frontPlane=.472-.046*p[1]-.034*p[0];
-        const backPlane=-.438+.028*p[1]+.022*p[0];
+        const leftPlane=-.612+.070*p[1]-.018*p[2];
+        const rightPlane=.602-.052*p[1]+.018*p[2];
+        const frontPlane=.438-.028*p[1]-.020*p[0];
+        const backPlane=-.398+.018*p[1]+.014*p[0];
         if(p[0]<leftPlane){
           const over=leftPlane-p[0];
           p[0]=leftPlane-over*.30;
@@ -606,17 +603,17 @@
           registerCut([.02,.03,-1],over,.56);
         }
 
-        const crownT=Math.max(0,Math.min(1,(p[1]-.62)/.28));
+        const crownT=Math.max(0,Math.min(1,(p[1]-.66)/.24));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.052*Math.exp(-Math.pow((p[0]+.018)/.150,2.0))*crownEase;
+        const crownCleft=.026*Math.exp(-Math.pow((p[0]+.010)/.180,2.0))*crownEase;
         p[1]-=crownCleft;
         p[0]+=crownCleft*.06;
 
-        const socketX=(p[0]-.120)/.190;
-        const socketY=(p[1]-.035)/.168;
+        const socketX=(p[0]-.105)/.230;
+        const socketY=(p[1]-.025)/.070;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p[2]-=.118*socket;
+        p[2]-=.072*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -955,9 +952,9 @@
     }
 
     {
-      const centreX=.120,centreY=.035;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.606;
-      const bezelMajorX=.126,bezelMajorY=.101,bezelTube=.0026;
+      const centreX=.105,centreY=.025;
+      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
+      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -981,10 +978,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.614];
-      const lensRadiusX=.109;
-      const lensRadiusY=.087;
-      const lensDepth=.044;
+      const lensCenter=[centreX,centreY,.609];
+      const lensRadiusX=.153;
+      const lensRadiusY=.041;
+      const lensDepth=.020;
       const radialSteps=auditMode?14:(software?16:mobile?20:22);
       const angularSteps=auditMode?96:(software?112:mobile?128:144);
       function lensVertex(radial,angle){
@@ -1057,7 +1054,7 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 52% 46% at 50% 43%,rgba(145,205,208,.185) 0%,rgba(55,94,99,.090) 36%,rgba(10,23,26,.030) 67%,rgba(0,0,0,0) 84%),radial-gradient(ellipse 38% 28% at 64% 64%,rgba(96,74,136,.052),rgba(0,0,0,0) 72%),radial-gradient(ellipse 84% 72% at 50% 51%,rgba(7,20,23,.26),rgba(0,0,0,0) 79%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 48% 42% at 50% 45%,rgba(132,174,176,.095) 0%,rgba(47,72,75,.038) 40%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 82% 70% at 50% 52%,rgba(5,14,17,.18),rgba(0,0,0,0) 80%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -1074,27 +1071,26 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R1902 — desktop living-system compositor heartbeat.
-       The shader/geometry remain the only visual renderer. WAAPI advances a
-       microscopic opacity timeline so the desktop MAG is measurably alive
-       without adding a JS RAF loop or changing shape/position. */
-    if(!reduced.matches && !mobile && typeof canvas.animate==='function'){
-      const desktopLivingTimeline=canvas.animate(
+    /* R1930 — one slow compositor breath on every capable screen.
+       No idle JS RAF is introduced; reduced-motion remains fully respected. */
+    if(!reduced.matches && typeof canvas.animate==='function'){
+      const livingTimeline=canvas.animate(
         [
-          {opacity:.986,offset:0},
-          {opacity:1,offset:.42},
-          {opacity:.990,offset:.70},
-          {opacity:.986,offset:1}
+          {opacity:.985,transform:'scale(.996)',offset:0},
+          {opacity:1,transform:'scale(1.004)',offset:.48},
+          {opacity:.990,transform:'scale(.999)',offset:.76},
+          {opacity:.985,transform:'scale(.996)',offset:1}
         ],
         {
-          duration:6400,
+          duration:6800,
           iterations:Infinity,
-          easing:'cubic-bezier(.36,0,.20,1)',
+          easing:'cubic-bezier(.37,0,.20,1)',
           fill:'both'
         }
       );
-      desktopLivingTimeline.id='fx-primary-mag-desktop-heart-r1902';
+      livingTimeline.id='fx-primary-mag-living-breath-r1930';
       root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
+      root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
     }
 
     const options = {
@@ -1210,9 +1206,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.665':'.805'};
+        projected*= ${mobile?'.585':'.735'};
         projected.x+=${mobile?'.002':'.040'};
-        projected.y+=${mobile?'.016':'.002'};
+        projected.y+=${mobile?'.010':'.002'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1827,9 +1823,9 @@
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
     const mobilePhysical = mobile || constrainedMobile || auditMode;
-    const fragmentSource = softwareRenderer
-      ? softwareFragmentSource
-      : (mobilePhysical ? constrainedFragmentSource : fullFragmentSource);
+    /* R1930 visual parity: one authored studio shader on desktop, mobile and
+       software proof. This removes the hardware/CI split that hid ugly live paths. */
+    const fragmentSource = constrainedFragmentSource;
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
@@ -1837,6 +1833,7 @@
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
     root.dataset.fxNativeMagVisualR1718='mobile-sharp-readable-midtone-photoreal-organism';
     root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
+    root.dataset.fxNativeMagStudioR1930='single-sculpt-frosted-ice-horizontal-aperture-slow-breath-cross-tier-parity';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
     root.dataset.fxNativeMagStudioR1892='audit-parity-recessed-optic-soft-trilobate-silhouette';
