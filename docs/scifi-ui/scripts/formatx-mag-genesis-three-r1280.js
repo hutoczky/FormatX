@@ -1540,6 +1540,11 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1240-organic-gyri-lock-dna-cellular-living-architecture'
+    revision:'r1280-armored-pod-eye-segmented-tendrils-reference'
   };
+  /* R1940 — the user-selected reference visual is the R1280 armored living
+     pod. Keep the existing R1360 loader contract intact by exposing R1280 as
+     its production owner instead of maintaining two divergent renderers. */
+  window.FormatXMagGenesisThreeR1360=window.FormatXMagGenesisThreeR1280;
+  document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
 })();
