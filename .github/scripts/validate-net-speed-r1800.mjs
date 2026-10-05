@@ -15,7 +15,7 @@ const [index,client,css,workerSource]=await Promise.all([
 assert.match(index,/id="network"/);
 assert.match(index,/data-fx-net-speed-r1800="true"/);
 assert.match(index,/formatx-net-speed-r1800\.js\?v=20260929-r1810-gigabit-multistream/);
-assert.match(index,/formatx-net-speed-r1800\.css\?v=20260928-r1800-network-sensor/);
+assert.match(index,/formatx-net-speed-r1800\.css\?v=20261004-r1902-touch-target/);
 assert.match(index,/https:\/\/www\.speedtest\.net\//);
 assert.match(client,/user-initiated-same-origin-multistream-gigabit-no-idle-network-r1810/);
 assert.match(client,/\/api\/net\/ping/);
