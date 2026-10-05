@@ -1297,19 +1297,19 @@
         float macroFacetB=.5+.5*cos(macroAngle*2.0-macroRadius*4.1+vLocal.z*1.4);
         float macroFacet=mix(macroFacetA,macroFacetB,.34);
         float facetTone=${mobile
-          ? "'.955+.090*facetRand'"
-          : "'.955+.018*facetRand+.070*macroFacet'"}; 
+          ? '.955+.090*facetRand'
+          : '.955+.018*facetRand+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945f — desktop uses broad continuous planes instead of per-triangle
            random contrast. That removes the pin-speckle/CGI mosaic while keeping
            a cut-glass studio response. Mobile keeps its proven facet cadence. */
         float facetSilver=${mobile
-          ? "'smoothstep(.58,.96,facetRand)*frontDepth'"
-          : "'smoothstep(.56,.94,macroFacet)*frontDepth'"}; 
+          ? 'smoothstep(.58,.96,facetRand)*frontDepth'
+          : 'smoothstep(.56,.94,macroFacet)*frontDepth'}; 
         float facetCool=${mobile
-          ? "'smoothstep(.08,.44,1.0-facetRand)*frontDepth'"
-          : "'smoothstep(.10,.48,1.0-macroFacet)*frontDepth'"}; 
+          ? 'smoothstep(.08,.44,1.0-facetRand)*frontDepth'
+          : 'smoothstep(.10,.48,1.0-macroFacet)*frontDepth'}; 
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.050':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.034':'.046'};
         c+=vec3(.030,.060,.064)*strata*.10;
