@@ -1240,8 +1240,16 @@
 
         /* Smoked blue-silver glass volume. */
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        vec3 c=mix(vec3(.003,.012,.020),vec3(.064,.185,.220),lift);
+        float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
+        float facetTone=.955+.090*facetRand;
+        vec3 c=mix(vec3(.003,.012,.020),vec3(.064,.185,.220),lift)*facetTone;
         c*=.93+.07*volume;
+        /* Broad facet separation comes from tonal response, not dark polygon
+           borders. This keeps the crystal authored and photographic. */
+        float facetSilver=smoothstep(.58,.96,facetRand)*frontDepth;
+        float facetCool=smoothstep(.08,.44,1.0-facetRand)*frontDepth;
+        c+=vec3(.095,.115,.112)*facetSilver*.055;
+        c+=vec3(.010,.075,.092)*facetCool*.050;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.018,.055,.066)*backDepth*.12;
 
@@ -1250,6 +1258,8 @@
         c+=vec3(.28,.52,.55)*softboxB*.16;
         c+=vec3(.92,.99,.97)*ribbonA*.34;
         c+=vec3(.16,.45,.50)*ribbonB*.13;
+        float glassBlade=exp(-pow((vLocal.x+.015+vLocal.y*.025)/.030,2.0))*frontDepth;
+        c+=vec3(.78,.94,.92)*glassBlade*.095;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
@@ -1275,9 +1285,11 @@
         c=mix(c,opticBase+c*.24,lens*.38);
         c+=vec3(.60,.82,.81)*rim*.16;
         c+=vec3(.030,.35,.41)*iris*(.16+.10*uEnergy);
-        c+=vec3(.22,.82,.88)*core*(.20+.12*uEnergy);
-        c+=vec3(.92,1.00,.98)*hot*(.26+.08*uEnergy);
-        c+=vec3(.98,1.00,.98)*glint*.26;
+        c+=vec3(.22,.82,.88)*core*(.26+.15*uEnergy);
+        c+=vec3(.92,1.00,.98)*hot*(.42+.10*uEnergy);
+        c+=vec3(.98,1.00,.98)*glint*.32;
+        float opticCaustic=exp(-pow((od-.38)/.14,2.0))*front;
+        c+=vec3(.030,.22,.25)*opticCaustic*(.055+.040*uEnergy);
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
@@ -1289,7 +1301,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*3.05),1.0);
+        ${outputName}=vec4(tone(c*3.14),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1471,7 +1483,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-three-quarter-smoked-silver-dichroic-studio-bioglass';
+    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-faceted-smoked-silver-dichroic-studio-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
