@@ -769,8 +769,8 @@
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
-      ? 'brightness(1.11) contrast(1.14) saturate(.90)'
-      : 'brightness(1.04) contrast(1.14) saturate(.96)';
+      ? 'brightness(1.12) contrast(1.15) saturate(.82)'
+      : 'brightness(1.04) contrast(1.15) saturate(.88)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -995,7 +995,7 @@
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.006,.014,.019),vec3(.135,.215,.225),lift)*facetTone;
+        vec3 mineral=mix(vec3(.005,.010,.013),vec3(.118,.160,.165),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
@@ -1004,11 +1004,11 @@
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.58,.72,.74)*sideSpec*.135;
-        mineral+=vec3(1.00,1.00,.99)*softboxA*.270;
-        mineral+=vec3(.52,.66,.66)*softboxB*.145;
+        mineral+=vec3(1.00,1.00,.99)*softboxA*.110;
+        mineral+=vec3(.55,.70,.69)*softboxB*.220;
         float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
-        mineral+=vec3(.72,.84,.82)*softboxC2*.125;
-        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.165;
+        mineral+=vec3(.76,.88,.84)*softboxC2*.185;
+        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.060;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
         mineral+=vec3(.68,.97,1.00)*studioRibbonC*.105;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
@@ -1089,13 +1089,13 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        mineral+=vec3(.095,.220,.230)*axisRidge*(.034+.018*prismSweep);
-        mineral+=vec3(.34,.42,.40)*axisRidge*softboxB*.028;
-        mineral*=1.0-.048*diagonalValley;
+        mineral+=vec3(.115,.255,.262)*axisRidge*(.062+.025*prismSweep);
+        mineral+=vec3(.40,.47,.44)*axisRidge*softboxB*.048;
+        mineral*=1.0-.082*diagonalValley;
         mineral+=vec3(.018,.072,.084)*diagonalValley*fresnel*.052;
         float innerPane=exp(-pow((abs(q.x)-(.16+.16*abs(q.y)))/.085,2.0))
           *smoothstep(.04,.52,front);
-        mineral+=vec3(.065,.155,.168)*innerPane*.027;
+        mineral+=vec3(.078,.180,.188)*innerPane*.040;
         float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
         float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
         float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
@@ -1265,24 +1265,24 @@
         float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
         float facetRand=fract(sin(vFacet*91.73+13.17)*43758.5453);
         float facetTone=.955+.090*facetRand;
-        vec3 c=mix(vec3(.004,.010,.014),vec3(.105,.158,.164),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
         c*=.93+.07*volume;
         /* Broad facet separation comes from tonal response, not dark polygon
            borders. This keeps the crystal authored and photographic. */
         float facetSilver=smoothstep(.58,.96,facetRand)*frontDepth;
         float facetCool=smoothstep(.08,.44,1.0-facetRand)*frontDepth;
-        c+=vec3(.095,.115,.112)*facetSilver*.055;
-        c+=vec3(.010,.075,.092)*facetCool*.050;
+        c+=vec3(.120,.136,.130)*facetSilver*.080;
+        c+=vec3(.010,.065,.076)*facetCool*.034;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.215;
-        c+=vec3(.32,.58,.60)*softboxB*.205;
+        c+=vec3(.98,1.00,.97)*softboxA*.082;
+        c+=vec3(.38,.64,.65)*softboxB*.285;
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.74,.86,.83)*softboxC*.145;
-        c+=vec3(.92,.98,.96)*ribbonA*.105;
-        c+=vec3(.16,.45,.50)*ribbonB*.13;
+        c+=vec3(.78,.88,.84)*softboxC*.205;
+        c+=vec3(.92,.98,.96)*ribbonA*.040;
+        c+=vec3(.18,.47,.50)*ribbonB*.175;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.016;
@@ -1300,15 +1300,15 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.105,.245,.255)*axisRidge*(.040+.020*prismSweep);
-        c+=vec3(.36,.43,.41)*axisRidge*softboxB*.032;
-        c*=1.0-.055*diagonalValley;
+        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
+        c*=1.0-.090*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
         float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
           *smoothstep(.04,.52,frontDepth);
-        c+=vec3(.070,.170,.182)*innerPane*.030;
+        c+=vec3(.082,.190,.198)*innerPane*.044;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*.12;
         c+=vec3(.15,.32,.35)*pow(side,3.2)*.11;
 
@@ -1539,7 +1539,7 @@
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagStudioR1941='source-locked-four-point-clean-apex-multisoftbox-smoked-silver-studio-bioglass';
-    root.dataset.fxNativeMagStudioR1942='signature-four-point-internal-prism-recessed-optic-multisoftbox-bioglass';
+    root.dataset.fxNativeMagStudioR1942='signature-four-point-side-lit-prism-recessed-optic-smoked-silver-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
