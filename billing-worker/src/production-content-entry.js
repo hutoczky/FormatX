@@ -171,8 +171,8 @@ const R502_ASSET_REWRITES = new Map([
     rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261005-r1945j-continuous-macro-facet']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1945g-material-convergence-finale',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261005-r1945g-material-convergence-finale']],
+    marker: 'intro-to-genesis-r1945k-smoked-silver-handoff',
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261005-r1945k-smoked-silver-handoff']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
