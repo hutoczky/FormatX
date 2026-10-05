@@ -1303,7 +1303,7 @@
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        c*=${mobile?'.965+.035*volume':'.93+.07*volume'};
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1311,7 +1311,7 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
+        c+=vec3(.030,.060,.064)*strata*${mobile?'.060':'.10'};
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
@@ -1338,7 +1338,7 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.120,.270,.278)*axisRidge*(${mobile?'.082':'.070'}+${mobile?'.032':'.028'}*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
         c*=1.0-.090*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
@@ -1368,8 +1368,8 @@
         float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
+        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.132':'.155'};
+        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.072':'.085'};
         c*=1.0-${mobile?'.085':'.110'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
@@ -1386,7 +1386,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.150':'.210'},vLocal.y/${mobile?'.150':'.210'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1418,6 +1418,10 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
+        /* R1946 — anti-speckle optical floor.
+           Prevent isolated near-black fragments from reading as surface dirt on
+           the photographic mobile proof while preserving the smoked silhouette. */
+        c=max(c,vec3(${mobile?'.006,.014,.017':'.004,.009,.012'}));
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
@@ -2174,6 +2178,7 @@
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
     root.dataset.fxNativeMagDesktopInteractionR1946='three-axis-pointer-parallax-dynamic-studio-light-coalesced-bounded-raf';
+    root.dataset.fxNativeMagStudioR1946='clean-smoked-glass-anti-speckle-stronger-inner-prism-optic';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
