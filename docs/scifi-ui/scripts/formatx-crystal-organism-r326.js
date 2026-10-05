@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 20 : constrainedMobile ? 24 : mobile ? 32 : constrained ? 30 : 40;
-    const longitudeSegments = software ? 40 : constrainedMobile ? 48 : mobile ? 64 : constrained ? 60 : 80;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
     const tendrilCount = (software||mobile) ? 0 : 10;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
@@ -304,10 +304,10 @@
       const shoulder=Math.max(0,1-y*y);
       const smoothUp=.5*(y+Math.sqrt(y*y+.0064));
       const smoothDown=.5*(-y+Math.sqrt(y*y+.0064));
-      const axisX=.625+shoulder*.132+direction[0]*.026-direction[2]*.010;
-      const axisY=.925+shoulder*.028+y*.028;
-      const axisZ=.445+shoulder*.078+direction[2]*.018-direction[0]*.012;
-      const exponent=1.72;
+      const axisX=.655+shoulder*.125+direction[0]*.024-direction[2]*.010;
+      const axisY=.865+shoulder*.028+y*.022;
+      const axisZ=.485+shoulder*.082+direction[2]*.016-direction[0]*.012;
+      const exponent=2.0;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
@@ -315,13 +315,13 @@
       const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
 
       const upperLeft=
-        .060*Math.exp(-Math.pow((y-.40)/.34,2))*
+        .072*Math.exp(-Math.pow((y-.38)/.31,2))*
         Math.max(0,.5-.5*Math.cos(theta));
       const rightMid=
-        .044*Math.exp(-Math.pow((y-.02)/.42,2))*
+        .050*Math.exp(-Math.pow((y-.01)/.38,2))*
         Math.max(0,.5+.5*Math.cos(theta));
       const lowerLeft=
-        .036*Math.exp(-Math.pow((y+.40)/.32,2))*
+        .044*Math.exp(-Math.pow((y+.39)/.29,2))*
         Math.max(0,.5-.5*Math.cos(theta-.34));
       const life=
         1+
@@ -334,8 +334,10 @@
         direction[1]*radial*life,
         direction[2]*radial*life
       ];
-      crystalPosition[0]+=-.052*Math.pow(smoothUp,1.8)+.026*Math.pow(smoothDown,1.6)
-        +Math.sin(theta*1.62+phi*.70)*.012*shoulder;
+      crystalPosition[0]+=-.072*Math.pow(smoothUp,1.8)+.034*Math.pow(smoothDown,1.6)
+        +Math.sin(theta*1.62+phi*.70)*.014*shoulder
+        -.030*Math.exp(-Math.pow((y-.34)/.24,2))
+        +.022*Math.exp(-Math.pow((y+.18)/.28,2));
       crystalPosition[1]+=Math.pow(smoothUp,3.2)*.034-Math.pow(smoothDown,3.0)*.018
         +Math.sin(theta*2.1+phi*.45)*.007*shoulder;
       crystalPosition[2]+=-direction[0]*.016+direction[0]*y*.010;
@@ -1266,27 +1268,28 @@
         /* Integrated smoked optical organ. It is part of the surface, not a HUD
            ring and not a glowing sticker. */
         float front=smoothstep(.08,.50,vLocal.z);
-        vec2 oq=vec2((vLocal.x-.015)/.205,(vLocal.y+.005)/.150);
+        vec2 oq=vec2((vLocal.x-.018)/.172,(vLocal.y+.004)/.118);
         float od=length(oq);
-        float optic=(1.0-smoothstep(.92,1.03,od))*front;
-        float opticRim=exp(-pow((od-.82)/.075,2.0))*front;
-        float opticCore=exp(-od*od*9.5)*front;
-        float opticPupil=exp(-od*od*24.0)*front;
-        float opticGlint=exp(-pow((oq.x+.34)/.16,2.0)-pow((oq.y-.30)/.14,2.0))*front;
-        vec3 opticColor=vec3(.002,.008,.010);
-        opticColor+=vec3(.014,.060,.070)*optic;
-        opticColor+=vec3(.22,.52,.54)*opticRim*.16;
-        opticColor+=vec3(.10,.62,.68)*opticCore*(.10+.08*uEnergy);
-        opticColor+=vec3(.68,.92,.91)*opticPupil*(.08+.06*uEnergy);
-        opticColor+=vec3(.92,.98,.96)*opticGlint*.38;
-        c=mix(c,opticColor,optic*.72);
-        c+=vec3(.16,.44,.48)*opticRim*.055;
+        float optic=(1.0-smoothstep(.90,1.02,od))*front;
+        float opticRim=exp(-pow((od-.83)/.060,2.0))*front;
+        float opticInner=exp(-od*od*3.4)*front;
+        float opticCore=exp(-od*od*15.0)*front;
+        float opticPupil=exp(-od*od*42.0)*front;
+        float opticGlint=exp(-pow((oq.x+.34)/.14,2.0)-pow((oq.y-.31)/.12,2.0))*front;
+        vec3 opticColor=vec3(.0015,.005,.0065);
+        opticColor+=vec3(.010,.022,.024)*opticInner;
+        opticColor+=vec3(.42,.48,.46)*opticRim*.12;
+        opticColor+=vec3(.020,.18,.205)*opticCore*(.075+.055*uEnergy);
+        opticColor+=vec3(.42,.86,.88)*opticPupil*(.090+.055*uEnergy);
+        opticColor+=vec3(.96,.99,.97)*opticGlint*.42;
+        c=mix(c,opticColor,optic*.86);
+        c+=vec3(.48,.54,.52)*opticRim*.035;
 
         c+=vec3(.10,.24,.26)*sweep*.22;
         c+=vec3(.58,.66,.63)*sweep*softA*.075;
 
-        float alpha=clamp(.975+.012*key+.008*side,.975,.995);
-        ${outputName}=vec4(tone(c*2.55),alpha);
+        float alpha=1.0;
+        ${outputName}=vec4(tone(c*2.62),alpha);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1467,6 +1470,7 @@
     root.dataset.fxNativeMagMobileR1936='brighter-readable-body-higher-opacity-balanced-cyan';
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
+    root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
@@ -1924,11 +1928,10 @@
       /* R1938 — one opaque photographic pass.
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
-      gl.enable(gl.BLEND);
+      gl.disable(gl.BLEND);
       gl.enable(gl.CULL_FACE);
       gl.cullFace(gl.BACK);
       gl.depthMask(true);
-      gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
