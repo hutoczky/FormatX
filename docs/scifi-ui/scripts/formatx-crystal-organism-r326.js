@@ -377,7 +377,10 @@
         }
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
-        const smoothWeight=software?.95:(mobile?.985:(constrained?.972:.978));
+        /* R1941f — the signature body keeps authored sharp silhouette geometry,
+           but uses the analytical smooth normal exclusively. Auxiliary geometry
+           may still retain a small face-normal contribution. */
+        const smoothWeight=facet<2.0?1:(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1468,7 +1471,7 @@
     root.dataset.fxNativeMagStudioR1937='smooth-asymmetric-smoked-bioglass-no-diamond-additive-star';
     root.dataset.fxNativeMagStudioR1938='rounded-asymmetric-monolith-single-pass-integrated-smoked-optic';
     root.dataset.fxNativeMagStudioR1939='premium-rounded-bioglass-opaque-shell-silver-smoked-optic-no-seams';
-    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-smoked-dichroic-studio-bioglass-integrated-optic-zero-speckle';
+    root.dataset.fxNativeMagStudioR1941='source-locked-r1934-four-point-analytic-normal-smoked-dichroic-studio-bioglass';
     root.dataset.fxNativeMagRollbackR1934='p0-27of28-visual-grammar-current-api';
     root.dataset.fxNativeMagStudioR1831='igloo-grade-monolithic-sculpt-dark-bioglass-premium-optic';
     root.dataset.fxNativeMagStudioR1890='fused-trilobate-bioglass-larger-centered-living-optic';
