@@ -894,10 +894,10 @@
         local.x+=tendrilTip*(uPointer.x*.060 + tendrilWave*(.012+.020*uEnergy));
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
-        local.xy+=uPointer*.038*uLayer;
-        float yaw=${mobile?'.405':'.365'}+uRotation.y+uPointer.x*.12+uTime*.007;
-        float pitch=-.070+uRotation.x-uPointer.y*.085+.006*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*.022+.005*sin(uTime*.23);
+        local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
+        float yaw=${mobile?'.405':'.365'}+uRotation.y+uPointer.x*${mobile?'.12':'.19'}+uTime*.007;
+        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -1663,6 +1663,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
+    root.dataset.fxNativeMagDesktopInteractionR1943='fine-pointer-delta-rotation-stronger-optical-parallax-no-idle-loop';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagOrganismR1724='asymmetric-living-crystal-rhombic-cortical-silhouette';
@@ -1773,6 +1774,7 @@
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
+    let ambientLastX=0,ambientLastY=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
     let morph=0,targetMorph=0;
     let rotationX=softwareRenderer?-.105:(mobile?-.090:-.070),rotationY=softwareRenderer?-.41:(mobile?-.40:-.32),rotationZ=softwareRenderer?-.020:.008;
@@ -2283,11 +2285,14 @@
     function onAmbientMove(event){
       const q=globalPoint(event);
       const touch=event.pointerType==='touch';
-      tx=q.x*(touch?.46:.72);ty=q.y*(touch?.46:.72);
-      targetRotationY+=q.x*(touch?.0010:.0018);
-      targetRotationX=clamp(targetRotationX-q.y*(touch?.0008:.0012),-1.02,1.02);
-      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.055));
-      schedule(mobile?1:2);
+      const dx=q.x-ambientLastX,dy=q.y-ambientLastY;
+      ambientLastX=q.x;ambientLastY=q.y;
+      tx=q.x*(touch?.46:.84);ty=q.y*(touch?.46:.84);
+      targetRotationY+=dx*(touch?.055:.145);
+      targetRotationX=clamp(targetRotationX-dy*(touch?.045:.105),-1.02,1.02);
+      targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.095));
+      targetBreath=Math.max(targetBreath,touch?.18:.25);
+      schedule(mobile?1:3);
     }
     function onAmbientPress(event){
       const q=globalPoint(event);
@@ -2414,7 +2419,11 @@
     listen(document,'change',()=>signalPhysiology('activation','form-change'),{passive:true});
     listen(document,'submit',()=>signalPhysiology('activation','form-submit'),{passive:true});
     listen(window,'pointerenter',()=>boost(.22,mobile?1:2),{passive:true});
-    listen(window,'pointerleave',()=>boost(.16,mobile?1:2),{passive:true});
+    listen(window,'pointerleave',()=>{
+      ambientLastX=ambientLastY=0;
+      tx=ty=0;
+      boost(.16,mobile?1:2);
+    },{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
