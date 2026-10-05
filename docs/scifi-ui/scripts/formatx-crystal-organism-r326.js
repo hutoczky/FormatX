@@ -531,7 +531,7 @@
 
         const theta=theta0+cp*.075+Math.sin(cp*Math.PI)*.020;
         const c=Math.cos(theta),zs=Math.sin(theta);
-        const superN=3.12;
+        const superN=4.65;
         const cx=Math.sign(c)*Math.pow(Math.abs(c),2/superN);
         const cz=Math.sign(zs)*Math.pow(Math.abs(zs),2/superN);
 
@@ -542,11 +542,11 @@
           return amp*Math.exp(-(dy*dy+da*da));
         };
 
-        const upperLeft=field(.54,.36,Math.PI,.95,.028);
-        const rightShoulder=field(.10,.38,.04,.96,.024);
-        const lowerLeft=field(-.42,.36,2.62,.96,.020);
-        const frontChest=field(.02,.44,Math.PI*.50,.92,.018);
-        const rearCut=field(.02,.50,-Math.PI*.50,1.02,.010);
+        const upperLeft=field(.54,.32,Math.PI,.82,.060);
+        const rightShoulder=field(.10,.34,.04,.82,.050);
+        const lowerLeft=field(-.42,.30,2.62,.84,.043);
+        const frontChest=field(.02,.40,Math.PI*.50,.80,.036);
+        const rearCut=field(.02,.46,-Math.PI*.50,.88,.018);
         const radial=1+upperLeft+rightShoulder+lowerLeft+frontChest-rearCut;
 
         rx*=radial;
@@ -558,9 +558,9 @@
           oz+cz*rz
         ];
 
-        p[0]+=-.012*cp+.010*Math.sin((cp+.10)*Math.PI)
-          -.004*upperLeft+.006*rightShoulder-.003*lowerLeft;
-        p[2]+=-.016*p[0]+.005*Math.sin(theta*2.0)*(1-Math.abs(cp));
+        p[0]+=-.020*cp+.017*Math.sin((cp+.10)*Math.PI)
+          -.010*upperLeft+.014*rightShoulder-.008*lowerLeft;
+        p[2]+=-.026*p[0]+.009*Math.sin(theta*2.0)*(1-Math.abs(cp));
 
         let cutNormal=null,cutWeight=0;
         const registerCut=(normal,overshoot,base=.62)=>{
@@ -568,8 +568,8 @@
           if(w>cutWeight){cutWeight=w;cutNormal=normalize(normal);}
         };
 
-        const topPlane=.948-p[0]*.085-p[2]*.028;
-        const bottomPlane=-.962-p[0]*.028+p[2]*.018;
+        const topPlane=.936-p[0]*.105-p[2]*.045;
+        const bottomPlane=-.950-p[0]*.045+p[2]*.025;
         if(p[1]>topPlane){
           const over=p[1]-topPlane;
           p[1]=topPlane+over*.24;
@@ -581,10 +581,10 @@
           registerCut([-.05,-1,.03],over,.66);
         }
 
-        const leftPlane=-.620+.082*p[1]-.020*p[2];
-        const rightPlane=.610-.048*p[1]+.018*p[2];
-        const frontPlane=.500-.030*p[1]-.026*p[0];
-        const backPlane=-.458+.018*p[1]+.014*p[0];
+        const leftPlane=-.596+.108*p[1]-.028*p[2];
+        const rightPlane=.584-.070*p[1]+.024*p[2];
+        const frontPlane=.472-.046*p[1]-.034*p[0];
+        const backPlane=-.438+.028*p[1]+.022*p[0];
         if(p[0]<leftPlane){
           const over=leftPlane-p[0];
           p[0]=leftPlane-over*.30;
@@ -608,15 +608,15 @@
 
         const crownT=Math.max(0,Math.min(1,(p[1]-.62)/.28));
         const crownEase=crownT*crownT*(3-2*crownT);
-        const crownCleft=.026*Math.exp(-Math.pow((p[0]+.010)/.180,2.0))*crownEase;
+        const crownCleft=.052*Math.exp(-Math.pow((p[0]+.018)/.150,2.0))*crownEase;
         p[1]-=crownCleft;
         p[0]+=crownCleft*.06;
 
-        const socketX=(p[0]-.115)/.205;
-        const socketY=(p[1]-.040)/.180;
+        const socketX=(p[0]-.120)/.190;
+        const socketY=(p[1]-.035)/.168;
         const frontness=Math.max(0,zs);
         const socket=Math.exp(-(socketX*socketX+socketY*socketY))*frontness;
-        p[2]-=.082*socket;
+        p[2]-=.118*socket;
 
         return {
           sphere:dir.map(value=>value*.89),
@@ -955,9 +955,9 @@
     }
 
     {
-      const centreX=.115,centreY=.040;
+      const centreX=.120,centreY=.035;
       const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.606;
-      const bezelMajorX=.112,bezelMajorY=.094,bezelTube=.0030;
+      const bezelMajorX=.126,bezelMajorY=.101,bezelTube=.0026;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -982,9 +982,9 @@
       }
 
       const lensCenter=[centreX,centreY,.614];
-      const lensRadiusX=.096;
-      const lensRadiusY=.079;
-      const lensDepth=.038;
+      const lensRadiusX=.109;
+      const lensRadiusY=.087;
+      const lensDepth=.044;
       const radialSteps=auditMode?14:(software?16:mobile?20:22);
       const angularSteps=auditMode?96:(software?112:mobile?128:144);
       function lensVertex(radial,angle){
@@ -1295,7 +1295,7 @@
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.010,.018,.022),vec3(.188,.220,.218),lift)*facetTone;
+        vec3 mineral=mix(vec3(.008,.018,.024),vec3(.215,.252,.250),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
@@ -1304,11 +1304,11 @@
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
         mineral+=vec3(.52,.58,.59)*sideSpec*.096;
-        mineral+=vec3(.98,1.00,.98)*softboxA*.285;
+        mineral+=vec3(1.00,1.00,.99)*softboxA*.345;
         mineral+=vec3(.46,.53,.53)*softboxB*.082;
-        mineral+=vec3(1.00,1.00,.99)*studioRibbonA*.285;
+        mineral+=vec3(1.00,1.00,.99)*studioRibbonA*.350;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
-        mineral+=vec3(.68,.88,.88)*studioRibbonC*.094;
+        mineral+=vec3(.72,.96,.98)*studioRibbonC*.145;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
         mineral+=vec3(.050,.126,.144)*fresnel*.145;
@@ -1483,7 +1483,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.18),clamp(outAlpha,.86,1.0));
+        ${outputName}=vec4(filmic(mineral*2.28),clamp(outAlpha,.88,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1540,17 +1540,17 @@
         float smoke=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1);
         float inclusion=smoothstep(.74,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smoke);
-        vec3 col=mix(vec3(.003,.008,.011),vec3(.068,.096,.104),lift);
+        vec3 col=mix(vec3(.004,.010,.014),vec3(.092,.128,.136),lift);
         col*=.984+.016*smoke;
         col+=vec3(.003,.0045,.0048)*strata*(.045+.085*lift);
         col-=vec3(.0012,.0018,.0020)*inclusion;
         col+=vec3(1.00,1.00,.99)*keySpec*.150;
         col+=vec3(.58,.72,.74)*sideSpec*.110;
-        col+=vec3(1.00,1.00,.99)*softboxA*.350;
+        col+=vec3(1.00,1.00,.99)*softboxA*.430;
         col+=vec3(.50,.72,.74)*softboxB*.078;
-        col+=vec3(1.00,1.00,.99)*studioRibbonA*.245;
+        col+=vec3(1.00,1.00,.99)*studioRibbonA*.330;
         col+=vec3(.40,.27,.18)*studioRibbonB*.006;
-        col+=vec3(.72,.98,1.00)*studioRibbonC*.205;
+        col+=vec3(.78,1.00,1.00)*studioRibbonC*.290;
         col+=vec3(.050,.066,.066)*horizonBand*.095;
         col+=vec3(.034,.120,.138)*fresnel*.128;
         col+=vec3(.032,.021,.015)*max(0.0,-n.y)*.055;
@@ -1657,7 +1657,7 @@
         float bodyGlassAlpha=.72+.16*facing;
         outAlpha=mix(outAlpha,bodyGlassAlpha,bodyMask);
         outAlpha=mix(outAlpha,.975,lensMeshMask);
-        ${outputName}=vec4(filmic(col*2.50),clamp(outAlpha,.70,1.0));
+        ${outputName}=vec4(filmic(col*2.58),clamp(outAlpha,.74,1.0));
       }`;
 
     /* R1678 — true software/very-low-GPU material.
@@ -1865,6 +1865,7 @@
     root.dataset.fxNativeMagStudioR1923='crease-free-cubic-smoked-ice-translucent-body';
     root.dataset.fxNativeMagStudioR1924='crystalline-superellipse-faceted-normals-silver-optic-ice-halo';
     root.dataset.fxNativeMagStudioR1925='clear-ice-transmission-correct-flush-optic-proportions';
+    root.dataset.fxNativeMagStudioR1926='igloo-grade-cut-ice-living-monolith-deep-optic-studio-refraction';
     root.dataset.fxNativeMagStudioR1898='photographic-dark-bioglass-elliptic-sensor-single-iris-arc';
     root.dataset.fxNativeMagStudioR1899='flush-integrated-smoked-sensor-clean-iris-arc-narrow-studio-reflections';
     root.dataset.fxNativeMagStudioR1900='tall-fused-bioglass-visible-embedded-optic-lifted-cinematic-midtones';
