@@ -1083,3 +1083,92 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 /* production-r1677-zero-fixed-cinematic-paint */
 
 /* production-r1943-desktop-pointer-perspective */
+
+
+/* R1947 — studio section continuity.
+   One optical field appears to travel through the page instead of every section
+   reading as a separate landing-page panel. Uses existing scene state/local
+   variables only: no new animation loop, no layout ownership. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero){
+    --fx-c1947-side-x:72%;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c1947-side="left"]{
+    --fx-c1947-side-x:28%;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .fx-c1947-bridge{
+    position:absolute;
+    z-index:-2;
+    inset:0;
+    width:100%;
+    height:100%;
+    max-width:100%;
+    overflow:hidden;
+    pointer-events:none;
+    transform:none;
+    background:
+      radial-gradient(ellipse 38% 46% at var(--fx-c1947-side-x) 46%,
+        rgba(var(--fx-c536-a),.072),
+        rgba(var(--fx-c536-b),.025) 42%,
+        transparent 76%),
+      radial-gradient(ellipse 58% 24% at 50% 54%,
+        rgba(232,253,255,.020),
+        transparent 72%);
+    filter:blur(1px);
+    opacity:calc(.10 + var(--fx-c536-scene-energy) * .48);
+    transition:opacity .7s ease,transform .85s cubic-bezier(.18,.78,.2,1);
+    contain:paint;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .fx-c1947-bridge::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:-54px;
+    width:min(760px,80%);
+    max-width:calc(100% - 24px);
+    height:108px;
+    pointer-events:none;
+    transform:translateX(-50%);
+    background:
+      linear-gradient(90deg,
+        transparent,
+        rgba(var(--fx-c536-a),.040) 18%,
+        rgba(235,254,255,.12) 50%,
+        rgba(var(--fx-c536-b),.035) 82%,
+        transparent);
+    -webkit-mask-image:linear-gradient(180deg,transparent,#000 48%,transparent);
+    mask-image:linear-gradient(180deg,transparent,#000 48%,transparent);
+    opacity:calc(.035 + var(--fx-c536-scene-energy) * .13);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="active"]{
+    filter:saturate(1.015) contrast(1.008);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="active"] > :is(
+    .section-heading,.fx-static-live-os__head,.fx-category-grid,.flow,.cards,.pricing,
+    .system-grid,.release-layout,.fx-feedback-head,.fx-feedback-form,
+    .fx-award-proof__head,.fx-award-proof__grid,.fx-net-head,.fx-net-grid
+  ){
+    filter:brightness(1.015);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="future"] > :is(
+    .section-heading,.fx-static-live-os__head,.flow,.cards,.pricing,.system-grid,
+    .release-layout,.fx-feedback-head,.fx-award-proof__head,.fx-net-head
+  ){
+    opacity:.925;
+    transform:translate3d(0,14px,0) scale(.992);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene[data-fx-c536-state="past"] > :is(
+    .section-heading,.fx-static-live-os__head,.flow,.cards,.pricing,.system-grid,
+    .release-layout,.fx-feedback-head,.fx-award-proof__head,.fx-net-head
+  ){
+    opacity:.985;
+    transform:translate3d(0,-4px,0);
+  }
+}
+/* production-r1947-studio-section-continuity-zero-idle */

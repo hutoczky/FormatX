@@ -31,6 +31,7 @@
     {selector:'#capabilities',key:'organs',code:'03',hu:'RENDSZERSZERVEK',en:'SYSTEM ORGANS',a:'121,241,219',b:'98,161,255',shape:'organism'},
     {selector:'#pricing',key:'heart',code:'04',hu:'KERESKEDELMI SZÍV',en:'COMMERCE HEART',a:'255,207,137',b:'160,109,255',shape:'organism'},
     {selector:'#system',key:'skeleton',code:'05',hu:'RENDSZERVÁZ',en:'SYSTEM SKELETON',a:'139,203,255',b:'143,114,255',shape:'organism'},
+    {selector:'#network',key:'network',code:'05.7',hu:'HÁLÓZATI SZENZOR',en:'NETWORK SENSOR',a:'104,228,255',b:'91,194,230',shape:'organism'},
     {selector:'.fx-origin-proof',key:'proof',code:'05.5',hu:'ELLENŐRIZHETŐSÉG',en:'VERIFIABILITY',a:'183,244,255',b:'111,227,200',shape:'organism'},
     {selector:'.fx-award-proof',key:'proof',code:'05.8',hu:'PUBLIC PROOF LAYER',en:'PUBLIC PROOF LAYER',a:'183,244,255',b:'111,227,200',shape:'organism'},
     {selector:'#user-feedback',key:'feedback',code:'06.5',hu:'VALÓDI VISSZAJELZÉS',en:'GENUINE FEEDBACK',a:'126,229,255',b:'168,121,255',shape:'organism'},
@@ -108,6 +109,13 @@
       layer.innerHTML = '<span class="a"></span><span class="b"></span><span class="c"></span>';
       node.appendChild(layer);
     }
+    let bridge=node.querySelector(':scope > .fx-c1947-bridge');
+    if(!(bridge instanceof HTMLElement)){
+      bridge=document.createElement('div');
+      bridge.className='fx-c1947-bridge';
+      bridge.setAttribute('aria-hidden','true');
+      node.appendChild(bridge);
+    }
     return layer;
   }
 
@@ -120,6 +128,7 @@
       seen.add(node);
       const layer = anatomy(node,def.key);
       node.dataset.fxC536Code = def.code;
+      node.dataset.fxC1947Side = (next.length % 2) ? 'left' : 'right';
       if (layer instanceof HTMLElement) layer.dataset.fxC617Code = def.code;
       const rect=node.getBoundingClientRect();
       next.push({
@@ -224,6 +233,7 @@
     const scene=scenes[index];
     root.dataset.fxCinematicSceneR536=scene.def.key;
     root.dataset.fxCinematicSceneCodeR536=scene.def.code;
+    root.dataset.fxCinematicContinuityR1947='studio-section-bridge-active';
     root.style.setProperty('--fx-c536-a',scene.def.a);
     root.style.setProperty('--fx-c536-b',scene.def.b);
     updateHud(scene);
@@ -419,8 +429,8 @@
       for (const record of records) {
         for (const node of record.addedNodes) {
           if (!(node instanceof HTMLElement)) continue;
-          if (node.matches?.('.fx-origin-proof,.fx-award-proof,#user-feedback,#live-os-overview,.fx-category-deck--standalone') ||
-              node.querySelector?.('.fx-origin-proof,.fx-award-proof,#user-feedback,#live-os-overview,.fx-category-deck--standalone')) {
+          if (node.matches?.('.fx-origin-proof,.fx-award-proof,#user-feedback,#live-os-overview,.fx-category-deck--standalone,#network') ||
+              node.querySelector?.('.fx-origin-proof,.fx-award-proof,#user-feedback,#live-os-overview,.fx-category-deck--standalone,#network')) {
             relevant=true; break;
           }
         }
@@ -520,6 +530,7 @@
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();},{passive:true});
 
     root.dataset.fxCinematicJourneyR536='ready';
+  root.dataset.fxCinematicContinuityR1947='studio-section-bridge-ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
     root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
