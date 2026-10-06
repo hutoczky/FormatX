@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261006-r1948-hero-progressive-disclosure';
+const STARTUP_REVISION = '20261006-r1949-award-final-seal';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-wM8l8kEv7xa4UGIU8YEM6eMI/uZ2TIQmvzF2tnWmD4Q='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -180,13 +180,14 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo-r1724-sitewide-habitat',
-    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20260924-r1724-final-viewport-safe']],
+    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20261006-r1949-award-final-seal']],
   }],
   ['/scifi-ui/scripts/igloo-parity.js', {
     marker: 'igloo-to-site-stability-and-mobile-surface-r1724-living-habitat',
     rewrites: [
       [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model'],
       [/formatx-mobile-unified\.js\?v=[^"']+/g, 'formatx-mobile-unified.js?v=20260924-r1724-final-viewport-safe-living-habitat'],
+      [/formatx-desktop-unified\.css(?:\?v=[^"']+)?/g, 'formatx-desktop-unified.css?v=20261006-r1949-award-final-seal'],
     ],
   }],
 ]);
@@ -273,7 +274,7 @@ function cacheBustR502Runtime(html) {
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260925-r1730-retired-r533-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260920-r644-persistent-open')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism')
-    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20260925-r1746-lighthouse-ua-audit')
+    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20261006-r1949-award-final-parent')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
 }

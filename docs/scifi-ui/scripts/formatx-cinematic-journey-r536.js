@@ -220,6 +220,21 @@
     scene.node.dataset.fxC536State=state;
   }
 
+  function applyHeroDisclosure(scene){
+    if(!(stage instanceof HTMLElement) || !scene)return;
+    const world=stage.querySelector('.fx-c536-world');
+    if(!(world instanceof HTMLElement))return;
+    if(scene.def.key==='core'){
+      /* R1949 — one-shot inline floor guarantees the hero world never flashes
+         at opacity:1 while deferred CSS/transition ownership settles. */
+      world.style.setProperty('opacity','.10','important');
+      root.dataset.fxCinematicHeroWorldR1949='restrained-inline-floor';
+    }else{
+      world.style.removeProperty('opacity');
+      root.dataset.fxCinematicHeroWorldR1949='journey-css-owned';
+    }
+  }
+
   function commitScene(index,previous,reason='scroll-settled-r1653'){
     if(!scenes.length)return;
     index=clamp(index,0,scenes.length-1);
@@ -233,6 +248,7 @@
     const scene=scenes[index];
     root.dataset.fxCinematicSceneR536=scene.def.key;
     root.dataset.fxCinematicSceneCodeR536=scene.def.code;
+    applyHeroDisclosure(scene);
     root.dataset.fxCinematicContinuityR1947='studio-section-bridge-active';
     root.style.setProperty('--fx-c536-a',scene.def.a);
     root.style.setProperty('--fx-c536-b',scene.def.b);
@@ -390,10 +406,14 @@
       scrollBudgetTimer=0;
       velocity=0;
       pendingSceneIndex=-1;
-      const target=pickActive(scrollY);
+      const atDocumentTop=scrollY<=Math.max(2,innerHeight*.015);
+      const target=atDocumentTop?0:pickActive(scrollY);
       if(target!==active)active=target;
       if(target!==committedSceneIndex){
-        commitScene(target,committedSceneIndex,'scroll-settled-r1665');
+        commitScene(target,committedSceneIndex,atDocumentTop?'document-top-core-r1948':'scroll-settled-r1665');
+      }
+      if(atDocumentTop){
+        root.dataset.fxCinematicTopReturnR1948='deterministic-core';
       }
       root.dataset.fxCinematicSceneCommitR1664='settled';
       root.dataset.fxCinematicSceneCommitR1665='single-post-scroll-sync';
@@ -504,6 +524,17 @@
     bindCinematicInteraction();
 
     addEventListener('scroll',()=>{
+      /* R1949 — document top is a semantic scene boundary, not a delayed
+         heuristic. Commit core immediately so a cancelled settle/refresh can
+         never strand the journey state below the hero. */
+      if(scrollY<=Math.max(2,innerHeight*.015) && committedSceneIndex!==0){
+        const previous=committedSceneIndex;
+        active=0;
+        pendingSceneIndex=-1;
+        clearTimeout(sceneCommitTimer);sceneCommitTimer=0;
+        commitScene(0,previous,'document-top-immediate-r1949');
+        root.dataset.fxCinematicTopReturnR1949='immediate-core-commit';
+      }
       /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
          is scheduled here. One settle pass updates scene state and visual depth
          after 120 ms without scroll input. */
@@ -531,6 +562,7 @@
 
     root.dataset.fxCinematicJourneyR536='ready';
     root.dataset.fxCinematicDisclosureR1948='hero-core-dormant-global-hud-noncore-scene-open-zero-idle';
+    root.dataset.fxCinematicSealR1949='hero-world-inline-floor-immediate-document-top-core';
   root.dataset.fxCinematicContinuityR1947='studio-section-bridge-ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
