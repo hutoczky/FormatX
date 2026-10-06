@@ -1944,7 +1944,7 @@
         ? (mobile?1.58:1.28)
         : (auditMode ? 1.34 : constrainedMobile?1.82:mobile?2.08:constrained?1.88:2.55);
       const nativeDpr=devicePixelRatio||1;
-      const cssArea=Math.max(1,cssWidth*cssHeight);
+      const cssArea=Math.max(1,rect.width*rect.height);
       /* R1951b — a small hero canvas is cheap enough to protect with a hard
          raster floor. This prevents the adaptive governor from turning a 2x
          phone screenshot into a ~1.48x backing store and making the four tips
