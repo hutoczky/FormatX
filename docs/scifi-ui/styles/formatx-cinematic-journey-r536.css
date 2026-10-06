@@ -491,16 +491,16 @@ html.fx-c536-flow .fx-c536-track{
     opacity:calc(.10 + var(--fx-c536-energy) * .14)
   }
   .fx-c536-vignette{opacity:.34}
-  .fx-c536-grain{opacity:.035}
-  .fx-c536-track{left:2vw;right:2vw;opacity:calc(.035 + var(--fx-c536-energy) * .09)}
-  .fx-c536-scan{left:0;right:0;opacity:.035}
+  .fx-c536-grain{opacity:.012}
+  .fx-c536-track{left:2vw;right:2vw;opacity:calc(.006 + var(--fx-c536-energy) * .026)}
+  .fx-c536-scan{left:0;right:0;opacity:.010}
   .fx-c536-anatomy{
     inset:0;
     width:100%;
     max-width:100%;
     overflow:hidden;
     contain:paint;
-    opacity:calc(.04 + var(--fx-c536-scene-energy) * .32)
+    opacity:calc(.025 + var(--fx-c536-scene-energy) * .22)
   }
   .fx-c536-anatomy .a,
   .fx-c536-anatomy .b,
