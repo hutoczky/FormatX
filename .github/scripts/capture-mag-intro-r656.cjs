@@ -288,6 +288,7 @@ const SHOTS=[
           nativeProof:root.dataset.fxMagBirthVisualFrameNativeR1947||'',
           nativeCrossfade:root.dataset.fxMagBirthNativeCrossfadeR1947||'',
           nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+          nativeUnderlay:root.dataset.fxMagBirthVisualFrameUnderlayR1948||root.dataset.fxMagBirthNativeUnderlayR1948||'',
           overlayOpacity:getComputedStyle(document.querySelector('.fx-mag-birth-r533')).opacity,
           overlay:document.querySelectorAll('.fx-mag-birth-r533').length
         };
@@ -303,6 +304,9 @@ const SHOTS=[
         }
         if(state.nativeProof!=='painted-crossfade-ready'){
           errors.push('R1947 fixed-frame native proof not synchronized: '+state.nativeProof);
+        }
+        if(state.nativeUnderlay!=='visible'){
+          errors.push('R1948 native hero underlay is not effectively visible during finale proof: '+state.nativeUnderlay);
         }
         if(seconds>=9.50){
           const blend=Number(state.nativeCrossfade);
