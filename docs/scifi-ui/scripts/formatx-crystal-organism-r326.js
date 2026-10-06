@@ -772,11 +772,30 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    stage.style.setProperty('background','transparent','important');
+
+    /* R1951 — studio depth field.
+       Static gradients provide contact shadow, restrained volumetric haze and
+       a tiny optical bloom without another renderer or idle animation loop. */
+    const depthField=document.createElement('div');
+    depthField.className='fx-mag-studio-depth-r1951';
+    depthField.setAttribute('aria-hidden','true');
+    depthField.style.setProperty('position','absolute','important');
+    depthField.style.setProperty('inset','0','important');
+    depthField.style.setProperty('pointer-events','none','important');
+    depthField.style.setProperty('z-index','0','important');
+    depthField.style.setProperty('background',[
+      'radial-gradient(ellipse 27% 12% at 50% 68%,rgba(0,0,0,.50) 0%,rgba(0,0,0,.24) 38%,transparent 78%)',
+      'radial-gradient(ellipse 35% 42% at 50% 49%,rgba(75,155,164,.085) 0%,rgba(28,73,80,.035) 42%,transparent 76%)',
+      'radial-gradient(ellipse 17% 22% at 50% 49%,rgba(108,227,228,.055) 0%,rgba(50,120,130,.018) 52%,transparent 78%)'
+    ].join(','),'important');
+    depthField.style.setProperty('opacity',mobile?'.72':'.88','important');
+    stage.appendChild(depthField);
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
+    canvas.style.setProperty('z-index','1','important');
     stage.appendChild(canvas);
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
@@ -784,7 +803,7 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : 'brightness(1.025) contrast(1.085) saturate(.90)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -794,13 +813,13 @@
     if(!reduced.matches && typeof canvas.animate==='function'){
       const livingTimeline=canvas.animate(
         [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
+          {opacity:.988,offset:0},
+          {opacity:1,offset:.48},
+          {opacity:.992,offset:.76},
+          {opacity:.988,offset:1}
         ],
         {
-          duration:6800,
+          duration:7200,
           iterations:Infinity,
           easing:'cubic-bezier(.37,0,.20,1)',
           fill:'both'
@@ -1691,6 +1710,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1951='desktop-minimum-supersample-no-css-scale-resample-high-quality-floor';
+    root.dataset.fxNativeMagDepthR1951='static-volumetric-haze-contact-shadow-optical-bloom-no-extra-render-loop';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1834,14 +1855,14 @@
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      ? (mobile?.94:.82)
+      : (mobile ? 1.00 : (auditMode ? .96 : (constrained ? .92 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      ? (mobile?1.00:.96)
+      : (mobile?1.08:(auditMode?1.02:(constrained?1.00:1.10)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      ? (mobile?.80:.64)
+      : (mobile?.80:(constrained?.78:.88));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1855,13 +1876,16 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        ? (mobile?1.58:1.42)
+        : (auditMode ? 1.55 : constrainedMobile?1.72:mobile?2.00:constrained?1.82:2.25);
       const cap=baseCap*qualityScale;
-      const dpr=Math.min(devicePixelRatio||1,cap);
+      const nativeDpr=devicePixelRatio||1;
+      const desktopSupersample=softwareRenderer?1.18:(constrained?1.28:1.46);
+      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,desktopSupersample);
+      const dpr=Math.min(requestedDpr,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        ? (mobile?920000:760000)
+        : (auditMode ? 1400000 : constrainedMobile?1280000:mobile?1900000:constrained?2100000:4600000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2116,7 +2140,10 @@
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
+          qualityScale=Math.max(
+            qualityFloor,
+            qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.08:.045))
+          );
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
