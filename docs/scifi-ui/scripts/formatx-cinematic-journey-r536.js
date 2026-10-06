@@ -390,10 +390,14 @@
       scrollBudgetTimer=0;
       velocity=0;
       pendingSceneIndex=-1;
-      const target=pickActive(scrollY);
+      const atDocumentTop=scrollY<=Math.max(2,innerHeight*.015);
+      const target=atDocumentTop?0:pickActive(scrollY);
       if(target!==active)active=target;
       if(target!==committedSceneIndex){
-        commitScene(target,committedSceneIndex,'scroll-settled-r1665');
+        commitScene(target,committedSceneIndex,atDocumentTop?'document-top-core-r1948':'scroll-settled-r1665');
+      }
+      if(atDocumentTop){
+        root.dataset.fxCinematicTopReturnR1948='deterministic-core';
       }
       root.dataset.fxCinematicSceneCommitR1664='settled';
       root.dataset.fxCinematicSceneCommitR1665='single-post-scroll-sync';
