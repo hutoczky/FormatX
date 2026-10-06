@@ -284,12 +284,25 @@ const SHOTS=[
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
+          nativeProof:root.dataset.fxMagBirthVisualFrameNativeR1947||'',
+          nativeCrossfade:root.dataset.fxMagBirthNativeCrossfadeR1947||'',
+          nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+          overlayOpacity:getComputedStyle(document.querySelector('.fx-mag-birth-r533')).opacity,
           overlay:document.querySelectorAll('.fx-mag-birth-r533').length
         };
       });
 
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      }
+      if(seconds>=8.85){
+        if(state.nativeFirstFrame!=='painted')errors.push('R1947 native hero did not paint before finale proof: '+state.nativeFirstFrame);
+        if(!/^(?:0(?:\.\d+)?|1(?:\.0+)?)$/.test(state.nativeCrossfade)){
+          errors.push('R1947 native crossfade telemetry missing at '+seconds+'s: '+state.nativeCrossfade);
+        }
+        if(state.nativeProof!=='painted-crossfade-ready'){
+          errors.push('R1947 fixed-frame native proof not synchronized: '+state.nativeProof);
+        }
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
