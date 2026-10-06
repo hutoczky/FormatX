@@ -328,7 +328,23 @@
         .020*Math.sin(theta*4+phi*1.7)*poleFade+
         .007*Math.sin(theta*7-phi*3.1)*poleFade;
 
-      const crystalPosition=direction.map(value=>value*radial*organic);
+      let crystalPosition=direction.map(value=>value*radial*organic);
+      if(!mobile){
+        /* R1947 — explicit cardinal tip extension.
+           The Lp body stays continuous, but the four signature directions receive
+           authored tip energy so the settled desktop silhouette cannot collapse
+           back into a rounded pod under broad studio reflections. */
+        const absX=Math.abs(direction[0]);
+        const absY=Math.abs(direction[1]);
+        const diagonalPinch=Math.pow(Math.min(1,absX*absY*2.0),2.25);
+        const tipX=.175*Math.pow(absX,7.2);
+        const tipY=.215*Math.pow(absY,6.8);
+        crystalPosition[0]+=Math.sign(direction[0]||1)*tipX;
+        crystalPosition[1]+=Math.sign(direction[1]||1)*tipY;
+        crystalPosition[0]*=1-.070*diagonalPinch;
+        crystalPosition[1]*=1-.070*diagonalPinch;
+        crystalPosition[2]*=.90;
+      }
 
       /* Keep the original crystalline outline, but smooth the studio response.
          This prevents the four quadrants from reading as flat cardboard planes. */
@@ -1298,15 +1314,15 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(${mobile?'.108,.138,.141':'.145,.188,.194'}),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
+        c+=vec3(.135,.152,.145)*facetSilver*${mobile?'.044':'.096'};
+        c+=vec3(.012,.075,.086)*facetCool*${mobile?'.030':'.062'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
@@ -1334,8 +1350,8 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
-        c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
+        c+=vec3(.135,.300,.305)*axisRidge*(${mobile?'.070':'.092'}+${mobile?'.028':'.036'}*prismSweep);
+        c+=vec3(.48,.53,.49)*axisRidge*softboxB*${mobile?'.055':'.075'};
         c*=1.0-.090*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
@@ -1371,8 +1387,8 @@
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.036,.205,.225)*fresnel*${mobile?'.34':'.42'};
+        c+=vec3(.065,.335,.365)*deepEdge*${mobile?'.235':'.295'};
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1382,7 +1398,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.238'},vLocal.y/${mobile?'.135':'.238'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1396,10 +1412,10 @@
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
-        c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        c+=vec3(.82,.92,.88)*rim*${mobile?'.125':'.205'};
+        c+=vec3(.032,.31,.35)*iris*(${mobile?'.115':'.160'}+${mobile?'.085':'.105'}*uEnergy);
+        c+=vec3(.30,.96,.97)*core*(${mobile?'.34':'.46'}+${mobile?'.17':'.20'}*uEnergy);
+        c+=vec3(1.00,1.00,.99)*hot*(${mobile?'.64':'.82'}+${mobile?'.12':'.15'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -1600,6 +1616,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='desktop-cardinal-tip-cutglass-brighter-prism-enlarged-optic';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
