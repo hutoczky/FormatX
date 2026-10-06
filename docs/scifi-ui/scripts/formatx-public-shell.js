@@ -155,7 +155,7 @@
       brand.href = '/scifi-ui/';
       brand.setAttribute('aria-label', 'FormatX Suite Pro');
       const icon = document.createElement('img');
-      icon.src = '/scifi-ui/assets/images/formatx-icon.png';
+      icon.src = '/scifi-ui/assets/images/formatx-icon-80.webp';
       icon.width = 36;
       icon.height = 36;
       icon.alt = '';
