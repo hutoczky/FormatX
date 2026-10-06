@@ -1192,19 +1192,42 @@
         const settleProof=()=>{
           if(finished||!overlay.isConnected)return;
           proofAttempts+=1;
+
+          /* R1947c — fixed-frame proof must repeatedly acquire/sync the native
+             hero, not only the intro canvas. A late runtime/bootstrap is normal
+             on CI and was previously invisible to the proof contract. */
+          try{
+            locateStage();
+            if(fixedR>=CORE_WARMUP_PROGRESS)requestCoreWarmup('fixed-frame-r1947-'+proofAttempts);
+            syncNativeCore(fixedR,fixedTime);
+            coreApi?.requestRender?.(2);
+          }catch(_){}
+
           try{drawParticles(fixedR,fixedTime);}catch(error){
             console.error('FormatX R1560 fixed-frame settle render failed:',error);
           }
           try{updateNativeCrossfade(fixedR);}catch(_){}
+
           const peak=Number(ROOT.dataset.fxMagBirthFramePeakR1557||0);
-          if(peak<8 && proofAttempts<8){
+          const needsNative=fixedR>=.885;
+          const nativePainted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
+          const crossfadeState=ROOT.dataset.fxMagBirthNativeCrossfadeR1947||'';
+          const crossfadeNumeric=/^(?:0(?:\.\d+)?|1(?:\.0+)?)$/.test(crossfadeState);
+          const introVisible=peak>=8;
+          const settled=introVisible&&(!needsNative||(nativePainted&&crossfadeNumeric));
+
+          if(!settled && proofAttempts<24){
             requestAnimationFrame(()=>requestAnimationFrame(settleProof));
             return;
           }
+
           ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
           ROOT.dataset.fxMagBirthVisualFrameR1557='double-render-compositor-synchronized';
-          ROOT.dataset.fxMagBirthVisualFrameR1560=peak>=8?'readback-visible':'bounded-readback-fail-open';
+          ROOT.dataset.fxMagBirthVisualFrameR1560=settled?'readback-visible-native-crossfade-synchronized':'bounded-readback-fail-open';
           ROOT.dataset.fxMagBirthVisualFrameAttemptsR1560=String(proofAttempts);
+          ROOT.dataset.fxMagBirthVisualFrameNativeR1947=needsNative
+            ? (nativePainted&&crossfadeNumeric?'painted-crossfade-ready':'bounded-native-fail-open')
+            : 'not-required';
           ROOT.dataset.fxMagBirthVisualFrameR659='ready';
           try{
             document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
