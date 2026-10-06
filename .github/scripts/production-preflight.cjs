@@ -212,8 +212,11 @@ check(
     && syncWorkflow.includes('android_local_digest')
     && syncWorkflow.includes('sha256sum')
     && syncWorkflow.includes("stat -c '%s'")
-    && syncWorkflow.includes("git commit -m '[deploy-production] Sync official current release metadata'"),
-  'Release sync is not deterministic and resilient'
+    && syncWorkflow.includes('actions: write')
+    && syncWorkflow.includes('deploy-formatx-custom-domain.yml/dispatches')
+    && syncWorkflow.includes('"deploy":"true"')
+    && syncWorkflow.includes("git commit -m 'Sync official current release metadata'"),
+  'Release sync is not deterministic, resilient and deploy-aware'
 );
 
 check(
