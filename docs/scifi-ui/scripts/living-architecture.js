@@ -119,7 +119,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20261006-r1949-award-final-seal';
+      script.src = './scripts/igloo-parity.js?v=20261007-r1951-photoreal-continuous-scene';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
