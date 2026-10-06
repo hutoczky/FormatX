@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-section-continuity
-base_master=246de190f38f323b50a7ff70a3dc52ff2a20d315
-purpose=deploy the R1947 continuous desktop living-system scene with dedicated compositor light bridges, NET chapter coverage, preserved R1945l Signature MAG and R1944 precision interaction
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, no-occlusion, cinematic handoff and production Worker parity
+token=20261006-r1948-desktop-editorial-rhythm
+base_master=0a086b6dc58648f5a98a1ad5f9cae3f38cea0abd
+purpose=compress desktop chapter dead zones into content-driven editorial rhythm while preserving R1947 continuity, R1945l Signature MAG, R1944 precision interaction and the mobile layout contract
+validation=production preflight, responsive overflow, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, cinematic handoff and production Worker parity
