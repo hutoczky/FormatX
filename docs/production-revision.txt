@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947c-native-crossfade-parity
+token=20261006-r1947d-native-crossfade-parity
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=deploy seamless intro-to-permanent Signature MAG continuity: early spatial travel to the real hero anchor, proxy-shell crossfade into the exact warmed native MAG, compact optic corona preserved through the render loop, no low-poly proxy plates and controlled no-clipping smoked-silver finale
-validation=production preflight, exact-revision convergence, intro keyframes, P0 fast loop, Lighthouse desktop/mobile, mobile MAG proof, no-occlusion, R536 handoff, Worker CSP/rewrite parity, review closure and production smoke tests
+purpose=deploy seamless intro-to-permanent Signature MAG continuity with runtime-safe handoff progress: early spatial travel to the hero anchor, proxy-shell crossfade into the exact warmed native MAG, compact optic corona, no low-poly proxy plates and controlled no-clipping smoked-silver finale
+validation=production preflight, exact-revision convergence, runtime error-free intro keyframes, P0 fast loop, Lighthouse desktop/mobile, mobile MAG proof, no-occlusion, R536 handoff, Worker CSP/rewrite parity, review closure and production smoke tests
