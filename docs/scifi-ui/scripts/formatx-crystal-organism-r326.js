@@ -1289,7 +1289,7 @@
         }
 
         /* Smoked blue-silver glass volume. */
-        float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
+        float lift=sat(.235+.33*key+.25*side+.16*fill+.085*top);
         float macroAngle=atan(vLocal.y,vLocal.x);
         float macroRadius=length(vLocal.xy);
         float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
@@ -1298,17 +1298,17 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        vec3 c=mix(vec3(.008,.018,.024),vec3(.138,.202,.210),lift)*facetTone;
+        c*=.965+.035*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
-        c+=vec3(.020,.043,.048)*backDepth*.11;
+        c+=vec3(.145,.165,.158)*facetSilver*${mobile?'.060':'.092'};
+        c+=vec3(.016,.090,.102)*facetCool*${mobile?'.040':'.058'};
+        c+=vec3(.030,.060,.064)*strata*.052;
+        c+=vec3(.022,.052,.058)*backDepth*.060;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
@@ -1350,8 +1350,8 @@
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
         float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
         float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
+        c+=vec3(.46,.60,.57)*prismShellA*(${mobile?'.125':'.155'}+${mobile?'.042':'.052'}*softboxB);
+        c+=vec3(.060,.220,.235)*prismShellB*(${mobile?'.090':'.115'}+${mobile?'.036':'.045'}*fresnel);
         c*=1.0-.020*prismShellB;
 
         /* R1942d — four authored fold ridges from optic to signature tips.
@@ -1364,9 +1364,9 @@
         float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
-        c*=1.0-${mobile?'.085':'.110'}*foldValley;
+        c+=vec3(.34,.50,.49)*foldRidge*${mobile?'.145':'.185'};
+        c+=vec3(.070,.235,.248)*foldSecondary*${mobile?'.078':'.105'};
+        c*=1.0-${mobile?'.070':'.092'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
@@ -1375,31 +1375,31 @@
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
+        c+=vec3(.030,.135,.148)*centreHaze*(${mobile?'.055':'.035'}+${mobile?'.050':'.040'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.158':'.232'},vLocal.y/${mobile?'.158':'.232'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
-        c+=vec3(.020,.080,.092)*cavityCore*.055;
+        c=mix(c,vec3(.008,.030,.038)+c*.52,cavity*.070);
+        c+=vec3(.028,.120,.132)*cavityCore*.078;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
         float rim=exp(-pow((od-.74)/.060,2.0))*front;
         float iris=exp(-od*od*4.8)*front;
         float core=exp(-od*od*18.5)*front;
         float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
-        vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
+        vec3 opticBase=vec3(.010,.060,.070)+vec3(.022,.145,.160)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
+        c+=vec3(.84,.93,.89)*rim*${mobile?'.145':'.185'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        c+=vec3(.32,.95,.96)*core*(${mobile?'.39':'.46'}+${mobile?'.18':'.20'}*uEnergy);
+        c+=vec3(.99,1.00,.99)*hot*(${mobile?'.70':'.78'}+${mobile?'.13':'.14'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -1414,7 +1414,9 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        /* R1947 — preserve a smoked-glass black level, never isolated black pinholes. */
+        c=max(c,vec3(.012,.026,.032));
+        ${outputName}=vec4(tone(c*${mobile?'3.12':'2.86'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1600,6 +1602,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='clear-layered-smoked-silver-bioglass-no-pinholes-enlarged-optic';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
