@@ -9,6 +9,7 @@
   const smooth = v => { v=clamp(v); return v*v*(3-2*v); };
   const ease = v => 1-Math.pow(1-clamp(v),3);
   const mix = (a,b,t) => a+(b-a)*t;
+  const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
 
   async function loadThree(){
     let last=null;
@@ -937,19 +938,26 @@
         const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
         const len=Math.hypot(x,y,z)||1;
         const dx=x/len,dy=y/len,dz=z/len;
-        const axisX=dx>=0?1.02:.98;
-        const axisY=dy>=0?1.18:1.06;
-        const axisZ=dz>=0?.49:.34;
-        const exponent=.70;
+        const axisX=MOBILE
+          ? (dx>=0?.88:.86)
+          : (dx>=0?1.02:.98);
+        const axisY=MOBILE
+          ? (dy>=0?1.09:.97)
+          : (dy>=0?1.18:1.06);
+        const axisZ=MOBILE
+          ? (dz>=0?.64:.43)
+          : (dz>=0?.49:.34);
+        const exponent=MOBILE?.78:.70;
         const terms=
           Math.pow(Math.abs(dx)/axisX,exponent)+
           Math.pow(Math.abs(dy)/axisY,exponent)+
           Math.pow(Math.abs(dz)/axisZ,exponent);
         const radialBase=1/Math.pow(Math.max(.0001,terms),1/exponent);
-        const tipBoost=
-          1+
-          .055*Math.pow(Math.abs(dx),8)+
-          .078*Math.pow(Math.abs(dy),8);
+        const tipBoost=MOBILE
+          ? 1
+          : 1+
+            .055*Math.pow(Math.abs(dx),8)+
+            .078*Math.pow(Math.abs(dy),8);
         const radial=radialBase*tipBoost;
         const poleFade=Math.max(0,1-dy*dy);
         const theta=Math.atan2(dz,dx);
@@ -1090,14 +1098,14 @@
         blending:T.AdditiveBlending
       }));
       this.mechEyeCorona.scale.set(.245,.245,1);
-      this.mechEyeCorona.position.set(0,.01,.447);
+      this.mechEyeCorona.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
         new T.CircleGeometry(.048,64),
         new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
       );
-      this.mechEyeCore.position.set(0,.01,.455);
+      this.mechEyeCore.position.set(0,.01,.512);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
@@ -1108,7 +1116,10 @@
         new T.TorusGeometry(.082,.0038,8,72),
         this.mechInnerMaterial
       );
-      this.mechInnerRing.position.set(0,.01,.451);
+      this.mechInnerRing.position.set(0,.01,.508);
+      this.mechInnerRing.renderOrder=4;
+      this.mechEyeCore.renderOrder=4;
+      this.mechEyeCorona.renderOrder=5;
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
@@ -1505,8 +1516,8 @@
         this.flashBeam.scale.x=1+flash*.08;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.24,.15+flash*.035);
+        const q=.245+flash*.018;
         this.mechEyeCorona.scale.set(q,q,1);
       }
       if(this.mechLight)this.mechLight.intensity+=flash*1.20;
@@ -1590,6 +1601,7 @@
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagSignatureR1947='same-volumetric-four-point-field-intro-to-hero-recessed-optic';
   document.documentElement.dataset.fxMagSignatureR1947b='smooth-cusp-small-optic-continuous-handoff';
+  document.documentElement.dataset.fxMagSignatureR1947c='mobile-parity-front-visible-optic-stable-corona-scale';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
