@@ -25,12 +25,12 @@
     display: grid;
     box-sizing: border-box;
     grid-template-columns: minmax(500px, .92fr) minmax(520px, 1.08fr);
-    width: min(1680px, calc(100% - clamp(72px, 8vw, 150px)));
+    width: min(1640px, calc(100% - clamp(88px, 10vw, 176px)));
     height: 100%;
     min-height: 0;
     margin-inline: auto;
     padding: 0;
-    gap: clamp(34px, 5vw, 96px);
+    gap: clamp(54px, 6.2vw, 118px);
     align-items: center;
   }
 
@@ -40,7 +40,7 @@
     bottom: auto;
     display: grid;
     grid-template-rows: repeat(7, auto);
-    row-gap: clamp(7px, 1.05vh, 14px);
+    row-gap: clamp(9px, 1.25vh, 17px);
     align-content: center;
     align-self: center;
     width: min(700px, 100%);
@@ -100,7 +100,7 @@
 
   html body.living-architecture #hero .hero-lead {
     max-width: 620px;
-    margin-top: clamp(8px, 1.2vh, 16px);
+    margin-top: clamp(12px, 1.5vh, 20px);
     font-size: clamp(15px, 1.05vw, 18px);
     line-height: 1.58;
   }
@@ -108,9 +108,9 @@
   html body.living-architecture #hero .hero-actions {
     display: flex !important;
     width: min(620px, 100%);
-    margin-top: clamp(10px, 1.5vh, 20px);
+    margin-top: clamp(14px, 1.8vh, 24px);
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
   }
 
   html body.living-architecture #hero .hero-actions .button {
@@ -139,7 +139,7 @@
     position: absolute;
     inset: 8% 3% 7%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--accent, 56 222 255), .055), transparent 66%);
+    background: radial-gradient(circle, rgba(var(--accent, 56 222 255), .034), transparent 68%);
     filter: blur(28px);
     pointer-events: none;
   }
@@ -167,20 +167,20 @@
      viewport of empty black space. */
   html body.living-architecture main > .scene:not(#hero) {
     min-height: clamp(640px, 82svh, 860px);
-    padding-block: clamp(72px, 9vh, 112px);
+    padding-block: clamp(88px, 11vh, 132px);
   }
 
   html body.living-architecture main > :is(
     #network,#resources
   ).scene:not(#hero){
     min-height: clamp(560px, 72svh, 760px);
-    padding-block: clamp(64px, 8vh, 96px);
+    padding-block: clamp(76px, 9.5vh, 108px);
   }
 
   html body.living-architecture main > :is(
     #experience,#capabilities,#pricing,#system
   ).scene:not(#hero) > .section-heading{
-    margin-bottom:clamp(34px,4.2vh,54px);
+    margin-bottom:clamp(46px,5.4vh,68px);
   }
 }
 
@@ -249,3 +249,5 @@
     transform: none;
   }
 }
+
+/* production-r1951-luxury-breathing-room */
