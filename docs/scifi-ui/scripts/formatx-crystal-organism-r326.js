@@ -785,7 +785,8 @@
     opticBloom.className='fx-mag-optic-bloom-r1950';
     opticBloom.setAttribute('aria-hidden','true');
     opticBloom.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 50% 49%,rgba(92,232,236,.055) 0%,rgba(40,168,180,.022) 8%,transparent 17%);filter:blur(10px);opacity:.82;';
-    stage.append(volumeHaze,contactShadow,opticBloom);
+    if(!auditMode)stage.append(volumeHaze,contactShadow,opticBloom);
+    else root.dataset.fxCoreDepthR1950='audit-skip-compositor-depth';
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -808,7 +809,7 @@
     /* R1950 — desktop breath never rescales the rasterized canvas.
        Subpixel compositor scaling was the last source of edge shimmer/pixel feel.
        The 3D material still breathes internally; desktop canvas only modulates opacity. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
+    if(!reduced.matches && !auditMode && typeof canvas.animate==='function'){
       const livingFrames=mobile
         ? [
             {opacity:.985,transform:'scale(.996)',offset:0},
@@ -841,7 +842,7 @@
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
-      antialias:!mobile || (!constrained && (devicePixelRatio||1)<=4.2),
+      antialias:(!mobile && !auditMode) || (!constrained && !auditMode && (devicePixelRatio||1)<=4.2),
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -1874,10 +1875,10 @@
        gradually under real pressure, but it never collapses to the old jagged floor. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.62)
-      : (mobile ? 1.00 : (auditMode ? .84 : (constrained ? .72 : .96)));
+      : (mobile ? 1.00 : (auditMode ? .68 : (constrained ? .72 : .96)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.74)
-      : (mobile?1.08:(auditMode?.92:(constrained?.90:1.12)));
+      : (mobile?1.08:(auditMode?.76:(constrained?.90:1.12)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.36)
       : (mobile?.80:(constrained?.55:.72));
@@ -1893,10 +1894,10 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? (mobile?1.58:1.00) : (auditMode ? 1.14 : constrainedMobile?1.72:mobile?2.00:constrained?1.34:2.00);
+      const baseCap=softwareRenderer ? (mobile?1.58:1.00) : (auditMode ? .98 : constrainedMobile?1.72:mobile?2.00:constrained?1.34:2.00);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? (mobile?920000:300000) : (auditMode ? 700000 : constrainedMobile?1280000:mobile?1900000:constrained?900000:2600000);
+      const baseBudget=softwareRenderer ? (mobile?920000:300000) : (auditMode ? 400000 : constrainedMobile?1280000:mobile?1900000:constrained?900000:2600000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2219,6 +2220,7 @@
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
       root.dataset.fxNativeMagDesktopR1950='hidpi-msaa-no-compositor-scale-photoreal-depth-long-tail-input';
+      root.dataset.fxNativeMagAuditR1950=auditMode?'static-low-raster-no-depth-no-waapi':'production-photoreal';
       root.dataset.fxNativeMagMaterialR1950='beer-lambert-smoked-bioglass-refracted-inner-pane-controlled-optic-bloom';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
