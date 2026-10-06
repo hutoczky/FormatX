@@ -1376,44 +1376,50 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.090,finale),
-        mix(.090,.175,finale),
-        mix(.106,.185,finale)
+        mix(.031,.082,finale),
+        mix(.090,.132,finale),
+        mix(.106,.140,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.075,finale),
-        mix(.125,.160,finale),
-        mix(.145,.175,finale)
+        mix(.039,.068,finale),
+        mix(.125,.118,finale),
+        mix(.145,.128,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
+        mix(.480,.500,finale),
+        mix(.575,.555,finale),
+        mix(.565,.535,finale)
       );
-      this.mechMaterial.transmission=mix(.32,.36,finale);
-      this.mechMidMaterial.transmission=mix(.38,.42,finale);
-      this.mechMaterial.roughness=mix(.115,.135,finale);
-      this.mechMidMaterial.roughness=mix(.105,.125,finale);
-      this.silverMaterial.roughness=mix(.085,.100,finale);
+      this.mechMaterial.transmission=mix(.32,.30,finale);
+      this.mechMidMaterial.transmission=mix(.38,.34,finale);
+      this.mechMaterial.roughness=mix(.115,.105,finale);
+      this.mechMidMaterial.roughness=mix(.105,.095,finale);
+      this.silverMaterial.roughness=mix(.085,.082,finale);
 
-      this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
-      this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
-      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      this.mechMaterial.opacity=(.91+.030*finale)*grow;
+      this.mechMidMaterial.opacity=(.62+.060*finale)*grow;
+      this.silverMaterial.opacity=(.16+.080*finale)*grow;
+      this.mechEdgeMaterial.opacity=(.012+.008*finale)*grow;
+      this.mechInnerMaterial.opacity=(.14+.045*finale)*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=(.035-.015*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.11+.025*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(.82+.20*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
         this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
       }
       if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
+      const facetReveal=smooth((t-7.65)/1.15);
       this.silverParts.forEach((p,i)=>{
-        p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
+        p.visible=facetReveal>.02;
+        p.rotation.y=Math.sin(time*.00015+i)*.004*grow;
+        p.scale.z=.70+.10*facetReveal;
       });
+      if(this.plates[0])this.plates[0].visible=facetReveal>.04;
+      if(this.plates[1])this.plates[1].visible=facetReveal>.04;
+      if(this.plates[2])this.plates[2].visible=false;
     }
 
     updateTentacles(t,time){
@@ -1475,33 +1481,38 @@
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
+      const studioFocus=1-smooth((t-8.15)/1.25)*.82;
+      this.particles.material.opacity=(.38+.10*Math.sin(time*.00045))*studioFocus;
+      if(this.debris?.material){
+        this.debris.material.opacity=.40*studioFocus;
+        this.debris.material.emissiveIntensity=.28*studioFocus;
+      }
 
       const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
       /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
       const after=smooth((t-9.46)/.34);
       this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
-      this.coreLight.intensity+=flash*.80+after*.25;
+      this.coreLight.intensity+=flash*.32+after*.10;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.070,this.glowSprite.material.opacity+flash*.016);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.028;
+        this.flashBurst.material.opacity=flash*.010;
         const burstScale=2.18+flash*.18;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.012;
+        this.flashBeam.material.opacity=flash*.004;
         this.flashBeam.scale.x=1+flash*.08;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.25,.18+flash*.022);
+        const q=1.00+flash*.018;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechLight)this.mechLight.intensity+=flash*.42;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1580,6 +1591,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1947='studio-final-cut-prism-smoked-silver-low-glow-facet-handoff';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
