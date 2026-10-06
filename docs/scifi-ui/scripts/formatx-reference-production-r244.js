@@ -51,7 +51,18 @@
     const bar = document.querySelector('.topbar');
     if (!(bar instanceof HTMLElement)) return {};
 
-    let mag = document.querySelector('.fx-reference-mag-button');
+    const canonicalButton=(selector,preferred)=>{
+      const all=Array.from(document.querySelectorAll(selector)).filter(node=>node instanceof HTMLElement);
+      let keep=(preferred instanceof HTMLElement)?preferred:all.find(node=>node.parentElement===bar)||all[0]||null;
+      for(const node of all){
+        if(node===keep)continue;
+        node.remove();
+      }
+      if(keep instanceof HTMLElement)keep.dataset.fxCanonicalControlR1951='true';
+      return keep;
+    };
+
+    let mag = canonicalButton('.fx-reference-mag-button',bar.querySelector(':scope > .fx-reference-mag-button'));
     if (!(mag instanceof HTMLButtonElement)) {
       mag = document.createElement('button');
       mag.className = 'fx-reference-mag-button fx-control-owner-r264';
@@ -59,7 +70,7 @@
       bar.appendChild(mag);
     }
 
-    let menu = document.querySelector('.fx-reference-menu-button');
+    let menu = canonicalButton('.fx-reference-menu-button',bar.querySelector(':scope > .fx-reference-menu-button'));
     if (!(menu instanceof HTMLButtonElement)) {
       menu = document.createElement('button');
       menu.className = 'fx-reference-menu-button fx-control-owner-r264';
@@ -73,7 +84,7 @@
     menu.dataset.fxControlOwnerR268 = 'true';
     menu.dataset.fxControlOwnerR264 = 'true';
 
-    const language = document.querySelector('.fx-language-toggle');
+    const language = canonicalButton('.fx-language-toggle',bar.querySelector(':scope > .fx-language-toggle'));
     if (language instanceof HTMLElement && language.parentElement !== bar) bar.appendChild(language);
     if (mag.parentElement !== bar) bar.appendChild(mag);
     if (menu.parentElement !== bar) bar.appendChild(menu);
@@ -118,7 +129,11 @@
       live.setAttribute('aria-label', root.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
     }
 
-    let controls = hero.querySelector('.fx-reference-controls-r204');
+    const controlCandidates=Array.from(hero.querySelectorAll('.fx-reference-controls-r204'));
+    let controls=controlCandidates.find(node=>node.parentElement===space)||controlCandidates[0]||null;
+    for(const duplicate of controlCandidates){
+      if(duplicate!==controls)duplicate.remove();
+    }
     if (!(controls instanceof HTMLElement)) {
       controls = document.createElement('div');
       controls.className = 'fx-reference-controls-r204 fx-reference-controls-r264';
@@ -138,7 +153,11 @@
       sound.innerHTML = mutedIcon();
     }
 
-    let rail = controls.querySelector(':scope > .fx-reference-rail') || hero.querySelector('.fx-reference-rail');
+    const railCandidates=Array.from(hero.querySelectorAll('.fx-reference-rail'));
+    let rail=controls.querySelector(':scope > .fx-reference-rail')||railCandidates[0]||null;
+    for(const duplicate of railCandidates){
+      if(duplicate!==rail)duplicate.remove();
+    }
     if (!(rail instanceof HTMLElement)) {
       rail = document.createElement('div');
       rail.className = 'fx-reference-rail fx-reference-rail-r264';
@@ -146,6 +165,13 @@
     } else {
       rail.classList.add('fx-reference-rail-r264');
     }
+
+    for(const selector of ['.fx-reference-ask','.fx-reference-pause']){
+      const all=Array.from(rail.querySelectorAll(selector));
+      all.slice(1).forEach(node=>node.remove());
+    }
+    rail.dataset.fxCanonicalHeroControlsR1951='true';
+    controls.dataset.fxCanonicalHeroControlsR1951='true';
 
     const askLabel = rail.querySelector('.fx-reference-ask span');
     if (askLabel && askLabel.textContent !== strings.ask) askLabel.textContent = strings.ask;
@@ -199,6 +225,7 @@
     root.dataset.fxReferenceRuntimeR254 = mobile
       ? 'event-driven-r207-owner-r260'
       : 'event-driven-standalone-r260';
+    root.dataset.fxReferenceDedupeR1951='single-header-and-hero-control-owner';
     return true;
   }
 
