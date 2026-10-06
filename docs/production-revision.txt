@@ -1,5 +1,5 @@
 FormatX production revision
 token=20261006-r1947-seamless-signature-handoff
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=deploy exact-pose Signature MAG continuity: intro finale and permanent renderer share the same authored baseline pose with no handoff rotation or energy kick
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, no-occlusion, R536 cinematic handoff, intro keyframes, mobile MAG proof, desktop visual contracts and production Worker CSP/cache parity
+purpose=deploy the seamless Signature MAG release: effective R326 pose parity, non-boosting idle handoff, no phase-4 pulse, final compositor crossfade, intro smoked-silver light-rig convergence and sharper mobile prism/optic clarity
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, no-occlusion, R536 cinematic handoff, intro keyframes, mobile MAG proof, desktop visual contracts, CSP/cache parity and production Worker ownership
