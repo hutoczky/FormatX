@@ -1187,6 +1187,7 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
     transition:
       opacity .72s cubic-bezier(.18,.78,.2,1),
       transform .82s cubic-bezier(.18,.78,.2,1),
+      translate .82s cubic-bezier(.18,.78,.2,1),
       filter .72s ease;
   }
 
@@ -1220,8 +1221,13 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 
   html[data-fx-cinematic-scene-r536="core"] :is(.fx-rail,.fx-organism-status){
     opacity:0!important;
-    transform:translate3d(14px,0,0)!important;
     pointer-events:none!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-rail{
+    translate:14px 0!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-organism-status{
+    translate:-14px 0!important;
   }
 
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-hud{
@@ -1229,7 +1235,7 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
   }
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) :is(.fx-rail,.fx-organism-status){
     opacity:1;
-    transform:translate3d(0,0,0);
+    translate:0 0;
   }
 
   /* The hero's own information remains, but its peripheral annotations are
