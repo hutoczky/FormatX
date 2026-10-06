@@ -2207,6 +2207,7 @@
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+      root.dataset.fxNativeMagDesktopInteractionR1951='dt-damped-pointer-scroll-converge-to-zero-idle-no-snap';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
@@ -2257,9 +2258,16 @@
       }
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
-      if(burstFrames>0){
+      const motionDelta=Math.max(
+        Math.abs(tx-px),Math.abs(ty-py),
+        Math.abs(targetRotationX-rotationX),Math.abs(targetRotationY-rotationY),Math.abs(targetRotationZ-rotationZ),
+        Math.abs(targetPointerTiltX-pointerTiltX),Math.abs(targetPointerTiltY-pointerTiltY),
+        Math.abs(targetEnergy-energy),Math.abs(targetBreath-breath),
+        Math.abs(targetSiteProgress-siteProgress),Math.abs(angularVelocityY)*22
+      );
+      if(burstFrames>0||motionDelta>.0014){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
+        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'continuous-damped-r1951';
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=auditMode
@@ -2286,7 +2294,7 @@
       const q=point(sample);if(!q)return;
       tx=q.x*(desktopFine.matches?.72:1);ty=q.y*(desktopFine.matches?.72:1);
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.105);
-      schedule(desktopFine.matches?4:2);
+      schedule(1);
     }
     function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,mobile?4:6);}
     function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(2);}
@@ -2349,10 +2357,12 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1951 — scroll owns a continuous damped render response. The single
+           renderer keeps drawing only until its state converges, then returns
+           to true zero-idle. */
+        schedule(1);
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},72);
       });
     }
 
@@ -2379,13 +2389,13 @@
         targetPointerTiltX=clamp(-q.y*.070 - dy*.014,-.095,.095);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.085+Math.min(.055,Math.hypot(dx,dy)*.12));
         targetBreath=Math.max(targetBreath,.235);
-        schedule(4);
+        schedule(1);
       }else{
         targetPointerTiltY=clamp(q.x*.055,-.07,.07);
         targetPointerTiltX=clamp(-q.y*.045,-.06,.06);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.090));
         targetBreath=Math.max(targetBreath,touch?.18:.23);
-        schedule(mobile?1:2);
+        schedule(1);
       }
     }
     function onAmbientMove(event){
