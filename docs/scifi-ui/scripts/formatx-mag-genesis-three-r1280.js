@@ -979,8 +979,8 @@
       // R1947 — recessed smoked optical socket, no separate diamond plate.
       const cradleGeo=new T.SphereGeometry(.205,36,22);
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(1.00,.92,.24);
-      this.mechCradle.position.set(0,.01,.405);
+      this.mechCradle.scale.set(.46,.44,.16);
+      this.mechCradle.position.set(0,.01,.418);
       this.mechanicalGroup.add(this.mechCradle);
 
       // Four internal silver-ice facets reinforce the signature points.
@@ -1416,7 +1416,7 @@
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
+      this.mechMidMaterial.opacity=(.30+.036*finale)*grow;
       this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
@@ -1602,6 +1602,7 @@
   document.documentElement.dataset.fxMagSignatureR1947='same-volumetric-four-point-field-intro-to-hero-recessed-optic';
   document.documentElement.dataset.fxMagSignatureR1947b='smooth-cusp-small-optic-continuous-handoff';
   document.documentElement.dataset.fxMagSignatureR1947c='mobile-parity-front-visible-optic-stable-corona-scale';
+  document.documentElement.dataset.fxMagSignatureR1947e='compact-smoked-socket-hero-optic-convergence';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
