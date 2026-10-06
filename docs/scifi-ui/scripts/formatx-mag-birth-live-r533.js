@@ -53,7 +53,7 @@
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
-  const EXIT_MS = 180;
+  const EXIT_MS = MOBILE ? 280 : 520;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
@@ -232,6 +232,7 @@
   ROOT.dataset.fxMagBirthArtR720 = 'organic-convex-diamond-fold-dominant-shell-dark-hood-thick-tendrils-late-close-camera';
   ROOT.dataset.fxMagBirthArtR721 = 'four-petal-organic-mag-r720-shell-nine-tendrils-reference-pullback';
   ROOT.dataset.fxMagBirthSignatureR1941 = 'four-point-smoked-bioglass-central-optic-studio-finale';
+  ROOT.dataset.fxMagBirthHandoffR1951='desktop-88ms-core-sync-520ms-continuous-dissolve-no-second-flash';
   ROOT.dataset.fxMagBirthArtR800 = 'wide-cellular-mass-smaller-blue-iris-integrated-petals-segmented-tendrils-local-flash';
   ROOT.dataset.fxMagBirthArtR820 = 'dark-contiguous-cellular-shell-blue-radial-iris-integrated-dark-petals-thick-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR900 = 'reference-stage1-liquid-core-dna-stage2-cellular-orb-stage3-armored-tentacle-pod';
@@ -664,7 +665,7 @@
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
-    stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    stage.style.setProperty('transition', 'opacity .88s cubic-bezier(.16,.82,.18,1)', 'important');
   }
 
   function releaseStageStyle() {
@@ -698,11 +699,11 @@
     if (r < .82) {
       const t=smoothstep((r-.50)/.32);
       setStageOpacity(.025 + t*.975);
-      if (now-lastMorphSync > 170) {
+      if (now-lastMorphSync > (MOBILE?170:92)) {
         lastMorphSync=now;
         try {
           coreApi.setMorph?.(.05 + t*.95,'r611-genome-to-living-core');
-          coreApi.requestRender?.(1);
+          coreApi.requestRender?.(MOBILE?1:3);
         } catch (_) {}
       }
       return;
@@ -951,7 +952,7 @@
     try {
       coreApi?.setMorph?.(0,'r611-final-living-handoff');
       coreApi?.setShape?.('organism','r611-final-living-handoff');
-      coreApi?.requestRender?.(2);
+      coreApi?.requestRender?.(MOBILE?2:5);
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
 
