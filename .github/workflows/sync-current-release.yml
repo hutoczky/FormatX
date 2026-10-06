@@ -198,8 +198,21 @@ jobs:
           ' "$candidate" >/dev/null
 
           if [[ -f "$current" ]]; then
-            jq -S 'del(.synced_at, .channels.android.updated_at)' "$current" > .tmp/current.normalized.json
-            jq -S 'del(.synced_at, .channels.android.updated_at)' "$candidate" > .tmp/candidate.normalized.json
+            # Download counters and generated timestamps are observational metadata,
+            # not release identity. Ignoring them prevents six-hourly no-op commits and
+            # unnecessary production rebuilds while still deploying real release changes.
+            jq -S 'del(
+              .synced_at,
+              .channels.android.updated_at,
+              .channels.multiplatform.download_count,
+              .channels.android.download_count
+            )' "$current" > .tmp/current.normalized.json
+            jq -S 'del(
+              .synced_at,
+              .channels.android.updated_at,
+              .channels.multiplatform.download_count,
+              .channels.android.download_count
+            )' "$candidate" > .tmp/candidate.normalized.json
             if cmp -s .tmp/current.normalized.json .tmp/candidate.normalized.json; then
               echo 'Release metadata is unchanged; preserving the existing synced_at value.'
               echo 'changed=false' >> "$GITHUB_OUTPUT"
@@ -217,5 +230,8 @@ jobs:
           git config user.name 'FormatX release metadata bot'
           git config user.email 'actions@users.noreply.github.com'
           git add docs/scifi-ui/data/current-release.json
-          git commit -m 'Sync official current release metadata'
+          # A meaningful release change modifies the public static release record,
+          # so explicitly route the resulting master push through the audited production
+          # deployment workflow instead of leaving master ahead of the live Worker.
+          git commit -m '[deploy-production] Sync official current release metadata'
           git push
