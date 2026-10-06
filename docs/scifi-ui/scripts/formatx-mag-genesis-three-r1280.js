@@ -103,6 +103,9 @@
       const key=new T.DirectionalLight(0xe7f2ef,1.62);
       key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
+      const fill=new T.DirectionalLight(0x9fb9b8,.42);
+      fill.position.set(4.4,1.8,5.2);
+      this.scene.add(fill);
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
@@ -981,7 +984,7 @@
       });
       cradleGeo.center();
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(.92,.92,.76);
+      this.mechCradle.scale.set(.78,.78,.64);
       this.mechCradle.position.z=.24;
       this.mechanicalGroup.add(this.mechCradle);
 
@@ -1332,19 +1335,19 @@
       const fade=1-smooth((t-6.20)/1.15)*.96;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*1.12,bodyScale*1.08,bodyScale*1.02);
+      const bodyScale=.001+visible*.82;
+      this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
-      this.organicShellMaterial.opacity=.58*visible;
-      this.organicLobeMaterial.opacity=.70*visible;
+      this.organicShellMaterial.opacity=.27*visible;
+      this.organicLobeMaterial.opacity=.24*visible;
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.34*visible;
-      this.organicHoodMaterial.opacity=.42*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.42*visible;
-      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.07*visible;
+      this.organicVeinMaterial.opacity=.105*visible;
+      this.organicHoodMaterial.opacity=.18*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
+      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
 
       if(this.organicHoodGroup){
-        this.organicHoodGroup.scale.setScalar(.92);
+        this.organicHoodGroup.scale.setScalar(.80);
         this.organicHoodGroup.rotation.y=Math.sin(time*.00022)*.014;
         this.organicHoodGroup.rotation.x=Math.sin(time*.00018)*.007;
       }
@@ -1360,7 +1363,7 @@
       this.organicVeins.forEach(vein=>{
         vein.rotation.z=Math.sin(time*.00025+vein.userData.phase)*.007;
       });
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.10*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.040*visible;
       this.organicPrimaryVeins?.forEach((vein,i)=>{
         vein.rotation.z=Math.sin(time*.00019+(vein.userData.phase||i))*.0035;
       });
@@ -1376,10 +1379,10 @@
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.99;
-      this.cellGroup.scale.set(cellScale*1.10,cellScale*1.06,cellScale);
-      this.cellMaterial.opacity=.085*visible;
+      this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
+      this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
-      this.cellVeinMaterial.opacity=.12*visible;
+      this.cellVeinMaterial.opacity=.058*visible;
       this.cells.forEach((c,i)=>{
         const q=1+Math.sin(time*.00102+c.userData.phase)*.010*visible;
         c.rotation.y+=.00010*(i%2?1:-1);
@@ -1422,7 +1425,7 @@
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
+      this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
       this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
@@ -1437,7 +1440,7 @@
       }
       if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
       if(this.innerPrism){
-        this.innerPrismMaterial.opacity=(.06+.12*finale)*grow;
+        this.innerPrismMaterial.opacity=(.10+.16*finale)*grow;
         this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
         this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
       }
@@ -1505,9 +1508,9 @@
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      const finaleClean=smooth((t-7.55)/1.55);
-      this.particles.material.opacity=(.30+.055*Math.sin(time*.00045))*(1-finaleClean*.72);
-      if(this.debris?.material)this.debris.material.opacity=.40*(1-finaleClean*.86);
+      const finaleClean=smooth((t-6.45)/1.70);
+      this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
+      if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
@@ -1615,6 +1618,7 @@
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
   document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
+  document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
