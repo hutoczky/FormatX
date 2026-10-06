@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261006-r1948-hero-progressive-disclosure';
+const STARTUP_REVISION = '20261006-r1949-live-performance-integrity';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-wM8l8kEv7xa4UGIU8YEM6eMI/uZ2TIQmvzF2tnWmD4Q='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -339,6 +339,40 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
+function mergeVaryValue(current, token) {
+  const values=String(current||'').split(',').map(value=>value.trim()).filter(Boolean);
+  if(!values.some(value=>value.toLowerCase()===String(token).toLowerCase()))values.push(token);
+  return values.join(', ');
+}
+function isCompressibleText(contentType) {
+  const type=String(contentType||'').toLowerCase().split(';',1)[0].trim();
+  return type.startsWith('text/')
+    || type==='application/javascript'
+    || type==='application/x-javascript'
+    || type==='application/json'
+    || type==='application/manifest+json'
+    || type==='application/xml'
+    || type==='application/xhtml+xml'
+    || type==='image/svg+xml';
+}
+function shouldGzipPublicResponse(request,response) {
+  if(request.method==='HEAD'||!response.body||response.status===204||response.status===304)return false;
+  if(response.headers.get('Content-Encoding'))return false;
+  if(!isCompressibleText(response.headers.get('Content-Type')))return false;
+  return /(?:^|,|\s)gzip(?:\s|,|$)/i.test(request.headers.get('Accept-Encoding')||'');
+}
+function gzipPublicResponse(request,response) {
+  if(!shouldGzipPublicResponse(request,response)||typeof CompressionStream!=='function')return response;
+  const headers=new Headers(response.headers);
+  headers.delete('Content-Length');
+  headers.delete('ETag');
+  headers.set('Content-Encoding','gzip');
+  headers.set('Vary',mergeVaryValue(headers.get('Vary'),'Accept-Encoding'));
+  headers.set('X-FormatX-Text-Compression','gzip-r1949');
+  const stream=response.body.pipeThrough(new CompressionStream('gzip'));
+  return new Response(stream,{status:response.status,statusText:response.statusText,headers});
+}
+
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
@@ -386,7 +420,8 @@ export default {
       return robotsResponse(request);
     }
     const response = await productionBase.fetch(request, env, ctx);
-    return stabilizePublicResponse(request, url, response);
+    const stabilized = await stabilizePublicResponse(request, url, response);
+    return gzipPublicResponse(request, stabilized);
   },
 };
 
