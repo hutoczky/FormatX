@@ -1381,9 +1381,12 @@
          at its authored three-quarter baseline, producing a subtle visual snap. */
       const handoffPose=smooth((t-8.55)/1.20);
       const mobilePose=this.mobileLayout.matches;
-      const finalRX=mobilePose?-.090:-.070;
-      const finalRY=mobilePose?-.400:-.320;
-      const finalRZ=.008;
+      /* R326 GLSL matrices are the inverse-sign form of Three.js
+         rotations, and its shader adds fixed yaw/pitch/roll offsets. These are
+         the equivalent Three.js Euler angles of the actual idle rendered pose. */
+      const finalRX=mobilePose?.160:.140;
+      const finalRY=mobilePose?-.005:-.015;
+      const finalRZ=.037;
       this.mechanicalGroup.rotation.x=mix(0,finalRX,handoffPose);
       this.mechanicalGroup.rotation.y=mix(0,finalRY,handoffPose);
       this.mechanicalGroup.rotation.z=mix(0,finalRZ,handoffPose);
@@ -1605,6 +1608,7 @@
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagSignatureR1947='exact-pose-seamless-handoff-to-permanent-renderer';
   document.documentElement.dataset.fxMagSignatureR1947c='smoked-silver-material-and-light-rig-convergence';
+  document.documentElement.dataset.fxMagSignatureR1947e='effective-r326-matrix-pose-parity';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
