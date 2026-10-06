@@ -87,14 +87,18 @@
     stage.dataset.fxC536Primed='false';
     stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
     stage.innerHTML = [
+      '<div class="fx-c1951-haze-back"></div>',
       '<div class="fx-c536-world"></div>',
+      '<div class="fx-c1951-dust"></div>',
       '<div class="fx-c536-iris"></div>',
       '<div class="fx-c536-track"></div>',
       '<div class="fx-c536-scan"></div>',
+      '<div class="fx-c1951-haze-front"></div>',
       '<div class="fx-c536-vignette"></div>',
       '<div class="fx-c536-grain"></div>',
       '<div class="fx-c536-flare"></div>'
     ].join('');
+    stage.dataset.fxVolumetricWorldR1951='back-haze-world-dust-front-haze';
     document.body.appendChild(stage);
     hudCode = null;
     hudTitle = null;
@@ -537,11 +541,16 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
-    clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    activate(0,'intro-handoff-r1951');
+    /* R1951 — no flash/cut at the intro boundary. R533 holds its final frame
+       while this world is already live underneath, producing one continuous
+       optical dissolve into the permanent MAG and the scroll camera. */
+    root.classList.remove('fx-c536-cut');
+    clearTimeout(cutTimer);cutTimer=0;
+    root.dataset.fxCinematicHandoffR1951='continuous-final-frame-dissolve-no-dom-cut';
+    scrollTailFrames=Math.max(scrollTailFrames,20);
+    signalCore(scenes[0],'intro-handoff-r1951');
+    schedule();
   }
 
   function boot() {
