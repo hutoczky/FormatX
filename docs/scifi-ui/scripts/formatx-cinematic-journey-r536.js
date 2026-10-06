@@ -120,6 +120,7 @@
       seen.add(node);
       const layer = anatomy(node,def.key);
       node.dataset.fxC536Code = def.code;
+      node.dataset.fxC1947Side = (next.length % 2) ? 'left' : 'right';
       if (layer instanceof HTMLElement) layer.dataset.fxC617Code = def.code;
       const rect=node.getBoundingClientRect();
       next.push({
@@ -224,6 +225,7 @@
     const scene=scenes[index];
     root.dataset.fxCinematicSceneR536=scene.def.key;
     root.dataset.fxCinematicSceneCodeR536=scene.def.code;
+    root.dataset.fxCinematicContinuityR1947='studio-section-bridge-active';
     root.style.setProperty('--fx-c536-a',scene.def.a);
     root.style.setProperty('--fx-c536-b',scene.def.b);
     updateHud(scene);
@@ -520,6 +522,7 @@
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();},{passive:true});
 
     root.dataset.fxCinematicJourneyR536='ready';
+  root.dataset.fxCinematicContinuityR1947='studio-section-bridge-ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
     root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
