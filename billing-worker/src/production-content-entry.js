@@ -340,40 +340,6 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
   headers.set('X-FormatX-R505-Asset-Graph', spec.marker);
   return new Response(source, { status: response.status, statusText: response.statusText, headers });
 }
-function mergeVaryValueR1950(current, token) {
-  const values=String(current||'').split(',').map(value=>value.trim()).filter(Boolean);
-  if(!values.some(value=>value.toLowerCase()===String(token).toLowerCase()))values.push(token);
-  return values.join(', ');
-}
-function isCompressibleTextR1950(contentType) {
-  const type=String(contentType||'').toLowerCase().split(';',1)[0].trim();
-  return type.startsWith('text/')
-    || type==='application/javascript'
-    || type==='application/x-javascript'
-    || type==='application/json'
-    || type==='application/manifest+json'
-    || type==='application/xml'
-    || type==='application/xhtml+xml'
-    || type==='image/svg+xml';
-}
-function shouldGzipPublicResponseR1950(request,response) {
-  if(request.method==='HEAD'||!response.body||response.status===204||response.status===206||response.status===304)return false;
-  if(response.headers.get('Content-Encoding'))return false;
-  if(!isCompressibleTextR1950(response.headers.get('Content-Type')))return false;
-  return /(?:^|,|\s)gzip(?:\s|,|$)/i.test(request.headers.get('Accept-Encoding')||'');
-}
-function gzipPublicResponseR1950(request,response) {
-  if(!shouldGzipPublicResponseR1950(request,response)||typeof CompressionStream!=='function')return response;
-  const headers=new Headers(response.headers);
-  headers.delete('Content-Length');
-  headers.delete('ETag');
-  headers.set('Content-Encoding','gzip');
-  headers.set('Vary',mergeVaryValueR1950(headers.get('Vary'),'Accept-Encoding'));
-  headers.set('X-FormatX-Text-Compression','gzip-r1950');
-  const stream=response.body.pipeThrough(new CompressionStream('gzip'));
-  return new Response(stream,{status:response.status,statusText:response.statusText,headers});
-}
-
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
@@ -421,8 +387,7 @@ export default {
       return robotsResponse(request);
     }
     const response = await productionBase.fetch(request, env, ctx);
-    const stabilized = await stabilizePublicResponse(request, url, response);
-    return gzipPublicResponseR1950(request, stabilized);
+    return stabilizePublicResponse(request, url, response);
   },
 };
 
