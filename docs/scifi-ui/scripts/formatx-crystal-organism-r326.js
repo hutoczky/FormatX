@@ -269,8 +269,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
+    /* R1950 — desktop silhouette tessellation.
+       The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
+       gets a denser body mesh. Mobile topology remains unchanged. */
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -813,7 +816,8 @@
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
-      antialias:!constrained && (!mobile || (devicePixelRatio||1)<=4.2),
+      /* Desktop always requests MSAA. On mobile the existing DPR guard remains. */
+      antialias:!mobile || (!constrained && (devicePixelRatio||1)<=4.2),
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -1686,6 +1690,8 @@
     root.dataset.fxNativeMagVisualR1721='cortical-lobes-electric-neural-core-subdermal-vascular-detail';
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
+    root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
@@ -1822,15 +1828,20 @@
        backing-store scale visibly pixelated the organism on high-DPI phones.
        Start near native CSS resolution and shed quality gradually only under
        measured pressure. */
+    /* R1950 — desktop contour fidelity.
+       The previous desktop start scale (.68) was too low for a large hero object
+       and produced visible stair-stepping on the silhouette even with MSAA.
+       Desktop now starts close to native CSS resolution and only sheds quality
+       after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.54)
-      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
+      ? (mobile?.94:.72)
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.66)
-      : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
+      ? (mobile?1.00:.86)
+      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.26)
-      : (mobile?.80:.22);
+      ? (mobile?.80:.48)
+      : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1843,10 +1854,14 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? (mobile?1.58:.90) : (auditMode ? 1.06 : constrainedMobile?1.72:mobile?2.00:constrained?1.16:1.60);
+      const baseCap=softwareRenderer
+        ? (mobile?1.58:1.28)
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? (mobile?920000:200000) : (auditMode ? 480000 : constrainedMobile?1280000:mobile?1900000:constrained?580000:1120000);
+      const baseBudget=softwareRenderer
+        ? (mobile?920000:560000)
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));

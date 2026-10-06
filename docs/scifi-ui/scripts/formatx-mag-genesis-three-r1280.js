@@ -49,23 +49,24 @@
       this.lastRender=0;
       this.disposed=false;
 
+      this.mobileRender=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:false,
+        antialias:!this.mobileRender,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
         preserveDrawingBuffer:false
       });
-      this.renderer.setClearColor(0x06131c,1);
+      this.renderer.setClearColor(0x02070b,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.16;
+      this.renderer.toneMappingExposure=1.08;
 
       this.scene=new THREE.Scene();
-      this.scene.background=new THREE.Color(0x06131c);
-      this.scene.fog=new THREE.FogExp2(0x06131c,0.056);
+      this.scene.background=new THREE.Color(0x02070b);
+      this.scene.fog=new THREE.FogExp2(0x02070b,0.044);
 
       this.camera=new THREE.PerspectiveCamera(42,1,0.05,80);
       this.camera.position.set(0,0.12,7.25);
@@ -96,21 +97,26 @@
 
     makeLights(){
       const T=this.THREE;
-      this.scene.add(new T.HemisphereLight(0x6fc9df,0x080612,0.86));
-      const key=new T.DirectionalLight(0xd3f3ff,2.05);
-      key.position.set(-3.5,5,6);
+      /* R1950 — studio lighting, not game-VFX lighting.
+         Neutral soft key + restrained cyan transmission + very faint cool rim. */
+      this.scene.add(new T.HemisphereLight(0x8fb8bd,0x05080b,0.54));
+      const key=new T.DirectionalLight(0xe7f2ef,1.62);
+      key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
-      const rim=new T.PointLight(0x7457ff,26,13,2);
-      rim.position.set(2.8,-2.2,3.6);
+      const fill=new T.DirectionalLight(0x9fb9b8,.42);
+      fill.position.set(4.4,1.8,5.2);
+      this.scene.add(fill);
+      const rim=new T.PointLight(0x6b9da9,10.5,13,2);
+      rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x5b2f9d,18,11,2);
-      bioticFill.position.set(-2.4,-.6,3.2);
+      const bioticFill=new T.PointLight(0x385866,5.8,11,2);
+      bioticFill.position.set(-2.8,-.4,3.4);
       this.scene.add(bioticFill);
-      this.coreLight=new T.PointLight(0x6feeff,0,8,2);
+      this.coreLight=new T.PointLight(0x78e6e8,0,7.2,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
-      this.mechLight=new T.PointLight(0xc8f4ff,0,9,2);
-      this.mechLight.position.set(-2.4,2.8,4.2);
+      this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
+      this.mechLight.position.set(-2.6,3.0,4.4);
       this.scene.add(this.mechLight);
     }
 
@@ -131,7 +137,7 @@
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.BufferAttribute(pos,3));
       const m=new T.PointsMaterial({
-        color:0x91d8e9,size:.043,transparent:true,opacity:.62,
+        color:0x9bc8ce,size:.034,transparent:true,opacity:.34,
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
       this.particles=new T.Points(g,m);
@@ -950,6 +956,21 @@
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
+      /* R1950b — nested optical volume.
+         A smaller translucent copy lives inside the outer shell so the finale
+         reads as layered cut glass instead of one flat teal extrusion. */
+      this.innerPrismMaterial=new T.MeshPhysicalMaterial({
+        color:0x17343a,metalness:.02,roughness:.075,
+        transmission:.58,thickness:.26,ior:1.47,
+        emissive:0x05171b,emissiveIntensity:.035,
+        clearcoat:1.0,clearcoatRoughness:.035,
+        transparent:true,opacity:0,depthWrite:false
+      });
+      this.innerPrism=new T.Mesh(baseGeo.clone(),this.innerPrismMaterial);
+      this.innerPrism.scale.set(.72,.72,.54);
+      this.innerPrism.position.z=.075;
+      this.mechanicalGroup.add(this.innerPrism);
+
       // Central smoked optical cradle, fused visually into the glass body.
       const cradleShape=new T.Shape();
       cradleShape.moveTo(0,.43);
@@ -963,7 +984,7 @@
       });
       cradleGeo.center();
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(.92,.92,.76);
+      this.mechCradle.scale.set(.78,.78,.64);
       this.mechCradle.position.z=.24;
       this.mechanicalGroup.add(this.mechCradle);
 
@@ -1086,10 +1107,17 @@
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.082,64),
-        new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
+        new T.SphereGeometry(.094,48,24),
+        new T.MeshPhysicalMaterial({
+          color:0x12383e,metalness:.02,roughness:.075,
+          transmission:.34,thickness:.18,ior:1.47,
+          clearcoat:1.0,clearcoatRoughness:.035,
+          emissive:0x06252b,emissiveIntensity:.045,
+          transparent:true,opacity:.92
+        })
       );
-      this.mechEyeCore.position.set(0,.01,.50);
+      this.mechEyeCore.scale.set(1,1,.30);
+      this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
@@ -1097,7 +1125,7 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.148,.0055,8,72),
+        new T.TorusGeometry(.132,.0042,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.01,.49);
@@ -1214,7 +1242,7 @@
       if(this.disposed)return;
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
-      const dpr=Math.min(devicePixelRatio||1,this.width<900?1.15:1.6);
+      const dpr=Math.min(devicePixelRatio||1,this.mobileRender?1.15:2.0);
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
       this.camera.aspect=this.width/this.height;
@@ -1307,19 +1335,19 @@
       const fade=1-smooth((t-6.20)/1.15)*.96;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+visible*.999;
-      this.organicGroup.scale.set(bodyScale*1.12,bodyScale*1.08,bodyScale*1.02);
+      const bodyScale=.001+visible*.82;
+      this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
-      this.organicShellMaterial.opacity=.58*visible;
-      this.organicLobeMaterial.opacity=.70*visible;
+      this.organicShellMaterial.opacity=.27*visible;
+      this.organicLobeMaterial.opacity=.24*visible;
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.34*visible;
-      this.organicHoodMaterial.opacity=.42*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.42*visible;
-      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.07*visible;
+      this.organicVeinMaterial.opacity=.105*visible;
+      this.organicHoodMaterial.opacity=.18*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
+      if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
 
       if(this.organicHoodGroup){
-        this.organicHoodGroup.scale.setScalar(.92);
+        this.organicHoodGroup.scale.setScalar(.80);
         this.organicHoodGroup.rotation.y=Math.sin(time*.00022)*.014;
         this.organicHoodGroup.rotation.x=Math.sin(time*.00018)*.007;
       }
@@ -1335,7 +1363,7 @@
       this.organicVeins.forEach(vein=>{
         vein.rotation.z=Math.sin(time*.00025+vein.userData.phase)*.007;
       });
-      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.10*visible;
+      if(this.organicPrimaryVeinMaterial)this.organicPrimaryVeinMaterial.opacity=.040*visible;
       this.organicPrimaryVeins?.forEach((vein,i)=>{
         vein.rotation.z=Math.sin(time*.00019+(vein.userData.phase||i))*.0035;
       });
@@ -1351,10 +1379,10 @@
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.99;
-      this.cellGroup.scale.set(cellScale*1.10,cellScale*1.06,cellScale);
-      this.cellMaterial.opacity=.085*visible;
+      this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
+      this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
-      this.cellVeinMaterial.opacity=.12*visible;
+      this.cellVeinMaterial.opacity=.058*visible;
       this.cells.forEach((c,i)=>{
         const q=1+Math.sin(time*.00102+c.userData.phase)*.010*visible;
         c.rotation.y+=.00010*(i%2?1:-1);
@@ -1376,41 +1404,46 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.090,finale),
-        mix(.090,.175,finale),
-        mix(.106,.185,finale)
+        mix(.031,.072,finale),
+        mix(.090,.124,finale),
+        mix(.106,.132,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.075,finale),
-        mix(.125,.160,finale),
-        mix(.145,.175,finale)
+        mix(.039,.066,finale),
+        mix(.125,.142,finale),
+        mix(.145,.150,finale)
       );
       this.silverMaterial.color.setRGB(
         mix(.480,.440,finale),
         mix(.575,.540,finale),
         mix(.565,.530,finale)
       );
-      this.mechMaterial.transmission=mix(.32,.36,finale);
-      this.mechMidMaterial.transmission=mix(.38,.42,finale);
-      this.mechMaterial.roughness=mix(.115,.135,finale);
-      this.mechMidMaterial.roughness=mix(.105,.125,finale);
+      this.mechMaterial.transmission=mix(.34,.44,finale);
+      this.mechMidMaterial.transmission=mix(.40,.49,finale);
+      this.mechMaterial.roughness=mix(.110,.098,finale);
+      this.mechMidMaterial.roughness=mix(.102,.090,finale);
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
+      this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
       this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
-      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
+      this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
         this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
       }
       if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
+      if(this.innerPrism){
+        this.innerPrismMaterial.opacity=(.10+.16*finale)*grow;
+        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
+        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
+      }
       this.silverParts.forEach((p,i)=>{
         p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
       });
@@ -1432,16 +1465,16 @@
       if(t<2.70){
         const k=smooth(t/2.70);
         z=mix(5.42,5.12,k);
-        x=Math.sin(time*.00027)*.040*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.015;
+        x=Math.sin(time*.00027)*.024*(1-k*.35);
+        y=.010+Math.sin(time*.00024)*.009;
       }else if(t<3.30){
         const k=smooth((t-2.70)/.60);
         z=mix(5.12,3.86,k);
         x=mix(.018,0,k);y=mix(.012,0,k);
       }else if(t<5.55){
-        z=3.86+Math.sin(time*.00020)*.006;
-        x=Math.sin(time*.00015)*.003;
-        y=Math.cos(time*.00018)*.003;
+        z=3.86+Math.sin(time*.00020)*.0035;
+        x=Math.sin(time*.00015)*.0018;
+        y=Math.cos(time*.00018)*.0018;
       }else if(t<7.25){
         const k=smooth((t-5.55)/1.70);
         z=mix(3.86,4.28,k);
@@ -1475,33 +1508,36 @@
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
+      const finaleClean=smooth((t-6.45)/1.70);
+      this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
+      if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
 
-      const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
-      /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
-      const after=smooth((t-9.46)/.34);
-      this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
-      this.coreLight.intensity+=flash*.80+after*.25;
+      const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
+      /* R1950 — controlled studio finale. The handoff lifts the optical core,
+         not the whole frame, and lands on the permanent smoked-silver grade. */
+      const after=smooth((t-9.44)/.38);
+      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
+      this.coreLight.intensity+=flash*.42+after*.12;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
         this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.028;
-        const burstScale=2.18+flash*.18;
+        this.flashBurst.material.opacity=flash*.010;
+        const burstScale=2.08+flash*.10;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.012;
-        this.flashBeam.scale.x=1+flash*.08;
+        this.flashBeam.material.opacity=flash*.004;
+        this.flashBeam.scale.x=1+flash*.035;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
+        const q=1.00+flash*.022;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechLight)this.mechLight.intensity+=flash*.34;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1580,6 +1616,9 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
+  document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
+  document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();

@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1949-award-final-seal
-base_master=4405446c76efa02d5c3a25473e31aa216d44bc0b
-purpose=deploy the R1949 award-final hero disclosure and editorial rhythm with guaranteed restrained hero world opacity, deterministic document-top core return, full production stylesheet rewrite parity and preserved R1948 progressive disclosure, R1947 continuous scene art-direction, R1945l Signature MAG and R1944 precision interaction
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, Igloo-floor gate, mobile MAG proof, no-occlusion, cinematic handoff, hero disclosure state and production Worker parity
+token=20261007-r1950c-studio-intro-edge-aa
+base_master=e68833ae89b0b45a99b0ff119672fa50e058f05b
+purpose=ship the final R1950 desktop Signature MAG contour fix and studio-grade MAG birth intro with 72x144 desktop geometry, higher supersampling, MSAA, cleaned genome transition, nested glass depth, physical optical lens and controlled final composition
+validation=desktop intro keyframes, desktop hero proof, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 handoff, Worker rewrite parity and exact-revision production convergence
