@@ -29,11 +29,11 @@ html[data-fx-mag-birth-live="active"] {
   pointer-events: none;
   opacity: 1;
   filter: brightness(1);
-  transition: opacity .72s cubic-bezier(.22,.61,.36,1), filter .72s cubic-bezier(.22,.61,.36,1);
+  transition: opacity .76s cubic-bezier(.18,.72,.18,1), filter .76s cubic-bezier(.18,.72,.18,1);
 }
 .fx-mag-birth-r533.is-leaving {
   opacity: 0;
-  filter: brightness(1.02);
+  filter: brightness(1);
 }
 .fx-mag-birth-r533::after {
   content: "";
@@ -41,7 +41,7 @@ html[data-fx-mag-birth-live="active"] {
   inset: 0;
   z-index: 50;
   pointer-events: none;
-  opacity: .055;
+  opacity: .022;
   background:
     linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
     linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
@@ -2256,3 +2256,11 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+
+/* R1951 — clean optical dissolve; no grid/post effect at the handoff edge. */
+.fx-mag-birth-r533.is-leaving::after{opacity:0!important}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533::after{opacity:.014}
+}
+/* production-r1951-continuous-intro-mag-dissolve */
