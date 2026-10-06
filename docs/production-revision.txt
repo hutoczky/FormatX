@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947b-cut-prism-raster
+token=20261006-r1947c-cut-prism-final
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=validate and deploy the R1947b studio Signature MAG: neutral smoked-silver cut-prism chevrons, sharper nested internal planes, deeper recessed optic, cleaner proof/live raster and intro-to-hero material continuity
+purpose=validate and deploy the R1947c studio Signature MAG: neutral smoked-silver cut-prism chevrons, sharper nested internal planes, deeper recessed optic, cleaner proof/live raster and intro-to-hero material continuity
 validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, intro keyframes, desktop visual contracts, production Worker parity and release-sync integrity
