@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947d-native-convergence
+token=20261006-r1948-integrated-award-final
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=validate and deploy R1947d: the cinematic finale reaches the exact permanent hero MAG through a painted-frame-gated 650 ms crossfade, with a dedicated 9.55 s convergence proof and the proven R1945l native renderer preserved
-validation=production preflight, exact-revision convergence, CSP parity, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, 9.25 s crossfade telemetry, 9.55 s >=95 percent native convergence and production Worker parity
+purpose=integrate the proven R1947 unified Signature MAG/native painted-frame crossfade with desktop first-paint Signature parity on top of R1946 deterministic release-sync integrity
+validation=production preflight, exact-revision convergence, CSP parity, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, 9.25s crossfade telemetry, 9.55s >=95 percent native convergence, desktop first-paint parity and production Worker ownership
