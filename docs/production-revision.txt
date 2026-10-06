@@ -2,4 +2,4 @@ FormatX production revision
 token=20261006-r1950-award-performance-closure
 base_master=e68833ae89b0b45a99b0ff119672fa50e058f05b
 purpose=close the final award-quality runtime gates without reducing real GPU visual quality
-validation=neutral smoked-silver MAG contract, software-WebGL photographic lite shader, post-FCP non-LCP desktop CSS, Lighthouse desktop/mobile, canonical MAG runtime, R454 visible MAG and production Worker parity
+validation=neutral smoked-silver MAG contract, software-WebGL photographic lite shader, P0 geometry parity plus post-FCP critical-core/reference desktop CSS, Lighthouse desktop/mobile, canonical MAG runtime, R454 visible MAG and production Worker parity
