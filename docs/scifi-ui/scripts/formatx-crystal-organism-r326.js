@@ -814,7 +814,7 @@
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
-      antialias:!constrained && (!mobile || (devicePixelRatio||1)<=4.2),
+      antialias:studioVisualProof || mobileVisualProof || (!constrained && (!mobile || (devicePixelRatio||1)<=4.2)),
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -1644,6 +1644,7 @@
     root.dataset.fxNativeMagStudioR1947c='exact-head-dual-layer-proof-owner';
     root.dataset.fxNativeMagStudioR1947d='initial-quality-gate-active-governor-shedding';
     root.dataset.fxNativeMagStudioR1947e='visual-proof-forces-desktop-inner-prism-without-production-policy-drift';
+    root.dataset.fxNativeMagStudioR1947f='capable-desktop-proof-quality-msaa-inner-prism-parity';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1868,7 +1869,7 @@
        measured pressure. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.54)
-      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
+      : (mobile ? 1.00 : (auditMode ? .78 : (studioVisualProof ? .68 : (constrained ? .58 : .68))));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.66)
       : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
@@ -2125,7 +2126,7 @@
       /* R1947 — second, smaller inner prism volume on capable desktop.
          One extra draw call only; no extra geometry buffer, texture, RAF or DOM.
          It automatically sheds if the renderer enters the slow path. */
-      const innerPrismPass=!mobile&&!softwareRenderer&&!slowRenderer&&qualityScale>=.68
+      const innerPrismPass=!mobile&&!softwareRenderer&&!slowRenderer&&(studioVisualProof||qualityScale>=.68)
         &&(!auditMode||studioVisualProof)&&(!constrained||studioVisualProof);
       if(innerPrismPass){
         gl.enable(gl.BLEND);
