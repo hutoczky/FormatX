@@ -778,21 +778,25 @@
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
-    /* R1559 owns the final compositor treatment inline so dynamically loaded
-       legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
-       deliberately mild, but preserve enough tonal separation for real mineral
-       planes on OLED/mobile displays and the canonical surface-energy contract. */
+    /* R1950 — desktop edge fidelity.
+       A CSS filter forces the browser through an extra offscreen compositor
+       raster. On fine-pointer desktop this softened/stair-stepped the four-point
+       silhouette even when WebGL itself was HiDPI + MSAA. Keep the mobile tone
+       correction, but let capable desktop pixels come directly from the shader. */
+    const crispDesktopCompositor=matchMedia('(min-width:901px) and (hover:hover) and (pointer:fine)').matches;
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : (crispDesktopCompositor ? 'none' : 'brightness(1.04) contrast(1.15) saturate(.88)');
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
+    root.dataset.fxNativeMagCompositorR1950=crispDesktopCompositor
+      ? 'desktop-filterless-direct-webgl'
+      : (mobile?'mobile-tonal-compositor-preserved':'adaptive-desktop-tonal-compositor');
 
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     if(!reduced.matches && typeof canvas.animate==='function'){
-      const crispDesktopCompositor=matchMedia('(min-width:901px) and (hover:hover) and (pointer:fine)').matches;
       const livingFrames=crispDesktopCompositor
         ? [
             {opacity:.988,transform:'none',offset:0},
