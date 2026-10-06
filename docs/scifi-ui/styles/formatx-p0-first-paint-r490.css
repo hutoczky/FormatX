@@ -1009,6 +1009,67 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* production-r1941-signature-four-point-mag-first-paint */
 /* production-r1942-prism-depth-first-paint */
 
+/* R1947 — desktop first-paint parity with the canonical four-point Signature MAG.
+   The blocking proxy now uses the same visual grammar as the live WebGL sculpt,
+   removing the old rounded pod flash on desktop before R326 becomes authoritative. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio:27/25){
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+    top:49%!important;
+    width:clamp(316px,29vw,438px)!important;
+    aspect-ratio:1!important;
+    opacity:1!important;
+    filter:brightness(1.035) contrast(1.12) saturate(.88)!important;
+    background:
+      radial-gradient(ellipse 76% 70% at 50% 50%,rgba(54,126,136,.080),transparent 72%),
+      radial-gradient(ellipse 32% 30% at 50% 49%,rgba(101,220,224,.045),transparent 74%)!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    inset:1.5% 1.5%!important;
+    clip-path:polygon(
+      50% 0%,
+      58% 27%,
+      100% 50%,
+      61% 58%,
+      50% 100%,
+      39% 59%,
+      0% 50%,
+      41% 28%
+    )!important;
+    border-radius:0!important;
+    transform:rotate(-.65deg) scale(.985)!important;
+    background:
+      linear-gradient(137deg,transparent 0 27%,rgba(226,245,240,.20) 35%,rgba(113,162,162,.065) 44%,transparent 53% 100%),
+      linear-gradient(46deg,transparent 0 31%,rgba(66,155,164,.095) 40%,transparent 50% 100%),
+      linear-gradient(-44deg,transparent 0 36%,rgba(79,171,179,.070) 45%,transparent 54% 100%),
+      radial-gradient(ellipse 22% 30% at 49% 50%,rgba(38,120,130,.22),rgba(7,27,32,.42) 56%,transparent 76%),
+      linear-gradient(25deg,rgba(2,8,11,.985) 0 27%,rgba(24,51,55,.32) 42%,rgba(3,11,15,.96) 58%,rgba(48,76,79,.17) 74%,rgba(1,6,9,.995) 100%),
+      radial-gradient(circle at 50% 50%,rgba(31,78,86,.15),rgba(8,23,28,.92) 43%,rgba(1,7,10,.998) 75%)!important;
+    box-shadow:
+      inset 20px -24px 42px rgba(0,3,6,.58),
+      inset -13px 14px 30px rgba(223,241,235,.052),
+      inset 0 0 0 1px rgba(181,218,214,.042),
+      0 30px 68px rgba(0,0,0,.50)!important;
+    opacity:.995!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:33.5% 33.5% 33.5% 33.5%!important;
+    border:1px solid rgba(161,219,217,.28)!important;
+    border-radius:50%!important;
+    background:
+      radial-gradient(circle at 36% 33%,rgba(248,255,252,.96) 0 2.6%,rgba(123,236,232,.66) 7%,rgba(25,125,136,.56) 18%,rgba(7,39,46,.93) 39%,rgba(0,9,13,.993) 72%),
+      radial-gradient(circle at 50% 50%,rgba(91,211,214,.13),transparent 66%)!important;
+    box-shadow:
+      0 0 0 5px rgba(3,13,17,.76),
+      inset 0 0 18px rgba(124,228,225,.13),
+      0 0 24px rgba(66,184,194,.075)!important;
+    opacity:.96!important;
+  }
+}
+/* production-r1947-desktop-signature-first-paint-parity */
+
+
 /* R1945 — signature MAG header control from first paint.
    Keep the accessible button text in the DOM, but paint the same four-point
    optical identity as the hero MAG so no text-placeholder flash survives. */
