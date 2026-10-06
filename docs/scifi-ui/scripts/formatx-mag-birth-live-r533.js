@@ -721,6 +721,24 @@
     }
   }
 
+  function updateNativeCrossfade(r){
+    locateStage();
+    const allocated=ROOT.dataset.fxCrystalOrganismR326==='ready' && stage instanceof HTMLElement;
+    const painted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
+    const ready=allocated&&painted;
+    if(ready&&r>=.885){
+      const nativeBlend=smoothstep((r-.885)/.105);
+      overlay.style.setProperty('--fxb-handoff-opacity',String(1-nativeBlend*.97));
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlend.toFixed(3);
+      return true;
+    }
+    overlay.style.setProperty('--fxb-handoff-opacity','1');
+    ROOT.dataset.fxMagBirthNativeCrossfadeR1947=allocated
+      ? (painted?'armed':'awaiting-painted-first-frame')
+      : 'waiting-renderer';
+    return false;
+  }
+
   function seedParticles(w,h) {
     const count=MOBILE?Math.max(8,Math.min(12,Math.round((w*h)/36000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
     particles=Array.from({length:count},(_,i)=>{
@@ -1027,19 +1045,8 @@
       syncNativeCore(r,now);
     }
 
-    /* R1947 — reveal the exact permanent hero during the final cinematic beat.
-       This removes the visual discontinuity between the Three.js finale sculpt
-       and the native R326 MAG. If the native core is not ready, fail open and
-       keep the cinematic fully opaque. */
-    const nativeBlendReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
-    if(nativeBlendReady && r>=.885){
-      const nativeBlend=smoothstep((r-.885)/.105);
-      overlay.style.setProperty('--fxb-handoff-opacity',String(1-nativeBlend*.97));
-      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlend.toFixed(3);
-    }else{
-      overlay.style.setProperty('--fxb-handoff-opacity','1');
-      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlendReady?'armed':'waiting';
-    }
+    /* R1947b — fade only after the permanent renderer has painted a real frame. */
+    updateNativeCrossfade(r);
 
     if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;
@@ -1153,7 +1160,7 @@
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
     ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
-    ROOT.dataset.fxMagBirthHandoffR1947='native-hero-crossfade-final-1-15s';
+    ROOT.dataset.fxMagBirthHandoffR1947='painted-frame-gated-native-hero-crossfade-final-1-15s';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
@@ -1173,6 +1180,7 @@
           status.textContent=statusFor(fixedR);
         }catch(_){}
         try{syncNativeCore(fixedR,fixedTime);}catch(_){}
+        try{updateNativeCrossfade(fixedR);}catch(_){}
         try{drawParticles(fixedR,fixedTime);}catch(error){
           console.error('FormatX R1557 first fixed-frame render failed:',error);
         }
@@ -1187,6 +1195,7 @@
           try{drawParticles(fixedR,fixedTime);}catch(error){
             console.error('FormatX R1560 fixed-frame settle render failed:',error);
           }
+          try{updateNativeCrossfade(fixedR);}catch(_){}
           const peak=Number(ROOT.dataset.fxMagBirthFramePeakR1557||0);
           if(peak<8 && proofAttempts<8){
             requestAnimationFrame(()=>requestAnimationFrame(settleProof));
