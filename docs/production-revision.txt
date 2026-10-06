@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-dual-layer-signature-mag
+token=20261006-r1947b-dual-layer-signature-mag
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=validate and deploy the R1947 dual-layer Signature MAG with a real adaptive inner prism volume on capable desktop while preserving the mobile single-pass performance path
+purpose=validate and deploy the R1947b dual-layer Signature MAG with a real adaptive inner prism volume on capable desktop while preserving the mobile single-pass performance path
 validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, no-occlusion, R536 cinematic handoff, mobile MAG proof, desktop visual contracts, adaptive renderer fallback and production Worker parity
