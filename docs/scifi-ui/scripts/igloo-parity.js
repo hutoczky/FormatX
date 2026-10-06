@@ -78,9 +78,22 @@
   }
 
   function ensureDesktopLayoutStyle() {
+    const existing = document.querySelector('link[data-fx-desktop-unified]');
+    if (existing instanceof HTMLLinkElement) {
+      const ready = () => { root.dataset.fxDesktopUnified = 'ready'; };
+      if (existing.sheet) ready();
+      else {
+        existing.addEventListener('load', ready, { once: true });
+        existing.addEventListener('error', () => {
+          root.dataset.fxDesktopUnified = 'failed';
+          console.warn('FormatX desktop composition stylesheet failed to load.');
+        }, { once: true });
+      }
+      return;
+    }
     ensureStyle(
       'data-fx-desktop-unified',
-      './styles/formatx-desktop-unified.css',
+      './styles/formatx-desktop-unified.css?v=20261006-r1948-award-final-rhythm',
       'fxDesktopUnified',
       'FormatX desktop composition stylesheet failed to load.'
     );
