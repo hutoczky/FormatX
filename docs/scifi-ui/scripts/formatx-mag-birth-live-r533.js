@@ -53,7 +53,7 @@
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
-  const EXIT_MS = 180;
+  const EXIT_MS = 820;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
@@ -664,7 +664,7 @@
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
-    stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    stage.style.setProperty('transition', 'opacity .92s cubic-bezier(.16,.78,.18,1)', 'important');
   }
 
   function releaseStageStyle() {
@@ -961,6 +961,7 @@
     try { overlay.dataset.phase='4'; } catch (_) {}
     try { ROOT.dataset.fxMagBirthLiveR533=source; } catch (_) {}
     try { ROOT.dataset.fxMagBirthHandoffR655='exception-safe-overlay-teardown'; } catch (_) {}
+    try { ROOT.dataset.fxMagBirthHandoffR1951='820ms-optical-crossfade-permanent-mag-continuity'; } catch (_) {}
 
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
