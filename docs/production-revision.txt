@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1951-photoreal-continuous-scene
+token=20261007-r1951b-photoreal-continuous-scene
 base_master=2e7c753e8c15a250bc4e625aa59c0f2322971413
-purpose=deploy the R1951 photoreal Signature MAG, physical refraction/scattering, pixel-stable contour, spring-mass cinematic camera, continuous intro handoff, volumetric DOM/WebGL world and single canonical mobile control owner
+purpose=deploy the R1951b photoreal Signature MAG, IOR refraction/scattering, protected supersampled contours, spring-mass cinematic camera, no-flash intro handoff, shared volumetric DOM/WebGL world and single canonical mobile control owner
 validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, desktop native MAG proof, mobile MAG proof, intro proof, control dedupe, no-occlusion, R536 cinematic continuity and production Worker parity
