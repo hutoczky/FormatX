@@ -1512,32 +1512,30 @@
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
       if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
 
-      const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
-      /* R1950 — controlled studio finale. The handoff lifts the optical core,
-         not the whole frame, and lands on the permanent smoked-silver grade. */
-      const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
-      this.coreLight.intensity+=flash*.42+after*.12;
+      const finaleLift=smooth((t-9.06)/.34)*(1-smooth((t-9.62)/.46));
+      /* R1951 — no frame flash. The finale is an optical exposure handoff:
+         the core gains a restrained internal luminance while the camera and
+         smoked-silver body stay on the exact permanent-MAG grade. */
+      const after=smooth((t-9.44)/.44);
+      this.renderer.toneMappingExposure=1.070+after*.0015;
+      this.coreLight.intensity+=finaleLift*.22+after*.10;
       if(this.glowSprite){
-        const g=1+flash*.10;
+        const g=1+finaleLift*.035;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.095,this.glowSprite.material.opacity+finaleLift*.014);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.010;
-        const burstScale=2.08+flash*.10;
-        this.flashBurst.scale.set(burstScale,burstScale,1);
+        this.flashBurst.material.opacity=0;
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.004;
-        this.flashBeam.scale.x=1+flash*.035;
+        this.flashBeam.material.opacity=0;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
-        const q=1.00+flash*.022;
+        this.mechEyeCorona.material.opacity=Math.min(.215,.175+finaleLift*.010);
+        const q=1.00+finaleLift*.012;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.34;
+      if(this.mechLight)this.mechLight.intensity+=finaleLift*.18;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1616,6 +1614,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagFinaleR1951='no-frame-flash-optical-core-exposure-handoff';
   document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
   document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
