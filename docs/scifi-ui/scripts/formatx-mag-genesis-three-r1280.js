@@ -48,6 +48,7 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      this.mobileLayout=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
@@ -99,12 +100,15 @@
       this.scene.add(new T.HemisphereLight(0x6fc9df,0x080612,0.86));
       const key=new T.DirectionalLight(0xd3f3ff,2.05);
       key.position.set(-3.5,5,6);
+      this.keyLight=key;
       this.scene.add(key);
       const rim=new T.PointLight(0x7457ff,26,13,2);
       rim.position.set(2.8,-2.2,3.6);
+      this.rimLight=rim;
       this.scene.add(rim);
       const bioticFill=new T.PointLight(0x5b2f9d,18,11,2);
       bioticFill.position.set(-2.4,-.6,3.2);
+      this.bioticFill=bioticFill;
       this.scene.add(bioticFill);
       this.coreLight=new T.PointLight(0x6feeff,0,8,2);
       this.coreLight.position.set(0,0,2.0);
@@ -1372,39 +1376,61 @@
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
+      /* R1947 — exact handoff orientation parity with the permanent renderer.
+         The old finale ended almost unrotated, then the permanent MAG appeared
+         at its authored three-quarter baseline, producing a subtle visual snap. */
+      const handoffPose=smooth((t-8.55)/1.20);
+      const mobilePose=this.mobileLayout.matches;
+      /* R326 GLSL matrices are the inverse-sign form of Three.js
+         rotations, and its shader adds fixed yaw/pitch/roll offsets. These are
+         the equivalent Three.js Euler angles of the actual idle rendered pose. */
+      const finalRX=mobilePose?.160:.140;
+      const finalRY=mobilePose?-.005:-.015;
+      const finalRZ=.037;
+      this.mechanicalGroup.rotation.x=mix(0,finalRX,handoffPose);
+      this.mechanicalGroup.rotation.y=mix(0,finalRY,handoffPose);
+      this.mechanicalGroup.rotation.z=mix(0,finalRZ,handoffPose);
+
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.090,finale),
-        mix(.090,.175,finale),
-        mix(.106,.185,finale)
+        mix(.031,.055,finale),
+        mix(.090,.115,finale),
+        mix(.106,.125,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.075,finale),
-        mix(.125,.160,finale),
-        mix(.145,.175,finale)
+        mix(.039,.040,finale),
+        mix(.125,.085,finale),
+        mix(.145,.095,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
+        mix(.480,.280,finale),
+        mix(.575,.340,finale),
+        mix(.565,.330,finale)
       );
-      this.mechMaterial.transmission=mix(.32,.36,finale);
-      this.mechMidMaterial.transmission=mix(.38,.42,finale);
-      this.mechMaterial.roughness=mix(.115,.135,finale);
-      this.mechMidMaterial.roughness=mix(.105,.125,finale);
-      this.silverMaterial.roughness=mix(.085,.100,finale);
+      this.mechMaterial.transmission=mix(.32,.30,finale);
+      this.mechMidMaterial.transmission=mix(.38,.30,finale);
+      this.mechMaterial.roughness=mix(.115,.150,finale);
+      this.mechMidMaterial.roughness=mix(.105,.140,finale);
+      this.silverMaterial.roughness=mix(.085,.125,finale);
 
-      this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
-      this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
-      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      this.mechMaterial.opacity=(.90+.020*finale)*grow;
+      this.mechMidMaterial.opacity=(.67-.310*finale)*grow;
+      this.silverMaterial.opacity=(.36-.210*finale)*grow;
+      this.mechEdgeMaterial.opacity=(.020-.008*finale)*grow;
+      this.mechInnerMaterial.opacity=(.22-.040*finale)*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=(.06-.045*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22-.040*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(1.35-.55*finale)*grow;
+
+      /* R1947c — the cinematic light rig also converges. Huge violet/cyan point
+         lights are valuable during genesis, but at handoff they made the same
+         geometry look like a different object. */
+      if(this.keyLight)this.keyLight.intensity=mix(2.05,1.20,finale);
+      if(this.rimLight)this.rimLight.intensity=mix(26,5.5,finale);
+      if(this.bioticFill)this.bioticFill.intensity=mix(18,3.8,finale);
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1580,6 +1606,9 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1947='exact-pose-seamless-handoff-to-permanent-renderer';
+  document.documentElement.dataset.fxMagSignatureR1947c='smoked-silver-material-and-light-rig-convergence';
+  document.documentElement.dataset.fxMagSignatureR1947e='effective-r326-matrix-pose-parity';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
