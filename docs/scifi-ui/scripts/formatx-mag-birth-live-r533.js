@@ -232,6 +232,8 @@
   ROOT.dataset.fxMagBirthArtR720 = 'organic-convex-diamond-fold-dominant-shell-dark-hood-thick-tendrils-late-close-camera';
   ROOT.dataset.fxMagBirthArtR721 = 'four-petal-organic-mag-r720-shell-nine-tendrils-reference-pullback';
   ROOT.dataset.fxMagBirthSignatureR1941 = 'four-point-smoked-bioglass-central-optic-studio-finale';
+  ROOT.dataset.fxMagBirthSignatureR1947='smoked-silver-internal-prism-intro-to-permanent-hero-parity';
+  ROOT.dataset.fxMagBirthSignatureR1947e='whole-film-crossfade-into-warmed-native-hero';
   ROOT.dataset.fxMagBirthArtR800 = 'wide-cellular-mass-smaller-blue-iris-integrated-petals-segmented-tendrils-local-flash';
   ROOT.dataset.fxMagBirthArtR820 = 'dark-contiguous-cellular-shell-blue-radial-iris-integrated-dark-petals-thick-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR900 = 'reference-stage1-liquid-core-dna-stage2-cellular-orb-stage3-armored-tentacle-pod';
@@ -514,7 +516,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1945l-controlled-studio-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261006-r1947d-native-crossfade-parity';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -965,6 +967,9 @@
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
+    /* Preserve the pre-handoff fade endpoint; never jump back to opacity:1
+       before the normal 180 ms teardown transition. */
+    try { overlay.style.setProperty('opacity','0'); } catch (_) {}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
 
     exitTimer=window.setTimeout(
@@ -1018,6 +1023,18 @@
 
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
+
+    /* R1947e — true visual handoff.
+       The exact permanent MAG is already warm underneath. During the final
+       950 ms fade the complete intro film, not just its proxy mesh, so the
+       native renderer becomes the visible continuation of the same object. */
+    const nativeFilmReveal=smoothstep((r-.900)/.095);
+    if(nativeFilmReveal>0){
+      const filmOpacity=1-nativeFilmReveal*.88;
+      overlay.style.setProperty('opacity',filmOpacity.toFixed(4));
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1947='active-'+Math.round(nativeFilmReveal*100);
+    }
+
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;

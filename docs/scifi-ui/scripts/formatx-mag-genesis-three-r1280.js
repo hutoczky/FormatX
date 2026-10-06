@@ -896,27 +896,27 @@
     makeMechanicalLayer(){
       const T=this.THREE;
 
-      /* R1945g — intro finale material converges into the permanent Signature MAG:
-         neutral smoked-silver bioglass, internal ice facets and recessed optic. */
+      /* R1947 — intro finale shares the permanent Signature MAG material grammar:
+         dark smoked-silver bioglass, low emission and internal refractive depth. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x08171b,metalness:.10,roughness:.115,
-        transmission:.32,thickness:.42,ior:1.45,
-        emissive:0x041216,emissiveIntensity:.065,
-        clearcoat:.98,clearcoatRoughness:.065,
+        color:0x071216,metalness:.08,roughness:.145,
+        transmission:.22,thickness:.48,ior:1.46,
+        emissive:0x020b0e,emissiveIntensity:.032,
+        clearcoat:.98,clearcoatRoughness:.075,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x0a2025,metalness:.08,roughness:.105,
-        transmission:.38,thickness:.32,ior:1.46,
-        emissive:0x04191d,emissiveIntensity:.075,
-        clearcoat:.98,clearcoatRoughness:.060,
+        color:0x08191d,metalness:.06,roughness:.135,
+        transmission:.30,thickness:.28,ior:1.47,
+        emissive:0x021012,emissiveIntensity:.036,
+        clearcoat:.98,clearcoatRoughness:.070,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0xb8c8c6,metalness:.12,roughness:.085,
-        transmission:.28,thickness:.22,ior:1.42,
-        emissive:0x0a252b,emissiveIntensity:.070,
-        clearcoat:1.0,clearcoatRoughness:.050,
+        color:0x9fb5b2,metalness:.10,roughness:.115,
+        transmission:.46,thickness:.16,ior:1.44,
+        emissive:0x061619,emissiveIntensity:.030,
+        clearcoat:1.0,clearcoatRoughness:.060,
         transparent:true,opacity:0
       });
       this.mechEdgeMaterial=new T.LineBasicMaterial({
@@ -964,7 +964,7 @@
       cradleGeo.center();
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
       this.mechCradle.scale.set(.92,.92,.76);
-      this.mechCradle.position.z=.24;
+      this.mechCradle.position.z=.16;
       this.mechanicalGroup.add(this.mechCradle);
 
       // Four internal silver-ice facets reinforce the signature points.
@@ -986,7 +986,7 @@
 
       const crownL=new T.Mesh(topPlateGeo,this.silverMaterial);
       crownL.scale.set(.56,.90,.76);
-      crownL.position.set(-.14,.40,.31);
+      crownL.position.set(-.14,.40,.20);
       crownL.rotation.z=-.10;
       this.mechanicalGroup.add(crownL);
       this.silverParts.push(crownL);
@@ -994,7 +994,7 @@
 
       const crownR=new T.Mesh(topPlateGeo,this.silverMaterial);
       crownR.scale.set(-.56,.90,.76);
-      crownR.position.set(.14,.40,.31);
+      crownR.position.set(.14,.40,.20);
       crownR.rotation.z=.10;
       this.mechanicalGroup.add(crownR);
       this.silverParts.push(crownR);
@@ -1016,7 +1016,7 @@
 
       const left=new T.Mesh(sideGeo,this.silverMaterial);
       left.scale.set(.66,.70,.74);
-      left.position.set(-.48,.00,.28);
+      left.position.set(-.48,.00,.19);
       left.rotation.z=.05;
       this.mechanicalGroup.add(left);
       this.plates.push(left);
@@ -1024,7 +1024,7 @@
 
       const right=new T.Mesh(sideGeo,this.silverMaterial);
       right.scale.set(-.66,.70,.74);
-      right.position.set(.48,.00,.28);
+      right.position.set(.48,.00,.19);
       right.rotation.z=-.05;
       this.mechanicalGroup.add(right);
       this.plates.push(right);
@@ -1081,13 +1081,13 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.50,.50,1);
+      this.mechEyeCorona.scale.set(.42,.42,1);
       this.mechEyeCorona.position.set(0,.01,.48);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.082,64),
-        new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
+        new T.CircleGeometry(.072,64),
+        new T.MeshBasicMaterial({color:0x0b3036,transparent:true,opacity:.36,side:T.DoubleSide})
       );
       this.mechEyeCore.position.set(0,.01,.50);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -1097,13 +1097,13 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.148,.0055,8,72),
+        new T.TorusGeometry(.128,.0045,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.01,.49);
       this.mechanicalGroup.add(this.mechInnerRing);
 
-      this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
+      this.mechLight=new T.PointLight(0x7ce8e7,0,3.6,2);
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
 
@@ -1264,7 +1264,9 @@
       else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
-      const endMove=smooth((t-9.78)/.20);
+      /* R1947b — spatial continuity: begin travelling toward the real hero
+         before the final frame instead of jumping during the last 200 ms. */
+      const endMove=smooth((t-9.05)/.80);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
@@ -1369,42 +1371,69 @@
     updateMechanical(t,time){
       const grow=smooth((t-6.25)/.90);
       const finale=smooth((t-7.20)/1.65);
+      const handoff=smooth((t-9.05)/.80);
       this.mechanicalGroup.visible=grow>.002;
-      this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
+      const handoffScale=mix(1.0,.88,handoff);
+      this.mechanicalGroup.scale.set(
+        (.001+grow*1.04)*handoffScale,
+        (.001+grow*1.04)*handoffScale,
+        (.001+grow*1.02)*handoffScale
+      );
 
-      /* R1945k — studio-smoked material convergence, not a flash.
-         The final 2.5 s gradually become the same smoked-silver/cyan bioglass
-         family as the permanent hero, so handoff reads as one continuous object. */
+      /* R1947 — converge into the permanent smoked-silver hero instead of
+         bright teal armour. Internal facets appear only as refracted depth. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.090,finale),
-        mix(.090,.175,finale),
-        mix(.106,.185,finale)
+        mix(.026,.040,finale),
+        mix(.070,.102,finale),
+        mix(.082,.108,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.075,finale),
-        mix(.125,.160,finale),
-        mix(.145,.175,finale)
+        mix(.030,.038,finale),
+        mix(.090,.092,finale),
+        mix(.104,.100,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
+        mix(.400,.330,finale),
+        mix(.475,.405,finale),
+        mix(.465,.398,finale)
       );
-      this.mechMaterial.transmission=mix(.32,.36,finale);
-      this.mechMidMaterial.transmission=mix(.38,.42,finale);
-      this.mechMaterial.roughness=mix(.115,.135,finale);
-      this.mechMidMaterial.roughness=mix(.105,.125,finale);
-      this.silverMaterial.roughness=mix(.085,.100,finale);
+      this.mechMaterial.transmission=mix(.22,.18,finale);
+      this.mechMidMaterial.transmission=mix(.30,.26,finale);
+      this.silverMaterial.transmission=mix(.46,.52,finale);
+      this.mechMaterial.roughness=mix(.145,.165,finale);
+      this.mechMidMaterial.roughness=mix(.135,.155,finale);
+      this.silverMaterial.roughness=mix(.115,.135,finale);
 
-      this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
-      this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
-      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
-      if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
-      this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      this.mechMaterial.opacity=(.90+.045*finale)*grow;
+      this.mechMidMaterial.opacity=(.20+.035*finale)*grow;
+      this.silverMaterial.opacity=(.045+.095*finale)*grow;
+      this.mechEdgeMaterial.opacity=(.012+.006*finale)*grow;
+      this.mechInnerMaterial.opacity=(.13+.035*finale)*grow;
+      if(this.seamMaterial)this.seamMaterial.opacity=(.025-.012*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.105+.025*finale)*grow;
+
+      /* The permanent MAG is already warm and visible under the masked film.
+         Fade the proxy shell while it reaches that exact DOM target, so the
+         viewer sees one object continuing rather than a model swap. */
+      const proxyFade=1-smooth((t-9.36)/.50);
+      this.mechMaterial.opacity*=proxyFade;
+      this.mechMidMaterial.opacity*=proxyFade;
+      this.silverMaterial.opacity*=proxyFade;
+      this.mechEdgeMaterial.opacity*=proxyFade;
+      this.mechInnerMaterial.opacity*=proxyFade;
+      if(this.seamMaterial)this.seamMaterial.opacity*=proxyFade;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity*=proxyFade;
+      if(this.mechEyeCore)this.mechEyeCore.material.opacity=(.34+.05*finale)*grow*proxyFade;
+
+      /* Flat armour pieces caused the low-poly star read in the final keyframe.
+         Keep the single continuous body; the true native shader supplies the
+         internal prism folds during the crossfade. */
+      this.silverParts.forEach((p)=>{p.visible=false;});
+      this.plates.forEach((p)=>{p.visible=false;});
+      if(this.jaw)this.jaw.visible=false;
+
+      this.mechInnerRing.rotation.z=time*.00010;
+      if(this.mechLight)this.mechLight.intensity=(.72+.16*finale)*grow*proxyFade;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1480,28 +1509,28 @@
       const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
       /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
       const after=smooth((t-9.46)/.34);
-      this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
-      this.coreLight.intensity+=flash*.80+after*.25;
+      this.renderer.toneMappingExposure=1.045+flash*.006+after*.002;
+      this.coreLight.intensity+=flash*.30+after*.10;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.08,this.glowSprite.material.opacity+flash*.018);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.028;
-        const burstScale=2.18+flash*.18;
+        this.flashBurst.material.opacity=flash*.014;
+        const burstScale=2.12+flash*.10;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.012;
-        this.flashBeam.scale.x=1+flash*.08;
+        this.flashBeam.material.opacity=flash*.006;
+        this.flashBeam.scale.x=1+flash*.04;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.20,.115+flash*.035);
+        const q=.42*(1.00+flash*.025);
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechLight)this.mechLight.intensity+=flash*.28;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1580,6 +1609,10 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1947='intro-finale-smoked-silver-internal-prism-permanent-hero-parity';
+  document.documentElement.dataset.fxMagSignatureR1947b='early-spatial-crossfade-into-exact-native-hero-no-proxy-plates';
+  document.documentElement.dataset.fxMagSignatureR1947c='corona-base-scale-preserved-native-crossfade';
+  document.documentElement.dataset.fxMagSignatureR1947d='runtime-scoped-handoff-progress-no-reference-error';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
