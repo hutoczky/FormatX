@@ -17,7 +17,8 @@ const SHOTS=[
   [3.50,'02-3.50s'],
   [5.50,'03-5.50s'],
   [7.50,'04-7.50s'],
-  [9.25,'05-9.25s']
+  [9.25,'05-9.25s'],
+  [9.55,'05b-9.55s']
 ];
 
 (async()=>{
@@ -302,6 +303,12 @@ const SHOTS=[
         }
         if(state.nativeProof!=='painted-crossfade-ready'){
           errors.push('R1947 fixed-frame native proof not synchronized: '+state.nativeProof);
+        }
+        if(seconds>=9.50){
+          const blend=Number(state.nativeCrossfade);
+          const opacity=Number(state.overlayOpacity);
+          if(!(blend>=.95))errors.push('R1947 finale did not converge to native hero: '+state.nativeCrossfade);
+          if(!(opacity<=.08))errors.push('R1947 cinematic shell still too visible at finale: '+state.overlayOpacity);
         }
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
