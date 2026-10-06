@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1948-hero-progressive-disclosure
-base_master=8b1c14f2332c76b54ce4dbf05009492de18cf874
-purpose=deploy the R1948 clean cinematic hero with dormant first-viewport journey telemetry, progressive non-core scene disclosure, preserved R1947 section continuity, R1945l Signature MAG and R1944 precision interaction
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff, desktop hero state and production Worker parity
+token=20261006-r1949-award-final-seal
+base_master=24dae858e8bf217ec504d519c11364c7514f1873
+purpose=seal the award-final hero disclosure and editorial rhythm with guaranteed restrained hero world opacity, deterministic document-top core return, full production stylesheet rewrite parity and preserved R1948 progressive disclosure, R1947 continuous scene art-direction, R1945l Signature MAG and R1944 precision interaction
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, Igloo-floor gate, mobile MAG proof, no-occlusion, cinematic handoff, hero disclosure state and production Worker parity
