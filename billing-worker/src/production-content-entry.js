@@ -187,7 +187,7 @@ const R502_ASSET_REWRITES = new Map([
     rewrites: [
       [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model'],
       [/formatx-mobile-unified\.js\?v=[^"']+/g, 'formatx-mobile-unified.js?v=20260924-r1724-final-viewport-safe-living-habitat'],
-      [/formatx-desktop-unified\.css\?v=[^"']+/g, 'formatx-desktop-unified.css?v=20261006-r1948-award-final-rhythm'],
+      [/formatx-desktop-unified\.css(?:\?v=[^"']+)?/g, 'formatx-desktop-unified.css?v=20261006-r1948-award-final-rhythm'],
     ],
   }],
 ]);
