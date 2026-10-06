@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-unified-signature-mag
+token=20261006-r1947c-painted-crossfade
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=validate and deploy the R1947 unified Signature MAG: clearer layered smoked-silver bioglass, enlarged recessed optic, zero-pin-black floor and cinematic crossfade into the exact permanent hero renderer
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, intro keyframes, desktop visual contracts, native crossfade telemetry and production Worker parity
+purpose=validate and deploy R1947c: the cinematic finale crossfades only after the exact permanent hero MAG has painted, fixed-frame proof validates the same handoff, and the proven R1945l native renderer is preserved
+validation=production preflight, exact-revision convergence, CSP parity, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, painted-frame crossfade telemetry, intro keyframes and production Worker parity
