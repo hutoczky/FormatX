@@ -205,14 +205,13 @@
   }
 
   function cut(){
+    /* R1951 — continuous cinema: scene transitions do not flash or hard-cut. */
     root.classList.remove('fx-c536-cut');
     if(cutRaf)cancelAnimationFrame(cutRaf);
-    cutRaf=requestAnimationFrame(()=>{
-      cutRaf=0;
-      root.classList.add('fx-c536-cut');
-      clearTimeout(cutTimer);
-      cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),760);
-    });
+    cutRaf=0;
+    clearTimeout(cutTimer);
+    cutTimer=0;
+    root.dataset.fxCinematicCutR1951='continuous-no-flash';
   }
 
   function setSceneState(scene,state){
@@ -324,7 +323,7 @@
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        const pointerEase=1-Math.exp(-dt*.0135);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -379,6 +378,13 @@
 
       root.dataset.fxCinematicProgressR536=global.toFixed(3);
       root.dataset.fxCinematicLocalR536=local.toFixed(3);
+    }else{
+      /* R1951 — keep camera state alive during fast scroll without the heavy
+         per-scene writes. This prevents the freeze-then-jump web-animation feel. */
+      root.style.setProperty('--fx-c536-progress',global.toFixed(4));
+      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
+      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*9.6 + velocity*-1.05).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*6.2 + velocity*.52).toFixed(2)+'px');
     }
     if(stage?.dataset.fxC536Primed!=='true'){
       stage.dataset.fxC536Primed='true';
@@ -476,8 +482,8 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
-    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
+    pointerTailFrames=12;
+    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1951';
     schedule();
   }
 
@@ -485,8 +491,8 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
-    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
+    pointerTailFrames=14;
+    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1951';
     schedule();
   }
 
@@ -501,11 +507,11 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
-    clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    /* R1951 — intro and permanent hero are one shot. */
+    root.classList.remove('fx-c536-cut');
+    activate(0,'intro-handoff-continuous-r1951');
+    signalCore(scenes[0],'intro-handoff-continuous-r1951');
+    root.dataset.fxCinematicIntroHandoffR1951='single-continuous-scene';
   }
 
   function boot() {
