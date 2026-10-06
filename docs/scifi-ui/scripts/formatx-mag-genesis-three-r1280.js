@@ -940,12 +940,17 @@
         const axisX=dx>=0?1.02:.98;
         const axisY=dy>=0?1.18:1.06;
         const axisZ=dz>=0?.49:.34;
-        const exponent=.61;
+        const exponent=.70;
         const terms=
           Math.pow(Math.abs(dx)/axisX,exponent)+
           Math.pow(Math.abs(dy)/axisY,exponent)+
           Math.pow(Math.abs(dz)/axisZ,exponent);
-        const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
+        const radialBase=1/Math.pow(Math.max(.0001,terms),1/exponent);
+        const tipBoost=
+          1+
+          .055*Math.pow(Math.abs(dx),8)+
+          .078*Math.pow(Math.abs(dy),8);
+        const radial=radialBase*tipBoost;
         const poleFade=Math.max(0,1-dy*dy);
         const theta=Math.atan2(dz,dx);
         const phi=Math.acos(Math.max(-1,Math.min(1,dy)));
@@ -964,10 +969,10 @@
       this.mechBodyParts.push(this.mechBody);
 
       // R1947 — recessed smoked optical socket, no separate diamond plate.
-      const cradleGeo=new T.SphereGeometry(.30,36,22);
+      const cradleGeo=new T.SphereGeometry(.205,36,22);
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(1.00,.92,.30);
-      this.mechCradle.position.set(0,.01,.37);
+      this.mechCradle.scale.set(1.00,.92,.24);
+      this.mechCradle.position.set(0,.01,.405);
       this.mechanicalGroup.add(this.mechCradle);
 
       // Four internal silver-ice facets reinforce the signature points.
@@ -1084,15 +1089,15 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.34,.34,1);
-      this.mechEyeCorona.position.set(0,.01,.455);
+      this.mechEyeCorona.scale.set(.245,.245,1);
+      this.mechEyeCorona.position.set(0,.01,.447);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.060,64),
+        new T.CircleGeometry(.048,64),
         new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
       );
-      this.mechEyeCore.position.set(0,.01,.468);
+      this.mechEyeCore.position.set(0,.01,.455);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
@@ -1100,10 +1105,10 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.105,.0042,8,72),
+        new T.TorusGeometry(.082,.0038,8,72),
         this.mechInnerMaterial
       );
-      this.mechInnerRing.position.set(0,.01,.462);
+      this.mechInnerRing.position.set(0,.01,.451);
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
@@ -1405,9 +1410,9 @@
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.15+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(1.02+.18*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1584,6 +1589,7 @@
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagSignatureR1947='same-volumetric-four-point-field-intro-to-hero-recessed-optic';
+  document.documentElement.dataset.fxMagSignatureR1947b='smooth-cusp-small-optic-continuous-handoff';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
