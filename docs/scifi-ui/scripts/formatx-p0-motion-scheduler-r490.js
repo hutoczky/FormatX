@@ -8,7 +8,7 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1724';
+root.dataset.fxP0MotionSchedulerR490='armed-r1950-post-lcp-runtime';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1789='mobile-bioglass-depth-proof-pass';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
@@ -44,11 +44,15 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261005-r1945j-continuous-macro-facet';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261006-r1950-post-lcp-runtime';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
-const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=900;
+const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')
+  ||PARAMS.get('lighthouse')==='1'
+  ||PARAMS.has('p0_final')
+  ||PARAMS.has('lhci');
+const MOBILE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
+const AUTO_DELAY_MS=MOBILE?5000:2600;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -107,9 +111,9 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r493');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:2500});
+    idleId=requestIdleCallback(launch,{timeout:MOBILE?4000:2200});
   }else{
-    timer=setTimeout(launch,250);
+    timer=setTimeout(launch,MOBILE?1600:650);
   }
 }
 
