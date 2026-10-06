@@ -1641,6 +1641,7 @@
     root.dataset.fxNativeMagStudioR1947='desktop-dual-layer-outer-crystal-inner-prism-depth-adaptive';
     root.dataset.fxNativeMagStudioR1947b='shader-scope-safe-inner-prism-lighting';
     root.dataset.fxNativeMagStudioR1947c='exact-head-dual-layer-proof-owner';
+    root.dataset.fxNativeMagStudioR1947d='initial-quality-gate-active-governor-shedding';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -2122,7 +2123,7 @@
       /* R1947 — second, smaller inner prism volume on capable desktop.
          One extra draw call only; no extra geometry buffer, texture, RAF or DOM.
          It automatically sheds if the renderer enters the slow path. */
-      const innerPrismPass=!mobile&&!auditMode&&!constrained&&!softwareRenderer&&!slowRenderer&&qualityScale>=.72;
+      const innerPrismPass=!mobile&&!auditMode&&!constrained&&!softwareRenderer&&!slowRenderer&&qualityScale>=.68;
       if(innerPrismPass){
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
