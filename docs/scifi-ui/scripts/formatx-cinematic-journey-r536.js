@@ -184,7 +184,7 @@
 
   function signalCore(scene,reason) {
     if (!scene) return;
-    const fastScroll=reason==='scroll'&&Math.abs(velocity)>.36;
+    const fastScroll=!finePointer&&reason==='scroll'&&Math.abs(velocity)>.36;
     if(fastScroll){
       pendingCoreScene=scene;
       clearTimeout(coreSettleTimer);
@@ -274,7 +274,7 @@
     index = clamp(index,0,scenes.length-1);
     const previous=active;
     const changed = index !== previous || !root.dataset.fxCinematicSceneR536;
-    const fastScroll=reason==='scroll'&&Math.abs(velocity)>.28;
+    const fastScroll=!finePointer&&reason==='scroll'&&Math.abs(velocity)>.28;
     active=index;
 
     if(!changed){
@@ -501,11 +501,16 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    activate(0,'intro-handoff-r1951');
+    /* R1951 — the birth film no longer ends on a second flash/cut. The scene
+       breathes directly into the live MAG and then into the page world. */
+    root.classList.remove('fx-c536-cut');
+    root.classList.add('fx-c536-handoff-r1951');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-handoff-r1951'),1120);
+    signalCore(scenes[0],'intro-handoff-r1951');
+    root.dataset.fxCinematicIntroHandoffR1951='continuous-no-second-flash';
+    schedule();
   }
 
   function boot() {
@@ -535,10 +540,16 @@
         commitScene(0,previous,'document-top-immediate-r1949');
         root.dataset.fxCinematicTopReturnR1949='immediate-core-commit';
       }
-      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
-         is scheduled here. One settle pass updates scene state and visual depth
-         after 120 ms without scroll input. */
-      setScrollBudget('fast');
+      /* R1951 — fine-pointer desktop gets one coalesced cinematic RAF per
+         browser scroll frame. Coarse/mobile keeps the low-cost settle strategy. */
+      if(finePointer){
+        setScrollBudget('interactive');
+        schedule();
+        root.dataset.fxCinematicScrollR1951='continuous-compositor-desktop';
+      }else{
+        setScrollBudget('fast');
+        root.dataset.fxCinematicScrollR1951='settled-coarse-budget';
+      }
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
