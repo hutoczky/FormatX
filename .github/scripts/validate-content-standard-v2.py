@@ -142,9 +142,13 @@ def validate_release_metadata_v2() -> None:
         "sha256sum",
         "stat -c '%s'",
         "integrity",
-        "del(.synced_at, .channels.android.updated_at)",
+        "del(",
+        ".synced_at,",
+        ".channels.android.updated_at,",
+        ".channels.multiplatform.download_count,",
+        ".channels.android.download_count",
         "cmp -s",
-        "git commit -m 'Sync official current release metadata'",
+        "git commit -m '[deploy-production] Sync official current release metadata'",
     ]:
         if token not in workflow:
             module.fail(f"Release sync workflow missing contract: {token}")
