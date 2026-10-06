@@ -1264,7 +1264,7 @@
       else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
-      const endMove=smooth((t-9.78)/.20);
+      const endMove=smooth((t-8.88)/.62);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
@@ -1370,7 +1370,10 @@
       const grow=smooth((t-6.25)/.90);
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
-      this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
+      const handoffMatch=smooth((t-8.88)/.62);
+      const handoffScale=mix(1.04,.82,handoffMatch);
+      const handoffDepth=mix(1.02,.88,handoffMatch);
+      this.mechanicalGroup.scale.set(.001+grow*handoffScale,.001+grow*handoffScale,.001+grow*handoffDepth);
 
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
@@ -1446,11 +1449,11 @@
         const k=smooth((t-5.55)/1.70);
         z=mix(3.86,4.28,k);
         y=mix(0,.003,k);
-      }else if(t<9.10){
+      }else if(t<8.88){
         z=4.28+Math.sin(time*.00018)*.006;
         y=.003;
       }else{
-        z=mix(4.28,4.40,smooth((t-9.10)/.60));
+        z=mix(4.28,4.50,smooth((t-8.88)/.62));
         y=.003;
       }
       if(this.width<this.height)z+=.90;

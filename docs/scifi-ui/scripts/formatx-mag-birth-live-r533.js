@@ -54,6 +54,8 @@
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
+  const NATIVE_HANDOFF_FADE_MS = 650;
+  const NATIVE_HANDOFF_GRACE_MS = 1800;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
@@ -514,7 +516,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1945l-controlled-studio-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261006-r1948-integrated-award-final';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -536,6 +538,10 @@
   let lastParticleDraw = 0;
   let lastTelemetryUpdate = 0;
   let warmupDispatched = false;
+  let nativeWarmupDispatched = false;
+  let nativeCrossfadeStartedAt = 0;
+  let nativeCrossfadeBlend = 0;
+  let nativeUnderlayRevealed = false;
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
@@ -673,6 +679,62 @@
     stage.style.removeProperty('transition');
   }
 
+  function revealNativeUnderlay() {
+    const nodes=[
+      document.getElementById('main-content'),
+      document.querySelector('body>.topbar'),
+      document.querySelector('body>.fx-rail'),
+      document.querySelector('body>.fx-organism-status'),
+      document.getElementById('fx-apex-canvas'),
+      document.querySelector('body>.fx-atmosphere')
+    ].filter(node=>node instanceof HTMLElement);
+    if(!nodes.length)return false;
+    for(const node of nodes){
+      node.style.setProperty('visibility','visible','important');
+      node.style.setProperty('opacity','1','important');
+    }
+    nativeUnderlayRevealed=true;
+    ROOT.dataset.fxMagBirthNativeUnderlayR1948='visible';
+    return true;
+  }
+
+  function releaseNativeUnderlayStyle() {
+    if(!nativeUnderlayRevealed)return;
+    for(const node of [
+      document.getElementById('main-content'),
+      document.querySelector('body>.topbar'),
+      document.querySelector('body>.fx-rail'),
+      document.querySelector('body>.fx-organism-status'),
+      document.getElementById('fx-apex-canvas'),
+      document.querySelector('body>.fx-atmosphere')
+    ]){
+      if(!(node instanceof HTMLElement))continue;
+      node.style.removeProperty('visibility');
+      node.style.removeProperty('opacity');
+    }
+    nativeUnderlayRevealed=false;
+    ROOT.dataset.fxMagBirthNativeUnderlayR1948='released';
+  }
+
+  function nativeUnderlayIsVisible() {
+    const main=document.getElementById('main-content');
+    if(!(main instanceof HTMLElement))return false;
+    const style=getComputedStyle(main);
+    const opacity=Number.parseFloat(style.opacity||'0');
+    const visible=style.visibility!=='hidden'&&style.display!=='none'&&opacity>.05;
+    ROOT.dataset.fxMagBirthNativeUnderlayR1948=visible?'visible':'blocked';
+    return visible;
+  }
+
+  function requestNativeHandoffWarmup(source='timeline') {
+    if(nativeWarmupDispatched)return;
+    nativeWarmupDispatched=true;
+    ROOT.dataset.fxMagBirthNativeWarmupR1948=source;
+    document.dispatchEvent(new CustomEvent('formatx:magbirthnativewarmup',{
+      detail:{source,revision:'r1948-native-handoff-warmup'}
+    }));
+  }
+
   function requestCoreWarmup(source='timeline') {
     if (warmupDispatched) return;
     warmupDispatched = true;
@@ -719,6 +781,36 @@
         coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
+  }
+
+  function updateNativeCrossfade(r,now=performance.now()){
+    locateStage();
+    const allocated=ROOT.dataset.fxCrystalOrganismR326==='ready' && stage instanceof HTMLElement;
+    const painted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
+    const ready=allocated&&painted;
+    if(ready&&r>=.885){
+      revealNativeUnderlay();
+      let nativeBlend=0;
+      if(HAS_VISUAL_FRAME){
+        nativeBlend=smoothstep((r-.885)/.065);
+      }else{
+        if(!nativeCrossfadeStartedAt)nativeCrossfadeStartedAt=now;
+        nativeBlend=smoothstep((now-nativeCrossfadeStartedAt)/NATIVE_HANDOFF_FADE_MS);
+      }
+      nativeCrossfadeBlend=nativeBlend;
+      overlay.style.setProperty('--fxb-handoff-opacity',String(1-nativeBlend*.97));
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlend.toFixed(3);
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1948='painted-frame-clocked-650ms';
+      return nativeBlend>=.995;
+    }
+    if(!nativeCrossfadeStartedAt){
+      nativeCrossfadeBlend=0;
+      overlay.style.setProperty('--fxb-handoff-opacity','1');
+    }
+    ROOT.dataset.fxMagBirthNativeCrossfadeR1947=allocated
+      ? (painted?'armed':'awaiting-painted-first-frame')
+      : 'waiting-renderer';
+    return false;
   }
 
   function seedParticles(w,h) {
@@ -922,6 +1014,7 @@
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
+    try { releaseNativeUnderlayStyle(); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
@@ -1019,13 +1112,19 @@
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
-    if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
+    if (r >= CORE_WARMUP_PROGRESS) {
+      requestCoreWarmup('timeline-'+Math.round(r*100));
+      requestNativeHandoffWarmup('timeline-'+Math.round(r*100));
+    }
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
       lastNativeSync=now;
       syncNativeCore(r,now);
     }
+
+    /* R1947b — fade only after the permanent renderer has painted a real frame. */
+    updateNativeCrossfade(r,now);
 
     if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;
@@ -1078,7 +1177,23 @@
       queueRender(120);
       return;
     }
-    ROOT.dataset.fxMagBirthHandoffR623=nativeReady?'native-ready':'bounded-static-fail-open';
+    const handoffElapsed=now-startedAt-DURATION;
+    const handoffDeadline=NATIVE_HANDOFF_GRACE_MS;
+    if(!HAS_VISUAL_FRAME && handoffElapsed<handoffDeadline){
+      if(!nativeReady){
+        requestNativeHandoffWarmup('post-film-native-wait');
+        ROOT.dataset.fxMagBirthHandoffR623='post-film-waiting-for-native';
+        queueRender(MOBILE?32:16);
+        return;
+      }
+      const crossfadeComplete=updateNativeCrossfade(1,now);
+      if(!crossfadeComplete){
+        ROOT.dataset.fxMagBirthHandoffR623='native-painted-finishing-650ms-crossfade';
+        queueRender(MOBILE?32:16);
+        return;
+      }
+    }
+    ROOT.dataset.fxMagBirthHandoffR623=nativeReady?'native-ready-crossfade-complete':'bounded-static-fail-open';
     finish('complete');
   }
 
@@ -1139,6 +1254,8 @@
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
     ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
+    ROOT.dataset.fxMagBirthHandoffR1947='painted-frame-gated-native-hero-crossfade-final-650ms';
+    ROOT.dataset.fxMagBirthHandoffR1948='native-warmup-visible-underlay-readiness-clocked-650ms-bounded-grace';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
@@ -1157,7 +1274,11 @@
           progress.value=value;
           status.textContent=statusFor(fixedR);
         }catch(_){}
-        try{syncNativeCore(fixedR,fixedTime);}catch(_){}
+        try{
+          if(fixedR>=CORE_WARMUP_PROGRESS)requestNativeHandoffWarmup('fixed-frame-r1948');
+          syncNativeCore(fixedR,fixedTime);
+        }catch(_){}
+        try{updateNativeCrossfade(fixedR,fixedTime);}catch(_){}
         try{drawParticles(fixedR,fixedTime);}catch(error){
           console.error('FormatX R1557 first fixed-frame render failed:',error);
         }
@@ -1166,21 +1287,51 @@
            retained framebuffer still read as black, which made valid Three
            geometry look absent in screenshot evidence. */
         let proofAttempts=0;
+        const proofDeadlineAt=performance.now()+12000;
         const settleProof=()=>{
           if(finished||!overlay.isConnected)return;
           proofAttempts+=1;
+
+          /* R1947c — fixed-frame proof must repeatedly acquire/sync the native
+             hero, not only the intro canvas. A late runtime/bootstrap is normal
+             on CI and was previously invisible to the proof contract. */
+          try{
+            locateStage();
+            if(fixedR>=CORE_WARMUP_PROGRESS){
+              requestCoreWarmup('fixed-frame-r1947-'+proofAttempts);
+              requestNativeHandoffWarmup('fixed-frame-r1948-'+proofAttempts);
+            }
+            syncNativeCore(fixedR,fixedTime);
+            coreApi?.requestRender?.(2);
+          }catch(_){}
+
           try{drawParticles(fixedR,fixedTime);}catch(error){
             console.error('FormatX R1560 fixed-frame settle render failed:',error);
           }
+          try{updateNativeCrossfade(fixedR,fixedTime);}catch(_){}
+
           const peak=Number(ROOT.dataset.fxMagBirthFramePeakR1557||0);
-          if(peak<8 && proofAttempts<8){
+          const needsNative=fixedR>=.885;
+          const nativePainted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
+          const crossfadeState=ROOT.dataset.fxMagBirthNativeCrossfadeR1947||'';
+          const crossfadeNumeric=/^(?:0(?:\.\d+)?|1(?:\.0+)?)$/.test(crossfadeState);
+          const introVisible=peak>=8;
+          const underlayVisible=!needsNative||nativeUnderlayIsVisible();
+          const settled=introVisible&&(!needsNative||(nativePainted&&crossfadeNumeric&&underlayVisible));
+
+          if(!settled && performance.now()<proofDeadlineAt){
             requestAnimationFrame(()=>requestAnimationFrame(settleProof));
             return;
           }
+
           ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
           ROOT.dataset.fxMagBirthVisualFrameR1557='double-render-compositor-synchronized';
-          ROOT.dataset.fxMagBirthVisualFrameR1560=peak>=8?'readback-visible':'bounded-readback-fail-open';
+          ROOT.dataset.fxMagBirthVisualFrameR1560=settled?'readback-visible-native-crossfade-synchronized':'bounded-readback-fail-open';
           ROOT.dataset.fxMagBirthVisualFrameAttemptsR1560=String(proofAttempts);
+          ROOT.dataset.fxMagBirthVisualFrameUnderlayR1948=nativeUnderlayIsVisible()?'visible':'blocked';
+          ROOT.dataset.fxMagBirthVisualFrameNativeR1947=needsNative
+            ? (nativePainted&&crossfadeNumeric?'painted-crossfade-ready':'bounded-native-fail-open')
+            : 'not-required';
           ROOT.dataset.fxMagBirthVisualFrameR659='ready';
           try{
             document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
@@ -1226,14 +1377,14 @@
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
         }));
       }catch(_){}
-    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
+    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 12000 : DURATION+NATIVE_HANDOFF_GRACE_MS+500));
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path
     // can never strand the cinematic overlay beyond the finished shot.
     hardFinishTimer=window.setTimeout(
       ()=>finish(VALIDATED_SKIP_MODE?'validated-skip-timeout-r1557':'bounded-failsafe-r652'),
-      VALIDATED_SKIP_MODE ? 35000 : (REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220))
+      VALIDATED_SKIP_MODE ? 35000 : (REDUCED ? 900 : DURATION + NATIVE_HANDOFF_GRACE_MS + 220)
     );
 
     if(REDUCED){
