@@ -778,27 +778,40 @@
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
-    /* R1559 owns the final compositor treatment inline so dynamically loaded
-       legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
-       deliberately mild, but preserve enough tonal separation for real mineral
-       planes on OLED/mobile displays and the canonical surface-energy contract. */
+    /* R1951 — direct desktop WebGL contour.
+       R1950c supplies the dense 72x144 mesh + HiDPI/MSAA raster. A CSS filter
+       or subpixel canvas scale would force an additional compositor raster and
+       can reintroduce stair-stepping. Fine-pointer desktop therefore stays
+       shader-owned and pixel-stable; mobile retains its proven tone correction. */
+    const crispDesktopCompositor=matchMedia('(min-width:901px) and (hover:hover) and (pointer:fine)').matches;
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : (crispDesktopCompositor ? 'none' : 'brightness(1.04) contrast(1.15) saturate(.88)');
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
+    root.dataset.fxNativeMagCompositorR1951=crispDesktopCompositor
+      ? 'desktop-direct-webgl-no-filter-no-resample'
+      : (mobile?'mobile-tonal-compositor-preserved':'adaptive-desktop-tonal-fallback');
 
-    /* R1930 — one slow compositor breath on every capable screen.
-       No idle JS RAF is introduced; reduced-motion remains fully respected. */
+    /* R1930/R1951 — opacity-only desktop breathing.
+       No subpixel transform of the WebGL backing store on fine desktop. */
     if(!reduced.matches && typeof canvas.animate==='function'){
+      const livingFrames=crispDesktopCompositor
+        ? [
+            {opacity:.988,transform:'none',offset:0},
+            {opacity:1,transform:'none',offset:.48},
+            {opacity:.993,transform:'none',offset:.76},
+            {opacity:.988,transform:'none',offset:1}
+          ]
+        : [
+            {opacity:.985,transform:'scale(.996)',offset:0},
+            {opacity:1,transform:'scale(1.004)',offset:.48},
+            {opacity:.990,transform:'scale(.999)',offset:.76},
+            {opacity:.985,transform:'scale(.996)',offset:1}
+          ];
       const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
+        livingFrames,
         {
           duration:6800,
           iterations:Infinity,
