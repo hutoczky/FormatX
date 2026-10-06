@@ -514,7 +514,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1945l-controlled-studio-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261006-r1947d-native-convergence';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -719,6 +719,24 @@
         coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
+  }
+
+  function updateNativeCrossfade(r){
+    locateStage();
+    const allocated=ROOT.dataset.fxCrystalOrganismR326==='ready' && stage instanceof HTMLElement;
+    const painted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
+    const ready=allocated&&painted;
+    if(ready&&r>=.885){
+      const nativeBlend=smoothstep((r-.885)/.065);
+      overlay.style.setProperty('--fxb-handoff-opacity',String(1-nativeBlend*.97));
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlend.toFixed(3);
+      return true;
+    }
+    overlay.style.setProperty('--fxb-handoff-opacity','1');
+    ROOT.dataset.fxMagBirthNativeCrossfadeR1947=allocated
+      ? (painted?'armed':'awaiting-painted-first-frame')
+      : 'waiting-renderer';
+    return false;
   }
 
   function seedParticles(w,h) {
@@ -1027,6 +1045,9 @@
       syncNativeCore(r,now);
     }
 
+    /* R1947b — fade only after the permanent renderer has painted a real frame. */
+    updateNativeCrossfade(r);
+
     if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;
       const value=Math.min(100,Math.round(easeOutCubic(r)*100));
@@ -1139,6 +1160,7 @@
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
     ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
+    ROOT.dataset.fxMagBirthHandoffR1947='painted-frame-gated-native-hero-crossfade-final-650ms';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
@@ -1158,6 +1180,7 @@
           status.textContent=statusFor(fixedR);
         }catch(_){}
         try{syncNativeCore(fixedR,fixedTime);}catch(_){}
+        try{updateNativeCrossfade(fixedR);}catch(_){}
         try{drawParticles(fixedR,fixedTime);}catch(error){
           console.error('FormatX R1557 first fixed-frame render failed:',error);
         }
@@ -1169,18 +1192,42 @@
         const settleProof=()=>{
           if(finished||!overlay.isConnected)return;
           proofAttempts+=1;
+
+          /* R1947c — fixed-frame proof must repeatedly acquire/sync the native
+             hero, not only the intro canvas. A late runtime/bootstrap is normal
+             on CI and was previously invisible to the proof contract. */
+          try{
+            locateStage();
+            if(fixedR>=CORE_WARMUP_PROGRESS)requestCoreWarmup('fixed-frame-r1947-'+proofAttempts);
+            syncNativeCore(fixedR,fixedTime);
+            coreApi?.requestRender?.(2);
+          }catch(_){}
+
           try{drawParticles(fixedR,fixedTime);}catch(error){
             console.error('FormatX R1560 fixed-frame settle render failed:',error);
           }
+          try{updateNativeCrossfade(fixedR);}catch(_){}
+
           const peak=Number(ROOT.dataset.fxMagBirthFramePeakR1557||0);
-          if(peak<8 && proofAttempts<8){
+          const needsNative=fixedR>=.885;
+          const nativePainted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
+          const crossfadeState=ROOT.dataset.fxMagBirthNativeCrossfadeR1947||'';
+          const crossfadeNumeric=/^(?:0(?:\.\d+)?|1(?:\.0+)?)$/.test(crossfadeState);
+          const introVisible=peak>=8;
+          const settled=introVisible&&(!needsNative||(nativePainted&&crossfadeNumeric));
+
+          if(!settled && proofAttempts<24){
             requestAnimationFrame(()=>requestAnimationFrame(settleProof));
             return;
           }
+
           ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
           ROOT.dataset.fxMagBirthVisualFrameR1557='double-render-compositor-synchronized';
-          ROOT.dataset.fxMagBirthVisualFrameR1560=peak>=8?'readback-visible':'bounded-readback-fail-open';
+          ROOT.dataset.fxMagBirthVisualFrameR1560=settled?'readback-visible-native-crossfade-synchronized':'bounded-readback-fail-open';
           ROOT.dataset.fxMagBirthVisualFrameAttemptsR1560=String(proofAttempts);
+          ROOT.dataset.fxMagBirthVisualFrameNativeR1947=needsNative
+            ? (nativePainted&&crossfadeNumeric?'painted-crossfade-ready':'bounded-native-fail-open')
+            : 'not-required';
           ROOT.dataset.fxMagBirthVisualFrameR659='ready';
           try{
             document.dispatchEvent(new CustomEvent('formatx:introframe-ready',{
