@@ -162,9 +162,25 @@
     transform: translateY(16px) !important;
   }
 
+  /* R1948 — editorial chapter rhythm.
+     Content drives height; compact chapters no longer reserve almost a full
+     viewport of empty black space. */
   html body.living-architecture main > .scene:not(#hero) {
-    min-height: clamp(760px, 94svh, 980px);
-    padding-block: clamp(96px, 12vh, 150px);
+    min-height: clamp(640px, 82svh, 860px);
+    padding-block: clamp(72px, 9vh, 112px);
+  }
+
+  html body.living-architecture main > :is(
+    #network,#resources
+  ).scene:not(#hero){
+    min-height: clamp(560px, 72svh, 760px);
+    padding-block: clamp(64px, 8vh, 96px);
+  }
+
+  html body.living-architecture main > :is(
+    #experience,#capabilities,#pricing,#system
+  ).scene:not(#hero) > .section-heading{
+    margin-bottom:clamp(34px,4.2vh,54px);
   }
 }
 
