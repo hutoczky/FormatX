@@ -392,7 +392,9 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0
+          ? (mobile?.985:(software?.94:.90))
+          : (software?.95:(mobile?.985:(constrained?.972:.944)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1297,8 +1299,8 @@
         float macroFacet=mix(macroFacetA,macroFacetB,.34);
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
-          : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+          : '.940+.105*macroFacet'}; 
+        vec3 c=mix(vec3(.004,.008,.010),vec3(${mobile?'.108,.138,.141':'.112,.129,.132'}),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1312,9 +1314,9 @@
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.305'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.215'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
@@ -1350,8 +1352,8 @@
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
         float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
         float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
+        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.150'}+${mobile?'.035':'.052'}*softboxB);
+        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.112'}+${mobile?'.030':'.044'}*fresnel);
         c*=1.0-.020*prismShellB;
 
         /* R1942d — four authored fold ridges from optic to signature tips.
@@ -1364,9 +1366,9 @@
         float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
-        c*=1.0-${mobile?'.085':'.110'}*foldValley;
+        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.185'};
+        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.105'};
+        c*=1.0-${mobile?'.085':'.135'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
@@ -1375,14 +1377,14 @@
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.022'}+${mobile?'.07':'.032'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.235'},vLocal.y/${mobile?'.135':'.235'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1396,10 +1398,10 @@
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
+        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.195'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.46'}+${mobile?'.17':'.19'}*uEnergy);
+        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.78'}+${mobile?'.12':'.14'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -1414,7 +1416,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.54'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1600,6 +1602,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='cut-prism-smoked-silver-larger-optic-reduced-haze-final';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
