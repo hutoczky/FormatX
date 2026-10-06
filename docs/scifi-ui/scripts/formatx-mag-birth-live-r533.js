@@ -53,7 +53,7 @@
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
-  const EXIT_MS = 180;
+  const EXIT_MS = MOBILE ? 720 : 1080;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
@@ -965,6 +965,12 @@
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
+    try {
+      ROOT.dataset.fxMagBirthHandoffR1951='film-dissolve-started';
+      document.dispatchEvent(new CustomEvent('formatx:magbirthhandoff',{
+        detail:{source,revision:'r1951-continuous-film-dissolve'}
+      }));
+    } catch (_) {}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
 
     exitTimer=window.setTimeout(
@@ -1134,7 +1140,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
     ROOT.dataset.fxMagBirthDurationR1549='10000ms-full-studio-adaptive-60fps';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
-    ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
+    ROOT.dataset.fxMagBirthHandoffR652='10s-film-r1951-long-dissolve-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
