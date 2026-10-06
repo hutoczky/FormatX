@@ -80,7 +80,7 @@
   function ensureDesktopLayoutStyle() {
     ensureStyle(
       'data-fx-desktop-unified',
-      './styles/formatx-desktop-unified.css',
+      './styles/formatx-desktop-unified.css?v=20261006-r1948-award-final-rhythm',
       'fxDesktopUnified',
       'FormatX desktop composition stylesheet failed to load.'
     );
