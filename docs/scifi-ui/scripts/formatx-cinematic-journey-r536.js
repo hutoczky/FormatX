@@ -380,12 +380,24 @@
       root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-scene-shift',((.5-local)*6.2-scrollCamera*1.8).toFixed(2)+'px');
       root.style.setProperty('--fx-c536-scene-scale',(0.9985 + Math.sin(local*Math.PI)*.0018 + Math.min(.0012,Math.abs(scrollCamera)*.0007)).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10.4 - scrollCamera*1.85).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*6.8 + scrollCamera*.92).toFixed(2)+'px');
+      const cameraX=pointerNX*10.4 - scrollCamera*1.85;
+      const cameraY=pointerNY*6.8 + scrollCamera*.92;
+      root.style.setProperty('--fx-c617-parallax-x',cameraX.toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',cameraY.toFixed(2)+'px');
       root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.62 + scrollCamera*.055).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.84 - scrollCamera*.045).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.min(1,Math.sin(local*Math.PI)+Math.abs(scrollCamera)*.035).toFixed(4));
       root.style.setProperty('--fx-c1951-camera-velocity',scrollCamera.toFixed(4));
+      root.style.setProperty('--fx-c1951-back-x',(-cameraX*.10).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-back-y',(-cameraY*.08).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-mid-x',(cameraX*.16).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-mid-y',(cameraY*.11).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-front-x',(cameraX*.24).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-front-y',(cameraY*.20).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-particle-x',(cameraX*.31).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-particle-y',(cameraY*.25).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-anatomy-x',(cameraX*.08).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1951-anatomy-y',(cameraY*.06).toFixed(2)+'px');
 
       scenes.forEach(scene=>{
         if(Math.abs(scene.index-active)>1)return;
