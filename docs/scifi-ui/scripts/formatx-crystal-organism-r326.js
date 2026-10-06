@@ -1254,6 +1254,7 @@
       ${fragmentIn} float vMorph;
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
+      float sq(float v){return v*v;}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
@@ -1270,10 +1271,10 @@
         float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
 
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
-        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.13)/.145,2.0)-pow((refl.y-.10)/.76,2.0))*smoothstep(-.10,.72,refl.z);
-        float ribbonB=exp(-pow((refl.x-.31)/.085,2.0)-pow((refl.y+.10)/.62,2.0))*smoothstep(-.10,.70,refl.z);
+        float softboxA=exp(-sq((refl.x+.26)/.22)-sq((refl.y-.30)/.50))*smoothstep(-.20,.62,refl.z);
+        float softboxB=exp(-sq((refl.x-.42)/.27)-sq((refl.y+.02)/.54))*smoothstep(-.26,.62,refl.z);
+        float ribbonA=exp(-sq((refl.x+.13)/.145)-sq((refl.y-.10)/.76))*smoothstep(-.10,.72,refl.z);
+        float ribbonB=exp(-sq((refl.x-.31)/.085)-sq((refl.y+.10)/.62))*smoothstep(-.10,.70,refl.z);
 
         float frontDepth=smoothstep(-.46,.58,vLocal.z);
         float backDepth=1.0-frontDepth;
@@ -1281,7 +1282,7 @@
         float deepEdge=pow(1.0-facing,3.20);
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
         float strata=.5+.5*sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4);
-        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        float centreHaze=exp(-sq(vLocal.x/.50)-sq(vLocal.y/.60))*frontDepth;
 
         if(uLayer>.5){
           ${outputName}=vec4(0.0,0.0,0.0,0.0);
@@ -1313,11 +1314,11 @@
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.205'};
-        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
+        float softboxC=exp(-sq((refl.x-.18)/.31)-sq((refl.y-.56)/.30))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.155'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
-        float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
+        float glassBlade=exp(-sq((vLocal.x+.24+vLocal.y*.060)/.150))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
 
@@ -1340,7 +1341,7 @@
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
-        float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
+        float innerPane=exp(-sq((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085))
           *smoothstep(.04,.52,frontDepth);
         c+=vec3(.082,.190,.198)*innerPane*.044;
 
@@ -1348,8 +1349,8 @@
            These echo the layered crystalline anatomy from the selected historic
            MAG without adding geometry or a second render pass. */
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/${mobile?'.050':'.034'},2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/${mobile?'.072':'.050'},2.0))*frontDepth;
+        float prismShellA=exp(-sq((l1Prism-.315)/${mobile?'.050':'.034'}))*frontDepth;
+        float prismShellB=exp(-sq((l1Prism-.475)/${mobile?'.072':'.050'}))*frontDepth;
         c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
         c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
         c*=1.0-.020*prismShellB;
@@ -1372,9 +1373,9 @@
            Desktop gets two nested V-shaped internal planes, inspired by the
            historic layered Signature MAG. They remain volumetric transmission
            events rather than drawn borders. */
-        float chevronA=exp(-pow(abs((abs(vLocal.y)-(.205+.40*abs(vLocal.x)))/${mobile?'.060':'.034'}),2.0))
+        float chevronA=exp(-sq((abs(vLocal.y)-(.205+.40*abs(vLocal.x)))/${mobile?'.060':'.034'}))
           *frontDepth*(1.0-smoothstep(.58,.78,radialXY));
-        float chevronB=exp(-pow(abs((abs(vLocal.y)-(.335+.24*abs(vLocal.x)))/${mobile?'.078':'.046'}),2.0))
+        float chevronB=exp(-sq((abs(vLocal.y)-(.335+.24*abs(vLocal.x)))/${mobile?'.078':'.046'}))
           *frontDepth*(1.0-smoothstep(.60,.80,radialXY));
         c+=vec3(.30,.43,.42)*chevronA*${mobile?'.030':'.090'};
         c+=vec3(.040,.165,.182)*chevronB*${mobile?'.022':'.065'};
@@ -1402,11 +1403,11 @@
         c=mix(c,vec3(.003,.011,.014)+c*.40,cavity*${mobile?'.12':'.18'});
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.060,2.0))*front;
+        float rim=exp(-sq((od-.74)/.060))*front;
         float iris=exp(-od*od*4.8)*front;
         float core=exp(-od*od*18.5)*front;
         float hot=exp(-od*od*74.0)*front;
-        float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
+        float glint=exp(-sq((oq.x+.30)/.13)-sq((oq.y-.30)/.12))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
         c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.205'};
@@ -1414,7 +1415,7 @@
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
-        float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
+        float opticCaustic=exp(-sq((od-.40)/.17))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
         /* Interaction/surface sweep remains physical and brief. */
@@ -1422,7 +1423,7 @@
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=exp(-sq((coordinate-head)/.072))*(.24+.76*fresnel);
         }
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
@@ -1616,6 +1617,7 @@
     root.dataset.fxNativeMagStudioR1947='desktop-cut-prism-chevrons-neutral-smoked-silver-deep-optic';
     root.dataset.fxNativeMagRasterR1947b='higher-software-topology-less-depth-crisper-desktop-normals';
     root.dataset.fxNativeMagShaderR1947c='active-fold-profile-parity-nan-safe-chevron-distance';
+    root.dataset.fxNativeMagShaderR1947d='nan-safe-squared-softboxes-prisms-optic-sweep';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
