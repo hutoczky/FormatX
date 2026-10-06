@@ -1018,7 +1018,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
     width:clamp(316px,29vw,438px)!important;
     aspect-ratio:1!important;
     opacity:1!important;
-    filter:brightness(1.035) contrast(1.12) saturate(.88)!important;
+    filter:brightness(1.08) contrast(1.08) saturate(.86)!important;
     background:
       radial-gradient(ellipse 76% 70% at 50% 50%,rgba(54,126,136,.080),transparent 72%),
       radial-gradient(ellipse 32% 30% at 50% 49%,rgba(101,220,224,.045),transparent 74%)!important;
@@ -1028,46 +1028,63 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
     inset:1.5% 1.5%!important;
     clip-path:polygon(
       50% 0%,
-      58% 27%,
+      54% 17%,
+      62% 32%,
+      81% 42%,
       100% 50%,
-      61% 58%,
+      82% 57%,
+      63% 66%,
+      56% 82%,
       50% 100%,
-      39% 59%,
+      44% 82%,
+      37% 66%,
+      18% 57%,
       0% 50%,
-      41% 28%
+      18% 42%,
+      38% 32%,
+      46% 17%
     )!important;
     border-radius:0!important;
     transform:rotate(-.65deg) scale(.985)!important;
     background:
-      linear-gradient(137deg,transparent 0 27%,rgba(226,245,240,.20) 35%,rgba(113,162,162,.065) 44%,transparent 53% 100%),
-      linear-gradient(46deg,transparent 0 31%,rgba(66,155,164,.095) 40%,transparent 50% 100%),
-      linear-gradient(-44deg,transparent 0 36%,rgba(79,171,179,.070) 45%,transparent 54% 100%),
-      radial-gradient(ellipse 22% 30% at 49% 50%,rgba(38,120,130,.22),rgba(7,27,32,.42) 56%,transparent 76%),
-      linear-gradient(25deg,rgba(2,8,11,.985) 0 27%,rgba(24,51,55,.32) 42%,rgba(3,11,15,.96) 58%,rgba(48,76,79,.17) 74%,rgba(1,6,9,.995) 100%),
-      radial-gradient(circle at 50% 50%,rgba(31,78,86,.15),rgba(8,23,28,.92) 43%,rgba(1,7,10,.998) 75%)!important;
+      linear-gradient(136deg,transparent 0 25%,rgba(228,246,241,.18) 34%,rgba(129,171,169,.075) 43%,transparent 52% 100%),
+      linear-gradient(48deg,transparent 0 30%,rgba(75,160,166,.11) 40%,transparent 51% 100%),
+      linear-gradient(-46deg,transparent 0 35%,rgba(84,169,175,.085) 45%,transparent 55% 100%),
+      conic-gradient(from 45deg at 50% 50%,
+        rgba(15,38,43,.97) 0 12%,
+        rgba(49,82,82,.92) 18%,
+        rgba(9,27,32,.98) 31%,
+        rgba(61,92,90,.88) 43%,
+        rgba(8,24,29,.985) 56%,
+        rgba(46,78,80,.92) 69%,
+        rgba(7,22,27,.99) 82%,
+        rgba(35,65,68,.95) 94%,
+        rgba(15,38,43,.97) 100%),
+      radial-gradient(ellipse 25% 32% at 49% 50%,rgba(49,135,143,.21),rgba(8,31,36,.34) 58%,transparent 78%),
+      radial-gradient(circle at 50% 50%,rgba(42,91,97,.16),rgba(11,31,35,.88) 46%,rgba(2,9,12,.995) 78%)!important;
     box-shadow:
-      inset 20px -24px 42px rgba(0,3,6,.58),
-      inset -13px 14px 30px rgba(223,241,235,.052),
-      inset 0 0 0 1px rgba(181,218,214,.042),
-      0 30px 68px rgba(0,0,0,.50)!important;
+      inset 18px -22px 38px rgba(0,3,6,.50),
+      inset -14px 15px 31px rgba(225,243,237,.060),
+      inset 0 0 0 1px rgba(185,222,217,.050),
+      0 28px 64px rgba(0,0,0,.45)!important;
     opacity:.995!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:33.5% 33.5% 33.5% 33.5%!important;
+    inset:39% 39% 39% 39%!important;
     border:1px solid rgba(161,219,217,.28)!important;
     border-radius:50%!important;
     background:
-      radial-gradient(circle at 36% 33%,rgba(248,255,252,.96) 0 2.6%,rgba(123,236,232,.66) 7%,rgba(25,125,136,.56) 18%,rgba(7,39,46,.93) 39%,rgba(0,9,13,.993) 72%),
-      radial-gradient(circle at 50% 50%,rgba(91,211,214,.13),transparent 66%)!important;
+      radial-gradient(circle at 36% 33%,rgba(249,255,253,.96) 0 3%,rgba(132,238,234,.68) 8%,rgba(30,132,141,.54) 20%,rgba(8,45,51,.92) 41%,rgba(0,10,14,.993) 74%),
+      radial-gradient(circle at 50% 50%,rgba(94,214,215,.15),transparent 68%)!important;
     box-shadow:
-      0 0 0 5px rgba(3,13,17,.76),
-      inset 0 0 18px rgba(124,228,225,.13),
-      0 0 24px rgba(66,184,194,.075)!important;
+      0 0 0 3px rgba(3,13,17,.72),
+      inset 0 0 14px rgba(124,228,225,.15),
+      0 0 18px rgba(66,184,194,.060)!important;
     opacity:.96!important;
   }
 }
-/* production-r1947-desktop-signature-first-paint-parity */
+/* production-r1947b-desktop-signature-first-paint-parity */
 
 
 /* R1945 — signature MAG header control from first paint.
