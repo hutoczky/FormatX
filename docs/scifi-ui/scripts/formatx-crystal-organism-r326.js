@@ -772,12 +772,34 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.095) 0%,rgba(40,92,98,.040) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.20),rgba(0,0,0,0) 82%)','important');
+
+    /* R1951 — physical depth behind the hero object without a second renderer.
+       Real PC users get static atmosphere/contact/bloom; audit and mobile stay lean. */
+    if(!mobile&&!auditMode){
+      const volumeHaze=document.createElement('div');
+      volumeHaze.className='fx-mag-volume-haze-r1951';
+      volumeHaze.setAttribute('aria-hidden','true');
+      volumeHaze.style.cssText='position:absolute;inset:9% 9% 7%;z-index:0;pointer-events:none;opacity:.66;filter:blur(14px);background:radial-gradient(ellipse 33% 37% at 50% 48%,rgba(93,213,220,.070) 0%,rgba(40,98,108,.030) 48%,transparent 76%);';
+      const contactShadow=document.createElement('div');
+      contactShadow.className='fx-mag-contact-shadow-r1951';
+      contactShadow.setAttribute('aria-hidden','true');
+      contactShadow.style.cssText='position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.88;filter:blur(7px);background:radial-gradient(ellipse 28% 7.5% at 50% 72%,rgba(0,0,0,.42) 0%,rgba(0,0,0,.19) 49%,transparent 80%);';
+      const opticBloom=document.createElement('div');
+      opticBloom.className='fx-mag-optic-bloom-r1951';
+      opticBloom.setAttribute('aria-hidden','true');
+      opticBloom.style.cssText='position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.72;filter:blur(9px);background:radial-gradient(circle at 50% 49%,rgba(93,230,231,.048) 0%,rgba(45,161,172,.018) 8%,transparent 17%);';
+      stage.append(volumeHaze,contactShadow,opticBloom);
+      root.dataset.fxNativeMagDepthR1951='static-volumetric-haze-contact-shadow-optic-bloom';
+    }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
+    canvas.style.setProperty('position','relative','important');
+    canvas.style.setProperty('z-index','1','important');
+    canvas.style.setProperty('image-rendering','auto','important');
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
@@ -789,16 +811,24 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R1930 — one slow compositor breath on every capable screen.
-       No idle JS RAF is introduced; reduced-motion remains fully respected. */
+    /* R1951 — preserve R1950c contour AA. Desktop breath is opacity-only:
+       compositor scaling would resample the already supersampled WebGL edge. */
     if(!reduced.matches && typeof canvas.animate==='function'){
+      const livingFrames=mobile
+        ? [
+            {opacity:.985,transform:'scale(.996)',offset:0},
+            {opacity:1,transform:'scale(1.004)',offset:.48},
+            {opacity:.990,transform:'scale(.999)',offset:.76},
+            {opacity:.985,transform:'scale(.996)',offset:1}
+          ]
+        : [
+            {opacity:.988,transform:'scale(1)',offset:0},
+            {opacity:1,transform:'scale(1)',offset:.48},
+            {opacity:.993,transform:'scale(1)',offset:.76},
+            {opacity:.988,transform:'scale(1)',offset:1}
+          ];
       const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
+        livingFrames,
         {
           duration:6800,
           iterations:Infinity,
@@ -1303,7 +1333,7 @@
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        c*=${mobile?'.93+.07*volume':'.966+.034*volume'};
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1311,8 +1341,8 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
-        c+=vec3(.020,.043,.048)*backDepth*.11;
+        c+=vec3(.030,.060,.064)*strata*${mobile?'.10':'.042'};
+        c+=vec3(.020,.043,.048)*backDepth*${mobile?'.11':'.074'};
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
@@ -1377,10 +1407,21 @@
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.180,.205)*fresnel*.34;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
+
+        /* R1951 — compact dielectric depth approximation.
+           Path-length absorption unifies the smoked glass; the displaced inner
+           pane gives a refracted depth cue without another texture/render pass. */
+        float opticalPath=(.34+.92*(1.0-facing))*(.45+.55*frontDepth);
+        vec3 absorption=exp(-vec3(${mobile?'.030,.015,.010':'.088,.036,.017'})*opticalPath);
+        c*=absorption;
+        vec2 refractedQ=vLocal.xy+n.xy*${mobile?'.008':'.017'}*(.35+.65*fresnel);
+        float refractedPane=exp(-pow((abs(refractedQ.x)-(.14+.14*abs(refractedQ.y)))/${mobile?'.095':'.118'},2.0))*frontDepth;
+        c+=vec3(.045,.145,.158)*refractedPane*${mobile?'.020':'.042'};
+
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
-        c+=vec3(.015,.050,.060)*frontDepth*.10;
+        c+=vec3(.015,.050,.060)*frontDepth*${mobile?'.10':'.068'};
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
@@ -1404,6 +1445,8 @@
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        float opticBloom=exp(-od*od*${mobile?'1.35':'1.05'})*front;
+        c+=vec3(.050,.255,.285)*opticBloom*${mobile?'.024':'.042'};
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -2041,13 +2084,13 @@
       if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
       else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
       if(!reduced.matches)simulationTime+=dt*.001;
-      const pointerEase=1-Math.exp(-dt*.018);
-      const rotationEase=1-Math.exp(-dt*.011);
+      const pointerEase=1-Math.exp(-dt*(desktopFine.matches?.0135:.018));
+      const rotationEase=1-Math.exp(-dt*(desktopFine.matches?.0088:.011));
       px+=(tx-px)*pointerEase;py+=(ty-py)*pointerEase;
       rotationX+=(targetRotationX-rotationX)*rotationEase;
       rotationY+=(targetRotationY-rotationY)*rotationEase;
       rotationZ+=(targetRotationZ-rotationZ)*rotationEase;
-      const pointerTiltEase=1-Math.exp(-dt*(desktopFine.matches?.020:.014));
+      const pointerTiltEase=1-Math.exp(-dt*(desktopFine.matches?.013:.014));
       pointerTiltX+=(targetPointerTiltX-pointerTiltX)*pointerTiltEase;
       pointerTiltY+=(targetPointerTiltY-pointerTiltY)*pointerTiltEase;
       if(Math.abs(angularVelocityY)>.00002){targetRotationY+=angularVelocityY*dt;angularVelocityY*=Math.exp(-dt*.010);}
@@ -2183,6 +2226,8 @@
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+      root.dataset.fxNativeMagMaterialR1951='smoked-dielectric-absorption-refracted-inner-pane-controlled-bloom';
+      root.dataset.fxNativeMagMotionR1951='longer-bounded-precision-inertia-no-idle-raf';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
@@ -2262,7 +2307,7 @@
       const q=point(sample);if(!q)return;
       tx=q.x*(desktopFine.matches?.72:1);ty=q.y*(desktopFine.matches?.72:1);
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.105);
-      schedule(desktopFine.matches?4:2);
+      schedule(desktopFine.matches?8:2);
     }
     function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,mobile?4:6);}
     function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(2);}
@@ -2355,7 +2400,7 @@
         targetPointerTiltX=clamp(-q.y*.070 - dy*.014,-.095,.095);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.085+Math.min(.055,Math.hypot(dx,dy)*.12));
         targetBreath=Math.max(targetBreath,.235);
-        schedule(4);
+        schedule(9);
       }else{
         targetPointerTiltY=clamp(q.x*.055,-.07,.07);
         targetPointerTiltX=clamp(-q.y*.045,-.06,.06);
@@ -2505,7 +2550,7 @@
       targetPointerTiltX=targetPointerTiltY=0;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.025);
       targetBreath=Math.max(targetBreath,.15);
-      schedule(mobile?2:5);
+      schedule(mobile?2:9);
     },{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
     listen(document,'visibilitychange',()=>{
