@@ -171,7 +171,7 @@ const R502_ASSET_REWRITES = new Map([
     rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261006-r1947-award-hero-depth']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1945l-controlled-studio-handoff',
+    marker: 'intro-to-genesis-r1947-award-hero-depth',
     rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261006-r1947-award-hero-depth']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
