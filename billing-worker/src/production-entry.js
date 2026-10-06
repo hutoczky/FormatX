@@ -22,7 +22,7 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/payment/cancel.html',
 ]);
 const CONTINUOUS_SCROLL_ASSET = [
-  '  <link rel="stylesheet" data-fx-continuous-scroll-style="true" href="/scifi-ui/styles/formatx-continuous-scroll.css?v=20260808-native-continuous-2">',
+  '  <link rel="stylesheet" data-fx-continuous-scroll-style="true" href="/scifi-ui/styles/formatx-continuous-scroll.css?v=20261007-r1950-mobile-containment">',
   '  <link rel="stylesheet" data-fx-seamless-loop-style="true" href="/scifi-ui/styles/formatx-seamless-loop.css?v=20260919-r534-live-mag-mirror">',
   '  <script defer data-fx-seamless-scroll-runtime="true" src="/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260925-r1744-heart-window-capture"></script>',
 ].join('\n') + '\n';
