@@ -742,14 +742,14 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   100% { transform: translateY(128vh); opacity: 0; }
 }
 @keyframes fxb-lens {
-  0% { opacity: 0; transform: translate(-50%,-50%) scaleX(.06); }
-  28% { opacity: .94; transform: translate(-50%,-50%) scaleX(1); }
-  100% { opacity: 0; transform: translate(-50%,-50%) scaleX(1.24); }
+  0% { opacity: 0; transform: translate(-50%,-50%) scaleX(.12); }
+  34% { opacity: .42; transform: translate(-50%,-50%) scaleX(.82); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scaleX(1.18); }
 }
 @keyframes fxb-flash {
-  0% { opacity: 0; transform: translate(-50%,-50%) scale(.02); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-  28% { opacity: 1; transform: translate(-50%,-50%) scale(1); box-shadow: 0 0 22px 8px rgba(255,255,255,.9),0 0 92px 34px rgba(102,226,255,.52),0 0 220px 90px rgba(123,83,255,.26); }
-  100% { opacity: 0; transform: translate(-50%,-50%) scale(18); box-shadow: 0 0 48px 18px rgba(255,255,255,0),0 0 160px 70px rgba(102,226,255,0); }
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.18); box-shadow: 0 0 0 rgba(255,255,255,0); }
+  36% { opacity: .28; transform: translate(-50%,-50%) scale(1.45); box-shadow: 0 0 18px 4px rgba(226,255,255,.24),0 0 76px 28px rgba(102,226,255,.15),0 0 150px 58px rgba(123,83,255,.07); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(10); box-shadow: 0 0 56px 20px rgba(255,255,255,0),0 0 140px 62px rgba(102,226,255,0); }
 }
 
 @media (max-width:700px) {
@@ -1274,7 +1274,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   animation:fxb-lens .74s cubic-bezier(.16,.76,.18,1) 1 forwards;
 }
 .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-flash{
-  animation:fxb-flash .76s ease-out 1 forwards;
+  animation:fxb-flash .92s cubic-bezier(.16,.72,.2,1) 1 forwards;
 }
 .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-biotic-field{
   opacity:.18;
@@ -1928,7 +1928,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   opacity:.58;transform:rotate(var(--ta)) scaleX(1.10) translateY(-50%);
 }
 .fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-lens{animation:fxb-lens .44s cubic-bezier(.16,.76,.18,1) 1 forwards}
-.fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-flash{animation:fxb-flash .52s ease-out 1 forwards}
+.fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-flash{animation:fxb-flash .88s cubic-bezier(.16,.72,.2,1) 1 forwards}
 
 /* Reference has large drifting particles, not a UI star wallpaper. */
 .fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"] .fxb-stars{
@@ -2254,3 +2254,5 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1871-silver-ice-studio-horizon */
 /* production-r1903-gallery-studio-bioglass-depth */
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
+
+/* production-r1950-optical-bloom-no-white-flash */
