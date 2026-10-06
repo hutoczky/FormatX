@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261006-r1949-award-final-seal';
+const STARTUP_REVISION = '20261006-r1950-award-performance-closure';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-wM8l8kEv7xa4UGIU8YEM6eMI/uZ2TIQmvzF2tnWmD4Q='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -156,6 +156,7 @@ const DEFERRED_STYLE_PATHS = new Set([
   // R514: artifact-proven first-divergence owner; activate with the existing
   // R487 double-rAF scheduler after the first painted frame.
   '/scifi-ui/styles/formatx-critical-core-r227.css',
+  '/scifi-ui/styles/formatx-reference-production-r244.css',
   '/scifi-ui/styles/formatx-continuous-scroll.css',
   '/scifi-ui/styles/formatx-seamless-loop.css',
   '/scifi-ui/styles/platform-status.css',
