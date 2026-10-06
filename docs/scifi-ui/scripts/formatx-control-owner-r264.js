@@ -10,6 +10,7 @@
   let bootObserver = null;
   let bootTimer = 0;
   let menu = null;
+  let duplicateGuardObserver = null;
 
   const language = () => root.lang === 'en' ? 'en' : 'hu';
   const isMobile = () => mobileQuery.matches;
@@ -133,7 +134,18 @@
     const topbar = document.querySelector('.topbar');
     if (!(topbar instanceof HTMLElement)) return false;
 
-    let mag = document.querySelector('.fx-reference-mag-button');
+    const canonicalOne=(selector,preferred)=>{
+      const all=Array.from(document.querySelectorAll(selector)).filter(node=>node instanceof HTMLElement);
+      const keep=(preferred instanceof HTMLElement)?preferred:all.find(node=>node.parentElement===topbar)||all[0]||null;
+      for(const node of all){
+        if(node===keep)continue;
+        node.remove();
+      }
+      if(keep instanceof HTMLElement)keep.dataset.fxCanonicalControlR1951='true';
+      return keep;
+    };
+
+    let mag = canonicalOne('.fx-reference-mag-button',topbar.querySelector(':scope > .fx-reference-mag-button'));
     if (!(mag instanceof HTMLButtonElement)) {
       mag = document.createElement('button');
       mag.type = 'button';
@@ -156,7 +168,7 @@
       });
     }
 
-    const lang = document.querySelector('.fx-language-toggle');
+    const lang = canonicalOne('.fx-language-toggle',topbar.querySelector(':scope > .fx-language-toggle'));
     if (lang instanceof HTMLButtonElement) {
       lang.classList.add('fx-control-owner-r264');
       lang.hidden = false;
@@ -165,7 +177,8 @@
       if (lang.parentElement !== topbar) topbar.appendChild(lang);
     }
 
-    canonicalMenu(topbar);
+    const canonicalMenuNode=canonicalMenu(topbar);
+    canonicalOne('.fx-reference-menu-button',canonicalMenuNode);
 
     for (const legacy of document.querySelectorAll('.menu-toggle:not(.fx-reference-menu-button), .fx-organism-system-toggle:not(.fx-reference-menu-button), [data-fx-legacy-menu="true"]')) {
       if (!(legacy instanceof HTMLElement)) continue;
@@ -223,7 +236,11 @@
     const space = grid?.querySelector(':scope > .hero-space');
     if (!(grid instanceof HTMLElement) || !(space instanceof HTMLElement)) return false;
 
-    let controls = hero.querySelector('.fx-reference-controls-r204');
+    const controlCandidates=Array.from(hero.querySelectorAll('.fx-reference-controls-r204'));
+    let controls=controlCandidates.find(node=>node.parentElement===space)||controlCandidates[0]||null;
+    for(const duplicate of controlCandidates){
+      if(duplicate!==controls)duplicate.remove();
+    }
     if (!(controls instanceof HTMLElement)) {
       controls = document.createElement('div');
       controls.className = 'fx-reference-controls-r204';
@@ -231,7 +248,11 @@
     controls.classList.add('fx-reference-controls-r264');
     controls.setAttribute('aria-label', language() === 'en' ? 'Hero controls' : 'Hero vezérlők');
 
-    let rail = controls.querySelector(':scope > .fx-reference-rail') || hero.querySelector('.fx-reference-rail');
+    const railCandidates=Array.from(hero.querySelectorAll('.fx-reference-rail'));
+    let rail=controls.querySelector(':scope > .fx-reference-rail')||railCandidates[0]||null;
+    for(const duplicate of railCandidates){
+      if(duplicate!==rail)duplicate.remove();
+    }
     if (!(rail instanceof HTMLElement)) {
       rail = document.createElement('div');
       rail.className = 'fx-reference-rail';
@@ -240,6 +261,12 @@
 
     const ask = ensureAsk(rail);
     const pause = ensurePause(rail);
+    for(const selector of ['.fx-reference-ask','.fx-reference-pause']){
+      const all=Array.from(rail.querySelectorAll(selector));
+      all.slice(1).forEach(node=>node.remove());
+    }
+    controls.dataset.fxCanonicalHeroControlsR1951='true';
+    rail.dataset.fxCanonicalHeroControlsR1951='true';
     const sound = document.querySelector('.fx-three-sound');
 
     if (sound instanceof HTMLButtonElement) {
@@ -271,6 +298,7 @@
       bootObserver = null;
       if (bootTimer) clearTimeout(bootTimer);
       bootTimer = 0;
+      root.dataset.fxControlDedupeR1951='single-canonical-header-and-hero-controls';
       dispatchEvent(new CustomEvent('formatx:controlownerready', { detail: { mobile: isMobile() } }));
       return true;
     }
@@ -299,6 +327,26 @@
       apply();
     }, 5000);
   }
+
+  function armDuplicateGuard(){
+    if(duplicateGuardObserver)return;
+    const topbar=document.querySelector('.topbar');
+    const hero=document.getElementById('hero');
+    if(!(topbar instanceof HTMLElement)||!(hero instanceof HTMLElement))return;
+    duplicateGuardObserver=new MutationObserver(records=>{
+      const relevant=records.some(record=>Array.from(record.addedNodes).some(node=>
+        node instanceof Element && (
+          node.matches?.('.fx-reference-mag-button,.fx-language-toggle,.fx-reference-menu-button,.fx-reference-controls-r204,.fx-reference-rail,.fx-reference-ask,.fx-reference-pause') ||
+          node.querySelector?.('.fx-reference-mag-button,.fx-language-toggle,.fx-reference-menu-button,.fx-reference-controls-r204,.fx-reference-rail,.fx-reference-ask,.fx-reference-pause')
+        )
+      ));
+      if(relevant)schedule();
+    });
+    duplicateGuardObserver.observe(topbar,{childList:true,subtree:true});
+    duplicateGuardObserver.observe(hero,{childList:true,subtree:true});
+    root.dataset.fxControlDuplicateGuardR1951='armed';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',armDuplicateGuard,{once:true});else armDuplicateGuard();
 
   document.addEventListener('pointerdown', event => {
     const currentMenu = liveMenuButton();
