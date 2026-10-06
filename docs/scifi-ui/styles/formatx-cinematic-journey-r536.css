@@ -1172,3 +1172,77 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
   }
 }
 /* production-r1947-studio-section-continuity-zero-idle */
+
+
+/* R1948 — hero cinematic progressive disclosure.
+   The first viewport belongs to the Signature MAG, headline and native hero
+   controls. Global journey telemetry stays optically dormant until the visitor
+   leaves the core scene, then opens as part of the system journey. No loop,
+   no geometry ownership, desktop only. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html[data-fx-cinematic-journey-r536="ready"] :is(
+    .fx-c536-hud,.fx-c536-track,.fx-c536-scan,.fx-c536-iris,
+    .fx-rail,.fx-organism-status
+  ){
+    transition:
+      opacity .72s cubic-bezier(.18,.78,.2,1),
+      transform .82s cubic-bezier(.18,.78,.2,1),
+      filter .72s ease;
+  }
+
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-hud{
+    opacity:0!important;
+    transform:translateY(-50%) translateX(16px)!important;
+    filter:blur(.8px);
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-track{
+    opacity:.012!important;
+    filter:brightness(.72);
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-track::after{
+    opacity:0!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-scan{
+    opacity:.012!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-iris{
+    opacity:.08!important;
+    transform:translate(-50%,-50%) scale(.74)!important;
+    filter:blur(.15px);
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-world{
+    opacity:.10!important;
+    transform:
+      translate(-50%,-50%)
+      translate3d(calc(var(--fx-c536-velocity) * -7px),calc(var(--fx-c536-velocity) * 4px),0)
+      scale(calc(.82 + var(--fx-c536-local) * .08))!important;
+  }
+
+  html[data-fx-cinematic-scene-r536="core"] :is(.fx-rail,.fx-organism-status){
+    opacity:0!important;
+    transform:translate3d(14px,0,0)!important;
+    pointer-events:none!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-hud{
+    opacity:.78;
+  }
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) :is(.fx-rail,.fx-organism-status){
+    opacity:1;
+    transform:translate3d(0,0,0);
+  }
+
+  /* The hero's own information remains, but its peripheral annotations are
+     quieter so the optical core is the first read at desktop size. */
+  html[data-fx-cinematic-scene-r536="core"] #hero :is(.hero-label,.fx-reference-heading){
+    opacity:.52!important;
+    filter:saturate(.86) brightness(.92);
+    transition:opacity .45s ease,filter .45s ease;
+  }
+  html[data-fx-cinematic-scene-r536="core"] #hero .fx-reference-proof{
+    opacity:.86;
+    transform:translate3d(0,5px,0);
+    transition:opacity .5s ease,transform .6s cubic-bezier(.18,.78,.2,1);
+  }
+}
+/* production-r1948-hero-progressive-disclosure-zero-idle */
