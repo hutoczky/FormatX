@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261005-r1945l-controlled-studio-handoff
-base_master=f638524962c2267ceb7f73e94faef418eb4b05e3
-purpose=deploy the merged R1945l studio Signature release: sharper desktop four-point MAG, cleaner cut-prism smoked-silver material, enlarged recessed optic, first-frame core icon, controlled no-clipping intro finale and R1944 precision interaction stack
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, intro keyframes, desktop visual contracts and production Worker parity
+token=20261006-r1947-intro-signature-parity
+base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
+purpose=deploy intro-to-permanent Signature MAG parity: darker smoked-silver finale, internal refractive facets, smaller integrated optic flare and controlled no-clipping handoff while preserving R1945l hero geometry and R1944 precision interaction
+validation=production preflight, exact-revision convergence, intro keyframes, P0 fast loop, Lighthouse desktop/mobile, mobile MAG proof, no-occlusion, R536 handoff, Worker CSP/rewrite parity and production smoke tests
