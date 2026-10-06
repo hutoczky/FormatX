@@ -1012,7 +1012,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* R1947 — desktop first-paint parity with the canonical four-point Signature MAG.
    The blocking proxy now uses the same visual grammar as the live WebGL sculpt,
    removing the old rounded pod flash on desktop before R326 becomes authoritative. */
-@media (min-width:901px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio:27/25){
+@media (min-width:901px) and (pointer:fine) and (aspect-ratio > 27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:49%!important;
     width:clamp(316px,29vw,438px)!important;
