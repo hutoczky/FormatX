@@ -68,6 +68,9 @@
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
+  let scrollVisualRaf=0;
+  let scrollVisualLastY=scrollY||0;
+  let scrollVisualPendingY=scrollVisualLastY;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -324,7 +327,7 @@
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        const pointerEase=1-Math.exp(-dt*.0125);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -362,10 +365,10 @@
       root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
       root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*11.5 + velocity*-1.35).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7.5 + velocity*.65).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.72).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*8.8 + velocity*-.85).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*5.8 + velocity*.42).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.50).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.68).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
       scenes.forEach(scene=>{
@@ -389,6 +392,25 @@
       if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
       else pointerTailFrames=0;
     }
+  }
+
+  function scheduleScrollVisual(){
+    scrollVisualPendingY=scrollY||0;
+    if(scrollVisualRaf)return;
+    scrollVisualRaf=requestAnimationFrame(()=>{
+      scrollVisualRaf=0;
+      if(document.hidden)return;
+      const current=scrollVisualPendingY;
+      const delta=clamp(current-scrollVisualLastY,-90,90);
+      scrollVisualLastY=current;
+      /* R1951 — continuous camera during active scroll.
+         Two compositor variables only; no scene commit, DOM walk or layout read. */
+      const drift=clamp(delta*.105,-7.5,7.5);
+      const pointerY=finePointer?pointerNY*5.8:0;
+      root.style.setProperty('--fx-c617-parallax-y',(pointerY+drift).toFixed(2)+'px');
+      root.style.setProperty('--fx-c536-scene-shift',(-drift*.42).toFixed(2)+'px');
+      root.dataset.fxCinematicScrollR1951='compositor-continuous-two-var-camera';
+    });
   }
 
   function setScrollBudget(state){
@@ -476,7 +498,7 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
+    pointerTailFrames=18;
     root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
     schedule();
   }
@@ -485,7 +507,7 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
+    pointerTailFrames=22;
     root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
     schedule();
   }
@@ -535,9 +557,9 @@
         commitScene(0,previous,'document-top-immediate-r1949');
         root.dataset.fxCinematicTopReturnR1949='immediate-core-commit';
       }
-      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
-         is scheduled here. One settle pass updates scene state and visual depth
-         after 120 ms without scroll input. */
+      /* R1951 — active scrolling keeps a lightweight compositor camera alive.
+         Heavy scene/core ownership still commits only after the quiet period. */
+      scheduleScrollVisual();
       setScrollBudget('fast');
       scheduleScrollSettle();
     },{passive:true});
@@ -585,6 +607,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1951='long-tail-precision-pointer-continuous-compositor-scroll-camera-no-heavy-scroll-render';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
@@ -624,6 +647,7 @@
 
   addEventListener('pagehide',()=>{
     if(raf)cancelAnimationFrame(raf);
+    if(scrollVisualRaf)cancelAnimationFrame(scrollVisualRaf);
     if(cutRaf)cancelAnimationFrame(cutRaf);
     clearTimeout(cutTimer);
     clearTimeout(coreSettleTimer);
