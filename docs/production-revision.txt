@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1950c-studio-intro-edge-aa
-base_master=d88b0b55be31dfdb776be6349ff47b5a02fd86a0
-purpose=ship the final R1950 desktop Signature MAG contour fix and studio-grade MAG birth intro with 72x144 desktop geometry, higher supersampling, MSAA, cleaned genome transition, nested glass depth, physical optical lens and controlled final composition
-validation=desktop intro keyframes, desktop hero proof, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 handoff, Worker rewrite parity and exact-revision production convergence
+token=20261007-r1951-cinematic-studio-final
+base_master=2e7c753e8c15a250bc4e625aa59c0f2322971413
+purpose=ship the final desktop Signature MAG anti-aliasing and cinematic studio pass with true DPR1 supersampling, no canvas scale resampling, volumetric haze, contact shadow, restrained bloom, continuous pointer and scroll camera, optical intro handoff and lower-noise luxury editorial rhythm
+validation=desktop hero contour proof, desktop intro keyframes, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, no-occlusion, R536 handoff, Worker rewrite parity and exact-revision production convergence
