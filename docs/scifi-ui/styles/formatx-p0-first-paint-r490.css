@@ -87,6 +87,19 @@ html body.living-architecture #hero .hero-copy > :is(
     overflow: visible !important;
     white-space: normal !important;
     contain: layout style !important;
+
+    /* R1947c — mirror the settled living-habitat panel before FCP.
+       Deferred habitat CSS must enhance the rest of the page without repainting
+       the hero H1's compositing ancestor and moving the desktop LCP timestamp. */
+    background:
+      radial-gradient(circle at 88% 8%,rgba(84,187,213,.060),transparent 38%),
+      linear-gradient(146deg,rgba(4,18,28,.70),rgba(2,9,15,.78)) !important;
+    border-color:rgba(118,224,240,.13) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(231,253,255,.035),
+      0 22px 72px rgba(0,0,0,.19) !important;
+    backdrop-filter:blur(5px) saturate(106%) !important;
+    -webkit-backdrop-filter:blur(5px) saturate(106%) !important;
   }
 }
 
@@ -1283,6 +1296,16 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     margin:0!important;
     line-height:1!important;
     white-space:normal!important;
+
+    /* R1947d — isolate the desktop LCP title from the sibling MAG proxy→WebGL
+       handoff. The title is already visually final at first paint; promoting it
+       prevents the hero canvas replacement from repainting the H1 and rewriting
+       the LCP timestamp ~1.5 s later. Geometry and typography remain unchanged. */
+    transform:translate3d(0,0,0)!important;
+    backface-visibility:hidden!important;
+    -webkit-backface-visibility:hidden!important;
+    will-change:transform!important;
+    isolation:isolate!important;
   }
   html:root:root:root body.living-architecture #hero .hero-title-main {
     display:block!important;
@@ -1363,3 +1386,7 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+/* production-r1947c-desktop-lcp-panel-parity */
+
+/* production-r1947d-lcp-compositor-isolation */

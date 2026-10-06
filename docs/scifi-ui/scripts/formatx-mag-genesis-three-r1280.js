@@ -1081,26 +1081,49 @@
         depthWrite:false,
         blending:T.AdditiveBlending
       }));
-      this.mechEyeCorona.scale.set(.50,.50,1);
-      this.mechEyeCorona.position.set(0,.01,.48);
+      this.mechEyeCorona.scale.set(.31,.31,1);
+      this.mechEyeCorona.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCorona);
 
+      /* R1947 — convex smoked optical lens instead of a flat HUD disc. */
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.082,64),
-        new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
+        new T.SphereGeometry(.076,48,24),
+        new T.MeshPhysicalMaterial({
+          color:0x08232b,
+          metalness:.04,
+          roughness:.075,
+          transmission:.34,
+          thickness:.15,
+          ior:1.46,
+          emissive:0x06202a,
+          emissiveIntensity:.16,
+          clearcoat:1,
+          clearcoatRoughness:.040,
+          transparent:true,
+          opacity:.94
+        })
       );
-      this.mechEyeCore.position.set(0,.01,.50);
+      this.mechEyeCore.scale.set(1,1,.42);
+      this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
+
+      this.mechEyePupil=new T.Mesh(
+        new T.SphereGeometry(.025,32,16),
+        new T.MeshBasicMaterial({color:0x021015,transparent:true,opacity:.96})
+      );
+      this.mechEyePupil.scale.set(1,1,.34);
+      this.mechEyePupil.position.set(0,.01,.540);
+      this.mechanicalGroup.add(this.mechEyePupil);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
         color:0x8af6f5,transparent:true,opacity:0,
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.148,.0055,8,72),
+        new T.TorusGeometry(.104,.0042,8,72),
         this.mechInnerMaterial
       );
-      this.mechInnerRing.position.set(0,.01,.49);
+      this.mechInnerRing.position.set(0,.01,.522);
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
@@ -1400,9 +1423,11 @@
       this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
       this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
-      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
+      this.mechInnerMaterial.opacity=(.10+.020*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.095+.015*finale)*grow;
+      if(this.mechEyeCore?.material)this.mechEyeCore.material.opacity=(.88+.05*finale)*grow;
+      if(this.mechEyePupil?.material)this.mechEyePupil.material.opacity=(.88+.08*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
 
@@ -1497,11 +1522,14 @@
         this.flashBeam.scale.x=1+flash*.08;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.16,.105+flash*.018);
+        const q=.31+flash*.015;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechEyeCore?.material){
+        this.mechEyeCore.material.emissiveIntensity=.16+flash*.025;
+      }
+      if(this.mechLight)this.mechLight.intensity+=flash*.42;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1580,6 +1608,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1947='convex-smoked-lens-deep-pupil-controlled-corona-handoff';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
