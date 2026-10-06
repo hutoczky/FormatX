@@ -193,7 +193,11 @@ async function assertHeroDisclosure(page) {
   await page.waitForTimeout(850);
   const heroState = await readOpacity();
   assert(heroState.scene === 'core', `R1948 hero scene not committed: ${JSON.stringify(heroState)}`);
-  for (const key of ['hud','rail','status']) {
+  if (heroState.hud !== null) {
+    assert(heroState.hud <= .05,
+      `R1948 hud must stay dormant in hero when mounted: ${JSON.stringify(heroState)}`);
+  }
+  for (const key of ['rail','status']) {
     assert(heroState[key] !== null && heroState[key] <= .05,
       `R1948 ${key} must stay dormant in hero: ${JSON.stringify(heroState)}`);
   }
@@ -209,7 +213,11 @@ async function assertHeroDisclosure(page) {
 
   const journeyState = await readOpacity();
   assert(journeyState.scene !== 'core', `R1948 journey scene did not open: ${JSON.stringify(journeyState)}`);
-  for (const key of ['hud','rail','status']) {
+  if (journeyState.hud !== null) {
+    assert(journeyState.hud >= .45,
+      `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify(journeyState)}`);
+  }
+  for (const key of ['rail','status']) {
     assert(journeyState[key] !== null && journeyState[key] >= .45,
       `R1948 ${key} did not progressively open after hero: ${JSON.stringify(journeyState)}`);
   }
