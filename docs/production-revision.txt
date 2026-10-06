@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1950-studio-intro-edge-aa
+token=20261007-r1950b-studio-intro-edge-aa
 base_master=e68833ae89b0b45a99b0ff119672fa50e058f05b
-purpose=eliminate desktop Signature MAG edge pixelation and upgrade the MAG birth intro to studio-quality neutral softbox lighting, 2x desktop DPR, MSAA and controlled optical finale
-validation=desktop intro proof, desktop hero proof, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 handoff, Worker rewrite parity and exact-revision production convergence
+purpose=eliminate desktop Signature MAG edge pixelation and deliver a studio-quality MAG birth intro with nested physical glass depth, 3D optical lens, controlled bloom, debris fade, 2x desktop DPR and MSAA
+validation=desktop intro keyframes, desktop hero proof, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 handoff, Worker rewrite parity and exact-revision production convergence
