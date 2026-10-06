@@ -292,7 +292,7 @@ main { position: relative; z-index: 2; }
   flex: 0 0 40px;
   width: 40px;
   height: 40px;
-  background: url('/scifi-ui/assets/images/formatx-icon.png') center / contain no-repeat;
+  background: url('/scifi-ui/assets/images/formatx-icon-80.webp') center / contain no-repeat;
 }
 
 @media (max-width: 900px), (pointer: coarse) {
