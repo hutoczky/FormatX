@@ -170,6 +170,17 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
 }
 
 async function assertHeroDisclosure(page) {
+  /* R536 CSS is deliberately post-FCP deferred. Wait for the production
+     scheduler to flip the cinematic stylesheet from print to its live media
+     before reading computed opacity. */
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const link = [...document.querySelectorAll('link[data-fx-cinematic-journey-r536="true"]')]
+      .find(node => node instanceof HTMLLinkElement);
+    return root.dataset.fxDeferredCssR487 === 'ready-fcp' &&
+      link && link.media !== 'print' && matchMedia(link.media || 'all').matches;
+  }, null, { timeout: 12000 });
+
   await page.waitForFunction(() =>
     document.documentElement.dataset.fxCinematicJourneyR536 === 'ready' &&
     document.documentElement.dataset.fxCinematicSceneR536 === 'core',
