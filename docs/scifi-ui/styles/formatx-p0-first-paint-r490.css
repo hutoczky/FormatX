@@ -801,9 +801,9 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
     opacity:.985!important;
     filter:brightness(1.03) contrast(1.12) saturate(.91)!important;
     background:
-      linear-gradient(4deg,transparent 0 14%,rgba(66,192,205,.035) 15% 17%,transparent 18% 100%),
-      linear-gradient(-3deg,transparent 0 80%,rgba(100,215,219,.040) 81% 84%,transparent 85% 100%),
-      radial-gradient(ellipse 72% 54% at 50% 51%,rgba(50,151,162,.070),transparent 72%)!important;
+      linear-gradient(4deg,transparent 0 14%,rgba(66,192,205,.020) 15% 17%,transparent 18% 100%),
+      linear-gradient(-3deg,transparent 0 80%,rgba(100,215,219,.024) 81% 84%,transparent 85% 100%),
+      radial-gradient(ellipse 70% 52% at 50% 51%,rgba(50,151,162,.055),transparent 72%)!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
@@ -821,48 +821,50 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
     border-radius:0!important;
     transform:rotate(-1deg) scale(.985)!important;
     background:
-      linear-gradient(126deg,transparent 0 27%,rgba(231,248,244,.20) 34%,rgba(115,167,168,.065) 42%,transparent 52% 100%),
-      linear-gradient(43deg,transparent 0 34%,rgba(66,151,158,.10) 43%,transparent 53% 100%),
-      linear-gradient(-46deg,transparent 0 38%,rgba(78,174,180,.080) 46%,transparent 56% 100%),
-      radial-gradient(ellipse 27% 34% at 50% 50%,rgba(51,139,149,.22),rgba(7,27,32,.43) 56%,transparent 78%),
+      linear-gradient(124deg,transparent 0 24%,rgba(238,251,247,.26) 32%,rgba(145,190,189,.090) 41%,transparent 51% 100%),
+      linear-gradient(42deg,transparent 0 31%,rgba(84,176,183,.145) 42%,transparent 54% 100%),
+      linear-gradient(-45deg,transparent 0 36%,rgba(97,190,194,.110) 47%,transparent 58% 100%),
+      radial-gradient(ellipse 24% 30% at 50% 50%,rgba(89,184,191,.26),rgba(18,59,66,.32) 50%,transparent 76%),
+      radial-gradient(ellipse 64% 72% at 45% 38%,rgba(123,179,179,.12),transparent 64%),
       conic-gradient(from 18deg at 50% 50%,
-        rgba(21,46,50,.98),
-        rgba(7,20,24,.995) 16%,
-        rgba(42,68,69,.96) 31%,
-        rgba(6,18,22,.998) 47%,
-        rgba(34,61,62,.97) 63%,
-        rgba(8,22,26,.995) 79%,
-        rgba(48,72,71,.95) 92%,
-        rgba(17,38,42,.99)
+        rgba(38,68,71,.97),
+        rgba(11,29,34,.985) 16%,
+        rgba(64,91,91,.95) 31%,
+        rgba(10,27,31,.99) 47%,
+        rgba(53,82,82,.96) 63%,
+        rgba(12,31,35,.99) 79%,
+        rgba(70,98,96,.94) 92%,
+        rgba(30,55,59,.98)
       )!important;
     box-shadow:
-      inset 16px -21px 34px rgba(0,4,7,.50),
-      inset -10px 12px 24px rgba(222,241,236,.055),
-      inset 0 0 0 1px rgba(189,226,222,.040),
-      0 28px 62px rgba(0,0,0,.42)!important;
+      inset 15px -20px 32px rgba(0,4,7,.40),
+      inset -11px 13px 26px rgba(228,244,239,.075),
+      inset 0 0 0 1px rgba(196,229,225,.060),
+      0 28px 62px rgba(0,0,0,.38)!important;
   }
 
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
-    inset:36.5% 36.5% 36.5% 36.5%!important;
+    inset:40.25% 40.25% 40.25% 40.25%!important;
     border-radius:50%!important;
-    border:1px solid rgba(157,220,219,.30)!important;
+    border:1px solid rgba(174,226,223,.38)!important;
     background:
       radial-gradient(circle at 38% 34%,
-        rgba(246,255,252,.95) 0 2.8%,
-        rgba(105,231,228,.62) 7%,
-        rgba(24,116,126,.56) 18%,
-        rgba(6,38,45,.94) 42%,
-        rgba(1,11,15,.992) 72%
+        rgba(249,255,253,.98) 0 3%,
+        rgba(128,238,234,.70) 8%,
+        rgba(31,133,142,.58) 20%,
+        rgba(10,54,61,.90) 43%,
+        rgba(2,18,23,.975) 72%
       ),
-      radial-gradient(circle at 50% 50%,rgba(82,207,211,.13),transparent 66%)!important;
+      radial-gradient(circle at 50% 50%,rgba(92,214,216,.18),transparent 66%)!important;
     box-shadow:
-      0 0 0 5px rgba(3,12,17,.55),
-      inset 0 0 16px rgba(116,222,220,.12),
-      0 0 20px rgba(55,179,190,.065)!important;
+      0 0 0 2px rgba(8,26,31,.58),
+      0 0 0 4px rgba(151,220,219,.055),
+      inset 0 0 14px rgba(126,228,224,.16),
+      0 0 18px rgba(62,185,194,.075)!important;
     opacity:.96!important;
   }
 }
-/* production-r1947-desktop-signature-first-paint-parity */
+/* production-r1947b-desktop-signature-first-paint-bioglass-optic-parity */
 
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
