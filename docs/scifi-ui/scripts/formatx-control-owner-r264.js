@@ -5,7 +5,7 @@
   if (root.dataset.fxControlOwnerR264 === 'ready') return;
   root.dataset.fxControlOwnerR264 = 'booting';
 
-  const mobileQuery = matchMedia('(max-width: 900px)');
+  const mobileQuery = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
   let queued = false;
   let bootObserver = null;
   let bootTimer = 0;
@@ -85,7 +85,10 @@
   }
 
   function canonicalMenu(topbar) {
-    let current = document.querySelector('.fx-reference-menu-button');
+    const menuCandidates=Array.from(document.querySelectorAll('.fx-reference-menu-button'));
+    let current=menuCandidates.find(node=>node instanceof HTMLButtonElement && node.parentElement===topbar)
+      || menuCandidates.find(node=>node instanceof HTMLButtonElement)
+      || null;
     if (!(current instanceof HTMLButtonElement)) {
       current = document.createElement('button');
       current.className = 'fx-reference-menu-button';
@@ -104,6 +107,9 @@
 
     current.dataset.fxR244Bound = 'true';
 
+    for(const duplicate of menuCandidates){
+      if(duplicate!==current)duplicate.remove();
+    }
     for (const duplicate of Array.from(document.querySelectorAll('#menu-toggle'))) {
       if (duplicate !== current) {
         duplicate.removeAttribute('id');
@@ -133,20 +139,46 @@
     const topbar = document.querySelector('.topbar');
     if (!(topbar instanceof HTMLElement)) return false;
 
-    let mag = document.querySelector('.fx-reference-mag-button');
+    const magCandidates=Array.from(document.querySelectorAll('.fx-reference-mag-button'));
+    let mag=magCandidates.find(node=>node instanceof HTMLButtonElement && node.parentElement===topbar)
+      || magCandidates.find(node=>node instanceof HTMLButtonElement)
+      || null;
     if (!(mag instanceof HTMLButtonElement)) {
       mag = document.createElement('button');
       mag.type = 'button';
       mag.className = 'fx-reference-mag-button';
       topbar.appendChild(mag);
     }
+    for(const duplicate of magCandidates){
+      if(duplicate!==mag)duplicate.remove();
+    }
     mag.classList.add('fx-control-owner-r264');
     mag.textContent = language() === 'en' ? 'CORE' : 'MAG';
     mag.setAttribute('aria-label', language() === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
-    mag.hidden = false;
-    mag.removeAttribute('aria-hidden');
+    if(isMobile()){
+      /* R1951 mobile canonical header: the FormatX brand already represents and
+         returns to the living core. A second standalone MAG glyph is visual
+         duplication, so keep only the brand + language + menu trio. */
+      mag.hidden=true;
+      mag.setAttribute('aria-hidden','true');
+      mag.setAttribute('tabindex','-1');
+      mag.dataset.fxMobileDuplicateRetiredR1951='true';
+    }else{
+      mag.hidden=false;
+      mag.removeAttribute('aria-hidden');
+      mag.removeAttribute('tabindex');
+    }
     clearLegacyStyle(mag);
     if (mag.parentElement !== topbar) topbar.appendChild(mag);
+
+    const brand=topbar.querySelector(':scope > .brand');
+    if(brand instanceof HTMLAnchorElement){
+      brand.dataset.fxMobileCoreOwnerR1951=isMobile()?'true':'false';
+      if(isMobile()){
+        brand.href='#hero';
+        brand.setAttribute('aria-label',language()==='en'?'FormatX — return to the living core':'FormatX — vissza az élő maghoz');
+      }
+    }
 
     if (mag.dataset.fxControlMagBoundR264 !== 'true') {
       mag.dataset.fxControlMagBoundR264 = 'true';
@@ -156,8 +188,14 @@
       });
     }
 
-    const lang = document.querySelector('.fx-language-toggle');
+    const langCandidates=Array.from(document.querySelectorAll('.fx-language-toggle'));
+    const lang=langCandidates.find(node=>node instanceof HTMLButtonElement && node.parentElement===topbar)
+      || langCandidates.find(node=>node instanceof HTMLButtonElement)
+      || null;
     if (lang instanceof HTMLButtonElement) {
+      for(const duplicate of langCandidates){
+        if(duplicate!==lang)duplicate.remove();
+      }
       lang.classList.add('fx-control-owner-r264');
       lang.hidden = false;
       lang.removeAttribute('aria-hidden');
