@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-intro-signature-parity
+token=20261006-r1947b-native-crossfade-parity
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=deploy intro-to-permanent Signature MAG parity: darker smoked-silver finale, internal refractive facets, smaller integrated optic flare and controlled no-clipping handoff while preserving R1945l hero geometry and R1944 precision interaction
+purpose=deploy seamless intro-to-permanent Signature MAG continuity: early spatial travel to the real hero anchor, proxy-shell crossfade into the exact warmed native MAG, no low-poly proxy plates, controlled smoked-silver optical finale and no clipping
 validation=production preflight, exact-revision convergence, intro keyframes, P0 fast loop, Lighthouse desktop/mobile, mobile MAG proof, no-occlusion, R536 handoff, Worker CSP/rewrite parity and production smoke tests
