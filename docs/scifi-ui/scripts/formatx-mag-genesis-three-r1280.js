@@ -1371,8 +1371,9 @@
     updateMechanical(t,time){
       const grow=smooth((t-6.25)/.90);
       const finale=smooth((t-7.20)/1.65);
+      const handoff=smooth((t-9.05)/.80);
       this.mechanicalGroup.visible=grow>.002;
-      const handoffScale=mix(1.0,.88,endMove);
+      const handoffScale=mix(1.0,.88,handoff);
       this.mechanicalGroup.scale.set(
         (.001+grow*1.04)*handoffScale,
         (.001+grow*1.04)*handoffScale,
@@ -1611,6 +1612,7 @@
   document.documentElement.dataset.fxMagSignatureR1947='intro-finale-smoked-silver-internal-prism-permanent-hero-parity';
   document.documentElement.dataset.fxMagSignatureR1947b='early-spatial-crossfade-into-exact-native-hero-no-proxy-plates';
   document.documentElement.dataset.fxMagSignatureR1947c='corona-base-scale-preserved-native-crossfade';
+  document.documentElement.dataset.fxMagSignatureR1947d='runtime-scoped-handoff-progress-no-reference-error';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
