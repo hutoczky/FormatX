@@ -25,13 +25,18 @@ for (const token of [
   'surfacePulse?.','requestRender?.',
   'MutationObserver','formatx:magbirthcomplete','formatx:loop',
   'all-content-actions-preserved-one-native-mag',
-  'scroll-interaction-driven-no-idle-raf',
+  'physical-spring-scroll-pointer-camera-zero-idle-after-settle',
+  'fxDesktopInteractionR1951',
+  'second-order-pointer-scroll-springs-velocity-depth-parallax-zero-idle-after-settle',
   'fxCinematicLivingIdentityR1723',
   'canonical-organism-scene-physiology-only'
 ]) assert.ok(js.includes(token),'R536 runtime contract missing '+token);
 
 assert.ok(!js.includes('setShape?.'),'R1723 cinematic journey must not request alternate body shapes');
 assert.ok(!js.includes('setInterval('),'R536 must not use an idle interval');
+assert.ok(js.includes("scrollTailFrames=18") || js.includes("scrollTailFrames=Math.max(scrollTailFrames,18)"),'R1951 scroll camera must be bounded rather than idle');
+assert.ok(js.includes("if(pointerMoving||scrollMoving||pointerTailFrames>0||scrollTailFrames>0)schedule()"),'R1951 spring camera must stop scheduling after settle');
+assert.ok(js.includes("setScrollBudget('fast');") && js.includes("scheduleScrollSettle();"),'R1951 must preserve fast-scroll logical state deferral and settle resync');
 assert.ok(!js.includes("createElement('canvas')"),'R536 must not create or duplicate a MAG canvas');
 assert.ok(css.includes('pointer-events:none!important'),'R536 film layer must not intercept user input');
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'),'R536 reduced-motion fail-open missing');
@@ -54,4 +59,4 @@ for (const token of [
 ]) assert.ok(css.includes(token),'R1948 hero disclosure CSS contract missing '+token);
 
 
-console.log('PASS: R1948 cinematic journey preserves one canonical organism, keeps the hero optically clean, opens global telemetry after the core scene and remains zero-idle.');
+console.log('PASS: R1951 cinematic journey preserves one canonical organism, uses bounded physical pointer/scroll springs, keeps the hero optically clean and returns to zero-idle after settle.');
