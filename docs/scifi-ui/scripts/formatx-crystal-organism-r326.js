@@ -291,11 +291,21 @@
 
     function vertex(latitudeIndex, longitudeIndex) {
       const latitude=latitudeIndex/latitudeSegments;
-      const longitude=longitudeIndex/longitudeSegments;
+      const uvLongitude=longitudeIndex/longitudeSegments;
+      /* R1947b — watertight latitude/longitude shell.
+         The 2π seam now evaluates with the exact same angle as longitude 0,
+         and both poles are exact coordinates instead of tiny sin(π) residues.
+         Non-indexed triangles therefore share bit-identical boundary positions
+         and cannot expose one-pixel background cracks under high-DPR rastering. */
+      const wrappedLongitude=longitudeIndex===longitudeSegments?0:longitudeIndex;
+      const longitude=wrappedLongitude/longitudeSegments;
       const phi=latitude*Math.PI;
       const theta=longitude*Math.PI*2;
-      const sinPhi=Math.sin(phi);
-      const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
+      const poleTop=latitudeIndex===0;
+      const poleBottom=latitudeIndex===latitudeSegments;
+      const sinPhi=(poleTop||poleBottom)?0:Math.sin(phi);
+      const cosPhi=poleTop?1:(poleBottom?-1:Math.cos(phi));
+      const direction=[sinPhi*Math.cos(theta),cosPhi,sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
 
       /* R1941c — source-locked Signature MAG.
@@ -343,7 +353,7 @@
         crystal:crystalPosition,
         sphereNormal:direction,
         crystalNormal,
-        uv:[longitude,latitude]
+        uv:[uvLongitude,latitude]
       };
     }
 
@@ -1616,6 +1626,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='intro-parity-clean-nested-diamond-petals-smoked-silver-optic';
+    root.dataset.fxNativeMagMeshR1947b='watertight-zero-two-pi-seam-exact-poles-no-raster-pinholes';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
