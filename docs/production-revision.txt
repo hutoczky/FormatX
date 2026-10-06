@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947d-front-shell-volumetric-handoff
+token=20261006-r1947e-compact-optic-front-shell-handoff
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=deploy the R1947d studio Signature refinement: shared volumetric intro/hero geometry on desktop and mobile, smooth-cusp cardinal tips, outward-only closed shell without rear-depth speckles, front-visible compact optic, stable corona scale, higher desktop crystal fidelity and preserved R1944 precision interaction
+purpose=deploy the R1947e studio Signature refinement: shared volumetric intro/hero geometry on desktop and mobile, smooth-cusp cardinal tips, outward-only closed shell without rear-depth speckles, compact smoked socket with front-visible optic, stable corona scale, higher desktop crystal fidelity and preserved R1944 precision interaction
 validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, mobile MAG proof, intro keyframes, desktop visual contracts, release-sync integrity and production Worker parity
