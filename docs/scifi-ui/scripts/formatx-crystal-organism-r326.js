@@ -17,6 +17,8 @@
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
   const constrainedMobile = mobile && constrained;
+  const desktopFine = !mobile && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const highHeadroomDesktop = desktopFine && !constrained && hardwareConcurrency >= 8 && deviceMemory >= 8;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
@@ -272,8 +274,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : highHeadroomDesktop ? 96 : 80;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : highHeadroomDesktop ? 192 : 160;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -820,7 +822,7 @@
       antialias:!mobile || (!constrained && (devicePixelRatio||1)<=4.2),
       depth:true,
       stencil:false,
-      premultipliedAlpha:false,
+      premultipliedAlpha:desktopFine,
       preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
       powerPreference:'high-performance'
     };
@@ -846,6 +848,8 @@
       return;
     }
 
+    root.dataset.fxNativeMagMsaaR1951=String(gl.getParameter(gl.SAMPLES)||0);
+    root.dataset.fxNativeMagPremultipliedAlphaR1951=desktopFine?'desktop-premultiplied-edge':'legacy-mobile-alpha';
     const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
     const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
     const softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
@@ -1856,12 +1860,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:highHeadroomDesktop?2.45:2.22);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:highHeadroomDesktop?5600000:4300000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
