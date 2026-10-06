@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-section-continuity
-base_master=246de190f38f323b50a7ff70a3dc52ff2a20d315
-purpose=deploy the R1947 continuous desktop living-system scene with dedicated compositor light bridges, NET chapter coverage, preserved R1945l Signature MAG and R1944 precision interaction
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, no-occlusion, cinematic handoff and production Worker parity
+token=20261006-r1948-hero-progressive-disclosure
+base_master=0a086b6dc58648f5a98a1ad5f9cae3f38cea0abd
+purpose=make the desktop hero a clean cinematic first viewport by keeping global journey telemetry dormant in the core scene and progressively opening the mounted R536 cinematic telemetry after the first committed non-core scene boundary while leaving retired legacy rail/status UI disabled, while preserving R1947 section continuity, R1945l Signature MAG and R1944 precision interaction
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff, desktop hero state and production Worker parity

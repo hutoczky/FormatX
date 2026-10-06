@@ -37,4 +37,21 @@ assert.ok(css.includes('pointer-events:none!important'),'R536 film layer must no
 assert.ok(css.includes('@media (prefers-reduced-motion:reduce)'),'R536 reduced-motion fail-open missing');
 assert.ok(!/animation:[^;]*infinite/.test(css),'R536 must not run infinite CSS animations');
 
-console.log('PASS: R1723 cinematic journey preserves every surface/action while one canonical organism responds physiologically without shape swapping.');
+/* R1948 — first viewport progressive disclosure contract. */
+for (const token of [
+  'fxCinematicDisclosureR1948',
+  'hero-core-dormant-global-hud-noncore-scene-open-zero-idle'
+]) assert.ok(js.includes(token),'R1948 runtime disclosure contract missing '+token);
+
+for (const token of [
+  'production-r1948-hero-progressive-disclosure-zero-idle',
+  '[data-fx-cinematic-scene-r536="core"] .fx-c536-hud',
+  '[data-fx-cinematic-scene-r536="core"] .fx-c536-track',
+  '[data-fx-cinematic-scene-r536="core"] .fx-c536-iris',
+  ':not([data-fx-cinematic-scene-r536="core"]) .fx-c536-hud',
+  '(min-width:901px)',
+  '(prefers-reduced-motion:no-preference)'
+]) assert.ok(css.includes(token),'R1948 hero disclosure CSS contract missing '+token);
+
+
+console.log('PASS: R1948 cinematic journey preserves one canonical organism, keeps the hero optically clean, opens global telemetry after the core scene and remains zero-idle.');

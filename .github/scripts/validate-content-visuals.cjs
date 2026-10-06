@@ -169,6 +169,81 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
   }
 }
 
+async function assertHeroDisclosure(page) {
+  /* R536 CSS is deliberately post-FCP deferred. Wait for the production
+     scheduler to flip the cinematic stylesheet from print to its live media
+     before reading computed opacity. */
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const link = [...document.querySelectorAll('link[data-fx-cinematic-journey-r536="true"]')]
+      .find(node => node instanceof HTMLLinkElement);
+    return root.dataset.fxDeferredCssR487 === 'ready-fcp' &&
+      link && link.media !== 'print' && matchMedia(link.media || 'all').matches;
+  }, null, { timeout: 12000 });
+
+  await page.waitForFunction(() =>
+    document.documentElement.dataset.fxCinematicJourneyR536 === 'ready' &&
+    document.documentElement.dataset.fxCinematicSceneR536 === 'core',
+    null, { timeout: 12000 }
+  );
+
+  const readOpacity = () => page.evaluate(() => {
+    const opacity = selector => {
+      const node = document.querySelector(selector);
+      if (!node) return null;
+      return Number.parseFloat(getComputedStyle(node).opacity || '1');
+    };
+    return {
+      scene: document.documentElement.dataset.fxCinematicSceneR536 || '',
+      hud: opacity('.fx-c536-hud'),
+      world: opacity('.fx-c536-world'),
+      iris: opacity('.fx-c536-iris'),
+      track: opacity('.fx-c536-track'),
+      scan: opacity('.fx-c536-scan')
+    };
+  });
+
+  await page.waitForTimeout(850);
+  const heroState = await readOpacity();
+  assert(heroState.scene === 'core', `R1948 hero scene not committed: ${JSON.stringify(heroState)}`);
+  assert(heroState.world !== null && heroState.world <= .12,
+    `R1948 world must stay restrained in hero: ${JSON.stringify(heroState)}`);
+  assert(heroState.iris !== null && heroState.iris <= .10,
+    `R1948 iris must stay restrained in hero: ${JSON.stringify(heroState)}`);
+  assert(heroState.track !== null && heroState.track <= .03,
+    `R1948 track must stay dormant in hero: ${JSON.stringify(heroState)}`);
+  assert(heroState.scan !== null && heroState.scan <= .03,
+    `R1948 scan must stay dormant in hero: ${JSON.stringify(heroState)}`);
+  if (heroState.hud !== null) {
+    assert(heroState.hud <= .05,
+      `R1948 hud must stay dormant in hero when mounted: ${JSON.stringify(heroState)}`);
+  }
+
+  await page.locator('#experience').scrollIntoViewIfNeeded();
+  await page.evaluate(() => document.querySelector('#experience')?.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await page.waitForFunction(() =>
+    document.documentElement.dataset.fxCinematicSceneR536 &&
+    document.documentElement.dataset.fxCinematicSceneR536 !== 'core',
+    null, { timeout: 8000 }
+  );
+  await page.waitForTimeout(950);
+
+  const journeyState = await readOpacity();
+  assert(journeyState.scene !== 'core', `R1948 journey scene did not open: ${JSON.stringify(journeyState)}`);
+  for (const key of ['world','iris','track','scan']) {
+    assert(journeyState[key] !== null && heroState[key] !== null && journeyState[key] > heroState[key] + .015,
+      `R1948 ${key} did not progressively open after hero: ${JSON.stringify({ heroState, journeyState })}`);
+  }
+  if (journeyState.hud !== null && heroState.hud !== null) {
+    assert(journeyState.hud > heroState.hud + .15,
+      `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify({ heroState, journeyState })}`);
+  }
+
+  await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+  await page.waitForFunction(() => document.documentElement.dataset.fxCinematicSceneR536 === 'core', null, { timeout: 8000 });
+  await page.waitForTimeout(250);
+}
+
 async function capture(browser, name, viewport, options = {}) {
   const context = await browser.newContext({
     viewport,
@@ -189,7 +264,11 @@ async function capture(browser, name, viewport, options = {}) {
   });
   let failure;
   try {
-    await page.goto(urlWith({ visual: `${name}-${Date.now()}`, ...(options.lang ? { lang: options.lang } : {}) }), {
+    await page.goto(urlWith({
+      visual: `${name}-${Date.now()}`,
+      ...(options.lang ? { lang: options.lang } : {}),
+      ...(options.disclosure ? { cinema: 1 } : {})
+    }), {
       waitUntil: 'domcontentloaded', timeout: 30000
     });
     await waitForProductShell(page);
@@ -197,6 +276,7 @@ async function capture(browser, name, viewport, options = {}) {
       await page.waitForFunction(lang => document.documentElement.lang === lang, options.lang, { timeout: 8000 });
     }
     await assertCommon(page, options);
+    if (options.disclosure) await assertHeroDisclosure(page);
     if (typeof options.after === 'function') await options.after(page);
     assert(errors.length === 0, `${name} browser errors: ${errors.join(' | ')}`);
   } catch (error) {
@@ -235,7 +315,7 @@ async function publicPage(browser, name, pathname, selector) {
     args: ['--no-sandbox', '--disable-dev-shm-usage', '--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']
   });
   try {
-    await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 });
+    await capture(browser, 'desktop-hero-hu', { width: 1440, height: 900 }, { disclosure: true });
     await capture(browser, 'desktop-small-height', { width: 1366, height: 600 });
     await capture(browser, 'mobile-390x844', { width: 390, height: 844 }, { mobile: true });
     await capture(browser, 'mobile-430x932', { width: 430, height: 932 }, { mobile: true });
@@ -259,7 +339,7 @@ async function publicPage(browser, name, pathname, selector) {
     await publicPage(browser, 'known-issues', '/scifi-ui/known-issues.html', 'main');
     await publicPage(browser, 'security', '/scifi-ui/security.html', 'main');
     await publicPage(browser, 'support', '/scifi-ui/support.html', 'main');
-    console.log('PASS: R532 current hero visual contract — no manual PAUSE, stable controls, responsive geometry, reduced-motion, i18n and public pages.');
+    console.log('PASS: R1948 current hero visual contract — clean hero disclosure, progressive journey telemetry, stable controls, responsive geometry, reduced-motion, i18n and public pages.');
   } finally {
     await browser.close();
   }

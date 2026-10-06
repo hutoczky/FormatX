@@ -530,6 +530,7 @@
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();},{passive:true});
 
     root.dataset.fxCinematicJourneyR536='ready';
+    root.dataset.fxCinematicDisclosureR1948='hero-core-dormant-global-hud-noncore-scene-open-zero-idle';
   root.dataset.fxCinematicContinuityR1947='studio-section-bridge-ready';
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
