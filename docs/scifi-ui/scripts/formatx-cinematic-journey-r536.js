@@ -648,6 +648,10 @@
     bootStarted=true;
     root.dataset.fxCinematicJourneyStartR1737=source;
     boot();
+    /* R1951 — when the birth event itself starts the engine, the listener that
+       boot() installs cannot observe the already-dispatched event. Apply the
+       handoff immediately after boot so intro -> MAG -> world is one timeline. */
+    if(source==='mag-birth-handoff')queueMicrotask(()=>introHandoff());
     for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
       removeEventListener(type,intentBoot,true);
     }
