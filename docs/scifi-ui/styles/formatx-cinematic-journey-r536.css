@@ -1097,8 +1097,7 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
     --fx-c1947-side-x:28%;
   }
 
-  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero)::before{
-    content:"";
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .fx-c1947-bridge{
     position:absolute;
     z-index:-2;
     left:50%;
@@ -1124,10 +1123,9 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
     contain:paint;
   }
 
-  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero)::after{
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .fx-c1947-bridge::after{
     content:"";
     position:absolute;
-    z-index:-1;
     left:50%;
     top:-54px;
     width:min(760px,58vw);
