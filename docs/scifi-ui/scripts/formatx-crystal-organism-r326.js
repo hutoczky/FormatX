@@ -316,12 +316,21 @@
       const axisZ=mobile
         ? (direction[2]>=0?.64:.43)
         : (direction[2]>=0?.49:.34);
-      const exponent=mobile?.78:.61;
+      /* R1947b — smooth the desktop cusp field itself instead of masking
+         the resulting raster cracks. Explicit cardinal tip gain preserves the
+         signature points without the p<.65 derivative singularity. */
+      const exponent=mobile?.78:.70;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
         Math.pow(Math.abs(direction[2])/axisZ,exponent);
-      const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
+      const radialBase=1/Math.pow(Math.max(.0001,terms),1/exponent);
+      const tipBoost=mobile
+        ? 1
+        : 1
+          +.055*Math.pow(Math.abs(direction[0]),8)
+          +.078*Math.pow(Math.abs(direction[1]),8);
+      const radial=radialBase*tipBoost;
       const poleFade=sinPhi*sinPhi;
       const organic=
         1+
@@ -1607,6 +1616,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='higher-desktop-topology-anti-pinhole-solid-glass-floor';
+    root.dataset.fxNativeMagStudioR1947b='smooth-cusp-tip-boost-no-axis-raster-cracks';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
