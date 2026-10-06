@@ -40,13 +40,13 @@ root.dataset.fxPerformancePolicyR1661='scroll-never-mounts-deferred-enhancements
 root.dataset.fxPerformancePolicyR1676='phase-gated-intro-lighter-mobile-geometry-preemptive-60fps-headroom';
 root.dataset.fxPerformancePolicyR1670='stable-60fps-headroom-no-fullscreen-blur-lower-start-resolution';
 root.dataset.fxPerformancePolicyR1672='photoreal-material-lighting-no-extra-geometry-adaptive-60fps';
-root.dataset.fxPerformancePolicyR1774='phase2-fetch-only-final-mag-prewarm-no-concurrent-webgl';
+root.dataset.fxPerformancePolicyR1774='phase2-fetch-only-then-r1948-72pct-native-handoff-warmup';
 root.dataset.fxPerformancePolicyR1778='mobile-monolith-clean-silhouette-low-overdraw-60fps';
 root.dataset.fxPerformancePolicyR1779='mobile-obsidian-zero-tendrils-broad-facets-proof-driven';
 root.dataset.fxPerformancePolicyR1781='clean-mobile-facets-no-aliased-surface-patterns';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
+const mobile=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261006-r1948-integrated-award-final';
@@ -181,6 +181,13 @@ function onMagBirthWarmup(event){
   activateMagRuntime('cinematic-warmup-'+source);
 }
 
+function onNativeMagWarmup(event){
+  const source=String(event?.detail?.source||root.dataset.fxMagBirthNativeWarmupR1948||'native-handoff');
+  warmCriticalOwners();
+  root.dataset.fxIntroAwareMagR1948='native-handoff-warmup-starting-'+source;
+  activateMagRuntime('native-handoff-'+source);
+}
+
 function ensureStaticMotionCss(){
   const existing=document.getElementById('fx-r170-mobile-seam-override');
   if(existing instanceof HTMLLinkElement){
@@ -251,11 +258,15 @@ ensureLanguageToggle();
 if(magBirthActive()){
   root.dataset.fxIntroAwareMagR618='waiting-for-core-formation';
   document.addEventListener('formatx:magbirthcorewarmup',onMagBirthWarmup,{once:true,passive:true});
+  document.addEventListener('formatx:magbirthnativewarmup',onNativeMagWarmup,{once:true,passive:true});
   document.addEventListener('formatx:magbirthcomplete',()=>activateMagRuntime('cinematic-complete'),{once:true,passive:true});
   /* The intro shell is deliberately mounted before this loader. If its warmup
      event already fired, consume the published latch instead of losing it. */
   if(root.dataset.fxMagBirthCoreWarmupR618){
     queueMicrotask(()=>onMagBirthWarmup({detail:{source:root.dataset.fxMagBirthCoreWarmupR618}}));
+  }
+  if(root.dataset.fxMagBirthNativeWarmupR1948){
+    queueMicrotask(()=>onNativeMagWarmup({detail:{source:root.dataset.fxMagBirthNativeWarmupR1948}}));
   }
 }else{
   activateMagRuntime('startup-no-cinematic');
