@@ -272,8 +272,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 36 : mobile ? 48 : constrained ? 52 : 80;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 72 : mobile ? 96 : constrained ? 104 : 160;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -772,12 +772,56 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.105) 0%,rgba(40,92,98,.045) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.22),rgba(0,0,0,0) 82%)','important');
+
+    /* R1951 — studio depth stack. These are compositor-only optical layers:
+       no second WebGL pass and no idle JS loop. They give the hero object the
+       contact, atmosphere and restrained bloom that a photographed glass object
+       has in a real studio. */
+    if(!mobile){
+      stage.style.setProperty('isolation','isolate');
+      const depthLayer=(className,styles)=>{
+        const node=document.createElement('div');
+        node.className=className;
+        node.setAttribute('aria-hidden','true');
+        node.style.position='absolute';
+        node.style.pointerEvents='none';
+        node.style.zIndex='0';
+        for(const [name,value] of Object.entries(styles))node.style.setProperty(name,value);
+        stage.appendChild(node);
+        return node;
+      };
+      const volumeHaze=depthLayer('fx-mag-volume-haze-r1951',{
+        left:'13%',top:'10%',width:'74%',height:'74%',
+        background:'radial-gradient(ellipse at 50% 46%,rgba(126,218,224,.115) 0%,rgba(44,100,108,.060) 34%,rgba(13,36,43,.025) 54%,transparent 74%)',
+        filter:'blur(26px)',opacity:'.58',transform:'translateZ(0)'
+      });
+      const contactShadow=depthLayer('fx-mag-contact-shadow-r1951',{
+        left:'24%',top:'70%',width:'52%',height:'14%',
+        background:'radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.68) 0%,rgba(0,0,0,.34) 35%,transparent 74%)',
+        filter:'blur(13px)',opacity:'.72',transform:'translateZ(0)'
+      });
+      const opticBloom=depthLayer('fx-mag-optic-bloom-r1951',{
+        left:'38%',top:'35%',width:'24%',height:'24%',
+        background:'radial-gradient(circle at 50% 50%,rgba(142,255,250,.13) 0%,rgba(67,207,218,.055) 31%,transparent 70%)',
+        filter:'blur(18px)',opacity:'.30','mix-blend-mode':'screen',transform:'translateZ(0) scale(.98)'
+      });
+      if(!reduced.matches&&typeof opticBloom.animate==='function'){
+        const bloom=opticBloom.animate(
+          [{opacity:.24,transform:'translateZ(0) scale(.975)'},{opacity:.33,transform:'translateZ(0) scale(1.025)'},{opacity:.24,transform:'translateZ(0) scale(.975)'}],
+          {duration:7600,iterations:Infinity,easing:'cubic-bezier(.37,0,.20,1)'}
+        );
+        bloom.id='fx-mag-optic-bloom-r1951';
+      }
+      root.dataset.fxNativeMagDepthR1951='desktop-volumetric-haze-contact-shadow-controlled-optic-bloom';
+    }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
+    canvas.style.setProperty('z-index','2');
+    canvas.style.setProperty('position','absolute');
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
@@ -887,13 +931,17 @@
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
-        float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
+        /* R1951 — keep physiological motion inside the body, not on the outer
+           contour. Silhouette vertices use only 8% of the micro-deformation,
+           eliminating subpixel edge shimmer while the inner material stays alive. */
+        float silhouetteGuard=smoothstep(.10,.52,abs(aSphereNormal.z));
+        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy)*mix(.08,1.0,silhouetteGuard);
+        float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask*mix(.18,1.0,silhouetteGuard);
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
         float cortex=(cortexA*.62+cortexB*.38)*.0058*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0009*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.00065*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
         /* R1923 — the smooth cubic body is now authoritative. The legacy
@@ -910,9 +958,9 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
-        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*${mobile?'.0055':'.00115'};
+        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+${mobile?'.005':'.0016'}*sin(uTime*.19);
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+${mobile?'.004':'.0013'}*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -958,6 +1006,17 @@
         float r=roughness+1.0;
         float k=(r*r)/8.0;
         return NoV/max(NoV*(1.0-k)+k,.0002);
+      }
+      vec3 studioTransmit(vec3 r){
+        float upper=smoothstep(-.18,.78,r.y);
+        float cyanBox=exp(-pow((r.x-.36)/.34,2.0)-pow((r.y-.26)/.50,2.0));
+        float silverBox=exp(-pow((r.x+.42)/.29,2.0)-pow((r.y-.12)/.58,2.0));
+        float floorWarm=smoothstep(.08,.78,-r.y);
+        vec3 env=mix(vec3(.008,.018,.023),vec3(.040,.072,.076),upper);
+        env+=vec3(.045,.155,.172)*cyanBox;
+        env+=vec3(.16,.18,.17)*silverBox*.34;
+        env+=vec3(.055,.032,.021)*floorWarm*.16;
+        return env;
       }
       void main(){
         vec3 n=normalize(vNormal);
@@ -1036,8 +1095,29 @@
         mineral+=vec3(.090,.098,.096)*pow(planeKey,.72)*.27;
         mineral+=vec3(.052,.045,.039)*pow(planeFill,.82)*.14;
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
-        vec3 mineralAbsorption=exp(-vec3(.38,.28,.22)*(0.22+0.52*smokyDepth)*(1.0-facing));
-        mineral*=mix(vec3(1.0),mineralAbsorption,.30);
+        /* R1951 — physical glass body.
+           Approximate local thickness from view angle, then apply Beer-Lambert
+           absorption, IOR 1.46 refraction, mild RGB dispersion and forward
+           scattering. No screen-space background texture is required, so this
+           stays deterministic and stable across DOM/WebGL compositing. */
+        float thickness=mix(.16,.74,pow(1.0-facing,.72))*(.82+.18*smokyDepth);
+        vec3 sigmaA=vec3(.31,.22,.18);
+        vec3 beer=exp(-sigmaA*thickness);
+        mineral*=mix(vec3(1.0),beer,.46);
+
+        vec3 refrG=refract(-view,n,1.0/1.460);
+        vec3 refrR=refract(-view,n,1.0/1.452);
+        vec3 refrB=refract(-view,n,1.0/1.474);
+        vec3 transmitG=studioTransmit(refrG);
+        vec3 dispersed=vec3(studioTransmit(refrR).r,transmitG.g,studioTransmit(refrB).b);
+        float transmissionMask=(.16+.58*(1.0-facing))*bodyMask;
+        mineral+=dispersed*beer*transmissionMask*.44;
+
+        float forwardKey=pow(max(dot(refrG,key),0.0),4.2);
+        float forwardSide=pow(max(dot(refrG,side),0.0),3.0);
+        float innerScatter=(forwardKey*.72+forwardSide*.36)*(1.0-facing)*bodyMask;
+        mineral+=vec3(.040,.105,.112)*innerScatter*(.26+.34*thickness);
+
         float internalCaustic=pow(1.0-facing,2.35)*(.35+.65*smokyDepth)*(1.0-.55*ndl);
         mineral+=vec3(.040,.072,.073)*internalCaustic*.46;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
@@ -1232,7 +1312,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.58),clamp(outAlpha,.92,1.0));
+        ${outputName}=vec4(filmic(mineral*2.42),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1583,9 +1663,12 @@
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
     const mobilePhysical = mobile || constrainedMobile || auditMode;
-    /* R1930 visual parity: one authored studio shader on desktop, mobile and
-       software proof. This removes the hardware/CI split that hid ugly live paths. */
-    const fragmentSource = constrainedFragmentSource;
+    /* R1951 — capable desktop hardware receives the full studio material path.
+       Mobile, constrained, software and audit paths retain the proven bounded
+       shader. The full path adds richer Fresnel, internal caustic and lens depth
+       without changing geometry or accessibility. */
+    const desktopFullStudio=!mobile&&!constrained&&!softwareRenderer&&!auditMode&&webgl2;
+    const fragmentSource = desktopFullStudio ? fullFragmentSource : constrainedFragmentSource;
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
@@ -1604,6 +1687,9 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1951='desktop-full-physical-shader-supersampled-contour-volumetric-depth-continuous-scroll';
+    root.dataset.fxNativeMagMaterialR1951='ior-1-46-beer-lambert-dispersive-refraction-inner-scattering-pixel-stable-silhouette';
+    root.dataset.fxNativeMagRasterR1951='desktop-min-1-65x-mobile-small-canvas-1-72-to-1-92x-supersampling-msaa-bounded-budget';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1835,13 +1921,13 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .88 : 1.06)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?1.00:1.14)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.70:.82));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1942,24 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
-      const cap=baseCap*qualityScale;
-      const dpr=Math.min(devicePixelRatio||1,cap);
+        : (auditMode ? 1.34 : constrainedMobile?1.82:mobile?2.08:constrained?1.88:2.55);
+      const nativeDpr=devicePixelRatio||1;
+      const cssArea=Math.max(1,rect.width*rect.height);
+      /* R1951b — a small hero canvas is cheap enough to protect with a hard
+         raster floor. This prevents the adaptive governor from turning a 2x
+         phone screenshot into a ~1.48x backing store and making the four tips
+         visibly stair-step. Desktop DPR=1 panels also get true supersampling. */
+      const rasterFloor=softwareRenderer||auditMode
+        ? 1.0
+        : mobile
+          ? (cssArea<220000?(constrainedMobile?1.72:1.92):1.42)
+          : (constrained?1.30:1.65);
+      const cap=Math.max(rasterFloor,baseCap*qualityScale);
+      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,constrained?1.30:1.65);
+      const dpr=Math.max(rasterFloor,Math.min(requestedDpr,cap));
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1550000:mobile?2200000:constrained?2100000:5600000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2113,7 +2211,10 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>16.75 || ms>6.4;
+        /* R1951 — frame cadence is presentation timing, not raster cost.
+           60 Hz naturally lands around 16.67 ms, so the old 16.75 ms panic edge
+           caused needless resolution shedding from normal scheduler jitter. */
+        const panicFrame=dt>19.25 || ms>7.2;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
           qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
@@ -2133,10 +2234,10 @@
           /* R1660 — preserve the 16.67 ms presentation budget. Resolution
              and secondary optical detail yield before cadence. Recovery waits
              until the renderer has sustained real headroom for long enough. */
-          const renderPressure=renderAverage>4.4 || renderPeak>5.8;
-          const severeRenderPressure=renderAverage>5.8 || renderPeak>7.4;
-          const framePressure=frameIntervalAverage>16.08 || framePeak>16.55;
-          const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
+          const renderPressure=renderAverage>5.2 || renderPeak>7.0;
+          const severeRenderPressure=renderAverage>7.0 || renderPeak>9.2;
+          const framePressure=frameIntervalAverage>18.25 || framePeak>19.8;
+          const severeFramePressure=frameIntervalAverage>21.5 || framePeak>24.0;
 
           if(severeFramePressure||severeRenderPressure){
             qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
@@ -2325,10 +2426,15 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1951 — desktop scroll remains a continuous camera gesture.
+           Six bounded frames per coalesced scroll sample feel cinematic while
+           preserving the zero-idle contract. Mobile retains the cheaper settle path. */
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        if(!mobile&&desktopFine.matches)schedule(6);
+        scrollSettleTimer=setTimeout(()=>{
+          scrollSettleTimer=0;
+          schedule(!mobile&&desktopFine.matches?5:1);
+        },mobile?88:118);
       });
     }
 

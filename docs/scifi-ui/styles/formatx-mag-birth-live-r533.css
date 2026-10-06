@@ -29,7 +29,7 @@ html[data-fx-mag-birth-live="active"] {
   pointer-events: none;
   opacity: 1;
   filter: brightness(1);
-  transition: opacity .72s cubic-bezier(.22,.61,.36,1), filter .72s cubic-bezier(.22,.61,.36,1);
+  transition: opacity .50s cubic-bezier(.16,.82,.18,1), filter .50s cubic-bezier(.16,.82,.18,1);
 }
 .fx-mag-birth-r533.is-leaving {
   opacity: 0;
@@ -2256,3 +2256,5 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+/* production-r1951-matched-cinematic-overlay-dissolve */

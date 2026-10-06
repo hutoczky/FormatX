@@ -1363,3 +1363,21 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+
+/* R1951 — duplicate-proof canonical mobile header from first paint. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root body.living-architecture .topbar:not([data-fx-canonical-topbar-r1951="true"]){
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+  html:root:root body.living-architecture .topbar[data-fx-canonical-topbar-r1951="true"] > .fx-reference-mag-button:not([data-fx-canonical-control-r1951="true"]),
+  html:root:root body.living-architecture .topbar[data-fx-canonical-topbar-r1951="true"] > .fx-language-toggle:not([data-fx-canonical-control-r1951="true"]),
+  html:root:root body.living-architecture .topbar[data-fx-canonical-topbar-r1951="true"] > .fx-reference-menu-button:not([data-fx-canonical-control-r1951="true"]){
+    display:none!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+  }
+}
+/* production-r1951-mobile-single-header-first-paint */
