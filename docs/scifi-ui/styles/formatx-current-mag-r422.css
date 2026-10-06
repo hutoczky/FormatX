@@ -20,6 +20,20 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
   visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
 
+/* R1951 mobile dedupe — the parser-visible first-paint proxy must retire
+   as soon as native R326 is authoritative. This is separate from hero-space
+   pseudo artwork and prevents a smaller second MAG from surviving below WebGL. */
+html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756,
+html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  animation:none!important;
+  transition:none!important;
+  content-visibility:hidden!important;
+}
+
 /* CSS fallback artwork must disappear as soon as native WebGL is ready. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
 html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space::before,
@@ -72,3 +86,5 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
 }
 
 /* production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer */
+
+/* production-r1951-mobile-single-mag-owner-no-first-paint-duplicate */
