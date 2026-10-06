@@ -1431,21 +1431,24 @@
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
-      this.mechInnerRing.rotation.z=time*.00012;
+      const settleMotion=1.0-finale*.94;
+      this.mechInnerRing.rotation.z=time*.00012*settleMotion;
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
+      /* R1951 — autonomous wobble dissolves before handoff. The final intro
+         frame remains optically alive but spatially locks to the permanent MAG. */
       if(this.mechBody){
-        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
-        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
+        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow*settleMotion;
+        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow*settleMotion;
       }
-      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
+      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow*settleMotion;
       if(this.innerPrism){
         this.innerPrismMaterial.opacity=(.10+.16*finale)*grow;
-        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
-        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
+        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow*settleMotion;
+        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow*settleMotion;
       }
       this.silverParts.forEach((p,i)=>{
-        p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
+        p.rotation.y=Math.sin(time*.00015+i)*.006*grow*settleMotion;
       });
     }
 
