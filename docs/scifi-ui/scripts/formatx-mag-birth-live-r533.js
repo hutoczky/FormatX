@@ -673,6 +673,17 @@
     stage.style.removeProperty('transition');
   }
 
+  function syncFinalHandoffBlend(r) {
+    /* R1950 — final 650 ms is a real crossfade, not an overlay teardown cut.
+       The native R326 core is already warmed and fully opaque underneath. */
+    const blend=smoothstep((r-.935)/.065);
+    const opacity=1-blend*.78;
+    overlay.style.setProperty('opacity',opacity.toFixed(3),'important');
+    ROOT.dataset.fxMagBirthCrossfadeR1950=blend>0
+      ? 'native-core-crossfade-active'
+      : 'cinematic-owned';
+  }
+
   function requestCoreWarmup(source='timeline') {
     if (warmupDispatched) return;
     warmupDispatched = true;
@@ -965,7 +976,11 @@
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
-    try { overlay.classList.add('is-leaving'); } catch (_) {}
+    try {
+      overlay.style.setProperty('transition','opacity '+Math.max(20,EXIT_MS)+'ms cubic-bezier(.2,.72,.2,1)','important');
+      overlay.style.setProperty('opacity','0','important');
+      overlay.classList.add('is-leaving');
+    } catch (_) {}
 
     exitTimer=window.setTimeout(
       ()=>safeTeardownOverlay(source),
@@ -1026,6 +1041,7 @@
       lastNativeSync=now;
       syncNativeCore(r,now);
     }
+    syncFinalHandoffBlend(r);
 
     if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;
@@ -1106,6 +1122,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
+    ROOT.dataset.fxMagBirthHandoffR1950='9.05s-object-migration-9.35s-native-crossfade-exact-hero-continuity';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
