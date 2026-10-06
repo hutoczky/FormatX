@@ -51,10 +51,10 @@ html[data-fx-cinematic-journey-r536="ready"]{
     conic-gradient(from calc(var(--fx-c536-progress) * 300deg),transparent 0 10%,rgba(var(--fx-c536-a),.036) 14%,transparent 20% 38%,rgba(var(--fx-c536-b),.03) 44%,transparent 50% 72%,rgba(237,254,255,.024) 78%,transparent 84% 100%);
   -webkit-mask-image:radial-gradient(circle,#000 0 48%,rgba(0,0,0,.55) 66%,transparent 84%);
   mask-image:radial-gradient(circle,#000 0 48%,rgba(0,0,0,.55) 66%,transparent 84%);
-  opacity:calc(.16 + var(--fx-c536-energy) * .36);
+  opacity:calc(.10 + var(--fx-c536-energy) * .24);
   mix-blend-mode:screen;
   will-change:transform,opacity;
-  transition:background .7s ease,opacity .5s ease;
+  transition:background 1.05s cubic-bezier(.20,.72,.18,1),opacity .9s cubic-bezier(.20,.72,.18,1);
 }
 
 .fx-c536-iris{
@@ -68,7 +68,7 @@ html[data-fx-cinematic-journey-r536="ready"]{
   box-shadow:
     0 0 44px rgba(var(--fx-c536-a),.035),
     inset 0 0 54px rgba(var(--fx-c536-b),.025);
-  opacity:calc(.18 + var(--fx-c536-energy) * .24);
+  opacity:calc(.10 + var(--fx-c536-energy) * .16);
   transition:border-color .6s ease,box-shadow .6s ease;
 }
 
@@ -94,7 +94,7 @@ html[data-fx-cinematic-journey-r536="ready"]{
   height:1px;
   background:linear-gradient(90deg,transparent,rgba(var(--fx-c536-a),.055) 15%,rgba(225,253,255,.28) 50%,rgba(var(--fx-c536-b),.08) 78%,transparent);
   box-shadow:0 0 16px rgba(var(--fx-c536-a),.08);
-  opacity:calc(.05 + var(--fx-c536-energy) * .15);
+  opacity:calc(.025 + var(--fx-c536-energy) * .080);
   transform:translateY(-50%);
 }
 
@@ -117,7 +117,7 @@ html[data-fx-cinematic-journey-r536="ready"]{
   height:22vh;
   top:calc(var(--fx-c536-track-y) - 11vh);
   background:linear-gradient(180deg,transparent,rgba(var(--fx-c536-a),.025),rgba(var(--fx-c536-b),.018),transparent);
-  opacity:calc(.04 + var(--fx-c536-energy) * .11);
+  opacity:calc(.018 + var(--fx-c536-energy) * .050);
   transform:translate3d(0,calc(var(--fx-c536-velocity) * 9px),0);
 }
 
@@ -131,7 +131,7 @@ html[data-fx-cinematic-journey-r536="ready"]{
 
 .fx-c536-grain{
   inset:0;
-  opacity:.055;
+  opacity:.020;
   background:
     linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px),
     linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px);
@@ -198,10 +198,27 @@ html[data-fx-cinematic-journey-r536="ready"]{
   background:linear-gradient(90deg,rgba(var(--fx-c536-a),.86),rgba(var(--fx-c536-b),.74));
 }
 
-/* One-shot cinematic hand-off. No continuous animation is used. */
-html.fx-c536-cut .fx-c536-flare{animation:fx-c536-flare .68s ease-out 1}
-html.fx-c536-cut .fx-c536-iris{animation:fx-c536-iris .74s cubic-bezier(.18,.78,.2,1) 1}
-html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
+/* R1951 — continuous film handoff.
+   No white flash, no hard scene cut. The shared world simply resolves from the
+   intro atmosphere into the permanent camera space. */
+html.fx-c536-flow .fx-c536-stage{
+  animation:fx-c536-film-dissolve 1.32s cubic-bezier(.20,.72,.18,1) both;
+}
+html.fx-c536-flow .fx-c536-world,
+html.fx-c536-flow .fx-c536-iris,
+html.fx-c536-flow .fx-c536-track{
+  transition:
+    opacity 1.05s cubic-bezier(.20,.72,.18,1),
+    filter 1.05s cubic-bezier(.20,.72,.18,1);
+}
+@keyframes fx-c536-film-dissolve{
+  0%{opacity:.12;filter:brightness(.82) saturate(.82) blur(2.2px)}
+  42%{opacity:.68;filter:brightness(.94) saturate(.90) blur(.9px)}
+  100%{opacity:1;filter:brightness(1) saturate(1) blur(0)}
+}
+
+/* Legacy keyframes are retained only for old snapshots; R1951 never applies
+   fx-c536-cut in production. */
 
 @keyframes fx-c536-flare{
   0%{opacity:0;transform:translate(-50%,-50%) scale(.02);box-shadow:0 0 0 rgba(255,255,255,0)}
@@ -237,7 +254,7 @@ html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
   overflow:hidden;
   contain:paint;
   pointer-events:none!important;
-  opacity:calc(.06 + var(--fx-c536-scene-energy) * .54);
+  opacity:calc(.035 + var(--fx-c536-scene-energy) * .36);
   transition:opacity .7s ease;
 }
 
@@ -415,7 +432,7 @@ html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
 .fx-c536-scene[data-fx-c536-state]>.fx-feedback-form,
 .fx-c536-scene[data-fx-c536-state]>.fx-award-proof__head,
 .fx-c536-scene[data-fx-c536-state]>.fx-award-proof__grid{
-  transition:transform .82s cubic-bezier(.2,.76,.2,1),opacity .58s ease,filter .65s ease;
+  transition:transform 1.05s cubic-bezier(.18,.78,.18,1),opacity .82s cubic-bezier(.18,.78,.18,1),filter .9s ease;
   transform-origin:center;
 }
 
@@ -1238,3 +1255,14 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
 /* production-r1948-hero-core-no-opacity-flash */
+
+
+/* R1951 — luxury noise floor / continuous film handoff. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine){
+  .fx-c536-vignette{opacity:.48}
+  .fx-c536-grain{opacity:.014}
+  .fx-c536-track{filter:blur(.15px)}
+  .fx-c536-scan{filter:blur(4px)}
+  .fx-c536-iris{box-shadow:0 0 34px rgba(var(--fx-c536-a),.022),inset 0 0 44px rgba(var(--fx-c536-b),.018)}
+}
+/* production-r1951-cinematic-noise-floor-continuous-film-handoff */
