@@ -185,21 +185,27 @@ async function assertHeroDisclosure(page) {
     return {
       scene: document.documentElement.dataset.fxCinematicSceneR536 || '',
       hud: opacity('.fx-c536-hud'),
-      rail: opacity('.fx-rail'),
-      status: opacity('.fx-organism-status')
+      world: opacity('.fx-c536-world'),
+      iris: opacity('.fx-c536-iris'),
+      track: opacity('.fx-c536-track'),
+      scan: opacity('.fx-c536-scan')
     };
   });
 
   await page.waitForTimeout(850);
   const heroState = await readOpacity();
   assert(heroState.scene === 'core', `R1948 hero scene not committed: ${JSON.stringify(heroState)}`);
+  assert(heroState.world !== null && heroState.world <= .12,
+    `R1948 world must stay restrained in hero: ${JSON.stringify(heroState)}`);
+  assert(heroState.iris !== null && heroState.iris <= .10,
+    `R1948 iris must stay restrained in hero: ${JSON.stringify(heroState)}`);
+  assert(heroState.track !== null && heroState.track <= .03,
+    `R1948 track must stay dormant in hero: ${JSON.stringify(heroState)}`);
+  assert(heroState.scan !== null && heroState.scan <= .03,
+    `R1948 scan must stay dormant in hero: ${JSON.stringify(heroState)}`);
   if (heroState.hud !== null) {
     assert(heroState.hud <= .05,
       `R1948 hud must stay dormant in hero when mounted: ${JSON.stringify(heroState)}`);
-  }
-  for (const key of ['rail','status']) {
-    assert(heroState[key] !== null && heroState[key] <= .05,
-      `R1948 ${key} must stay dormant in hero: ${JSON.stringify(heroState)}`);
   }
 
   await page.locator('#experience').scrollIntoViewIfNeeded();
@@ -213,13 +219,13 @@ async function assertHeroDisclosure(page) {
 
   const journeyState = await readOpacity();
   assert(journeyState.scene !== 'core', `R1948 journey scene did not open: ${JSON.stringify(journeyState)}`);
-  if (journeyState.hud !== null) {
-    assert(journeyState.hud >= .45,
-      `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify(journeyState)}`);
+  for (const key of ['world','iris','track','scan']) {
+    assert(journeyState[key] !== null && heroState[key] !== null && journeyState[key] > heroState[key] + .015,
+      `R1948 ${key} did not progressively open after hero: ${JSON.stringify({ heroState, journeyState })}`);
   }
-  for (const key of ['rail','status']) {
-    assert(journeyState[key] !== null && journeyState[key] >= .45,
-      `R1948 ${key} did not progressively open after hero: ${JSON.stringify(journeyState)}`);
+  if (journeyState.hud !== null && heroState.hud !== null) {
+    assert(journeyState.hud > heroState.hud + .15,
+      `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify({ heroState, journeyState })}`);
   }
 
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
