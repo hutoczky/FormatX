@@ -14,11 +14,55 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
 }
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  position:absolute!important;inset:0!important;display:block!important;box-sizing:border-box!important;
+  position:absolute!important;inset:0!important;z-index:2!important;display:block!important;box-sizing:border-box!important;
   width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;margin:0!important;
   background:transparent!important;image-rendering:auto!important;mix-blend-mode:normal!important;
   visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
+
+
+/* R1951 — physical depth stack for the desktop Signature MAG.
+   These layers are intentionally broad and low-frequency: contact shadow below,
+   volumetric air around the object, then a restrained optical bloom. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) {
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before,
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    content:""!important;
+    position:absolute!important;
+    pointer-events:none!important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    z-index:1!important;
+    left:50%!important;
+    top:67%!important;
+    width:min(54%,520px)!important;
+    height:min(11%,72px)!important;
+    transform:translate(-50%,-50%) scaleX(1.08)!important;
+    border-radius:50%!important;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.46) 0%,rgba(0,4,7,.30) 36%,rgba(8,30,34,.10) 61%,transparent 78%)!important;
+    filter:blur(18px)!important;
+    opacity:.72!important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    z-index:3!important;
+    inset:5% 4% 4%!important;
+    background:
+      radial-gradient(ellipse 34% 39% at 50% 48%,rgba(127,226,224,.050) 0%,rgba(60,135,145,.030) 38%,transparent 72%),
+      radial-gradient(ellipse 58% 52% at 50% 50%,transparent 48%,rgba(58,123,131,.024) 66%,transparent 82%)!important;
+    filter:blur(8px)!important;
+    mix-blend-mode:screen!important;
+    opacity:.82!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    opacity:.56!important;
+  }
+}
+/* production-r1951-contact-shadow-volumetric-haze-controlled-bloom */
 
 /* CSS fallback artwork must disappear as soon as native WebGL is ready. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
