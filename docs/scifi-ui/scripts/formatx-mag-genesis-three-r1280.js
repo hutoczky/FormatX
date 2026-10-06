@@ -953,6 +953,21 @@
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
+      /* R1950b — nested optical volume.
+         A smaller translucent copy lives inside the outer shell so the finale
+         reads as layered cut glass instead of one flat teal extrusion. */
+      this.innerPrismMaterial=new T.MeshPhysicalMaterial({
+        color:0x17343a,metalness:.02,roughness:.075,
+        transmission:.58,thickness:.26,ior:1.47,
+        emissive:0x05171b,emissiveIntensity:.035,
+        clearcoat:1.0,clearcoatRoughness:.035,
+        transparent:true,opacity:0,depthWrite:false
+      });
+      this.innerPrism=new T.Mesh(baseGeo.clone(),this.innerPrismMaterial);
+      this.innerPrism.scale.set(.72,.72,.54);
+      this.innerPrism.position.z=.075;
+      this.mechanicalGroup.add(this.innerPrism);
+
       // Central smoked optical cradle, fused visually into the glass body.
       const cradleShape=new T.Shape();
       cradleShape.moveTo(0,.43);
@@ -1089,10 +1104,17 @@
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.CircleGeometry(.082,64),
-        new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
+        new T.SphereGeometry(.094,48,24),
+        new T.MeshPhysicalMaterial({
+          color:0x12383e,metalness:.02,roughness:.075,
+          transmission:.34,thickness:.18,ior:1.47,
+          clearcoat:1.0,clearcoatRoughness:.035,
+          emissive:0x06252b,emissiveIntensity:.045,
+          transparent:true,opacity:.92
+        })
       );
-      this.mechEyeCore.position.set(0,.01,.50);
+      this.mechEyeCore.scale.set(1,1,.30);
+      this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
@@ -1100,7 +1122,7 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.mechInnerRing=new T.Mesh(
-        new T.TorusGeometry(.148,.0055,8,72),
+        new T.TorusGeometry(.132,.0042,8,72),
         this.mechInnerMaterial
       );
       this.mechInnerRing.position.set(0,.01,.49);
@@ -1379,41 +1401,46 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.090,finale),
-        mix(.090,.175,finale),
-        mix(.106,.185,finale)
+        mix(.031,.072,finale),
+        mix(.090,.124,finale),
+        mix(.106,.132,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.075,finale),
-        mix(.125,.160,finale),
-        mix(.145,.175,finale)
+        mix(.039,.066,finale),
+        mix(.125,.142,finale),
+        mix(.145,.150,finale)
       );
       this.silverMaterial.color.setRGB(
         mix(.480,.440,finale),
         mix(.575,.540,finale),
         mix(.565,.530,finale)
       );
-      this.mechMaterial.transmission=mix(.32,.36,finale);
-      this.mechMidMaterial.transmission=mix(.38,.42,finale);
-      this.mechMaterial.roughness=mix(.115,.135,finale);
-      this.mechMidMaterial.roughness=mix(.105,.125,finale);
+      this.mechMaterial.transmission=mix(.34,.44,finale);
+      this.mechMidMaterial.transmission=mix(.40,.49,finale);
+      this.mechMaterial.roughness=mix(.110,.098,finale);
+      this.mechMidMaterial.roughness=mix(.102,.090,finale);
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
       this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
       this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
-      this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
+      this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
         this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
       }
       if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
+      if(this.innerPrism){
+        this.innerPrismMaterial.opacity=(.06+.12*finale)*grow;
+        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
+        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
+      }
       this.silverParts.forEach((p,i)=>{
         p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
       });
@@ -1478,7 +1505,9 @@
         this.debris.rotation.y=time*.000018;
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
-      this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
+      const finaleClean=smooth((t-7.55)/1.55);
+      this.particles.material.opacity=(.30+.055*Math.sin(time*.00045))*(1-finaleClean*.72);
+      if(this.debris?.material)this.debris.material.opacity=.40*(1-finaleClean*.86);
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
@@ -1501,11 +1530,11 @@
         this.flashBeam.scale.x=1+flash*.035;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.36,.31+flash*.025);
+        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
         const q=1.00+flash*.022;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.58;
+      if(this.mechLight)this.mechLight.intensity+=flash*.34;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1585,6 +1614,7 @@
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
+  document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
