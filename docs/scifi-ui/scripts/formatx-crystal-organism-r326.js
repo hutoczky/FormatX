@@ -1302,7 +1302,7 @@
           inner+=vec3(.42,.57,.54)*innerRing*(.075+.15*softboxB);
           inner+=vec3(.040,.145,.160)*innerShell*(.06+.08*fresnel);
           inner+=vec3(.20,.79,.82)*innerCore*(.18+.12*uEnergy)*innerPulse;
-          inner+=vec3(.90,.99,.96)*softboxC*.055;
+          inner+=vec3(.90,.99,.96)*(softboxA*.020+softboxB*.055);
           inner+=vec3(.050,.210,.235)*fresnel*.16;
           inner*=1.0-.075*innerDiagonal;
           float innerAlpha=(.050+.080*innerAxis+.090*innerRing+.060*innerShell+.155*innerCore+.040*fresnel)*innerFront;
@@ -1639,6 +1639,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='desktop-dual-layer-outer-crystal-inner-prism-depth-adaptive';
+    root.dataset.fxNativeMagStudioR1947b='shader-scope-safe-inner-prism-lighting';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
