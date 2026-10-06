@@ -1327,7 +1327,7 @@
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        c*=${mobile?'.93+.07*volume':'.965+.035*volume'};
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1335,8 +1335,8 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
-        c+=vec3(.020,.043,.048)*backDepth*.11;
+        c+=vec3(.030,.060,.064)*strata*${mobile?'.10':'.045'};
+        c+=vec3(.020,.043,.048)*backDepth*${mobile?'.11':'.075'};
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
@@ -1401,10 +1401,23 @@
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.180,.205)*fresnel*.34;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
+
+        /* R1950 — dielectric path length / Beer-Lambert approximation.
+           This gives the PC body one coherent glass volume instead of stacked
+           procedural highlights. Mobile keeps the cheaper calibrated path. */
+        float opticalPath=(.34+.92*(1.0-facing))*(.45+.55*frontDepth);
+        vec3 absorption=exp(-vec3(${mobile?'.030,.015,.010':'.090,.038,.018'})*opticalPath);
+        c*=absorption;
+
+        /* A refracted inner ribbon reads as depth through the body, not a decal. */
+        vec2 refractedQ=vLocal.xy+n.xy*${mobile?'.008':'.018'}*(.35+.65*fresnel);
+        float refractedPane=exp(-pow((abs(refractedQ.x)-(.14+.14*abs(refractedQ.y)))/${mobile?'.095':'.120'},2.0))*frontDepth;
+        c+=vec3(.045,.145,.158)*refractedPane*${mobile?'.020':'.044'};
+
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
-        c+=vec3(.015,.050,.060)*frontDepth*.10;
+        c+=vec3(.015,.050,.060)*frontDepth*${mobile?'.10':'.070'};
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
@@ -1428,9 +1441,11 @@
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        float opticBloom=exp(-od*od*${mobile?'1.35':'1.05'})*front;
+        c+=vec3(.050,.26,.29)*opticBloom*${mobile?'.026':'.045'};
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
-        c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
+        c+=vec3(.025,.18,.21)*opticCaustic*(${mobile?'.045':'.060'}+${mobile?'.035':'.042'}*uEnergy);
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
@@ -1442,7 +1457,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.58'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -2199,6 +2214,7 @@
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
       root.dataset.fxNativeMagDesktopR1950='hidpi-msaa-no-compositor-scale-photoreal-depth-long-tail-input';
+      root.dataset.fxNativeMagMaterialR1950='beer-lambert-smoked-bioglass-refracted-inner-pane-controlled-optic-bloom';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
