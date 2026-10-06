@@ -800,7 +800,7 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : 'brightness(1.03) contrast(1.10) saturate(.90)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -841,7 +841,7 @@
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
-      antialias:!constrained && (!mobile || (devicePixelRatio||1)<=4.2),
+      antialias:!mobile || (!constrained && (devicePixelRatio||1)<=4.2),
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -851,6 +851,11 @@
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
     if (!gl) gl = canvas.getContext('webgl', options);
+    if(gl){
+      const msaaSamples=Number(gl.getParameter(gl.SAMPLES)||0);
+      root.dataset.fxCoreMsaaR1950=msaaSamples>0?('samples-'+msaaSamples):'default-framebuffer-no-msaa';
+      root.dataset.fxCoreRasterR1950=mobile?'mobile-calibrated':'desktop-hidpi-msaa-no-resample';
+    }
     if (!gl) {
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
