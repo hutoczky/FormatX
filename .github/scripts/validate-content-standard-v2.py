@@ -148,7 +148,10 @@ def validate_release_metadata_v2() -> None:
         ".channels.multiplatform.download_count,",
         ".channels.android.download_count",
         "cmp -s",
-        "git commit -m '[deploy-production] Sync official current release metadata'",
+        "actions: write",
+        "deploy-formatx-custom-domain.yml/dispatches",
+        "\"deploy\":\"true\"",
+        "git commit -m 'Sync official current release metadata'",
     ]:
         if token not in workflow:
             module.fail(f"Release sync workflow missing contract: {token}")
