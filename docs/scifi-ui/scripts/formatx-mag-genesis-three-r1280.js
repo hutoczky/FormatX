@@ -1372,29 +1372,29 @@
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
-      /* R1945k — studio-smoked material convergence, not a flash.
-         The final 2.5 s gradually become the same smoked-silver/cyan bioglass
-         family as the permanent hero, so handoff reads as one continuous object. */
+      /* R1947 — cut-prism studio convergence.
+         The final 2.5 s neutralise the earlier cyan into the same smoked-silver
+         family as the permanent hero while the optic remains the living colour source. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.090,finale),
-        mix(.090,.175,finale),
-        mix(.106,.185,finale)
+        mix(.031,.070,finale),
+        mix(.090,.118,finale),
+        mix(.106,.124,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.075,finale),
-        mix(.125,.160,finale),
-        mix(.145,.175,finale)
+        mix(.039,.064,finale),
+        mix(.125,.128,finale),
+        mix(.145,.138,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
+        mix(.480,.455,finale),
+        mix(.575,.500,finale),
+        mix(.565,.492,finale)
       );
-      this.mechMaterial.transmission=mix(.32,.36,finale);
-      this.mechMidMaterial.transmission=mix(.38,.42,finale);
-      this.mechMaterial.roughness=mix(.115,.135,finale);
-      this.mechMidMaterial.roughness=mix(.105,.125,finale);
-      this.silverMaterial.roughness=mix(.085,.100,finale);
+      this.mechMaterial.transmission=mix(.32,.40,finale);
+      this.mechMidMaterial.transmission=mix(.38,.46,finale);
+      this.mechMaterial.roughness=mix(.115,.105,finale);
+      this.mechMidMaterial.roughness=mix(.105,.095,finale);
+      this.silverMaterial.roughness=mix(.085,.082,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
       this.mechMidMaterial.opacity=(.67+.052*finale)*grow;
@@ -1402,9 +1402,9 @@
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.22+.035*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.22+.022*finale)*grow;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.20+.030*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(1.35+.25*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(1.18+.22*finale)*grow;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1580,6 +1580,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1947='cut-prism-neutral-smoked-silver-deep-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
