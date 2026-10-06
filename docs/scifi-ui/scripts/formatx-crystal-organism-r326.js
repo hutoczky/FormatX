@@ -911,7 +911,7 @@
            procedural face-grooves were still deforming the first WebGL frame
            after geometry cleanup and created a mouth/visor-like horizontal seam. */
         float layerScale=uLayer>.5?.50:1.0;
-        float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
+        float heartbeat=1.0+uBreath*(uLayer>.5?${mobile?'.040':'.010'}:${mobile?'.020':'.004'});
         /* R1951 — the interior may breathe, the projected contour may not. */
         float contourInterior=${mobile?'1.0':'smoothstep(.10,.34,abs(aSphereNormal.z))'};
         float livingStable=(living+cortex+microFold)*contourInterior;
