@@ -269,8 +269,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
+    /* R1950 — desktop silhouette tessellation.
+       The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
+       gets a denser body mesh. Mobile topology remains unchanged. */
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 40 : 58;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 80 : 116;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -813,7 +816,8 @@
       /* R1626: mobile/coarse displays get temporal smoothness from native
          device density; MSAA costs frame budget twice (raster + resolve).
          Preserve desktop MSAA only where headroom is normally available. */
-      antialias:!constrained && (!mobile || (devicePixelRatio||1)<=4.2),
+      /* Desktop always requests MSAA. On mobile the existing DPR guard remains. */
+      antialias:!mobile || (!constrained && (devicePixelRatio||1)<=4.2),
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
@@ -1687,6 +1691,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagGeometryR1950='desktop-58x116-signature-contour-tessellation-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
