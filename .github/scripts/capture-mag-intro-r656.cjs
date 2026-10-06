@@ -17,7 +17,10 @@ const SHOTS=[
   [3.50,'02-3.50s'],
   [5.50,'03-5.50s'],
   [7.50,'04-7.50s'],
-  [9.25,'05-9.25s']
+  [9.25,'05-9.25s'],
+  /* R1947 — capture the actual cinematic/native blend window, not only the
+     frame before it and the already-finished hero. */
+  [9.70,'05b-9.70s-handoff']
 ];
 
 (async()=>{
