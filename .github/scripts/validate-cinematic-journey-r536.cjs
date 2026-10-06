@@ -40,7 +40,7 @@ assert.ok(!/animation:[^;]*infinite/.test(css),'R536 must not run infinite CSS a
 /* R1948 — first viewport progressive disclosure contract. */
 for (const token of [
   'fxCinematicDisclosureR1948',
-  'hero-core-dormant-global-hud-scroll-open-zero-idle'
+  'hero-core-dormant-global-hud-noncore-scene-open-zero-idle'
 ]) assert.ok(js.includes(token),'R1948 runtime disclosure contract missing '+token);
 
 for (const token of [
