@@ -17,7 +17,7 @@ assert.ok(index.includes('formatx-deferred-css-r487.js?v=20260904-r526-fcp-obser
 
 for (const token of [
   '#hero','#live-os-overview','.fx-category-deck--standalone','#experience','#capabilities',
-  '#pricing','#system','.fx-origin-proof','.fx-award-proof','#user-feedback','#resources','footer.site-footer'
+  '#pricing','#system','#network','.fx-origin-proof','.fx-award-proof','#user-feedback','#resources','footer.site-footer'
 ]) assert.ok(js.includes(token),'R536 scene coverage missing '+token);
 
 for (const token of [
