@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-crystal-material-parity
+token=20261006-r1947b-watertight-crystal-parity
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
 purpose=deploy R1947 intro-to-hero crystal material parity: clean nested diamond petal layers, reduced haze, controlled smoked-silver glass and a clearer integrated optical core while preserving the four-point Signature MAG and R1944 precision interaction
 validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, no-occlusion, R536 cinematic handoff, mobile MAG proof, intro-to-hero material parity proof and production Worker parity
