@@ -69,6 +69,7 @@
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+  let introBridgeDone=false;
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
   function coreApi() { return window.FormatXLivingCore || window.FormatXCoreMobileV69 || null; }
@@ -500,6 +501,8 @@
   }
 
   function introHandoff() {
+    if(introBridgeDone)return;
+    introBridgeDone=true;
     visualY=scrollY;
     activate(0,'intro-handoff');
     flowBridge(1320);
@@ -557,6 +560,7 @@
       if(i>=0)activate(i,'loop-exit');
       schedule();
     },{passive:true});
+    document.addEventListener('formatx:magbirthhandoff',introHandoff,{passive:true});
     document.addEventListener('formatx:magbirthcomplete',introHandoff,{passive:true});
     document.addEventListener('formatx:introcomplete',introHandoff,{passive:true});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();},{passive:true});
@@ -622,7 +626,8 @@
     for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
       addEventListener(type,intentBoot,{once:false,capture:true,passive:type!=='keydown'});
     }
-    document.addEventListener('formatx:magbirthcomplete',()=>startBoot('mag-birth-handoff'),{once:true,passive:true});
+    document.addEventListener('formatx:magbirthhandoff',()=>startBoot('mag-birth-dissolve-start'),{once:true,passive:true});
+    document.addEventListener('formatx:magbirthcomplete',()=>startBoot('mag-birth-handoff-fallback'),{once:true,passive:true});
   }
 
   addEventListener('pagehide',()=>{
