@@ -1281,7 +1281,11 @@
       else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
-      const endMove=smooth((t-9.78)/.20);
+      /* R1950 — authored spatial handoff.
+         The old 9.78→9.98 s move read as a hard cut. Start the migration while
+         the studio finale is still legible so the same object visibly travels
+         into its permanent hero position. */
+      const endMove=smooth((t-9.05)/.76);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
