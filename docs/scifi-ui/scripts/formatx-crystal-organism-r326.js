@@ -1640,6 +1640,7 @@
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='desktop-dual-layer-outer-crystal-inner-prism-depth-adaptive';
     root.dataset.fxNativeMagStudioR1947b='shader-scope-safe-inner-prism-lighting';
+    root.dataset.fxNativeMagStudioR1947c='exact-head-dual-layer-proof-owner';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
