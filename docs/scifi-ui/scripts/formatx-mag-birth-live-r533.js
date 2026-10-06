@@ -1027,6 +1027,20 @@
       syncNativeCore(r,now);
     }
 
+    /* R1947 — reveal the exact permanent hero during the final cinematic beat.
+       This removes the visual discontinuity between the Three.js finale sculpt
+       and the native R326 MAG. If the native core is not ready, fail open and
+       keep the cinematic fully opaque. */
+    const nativeBlendReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
+    if(nativeBlendReady && r>=.885){
+      const nativeBlend=smoothstep((r-.885)/.105);
+      overlay.style.setProperty('--fxb-handoff-opacity',String(1-nativeBlend*.97));
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlend.toFixed(3);
+    }else{
+      overlay.style.setProperty('--fxb-handoff-opacity','1');
+      ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlendReady?'armed':'waiting';
+    }
+
     if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;
       const value=Math.min(100,Math.round(easeOutCubic(r)*100));
@@ -1139,6 +1153,7 @@
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
     ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
+    ROOT.dataset.fxMagBirthHandoffR1947='native-hero-crossfade-final-1-15s';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
