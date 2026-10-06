@@ -67,6 +67,10 @@
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
+  let scrollPreviewRaf=0;
+  let scrollPreviewLastY=scrollY;
+  let scrollPreviewLastT=performance.now();
+  let scrollPreviewVelocity=0;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -198,6 +202,7 @@
   function cut(){
     root.classList.remove('fx-c536-cut');
     if(cutRaf)cancelAnimationFrame(cutRaf);
+    if(scrollPreviewRaf){cancelAnimationFrame(scrollPreviewRaf);scrollPreviewRaf=0;}
     cutRaf=requestAnimationFrame(()=>{
       cutRaf=0;
       root.classList.add('fx-c536-cut');
@@ -374,6 +379,58 @@
       : 'full-detail-settled';
   }
 
+  function paintScrollPreview(now=performance.now()){
+    scrollPreviewRaf=0;
+    if(!stage||!scenes.length||document.hidden)return;
+    const y=scrollY;
+    const dt=Math.max(8,Math.min(80,now-scrollPreviewLastT));
+    const raw=clamp((y-scrollPreviewLastY)/Math.max(1,dt),-2.2,2.2);
+    scrollPreviewVelocity+=(raw-scrollPreviewVelocity)*.38;
+    scrollPreviewLastY=y;
+    scrollPreviewLastT=now;
+
+    /* R1946 — continuous cinematic preview during active scroll.
+       Geometry is already cached in document space. This path performs no
+       layout reads, no scene mutations and no MAG render; it only updates
+       transform/opacity variables on the fixed cinematic stage. */
+    const index=pickActive(y);
+    const scene=scenes[index]||scenes[active];
+    const local=scene
+      ? clamp((innerHeight*.78-(scene.top-y))/Math.max(1,scene.height+innerHeight*.42),0,1)
+      : .5;
+    const wave=Math.sin(local*Math.PI);
+    const direction=index%2?-1:1;
+    const px=direction*(2.5+wave*5.0)+scrollPreviewVelocity*-4.2;
+    const py=(local-.5)*13.0+scrollPreviewVelocity*6.0;
+    const scale=.994+wave*.012;
+    const energy=clamp(.18+wave*.30+Math.min(.12,Math.abs(scrollPreviewVelocity)*.08),.16,.62);
+
+    stage.style.setProperty('--fx-c536-preview-x',px.toFixed(2)+'px');
+    stage.style.setProperty('--fx-c536-preview-y',py.toFixed(2)+'px');
+    stage.style.setProperty('--fx-c536-preview-scale',scale.toFixed(4));
+    stage.style.setProperty('--fx-c536-preview-velocity',scrollPreviewVelocity.toFixed(4));
+    stage.style.setProperty('--fx-c536-preview-energy',energy.toFixed(4));
+    stage.dataset.fxC536ScrollPreview='active';
+  }
+
+  function scheduleScrollPreview(){
+    if(scrollPreviewRaf||!stage||document.hidden)return;
+    scrollPreviewRaf=requestAnimationFrame(paintScrollPreview);
+  }
+
+  function resetScrollPreview(){
+    if(!stage)return;
+    stage.style.setProperty('--fx-c536-preview-x','0px');
+    stage.style.setProperty('--fx-c536-preview-y','0px');
+    stage.style.setProperty('--fx-c536-preview-scale','1');
+    stage.style.setProperty('--fx-c536-preview-velocity','0');
+    stage.style.setProperty('--fx-c536-preview-energy','0');
+    stage.dataset.fxC536ScrollPreview='settled';
+    scrollPreviewVelocity=0;
+    scrollPreviewLastY=scrollY;
+    scrollPreviewLastT=performance.now();
+  }
+
   function scheduleScrollSettle(){
     clearTimeout(scrollBudgetTimer);
     scrollBudgetTimer=setTimeout(()=>{
@@ -388,6 +445,7 @@
       root.dataset.fxCinematicSceneCommitR1664='settled';
       root.dataset.fxCinematicSceneCommitR1665='single-post-scroll-sync';
       setScrollBudget('settled');
+      resetScrollPreview();
       schedule();
     },120);
   }
@@ -494,10 +552,11 @@
     bindCinematicInteraction();
 
     addEventListener('scroll',()=>{
-      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
-         is scheduled here. One settle pass updates scene state and visual depth
-         after 120 ms without scroll input. */
+      /* R1946 — one coalesced compositor preview RAF keeps the world visually
+         continuous while scrolling. Scene state and MAG work still wait for the
+         quiet-period settle, preserving the existing performance contract. */
       setScrollBudget('fast');
+      scheduleScrollPreview();
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -536,11 +595,13 @@
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
     root.dataset.fxCinematicJourneyPerformanceR1665='zero-cinematic-raf-during-scroll-single-post-scroll-sync';
+    root.dataset.fxCinematicJourneyPerformanceR1946='single-compositor-scroll-preview-no-layout-read-no-mag-render';
     setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1946='continuous-scroll-preview-plus-bounded-pointer-parallax';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
