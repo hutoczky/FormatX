@@ -9,9 +9,9 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261006-r1947b-smooth-cusp-volumetric-handoff';
+const STARTUP_REVISION = '20261006-r1947c-mobile-parity-volumetric-handoff';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-+yI0Ce2i+9/Cl8zpzu1QBIM0+le9feDsBDyTXhM8X6k='";
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-i6tXi/DO3JznRyrZuiIB5rwLXZPa8qvzKxQAckDAj9Q='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -171,8 +171,8 @@ const R502_ASSET_REWRITES = new Map([
     rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261006-r1947b-smooth-cusp-fidelity']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1947b-volumetric-studio-handoff',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261006-r1947b-volumetric-studio-handoff']],
+    marker: 'intro-to-genesis-r1947c-volumetric-studio-handoff',
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261006-r1947c-volumetric-studio-handoff']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
