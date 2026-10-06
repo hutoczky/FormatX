@@ -244,6 +244,48 @@
   }
 }
 
+
+/* R1951 — luxury composition. Fewer competing blocks share a viewport; each
+   chapter receives negative space and a single primary visual focus. */
+@media (min-width:1100px) and (pointer:fine){
+  html body.living-architecture main > :is(
+    #experience,#capabilities,#pricing,#system
+  ).scene:not(#hero){
+    min-height:clamp(760px,92svh,1040px);
+    padding-block:clamp(96px,12vh,148px);
+  }
+
+  html body.living-architecture main > :is(#network,#resources).scene:not(#hero){
+    min-height:clamp(650px,80svh,900px);
+    padding-block:clamp(84px,10vh,124px);
+  }
+
+  html body.living-architecture main > :is(
+    #experience,#capabilities,#pricing,#system
+  ).scene:not(#hero) > .section-heading{
+    margin-bottom:clamp(52px,6.4vh,86px);
+    max-width:min(1060px,84vw);
+  }
+
+  html body.living-architecture #capabilities .cards,
+  html body.living-architecture #pricing .pricing{
+    gap:clamp(18px,2vw,32px);
+  }
+
+  html body.living-architecture #hero .hero-grid{
+    gap:clamp(54px,6.8vw,112px);
+  }
+
+  html body.living-architecture #hero .hero-copy{
+    width:min(640px,100%);
+  }
+
+  html body.living-architecture #hero .hero-space{
+    min-height:520px;
+  }
+}
+/* production-r1951-luxury-negative-space-composition */
+
 @media (prefers-reduced-motion: reduce) {
   html body.living-architecture #hero .hero-copy {
     transform: none;
