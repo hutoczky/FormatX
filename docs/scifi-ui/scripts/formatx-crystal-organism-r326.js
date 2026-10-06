@@ -931,13 +931,17 @@
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
-        float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
+        /* R1951 — keep physiological motion inside the body, not on the outer
+           contour. Silhouette vertices use only 8% of the micro-deformation,
+           eliminating subpixel edge shimmer while the inner material stays alive. */
+        float silhouetteGuard=smoothstep(.10,.52,abs(aSphereNormal.z));
+        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy)*mix(.08,1.0,silhouetteGuard);
+        float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask*mix(.18,1.0,silhouetteGuard);
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
         float cortex=(cortexA*.62+cortexB*.38)*.0058*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0009*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.00065*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
         /* R1923 — the smooth cubic body is now authoritative. The legacy
@@ -954,9 +958,9 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
-        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*${mobile?'.0055':'.00115'};
+        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+${mobile?'.005':'.0016'}*sin(uTime*.19);
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+${mobile?'.004':'.0013'}*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -1002,6 +1006,17 @@
         float r=roughness+1.0;
         float k=(r*r)/8.0;
         return NoV/max(NoV*(1.0-k)+k,.0002);
+      }
+      vec3 studioTransmit(vec3 r){
+        float upper=smoothstep(-.18,.78,r.y);
+        float cyanBox=exp(-pow((r.x-.36)/.34,2.0)-pow((r.y-.26)/.50,2.0));
+        float silverBox=exp(-pow((r.x+.42)/.29,2.0)-pow((r.y-.12)/.58,2.0));
+        float floorWarm=smoothstep(.08,.78,-r.y);
+        vec3 env=mix(vec3(.008,.018,.023),vec3(.040,.072,.076),upper);
+        env+=vec3(.045,.155,.172)*cyanBox;
+        env+=vec3(.16,.18,.17)*silverBox*.34;
+        env+=vec3(.055,.032,.021)*floorWarm*.16;
+        return env;
       }
       void main(){
         vec3 n=normalize(vNormal);
@@ -1080,8 +1095,29 @@
         mineral+=vec3(.090,.098,.096)*pow(planeKey,.72)*.27;
         mineral+=vec3(.052,.045,.039)*pow(planeFill,.82)*.14;
         mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
-        vec3 mineralAbsorption=exp(-vec3(.38,.28,.22)*(0.22+0.52*smokyDepth)*(1.0-facing));
-        mineral*=mix(vec3(1.0),mineralAbsorption,.30);
+        /* R1951 — physical glass body.
+           Approximate local thickness from view angle, then apply Beer-Lambert
+           absorption, IOR 1.46 refraction, mild RGB dispersion and forward
+           scattering. No screen-space background texture is required, so this
+           stays deterministic and stable across DOM/WebGL compositing. */
+        float thickness=mix(.16,.74,pow(1.0-facing,.72))*(.82+.18*smokyDepth);
+        vec3 sigmaA=vec3(.31,.22,.18);
+        vec3 beer=exp(-sigmaA*thickness);
+        mineral*=mix(vec3(1.0),beer,.46);
+
+        vec3 refrG=refract(-view,n,1.0/1.460);
+        vec3 refrR=refract(-view,n,1.0/1.452);
+        vec3 refrB=refract(-view,n,1.0/1.474);
+        vec3 transmitG=studioTransmit(refrG);
+        vec3 dispersed=vec3(studioTransmit(refrR).r,transmitG.g,studioTransmit(refrB).b);
+        float transmissionMask=(.16+.58*(1.0-facing))*bodyMask;
+        mineral+=dispersed*beer*transmissionMask*.44;
+
+        float forwardKey=pow(max(dot(refrG,key),0.0),4.2);
+        float forwardSide=pow(max(dot(refrG,side),0.0),3.0);
+        float innerScatter=(forwardKey*.72+forwardSide*.36)*(1.0-facing)*bodyMask;
+        mineral+=vec3(.040,.105,.112)*innerScatter*(.26+.34*thickness);
+
         float internalCaustic=pow(1.0-facing,2.35)*(.35+.65*smokyDepth)*(1.0-.55*ndl);
         mineral+=vec3(.040,.072,.073)*internalCaustic*.46;
         float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
@@ -1276,7 +1312,7 @@
         }
         float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
         outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.58),clamp(outAlpha,.92,1.0));
+        ${outputName}=vec4(filmic(mineral*2.42),clamp(outAlpha,.94,1.0));
       }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
@@ -1652,6 +1688,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1951='desktop-full-physical-shader-supersampled-contour-volumetric-depth-continuous-scroll';
+    root.dataset.fxNativeMagMaterialR1951='ior-1-46-beer-lambert-dispersive-refraction-inner-scattering-pixel-stable-silhouette';
     root.dataset.fxNativeMagRasterR1951='desktop-min-1-48x-supersampling-msaa-bounded-5-2mp-budget';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
