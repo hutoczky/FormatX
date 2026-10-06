@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 52;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 104;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -1404,6 +1404,12 @@
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
+        /* R1947 — anti-pinhole floor.
+           Front-facing glass may become very dark, but never collapses to
+           isolated black pixels/triangles under extreme reflection angles. */
+        float solidFront=smoothstep(.12,.58,frontDepth)*smoothstep(.03,.42,facing);
+        c=max(c,vec3(.0065,.0145,.0175)*solidFront);
+
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
@@ -1600,6 +1606,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='higher-desktop-topology-anti-pinhole-solid-glass-floor';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1824,10 +1831,10 @@
        measured pressure. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.54)
-      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
+      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .72)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.66)
-      : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
+      : (mobile?1.08:(auditMode?.86:(constrained?.78:.98)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.26)
       : (mobile?.80:.22);
