@@ -2138,6 +2138,17 @@
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
+
+        /* R1951 — hard-retire the parser proxy after the first real R326 frame.
+           The proxy exists only to cover startup; keeping it afterwards creates
+           the exact mobile double-MAG visible in production screenshots. */
+        const firstPaintProxy=host.querySelector(':scope > .fx-mag-first-paint-r1756');
+        if(firstPaintProxy instanceof HTMLElement){
+          firstPaintProxy.remove();
+          root.dataset.fxMobileMagDedupeR1951='first-paint-proxy-removed-after-webgl-frame';
+        }else{
+          root.dataset.fxMobileMagDedupeR1951='no-proxy-present';
+        }
       }
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
