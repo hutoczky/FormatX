@@ -1526,7 +1526,7 @@
       }
       if(this.mechEyeCorona){
         this.mechEyeCorona.material.opacity=Math.min(.20,.115+flash*.035);
-        const q=1.00+flash*.025;
+        const q=.42*(1.00+flash*.025);
         this.mechEyeCorona.scale.set(q,q,1);
       }
       if(this.mechLight)this.mechLight.intensity+=flash*.28;
@@ -1610,6 +1610,7 @@
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagSignatureR1947='intro-finale-smoked-silver-internal-prism-permanent-hero-parity';
   document.documentElement.dataset.fxMagSignatureR1947b='early-spatial-crossfade-into-exact-native-hero-no-proxy-plates';
+  document.documentElement.dataset.fxMagSignatureR1947c='corona-base-scale-preserved-native-crossfade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
