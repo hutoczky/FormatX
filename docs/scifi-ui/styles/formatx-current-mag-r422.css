@@ -71,4 +71,94 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
   }
 }
 
+
+/* R1951 — cinematic depth stack around the native MAG.
+   No autonomous CSS animation: all apparent motion comes from the shared
+   spring/parallax variables published by the cinematic engine. */
+html body.living-architecture #hero .fx-crystal-organism-r326-stage > :is(
+  .fx-mag-depth-back-r1951,
+  .fx-mag-contact-shadow-r1951,
+  .fx-mag-depth-front-r1951
+){
+  position:absolute!important;
+  display:block!important;
+  pointer-events:none!important;
+  contain:paint!important;
+  transform-origin:50% 50%!important;
+}
+
+html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-mag-depth-back-r1951{
+  z-index:0!important;
+  left:5%!important;right:5%!important;top:4%!important;bottom:3%!important;
+  background:
+    radial-gradient(ellipse 40% 48% at 50% 47%,rgba(104,197,205,.090),rgba(38,94,102,.036) 44%,transparent 72%),
+    radial-gradient(ellipse 58% 32% at 53% 68%,rgba(16,55,63,.105),transparent 72%)!important;
+  filter:blur(22px) saturate(.86)!important;
+  opacity:.86!important;
+  transform:translate3d(
+    calc(var(--fx-c536-parallax-x,0px) * .16),
+    calc(var(--fx-c536-parallax-y,0px) * .13),
+    0
+  ) scale(1.025)!important;
+}
+
+html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-mag-contact-shadow-r1951{
+  z-index:1!important;
+  left:22%!important;right:18%!important;bottom:12%!important;height:14%!important;
+  border-radius:50%!important;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.48) 0%,rgba(0,0,0,.24) 42%,transparent 76%)!important;
+  filter:blur(17px)!important;
+  opacity:.88!important;
+  transform:translate3d(
+    calc(var(--fx-c536-parallax-x,0px) * -.055),
+    calc(var(--fx-c536-parallax-y,0px) * -.035),
+    0
+  ) scaleX(.96)!important;
+}
+
+html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+  z-index:2!important;
+}
+
+html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-mag-depth-front-r1951{
+  z-index:3!important;
+  left:8%!important;right:6%!important;top:5%!important;bottom:4%!important;
+  background:
+    radial-gradient(ellipse 22% 35% at 62% 31%,rgba(221,249,247,.052),transparent 72%),
+    radial-gradient(ellipse 40% 24% at 48% 57%,rgba(69,188,199,.034),transparent 72%)!important;
+  mix-blend-mode:screen!important;
+  filter:blur(14px)!important;
+  opacity:.62!important;
+  transform:translate3d(
+    calc(var(--fx-c536-parallax-x,0px) * .30),
+    calc(var(--fx-c536-parallax-y,0px) * .24),
+    0
+  )!important;
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-mag-depth-back-r1951{
+    opacity:.54!important;
+    filter:blur(16px) saturate(.92)!important;
+  }
+  html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-mag-contact-shadow-r1951{
+    left:19%!important;right:19%!important;bottom:14%!important;height:12%!important;
+    opacity:.64!important;
+    filter:blur(12px)!important;
+  }
+  html body.living-architecture #hero .fx-crystal-organism-r326-stage > .fx-mag-depth-front-r1951{
+    opacity:.34!important;
+    filter:blur(10px)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture #hero .fx-crystal-organism-r326-stage > :is(
+    .fx-mag-depth-back-r1951,
+    .fx-mag-contact-shadow-r1951,
+    .fx-mag-depth-front-r1951
+  ){transform:none!important;}
+}
+/* production-r1951-native-mag-volumetric-depth-stack */
+
 /* production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer */
