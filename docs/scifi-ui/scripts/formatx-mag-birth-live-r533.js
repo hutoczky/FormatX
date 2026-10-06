@@ -234,6 +234,7 @@
   ROOT.dataset.fxMagBirthSignatureR1941 = 'four-point-smoked-bioglass-central-optic-studio-finale';
   ROOT.dataset.fxMagBirthSignatureR1947 = 'exact-pose-no-kick-seamless-permanent-handoff';
   ROOT.dataset.fxMagBirthSeamOwnerR1947 = 'native-warm-underlay-final-450ms-crossfade';
+  ROOT.dataset.fxMagBirthIdleHandoffR1947 = 'prepareHandoff-no-morph-boost-no-phase4-pulse';
   ROOT.dataset.fxMagBirthArtR800 = 'wide-cellular-mass-smaller-blue-iris-integrated-petals-segmented-tendrils-local-flash';
   ROOT.dataset.fxMagBirthArtR820 = 'dark-contiguous-cellular-shell-blue-radial-iris-integrated-dark-petals-thick-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR900 = 'reference-stage1-liquid-core-dna-stage2-cellular-orb-stage3-armored-tentacle-pod';
@@ -586,9 +587,8 @@
       if(value===4){
         locateStage();
         try{
-          coreApi?.setMorph?.(0,'r631-mobile-css-final-handoff');
-          coreApi?.setShape?.('organism','r631-mobile-css-final-handoff');
-          coreApi?.surfacePulse?.('r631-mobile-css-final-handoff');
+          const pose=[-.090,-.400,.008];
+          coreApi?.prepareHandoff?.(pose[0],pose[1],pose[2],'r1947-mobile-phase4-idle-handoff');
           coreApi?.requestRender?.(1);
         }catch(_){}
         if(stage instanceof HTMLElement)setStageOpacity(1);
@@ -714,12 +714,9 @@
     if (!ignitionDone) {
       ignitionDone=true;
       try {
-        coreApi.setMorph?.(0,'r1947-seamless-living-core-handoff');
-        coreApi.setShape?.('organism','r1947-seamless-living-core-handoff');
         const pose=MOBILE?[-.090,-.400,.008]:[-.070,-.320,.008];
-        coreApi.setRotation?.(pose[0],pose[1],pose[2],'r1947-exact-intro-handoff-pose');
-        /* R1947: no relative rotation kick or energy sweep at the seam.
-           Interaction begins only after the visual transfer. */
+        coreApi.prepareHandoff?.(pose[0],pose[1],pose[2],'r1947-idle-intro-handoff-pose');
+        /* No relative rotation kick, morph boost or energy sweep at the seam. */
         coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
@@ -953,8 +950,8 @@
 
     try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
-      coreApi?.setMorph?.(0,'r611-final-living-handoff');
-      coreApi?.setShape?.('organism','r611-final-living-handoff');
+      const pose=MOBILE?[-.090,-.400,.008]:[-.070,-.320,.008];
+      coreApi?.prepareHandoff?.(pose[0],pose[1],pose[2],'r1947-final-idle-handoff');
       coreApi?.requestRender?.(2);
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
