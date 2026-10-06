@@ -794,13 +794,21 @@
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     if(!reduced.matches && typeof canvas.animate==='function'){
+      const livingKeyframes=desktopFine
+        ? [
+            {opacity:.992,offset:0},
+            {opacity:1,offset:.48},
+            {opacity:.995,offset:.76},
+            {opacity:.992,offset:1}
+          ]
+        : [
+            {opacity:.985,transform:'scale(.996)',offset:0},
+            {opacity:1,transform:'scale(1.004)',offset:.48},
+            {opacity:.990,transform:'scale(.999)',offset:.76},
+            {opacity:.985,transform:'scale(.996)',offset:1}
+          ];
       const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
+        livingKeyframes,
         {
           duration:6800,
           iterations:Infinity,
@@ -811,6 +819,7 @@
       livingTimeline.id='fx-primary-mag-living-breath-r1930';
       root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
       root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+      root.dataset.fxNativeMagEdgeStabilityR1951=desktopFine?'desktop-opacity-only-no-canvas-scale':'mobile-existing-compositor-breath';
     }
 
     const options = {
