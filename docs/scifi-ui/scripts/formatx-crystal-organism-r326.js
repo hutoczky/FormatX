@@ -1471,7 +1471,7 @@
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.84+.16*facing;
         vec3 col=mix(vec3(.003,.007,.010),vec3(.066,.086,.090),lift)*facetTone*capShade*absorption;
-        col*=.994+.012*grain;
+        col*=.997+.006*grain;
         col+=vec3(1.00,1.00,.99)*keySpec*.135;
         col+=vec3(.26,.54,.59)*sideSpec*.105;
         col+=vec3(.020,.125,.150)*fresnel*.185;
@@ -1495,9 +1495,9 @@
         col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
         col+=vec3(.98,1.00,.99)*studioFaceA*.074;
         col+=vec3(.30,.72,.78)*studioFaceB*.052;
-        col+=vec3(1.00,1.00,.99)*studioStripeA*.145;
+        col+=vec3(1.00,1.00,.99)*studioStripeA*.105;
         col+=vec3(.25,.62,.69)*studioStripeB*.052;
-        col+=vec3(.58,.90,.93)*studioStripeC*.058;
+        col+=vec3(.58,.90,.93)*studioStripeC*.040;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1530,6 +1530,17 @@
         col+=spectralEdge*fresnel*bodyMask*.135;
         float refractRibbon=exp(-pow((vLocal.x+.11-vLocal.y*.16)/.115,2.0))*smoothstep(-.62,.66,vLocal.y)*frontDepth;
         col+=vec3(.055,.185,.205)*refractRibbon*(.045+.055*(1.0-facing));
+
+        /* R1951 — coherent optical volume. */
+        float opticalThickness=.32+.68*(1.0-facing);
+        vec3 absorptionColor=exp(-vec3(.44,.23,.18)*opticalThickness);
+        col*=mix(vec3(1.0),absorptionColor,.34*bodyMask);
+        float volumeHaze=exp(-pow((vLocal.x+.015)/.46,2.0)-pow((vLocal.y-.03)/.56,2.0))
+          *frontDepth*bodyMask;
+        col+=vec3(.055,.095,.100)*volumeHaze*(.030+.030*(1.0-facing));
+        float refractedCore=exp(-pow((vLocal.x-.055+vLocal.y*.09)/.19,2.0)-pow((vLocal.y+.015)/.46,2.0))
+          *frontDepth*bodyMask;
+        col+=vec3(.032,.105,.116)*refractedCore*(.026+.034*fresnel);
 
         vec3 bezel=vec3(.080,.090,.087)
           +vec3(.095,.112,.108)*(.11*ndl+.12*sideLight)
@@ -2680,6 +2691,7 @@
     root.dataset.fxCoreOpticsR1558='smoky-obsidian-visible-neutral-studio-planes-no-compositor-glow';
     root.dataset.fxCoreShapeR1558='continuous-asymmetric-superellipsoid-no-equator-seam-clean-buried-tendril-roots';
     root.dataset.fxCoreOpticsR1559='antialiased-opaque-smoky-glass-no-drop-shadow-no-black-facet-voids';
+    root.dataset.fxNativeMagStudioR1951='photoreal-coherent-optical-volume-highheadroom-edge-aa';
     root.dataset.fxCoreShapeR1559='leaning-irregular-monolith-continuous-envelope-buried-legacy-tendrils';
     root.dataset.fxCoreOpticsR1560='deep-obsidian-local-softbox-specular-subtle-mineral-vein-visible-surface-energy';
     root.dataset.fxCoreShapeR1560='asymmetric-cinematic-seed-smoother-monolith-offset-apex-natural-shoulders';
