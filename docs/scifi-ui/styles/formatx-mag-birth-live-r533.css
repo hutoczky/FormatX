@@ -747,9 +747,9 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   100% { opacity: 0; transform: translate(-50%,-50%) scaleX(1.06); }
 }
 @keyframes fxb-flash {
-  0% { opacity: 0; transform: translate(-50%,-50%) scale(.04); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-  30% { opacity: .34; transform: translate(-50%,-50%) scale(.82); box-shadow: 0 0 12px 4px rgba(236,255,252,.34),0 0 54px 20px rgba(112,221,224,.18),0 0 120px 44px rgba(76,118,132,.10); }
-  100% { opacity: 0; transform: translate(-50%,-50%) scale(7.5); box-shadow: 0 0 30px 10px rgba(255,255,255,0),0 0 96px 36px rgba(102,226,255,0); }
+  0% { opacity: 0; transform: translate(-50%,-50%) scale(.16); box-shadow:0 0 0 rgba(255,255,255,0); }
+  36% { opacity: .22; transform: translate(-50%,-50%) scale(1.18); box-shadow:0 0 14px 3px rgba(231,255,252,.20),0 0 58px 20px rgba(112,221,224,.12),0 0 126px 48px rgba(76,118,132,.055); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(8.5); box-shadow:0 0 38px 14px rgba(255,255,255,0),0 0 110px 42px rgba(102,226,255,0); }
 }
 
 @media (max-width:700px) {
@@ -1274,7 +1274,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   animation:fxb-lens .74s cubic-bezier(.16,.76,.18,1) 1 forwards;
 }
 .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="3"] .fxb-flash{
-  animation:fxb-flash .76s ease-out 1 forwards;
+  animation:fxb-flash .92s cubic-bezier(.16,.72,.2,1) 1 forwards;
 }
 .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-biotic-field{
   opacity:.18;
@@ -1928,7 +1928,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   opacity:.58;transform:rotate(var(--ta)) scaleX(1.10) translateY(-50%);
 }
 .fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-lens{animation:fxb-lens .44s cubic-bezier(.16,.76,.18,1) 1 forwards}
-.fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-flash{animation:fxb-flash .52s ease-out 1 forwards}
+.fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-flash{animation:fxb-flash .88s cubic-bezier(.16,.72,.2,1) 1 forwards}
 
 /* Reference has large drifting particles, not a UI star wallpaper. */
 .fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"] .fxb-stars{
@@ -2256,3 +2256,5 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+/* production-r1951-optical-bloom-handoff-no-white-flash */
