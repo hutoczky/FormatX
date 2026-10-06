@@ -29,11 +29,12 @@ html[data-fx-mag-birth-live="active"] {
   pointer-events: none;
   opacity: var(--fxb-handoff-opacity,1);
   filter: brightness(1);
-  transition: opacity .72s cubic-bezier(.22,.61,.36,1), filter .72s cubic-bezier(.22,.61,.36,1);
+  transition: filter .72s cubic-bezier(.22,.61,.36,1);
 }
 .fx-mag-birth-r533.is-leaving {
   opacity: 0;
   filter: brightness(1.09);
+  transition: opacity .18s cubic-bezier(.22,.61,.36,1), filter .18s cubic-bezier(.22,.61,.36,1);
 }
 .fx-mag-birth-r533::after {
   content: "";
