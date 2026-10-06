@@ -49,23 +49,24 @@
       this.lastRender=0;
       this.disposed=false;
 
+      this.mobileRender=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:false,
+        antialias:!this.mobileRender,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
         preserveDrawingBuffer:false
       });
-      this.renderer.setClearColor(0x06131c,1);
+      this.renderer.setClearColor(0x02070b,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure=1.16;
+      this.renderer.toneMappingExposure=1.08;
 
       this.scene=new THREE.Scene();
-      this.scene.background=new THREE.Color(0x06131c);
-      this.scene.fog=new THREE.FogExp2(0x06131c,0.056);
+      this.scene.background=new THREE.Color(0x02070b);
+      this.scene.fog=new THREE.FogExp2(0x02070b,0.044);
 
       this.camera=new THREE.PerspectiveCamera(42,1,0.05,80);
       this.camera.position.set(0,0.12,7.25);
@@ -96,21 +97,23 @@
 
     makeLights(){
       const T=this.THREE;
-      this.scene.add(new T.HemisphereLight(0x6fc9df,0x080612,0.86));
-      const key=new T.DirectionalLight(0xd3f3ff,2.05);
-      key.position.set(-3.5,5,6);
+      /* R1950 — studio lighting, not game-VFX lighting.
+         Neutral soft key + restrained cyan transmission + very faint cool rim. */
+      this.scene.add(new T.HemisphereLight(0x8fb8bd,0x05080b,0.54));
+      const key=new T.DirectionalLight(0xe7f2ef,1.62);
+      key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
-      const rim=new T.PointLight(0x7457ff,26,13,2);
-      rim.position.set(2.8,-2.2,3.6);
+      const rim=new T.PointLight(0x6b9da9,10.5,13,2);
+      rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
-      const bioticFill=new T.PointLight(0x5b2f9d,18,11,2);
-      bioticFill.position.set(-2.4,-.6,3.2);
+      const bioticFill=new T.PointLight(0x385866,5.8,11,2);
+      bioticFill.position.set(-2.8,-.4,3.4);
       this.scene.add(bioticFill);
-      this.coreLight=new T.PointLight(0x6feeff,0,8,2);
+      this.coreLight=new T.PointLight(0x78e6e8,0,7.2,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
-      this.mechLight=new T.PointLight(0xc8f4ff,0,9,2);
-      this.mechLight.position.set(-2.4,2.8,4.2);
+      this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
+      this.mechLight.position.set(-2.6,3.0,4.4);
       this.scene.add(this.mechLight);
     }
 
@@ -131,7 +134,7 @@
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.BufferAttribute(pos,3));
       const m=new T.PointsMaterial({
-        color:0x91d8e9,size:.043,transparent:true,opacity:.62,
+        color:0x9bc8ce,size:.034,transparent:true,opacity:.34,
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
       this.particles=new T.Points(g,m);
@@ -1214,7 +1217,7 @@
       if(this.disposed)return;
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
-      const dpr=Math.min(devicePixelRatio||1,this.width<900?1.15:1.6);
+      const dpr=Math.min(devicePixelRatio||1,this.mobileRender?1.15:2.0);
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
       this.camera.aspect=this.width/this.height;
@@ -1432,16 +1435,16 @@
       if(t<2.70){
         const k=smooth(t/2.70);
         z=mix(5.42,5.12,k);
-        x=Math.sin(time*.00027)*.040*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.015;
+        x=Math.sin(time*.00027)*.024*(1-k*.35);
+        y=.010+Math.sin(time*.00024)*.009;
       }else if(t<3.30){
         const k=smooth((t-2.70)/.60);
         z=mix(5.12,3.86,k);
         x=mix(.018,0,k);y=mix(.012,0,k);
       }else if(t<5.55){
-        z=3.86+Math.sin(time*.00020)*.006;
-        x=Math.sin(time*.00015)*.003;
-        y=Math.cos(time*.00018)*.003;
+        z=3.86+Math.sin(time*.00020)*.0035;
+        x=Math.sin(time*.00015)*.0018;
+        y=Math.cos(time*.00018)*.0018;
       }else if(t<7.25){
         const k=smooth((t-5.55)/1.70);
         z=mix(3.86,4.28,k);
@@ -1477,31 +1480,32 @@
       }
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
-      const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
-      /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
-      const after=smooth((t-9.46)/.34);
-      this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
-      this.coreLight.intensity+=flash*.80+after*.25;
+      const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
+      /* R1950 — controlled studio finale. The handoff lifts the optical core,
+         not the whole frame, and lands on the permanent smoked-silver grade. */
+      const after=smooth((t-9.44)/.38);
+      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
+      this.coreLight.intensity+=flash*.42+after*.12;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
         this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.028;
-        const burstScale=2.18+flash*.18;
+        this.flashBurst.material.opacity=flash*.010;
+        const burstScale=2.08+flash*.10;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.012;
-        this.flashBeam.scale.x=1+flash*.08;
+        this.flashBeam.material.opacity=flash*.004;
+        this.flashBeam.scale.x=1+flash*.035;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.36,.31+flash*.025);
+        const q=1.00+flash*.022;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechLight)this.mechLight.intensity+=flash*.58;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1580,6 +1584,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
