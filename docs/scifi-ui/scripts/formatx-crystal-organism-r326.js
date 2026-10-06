@@ -291,11 +291,21 @@
 
     function vertex(latitudeIndex, longitudeIndex) {
       const latitude=latitudeIndex/latitudeSegments;
-      const longitude=longitudeIndex/longitudeSegments;
+      const uvLongitude=longitudeIndex/longitudeSegments;
+      /* R1947b — watertight latitude/longitude shell.
+         The 2π seam now evaluates with the exact same angle as longitude 0,
+         and both poles are exact coordinates instead of tiny sin(π) residues.
+         Non-indexed triangles therefore share bit-identical boundary positions
+         and cannot expose one-pixel background cracks under high-DPR rastering. */
+      const wrappedLongitude=longitudeIndex===longitudeSegments?0:longitudeIndex;
+      const longitude=wrappedLongitude/longitudeSegments;
       const phi=latitude*Math.PI;
       const theta=longitude*Math.PI*2;
-      const sinPhi=Math.sin(phi);
-      const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
+      const poleTop=latitudeIndex===0;
+      const poleBottom=latitudeIndex===latitudeSegments;
+      const sinPhi=(poleTop||poleBottom)?0:Math.sin(phi);
+      const cosPhi=poleTop?1:(poleBottom?-1:Math.cos(phi));
+      const direction=[sinPhi*Math.cos(theta),cosPhi,sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
 
       /* R1941c — source-locked Signature MAG.
@@ -343,7 +353,7 @@
         crystal:crystalPosition,
         sphereNormal:direction,
         crystalNormal,
-        uv:[longitude,latitude]
+        uv:[uvLongitude,latitude]
       };
     }
 
@@ -1279,9 +1289,9 @@
         float backDepth=1.0-frontDepth;
         float edge=pow(1.0-facing,2.20);
         float deepEdge=pow(1.0-facing,3.20);
-        float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
-        float strata=.5+.5*sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4);
-        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        float volume=.5+.5*sin(vLocal.y*4.0+vLocal.x*1.6-vLocal.z*2.1);
+        float strata=.5+.5*sin(vLocal.y*8.0+vLocal.x*1.2-vLocal.z*1.0);
+        float centreHaze=exp(-pow(vLocal.x/.34,2.0)-pow(vLocal.y/.42,2.0))*frontDepth;
 
         if(uLayer>.5){
           ${outputName}=vec4(0.0,0.0,0.0,0.0);
@@ -1298,8 +1308,8 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        vec3 c=mix(vec3(.005,.010,.013),vec3(.125,.160,.162),lift)*facetTone;
+        c*=.975+.025*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1307,16 +1317,16 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
+        c+=vec3(.030,.060,.064)*strata*.035;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.245':'.190'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.170':'.135'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
-        c+=vec3(.18,.47,.50)*ribbonB*.175;
+        c+=vec3(.18,.47,.50)*ribbonB*.105;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1347,12 +1357,27 @@
         /* R1942c — nested internal prism shells.
            These echo the layered crystalline anatomy from the selected historic
            MAG without adding geometry or a second render pass. */
-        float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
-        c*=1.0-.020*prismShellB;
+        /* R1947 — intro-to-hero crystal parity.
+           Three clean L1 diamond/petal shells replace the old soft nested haze.
+           The layers are deterministic and continuous, so they cannot create the
+           tiny per-triangle dark freckles visible in the previous hero proof. */
+        float l1Prism=abs(vLocal.x)*.92+abs(vLocal.y)*.76;
+        float prismFillOuter=(1.0-smoothstep(.455,.515,l1Prism))*frontDepth;
+        float prismFillMid=(1.0-smoothstep(.315,.365,l1Prism))*frontDepth;
+        float prismFillInner=(1.0-smoothstep(.205,.245,l1Prism))*frontDepth;
+        float prismRimOuter=exp(-pow((l1Prism-.485)/.022,2.0))*frontDepth;
+        float prismRimMid=exp(-pow((l1Prism-.340)/.018,2.0))*frontDepth;
+        float prismRimInner=exp(-pow((l1Prism-.225)/.015,2.0))*frontDepth;
+
+        vec3 outerGlass=mix(c,vec3(.055,.145,.155),.22);
+        vec3 midGlass=mix(c,vec3(.085,.235,.245),.32);
+        vec3 innerGlass=mix(c,vec3(.135,.360,.365),.42);
+        c=mix(c,outerGlass,prismFillOuter*.16);
+        c=mix(c,midGlass,prismFillMid*.21);
+        c=mix(c,innerGlass,prismFillInner*.24);
+        c+=vec3(.34,.48,.46)*prismRimOuter*(.055+.040*softboxB);
+        c+=vec3(.30,.65,.66)*prismRimMid*(.075+.045*fresnel);
+        c+=vec3(.54,.86,.84)*prismRimInner*(.090+.050*key);
 
         /* R1942d — four authored fold ridges from optic to signature tips.
            This is the structural cue that made the historic MAG read as a
@@ -1364,9 +1389,9 @@
         float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
-        c*=1.0-${mobile?'.085':'.110'}*foldValley;
+        c+=vec3(.36,.52,.50)*foldRidge*${mobile?'.135':'.175'};
+        c+=vec3(.065,.235,.245)*foldSecondary*${mobile?'.075':'.100'};
+        c*=1.0-${mobile?'.045':'.060'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
@@ -1375,7 +1400,7 @@
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.040':'.025'}+${mobile?'.045':'.030'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
         /* R1942 — recessed optical organ.
@@ -1386,19 +1411,19 @@
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
-        c+=vec3(.020,.080,.092)*cavityCore*.055;
+        c=mix(c,vec3(.010,.035,.040)+c*.56,cavity*.075);
+        c+=vec3(.030,.115,.125)*cavityCore*.070;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
         float rim=exp(-pow((od-.74)/.060,2.0))*front;
         float iris=exp(-od*od*4.8)*front;
         float core=exp(-od*od*18.5)*front;
         float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
-        vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
+        vec3 opticBase=vec3(.010,.055,.064)+vec3(.020,.145,.158)*iris;
+        c=mix(c,opticBase+c*.54,lens*.18);
+        c+=vec3(.82,.92,.88)*rim*${mobile?'.145':'.185'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
+        c+=vec3(.30,.96,.96)*core*(${mobile?'.38':'.44'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
@@ -1414,7 +1439,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'2.88':'2.52'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1600,6 +1625,8 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='intro-parity-clean-nested-diamond-petals-smoked-silver-optic';
+    root.dataset.fxNativeMagMeshR1947b='watertight-zero-two-pi-seam-exact-poles-no-raster-pinholes';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
