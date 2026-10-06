@@ -272,8 +272,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 36 : mobile ? 48 : constrained ? 52 : 80;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 72 : mobile ? 96 : constrained ? 104 : 160;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -1689,7 +1689,7 @@
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1951='desktop-full-physical-shader-supersampled-contour-volumetric-depth-continuous-scroll';
     root.dataset.fxNativeMagMaterialR1951='ior-1-46-beer-lambert-dispersive-refraction-inner-scattering-pixel-stable-silhouette';
-    root.dataset.fxNativeMagRasterR1951='desktop-min-1-48x-supersampling-msaa-bounded-5-2mp-budget';
+    root.dataset.fxNativeMagRasterR1951='desktop-min-1-65x-mobile-small-canvas-1-72-to-1-92x-supersampling-msaa-bounded-budget';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1942,17 +1942,24 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.78:2.45);
-      const cap=baseCap*qualityScale;
+        : (auditMode ? 1.34 : constrainedMobile?1.82:mobile?2.08:constrained?1.88:2.55);
       const nativeDpr=devicePixelRatio||1;
-      /* R1951: desktop edge supersampling remains active even on DPR=1 panels.
-         This is the missing piece MSAA alone cannot solve on the sharp four-point
-         silhouette. Pixel budget and governor still bound the actual backing store. */
-      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,constrained?1.18:1.48);
-      const dpr=Math.min(requestedDpr,cap);
+      const cssArea=Math.max(1,cssWidth*cssHeight);
+      /* R1951b — a small hero canvas is cheap enough to protect with a hard
+         raster floor. This prevents the adaptive governor from turning a 2x
+         phone screenshot into a ~1.48x backing store and making the four tips
+         visibly stair-step. Desktop DPR=1 panels also get true supersampling. */
+      const rasterFloor=softwareRenderer||auditMode
+        ? 1.0
+        : mobile
+          ? (cssArea<220000?(constrainedMobile?1.72:1.92):1.42)
+          : (constrained?1.30:1.65);
+      const cap=Math.max(rasterFloor,baseCap*qualityScale);
+      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,constrained?1.30:1.65);
+      const dpr=Math.max(rasterFloor,Math.min(requestedDpr,cap));
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:5200000);
+        : (auditMode ? 980000 : constrainedMobile?1550000:mobile?2200000:constrained?2100000:5600000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
