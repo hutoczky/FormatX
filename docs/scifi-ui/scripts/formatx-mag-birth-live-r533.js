@@ -514,7 +514,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1945l-controlled-studio-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261006-r1947-cinematic-native-handoff';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -683,6 +683,13 @@
   }
 
   function syncNativeCore(r, now) {
+    /* R1947 — crossfade the cinematic shell into the already-live native hero.
+       The native MAG is fully rendered underneath from r>=.82; the overlay only
+       gives up opacity after the Three object has begun its target glide. */
+    const nativeHandoff=smoothstep((r-.945)/.050);
+    overlay.style.setProperty('--fxb-native-handoff',nativeHandoff.toFixed(4));
+    if(nativeHandoff>.001)ROOT.dataset.fxMagBirthHandoffR1947='cinematic-native-crossfade-active';
+
     locateStage();
     if (!coreApi) return;
 
@@ -965,7 +972,10 @@
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
-    try { overlay.classList.add('is-leaving'); } catch (_) {}
+    try {
+      overlay.style.setProperty('--fxb-native-handoff','1');
+      overlay.classList.add('is-leaving');
+    } catch (_) {}
 
     exitTimer=window.setTimeout(
       ()=>safeTeardownOverlay(source),
@@ -1100,6 +1110,7 @@
     ROOT.dataset.fxMagBirthVisualR1775='photoreal-intro-core-material-continuity';
     ROOT.dataset.fxMagBirthVisualR1776='cinematic-irregular-crystal-deep-optic-continuity';
     ROOT.dataset.fxMagBirthVisualR1777='photographic-black-mineral-bioglass-final-lighting';
+    ROOT.dataset.fxMagBirthVisualR1947='cinematic-object-glides-into-native-hero-crossfade';
     ROOT.dataset.fxMagBirthVisualR1908='runtime-fixed-centered-genome-to-single-gallery-shard';
     ROOT.dataset.fxMagBirthVisualR1909='single-genome-to-slender-smoked-ice-monolith';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
