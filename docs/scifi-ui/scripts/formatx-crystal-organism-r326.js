@@ -1686,6 +1686,7 @@
     root.dataset.fxNativeMagVisualR1721='cortical-lobes-electric-neural-core-subdermal-vascular-detail';
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
+    root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
@@ -1822,15 +1823,20 @@
        backing-store scale visibly pixelated the organism on high-DPI phones.
        Start near native CSS resolution and shed quality gradually only under
        measured pressure. */
+    /* R1950 — desktop contour fidelity.
+       The previous desktop start scale (.68) was too low for a large hero object
+       and produced visible stair-stepping on the silhouette even with MSAA.
+       Desktop now starts close to native CSS resolution and only sheds quality
+       after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.54)
-      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
+      ? (mobile?.94:.62)
+      : (mobile ? 1.00 : (auditMode ? .84 : (constrained ? .74 : .92)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.66)
-      : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
+      ? (mobile?1.00:.76)
+      : (mobile?1.08:(auditMode?.92:(constrained?.88:1.00)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.26)
-      : (mobile?.80:.22);
+      ? (mobile?.80:.40)
+      : (mobile?.80:(constrained?.54:.68));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1843,10 +1849,14 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? (mobile?1.58:.90) : (auditMode ? 1.06 : constrainedMobile?1.72:mobile?2.00:constrained?1.16:1.60);
+      const baseCap=softwareRenderer
+        ? (mobile?1.58:1.10)
+        : (auditMode ? 1.18 : constrainedMobile?1.72:mobile?2.00:constrained?1.42:1.86);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? (mobile?920000:200000) : (auditMode ? 480000 : constrainedMobile?1280000:mobile?1900000:constrained?580000:1120000);
+      const baseBudget=softwareRenderer
+        ? (mobile?920000:360000)
+        : (auditMode ? 720000 : constrainedMobile?1280000:mobile?1900000:constrained?920000:2200000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
