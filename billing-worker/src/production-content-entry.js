@@ -11,7 +11,7 @@ import productionBase from './production-content-entry-r369-base.js';
 // production-r1776-immediate-visible-intro-edge-wire
 const STARTUP_REVISION = '20261006-r1947-optical-material-fidelity';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-wM8l8kEv7xa4UGIU8YEM6eMI/uZ2TIQmvzF2tnWmD4Q='";
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-YW1z3Mmb37z3EQS3lAK8t1krvPz7aeumLhxJXrvIBdo='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
