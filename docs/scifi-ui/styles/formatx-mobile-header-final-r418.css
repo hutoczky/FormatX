@@ -213,6 +213,31 @@
   }
 }
 
+
+/* R1951 — mobile canonical header.
+   The brand is the living-core identity/return target; a second MAG glyph next
+   to it is redundant. Keep one language control and one menu control only. */
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+  html:root:root body.living-architecture .topbar > .brand{
+    max-width:min(190px,calc(100vw - 128px))!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-language-toggle,
+  html:root:root body.living-architecture .topbar > .fx-language-toggle.fx-control-owner-r264{
+    right:72px!important;
+  }
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button,
+  html:root:root body.living-architecture .topbar > .fx-reference-menu-button.fx-control-owner-r264{
+    right:12px!important;
+  }
+}
+/* production-r1951-mobile-header-single-core-identity */
+
 /* The architecture overlay is a user-opened interaction surface. Keeping its
    close button in the render tree while the surface is closed creates a ghost
    fixed control that can sit under the header and be reported as information.

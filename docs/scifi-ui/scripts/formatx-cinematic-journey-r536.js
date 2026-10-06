@@ -63,7 +63,12 @@
   let pointerNY = 0;
   let pointerTargetNX = 0;
   let pointerTargetNY = 0;
+  let pointerVX = 0;
+  let pointerVY = 0;
   let pointerTailFrames = 0;
+  let visualY = scrollY;
+  let scrollSpringV = 0;
+  let scrollTailFrames = 0;
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
   let lastCoreKey = '';
   let scrollBudgetState='';
@@ -82,14 +87,18 @@
     stage.dataset.fxC536Primed='false';
     stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
     stage.innerHTML = [
+      '<div class="fx-c1951-haze-back"></div>',
       '<div class="fx-c536-world"></div>',
+      '<div class="fx-c1951-dust"></div>',
       '<div class="fx-c536-iris"></div>',
       '<div class="fx-c536-track"></div>',
       '<div class="fx-c536-scan"></div>',
+      '<div class="fx-c1951-haze-front"></div>',
       '<div class="fx-c536-vignette"></div>',
       '<div class="fx-c536-grain"></div>',
       '<div class="fx-c536-flare"></div>'
     ].join('');
+    stage.dataset.fxVolumetricWorldR1951='back-haze-world-dust-front-haze';
     document.body.appendChild(stage);
     hudCode = null;
     hudTitle = null;
@@ -318,17 +327,35 @@
     const y = scrollY;
     const dt = Math.max(16,Math.min(180,now-lastT));
     if(finePointer){
-      if(pointerTailFrames===1){
-        /* Final bounded frame lands exactly on target/rest so zero-idle never
-           preserves a residual parallax offset. */
-        pointerNX=pointerTargetNX;
-        pointerNY=pointerTargetNY;
-      }else{
-        const pointerEase=1-Math.exp(-dt*.018);
-        pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
-        pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
+      /* R1951 — second-order pointer spring. Position, velocity and damping are
+         integrated together, so motion feels camera-like instead of eased CSS. */
+      const pOmega=.020;
+      const pDamp=Math.exp(-2.0*.86*pOmega*dt);
+      pointerVX+=(pointerTargetNX-pointerNX)*(pOmega*pOmega)*dt;
+      pointerVY+=(pointerTargetNY-pointerNY)*(pOmega*pOmega)*dt;
+      pointerVX*=pDamp;pointerVY*=pDamp;
+      pointerNX+=pointerVX*dt;
+      pointerNY+=pointerVY*dt;
+      if(Math.abs(pointerTargetNX-pointerNX)<.0015&&Math.abs(pointerVX)<.00012){
+        pointerNX=pointerTargetNX;pointerVX=0;
+      }
+      if(Math.abs(pointerTargetNY-pointerNY)<.0015&&Math.abs(pointerVY)<.00012){
+        pointerNY=pointerTargetNY;pointerVY=0;
       }
     }
+
+    /* R1951 — scroll is the camera rail. Browser scroll remains authoritative
+       for content/accessibility; a critically damped visual carriage follows it
+       continuously and supplies inertial depth without changing layout. */
+    const sOmega=.0175;
+    const sDamp=Math.exp(-2.0*.88*sOmega*dt);
+    scrollSpringV+=(y-visualY)*(sOmega*sOmega)*dt;
+    scrollSpringV*=sDamp;
+    visualY+=scrollSpringV*dt;
+    if(Math.abs(y-visualY)<.08&&Math.abs(scrollSpringV)<.002){
+      visualY=y;scrollSpringV=0;
+    }
+
     const rawV = clamp((y-lastY)/dt,-2.2,2.2);
     velocity += (rawV-velocity)*.35;
     lastY = y;
@@ -338,9 +365,11 @@
     if(next!==active||!root.dataset.fxCinematicSceneR536)activate(next,'scroll');
 
     const current=scenes[active];
-    const currentTop=current.top-y;
+    const currentTop=current.top-visualY;
     const local=clamp((innerHeight*.78-currentTop)/Math.max(1,current.height+innerHeight*.42),0,1);
-    const global = clamp(y/scrollRange,0,1);
+    const global = clamp(visualY/scrollRange,0,1);
+    const cameraLag=clamp((y-visualY)/Math.max(1,innerHeight),-.20,.20);
+    const cameraVelocity=clamp(scrollSpringV,-2.2,2.2);
     const energy = clamp(.14 + Math.sin(local*Math.PI)*.46 + Math.min(.08,Math.abs(velocity)*.05),.12,.68);
     const x = clamp(54 + (active%2 ? -5.5 : 4.5) + (local-.5)*5 + velocity*2,39,66);
     const yy = clamp(27 + active*(54/Math.max(1,scenes.length-1)) + (local-.5)*7,18,84);
@@ -352,21 +381,36 @@
        broad selectors and caused repeated full-page style recalculation. */
     const fastScroll=scrollBudgetState==='fast';
 
+    /* Camera variables stay live even during fast scroll. They are compositor
+       transforms only; scene-local DOM/state work remains deferred to settle. */
+    const worldX=pointerNX*10.2 + cameraVelocity*-1.60;
+    const worldY=pointerNY*6.8 + cameraVelocity*.82 + cameraLag*18;
+    root.style.setProperty('--fx-c536-velocity',cameraVelocity.toFixed(4));
+    root.style.setProperty('--fx-c617-parallax-x',worldX.toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-parallax-y',worldY.toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.62 + cameraLag*1.15).toFixed(3)+'deg');
+    root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.84 - cameraVelocity*.075).toFixed(3)+'deg');
+    root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+    root.style.setProperty('--fx-c1951-camera-lag',cameraLag.toFixed(4));
+    root.style.setProperty('--fx-c1951-camera-z',(1+Math.min(.035,Math.abs(cameraVelocity)*.010)).toFixed(4));
+    root.style.setProperty('--fx-c1951-world-x',worldX.toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-world-y',worldY.toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-back-x',(pointerNX*2.0-cameraVelocity*.28).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-back-y',(pointerNY*1.5+cameraVelocity*.32+cameraLag*5).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-dust-x',(pointerNX*3.5-cameraVelocity*.42).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-dust-y',(pointerNY*2.6+cameraVelocity*.48+cameraLag*8).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-front-x',(pointerNX*5.8-cameraVelocity*.70).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-front-y',(pointerNY*4.6+cameraVelocity*.78+cameraLag*12).toFixed(2)+'px');
+
     if(!fastScroll){
       root.style.setProperty('--fx-c536-progress',global.toFixed(4));
       root.style.setProperty('--fx-c536-local',local.toFixed(4));
       root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
-      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
       root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
       root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*11.5 + velocity*-1.35).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7.5 + velocity*.65).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.72).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
       scenes.forEach(scene=>{
         if(Math.abs(scene.index-active)>1)return;
@@ -384,11 +428,16 @@
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
     }
-    if(finePointer&&pointerTailFrames>0){
-      pointerTailFrames-=1;
-      if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
-      else pointerTailFrames=0;
-    }
+    const pointerMoving=finePointer&&(
+      Math.abs(pointerTargetNX-pointerNX)>.0015||
+      Math.abs(pointerTargetNY-pointerNY)>.0015||
+      Math.abs(pointerVX)>.00012||
+      Math.abs(pointerVY)>.00012
+    );
+    const scrollMoving=Math.abs(y-visualY)>.08||Math.abs(scrollSpringV)>.002;
+    if(pointerTailFrames>0)pointerTailFrames-=1;
+    if(scrollTailFrames>0)scrollTailFrames-=1;
+    if(pointerMoving||scrollMoving||pointerTailFrames>0||scrollTailFrames>0)schedule();
   }
 
   function setScrollBudget(state){
@@ -405,6 +454,7 @@
     scrollBudgetTimer=setTimeout(()=>{
       scrollBudgetTimer=0;
       velocity=0;
+      scrollTailFrames=Math.max(scrollTailFrames,18);
       pendingSceneIndex=-1;
       const atDocumentTop=scrollY<=Math.max(2,innerHeight*.015);
       const target=atDocumentTop?0:pickActive(scrollY);
@@ -476,8 +526,8 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
-    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
+    pointerTailFrames=24;
+    root.dataset.fxCinematicPointerR617 = 'active-physical-spring-r1951';
     schedule();
   }
 
@@ -485,8 +535,8 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
-    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
+    pointerTailFrames=28;
+    root.dataset.fxCinematicPointerR617 = 'rest-physical-spring-r1951';
     schedule();
   }
 
@@ -501,11 +551,16 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
-    clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    activate(0,'intro-handoff-r1951');
+    /* R1951 — no flash/cut at the intro boundary. R533 holds its final frame
+       while this world is already live underneath, producing one continuous
+       optical dissolve into the permanent MAG and the scroll camera. */
+    root.classList.remove('fx-c536-cut');
+    clearTimeout(cutTimer);cutTimer=0;
+    root.dataset.fxCinematicHandoffR1951='continuous-final-frame-dissolve-no-dom-cut';
+    scrollTailFrames=Math.max(scrollTailFrames,20);
+    signalCore(scenes[0],'intro-handoff-r1951');
+    schedule();
   }
 
   function boot() {
@@ -535,10 +590,12 @@
         commitScene(0,previous,'document-top-immediate-r1949');
         root.dataset.fxCinematicTopReturnR1949='immediate-core-commit';
       }
-      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
-         is scheduled here. One settle pass updates scene state and visual depth
-         after 120 ms without scroll input. */
+      /* R1951 — browser scroll still owns layout, while a bounded RAF drives only
+         the spring camera/compositor variables. This removes the stop-start
+         section feel without reintroducing layout reads or continuous idle RAF. */
       setScrollBudget('fast');
+      scrollTailFrames=18;
+      schedule();
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -567,7 +624,7 @@
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
     root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
-    root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
+    root.dataset.fxCinematicJourneyMotionR536='physical-spring-scroll-pointer-camera-zero-idle-after-settle';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
     root.dataset.fxCinematicJourneyPerformanceR1643='fast-scroll-zero-mag-burst-deferred-final-scene-handoff';
@@ -579,12 +636,12 @@
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
-    root.dataset.fxCinematicJourneyPerformanceR1665='zero-cinematic-raf-during-scroll-single-post-scroll-sync';
+    root.dataset.fxCinematicJourneyPerformanceR1665='superseded-r1951-bounded-compositor-spring-during-scroll';
     setScrollBudget('settled');
     root.dataset.fxCinematicJourneyScenesR536=String(scenes.length);
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
-    root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1951='second-order-pointer-scroll-springs-velocity-depth-parallax-zero-idle-after-settle';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
@@ -601,6 +658,10 @@
     bootStarted=true;
     root.dataset.fxCinematicJourneyStartR1737=source;
     boot();
+    /* R1951 — when the birth event itself starts the engine, the listener that
+       boot() installs cannot observe the already-dispatched event. Apply the
+       handoff immediately after boot so intro -> MAG -> world is one timeline. */
+    if(source==='mag-birth-handoff')queueMicrotask(()=>introHandoff());
     for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
       removeEventListener(type,intentBoot,true);
     }

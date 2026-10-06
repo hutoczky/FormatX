@@ -53,7 +53,7 @@
   const DURATION = 10000;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
-  const EXIT_MS = 180;
+  const EXIT_MS = MOBILE ? 620 : 760;
   const CORE_WARMUP_PROGRESS = MOBILE ? .72 : .72;
   ROOT.dataset.fxMagBirthProductionPathR1674='absolute-scifi-ui-runtime-assets';
 
@@ -208,6 +208,7 @@
   ROOT.dataset.fxMagBirthArtR649 = 'reference-geometry-24fps-native-canvas-no-video';
   ROOT.dataset.fxMagBirthArtR650 = 'threejs-dna-cellular-living-architecture-one-continuous-mag';
   ROOT.dataset.fxMagBirthArtR1938='smoked-bioglass-cinematic-reenabled-first-visit';
+  ROOT.dataset.fxMagBirthArtR1951='held-final-frame-continuous-dissolve-into-permanent-photoreal-mag';
   ROOT.dataset.fxMagBirthArtR651 = 'frame-matched-10s-dna-cellular-tentacle-flash-handoff';
   ROOT.dataset.fxMagBirthArtR657 = 'tubular-dna-diamond-iris-organic-shell-tapered-tendrils-reference-match';
   ROOT.dataset.fxMagBirthArtR660 = 'fine-dna-central-diamond-neural-cell-shell-mechanical-petals-nine-tendrils';
@@ -514,7 +515,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261007-r1950c-studio-intro';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261007-r1951-cinematic-photoreal-engine';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -664,7 +665,7 @@
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
-    stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    stage.style.setProperty('transition', 'opacity .18s linear', 'important');
   }
 
   function releaseStageStyle() {
@@ -919,13 +920,18 @@
   }
 
   function safeTeardownOverlay(source) {
+    /* R1951 — destroy the intro renderer only after the optical dissolve.
+       Keeping the last rendered frame alive lets it crossfade directly into the
+       permanent MAG instead of flashing back to a flat overlay background. */
+    try { filmRenderer?.destroy?.(); } catch (_) {}
+    filmRenderer=null;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
-        detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
+        detail:{source,revision:'r1951-continuous-cinematic-dissolve-handoff'}
       }));
     } catch (_) {}
   }
@@ -961,9 +967,8 @@
     try { overlay.dataset.phase='4'; } catch (_) {}
     try { ROOT.dataset.fxMagBirthLiveR533=source; } catch (_) {}
     try { ROOT.dataset.fxMagBirthHandoffR655='exception-safe-overlay-teardown'; } catch (_) {}
+    try { ROOT.dataset.fxMagBirthHandoffR1951='final-frame-held-optical-dissolve-to-permanent-mag'; } catch (_) {}
 
-    try { filmRenderer?.destroy?.(); } catch (_) {}
-    filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
 

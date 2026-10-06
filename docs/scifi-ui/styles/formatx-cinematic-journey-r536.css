@@ -1007,6 +1007,141 @@ html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
 }
 /* production-r1541-stable-cinematic-field */
 
+/* R1951 — volumetric cinematic world.
+   Replace HUD-like ring density with depth, atmosphere and camera response.
+   Every moving layer is driven by the physical spring variables from R536 JS;
+   there is no autonomous CSS animation. */
+html[data-fx-cinematic-journey-r536="ready"]{
+  --fx-c1951-camera-lag:0;
+  --fx-c1951-camera-z:1;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-stage > :is(
+  .fx-c1951-haze-back,.fx-c1951-dust,.fx-c1951-haze-front
+){
+  position:absolute;
+  inset:-8%;
+  pointer-events:none!important;
+  contain:paint;
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c1951-haze-back{
+  z-index:-2;
+  background:
+    radial-gradient(ellipse 34% 56% at 62% 16%,rgba(178,231,234,.070),transparent 72%),
+    radial-gradient(ellipse 54% 44% at 36% 58%,rgba(46,103,114,.075),transparent 76%),
+    radial-gradient(ellipse 76% 42% at 54% 88%,rgba(22,65,73,.080),transparent 78%);
+  filter:blur(28px) saturate(.82);
+  opacity:.78;
+  transform:
+    translate3d(
+      var(--fx-c1951-back-x,0px),
+      var(--fx-c1951-back-y,0px),
+      0
+    )
+    scale(1.06);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c1951-dust{
+  z-index:-1;
+  inset:-2%;
+  opacity:.13;
+  background:
+    radial-gradient(circle at 13% 19%,rgba(224,249,248,.42) 0 .55px,transparent .85px),
+    radial-gradient(circle at 29% 73%,rgba(111,218,224,.28) 0 .48px,transparent .82px),
+    radial-gradient(circle at 71% 31%,rgba(218,242,240,.30) 0 .52px,transparent .82px),
+    radial-gradient(circle at 87% 68%,rgba(97,181,193,.24) 0 .50px,transparent .80px);
+  background-size:173px 149px,241px 217px,293px 263px,347px 317px;
+  filter:blur(.18px);
+  transform:translate3d(
+    var(--fx-c1951-dust-x,0px),
+    var(--fx-c1951-dust-y,0px),
+    0
+  );
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c1951-haze-front{
+  z-index:6;
+  background:
+    radial-gradient(ellipse 28% 42% at 78% 28%,rgba(195,239,238,.030),transparent 72%),
+    radial-gradient(ellipse 36% 26% at 20% 72%,rgba(59,157,169,.034),transparent 74%);
+  mix-blend-mode:screen;
+  filter:blur(24px);
+  opacity:.56;
+  transform:translate3d(
+    var(--fx-c1951-front-x,0px),
+    var(--fx-c1951-front-y,0px),
+    0
+  );
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
+  background:
+    radial-gradient(ellipse 46% 42% at 51% 46%,rgba(222,250,248,.030),rgba(var(--fx-c536-a),.042) 20%,rgba(var(--fx-c536-b),.018) 42%,transparent 72%),
+    radial-gradient(ellipse 70% 54% at 50% 58%,rgba(31,91,101,.040),transparent 74%);
+  -webkit-mask-image:radial-gradient(ellipse,#000 0 45%,rgba(0,0,0,.42) 67%,transparent 86%);
+  mask-image:radial-gradient(ellipse,#000 0 45%,rgba(0,0,0,.42) 67%,transparent 86%);
+  opacity:calc(.10 + var(--fx-c536-energy) * .20);
+  filter:saturate(.88) contrast(1.01);
+  transform:
+    perspective(1500px)
+    translate(-50%,-50%)
+    translate3d(
+      var(--fx-c1951-world-x,var(--fx-c617-parallax-x)),
+      var(--fx-c1951-world-y,var(--fx-c617-parallax-y)),
+      0
+    )
+    rotateX(var(--fx-c617-tilt-x))
+    rotateY(var(--fx-c617-tilt-y))
+    scale(calc(.88 + var(--fx-c536-local) * .08))
+    scale(var(--fx-c1951-camera-z,1));
+}
+
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::before{
+  opacity:calc(.025 + var(--fx-c536-energy) * .055);
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::after{
+  opacity:calc(.035 + var(--fx-c536-energy) * .065);
+  border-color:rgba(var(--fx-c536-a),.040);
+  box-shadow:0 0 44px rgba(var(--fx-c536-a),.020),inset 0 0 32px rgba(var(--fx-c536-b),.016);
+}
+
+html[data-fx-cinematic-journey-r536="ready"] :is(.fx-c536-iris,.fx-c536-track,.fx-c536-scan){
+  opacity:.055;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
+  opacity:.010!important;
+}
+html[data-fx-cinematic-journey-r536="ready"] .fx-c536-vignette{
+  opacity:.46;
+}
+
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene > .section-heading{
+    transform:none!important;
+    translate:none!important;
+    transition:opacity .28s linear!important;
+    text-rendering:geometricPrecision;
+    -webkit-font-smoothing:antialiased;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene .section-heading h2,
+  html[data-fx-cinematic-journey-r536="ready"] #hero .hero-copy{
+    transform:none!important;
+    translate:none!important;
+    text-rendering:geometricPrecision;
+    -webkit-font-smoothing:antialiased;
+    backface-visibility:hidden;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-cinematic-journey-r536] .fx-c536-stage > :is(
+    .fx-c1951-haze-back,.fx-c1951-dust,.fx-c1951-haze-front
+  ){transform:none!important;}
+}
+/* production-r1951-physical-volumetric-cinematic-world */
+
+
 
 /* R1546 — prevent initial fixed-world coordinate jump from contributing CLS. */
 .fx-c536-stage[data-fx-c536-primed="false"]{

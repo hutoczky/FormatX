@@ -1043,6 +1043,17 @@ html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
 }
 /* production-r1945-signature-header-mag-first-paint */
 
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+}
+/* production-r1951-no-mobile-duplicate-mag-first-paint */
+
+
 /* R1941j — award-grade first-frame control skin.
    The render-blocking layer owns the same dark optical-glass language as the
    settled UI, so mobile never flashes browser-default links or grey buttons. */

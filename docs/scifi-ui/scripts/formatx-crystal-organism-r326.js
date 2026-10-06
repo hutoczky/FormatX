@@ -272,8 +272,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 56 : 96;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 112 : 192;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -774,10 +774,20 @@
     host.prepend(stage);
     stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
 
+    const depthBack=document.createElement('div');
+    depthBack.className='fx-mag-depth-back-r1951';
+    depthBack.setAttribute('aria-hidden','true');
+    const contactShadow=document.createElement('div');
+    contactShadow.className='fx-mag-contact-shadow-r1951';
+    contactShadow.setAttribute('aria-hidden','true');
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
-    stage.appendChild(canvas);
+    const depthFront=document.createElement('div');
+    depthFront.className='fx-mag-depth-front-r1951';
+    depthFront.setAttribute('aria-hidden','true');
+    stage.append(depthBack,contactShadow,canvas,depthFront);
+    stage.dataset.fxDepthStackR1951='back-haze-contact-shadow-native-mag-front-haze';
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
@@ -791,24 +801,25 @@
 
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
+    if(mobile && !reduced.matches && typeof canvas.animate==='function'){
       const livingTimeline=canvas.animate(
         [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
+          {opacity:.990,transform:'scale(.999)',offset:0},
+          {opacity:1,transform:'scale(1.0015)',offset:.50},
+          {opacity:.990,transform:'scale(.999)',offset:1}
         ],
         {
-          duration:6800,
+          duration:7600,
           iterations:Infinity,
           easing:'cubic-bezier(.37,0,.20,1)',
           fill:'both'
         }
       );
       livingTimeline.id='fx-primary-mag-living-breath-r1930';
-      root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
-      root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+      root.dataset.fxNativeMagBreathR1930='mobile-compositor-breath-no-idle-raf';
+    }else{
+      canvas.style.setProperty('transform','none','important');
+      root.dataset.fxNativeMagDesktopLifeR1951='native-shader-only-pixel-stable-no-css-scale';
     }
 
     const options = {
@@ -900,8 +911,11 @@
            procedural face-grooves were still deforming the first WebGL frame
            after geometry cleanup and created a mouth/visor-like horizontal seam. */
         float layerScale=uLayer>.5?.50:1.0;
-        float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        float heartbeat=1.0+uBreath*(uLayer>.5?${mobile?'.040':'.010'}:${mobile?'.020':'.004'});
+        /* R1951 — the interior may breathe, the projected contour may not. */
+        float contourInterior=${mobile?'1.0':'smoothstep(.10,.34,abs(aSphereNormal.z))'};
+        float livingStable=(living+cortex+microFold)*contourInterior;
+        vec3 local=(base+normal*livingStable)*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
@@ -910,9 +924,9 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
-        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*${mobile?'.007':'.0015'};
+        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+${mobile?'.006':'.0015'}*sin(uTime*.19);
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+${mobile?'.005':'.0012'}*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -1259,6 +1273,20 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      float dGGX(float NoH,float roughness){
+        float a=roughness*roughness;
+        float a2=a*a;
+        float d=(NoH*NoH)*(a2-1.0)+1.0;
+        return a2/max(3.14159265*d*d,.00025);
+      }
+      float gSchlick(float NoV,float roughness){
+        float r=roughness+1.0;
+        float k=(r*r)/8.0;
+        return NoV/max(NoV*(1.0-k)+k,.00025);
+      }
+      vec3 fSchlick(float VoH,vec3 F0){
+        return F0+(1.0-F0)*pow(1.0-clamp(VoH,0.0,1.0),5.0);
+      }
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
@@ -1283,6 +1311,20 @@
         float backDepth=1.0-frontDepth;
         float edge=pow(1.0-facing,2.20);
         float deepEdge=pow(1.0-facing,3.20);
+
+        /* R1951 — coherent optical depth. One thickness proxy drives absorption,
+           refraction and scattering so the material reads as one physical glass,
+           not a stack of unrelated glow effects. */
+        float thickness=(.24+.86*pow(1.0-facing,.72))*(.82+.18*frontDepth);
+        vec3 absorption=exp(-vec3(.54,.30,.22)*thickness);
+        vec3 refrDir=refract(-view,n,1.0/1.46);
+        float refrSky=sat(refrDir.y*.5+.5);
+        float refrSide=sat(refrDir.x*.5+.5);
+        vec3 refractedField=
+          mix(vec3(.010,.022,.026),vec3(.090,.130,.132),refrSky)
+          +mix(vec3(.008,.058,.070),vec3(.055,.025,.046),refrSide)*.34;
+        float forwardScatter=pow(sat(dot(-keyDir,refrDir)),2.2)*(1.0-facing);
+        float sideScatter=pow(sat(dot(-sideDir,refrDir)),1.7)*(1.0-facing);
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
         float strata=.5+.5*sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4);
         float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
@@ -1304,6 +1346,10 @@
           : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
         c*=.93+.07*volume;
+        c*=mix(vec3(1.0),absorption,.44);
+        c+=refractedField*(.045+.090*deepEdge);
+        c+=vec3(.055,.105,.108)*forwardScatter*.115;
+        c+=vec3(.030,.090,.102)*sideScatter*.080;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1313,6 +1359,19 @@
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
+
+        /* R1951 — restrained GGX skin over the transmissive body. */
+        vec3 h=normalize(keyDir+view);
+        float NoV=max(dot(n,view),.001);
+        float NoL=max(dot(n,keyDir),.001);
+        float NoH=max(dot(n,h),0.0);
+        float VoH=max(dot(view,h),0.0);
+        float roughness=mix(.175,.255,macroFacet);
+        float D=dGGX(NoH,roughness);
+        float G=gSchlick(NoV,roughness)*gSchlick(NoL,roughness);
+        vec3 F=fSchlick(VoH,vec3(.040,.043,.044));
+        vec3 microSpec=min(vec3(1.65),(D*G*F)/max(4.0*NoV*NoL,.001));
+        c+=microSpec*NoL*.20;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
@@ -1375,8 +1434,10 @@
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.030,.180,.205)*fresnel*.30;
+        c+=vec3(.055,.300,.335)*deepEdge*.215;
+        c+=refractedField*deepEdge*.115;
+        c+=vec3(.090,.155,.155)*forwardScatter*.085;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1399,7 +1460,8 @@
         float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
+        vec3 opticRefract=mix(vec3(.008,.030,.036),refractedField,0.72);
+        c=mix(c,opticBase+opticRefract+c*.38,lens*.24);
         c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
@@ -1604,6 +1666,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagMaterialR1951='coherent-ior146-beer-lambert-refraction-internal-scattering-ggx-softbox';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1691,6 +1754,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1951='desktop-96x192-hidpi-msaa-pixel-stable-contour-adaptive-governor';
+    root.dataset.fxNativeMagRasterR1951='no-css-scale-no-autonomous-contour-wander-subpixel-shimmer-suppressed';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1841,7 +1906,7 @@
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.68:.82));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1921,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.82:2.38);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1900000:4800000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
