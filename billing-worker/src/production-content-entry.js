@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261006-r1949-award-final-seal';
+const STARTUP_REVISION = '20261007-r1950-pc-crisp-intro-final';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-wM8l8kEv7xa4UGIU8YEM6eMI/uZ2TIQmvzF2tnWmD4Q='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -167,16 +167,28 @@ const DEFERRED_STYLE_PATHS = new Set([
 
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
-    marker: 'scheduler-to-loader-r1945j-continuous-macro-facet',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261005-r1945j-continuous-macro-facet']],
+    marker: 'scheduler-to-loader-r1950-pc-crisp-raster',
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261007-r1950-pc-crisp-raster']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1945l-controlled-studio-handoff',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261005-r1945l-controlled-studio-handoff']],
+    marker: 'intro-to-genesis-r1950-pc-msaa-soft-handoff',
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261007-r1950-pc-msaa-soft-handoff']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
-    marker: 'loader-to-mag-shape-sync-r1723',
-    rewrites: [[/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism']],
+    marker: 'loader-to-r1950-crisp-mag-and-shape-sync',
+    rewrites: [
+      [/formatx-current-mag-loader-r422\.js\?v=[^"']+/g, 'formatx-current-mag-loader-r422.js?v=20261007-r1950-pc-crisp-raster'],
+      [/formatx-crystal-organism-r326\.js\?v=[^"']+/g, 'formatx-crystal-organism-r326.js?v=20261007-r1950-pc-crisp-raster'],
+      [/formatx-core-shapeshifter-r337\.css\?v=[^"']+/g, 'formatx-core-shapeshifter-r337.css?v=20261007-r1950-desktop-crisp-contour'],
+      [/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism'],
+    ],
+  }],
+  ['/scifi-ui/scripts/formatx-current-mag-loader-r422.js', {
+    marker: 'current-mag-to-r1950-crisp-renderer',
+    rewrites: [
+      [/formatx-crystal-organism-r326\.js\?v=[^"']+/g, 'formatx-crystal-organism-r326.js?v=20261007-r1950-pc-crisp-raster'],
+      [/formatx-core-shapeshifter-r337\.css\?v=[^"']+/g, 'formatx-core-shapeshifter-r337.css?v=20261007-r1950-desktop-crisp-contour'],
+    ],
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo-r1724-sitewide-habitat',
