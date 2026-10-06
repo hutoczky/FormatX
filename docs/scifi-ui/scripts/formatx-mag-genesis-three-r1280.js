@@ -1264,7 +1264,10 @@
       else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
-      const endMove=smooth((t-9.78)/.20);
+      /* R1947 — start the spatial handoff before the teardown.
+         The cinematic object now glides into the exact hero target over ~0.6 s
+         instead of jumping there in the final 200 ms. */
+      const endMove=smooth((t-9.34)/.58);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
@@ -1370,7 +1373,13 @@
       const grow=smooth((t-6.25)/.90);
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
-      this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
+      const handoffMove=smooth((t-9.34)/.58);
+      const handoffScale=mix(1,.845,handoffMove);
+      this.mechanicalGroup.scale.set(
+        (.001+grow*1.04)*handoffScale,
+        (.001+grow*1.04)*handoffScale,
+        (.001+grow*1.02)*handoffScale
+      );
 
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
@@ -1450,7 +1459,9 @@
         z=4.28+Math.sin(time*.00018)*.006;
         y=.003;
       }else{
-        z=mix(4.28,4.40,smooth((t-9.10)/.60));
+        /* R1947 — the camera settles while the object moves to the native hero.
+           Avoid a simultaneous zoom kick during the final crossfade. */
+        z=mix(4.28,4.36,smooth((t-9.10)/.72));
         y=.003;
       }
       if(this.width<this.height)z+=.90;
@@ -1580,6 +1591,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagHandoffR1947='early-target-glide-native-scale-convergence';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
