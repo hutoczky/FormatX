@@ -29,6 +29,10 @@ html[data-fx-cinematic-journey-r536="ready"]{
 
 .fx-c536-stage>*{pointer-events:none!important}
 
+.fx-c1951-atmosphere-back,
+.fx-c1951-light-field,
+.fx-c1951-atmosphere-front,
+.fx-c1951-depth-particles,
 .fx-c536-world,
 .fx-c536-iris,
 .fx-c536-track,
@@ -37,6 +41,64 @@ html[data-fx-cinematic-journey-r536="ready"]{
 .fx-c536-grain,
 .fx-c536-flare{
   position:absolute;
+}
+
+/* R1951 — shared-camera volumetric world.
+   No independent CSS animation: every layer is positioned only by the spring
+   camera variables produced in JS, so WebGL and DOM remain one visual space. */
+.fx-c1951-atmosphere-back{
+  inset:-12%;
+  z-index:-2;
+  background:
+    radial-gradient(ellipse at calc(50% + var(--fx-c617-parallax-x)*.10) calc(44% + var(--fx-c617-parallax-y)*.08),
+      rgba(var(--fx-c536-a),.055) 0 12%,rgba(var(--fx-c536-b),.024) 32%,transparent 68%),
+    radial-gradient(ellipse at 50% 72%,rgba(18,38,46,.16),transparent 60%);
+  filter:blur(34px);
+  opacity:calc(.42 + var(--fx-c617-depth)*.16);
+  transform:translate3d(calc(var(--fx-c617-parallax-x)*-.10),calc(var(--fx-c617-parallax-y)*-.08),0) scale(1.06);
+  will-change:transform,opacity;
+}
+
+.fx-c1951-light-field{
+  inset:8% 6%;
+  z-index:-1;
+  background:
+    radial-gradient(ellipse at calc(56% + var(--fx-c617-parallax-x)*.18) calc(38% + var(--fx-c617-parallax-y)*.14),
+      rgba(180,244,240,.045) 0 10%,rgba(82,188,198,.038) 22%,transparent 55%),
+    linear-gradient(112deg,transparent 28%,rgba(162,224,221,.018) 44%,transparent 60%);
+  filter:blur(18px);
+  mix-blend-mode:screen;
+  opacity:calc(.20 + var(--fx-c617-depth)*.18);
+  transform:translate3d(calc(var(--fx-c617-parallax-x)*.16),calc(var(--fx-c617-parallax-y)*.11),0);
+  will-change:transform,opacity;
+}
+
+.fx-c1951-atmosphere-front{
+  inset:-8%;
+  z-index:4;
+  background:
+    radial-gradient(circle at 12% 22%,rgba(207,243,240,.035) 0 1.5%,transparent 7%),
+    radial-gradient(circle at 86% 34%,rgba(87,209,220,.030) 0 1.8%,transparent 8%),
+    radial-gradient(circle at 72% 82%,rgba(196,221,216,.024) 0 1.2%,transparent 7%),
+    radial-gradient(ellipse at 50% 100%,rgba(0,0,0,.20),transparent 56%);
+  filter:blur(11px);
+  opacity:calc(.18 + var(--fx-c617-depth)*.10);
+  transform:translate3d(calc(var(--fx-c617-parallax-x)*.24),calc(var(--fx-c617-parallax-y)*.20),0) scale(1.04);
+  will-change:transform,opacity;
+}
+
+.fx-c1951-depth-particles{
+  inset:0;
+  z-index:3;
+  background:
+    radial-gradient(circle at 18% 31%,rgba(228,248,245,.11) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 77% 24%,rgba(104,219,226,.08) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 64% 70%,rgba(228,248,245,.07) 0 1px,transparent 1.9px),
+    radial-gradient(circle at 35% 81%,rgba(128,201,207,.065) 0 1px,transparent 1.8px),
+    radial-gradient(circle at 89% 74%,rgba(235,250,247,.055) 0 1px,transparent 1.8px);
+  opacity:calc(.12 + var(--fx-c617-depth)*.08);
+  transform:translate3d(calc(var(--fx-c617-parallax-x)*.31),calc(var(--fx-c617-parallax-y)*.25),0);
+  will-change:transform,opacity;
 }
 
 .fx-c536-world{
@@ -256,6 +318,23 @@ html.fx-c536-handoff-r1951 .fx-c536-stage{
 }
 
 .fx-c536-anatomy>*{pointer-events:none!important}
+
+@media (min-width:901px) and (pointer:fine){
+  .fx-c536-anatomy,
+  .fx-c1947-bridge{
+    transform:translate3d(
+      calc(var(--fx-c617-parallax-x)*.08),
+      calc(var(--fx-c617-parallax-y)*.06 + var(--fx-c536-scene-shift)),
+      0
+    );
+    will-change:transform,opacity;
+  }
+  .fx-c536-scene > :not(.fx-c536-anatomy):not(.fx-c1947-bridge){
+    /* DOM text/content stays on the pixel grid; depth is carried by its
+       surrounding light field rather than subpixel-translating glyphs. */
+    transform:none;
+  }
+}
 
 .fx-c536-anatomy .a,
 .fx-c536-anatomy .b,
@@ -1254,3 +1333,5 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 /* production-r1948-hero-core-no-opacity-flash */
 
 /* production-r1951-continuous-intro-to-scene-handoff */
+
+/* production-r1951-shared-camera-volumetric-dom-webgl-world */
