@@ -1087,7 +1087,7 @@
 
       this.mechEyeCore=new T.Mesh(
         new T.CircleGeometry(.072,64),
-        new T.MeshBasicMaterial({color:0x0a3037,transparent:true,opacity:.88,side:T.DoubleSide})
+        new T.MeshBasicMaterial({color:0x0b3036,transparent:true,opacity:.36,side:T.DoubleSide})
       );
       this.mechEyeCore.position.set(0,.01,.50);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -1264,7 +1264,9 @@
       else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
-      const endMove=smooth((t-9.78)/.20);
+      /* R1947b — spatial continuity: begin travelling toward the real hero
+         before the final frame instead of jumping during the last 200 ms. */
+      const endMove=smooth((t-9.05)/.80);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
@@ -1370,7 +1372,12 @@
       const grow=smooth((t-6.25)/.90);
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
-      this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
+      const handoffScale=mix(1.0,.88,endMove);
+      this.mechanicalGroup.scale.set(
+        (.001+grow*1.04)*handoffScale,
+        (.001+grow*1.04)*handoffScale,
+        (.001+grow*1.02)*handoffScale
+      );
 
       /* R1947 — converge into the permanent smoked-silver hero instead of
          bright teal armour. Internal facets appear only as refracted depth. */
@@ -1397,20 +1404,35 @@
       this.silverMaterial.roughness=mix(.115,.135,finale);
 
       this.mechMaterial.opacity=(.90+.045*finale)*grow;
-      this.mechMidMaterial.opacity=(.38+.055*finale)*grow;
+      this.mechMidMaterial.opacity=(.20+.035*finale)*grow;
       this.silverMaterial.opacity=(.045+.095*finale)*grow;
       this.mechEdgeMaterial.opacity=(.012+.006*finale)*grow;
       this.mechInnerMaterial.opacity=(.13+.035*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.025-.012*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.105+.025*finale)*grow;
 
-      const facetVisible=finale>.035&&grow>.05;
-      this.silverParts.forEach((p)=>{p.visible=facetVisible;});
-      this.plates.forEach((p)=>{if(p!==this.jaw)p.visible=facetVisible;});
+      /* The permanent MAG is already warm and visible under the masked film.
+         Fade the proxy shell while it reaches that exact DOM target, so the
+         viewer sees one object continuing rather than a model swap. */
+      const proxyFade=1-smooth((t-9.36)/.50);
+      this.mechMaterial.opacity*=proxyFade;
+      this.mechMidMaterial.opacity*=proxyFade;
+      this.silverMaterial.opacity*=proxyFade;
+      this.mechEdgeMaterial.opacity*=proxyFade;
+      this.mechInnerMaterial.opacity*=proxyFade;
+      if(this.seamMaterial)this.seamMaterial.opacity*=proxyFade;
+      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity*=proxyFade;
+      if(this.mechEyeCore)this.mechEyeCore.material.opacity=(.34+.05*finale)*grow*proxyFade;
+
+      /* Flat armour pieces caused the low-poly star read in the final keyframe.
+         Keep the single continuous body; the true native shader supplies the
+         internal prism folds during the crossfade. */
+      this.silverParts.forEach((p)=>{p.visible=false;});
+      this.plates.forEach((p)=>{p.visible=false;});
       if(this.jaw)this.jaw.visible=false;
 
       this.mechInnerRing.rotation.z=time*.00010;
-      if(this.mechLight)this.mechLight.intensity=(.72+.16*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(.72+.16*finale)*grow*proxyFade;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
@@ -1587,6 +1609,7 @@
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
   document.documentElement.dataset.fxMagSignatureR1947='intro-finale-smoked-silver-internal-prism-permanent-hero-parity';
+  document.documentElement.dataset.fxMagSignatureR1947b='early-spatial-crossfade-into-exact-native-hero-no-proxy-plates';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
