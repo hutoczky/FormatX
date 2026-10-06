@@ -239,7 +239,11 @@ async function capture(browser, name, viewport, options = {}) {
   });
   let failure;
   try {
-    await page.goto(urlWith({ visual: `${name}-${Date.now()}`, ...(options.lang ? { lang: options.lang } : {}) }), {
+    await page.goto(urlWith({
+      visual: `${name}-${Date.now()}`,
+      ...(options.lang ? { lang: options.lang } : {}),
+      ...(options.disclosure ? { cinema: 1 } : {})
+    }), {
       waitUntil: 'domcontentloaded', timeout: 30000
     });
     await waitForProductShell(page);
