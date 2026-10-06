@@ -138,7 +138,9 @@ export default {
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
     }
 
-    let html = restoreCriticalCoreFirstPaint(await response.text());
+    /* R1950d — P0 owns exact first-frame geometry, so keep critical-core
+       on the canonical R487 post-FCP path in production as well as source. */
+    let html = await response.text();
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);

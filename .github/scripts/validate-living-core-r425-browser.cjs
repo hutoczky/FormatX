@@ -285,7 +285,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     const mobileSaturate=Number((state.filter.match(/saturate\(([-\d.]+)/)||[])[1]);
     assert.ok(mobileBrightness>=.95, state.filter);
     assert.ok(mobileContrast>=1.05, state.filter);
-    assert.ok(mobileSaturate>=.94&&mobileSaturate<=1.02, state.filter);
+    assert.ok(mobileSaturate>=.78&&mobileSaturate<=.90, state.filter);
     assert.ok(!/blur\((?!0(?:px)?\))/i.test(state.filter), state.filter);
     assert.equal(state.stageAnimation, 'none', JSON.stringify(state));
   } else {

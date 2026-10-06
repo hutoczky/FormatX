@@ -1579,13 +1579,18 @@
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
     const mobilePhysical = mobile || constrainedMobile || auditMode;
-    /* R1930 visual parity: one authored studio shader on desktop, mobile and
-       software proof. This removes the hardware/CI split that hid ugly live paths. */
-    const fragmentSource = constrainedFragmentSource;
+    /* R1950 — real GPU keeps the full studio material. Software WebGL
+       (SwiftShader/llvmpipe/offscreen) uses the already-authored photographic
+       lite shader so fallback devices and CI avoid two expensive shader compile
+       long tasks without reducing hardware visual quality. */
+    const fragmentSource = softwareRenderer ? softwareFragmentSource : constrainedFragmentSource;
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
     root.dataset.fxNativeMagPerformanceR1710='16-67ms-first-adaptive-resolution-zero-idle';
+    root.dataset.fxNativeMagPerformanceR1950=softwareRenderer
+      ? 'software-lite-photographic-shader-no-heavy-compile-path'
+      : 'hardware-full-studio-shader-preserved';
     root.dataset.fxNativeMagVisualR1716='mobile-normal-topology-physical-shader-photoreal-60fps-first';
     root.dataset.fxNativeMagVisualR1718='mobile-sharp-readable-midtone-photoreal-organism';
     root.dataset.fxNativeMagQualityR1718='higher-resolution-floor-gradual-pressure-shedding';
