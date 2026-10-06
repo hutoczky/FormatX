@@ -391,12 +391,18 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
   }
 }
 
-@media (min-width:901px) and (pointer:fine) {
+@media (min-width:901px) and (hover:hover) and (pointer:fine) {
   html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity:1!important;
-    filter:brightness(1.03) contrast(1.13) saturate(1.01) drop-shadow(0 0 4px rgba(72,210,242,.06))!important;
-    -webkit-filter:brightness(1.03) contrast(1.13) saturate(1.01) drop-shadow(0 0 4px rgba(72,210,242,.06))!important;
+    /* R1950 — shader-owned light only. Removing CSS drop-shadow avoids an
+       extra compositor raster pass that visibly stair-stepped the four-point
+       silhouette on desktop monitors. */
+    filter:brightness(1.02) contrast(1.12) saturate(.99)!important;
+    -webkit-filter:brightness(1.02) contrast(1.12) saturate(.99)!important;
+    image-rendering:auto!important;
+    backface-visibility:hidden!important;
   }
 }
 /* production-r1480-realistic-crystal-optics */
+/* production-r1950-desktop-crisp-shader-owned-contour */
