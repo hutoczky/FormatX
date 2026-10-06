@@ -1809,6 +1809,7 @@
     root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
+    let visibleFrameChecks=0;
     let px=0,py=0,tx=0,ty=0;
     let ambientLastX=0,ambientLastY=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
@@ -2097,6 +2098,30 @@
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
+      }
+
+      /* R1950 — a draw call is not proof of a visible MAG. Software WebGL and
+         rare driver paths can return a valid context/program while producing a
+         transparent frame. Keep the parser-visible Signature proxy until one
+         real center pixel proves that the closed shell actually reached the
+         framebuffer. Bounded to four one-pixel readbacks. */
+      if(root.dataset.fxCoreVisibleFrameR1950!=='ready' && visibleFrameChecks<4 && width>2 && height>2){
+        visibleFrameChecks+=1;
+        try{
+          const proofPixel=new Uint8Array(4);
+          gl.readPixels(Math.floor(width*.5),Math.floor(height*.5),1,1,gl.RGBA,gl.UNSIGNED_BYTE,proofPixel);
+          root.dataset.fxCoreVisiblePixelAlphaR1950=String(proofPixel[3]);
+          root.dataset.fxCoreVisiblePixelLumaR1950=String(proofPixel[0]+proofPixel[1]+proofPixel[2]);
+          if(proofPixel[3]>=192){
+            root.dataset.fxCoreVisibleFrameR1950='ready';
+            stage.dataset.visibleFrameR1950='ready';
+          }else{
+            root.dataset.fxCoreVisibleFrameR1950='fallback-held';
+            burstFrames=Math.max(burstFrames,2);
+          }
+        }catch(_){
+          root.dataset.fxCoreVisibleFrameR1950='readback-unavailable-fallback-held';
+        }
       }
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
@@ -2798,6 +2823,7 @@
     root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreFirstFrameR1913='pending';
+    root.dataset.fxCoreVisibleFrameR1950='pending';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
     root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';
