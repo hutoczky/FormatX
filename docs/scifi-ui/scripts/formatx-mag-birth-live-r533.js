@@ -727,7 +727,7 @@
     const painted=ROOT.dataset.fxCoreFirstFrameR1913==='painted';
     const ready=allocated&&painted;
     if(ready&&r>=.885){
-      const nativeBlend=smoothstep((r-.885)/.105);
+      const nativeBlend=smoothstep((r-.885)/.065);
       overlay.style.setProperty('--fxb-handoff-opacity',String(1-nativeBlend*.97));
       ROOT.dataset.fxMagBirthNativeCrossfadeR1947=nativeBlend.toFixed(3);
       return true;
@@ -1160,7 +1160,7 @@
     ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
     ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
-    ROOT.dataset.fxMagBirthHandoffR1947='painted-frame-gated-native-hero-crossfade-final-1-15s';
+    ROOT.dataset.fxMagBirthHandoffR1947='painted-frame-gated-native-hero-crossfade-final-650ms';
     ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
