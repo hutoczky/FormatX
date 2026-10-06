@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 52;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 104;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -316,12 +316,21 @@
       const axisZ=mobile
         ? (direction[2]>=0?.64:.43)
         : (direction[2]>=0?.49:.34);
-      const exponent=mobile?.78:.61;
+      /* R1947b — smooth the desktop cusp field itself instead of masking
+         the resulting raster cracks. Explicit cardinal tip gain preserves the
+         signature points without the p<.65 derivative singularity. */
+      const exponent=mobile?.78:.70;
       const terms=
         Math.pow(Math.abs(direction[0])/axisX,exponent)+
         Math.pow(Math.abs(direction[1])/axisY,exponent)+
         Math.pow(Math.abs(direction[2])/axisZ,exponent);
-      const radial=1/Math.pow(Math.max(.0001,terms),1/exponent);
+      const radialBase=1/Math.pow(Math.max(.0001,terms),1/exponent);
+      const tipBoost=mobile
+        ? 1
+        : 1
+          +.055*Math.pow(Math.abs(direction[0]),8)
+          +.078*Math.pow(Math.abs(direction[1]),8);
+      const radial=radialBase*tipBoost;
       const poleFade=sinPhi*sinPhi;
       const organic=
         1+
@@ -1404,6 +1413,12 @@
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
+        /* R1947 — anti-pinhole floor.
+           Front-facing glass may become very dark, but never collapses to
+           isolated black pixels/triangles under extreme reflection angles. */
+        float solidFront=smoothstep(.12,.58,frontDepth)*smoothstep(.03,.42,facing);
+        c=max(c,vec3(.0065,.0145,.0175)*solidFront);
+
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
@@ -1600,6 +1615,9 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='higher-desktop-topology-anti-pinhole-solid-glass-floor';
+    root.dataset.fxNativeMagStudioR1947b='smooth-cusp-tip-boost-no-axis-raster-cracks';
+    root.dataset.fxNativeMagRasterR1947d='closed-outward-shell-backface-cull-no-rear-depth-speckles';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1824,10 +1842,10 @@
        measured pressure. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.54)
-      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
+      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .72)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.66)
-      : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
+      : (mobile?1.08:(auditMode?.86:(constrained?.78:.98)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.26)
       : (mobile?.80:.22);
@@ -2070,10 +2088,12 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      /* R1945j — retain the proven two-sided closed shell. The R1945i culling
-         experiment increased pinholes; the actual speckle source was the
-         per-triangle material randomization, now removed above. */
-      gl.disable(gl.CULL_FACE);
+      /* R1947d — render only the outward closed shell.
+         With the continuous macro-facet field and smoothed cusp geometry now in
+         place, two-sided depth writes only add rear-surface contamination. */
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      gl.frontFace(gl.CCW);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
