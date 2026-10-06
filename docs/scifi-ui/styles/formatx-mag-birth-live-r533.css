@@ -35,6 +35,9 @@ html[data-fx-mag-birth-live="active"] {
 .fx-mag-birth-r533.is-leaving {
   opacity: 0!important;
   filter: brightness(1)!important;
+  /* R1947b — finish() tears the shell down after 180 ms. Complete the
+     residual 18%->0 fade inside that window instead of inheriting 720 ms. */
+  transition: opacity .16s linear, filter .16s linear!important;
 }
 .fx-mag-birth-r533::after {
   content: "";
