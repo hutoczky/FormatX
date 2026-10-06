@@ -392,7 +392,7 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0?1.0:(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -883,13 +883,13 @@
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*${mobile?'.011':'.0065'}+membrane*${mobile?'.0065':'.0034'})*(.42+.58*uEnergy);
+        float living=(cell*${mobile?'.0085':'.0065'}+membrane*${mobile?'.0048':'.0034'})*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
-        float cortex=(cortexA*.62+cortexB*.38)*${mobile?'.0058':'.0028'}*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*${mobile?'.0009':'.00035'}*cortexEnvelope;
+        float cortex=(cortexA*.62+cortexB*.38)*${mobile?'.0038':'.0028'}*cortexEnvelope;
+        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*${mobile?'.00055':'.00035'}*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
         /* R1923 — the smooth cubic body is now authoritative. The legacy
@@ -1603,6 +1603,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='desktop-clean-surface-cut-prism-deep-pupil-optic';
+    root.dataset.fxNativeMagRasterR1947b='canonical-body-100pct-analytic-normal-mobile-microdeformation-reduced';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
