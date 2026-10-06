@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1947-desktop-first-paint-parity
+token=20261006-r1947b-desktop-first-paint-parity
 base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=remove the remaining desktop first-frame pod flash by matching the render-blocking proxy to the canonical four-point Signature MAG
+purpose=remove the remaining desktop first-frame pod flash and refine the blocking proxy to the canonical curved four-point Signature MAG with integrated optical core
 validation=desktop first-paint visual parity, mobile regression proof, Lighthouse desktop/mobile, P0 source loop, no-occlusion, hero/navigation, production Worker cache parity and exact-revision convergence
