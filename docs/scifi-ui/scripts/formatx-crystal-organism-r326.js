@@ -1956,6 +1956,34 @@
       return [rotationX,rotationY,rotationZ];
     }
 
+    function prepareHandoff(x,y,z,source='r1947-prepare-handoff'){
+      const nx=clamp(Number(x)||0,-1.02,1.02);
+      const ny=Number.isFinite(Number(y))?Number(y):0;
+      const nz=Number.isFinite(Number(z))?Number(z):0;
+
+      /* No setMorph/setShape/boost path here: the seam must be a true idle
+         render, not an interaction response hidden under the overlay. */
+      morph=targetMorph=0;
+      publishShape(source);
+      rotationX=targetRotationX=nx;
+      rotationY=targetRotationY=ny;
+      rotationZ=targetRotationZ=nz;
+      angularVelocityY=0;
+      pointerTiltX=targetPointerTiltX=0;
+      pointerTiltY=targetPointerTiltY=0;
+      px=py=tx=ty=0;
+      energy=targetEnergy=IDLE_ENERGY;
+      breath=targetBreath=.12;
+      surfacePulseStart=-Infinity;
+      burstFrames=0;
+      simulationTime=0;
+      root.dataset.fxCoreRotationSource=source;
+      root.dataset.fxCoreAbsoluteRotationR1947=`${nx.toFixed(3)},${ny.toFixed(3)},${nz.toFixed(3)}`;
+      root.dataset.fxCoreHandoffStateR1947='idle-pose-locked-no-boost-no-pulse';
+      schedule(1);
+      return {rotation:[rotationX,rotationY,rotationZ],energy,breath,morph};
+    }
+
     /* heartbeat-and-interaction-bursts-no-idle-loop-r326.
        R484 has one bounded native surface sweep every five to six seconds.
        Its timeout is suspended when hidden, offscreen, user-paused or reduced.
@@ -2607,6 +2635,7 @@
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       setRotation:(x,y,z,source)=>setRotation(x,y,z,source||'api-set-rotation'),
+      prepareHandoff:(x,y,z,source)=>prepareHandoff(x,y,z,source||'r1947-prepare-handoff'),
       requestRender:schedule,
       destroy,
       canvas,
