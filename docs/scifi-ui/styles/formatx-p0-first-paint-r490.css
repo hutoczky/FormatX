@@ -790,6 +790,82 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
   opacity:0!important;
   visibility:hidden!important;
 }
+/* R1947 — desktop Signature MAG parity from the parser-visible first frame.
+   The previous desktop proxy still painted the old rounded pod silhouette.
+   This keeps first paint, intro handoff and native R326 on one visual identity. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine){
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
+    top:48%!important;
+    width:clamp(330px,32vw,470px)!important;
+    aspect-ratio:.92!important;
+    opacity:.985!important;
+    filter:brightness(1.03) contrast(1.12) saturate(.91)!important;
+    background:
+      linear-gradient(4deg,transparent 0 14%,rgba(66,192,205,.020) 15% 17%,transparent 18% 100%),
+      linear-gradient(-3deg,transparent 0 80%,rgba(100,215,219,.024) 81% 84%,transparent 85% 100%),
+      radial-gradient(ellipse 70% 52% at 50% 51%,rgba(50,151,162,.055),transparent 72%)!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::before{
+    inset:1% 2%!important;
+    clip-path:polygon(
+      50% 0%,
+      58.5% 29%,
+      100% 50%,
+      60% 59%,
+      50% 100%,
+      39.5% 60%,
+      0% 50%,
+      41% 29%
+    )!important;
+    border-radius:0!important;
+    transform:rotate(-1deg) scale(.985)!important;
+    background:
+      linear-gradient(124deg,transparent 0 24%,rgba(238,251,247,.26) 32%,rgba(145,190,189,.090) 41%,transparent 51% 100%),
+      linear-gradient(42deg,transparent 0 31%,rgba(84,176,183,.145) 42%,transparent 54% 100%),
+      linear-gradient(-45deg,transparent 0 36%,rgba(97,190,194,.110) 47%,transparent 58% 100%),
+      radial-gradient(ellipse 24% 30% at 50% 50%,rgba(89,184,191,.26),rgba(18,59,66,.32) 50%,transparent 76%),
+      radial-gradient(ellipse 64% 72% at 45% 38%,rgba(123,179,179,.12),transparent 64%),
+      conic-gradient(from 18deg at 50% 50%,
+        rgba(38,68,71,.97),
+        rgba(11,29,34,.985) 16%,
+        rgba(64,91,91,.95) 31%,
+        rgba(10,27,31,.99) 47%,
+        rgba(53,82,82,.96) 63%,
+        rgba(12,31,35,.99) 79%,
+        rgba(70,98,96,.94) 92%,
+        rgba(30,55,59,.98)
+      )!important;
+    box-shadow:
+      inset 15px -20px 32px rgba(0,4,7,.40),
+      inset -11px 13px 26px rgba(228,244,239,.075),
+      inset 0 0 0 1px rgba(196,229,225,.060),
+      0 28px 62px rgba(0,0,0,.38)!important;
+  }
+
+  html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756::after{
+    inset:40.25% 40.25% 40.25% 40.25%!important;
+    border-radius:50%!important;
+    border:1px solid rgba(174,226,223,.38)!important;
+    background:
+      radial-gradient(circle at 38% 34%,
+        rgba(249,255,253,.98) 0 3%,
+        rgba(128,238,234,.70) 8%,
+        rgba(31,133,142,.58) 20%,
+        rgba(10,54,61,.90) 43%,
+        rgba(2,18,23,.975) 72%
+      ),
+      radial-gradient(circle at 50% 50%,rgba(92,214,216,.18),transparent 66%)!important;
+    box-shadow:
+      0 0 0 2px rgba(8,26,31,.58),
+      0 0 0 4px rgba(151,220,219,.055),
+      inset 0 0 14px rgba(126,228,224,.16),
+      0 0 18px rgba(62,185,194,.075)!important;
+    opacity:.96!important;
+  }
+}
+/* production-r1947b-desktop-signature-first-paint-bioglass-optic-parity */
+
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:45%!important;
