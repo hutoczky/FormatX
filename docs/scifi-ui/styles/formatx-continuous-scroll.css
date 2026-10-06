@@ -78,10 +78,25 @@ body {
     height: auto !important;
     scroll-snap-align: none !important;
     scroll-snap-stop: normal !important;
+    overflow-anchor: none !important;
+  }
+
+  /* R1950 — reconcile the r305 blank-gap safeguard with viewport containment.
+     Sections stay genuinely content-sized (no legacy 104/118svh reserve), while
+     distant sections may skip style/layout/paint until Chromium approaches
+     them. The auto intrinsic value remembers the real measured block size after
+     first realization, so fast return-scrolls do not reopen synthetic gaps. */
+  main#main-content > .scene:not(#hero) {
+    content-visibility: auto !important;
+    contain-intrinsic-size: auto 620px !important;
+  }
+
+  /* Organism chapter carriers are interaction/navigation anchors and remain
+     immediately realized; only the outer page scene is eligible for skipping. */
+  .fx-organism-chapter {
     contain: none !important;
     content-visibility: visible !important;
     contain-intrinsic-size: none !important;
-    overflow-anchor: none !important;
   }
 
   .fx-organism-chapter-trigger {
