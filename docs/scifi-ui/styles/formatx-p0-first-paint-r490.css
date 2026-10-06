@@ -1340,6 +1340,12 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     line-height:.94!important;
     letter-spacing:-.035em!important;
     white-space:nowrap!important;
+    color:transparent!important;
+    -webkit-text-fill-color:transparent!important;
+    background:linear-gradient(115deg,#fff 0%,#c6f6ff 38%,#86caff 62%,#c8bcff 86%,#fff 100%)!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    text-shadow:none!important;
   }
   html:root:root:root body.living-architecture #hero .hero-title-sub {
     display:block!important;
@@ -1350,6 +1356,9 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     line-height:1.08!important;
     letter-spacing:.07em!important;
     white-space:nowrap!important;
+    color:rgba(210,230,240,.88)!important;
+    -webkit-text-fill-color:currentColor!important;
+    text-shadow:none!important;
   }
   html:root:root:root body.living-architecture #hero .hero-lead {
     display:block!important;
@@ -1363,3 +1372,4 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+/* production-r1949-mobile-lcp-final-paint */
