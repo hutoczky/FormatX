@@ -1,5 +1,5 @@
 FormatX production revision
 token=20261006-r1947-section-continuity
-base_master=302c84a540b9bef1a3c663677b6f205dbcd4b3c1
-purpose=unify the desktop page into one continuous living-system scene with compositor-only section light bridges, chapter focus and preserved R1945l Signature MAG plus R1944 precision interaction
+base_master=246de190f38f323b50a7ff70a3dc52ff2a20d315
+purpose=deploy the R1947 continuous desktop living-system scene with dedicated compositor light bridges, NET chapter coverage, preserved R1945l Signature MAG and R1944 precision interaction
 validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, no-occlusion, cinematic handoff and production Worker parity
