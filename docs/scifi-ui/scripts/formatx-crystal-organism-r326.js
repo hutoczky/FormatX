@@ -397,7 +397,9 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0
+          ? (mobile?.998:(software?.970:(constrained?.985:.992)))
+          : (software?.970:(mobile?.992:(constrained?.982:.988)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -2711,6 +2713,7 @@
     root.dataset.fxCoreShapeR1558='continuous-asymmetric-superellipsoid-no-equator-seam-clean-buried-tendril-roots';
     root.dataset.fxCoreOpticsR1559='antialiased-opaque-smoky-glass-no-drop-shadow-no-black-facet-voids';
     root.dataset.fxNativeMagStudioR1951='photoreal-coherent-optical-volume-highheadroom-edge-aa';
+    root.dataset.fxNativeMagNormalContinuityR1951='near-analytic-body-normal-no-microtriangle-light-breakup';
     root.dataset.fxCoreShapeR1559='leaning-irregular-monolith-continuous-envelope-buried-legacy-tendrils';
     root.dataset.fxCoreOpticsR1560='deep-obsidian-local-softbox-specular-subtle-mineral-vein-visible-surface-energy';
     root.dataset.fxCoreShapeR1560='asymmetric-cinematic-seed-smoother-monolith-offset-apex-natural-shoulders';
