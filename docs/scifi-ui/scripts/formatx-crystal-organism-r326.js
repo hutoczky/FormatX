@@ -269,8 +269,11 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
+    /* R1950 — desktop contour supersampling at the mesh level.
+       Mobile topology is unchanged. Fine desktop GPUs get a denser silhouette so
+       the four-point crystal stays smooth even before raster AA is considered. */
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 42 : 64;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 84 : 128;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -775,27 +778,40 @@
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
-    /* R1559 owns the final compositor treatment inline so dynamically loaded
-       legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
-       deliberately mild, but preserve enough tonal separation for real mineral
-       planes on OLED/mobile displays and the canonical surface-energy contract. */
+    /* R1950 — desktop edge fidelity.
+       A CSS filter forces the browser through an extra offscreen compositor
+       raster. On fine-pointer desktop this softened/stair-stepped the four-point
+       silhouette even when WebGL itself was HiDPI + MSAA. Keep the mobile tone
+       correction, but let capable desktop pixels come directly from the shader. */
+    const crispDesktopCompositor=matchMedia('(min-width:901px) and (hover:hover) and (pointer:fine)').matches;
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : (crispDesktopCompositor ? 'none' : 'brightness(1.04) contrast(1.15) saturate(.88)');
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
+    root.dataset.fxNativeMagCompositorR1950=crispDesktopCompositor
+      ? 'desktop-filterless-direct-webgl'
+      : (mobile?'mobile-tonal-compositor-preserved':'adaptive-desktop-tonal-compositor');
 
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     if(!reduced.matches && typeof canvas.animate==='function'){
+      const livingFrames=crispDesktopCompositor
+        ? [
+            {opacity:.988,transform:'none',offset:0},
+            {opacity:1,transform:'none',offset:.48},
+            {opacity:.993,transform:'none',offset:.76},
+            {opacity:.988,transform:'none',offset:1}
+          ]
+        : [
+            {opacity:.985,transform:'scale(.996)',offset:0},
+            {opacity:1,transform:'scale(1.004)',offset:.48},
+            {opacity:.990,transform:'scale(.999)',offset:.76},
+            {opacity:.985,transform:'scale(.996)',offset:1}
+          ];
       const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
+        livingFrames,
         {
           duration:6800,
           iterations:Infinity,
@@ -1797,6 +1813,7 @@
     root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
+    let visibleFrameChecks=0;
     let px=0,py=0,tx=0,ty=0;
     let ambientLastX=0,ambientLastY=0;
     let energy=IDLE_ENERGY,targetEnergy=IDLE_ENERGY,breath=.12,targetBreath=.12;
@@ -1804,6 +1821,7 @@
     let rotationX=softwareRenderer?-.105:(mobile?-.090:-.070),rotationY=softwareRenderer?-.41:(mobile?-.40:-.32),rotationZ=softwareRenderer?-.020:.008;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     const desktopFine=matchMedia('(hover:hover) and (pointer:fine)');
+    const crispDesktop=desktopFine.matches && !mobile && !softwareRenderer && !constrained && !auditMode;
     let pointerTiltX=0,pointerTiltY=0,targetPointerTiltX=0,targetPointerTiltY=0;
     let ambientPointerFrame=0,pendingAmbientPointer=null;
     let siteProgress=0,targetSiteProgress=0;
@@ -1824,13 +1842,13 @@
        measured pressure. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.54)
-      : (mobile ? 1.00 : (auditMode ? .78 : (constrained ? .58 : .68)));
+      : (mobile ? 1.00 : (crispDesktop ? .96 : (auditMode ? .78 : (constrained ? .58 : .72))));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.66)
-      : (mobile?1.08:(auditMode?.86:(constrained?.78:.94)));
+      : (mobile?1.08:(crispDesktop?1.08:(auditMode?.86:(constrained?.78:.96))));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.26)
-      : (mobile?.80:.22);
+      : (mobile?.80:(crispDesktop?.62:.24));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1843,10 +1861,14 @@
     function resize(){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
-      const baseCap=softwareRenderer ? (mobile?1.58:.90) : (auditMode ? 1.06 : constrainedMobile?1.72:mobile?2.00:constrained?1.16:1.60);
+      const baseCap=softwareRenderer
+        ? (mobile?1.58:.90)
+        : (auditMode ? 1.06 : constrainedMobile?1.72:mobile?2.00:constrained?1.22:(crispDesktop?2.00:1.72));
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
-      const baseBudget=softwareRenderer ? (mobile?920000:200000) : (auditMode ? 480000 : constrainedMobile?1280000:mobile?1900000:constrained?580000:1120000);
+      const baseBudget=softwareRenderer
+        ? (mobile?920000:200000)
+        : (auditMode ? 480000 : constrainedMobile?1280000:mobile?1900000:constrained?720000:(crispDesktop?2600000:1500000));
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2081,6 +2103,30 @@
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
       }
+
+      /* R1950 — a draw call is not proof of a visible MAG. Software WebGL and
+         rare driver paths can return a valid context/program while producing a
+         transparent frame. Keep the parser-visible Signature proxy until one
+         real center pixel proves that the closed shell actually reached the
+         framebuffer. Bounded to four one-pixel readbacks. */
+      if(root.dataset.fxCoreVisibleFrameR1950!=='ready' && visibleFrameChecks<4 && width>2 && height>2){
+        visibleFrameChecks+=1;
+        try{
+          const proofPixel=new Uint8Array(4);
+          gl.readPixels(Math.floor(width*.5),Math.floor(height*.5),1,1,gl.RGBA,gl.UNSIGNED_BYTE,proofPixel);
+          root.dataset.fxCoreVisiblePixelAlphaR1950=String(proofPixel[3]);
+          root.dataset.fxCoreVisiblePixelLumaR1950=String(proofPixel[0]+proofPixel[1]+proofPixel[2]);
+          if(proofPixel[3]>=192){
+            root.dataset.fxCoreVisibleFrameR1950='ready';
+            stage.dataset.visibleFrameR1950='ready';
+          }else{
+            root.dataset.fxCoreVisibleFrameR1950='fallback-held';
+            burstFrames=Math.max(burstFrames,2);
+          }
+        }catch(_){
+          root.dataset.fxCoreVisibleFrameR1950='readback-unavailable-fallback-held';
+        }
+      }
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
@@ -2101,7 +2147,12 @@
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
+          qualityScale=Math.max(
+            qualityFloor,
+            qualityScale-(mobile
+              ? (dt>20||ms>9?.10:.06)
+              : (crispDesktop ? (dt>20||ms>9?.10:.055) : (dt>20||ms>9?.22:.12)))
+          );
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -2124,11 +2175,11 @@
           const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
 
           if(severeFramePressure||severeRenderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:(crispDesktop?.085:.20)));
             stableBudgetFrames=0;
             panicFrames=Math.max(panicFrames,12);
           }else if(framePressure||renderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.09));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:(crispDesktop?.040:.09)));
             stableBudgetFrames=0;
           }else{
             if(panicFrames>0)panicFrames-=1;
@@ -2170,6 +2221,9 @@
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
+      root.dataset.fxNativeMagRasterR1950=crispDesktop
+        ? 'desktop-hidpi-msaa-dense-contour-no-css-resample'
+        : (mobile?'mobile-existing-quality-contract':'adaptive-desktop-fallback');
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
     }
 
@@ -2773,6 +2827,7 @@
     root.dataset.fxCoreReal3dTargetFps='interaction-60-idle-zero-r441';
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreFirstFrameR1913='pending';
+    root.dataset.fxCoreVisibleFrameR1950='pending';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
     root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';

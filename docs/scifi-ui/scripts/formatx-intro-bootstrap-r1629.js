@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
-r.dataset.fxIntroBootstrapRescueR1945g='active-prism-depth-signature-cinematic';
+r.dataset.fxIntroBootstrapRescueR1950='active-prism-depth-signature-cinematic';
 r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
@@ -30,7 +30,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261005-r1945l-controlled-studio-handoff';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261007-r1950-pc-msaa-soft-handoff';
 let retryCount=0,retryTimer=0;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){

@@ -49,10 +49,15 @@
       this.lastRender=0;
       this.disposed=false;
 
+      this.crispDesktop=matchMedia('(min-width:901px) and (hover:hover) and (pointer:fine)').matches;
+      const introDpr=devicePixelRatio||1;
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:false,
+        /* R1950 — PC intro must hand off at the same edge quality as the
+           permanent Signature MAG. High-DPI panels already supersample; normal
+           desktop DPR uses real MSAA. */
+        antialias:this.crispDesktop && introDpr<=2.5,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -1214,9 +1219,21 @@
       if(this.disposed)return;
       this.width=Math.max(1,innerWidth);
       this.height=Math.max(1,innerHeight);
-      const dpr=Math.min(devicePixelRatio||1,this.width<900?1.15:1.6);
+      const deviceDpr=devicePixelRatio||1;
+      let dpr=Math.min(deviceDpr,this.width<900?1.15:(this.crispDesktop?1.95:1.60));
+      if(this.crispDesktop){
+        /* Full-screen intro can afford a higher raster budget for 10 seconds,
+           but never allocate an unbounded 4K/5K supersampled buffer. */
+        const maxIntroPixels=9000000;
+        const requestedPixels=this.width*this.height*dpr*dpr;
+        if(requestedPixels>maxIntroPixels){
+          dpr=Math.max(1,dpr*Math.sqrt(maxIntroPixels/requestedPixels));
+        }
+      }
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(this.width,this.height,false);
+      document.documentElement.dataset.fxIntroRasterR1950=
+        this.crispDesktop?('desktop-msaa-hidpi-'+dpr.toFixed(2)):'existing-mobile-adaptive';
       this.camera.aspect=this.width/this.height;
       const portrait=this.camera.aspect<1;
       this.camera.fov=portrait?51:42;
@@ -1477,31 +1494,32 @@
       }
       this.particles.material.opacity=.38+.10*Math.sin(time*.00045);
 
-      const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
-      /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
-      const after=smooth((t-9.46)/.34);
-      this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
-      this.coreLight.intensity+=flash*.80+after*.25;
+      const flash=smooth((t-9.12)/.18)*(1-smooth((t-9.48)/.34));
+      /* R1950 — soft studio finale. No white/cyan clipping and no exposure
+         discontinuity at the permanent MAG handoff. */
+      const after=smooth((t-9.44)/.38);
+      this.renderer.toneMappingExposure=1.10+flash*.006;
+      this.coreLight.intensity+=flash*.58+after*.12;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
         this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.028;
-        const burstScale=2.18+flash*.18;
+        this.flashBurst.material.opacity=flash*.018;
+        const burstScale=2.16+flash*.12;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.012;
-        this.flashBeam.scale.x=1+flash*.08;
+        this.flashBeam.material.opacity=flash*.006;
+        this.flashBeam.scale.x=1+flash*.05;
       }
       if(this.mechEyeCorona){
         this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
         const q=1.00+flash*.04;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechLight)this.mechLight.intensity+=flash*.82;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1580,6 +1598,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1950='pc-msaa-hidpi-soft-studio-finale-exact-handoff';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
