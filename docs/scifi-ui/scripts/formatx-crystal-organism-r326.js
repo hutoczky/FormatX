@@ -1688,6 +1688,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
+    root.dataset.fxNativeMagHandoffR1947='absolute-pose-api-for-deterministic-intro-continuity';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
     root.dataset.fxNativeMagMaterialR1723='subsurface-cortical-tissue-living-membrane-cartilage-energy-organ';
     root.dataset.fxNativeMagOrganismR1724='asymmetric-living-crystal-rhombic-cortical-silhouette';
@@ -1935,6 +1936,22 @@
       targetRotationY+=y;
       root.dataset.fxCoreRotationSource=source;
       boost(.84,mobile?5:8);
+    }
+
+    function setRotation(x,y,z,source='api-set-rotation'){
+      const nx=clamp(Number(x)||0,-1.02,1.02);
+      const ny=Number.isFinite(Number(y))?Number(y):0;
+      const nz=Number.isFinite(Number(z))?Number(z):0;
+      rotationX=targetRotationX=nx;
+      rotationY=targetRotationY=ny;
+      rotationZ=targetRotationZ=nz;
+      angularVelocityY=0;
+      pointerTiltX=targetPointerTiltX=0;
+      pointerTiltY=targetPointerTiltY=0;
+      root.dataset.fxCoreRotationSource=source;
+      root.dataset.fxCoreAbsoluteRotationR1947=`${nx.toFixed(3)},${ny.toFixed(3)},${nz.toFixed(3)}`;
+      schedule(1);
+      return [rotationX,rotationY,rotationZ];
     }
 
     /* heartbeat-and-interaction-bursts-no-idle-loop-r326.
@@ -2587,6 +2604,7 @@
       setShape:(shape,source)=>setShape(shape,source||'api-set'),
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
+      setRotation:(x,y,z,source)=>setRotation(x,y,z,source||'api-set-rotation'),
       requestRender:schedule,
       destroy,
       canvas,
