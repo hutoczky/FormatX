@@ -269,8 +269,8 @@
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
   function buildOrganismGeometry(software=false) {
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
+    const latitudeSegments = software ? 32 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 34 : 44;
+    const longitudeSegments = software ? 64 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 68 : 88;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -392,7 +392,7 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0?(mobile?.985:(software?.90:.88)):(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1614,6 +1614,7 @@
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='desktop-cut-prism-chevrons-neutral-smoked-silver-deep-optic';
+    root.dataset.fxNativeMagRasterR1947b='higher-software-topology-less-depth-crisper-desktop-normals';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1790,7 +1791,7 @@
     gl.useProgram(program);
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
     gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    gl.depthFunc(gl.LESS);
     gl.enable(gl.BLEND);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
