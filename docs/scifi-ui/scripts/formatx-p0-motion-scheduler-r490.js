@@ -44,7 +44,7 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1950-desktop-edge-aa';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1951-cinematic-photoreal-engine';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
