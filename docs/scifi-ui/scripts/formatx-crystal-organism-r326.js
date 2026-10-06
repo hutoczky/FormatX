@@ -1361,9 +1361,9 @@
           smoothstep(.075,.19,radialXY)*
           (1.0-smoothstep(.55,.76,radialXY))*
           frontDepth;
-        float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
-        float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
+        float foldRidge=pow(abs(cos(polar*2.0)),${mobile?'9.0':'13.0'})*foldEnvelope;
+        float foldValley=pow(abs(sin(polar*2.0)),${mobile?'8.0':'10.0'})*foldEnvelope;
+        float foldSecondary=pow(abs(cos(polar*4.0)),${mobile?'14.0':'20.0'})*foldEnvelope;
         c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.205'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.115'};
         c*=1.0-${mobile?'.085':'.145'}*foldValley;
@@ -1372,9 +1372,9 @@
            Desktop gets two nested V-shaped internal planes, inspired by the
            historic layered Signature MAG. They remain volumetric transmission
            events rather than drawn borders. */
-        float chevronA=exp(-pow((abs(vLocal.y)-(.205+.40*abs(vLocal.x)))/${mobile?'.060':'.034'},2.0))
+        float chevronA=exp(-pow(abs((abs(vLocal.y)-(.205+.40*abs(vLocal.x)))/${mobile?'.060':'.034'}),2.0))
           *frontDepth*(1.0-smoothstep(.58,.78,radialXY));
-        float chevronB=exp(-pow((abs(vLocal.y)-(.335+.24*abs(vLocal.x)))/${mobile?'.078':'.046'},2.0))
+        float chevronB=exp(-pow(abs((abs(vLocal.y)-(.335+.24*abs(vLocal.x)))/${mobile?'.078':'.046'}),2.0))
           *frontDepth*(1.0-smoothstep(.60,.80,radialXY));
         c+=vec3(.30,.43,.42)*chevronA*${mobile?'.030':'.090'};
         c+=vec3(.040,.165,.182)*chevronB*${mobile?'.022':'.065'};
@@ -1615,6 +1615,7 @@
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='desktop-cut-prism-chevrons-neutral-smoked-silver-deep-optic';
     root.dataset.fxNativeMagRasterR1947b='higher-software-topology-less-depth-crisper-desktop-normals';
+    root.dataset.fxNativeMagShaderR1947c='active-fold-profile-parity-nan-safe-chevron-distance';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
