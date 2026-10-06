@@ -233,6 +233,7 @@
   ROOT.dataset.fxMagBirthArtR721 = 'four-petal-organic-mag-r720-shell-nine-tendrils-reference-pullback';
   ROOT.dataset.fxMagBirthSignatureR1941 = 'four-point-smoked-bioglass-central-optic-studio-finale';
   ROOT.dataset.fxMagBirthSignatureR1947 = 'exact-pose-no-kick-seamless-permanent-handoff';
+  ROOT.dataset.fxMagBirthSeamOwnerR1947 = 'native-warm-underlay-final-450ms-crossfade';
   ROOT.dataset.fxMagBirthArtR800 = 'wide-cellular-mass-smaller-blue-iris-integrated-petals-segmented-tendrils-local-flash';
   ROOT.dataset.fxMagBirthArtR820 = 'dark-contiguous-cellular-shell-blue-radial-iris-integrated-dark-petals-thick-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR900 = 'reference-stage1-liquid-core-dna-stage2-cellular-orb-stage3-armored-tentacle-pod';
@@ -1022,6 +1023,15 @@
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
+
+    /* R1947d — final renderer convergence. The native MAG is already warm and
+       pose-locked underneath; fade only the cinematic compositor during the
+       final ~450 ms so DOM teardown cannot expose a one-frame renderer jump. */
+    if(!HAS_VISUAL_FRAME){
+      const seam=smoothstep((r-.955)/.045);
+      overlay.style.opacity=String(1-seam*.94);
+      ROOT.dataset.fxMagBirthSeamR1947=seam>0?'crossfading':'cinematic';
+    }
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
