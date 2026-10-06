@@ -895,7 +895,9 @@
         /* R1923 — the smooth cubic body is now authoritative. The legacy
            procedural face-grooves were still deforming the first WebGL frame
            after geometry cleanup and created a mouth/visor-like horizontal seam. */
-        float layerScale=uLayer>.5?.50:1.0;
+        /* R1947 — desktop second pass uses a true smaller prism volume.
+           Mobile keeps the historical scale but never schedules this pass. */
+        float layerScale=uLayer>.5?${mobile?'.50':'.58'}:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
         vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
@@ -1284,7 +1286,27 @@
         float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
 
         if(uLayer>.5){
-          ${outputName}=vec4(0.0,0.0,0.0,0.0);
+          /* R1947 — physically separate inner prism volume.
+             It is intentionally broad and low-alpha: depth, not neon decoration. */
+          float innerRadius=length(vLocal.xy);
+          float innerAngle=atan(vLocal.y,vLocal.x);
+          float innerAxis=pow(abs(cos(innerAngle*2.0)),7.5);
+          float innerDiagonal=pow(abs(sin(innerAngle*2.0)),8.0);
+          float innerRing=exp(-pow((innerRadius-.18)/.090,2.0));
+          float innerShell=exp(-pow((innerRadius-.31)/.105,2.0));
+          float innerCore=exp(-innerRadius*innerRadius*17.5);
+          float innerFront=smoothstep(-.24,.34,vLocal.z);
+          float innerPulse=.94+.06*sin(uTime*.78+innerRadius*7.0);
+          vec3 inner=vec3(.004,.018,.024);
+          inner+=vec3(.072,.205,.220)*innerAxis*(.11+.09*uEnergy);
+          inner+=vec3(.42,.57,.54)*innerRing*(.075+.15*softboxB);
+          inner+=vec3(.040,.145,.160)*innerShell*(.06+.08*fresnel);
+          inner+=vec3(.20,.79,.82)*innerCore*(.18+.12*uEnergy)*innerPulse;
+          inner+=vec3(.90,.99,.96)*softboxC*.055;
+          inner+=vec3(.050,.210,.235)*fresnel*.16;
+          inner*=1.0-.075*innerDiagonal;
+          float innerAlpha=(.050+.080*innerAxis+.090*innerRing+.060*innerShell+.155*innerCore+.040*fresnel)*innerFront;
+          ${outputName}=vec4(tone(inner*2.55),clamp(innerAlpha,0.0,.30));
           return;
         }
 
@@ -1568,7 +1590,23 @@
         optical+=vec3(.72,.92,.94)*lensGlint*.080;
         col=mix(col,optical,lensMeshMask*.997);
 
-        if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
+        if(uLayer>.5){
+          float innerRadius=length(vLocal.xy);
+          float innerAngle=atan(vLocal.y,vLocal.x);
+          float innerAxis=pow(abs(cos(innerAngle*2.0)),7.0);
+          float innerRing=exp(-pow((innerRadius-.18)/.095,2.0));
+          float innerCore=exp(-innerRadius*innerRadius*16.0);
+          float innerFront=smoothstep(-.24,.34,vLocal.z);
+          vec3 inner=vec3(.005,.020,.026);
+          inner+=vec3(.080,.205,.220)*innerAxis*(.10+.08*uEnergy);
+          inner+=vec3(.44,.58,.55)*innerRing*softboxB*.20;
+          inner+=vec3(.18,.70,.74)*innerCore*(.15+.10*uEnergy);
+          inner+=vec3(.86,.98,.95)*softboxA*.065;
+          inner+=vec3(.060,.220,.245)*fresnel*.18;
+          float innerAlpha=(.055+.090*innerAxis+.105*innerRing+.145*innerCore+.045*fresnel)*innerFront;
+          ${outputName}=vec4(filmic(inner*2.30),clamp(innerAlpha,0.0,.30));
+          return;
+        }
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.97,isLensMesh);
         ${outputName}=vec4(tone(col*2.10),clamp(alpha,.99,1.0));
@@ -1600,6 +1638,7 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1947='desktop-dual-layer-outer-crystal-inner-prism-depth-adaptive';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -2077,6 +2116,29 @@
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+
+      /* R1947 — second, smaller inner prism volume on capable desktop.
+         One extra draw call only; no extra geometry buffer, texture, RAF or DOM.
+         It automatically sheds if the renderer enters the slow path. */
+      const innerPrismPass=!mobile&&!auditMode&&!constrained&&!softwareRenderer&&!slowRenderer&&qualityScale>=.72;
+      if(innerPrismPass){
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
+        gl.disable(gl.DEPTH_TEST);
+        gl.depthMask(false);
+        gl.uniform1f(uniforms.uLayer,1);
+        gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+        gl.uniform1f(uniforms.uLayer,0);
+        gl.depthMask(true);
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.CULL_FACE);
+        gl.disable(gl.BLEND);
+        root.dataset.fxCorePassModelR1947='dual-layer-outer-crystal-inner-prism-single-buffer-adaptive-desktop';
+      }else{
+        root.dataset.fxCorePassModelR1947=mobile?'mobile-single-pass-preserved':'adaptive-single-pass-fallback';
+      }
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
