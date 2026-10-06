@@ -772,12 +772,56 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.105) 0%,rgba(40,92,98,.045) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.22),rgba(0,0,0,0) 82%)','important');
+
+    /* R1951 — studio depth stack. These are compositor-only optical layers:
+       no second WebGL pass and no idle JS loop. They give the hero object the
+       contact, atmosphere and restrained bloom that a photographed glass object
+       has in a real studio. */
+    if(!mobile){
+      stage.style.setProperty('isolation','isolate');
+      const depthLayer=(className,styles)=>{
+        const node=document.createElement('div');
+        node.className=className;
+        node.setAttribute('aria-hidden','true');
+        node.style.position='absolute';
+        node.style.pointerEvents='none';
+        node.style.zIndex='0';
+        for(const [name,value] of Object.entries(styles))node.style.setProperty(name,value);
+        stage.appendChild(node);
+        return node;
+      };
+      const volumeHaze=depthLayer('fx-mag-volume-haze-r1951',{
+        left:'13%',top:'10%',width:'74%',height:'74%',
+        background:'radial-gradient(ellipse at 50% 46%,rgba(126,218,224,.115) 0%,rgba(44,100,108,.060) 34%,rgba(13,36,43,.025) 54%,transparent 74%)',
+        filter:'blur(26px)',opacity:'.58',transform:'translateZ(0)'
+      });
+      const contactShadow=depthLayer('fx-mag-contact-shadow-r1951',{
+        left:'24%',top:'70%',width:'52%',height:'14%',
+        background:'radial-gradient(ellipse at 50% 50%,rgba(0,0,0,.68) 0%,rgba(0,0,0,.34) 35%,transparent 74%)',
+        filter:'blur(13px)',opacity:'.72',transform:'translateZ(0)'
+      });
+      const opticBloom=depthLayer('fx-mag-optic-bloom-r1951',{
+        left:'38%',top:'35%',width:'24%',height:'24%',
+        background:'radial-gradient(circle at 50% 50%,rgba(142,255,250,.13) 0%,rgba(67,207,218,.055) 31%,transparent 70%)',
+        filter:'blur(18px)',opacity:'.30','mix-blend-mode':'screen',transform:'translateZ(0) scale(.98)'
+      });
+      if(!reduced.matches&&typeof opticBloom.animate==='function'){
+        const bloom=opticBloom.animate(
+          [{opacity:.24,transform:'translateZ(0) scale(.975)'},{opacity:.33,transform:'translateZ(0) scale(1.025)'},{opacity:.24,transform:'translateZ(0) scale(.975)'}],
+          {duration:7600,iterations:Infinity,easing:'cubic-bezier(.37,0,.20,1)'}
+        );
+        bloom.id='fx-mag-optic-bloom-r1951';
+      }
+      root.dataset.fxNativeMagDepthR1951='desktop-volumetric-haze-contact-shadow-controlled-optic-bloom';
+    }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
     stage.appendChild(canvas);
+    canvas.style.setProperty('z-index','2');
+    canvas.style.setProperty('position','absolute');
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
@@ -1583,9 +1627,12 @@
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
     const mobilePhysical = mobile || constrainedMobile || auditMode;
-    /* R1930 visual parity: one authored studio shader on desktop, mobile and
-       software proof. This removes the hardware/CI split that hid ugly live paths. */
-    const fragmentSource = constrainedFragmentSource;
+    /* R1951 — capable desktop hardware receives the full studio material path.
+       Mobile, constrained, software and audit paths retain the proven bounded
+       shader. The full path adds richer Fresnel, internal caustic and lens depth
+       without changing geometry or accessibility. */
+    const desktopFullStudio=!mobile&&!constrained&&!softwareRenderer&&!auditMode&&webgl2;
+    const fragmentSource = desktopFullStudio ? fullFragmentSource : constrainedFragmentSource;
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
@@ -1604,6 +1651,8 @@
     root.dataset.fxNativeMagStudioR1942='signature-four-point-historic-fold-ridges-nested-prism-recessed-optic-bioglass';
     root.dataset.fxNativeMagStudioR1945='desktop-sharper-four-point-flatter-depth-frontal-signature-sculpt';
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
+    root.dataset.fxNativeMagStudioR1951='desktop-full-physical-shader-supersampled-contour-volumetric-depth-continuous-scroll';
+    root.dataset.fxNativeMagRasterR1951='desktop-min-1-48x-supersampling-msaa-bounded-5-2mp-budget';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -1835,13 +1884,13 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .88 : 1.06)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?1.00:1.14)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.70:.82));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1905,17 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.78:2.45);
       const cap=baseCap*qualityScale;
-      const dpr=Math.min(devicePixelRatio||1,cap);
+      const nativeDpr=devicePixelRatio||1;
+      /* R1951: desktop edge supersampling remains active even on DPR=1 panels.
+         This is the missing piece MSAA alone cannot solve on the sharp four-point
+         silhouette. Pixel budget and governor still bound the actual backing store. */
+      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,constrained?1.18:1.48);
+      const dpr=Math.min(requestedDpr,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:5200000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2113,7 +2167,10 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>16.75 || ms>6.4;
+        /* R1951 — frame cadence is presentation timing, not raster cost.
+           60 Hz naturally lands around 16.67 ms, so the old 16.75 ms panic edge
+           caused needless resolution shedding from normal scheduler jitter. */
+        const panicFrame=dt>19.25 || ms>7.2;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
           qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
@@ -2133,10 +2190,10 @@
           /* R1660 — preserve the 16.67 ms presentation budget. Resolution
              and secondary optical detail yield before cadence. Recovery waits
              until the renderer has sustained real headroom for long enough. */
-          const renderPressure=renderAverage>4.4 || renderPeak>5.8;
-          const severeRenderPressure=renderAverage>5.8 || renderPeak>7.4;
-          const framePressure=frameIntervalAverage>16.08 || framePeak>16.55;
-          const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
+          const renderPressure=renderAverage>5.2 || renderPeak>7.0;
+          const severeRenderPressure=renderAverage>7.0 || renderPeak>9.2;
+          const framePressure=frameIntervalAverage>18.25 || framePeak>19.8;
+          const severeFramePressure=frameIntervalAverage>21.5 || framePeak>24.0;
 
           if(severeFramePressure||severeRenderPressure){
             qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
@@ -2325,10 +2382,15 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1951 — desktop scroll remains a continuous camera gesture.
+           Six bounded frames per coalesced scroll sample feel cinematic while
+           preserving the zero-idle contract. Mobile retains the cheaper settle path. */
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        if(!mobile&&desktopFine.matches)schedule(6);
+        scrollSettleTimer=setTimeout(()=>{
+          scrollSettleTimer=0;
+          schedule(!mobile&&desktopFine.matches?5:1);
+        },mobile?88:118);
       });
     }
 
