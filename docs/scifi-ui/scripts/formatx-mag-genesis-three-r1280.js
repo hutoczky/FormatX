@@ -1479,29 +1479,30 @@
 
       const flash=smooth((t-9.12)/.16)*(1-smooth((t-9.50)/.30));
       /* R1945l — finale energy remains below clipping and converges to the permanent hero tone. */
+      /* R1950 — optical bloom only; no white-frame exposure spike. */
       const after=smooth((t-9.46)/.34);
-      this.renderer.toneMappingExposure=1.10+flash*.012+after*.004;
-      this.coreLight.intensity+=flash*.80+after*.25;
+      this.renderer.toneMappingExposure=1.095+flash*.006+after*.003;
+      this.coreLight.intensity+=flash*.38+after*.18;
       if(this.glowSprite){
-        const g=1+flash*.10;
+        const g=1+flash*.045;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.085,this.glowSprite.material.opacity+flash*.018);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.028;
-        const burstScale=2.18+flash*.18;
+        this.flashBurst.material.opacity=flash*.012;
+        const burstScale=2.12+flash*.10;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.012;
+        this.flashBeam.material.opacity=flash*.005;
         this.flashBeam.scale.x=1+flash*.08;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.42,.34+flash*.04);
-        const q=1.00+flash*.04;
+        this.mechEyeCorona.material.opacity=Math.min(.36,.32+flash*.025);
+        const q=1.00+flash*.022;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*1.20;
+      if(this.mechLight)this.mechLight.intensity+=flash*.55;
 
       this.renderer.render(this.scene,this.camera);
     }
