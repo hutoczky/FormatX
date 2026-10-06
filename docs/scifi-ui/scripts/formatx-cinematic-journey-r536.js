@@ -383,14 +383,24 @@
 
     /* Camera variables stay live even during fast scroll. They are compositor
        transforms only; scene-local DOM/state work remains deferred to settle. */
+    const worldX=pointerNX*10.2 + cameraVelocity*-1.60;
+    const worldY=pointerNY*6.8 + cameraVelocity*.82 + cameraLag*18;
     root.style.setProperty('--fx-c536-velocity',cameraVelocity.toFixed(4));
-    root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10.2 + cameraVelocity*-1.60).toFixed(2)+'px');
-    root.style.setProperty('--fx-c617-parallax-y',(pointerNY*6.8 + cameraVelocity*.82 + cameraLag*18).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-parallax-x',worldX.toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-parallax-y',worldY.toFixed(2)+'px');
     root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.62 + cameraLag*1.15).toFixed(3)+'deg');
     root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.84 - cameraVelocity*.075).toFixed(3)+'deg');
     root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
     root.style.setProperty('--fx-c1951-camera-lag',cameraLag.toFixed(4));
     root.style.setProperty('--fx-c1951-camera-z',(1+Math.min(.035,Math.abs(cameraVelocity)*.010)).toFixed(4));
+    root.style.setProperty('--fx-c1951-world-x',worldX.toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-world-y',worldY.toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-back-x',(pointerNX*2.0-cameraVelocity*.28).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-back-y',(pointerNY*1.5+cameraVelocity*.32+cameraLag*5).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-dust-x',(pointerNX*3.5-cameraVelocity*.42).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-dust-y',(pointerNY*2.6+cameraVelocity*.48+cameraLag*8).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-front-x',(pointerNX*5.8-cameraVelocity*.70).toFixed(2)+'px');
+    root.style.setProperty('--fx-c1951-front-y',(pointerNY*4.6+cameraVelocity*.78+cameraLag*12).toFixed(2)+'px');
 
     if(!fastScroll){
       root.style.setProperty('--fx-c536-progress',global.toFixed(4));
