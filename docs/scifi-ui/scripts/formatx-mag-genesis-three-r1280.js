@@ -48,6 +48,7 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      this.mobileLayout=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)');
 
       this.renderer=new THREE.WebGLRenderer({
         canvas,
@@ -1372,6 +1373,18 @@
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
 
+      /* R1947 — exact handoff orientation parity with the permanent renderer.
+         The old finale ended almost unrotated, then the permanent MAG appeared
+         at its authored three-quarter baseline, producing a subtle visual snap. */
+      const handoffPose=smooth((t-8.55)/1.20);
+      const mobilePose=this.mobileLayout.matches;
+      const finalRX=mobilePose?-.090:-.070;
+      const finalRY=mobilePose?-.400:-.320;
+      const finalRZ=.008;
+      this.mechanicalGroup.rotation.x=mix(0,finalRX,handoffPose);
+      this.mechanicalGroup.rotation.y=mix(0,finalRY,handoffPose);
+      this.mechanicalGroup.rotation.z=mix(0,finalRZ,handoffPose);
+
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
@@ -1580,6 +1593,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1947='exact-pose-seamless-handoff-to-permanent-renderer';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
