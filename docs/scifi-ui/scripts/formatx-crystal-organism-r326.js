@@ -1617,6 +1617,7 @@
     root.dataset.fxNativeMagStudioR1945b='desktop-cut-prism-clarity-enlarged-recessed-optic';
     root.dataset.fxNativeMagStudioR1947='higher-desktop-topology-anti-pinhole-solid-glass-floor';
     root.dataset.fxNativeMagStudioR1947b='smooth-cusp-tip-boost-no-axis-raster-cracks';
+    root.dataset.fxNativeMagRasterR1947d='closed-outward-shell-backface-cull-no-rear-depth-speckles';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -2087,10 +2088,12 @@
          This removes the additive back-face wash that turned the living MAG into
          a translucent crystal/diamond on phones, while cutting hero overdraw. */
       gl.disable(gl.BLEND);
-      /* R1945j — retain the proven two-sided closed shell. The R1945i culling
-         experiment increased pinholes; the actual speckle source was the
-         per-triangle material randomization, now removed above. */
-      gl.disable(gl.CULL_FACE);
+      /* R1947d — render only the outward closed shell.
+         With the continuous macro-facet field and smoothed cusp geometry now in
+         place, two-sided depth writes only add rear-surface contamination. */
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      gl.frontFace(gl.CCW);
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
