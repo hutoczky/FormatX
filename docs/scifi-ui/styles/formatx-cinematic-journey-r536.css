@@ -1204,6 +1204,7 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
   }
   html[data-fx-cinematic-scene-r536="core"] .fx-c536-scan{
     opacity:.012!important;
+    transition:filter .72s ease!important;
   }
   html[data-fx-cinematic-scene-r536="core"] .fx-c536-iris{
     opacity:.08!important;
@@ -1216,6 +1217,7 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
       translate(-50%,-50%)
       translate3d(calc(var(--fx-c536-velocity) * -7px),calc(var(--fx-c536-velocity) * 4px),0)
       scale(calc(.82 + var(--fx-c536-local) * .08))!important;
+    transition:transform .82s cubic-bezier(.18,.78,.2,1),filter .72s ease!important;
   }
 
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-hud{
@@ -1235,3 +1237,4 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
   }
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
+/* production-r1948-hero-core-no-opacity-flash */
