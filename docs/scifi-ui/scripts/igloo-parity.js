@@ -93,7 +93,7 @@
     }
     ensureStyle(
       'data-fx-desktop-unified',
-      './styles/formatx-desktop-unified.css?v=20261006-r1949-award-final-seal',
+      './styles/formatx-desktop-unified.css?v=20261007-r1951-luxury-continuous-scene',
       'fxDesktopUnified',
       'FormatX desktop composition stylesheet failed to load.'
     );
