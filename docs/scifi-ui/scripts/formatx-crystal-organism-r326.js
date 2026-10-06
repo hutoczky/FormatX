@@ -12,7 +12,8 @@
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
   const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  const studioVisualProof = auditParams.has('visualintro') || auditParams.has('r1947proof');
+  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && !studioVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -1642,6 +1643,7 @@
     root.dataset.fxNativeMagStudioR1947b='shader-scope-safe-inner-prism-lighting';
     root.dataset.fxNativeMagStudioR1947c='exact-head-dual-layer-proof-owner';
     root.dataset.fxNativeMagStudioR1947d='initial-quality-gate-active-governor-shedding';
+    root.dataset.fxNativeMagStudioR1947e='visual-proof-forces-desktop-inner-prism-without-production-policy-drift';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
@@ -2123,7 +2125,8 @@
       /* R1947 — second, smaller inner prism volume on capable desktop.
          One extra draw call only; no extra geometry buffer, texture, RAF or DOM.
          It automatically sheds if the renderer enters the slow path. */
-      const innerPrismPass=!mobile&&!auditMode&&!constrained&&!softwareRenderer&&!slowRenderer&&qualityScale>=.68;
+      const innerPrismPass=!mobile&&!softwareRenderer&&!slowRenderer&&qualityScale>=.68
+        &&(!auditMode||studioVisualProof)&&(!constrained||studioVisualProof);
       if(innerPrismPass){
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
