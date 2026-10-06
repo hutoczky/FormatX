@@ -47,7 +47,7 @@ for (const token of [
   'production-r1948-hero-progressive-disclosure-zero-idle',
   '[data-fx-cinematic-scene-r536="core"] .fx-c536-hud',
   '[data-fx-cinematic-scene-r536="core"] .fx-c536-track',
-  '[data-fx-cinematic-scene-r536="core"] :is(.fx-rail,.fx-organism-status)',
+  '[data-fx-cinematic-scene-r536="core"] .fx-c536-iris',
   ':not([data-fx-cinematic-scene-r536="core"]) .fx-c536-hud',
   '(min-width:901px)',
   '(prefers-reduced-motion:no-preference)'
