@@ -17,7 +17,8 @@ const SHOTS=[
   [3.50,'02-3.50s'],
   [5.50,'03-5.50s'],
   [7.50,'04-7.50s'],
-  [9.25,'05-9.25s']
+  [9.25,'05-9.25s'],
+  [9.55,'05b-9.55s']
 ];
 
 (async()=>{
@@ -284,12 +285,31 @@ const SHOTS=[
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
+          nativeProof:root.dataset.fxMagBirthVisualFrameNativeR1947||'',
+          nativeCrossfade:root.dataset.fxMagBirthNativeCrossfadeR1947||'',
+          nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+          overlayOpacity:getComputedStyle(document.querySelector('.fx-mag-birth-r533')).opacity,
           overlay:document.querySelectorAll('.fx-mag-birth-r533').length
         };
       });
 
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      }
+      if(seconds>=8.85){
+        if(state.nativeFirstFrame!=='painted')errors.push('R1947 native hero did not paint before finale proof: '+state.nativeFirstFrame);
+        if(!/^(?:0(?:\.\d+)?|1(?:\.0+)?)$/.test(state.nativeCrossfade)){
+          errors.push('R1947 native crossfade telemetry missing at '+seconds+'s: '+state.nativeCrossfade);
+        }
+        if(state.nativeProof!=='painted-crossfade-ready'){
+          errors.push('R1947 fixed-frame native proof not synchronized: '+state.nativeProof);
+        }
+        if(seconds>=9.50){
+          const blend=Number(state.nativeCrossfade);
+          const opacity=Number(state.overlayOpacity);
+          if(!(blend>=.95))errors.push('R1947 finale did not converge to native hero: '+state.nativeCrossfade);
+          if(!(opacity<=.08))errors.push('R1947 cinematic shell still too visible at finale: '+state.overlayOpacity);
+        }
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
