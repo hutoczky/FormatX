@@ -715,9 +715,10 @@
       try {
         coreApi.setMorph?.(0,'r1947-seamless-living-core-handoff');
         coreApi.setShape?.('organism','r1947-seamless-living-core-handoff');
-        /* R1947: no pose kick or energy sweep at the seam. The permanent
-           renderer already owns the exact final pose; interaction begins after
-           the visual transfer instead of during it. */
+        const pose=MOBILE?[-.090,-.400,.008]:[-.070,-.320,.008];
+        coreApi.setRotation?.(pose[0],pose[1],pose[2],'r1947-exact-intro-handoff-pose');
+        /* R1947: no relative rotation kick or energy sweep at the seam.
+           Interaction begins only after the visual transfer. */
         coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
