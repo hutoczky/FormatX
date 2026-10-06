@@ -774,10 +774,20 @@
     host.prepend(stage);
     stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
 
+    const depthBack=document.createElement('div');
+    depthBack.className='fx-mag-depth-back-r1951';
+    depthBack.setAttribute('aria-hidden','true');
+    const contactShadow=document.createElement('div');
+    contactShadow.className='fx-mag-contact-shadow-r1951';
+    contactShadow.setAttribute('aria-hidden','true');
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
-    stage.appendChild(canvas);
+    const depthFront=document.createElement('div');
+    depthFront.className='fx-mag-depth-front-r1951';
+    depthFront.setAttribute('aria-hidden','true');
+    stage.append(depthBack,contactShadow,canvas,depthFront);
+    stage.dataset.fxDepthStackR1951='back-haze-contact-shadow-native-mag-front-haze';
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
