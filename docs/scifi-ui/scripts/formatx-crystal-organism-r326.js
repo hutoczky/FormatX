@@ -392,7 +392,7 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.90:.88)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        const smoothWeight=facet<2.0?1.0:(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -1618,6 +1618,7 @@
     root.dataset.fxNativeMagRasterR1947b='higher-software-topology-less-depth-crisper-desktop-normals';
     root.dataset.fxNativeMagShaderR1947c='active-fold-profile-parity-nan-safe-chevron-distance';
     root.dataset.fxNativeMagShaderR1947d='nan-safe-squared-softboxes-prisms-optic-sweep';
+    root.dataset.fxNativeMagNormalsR1947e='body-100pct-analytical-smooth-normal-no-triangle-normal-discontinuity';
     root.dataset.fxNativeMagStudioR1945f='desktop-macro-facet-smoked-silver-zero-triangle-speckle';
     root.dataset.fxNativeMagRasterR1945i='closed-front-skin-backface-cull-no-rear-depth-speckle';
     root.dataset.fxNativeMagRasterR1945j='two-sided-shell-continuous-macro-facet-no-triangle-random-speckle';
