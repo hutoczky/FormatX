@@ -232,6 +232,7 @@
   ROOT.dataset.fxMagBirthArtR720 = 'organic-convex-diamond-fold-dominant-shell-dark-hood-thick-tendrils-late-close-camera';
   ROOT.dataset.fxMagBirthArtR721 = 'four-petal-organic-mag-r720-shell-nine-tendrils-reference-pullback';
   ROOT.dataset.fxMagBirthSignatureR1941 = 'four-point-smoked-bioglass-central-optic-studio-finale';
+  ROOT.dataset.fxMagBirthSignatureR1947 = 'exact-pose-no-kick-seamless-permanent-handoff';
   ROOT.dataset.fxMagBirthArtR800 = 'wide-cellular-mass-smaller-blue-iris-integrated-petals-segmented-tendrils-local-flash';
   ROOT.dataset.fxMagBirthArtR820 = 'dark-contiguous-cellular-shell-blue-radial-iris-integrated-dark-petals-thick-segmented-tendrils';
   ROOT.dataset.fxMagBirthArtR900 = 'reference-stage1-liquid-core-dna-stage2-cellular-orb-stage3-armored-tentacle-pod';
@@ -712,10 +713,11 @@
     if (!ignitionDone) {
       ignitionDone=true;
       try {
-        coreApi.setMorph?.(0,'r611-living-core-ignition');
-        coreApi.setShape?.('organism','r611-living-core-ignition');
-        coreApi.rotateBy?.(.035,.055,'r614-genome-first-living-impulse');
-        coreApi.surfacePulse?.('r614-genome-handoff');
+        coreApi.setMorph?.(0,'r1947-seamless-living-core-handoff');
+        coreApi.setShape?.('organism','r1947-seamless-living-core-handoff');
+        /* R1947: no pose kick or energy sweep at the seam. The permanent
+           renderer already owns the exact final pose; interaction begins after
+           the visual transfer instead of during it. */
         coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
