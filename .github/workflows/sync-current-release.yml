@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: sync-current-formatx-release
@@ -198,8 +199,21 @@ jobs:
           ' "$candidate" >/dev/null
 
           if [[ -f "$current" ]]; then
-            jq -S 'del(.synced_at, .channels.android.updated_at)' "$current" > .tmp/current.normalized.json
-            jq -S 'del(.synced_at, .channels.android.updated_at)' "$candidate" > .tmp/candidate.normalized.json
+            # Download counters and generated timestamps are observational metadata,
+            # not release identity. Ignoring them prevents six-hourly no-op commits and
+            # unnecessary production rebuilds while still deploying real release changes.
+            jq -S 'del(
+              .synced_at,
+              .channels.android.updated_at,
+              .channels.multiplatform.download_count,
+              .channels.android.download_count
+            )' "$current" > .tmp/current.normalized.json
+            jq -S 'del(
+              .synced_at,
+              .channels.android.updated_at,
+              .channels.multiplatform.download_count,
+              .channels.android.download_count
+            )' "$candidate" > .tmp/candidate.normalized.json
             if cmp -s .tmp/current.normalized.json .tmp/candidate.normalized.json; then
               echo 'Release metadata is unchanged; preserving the existing synced_at value.'
               echo 'changed=false' >> "$GITHUB_OUTPUT"
@@ -219,3 +233,13 @@ jobs:
           git add docs/scifi-ui/data/current-release.json
           git commit -m 'Sync official current release metadata'
           git push
+
+      - name: Dispatch audited production deployment for meaningful release changes
+        if: steps.metadata.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location             --retry 4 --retry-all-errors --retry-delay 2             --connect-timeout 15 --max-time 90             -X POST             -H 'Accept: application/vnd.github+json'             -H 'X-GitHub-Api-Version: 2022-11-28'             -H "Authorization: Bearer ${GH_TOKEN}"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/deploy-formatx-custom-domain.yml/dispatches"             -d '{"ref":"master","inputs":{"deploy":"true"}}'
+          echo 'Audited production deployment dispatched for the newly synced release metadata.'

@@ -164,7 +164,10 @@ def validate_release_sync() -> None:
         "multiplatform_asset", "primary_platform: \"linux-bazzite\"",
         "supported_platforms: [\"linux-bazzite\", \"windows\"]",
         "android_local", "android_local_size", "android_local_digest", "sha256sum",
-        "integrity", "del(.synced_at, .channels.android.updated_at)", "cmp -s",
+        "integrity", "del(", ".synced_at,", ".channels.android.updated_at,",
+        ".channels.multiplatform.download_count,", ".channels.android.download_count",
+        "cmp -s", "actions: write", "deploy-formatx-custom-domain.yml/dispatches",
+        "\"deploy\":\"true\"", "git commit -m 'Sync official current release metadata'",
         "preserving the existing synced_at value", "--retry-all-errors",
     ])
     require_tokens(android_integrity_workflow, "Android integrity workflow", [

@@ -201,14 +201,22 @@ check(
 );
 check(
   'release-sync-deterministic',
-  syncWorkflow.includes('del(.synced_at, .channels.android.updated_at)')
+  syncWorkflow.includes('del(')
+    && syncWorkflow.includes('.synced_at,')
+    && syncWorkflow.includes('.channels.android.updated_at,')
+    && syncWorkflow.includes('.channels.multiplatform.download_count,')
+    && syncWorkflow.includes('.channels.android.download_count')
     && syncWorkflow.includes('cmp -s')
     && syncWorkflow.includes('--retry-all-errors')
     && syncWorkflow.includes('android_local_size')
     && syncWorkflow.includes('android_local_digest')
     && syncWorkflow.includes('sha256sum')
-    && syncWorkflow.includes("stat -c '%s'"),
-  'Release sync is not deterministic and resilient'
+    && syncWorkflow.includes("stat -c '%s'")
+    && syncWorkflow.includes('actions: write')
+    && syncWorkflow.includes('deploy-formatx-custom-domain.yml/dispatches')
+    && syncWorkflow.includes('"deploy":"true"')
+    && syncWorkflow.includes("git commit -m 'Sync official current release metadata'"),
+  'Release sync is not deterministic, resilient and deploy-aware'
 );
 
 check(
