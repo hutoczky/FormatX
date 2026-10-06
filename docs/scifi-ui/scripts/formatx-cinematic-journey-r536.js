@@ -86,10 +86,14 @@
     stage.dataset.fxC536Primed='false';
     stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
     stage.innerHTML = [
+      '<div class="fx-c1951-atmosphere-back"></div>',
       '<div class="fx-c536-world"></div>',
+      '<div class="fx-c1951-light-field"></div>',
       '<div class="fx-c536-iris"></div>',
       '<div class="fx-c536-track"></div>',
       '<div class="fx-c536-scan"></div>',
+      '<div class="fx-c1951-atmosphere-front"></div>',
+      '<div class="fx-c1951-depth-particles"></div>',
       '<div class="fx-c536-vignette"></div>',
       '<div class="fx-c536-grain"></div>',
       '<div class="fx-c536-flare"></div>'
@@ -596,6 +600,7 @@
     root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicPhysicsR1951='spring-mass-pointer-scroll-velocity-depth-camera-zero-idle';
+    root.dataset.fxCinematicAtmosphereR1951='shared-camera-back-mid-front-depth-layers-no-idle-animation';
     root.dataset.fxCinematicContinuityR1951='no-desktop-section-cut-single-camera-path';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
