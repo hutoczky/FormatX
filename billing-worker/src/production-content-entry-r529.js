@@ -110,6 +110,55 @@ function injectStaticHeart(html) {
   }
   return source;
 }
+function mergeVaryR1950(current, token) {
+  const values=String(current||'').split(',').map(value=>value.trim()).filter(Boolean);
+  if(!values.some(value=>value.toLowerCase()===String(token).toLowerCase()))values.push(token);
+  return values.join(', ');
+}
+function encodingQualityR1950(header, coding) {
+  let wildcard=null;
+  for(const raw of String(header||'').split(',')){
+    const parts=raw.trim().split(';');
+    const name=String(parts.shift()||'').trim().toLowerCase();
+    if(!name)continue;
+    let q=1;
+    for(const parameter of parts){
+      const match=parameter.trim().match(/^q\s*=\s*(0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/i);
+      if(match){q=Math.max(0,Math.min(1,Number(match[1])));break;}
+    }
+    if(name===String(coding).toLowerCase())return q;
+    if(name==='*')wildcard=q;
+  }
+  return wildcard??0;
+}
+function compressibleR1950(contentType) {
+  const type=String(contentType||'').toLowerCase().split(';',1)[0].trim();
+  return type.startsWith('text/')
+    || type==='application/javascript'
+    || type==='application/x-javascript'
+    || type==='application/json'
+    || type==='application/manifest+json'
+    || type==='application/xml'
+    || type==='application/xhtml+xml'
+    || type==='image/svg+xml';
+}
+function gzipFinalR1950(request,response) {
+  if(request.method==='HEAD'||!response.body||[204,206,304].includes(response.status))return response;
+  if(response.headers.get('Content-Encoding'))return response;
+  if(!compressibleR1950(response.headers.get('Content-Type')))return response;
+  if(encodingQualityR1950(request.headers.get('Accept-Encoding'),'gzip')<=0)return response;
+  if(typeof CompressionStream!=='function')return response;
+  const headers=new Headers(response.headers);
+  headers.delete('Content-Length');
+  headers.delete('ETag');
+  headers.set('Content-Encoding','gzip');
+  headers.set('Vary',mergeVaryR1950(headers.get('Vary'),'Accept-Encoding'));
+  headers.set('X-FormatX-Text-Compression','gzip-r1950-final-wrapper');
+  return new Response(response.body.pipeThrough(new CompressionStream('gzip')),{
+    status:response.status,statusText:response.statusText,headers
+  });
+}
+
 function r529Headers(source) {
   const headers = new Headers(source);
   headers.set('X-FormatX-Transport-Stability', 'r529-direct-canonical-living-core');
@@ -135,7 +184,7 @@ export default {
     }
     const type = headers.get('Content-Type') || '';
     if (!type.includes('text/html')) {
-      return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+      return gzipFinalR1950(request,new Response(response.body, { status: response.status, statusText: response.statusText, headers }));
     }
 
     let html = restoreCriticalCoreFirstPaint(await response.text());
@@ -150,6 +199,6 @@ export default {
     headers.delete('Content-Encoding');
     headers.delete('ETag');
     headers.set('Cache-Control', 'no-store, max-age=0');
-    return new Response(html, { status: response.status, statusText: response.statusText, headers });
+    return gzipFinalR1950(request,new Response(html, { status: response.status, statusText: response.statusText, headers }));
   },
 };

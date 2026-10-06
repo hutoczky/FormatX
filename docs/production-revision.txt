@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261006-r1949-award-final-seal
+token=20261006-r1950-live-performance-integrity
 base_master=4405446c76efa02d5c3a25473e31aa216d44bc0b
-purpose=deploy the R1949 award-final hero disclosure and editorial rhythm with guaranteed restrained hero world opacity, deterministic document-top core return, full production stylesheet rewrite parity and preserved R1948 progressive disclosure, R1947 continuous scene art-direction, R1945l Signature MAG and R1944 precision interaction
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, Igloo-floor gate, mobile MAG proof, no-occlusion, cinematic handoff, hero disclosure state and production Worker parity
+purpose=preserve the R1949 award-final seal while removing uncompressed transformed text and heavy MAG runtime work from the first-paint critical path, locking the mobile FORMATX LCP paint and keeping the live Signature MAG immediate on trusted interaction
+validation=production preflight, exact-revision convergence, gzip public text delivery, charset-first HTML, Lighthouse desktop/mobile, P0 first paint, canonical MAG, no-occlusion, cinematic handoff, award-final hero disclosure and current-runtime audit parity
