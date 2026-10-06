@@ -222,12 +222,12 @@ async function verify(browser, name, viewport, mobile) {
       };
       assert.ok(!/blur\((?!0(?:px)?\))/i.test(filter),
         `${name}: final mobile compositor reintroduced blur; computed=${filter}`);
-      assert.ok(numberOf('brightness') >= .95,
-        `${name}: final mobile crystal is too dim; computed=${filter}`);
-      assert.ok(numberOf('contrast') >= 1.05,
-        `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
-      assert.ok(numberOf('saturate') >= .94 && numberOf('saturate') <= 1.02,
-        `${name}: final R1795 smoky-bioglass saturation drift; computed=${filter}`);
+      assert.ok(numberOf('brightness') >= 1.08 && numberOf('brightness') <= 1.16,
+        `${name}: R1943 mobile crystal brightness drift; computed=${filter}`);
+      assert.ok(numberOf('contrast') >= 1.10 && numberOf('contrast') <= 1.20,
+        `${name}: R1943 mobile crystal facet contrast drift; computed=${filter}`);
+      assert.ok(numberOf('saturate') >= .78 && numberOf('saturate') <= .90,
+        `${name}: R1943 smoked-silver prism saturation drift; computed=${filter}`);
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
