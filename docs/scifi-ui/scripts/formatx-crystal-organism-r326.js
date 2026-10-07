@@ -1760,7 +1760,7 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
-      finishBoot(program);
+      void finishBoot(program).catch(failShader);
     }
     finishWhenReady();
     return;
