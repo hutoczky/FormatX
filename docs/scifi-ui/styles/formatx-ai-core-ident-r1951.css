@@ -1,107 +1,133 @@
-/* R1951 — first-load MAG AI identity.
-   A short post-genesis label makes the MAG's AI role explicit, then clears the
-   hero completely. It is intentionally presentation-only and never captures input. */
+/* R1955 — MAG AI CORE boot telemetry.
+   Presentation-only identity appears after genesis stabilizes, reads like a
+   system telemetry signature rather than a web badge, then clears the hero. */
 .fx-ai-core-ident-r1951{
   position:fixed;
   left:50%;
-  top:58%;
+  top:58.5%;
   z-index:2147483400;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
+  display:grid;
+  justify-items:center;
+  gap:7px;
   width:max-content;
-  max-width:min(88vw,620px);
-  padding:13px 22px 12px;
+  max-width:min(88vw,660px);
+  padding:14px 24px 13px;
   pointer-events:none;
   user-select:none;
   opacity:0;
-  transform:translate3d(-50%,18px,0) scale(.985);
-  filter:blur(9px);
+  transform:translate3d(-50%,14px,0) scale(.992);
+  filter:blur(8px);
   will-change:opacity,transform,filter;
   transition:
-    opacity .48s cubic-bezier(.22,.61,.36,1),
-    transform .68s cubic-bezier(.16,.84,.24,1),
-    filter .62s ease;
+    opacity .38s cubic-bezier(.22,.61,.36,1),
+    transform .58s cubic-bezier(.16,.84,.24,1),
+    filter .52s cubic-bezier(.22,.61,.36,1);
   text-align:center;
   isolation:isolate;
 }
-.fx-ai-core-ident-r1951::before{
+.fx-ai-core-ident-r1951::before,
+.fx-ai-core-ident-r1951::after{
   content:"";
   position:absolute;
   left:50%;
-  top:-5px;
-  width:clamp(82px,10vw,144px);
+  width:clamp(86px,9vw,138px);
   height:1px;
-  transform:translateX(-50%);
-  background:linear-gradient(90deg,transparent,rgba(172,230,235,.38),transparent);
-  box-shadow:0 0 18px rgba(103,218,225,.12);
+  transform:translateX(-50%) scaleX(.74);
+  opacity:.34;
+  background:linear-gradient(90deg,transparent,rgba(173,228,232,.72),transparent);
+  box-shadow:0 0 14px rgba(93,205,214,.10);
+  transition:transform .62s cubic-bezier(.16,.84,.24,1),opacity .42s ease;
 }
+.fx-ai-core-ident-r1951::before{top:0}
+.fx-ai-core-ident-r1951::after{bottom:0;opacity:.18}
 .fx-ai-core-ident-r1951.is-visible{
   opacity:.96;
   transform:translate3d(-50%,0,0) scale(1);
   filter:blur(0);
 }
+.fx-ai-core-ident-r1951.is-visible::before,
+.fx-ai-core-ident-r1951.is-visible::after{
+  transform:translateX(-50%) scaleX(1);
+}
 .fx-ai-core-ident-r1951.is-exiting{
   opacity:0;
-  transform:translate3d(-50%,-8px,0) scale(.992);
-  filter:blur(7px);
+  transform:translate3d(-50%,-7px,0) scale(.994);
+  filter:blur(6px);
 }
 .fx-ai-core-ident-r1951__title,
 .fx-ai-core-ident-r1951__sub{
   display:block;
   white-space:nowrap;
-  font-family:inherit;
+  font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
   text-transform:uppercase;
 }
 .fx-ai-core-ident-r1951__title{
-  font-size:clamp(13px,.92vw,16px);
+  position:relative;
+  padding-left:14px;
+  font-size:clamp(12px,.82vw,15px);
   line-height:1;
-  font-weight:720;
-  letter-spacing:.34em;
-  color:rgba(226,248,249,.96);
+  font-weight:760;
+  letter-spacing:.28em;
+  color:rgba(229,248,249,.95);
   text-shadow:
-    0 0 10px rgba(116,221,226,.20),
-    0 0 28px rgba(87,185,198,.10);
+    0 0 9px rgba(116,221,226,.15),
+    0 0 24px rgba(87,185,198,.07);
+}
+.fx-ai-core-ident-r1951__title::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  transform:translateY(-50%);
+  background:rgba(120,240,217,.92);
+  box-shadow:
+    0 0 5px rgba(120,240,217,.52),
+    0 0 12px rgba(88,218,204,.18);
 }
 .fx-ai-core-ident-r1951__sub{
-  font-size:clamp(8px,.52vw,10px);
+  font-size:clamp(7px,.45vw,9px);
   line-height:1;
-  font-weight:560;
-  letter-spacing:.22em;
-  color:rgba(184,218,222,.62);
-  text-shadow:0 0 12px rgba(91,188,199,.08);
+  font-weight:540;
+  letter-spacing:.18em;
+  color:rgba(180,211,215,.50);
+  text-shadow:0 0 10px rgba(91,188,199,.05);
 }
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   .fx-ai-core-ident-r1951{
-    top:57%;
-    gap:7px;
-    max-width:90vw;
-    padding:11px 16px 10px;
-    transform:translate3d(-50%,14px,0) scale(.99);
+    top:57.5%;
+    gap:6px;
+    max-width:91vw;
+    padding:12px 16px 11px;
+    transform:translate3d(-50%,11px,0) scale(.994);
   }
   .fx-ai-core-ident-r1951.is-visible{
     transform:translate3d(-50%,0,0) scale(1);
   }
   .fx-ai-core-ident-r1951.is-exiting{
-    transform:translate3d(-50%,-6px,0) scale(.994);
+    transform:translate3d(-50%,-5px,0) scale(.996);
   }
   .fx-ai-core-ident-r1951__title{
-    font-size:clamp(12px,3.35vw,14px);
-    letter-spacing:.25em;
+    padding-left:12px;
+    font-size:clamp(11px,3.15vw,13px);
+    letter-spacing:.22em;
   }
   .fx-ai-core-ident-r1951__sub{
-    font-size:clamp(8px,2.2vw,9px);
-    letter-spacing:.16em;
+    font-size:clamp(7px,2.05vw,8px);
+    letter-spacing:.13em;
   }
 }
 @media (prefers-reduced-motion:reduce){
   .fx-ai-core-ident-r1951{
     filter:none;
     transform:translate3d(-50%,0,0);
-    transition:opacity .12s linear;
+    transition:opacity .14s linear;
   }
-  .fx-ai-core-ident-r1951.is-visible{transform:translate3d(-50%,0,0)}
+  .fx-ai-core-ident-r1951::before,
+  .fx-ai-core-ident-r1951::after{transition:none}
+  .fx-ai-core-ident-r1951.is-visible,
   .fx-ai-core-ident-r1951.is-exiting{transform:translate3d(-50%,0,0)}
 }
+/* production-r1955-mag-ai-core-boot-telemetry */
