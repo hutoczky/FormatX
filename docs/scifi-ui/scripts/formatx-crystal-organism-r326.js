@@ -1710,7 +1710,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
-    root.dataset.fxNativeMagQualityR1951='desktop-minimum-supersample-no-css-scale-resample-high-quality-floor';
+    root.dataset.fxNativeMagQualityR1951='desktop-1-32x-minimum-supersample-msaa-no-css-scale-resample-balanced-quality-floor';
     root.dataset.fxNativeMagDepthR1951='static-volumetric-haze-contact-shadow-optical-bloom-no-extra-render-loop';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
@@ -1855,14 +1855,14 @@
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.82)
-      : (mobile ? 1.00 : (auditMode ? .96 : (constrained ? .92 : 1.00)));
+      ? (mobile?.94:.80)
+      : (mobile ? 1.00 : (auditMode ? .93 : (constrained ? .89 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.96)
-      : (mobile?1.08:(auditMode?1.02:(constrained?1.00:1.10)));
+      ? (mobile?1.00:.94)
+      : (mobile?1.08:(auditMode?.98:(constrained?.97:1.06)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.64)
-      : (mobile?.80:(constrained?.78:.88));
+      ? (mobile?.80:.62)
+      : (mobile?.80:(constrained?.76:.84));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1876,16 +1876,16 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.42)
-        : (auditMode ? 1.55 : constrainedMobile?1.72:mobile?2.00:constrained?1.82:2.25);
+        ? (mobile?1.58:1.34)
+        : (auditMode ? 1.38 : constrainedMobile?1.72:mobile?2.00:constrained?1.62:2.05);
       const cap=baseCap*qualityScale;
       const nativeDpr=devicePixelRatio||1;
-      const desktopSupersample=softwareRenderer?1.18:(constrained?1.28:1.46);
+      const desktopSupersample=softwareRenderer?1.14:(constrained?1.20:1.32);
       const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,desktopSupersample);
       const dpr=Math.min(requestedDpr,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:760000)
-        : (auditMode ? 1400000 : constrainedMobile?1280000:mobile?1900000:constrained?2100000:4600000);
+        ? (mobile?920000:690000)
+        : (auditMode ? 1180000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:3800000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
