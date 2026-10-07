@@ -1631,6 +1631,115 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   transform:rotate(var(--r)) scaleX(1.28) translateY(-50%);
 }
 
+
+/* R1959 — cinematic system identifier.
+   This is not a badge/card. It floats in the optical field as boot telemetry,
+   appears once during stabilization, then dissolves before the settled hero. */
+.fxb-core-ident{
+  position:absolute;
+  left:var(--fxb-x);
+  top:calc(var(--fxb-y) + clamp(118px,17vh,168px));
+  z-index:18;
+  display:grid;
+  justify-items:center;
+  gap:7px;
+  min-width:220px;
+  padding:18px 26px 12px;
+  color:rgba(235,251,255,.94);
+  pointer-events:none;
+  user-select:none;
+  transform:translate(-50%,18px) scale(.985);
+  transform-origin:50% 50%;
+  opacity:0;
+  filter:blur(8px);
+  text-align:center;
+  mix-blend-mode:screen;
+  transition:
+    opacity .42s cubic-bezier(.18,.72,.2,1),
+    filter .58s cubic-bezier(.18,.72,.2,1),
+    transform .72s cubic-bezier(.16,.78,.18,1);
+}
+.fxb-core-ident::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:0;
+  width:76px;
+  height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,rgba(127,226,238,.46),transparent);
+  box-shadow:0 0 14px rgba(72,199,218,.10);
+}
+.fxb-core-ident::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-2px;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  background:rgba(190,249,255,.92);
+  box-shadow:
+    0 0 8px rgba(102,226,239,.55),
+    0 0 18px rgba(68,195,217,.16);
+}
+.fxb-core-ident > span{
+  display:block;
+  font:650 11px/1.05 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  letter-spacing:.235em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  text-shadow:
+    0 0 12px rgba(140,236,244,.12),
+    0 0 26px rgba(70,191,211,.08);
+}
+.fxb-core-ident > small{
+  display:block;
+  font:560 7.5px/1.1 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  color:rgba(186,220,226,.48);
+  white-space:nowrap;
+  text-shadow:0 0 10px rgba(89,205,220,.06);
+}
+.fx-mag-birth-r533[data-core-identity="show"] .fxb-core-ident{
+  opacity:.96;
+  filter:blur(.01px);
+  transform:translate(-50%,0) scale(1);
+}
+.fx-mag-birth-r533[data-core-identity="hide"] .fxb-core-ident,
+.fx-mag-birth-r533.is-leaving .fxb-core-ident{
+  opacity:0;
+  filter:blur(10px);
+  transform:translate(-50%,-8px) scale(.992);
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fxb-core-ident{
+    top:calc(var(--fxb-y) + clamp(104px,15vh,144px));
+    min-width:0;
+    width:min(82vw,310px);
+    padding:15px 16px 10px;
+    gap:6px;
+  }
+  .fxb-core-ident > span{
+    font-size:10px;
+    letter-spacing:.19em;
+  }
+  .fxb-core-ident > small{
+    font-size:7px;
+    letter-spacing:.15em;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .fxb-core-ident{
+    transition:opacity .18s linear!important;
+    filter:none!important;
+    transform:translate(-50%,0)!important;
+  }
+}
+/* production-r1959-mag-ai-core-boot-telemetry */
+
 /* Stop looking like a preloader: the film gets visual priority. */
 .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-copy{
   left:max(24px,5vw);
