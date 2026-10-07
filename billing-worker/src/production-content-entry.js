@@ -11,7 +11,7 @@ import productionBase from './production-content-entry-r369-base.js';
 // production-r1776-immediate-visible-intro-edge-wire
 const STARTUP_REVISION = '20261007-r1951-cinematic-material-pass';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-rhmFQokmSAFR/Wm4HCQIjTmhqiZMgt8xHgtl6IHtsak='";
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-WJNkmoQhSK1Wpz4fqKtX2F4+leX51KX0PrRZ4yBstRI='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -171,8 +171,8 @@ const R502_ASSET_REWRITES = new Map([
     rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261007-r1951-cinematic-material-pass']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261007-r1950c-studio-intro']],
+    marker: 'intro-to-genesis-r1951d-matched-cinematic-intro',
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261007-r1951d-matched-cinematic-intro']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
