@@ -555,7 +555,7 @@
     if (r < .245) return 0;
     if (r < .315) return 1;
     if (r < .572) return 2;
-    if (r < .928) return 3;
+    if (r < .840) return 3;
     return 4;
   }
   function applyPhase(next,source='timeline') {
@@ -603,7 +603,7 @@
   function armPhaseTimeline(){
     for(const timer of phaseTimers)clearTimeout(timer);
     phaseTimers.clear();
-    for(const [phase,ratio] of [[1,.245],[2,.315],[3,.572],[4,.928]]){
+    for(const [phase,ratio] of [[1,.245],[2,.315],[3,.572],[4,.840]]){
       const timer=setTimeout(()=>{
         phaseTimers.delete(timer);
         if(!finished)applyPhase(phase,'timer-r621');
@@ -1034,7 +1034,7 @@
 
     /* R1951 — one-time boot telemetry identity.
        It exists only while the first-visit cinematic owns the screen. */
-    const shouldShowCoreId=!REDUCED && r>=.835 && r<.965;
+    const shouldShowCoreId=!REDUCED && visiblePhase>=4 && r>=.845 && r<.965;
     if(coreIdLabel instanceof HTMLElement && shouldShowCoreId!==coreIdVisible){
       coreIdVisible=shouldShowCoreId;
       coreIdLabel.classList.toggle('is-visible',shouldShowCoreId);
@@ -1128,7 +1128,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
-    ROOT.dataset.fxMagCoreIdentityContractR1951='first-visit-stabilization-1p3s-telemetry-label-clean-hero-after';
+    ROOT.dataset.fxMagCoreIdentityContractR1951='first-visit-phase4-stabilization-1p2s-telemetry-350ms-blur-out-clean-hero-after';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
