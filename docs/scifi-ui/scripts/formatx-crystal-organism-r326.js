@@ -1266,6 +1266,7 @@
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
+        ${webgl2 ? "vec3 faceN=normalize(cross(dFdx(vLocal),dFdy(vLocal))); n=normalize(mix(n,faceN,"+(mobile?".035":".145")+"));" : ""}
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
@@ -1308,8 +1309,8 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),${mobile?'vec3(.108,.138,.141)':'vec3(.132,.148,.147)'},lift)*facetTone;
-        c*=.93+.07*volume;
+        vec3 c=mix(vec3(.004,.008,.010),${mobile?'vec3(.108,.138,.141)':'vec3(.146,.154,.151)'},lift)*facetTone;
+        c*=${mobile?'.93+.07*volume':'.975+.025*volume'};
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1317,7 +1318,7 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
+        c+=vec3(.030,.060,.064)*strata*${mobile?'.10':'.035'};
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
@@ -1327,6 +1328,10 @@
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.155'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*${mobile?'.175':'.070'};
+        float keySpec=pow(sat(dot(reflect(-keyDir,n),view)),${mobile?'28.0':'42.0'});
+        float sideSpec=pow(sat(dot(reflect(-sideDir,n),view)),${mobile?'30.0':'54.0'});
+        c+=vec3(.96,.99,.97)*keySpec*${mobile?'.055':'.285'};
+        c+=vec3(.64,.79,.78)*sideSpec*${mobile?'.045':'.145'};
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1344,7 +1349,7 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.120,.270,.278)*axisRidge*(${mobile?'.070':'.048'}+${mobile?'.028':'.018'}*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
         c*=1.0-${mobile?'.090':'.042'}*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
@@ -1360,8 +1365,8 @@
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
         float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
         float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
+        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.082'}+${mobile?'.035':'.030'}*softboxB);
+        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.060'}+${mobile?'.030':'.025'}*fresnel);
         c*=1.0-.020*prismShellB;
 
         /* R1942d — four authored fold ridges from optic to signature tips.
@@ -1374,8 +1379,8 @@
         float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
+        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.105'};
+        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.055'};
         c*=1.0-${mobile?'.085':'.048'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
@@ -1385,7 +1390,7 @@
         c+=vec3(.055,.300,.335)*deepEdge*${mobile?'.235':'.155'};
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.020'}+${mobile?'.07':'.025'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
         /* R1951 — coherent glass transmission/refraction depth. */
@@ -1411,7 +1416,7 @@
         c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.060,2.0))*front;
+        float rim=exp(-pow((od-.74)/${mobile?'.060':'.044'},2.0))*front;
         float iris=exp(-od*od*4.8)*front;
         float core=exp(-od*od*18.5)*front;
         float hot=exp(-od*od*74.0)*front;
@@ -1422,7 +1427,7 @@
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
-        c+=vec3(1.00,1.00,.98)*glint*.24;
+        c+=vec3(1.00,1.00,.98)*glint*${mobile?'.24':'.31'};
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
@@ -1437,7 +1442,7 @@
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
         float finalAlpha=${mobile?'1.0':'clamp(.985+contourAA*.015,.985,1.0)'};
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.66'}),finalAlpha);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.54'}),finalAlpha);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1712,6 +1717,7 @@
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagMaterialR1951='coherent-smoked-silver-refraction-contact-ready-subpixel-contour';
     root.dataset.fxNativeMagMaterialR1951b='neutral-smoked-silver-soft-prism-stable-hidpi-floor';
+    root.dataset.fxNativeMagMaterialR1951c='cut-glass-facet-normal-neutral-softbox-crisp-optic';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
