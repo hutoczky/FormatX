@@ -85,15 +85,44 @@ html.fx-organism-menu-open body.living-architecture #main-nav.fx-organism-system
 }
 
 
-/* R1973 — desktop hero LCP-safe optical silver. */
+/* R1974 — desktop hero LCP hard owner.
+   The title is the measured desktop LCP element. Own every paint-affecting
+   property in the tiny blocking stylesheet so deferred design/polish layers
+   cannot repaint FORMATX 1.5s later and reset the LCP timestamp. */
 @media (min-width:901px){
-  html:root:root:root:root body.living-architecture #hero .hero-title-main{
+  html:root:root:root:root:root body.living-architecture #hero #hero-title{
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+    transform:none!important;
+    translate:none!important;
+    filter:none!important;
+    clip-path:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero .hero-title-main{
+    display:block!important;
+    font-family:"Arial Black",Arial,sans-serif!important;
+    font-size:clamp(64px,6.25vw,92px)!important;
+    font-weight:900!important;
+    line-height:.88!important;
+    letter-spacing:-.075em!important;
     color:#f4fbff!important;
     -webkit-text-fill-color:currentColor!important;
     background:none!important;
     -webkit-background-clip:border-box!important;
     background-clip:border-box!important;
-    text-shadow:0 1px 0 rgba(255,255,255,.18),0 0 18px rgba(126,218,255,.055)!important;
+    opacity:1!important;
+    visibility:visible!important;
+    transform:none!important;
+    translate:none!important;
+    filter:none!important;
+    clip-path:none!important;
+    animation:none!important;
+    transition:none!important;
+    text-shadow:0 1px 0 rgba(255,255,255,.18),0 0 14px rgba(126,218,255,.045)!important;
+    will-change:auto!important;
   }
 }
-/* production-r1973-solid-optical-silver-lcp */
+/* production-r1974-desktop-title-single-paint-owner */
