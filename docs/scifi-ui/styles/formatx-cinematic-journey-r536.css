@@ -1309,3 +1309,36 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1957-luxury-continuous-handoff */
 /* production-r1957b-progressive-scan-restored */
+
+
+/* R1957d — desktop visual contract is viewport-owned, not mouse-owned.
+   Hybrid laptops, Playwright and accessibility input modes must see the same
+   restrained core composition even when pointer:fine is not advertised.
+   Pointer capability still controls interaction; it no longer controls art. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference){
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-hud{
+    opacity:0!important;
+    transform:translateY(-50%) translateX(16px)!important;
+    filter:blur(.8px)!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-track{
+    opacity:.012!important;
+    filter:brightness(.72)!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-track::after{
+    opacity:0!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-scan{
+    opacity:.012!important;
+    filter:blur(.2px)!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-iris{
+    opacity:.08!important;
+    transform:translate(-50%,-50%) scale(.74)!important;
+    filter:blur(.15px)!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-world{
+    opacity:.10!important;
+  }
+}
+/* production-r1957d-desktop-core-disclosure-cross-input */
