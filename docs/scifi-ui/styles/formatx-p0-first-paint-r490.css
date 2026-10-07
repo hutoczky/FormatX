@@ -1364,10 +1364,13 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
 }
 /* production-r1820-final-hero-typography-lcp-lock */
 
+/* R1964 — 901px+ is desktop geometry regardless of mouse/coarse/hybrid input. */
+/* production-r1964-hybrid-desktop-control-lock */
+
 /* R1962 — final control geometry from the first painted frame.
    The DOM is already canonical; keep it in its settled position before deferred
    control owners arrive, preventing the sound/ASK/header teleport measured in CI. */
-@media (min-width:901px) and (pointer:fine){
+@media (min-width:901px){
   html:root:root body.living-architecture .topbar > #menu-toggle,
   html:root:root body.living-architecture .topbar > .fx-reference-menu-button{
     position:absolute!important;top:12px!important;right:22px!important;
