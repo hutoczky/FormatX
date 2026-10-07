@@ -82,3 +82,59 @@
 @media (prefers-reduced-motion:reduce){
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{filter:none!important}
 }
+
+
+/* R1959 — final studio depth / luxury spacing pass. */
+@media (min-width:901px) and (pointer:fine){
+  html[data-fx-design-system="2"]{
+    --fx-r175-space-scene:clamp(104px,10vw,176px);
+  }
+
+  html[data-fx-design-system="2"] #main-content > section.scene:not(#hero) + section.scene:not(#hero){
+    margin-top:0!important;
+  }
+
+  html[data-fx-design-system="2"] .section-heading{
+    margin-bottom:clamp(54px,6.3vw,96px)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
+    opacity:calc(.095 + var(--fx-c536-energy) * .22)!important;
+    filter:saturate(.98) contrast(1.035) brightness(.97) blur(.12px)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
+    opacity:calc(.085 + var(--fx-c536-energy) * .12)!important;
+    box-shadow:
+      0 0 48px rgba(var(--fx-c536-a),.018),
+      inset 0 0 64px rgba(var(--fx-c536-b),.012)!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    image-rendering:auto!important;
+    backface-visibility:hidden!important;
+    filter:
+      brightness(1.02)
+      contrast(1.095)
+      saturate(.94)
+      drop-shadow(0 9px 10px rgba(0,0,0,.30))
+      drop-shadow(0 31px 28px rgba(0,0,0,.40))
+      drop-shadow(0 3px 24px rgba(91,191,198,.040))!important;
+    -webkit-filter:
+      brightness(1.02)
+      contrast(1.095)
+      saturate(.94)
+      drop-shadow(0 9px 10px rgba(0,0,0,.30))
+      drop-shadow(0 31px 28px rgba(0,0,0,.40))
+      drop-shadow(0 3px 24px rgba(91,191,198,.040))!important;
+  }
+
+  html body.living-architecture::after{
+    background:
+      radial-gradient(ellipse 68% 62% at 50% 46%,transparent 36%,rgba(0,0,0,.11) 72%,rgba(0,0,0,.50) 116%),
+      radial-gradient(ellipse 40% 12% at 62% 82%,rgba(76,111,115,.022),transparent 82%),
+      radial-gradient(ellipse 22% 12% at 50% 73%,rgba(74,112,118,.018),transparent 80%)!important;
+  }
+}
+/* production-r1959-photographic-depth-luxury-spacing */
