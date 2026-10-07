@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1956-menu-owner-mobile-desktop
-base_master=769dc28640ce5156873f815c3d64ac44ee474815
-purpose=ship deterministic hamburger navigation on phone and desktop with an early capture-phase owner, live-nav detachment from header hiding rules, and synchronous visible-open fallback styling
-validation=Chromium 1440x900 desktop and 390x844 touch mobile open-close geometry, aria-expanded state, pointer visibility, section navigation, language controls, infinite-scroll coexistence, production candidate validation
+token=20261007-r1959-supersampled-film-continuity
+base_master=0152e84078a7f8ead0baee78d719a00a879166f5
+purpose=ship the final studio pass: supersampled anti-aliased desktop Signature MAG, physically coherent smoked-bioglass depth, target-locked MAG // AI CORE boot telemetry, time-damped pointer camera, continuous scroll optics and flare-free intro-to-hero cinematic handoff
+validation=desktop native WebGL contour proof, default-framebuffer MSAA telemetry, 1x-DPI supersampling, Lighthouse desktop/mobile, P0 fast loop, intro keyframes, MAG visual proof, cinematic continuity, no-occlusion, responsive matrix, Worker CSP/cache parity and exact production revision convergence
