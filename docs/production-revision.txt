@@ -1,5 +1,5 @@
 FormatX production revision
 token=20261007-r1955-stabilized-ai-core-telemetry
-base_master=bc6712a2c888a42861f1bbc53c1b87b8458ceba4
-purpose=ship the stabilized MAG // AI CORE boot telemetry inside the cinematic window, clear it before hero handoff, preserve the R1950c studio intro and edge-AA MAG, and keep the R1944 precision interaction stack
-validation=JavaScript syntax, CSP/Worker parity, first-load intro timing, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, no-occlusion, R536 handoff, canonical visual contracts and exact-revision production convergence
+base_master=e9de70e013ce0f4ad0299705652239d0642347a7
+purpose=ship the stabilized MAG // AI CORE boot telemetry inside the cinematic window, clear it before hero handoff, preserve the R1950c studio intro and edge-AA MAG, retain the R1944 precision interaction stack, and preserve the current authenticated download/account flow
+validation=JavaScript syntax, CSP/Worker parity, first-load intro timing, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, no-occlusion, R536 handoff, canonical visual contracts, account/download regression coverage and exact-revision production convergence
