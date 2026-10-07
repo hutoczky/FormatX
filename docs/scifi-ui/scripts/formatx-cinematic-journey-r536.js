@@ -81,18 +81,31 @@
     stage.setAttribute('aria-hidden','true');
     stage.dataset.fxC536Primed='false';
     stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
-    /* R1980: decorative geometry exists in its final absolute coordinate
-       system from creation. Deferred CSS may add material/energy, but it never
-       converts full-width normal-flow divs into positioned optics after paint. */
+    /* R1981: decorative geometry exists in its final absolute coordinate
+       system from creation. Keep markup style-free; seed geometry through the
+       same script-owned CSSOM path already used by the stage itself. */
     stage.innerHTML = [
-      '<div class="fx-c536-world" style="position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(92vw,1260px);aspect-ratio:1;border-radius:50%"></div>',
-      '<div class="fx-c536-iris" style="position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(56vw,700px);aspect-ratio:1;border-radius:50%"></div>',
-      '<div class="fx-c536-track" style="position:absolute;left:4vw;right:4vw;top:var(--fx-c536-track-y,50%);height:1px"></div>',
-      '<div class="fx-c536-scan" style="position:absolute;left:0;right:0;height:22vh;top:calc(var(--fx-c536-track-y,50%) - 11vh)"></div>',
-      '<div class="fx-c536-vignette" style="position:absolute;inset:0"></div>',
-      '<div class="fx-c536-grain" style="position:absolute;inset:0"></div>',
-      '<div class="fx-c536-flare" style="position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:2px;height:2px;border-radius:50%;transform:translate(-50%,-50%) scale(.01);opacity:0"></div>'
+      '<div class="fx-c536-world"></div>',
+      '<div class="fx-c536-iris"></div>',
+      '<div class="fx-c536-track"></div>',
+      '<div class="fx-c536-scan"></div>',
+      '<div class="fx-c536-vignette"></div>',
+      '<div class="fx-c536-grain"></div>',
+      '<div class="fx-c536-flare"></div>'
     ].join('');
+    const seedGeometry={
+      '.fx-c536-world':'position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(92vw,1260px);aspect-ratio:1;border-radius:50%;',
+      '.fx-c536-iris':'position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(56vw,700px);aspect-ratio:1;border-radius:50%;',
+      '.fx-c536-track':'position:absolute;left:4vw;right:4vw;top:var(--fx-c536-track-y,50%);height:1px;',
+      '.fx-c536-scan':'position:absolute;left:0;right:0;height:22vh;top:calc(var(--fx-c536-track-y,50%) - 11vh);',
+      '.fx-c536-vignette':'position:absolute;inset:0;',
+      '.fx-c536-grain':'position:absolute;inset:0;',
+      '.fx-c536-flare':'position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:2px;height:2px;border-radius:50%;transform:translate(-50%,-50%) scale(.01);opacity:0;'
+    };
+    for(const [selector,css] of Object.entries(seedGeometry)){
+      const node=stage.querySelector(selector);
+      if(node instanceof HTMLElement)node.style.cssText=css;
+    }
     document.body.appendChild(stage);
     hudCode = null;
     hudTitle = null;
@@ -600,6 +613,7 @@
     root.dataset.fxCinematicJourneyRecoveryR1975='refresh-cannot-strand-fast-scroll-budget';
     root.dataset.fxCinematicHeroWorldR1976='active-scene-owns-inline-floor';
     root.dataset.fxCinematicGeometryR1980='absolute-from-creation-zero-late-flow-conversion';
+    root.dataset.fxCinematicGeometryR1981='script-cssom-seeded-no-inline-style-markup';
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
