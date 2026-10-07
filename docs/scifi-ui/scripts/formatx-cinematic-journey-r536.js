@@ -279,7 +279,17 @@
     active=index;
 
     if(!changed){
-      if(!fastScroll)setSceneState(scenes[index],'active');
+      if(!fastScroll){
+        setSceneState(scenes[index],'active');
+        /* R1951b — active is the visual prediction; committedSceneIndex is the
+           authoritative semantic scene. A resize/deferred-CSS refresh can land
+           between fast-scroll prediction and settle. In that case we must
+           commit the already-active target instead of treating it as a no-op. */
+        if(committedSceneIndex!==index){
+          commitScene(index,committedSceneIndex,reason);
+          root.dataset.fxCinematicCommitRepairR1951='active-committed-converged';
+        }
+      }
       return;
     }
 
@@ -614,6 +624,7 @@
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
     root.dataset.fxDesktopInteractionR1951='frame-synchronous-scroll-soft-inertia-no-idle-raf';
     root.dataset.fxCinematicContinuityR1951='intro-core-next-scene-continuous-no-scroll-cut';
+    root.dataset.fxCinematicStateR1951b='predicted-active-authoritative-commit-convergent';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
