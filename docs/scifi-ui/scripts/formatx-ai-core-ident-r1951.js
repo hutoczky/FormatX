@@ -42,18 +42,22 @@
 
     const sub = document.createElement('span');
     sub.className = 'fx-ai-core-ident-r1951__sub';
-    sub.textContent = ROOT.lang === 'en' ? 'ONLINE · LOCAL INTELLIGENCE' : 'ONLINE · HELYI INTELLIGENCIA';
+    sub.textContent = 'ONLINE · LOCAL INTELLIGENCE';
 
     badge.append(title, sub);
-    document.body.appendChild(badge);
+    const host = document.querySelector('#hero .hero-space') || document.querySelector('#hero') || document.body;
+    if(host instanceof HTMLElement)host.classList.add('fx-ai-core-ident-host-r1959');
+    host.appendChild(badge);
 
     ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'shown-mobile' : 'shown-desktop';
+    ROOT.dataset.fxAiCoreIdentityR1959 = 'system-telemetry-local-intelligence';
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => badge.classList.add('is-visible'));
     });
 
-    const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
+    /* R1959 — 1–1.5 s of fully readable telemetry after the blur-in. */
+    const hold = REDUCED ? 800 : (MOBILE ? 1680 : 1880);
     exitTimer = window.setTimeout(() => {
       badge.classList.remove('is-visible');
       badge.classList.add('is-exiting');
