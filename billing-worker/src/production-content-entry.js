@@ -300,8 +300,12 @@ function deferNonCriticalStyles(html) {
     const pathname = stylesheetPath(tag);
     if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
     const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
-    const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
-    let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
+    const targetMatch = tag.match(/\sdata-fx-r487-media=(["'])(.*?)\1/i);
+    const originalMedia = targetMatch ? targetMatch[2] : (mediaMatch ? mediaMatch[2] : 'all');
+    let next = tag
+      .replace(/\smedia=(["'])(.*?)\1/i, '')
+      .replace(/\sdata-fx-r487-deferred-style=(["'])(.*?)\1/i, '')
+      .replace(/\sdata-fx-r487-media=(["'])(.*?)\1/i, '');
     const close = /\/>$/.test(next) ? '/>' : '>';
     next = next.replace(/\s*\/?>$/, '');
     return `${next} data-fx-r487-deferred-style="true" data-fx-r487-media="${escapeAttribute(originalMedia)}" media="print"${close}`;
