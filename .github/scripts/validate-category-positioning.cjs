@@ -27,11 +27,15 @@ async function mainPageCase(browser, language, viewport) {
   const errors = watchBrowser(page);
 
   await page.goto(BASE + 'index.html?lang=' + language, { waitUntil: 'domcontentloaded' });
+  /* R1959: semantic category content is first-paint HTML; its positioning runtime
+     now joins the existing user-intent enhancement bundle to reduce initial TBT. */
+  await page.waitForFunction(() => {
+    const title=document.querySelector('[data-fx-category-title]')?.textContent?.trim()||'';
+    return title.length>0 && document.querySelectorAll('.fx-category-grid article').length===4;
+  }, null, { timeout: 20000 });
+  await page.evaluate(() => dispatchEvent(new Event('pointerdown')));
   await page.waitForFunction(() => document.documentElement.dataset.fxCategoryPositioning === 'v1', null, { timeout: 20000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxCategoryFirstPaint === 'semantic-immediate-r243', null, { timeout: 20000 });
-  // r301 keeps content enhancements dormant until genuine user intent.  Wake
-  // that layer before checking the simulator/header/footer enhancement links.
-  await page.evaluate(() => dispatchEvent(new Event('pointerdown')));
   await page.waitForFunction(() => document.documentElement.dataset.fxSimulatorEntryState === 'ready', null, { timeout: 20000 });
   await page.waitForSelector('.fx-category-deck', { state: 'attached', timeout: 10000 });
   await page.waitForSelector('.fx-origin-proof', { state: 'attached', timeout: 10000 });
