@@ -82,6 +82,21 @@ document.addEventListener('click',event=>{toggleFromEvent(event);},true);
    Window capture precedes every document/DOM owner, so the first click cannot
    be swallowed by a later stopImmediatePropagation. The event marker prevents
    the deferred shapeshifter from producing a second physiological response. */
+/* R1959 — publish audio intent before deferred audio owners.
+   The professional engine still owns playback; this only guarantees that the
+   visible control reflects the trusted click immediately. */
+addEventListener('click',event=>{
+  const button=event.target instanceof Element?event.target.closest('.fx-three-sound'):null;
+  if(!(button instanceof HTMLButtonElement))return;
+  const state=button.dataset.fxAudioState||root.dataset.fxAudioState||'off';
+  if(state==='off'||!state){
+    button.dataset.fxAudioState='pending';
+    root.dataset.fxAudioState='pending';
+    root.dataset.fxAudioIntentR1959='trusted-click-pending';
+    button.setAttribute('aria-pressed','false');
+  }
+},true);
+
 addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target.closest('.fx-reference-mag-button'):null;
   if(!(target instanceof HTMLButtonElement)||event.__fxMagResponseR1959===true)return;
