@@ -272,8 +272,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 56 : 96;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 112 : 192;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -782,8 +782,8 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
-    /* R1959: physically neutral compositor tone. The previous inline
-       !important saturation overrode the canonical material CSS. */
+    /* R1959c — inherit the canonical neutral compositor tone from master.
+       AA, Beer-Lambert absorption and refraction remain shader-owned. */
     const compositorFilter=mobile
       ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
       : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
@@ -1410,6 +1410,26 @@
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
+        /* R1959 — desktop physical glass depth.
+           Beer-Lambert-like absorption and a restrained view-dependent inner
+           refraction veil add real thickness without neon or screen-space blur.
+           Mobile keeps the lighter established profile for frame budget parity. */
+        float opticalThickness=clamp(
+          .30+(1.0-facing)*.72+backDepth*.18+prismShellB*.10,
+          0.0,1.32
+        );
+        vec3 absorption=exp(-vec3(.115,.070,.055)*opticalThickness*${mobile?'0.0':'1.0'});
+        c*=mix(vec3(1.0),absorption,${mobile?'0.0':'.72'});
+        float refractedVeil=
+          exp(-pow((vLocal.x+n.x*.055+.08)/.34,2.0)
+              -pow((vLocal.y+n.y*.045-.03)/.48,2.0))
+          *frontDepth*(1.0-facing);
+        c+=vec3(.070,.125,.128)*refractedVeil*${mobile?'0.0':'.115'};
+        float innerCaustic=
+          exp(-pow((refl.x+.06)/.29,2.0)-pow((refl.y-.18)/.38,2.0))
+          *frontDepth*(.22+.78*fresnel);
+        c+=vec3(.31,.39,.37)*innerCaustic*${mobile?'0.0':'.052'};
+
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
@@ -1693,6 +1713,9 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1959='desktop-96x192-mesh-msaa-2.25dpr-6.4mp-adaptive-contour-aa';
+    root.dataset.fxNativeMagMaterialR1959='shader-owned-smoked-silver-glass-neutral-compositor-master-parity-mobile-1.06-1.14-.98-desktop-1.025-1.11-.97';
+    root.dataset.fxNativeMagOpticsR1959='desktop-beer-lambert-depth-view-refraction-inner-caustic-no-neon';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1840,10 +1863,10 @@
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?1.00:1.14)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.68:.82));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1858,12 +1881,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.82:2.25);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?2200000:6400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
