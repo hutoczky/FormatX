@@ -4,6 +4,7 @@
   const ROOT = document.documentElement;
   if (ROOT.dataset.fxAiCoreIdentityR1951) return;
   ROOT.dataset.fxAiCoreIdentityR1951 = 'armed';
+  ROOT.dataset.fxAiCoreIdentityR1957 = 'stabilization-telemetry-armed';
 
   const PARAMS = new URLSearchParams(location.search);
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1' || /Chrome-Lighthouse/i.test(navigator.userAgent || '');
@@ -42,7 +43,7 @@
 
     const sub = document.createElement('span');
     sub.className = 'fx-ai-core-ident-r1951__sub';
-    sub.textContent = ROOT.lang === 'en' ? 'ONLINE · LOCAL INTELLIGENCE' : 'ONLINE · HELYI INTELLIGENCIA';
+    sub.textContent = 'ONLINE · LOCAL INTELLIGENCE';
 
     badge.append(title, sub);
     document.body.appendChild(badge);
@@ -53,7 +54,7 @@
       requestAnimationFrame(() => badge.classList.add('is-visible'));
     });
 
-    const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
+    const hold = REDUCED ? 800 : (MOBILE ? 1300 : 1420);
     exitTimer = window.setTimeout(() => {
       badge.classList.remove('is-visible');
       badge.classList.add('is-exiting');
@@ -65,8 +66,14 @@
     }, hold);
   }
 
+  document.addEventListener('formatx:magstabilized', event => {
+    showIdentity(event.detail?.source || 'magstabilized-r1957');
+  }, { once: true, passive: true });
+
+  /* Fallback for reduced-motion / old cached intro owners. The one-shot shown
+     guard guarantees this can never duplicate the stabilization identity. */
   document.addEventListener('formatx:magbirthcomplete', event => {
-    showIdentity(event.detail?.source || 'magbirthcomplete');
+    showIdentity(event.detail?.source || 'magbirthcomplete-fallback');
   }, { once: true, passive: true });
 
   addEventListener('pagehide', () => {
