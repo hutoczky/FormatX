@@ -780,7 +780,10 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    const studioStageBackground=mobile
+      ? 'radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)'
+      : 'radial-gradient(ellipse 31% 13% at 51% 74%,rgba(0,0,0,.40) 0%,rgba(0,0,0,.18) 42%,transparent 78%),radial-gradient(ellipse 48% 42% at 49% 45%,rgba(103,167,166,.070) 0%,rgba(42,82,84,.032) 43%,transparent 76%),radial-gradient(ellipse 76% 62% at 50% 53%,rgba(7,16,19,.28),transparent 82%)';
+    stage.style.setProperty('background',studioStageBackground,'important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -792,7 +795,7 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : 'brightness(1.045) contrast(1.19) saturate(.78)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1310,8 +1313,8 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        vec3 c=mix(vec3(.004,.008,.010),${mobile?'vec3(.108,.138,.141)':'vec3(.082,.098,.101)'},lift)*facetTone;
+        c*= ${mobile?'.93+.07*volume':'.972+.028*volume'};
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1319,16 +1322,16 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
+        c+=vec3(.030,.060,.064)*strata*${mobile?'.10':'.045'};
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.305'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
-        c+=vec3(.92,.98,.96)*ribbonA*.040;
-        c+=vec3(.18,.47,.50)*ribbonB*.175;
+        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.235'};
+        c+=vec3(.92,.98,.96)*ribbonA*${mobile?'.040':'.060'};
+        c+=vec3(.18,.47,.50)*ribbonB*${mobile?'.175':'.125'};
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1383,12 +1386,12 @@
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.030,.180,.205)*fresnel*${mobile?'.34':'.255'};
+        c+=vec3(.055,.300,.335)*deepEdge*${mobile?'.235':'.165'};
         float spectralSide=.5+.5*n.x;
-        c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
-        c+=vec3(.015,.050,.060)*frontDepth*.10;
+        c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*${mobile?'.070':'.043'};
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.022'}+${mobile?'.07':'.030'}*uEnergy);
+        c+=vec3(.015,.050,.060)*frontDepth*${mobile?'.10':'.052'};
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
@@ -1398,7 +1401,7 @@
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
+        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*${mobile?'.12':'.16'});
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
         float rim=exp(-pow((od-.74)/.060,2.0))*front;
@@ -1408,11 +1411,11 @@
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
+        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.195'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
-        c+=vec3(1.00,1.00,.98)*glint*.24;
+        c+=vec3(1.00,1.00,.98)*glint*${mobile?'.24':'.28'};
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
@@ -1426,7 +1429,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.76'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1700,6 +1703,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagPerformanceR1953b='cached-vertex-lattice-yielded-gpu-buffer-upload-exact-visual-parity';
+    root.dataset.fxNativeMagStudioR1953c='desktop-neutral-smoked-silver-cut-glass-contact-depth-controlled-refraction';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
