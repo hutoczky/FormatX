@@ -1434,15 +1434,16 @@
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
+      const settleMotion=1-finale*.72;
       if(this.mechBody){
-        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
-        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
+        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow*settleMotion;
+        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow*settleMotion;
       }
-      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
+      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow*settleMotion;
       if(this.innerPrism){
         this.innerPrismMaterial.opacity=(.10+.16*finale)*grow;
-        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
-        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
+        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow*settleMotion;
+        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow*settleMotion;
       }
       this.silverParts.forEach((p,i)=>{
         p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
@@ -1479,12 +1480,14 @@
         const k=smooth((t-5.55)/1.70);
         z=mix(3.86,4.28,k);
         y=mix(0,.003,k);
-      }else if(t<9.10){
-        z=4.28+Math.sin(time*.00018)*.006;
+      }else if(t<8.72){
+        z=4.28+Math.sin(time*.00018)*.004;
         y=.003;
       }else{
-        z=mix(4.28,4.40,smooth((t-9.10)/.60));
-        y=.003;
+        const k=smooth((t-8.72)/1.18);
+        z=mix(4.28,4.43,k);
+        x=mix(Math.sin(time*.00015)*.0018,0,k);
+        y=mix(.003,0,k);
       }
       if(this.width<this.height)z+=.90;
       this.camera.position.set(x,y,z);
@@ -1512,32 +1515,32 @@
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
       if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
 
-      const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
-      /* R1950 — controlled studio finale. The handoff lifts the optical core,
-         not the whole frame, and lands on the permanent smoked-silver grade. */
-      const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
-      this.coreLight.intensity+=flash*.42+after*.12;
+      const opticalLift=smooth((t-8.92)/.34)*(1-smooth((t-9.72)/.44));
+      /* R1951 — no white flash cut. The final beat is a broad optical bloom
+         inside the lens while the body, exposure and background remain stable. */
+      const after=smooth((t-9.46)/.44);
+      this.renderer.toneMappingExposure=1.072+opticalLift*.002+after*.001;
+      this.coreLight.intensity+=opticalLift*.18+after*.06;
       if(this.glowSprite){
-        const g=1+flash*.10;
+        const g=1+opticalLift*.035;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.075,this.glowSprite.material.opacity+opticalLift*.014);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.010;
-        const burstScale=2.08+flash*.10;
+        this.flashBurst.material.opacity=opticalLift*.0035;
+        const burstScale=2.04+opticalLift*.045;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.004;
-        this.flashBeam.scale.x=1+flash*.035;
+        this.flashBeam.material.opacity=opticalLift*.0012;
+        this.flashBeam.scale.x=1+opticalLift*.012;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
-        const q=1.00+flash*.022;
+        this.mechEyeCorona.material.opacity=Math.min(.205,.168+opticalLift*.016);
+        const q=1.00+opticalLift*.012;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.34;
+      if(this.mechLight)this.mechLight.intensity+=opticalLift*.16;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1607,7 +1610,7 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1941-signature-four-point-bioglass-central-optic-studio'
+    revision:'r1951-continuous-optical-bloom-smoked-silver-handoff'
   };
   /* R1940 — the user-selected reference visual is the R1280 armored living
      pod. Keep the existing R1360 loader contract intact by exposing R1280 as
@@ -1616,6 +1619,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1951='settled-four-point-optical-bloom-continuous-handoff';
   document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
   document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
