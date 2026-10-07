@@ -354,6 +354,10 @@
       <progress class="fxb-progress" max="100" value="0">0%</progress>
       <span class="fxb-status"></span>
     </div>
+    <div class="fxb-core-identity" aria-hidden="true">
+      <span class="fxb-core-identity-kicker">MAG // AI CORE</span>
+      <span class="fxb-core-identity-sub">ONLINE · LOCAL INTELLIGENCE</span>
+    </div>
   `);
 
   let liveSkip=overlay.querySelector('.fxb-skip');
@@ -388,6 +392,7 @@
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
+  const coreIdentity = overlay.querySelector('.fxb-core-identity');
   const canvas = prepaintCanvas;
   const dnaStage = overlay.querySelector('.fxb-dna-stage');
   const dnaHelix = overlay.querySelector('.fxb-dna-helix');
@@ -594,6 +599,26 @@
     }
     return true;
   }
+  function armCoreIdentityTimeline(){
+    if(!(coreIdentity instanceof HTMLElement)||REDUCED)return;
+    const showTimer=setTimeout(()=>{
+      phaseTimers.delete(showTimer);
+      if(finished)return;
+      coreIdentity.classList.add('is-visible');
+      ROOT.dataset.fxMagBirthIdentityR1952='visible-mag-ai-core';
+    },8550);
+    phaseTimers.add(showTimer);
+
+    const hideTimer=setTimeout(()=>{
+      phaseTimers.delete(hideTimer);
+      if(finished)return;
+      coreIdentity.classList.remove('is-visible');
+      coreIdentity.classList.add('is-leaving');
+      ROOT.dataset.fxMagBirthIdentityR1952='leaving-before-clean-hero';
+    },9850);
+    phaseTimers.add(hideTimer);
+  }
+
   function armPhaseTimeline(){
     for(const timer of phaseTimers)clearTimeout(timer);
     phaseTimers.clear();
@@ -959,6 +984,10 @@
     try { progress.value=100; } catch (_) {}
     try { status.textContent=copy.statuses[copy.statuses.length-1][1]; } catch (_) {}
     try { overlay.dataset.phase='4'; } catch (_) {}
+    try {
+      coreIdentity?.classList.remove('is-visible');
+      coreIdentity?.classList.add('is-leaving');
+    } catch (_) {}
     try { ROOT.dataset.fxMagBirthLiveR533=source; } catch (_) {}
     try { ROOT.dataset.fxMagBirthHandoffR655='exception-safe-overlay-teardown'; } catch (_) {}
     try { ROOT.dataset.fxMagBirthHandoffR1951='820ms-optical-crossfade-permanent-mag-continuity'; } catch (_) {}
@@ -1107,6 +1136,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
+    ROOT.dataset.fxMagBirthIdentityR1952='scheduled-8-55s-1-30s-system-identifier';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
@@ -1114,6 +1144,7 @@
     ROOT.dataset.fxMagBirthPhase='0';
     ROOT.setAttribute('data-fx-mag-birth-live','active');
     if(!HAS_VISUAL_FRAME)armPhaseTimeline();
+    armCoreIdentityTimeline();
     document.body.prepend(overlay);
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
