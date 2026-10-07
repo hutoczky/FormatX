@@ -498,11 +498,16 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    activate(0,'intro-handoff-r1959');
+    root.classList.remove('fx-c536-cut');
+    root.classList.add('fx-c536-bridge-r1959');
+    root.dataset.fxCinematicBridgeR1959='hero-space-crossfade';
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    cutTimer=setTimeout(()=>{
+      root.classList.remove('fx-c536-bridge-r1959');
+      root.dataset.fxCinematicBridgeR1959='settled';
+    },1180);
+    signalCore(scenes[0],'intro-handoff-r1959');
   }
 
   function boot() {
