@@ -2347,10 +2347,13 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1957 — desktop fine-pointer scroll is one continuous camera shot.
+           The MAG receives one bounded redraw per scroll animation frame; the
+           existing quality governor still sheds resolution before cadence. */
+        if(desktopFine.matches&&!constrained&&!auditMode)schedule(1);
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(desktopFine.matches?3:1);},72);
+        root.dataset.fxNativeMagScrollR1957=desktopFine.matches?'continuous-desktop-adaptive-redraw':'settled-budget-redraw';
       });
     }
 
