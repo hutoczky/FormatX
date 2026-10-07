@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1955-mag-ai-core-boot-telemetry
+token=20261007-r1955b-deferred-ai-core-telemetry
 base_master=bc6712a2c888a42861f1bbc53c1b87b8458ceba4
-purpose=ship the first-load MAG // AI CORE boot telemetry after genesis stabilization while preserving the R1950c studio intro, photoreal desktop MAG edge AA, R1949 award-final scene continuity and R1944 precision interaction
-validation=AI CORE first-load timing, reduced-motion behavior, mobile and desktop first-load proof, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, no-occlusion, cinematic handoff and production Worker parity
+purpose=ship first-load MAG // AI CORE boot telemetry after genesis stabilization while keeping the telemetry stylesheet entirely out of the render-blocking first-paint path
+validation=AI CORE timing and fade, deferred telemetry CSS, reduced-motion behavior, Lighthouse desktop/mobile, mobile and desktop proof, P0 fast loop, canonical visual contracts, no-occlusion, cinematic handoff and production Worker parity
