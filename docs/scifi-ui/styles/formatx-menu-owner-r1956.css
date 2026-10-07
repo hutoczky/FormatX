@@ -83,3 +83,17 @@ html.fx-organism-menu-open body.living-architecture #main-nav.fx-organism-system
 @media (prefers-reduced-motion:reduce){
   html body.living-architecture #main-nav.fx-organism-system-menu{transition:none!important}
 }
+
+
+/* R1973 — desktop hero LCP-safe optical silver. */
+@media (min-width:901px){
+  html:root:root:root:root body.living-architecture #hero .hero-title-main{
+    color:#f4fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    background:none!important;
+    -webkit-background-clip:border-box!important;
+    background-clip:border-box!important;
+    text-shadow:0 1px 0 rgba(255,255,255,.18),0 0 18px rgba(126,218,255,.055)!important;
+  }
+}
+/* production-r1973-solid-optical-silver-lcp */
