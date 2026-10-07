@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1956-ai-core-boot-telemetry
+token=20261007-r1956c-ai-core-hero-lcp-lock
 base_master=95a4b127570c05955bb19c908791f9f312944b69
-purpose=ship the stabilized first-load MAG // AI CORE boot telemetry on top of the current registration-gated download production, while preserving the R1950c studio intro, desktop MAG edge AA, R1949 scene continuity and R1944 precision interaction
-validation=AI CORE stabilization timing, 1.2-1.4s telemetry hold, deferred telemetry CSS, reduced-motion behavior, account/download regression checks, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff and production Worker parity
+purpose=ship stabilized MAG // AI CORE boot telemetry on the current registration-gated production and make the blocking hero geometry/typography the permanent settled geometry so premium-finish cannot repaint the desktop LCP
+validation=AI CORE stabilization timing and fade, deferred telemetry CSS, first-paint-owned hero geometry, desktop Lighthouse >=0.95 target, mobile Lighthouse, account/download regression checks, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff and production Worker parity
