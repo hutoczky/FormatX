@@ -43,9 +43,23 @@ async function runCase(browser, { width, height, language }) {
     waitUntil: 'domcontentloaded',
   });
 
-  /* R1959b: first-paint stability is the static shell contract; category
-     copy is an intent-deferred semantic enhancement. Arm it with a neutral pointer
-     intent only after the DOM/CSS first paint has settled. */
+  /* R1959c: first capture the true pre-intent first-paint contract, then
+     arm the deferred semantic enhancement with a neutral product interaction. */
+  const preIntent = await page.evaluate(() => ({
+    contentGate: document.documentElement.dataset.fxContentRuntimeR241 || '',
+    stability: document.documentElement.dataset.fxFirstFrameStabilityR283 || '',
+  }));
+  assert.equal(
+    preIntent.contentGate,
+    EXPECTED_CONTENT_GATE,
+    `semantic enhancement gate was not dormant before interaction: ${JSON.stringify(preIntent)}`,
+  );
+  assert.equal(
+    preIntent.stability,
+    EXPECTED_STABILITY,
+    `critical first-frame stability marker missing before interaction: ${JSON.stringify(preIntent)}`,
+  );
+
   await page.evaluate(() => {
     const target=document.querySelector('#main-content') || document.body;
     target?.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse'}));
@@ -100,8 +114,8 @@ async function runCase(browser, { width, height, language }) {
   assert.ok(['','v1'].includes(state.categoryRuntime), `unexpected category runtime state: ${JSON.stringify(state)}`);
   assert.equal(
     state.contentGate,
-    EXPECTED_CONTENT_GATE,
-    `semantic enhancement gate was not dormant before interaction: ${JSON.stringify(state)}`,
+    'requested-r497-user-intent',
+    `semantic enhancement gate did not arm after explicit intent: ${JSON.stringify(state)}`,
   );
   assert.equal(state.stability, EXPECTED_STABILITY, `critical first-frame stability marker missing: ${JSON.stringify(state)}`);
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
