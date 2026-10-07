@@ -40,12 +40,25 @@
   }
 
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-track{
-    opacity:calc(.035 + var(--fx-c536-energy) * .10)!important;
+    opacity:calc(.020 + var(--fx-c536-energy) * .060)!important;
   }
 
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{
-    opacity:calc(.025 + var(--fx-c536-energy) * .075)!important;
-    filter:blur(.35px);
+    opacity:calc(.008 + var(--fx-c536-energy) * .025)!important;
+    filter:blur(.55px);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
+    opacity:.010!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-anatomy{
+    opacity:calc(.045 + var(--fx-c536-scene-energy) * .34)!important;
+  }
+
+  html body.living-architecture main > :is(#experience,#capabilities,#pricing,#system,#resources)
+  > .section-heading{
+    margin-bottom:clamp(44px,5.6vh,72px)!important;
   }
 
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-vignette{
@@ -135,3 +148,5 @@
 }
 
 /* production-r1959-physical-depth-no-canvas-edge-filter */
+
+/* production-r1959-luxury-breathing-room */
