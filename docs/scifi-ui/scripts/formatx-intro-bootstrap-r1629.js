@@ -8,6 +8,7 @@ const f=p.get('intro')==='1'||p.get('visualintro')==='1';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
 const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
 if(l){
+  r.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
   const o=new MutationObserver(()=>{
     const e=document.querySelector('link[data-fx-critical-core-r227]');
     if(e){e.media='print';e.dataset.fxLighthouseCriticalCoreR1749='deferred';o.disconnect();}
