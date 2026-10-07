@@ -26,6 +26,12 @@
   }
 
   function showIdentity(source = 'magbirthcomplete') {
+    /* R1959 intro owns the identity moment during MAG stabilization.
+       Do not replay the label after the cinematic handoff. */
+    if (ROOT.dataset.fxMagBirthCoreIdentityR1959) {
+      ROOT.dataset.fxAiCoreIdentityR1951='suppressed-by-r1959-intro-telemetry';
+      return;
+    }
     if (shown || AUTOMATION || document.hidden) return;
     shown = true;
     clearTimers();
