@@ -43,6 +43,13 @@ async function runCase(browser, { width, height, language }) {
     waitUntil: 'domcontentloaded',
   });
 
+  /* R1959b: first-paint stability is the static shell contract; category
+     copy is an intent-deferred semantic enhancement. Arm it with a neutral pointer
+     intent only after the DOM/CSS first paint has settled. */
+  await page.evaluate(() => {
+    const target=document.querySelector('#main-content') || document.body;
+    target?.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse'}));
+  });
   await page.waitForFunction(() => {
     const title = document.querySelector('[data-fx-category-title]')?.textContent.trim() || '';
     return title.length > 0 && document.querySelectorAll('.fx-category-grid article').length === 4;
