@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1955-registration-download-gate
-base_master=402b681b4055dcd127815ee0934522809d1e9bc7
-purpose=ship public FormatX registration and sign-in before official downloads, optional 30-day remembered login, secure D1-backed sessions, and the unified owner admin refinements
-validation=public account Worker tests, PBKDF2 password storage, HttpOnly Secure SameSite session cookie contract, anonymous download redirect to /account/, authenticated download gate, account UI, privacy/terms parity, bilingual download copy, production smoke and exact-revision convergence
+token=20261007-r1956-ai-core-boot-telemetry
+base_master=95a4b127570c05955bb19c908791f9f312944b69
+purpose=ship the stabilized first-load MAG // AI CORE boot telemetry on top of the current registration-gated download production, while preserving the R1950c studio intro, desktop MAG edge AA, R1949 scene continuity and R1944 precision interaction
+validation=AI CORE stabilization timing, 1.2-1.4s telemetry hold, deferred telemetry CSS, reduced-motion behavior, account/download regression checks, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff and production Worker parity
