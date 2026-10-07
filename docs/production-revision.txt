@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1953-integrated-ai-core-cinematic
+token=20261007-r1953b-integrated-ai-core-renderer-boot-opt
 base_master=7dc917d72f175cb025268a75ee12e68128519ba7
-purpose=move MAG // AI CORE identity into the stabilized intro itself, retire the duplicate post-handoff badge, preserve R1950c desktop edge AA and finish the intro-to-clean-hero optical handoff
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, deterministic 9.25s visible and 9.84s fading AI Core keyframes, mobile MAG proof, no-occlusion, R536 cinematic handoff, production Worker CSP parity and syntax validation
+purpose=integrate MAG // AI CORE inside the stabilized intro, preserve R1950c desktop edge AA and R1952 mobile brand dedupe, and remove duplicate permanent-MAG boot CPU work without visual topology changes
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, deterministic 9.25s visible and 9.84s fading AI Core keyframes, mobile MAG proof, no-occlusion, R536 cinematic handoff, production Worker CSP parity, exact topology parity and syntax validation
