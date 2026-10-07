@@ -136,7 +136,20 @@ async function assertPrimaryControls(page, viewportName) {
 
   const sound = page.locator('#hero .fx-three-sound');
   const beforeAudio = await sound.getAttribute('data-fx-audio-state');
+  console.log('AUDIO_RESPONSE_DEBUG_BEFORE', JSON.stringify(await page.evaluate(() => ({
+    button: document.querySelector('#hero .fx-three-sound')?.dataset.fxAudioState || '',
+    root: document.documentElement.dataset.fxAudioState || '',
+    owner: document.documentElement.dataset.fxAudioOwner || '',
+    intent: document.documentElement.dataset.fxAudioIntentR1959 || ''
+  }))));
   await sound.click();
+  await page.waitForTimeout(120);
+  console.log('AUDIO_RESPONSE_DEBUG_AFTER', JSON.stringify(await page.evaluate(() => ({
+    button: document.querySelector('#hero .fx-three-sound')?.dataset.fxAudioState || '',
+    root: document.documentElement.dataset.fxAudioState || '',
+    owner: document.documentElement.dataset.fxAudioOwner || '',
+    intent: document.documentElement.dataset.fxAudioIntentR1959 || ''
+  }))));
   await page.waitForFunction(before => {
     const button = document.querySelector('#hero .fx-three-sound');
     if (!(button instanceof HTMLButtonElement)) return false;
