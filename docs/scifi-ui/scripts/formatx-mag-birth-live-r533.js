@@ -965,6 +965,7 @@
       coreIdVisible=false;
       coreIdLabel?.classList?.remove('is-visible');
       if(coreIdLabel instanceof HTMLElement)coreIdLabel.dataset.state='retired';
+      overlay.dataset.coreIdR1951='retired';
       ROOT.dataset.fxMagCoreIdentityR1951='retired';
     } catch (_) {}
     try { percent.value='100'; } catch (_) {}
@@ -1039,6 +1040,7 @@
       coreIdVisible=shouldShowCoreId;
       coreIdLabel.classList.toggle('is-visible',shouldShowCoreId);
       coreIdLabel.dataset.state=shouldShowCoreId?'online':'retiring';
+      overlay.dataset.coreIdR1951=shouldShowCoreId?'visible':'retiring';
       ROOT.dataset.fxMagCoreIdentityR1951=shouldShowCoreId?'visible':'hidden';
     }
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
