@@ -3,27 +3,27 @@
    hero completely. It is intentionally presentation-only and never captures input. */
 .fx-ai-core-ident-r1951{
   position:fixed;
-  left:50%;
-  top:58%;
+  left:var(--fx-ai-core-x,50%);
+  top:calc(var(--fx-ai-core-y,48%) + clamp(92px,10vh,132px));
   z-index:2147483400;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:8px;
+  gap:7px;
   width:max-content;
   max-width:min(88vw,620px);
-  padding:13px 22px 12px;
+  padding:10px 20px 11px;
   pointer-events:none;
   user-select:none;
   opacity:0;
-  transform:translate3d(-50%,18px,0) scale(.985);
-  filter:blur(9px);
+  transform:translate3d(-50%,14px,0) scale(.988);
+  filter:blur(8px);
   will-change:opacity,transform,filter;
   transition:
-    opacity .48s cubic-bezier(.22,.61,.36,1),
-    transform .68s cubic-bezier(.16,.84,.24,1),
-    filter .62s ease;
+    opacity .42s cubic-bezier(.22,.61,.36,1),
+    transform .58s cubic-bezier(.16,.84,.24,1),
+    filter .56s ease;
   text-align:center;
   isolation:isolate;
 }
@@ -31,12 +31,23 @@
   content:"";
   position:absolute;
   left:50%;
-  top:-5px;
-  width:clamp(82px,10vw,144px);
+  top:-6px;
+  width:clamp(92px,11vw,156px);
   height:1px;
   transform:translateX(-50%);
-  background:linear-gradient(90deg,transparent,rgba(172,230,235,.38),transparent);
-  box-shadow:0 0 18px rgba(103,218,225,.12);
+  background:linear-gradient(90deg,transparent,rgba(172,230,235,.28),rgba(225,247,247,.46) 50%,rgba(172,230,235,.28),transparent);
+  box-shadow:0 0 14px rgba(103,218,225,.08);
+}
+.fx-ai-core-ident-r1951::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-7px;
+  width:clamp(34px,3.8vw,52px);
+  height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,rgba(122,192,198,.22),transparent);
+  opacity:.72;
 }
 .fx-ai-core-ident-r1951.is-visible{
   opacity:.96;
@@ -52,15 +63,15 @@
 .fx-ai-core-ident-r1951__sub{
   display:block;
   white-space:nowrap;
-  font-family:inherit;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
   text-transform:uppercase;
 }
 .fx-ai-core-ident-r1951__title{
   font-size:clamp(13px,.92vw,16px);
   line-height:1;
-  font-weight:720;
-  letter-spacing:.34em;
-  color:rgba(226,248,249,.96);
+  font-weight:700;
+  letter-spacing:.30em;
+  color:rgba(230,247,247,.94);
   text-shadow:
     0 0 10px rgba(116,221,226,.20),
     0 0 28px rgba(87,185,198,.10);
@@ -68,18 +79,18 @@
 .fx-ai-core-ident-r1951__sub{
   font-size:clamp(8px,.52vw,10px);
   line-height:1;
-  font-weight:560;
-  letter-spacing:.22em;
-  color:rgba(184,218,222,.62);
+  font-weight:540;
+  letter-spacing:.18em;
+  color:rgba(178,210,214,.54);
   text-shadow:0 0 12px rgba(91,188,199,.08);
 }
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   .fx-ai-core-ident-r1951{
-    top:57%;
-    gap:7px;
+    top:calc(var(--fx-ai-core-y,45%) + clamp(72px,13vw,96px));
+    gap:6px;
     max-width:90vw;
-    padding:11px 16px 10px;
-    transform:translate3d(-50%,14px,0) scale(.99);
+    padding:9px 14px 9px;
+    transform:translate3d(-50%,12px,0) scale(.992);
   }
   .fx-ai-core-ident-r1951.is-visible{
     transform:translate3d(-50%,0,0) scale(1);
@@ -105,3 +116,5 @@
   .fx-ai-core-ident-r1951.is-visible{transform:translate3d(-50%,0,0)}
   .fx-ai-core-ident-r1951.is-exiting{transform:translate3d(-50%,0,0)}
 }
+
+/* production-r1959-mag-stabilisation-system-telemetry-label */
