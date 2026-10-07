@@ -118,6 +118,8 @@ jobs:
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
+          node --check .github/scripts/validate-ai-core-telemetry-r1955.cjs
+          node .github/scripts/validate-ai-core-telemetry-r1955.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site
         shell: bash
