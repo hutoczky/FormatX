@@ -1017,10 +1017,10 @@
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
         vec3 mineral=mix(vec3(.005,.010,.013),vec3(.118,.160,.165),lift)*facetTone;
-        mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
-        mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
-        mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
-        mineral-=vec3(.0035,.0048,.0052)*inclusion;
+        mineral*=.958+.036*smokyDepth+.003*mineralGrain+.002*mineralGrainB+.001*mineralGrainC;
+        mineral+=vec3(.052,.057,.056)*fractureHair*(.004+.010*fresnel);
+        mineral+=vec3(.011,.014,.015)*strata*(.055+.095*lift);
+        mineral-=vec3(.0020,.0026,.0028)*inclusion;
         mineral+=vec3(.96,.98,.94)*keySpec*.110;
         mineral+=microSpec*ndl*.22;
         mineral+=vec3(.27,.28,.27)*keySoft*.045;
@@ -1029,9 +1029,9 @@
         mineral+=vec3(.57,.72,.71)*softboxB*.250;
         float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
         mineral+=vec3(.79,.90,.86)*softboxC2*.215;
-        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.060;
+        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.040;
         mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
-        mineral+=vec3(.68,.97,1.00)*studioRibbonC*.105;
+        mineral+=vec3(.68,.97,1.00)*studioRibbonC*.045;
         mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
         mineral+=vec3(.080,.096,.095)*horizonBand*.170;
         mineral+=vec3(.055,.175,.195)*fresnel*.190;
@@ -1068,15 +1068,15 @@
         float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
         float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
         float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.022,.066,.073)*vascular*(.016+.030*uEnergy);
-        mineral+=vec3(.038,.016,.023)*vascular*subsurface*(.010+.020*uEnergy);
+        mineral+=vec3(.022,.066,.073)*vascular*(.004+.009*uEnergy);
+        mineral+=vec3(.038,.016,.023)*vascular*subsurface*(.003+.006*uEnergy);
         float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
         float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
         float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
         float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
-        mineral=mix(mineral,vec3(.014,.025,.031),cortexValley*.050);
-        mineral+=vec3(.066,.082,.090)*cortexRidge*.035;
-        mineral+=vec3(.020,.082,.096)*cortexRidge*vascular*.12;
+        mineral=mix(mineral,vec3(.014,.025,.031),cortexValley*.018);
+        mineral+=vec3(.066,.082,.090)*cortexRidge*.014;
+        mineral+=vec3(.020,.082,.096)*cortexRidge*vascular*.035;
 
         /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
            plates ride above dark cortical tissue. The plate field is broad,
@@ -1092,13 +1092,29 @@
           +vec3(.12,.20,.22)*fresnel*.16;
         ivory+=vec3(.42,.27,.17)*studioRibbonB*.036;
         mineral*=mix(1.0,plateFacetTone,bodyMask*.06);
-        mineral=mix(mineral,ivory,plateMask*.065);
-        mineral=mix(mineral,vec3(.006,.018,.023),livingSeam*.115);
-        mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
+        mineral=mix(mineral,ivory,plateMask*.035);
+        mineral=mix(mineral,vec3(.006,.018,.023),livingSeam*.052);
+        mineral+=vec3(.032,.190,.218)*vascular*(.025+.045*uEnergy);
         mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
 
         vec2 q=vLocal.xy;
         float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
+
+        /* R1951b — full desktop volumetric/refraction parity.
+           Broad optical volumes carry depth; they deliberately avoid high-
+           frequency texture so the material reads as one physical glass body. */
+        float volumeCoreDesktop=exp(-pow(q.x/.49,2.0)-pow((q.y+.015)/.59,2.0))
+          *smoothstep(-.28,.64,vLocal.z)*(1.0-.40*fresnel)*front;
+        float refractDesktopA=exp(-pow((q.x+.13-q.y*.10+uPointer.x*.020)/.165,2.0))
+          *smoothstep(-.46,.66,q.y)*front;
+        float refractDesktopB=exp(-pow((q.x-.22+q.y*.14+uPointer.y*.016)/.205,2.0))
+          *smoothstep(-.56,.70,q.y)*front;
+        float absorptionDesktop=exp(-pow((q.x+.015)/.36,2.0)-pow((q.y-.055)/.44,2.0))
+          *smoothstep(-.22,.55,vLocal.z)*front;
+        mineral+=vec3(.032,.086,.091)*volumeCoreDesktop*.090;
+        mineral+=vec3(.120,.180,.178)*refractDesktopA*.034;
+        mineral+=vec3(.030,.125,.140)*refractDesktopB*.030;
+        mineral*=1.0-absorptionDesktop*.030;
 
         /* R1942 — desktop/internal prism parity with the mobile studio shader. */
         float polar=atan(q.y,q.x);
@@ -1133,13 +1149,12 @@
         mineral+=vec3(.28,.43,.42)*foldRidge*.105;
         mineral+=vec3(.050,.188,.202)*foldSecondary*.054;
         mineral*=1.0-.078*foldValley;
-        float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
-        float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
-        float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
-        float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
-        mineral=mix(mineral,vec3(.006,.017,.021),fissureHalo*.035);
-        mineral+=vec3(.18,.30,.31)*fissure*.072;
-        mineral+=vec3(.66,.67,.62)*fissure*.030;
+        /* R1951b — retire the central procedural fissure. A tiny off-axis
+           subsurface seam remains only to prevent sterile CG symmetry. */
+        float seamX=q.x+.145+.008*sin(q.y*15.0+vLocal.z*5.0);
+        float seamEnvelope=exp(-pow((q.y+.03)/.36,4.0))*front;
+        float seam=exp(-pow(seamX/.010,2.0))*seamEnvelope;
+        mineral+=vec3(.050,.105,.112)*seam*.010;
 
         /* R1942 — central optical organ with a true recessed cavity. */
         vec2 lq=q;
@@ -1716,6 +1731,7 @@
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagQualityR1951='desktop-1p16x-supersample-msaa-analytic-volume-refraction-clean-edge';
     root.dataset.fxNativeMagMaterialR1951='coherent-smoked-silver-bioglass-broad-caustics-no-micro-noise';
+    root.dataset.fxNativeMagMaterialR1951b='full-desktop-volumetric-refraction-no-central-fissure-low-noise';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
