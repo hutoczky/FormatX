@@ -64,7 +64,9 @@
   let pointerTargetNX = 0;
   let pointerTargetNY = 0;
   let pointerTailFrames = 0;
+  let scrollTailFrames = 0;
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const desktopCinemaLive = finePointer && innerWidth >= 1100;
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
@@ -330,7 +332,8 @@
       }
     }
     const rawV = clamp((y-lastY)/dt,-2.2,2.2);
-    velocity += (rawV-velocity)*.35;
+    const velocityEase=1-Math.exp(-dt*.020);
+    velocity += (rawV-velocity)*velocityEase;
     lastY = y;
     lastT = now;
 
@@ -351,8 +354,9 @@
        attribute from instantaneous velocity inside every RAF; that invalidated
        broad selectors and caused repeated full-page style recalculation. */
     const fastScroll=scrollBudgetState==='fast';
+    const liveScrollPass=fastScroll&&desktopCinemaLive;
 
-    if(!fastScroll){
+    if(!fastScroll||liveScrollPass){
       root.style.setProperty('--fx-c536-progress',global.toFixed(4));
       root.style.setProperty('--fx-c536-local',local.toFixed(4));
       root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
@@ -368,14 +372,16 @@
       root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
-      scenes.forEach(scene=>{
-        if(Math.abs(scene.index-active)>1)return;
-        const sceneTop=scene.top-y;
-        const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
-        const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
-        scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
-        scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
-      });
+      if(!fastScroll){
+        scenes.forEach(scene=>{
+          if(Math.abs(scene.index-active)>1)return;
+          const sceneTop=scene.top-y;
+          const lp=clamp((innerHeight*.72-sceneTop)/Math.max(1,scene.height+innerHeight*.36),0,1);
+          const se=scene.index===active?clamp(.16+Math.sin(lp*Math.PI)*.68,.14,.84):.07;
+          scene.node.style.setProperty('--fx-c536-scene-local',lp.toFixed(4));
+          scene.node.style.setProperty('--fx-c536-scene-energy',se.toFixed(4));
+        });
+      }
 
       root.dataset.fxCinematicProgressR536=global.toFixed(3);
       root.dataset.fxCinematicLocalR536=local.toFixed(3);
@@ -388,6 +394,11 @@
       pointerTailFrames-=1;
       if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
       else pointerTailFrames=0;
+    }
+    if(desktopCinemaLive&&scrollTailFrames>0){
+      scrollTailFrames-=1;
+      if(scrollTailFrames>0||Math.abs(velocity)>.012)schedule();
+      else velocity=0;
     }
   }
 
@@ -501,11 +512,12 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    activate(0,'intro-handoff-r1951');
+    root.classList.add('fx-c536-handoff-r1951');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-handoff-r1951'),1280);
+    signalCore(scenes[0],'intro-handoff-r1951');
+    root.dataset.fxCinematicHandoffR1951='optical-crossfade-single-scene';
   }
 
   function boot() {
@@ -539,6 +551,10 @@
          is scheduled here. One settle pass updates scene state and visual depth
          after 120 ms without scroll input. */
       setScrollBudget('fast');
+      if(desktopCinemaLive){
+        scrollTailFrames=6;
+        schedule();
+      }
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -585,6 +601,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxCinematicMotionR1951='desktop-live-scroll-six-frame-inertia-dt-smoothed-optical-handoff';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();

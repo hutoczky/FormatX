@@ -1238,3 +1238,59 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
 /* production-r1948-hero-core-no-opacity-flash */
+
+
+/* R1951 — continuous optical handoff and desktop live-scroll continuity. */
+@media (min-width:1100px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html.fx-c536-handoff-r1951 .fx-c536-flare{
+    animation:fx-c536-r1951-flare 1.18s cubic-bezier(.18,.78,.2,1) 1!important;
+  }
+  html.fx-c536-handoff-r1951 .fx-c536-iris{
+    animation:fx-c536-r1951-iris 1.24s cubic-bezier(.18,.78,.2,1) 1!important;
+  }
+  html.fx-c536-handoff-r1951 .fx-c536-world{
+    animation:fx-c536-r1951-world 1.28s cubic-bezier(.18,.78,.2,1) 1!important;
+  }
+
+  @keyframes fx-c536-r1951-flare{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.72);filter:blur(8px)}
+    30%{opacity:.20;transform:translate(-50%,-50%) scale(1.04);filter:blur(6px)}
+    68%{opacity:.08;transform:translate(-50%,-50%) scale(1.32);filter:blur(12px)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.55);filter:blur(18px)}
+  }
+  @keyframes fx-c536-r1951-iris{
+    0%{opacity:.05;transform:translate(-50%,-50%) scale(.78)}
+    42%{opacity:.18;transform:translate(-50%,-50%) scale(.92)}
+    100%{opacity:calc(.18 + var(--fx-c536-energy) * .24);transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18))}
+  }
+  @keyframes fx-c536-r1951-world{
+    0%{opacity:.035;filter:saturate(.84) contrast(.98) blur(2px)}
+    48%{opacity:.075;filter:saturate(.94) contrast(1) blur(.6px)}
+    100%{opacity:.10;filter:saturate(1) contrast(1) blur(0)}
+  }
+
+  /* During real desktop scrolling keep one faint continuous scene alive.
+     Heavy decorative children remain suppressed by the existing fast-scroll gate. */
+  html[data-fx-scroll-budget-r1660="fast"] .fx-c536-stage{
+    visibility:visible!important;
+    opacity:.055!important;
+    contain:strict!important;
+  }
+  html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world{
+    visibility:visible!important;
+    opacity:.055!important;
+    -webkit-mask-image:radial-gradient(circle,#000 0 45%,rgba(0,0,0,.42) 64%,transparent 82%)!important;
+    mask-image:radial-gradient(circle,#000 0 45%,rgba(0,0,0,.42) 64%,transparent 82%)!important;
+    filter:none!important;
+  }
+
+  /* Lower decorative noise: the content and the MAG remain the first read. */
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{opacity:.010!important}
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-scan{opacity:.012!important}
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-scan{
+    opacity:calc(.026 + var(--fx-c536-energy) * .060)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::before{opacity:calc(.055 + var(--fx-c536-energy) * .13)!important}
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::after{opacity:calc(.07 + var(--fx-c536-energy) * .12)!important}
+}
+/* production-r1951-continuous-optical-handoff-live-scroll-luxury-noise-floor */

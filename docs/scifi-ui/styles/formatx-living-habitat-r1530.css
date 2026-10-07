@@ -1745,3 +1745,96 @@ body>.fx-mag-birth-r533 .fxb-particles{opacity:.40!important;}
   }
 }
 /* production-r1778-mobile-monolith */
+
+
+/* R1951 — desktop optical depth owner.
+   Diffuse volume + contact shadow only: no ring, no plate, no HUD geometry. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    isolation:isolate!important;
+    overflow:visible!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    content:""!important;
+    display:block!important;
+    visibility:visible!important;
+    position:absolute!important;
+    z-index:0!important;
+    inset:6% 4% 7%!important;
+    opacity:.62!important;
+    background:
+      radial-gradient(ellipse 38% 34% at 50% 46%,
+        rgba(159,221,220,.095) 0%,
+        rgba(74,155,166,.050) 34%,
+        rgba(22,63,73,.020) 58%,
+        transparent 78%)!important;
+    filter:blur(18px)!important;
+    border:0!important;
+    box-shadow:none!important;
+    pointer-events:none!important;
+    mix-blend-mode:screen!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    content:""!important;
+    display:block!important;
+    visibility:visible!important;
+    position:absolute!important;
+    z-index:1!important;
+    left:27%!important;
+    right:27%!important;
+    top:66%!important;
+    height:11%!important;
+    opacity:.74!important;
+    background:
+      radial-gradient(ellipse at center,
+        rgba(0,0,0,.52) 0%,
+        rgba(0,0,0,.25) 42%,
+        rgba(0,0,0,.08) 68%,
+        transparent 82%)!important;
+    filter:blur(15px)!important;
+    transform:perspective(700px) rotateX(66deg) scaleX(1.10)!important;
+    border:0!important;
+    box-shadow:none!important;
+    pointer-events:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    position:absolute!important;
+    z-index:2!important;
+    filter:brightness(.995) contrast(1.075) saturate(.93)!important;
+    -webkit-filter:brightness(.995) contrast(1.075) saturate(.93)!important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture::before{opacity:.78!important}
+  html:root:root:root:root:root:root:root body.living-architecture::after{opacity:.84!important}
+  html:root:root:root:root:root body.living-architecture > .fx-living-habitat-r1530{opacity:.46!important}
+
+  html:root:root:root:root body.living-architecture :is(
+    .hero-copy,.flow-stage,.flow-chapters article,.card,.price-card,.payment,
+    .payment-console,.system-grid article,.release-card,.fx-category-grid>article,
+    .fx-origin-proof,.fx-origin-proof article,.fx-award-proof,#user-feedback,
+    .fx-plan-qr-card,.fx-platform-card,.fx-organism-console,.fx-thought-genome-disclosure
+  ){
+    background:
+      radial-gradient(circle at 84% 8%,rgba(122,219,236,.014),transparent 39%),
+      linear-gradient(146deg,rgba(5,17,25,.60),rgba(2,8,13,.69))!important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.016),
+      0 20px 64px rgba(0,0,0,.13)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before,
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    animation:none!important;
+    transform:none!important;
+  }
+}
+/* production-r1951-volumetric-haze-contact-shadow-luxury-noise-floor */
