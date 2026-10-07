@@ -291,7 +291,9 @@
     sceneCommitTimer=0;
     pendingSceneIndex=-1;
     commitScene(index,previous,reason);
-    if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
+    /* R1957 — scroll is one continuous camera move. Optical cuts remain only
+       for explicit jumps/actions, never for normal wheel/trackpad travel. */
+    if(reason!=='scroll')cut();
   }
 
   function pickActive(y=scrollY){
@@ -324,7 +326,7 @@
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        const pointerEase=1-Math.exp(-dt*.014);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -367,6 +369,8 @@
       root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.72).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+      const heroExit=active===0?clamp((local-.52)/.48,0,1):1;
+      root.style.setProperty('--fx-c1957-hero-exit',heroExit.toFixed(4));
 
       scenes.forEach(scene=>{
         if(Math.abs(scene.index-active)>1)return;
@@ -476,8 +480,8 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
-    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
+    pointerTailFrames=10;
+    root.dataset.fxCinematicPointerR617 = 'active-continuous-inertia-r1957';
     schedule();
   }
 
@@ -485,8 +489,8 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
-    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
+    pointerTailFrames=12;
+    root.dataset.fxCinematicPointerR617 = 'rest-continuous-inertia-r1957';
     schedule();
   }
 
@@ -501,11 +505,13 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    activate(0,'intro-handoff-r1957');
+    root.classList.remove('fx-c536-cut');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    cutTimer=0;
+    signalCore(scenes[0],'intro-handoff-r1957');
+    root.dataset.fxCinematicHandoffR1957='continuous-intro-mag-hero-no-cut';
+    schedule();
   }
 
   function boot() {
@@ -535,10 +541,14 @@
         commitScene(0,previous,'document-top-immediate-r1949');
         root.dataset.fxCinematicTopReturnR1949='immediate-core-commit';
       }
-      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
-         is scheduled here. One settle pass updates scene state and visual depth
-         after 120 ms without scroll input. */
-      setScrollBudget('fast');
+      /* R1957 — desktop wheel/trackpad travel stays inside the same cinematic
+         shot. Coarse/mobile retains the compositor-lite fast-scroll budget. */
+      if(finePointer){
+        setScrollBudget('continuous');
+        schedule();
+      }else{
+        setScrollBudget('fast');
+      }
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -567,6 +577,7 @@
     root.dataset.fxCinematicJourneyContractR536='all-content-actions-preserved-one-native-mag';
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
     root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
+    root.dataset.fxCinematicContinuityR1957='desktop-scroll-stage-persistent-no-cut-intro-handoff';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
