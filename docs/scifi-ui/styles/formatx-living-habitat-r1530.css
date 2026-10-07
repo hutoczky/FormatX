@@ -1745,3 +1745,99 @@ body>.fx-mag-birth-r533 .fxb-particles{opacity:.40!important;}
   }
 }
 /* production-r1778-mobile-monolith */
+
+
+/* R1951 — desktop physical depth stack.
+   Depth is painted on dedicated helper layers behind the WebGL canvas so the
+   MAG contour stays untouched by CSS blur/filter passes. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) {
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
+    isolation:isolate!important;
+    overflow:visible!important;
+  }
+
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-mag-depth-r1951 {
+    position:absolute!important;
+    inset:0!important;
+    z-index:0!important;
+    pointer-events:none!important;
+    overflow:visible!important;
+    contain:paint!important;
+  }
+
+  html:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
+    z-index:2!important;
+    filter:brightness(1.025) contrast(1.085) saturate(.90)!important;
+    -webkit-filter:brightness(1.025) contrast(1.085) saturate(.90)!important;
+  }
+
+  .fx-mag-contact-r1951,
+  .fx-mag-haze-r1951,
+  .fx-mag-bloom-r1951 {
+    position:absolute;
+    left:50%;
+    pointer-events:none;
+    transform:translate3d(-50%,0,0);
+  }
+
+  .fx-mag-contact-r1951 {
+    z-index:0;
+    top:68%;
+    width:min(62%,560px);
+    height:clamp(34px,6vh,62px);
+    border-radius:50%;
+    background:radial-gradient(ellipse at center,
+      rgba(0,0,0,.48) 0%,
+      rgba(0,0,0,.28) 34%,
+      rgba(0,0,0,.10) 58%,
+      transparent 78%);
+    filter:blur(12px);
+    opacity:.72;
+  }
+
+  .fx-mag-haze-r1951 {
+    z-index:0;
+    top:17%;
+    width:min(76%,720px);
+    height:64%;
+    border-radius:50%;
+    background:
+      radial-gradient(ellipse at 50% 47%,rgba(126,200,204,.055),rgba(52,101,108,.026) 39%,transparent 72%),
+      linear-gradient(180deg,rgba(221,246,243,.020),transparent 31% 72%,rgba(59,111,119,.020));
+    filter:blur(22px);
+    opacity:.78;
+  }
+
+  .fx-mag-bloom-r1951 {
+    z-index:1;
+    top:28%;
+    width:min(42%,380px);
+    aspect-ratio:1;
+    border-radius:50%;
+    background:radial-gradient(circle,
+      rgba(159,236,237,.070) 0%,
+      rgba(63,174,188,.032) 31%,
+      transparent 69%);
+    filter:blur(16px);
+    opacity:.54;
+    mix-blend-mode:screen;
+  }
+
+  /* Luxury breathing room: keep the hero/first chapter visually quiet.
+     Structural atmosphere remains, but ornamental density drops around the
+     focal object and the first transition. */
+  html[data-fx-cinematic-scene-r536="core"] body.living-architecture::before {
+    opacity:.72!important;
+  }
+  html[data-fx-cinematic-scene-r536="core"] body.living-architecture::after {
+    opacity:.76!important;
+  }
+  html body.living-architecture #experience {
+    padding-top:clamp(104px,12vh,148px)!important;
+  }
+  html body.living-architecture #experience > .section-heading {
+    margin-bottom:clamp(46px,5.6vh,72px)!important;
+  }
+}
+
+/* production-r1951-desktop-physical-depth-luxury-breathing-room */

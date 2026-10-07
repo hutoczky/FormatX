@@ -349,6 +349,10 @@
       <h1></h1>
       <p class="fxb-subtitle"></p>
     </header>
+    <div class="fxb-core-id-r1951" aria-hidden="true">
+      <span class="fxb-core-id-r1951__main">MAG <b>//</b> AI CORE</span>
+      <span class="fxb-core-id-r1951__sub"><i></i>ONLINE <b>·</b> LOCAL INTELLIGENCE</span>
+    </div>
     <div class="fxb-telemetry" aria-live="polite">
       <output class="fxb-percent">000</output>
       <progress class="fxb-progress" max="100" value="0">0%</progress>
@@ -388,6 +392,7 @@
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
+  const coreIdLabel = overlay.querySelector('.fxb-core-id-r1951');
   const canvas = prepaintCanvas;
   const dnaStage = overlay.querySelector('.fxb-dna-stage');
   const dnaHelix = overlay.querySelector('.fxb-dna-helix');
@@ -514,7 +519,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261007-r1950c-studio-intro';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261007-r1951-continuous-ai-core-intro';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -537,7 +542,18 @@
   let lastTelemetryUpdate = 0;
   let warmupDispatched = false;
   let ignitionDone = false;
+  let coreIdVisible = false;
   let visiblePhase = 0;
+
+  function syncCoreIdentity(r){
+    const shouldShowCoreId=!REDUCED && visiblePhase>=4 && r>=.845 && r<.965;
+    if(!(coreIdLabel instanceof HTMLElement)||shouldShowCoreId===coreIdVisible)return;
+    coreIdVisible=shouldShowCoreId;
+    coreIdLabel.classList.toggle('is-visible',shouldShowCoreId);
+    coreIdLabel.dataset.state=shouldShowCoreId?'online':'retiring';
+    overlay.dataset.coreIdR1951=shouldShowCoreId?'visible':'retiring';
+    ROOT.dataset.fxMagCoreIdentityR1951=shouldShowCoreId?'visible':'hidden';
+  }
   let phaseChangedAt = 0;
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
@@ -549,7 +565,7 @@
     if (r < .245) return 0;
     if (r < .315) return 1;
     if (r < .572) return 2;
-    if (r < .928) return 3;
+    if (r < .840) return 3;
     return 4;
   }
   function applyPhase(next,source='timeline') {
@@ -597,7 +613,7 @@
   function armPhaseTimeline(){
     for(const timer of phaseTimers)clearTimeout(timer);
     phaseTimers.clear();
-    for(const [phase,ratio] of [[1,.245],[2,.315],[3,.572],[4,.928]]){
+    for(const [phase,ratio] of [[1,.245],[2,.315],[3,.572],[4,.840]]){
       const timer=setTimeout(()=>{
         phaseTimers.delete(timer);
         if(!finished)applyPhase(phase,'timer-r621');
@@ -955,6 +971,13 @@
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
 
+    try {
+      coreIdVisible=false;
+      coreIdLabel?.classList?.remove('is-visible');
+      if(coreIdLabel instanceof HTMLElement)coreIdLabel.dataset.state='retired';
+      overlay.dataset.coreIdR1951='retired';
+      ROOT.dataset.fxMagCoreIdentityR1951='retired';
+    } catch (_) {}
     try { percent.value='100'; } catch (_) {}
     try { progress.value=100; } catch (_) {}
     try { status.textContent=copy.statuses[copy.statuses.length-1][1]; } catch (_) {}
@@ -1019,6 +1042,9 @@
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
+
+    /* R1951 — one-time boot telemetry identity. */
+    syncCoreIdentity(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
@@ -1106,6 +1132,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
+    ROOT.dataset.fxMagCoreIdentityContractR1951='first-visit-phase4-stabilization-1p2s-telemetry-350ms-blur-out-clean-hero-after';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
@@ -1151,6 +1178,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{syncCoreIdentity(fixedR);}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');

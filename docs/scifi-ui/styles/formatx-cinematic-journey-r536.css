@@ -1238,3 +1238,94 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
 /* production-r1948-hero-core-no-opacity-flash */
+
+
+/* R1951 — continuous desktop cinema and luxury noise floor.
+   Fine-pointer desktop never hard-hides the world during scroll. The hot path
+   keeps only cheap compositor layers alive; mobile retains the R1677 hide rule. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html[data-fx-scroll-budget-r1660="fast"] .fx-c536-stage{
+    visibility:visible!important;
+    opacity:.72!important;
+    contain:layout paint style!important;
+    transition:opacity .22s linear!important;
+  }
+
+  html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world{
+    opacity:calc(.08 + var(--fx-c536-energy) * .18)!important;
+  }
+
+  html[data-fx-scroll-budget-r1660="fast"] :is(
+    .fx-c536-iris,.fx-c536-track,.fx-c536-scan,.fx-c536-grain
+  ){
+    opacity:.025!important;
+  }
+
+  .fx-c536-world{
+    opacity:calc(.10 + var(--fx-c536-energy) * .24);
+  }
+
+  .fx-c536-iris{
+    opacity:calc(.10 + var(--fx-c536-energy) * .15);
+    border-color:rgba(var(--fx-c536-a),.050);
+    box-shadow:0 0 36px rgba(var(--fx-c536-a),.022),inset 0 0 44px rgba(var(--fx-c536-b),.018);
+  }
+
+  .fx-c536-track{
+    opacity:calc(.025 + var(--fx-c536-energy) * .075);
+  }
+
+  .fx-c536-scan{
+    opacity:calc(.018 + var(--fx-c536-energy) * .060);
+  }
+
+  .fx-c536-grain{
+    opacity:.018;
+  }
+
+  .fx-c536-anatomy{
+    opacity:calc(.035 + var(--fx-c536-scene-energy) * .34);
+  }
+
+  /* Intro dissolves into the same world instead of triggering a separate cut. */
+  html.fx-c536-intro-blend-r1951 .fx-c536-world{
+    animation:fx-c536-intro-world-r1951 1.08s cubic-bezier(.18,.78,.2,1) both;
+  }
+  html.fx-c536-intro-blend-r1951 .fx-c536-iris{
+    animation:fx-c536-intro-iris-r1951 1.08s cubic-bezier(.18,.78,.2,1) both;
+  }
+  html.fx-c536-intro-blend-r1951 .fx-c536-track,
+  html.fx-c536-intro-blend-r1951 .fx-c536-scan{
+    animation:fx-c536-intro-detail-r1951 1.08s ease both;
+  }
+
+  /* Hero -> first chapter shares one optical bridge. */
+  html[data-fx-cinematic-journey-r536="ready"] #live-os-overview > .fx-c1947-bridge,
+  html[data-fx-cinematic-journey-r536="ready"] #experience > .fx-c1947-bridge{
+    background:
+      radial-gradient(ellipse 44% 50% at var(--fx-c1947-side-x) 32%,
+        rgba(var(--fx-c536-a),.050),
+        rgba(var(--fx-c536-b),.016) 44%,
+        transparent 78%),
+      radial-gradient(ellipse 62% 18% at 50% 0%,
+        rgba(224,250,251,.026),
+        transparent 74%);
+    opacity:calc(.07 + var(--fx-c536-scene-energy) * .32);
+  }
+}
+
+@keyframes fx-c536-intro-world-r1951{
+  0%{opacity:.035;transform:translate(-50%,-50%) scale(.82)}
+  42%{opacity:.09;transform:translate(-50%,-50%) scale(.85)}
+  100%{opacity:calc(.10 + var(--fx-c536-energy) * .24);transform:translate(-50%,-50%) scale(calc(.86 + var(--fx-c536-local) * .12))}
+}
+@keyframes fx-c536-intro-iris-r1951{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.68)}
+  100%{opacity:calc(.10 + var(--fx-c536-energy) * .15);transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18))}
+}
+@keyframes fx-c536-intro-detail-r1951{
+  0%,24%{opacity:0}
+  100%{opacity:.06}
+}
+
+/* production-r1951-continuous-desktop-cinema-luxury-noise-floor */

@@ -2256,3 +2256,156 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+
+/* R1951 — transient MAG identity telemetry.
+   This is a boot-system identifier, not a headline: no card chrome, no persistent
+   hero copy, no layout ownership. It appears only during final stabilization. */
+.fxb-core-id-r1951{
+  position:absolute;
+  z-index:18;
+  left:50%;
+  top:64%;
+  width:min(360px,calc(100vw - 48px));
+  transform:translate3d(-50%,10px,0) scale(.985);
+  display:grid;
+  gap:7px;
+  padding:10px 0 10px 18px;
+  opacity:0;
+  filter:blur(8px);
+  color:rgba(231,249,251,.94);
+  pointer-events:none;
+  will-change:opacity,transform,filter;
+  transition:
+    opacity .28s cubic-bezier(.18,.78,.2,1),
+    transform .36s cubic-bezier(.18,.78,.2,1),
+    filter .34s cubic-bezier(.18,.78,.2,1);
+}
+.fxb-core-id-r1951::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:8px;
+  bottom:8px;
+  width:1px;
+  background:linear-gradient(180deg,
+    transparent,
+    rgba(114,224,231,.18) 18%,
+    rgba(146,242,241,.68) 49%,
+    rgba(80,168,181,.22) 82%,
+    transparent);
+  box-shadow:0 0 10px rgba(96,220,228,.14);
+}
+.fxb-core-id-r1951::after{
+  content:"";
+  position:absolute;
+  left:-2px;
+  top:50%;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:#bff9f7;
+  box-shadow:
+    0 0 8px rgba(128,239,239,.68),
+    0 0 18px rgba(87,203,218,.22);
+  opacity:.82;
+}
+.fxb-core-id-r1951.is-visible{
+  opacity:1;
+  filter:blur(0);
+  transform:translate3d(-50%,0,0) scale(1);
+}
+.fxb-core-id-r1951__main,
+.fxb-core-id-r1951__sub{
+  display:block;
+  white-space:nowrap;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  text-transform:uppercase;
+  text-shadow:0 0 18px rgba(96,220,228,.08);
+}
+.fxb-core-id-r1951__main{
+  font-size:clamp(11px,.92vw,14px);
+  font-weight:760;
+  letter-spacing:.22em;
+  line-height:1.15;
+  color:rgba(239,252,252,.94);
+}
+.fxb-core-id-r1951__main b{
+  margin:0 .34em;
+  font-weight:500;
+  color:rgba(120,213,221,.48);
+}
+.fxb-core-id-r1951__sub{
+  font-size:clamp(7px,.56vw,9px);
+  font-weight:650;
+  letter-spacing:.18em;
+  line-height:1.2;
+  color:rgba(170,205,210,.47);
+}
+.fxb-core-id-r1951__sub i{
+  display:inline-block;
+  width:4px;
+  height:4px;
+  margin:0 8px 1px 0;
+  border-radius:50%;
+  background:#78ddd9;
+  box-shadow:0 0 8px rgba(91,220,220,.44);
+  vertical-align:middle;
+}
+.fxb-core-id-r1951__sub b{
+  margin:0 .55em;
+  font-weight:400;
+  color:rgba(127,185,193,.34);
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fxb-core-id-r1951{
+    top:61.5%;
+    width:min(320px,calc(100vw - 40px));
+    padding-left:16px;
+    gap:6px;
+  }
+  .fxb-core-id-r1951__main{
+    font-size:11px;
+    letter-spacing:.19em;
+  }
+  .fxb-core-id-r1951__sub{
+    font-size:7px;
+    letter-spacing:.14em;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fxb-core-id-r1951{
+    display:none!important;
+  }
+}
+/* production-r1951-mag-ai-core-transient-telemetry */
+
+/* R1951 — phase 4 is stabilization, not a separate white/cyan flash event. */
+.fx-mag-birth-r533[data-phase="4"] .fxb-flash,
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-flash,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-flash,
+.fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-flash{
+  animation:none!important;
+  opacity:0!important;
+  filter:none!important;
+}
+/* production-r1951-no-white-flash-phase4 */
+
+/* R1951 — while the core identity is online, legacy intro copy yields completely.
+   The label remains a single instrumentation event, never a stacked web heading. */
+.fx-mag-birth-r533[data-core-id-r1951="visible"] :is(.fxb-copy,.fxb-telemetry){
+  opacity:0!important;
+  filter:blur(5px)!important;
+  transform:translateY(-4px) scale(.99)!important;
+  transition:
+    opacity .22s ease,
+    filter .28s ease,
+    transform .30s cubic-bezier(.18,.78,.2,1)!important;
+}
+.fx-mag-birth-r533[data-core-id-r1951="retiring"] :is(.fxb-copy,.fxb-telemetry){
+  opacity:0!important;
+}
+/* production-r1951-ai-core-exclusive-telemetry */
