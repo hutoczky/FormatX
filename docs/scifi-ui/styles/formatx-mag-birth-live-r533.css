@@ -2277,9 +2277,9 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   pointer-events:none;
   will-change:opacity,transform,filter;
   transition:
-    opacity .32s cubic-bezier(.18,.78,.2,1),
-    transform .52s cubic-bezier(.18,.78,.2,1),
-    filter .48s cubic-bezier(.18,.78,.2,1);
+    opacity .28s cubic-bezier(.18,.78,.2,1),
+    transform .36s cubic-bezier(.18,.78,.2,1),
+    filter .34s cubic-bezier(.18,.78,.2,1);
 }
 .fxb-core-id-r1951::before{
   content:"";
@@ -2382,3 +2382,14 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   }
 }
 /* production-r1951-mag-ai-core-transient-telemetry */
+
+/* R1951 — phase 4 is stabilization, not a separate white/cyan flash event. */
+.fx-mag-birth-r533[data-phase="4"] .fxb-flash,
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"][data-phase="4"] .fxb-flash,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"][data-phase="4"] .fxb-flash,
+.fx-mag-birth-r533[data-fx-intro-r647="shot-match-biotic-genesis"][data-phase="4"] .fxb-flash{
+  animation:none!important;
+  opacity:0!important;
+  filter:none!important;
+}
+/* production-r1951-no-white-flash-phase4 */
