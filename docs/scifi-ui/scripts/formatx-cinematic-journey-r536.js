@@ -277,6 +277,15 @@
     const fastScroll=reason==='scroll'&&Math.abs(velocity)>.28;
     active=index;
 
+    /* R1976: the hero world floor follows the logical active scene immediately.
+       Fast-scroll CSS may still keep compositor-lite opacity during motion, but
+       the core-only inline !important floor must never survive into non-core
+       scenes and block the post-scroll cinematic reveal. */
+    applyHeroDisclosure(scenes[index]);
+    root.dataset.fxCinematicHeroWorldR1976=scenes[index].def.key==='core'
+      ? 'core-floor-active'
+      : 'noncore-inline-floor-cleared';
+
     if(!changed){
       if(!fastScroll)setSceneState(scenes[index],'active');
       return;
@@ -586,6 +595,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1655='fast-scroll-two-css-vars-full-detail-on-settle';
     root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
     root.dataset.fxCinematicJourneyRecoveryR1975='refresh-cannot-strand-fast-scroll-budget';
+    root.dataset.fxCinematicHeroWorldR1976='active-scene-owns-inline-floor';
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
