@@ -81,8 +81,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
 
   const page = await context.newPage();
   const started = Date.now();
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForSelector('#hero-title');
 
   const controlSnapshot = async label => page.evaluate(label => {
     const pick = selector => {
@@ -102,26 +100,62 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
         fontSize:s.fontSize,boxSizing:s.boxSizing
       };
     };
+    const matched = selector => {
+      const el=document.querySelector(selector);
+      if(!(el instanceof Element)) return [];
+      const out=[];
+      const interesting=new Set(['width','height','min-width','min-height','max-width','max-height','position','top','right','bottom','left','inset','transform','scale','margin','padding','display']);
+      const walk=(rules,href)=>{for(const rule of Array.from(rules||[])){
+        if(rule instanceof CSSMediaRule){
+          if(!matchMedia(rule.conditionText).matches) continue;
+          walk(rule.cssRules,href); continue;
+        }
+        if(rule instanceof CSSSupportsRule || rule instanceof CSSLayerBlockRule){walk(rule.cssRules,href);continue;}
+        if(!(rule instanceof CSSStyleRule)) continue;
+        let ok=false; try{ok=el.matches(rule.selectorText)}catch(_){}
+        if(!ok) continue;
+        const declarations={};
+        for(const name of Array.from(rule.style)){
+          if(interesting.has(name)) declarations[name]=rule.style.getPropertyValue(name)+(rule.style.getPropertyPriority(name)?' !important':'');
+        }
+        if(Object.keys(declarations).length) out.push({href,selector:rule.selectorText,declarations});
+      }};
+      for(const sheet of Array.from(document.styleSheets)){
+        let rules; try{rules=sheet.cssRules}catch(_){continue}
+        walk(rules,sheet.href||'inline');
+      }
+      return out;
+    };
     return {
       label,t:performance.now(),
       referenceMode:document.documentElement.dataset.fxReferenceProductionR244||null,
+      rootDataset:{...document.documentElement.dataset},
+      styleSheets:Array.from(document.styleSheets).map(s=>s.href||'inline'),
       controls:pick('#hero .fx-reference-controls-r204'),
       sound:pick('#hero .fx-three-sound'),
       ask:pick('#hero .fx-reference-ask'),
       heroSpace:pick('#hero .hero-space'),
-      topbar:pick('.topbar')
+      topbar:pick('.topbar'),
+      matchedRules:{
+        controls:matched('#hero .fx-reference-controls-r204'),
+        sound:matched('#hero .fx-three-sound'),
+        ask:matched('#hero .fx-reference-ask'),
+        topbar:matched('.topbar')
+      }
     };
   }, label);
 
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
   const controlSnapshotsR1968 = [];
-  controlSnapshotsR1968.push(await controlSnapshot('domcontentloaded'));
-  await page.waitForTimeout(80);
-  controlSnapshotsR1968.push(await controlSnapshot('plus80ms'));
-  await page.waitForTimeout(120);
-  controlSnapshotsR1968.push(await controlSnapshot('plus200ms'));
-  await page.waitForTimeout(300);
-  controlSnapshotsR1968.push(await controlSnapshot('plus500ms'));
-  await page.waitForTimeout(2000);
+  controlSnapshotsR1968.push(await controlSnapshot('domcontentloaded-immediate'));
+  await page.waitForTimeout(20);
+  controlSnapshotsR1968.push(await controlSnapshot('plus20ms'));
+  await page.waitForTimeout(30);
+  controlSnapshotsR1968.push(await controlSnapshot('plus50ms'));
+  await page.waitForTimeout(70);
+  controlSnapshotsR1968.push(await controlSnapshot('plus120ms'));
+  await page.waitForSelector('#hero-title');
+  await page.waitForTimeout(2380);
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
