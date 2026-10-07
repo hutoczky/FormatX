@@ -1296,6 +1296,16 @@
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
         float strata=.5+.5*sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4);
         float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        float desktopFactor=${mobile?'0.0':'1.0'};
+        float volumeDepth=sat(.5+.5*vLocal.z);
+        float volumetricVeil=desktopFactor
+          *exp(-pow((vLocal.z+.10)/.42,2.0))
+          *(0.22+.78*(1.0-facing))
+          *frontDepth;
+        float refractPlane=desktopFactor
+          *exp(-pow((vLocal.x*.78+vLocal.y*.28-.08)/.20,2.0))
+          *smoothstep(.08,.78,frontDepth)
+          *(0.32+.68*fresnel);
 
         if(uLayer>.5){
           ${outputName}=vec4(0.0,0.0,0.0,0.0);
@@ -1391,6 +1401,12 @@
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
+        /* R1959 — broad physical depth, not decorative noise.
+           One absorption veil and one off-axis refractive plane make the shell
+           read as a single thick optical volume under the studio light. */
+        c+=vec3(.018,.050,.056)*volumetricVeil*(.040+.026*volumeDepth);
+        c+=vec3(.032,.105,.118)*refractPlane*.060;
+        c*=1.0-volumetricVeil*.018;
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
@@ -1417,6 +1433,9 @@
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
+        float opticBloom=desktopFactor*exp(-od*od*1.85)*front;
+        c+=vec3(.018,.105,.118)*opticBloom*(.028+.020*uEnergy);
+        c+=vec3(.32,.56,.56)*opticBloom*glint*.020;
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
@@ -1428,7 +1447,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.74'}),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -2194,6 +2213,7 @@
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
       root.dataset.fxNativeMagStudioR1959='desktop-96x192-mesh-234dpr-supersample-contact-depth-photographic-pass';
+      root.dataset.fxNativeMagMaterialR1959='single-smoked-silver-volume-offaxis-refraction-subtle-optic-bloom';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
