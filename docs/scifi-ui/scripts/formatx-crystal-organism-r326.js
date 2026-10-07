@@ -1308,7 +1308,7 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),${mobile?'vec3(.108,.138,.141)':'vec3(.132,.148,.147)'},lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1321,12 +1321,12 @@
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.98,1.00,.97)*softboxA*${mobile?'.006':'.095'};
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.175'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.155'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
-        c+=vec3(.18,.47,.50)*ribbonB*.175;
+        c+=vec3(.18,.47,.50)*ribbonB*${mobile?'.175':'.070'};
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1346,7 +1346,7 @@
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
         c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-${mobile?'.090':'.042'}*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1376,13 +1376,13 @@
         float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
         c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
-        c*=1.0-${mobile?'.085':'.110'}*foldValley;
+        c*=1.0-${mobile?'.085':'.048'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.030,.180,.205)*fresnel*${mobile?'.34':'.205'};
+        c+=vec3(.055,.300,.335)*deepEdge*${mobile?'.235':'.155'};
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1436,7 +1436,7 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        float finalAlpha=${mobile?'1.0':'clamp(contourAA*1.08,0.0,1.0)'};
+        float finalAlpha=${mobile?'1.0':'clamp(.985+contourAA*.015,.985,1.0)'};
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.66'}),finalAlpha);
       }`;
 
@@ -1711,6 +1711,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagMaterialR1951='coherent-smoked-silver-refraction-contact-ready-subpixel-contour';
+    root.dataset.fxNativeMagMaterialR1951b='neutral-smoked-silver-soft-prism-stable-hidpi-floor';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1860,8 +1861,8 @@
       ? (mobile?1.00:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      ? (mobile?.80:.52)
+      : (mobile?.80:(constrained?.68:.86));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -2133,10 +2134,13 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>16.75 || ms>6.4;
+        const panicFrame=mobile ? (dt>16.75 || ms>6.4) : (dt>19.2 || ms>8.5);
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
+          qualityScale=Math.max(
+            qualityFloor,
+            qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>25||ms>12?.08:.04))
+          );
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -2153,23 +2157,31 @@
           /* R1660 — preserve the 16.67 ms presentation budget. Resolution
              and secondary optical detail yield before cadence. Recovery waits
              until the renderer has sustained real headroom for long enough. */
-          const renderPressure=renderAverage>4.4 || renderPeak>5.8;
-          const severeRenderPressure=renderAverage>5.8 || renderPeak>7.4;
-          const framePressure=frameIntervalAverage>16.08 || framePeak>16.55;
-          const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
+          const renderPressure=mobile
+            ? (renderAverage>4.4 || renderPeak>5.8)
+            : (renderAverage>5.2 || renderPeak>7.6);
+          const severeRenderPressure=mobile
+            ? (renderAverage>5.8 || renderPeak>7.4)
+            : (renderAverage>7.0 || renderPeak>10.5);
+          const framePressure=mobile
+            ? (frameIntervalAverage>16.08 || framePeak>16.55)
+            : (frameIntervalAverage>16.95 || framePeak>18.8);
+          const severeFramePressure=mobile
+            ? (frameIntervalAverage>16.42 || framePeak>17.05)
+            : (frameIntervalAverage>17.8 || framePeak>22.0);
 
           if(severeFramePressure||severeRenderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.06));
             stableBudgetFrames=0;
             panicFrames=Math.max(panicFrames,12);
           }else if(framePressure||renderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.09));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.025));
             stableBudgetFrames=0;
           }else{
             if(panicFrames>0)panicFrames-=1;
             else stableBudgetFrames+=1;
-            if(stableBudgetFrames>360 && frameIntervalAverage<15.92 && renderAverage<3.4 && renderPeak<4.8){
-              qualityScale=Math.min(qualityCeiling,qualityScale+.0015);
+            if(stableBudgetFrames>(mobile?360:240) && frameIntervalAverage<(mobile?15.92:16.35) && renderAverage<(mobile?3.4:4.4) && renderPeak<(mobile?4.8:6.4)){
+              qualityScale=Math.min(qualityCeiling,qualityScale+(mobile?.0015:.003));
               stableBudgetFrames=0;
             }
           }
