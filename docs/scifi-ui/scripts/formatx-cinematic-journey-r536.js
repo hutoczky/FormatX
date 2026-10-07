@@ -291,7 +291,10 @@
     sceneCommitTimer=0;
     pendingSceneIndex=-1;
     commitScene(index,previous,reason);
-    if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
+    /* R1959 — scroll transitions are continuous camera movement, never a
+       flare/cut. Explicit story/loop actions may still use the cinematic cut. */
+    if(reason!=='scroll')cut();
+    else root.dataset.fxCinematicScrollTransitionR1959='continuous-no-flare';
   }
 
   function pickActive(y=scrollY){
