@@ -1382,6 +1382,20 @@
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
+        /* R1956 — photographic internal depth.
+           Broad volumetric/refraction fields replace decorative noise. The lower
+           body receives restrained self-occlusion so the floating object still
+           feels grounded in the hero chamber without a fake painted shadow. */
+        float internalFog=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.58,2.0))
+          *smoothstep(-.28,.58,vLocal.z)*frontDepth;
+        float refractionBand=exp(-pow((abs(vLocal.x)+abs(vLocal.y)*.62-.37)/.105,2.0))
+          *frontDepth;
+        float lowerSelfShadow=exp(-pow((vLocal.y+.52)/.19,2.0))
+          *frontDepth*(.55+.45*facing);
+        c*=1.0-lowerSelfShadow*${mobile?'.026':'.062'};
+        c+=vec3(.020,.090,.105)*internalFog*${mobile?'.024':'.046'};
+        c+=vec3(.24,.34,.33)*refractionBand*softboxB*${mobile?'.018':'.034'};
+
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
@@ -1692,6 +1706,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagQualityR1956='desktop-hidpi-persistent-edge-aa-2_35x-cap-4_6mp-budget-0_88-floor';
+    root.dataset.fxNativeMagMaterialR1956='smoked-silver-volumetric-depth-refraction-self-occlusion-controlled-bloom';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
