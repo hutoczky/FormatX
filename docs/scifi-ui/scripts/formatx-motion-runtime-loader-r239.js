@@ -49,9 +49,9 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261007-r1950-desktop-edge-aa';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261007-r1959-ai-core-optics-aa';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261007-r1950-desktop-edge-aa';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261007-r1959-ai-core-optics-aa';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
@@ -59,13 +59,14 @@ const CURRENT_LIFE='/scifi-ui/scripts/formatx-core-life-r455.js?v=20260920-r629-
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const DIALOGUE_STYLE='/scifi-ui/styles/formatx-dialogue-surface-r475.css?v=20260925-r1747-p0-owned-open';
 const MAG_SHAPE_SYNC='/scifi-ui/scripts/formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism';
+const WDA_SOUND_OWNER='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20261007-r1959-sound-click-owner';
 
 if(!(template instanceof HTMLTemplateElement)){root.dataset.fxMotionRuntimeR239='missing-template';return;}
 const deferred=Array.from(template.content.querySelectorAll('script[src]'));
 const mounted=new Set();
 const passive={passive:true};
 const intentListeners=[['click',false],['keydown',false]];
-let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,askActivationPending=false,magRuntimeActivated=false;
+let enhancementsStarted=false,currentRequested=false,languageRequested=false,shapeSyncRequested=false,wdaSoundRequested=false,askActivationPending=false,magRuntimeActivated=false;
 
 function srcOf(spec){return String(spec.getAttribute('src')||'');}
 function mount(spec){
@@ -140,6 +141,20 @@ function ensureLanguageToggle(){
   const script=document.createElement('script');script.src=LANGUAGE_TOGGLE;script.async=false;script.dataset.fxCriticalLanguageR461='true';
   script.addEventListener('load',()=>{root.dataset.fxLanguageCriticalPathR461=root.dataset.fxSingleLanguageToggle==='ready'?'ready':'loaded-awaiting-install';},{once:true});
   script.addEventListener('error',()=>{root.dataset.fxLanguageCriticalPathR461='failed';},{once:true});
+  document.head.appendChild(script);
+}
+function ensureWdaSoundOwner(){
+  if(root.dataset.fxWdaHardening==='r263')return;
+  if(wdaSoundRequested||document.querySelector('script[data-fx-wda-sound-owner-r1959]'))return;
+  wdaSoundRequested=true;
+  const script=document.createElement('script');
+  script.src=WDA_SOUND_OWNER;
+  script.async=false;
+  script.dataset.fxWdaSoundOwnerR1959='true';
+  script.addEventListener('load',()=>{
+    root.dataset.fxWdaSoundBootstrapR1959=root.dataset.fxWdaHardening==='r263'?'ready':'loaded-awaiting-owner';
+  },{once:true});
+  script.addEventListener('error',()=>{root.dataset.fxWdaSoundBootstrapR1959='failed';},{once:true});
   document.head.appendChild(script);
 }
 function ensureCurrentMag(){
@@ -248,6 +263,12 @@ root.dataset.fxCoreCriticalPathR422='armed-direct-r326-r468-soft-optics-live-ene
 warmCriticalOwners();
 ensureDialogueSurface();
 ensureLanguageToggle();
+/* R1959 — the visible SOUND shell exists at first paint, but its lightweight
+   click owner must be armed before the first trusted click. This runtime itself
+   is post-first-paint, so audio ownership becomes deterministic without adding
+   the professional audio engine to the critical path. */
+ensureWdaSoundOwner();
+root.dataset.fxSoundClickOwnerR1959='post-first-paint-wda-r263';
 if(magBirthActive()){
   root.dataset.fxIntroAwareMagR618='waiting-for-core-formation';
   document.addEventListener('formatx:magbirthcorewarmup',onMagBirthWarmup,{once:true,passive:true});
