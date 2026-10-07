@@ -49,7 +49,7 @@
       this.lastRender=0;
       this.disposed=false;
 
-      this.mobileRender=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
+      this.mobileRender=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
@@ -593,12 +593,73 @@
     }
 
 
+    /* R1983 — physically readable microfibril relief.
+       The grayscale texture is generated locally (no network asset) and feeds
+       actual bump mapping on tissue and smoked bioglass. It is complemented by
+       true LineSegments below so close-up silhouette hairs remain razor sharp. */
+    makeMicroFiberTexture(){
+      if(this.microFiberTexture)return this.microFiberTexture;
+      const T=this.THREE;
+      const size=this.mobileRender?256:512;
+      const c=document.createElement('canvas');
+      c.width=c.height=size;
+      const x=c.getContext('2d',{alpha:false});
+      x.fillStyle='rgb(118,118,118)';
+      x.fillRect(0,0,size,size);
+      let state=0x1983f1b7;
+      const rnd=()=>{
+        state=(Math.imul(state^state>>>15,1|state)+0x6D2B79F5)|0;
+        let q=state^state>>>7;
+        return ((q^q>>>14)>>>0)/4294967296;
+      };
+      const strands=this.mobileRender?420:1480;
+      for(let i=0;i<strands;i++){
+        const sx=rnd()*size;
+        const sy=rnd()*size;
+        const len=(.035+rnd()*.16)*size;
+        const angle=(-.34+rnd()*.68)+(i%5===0?.72:0);
+        const ex=sx+Math.cos(angle)*len;
+        const ey=sy+Math.sin(angle)*len;
+        const bend=(rnd()-.5)*len*.18;
+        const cx=(sx+ex)*.5-Math.sin(angle)*bend;
+        const cy=(sy+ey)*.5+Math.cos(angle)*bend;
+        const raised=i%3!==0;
+        const alpha=.15+rnd()*.26;
+        const tone=raised?178+Math.floor(rnd()*36):66+Math.floor(rnd()*28);
+        x.strokeStyle=`rgba(${tone},${tone},${tone},${alpha.toFixed(3)})`;
+        x.lineWidth=this.mobileRender?.55:(.38+rnd()*.55);
+        x.beginPath();
+        x.moveTo(sx,sy);
+        x.quadraticCurveTo(cx,cy,ex,ey);
+        x.stroke();
+      }
+      const pores=this.mobileRender?150:520;
+      for(let i=0;i<pores;i++){
+        const px=rnd()*size,py=rnd()*size,r=.22+rnd()*.75;
+        const tone=rnd()>.48?154:78;
+        x.fillStyle=`rgba(${tone},${tone},${tone},${(.08+rnd()*.16).toFixed(3)})`;
+        x.beginPath();x.arc(px,py,r,0,Math.PI*2);x.fill();
+      }
+      const tex=new T.CanvasTexture(c);
+      tex.wrapS=tex.wrapT=T.RepeatWrapping;
+      tex.repeat.set(this.mobileRender?3.0:5.2,this.mobileRender?2.6:4.4);
+      tex.minFilter=T.LinearMipmapLinearFilter;
+      tex.magFilter=T.LinearFilter;
+      tex.generateMipmaps=true;
+      tex.anisotropy=Math.min(8,this.renderer.capabilities.getMaxAnisotropy?.()||1);
+      if('NoColorSpace' in T)tex.colorSpace=T.NoColorSpace;
+      this.microFiberTexture=tex;
+      return tex;
+    }
+
     makeOrganicLayer(){
       const T=this.THREE,r=this.rand;
+      const microFiberTexture=this.makeMicroFiberTexture();
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
         color:0x160d20,roughness:.66,metalness:.010,
         clearcoat:.11,clearcoatRoughness:.54,
+        bumpMap:microFiberTexture,bumpScale:.036,
         transparent:true,opacity:0,
         emissive:0x1c0b29,emissiveIntensity:.18,
         depthWrite:true
@@ -606,6 +667,7 @@
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
         color:0x25162e,roughness:.70,metalness:.006,
         clearcoat:.08,clearcoatRoughness:.62,
+        bumpMap:microFiberTexture,bumpScale:.031,
         transparent:true,opacity:0,
         emissive:0x170a22,emissiveIntensity:.10,
         depthWrite:true
@@ -649,6 +711,7 @@
       this.organicFoldMaterial=new T.MeshPhysicalMaterial({
         color:0x36283d,roughness:.68,metalness:.004,
         emissive:0x140b1b,emissiveIntensity:.038,
+        bumpMap:microFiberTexture,bumpScale:.019,
         transparent:true,opacity:0,depthWrite:true
       });
       this.organicFoldGlowMaterial=new T.MeshBasicMaterial({
@@ -832,6 +895,63 @@
       }
       this.organicGroup.add(this.organicHoodGroup);
 
+      /* R1983 — real hair-thin surface fibrils.
+         Every strand is two connected 3D line segments grown from the ellipsoid
+         normal, with a small deterministic tangent curl. The line stays a native
+         one-device-pixel primitive, so individual strands remain sharp instead
+         of becoming a blurred alpha texture. */
+      this.organicFiberMaterial=new T.LineBasicMaterial({
+        color:0xb8c7bf,
+        transparent:true,
+        opacity:0,
+        depthWrite:false,
+        depthTest:true,
+        blending:T.NormalBlending,
+        toneMapped:true
+      });
+      const fiberPositions=[];
+      const fiberCount=this.mobileRender?168:560;
+      let fiberState=0x1983a17d;
+      const fiberRnd=()=>{
+        fiberState=(Math.imul(fiberState^fiberState>>>16,2246822507)+3266489909)|0;
+        return ((fiberState^fiberState>>>13)>>>0)/4294967296;
+      };
+      const golden=2.399963229728653;
+      const rx=1.385,ry=1.425,rz=1.075;
+      for(let i=0;i<fiberCount;i++){
+        const y=1-2*(i+.5)/fiberCount;
+        const phi=Math.acos(Math.max(-1,Math.min(1,y)));
+        const theta=i*golden+(fiberRnd()-.5)*.20;
+        const sp=Math.sin(phi),cp=Math.cos(phi),ct=Math.cos(theta),st=Math.sin(theta);
+        const base=new T.Vector3(sp*ct*rx,cp*ry,sp*st*rz);
+        const normal=new T.Vector3(base.x/(rx*rx),base.y/(ry*ry),base.z/(rz*rz)).normalize();
+        const tangent=new T.Vector3(-st,0,ct).normalize();
+        const binormal=new T.Vector3().crossVectors(normal,tangent).normalize();
+        const len=(this.mobileRender?.016:.022)+fiberRnd()*(this.mobileRender?.024:.040);
+        const curlT=(fiberRnd()-.5)*(this.mobileRender?.010:.016);
+        const curlB=(fiberRnd()-.5)*(this.mobileRender?.008:.013);
+        const root=base.clone().addScaledVector(normal,.0045);
+        const mid=root.clone()
+          .addScaledVector(normal,len*.52)
+          .addScaledVector(tangent,curlT*.42)
+          .addScaledVector(binormal,curlB*.32);
+        const tip=root.clone()
+          .addScaledVector(normal,len)
+          .addScaledVector(tangent,curlT)
+          .addScaledVector(binormal,curlB);
+        fiberPositions.push(
+          root.x,root.y,root.z,mid.x,mid.y,mid.z,
+          mid.x,mid.y,mid.z,tip.x,tip.y,tip.z
+        );
+      }
+      const fiberGeometry=new T.BufferGeometry();
+      fiberGeometry.setAttribute('position',new T.Float32BufferAttribute(fiberPositions,3));
+      this.organicFibers=new T.LineSegments(fiberGeometry,this.organicFiberMaterial);
+      this.organicFibers.renderOrder=5;
+      this.organicFibers.frustumCulled=false;
+      this.organicGroup.add(this.organicFibers);
+      document.documentElement.dataset.fxMagBirthMicrofibrilsR1983=`${fiberCount}-native-line-fibrils-plus-physical-bump`;
+
       this.organicGroup.scale.setScalar(.001);
     }
 
@@ -909,6 +1029,7 @@
         transmission:.32,thickness:.42,ior:1.45,
         emissive:0x041216,emissiveIntensity:.065,
         clearcoat:.98,clearcoatRoughness:.065,
+        bumpMap:this.microFiberTexture,bumpScale:.013,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
@@ -916,6 +1037,7 @@
         transmission:.38,thickness:.32,ior:1.46,
         emissive:0x04191d,emissiveIntensity:.075,
         clearcoat:.98,clearcoatRoughness:.060,
+        bumpMap:this.microFiberTexture,bumpScale:.010,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
@@ -923,6 +1045,7 @@
         transmission:.28,thickness:.22,ior:1.42,
         emissive:0x0a252b,emissiveIntensity:.070,
         clearcoat:1.0,clearcoatRoughness:.050,
+        bumpMap:this.microFiberTexture,bumpScale:.006,
         transparent:true,opacity:0
       });
       this.mechEdgeMaterial=new T.LineBasicMaterial({
@@ -964,6 +1087,7 @@
         transmission:.58,thickness:.26,ior:1.47,
         emissive:0x05171b,emissiveIntensity:.035,
         clearcoat:1.0,clearcoatRoughness:.035,
+        bumpMap:this.microFiberTexture,bumpScale:.006,
         transparent:true,opacity:0,depthWrite:false
       });
       this.innerPrism=new T.Mesh(baseGeo.clone(),this.innerPrismMaterial);
@@ -1345,6 +1469,11 @@
       this.organicHoodMaterial.opacity=.18*visible;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
+      if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
+      if(this.organicFibers){
+        this.organicFibers.rotation.y=Math.sin(time*.00013)*.010;
+        this.organicFibers.rotation.x=Math.sin(time*.00011)*.006;
+      }
 
       if(this.organicHoodGroup){
         this.organicHoodGroup.scale.setScalar(.80);
@@ -1551,6 +1680,7 @@
         if(Array.isArray(m))m.forEach(x=>x?.dispose?.());
         else m?.dispose?.();
       });
+      this.microFiberTexture?.dispose?.();
       this.renderer.dispose();
     }
   }
@@ -1604,6 +1734,7 @@
   document.documentElement.dataset.fxMagBirthProofR1231='fast-six-frame-r1230-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1241='fast-six-frame-r1240-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1252='clean-current-r1250-proof';
+  document.documentElement.dataset.fxMagBirthVisualR1983='photoreal-physical-bump-plus-native-line-microfibrils-studio-sharp';
 
   window.FormatXMagGenesisThreeR1280={
     attach,

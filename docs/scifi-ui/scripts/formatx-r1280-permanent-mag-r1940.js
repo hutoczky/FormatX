@@ -6,7 +6,7 @@
   root.dataset.fxR1280PermanentMagR1940='booting';
   root.dataset.fxCrystalOrganismR326='booting';
 
-  const OWNER='/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261005-r1940-reference-armored-pod';
+  const OWNER='/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261008-r1983-photoreal-microfibril-intro';
   const TARGET_PROGRESS=.785;
   const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
   let engine=null;
