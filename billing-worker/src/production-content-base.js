@@ -54,7 +54,7 @@ const CONTENT_ASSETS = [
 ].join('\n');
 const FEEDBACK_ASSETS = [
   '<link rel="stylesheet" data-fx-feedback-style="true" href="/scifi-ui/styles/formatx-feedback.css?v=20260806-feedback-1">',
-  '<script defer data-fx-feedback-script="true" src="/scifi-ui/scripts/formatx-feedback.js?v=20260806-feedback-1"></script>'
+  '<script defer data-fx-feedback-script="true" src="/scifi-ui/scripts/formatx-feedback.js?v=20261007-r1954-public-rating-no-count"></script>'
 ].join('\n');
 
 const HERO_LIVE_OS_CTA = '<button type="button" class="button button-solid magnetic" data-fx-live-os-cta data-hu="Live OS kipróbálása" data-en="Try Live OS"><span data-hu="Live OS kipróbálása" data-en="Try Live OS">Live OS kipróbálása</span><i>↗</i></button>';
