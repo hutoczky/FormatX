@@ -272,8 +272,12 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    /* R1959 — desktop silhouette supersampling.
+       The final Signature MAG is large enough that geometry faceting can still
+       read as aliasing on 1440p/4K displays. Raise only desktop topology; mobile
+       and constrained contracts stay unchanged. */
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 56 : 96;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 112 : 192;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -772,7 +776,9 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    stage.style.setProperty('background',mobile
+      ? 'radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)'
+      : 'radial-gradient(ellipse 34% 26% at 50% 70%,rgba(0,0,0,.42) 0%,rgba(0,0,0,.16) 44%,transparent 78%),radial-gradient(ellipse 46% 43% at 50% 48%,rgba(77,156,165,.085) 0%,rgba(23,69,76,.038) 46%,transparent 76%),radial-gradient(ellipse 82% 72% at 50% 52%,rgba(5,15,19,.22),transparent 84%)','important');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
@@ -850,6 +856,10 @@
     const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
     const softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
     root.dataset.fxCoreRendererClassR1541=softwareRenderer?'software-adaptive':'hardware-full';
+    const contextAttributes=gl.getContextAttributes?.()||{};
+    const defaultSamples=webgl2 ? Number(gl.getParameter(gl.SAMPLES)||0) : (contextAttributes.antialias?1:0);
+    root.dataset.fxCoreDesktopAAR1959=mobile?'mobile-contract-unchanged':(contextAttributes.antialias?'msaa-plus-supersample':'supersample-fallback');
+    root.dataset.fxCoreDesktopSamplesR1959=String(defaultSamples);
 
     const vertexIn = webgl2 ? 'in' : 'attribute';
     const vertexOut = webgl2 ? 'out' : 'varying';
@@ -1835,13 +1845,13 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .88 : 1.06)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?1.00:1.16)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.68:.82));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1866,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.82:2.34);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:4800000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2183,6 +2193,7 @@
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+      root.dataset.fxNativeMagStudioR1959='desktop-96x192-mesh-234dpr-supersample-contact-depth-photographic-pass';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
