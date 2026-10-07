@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
+const r=document.documentElement,p=new URLSearchParams(location.search),m=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
 r.dataset.fxIntroBootstrapRescueR1945g='active-prism-depth-signature-cinematic';
 r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
