@@ -63,7 +63,7 @@
   let pointerNY = 0;
   let pointerTargetNX = 0;
   let pointerTargetNY = 0;
-  let pointerTailFrames = 0;
+  let pointerSettleUntil = 0;
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
   let lastCoreKey = '';
   let scrollBudgetState='';
@@ -291,7 +291,10 @@
     sceneCommitTimer=0;
     pendingSceneIndex=-1;
     commitScene(index,previous,reason);
-    if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
+    /* R1959 — scroll transitions are continuous camera movement, never a
+       flare/cut. Explicit story/loop actions may still use the cinematic cut. */
+    if(reason!=='scroll')cut();
+    else root.dataset.fxCinematicScrollTransitionR1959='continuous-no-flare';
   }
 
   function pickActive(y=scrollY){
@@ -317,14 +320,16 @@
 
     const y = scrollY;
     const dt = Math.max(16,Math.min(180,now-lastT));
-    if(finePointer){
-      if(pointerTailFrames===1){
-        /* Final bounded frame lands exactly on target/rest so zero-idle never
-           preserves a residual parallax offset. */
+    if(finePointer&&pointerSettleUntil){
+      if(now>=pointerSettleUntil){
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
+        pointerSettleUntil=0;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        /* R1959 — critically damped camera feel. Time-based settling makes the
+           response identical at 60/120/144 Hz and avoids the six-frame
+           "web animation" cadence of the older pointer tail. */
+        const pointerEase=1-Math.exp(-dt*.0105);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -384,10 +389,14 @@
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
     }
-    if(finePointer&&pointerTailFrames>0){
-      pointerTailFrames-=1;
-      if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
-      else pointerTailFrames=0;
+    if(finePointer&&pointerSettleUntil){
+      const delta=Math.abs(pointerTargetNX-pointerNX)+Math.abs(pointerTargetNY-pointerNY);
+      if(delta>.0015&&performance.now()<pointerSettleUntil)schedule();
+      else{
+        pointerNX=pointerTargetNX;
+        pointerNY=pointerTargetNY;
+        pointerSettleUntil=0;
+      }
     }
   }
 
@@ -417,6 +426,10 @@
       }
       root.dataset.fxCinematicSceneCommitR1664='settled';
       root.dataset.fxCinematicSceneCommitR1665='single-post-scroll-sync';
+      if(stage instanceof HTMLElement){
+        stage.style.setProperty('--fx-c1959-scroll-drift','0px');
+        stage.style.setProperty('--fx-c1959-scroll-compress','1');
+      }
       setScrollBudget('settled');
       schedule();
     },120);
@@ -476,8 +489,8 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
-    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
+    pointerSettleUntil=performance.now()+280;
+    root.dataset.fxCinematicPointerR617 = 'active-time-damped-r1959';
     schedule();
   }
 
@@ -485,8 +498,8 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
-    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
+    pointerSettleUntil=performance.now()+340;
+    root.dataset.fxCinematicPointerR617 = 'rest-time-damped-r1959';
     schedule();
   }
 
@@ -502,10 +515,12 @@
 
   function introHandoff() {
     activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    root.classList.remove('fx-c536-cut');
+    root.classList.add('fx-c536-handoff-r1959');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
+    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-handoff-r1959'),1180);
     signalCore(scenes[0],'intro-handoff');
+    root.dataset.fxCinematicIntroHandoffR1959='continuous-no-flare-cut';
   }
 
   function boot() {
@@ -524,6 +539,15 @@
     bindCinematicInteraction();
 
     addEventListener('scroll',()=>{
+      /* R1959 — one compositor-local style update keeps the camera connected
+         to wheel/trackpad motion without reactivating the heavy cinematic
+         scene RAF/layout path during fast scroll. */
+      if(stage instanceof HTMLElement){
+        const yNow=scrollY;
+        const dy=clamp(yNow-lastY,-180,180);
+        stage.style.setProperty('--fx-c1959-scroll-drift',(dy*.045).toFixed(2)+'px');
+        stage.style.setProperty('--fx-c1959-scroll-compress',(1-Math.min(.010,Math.abs(dy)*.00004)).toFixed(4));
+      }
       /* R1949 — document top is a semantic scene boundary, not a delayed
          heuristic. Commit core immediately so a cancelled settle/refresh can
          never strand the journey state below the hero. */
@@ -585,6 +609,8 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1959='time-damped-pointer-continuous-scroll-camera-zero-idle-settle';
+    root.dataset.fxCinematicContinuityR1959='intro-mag-section-single-film-no-flare-cut';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();

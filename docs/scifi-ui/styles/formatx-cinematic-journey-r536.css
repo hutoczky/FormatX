@@ -18,6 +18,8 @@ html[data-fx-cinematic-journey-r536="ready"]{
 }
 
 .fx-c536-stage{
+  --fx-c1959-scroll-drift:0px;
+  --fx-c1959-scroll-compress:1;
   position:fixed;
   inset:0;
   z-index:7;
@@ -37,6 +39,20 @@ html[data-fx-cinematic-journey-r536="ready"]{
 .fx-c536-grain,
 .fx-c536-flare{
   position:absolute;
+}
+
+/* R1959 — lightweight scroll-camera continuity. Individual translate/scale
+   properties compose with the existing transforms, so the optical world can
+   follow wheel/trackpad motion without another heavy scene animation loop. */
+.fx-c536-world,
+.fx-c536-iris,
+.fx-c536-track,
+.fx-c536-scan{
+  translate:0 var(--fx-c1959-scroll-drift);
+}
+.fx-c536-world,
+.fx-c536-iris{
+  scale:var(--fx-c1959-scroll-compress);
 }
 
 .fx-c536-world{
@@ -202,6 +218,28 @@ html[data-fx-cinematic-journey-r536="ready"]{
 html.fx-c536-cut .fx-c536-flare{animation:fx-c536-flare .68s ease-out 1}
 html.fx-c536-cut .fx-c536-iris{animation:fx-c536-iris .74s cubic-bezier(.18,.78,.2,1) 1}
 html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
+
+/* R1959 intro -> hero is a dissolve into the same optical world, not a flash cut. */
+html.fx-c536-handoff-r1959 .fx-c536-flare{
+  display:none!important;
+  animation:none!important;
+}
+html.fx-c536-handoff-r1959 .fx-c536-world{
+  opacity:calc(.11 + var(--fx-c536-energy) * .22)!important;
+  filter:saturate(.96) brightness(.98) blur(.18px);
+}
+html.fx-c536-handoff-r1959 .fx-c536-iris{
+  opacity:calc(.08 + var(--fx-c536-energy) * .12)!important;
+  filter:blur(.15px);
+}
+html.fx-c536-handoff-r1959 .fx-c536-track,
+html.fx-c536-handoff-r1959 .fx-c536-scan{
+  opacity:.008!important;
+}
+html.fx-c536-handoff-r1959 .fx-c536-vignette{
+  opacity:.68!important;
+}
+
 
 @keyframes fx-c536-flare{
   0%{opacity:0;transform:translate(-50%,-50%) scale(.02);box-shadow:0 0 0 rgba(255,255,255,0)}
@@ -1238,3 +1276,5 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
 /* production-r1948-hero-core-no-opacity-flash */
+
+/* production-r1959-time-damped-camera-continuous-intro-handoff */

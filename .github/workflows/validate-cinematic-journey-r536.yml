@@ -8,13 +8,22 @@ on:
       - 'docs/scifi-ui/styles/formatx-cinematic-journey-r536.css'
       - 'docs/scifi-ui/styles/formatx-desktop-depth-r1958.css'
       - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
+      - 'docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js'
+      - 'docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css'
       - '.github/scripts/validate-cinematic-journey-r536.cjs'
       - '.github/workflows/validate-cinematic-journey-r536.yml'
   pull_request:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/styles/formatx-cinematic-journey-r536.css'
+      - 'docs/scifi-ui/styles/formatx-desktop-depth-r1958.css'
       - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
+      - 'docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js'
+      - 'docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css'
       - '.github/scripts/validate-cinematic-journey-r536.cjs'
 
 permissions:
@@ -29,4 +38,7 @@ jobs:
         with:
           node-version: 22
       - run: node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
+      - run: node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+      - run: node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
+      - run: node --check docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js
       - run: node .github/scripts/validate-cinematic-journey-r536.cjs

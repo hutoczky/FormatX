@@ -8,10 +8,21 @@ const index = read('docs/scifi-ui/index.html');
 const css = read('docs/scifi-ui/styles/formatx-cinematic-journey-r536.css');
 const js = read('docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js');
 const depth = read('docs/scifi-ui/styles/formatx-desktop-depth-r1958.css');
+const renderer = read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const genesis = read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
+const aiIdent = read('docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js');
+const aiIdentCss = read('docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css');
 
 assert.equal((index.match(/formatx-cinematic-journey-r536\.css/g)||[]).length,1,'R536 CSS must load exactly once');
 assert.equal((index.match(/formatx-desktop-depth-r1958\.css/g)||[]).length,1,'R1958 desktop depth CSS must load exactly once');
-for(const token of ['photographic depth pass','fx-c536-world','fx-c536-iris','fx-c536-vignette','drop-shadow(0 20px 20px','data-fx-scroll-budget-r1660']) assert.ok(depth.includes(token),`R1958 depth contract missing: ${token}`);
+for(const token of [
+  'photographic depth pass','fx-c536-world','fx-c536-iris','fx-c536-vignette',
+  'production-r1959-supersampled-clean-contour-volumetric-contact-depth',
+  '.fx-crystal-organism-r326-stage::before',
+  '.fx-crystal-organism-r326-stage::after',
+  'filter:none!important',
+  'data-fx-scroll-budget-r1660'
+]) assert.ok(depth.includes(token),`R1959 depth contract missing: ${token}`);
 assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'R536 JS must load exactly once');
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
@@ -57,4 +68,49 @@ for (const token of [
 ]) assert.ok(css.includes(token),'R1948 hero disclosure CSS contract missing '+token);
 
 
-console.log('PASS: R1948 cinematic journey preserves one canonical organism, keeps the hero optically clean, opens global telemetry after the core scene and remains zero-idle.');
+
+/* R1959 — studio finish contract. */
+for(const token of [
+  "fxNativeMagMsaaR1959",
+  "fxNativeMagQualityR1959",
+  "desktop-128pct-supersample-msaa-no-css-scale-adaptive-clean-contour",
+  "const supersample=fineDesktop?(constrained?1.12:1.28):1",
+  "transform:'none'",
+  "single-pass-beer-lambert-extinction-refractive-caustic-smoked-bioglass"
+]) assert.ok(renderer.includes(token),'R1959 renderer contract missing '+token);
+
+for(const token of [
+  "formatx:magstabilized",
+  "r1959-ai-core-telemetry",
+  "this.identitySignaled"
+]) assert.ok(genesis.includes(token),'R1959 genesis stabilisation contract missing '+token);
+
+for(const token of [
+  "MAG // AI CORE",
+  "ONLINE · LOCAL INTELLIGENCE",
+  "formatx:magstabilized",
+  "--fx-ai-core-x",
+  "stabilisation-telemetry-armed"
+]) assert.ok(aiIdent.includes(token),'R1959 AI identity runtime contract missing '+token);
+
+for(const token of [
+  "production-r1959-mag-stabilisation-system-telemetry-label",
+  "ui-monospace",
+  "--fx-ai-core-x",
+  "--fx-ai-core-y"
+]) assert.ok(aiIdentCss.includes(token),'R1959 AI identity visual contract missing '+token);
+
+for(const token of [
+  "fx-c536-handoff-r1959",
+  "continuous-no-flare-cut",
+  "active-time-damped-r1959",
+  "fx-c1959-scroll-drift"
+]) assert.ok(js.includes(token),'R1959 cinematic runtime contract missing '+token);
+
+for(const token of [
+  "production-r1959-time-damped-camera-continuous-intro-handoff",
+  "fx-c536-handoff-r1959",
+  "--fx-c1959-scroll-drift"
+]) assert.ok(css.includes(token),'R1959 cinematic CSS contract missing '+token);
+
+console.log('PASS: R1959 cinematic journey preserves one canonical organism, supersampled clean MAG edges, target-locked AI CORE telemetry and continuous zero-idle film transitions.');

@@ -48,6 +48,7 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      this.identitySignaled=false;
 
       this.mobileRender=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
@@ -1494,6 +1495,25 @@
     render(r,time){
       if(this.disposed)return;
       const t=clamp(r)*10;
+
+      /* R1959 — the AI identity appears at the visual stabilisation point,
+         not after the film has already ended. The final hero therefore reads
+         as one continuous boot sequence: form -> identify -> clean core. */
+      if(!this.identitySignaled&&t>=8.35){
+        this.identitySignaled=true;
+        try{
+          const target=this.getTarget?.()||{};
+          document.dispatchEvent(new CustomEvent('formatx:magstabilized',{
+            detail:{
+              source:'r1959-genesis-stable',
+              revision:'r1959-ai-core-telemetry',
+              x:Number(target.x)||innerWidth*.5,
+              y:Number(target.y)||innerHeight*.48
+            }
+          }));
+        }catch(_){}
+      }
+
       this.updateCamera(t,time);
       this.updateDNA(t,time);
       this.updateCore(t,time);

@@ -20,8 +20,9 @@ const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-m
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const MINI_ASSISTANT='/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js?v=20260924-r1723-living-response';
+const SHAPE_CONTROLLER='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20261007-r1959-deterministic-mag-response';
 const SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261007-r1950-desktop-edge-aa';
+const RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261007-r1959-supersampled-film-continuity';
 const TOUCH='/scifi-ui/scripts/formatx-core-touch-pulse-r99.js?v=20260830-r434-native-delegate';
 const NATIVE_TOUCH='/scifi-ui/scripts/formatx-native-mag-touch-r434.js?v=20260830-r460-controller-tap-drag-safe';
 // compatibility-contract: r484-bounded-surface-window
@@ -226,6 +227,11 @@ async function start(){
   root.dataset.fxCoreMobileIdlePolicyR426=mobile?'periodic-surface-bursts-between-zero-idle':'desktop-native-scheduler';
   root.dataset.fxMiniMagBootstrapR459='requested-alongside-primary-mag';
   void addScript(MINI_ASSISTANT,'data-fx-mini-mag-assistant-script-r459');
+  /* R1959 — the header MAG button is a deterministic physiology control.
+     Load its capture-phase owner explicitly instead of relying on a legacy
+     side-effect from old mobile runtimes. */
+  await addScript(SHAPE_CONTROLLER,'data-fx-core-shapeshifter-script-r337');
+  root.dataset.fxCurrentMagControlR1959='canonical-physiology-controller-ready';
 
   const solidGlassPromise=addScript(SOLID_GLASS,'data-fx-solid-glass-r456');
   if(earlyRenderer)await Promise.all([solidGlassPromise,earlyRenderer]);
