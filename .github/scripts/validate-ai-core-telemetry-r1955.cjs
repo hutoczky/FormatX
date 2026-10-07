@@ -35,10 +35,10 @@ must(css.includes("filter:blur(8px)"),'Cinematic blur-in contract missing.');
 must(css.includes("filter:blur(6px)"),'Cinematic blur-out contract missing.');
 must(css.includes('"SFMono-Regular"'),'Telemetry must keep the system/monospace visual language.');
 
-must(index.includes("20261007-r1955-ai-core-telemetry-flow"),'Index must cache-bust R533 to R1955.');
+must(index.includes("20261007-r1955c-ai-core-telemetry-flow"),'Index must cache-bust R533 to R1955.');
 must(index.includes("20261007-r1955-stabilized-telemetry"),'Index must cache-bust telemetry assets.');
 must(worker.includes("20261007-r1955c-stabilized-ai-core-telemetry"),'Worker startup revision must match R1955.');
-must(worker.includes("sha256-Bypb+3f/p7PMwNyXKzSa4qQGlRgb3XlS527gZ8s67YU="),'Worker CSP must match the R1955 inline bootstrap hash.');
+must(worker.includes("sha256-c0cB6pDcAX6NWsOnhJrf8LPWn2c0Pr0JWSW1dPDwZhw="),'Worker CSP must match the R1955 inline bootstrap hash.');
 must(revision.includes("token=20261007-r1955c-stabilized-ai-core-telemetry"),'Exact production revision token must match R1955.');
 
 console.log('R1955 MAG AI CORE telemetry contract: OK');
