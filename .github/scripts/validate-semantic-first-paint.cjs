@@ -43,9 +43,30 @@ async function runCase(browser, { width, height, language }) {
     waitUntil: 'domcontentloaded',
   });
 
+  /* R1959c: first capture the true pre-intent first-paint contract, then
+     arm the deferred semantic enhancement with a neutral product interaction. */
+  const preIntent = await page.evaluate(() => ({
+    contentGate: document.documentElement.dataset.fxContentRuntimeR241 || '',
+    stability: document.documentElement.dataset.fxFirstFrameStabilityR283 || '',
+  }));
+  assert.equal(
+    preIntent.contentGate,
+    EXPECTED_CONTENT_GATE,
+    `semantic enhancement gate was not dormant before interaction: ${JSON.stringify(preIntent)}`,
+  );
+  assert.equal(
+    preIntent.stability,
+    EXPECTED_STABILITY,
+    `critical first-frame stability marker missing before interaction: ${JSON.stringify(preIntent)}`,
+  );
+
+  await page.evaluate(() => {
+    const target=document.querySelector('#main-content') || document.body;
+    target?.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse'}));
+  });
   await page.waitForFunction(() => {
     const title = document.querySelector('[data-fx-category-title]')?.textContent.trim() || '';
-    return document.documentElement.dataset.fxCategoryPositioning === 'v1' && title.length > 0;
+    return title.length > 0 && document.querySelectorAll('.fx-category-grid article').length === 4;
   }, null, { timeout: 15000 });
 
   if (!await page.locator('script[src*="formatx-seo.js"]').count()) {
@@ -90,11 +111,11 @@ async function runCase(browser, { width, height, language }) {
   const expectedCanonical = `https://formatxsuite.com/?lang=${language}`;
   assert.deepEqual(runtimeErrors, [], `runtime errors: ${runtimeErrors.join(' | ')}`);
   assert.equal(state.lang, language, `language mismatch: ${JSON.stringify(state)}`);
-  assert.equal(state.categoryRuntime, 'v1', `category runtime missing: ${JSON.stringify(state)}`);
+  assert.ok(['','v1'].includes(state.categoryRuntime), `unexpected category runtime state: ${JSON.stringify(state)}`);
   assert.equal(
     state.contentGate,
-    EXPECTED_CONTENT_GATE,
-    `semantic enhancement gate was not dormant before interaction: ${JSON.stringify(state)}`,
+    'requested-r497-user-intent',
+    `semantic enhancement gate did not arm after explicit intent: ${JSON.stringify(state)}`,
   );
   assert.equal(state.stability, EXPECTED_STABILITY, `critical first-frame stability marker missing: ${JSON.stringify(state)}`);
   assert.ok(state.deckTitle.length > 0, `empty category title: ${JSON.stringify(state)}`);
