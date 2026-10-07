@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261007-r1956-ai-core-boot-telemetry';
+const STARTUP_REVISION = '20261007-r1956c-ai-core-hero-lcp-lock';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-rhmFQokmSAFR/Wm4HCQIjTmhqiZMgt8xHgtl6IHtsak='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -181,7 +181,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo-r1724-sitewide-habitat',
-    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20261007-r1950-desktop-edge-aa']],
+    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20261007-r1956-no-late-hero-reflow']],
   }],
   ['/scifi-ui/scripts/igloo-parity.js', {
     marker: 'igloo-to-site-stability-and-mobile-surface-r1724-living-habitat',
@@ -189,6 +189,7 @@ const R502_ASSET_REWRITES = new Map([
       [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model'],
       [/formatx-mobile-unified\.js\?v=[^"']+/g, 'formatx-mobile-unified.js?v=20260924-r1724-final-viewport-safe-living-habitat'],
       [/formatx-desktop-unified\.css(?:\?v=[^"']+)?/g, 'formatx-desktop-unified.css?v=20261007-r1950-desktop-edge-aa'],
+      [/formatx-premium-finish\.css(?:\?v=[^"']+)?/g, 'formatx-premium-finish.css?v=20261007-r1956-no-late-hero-reflow'],
     ],
   }],
 ]);
