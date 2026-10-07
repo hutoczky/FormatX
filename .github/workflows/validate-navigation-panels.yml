@@ -17,6 +17,7 @@ on:
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/formatx-menu-owner-r1956.js'
       - 'docs/scifi-ui/styles/formatx-menu-owner-r1956.css'
+      - 'docs/scifi-ui/styles/formatx-interaction-contract-r1957.css'
       - 'docs/scifi-ui/scripts/organism-core-controller.js'
       - 'docs/scifi-ui/scripts/organism-console-state.js'
       - 'docs/scifi-ui/scripts/living-architecture.js'

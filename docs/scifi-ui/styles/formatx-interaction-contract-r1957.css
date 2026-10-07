@@ -1,0 +1,127 @@
+/* FormatX R1957 — unified interaction quality contract.
+   Visual owners keep geometry/art-direction; this layer guarantees one premium
+   interaction baseline across mouse, keyboard and touch without taking event
+   ownership away from the existing canonical runtimes. */
+html body.living-architecture :is(
+  #menu-toggle,
+  .fx-language-toggle,
+  .fx-reference-mag-button,
+  #hero .fx-three-sound,
+  #hero .fx-reference-ask,
+  #hero .hero-actions a,
+  .header-actions a,
+  .button,
+  button
+){
+  -webkit-tap-highlight-color:transparent;
+}
+
+html body.living-architecture :is(
+  #menu-toggle,
+  .fx-language-toggle,
+  .fx-reference-mag-button,
+  #hero .fx-three-sound,
+  #hero .fx-reference-ask
+){
+  min-width:44px!important;
+  min-height:44px!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  user-select:none!important;
+  cursor:pointer!important;
+  isolation:isolate;
+}
+
+html body.living-architecture :is(
+  #hero .hero-actions a,
+  .header-actions a,
+  a.button,
+  button.button
+){
+  min-height:44px;
+  touch-action:manipulation;
+}
+
+html body.living-architecture :is(
+  #menu-toggle,
+  .fx-language-toggle,
+  .fx-reference-mag-button,
+  #hero .fx-three-sound,
+  #hero .fx-reference-ask,
+  #hero .hero-actions a,
+  .header-actions a,
+  a.button,
+  button.button
+):focus-visible{
+  outline:2px solid rgba(156,237,255,.88)!important;
+  outline-offset:3px!important;
+  box-shadow:
+    0 0 0 1px rgba(4,18,28,.88),
+    0 0 0 4px rgba(83,214,244,.18),
+    0 0 24px rgba(83,214,244,.16)!important;
+}
+
+html body.living-architecture :is(
+  #menu-toggle,
+  .fx-language-toggle,
+  .fx-reference-mag-button,
+  #hero .fx-three-sound,
+  #hero .fx-reference-ask,
+  #hero .hero-actions a,
+  .header-actions a,
+  a.button,
+  button.button
+):active{
+  filter:brightness(1.08) saturate(1.04);
+}
+
+html body.living-architecture #hero :is(.fx-three-sound,.fx-reference-ask){
+  position:relative!important;
+  z-index:3!important;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r204{
+  pointer-events:auto!important;
+}
+
+html body.living-architecture #hero .fx-reference-controls-r204 > *{
+  pointer-events:auto!important;
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture :is(
+    #menu-toggle,
+    .fx-language-toggle,
+    .fx-reference-mag-button,
+    #hero .fx-three-sound,
+    #hero .fx-reference-ask
+  ){
+    min-width:48px!important;
+    min-height:48px!important;
+  }
+
+  html body.living-architecture :is(
+    #hero .hero-actions a,
+    .header-actions a,
+    a.button,
+    button.button
+  ){
+    min-height:48px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture :is(
+    #menu-toggle,
+    .fx-language-toggle,
+    .fx-reference-mag-button,
+    #hero .fx-three-sound,
+    #hero .fx-reference-ask,
+    #hero .hero-actions a,
+    .header-actions a,
+    a.button,
+    button.button
+  ){
+    transition:none!important;
+  }
+}

@@ -69,6 +69,81 @@ async function assertSingleLanguageToggle(page) {
   await page.waitForFunction(() => document.documentElement.lang === 'hu');
 }
 
+async function assertPrimaryControls(page, viewportName) {
+  const state = await page.evaluate(() => {
+    const selectors = {
+      menu:'#menu-toggle',
+      language:'.fx-language-toggle',
+      mag:'.fx-reference-mag-button',
+      sound:'#hero .fx-three-sound',
+      ask:'#hero .fx-reference-ask'
+    };
+    const result = {};
+    for (const [name, selector] of Object.entries(selectors)) {
+      const nodes = [...document.querySelectorAll(selector)];
+      const visible = nodes.filter(node => {
+        const style = getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        return !node.hidden
+          && node.getAttribute('aria-hidden') !== 'true'
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || 1) > .02
+          && rect.width > 0
+          && rect.height > 0;
+      });
+      const rect = visible[0]?.getBoundingClientRect();
+      result[name] = {
+        total:nodes.length,
+        visible:visible.length,
+        width:rect?.width || 0,
+        height:rect?.height || 0,
+        pointer:visible[0] ? getComputedStyle(visible[0]).pointerEvents : '',
+        touch:visible[0] ? getComputedStyle(visible[0]).touchAction : ''
+      };
+    }
+    return result;
+  });
+
+  for (const [name, info] of Object.entries(state)) {
+    if (info.visible !== 1) throw new Error(`${viewportName}: ${name} visible ownership invalid: ${JSON.stringify(state)}`);
+    if (info.width < 40 || info.height < 40) throw new Error(`${viewportName}: ${name} target too small: ${JSON.stringify(info)}`);
+    if (info.pointer === 'none') throw new Error(`${viewportName}: ${name} pointer-events disabled: ${JSON.stringify(info)}`);
+  }
+
+  const beforeToken = await page.evaluate(() => Number(document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || 0));
+  await page.locator('.fx-reference-mag-button').click();
+  await page.waitForFunction(before => Number(document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || 0) > before, beforeToken, { timeout:8000 });
+
+  const sound = page.locator('#hero .fx-three-sound');
+  const beforeAudio = await sound.getAttribute('data-fx-audio-state');
+  await sound.click();
+  await page.waitForFunction(before => {
+    const button = document.querySelector('#hero .fx-three-sound');
+    if (!(button instanceof HTMLButtonElement)) return false;
+    const state = button.dataset.fxAudioState || '';
+    return state && state !== before;
+  }, beforeAudio || 'off', { timeout:8000 });
+
+  const ask = page.locator('#hero .fx-reference-ask');
+  await ask.click();
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const thought = document.querySelector('.fx-organism-thought');
+    const shell = thought?.closest('.fx-organism-dialogue, .fx-organism-dialogue-shell, [data-organism-dialogue]');
+    if (root.dataset.fxOrganismThought === 'open') return true;
+    if (shell instanceof HTMLElement && (shell.classList.contains('is-open') || shell.getAttribute('aria-hidden') === 'false')) return true;
+    if (thought instanceof HTMLElement) {
+      const style = getComputedStyle(thought);
+      const rect = thought.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 20 && rect.height > 20;
+    }
+    return false;
+  }, null, { timeout:8000 });
+  await page.evaluate(() => window.FormatXOrganismVoice?.close?.());
+  await page.waitForTimeout(80);
+}
+
 async function openMenu(page) {
   await page.locator('.fx-reference-menu-button').click();
   await page.waitForFunction(() => {
@@ -326,6 +401,7 @@ async function testDesktop(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
+  await assertPrimaryControls(page, 'desktop');
   await assertMenuToggleCycle(page, 'desktop');
 
   await assertSectionNavigation(page, '#experience');
@@ -342,6 +418,7 @@ async function testMobile(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
+  await assertPrimaryControls(page, 'mobile');
   await assertMenuToggleCycle(page, 'mobile');
 
   await assertSectionNavigation(page, '#capabilities');
