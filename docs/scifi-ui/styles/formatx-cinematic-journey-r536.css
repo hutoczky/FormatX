@@ -198,6 +198,41 @@ html[data-fx-cinematic-journey-r536="ready"]{
   background:linear-gradient(90deg,rgba(var(--fx-c536-a),.86),rgba(var(--fx-c536-b),.74));
 }
 
+
+/* R1959 — continuous intro → hero bridge.
+   No white flash. The existing world/iris/track rise together as the R533
+   overlay dissolves, preserving one camera space across the handoff. */
+html.fx-c536-bridge-r1959 .fx-c536-flare{
+  animation:none!important;
+  opacity:.045!important;
+  transform:translate(-50%,-50%) scale(1.35)!important;
+  box-shadow:0 0 44px rgba(var(--fx-c536-a),.055)!important;
+}
+html.fx-c536-bridge-r1959 .fx-c536-world{
+  animation:fx-c536-bridge-world-r1959 1.12s cubic-bezier(.16,.78,.18,1) 1 both!important;
+}
+html.fx-c536-bridge-r1959 .fx-c536-iris{
+  animation:fx-c536-bridge-iris-r1959 1.08s cubic-bezier(.16,.78,.18,1) 1 both!important;
+}
+html.fx-c536-bridge-r1959 .fx-c536-track,
+html.fx-c536-bridge-r1959 .fx-c536-scan{
+  animation:fx-c536-bridge-field-r1959 1.05s ease-out 1 both!important;
+}
+@keyframes fx-c536-bridge-world-r1959{
+  0%{opacity:.02;filter:blur(4px) saturate(.88);transform:translate(-50%,-50%) scale(.94)}
+  45%{opacity:.075;filter:blur(1.4px) saturate(.94)}
+  100%{opacity:calc(.16 + var(--fx-c536-energy) * .36);filter:blur(0) saturate(1.02);transform:translate(-50%,-50%) scale(calc(.86 + var(--fx-c536-local) * .12))}
+}
+@keyframes fx-c536-bridge-iris-r1959{
+  0%{opacity:.015;filter:blur(3px);transform:translate(-50%,-50%) scale(.79)}
+  100%{opacity:calc(.18 + var(--fx-c536-energy) * .24);filter:blur(0);transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18))}
+}
+@keyframes fx-c536-bridge-field-r1959{
+  0%{opacity:0;filter:blur(2px)}
+  100%{filter:blur(0)}
+}
+/* production-r1959-continuous-spatial-intro-hero-bridge */
+
 /* One-shot cinematic hand-off. No continuous animation is used. */
 html.fx-c536-cut .fx-c536-flare{animation:fx-c536-flare .68s ease-out 1}
 html.fx-c536-cut .fx-c536-iris{animation:fx-c536-iris .74s cubic-bezier(.18,.78,.2,1) 1}
