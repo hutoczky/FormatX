@@ -2256,3 +2256,117 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+/* R1951 — stabilized AI Core identity telemetry.
+   This is intentionally not a card/badge. It behaves like a calibrated system
+   identifier floating in the cinematic scene, then optically defocuses away. */
+.fx-mag-birth-r533 .fxb-core-identity{
+  position:absolute;
+  z-index:18;
+  left:calc(var(--fxb-x) - clamp(188px,14vw,268px));
+  top:calc(var(--fxb-y) + clamp(96px,12vh,142px));
+  width:min(320px,32vw);
+  display:grid;
+  gap:7px;
+  align-content:start;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(9px);
+  transform:translate3d(-14px,8px,0);
+  transform-origin:left center;
+  will-change:opacity,filter,transform;
+  transition:
+    opacity .42s cubic-bezier(.18,.78,.18,1),
+    filter .58s cubic-bezier(.18,.78,.18,1),
+    transform .72s cubic-bezier(.16,.82,.18,1);
+  text-shadow:0 0 18px rgba(91,220,235,.10);
+}
+.fx-mag-birth-r533 .fxb-core-identity::before{
+  content:"";
+  width:72px;
+  height:1px;
+  margin:0 0 3px;
+  background:linear-gradient(90deg,rgba(124,238,241,.82),rgba(124,238,241,.16),transparent);
+  box-shadow:0 0 10px rgba(91,220,235,.18);
+}
+.fx-mag-birth-r533 .fxb-core-identity::after{
+  content:"";
+  position:absolute;
+  left:-8px;
+  top:-2px;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(191,255,251,.92);
+  box-shadow:0 0 9px rgba(101,231,239,.50);
+}
+.fx-mag-birth-r533 .fxb-core-identity-main{
+  display:block;
+  color:rgba(237,251,250,.94);
+  font:760 clamp(11px,.78vw,13px)/1.12 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.235em;
+  white-space:nowrap;
+}
+.fx-mag-birth-r533 .fxb-core-identity-main i{
+  color:rgba(100,222,230,.62);
+  font-style:normal;
+  font-weight:520;
+}
+.fx-mag-birth-r533 .fxb-core-identity-sub{
+  display:block;
+  color:rgba(162,199,202,.47);
+  font:650 clamp(7px,.52vw,9px)/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.205em;
+  white-space:nowrap;
+}
+.fx-mag-birth-r533 .fxb-core-identity-sub b{
+  color:rgba(105,222,230,.52);
+  font-weight:500;
+}
+.fx-mag-birth-r533[data-core-identity="visible"] .fxb-core-identity{
+  opacity:1;
+  filter:blur(0);
+  transform:translate3d(0,0,0);
+}
+.fx-mag-birth-r533[data-core-identity="fading"] .fxb-core-identity{
+  opacity:0;
+  filter:blur(6px);
+  transform:translate3d(10px,-3px,0);
+  transition-duration:.30s,.34s,.38s;
+}
+/* Once the identity lock appears, legacy progress UI gets out of the shot.
+   This creates the requested luxury breathing room around the final MAG. */
+.fx-mag-birth-r533:is([data-core-identity="visible"],[data-core-identity="fading"]) .fxb-telemetry,
+.fx-mag-birth-r533:is([data-core-identity="visible"],[data-core-identity="fading"]) .fxb-copy{
+  opacity:0!important;
+  transition:opacity .30s ease!important;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533 .fxb-core-identity{
+    left:50%;
+    top:calc(var(--fxb-y) + clamp(118px,17vh,158px));
+    width:min(290px,78vw);
+    justify-items:center;
+    text-align:center;
+    transform-origin:center center;
+    transform:translate3d(-50%,8px,0);
+  }
+  .fx-mag-birth-r533 .fxb-core-identity::before{
+    width:58px;
+    background:linear-gradient(90deg,transparent,rgba(124,238,241,.62),transparent);
+  }
+  .fx-mag-birth-r533 .fxb-core-identity::after{
+    display:none;
+  }
+  .fx-mag-birth-r533[data-core-identity="visible"] .fxb-core-identity{
+    transform:translate3d(-50%,0,0);
+  }
+  .fx-mag-birth-r533[data-core-identity="fading"] .fxb-core-identity{
+    transform:translate3d(-50%,-3px,0);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533 .fxb-core-identity{display:none!important;}
+}
+/* production-r1951-ai-core-identity-telemetry */
+
