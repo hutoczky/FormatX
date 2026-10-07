@@ -204,13 +204,13 @@ html.fx-c536-cut .fx-c536-iris{animation:fx-c536-iris .74s cubic-bezier(.18,.78,
 html.fx-c536-cut .fx-c536-track{animation:fx-c536-track .62s ease-out 1}
 
 @keyframes fx-c536-flare{
-  0%{opacity:0;transform:translate(-50%,-50%) scale(.02);box-shadow:0 0 0 rgba(255,255,255,0)}
-  28%{opacity:.96;transform:translate(-50%,-50%) scale(1);box-shadow:0 0 28px 9px rgba(255,255,255,.55),0 0 90px 36px rgba(var(--fx-c536-a),.24)}
-  100%{opacity:0;transform:translate(-50%,-50%) scale(22);box-shadow:0 0 80px 30px rgba(var(--fx-c536-a),0)}
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.08);box-shadow:0 0 0 rgba(255,255,255,0)}
+  34%{opacity:.18;transform:translate(-50%,-50%) scale(.72);box-shadow:0 0 24px 5px rgba(255,255,255,.16),0 0 74px 28px rgba(var(--fx-c536-a),.11)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(7);box-shadow:0 0 70px 24px rgba(var(--fx-c536-a),0)}
 }
 @keyframes fx-c536-iris{
-  0%{opacity:.10;transform:translate(-50%,-50%) scale(.66)}
-  38%{opacity:.64;transform:translate(-50%,-50%) scale(.98)}
+  0%{opacity:.12;transform:translate(-50%,-50%) scale(.78)}
+  42%{opacity:.34;transform:translate(-50%,-50%) scale(.94)}
   100%{opacity:calc(.18 + var(--fx-c536-energy) * .24);transform:translate(-50%,-50%) scale(calc(.72 + var(--fx-c536-local) * .18))}
 }
 @keyframes fx-c536-track{
@@ -1238,3 +1238,21 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
 /* production-r1948-hero-core-no-opacity-flash */
+
+
+@media (min-width:1100px) and (prefers-reduced-motion:no-preference){
+  html body.living-architecture #main-content > section.scene:not(#hero){
+    padding-block:clamp(118px,13vh,176px);
+  }
+  html body.living-architecture #main-content > section.scene:not(#hero) > .section-heading{
+    margin-bottom:clamp(48px,6.5vh,88px);
+    max-width:min(920px,72vw);
+  }
+  html body.living-architecture #hero{
+    padding-bottom:clamp(112px,12vh,168px);
+  }
+  html body.living-architecture #experience{
+    padding-top:clamp(132px,15vh,196px);
+  }
+}
+/* production-r1957-luxury-breathing-room-soft-cinematic-handoff */
