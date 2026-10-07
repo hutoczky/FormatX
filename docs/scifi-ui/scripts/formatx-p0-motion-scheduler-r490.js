@@ -8,7 +8,7 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxP0MotionSchedulerR490)return;
-root.dataset.fxP0MotionSchedulerR490='armed-r1724';
+root.dataset.fxP0MotionSchedulerR490='armed-r1971-late-webgl-handoff';
 root.dataset.fxP0MotionCacheR1703='motion-loader-r1703-sharp-photoreal-mobile';
 root.dataset.fxP0MotionCacheR1789='mobile-bioglass-depth-proof-pass';
 root.dataset.fxP0MotionCacheR1704='motion-loader-r1704-software-mobile-photoreal-lens';
@@ -48,7 +48,7 @@ const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=900;
+const AUTO_DELAY_MS=5500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -105,11 +105,11 @@ function runLateAuto(){
     root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r493';
     return;
   }
-  const launch=()=>start('late-auto-r493');
+  const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:2500});
+    idleId=requestIdleCallback(launch,{timeout:3500});
   }else{
-    timer=setTimeout(launch,250);
+    timer=setTimeout(launch,900);
   }
 }
 
