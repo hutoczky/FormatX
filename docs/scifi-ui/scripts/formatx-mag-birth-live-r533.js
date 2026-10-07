@@ -349,6 +349,10 @@
       <h1></h1>
       <p class="fxb-subtitle"></p>
     </header>
+    <div class="fxb-core-id" aria-hidden="true">
+      <span class="fxb-core-id-main">MAG <i>//</i> AI CORE</span>
+      <span class="fxb-core-id-meta"><b></b>ONLINE <i>·</i> LOCAL INTELLIGENCE</span>
+    </div>
     <div class="fxb-telemetry" aria-live="polite">
       <output class="fxb-percent">000</output>
       <progress class="fxb-progress" max="100" value="0">0%</progress>
@@ -514,7 +518,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261007-r1950c-studio-intro';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261007-r1951-mag-core-identity';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -539,11 +543,27 @@
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
+  let coreIdentityState = 'off';
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
   function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
   function smoothstep(t) { t=clamp(t,0,1); return t*t*(3-2*t); }
+
+  /* R1951 — one-shot MAG boot identity. Three discrete state changes only:
+     no extra animation loop, no layout polling, no recurring timers. */
+  function updateCoreIdentity(r,force=false) {
+    const next = r >= .998
+      ? 'off'
+      : (r >= .945 ? 'leaving' : (r >= .805 ? 'visible' : 'off'));
+    if(!force && next===coreIdentityState)return;
+    coreIdentityState=next;
+    overlay.dataset.coreIdState=next;
+    ROOT.dataset.fxMagCoreIdentityR1951=
+      next==='visible'
+        ? 'mag-ai-core-online-local-intelligence'
+        : (next==='leaving' ? 'cinematic-blur-exit' : 'clean-hero');
+  }
 
   function phaseTargetFor(r) {
     if (r < .245) return 0;
@@ -1018,6 +1038,7 @@
 
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
+    updateCoreIdentity(r);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
@@ -1106,6 +1127,9 @@
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
+    ROOT.dataset.fxMagCoreIdentityContractR1951='8.05s-show-9.45s-blur-exit-clean-hero';
+    coreIdentityState='off';
+    overlay.dataset.coreIdState='off';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
@@ -1151,6 +1175,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{updateCoreIdentity(fixedR,true);}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');
@@ -1239,6 +1264,8 @@
     if(REDUCED){
       requestCoreWarmup('reduced-motion');
       overlay.dataset.phase='4';
+      overlay.dataset.coreIdState='off';
+      coreIdentityState='off';
       ROOT.dataset.fxMagBirthPhase='4';
       locateStage();
       try { coreApi?.setShape?.('organism','r533-reduced'); coreApi?.requestRender?.(2); } catch (_) {}
