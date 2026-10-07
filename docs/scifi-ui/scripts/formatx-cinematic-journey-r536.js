@@ -68,6 +68,7 @@
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
+  let semanticScrollRaf=0;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -400,6 +401,22 @@
       : 'full-detail-settled';
   }
 
+  function scheduleSemanticBoundary(){
+    if(semanticScrollRaf)return;
+    semanticScrollRaf=requestAnimationFrame(()=>{
+      semanticScrollRaf=0;
+      const atDocumentTop=scrollY<=Math.max(2,innerHeight*.015);
+      const target=atDocumentTop?0:pickActive(scrollY);
+      if(target===committedSceneIndex)return;
+      const previous=committedSceneIndex;
+      active=target;
+      pendingSceneIndex=-1;
+      clearTimeout(sceneCommitTimer);sceneCommitTimer=0;
+      commitScene(target,previous,atDocumentTop?'document-top-boundary-r1956':'scroll-boundary-r1956');
+      root.dataset.fxCinematicSceneCommitR1956='semantic-boundary-frame';
+    });
+  }
+
   function scheduleScrollSettle(){
     clearTimeout(scrollBudgetTimer);
     scrollBudgetTimer=setTimeout(()=>{
@@ -539,6 +556,7 @@
          is scheduled here. One settle pass updates scene state and visual depth
          after 120 ms without scroll input. */
       setScrollBudget('fast');
+      scheduleSemanticBoundary();
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -585,6 +603,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+  root.dataset.fxCinematicSceneBoundaryR1956='one-frame-semantic-commit-settled-heavy-visuals';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
@@ -625,9 +644,11 @@
   addEventListener('pagehide',()=>{
     if(raf)cancelAnimationFrame(raf);
     if(cutRaf)cancelAnimationFrame(cutRaf);
+    if(semanticScrollRaf)cancelAnimationFrame(semanticScrollRaf);
     clearTimeout(cutTimer);
     clearTimeout(coreSettleTimer);
     clearTimeout(sceneCommitTimer);
+    clearTimeout(scrollBudgetTimer);
     clearTimeout(refreshTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
