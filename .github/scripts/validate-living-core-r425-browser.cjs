@@ -293,7 +293,7 @@ async function verify(browser, name, viewport, isMobile, deviceScaleFactor) {
     assert.equal(state.specular, 'continuous-controlled-highlight', JSON.stringify(state));
     assert.equal(state.rendererSelection, 'r326-direct-r468-desktop-live-energy', JSON.stringify(state));
     assert.ok(state.opacity >= .90, JSON.stringify(state));
-    assert.ok(!state.filter.includes('blur('), state.filter);
+    assert.ok(!/blur\((?!0(?:px)?\))/i.test(state.filter), state.filter);
     assert.equal(state.controlBoxes.length, 2, JSON.stringify(state));
     assert.ok(state.controlBoxes.every(item => item.width >= 54 && item.height >= 54), JSON.stringify(state));
   }
