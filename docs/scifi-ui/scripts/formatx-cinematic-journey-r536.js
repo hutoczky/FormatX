@@ -274,7 +274,10 @@
     index = clamp(index,0,scenes.length-1);
     const previous=active;
     const changed = index !== previous || !root.dataset.fxCinematicSceneR536;
-    const fastScroll=reason==='scroll'&&Math.abs(velocity)>.28;
+    /* R1957c — fine-pointer desktop commits scene boundaries immediately
+       while retaining continuous camera motion and zero optical cuts. Only
+       coarse/mobile fast scroll defers scene ownership until settle. */
+    const fastScroll=reason==='scroll'&&!finePointer&&Math.abs(velocity)>.28;
     active=index;
 
     if(!changed){
@@ -581,6 +584,7 @@
     root.dataset.fxCinematicLivingIdentityR1711='single-organism-no-scene-shape-swap';
     root.dataset.fxCinematicLivingIdentityR1723='canonical-organism-scene-physiology-only';
     root.dataset.fxCinematicContinuityR1957='desktop-scroll-stage-persistent-no-cut-intro-handoff';
+    root.dataset.fxCinematicSceneCommitR1957='fine-pointer-immediate-boundary-coarse-deferred';
     root.dataset.fxCinematicJourneyMotionR536='scroll-interaction-driven-no-idle-raf';
     root.dataset.fxCinematicJourneyPerformanceR1624='cached-scene-geometry-no-scroll-layout-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1625='fast-scroll-single-mag-render-no-pulse-burst';
