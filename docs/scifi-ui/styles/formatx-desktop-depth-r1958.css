@@ -1,0 +1,84 @@
+/* FormatX R1958 — desktop photographic depth pass.
+   Uses only existing scene/MAG layers: no fake ring, no duplicate MAG, no
+   continuous animation. The aim is coherent physical depth rather than more UI. */
+@media (min-width:901px) and (pointer:fine){
+  html body.living-architecture{
+    background:
+      radial-gradient(ellipse 46% 62% at 73% -8%,rgba(184,218,220,.070),rgba(77,122,129,.020) 48%,transparent 82%),
+      radial-gradient(ellipse 32% 74% at 8% 48%,rgba(46,78,85,.040),transparent 76%),
+      radial-gradient(ellipse 38% 68% at 96% 66%,rgba(48,54,67,.030),transparent 78%),
+      radial-gradient(ellipse 74% 46% at 50% 44%,rgba(12,29,35,.145),rgba(3,10,14,.055) 60%,transparent 84%),
+      linear-gradient(180deg,#010305 0%,#041016 34%,#02090d 70%,#010305 100%)!important;
+  }
+
+  html body.living-architecture::before{
+    background:
+      radial-gradient(ellipse 18% 82% at 71% -7%,rgba(212,237,237,.050),transparent 76%),
+      radial-gradient(ellipse 13% 68% at 19% 34%,rgba(82,119,124,.024),transparent 78%),
+      radial-gradient(ellipse 14% 70% at 88% 66%,rgba(69,76,91,.020),transparent 80%)!important;
+    opacity:.88!important;
+  }
+
+  html body.living-architecture::after{
+    background:
+      radial-gradient(ellipse 74% 66% at 50% 46%,transparent 38%,rgba(0,0,0,.10) 73%,rgba(0,0,0,.48) 116%),
+      radial-gradient(ellipse 46% 15% at 63% 83%,rgba(78,117,121,.025),transparent 82%)!important;
+    opacity:.98!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
+    filter:saturate(1.025) contrast(1.055) brightness(.985)!important;
+    opacity:calc(.13 + var(--fx-c536-energy) * .30)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
+    border-color:rgba(var(--fx-c536-a),.060)!important;
+    box-shadow:
+      0 0 56px rgba(var(--fx-c536-a),.026),
+      inset 0 0 74px rgba(var(--fx-c536-b),.018)!important;
+    opacity:calc(.14 + var(--fx-c536-energy) * .19)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-track{
+    opacity:calc(.035 + var(--fx-c536-energy) * .10)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{
+    opacity:calc(.025 + var(--fx-c536-energy) * .075)!important;
+    filter:blur(.35px);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-vignette{
+    background:
+      linear-gradient(180deg,rgba(0,2,7,.26),transparent 11%,transparent 87%,rgba(0,2,8,.31)),
+      radial-gradient(ellipse at center,transparent 43%,rgba(0,2,8,.10) 73%,rgba(0,1,5,.31) 100%)!important;
+    opacity:.74!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    image-rendering:auto!important;
+    filter:
+      brightness(1.025)
+      contrast(1.105)
+      saturate(.96)
+      drop-shadow(0 20px 20px rgba(0,0,0,.36))
+      drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
+    -webkit-filter:
+      brightness(1.025)
+      contrast(1.105)
+      saturate(.96)
+      drop-shadow(0 20px 20px rgba(0,0,0,.36))
+      drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
+  }
+
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    filter:brightness(1.02) contrast(1.09) saturate(.95)!important;
+    -webkit-filter:brightness(1.02) contrast(1.09) saturate(.95)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{filter:none!important}
+}

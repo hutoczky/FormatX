@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/styles/formatx-cinematic-journey-r536.css'
+      - 'docs/scifi-ui/styles/formatx-desktop-depth-r1958.css'
       - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
       - '.github/scripts/validate-cinematic-journey-r536.cjs'
       - '.github/workflows/validate-cinematic-journey-r536.yml'

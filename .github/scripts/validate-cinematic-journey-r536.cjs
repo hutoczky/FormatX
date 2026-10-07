@@ -7,8 +7,11 @@ const read = p => fs.readFileSync(p,'utf8');
 const index = read('docs/scifi-ui/index.html');
 const css = read('docs/scifi-ui/styles/formatx-cinematic-journey-r536.css');
 const js = read('docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js');
+const depth = read('docs/scifi-ui/styles/formatx-desktop-depth-r1958.css');
 
 assert.equal((index.match(/formatx-cinematic-journey-r536\.css/g)||[]).length,1,'R536 CSS must load exactly once');
+assert.equal((index.match(/formatx-desktop-depth-r1958\.css/g)||[]).length,1,'R1958 desktop depth CSS must load exactly once');
+for(const token of ['photographic depth pass','fx-c536-world','fx-c536-iris','fx-c536-vignette','drop-shadow(0 20px 20px','data-fx-scroll-budget-r1660']) assert.ok(depth.includes(token),`R1958 depth contract missing: ${token}`);
 assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'R536 JS must load exactly once');
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
