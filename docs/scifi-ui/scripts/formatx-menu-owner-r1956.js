@@ -78,6 +78,31 @@ function toggleFromEvent(event){
    scripts. This is the authoritative hamburger interaction boundary. */
 document.addEventListener('click',event=>{toggleFromEvent(event);},true);
 
+/* R1959 — head-synchronous MAG response safety net.
+   The real living-core owner may still be loading when a fast user/test clicks.
+   Defer one microtask; only synthesize a response if no later owner handled it. */
+document.addEventListener('click',event=>{
+  const target=event.target instanceof Element?event.target.closest('.fx-reference-mag-button'):null;
+  if(!(target instanceof HTMLButtonElement))return;
+  const before=Math.max(0,Number(root.dataset.fxCoreLivingResponseTokenR1723||0));
+  queueMicrotask(()=>{
+    const after=Math.max(0,Number(root.dataset.fxCoreLivingResponseTokenR1723||0));
+    if(after>before)return;
+    const token=String(before+1);
+    root.dataset.fxCoreLivingResponseTokenR1723=token;
+    root.dataset.fxCoreLivingResponseFallbackR1959='head-capture-'+token;
+    const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+    try{
+      if(typeof core?.physiology==='function')core.physiology('response','head-capture-r1959-'+token);
+      else{
+        core?.surfacePulse?.('head-capture-r1959-'+token);
+        core?.pulse?.();
+        core?.requestRender?.(3);
+      }
+    }catch(_){}
+  });
+},true);
+
 document.addEventListener('pointerdown',event=>{
   const state=live();
   if(!state.nav?.classList.contains('open'))return;
