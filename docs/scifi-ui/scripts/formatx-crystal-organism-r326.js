@@ -272,8 +272,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 64 : 96;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 128 : 192;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -1692,6 +1692,8 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
+    root.dataset.fxNativeMagQualityR1957='desktop-hires-floor-stable-lod-no-visible-resolution-step';
+    root.dataset.fxNativeMagGeometryR1957='desktop-96x192-signature-contour-tessellation-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
     root.dataset.fxNativeMagIdentityR1723='canonical-organism-no-crystal-sphere-state';
@@ -1833,15 +1835,19 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    /* R1957 — desktop contour lock.
+       Keep the backing store above the visible aliasing threshold and make LOD
+       changes smaller so sharp four-point edges never visibly step during
+       pointer or camera motion. Mobile retains the established budget. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      ? (mobile?.94:.76)
+      : (mobile ? 1.00 : (auditMode ? .94 : (constrained ? .92 : 1.04)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      ? (mobile?1.00:.90)
+      : (mobile?1.08:(auditMode?1.02:(constrained?1.04:1.14)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      ? (mobile?.80:.56)
+      : (mobile?.80:(constrained?.80:.88));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1855,13 +1861,13 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        ? (mobile?1.58:1.34)
+        : (auditMode ? 1.42 : constrainedMobile?1.72:mobile?2.00:constrained?1.92:2.35);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        ? (mobile?920000:680000)
+        : (auditMode ? 1180000 : constrainedMobile?1280000:mobile?1900000:constrained?2200000:4600000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2116,7 +2122,7 @@
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
+          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.12:.07)));
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -2139,11 +2145,11 @@
           const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
 
           if(severeFramePressure||severeRenderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.10));
             stableBudgetFrames=0;
             panicFrames=Math.max(panicFrames,12);
           }else if(framePressure||renderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.09));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.05));
             stableBudgetFrames=0;
           }else{
             if(panicFrames>0)panicFrames-=1;
