@@ -553,9 +553,9 @@
   /* R1951 — one-shot MAG boot identity. Three discrete state changes only:
      no extra animation loop, no layout polling, no recurring timers. */
   function updateCoreIdentity(r,force=false) {
-    const next = r >= .985
+    const next = r >= .998
       ? 'off'
-      : (r >= .925 ? 'leaving' : (r >= .795 ? 'visible' : 'off'));
+      : (r >= .945 ? 'leaving' : (r >= .805 ? 'visible' : 'off'));
     if(!force && next===coreIdentityState)return;
     coreIdentityState=next;
     overlay.dataset.coreIdState=next;
@@ -1127,7 +1127,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
     ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
-    ROOT.dataset.fxMagCoreIdentityContractR1951='7.95s-show-9.25s-blur-exit-clean-hero';
+    ROOT.dataset.fxMagCoreIdentityContractR1951='8.05s-show-9.45s-blur-exit-clean-hero';
     coreIdentityState='off';
     overlay.dataset.coreIdState='off';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
