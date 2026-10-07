@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="same-origin">
+  <meta name="theme-color" content="#03080d">
+  <title>FormatX fiók</title>
+  <link rel="icon" type="image/png" href="/scifi-ui/assets/images/formatx-icon-80.png">
+  <link rel="stylesheet" href="/account/account.css">
+</head>
+<body>
+  <main class="account-shell">
+    <section class="account-brand" aria-label="FormatX">
+      <a href="/" class="account-logo"><img src="/scifi-ui/assets/images/formatx-icon-80.webp" width="50" height="50" alt=""><span><strong>FORMATX</strong><small>ACCOUNT</small></span></a>
+      <p>Biztonságos hozzáférés a hivatalos FormatX letöltésekhez.</p>
+    </section>
+
+    <section class="account-card">
+      <div class="account-head">
+        <p class="eyebrow">FORMATX USER ACCESS</p>
+        <h1>Fiók és letöltés</h1>
+        <p id="downloadReason" class="notice" hidden>A letöltéshez ingyenes regisztráció vagy belépés szükséges.</p>
+      </div>
+
+      <div id="authLoading" class="loading">Fiókállapot ellenőrzése…</div>
+
+      <section id="signedIn" class="signed-in" hidden>
+        <span class="status">BEJELENTKEZVE</span>
+        <h2 id="userName">—</h2>
+        <p id="userEmail">—</p>
+        <div class="actions">
+          <a id="continueDownload" class="primary-link" href="/scifi-ui/downloads/">Folytatás a letöltéshez</a>
+          <button id="logoutButton" type="button" class="secondary">Kilépés</button>
+        </div>
+      </section>
+
+      <section id="authForms" hidden>
+        <div class="tabs" role="tablist" aria-label="Belépés vagy regisztráció">
+          <button id="loginTab" type="button" role="tab" aria-selected="true">Belépés</button>
+          <button id="registerTab" type="button" role="tab" aria-selected="false">Regisztráció</button>
+        </div>
+
+        <form id="loginForm" autocomplete="on">
+          <label>E-mail-cím<input id="loginEmail" type="email" name="email" autocomplete="email" maxlength="254" required></label>
+          <label>Jelszó<input id="loginPassword" type="password" name="password" autocomplete="current-password" maxlength="128" required></label>
+          <label class="remember"><input id="loginRemember" type="checkbox"> <span>Belépés megjegyzése ezen az eszközön <small>30 nap</small></span></label>
+          <button class="primary" type="submit">Belépés és folytatás</button>
+          <p id="loginStatus" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <form id="registerForm" autocomplete="on" hidden>
+          <label>Név<input id="registerName" name="name" autocomplete="name" maxlength="120" required></label>
+          <label>E-mail-cím<input id="registerEmail" type="email" name="email" autocomplete="email" maxlength="254" required></label>
+          <label>Jelszó<input id="registerPassword" type="password" name="new-password" autocomplete="new-password" minlength="10" maxlength="128" required><small>Legalább 10 karakter.</small></label>
+          <label>Jelszó újra<input id="registerPasswordAgain" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+          <label class="remember"><input id="registerRemember" type="checkbox"> <span>Belépés megjegyzése ezen az eszközön <small>30 nap</small></span></label>
+          <label class="consent"><input id="privacyConsent" type="checkbox" required> <span>Elfogadom a <a href="/scifi-ui/terms.html" target="_blank" rel="noopener">felhasználási feltételeket</a> és megismertem az <a href="/scifi-ui/privacy.html" target="_blank" rel="noopener">adatkezelési tájékoztatót</a>.</span></label>
+          <button class="primary" type="submit">Regisztráció és letöltés</button>
+          <p id="registerStatus" class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </section>
+
+    <footer><a href="/">Főoldal</a><a href="/scifi-ui/privacy.html">Adatvédelem</a><a href="/scifi-ui/terms.html">Feltételek</a></footer>
+  </main>
+  <script type="module" src="/account/account.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import liveWorker from './live-entry.js';
 import { handleLicenseCenterRequest } from './license-center.js';
 import { handleV100PricingRequest } from './pricing-v100-api.js';
 import { handleProjectAi } from './project-ai.js';
+import { handlePublicAccountRequest, requireDownloadAccount } from './public-account.js';
 import {
   annotateHealthResponse,
   createSalesUnavailableJson,
@@ -13,6 +14,13 @@ const PUBLIC_ORIGIN = 'https://www.formatxsuite.com';
 const RELEASE_METADATA_PATH = '/scifi-ui/data/current-release.json';
 const PUBLIC_RELEASE_API_PATH = '/api/public-release';
 const MULTIPLATFORM_DOWNLOAD_PATH = '/download/multiplatform';
+const ACCOUNT_PROTECTED_DOWNLOAD_PATHS = new Set([
+  '/download/multiplatform',
+  '/download/android',
+  '/download/android-native-beta',
+  '/scifi-ui/downloads/FormatX-Suite-Pro-Android.apk',
+  '/scifi-ui/downloads/FormatX-Native-Android.apk',
+]);
 const GITHUB_LATEST_RELEASE_API = 'https://api.github.com/repos/hutoczky/FormatX-Updates/releases/latest';
 const GITHUB_LATEST_RELEASE_PAGE = 'https://github.com/hutoczky/FormatX-Updates/releases/latest';
 const LIVE_RELEASE_CACHE_SECONDS = 15;
@@ -129,6 +137,17 @@ const PERMISSIONS_POLICY = [
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    const accountResponse = await handlePublicAccountRequest(request, env);
+    if (accountResponse) return secureResponse(accountResponse, url);
+
+    if (
+      (request.method === 'GET' || request.method === 'HEAD')
+      && ACCOUNT_PROTECTED_DOWNLOAD_PATHS.has(url.pathname)
+    ) {
+      const accountGate = await requireDownloadAccount(request, env);
+      if (accountGate) return secureResponse(accountGate, url);
+    }
 
     if (
       (request.method === 'GET' || request.method === 'HEAD')

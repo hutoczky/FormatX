@@ -21,7 +21,7 @@
 
   <main id="main-content" class="legal-main">
     <article class="content-width legal-document">
-      <p class="eyebrow">ADATKEZELÉSI TÁJÉKOZTATÓ · FRISSÍTVE 2026-08-10</p>
+      <p class="eyebrow">ADATKEZELÉSI TÁJÉKOZTATÓ · FRISSÍTVE 2026-10-07</p>
       <h1>Adatvédelem</h1>
       <p class="legal-lead">A FormatX nem kér és nem tárol bankkártyaszámot, lejárati adatot vagy CVC-kódot. A fizetés HUF- vagy EUR-bankátutalással történik. A kezelt adatok köre célhoz kötött.</p>
 
@@ -33,6 +33,7 @@
         <li><strong>Számlázás:</strong> számlázási név, cím, adószám, számlatartalom. Jogalap: jogi kötelezettség.</li>
         <li><strong>Támogatás és panasz:</strong> név, e-mail, rendelési vagy licencazonosító, üzenet, melléklet, technikai környezet. Jogalap: szerződés teljesítése, jogi kötelezettség vagy jogos érdek.</li>
         <li><strong>Biztonsági és működési napló:</strong> időpont, IP-cím, technikai kérésadatok, hibakód. Jogalap: a szolgáltatás biztonságához fűződő jogos érdek.</li>
+        <li><strong>FormatX-fiók és letöltési hozzáférés:</strong> név, e-mail-cím, egyirányú PBKDF2-SHA-256 jelszólenyomat és só, regisztrációs/időbélyeg-adatok, valamint munkamenet-azonosító. A jelszó olvasható formában nem kerül tárolásra. Jogalap: a kért digitális hozzáférés biztosítása és a szolgáltatás biztonságos működtetése.</li>
         <li><strong>Helyi beállítások:</strong> nyelv, téma, intro-megtekintés, Organizmus BE/KI állapot, valamint legfeljebb 12 gondolatgenom-lenyomat a böngésző helyi tárhelyén. A lenyomat nem tartalmazza a beírt kérdés nyers szövegét, és nem kerül automatikusan szerverre.</li>
       </ul></section>
 
@@ -49,6 +50,7 @@
         <li><strong>Számviteli és számlázási iratok:</strong> 8 év.</li>
         <li><strong>Teljesített rendelés és licencnyilvántartás:</strong> a hozzáférés megszűnésétől számított 5 év, illetve a jogi igény érvényesíthetőségéig; a számviteli adatokra a hosszabb kötelező idő alkalmazandó.</li>
         <li><strong>Sikertelen vagy be nem fejezett rendelési munkamenet:</strong> legfeljebb 30 nap.</li>
+        <li><strong>Felhasználói fiók:</strong> a fiók fennállásáig vagy törlési kérelem teljesítéséig. A normál belépési munkamenet legfeljebb 12 órás; a külön kért „Belépés megjegyzése” munkamenet legfeljebb 30 napos.</li>
         <li><strong>Írásbeli fogyasztói panasz és válasz:</strong> 3 év.</li>
         <li><strong>Általános támogatási levelezés:</strong> az ügy lezárásától számított 2 év, kivéve ha jogi igény vagy szerződés miatt hosszabb megőrzés szükséges.</li>
         <li><strong>Biztonsági és hibakeresési napló:</strong> főszabály szerint 30 nap, biztonsági eseménynél a vizsgálat lezárásáig.</li>
@@ -61,7 +63,7 @@
 
       <section><h2>7. Érintetti jogok</h2><p>Az érintett kérhet hozzáférést, helyesbítést, törlést, korlátozást, tiltakozhat a jogos érdeken alapuló adatkezelés ellen, és ahol alkalmazható, élhet adathordozhatósággal vagy visszavonhatja hozzájárulását.</p><p>Kérelem: <a href="mailto:hutoczky@gmail.com?subject=FormatX%20adatv%C3%A9delmi%20k%C3%A9relem">hutoczky@gmail.com</a>.</p><p>Az érintett panaszt tehet a Nemzeti Adatvédelmi és Információszabadság Hatóságnál, továbbá bírósághoz fordulhat.</p></section>
 
-      <section><h2>8. Adatbiztonság</h2><p>A szerveroldali rendelési végpontok hozzáférés-korlátozást, sebességkorlátot, naplózást és adatbázis-jogosultságokat alkalmazhatnak. Titkos adatot, licenckulcsot vagy banki hitelesítő adatot nyilvános hibajegyben nem szabad megadni.</p></section>
+      <section><h2>8. Adatbiztonság</h2><p>A szerveroldali rendelési és fiókvégpontok hozzáférés-korlátozást, sebességkorlátot, naplózást és adatbázis-jogosultságokat alkalmazhatnak. A fiókjelszó PBKDF2-SHA-256 kulcsszármaztatással, egyedi sóval kerül tárolásra; a belépési cookie HttpOnly, Secure és SameSite=Lax védelemmel működik. Titkos adatot, licenckulcsot vagy banki hitelesítő adatot nyilvános hibajegyben nem szabad megadni.</p></section>
 
       <div class="legal-actions"><a class="button primary" href="./support.html">Adatvédelmi kapcsolat</a><a class="button secondary" href="./terms.html">Felhasználási feltételek</a><a class="button secondary" href="./license.html">Licenc</a><a class="button secondary" href="./verification.html">Bizonyítéki központ</a></div>
     </article>

@@ -39,6 +39,7 @@ export default defineConfig({
     include: [
       'test/license-center.spec.js',
       'test/license-center-e2e.spec.js',
+      'test/account-auth.spec.js',
       'test/production-routing.spec.js',
       'test/canonical-entry.spec.js',
     ],
