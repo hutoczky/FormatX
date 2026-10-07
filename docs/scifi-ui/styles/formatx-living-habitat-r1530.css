@@ -222,8 +222,14 @@ html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:
 body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
   opacity:1!important;
   image-rendering:auto!important;
-  filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
-  -webkit-filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
+  filter:
+    brightness(1.035) contrast(1.085) saturate(.89)
+    drop-shadow(0 20px 28px rgba(0,0,0,.34))
+    drop-shadow(0 0 10px rgba(98,220,225,.035))!important;
+  -webkit-filter:
+    brightness(1.035) contrast(1.085) saturate(.89)
+    drop-shadow(0 20px 28px rgba(0,0,0,.34))
+    drop-shadow(0 0 10px rgba(98,220,225,.035))!important;
   mix-blend-mode:normal!important;
 }
 
@@ -236,6 +242,19 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
   }
 }
 /* production-r1531-proof-corrected-photoreal-mag-owner */
+
+/* R1956 — desktop atmospheric grounding for the real WebGL MAG.
+   This is chamber lighting only: no CSS MAG artwork. */
+@media (min-width:1100px) and (hover:hover) and (pointer:fine){
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space{
+    background:
+      radial-gradient(ellipse 42% 48% at 53% 48%,rgba(92,173,181,.042),rgba(30,72,78,.016) 44%,transparent 72%),
+      radial-gradient(ellipse 31% 12% at 53% 75%,rgba(0,0,0,.42),rgba(0,0,0,.18) 44%,transparent 78%)!important;
+  }
+}
+/* production-r1956-volumetric-chamber-grounding */
+
 
 
 /* R1532 — native MAG only. Keep semantic/interactivity owners, remove their
