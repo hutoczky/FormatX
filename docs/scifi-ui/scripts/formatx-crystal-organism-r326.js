@@ -8,6 +8,7 @@
   const VISUAL_REVISION_R1713 = 'photoreal-single-living-organism-r1713';
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
+  const fineDesktop = !mobile && matchMedia('(hover:hover) and (pointer:fine)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
@@ -792,13 +793,24 @@
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     if(!reduced.matches && typeof canvas.animate==='function'){
+      /* R1959 — desktop WebGL breath must never scale the raster canvas.
+         The shader already breathes internally; CSS scaling re-sampled the
+         transparent silhouette and exposed stair-step shimmer on 1x panels. */
+      const livingKeyframes=mobile
+        ? [
+            {opacity:.985,transform:'scale(.996)',offset:0},
+            {opacity:1,transform:'scale(1.004)',offset:.48},
+            {opacity:.990,transform:'scale(.999)',offset:.76},
+            {opacity:.985,transform:'scale(.996)',offset:1}
+          ]
+        : [
+            {opacity:.992,transform:'none',offset:0},
+            {opacity:1,transform:'none',offset:.48},
+            {opacity:.996,transform:'none',offset:.76},
+            {opacity:.992,transform:'none',offset:1}
+          ];
       const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
+        livingKeyframes,
         {
           duration:6800,
           iterations:Infinity,
@@ -827,6 +839,10 @@
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
     if (!gl) gl = canvas.getContext('webgl', options);
+    if(gl){
+      try{root.dataset.fxNativeMagMsaaR1959=String(gl.getParameter(gl.SAMPLES)||0);}
+      catch(_){root.dataset.fxNativeMagMsaaR1959='unknown';}
+    }
     if (!gl) {
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
@@ -1379,6 +1395,22 @@
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
+
+        /* R1959 — single-pass optical volume: restrained Beer-Lambert style
+           extinction plus broad refractive caustics. This keeps the sculpt one
+           coherent glass body without adding a costly second renderer. */
+        float opticalPath=.22+(1.0-facing)*.92+backDepth*.28;
+        vec3 extinction=exp(-vec3(.18,.095,.060)*opticalPath);
+        c*=mix(vec3(1.0),extinction,.34);
+        float refractiveVeil=
+          exp(-pow((refl.x+vLocal.x*.15+.10)/.26,2.0))
+          *frontDepth*(.20+.80*fresnel);
+        float refractiveCaustic=
+          exp(-pow((refl.y-vLocal.y*.10-.08)/.18,2.0))
+          *frontDepth*(.18+.82*side);
+        c+=vec3(.045,.095,.098)*refractiveVeil*.105;
+        c+=vec3(.34,.43,.40)*refractiveCaustic*.040;
+
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
@@ -1691,6 +1723,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1959='desktop-128pct-supersample-msaa-no-css-scale-adaptive-clean-contour';
+    root.dataset.fxNativeMagMaterialR1959='single-pass-beer-lambert-extinction-refractive-caustic-smoked-bioglass';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1835,13 +1869,13 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .88 : 1.00)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?1.00:1.10)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.68:.80));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1890,18 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.92:2.55);
       const cap=baseCap*qualityScale;
-      const dpr=Math.min(devicePixelRatio||1,cap);
+      /* R1959 — true desktop supersampling. At DPR=1 the previous path had
+         no downsample pass, so large diagonal tips could still stair-step.
+         The existing frame governor remains authoritative and can shed this
+         extra resolution before cadence is sacrificed. */
+      const nativeDpr=devicePixelRatio||1;
+      const supersample=fineDesktop?(constrained?1.12:1.28):1;
+      const dpr=Math.min(nativeDpr*supersample,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?2300000:5200000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
