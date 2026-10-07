@@ -1286,7 +1286,10 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 
   /* Lower decorative noise: the content and the MAG remain the first read. */
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{opacity:.010!important}
-  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{opacity:.018!important}
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-scan{opacity:.012!important}
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-scan{
+    opacity:calc(.026 + var(--fx-c536-energy) * .060)!important;
+  }
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::before{opacity:calc(.055 + var(--fx-c536-energy) * .13)!important}
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world::after{opacity:calc(.07 + var(--fx-c536-energy) * .12)!important}
 }
