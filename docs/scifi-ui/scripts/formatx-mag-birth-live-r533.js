@@ -522,6 +522,7 @@
   let schedulerTick = 0;
   let startedAt = 0;
   let finished = false;
+  let stabilizationDispatched = false;
   let exitTimer = 0;
   let hardFinishTimer = 0;
   let frameTimer = 0;
@@ -1019,6 +1020,21 @@
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
+
+    /* R1957 — AI CORE identity appears at the exact moment the final MAG has
+       visually stabilized, not after the overlay teardown. This keeps intro,
+       identity and hero as one continuous cinematic shot. */
+    if(!stabilizationDispatched && r>=.918){
+      stabilizationDispatched=true;
+      ROOT.dataset.fxMagBirthStabilizedR1957='true';
+      document.dispatchEvent(new CustomEvent('formatx:magstabilized',{
+        detail:{
+          source:'timeline-stabilized-r1957',
+          progress:r,
+          revision:'r1957-cinematic-optical-finish'
+        }
+      }));
+    }
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
@@ -1093,6 +1109,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1622='refresh-divisor-never-intentionally-below-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1640='60fps-priority-three-owner-preemptive-quality-shedding';
     ROOT.dataset.fxMagBirthPerformanceR1667='no-30fps-fallback-user-path-60fps-minimum-target';
+    ROOT.dataset.fxMagBirthTelemetryR1957='identity-at-91-8pct-stabilization-before-handoff';
     ROOT.dataset.fxMagBirthMobilePolicyR630=MOBILE?'cinematic-constrained-by-default':'desktop-full-fidelity';
     ROOT.dataset.fxMagBirthMobilePolicyR631=MOBILE?'css-phase-timers-adaptive-cinematic':'desktop-full-native-raf';
     ROOT.dataset.fxMagBirthPerformanceR1727=CONSTRAINED?'constrained-reference-film-no-heavy-three-loop':'hardware-three-adaptive-quality';
