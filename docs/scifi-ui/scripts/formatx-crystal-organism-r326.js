@@ -1710,7 +1710,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
-    root.dataset.fxNativeMagQualityR1951='desktop-1-32x-minimum-supersample-msaa-no-css-scale-resample-balanced-quality-floor';
+    root.dataset.fxNativeMagQualityR1951='desktop-progressive-1-08-to-1-32x-supersample-msaa-no-css-resample';
     root.dataset.fxNativeMagDepthR1951='static-volumetric-haze-contact-shadow-optical-bloom-no-extra-render-loop';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
@@ -1868,6 +1868,14 @@
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
+    /* R1951b — progressive desktop supersampling.
+       First-time visitors are already covered by the intro, so the permanent
+       MAG can prepare at studio density immediately. Returning/no-intro visits
+       start with a lightweight MSAA+dense-mesh backing store and promote to the
+       full studio backing store on the first real interaction or after a calm
+       fallback window. */
+    let desktopSupersampleArmed=mobile || root.dataset.fxIntroPrepaintR1611==='show';
+    let desktopSupersampleSource=desktopSupersampleArmed?'intro-prewarm':'startup-fast';
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
     cinematic.corePosition=[0,0,.52];
@@ -1881,7 +1889,9 @@
       const cap=baseCap*qualityScale;
       const nativeDpr=devicePixelRatio||1;
       const desktopSupersample=softwareRenderer?1.14:(constrained?1.20:1.32);
-      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,desktopSupersample);
+      const desktopStartupSample=softwareRenderer?1.02:(constrained?1.05:1.08);
+      const desktopRequested=desktopSupersampleArmed?desktopSupersample:desktopStartupSample;
+      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,desktopRequested);
       const dpr=Math.min(requestedDpr,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:690000)
@@ -1895,6 +1905,15 @@
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
+      return true;
+    }
+
+    function armDesktopSupersample(source='interaction'){
+      if(mobile||desktopSupersampleArmed||disposed||contextLost)return false;
+      desktopSupersampleArmed=true;
+      desktopSupersampleSource=String(source||'interaction');
+      root.dataset.fxNativeMagSupersampleR1951='armed-'+desktopSupersampleSource;
+      if(resize())schedule(reduced.matches?1:2);
       return true;
     }
 
@@ -2340,6 +2359,7 @@
     }
     let previousScrollY=scrollY;
     function onScroll(){
+      if(!mobile)armDesktopSupersample('scroll');
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
@@ -2376,6 +2396,7 @@
       tx=q.x*(touch?.46:.72);ty=q.y*(touch?.46:.72);
 
       if(desktopFine.matches&&!touch){
+        armDesktopSupersample('pointer');
         /* R1943 desktop: absolute camera bias, independent of mouse polling rate.
            Velocity only adds a tiny impulse; it never accumulates orientation. */
         targetPointerTiltY=clamp(q.x*.095 + dx*.020,-.12,.12);
@@ -2402,6 +2423,7 @@
       });
     }
     function onAmbientPress(event){
+      if(!mobile)armDesktopSupersample('press');
       const q=globalPoint(event);
       tx=q.x*.70;ty=q.y*.70;
       targetEnergy=Math.max(targetEnergy,.72);
@@ -2417,6 +2439,7 @@
       schedule(mobile?2:3);
     }
     function onAmbientWheel(event){
+      if(!mobile)armDesktopSupersample('wheel');
       const impulse=clamp(event.deltaY/180,-1,1);
       targetRotationY+=impulse*.018;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);
@@ -2425,6 +2448,7 @@
     }
     function onAmbientKey(event){
       if(event.repeat)return;
+      if(!mobile)armDesktopSupersample('keyboard');
       const horizontal=event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0;
       const vertical=event.key==='ArrowUp'?1:event.key==='ArrowDown'?-1:0;
       targetRotationY+=horizontal*.055;
@@ -2535,6 +2559,12 @@
       schedule(mobile?2:5);
     },{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
+    if(!mobile&&!desktopSupersampleArmed){
+      later(()=>armDesktopSupersample('calm-4200ms'),4200);
+      root.dataset.fxNativeMagSupersampleR1951='startup-fast-then-1-32x';
+    }else if(!mobile){
+      root.dataset.fxNativeMagSupersampleR1951='intro-prewarm-1-32x';
+    }
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
       scheduleSurfacePulse();
