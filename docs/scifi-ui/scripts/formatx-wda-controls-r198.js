@@ -27,7 +27,7 @@
   }
 
   const SELECTOR = '.fx-three-sound';
-  const AUDIO_SRC = '/scifi-ui/scripts/formatx-audio-repair.js?v=20260829-r423-first-tap-handoff';
+  const AUDIO_SRC = '/scifi-ui/scripts/formatx-audio-repair.js?v=20261007-r1961-window-capture-owner';
   const ICONS = Object.freeze({
     muted: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>',
     sound: '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M15 9.2c1.2 1.5 1.2 4.1 0 5.6"/><path d="M18 6.8c2.8 2.9 2.8 7.5 0 10.4"/></svg>',
@@ -268,20 +268,22 @@
   // r423: the physical pointer sequence stays on the same SOUND element. The
   // professional engine may be installed asynchronously after the trusted click;
   // preserve that first toggle intent and replay it exactly once after handoff.
-  document.addEventListener('pointerdown', event => {
+  window.addEventListener('pointerdown', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
-    root.dataset.fxWdaSoundTouchR418 = 'gesture-armed';
+    root.dataset.fxWdaSoundTouchR418 = 'gesture-armed-r1961';
   }, { capture: true, passive: true });
 
-  document.addEventListener('click', event => {
+  window.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target.closest(SELECTOR) : null;
     if (!target || root.dataset.fxAudioOwner === 'professional-v6') return;
     event.preventDefault();
-    root.dataset.fxWdaSoundTouchR418 = 'click-received';
+    event.stopImmediatePropagation();
+    root.dataset.fxWdaSoundTouchR418 = 'click-received-r1961';
     pendingToggleAfterLoad = true;
     const button = ensureButton();
     button.dataset.fxAudioState = 'pending';
+    root.dataset.fxAudioState = 'pending';
     sync(button);
     requestProfessionalAudio();
     scheduleLayout();
