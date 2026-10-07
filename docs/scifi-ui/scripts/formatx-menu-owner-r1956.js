@@ -78,6 +78,32 @@ function toggleFromEvent(event){
    scripts. This is the authoritative hamburger interaction boundary. */
 document.addEventListener('click',event=>{toggleFromEvent(event);},true);
 
+/* R1963 — the same earliest owner that protects navigation also reserves the
+   first trusted SOUND click. This publishes visible feedback synchronously and
+   hands the intent to the lazy professional engine without adding a new request
+   to first paint. Synthetic replay is deliberately ignored here. */
+window.addEventListener('click',event=>{
+  if(event.isTrusted===false)return;
+  const target=event.target instanceof Element?event.target.closest('.fx-three-sound'):null;
+  if(!(target instanceof HTMLButtonElement))return;
+  if(root.dataset.fxAudioOwner==='professional-v6')return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  target.dataset.fxAudioState='pending';
+  target.setAttribute('aria-pressed','false');
+  root.dataset.fxAudioState='pending';
+  root.dataset.fxSoundEarlyOwnerR1963='requested';
+  let loader=document.querySelector('script[src*="formatx-wda-controls-r198.js"]');
+  if(!(loader instanceof HTMLScriptElement)){
+    loader=document.createElement('script');
+    loader.src='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20261007-r1963-early-sound-handoff';
+    loader.async=true;
+    loader.dataset.fxAwardRuntimeControlsR206='true';
+    loader.dataset.fxWdaHardeningR198='true';
+    (document.head||document.documentElement).appendChild(loader);
+  }
+},true);
+
 document.addEventListener('pointerdown',event=>{
   const state=live();
   if(!state.nav?.classList.contains('open'))return;

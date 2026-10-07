@@ -323,4 +323,15 @@
 
   ensureButton();
   startLayoutBoot();
+
+  /* R1963: consume exactly one intent reserved by the early control owner. */
+  if(root.dataset.fxSoundEarlyOwnerR1963==='requested' && root.dataset.fxAudioOwner!=='professional-v6'){
+    root.dataset.fxSoundEarlyOwnerR1963='handoff';
+    pendingToggleAfterLoad=true;
+    const earlyButton=ensureButton();
+    earlyButton.dataset.fxAudioState='pending';
+    root.dataset.fxAudioState='pending';
+    sync(earlyButton);
+    requestProfessionalAudio();
+  }
 }());
