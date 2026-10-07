@@ -17,6 +17,7 @@ const SHOTS=[
   [3.50,'02-3.50s'],
   [5.50,'03-5.50s'],
   [7.50,'04-7.50s'],
+  [8.60,'04b-8.60s-core-id'],
   [9.25,'05-9.25s']
 ];
 
@@ -284,12 +285,22 @@ const SHOTS=[
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
-          overlay:document.querySelectorAll('.fx-mag-birth-r533').length
+          overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
+          coreIdentityState:document.querySelector('.fx-mag-birth-r533')?.dataset.coreIdState||'',
+          coreIdentityContract:root.dataset.fxMagCoreIdentityContractR1951||'',
+          coreIdentityMain:document.querySelector('.fxb-core-id-main')?.textContent?.replace(/\s+/g,' ').trim()||'',
+          coreIdentityMeta:document.querySelector('.fxb-core-id-meta')?.textContent?.replace(/\s+/g,' ').trim()||''
         };
       });
 
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      }
+      if(seconds===8.60 || seconds===9.25){
+        if(state.coreIdentityState!=='visible')errors.push('R1951 MAG core identity is not visible at '+seconds+'s: '+state.coreIdentityState);
+        if(state.coreIdentityMain!=='MAG // AI CORE')errors.push('R1951 core identity main copy mismatch: '+state.coreIdentityMain);
+        if(state.coreIdentityMeta!=='ONLINE · LOCAL INTELLIGENCE')errors.push('R1951 core identity meta copy mismatch: '+state.coreIdentityMeta);
+        if(!/8\.05s-show-9\.45s-blur-exit-clean-hero/.test(state.coreIdentityContract))errors.push('R1951 core identity timing contract missing: '+state.coreIdentityContract);
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
