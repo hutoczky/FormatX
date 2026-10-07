@@ -971,6 +971,7 @@
       coreApi?.requestRender?.(2);
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
+    try { ROOT.dataset.fxCinematicBridgeR1959='intro-to-hero-active'; } catch (_) {}
 
     try { percent.value='100'; } catch (_) {}
     try { progress.value=100; } catch (_) {}
