@@ -1363,3 +1363,93 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+
+/* R1957c — merged critical menu owner to remove one render-blocking request. */
+/* FormatX R1956 — deterministic menu render contract for phone + PC.
+   This stylesheet is intentionally synchronous and small: the navigation must
+   remain operable even while cinematic/deferred style layers are still loading. */
+html body.living-architecture #menu-toggle.fx-reference-menu-button{
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html body.living-architecture #main-nav.fx-organism-system-menu{
+  position:fixed!important;
+  display:grid!important;
+  box-sizing:border-box!important;
+  z-index:2147482400!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch;
+  gap:4px!important;
+  border:1px solid rgba(122,199,231,.24)!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,rgba(3,14,24,.992),rgba(2,9,17,.995))!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.56),inset 0 0 32px rgba(72,199,255,.035)!important;
+  backdrop-filter:blur(22px) saturate(132%)!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translateY(-8px) scale(.988)!important;
+  clip-path:none!important;
+  transition:opacity .18s ease,visibility .18s ease,transform .18s ease!important;
+}
+
+html body.living-architecture #main-nav.fx-organism-system-menu.open{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:translateY(0) scale(1)!important;
+  clip-path:none!important;
+}
+
+html body.living-architecture #main-nav.fx-organism-system-menu.open a{
+  display:flex!important;
+  align-items:center!important;
+  min-height:48px!important;
+  padding:11px 14px!important;
+  color:rgba(234,247,252,.94)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+html.fx-organism-menu-open body.living-architecture #main-nav.fx-organism-system-menu.open{
+  display:grid!important;
+}
+
+@media (min-width:901px) and (pointer:fine){
+  html body.living-architecture #main-nav.fx-organism-system-menu{
+    top:76px!important;
+    right:22px!important;
+    bottom:auto!important;
+    left:auto!important;
+    width:min(360px,calc(100vw - 44px))!important;
+    min-width:280px!important;
+    max-width:360px!important;
+    max-height:calc(100dvh - 96px)!important;
+    padding:14px!important;
+  }
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture #main-nav.fx-organism-system-menu{
+    top:max(76px,env(safe-area-inset-top))!important;
+    right:12px!important;
+    bottom:auto!important;
+    left:12px!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    max-height:calc(100dvh - max(92px,calc(env(safe-area-inset-top) + 92px)))!important;
+    padding:18px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture #main-nav.fx-organism-system-menu{transition:none!important}
+}
+
+/* production-r1957c-inline-menu-owner */

@@ -44,11 +44,14 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1950-desktop-edge-aa';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1957-photoreal-depth';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=900;
+/* R1957b — preserve a clean first paint on returning visits too.
+   Explicit user intent still mounts WebGL immediately; only ambient auto-start
+   moves later so the static MAG can own FCP/LCP without shader compilation. */
+const AUTO_DELAY_MS=3500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
