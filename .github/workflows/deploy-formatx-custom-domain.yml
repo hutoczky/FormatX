@@ -76,12 +76,14 @@ jobs:
           set -euo pipefail
           node --check content-preview-entry.js
           node --input-type=module --check < billing-worker/src/production-with-license.js
+          node --input-type=module --check < billing-worker/src/public-account.js
           node --input-type=module --check < billing-worker/src/production-entry.js
           node --input-type=module --check < billing-worker/src/production-content-entry.js
           node --input-type=module --check < billing-worker/src/production-feedback-entry.js
           node --input-type=module --check < billing-worker/src/feedback-api.js
           node --input-type=module --check < billing-worker/src/feedback-schema.js
           node --input-type=module --check < billing-worker/src/pricing-v100-api.js
+          node --check docs/account/account.js
           node --check docs/scifi-ui/scripts/formatx-event-horizon.js
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check docs/scifi-ui/scripts/igloo-parity.js
@@ -238,12 +240,13 @@ jobs:
             summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$ORIGIN/api/feedback/summary" || true)"
             downloads_code="$(curl -sS -L --max-time 30 -o "$tmp/downloads.html" -w '%{http_code}' "$ORIGIN/downloads/" || true)"
             verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$ORIGIN/verification" || true)"
-            package_code="$(curl -sS --max-time 45 --range 0-0 -o "$tmp/package.bin" -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
+            account_code="$(curl -sS -L --max-time 30 -o "$tmp/account.html" -w '%{http_code}' "$ORIGIN/account/" || true)"
+            package_code="$(curl -sS --max-time 30 -D "$tmp/package.headers" -o /dev/null -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
 
             if [[ "$home_code" == 200 && "$www_code" == 200 && "$bootstrap_code" == 200 && "$seamless_code" == 200 \
               && "$continuous_code" == 200 && "$mobile_code" == 200 && "$mobile_loop_code" == 200 && "$policy_code" == 200 \
               && "$release_code" == 200 && "$summary_code" == 200 && "$downloads_code" == 200 && "$verification_code" == 200 \
-              && ( "$package_code" == 200 || "$package_code" == 206 ) ]]; then
+              && "$account_code" == 200 && "$package_code" == 302 ]]; then
               if python3 - "$tmp" <<'PY'
           import json
           import pathlib
@@ -260,6 +263,8 @@ jobs:
           mobile_loop = (root / 'mobile-loop.css').read_text()
           downloads = (root / 'downloads.html').read_text()
           verification = (root / 'verification.html').read_text()
+          account = (root / 'account.html').read_text()
+          package_headers = (root / 'package.headers').read_text().lower()
           policy = json.loads((root / 'scroll-policy.json').read_text())
           release = json.loads((root / 'release.json').read_text())
           summary = json.loads((root / 'summary.json').read_text())
@@ -300,6 +305,9 @@ jobs:
           assert 'data-release-download="multiplatform"' in home
           assert 'data-release-download="multiplatform"' in downloads
           assert 'verification' in verification.lower() or 'ellenőrz' in verification.lower()
+          assert 'Regisztráció' in account and 'Belépés megjegyzése' in account, 'account registration UI missing'
+          assert 'location:' in package_headers and '/account/' in package_headers, 'anonymous download is not account-gated'
+          assert 'next=%2fdownload%2fmultiplatform' in package_headers, 'download return target missing from account redirect'
           assert 'content-security-policy' in headers, 'CSP response header missing'
           PY
               then

@@ -4,15 +4,18 @@ on:
   pull_request:
     paths:
       - 'billing-worker/src/license-center.js'
+      - 'billing-worker/src/public-account.js'
       - 'billing-worker/src/signed-license-api.js'
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/license-migrations/**'
       - 'billing-worker/scripts/deploy-license-center-live.sh'
       - 'billing-worker/test/license-center*.js'
+      - 'billing-worker/test/account-auth.spec.js'
       - 'billing-worker/vitest.license-workers.config.js'
       - 'billing-worker/wrangler.license-test.jsonc'
       - 'billing-worker/package.json'
       - 'docs/fx-owner-license/**'
+      - 'docs/account/**'
       - 'billing-worker/wrangler.jsonc'
       - '.github/workflows/license-center-ci.yml'
   workflow_dispatch:
@@ -38,11 +41,14 @@ jobs:
       - name: JavaScript syntax
         run: |
           node --check src/license-center.js
+          node --check src/public-account.js
           node --check src/production-with-license.js
           node --check ../docs/fx-owner-license/app.js
           node --check vitest.license-workers.config.js
           node --check test/license-center-e2e.spec.js
+          node --check test/account-auth.spec.js
           node --check test/license-center.setup.js
+          node --check ../docs/account/account.js
       - name: Shell syntax
         run: bash -n scripts/deploy-license-center-live.sh
       - name: Safe Worker, secret and trusted-session configuration
