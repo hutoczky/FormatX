@@ -17,6 +17,8 @@
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
   const constrainedMobile = mobile && constrained;
+  const desktopFine = !mobile && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const highHeadroomDesktop = desktopFine && !constrained && hardwareConcurrency >= 8 && deviceMemory >= 8;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
   const SURFACE_PULSE_WINDOW_MS = mobile ? SURFACE_PULSE_MS : 1880;
@@ -272,8 +274,8 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : highHeadroomDesktop ? 96 : 80;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : highHeadroomDesktop ? 192 : 160;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -792,13 +794,21 @@
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     if(!reduced.matches && typeof canvas.animate==='function'){
+      const livingKeyframes=desktopFine
+        ? [
+            {opacity:.992,offset:0},
+            {opacity:1,offset:.48},
+            {opacity:.995,offset:.76},
+            {opacity:.992,offset:1}
+          ]
+        : [
+            {opacity:.985,transform:'scale(.996)',offset:0},
+            {opacity:1,transform:'scale(1.004)',offset:.48},
+            {opacity:.990,transform:'scale(.999)',offset:.76},
+            {opacity:.985,transform:'scale(.996)',offset:1}
+          ];
       const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
+        livingKeyframes,
         {
           duration:6800,
           iterations:Infinity,
@@ -809,6 +819,7 @@
       livingTimeline.id='fx-primary-mag-living-breath-r1930';
       root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
       root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+      root.dataset.fxNativeMagEdgeStabilityR1951=desktopFine?'desktop-opacity-only-no-canvas-scale':'mobile-existing-compositor-breath';
     }
 
     const options = {
@@ -820,7 +831,7 @@
       antialias:!mobile || (!constrained && (devicePixelRatio||1)<=4.2),
       depth:true,
       stencil:false,
-      premultipliedAlpha:false,
+      premultipliedAlpha:desktopFine,
       preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
       powerPreference:'high-performance'
     };
@@ -846,6 +857,8 @@
       return;
     }
 
+    root.dataset.fxNativeMagMsaaR1951=String(gl.getParameter(gl.SAMPLES)||0);
+    root.dataset.fxNativeMagPremultipliedAlphaR1951=desktopFine?'desktop-premultiplied-edge':'legacy-mobile-alpha';
     const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
     const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
     const softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
@@ -1467,7 +1480,7 @@
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.84+.16*facing;
         vec3 col=mix(vec3(.003,.007,.010),vec3(.066,.086,.090),lift)*facetTone*capShade*absorption;
-        col*=.994+.012*grain;
+        col*=.997+.006*grain;
         col+=vec3(1.00,1.00,.99)*keySpec*.135;
         col+=vec3(.26,.54,.59)*sideSpec*.105;
         col+=vec3(.020,.125,.150)*fresnel*.185;
@@ -1491,9 +1504,9 @@
         col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
         col+=vec3(.98,1.00,.99)*studioFaceA*.074;
         col+=vec3(.30,.72,.78)*studioFaceB*.052;
-        col+=vec3(1.00,1.00,.99)*studioStripeA*.145;
+        col+=vec3(1.00,1.00,.99)*studioStripeA*.105;
         col+=vec3(.25,.62,.69)*studioStripeB*.052;
-        col+=vec3(.58,.90,.93)*studioStripeC*.058;
+        col+=vec3(.58,.90,.93)*studioStripeC*.040;
         col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
         float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
         float glassEdge=pow(1.0-facing,2.05)*bodyMask;
@@ -1526,6 +1539,17 @@
         col+=spectralEdge*fresnel*bodyMask*.135;
         float refractRibbon=exp(-pow((vLocal.x+.11-vLocal.y*.16)/.115,2.0))*smoothstep(-.62,.66,vLocal.y)*frontDepth;
         col+=vec3(.055,.185,.205)*refractRibbon*(.045+.055*(1.0-facing));
+
+        /* R1951 — coherent optical volume. */
+        float opticalThickness=.32+.68*(1.0-facing);
+        vec3 absorptionColor=exp(-vec3(.44,.23,.18)*opticalThickness);
+        col*=mix(vec3(1.0),absorptionColor,.34*bodyMask);
+        float volumeHaze=exp(-pow((vLocal.x+.015)/.46,2.0)-pow((vLocal.y-.03)/.56,2.0))
+          *frontDepth*bodyMask;
+        col+=vec3(.055,.095,.100)*volumeHaze*(.030+.030*(1.0-facing));
+        float refractedCore=exp(-pow((vLocal.x-.055+vLocal.y*.09)/.19,2.0)-pow((vLocal.y+.015)/.46,2.0))
+          *frontDepth*bodyMask;
+        col+=vec3(.032,.105,.116)*refractedCore*(.026+.034*fresnel);
 
         vec3 bezel=vec3(.080,.090,.087)
           +vec3(.095,.112,.108)*(.11*ndl+.12*sideLight)
@@ -1856,12 +1880,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:highHeadroomDesktop?2.45:2.22);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:highHeadroomDesktop?5600000:4300000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2183,6 +2207,7 @@
       root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
       root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
       root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+      root.dataset.fxNativeMagDesktopInteractionR1951='dt-damped-pointer-scroll-converge-to-zero-idle-no-snap';
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
@@ -2233,9 +2258,16 @@
       }
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
-      if(burstFrames>0){
+      const motionDelta=Math.max(
+        Math.abs(tx-px),Math.abs(ty-py),
+        Math.abs(targetRotationX-rotationX),Math.abs(targetRotationY-rotationY),Math.abs(targetRotationZ-rotationZ),
+        Math.abs(targetPointerTiltX-pointerTiltX),Math.abs(targetPointerTiltY-pointerTiltY),
+        Math.abs(targetEnergy-energy),Math.abs(targetBreath-breath),
+        Math.abs(targetSiteProgress-siteProgress),Math.abs(angularVelocityY)*22
+      );
+      if(burstFrames>0||motionDelta>.0014){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
+        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'continuous-damped-r1951';
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=auditMode
@@ -2262,7 +2294,7 @@
       const q=point(sample);if(!q)return;
       tx=q.x*(desktopFine.matches?.72:1);ty=q.y*(desktopFine.matches?.72:1);
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.105);
-      schedule(desktopFine.matches?4:2);
+      schedule(1);
     }
     function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,mobile?4:6);}
     function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(2);}
@@ -2325,10 +2357,12 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1951 — scroll owns a continuous damped render response. The single
+           renderer keeps drawing only until its state converges, then returns
+           to true zero-idle. */
+        schedule(1);
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},72);
       });
     }
 
@@ -2355,13 +2389,13 @@
         targetPointerTiltX=clamp(-q.y*.070 - dy*.014,-.095,.095);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.085+Math.min(.055,Math.hypot(dx,dy)*.12));
         targetBreath=Math.max(targetBreath,.235);
-        schedule(4);
+        schedule(1);
       }else{
         targetPointerTiltY=clamp(q.x*.055,-.07,.07);
         targetPointerTiltX=clamp(-q.y*.045,-.06,.06);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+(touch?.075:.090));
         targetBreath=Math.max(targetBreath,touch?.18:.23);
-        schedule(mobile?1:2);
+        schedule(1);
       }
     }
     function onAmbientMove(event){
@@ -2676,6 +2710,7 @@
     root.dataset.fxCoreOpticsR1558='smoky-obsidian-visible-neutral-studio-planes-no-compositor-glow';
     root.dataset.fxCoreShapeR1558='continuous-asymmetric-superellipsoid-no-equator-seam-clean-buried-tendril-roots';
     root.dataset.fxCoreOpticsR1559='antialiased-opaque-smoky-glass-no-drop-shadow-no-black-facet-voids';
+    root.dataset.fxNativeMagStudioR1951='photoreal-coherent-optical-volume-highheadroom-edge-aa';
     root.dataset.fxCoreShapeR1559='leaning-irregular-monolith-continuous-envelope-buried-legacy-tendrils';
     root.dataset.fxCoreOpticsR1560='deep-obsidian-local-softbox-specular-subtle-mineral-vein-visible-surface-energy';
     root.dataset.fxCoreShapeR1560='asymmetric-cinematic-seed-smoother-monolith-offset-apex-natural-shoulders';

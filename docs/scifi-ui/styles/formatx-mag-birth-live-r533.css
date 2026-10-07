@@ -29,11 +29,22 @@ html[data-fx-mag-birth-live="active"] {
   pointer-events: none;
   opacity: 1;
   filter: brightness(1);
-  transition: opacity .72s cubic-bezier(.22,.61,.36,1), filter .72s cubic-bezier(.22,.61,.36,1);
+  transition: opacity 1.08s cubic-bezier(.20,.72,.18,1), filter 1.08s cubic-bezier(.20,.72,.18,1);
 }
 .fx-mag-birth-r533.is-leaving {
   opacity: 0;
-  filter: brightness(1.02);
+  filter: brightness(.96) saturate(.90) blur(1.1px);
+}
+.fx-mag-birth-r533.is-leaving .fxb-veil{
+  opacity:.40;
+  filter:blur(1.4px) brightness(.94);
+}
+.fx-mag-birth-r533.is-leaving .fxb-stars{
+  opacity:.08;
+  filter:blur(.6px);
+}
+.fx-mag-birth-r533.is-leaving .fxb-deep{
+  opacity:.46;
 }
 .fx-mag-birth-r533::after {
   content: "";
@@ -41,7 +52,7 @@ html[data-fx-mag-birth-live="active"] {
   inset: 0;
   z-index: 50;
   pointer-events: none;
-  opacity: .055;
+  opacity: .030;
   background:
     linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
     linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
@@ -81,7 +92,7 @@ html[data-fx-mag-birth-live="active"] {
   position: absolute;
   inset: -8%;
   z-index: -7;
-  opacity: .34;
+  opacity: .22;
   pointer-events: none;
   background-image:
     radial-gradient(circle at 8% 17%,rgba(255,255,255,.9) 0 .6px,transparent .9px),
@@ -2256,3 +2267,6 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+
+/* production-r1951-intro-film-dissolve */

@@ -249,3 +249,45 @@
     transform: none;
   }
 }
+
+
+/* R1951 — luxury breathing room.
+   Larger negative space is concentrated around chapter boundaries and primary
+   groups, not inserted as dead full-screen gaps. */
+@media (min-width:1100px) and (pointer:fine){
+  html body.living-architecture #hero .hero-grid{
+    gap:clamp(56px,6.4vw,118px);
+  }
+
+  html body.living-architecture #hero .hero-copy{
+    row-gap:clamp(9px,1.15vh,15px);
+    width:min(660px,100%);
+  }
+
+  html body.living-architecture #hero .hero-lead,
+  html body.living-architecture #hero .hero-actions,
+  html body.living-architecture #hero .hero-facts{
+    width:min(590px,100%);
+    max-width:590px;
+  }
+
+  html body.living-architecture main > .scene:not(#hero){
+    padding-block:clamp(88px,10.2vh,132px);
+  }
+
+  html body.living-architecture main > :is(#network,#resources).scene:not(#hero){
+    padding-block:clamp(76px,9vh,112px);
+  }
+
+  html body.living-architecture main > .scene:not(#hero) > .section-heading{
+    max-width:min(780px,78vw);
+    margin-bottom:clamp(42px,5.2vh,68px);
+  }
+
+  html body.living-architecture main > .scene :is(
+    .cards,.pricing,.system-grid,.flow,.fx-category-grid
+  ){
+    gap:clamp(18px,1.7vw,28px);
+  }
+}
+/* production-r1951-luxury-breathing-room */
