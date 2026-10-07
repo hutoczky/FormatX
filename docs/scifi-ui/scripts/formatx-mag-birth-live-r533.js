@@ -354,6 +354,10 @@
       <progress class="fxb-progress" max="100" value="0">0%</progress>
       <span class="fxb-status"></span>
     </div>
+    <div class="fxb-core-identity" aria-hidden="true">
+      <span class="fxb-core-identity-main">MAG <i>//</i> AI CORE</span>
+      <span class="fxb-core-identity-sub">ONLINE <b>·</b> LOCAL INTELLIGENCE</span>
+    </div>
   `);
 
   let liveSkip=overlay.querySelector('.fxb-skip');
@@ -388,6 +392,7 @@
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
+  const coreIdentity = overlay.querySelector('.fxb-core-identity');
   const canvas = prepaintCanvas;
   const dnaStage = overlay.querySelector('.fxb-dna-stage');
   const dnaHelix = overlay.querySelector('.fxb-dna-helix');
@@ -539,6 +544,7 @@
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
+  let coreIdentityState = 'hidden';
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
@@ -622,6 +628,33 @@
     let value = copy.statuses[0][1];
     for (const [limit,label] of copy.statuses) if (r >= limit) value = label;
     return value;
+  }
+
+  /* R1951 — first-load core identity telemetry.
+     The label is event/state driven, not frame animated. It appears only once the
+     final MAG is substantially stabilized, holds for roughly 1.2 s, then leaves
+     with a soft optical defocus before the hero handoff. */
+  function setCoreIdentityState(next,source='timeline'){
+    if(!(coreIdentity instanceof HTMLElement)||next===coreIdentityState)return;
+    coreIdentityState=next;
+    overlay.dataset.coreIdentity=next;
+    ROOT.dataset.fxMagCoreIdentityR1951=next;
+    ROOT.dataset.fxMagCoreIdentitySourceR1951=source;
+  }
+  function syncCoreIdentity(seconds,source='timeline'){
+    if(REDUCED){
+      setCoreIdentityState('hidden',source+'-reduced');
+      return;
+    }
+    if(seconds>=9.72 && seconds<9.98){
+      setCoreIdentityState('fading',source);
+      return;
+    }
+    if(seconds>=8.46 && seconds<9.72){
+      setCoreIdentityState('visible',source);
+      return;
+    }
+    setCoreIdentityState('hidden',source);
   }
 
   function locateStage() {
@@ -959,6 +992,7 @@
     try { progress.value=100; } catch (_) {}
     try { status.textContent=copy.statuses[copy.statuses.length-1][1]; } catch (_) {}
     try { overlay.dataset.phase='4'; } catch (_) {}
+    try { setCoreIdentityState('hidden','finish-r1951'); } catch (_) {}
     try { ROOT.dataset.fxMagBirthLiveR533=source; } catch (_) {}
     try { ROOT.dataset.fxMagBirthHandoffR655='exception-safe-overlay-teardown'; } catch (_) {}
 
@@ -1018,6 +1052,7 @@
 
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
+    syncCoreIdentity((now-startedAt)/1000,'render-r1951');
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
@@ -1102,6 +1137,7 @@
     ROOT.dataset.fxMagBirthVisualR1777='photographic-black-mineral-bioglass-final-lighting';
     ROOT.dataset.fxMagBirthVisualR1908='runtime-fixed-centered-genome-to-single-gallery-shard';
     ROOT.dataset.fxMagBirthVisualR1909='single-genome-to-slender-smoked-ice-monolith';
+    ROOT.dataset.fxMagBirthCoreIdentityR1951='first-load-stabilized-mag-ai-core-telemetry-1p2s-soft-defocus';
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
@@ -1151,6 +1187,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{syncCoreIdentity(seconds,'visual-frame-r1951');}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');
