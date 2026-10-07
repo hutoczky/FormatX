@@ -1238,3 +1238,74 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
 }
 /* production-r1948-hero-progressive-disclosure-zero-idle */
 /* production-r1948-hero-core-no-opacity-flash */
+
+
+/* R1957 — luxury breathing room + continuous hero handoff.
+   Desktop only. No new animation loop: the existing cinematic compositor owns
+   the variables and this layer merely consumes them. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
+    opacity:.018!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{
+    opacity:.022!important;
+    filter:blur(.2px)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-vignette{
+    opacity:.26!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #hero :is(
+    .fx-reference-heading,.fx-reference-proof,.scroll-cue
+  ){
+    transform:translate3d(0,var(--fx-c1957-hero-shift,0px),0)!important;
+    opacity:var(--fx-c1957-hero-content-opacity,1)!important;
+    transition:
+      opacity .16s linear,
+      transform .16s linear,
+      filter .36s ease!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #experience{
+    padding-top:clamp(128px,14vh,212px)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #experience > .section-heading{
+    max-width:min(1100px,86vw)!important;
+    margin-bottom:clamp(44px,5.5vh,76px)!important;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] #experience > .fx-c1947-bridge::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:-20vh;
+    width:min(1080px,88vw);
+    height:24vh;
+    transform:translateX(-50%);
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse 58% 70% at 50% 100%,
+        rgba(var(--fx-c536-a),.060),
+        rgba(var(--fx-c536-b),.018) 48%,
+        transparent 78%),
+      linear-gradient(180deg,transparent,rgba(224,250,253,.018));
+    filter:blur(12px);
+    opacity:var(--fx-c1957-bridge-opacity,.07);
+    -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 42%,#000 100%);
+    mask-image:linear-gradient(180deg,transparent 0%,#000 42%,#000 100%);
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] :is(
+    #experience,#capabilities,#pricing,#system,#network,#resources
+  ) > .section-heading{
+    text-wrap:balance;
+  }
+
+  html[data-fx-cinematic-journey-r536="ready"] :is(
+    #experience,#capabilities,#pricing,#system,#network,#resources
+  ){
+    scroll-margin-top:clamp(82px,9vh,132px);
+  }
+}
+/* production-r1957-luxury-continuous-handoff */
