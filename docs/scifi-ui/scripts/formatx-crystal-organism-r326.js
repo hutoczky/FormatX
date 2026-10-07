@@ -1324,6 +1324,17 @@
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
+
+        /* R1959 — physical-looking internal refraction.
+           No extra texture or fake overlay: the normal/view field bends the same
+           studio light sources through a 1.45 IOR glass response. */
+        vec3 refracted=refract(-view,n,1.0/1.45);
+        float refrBox=exp(-pow((refracted.x-.18)/.34,2.0)-pow((refracted.y+.08)/.44,2.0))
+          *smoothstep(-.34,.60,refracted.z);
+        float refrEdge=pow(1.0-facing,2.45);
+        c+=vec3(.20,.46,.49)*refrBox*${mobile?'.030':'.070'};
+        c+=vec3(.035,.145,.162)*refrEdge*${mobile?'.045':'.082'};
+
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1695,6 +1706,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
   root.dataset.fxNativeMagQualityR1959='desktop-dense-contour-high-dpr-floor-anti-aliasing';
+  root.dataset.fxNativeMagMaterialR1959='smoked-silver-ior145-refractive-softbox-volume';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
