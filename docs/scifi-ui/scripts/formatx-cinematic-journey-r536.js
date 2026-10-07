@@ -429,15 +429,24 @@
 
   function refresh(reason='dom') {
     clearTimeout(refreshTimer);
+    const restoreScrollSettle = scrollBudgetState === 'fast';
     clearTimeout(scrollBudgetTimer);
+    scrollBudgetTimer = 0;
     refreshTimer = setTimeout(() => {
       const previousKey=scenes[active]?.def.key||'';
-      if(!discover())return;
+      if(!discover()){
+        if(restoreScrollSettle || scrollBudgetState === 'fast') scheduleScrollSettle();
+        return;
+      }
       cacheGeometry(reason);
       const found=scenes.findIndex(scene=>scene.def.key===previousKey);
       if(found>=0)active=found;
       activate(pickActive(scrollY),reason);
       schedule();
+      if(restoreScrollSettle || scrollBudgetState === 'fast'){
+        root.dataset.fxCinematicScrollRecoveryR1975='refresh-rearmed-settle';
+        scheduleScrollSettle();
+      }
     },80);
   }
 
@@ -576,6 +585,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1653='fast-scroll-scene-commit-deferred-until-settle';
     root.dataset.fxCinematicJourneyPerformanceR1655='fast-scroll-two-css-vars-full-detail-on-settle';
     root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
+    root.dataset.fxCinematicJourneyRecoveryR1975='refresh-cannot-strand-fast-scroll-budget';
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
