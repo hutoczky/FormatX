@@ -774,6 +774,12 @@
     host.prepend(stage);
     stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
 
+    const depthLayer=document.createElement('div');
+    depthLayer.className='fx-mag-depth-r1951';
+    depthLayer.setAttribute('aria-hidden','true');
+    depthLayer.innerHTML='<span class="fx-mag-contact-r1951"></span><span class="fx-mag-haze-r1951"></span><span class="fx-mag-bloom-r1951"></span>';
+    stage.appendChild(depthLayer);
+
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
@@ -1303,7 +1309,7 @@
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
+        c*=.965+.035*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
@@ -1311,8 +1317,8 @@
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
         c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
         c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
-        c+=vec3(.020,.043,.048)*backDepth*.11;
+        c+=vec3(.030,.060,.064)*strata*.055;
+        c+=vec3(.020,.043,.048)*backDepth*.085;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
@@ -1379,8 +1385,25 @@
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.038'}+${mobile?'.07':'.042'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
+
+        /* R1951 — coherent optical depth.
+           Broad analytic volumes replace noisy micro-detail: one inner haze,
+           two refracted panes and a soft absorption pocket. The pointer only
+           biases refraction by millimetres; it never shears the silhouette. */
+        float volumeCore=exp(-pow(vLocal.x/.48,2.0)-pow((vLocal.y+.02)/.58,2.0))
+          *smoothstep(-.30,.62,vLocal.z)*(1.0-.42*fresnel);
+        float refractA=exp(-pow((vLocal.x+.12-vLocal.y*.11+uPointer.x*.028)/.145,2.0))
+          *smoothstep(-.48,.62,vLocal.y)*frontDepth;
+        float refractB=exp(-pow((vLocal.x-.20+vLocal.y*.16+uPointer.y*.020)/.190,2.0))
+          *smoothstep(-.58,.68,vLocal.y)*frontDepth;
+        float absorptionPocket=exp(-pow((vLocal.x+.02)/.34,2.0)-pow((vLocal.y-.06)/.42,2.0))
+          *smoothstep(-.24,.52,vLocal.z);
+        c+=vec3(.028,.082,.090)*volumeCore*${mobile?'.050':'.085'};
+        c+=vec3(.105,.175,.176)*refractA*${mobile?'.022':'.042'};
+        c+=vec3(.026,.122,.140)*refractB*${mobile?'.018':'.036'};
+        c*=1.0-absorptionPocket*${mobile?'.018':'.032'};
 
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
@@ -1691,6 +1714,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1951='desktop-1p16x-supersample-msaa-analytic-volume-refraction-clean-edge';
+    root.dataset.fxNativeMagMaterialR1951='coherent-smoked-silver-bioglass-broad-caustics-no-micro-noise';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1855,13 +1880,14 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        ? (mobile?1.58:1.34)
+        : (auditMode ? 1.40 : constrainedMobile?1.72:mobile?2.00:constrained?1.82:2.24);
       const cap=baseCap*qualityScale;
-      const dpr=Math.min(devicePixelRatio||1,cap);
+      const desktopSupersample=(!mobile&&!auditMode&&!softwareRenderer)?1.16:1;
+      const dpr=Math.min((devicePixelRatio||1)*desktopSupersample,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        ? (mobile?920000:620000)
+        : (auditMode ? 1120000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:4100000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2325,10 +2351,17 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1951 — fine-pointer desktop stays frame-synchronous with scroll.
+           This is still bounded/event-driven: one RAF-coalesced render burst per
+           scroll frame, never an idle loop. Mobile keeps the cheaper settle path. */
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        if(desktopFine.matches&&!mobile){
+          schedule(2);
+          scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(2);},72);
+          root.dataset.fxNativeMagScrollR1951='desktop-frame-synchronous-bounded';
+        }else{
+          scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        }
       });
     }
 
