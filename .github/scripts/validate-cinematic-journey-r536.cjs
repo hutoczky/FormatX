@@ -11,7 +11,12 @@ const depth = read('docs/scifi-ui/styles/formatx-desktop-depth-r1958.css');
 
 assert.equal((index.match(/formatx-cinematic-journey-r536\.css/g)||[]).length,1,'R536 CSS must load exactly once');
 assert.equal((index.match(/formatx-desktop-depth-r1958\.css/g)||[]).length,1,'R1958 desktop depth CSS must load exactly once');
-for(const token of ['photographic depth pass','fx-c536-world','fx-c536-iris','fx-c536-vignette','drop-shadow(0 20px 20px','data-fx-scroll-budget-r1660']) assert.ok(depth.includes(token),`R1958 depth contract missing: ${token}`);
+for(const token of [
+  'photographic depth pass','fx-c536-world','fx-c536-iris','fx-c536-vignette',
+  'fx-crystal-organism-r326-stage::before','fx-crystal-organism-r326-stage::after',
+  'production-r1959-physical-depth-no-canvas-edge-filter','data-fx-scroll-budget-r1660'
+]) assert.ok(depth.includes(token),`R1959 depth contract missing: ${token}`);
+assert.ok(!/drop-shadow\(/.test(depth.match(/fx-crystal-organism-r326-canvas\{[\s\S]*?\}/)?.[0]||''),'R1959 canvas contour must not be re-rasterized by drop-shadow');
 assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'R536 JS must load exactly once');
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
@@ -57,4 +62,4 @@ for (const token of [
 ]) assert.ok(css.includes(token),'R1948 hero disclosure CSS contract missing '+token);
 
 
-console.log('PASS: R1948 cinematic journey preserves one canonical organism, keeps the hero optically clean, opens global telemetry after the core scene and remains zero-idle.');
+console.log('PASS: R1959 cinematic journey preserves one canonical organism, clean MSAA contour depth, continuous intro bridge, progressive disclosure and zero-idle behavior.');
