@@ -81,6 +81,12 @@ apply(index,'boot');
 document.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target.closest('.fx-reference-mag-button'):null;
   if(!(target instanceof HTMLButtonElement))return;
+  if(event.__fxMagResponseR1959===true){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    syncButton();
+    return;
+  }
   event.preventDefault();
   event.stopImmediatePropagation();
   const shape=next('mag-button');
