@@ -1408,6 +1408,26 @@
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
 
+        /* R1959 — desktop physical glass depth.
+           Beer-Lambert-like absorption and a restrained view-dependent inner
+           refraction veil add real thickness without neon or screen-space blur.
+           Mobile keeps the lighter established profile for frame budget parity. */
+        float opticalThickness=clamp(
+          .30+(1.0-facing)*.72+backDepth*.18+prismShellB*.10,
+          0.0,1.32
+        );
+        vec3 absorption=exp(-vec3(.115,.070,.055)*opticalThickness*${mobile?'0.0':'1.0'});
+        c*=mix(vec3(1.0),absorption,${mobile?'0.0':'.72'});
+        float refractedVeil=
+          exp(-pow((vLocal.x+n.x*.055+.08)/.34,2.0)
+              -pow((vLocal.y+n.y*.045-.03)/.48,2.0))
+          *frontDepth*(1.0-facing);
+        c+=vec3(.070,.125,.128)*refractedVeil*${mobile?'0.0':'.115'};
+        float innerCaustic=
+          exp(-pow((refl.x+.06)/.29,2.0)-pow((refl.y-.18)/.38,2.0))
+          *frontDepth*(.22+.78*fresnel);
+        c+=vec3(.31,.39,.37)*innerCaustic*${mobile?'0.0':'.052'};
+
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
@@ -1693,6 +1713,7 @@
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagQualityR1959='desktop-96x192-mesh-msaa-2.25dpr-6.4mp-adaptive-contour-aa';
     root.dataset.fxNativeMagMaterialR1959='shader-owned-smoked-silver-glass-neutral-compositor-mobile-1.07-1.11-.88-desktop-1.03-1.10-.91';
+    root.dataset.fxNativeMagOpticsR1959='desktop-beer-lambert-depth-view-refraction-inner-caustic-no-neon';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
