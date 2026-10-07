@@ -599,6 +599,20 @@
     }
     return true;
   }
+  function applyCoreIdentityAtSeconds(seconds){
+    if(!(coreIdentity instanceof HTMLElement))return;
+    const t=Number(seconds)||0;
+    coreIdentity.classList.remove('is-visible','is-leaving');
+    if(t>=8.55&&t<9.85){
+      applyCoreIdentityAtSeconds(8.55);
+    }else if(t>=9.85&&t<10.30){
+      coreIdentity.classList.add('is-leaving');
+      ROOT.dataset.fxMagBirthIdentityR1952='leaving-before-clean-hero';
+    }else if(t>=10.30){
+      ROOT.dataset.fxMagBirthIdentityR1952='clean-hero-no-identity';
+    }
+  }
+
   function armCoreIdentityTimeline(){
     if(!(coreIdentity instanceof HTMLElement)||REDUCED)return;
     const showTimer=setTimeout(()=>{
@@ -612,9 +626,7 @@
     const hideTimer=setTimeout(()=>{
       phaseTimers.delete(hideTimer);
       if(finished)return;
-      coreIdentity.classList.remove('is-visible');
-      coreIdentity.classList.add('is-leaving');
-      ROOT.dataset.fxMagBirthIdentityR1952='leaving-before-clean-hero';
+      applyCoreIdentityAtSeconds(9.85);
     },9850);
     phaseTimers.add(hideTimer);
   }
@@ -1183,6 +1195,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{applyCoreIdentityAtSeconds(seconds);}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');
