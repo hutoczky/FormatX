@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1956-menu-owner-mobile-desktop
-base_master=769dc28640ce5156873f815c3d64ac44ee474815
-purpose=ship deterministic hamburger navigation on phone and desktop with an early capture-phase owner, live-nav detachment from header hiding rules, and synchronous visible-open fallback styling
-validation=Chromium 1440x900 desktop and 390x844 touch mobile open-close geometry, aria-expanded state, pointer visibility, section navigation, language controls, infinite-scroll coexistence, production candidate validation
+token=20261007-r1959-ai-core-optics-aa-performance
+base_master=a78f6c18cdb20586b6e992e32cc647decb3087a1
+purpose=finalize desktop MAG photoreal optics and contour AA, transient MAG AI CORE telemetry, continuous intro-to-hero cinema, R1960 first-paint deferral and R1961 deterministic sound ownership
+validation=canonical MAG desktop/mobile visual proof, Lighthouse desktop/mobile x3, audio owner sequencing, semantic first paint, category intent runtime, R533-R536 handoff, production Worker cache/CSP parity

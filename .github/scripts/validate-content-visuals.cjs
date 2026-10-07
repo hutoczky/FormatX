@@ -230,10 +230,14 @@ async function assertHeroDisclosure(page) {
 
   const journeyState = await readOpacity();
   assert(journeyState.scene !== 'core', `R1948 journey scene did not open: ${JSON.stringify(journeyState)}`);
-  for (const key of ['world','iris','track','scan']) {
+  for (const key of ['world','iris','track']) {
     assert(journeyState[key] !== null && heroState[key] !== null && journeyState[key] > heroState[key] + .015,
       `R1948 ${key} did not progressively open after hero: ${JSON.stringify({ heroState, journeyState })}`);
   }
+  /* R1959b luxury field contract: scan remains deliberately quieter than the
+     world/iris/track layers, but must still open perceptibly after hero. */
+  assert(journeyState.scan !== null && heroState.scan !== null && journeyState.scan > heroState.scan + .007,
+    `R1959 scan did not progressively open after hero: ${JSON.stringify({ heroState, journeyState })}`);
   if (journeyState.hud !== null && heroState.hud !== null) {
     assert(journeyState.hud > heroState.hud + .15,
       `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify({ heroState, journeyState })}`);
