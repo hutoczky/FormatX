@@ -409,15 +409,23 @@
       });
     }
 
-    /* R1931 — clean P0-derived body topology.
-       Low, even facet density is intentional: the silhouette is authored by the
-       continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    /* R1953b — exact-topology vertex cache.
+       The former cell loop recalculated each expensive sin/cos/pow vertex up to
+       four times. Cache the shared latitude/longitude lattice once, then build
+       the exact same triangles from those immutable samples. Geometry, normals,
+       UV seams and silhouette stay bit-for-bit derived from vertex(); only
+       duplicate CPU work disappears. */
+    const vertexGrid=Array.from({length:latitudeSegments+1},(_,lat)=>
+      Array.from({length:longitudeSegments+1},(_,lon)=>vertex(lat,lon))
+    );
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const row=vertexGrid[lat];
+      const nextRow=vertexGrid[lat+1];
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=row[lon];
+        const b=row[lon+1];
+        const c=nextRow[lon];
+        const d=nextRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
@@ -1691,6 +1699,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagPerformanceR1953b='cached-vertex-lattice-yielded-gpu-buffer-upload-exact-visual-parity';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1756,8 +1765,13 @@
     finishWhenReady();
     return;
 
-    function finishBoot(program) {
+    async function finishBoot(program) {
     const geometry=buildOrganismGeometry(softwareRenderer);
+    /* R1953b — let the browser present/handle input between CPU geometry
+       generation and GPU buffer uploads. This is production behavior on every
+       renderer, not an audit-only branch. */
+    await new Promise(resolve=>setTimeout(resolve,0));
+    if(!stage.isConnected)return;
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -1780,7 +1794,15 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
-    buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    for(let index=0;index<buffers.length;index+=1){
+      upload(buffers[index],geometry.arrays[index],attributes[index],geometry.sizes[index]);
+      /* Large typed-array transfers can synchronize SwiftShader/low-end drivers.
+         Yield after each pair while keeping hardware startup effectively instant. */
+      if(index===1||index===3||index===5){
+        await new Promise(resolve=>setTimeout(resolve,0));
+        if(!stage.isConnected)return;
+      }
+    }
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
