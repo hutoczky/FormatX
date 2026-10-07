@@ -784,7 +784,7 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : 'brightness(1.02) contrast(1.10) saturate(.91)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -827,6 +827,11 @@
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
     if (!gl) gl = canvas.getContext('webgl', options);
+    if (webgl2 && !mobile) {
+      /* R1951 — subpixel silhouette coverage. */
+      gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
+      root.dataset.fxNativeMagEdgeAAR1951='webgl2-msaa-alpha-to-coverage-derivative-contour';
+    }
     if (!gl) {
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
@@ -1264,6 +1269,7 @@
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
+        ${webgl2 ? "float contourWidth=max(fwidth(facing)*1.65,.0012); float contourAA=smoothstep(0.0,contourWidth,facing);" : "float contourAA=1.0;"}
 
         vec3 keyDir=normalize(vec3(-.50,.78,.38));
         vec3 sideDir=normalize(vec3(.72,.08,.69));
@@ -1382,6 +1388,18 @@
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
+        /* R1951 — coherent glass transmission/refraction depth. */
+        vec3 refracted=refract(-view,n,1.0/1.46);
+        float refractPhase=dot(refracted,vec3(12.7,17.3,9.4))+vLocal.y*7.2-vLocal.z*5.1;
+        float refractR=.5+.5*sin(refractPhase-.18);
+        float refractG=.5+.5*sin(refractPhase);
+        float refractB=.5+.5*sin(refractPhase+.22);
+        vec3 spectralRefraction=vec3(refractR,refractG,refractB);
+        float transmissionDepth=(1.0-facing)*frontDepth;
+        c+=mix(vec3(.020,.060,.066),vec3(.035,.120,.132),spectralRefraction)
+          *transmissionDepth*${mobile?'.045':'.082'};
+        c*=1.0-${mobile?'.018':'.032'}*backDepth*(1.0-facing);
+
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
@@ -1418,7 +1436,8 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        float finalAlpha=${mobile?'1.0':'clamp(contourAA*1.08,0.0,1.0)'};
+        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.66'}),finalAlpha);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1691,6 +1710,7 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagMaterialR1951='coherent-smoked-silver-refraction-contact-ready-subpixel-contour';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
