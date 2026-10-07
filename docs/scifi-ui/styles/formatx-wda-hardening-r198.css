@@ -2,7 +2,7 @@
    Clear audio consent, keyboard/touch affordances and inclusive media modes.
    Strict CSP: no inline-style ownership. */
 
-html body .fx-three-sound.fx-wda-sound-toggle {
+html body > .fx-three-sound.fx-wda-sound-toggle {
   position: fixed !important;
   top: max(86px, calc(env(safe-area-inset-top) + 78px)) !important;
   right: max(16px, env(safe-area-inset-right)) !important;
@@ -34,7 +34,7 @@ html body .fx-three-sound.fx-wda-sound-toggle {
   -webkit-tap-highlight-color: transparent !important;
 }
 
-html body .fx-three-sound.fx-wda-sound-toggle::before {
+html body > .fx-three-sound.fx-wda-sound-toggle::before {
   content: "";
   width: 9px;
   height: 9px;
@@ -45,11 +45,11 @@ html body .fx-three-sound.fx-wda-sound-toggle::before {
   opacity: .92;
 }
 
-html[data-fx-audio-state="on"] body .fx-three-sound.fx-wda-sound-toggle {
+html[data-fx-audio-state="on"] body > .fx-three-sound.fx-wda-sound-toggle {
   border-color: rgba(132, 255, 211, .72) !important;
 }
 
-html body .fx-three-sound.fx-wda-sound-toggle:hover {
+html body > .fx-three-sound.fx-wda-sound-toggle:hover {
   border-color: rgba(197, 247, 255, .9) !important;
 }
 
@@ -59,7 +59,7 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
 }
 
 @media (max-width: 900px) {
-  html body .fx-three-sound.fx-wda-sound-toggle {
+  html body > .fx-three-sound.fx-wda-sound-toggle {
     top: max(80px, calc(env(safe-area-inset-top) + 74px)) !important;
     right: max(12px, env(safe-area-inset-right)) !important;
     min-width: 104px !important;
@@ -354,15 +354,15 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html body .fx-three-sound.fx-wda-sound-toggle,
-  html body .fx-three-sound.fx-wda-sound-toggle::before {
+  html body > .fx-three-sound.fx-wda-sound-toggle,
+  html body > .fx-three-sound.fx-wda-sound-toggle::before {
     animation: none !important;
     transition: none !important;
   }
 }
 
 @media (prefers-contrast: more) {
-  html body .fx-three-sound.fx-wda-sound-toggle {
+  html body > .fx-three-sound.fx-wda-sound-toggle {
     border-width: 2px !important;
     border-color: currentColor !important;
     background: #000 !important;
@@ -370,10 +370,36 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
 }
 
 @media (forced-colors: active) {
-  html body .fx-three-sound.fx-wda-sound-toggle {
+  html body > .fx-three-sound.fx-wda-sound-toggle {
     border: 2px solid ButtonText !important;
     background: ButtonFace !important;
     color: ButtonText !important;
     forced-color-adjust: auto;
   }
 }
+
+/* R1966 — canonical hero SOUND is never a legacy floating button.
+   The server-rendered control lives inside #hero from byte one; fixed/top-right
+   WDA fallback ownership is reserved for an old detached body-level button only. */
+html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound.fx-wda-sound-toggle{
+  position:relative!important;
+  inset:auto!important;
+  top:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  left:auto!important;
+  box-sizing:border-box!important;
+  width:54px!important;
+  min-width:54px!important;
+  max-width:54px!important;
+  height:54px!important;
+  min-height:54px!important;
+  max-height:54px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  font-size:0!important;
+  transform:none!important;
+  translate:none!important;
+}
+/* production-r1966-canonical-hero-sound-never-legacy-fixed */
