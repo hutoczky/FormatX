@@ -782,9 +782,11 @@
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
        deliberately mild, but preserve enough tonal separation for real mineral
        planes on OLED/mobile displays and the canonical surface-energy contract. */
+    /* R1959c — inherit the canonical neutral compositor tone from master.
+       AA, Beer-Lambert absorption and refraction remain shader-owned. */
     const compositorFilter=mobile
-      ? 'brightness(1.07) contrast(1.11) saturate(.88)'
-      : 'brightness(1.03) contrast(1.10) saturate(.91)';
+      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
+      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -1712,7 +1714,7 @@
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagQualityR1959='desktop-96x192-mesh-msaa-2.25dpr-6.4mp-adaptive-contour-aa';
-    root.dataset.fxNativeMagMaterialR1959='shader-owned-smoked-silver-glass-neutral-compositor-mobile-1.07-1.11-.88-desktop-1.03-1.10-.91';
+    root.dataset.fxNativeMagMaterialR1959='shader-owned-smoked-silver-glass-neutral-compositor-master-parity-mobile-1.06-1.14-.98-desktop-1.025-1.11-.97';
     root.dataset.fxNativeMagOpticsR1959='desktop-beer-lambert-depth-view-refraction-inner-caustic-no-neon';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
