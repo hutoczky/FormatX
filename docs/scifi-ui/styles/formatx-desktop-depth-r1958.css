@@ -1,4 +1,4 @@
-/* FormatX R1958 — desktop photographic depth pass.
+/* FormatX R1958/R1959 — desktop photographic depth pass.
    Uses only existing scene/MAG layers: no fake ring, no duplicate MAG, no
    continuous animation. The aim is coherent physical depth rather than more UI. */
 @media (min-width:901px) and (pointer:fine){
@@ -55,30 +55,89 @@
     opacity:.74!important;
   }
 
+  /* R1959 — luxury breathing room: keep the information architecture intact,
+     but reduce telemetry noise and give section headings a calmer arrival. */
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-grain{
+    opacity:.018!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-track{
+    opacity:calc(.022 + var(--fx-c536-energy) * .055)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{
+    opacity:calc(.010 + var(--fx-c536-energy) * .035)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scene:not(#hero) > .section-heading{
+    max-width:min(900px,78vw)!important;
+    margin-bottom:clamp(42px,4.8vw,72px)!important;
+  }
+
+  /* R1959 — physical depth must live behind the WebGL silhouette, never
+     on the canvas itself. CSS filters/drop-shadows force an offscreen raster
+     pass and can soften or stair-step a transparent high-contrast contour. */
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    isolation:isolate!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    content:""!important;
+    position:absolute!important;
+    z-index:0!important;
+    left:50%!important;
+    top:48%!important;
+    width:56%!important;
+    height:62%!important;
+    transform:translate(-50%,-50%)!important;
+    pointer-events:none!important;
+    background:
+      radial-gradient(ellipse at 48% 46%,rgba(211,235,233,.050) 0 8%,rgba(92,160,164,.040) 24%,rgba(30,72,78,.024) 44%,transparent 72%),
+      radial-gradient(ellipse at 56% 52%,rgba(67,178,191,.038),transparent 62%)!important;
+    filter:blur(24px)!important;
+    opacity:.72!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    content:""!important;
+    position:absolute!important;
+    z-index:0!important;
+    left:50%!important;
+    top:72%!important;
+    width:34%!important;
+    height:8.5%!important;
+    transform:translate(-50%,-50%) scaleX(1.12)!important;
+    pointer-events:none!important;
+    border-radius:50%!important;
+    background:
+      radial-gradient(ellipse at center,rgba(0,0,0,.54) 0 18%,rgba(0,0,0,.28) 42%,rgba(22,56,61,.070) 64%,transparent 78%)!important;
+    filter:blur(14px)!important;
+    opacity:.82!important;
+  }
+
   html:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    z-index:2!important;
     image-rendering:auto!important;
-    filter:
-      brightness(1.025)
-      contrast(1.105)
-      saturate(.96)
-      drop-shadow(0 20px 20px rgba(0,0,0,.36))
-      drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
-    -webkit-filter:
-      brightness(1.025)
-      contrast(1.105)
-      saturate(.96)
-      drop-shadow(0 20px 20px rgba(0,0,0,.36))
-      drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
+    filter:none!important;
+    -webkit-filter:none!important;
+    transform:none!important;
   }
 
   html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
-  #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
-    filter:brightness(1.02) contrast(1.09) saturate(.95)!important;
-    -webkit-filter:brightness(1.02) contrast(1.09) saturate(.95)!important;
+  #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    filter:blur(18px)!important;
+    opacity:.46!important;
+  }
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    filter:blur(10px)!important;
+    opacity:.64!important;
   }
 }
 
 @media (prefers-reduced-motion:reduce){
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{filter:none!important}
 }
+
+/* production-r1959-supersampled-clean-contour-volumetric-contact-depth */
