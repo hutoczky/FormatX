@@ -324,7 +324,7 @@
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        const pointerEase=1-Math.exp(-dt*.0125);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -352,22 +352,25 @@
        broad selectors and caused repeated full-page style recalculation. */
     const fastScroll=scrollBudgetState==='fast';
 
-    if(!fastScroll){
-      root.style.setProperty('--fx-c536-progress',global.toFixed(4));
-      root.style.setProperty('--fx-c536-local',local.toFixed(4));
-      root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
-      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
-      root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
-      root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
-      root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
-      root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
-      root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*11.5 + velocity*-1.35).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7.5 + velocity*.65).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.72).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+    /* R1959 — camera continuity is frame-synchronous even while scrolling.
+       Only nearby per-section DOM writes are deferred during fast scroll; the
+       global optical camera never freezes and then jumps after settle. */
+    root.style.setProperty('--fx-c536-progress',global.toFixed(4));
+    root.style.setProperty('--fx-c536-local',local.toFixed(4));
+    root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
+    root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
+    root.style.setProperty('--fx-c536-x',x.toFixed(2)+'%');
+    root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
+    root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
+    root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
+    root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
+    root.style.setProperty('--fx-c617-parallax-x',(pointerNX*10.2 + velocity*-1.08).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-parallax-y',(pointerNY*6.6 + velocity*.54).toFixed(2)+'px');
+    root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.62).toFixed(3)+'deg');
+    root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.82).toFixed(3)+'deg');
+    root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
+    if(!fastScroll){
       scenes.forEach(scene=>{
         if(Math.abs(scene.index-active)>1)return;
         const sceneTop=scene.top-y;
@@ -476,8 +479,8 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
-    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
+    pointerTailFrames=18;
+    root.dataset.fxCinematicPointerR617 = 'active-continuous-inertia-r1959';
     schedule();
   }
 
@@ -485,8 +488,8 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
-    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
+    pointerTailFrames=22;
+    root.dataset.fxCinematicPointerR617 = 'rest-continuous-inertia-r1959';
     schedule();
   }
 
@@ -502,10 +505,15 @@
 
   function introHandoff() {
     activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    /* R1959 — no flash/cut between genesis and the live MAG. The same world
+       softly resolves into the hero, so the intro and page read as one shot. */
+    root.classList.remove('fx-c536-cut');
+    root.classList.add('fx-c536-handoff-r1959');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
+    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-handoff-r1959'),1180);
     signalCore(scenes[0],'intro-handoff');
+    schedule();
+    root.dataset.fxCinematicHandoffR1959='continuous-genesis-to-live-mag';
   }
 
   function boot() {
@@ -539,6 +547,7 @@
          is scheduled here. One settle pass updates scene state and visual depth
          after 120 ms without scroll input. */
       setScrollBudget('fast');
+      schedule();
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -585,6 +594,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1959='continuous-exp-inertia-scroll-synchronous-camera-zero-idle-after-settle';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
