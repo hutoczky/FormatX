@@ -1079,6 +1079,55 @@
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
+      /* R1984 — final-stage edge fibrils.
+         Sample the actual four-point signature outline and grow one-pixel fibers
+         out of its silhouette. This keeps microscopic detail visible through the
+         final 6–10 s handoff instead of dropping back to a perfectly machined CGI
+         edge before the permanent R1982 MAG takes over. */
+      this.mechFiberMaterial=new T.LineBasicMaterial({
+        color:0x9aaba5,
+        transparent:true,
+        opacity:0,
+        depthWrite:false,
+        depthTest:true,
+        blending:T.NormalBlending,
+        toneMapped:true
+      });
+      const edgeSamples=baseShape.getSpacedPoints(this.mobileRender?72:184);
+      const mechFiberPositions=[];
+      let mechFiberState=0x1984cafe;
+      const mechFiberRnd=()=>{
+        mechFiberState=(Math.imul(mechFiberState^mechFiberState>>>15,1597334677)+3812015801)|0;
+        return ((mechFiberState^mechFiberState>>>12)>>>0)/4294967296;
+      };
+      edgeSamples.forEach((point,index)=>{
+        if(index===edgeSamples.length-1)return;
+        const radial=new T.Vector2(point.x,point.y).normalize();
+        const len=(this.mobileRender?.014:.018)+mechFiberRnd()*(this.mobileRender?.016:.026);
+        const z=.205+(mechFiberRnd()-.5)*.020;
+        const root=new T.Vector3(point.x*1.015,point.y*1.015,z);
+        const mid=root.clone();
+        mid.x+=radial.x*len*.52;
+        mid.y+=radial.y*len*.52;
+        mid.z+=(mechFiberRnd()-.5)*.008;
+        const tip=root.clone();
+        tip.x+=radial.x*len;
+        tip.y+=radial.y*len;
+        tip.z+=(mechFiberRnd()-.5)*.014;
+        mechFiberPositions.push(
+          root.x,root.y,root.z,mid.x,mid.y,mid.z,
+          mid.x,mid.y,mid.z,tip.x,tip.y,tip.z
+        );
+      });
+      const mechFiberGeometry=new T.BufferGeometry();
+      mechFiberGeometry.setAttribute('position',new T.Float32BufferAttribute(mechFiberPositions,3));
+      this.mechFibers=new T.LineSegments(mechFiberGeometry,this.mechFiberMaterial);
+      this.mechFibers.scale.set(1.02,1.02,1.00);
+      this.mechFibers.position.z=-.03;
+      this.mechFibers.renderOrder=6;
+      this.mechFibers.frustumCulled=false;
+      this.mechanicalGroup.add(this.mechFibers);
+
       /* R1950b — nested optical volume.
          A smaller translucent copy lives inside the outer shell so the finale
          reads as layered cut glass instead of one flat teal extrusion. */
@@ -1558,6 +1607,7 @@
       this.silverMaterial.opacity=(.36+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
+      if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
@@ -1735,6 +1785,7 @@
   document.documentElement.dataset.fxMagBirthProofR1241='fast-six-frame-r1240-reference-proof';
   document.documentElement.dataset.fxMagBirthProofR1252='clean-current-r1250-proof';
   document.documentElement.dataset.fxMagBirthVisualR1983='photoreal-physical-bump-plus-native-line-microfibrils-studio-sharp';
+  document.documentElement.dataset.fxMagBirthVisualR1984='continuous-organic-to-smoked-bioglass-edge-fibrils-permanent-mag-handoff';
 
   window.FormatXMagGenesisThreeR1280={
     attach,

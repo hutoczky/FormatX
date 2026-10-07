@@ -514,7 +514,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261008-r1983-photoreal-microfibril-intro';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261008-r1984-continuous-microfibril-handoff';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
