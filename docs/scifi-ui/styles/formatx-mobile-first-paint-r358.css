@@ -1003,3 +1003,49 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+
+/* R1957c — merged canonical mobile brand owner to remove a blocking request. */
+/* R1952 — canonical single mobile brand icon.
+   The header already contains the real first-party <img>. A legacy critical-shell
+   ::before fallback can be reactivated by later mobile layers, producing the two
+   adjacent FX marks seen on production. On mobile/coarse layouts the canonical
+   image is the sole logo owner. Desktop is intentionally untouched. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root body.living-architecture .topbar > a.brand::before {
+    content:none !important;
+    display:none !important;
+    flex:0 0 0 !important;
+    width:0 !important;
+    height:0 !important;
+    min-width:0 !important;
+    max-width:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    background:none !important;
+    background-image:none !important;
+    box-shadow:none !important;
+    filter:none !important;
+  }
+
+  html:root:root body.living-architecture .topbar > a.brand > img {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    flex:0 0 44px !important;
+    width:44px !important;
+    min-width:44px !important;
+    max-width:44px !important;
+    height:44px !important;
+    min-height:44px !important;
+    max-height:44px !important;
+    margin:0 !important;
+    object-fit:contain !important;
+  }
+
+  html:root:root body.living-architecture .topbar > a.brand {
+    gap:10px !important;
+  }
+}
+
+/* production-r1957c-inline-mobile-brand-dedupe */
