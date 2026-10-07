@@ -17,7 +17,8 @@ const SHOTS=[
   [3.50,'02-3.50s'],
   [5.50,'03-5.50s'],
   [7.50,'04-7.50s'],
-  [9.25,'05-9.25s']
+  [9.25,'05-9.25s'],
+  [9.84,'05b-9.84s-ai-core-fade']
 ];
 
 (async()=>{
@@ -284,12 +285,25 @@ const SHOTS=[
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
-          overlay:document.querySelectorAll('.fx-mag-birth-r533').length
+          overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
+          coreIdentity:document.querySelector('.fx-mag-birth-r533')?.dataset.coreIdentity||'',
+          coreIdentityRoot:root.dataset.fxMagCoreIdentityR1951||'',
+          coreIdentityMain:document.querySelector('.fxb-core-identity-main')?.textContent?.replace(/\s+/g,' ').trim()||'',
+          coreIdentitySub:document.querySelector('.fxb-core-identity-sub')?.textContent?.replace(/\s+/g,' ').trim()||'',
+          coreIdentityOpacity:Number(getComputedStyle(document.querySelector('.fxb-core-identity')||document.documentElement).opacity||0)
         };
       });
 
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      }
+      if(Math.abs(seconds-9.25)<.001){
+        if(state.coreIdentity!=='visible')errors.push('R1951 AI Core identity not visible at 9.25s: '+state.coreIdentity);
+        if(state.coreIdentityMain!=='MAG // AI CORE')errors.push('R1951 AI Core main label mismatch: '+state.coreIdentityMain);
+        if(state.coreIdentitySub!=='ONLINE · LOCAL INTELLIGENCE')errors.push('R1951 AI Core sub label mismatch: '+state.coreIdentitySub);
+      }
+      if(Math.abs(seconds-9.84)<.001 && state.coreIdentity!=='fading'){
+        errors.push('R1951 AI Core identity not fading at 9.84s: '+state.coreIdentity);
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
