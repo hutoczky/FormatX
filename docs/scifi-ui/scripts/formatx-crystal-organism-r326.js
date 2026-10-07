@@ -272,8 +272,9 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    const studioDesktop=!mobile&&!software&&!constrained&&hardwareConcurrency>=8&&deviceMemory>=8;
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 56 : studioDesktop ? 96 : 80;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 112 : studioDesktop ? 192 : 160;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -846,6 +847,9 @@
       return;
     }
 
+    const defaultSamples=webgl2&&gl.SAMPLES?Number(gl.getParameter(gl.SAMPLES)||0):0;
+    root.dataset.fxCoreMsaaSamplesR1957=String(defaultSamples);
+    root.dataset.fxCoreEdgeAaR1957=mobile?'mobile-density-owned':'desktop-msaa-supersample-dense-contour';
     const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
     const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
     const softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
@@ -1281,6 +1285,10 @@
 
         float frontDepth=smoothstep(-.46,.58,vLocal.z);
         float backDepth=1.0-frontDepth;
+        vec3 refrDir=refract(-view,n,1.0/1.455);
+        float opticalThickness=.30+.70*(1.0-facing);
+        float refractPlaneA=exp(-pow((refrDir.x+vLocal.y*.12+.06)/.24,2.0))*frontDepth;
+        float refractPlaneB=exp(-pow((refrDir.y-vLocal.x*.10-.04)/.28,2.0))*frontDepth;
         float edge=pow(1.0-facing,2.20);
         float deepEdge=pow(1.0-facing,3.20);
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
@@ -1321,6 +1329,15 @@
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
+
+        /* R1957 — physically coherent smoked-bioglass transmission.
+           A single IOR/absorption model drives interior cyan/silver refraction;
+           no detached neon layer or screen-space decal. */
+        vec3 absorption=exp(-vec3(.36,.17,.115)*opticalThickness);
+        c*=mix(vec3(1.0),absorption,${mobile?'.075':'.145'});
+        c+=vec3(.036,.150,.168)*refractPlaneA*${mobile?'.030':'.060'};
+        c+=vec3(.19,.235,.225)*refractPlaneB*${mobile?'.016':'.034'}*(.45+.55*softboxB);
+
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1407,6 +1424,8 @@
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
+        float opticBloom=exp(-od*od*1.55)*front;
+        c+=vec3(.045,.245,.255)*opticBloom*(${mobile?'.010':'.018'}+uEnergy*${mobile?'.006':'.010'});
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
@@ -1691,6 +1710,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1957='desktop-96x192-highend-2-45dpr-4-8mpx-adaptive-aa';
+    root.dataset.fxNativeMagMaterialR1957='single-ior-smoked-bioglass-refraction-absorption-subtle-optic-bloom';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1833,15 +1854,16 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    const studioDesktopQuality=!mobile&&!softwareRenderer&&!constrained&&hardwareConcurrency>=8&&deviceMemory>=8;
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .86 : 1.00)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?.98:(studioDesktopQuality?1.12:1.10))));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.66:(studioDesktopQuality?.80:.76)));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1878,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.78:(studioDesktopQuality?2.45:2.28));
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:(studioDesktopQuality?4800000:4100000));
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2262,7 +2284,7 @@
       const q=point(sample);if(!q)return;
       tx=q.x*(desktopFine.matches?.72:1);ty=q.y*(desktopFine.matches?.72:1);
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.105);
-      schedule(desktopFine.matches?4:2);
+      schedule(desktopFine.matches?7:2);
     }
     function onDown(event){const q=point(event);if(q){tx=q.x;ty=q.y;}shapeLockUntil=performance.now()+4800;boost(.82,mobile?4:6);}
     function onLeave(){tx=0;ty=0;targetEnergy=IDLE_ENERGY;targetBreath=.12;schedule(2);}
@@ -2325,10 +2347,13 @@
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.08+Math.sin(targetSiteProgress*Math.PI)*.12+Math.abs(velocity)*.08);
         targetRotationY+=velocity*.016;
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
-        /* R1755d — native compositor owns the hot scroll path. Keep the
-           organism state live, but defer shader redraw until the gesture settles. */
+        /* R1957 — desktop fine-pointer scroll is one continuous camera shot.
+           The MAG receives one bounded redraw per scroll animation frame; the
+           existing quality governor still sheds resolution before cadence. */
+        if(desktopFine.matches&&!constrained&&!auditMode)schedule(1);
         clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(desktopFine.matches?3:1);},72);
+        root.dataset.fxNativeMagScrollR1957=desktopFine.matches?'continuous-desktop-adaptive-redraw':'settled-budget-redraw';
       });
     }
 
@@ -2355,7 +2380,7 @@
         targetPointerTiltX=clamp(-q.y*.070 - dy*.014,-.095,.095);
         targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.085+Math.min(.055,Math.hypot(dx,dy)*.12));
         targetBreath=Math.max(targetBreath,.235);
-        schedule(4);
+        schedule(7);
       }else{
         targetPointerTiltY=clamp(q.x*.055,-.07,.07);
         targetPointerTiltX=clamp(-q.y*.045,-.06,.06);
