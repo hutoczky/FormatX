@@ -177,7 +177,6 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
-      controlSnapshotsR1968,
       memory,
       styleOrigins: (() => {
         const targets = {
@@ -232,6 +231,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       })()
     };
   });
+
+  metrics.controlSnapshotsR1968 = controlSnapshotsR1968;
 
   const second = await context.newPage();
   await second.goto('about:blank');
