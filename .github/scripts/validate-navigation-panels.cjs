@@ -111,10 +111,24 @@ async function assertPrimaryControls(page, viewportName) {
     if (info.pointer === 'none') throw new Error(`${viewportName}: ${name} pointer-events disabled: ${JSON.stringify(info)}`);
   }
 
+  /* R1959b: WDA/audio owners live in the explicit-intent content runtime.
+     Arm that bundle with a neutral surface interaction before exercising reserved
+     MAG/sound/ASK controls, which correctly do not bootstrap unrelated content. */
+  await page.evaluate(() => {
+    const target=document.querySelector('#main-content') || document.body;
+    target?.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerType:'mouse'}));
+  });
+  await page.waitForFunction(() => document.documentElement.dataset.fxContentRuntimeR241 === 'requested-r497-user-intent', null, { timeout:8000 });
+
   const beforeToken = await page.evaluate(() => Number(document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || 0));
   await page.locator('.fx-reference-mag-button').click();
   await page.waitForFunction(before => Number(document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || 0) > before, beforeToken, { timeout:8000 });
 
+  /* R1959: the full interaction suite must wait for the sound click owner,
+     not merely for the visual control shell. The dedicated audio suite already
+     validates AudioContext/output. This prevents a false timeout where the
+     control is visible before formatx-wda-controls-r198 has armed its handler. */
+  await page.waitForFunction(() => document.documentElement.dataset.fxWdaHardening === 'r263', null, { timeout:8000 });
   const sound = page.locator('#hero .fx-three-sound');
   const beforeAudio = await sound.getAttribute('data-fx-audio-state');
   await sound.click();
