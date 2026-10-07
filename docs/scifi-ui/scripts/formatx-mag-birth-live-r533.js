@@ -194,6 +194,7 @@
   overlay.dataset.fxIntroR1530 = 'photoreal-microfacet-mag-continuous-living-habitat-three-genesis';
   overlay.dataset.fxIntroR1540 = 'photoreal-bioceramic-organism-round-optic-ringless-habitat-genesis';
   ROOT.dataset.fxMagBirthArtR1530 = 'physical-studio-light-microtextured-mineral-continuous-habitat-handoff';
+  ROOT.dataset.fxMagBirthHandoffR1956='overlapped-920ms-native-core-crossfade-telemetry-stabilisation';
   overlay.dataset.fxIntroR1400 = 'irregular-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1412 = 'vertical-asymmetric-crystal-final-handoff-three-genesis';
   overlay.dataset.fxIntroR1420 = 'real-three-solid-cortical-reference-dna-dark-shard-final-handoff';
@@ -664,7 +665,7 @@
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
-    stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    stage.style.setProperty('transition', 'opacity .92s cubic-bezier(.16,.78,.18,1)', 'important');
   }
 
   function releaseStageStyle() {
