@@ -55,21 +55,64 @@
     opacity:.74!important;
   }
 
+  /* R1959 — keep the WebGL contour untouched.
+     Canvas drop-shadow rasterizes the alpha edge again and can reintroduce a
+     stair-stepped halo on large desktop panels. Depth now lives on independent
+     stage layers behind the MSAA/supersampled canvas. */
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    isolation:isolate!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    content:""!important;
+    position:absolute!important;
+    left:50%!important;
+    top:67%!important;
+    z-index:0!important;
+    width:min(54%,560px)!important;
+    height:min(18%,150px)!important;
+    transform:translate(-50%,-50%) scaleX(1.04)!important;
+    border-radius:50%!important;
+    background:
+      radial-gradient(ellipse at center,
+        rgba(0,0,0,.52) 0%,
+        rgba(0,0,0,.34) 36%,
+        rgba(0,0,0,.13) 62%,
+        transparent 82%)!important;
+    filter:blur(22px)!important;
+    opacity:.82!important;
+    pointer-events:none!important;
+  }
+
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    content:""!important;
+    position:absolute!important;
+    left:50%!important;
+    top:48%!important;
+    z-index:0!important;
+    width:min(70%,760px)!important;
+    height:min(62%,520px)!important;
+    transform:translate(-50%,-50%)!important;
+    border-radius:50%!important;
+    background:
+      radial-gradient(ellipse at 50% 52%,rgba(92,192,202,.060),rgba(31,74,82,.025) 38%,transparent 72%),
+      radial-gradient(ellipse at 43% 37%,rgba(220,240,236,.030),transparent 48%)!important;
+    filter:blur(28px)!important;
+    opacity:.86!important;
+    mix-blend-mode:screen!important;
+    pointer-events:none!important;
+  }
+
   html:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    position:relative!important;
+    z-index:1!important;
     image-rendering:auto!important;
-    filter:
-      brightness(1.025)
-      contrast(1.105)
-      saturate(.96)
-      drop-shadow(0 20px 20px rgba(0,0,0,.36))
-      drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
-    -webkit-filter:
-      brightness(1.025)
-      contrast(1.105)
-      saturate(.96)
-      drop-shadow(0 20px 20px rgba(0,0,0,.36))
-      drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
+    filter:brightness(1.025) contrast(1.105) saturate(.96)!important;
+    -webkit-filter:brightness(1.025) contrast(1.105) saturate(.96)!important;
   }
 
   html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
@@ -77,8 +120,18 @@
     filter:brightness(1.02) contrast(1.09) saturate(.95)!important;
     -webkit-filter:brightness(1.02) contrast(1.09) saturate(.95)!important;
   }
+
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage::before,
+  html[data-fx-scroll-budget-r1660="fast"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    filter:none!important;
+    opacity:.24!important;
+  }
 }
 
 @media (prefers-reduced-motion:reduce){
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{filter:none!important}
 }
+
+/* production-r1959-physical-depth-no-canvas-edge-filter */
