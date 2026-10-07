@@ -352,7 +352,16 @@
        broad selectors and caused repeated full-page style recalculation. */
     const fastScroll=scrollBudgetState==='fast';
 
-    if(!fastScroll){
+    if(fastScroll){
+      /* R1957 — continuous cinematic scroll without the old 120 ms visual step.
+         Only compositor-facing root variables move during active scrolling;
+         scene-local detail still waits for settle, so there is no layout thrash. */
+      root.style.setProperty('--fx-c536-progress',global.toFixed(4));
+      root.style.setProperty('--fx-c536-local',local.toFixed(4));
+      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
+      root.style.setProperty('--fx-c536-y',yy.toFixed(2)+'%');
+      root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
+    }else{
       root.style.setProperty('--fx-c536-progress',global.toFixed(4));
       root.style.setProperty('--fx-c536-local',local.toFixed(4));
       root.style.setProperty('--fx-c536-energy',energy.toFixed(4));
@@ -476,7 +485,7 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
+    pointerTailFrames=10;
     root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
     schedule();
   }
@@ -485,7 +494,7 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
+    pointerTailFrames=12;
     root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
     schedule();
   }
@@ -539,6 +548,7 @@
          is scheduled here. One settle pass updates scene state and visual depth
          after 120 ms without scroll input. */
       setScrollBudget('fast');
+      schedule();
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -585,6 +595,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxCinematicContinuityR1957='continuous-fast-scroll-compositor-vars-longer-pointer-inertia';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
