@@ -1512,32 +1512,34 @@
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
       if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
 
-      const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
-      /* R1950 — controlled studio finale. The handoff lifts the optical core,
-         not the whole frame, and lands on the permanent smoked-silver grade. */
-      const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
-      this.coreLight.intensity+=flash*.42+after*.12;
+      const flash=smooth((t-9.14)/.26)*(1-smooth((t-9.50)/.36));
+      /* R1951 — optical impulse, not a white flash.
+         The core receives the energy while frame exposure, bloom sprites and
+         beam contribution remain below the threshold that washed out the final
+         smoked-silver material and boot telemetry. */
+      const after=smooth((t-9.48)/.40);
+      this.renderer.toneMappingExposure=1.074+flash*.0024+after*.0012;
+      this.coreLight.intensity+=flash*.24+after*.08;
       if(this.glowSprite){
-        const g=1+flash*.10;
+        const g=1+flash*.055;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.095,this.glowSprite.material.opacity+flash*.020);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.010;
-        const burstScale=2.08+flash*.10;
+        this.flashBurst.material.opacity=flash*.0045;
+        const burstScale=2.06+flash*.055;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.004;
-        this.flashBeam.scale.x=1+flash*.035;
+        this.flashBeam.material.opacity=flash*.0015;
+        this.flashBeam.scale.x=1+flash*.018;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
-        const q=1.00+flash*.022;
+        this.mechEyeCorona.material.opacity=Math.min(.215,.176+flash*.010);
+        const q=1.00+flash*.014;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.34;
+      if(this.mechLight)this.mechLight.intensity+=flash*.20;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1619,6 +1621,7 @@
   document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
   document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
+  document.documentElement.dataset.fxMagIntroStudioR1951='optical-core-impulse-no-frame-whiteout-telemetry-safe-finale';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
 })();
