@@ -1382,6 +1382,20 @@
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
+        /* R1956 — photographic internal depth.
+           Broad volumetric/refraction fields replace decorative noise. The lower
+           body receives restrained self-occlusion so the floating object still
+           feels grounded in the hero chamber without a fake painted shadow. */
+        float internalFog=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.58,2.0))
+          *smoothstep(-.28,.58,vLocal.z)*frontDepth;
+        float refractionBand=exp(-pow((abs(vLocal.x)+abs(vLocal.y)*.62-.37)/.105,2.0))
+          *frontDepth;
+        float lowerSelfShadow=exp(-pow((vLocal.y+.52)/.19,2.0))
+          *frontDepth*(.55+.45*facing);
+        c*=1.0-lowerSelfShadow*${mobile?'.026':'.062'};
+        c+=vec3(.020,.090,.105)*internalFog*${mobile?'.024':'.046'};
+        c+=vec3(.24,.34,.33)*refractionBand*softboxB*${mobile?'.018':'.034'};
+
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
@@ -1691,6 +1705,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1956='desktop-hidpi-persistent-edge-aa-2_35x-cap-4_6mp-budget-0_88-floor';
+    root.dataset.fxNativeMagMaterialR1956='smoked-silver-volumetric-depth-refraction-self-occlusion-controlled-bloom';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1810,6 +1826,7 @@
     let rotationX=softwareRenderer?-.105:(mobile?-.090:-.070),rotationY=softwareRenderer?-.41:(mobile?-.40:-.32),rotationZ=softwareRenderer?-.020:.008;
     let targetRotationX=rotationX,targetRotationY=rotationY,targetRotationZ=rotationZ,angularVelocityY=0;
     const desktopFine=matchMedia('(hover:hover) and (pointer:fine)');
+    const desktopHighFidelity=desktopFine.matches&&!constrained&&!softwareRenderer&&!auditMode;
     let pointerTiltX=0,pointerTiltY=0,targetPointerTiltX=0,targetPointerTiltY=0;
     let ambientPointerFrame=0,pendingAmbientPointer=null;
     let siteProgress=0,targetSiteProgress=0;
@@ -1833,15 +1850,19 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    /* R1956 — desktop contour persistence.
+       R1950 fixed first-frame aliasing; R1956 prevents the adaptive governor
+       from later dropping a capable desktop backing store low enough for the
+       large Signature MAG silhouette to become visibly stair-stepped again. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : (desktopHighFidelity?1.06:1.00))));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?.98:(constrained?.96:(desktopHighFidelity?1.18:1.08))));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.62:(desktopHighFidelity?.88:.78)));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1877,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:(desktopHighFidelity?2.35:2.10));
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:(desktopHighFidelity?4600000:3600000));
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -2116,7 +2137,12 @@
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
+          qualityScale=Math.max(
+            qualityFloor,
+            qualityScale-(mobile
+              ? (dt>20||ms>9?.10:.06)
+              : (desktopHighFidelity?(dt>20||ms>9?.10:.055):(dt>20||ms>9?.22:.12)))
+          );
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -2139,11 +2165,11 @@
           const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
 
           if(severeFramePressure||severeRenderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:(desktopHighFidelity?.11:.20)));
             stableBudgetFrames=0;
             panicFrames=Math.max(panicFrames,12);
           }else if(framePressure||renderPressure){
-            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:.09));
+            qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.035:(desktopHighFidelity?.045:.09)));
             stableBudgetFrames=0;
           }else{
             if(panicFrames>0)panicFrames-=1;
