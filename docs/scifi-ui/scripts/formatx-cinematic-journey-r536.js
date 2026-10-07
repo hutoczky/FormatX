@@ -64,6 +64,7 @@
   let pointerTargetNX = 0;
   let pointerTargetNY = 0;
   let pointerTailFrames = 0;
+  let scrollTailFrames = 0;
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
   let lastCoreKey = '';
   let scrollBudgetState='';
@@ -291,7 +292,8 @@
     sceneCommitTimer=0;
     pendingSceneIndex=-1;
     commitScene(index,previous,reason);
-    if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
+    const continuousReason=reason==='scroll'||reason.includes('scroll-settled')||reason.includes('document-top')||reason==='intro-handoff';
+    if(!continuousReason)cut();
   }
 
   function pickActive(y=scrollY){
@@ -324,7 +326,7 @@
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        const pointerEase=1-Math.exp(-dt*.0125);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -351,6 +353,18 @@
        attribute from instantaneous velocity inside every RAF; that invalidated
        broad selectors and caused repeated full-page style recalculation. */
     const fastScroll=scrollBudgetState==='fast';
+
+    if(fastScroll&&finePointer){
+      /* R1951 — desktop scroll remains visually continuous with only compositor
+         variables on the hot path. Scene DOM/core commits still wait for settle. */
+      root.style.setProperty('--fx-c536-progress',global.toFixed(4));
+      root.style.setProperty('--fx-c536-local',local.toFixed(4));
+      root.style.setProperty('--fx-c536-velocity',velocity.toFixed(4));
+      root.style.setProperty('--fx-c536-scene-shift',((.5-local)*5.5).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*6.4 + velocity*.55).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
+      root.dataset.fxCinematicScrollR1951='desktop-frame-synchronous-compositor-lite';
+    }
 
     if(!fastScroll){
       root.style.setProperty('--fx-c536-progress',global.toFixed(4));
@@ -389,6 +403,10 @@
       if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
       else pointerTailFrames=0;
     }
+    if(finePointer&&scrollTailFrames>0){
+      scrollTailFrames-=1;
+      if(Math.abs(velocity)>.004||scrollTailFrames>0)schedule();
+    }
   }
 
   function setScrollBudget(state){
@@ -404,7 +422,8 @@
     clearTimeout(scrollBudgetTimer);
     scrollBudgetTimer=setTimeout(()=>{
       scrollBudgetTimer=0;
-      velocity=0;
+      velocity*=.42;
+      scrollTailFrames=finePointer?8:0;
       pendingSceneIndex=-1;
       const atDocumentTop=scrollY<=Math.max(2,innerHeight*.015);
       const target=atDocumentTop?0:pickActive(scrollY);
@@ -502,10 +521,14 @@
 
   function introHandoff() {
     activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    root.classList.remove('fx-c536-cut');
+    root.classList.add('fx-c536-intro-blend-r1951');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
+    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-intro-blend-r1951'),1180);
     signalCore(scenes[0],'intro-handoff');
+    scrollTailFrames=finePointer?8:0;
+    schedule();
+    root.dataset.fxCinematicHandoffR1951='continuous-intro-core-world-blend';
   }
 
   function boot() {
@@ -535,10 +558,14 @@
         commitScene(0,previous,'document-top-immediate-r1949');
         root.dataset.fxCinematicTopReturnR1949='immediate-core-commit';
       }
-      /* R1665 — the browser/compositor owns active scrolling. No cinematic RAF
-         is scheduled here. One settle pass updates scene state and visual depth
-         after 120 ms without scroll input. */
+      /* R1951 — fine-pointer desktop paints one coalesced frame per scroll
+         event so camera/world depth never freezes between section commits.
+         Mobile remains settle-driven to protect battery/GPU budget. */
       setScrollBudget('fast');
+      if(finePointer){
+        scrollTailFrames=Math.max(scrollTailFrames,3);
+        schedule();
+      }
       scheduleScrollSettle();
     },{passive:true});
     addEventListener('resize',()=>refresh('resize'),{passive:true});
@@ -585,6 +612,8 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1951='frame-synchronous-scroll-soft-inertia-no-idle-raf';
+    root.dataset.fxCinematicContinuityR1951='intro-core-next-scene-continuous-no-scroll-cut';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
