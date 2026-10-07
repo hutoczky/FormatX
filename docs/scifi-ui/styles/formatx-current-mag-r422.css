@@ -14,11 +14,64 @@ html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stag
 }
 
 html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  position:absolute!important;inset:0!important;display:block!important;box-sizing:border-box!important;
+  position:absolute!important;inset:0!important;z-index:1!important;display:block!important;box-sizing:border-box!important;
   width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;margin:0!important;
   background:transparent!important;image-rendering:auto!important;mix-blend-mode:normal!important;
   visibility:visible!important;pointer-events:none!important;transform-origin:50% 48%!important;
 }
+
+@media (min-width:901px) and (hover:hover) and (pointer:fine) {
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    isolation:isolate!important;
+  }
+
+  /* R1957 — contact shadow anchors the floating glass mass in the studio.
+     It is intentionally broad and low contrast: grounding, not a drop shadow. */
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    content:""!important;
+    position:absolute!important;
+    z-index:0!important;
+    left:50%!important;
+    top:69%!important;
+    width:min(48%,420px)!important;
+    height:min(8.5%,58px)!important;
+    transform:translate3d(-50%,0,0) scaleX(1.08)!important;
+    border-radius:50%!important;
+    pointer-events:none!important;
+    background:
+      radial-gradient(ellipse at center,
+        rgba(0,0,0,.42) 0%,
+        rgba(0,0,0,.23) 34%,
+        rgba(17,67,75,.10) 58%,
+        transparent 78%)!important;
+    filter:blur(12px)!important;
+    opacity:.74!important;
+  }
+
+  /* Volumetric haze + optic bloom are one restrained optical atmosphere.
+     The center stays clear; depth lives around and behind the object. */
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    content:""!important;
+    position:absolute!important;
+    z-index:2!important;
+    inset:7% 7% 9%!important;
+    pointer-events:none!important;
+    background:
+      radial-gradient(ellipse 23% 19% at 50% 49%,
+        rgba(102,228,232,.060),
+        rgba(54,139,151,.026) 36%,
+        transparent 72%),
+      radial-gradient(ellipse 57% 49% at 50% 51%,
+        transparent 0 46%,
+        rgba(74,145,150,.022) 62%,
+        rgba(21,56,63,.018) 74%,
+        transparent 88%)!important;
+    filter:blur(10px)!important;
+    mix-blend-mode:screen!important;
+    opacity:.82!important;
+  }
+}
+
 
 /* CSS fallback artwork must disappear as soon as native WebGL is ready. */
 html[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space::before,
@@ -72,3 +125,5 @@ html[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-arc
 }
 
 /* production-r454-direct-r326-layout-a11y-touch-no-painted-mag-layer */
+
+/* production-r1957-contact-shadow-volumetric-haze */
