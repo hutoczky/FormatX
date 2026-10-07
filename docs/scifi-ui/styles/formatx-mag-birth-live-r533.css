@@ -2256,3 +2256,145 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+
+/* R1951 — MAG // AI CORE boot identity.
+   A system identifier, not a headline/card. It appears once as the core settles,
+   holds for ~1.3 s, then leaves through optical blur so the hero returns clean. */
+.fx-mag-birth-r533 .fxb-core-id{
+  position:absolute;
+  z-index:18;
+  left:var(--fxb-x);
+  top:calc(var(--fxb-y) + clamp(118px,15vh,168px));
+  width:min(420px,calc(100vw - 48px));
+  display:grid;
+  justify-items:center;
+  gap:7px;
+  pointer-events:none;
+  contain:layout style paint;
+  opacity:0;
+  filter:blur(8px) brightness(.82);
+  transform:translate3d(-50%,12px,0) scale(.985);
+  transform-origin:50% 50%;
+  transition:
+    opacity .42s cubic-bezier(.18,.78,.2,1),
+    filter .48s cubic-bezier(.18,.78,.2,1),
+    transform .58s cubic-bezier(.16,.82,.2,1);
+}
+.fx-mag-birth-r533 .fxb-core-id::before,
+.fx-mag-birth-r533 .fxb-core-id::after{
+  content:"";
+  position:absolute;
+  top:8px;
+  width:clamp(32px,5.2vw,72px);
+  height:1px;
+  opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(146,225,232,.36));
+  transform:scaleX(.18);
+  transition:opacity .42s ease,transform .56s cubic-bezier(.16,.82,.2,1);
+}
+.fx-mag-birth-r533 .fxb-core-id::before{
+  right:calc(50% + 112px);
+  transform-origin:100% 50%;
+}
+.fx-mag-birth-r533 .fxb-core-id::after{
+  left:calc(50% + 112px);
+  transform-origin:0 50%;
+  background:linear-gradient(90deg,rgba(146,225,232,.36),transparent);
+}
+.fx-mag-birth-r533 .fxb-core-id-main{
+  position:relative;
+  display:block;
+  color:rgba(235,250,250,.91);
+  font:650 clamp(11px,.82vw,13px)/1.1 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  letter-spacing:.205em;
+  text-transform:uppercase;
+  text-shadow:
+    0 0 10px rgba(122,224,229,.11),
+    0 0 24px rgba(93,175,186,.05);
+  white-space:nowrap;
+}
+.fx-mag-birth-r533 .fxb-core-id-main::before,
+.fx-mag-birth-r533 .fxb-core-id-main::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  width:3px;
+  height:3px;
+  border:1px solid rgba(151,229,233,.44);
+  transform:translateY(-50%) rotate(45deg);
+  box-shadow:0 0 8px rgba(111,218,225,.10);
+}
+.fx-mag-birth-r533 .fxb-core-id-main::before{left:-19px}
+.fx-mag-birth-r533 .fxb-core-id-main::after{right:-16px}
+.fx-mag-birth-r533 .fxb-core-id-main i{
+  color:rgba(116,206,213,.48);
+  font-style:normal;
+  font-weight:450;
+  letter-spacing:.08em;
+}
+.fx-mag-birth-r533 .fxb-core-id-meta{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  color:rgba(177,205,207,.47);
+  font:560 clamp(7px,.53vw,8.5px)/1.2 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  letter-spacing:.19em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.fx-mag-birth-r533 .fxb-core-id-meta b{
+  width:4px;
+  height:4px;
+  margin-right:1px;
+  border-radius:50%;
+  background:rgba(124,235,222,.78);
+  box-shadow:0 0 8px rgba(92,225,213,.32);
+}
+.fx-mag-birth-r533 .fxb-core-id-meta i{
+  color:rgba(125,194,199,.33);
+  font-style:normal;
+}
+.fx-mag-birth-r533[data-core-id-state="visible"] .fxb-core-id{
+  opacity:.94;
+  filter:blur(0) brightness(1);
+  transform:translate3d(-50%,0,0) scale(1);
+}
+.fx-mag-birth-r533[data-core-id-state="visible"] .fxb-core-id::before,
+.fx-mag-birth-r533[data-core-id-state="visible"] .fxb-core-id::after{
+  opacity:1;
+  transform:scaleX(1);
+}
+.fx-mag-birth-r533[data-core-id-state="leaving"] .fxb-core-id{
+  opacity:0;
+  filter:blur(7px) brightness(1.03);
+  transform:translate3d(-50%,-9px,0) scale(1.012);
+  transition-duration:.58s,.62s,.68s;
+}
+.fx-mag-birth-r533[data-core-id-state="leaving"] .fxb-core-id::before,
+.fx-mag-birth-r533[data-core-id-state="leaving"] .fxb-core-id::after{
+  opacity:0;
+  transform:scaleX(.42);
+  transition-duration:.42s,.58s;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fx-mag-birth-r533 .fxb-core-id{
+    top:calc(var(--fxb-y) + clamp(104px,14vh,132px));
+    width:min(330px,calc(100vw - 38px));
+    gap:6px;
+  }
+  .fx-mag-birth-r533 .fxb-core-id-main{
+    font-size:clamp(10px,3.1vw,12px);
+    letter-spacing:.17em;
+  }
+  .fx-mag-birth-r533 .fxb-core-id-meta{
+    font-size:clamp(6.5px,2vw,7.5px);
+    letter-spacing:.15em;
+  }
+  .fx-mag-birth-r533 .fxb-core-id::before{right:calc(50% + 96px)}
+  .fx-mag-birth-r533 .fxb-core-id::after{left:calc(50% + 96px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533 .fxb-core-id{display:none!important}
+}
+/* production-r1951-mag-ai-core-boot-telemetry */
