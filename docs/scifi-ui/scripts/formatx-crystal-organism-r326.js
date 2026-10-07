@@ -1318,7 +1318,8 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 bodyHigh=vec3(${mobile?'.108,.138,.141':'.082,.101,.103'});
+        vec3 c=mix(vec3(.004,.008,.010),bodyHigh,lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1332,11 +1333,21 @@
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.205'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.145'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
-        c+=vec3(.18,.47,.50)*ribbonB*.175;
+        c+=vec3(.18,.47,.50)*ribbonB*${mobile?'.175':'.120'};
+
+        /* R1959b — narrow neutral product-light specular on desktop. Broad teal
+           fill remains inside the volume; the surface itself catches silver
+           studio highlights like polished smoked glass. */
+        float keySpec=pow(sat(dot(reflect(-keyDir,n),view)),${mobile?'26.0':'52.0'});
+        float sideSpec=pow(sat(dot(reflect(-sideDir,n),view)),${mobile?'22.0':'38.0'});
+        float crownSpec=pow(sat(dot(reflect(-normalize(vec3(-.10,.96,.28)),n),view)),${mobile?'24.0':'46.0'});
+        c+=vec3(.94,.98,.95)*keySpec*${mobile?'.018':'.150'};
+        c+=vec3(.68,.76,.74)*sideSpec*${mobile?'.014':'.105'};
+        c+=vec3(.98,1.00,.98)*crownSpec*${mobile?'.010':'.075'};
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1408,10 +1419,10 @@
         float refractiveCaustic=
           exp(-pow((refl.y-vLocal.y*.10-.08)/.18,2.0))
           *frontDepth*(.18+.82*side);
-        c+=vec3(.045,.095,.098)*refractiveVeil*.105;
-        c+=vec3(.34,.43,.40)*refractiveCaustic*.040;
+        c+=vec3(.045,.095,.098)*refractiveVeil*${mobile?'.105':'.082'};
+        c+=vec3(.34,.43,.40)*refractiveCaustic*${mobile?'.040':'.060'};
 
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
+        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.030'}+${mobile?'.07':'.038'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
         /* R1942 — recessed optical organ.
@@ -1725,6 +1736,7 @@
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
     root.dataset.fxNativeMagQualityR1959='desktop-128pct-supersample-msaa-no-css-scale-adaptive-clean-contour';
     root.dataset.fxNativeMagMaterialR1959='single-pass-beer-lambert-extinction-refractive-caustic-smoked-bioglass';
+    root.dataset.fxNativeMagMaterialR1959b='desktop-neutral-silver-narrow-specular-cut-smoked-bioglass';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
