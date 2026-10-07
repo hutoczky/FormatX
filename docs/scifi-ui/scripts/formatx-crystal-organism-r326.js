@@ -128,6 +128,7 @@
   root.dataset.fxNativeMagVisualR1717='photoreal-fixed-anatomy-organic-surface-physiology';
   root.dataset.fxNativeMagVisualR1725='studio-photoreal-smoky-pearl-biocrystal-broad-facets-subtle-physiology';
   root.dataset.fxNativeMagMaterialR1725='low-emission-mineral-diffuse-ggx-reflection-facet-tonal-variation';
+  root.dataset.fxNativeMagVisualR1982='photoreal-microfibril-surface-native-silhouette-fibers-anisotropic-mineral-sheen';
   root.dataset.fxNativeMagVisualR1726='cinematic-photographic-smoky-pearl-biocrystal-neutral-studio-response';
   root.dataset.fxNativeMagMaterialR1726='neutral-mineral-ggx-softbox-restrained-vascular-emission-physical-edge-transmission';
   root.dataset.fxNativeMagVisualR1727='photographic-biocrystal-continuity-neutral-cortex-smoked-optic';
@@ -422,6 +423,62 @@
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+    }
+
+    /* R1982 — real microfibril geometry.
+       These are not a 2D overlay: each strand is a hair-thin tapered triangle
+       rooted in the analytical mineral surface and emitted inside the existing
+       single WebGL draw. The count is capability-aware so the 60 Hz governor
+       keeps priority while desktop close-ups gain physically sharp silhouette
+       fibers. */
+    const microFiberCount=software?0:(mobile?(constrainedMobile?44:78):(constrained?136:286));
+    for(let index=0;index<microFiberCount;index+=1){
+      const lat=1.65+random(index*19+7,index*31+11)*(latitudeSegments-3.3);
+      const lon=random(index*43+17,index*13+29)*longitudeSegments;
+      const base=vertex(lat,lon);
+      const normal=normalize(base.crystalNormal||base.crystal);
+      const guide=Math.abs(normal[1])>.88?[1,0,0]:[0,1,0];
+      const tangent=normalize(cross(normal,guide));
+      const bitangent=normalize(cross(normal,tangent));
+      const strandLength=(mobile?.015:.021)+(mobile?.020:.034)*random(index*47+3,index*59+5);
+      const halfWidth=(mobile?.00135:.00100)+(mobile?.00070:.00082)*random(index*61+9,index*67+15);
+      const curlT=(random(index*71+2,index*73+4)-.5)*(mobile?.007:.012);
+      const curlB=(random(index*79+6,index*83+8)-.5)*(mobile?.006:.010);
+      const root=[
+        base.crystal[0]+normal[0]*.0025,
+        base.crystal[1]+normal[1]*.0025,
+        base.crystal[2]+normal[2]*.0025
+      ];
+      const left=[
+        root[0]-tangent[0]*halfWidth,
+        root[1]-tangent[1]*halfWidth,
+        root[2]-tangent[2]*halfWidth
+      ];
+      const right=[
+        root[0]+tangent[0]*halfWidth,
+        root[1]+tangent[1]*halfWidth,
+        root[2]+tangent[2]*halfWidth
+      ];
+      const tip=[
+        root[0]+normal[0]*strandLength+tangent[0]*curlT+bitangent[0]*curlB,
+        root[1]+normal[1]*strandLength+tangent[1]*curlT+bitangent[1]*curlB,
+        root[2]+normal[2]*strandLength+tangent[2]*curlT+bitangent[2]*curlB
+      ];
+      const makeFiberVertex=(position,uv)=>{
+        const dir=normalize(position);
+        return{
+          sphere:dir.map(value=>value*.91),
+          crystal:position,
+          sphereNormal:dir,
+          crystalNormal:normal,
+          uv
+        };
+      };
+      triangle([
+        makeFiberVertex(left,[0,0]),
+        makeFiberVertex(right,[1,0]),
+        makeFiberVertex(tip,[.5,1])
+      ],1.72+.20*random(index*89+1,index*97+3));
     }
 
     /* The reference's cable/tentacle silhouette is still one native R326 draw.
@@ -749,6 +806,7 @@
       sizes: [3, 3, 3, 3, 2, 3, 1],
       count: facets.length,
       tendrils: tendrilCount,
+      microFibers: microFiberCount,
       topology: `${latitudeSegments}x${longitudeSegments}-cortical-organic-core-plus-${tendrilCount}-native-tendrils-r1723`
     };
   }
@@ -1011,10 +1069,30 @@
         float mineralGrainC=.5+.5*sin(vLocal.x*113.0+vLocal.y*97.0-vLocal.z*83.0);
         float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
         float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
+
+        /* R1982 — sub-millimetre fibril field.
+           Two non-parallel strand families, a phase-shifted root shadow and an
+           elongated anisotropic glint make individual fibers readable without
+           turning the organism into a noisy texture. Frequencies are lowered on
+           phone profiles to remain temporally stable at the adaptive DPR. */
+        float fiberPhaseA=vUv.x*${mobile?'118.0':'224.0'}+vUv.y*${mobile?'21.0':'37.0'}+sin(vUv.y*17.0)*2.15+vLocal.z*9.0;
+        float fiberPhaseB=vUv.y*${mobile?'136.0':'252.0'}-vUv.x*${mobile?'31.0':'47.0'}+sin(vUv.x*14.0)*1.82-vLocal.z*7.0;
+        float microFiberA=pow(max(0.0,1.0-abs(sin(fiberPhaseA))),${mobile?'16.0':'26.0'});
+        float microFiberB=pow(max(0.0,1.0-abs(sin(fiberPhaseB))),${mobile?'18.0':'30.0'});
+        float microFiberSurface=max(microFiberA,microFiberB*.62)*bodyMask;
+        float microFiberShadow=pow(max(0.0,1.0-abs(sin(fiberPhaseA+.19))),${mobile?'18.0':'30.0'})*bodyMask;
+        vec3 fiberGuide=abs(n.y)<.90?vec3(0.0,1.0,0.0):vec3(1.0,0.0,0.0);
+        vec3 fiberAxis=normalize(cross(fiberGuide,n));
+        float fiberAniso=pow(max(0.0,1.0-abs(dot(halfKey,fiberAxis))),${mobile?'10.0':'19.0'})*microFiberSurface;
+        float fiberGeometryMask=smoothstep(1.55,1.68,vFacet)*(1.0-step(2.0,vFacet));
         float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
         vec3 mineral=mix(vec3(.005,.010,.013),vec3(.118,.160,.165),lift)*facetTone;
         mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
         mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
+        mineral-=vec3(.008,.010,.010)*microFiberShadow*(.22+.28*(1.0-facing));
+        mineral+=vec3(.105,.126,.122)*microFiberSurface*(.020+.032*ndl+.044*fresnel);
+        mineral+=vec3(.52,.61,.58)*fiberAniso*(.020+.030*softboxA+.018*sideSpec);
+        mineral+=vec3(.20,.235,.225)*fiberGeometryMask*(.030+.055*ndl+.075*fresnel+.052*softboxA);
         mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
         mineral-=vec3(.0035,.0048,.0052)*inclusion;
         mineral+=vec3(.96,.98,.94)*keySpec*.110;
@@ -2634,6 +2712,7 @@
     root.dataset.fxCoreGeometry='cortical-cellular-organism-with-native-tendrils-r1723';
     root.dataset.fxCoreGenesisMagR614='dna-to-cell-to-cortical-living-organism-r1723';
     root.dataset.fxCoreNativeTendrilsR614=String(geometry.tendrils||0);
+    root.dataset.fxCoreMicrofibrilsR1982=`${geometry.microFibers||0}-native-hair-geometry-plus-procedural-fibril-shader`;
     root.dataset.fxCoreGenomeR614='native-double-helix-energy-lattice';
     root.dataset.fxCoreGenomeContinuityR614='r533-dna-genesis-to-same-r326-native-core';
     root.dataset.fxCoreRendererVersion=REVISION;
