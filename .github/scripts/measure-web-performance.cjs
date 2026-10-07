@@ -32,6 +32,23 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
         for (const entry of list.getEntries()) {
           if (entry.hadRecentInput) continue;
           window.__fxPerf.cls += entry.value;
+          const snap = sel => {
+            const el = document.querySelector(sel);
+            if (!(el instanceof Element)) return null;
+            const s = getComputedStyle(el);
+            const r = el.getBoundingClientRect();
+            return {
+              rect:{x:r.x,y:r.y,width:r.width,height:r.height},
+              inline:el.getAttribute('style')||'',
+              className:el.getAttribute('class')||'',
+              display:s.display,position:s.position,
+              top:s.top,right:s.right,bottom:s.bottom,left:s.left,
+              width:s.width,minWidth:s.minWidth,maxWidth:s.maxWidth,
+              height:s.height,minHeight:s.minHeight,maxHeight:s.maxHeight,
+              padding:s.padding,margin:s.margin,transform:s.transform,
+              boxSizing:s.boxSizing,fontSize:s.fontSize
+            };
+          };
           window.__fxPerf.shifts.push({
             at: entry.startTime,
             value: entry.value,
@@ -39,7 +56,15 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
               selector: selector(source.node),
               previousRect: source.previousRect,
               currentRect: source.currentRect
-            }))
+            })),
+            shiftStyleR1968b:{
+              sound:snap('#hero .fx-three-sound'),
+              ask:snap('#hero .fx-reference-ask'),
+              controls:snap('#hero .fx-reference-controls-r204'),
+              topbar:snap('.topbar'),
+              hero:snap('#hero'),
+              heroCopy:snap('#hero .hero-copy')
+            }
           });
         }
       }).observe({ type: 'layout-shift', buffered: true });
