@@ -139,7 +139,58 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
-      memory
+      memory,
+      styleOrigins: (() => {
+        const targets = {
+          sound: document.querySelector('#hero .fx-three-sound'),
+          ask: document.querySelector('#hero .fx-reference-ask'),
+          controls: document.querySelector('#hero .fx-reference-controls-r204'),
+          topbar: document.querySelector('.topbar')
+        };
+        const interesting = new Set(['width','height','min-width','min-height','max-width','max-height','position','top','right','bottom','left','inset','transform','scale','margin','padding','display']);
+        const collect = element => {
+          if (!(element instanceof Element)) return null;
+          const computed = getComputedStyle(element);
+          const matches = [];
+          for (const sheet of Array.from(document.styleSheets)) {
+            let rules;
+            try { rules = sheet.cssRules; } catch (_) { continue; }
+            const walk = list => {
+              for (const rule of Array.from(list || [])) {
+                if (rule instanceof CSSMediaRule || rule instanceof CSSSupportsRule || rule instanceof CSSLayerBlockRule) {
+                  if (rule instanceof CSSMediaRule && !matchMedia(rule.conditionText).matches) continue;
+                  walk(rule.cssRules);
+                  continue;
+                }
+                if (!(rule instanceof CSSStyleRule)) continue;
+                let matched = false;
+                try { matched = element.matches(rule.selectorText); } catch (_) {}
+                if (!matched) continue;
+                const declarations = {};
+                for (const name of Array.from(rule.style)) {
+                  if (interesting.has(name)) declarations[name] = rule.style.getPropertyValue(name) + (rule.style.getPropertyPriority(name) ? ' !important' : '');
+                }
+                if (Object.keys(declarations).length) {
+                  matches.push({
+                    href: sheet.href || 'inline',
+                    selector: rule.selectorText,
+                    declarations
+                  });
+                }
+              }
+            };
+            walk(rules);
+          }
+          return {
+            rect: element.getBoundingClientRect().toJSON(),
+            computed: Object.fromEntries(Array.from(interesting).map(name => [name, computed.getPropertyValue(name)])),
+            inlineStyle: element.getAttribute('style') || '',
+            className: element.className,
+            matches
+          };
+        };
+        return Object.fromEntries(Object.entries(targets).map(([key,element]) => [key, collect(element)]));
+      })()
     };
   });
 
