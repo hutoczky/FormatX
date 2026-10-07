@@ -37,6 +37,7 @@ must(css.includes('"SFMono-Regular"'),'Telemetry must keep the system/monospace 
 
 must(index.includes("20261007-r1955c-ai-core-telemetry-flow"),'Index must cache-bust R533 to R1955.');
 must(index.includes("20261007-r1955c-stabilized-telemetry"),'Index must cache-bust telemetry assets.');
+must(/data-fx-ai-core-ident-r1951="true"[^>]*data-fx-r487-deferred-style="true"[^>]*media="print"[^>]*formatx-ai-core-ident-r1951\.css/.test(index),'Telemetry CSS must stay off the render-blocking first-paint path.');
 must(worker.includes("20261007-r1955c-stabilized-ai-core-telemetry"),'Worker startup revision must match R1955.');
 must(worker.includes("sha256-c0cB6pDcAX6NWsOnhJrf8LPWn2c0Pr0JWSW1dPDwZhw="),'Worker CSP must match the R1955 inline bootstrap hash.');
 must(revision.includes("token=20261007-r1955c-stabilized-ai-core-telemetry"),'Exact production revision token must match R1955.');
