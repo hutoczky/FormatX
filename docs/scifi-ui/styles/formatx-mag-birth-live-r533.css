@@ -2393,3 +2393,19 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
   filter:none!important;
 }
 /* production-r1951-no-white-flash-phase4 */
+
+/* R1951 — while the core identity is online, legacy intro copy yields completely.
+   The label remains a single instrumentation event, never a stacked web heading. */
+.fx-mag-birth-r533[data-core-id-r1951="visible"] :is(.fxb-copy,.fxb-telemetry){
+  opacity:0!important;
+  filter:blur(5px)!important;
+  transform:translateY(-4px) scale(.99)!important;
+  transition:
+    opacity .22s ease,
+    filter .28s ease,
+    transform .30s cubic-bezier(.18,.78,.2,1)!important;
+}
+.fx-mag-birth-r533[data-core-id-r1951="retiring"] :is(.fxb-copy,.fxb-telemetry){
+  opacity:0!important;
+}
+/* production-r1951-ai-core-exclusive-telemetry */
