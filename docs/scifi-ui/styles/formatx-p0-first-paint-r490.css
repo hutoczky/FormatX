@@ -1363,3 +1363,40 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1820-final-hero-typography-lcp-lock */
+
+
+/* R1956d — permanent LCP paint island.
+   The hero wordmark is already the largest first-frame content. Keep it on one
+   immutable compositor/paint surface and use a physical ice-white text material
+   instead of background-clip text that can be repainted by late visual layers. */
+@media (min-width:901px) and (pointer:fine){
+  html:root:root:root body.living-architecture #hero #hero-title{
+    contain:paint style!important;
+    isolation:isolate!important;
+    transform:translateZ(0)!important;
+    backface-visibility:hidden!important;
+    will-change:transform!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-title-main{
+    color:#eff9fb!important;
+    -webkit-text-fill-color:#eff9fb!important;
+    background:none!important;
+    background-image:none!important;
+    -webkit-background-clip:border-box!important;
+    background-clip:border-box!important;
+    text-shadow:
+      0 1px 0 rgba(255,255,255,.05),
+      0 12px 34px rgba(0,0,0,.16)!important;
+    filter:none!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-title-sub{
+    color:rgba(196,220,224,.78)!important;
+    -webkit-text-fill-color:rgba(196,220,224,.78)!important;
+    -webkit-text-stroke:0!important;
+    background:none!important;
+    background-image:none!important;
+    text-shadow:none!important;
+    filter:none!important;
+  }
+}
+/* production-r1956d-permanent-hero-lcp-paint-island */
