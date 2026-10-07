@@ -37,8 +37,8 @@ must(css.includes('"SFMono-Regular"'),'Telemetry must keep the system/monospace 
 
 must(index.includes("20261007-r1955-ai-core-telemetry-flow"),'Index must cache-bust R533 to R1955.');
 must(index.includes("20261007-r1955-stabilized-telemetry"),'Index must cache-bust telemetry assets.');
-must(worker.includes("20261007-r1955-stabilized-ai-core-telemetry"),'Worker startup revision must match R1955.');
+must(worker.includes("20261007-r1955c-stabilized-ai-core-telemetry"),'Worker startup revision must match R1955.');
 must(worker.includes("sha256-Bypb+3f/p7PMwNyXKzSa4qQGlRgb3XlS527gZ8s67YU="),'Worker CSP must match the R1955 inline bootstrap hash.');
-must(revision.includes("token=20261007-r1955-stabilized-ai-core-telemetry"),'Exact production revision token must match R1955.');
+must(revision.includes("token=20261007-r1955c-stabilized-ai-core-telemetry"),'Exact production revision token must match R1955.');
 
 console.log('R1955 MAG AI CORE telemetry contract: OK');
