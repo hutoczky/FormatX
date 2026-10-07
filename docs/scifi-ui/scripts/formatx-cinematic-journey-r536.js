@@ -63,7 +63,7 @@
   let pointerNY = 0;
   let pointerTargetNX = 0;
   let pointerTargetNY = 0;
-  let pointerTailFrames = 0;
+  let pointerTailUntil = 0;
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
   let lastCoreKey = '';
   let scrollBudgetState='';
@@ -318,15 +318,13 @@
     const y = scrollY;
     const dt = Math.max(16,Math.min(180,now-lastT));
     if(finePointer){
-      if(pointerTailFrames===1){
-        /* Final bounded frame lands exactly on target/rest so zero-idle never
-           preserves a residual parallax offset. */
+      const pointerEase=1-Math.exp(-dt*.0165);
+      pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
+      pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
+      if(now>=pointerTailUntil || (Math.abs(pointerTargetNX-pointerNX)<.0015&&Math.abs(pointerTargetNY-pointerNY)<.0015)){
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
-      }else{
-        const pointerEase=1-Math.exp(-dt*.018);
-        pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
-        pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
+        pointerTailUntil=0;
       }
     }
     const rawV = clamp((y-lastY)/dt,-2.2,2.2);
@@ -384,10 +382,9 @@
       stage.dataset.fxC536Primed='true';
       root.dataset.fxCinematicPrimingR1546='first-frame-position-locked';
     }
-    if(finePointer&&pointerTailFrames>0){
-      pointerTailFrames-=1;
-      if(Math.abs(pointerTargetNX-pointerNX)>.002||Math.abs(pointerTargetNY-pointerNY)>.002)schedule();
-      else pointerTailFrames=0;
+    if(finePointer&&pointerTailUntil>now){
+      if(Math.abs(pointerTargetNX-pointerNX)>.0015||Math.abs(pointerTargetNY-pointerNY)>.0015)schedule();
+      else pointerTailUntil=0;
     }
   }
 
@@ -476,8 +473,8 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
-    root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
+    pointerTailUntil=performance.now()+260;
+    root.dataset.fxCinematicPointerR617 = 'active-time-based-inertia-r1959';
     schedule();
   }
 
@@ -485,8 +482,8 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
-    root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
+    pointerTailUntil=performance.now()+320;
+    root.dataset.fxCinematicPointerR617 = 'rest-time-based-inertia-r1959';
     schedule();
   }
 
@@ -501,11 +498,16 @@
   }
 
   function introHandoff() {
-    activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
+    activate(0,'intro-handoff-r1959');
+    root.classList.remove('fx-c536-cut');
+    root.classList.add('fx-c536-bridge-r1959');
+    root.dataset.fxCinematicBridgeR1959='hero-space-crossfade';
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
-    signalCore(scenes[0],'intro-handoff');
+    cutTimer=setTimeout(()=>{
+      root.classList.remove('fx-c536-bridge-r1959');
+      root.dataset.fxCinematicBridgeR1959='settled';
+    },1180);
+    signalCore(scenes[0],'intro-handoff-r1959');
   }
 
   function boot() {
@@ -585,6 +587,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+    root.dataset.fxDesktopInteractionR1959='time-based-exponential-camera-inertia-refresh-rate-independent-zero-idle';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();
