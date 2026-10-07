@@ -80,6 +80,51 @@ async function openMenu(page) {
   }, null, { timeout: 8000 });
 }
 
+async function assertMenuToggleCycle(page, viewportName) {
+  const button = page.locator('#menu-toggle');
+  await button.click();
+  await page.waitForFunction(() => {
+    const toggle = document.getElementById('menu-toggle');
+    const nav = document.getElementById('main-nav');
+    if (!(toggle instanceof HTMLButtonElement) || !(nav instanceof HTMLElement)) return false;
+    const style = getComputedStyle(nav);
+    const rect = nav.getBoundingClientRect();
+    return toggle.getAttribute('aria-expanded') === 'true'
+      && nav.classList.contains('open')
+      && document.documentElement.classList.contains('fx-organism-menu-open')
+      && style.display !== 'none'
+      && style.visibility === 'visible'
+      && Number(style.opacity || 0) > .9
+      && style.pointerEvents !== 'none'
+      && rect.width > 180
+      && rect.height > 100;
+  }, null, { timeout: 8000 });
+
+  const opened = await page.evaluate(() => {
+    const nav = document.getElementById('main-nav');
+    const rect = nav?.getBoundingClientRect();
+    return {
+      owner: document.documentElement.dataset.fxMenuOwnerR1956 || '',
+      expanded: document.getElementById('menu-toggle')?.getAttribute('aria-expanded') || '',
+      navOpen: nav?.classList.contains('open') || false,
+      display: nav ? getComputedStyle(nav).display : '',
+      visibility: nav ? getComputedStyle(nav).visibility : '',
+      pointerEvents: nav ? getComputedStyle(nav).pointerEvents : '',
+      rect: rect ? { width: rect.width, height: rect.height, top: rect.top, left: rect.left } : null,
+    };
+  });
+  if (!['open','ready'].includes(opened.owner)) throw new Error(`${viewportName}: R1956 menu owner not active: ${JSON.stringify(opened)}`);
+
+  await button.click();
+  await page.waitForFunction(() => {
+    const toggle = document.getElementById('menu-toggle');
+    const nav = document.getElementById('main-nav');
+    return toggle?.getAttribute('aria-expanded') === 'false'
+      && !nav?.classList.contains('open')
+      && !document.documentElement.classList.contains('fx-organism-menu-open');
+  }, null, { timeout: 8000 });
+}
+
 async function assertSectionNavigation(page, href) {
   await openMenu(page);
   await page.locator(`#main-nav a[href="${href}"]`).click();
@@ -281,6 +326,7 @@ async function testDesktop(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
+  await assertMenuToggleCycle(page, 'desktop');
 
   await assertSectionNavigation(page, '#experience');
   await assertSectionNavigation(page, '#pricing');
@@ -296,6 +342,7 @@ async function testMobile(browser) {
   await preparePage(page);
   await assertSingleLanguageToggle(page);
   await assertCore(page);
+  await assertMenuToggleCycle(page, 'mobile');
 
   await assertSectionNavigation(page, '#capabilities');
   await assertSectionNavigation(page, '#experience');
