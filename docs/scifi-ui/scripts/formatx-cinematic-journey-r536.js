@@ -81,14 +81,17 @@
     stage.setAttribute('aria-hidden','true');
     stage.dataset.fxC536Primed='false';
     stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
+    /* R1980: decorative geometry exists in its final absolute coordinate
+       system from creation. Deferred CSS may add material/energy, but it never
+       converts full-width normal-flow divs into positioned optics after paint. */
     stage.innerHTML = [
-      '<div class="fx-c536-world"></div>',
-      '<div class="fx-c536-iris"></div>',
-      '<div class="fx-c536-track"></div>',
-      '<div class="fx-c536-scan"></div>',
-      '<div class="fx-c536-vignette"></div>',
-      '<div class="fx-c536-grain"></div>',
-      '<div class="fx-c536-flare"></div>'
+      '<div class="fx-c536-world" style="position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(92vw,1260px);aspect-ratio:1;border-radius:50%"></div>',
+      '<div class="fx-c536-iris" style="position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(56vw,700px);aspect-ratio:1;border-radius:50%"></div>',
+      '<div class="fx-c536-track" style="position:absolute;left:4vw;right:4vw;top:var(--fx-c536-track-y,50%);height:1px"></div>',
+      '<div class="fx-c536-scan" style="position:absolute;left:0;right:0;height:22vh;top:calc(var(--fx-c536-track-y,50%) - 11vh)"></div>',
+      '<div class="fx-c536-vignette" style="position:absolute;inset:0"></div>',
+      '<div class="fx-c536-grain" style="position:absolute;inset:0"></div>',
+      '<div class="fx-c536-flare" style="position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:2px;height:2px;border-radius:50%;transform:translate(-50%,-50%) scale(.01);opacity:0"></div>'
     ].join('');
     document.body.appendChild(stage);
     hudCode = null;
@@ -596,6 +599,7 @@
     root.dataset.fxCinematicJourneyPerformanceR1660='fast-scroll-compositor-lite-full-detail-after-120ms-settle';
     root.dataset.fxCinematicJourneyRecoveryR1975='refresh-cannot-strand-fast-scroll-budget';
     root.dataset.fxCinematicHeroWorldR1976='active-scene-owns-inline-floor';
+    root.dataset.fxCinematicGeometryR1980='absolute-from-creation-zero-late-flow-conversion';
     root.dataset.fxCinematicJourneyPerformanceR1662='latched-scroll-budget-no-per-frame-global-style-thrash';
     root.dataset.fxCinematicJourneyPerformanceR1663='fast-scroll-zero-css-write-zero-layout-read-settle-resync';
     root.dataset.fxCinematicJourneyPerformanceR1664='single-scroll-settle-owner-no-scene-timer-churn';
