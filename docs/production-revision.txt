@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1956c-ai-core-hero-lcp-lock
+token=20261007-r1956d-permanent-hero-lcp
 base_master=95a4b127570c05955bb19c908791f9f312944b69
-purpose=ship stabilized MAG // AI CORE boot telemetry on the current registration-gated production and make the blocking hero geometry/typography the permanent settled geometry so premium-finish cannot repaint the desktop LCP
-validation=AI CORE stabilization timing and fade, deferred telemetry CSS, first-paint-owned hero geometry, desktop Lighthouse >=0.95 target, mobile Lighthouse, account/download regression checks, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff and production Worker parity
+purpose=ship stabilized MAG // AI CORE boot telemetry and make the desktop FORMATX SUITE PRO wordmark an immutable first-paint layer with no late gradient-text repaint, while preserving the current registration-gated download production and studio MAG stack
+validation=AI CORE stabilization timing and fade, deferred telemetry CSS, permanent hero paint island, desktop Lighthouse >=0.95 target, mobile Lighthouse, account/download regression checks, P0 fast loop, canonical visual contracts, mobile MAG proof, no-occlusion, cinematic handoff and production Worker parity
