@@ -10,7 +10,7 @@ const LABELS={
   hu:{organism:'élő organizmus'},
   en:{organism:'living organism'}
 };
-let index=0,responseSequence=0;
+let index=0,responseSequence=Math.max(0,Number(root.dataset.fxCoreLivingResponseTokenR1723||0));
 
 function language(){return root.lang==='en'?'en':'hu';}
 function ensureStyle(){
@@ -74,12 +74,19 @@ root.dataset.fxCoreDefaultShapeR1404='organism';
 root.dataset.fxCoreControlR1666='deterministic-repeat-click-shape-confirm';
 root.dataset.fxCoreControlR1669='canonical-living-core-api-user-shape-priority';
 root.dataset.fxCoreCanonicalIdentityR1723='organism-only-physiology-control';
-root.dataset.fxCoreLivingResponseTokenR1723='0';
+root.dataset.fxCoreLivingResponseTokenR1723=String(responseSequence);
+root.dataset.fxCoreLivingResponseContinuityR1959='preserve-early-control-token';
 apply(index,'boot');
 
 document.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target.closest('.fx-reference-mag-button'):null;
   if(!(target instanceof HTMLButtonElement))return;
+  if(event.__fxMagResponseR1959===true){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    syncButton();
+    return;
+  }
   event.preventDefault();
   event.stopImmediatePropagation();
   const shape=next('mag-button');

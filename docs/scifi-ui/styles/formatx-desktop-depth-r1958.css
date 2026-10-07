@@ -1,4 +1,5 @@
 /* FormatX R1958 — desktop photographic depth pass.
+   R1959 adds physical contact depth, cleaner volumetric air and luxury spacing.
    Uses only existing scene/MAG layers: no fake ring, no duplicate MAG, no
    continuous animation. The aim is coherent physical depth rather than more UI. */
 @media (min-width:901px) and (pointer:fine){
@@ -70,6 +71,77 @@
       saturate(.96)
       drop-shadow(0 20px 20px rgba(0,0,0,.36))
       drop-shadow(0 4px 26px rgba(107,205,214,.055))!important;
+  }
+
+
+  /* R1959 — physical depth around the actual WebGL object.
+     No duplicate MAG, no fake orbit: only contact density + volumetric air. */
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    isolation:isolate!important;
+    overflow:visible!important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:59%;
+    width:min(54%,680px);
+    height:min(18%,150px);
+    translate:-50% -50%;
+    z-index:0;
+    pointer-events:none;
+    border-radius:50%;
+    background:
+      radial-gradient(ellipse at center,
+        rgba(0,0,0,.34) 0%,
+        rgba(1,8,11,.22) 34%,
+        rgba(4,19,23,.08) 58%,
+        transparent 78%);
+    filter:blur(16px);
+    opacity:.82;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:46%;
+    width:min(72%,900px);
+    height:min(70%,620px);
+    translate:-50% -50%;
+    z-index:0;
+    pointer-events:none;
+    border-radius:50%;
+    background:
+      radial-gradient(ellipse at 50% 48%,rgba(71,142,150,.070),rgba(24,65,72,.026) 38%,transparent 72%),
+      radial-gradient(ellipse at 59% 38%,rgba(199,229,226,.032),transparent 52%);
+    filter:blur(28px);
+    opacity:.76;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
+    z-index:1!important;
+  }
+
+  /* Luxury breathing room: reduce competing atmospheric UI between chapters. */
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-world{
+    opacity:calc(.10 + var(--fx-c536-energy) * .24)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-track{
+    opacity:calc(.022 + var(--fx-c536-energy) * .070)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"] .fx-c536-scan{
+    opacity:calc(.014 + var(--fx-c536-energy) * .048)!important;
+  }
+
+  html body.living-architecture #main-content > section.scene:not(#hero){
+    padding-block:clamp(82px,8vw,150px);
+  }
+
+  /* Fine optical bloom stays outside the silhouette, never blurs the object. */
+  html body.living-architecture #hero .hero-space{
+    --fx-r1959-bloom:rgba(97,207,214,.045);
   }
 
   html[data-fx-scroll-budget-r1660="fast"] body.living-architecture

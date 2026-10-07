@@ -272,8 +272,11 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    /* R1959 — desktop silhouette anti-aliasing floor.
+       The Signature MAG is a hero-scale object, so desktop contour tessellation
+       must stay above the visibility threshold even before MSAA/supersampling. */
+    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 64 : 96;
+    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 128 : 192;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
@@ -1321,6 +1324,17 @@
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.040;
         c+=vec3(.18,.47,.50)*ribbonB*.175;
+
+        /* R1959 — physical-looking internal refraction.
+           No extra texture or fake overlay: the normal/view field bends the same
+           studio light sources through a 1.45 IOR glass response. */
+        vec3 refracted=refract(-view,n,1.0/1.45);
+        float refrBox=exp(-pow((refracted.x-.18)/.34,2.0)-pow((refracted.y+.08)/.44,2.0))
+          *smoothstep(-.34,.60,refracted.z);
+        float refrEdge=pow(1.0-facing,2.45);
+        c+=vec3(.20,.46,.49)*refrBox*${mobile?'.030':'.070'};
+        c+=vec3(.035,.145,.162)*refrEdge*${mobile?'.045':'.082'};
+
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1691,6 +1705,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+  root.dataset.fxNativeMagQualityR1959='desktop-dense-contour-high-dpr-floor-anti-aliasing';
+  root.dataset.fxNativeMagMaterialR1959='smoked-silver-ior145-refractive-softbox-volume';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1835,13 +1851,13 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (auditMode ? .94 : (constrained ? .92 : 1.04)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(auditMode?1.02:(constrained?1.04:1.16)));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      : (mobile?.80:(constrained?.84:.90));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1856,12 +1872,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (auditMode ? 1.52 : constrainedMobile?1.72:mobile?2.00:constrained?1.95:2.42);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (auditMode ? 1280000 : constrainedMobile?1280000:mobile?1900000:constrained?2300000:5200000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1870,6 +1886,7 @@
       width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
+      root.dataset.fxCoreSilhouetteAAR1959=mobile?'mobile-preserved':'desktop-hidpi-msaa-dense-mesh-high-floor';
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
       return true;
     }

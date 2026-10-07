@@ -1512,32 +1512,34 @@
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
       if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
 
-      const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
+      /* R1959 — no full-frame flash. The finale behaves like a controlled
+         optical exposure bloom inside the core, preserving material detail. */
+      const flash=smooth((t-9.14)/.26)*(1-smooth((t-9.48)/.42));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
          not the whole frame, and lands on the permanent smoked-silver grade. */
       const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
-      this.coreLight.intensity+=flash*.42+after*.12;
+      this.renderer.toneMappingExposure=1.070+flash*.0025+after*.0015;
+      this.coreLight.intensity+=flash*.20+after*.08;
       if(this.glowSprite){
-        const g=1+flash*.10;
+        const g=1+flash*.045;
         this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
+        this.glowSprite.material.opacity=Math.min(.085,this.glowSprite.material.opacity+flash*.018);
       }
       if(this.flashBurst){
-        this.flashBurst.material.opacity=flash*.010;
-        const burstScale=2.08+flash*.10;
+        this.flashBurst.material.opacity=flash*.0035;
+        const burstScale=2.04+flash*.055;
         this.flashBurst.scale.set(burstScale,burstScale,1);
       }
       if(this.flashBeam){
-        this.flashBeam.material.opacity=flash*.004;
-        this.flashBeam.scale.x=1+flash*.035;
+        this.flashBeam.material.opacity=flash*.0012;
+        this.flashBeam.scale.x=1+flash*.018;
       }
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
-        const q=1.00+flash*.022;
+        this.mechEyeCorona.material.opacity=Math.min(.22,.17+flash*.012);
+        const q=1.00+flash*.012;
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.34;
+      if(this.mechLight)this.mechLight.intensity+=flash*.16;
 
       this.renderer.render(this.scene,this.camera);
     }
@@ -1607,7 +1609,7 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1941-signature-four-point-bioglass-central-optic-studio'
+    revision:'r1959-controlled-optical-finale-signature-mag'
   };
   /* R1940 — the user-selected reference visual is the R1280 armored living
      pod. Keep the existing R1360 loader contract intact by exposing R1280 as

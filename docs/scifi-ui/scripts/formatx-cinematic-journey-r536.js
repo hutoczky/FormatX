@@ -324,7 +324,7 @@
         pointerNX=pointerTargetNX;
         pointerNY=pointerTargetNY;
       }else{
-        const pointerEase=1-Math.exp(-dt*.018);
+        const pointerEase=1-Math.exp(-dt*.0135);
         pointerNX+=(pointerTargetNX-pointerNX)*pointerEase;
         pointerNY+=(pointerTargetNY-pointerNY)*pointerEase;
       }
@@ -362,10 +362,10 @@
       root.style.setProperty('--fx-c536-track-y',trackY.toFixed(2)+'%');
       root.style.setProperty('--fx-c536-scene-shift',((.5-local)*7).toFixed(2)+'px');
       root.style.setProperty('--fx-c536-scene-scale',(0.998 + Math.sin(local*Math.PI)*.002).toFixed(4));
-      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*11.5 + velocity*-1.35).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*7.5 + velocity*.65).toFixed(2)+'px');
-      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.72).toFixed(3)+'deg');
-      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.96).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-parallax-x',(pointerNX*9.5 + velocity*-1.12).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-parallax-y',(pointerNY*6.2 + velocity*.52).toFixed(2)+'px');
+      root.style.setProperty('--fx-c617-tilt-x',(-pointerNY*.56).toFixed(3)+'deg');
+      root.style.setProperty('--fx-c617-tilt-y',(pointerNX*.74).toFixed(3)+'deg');
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
 
       scenes.forEach(scene=>{
@@ -476,7 +476,7 @@
     const sample=batch?.length?batch[batch.length-1]:event;
     pointerTargetNX = clamp((sample.clientX / Math.max(1,innerWidth) - .5) * 2,-1,1);
     pointerTargetNY = clamp((sample.clientY / Math.max(1,innerHeight) - .5) * 2,-1,1);
-    pointerTailFrames=6;
+    pointerTailFrames=12;
     root.dataset.fxCinematicPointerR617 = 'active-bounded-inertia-r1944';
     schedule();
   }
@@ -485,7 +485,7 @@
     if (!finePointer) return;
     pointerTargetNX = 0;
     pointerTargetNY = 0;
-    pointerTailFrames=8;
+    pointerTailFrames=16;
     root.dataset.fxCinematicPointerR617 = 'rest-bounded-inertia-r1944';
     schedule();
   }
@@ -585,6 +585,7 @@
     root.dataset.fxCinematicUniverseR617='ready';
     root.dataset.fxCinematicUniverseContractR617='biotech-film-product-trust-no-input-capture';
     root.dataset.fxDesktopInteractionR1944='fine-pointer-bounded-inertia-depth-parallax-precision-camera-zero-idle-raf';
+  root.dataset.fxDesktopInteractionR1959='longer-bounded-cinematic-inertia-subtle-parallax-continuous-feel';
     root.dataset.fxCinematicHudR1548='removed-photoreal-no-layout-shift';
     root.dataset.fxAwardPerformanceR644='r631-proven-critical-path-award-layer-post-intent';
     schedule();

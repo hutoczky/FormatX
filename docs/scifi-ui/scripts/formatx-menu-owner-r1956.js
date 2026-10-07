@@ -78,6 +78,51 @@ function toggleFromEvent(event){
    scripts. This is the authoritative hamburger interaction boundary. */
 document.addEventListener('click',event=>{toggleFromEvent(event);},true);
 
+/* R1959 — window-capture MAG response owner.
+   Window capture precedes every document/DOM owner, so the first click cannot
+   be swallowed by a later stopImmediatePropagation. The event marker prevents
+   the deferred shapeshifter from producing a second physiological response. */
+/* R1959 — publish audio intent before deferred audio owners.
+   The professional engine still owns playback; this only guarantees that the
+   visible control reflects the trusted click immediately. */
+addEventListener('click',event=>{
+  const button=event.target instanceof Element?event.target.closest('.fx-three-sound'):null;
+  if(!(button instanceof HTMLButtonElement))return;
+  const state=button.dataset.fxAudioState||root.dataset.fxAudioState||'off';
+  if(state==='off'||!state){
+    button.dataset.fxAudioState='pending';
+    root.dataset.fxAudioState='pending';
+    root.dataset.fxAudioIntentR1959='trusted-click-pending';
+    button.setAttribute('aria-pressed','false');
+  }
+},true);
+
+addEventListener('click',event=>{
+  const target=event.target instanceof Element?event.target.closest('.fx-reference-mag-button'):null;
+  if(!(target instanceof HTMLButtonElement)||event.__fxMagResponseR1959===true)return;
+  event.__fxMagResponseR1959=true;
+
+  const full=window.FormatXCoreShapeR337;
+  if(typeof full?.next==='function'){
+    full.next();
+    root.dataset.fxCoreLivingResponseFallbackR1959='window-capture-full-owner';
+    return;
+  }
+
+  const token=String(Math.max(0,Number(root.dataset.fxCoreLivingResponseTokenR1723||0))+1);
+  root.dataset.fxCoreLivingResponseTokenR1723=token;
+  root.dataset.fxCoreLivingResponseFallbackR1959='window-capture-'+token;
+  const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+  try{
+    if(typeof core?.physiology==='function')core.physiology('response','window-capture-r1959-'+token);
+    else{
+      core?.surfacePulse?.('window-capture-r1959-'+token);
+      core?.pulse?.();
+      core?.requestRender?.(3);
+    }
+  }catch(_){}
+},true);
+
 document.addEventListener('pointerdown',event=>{
   const state=live();
   if(!state.nav?.classList.contains('open'))return;

@@ -112,12 +112,44 @@ async function assertPrimaryControls(page, viewportName) {
   }
 
   const beforeToken = await page.evaluate(() => Number(document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || 0));
+  const magDebugBefore = await page.evaluate(() => ({
+    token: document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || '',
+    fallback: document.documentElement.dataset.fxCoreLivingResponseFallbackR1959 || '',
+    menuOwner: document.documentElement.dataset.fxMenuOwnerR1956 || '',
+    shapeshifter: document.documentElement.dataset.fxCoreShapeshifterR337 || '',
+    controlOwner: document.documentElement.dataset.fxControlOwnerR268 || '',
+    button: document.querySelector('.fx-reference-mag-button')?.outerHTML || '',
+    scripts: [...document.scripts].filter(s => /menu-owner-r1956|core-shapeshifter-r337|control-owner-r268/.test(s.src)).map(s => s.src)
+  }));
+  console.log('MAG_RESPONSE_DEBUG_BEFORE', JSON.stringify(magDebugBefore));
   await page.locator('.fx-reference-mag-button').click();
+  await page.waitForTimeout(120);
+  const magDebugAfter = await page.evaluate(() => ({
+    token: document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || '',
+    fallback: document.documentElement.dataset.fxCoreLivingResponseFallbackR1959 || '',
+    continuity: document.documentElement.dataset.fxCoreLivingResponseContinuityR1959 || '',
+    shapeshifter: document.documentElement.dataset.fxCoreShapeshifterR337 || '',
+    controlBootstrap: document.documentElement.dataset.fxCoreLivingControlBootstrapR1959 || ''
+  }));
+  console.log('MAG_RESPONSE_DEBUG_AFTER', JSON.stringify(magDebugAfter));
   await page.waitForFunction(before => Number(document.documentElement.dataset.fxCoreLivingResponseTokenR1723 || 0) > before, beforeToken, { timeout:8000 });
 
   const sound = page.locator('#hero .fx-three-sound');
   const beforeAudio = await sound.getAttribute('data-fx-audio-state');
+  console.log('AUDIO_RESPONSE_DEBUG_BEFORE', JSON.stringify(await page.evaluate(() => ({
+    button: document.querySelector('#hero .fx-three-sound')?.dataset.fxAudioState || '',
+    root: document.documentElement.dataset.fxAudioState || '',
+    owner: document.documentElement.dataset.fxAudioOwner || '',
+    intent: document.documentElement.dataset.fxAudioIntentR1959 || ''
+  }))));
   await sound.click();
+  await page.waitForTimeout(120);
+  console.log('AUDIO_RESPONSE_DEBUG_AFTER', JSON.stringify(await page.evaluate(() => ({
+    button: document.querySelector('#hero .fx-three-sound')?.dataset.fxAudioState || '',
+    root: document.documentElement.dataset.fxAudioState || '',
+    owner: document.documentElement.dataset.fxAudioOwner || '',
+    intent: document.documentElement.dataset.fxAudioIntentR1959 || ''
+  }))));
   await page.waitForFunction(before => {
     const button = document.querySelector('#hero .fx-three-sound');
     if (!(button instanceof HTMLButtonElement)) return false;
