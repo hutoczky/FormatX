@@ -16,6 +16,7 @@ root.dataset.fxCurrentMagRuntimeR422='booting';
 
 const STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
+const SHAPESHIFTER='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20261007-r1959-deterministic-living-response';
 const LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
 const FINAL_HEADER='/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260830-r428-cross-device-language-owner';
 const MINI_STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
@@ -181,6 +182,8 @@ async function start(){
       addStyle(FINAL_HEADER,'data-fx-mobile-header-final-r418')
     ]);
     repairAccessibleNames();
+    await addScript(SHAPESHIFTER,'data-fx-core-shapeshifter-script-r337');
+    root.dataset.fxCoreLivingControlBootstrapR1959='audit-ready';
     root.dataset.fxCurrentMagRuntimeR422='ready';
     root.dataset.fxCoreRendererSelection='lighthouse-static-photographic-shell-r1741';
     root.dataset.fxCurrentMagAuditR1741='webgl-and-assistant-deferred';
@@ -204,6 +207,11 @@ async function start(){
   ]);
   root.dataset.fxMobileHeaderFinalR418=mobile?'loaded-last-mobile':'loaded-cross-device-desktop';
   root.dataset.fxCurrentMagStylesR423='ready';
+  /* R1959 — deterministic MAG control owner.
+     The header MAG button must stimulate the living core even while the heavy
+     WebGL renderer is still warming. */
+  await addScript(SHAPESHIFTER,'data-fx-core-shapeshifter-script-r337');
+  root.dataset.fxCoreLivingControlBootstrapR1959='ready-before-renderer';
   root.dataset.fxCurrentMagStartupR442='styles-ready-before-renderer';
   root.dataset.fxCurrentMagOpticsR458='superseded-by-r468-soft-mobile-bloom';
   root.dataset.fxCurrentMagOpticsR460=mobile?'superseded-by-r468-soft-mobile-bloom':'desktop-optics-unchanged';
