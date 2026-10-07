@@ -5,80 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="referrer" content="no-referrer">
-  <title>FormatX visszajelzés-moderáció</title>
+  <title>FormatX Admin — Hozzászólások</title>
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./feedback-admin.css">
+  <link rel="stylesheet" href="./admin-shell.css">
 </head>
-<body>
+<body class="fx-admin-body">
   <div class="grid-bg" aria-hidden="true"></div>
-  <header class="topbar">
-    <div class="brand">
-      <span class="logo">FX</span>
-      <div>
-        <p class="eyebrow">FORMATX SUITE PRO</p>
-        <h1>Visszajelzés-moderáció</h1>
-      </div>
-    </div>
-    <div class="session">
-      <span id="serviceState" class="state state-wait">kapcsolódás…</span>
-      <span id="adminEmail">—</span>
-      <a class="ghost compact admin-link" href="./">Licencek</a>
-      <form action="./logout" method="post"><button class="ghost compact" type="submit">Kilépés</button></form>
-    </div>
-  </header>
+  <div class="admin-shell">
 
-  <main class="feedback-layout">
-    <section class="panel summary-panel" aria-labelledby="summaryTitle">
-      <div class="panel-head">
-        <div><p class="eyebrow">VALÓDI BEKÜLDÉSEK</p><h2 id="summaryTitle">Moderációs áttekintés</h2></div>
-        <button id="refreshButton" type="button" class="ghost">Frissítés</button>
+    <aside class="admin-sidebar" id="adminSidebar">
+      <a class="admin-brand" href="./" aria-label="FormatX Admin">
+        <img src="/scifi-ui/assets/images/formatx-icon-80.webp" width="38" height="38" alt="">
+        <span><strong>FORMATX</strong><small>ADMIN</small></span>
+      </a>
+      <nav class="admin-nav" aria-label="Adminisztráció">
+        <a class="" href="./"><span class="admin-nav-icon">⌂</span><span>Vezérlőpult</span></a>
+        <a class="" href="./licenses.html"><span class="admin-nav-icon">▣</span><span>Licencek</span></a>
+        <a class="active" href="./feedback.html"><span class="admin-nav-icon">✦</span><span>Hozzászólások</span></a>
+      </nav>
+      <div class="admin-sidebar-foot">
+        <a href="/" target="_blank" rel="noopener noreferrer"><span class="admin-nav-icon">↗</span><span>Nyilvános oldal</span></a>
+        <form action="./logout" method="post"><button type="submit"><span class="admin-nav-icon">⏻</span><span>Kilépés</span></button></form>
       </div>
-      <div id="summaryGrid" class="feedback-summary-grid" aria-live="polite"></div>
-    </section>
+    </aside>
+    <div class="admin-workspace">
 
-    <section class="panel queue-panel" aria-labelledby="queueTitle">
-      <div class="panel-head queue-head">
-        <div><p class="eyebrow">ELLENŐRZÉSI SOR</p><h2 id="queueTitle">Felhasználói értékelések</h2></div>
-        <label class="status-filter">Állapot
-          <select id="statusFilter">
-            <option value="pending" selected>Moderálásra vár</option>
-            <option value="approved">Jóváhagyott</option>
-            <option value="rejected">Elutasított</option>
-            <option value="all">Összes</option>
-          </select>
-        </label>
-      </div>
-      <div id="feedbackList" class="feedback-list"></div>
-      <p id="emptyState" class="empty" hidden>Nincs az állapotnak megfelelő visszajelzés.</p>
-    </section>
-  </main>
+      <header class="admin-topbar">
+        <button class="admin-menu-toggle" type="button" aria-label="Admin menü" aria-expanded="false" aria-controls="adminSidebar"><span></span><span></span><span></span></button>
+        <div class="admin-page-title"><p class="eyebrow">FORMATX ADMIN / HOZZÁSZÓLÁSOK</p><h1>Moderáció</h1></div>
+        <div class="admin-session">
+          <span id="serviceState" class="state state-wait">kapcsolódás…</span>
+          <span id="adminEmail">—</span>
+        </div>
+      </header>
+      <main class="feedback-layout admin-feedback-layout">
+        <section class="panel summary-panel" aria-labelledby="summaryTitle">
+          <div class="panel-head"><div><p class="eyebrow">VALÓDI BEKÜLDÉSEK</p><h2 id="summaryTitle">Moderációs áttekintés</h2></div><button id="refreshButton" type="button" class="ghost">Frissítés</button></div>
+          <div id="summaryGrid" class="feedback-summary-grid" aria-live="polite"></div>
+        </section>
+        <section class="panel queue-panel" aria-labelledby="queueTitle">
+          <div class="panel-head queue-head"><div><p class="eyebrow">ELLENŐRZÉSI SOR</p><h2 id="queueTitle">Felhasználói értékelések</h2></div><label class="status-filter">Állapot<select id="statusFilter"><option value="pending" selected>Moderálásra vár</option><option value="approved">Jóváhagyott</option><option value="rejected">Elutasított</option><option value="all">Összes</option></select></label></div>
+          <div id="feedbackList" class="feedback-list"></div>
+          <p id="emptyState" class="empty" hidden>Nincs az állapotnak megfelelő visszajelzés.</p>
+        </section>
+      </main>
+    </div>
+  </div>
 
   <dialog id="moderationDialog" class="moderation-dialog">
     <form id="moderationForm" method="dialog">
-      <div class="dialog-head">
-        <div><p class="eyebrow">RÉSZLETES ELLENŐRZÉS</p><h2 id="dialogTitle">Visszajelzés</h2></div>
-        <button class="ghost compact" value="cancel">Bezárás</button>
-      </div>
-      <input id="feedbackId" type="hidden">
-      <div id="dialogRatings" class="dialog-ratings"></div>
-      <dl id="dialogMeta" class="dialog-meta"></dl>
-      <section class="feedback-text-block">
-        <h3>Szöveges visszajelzés</h3>
-        <p id="dialogComment">—</p>
-      </section>
-      <label>Moderátori megjegyzés
-        <textarea id="moderationNote" maxlength="1000" rows="4" placeholder="Belső megjegyzés; nem nyilvános."></textarea>
-      </label>
-      <div class="moderation-actions">
-        <button id="approveButton" class="success" type="button">Jóváhagyás</button>
-        <button id="rejectButton" class="warn" type="button">Elutasítás</button>
-        <button id="pendingButton" type="button">Vissza várakozó állapotba</button>
-        <button id="deleteButton" class="danger" type="button">Végleges törlés</button>
-      </div>
+      <div class="dialog-head"><div><p class="eyebrow">RÉSZLETES ELLENŐRZÉS</p><h2 id="dialogTitle">Visszajelzés</h2></div><button class="ghost compact" value="cancel">Bezárás</button></div>
+      <input id="feedbackId" type="hidden"><div id="dialogRatings" class="dialog-ratings"></div><dl id="dialogMeta" class="dialog-meta"></dl>
+      <section class="feedback-text-block"><h3>Szöveges visszajelzés</h3><p id="dialogComment">—</p></section>
+      <label>Moderátori megjegyzés<textarea id="moderationNote" maxlength="1000" rows="4" placeholder="Belső megjegyzés; nem nyilvános."></textarea></label>
+      <div class="moderation-actions"><button id="approveButton" class="success" type="button">Jóváhagyás</button><button id="rejectButton" class="warn" type="button">Elutasítás</button><button id="pendingButton" type="button">Vissza várakozó állapotba</button><button id="deleteButton" class="danger" type="button">Végleges törlés</button></div>
     </form>
   </dialog>
-
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="./admin-shell.js"></script>
   <script type="module" src="./feedback-admin.js"></script>
 </body>
 </html>
