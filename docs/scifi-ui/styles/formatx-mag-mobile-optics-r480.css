@@ -21,15 +21,15 @@
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     opacity: .965 !important;
     filter:
-      brightness(.99)
-      contrast(1.24)
-      saturate(1.03)
+      brightness(1.06)
+      contrast(1.14)
+      saturate(.98)
       hue-rotate(-1deg)
       blur(0px) !important;
     -webkit-filter:
-      brightness(.99)
-      contrast(1.24)
-      saturate(1.03)
+      brightness(1.06)
+      contrast(1.14)
+      saturate(.98)
       hue-rotate(-1deg)
       blur(0px) !important;
     mix-blend-mode: normal !important;

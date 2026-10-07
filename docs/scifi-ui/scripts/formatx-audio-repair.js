@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   if (root.dataset.fxAudioRepair === 'v6') return;
-  root.dataset.fxAudioRepair = 'v6';
+  root.dataset.fxAudioRepair = 'v7-r1959';
 
   const Context = window.AudioContext || window.webkitAudioContext;
   const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
@@ -599,11 +599,14 @@
 
     sync('off');
     button.addEventListener('pointerdown', () => { void ensureRunning(); }, { passive: true });
-    document.addEventListener('click', event => {
+    /* R1959: own the sound toggle at window-capture level so no later
+       document-capture runtime can swallow the visible control interaction. */
+    window.addEventListener('click', event => {
       const target = event.target instanceof Element ? event.target.closest('.fx-three-sound') : null;
       if (target !== button) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      root.dataset.fxAudioToggleR1959 = 'received';
       void setEnabled(!enabled);
     }, true);
 
