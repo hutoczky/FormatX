@@ -4,6 +4,7 @@
   const ROOT = document.documentElement;
   if (ROOT.dataset.fxAiCoreIdentityR1951) return;
   ROOT.dataset.fxAiCoreIdentityR1951 = 'armed';
+  ROOT.dataset.fxAiCoreIdentityR1957 = 'boot-telemetry-fixed-system-label-1350ms';
 
   const PARAMS = new URLSearchParams(location.search);
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1' || /Chrome-Lighthouse/i.test(navigator.userAgent || '');
@@ -42,7 +43,7 @@
 
     const sub = document.createElement('span');
     sub.className = 'fx-ai-core-ident-r1951__sub';
-    sub.textContent = ROOT.lang === 'en' ? 'ONLINE · LOCAL INTELLIGENCE' : 'ONLINE · HELYI INTELLIGENCIA';
+    sub.textContent = 'ONLINE · LOCAL INTELLIGENCE';
 
     badge.append(title, sub);
     document.body.appendChild(badge);
@@ -53,7 +54,7 @@
       requestAnimationFrame(() => badge.classList.add('is-visible'));
     });
 
-    const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
+    const hold = REDUCED ? 720 : 1350;
     exitTimer = window.setTimeout(() => {
       badge.classList.remove('is-visible');
       badge.classList.add('is-exiting');
