@@ -1,5 +1,5 @@
 FormatX production revision
 token=20261007-r1959-ai-core-optics-aa-performance
-base_master=0152e84078a7f8ead0baee78d719a00a879166f5
+base_master=11d45d882beffe6922a8aa65f28183005c900b43
 purpose=finalize desktop MAG photoreal optics and contour AA, transient MAG AI CORE telemetry, continuous intro-to-hero cinema, polling-rate-independent interaction and lower first-load main-thread cost
 validation=canonical MAG desktop/mobile visual proof, Lighthouse desktop/mobile x3, audio owner sequencing, semantic first paint, category intent runtime, R533-R536 handoff, production Worker cache/CSP parity
