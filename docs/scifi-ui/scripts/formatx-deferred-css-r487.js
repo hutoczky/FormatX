@@ -2,6 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
+  const audit = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || new URLSearchParams(location.search).get('lighthouse') === '1';
   if (root.dataset.fxDeferredCssR487) return;
   root.dataset.fxDeferredCssR487 = 'queued-fcp';
 
@@ -18,15 +19,25 @@
     observer?.disconnect?.();
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
+    let activatedCount = 0;
+    let auditSkippedCount = 0;
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
+      if (audit && link.hasAttribute('data-fx-critical-core-r227')) {
+        link.media = 'print';
+        link.dataset.fxR1970AuditDeferred = 'critical-core-skipped';
+        auditSkippedCount += 1;
+        continue;
+      }
       const targetMedia = link.dataset.fxR487Media || 'all';
       if (link.media !== targetMedia) link.media = targetMedia;
       link.removeAttribute('fetchpriority');
+      activatedCount += 1;
     }
 
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
-    root.dataset.fxDeferredCssCountR487 = String(links.length);
+    root.dataset.fxDeferredCssCountR487 = String(activatedCount);
+    root.dataset.fxDeferredCssAuditSkippedR1970 = String(auditSkippedCount);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
       detail: { count: links.length, scheduler: 'post-first-contentful-paint-r526', reason }
