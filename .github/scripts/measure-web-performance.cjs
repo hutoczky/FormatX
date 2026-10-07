@@ -58,7 +58,45 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const started = Date.now();
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('#hero-title');
-  await page.waitForTimeout(2500);
+
+  const controlSnapshot = async label => page.evaluate(label => {
+    const pick = selector => {
+      const el = document.querySelector(selector);
+      if (!(el instanceof Element)) return null;
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return {
+        selector,
+        rect:{x:r.x,y:r.y,width:r.width,height:r.height},
+        inline:el.getAttribute('style')||'',
+        className:el.getAttribute('class')||'',
+        position:s.position,top:s.top,right:s.right,bottom:s.bottom,left:s.left,
+        width:s.width,minWidth:s.minWidth,maxWidth:s.maxWidth,
+        height:s.height,minHeight:s.minHeight,maxHeight:s.maxHeight,
+        padding:s.padding,display:s.display,transform:s.transform,
+        fontSize:s.fontSize,boxSizing:s.boxSizing
+      };
+    };
+    return {
+      label,t:performance.now(),
+      referenceMode:document.documentElement.dataset.fxReferenceProductionR244||null,
+      controls:pick('#hero .fx-reference-controls-r204'),
+      sound:pick('#hero .fx-three-sound'),
+      ask:pick('#hero .fx-reference-ask'),
+      heroSpace:pick('#hero .hero-space'),
+      topbar:pick('.topbar')
+    };
+  }, label);
+
+  const controlSnapshotsR1968 = [];
+  controlSnapshotsR1968.push(await controlSnapshot('domcontentloaded'));
+  await page.waitForTimeout(80);
+  controlSnapshotsR1968.push(await controlSnapshot('plus80ms'));
+  await page.waitForTimeout(120);
+  controlSnapshotsR1968.push(await controlSnapshot('plus200ms'));
+  await page.waitForTimeout(300);
+  controlSnapshotsR1968.push(await controlSnapshot('plus500ms'));
+  await page.waitForTimeout(2000);
 
   const interaction = await page.evaluate(async () => {
     const button = document.getElementById('menu-toggle');
@@ -139,6 +177,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
+      controlSnapshotsR1968,
       memory,
       styleOrigins: (() => {
         const targets = {
