@@ -544,6 +544,16 @@
   let ignitionDone = false;
   let coreIdVisible = false;
   let visiblePhase = 0;
+
+  function syncCoreIdentity(r){
+    const shouldShowCoreId=!REDUCED && visiblePhase>=4 && r>=.845 && r<.965;
+    if(!(coreIdLabel instanceof HTMLElement)||shouldShowCoreId===coreIdVisible)return;
+    coreIdVisible=shouldShowCoreId;
+    coreIdLabel.classList.toggle('is-visible',shouldShowCoreId);
+    coreIdLabel.dataset.state=shouldShowCoreId?'online':'retiring';
+    overlay.dataset.coreIdR1951=shouldShowCoreId?'visible':'retiring';
+    ROOT.dataset.fxMagCoreIdentityR1951=shouldShowCoreId?'visible':'hidden';
+  }
   let phaseChangedAt = 0;
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
@@ -1033,16 +1043,8 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
 
-    /* R1951 — one-time boot telemetry identity.
-       It exists only while the first-visit cinematic owns the screen. */
-    const shouldShowCoreId=!REDUCED && visiblePhase>=4 && r>=.845 && r<.965;
-    if(coreIdLabel instanceof HTMLElement && shouldShowCoreId!==coreIdVisible){
-      coreIdVisible=shouldShowCoreId;
-      coreIdLabel.classList.toggle('is-visible',shouldShowCoreId);
-      coreIdLabel.dataset.state=shouldShowCoreId?'online':'retiring';
-      overlay.dataset.coreIdR1951=shouldShowCoreId?'visible':'retiring';
-      ROOT.dataset.fxMagCoreIdentityR1951=shouldShowCoreId?'visible':'hidden';
-    }
+    /* R1951 — one-time boot telemetry identity. */
+    syncCoreIdentity(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
@@ -1176,6 +1178,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{syncCoreIdentity(fixedR);}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');
