@@ -371,6 +371,9 @@
       root.style.setProperty('--fx-c617-depth',Math.sin(local*Math.PI).toFixed(4));
       const heroExit=active===0?clamp((local-.52)/.48,0,1):1;
       root.style.setProperty('--fx-c1957-hero-exit',heroExit.toFixed(4));
+      root.style.setProperty('--fx-c1957-hero-shift',(-heroExit*9).toFixed(2)+'px');
+      root.style.setProperty('--fx-c1957-hero-content-opacity',(1-heroExit*.16).toFixed(3));
+      root.style.setProperty('--fx-c1957-bridge-opacity',(.07+heroExit*.09).toFixed(3));
 
       scenes.forEach(scene=>{
         if(Math.abs(scene.index-active)>1)return;
