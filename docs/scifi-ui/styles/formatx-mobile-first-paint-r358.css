@@ -760,7 +760,7 @@
 
 /* production-r1636-mobile-hero-final-geometry-lock */
 
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px){
   html body.living-architecture :is(
     .fx-organism-status,
     .fx-organism-actionbar,

@@ -4,7 +4,7 @@
    In particular the mobile controls stay absolutely positioned whether they
    are temporarily a hero-grid child or already mounted inside hero-space. */
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   html:root:root:root body.living-architecture main#main-content #hero,
   html:root:root:root body.living-architecture main#main-content #hero > .hero-grid {
     box-sizing: border-box !important;

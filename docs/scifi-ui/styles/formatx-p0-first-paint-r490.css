@@ -115,7 +115,7 @@ html body.living-architecture .fx-feedback-honeypot {
 /* Narrow footer navigation must wrap inside its own content box. The R494
    overflow artifact showed three anonymous footer anchors extending to 463.5px
    in a 320px viewport. Fix the flex/grid sizing rather than clipping the page. */
-@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+@media (max-width: 900px) {
   html body.living-architecture footer.site-footer,
   html body.living-architecture footer.site-footer nav,
   html body.living-architecture footer.site-footer .footer-bottom {
@@ -860,7 +860,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
    SOUND/ASK must never appear below WCAG's 44px floor while deferred quality
    styles and the canonical control owner settle. Manual PAUSE is retired and
    therefore cannot flash as a transient third mobile control. */
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px){
   html:root:root:root body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
     position:absolute!important;
     inset:auto auto 18px 50%!important;
@@ -952,7 +952,7 @@ html:root:root[data-fx-core-first-frame-r1913="painted"] body.living-architectur
 /* R1941 — first-paint parity for the Signature MAG.
    The blocking frame already shows the canonical four-point silhouette, central
    optical organ and silver/smoked bioglass response before WebGL takes over. */
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px){
   html:root:root body.living-architecture #hero .hero-space > .fx-mag-first-paint-r1756{
     top:44.5%!important;
     width:clamp(196px,54vw,246px)!important;
@@ -1036,7 +1036,7 @@ html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
     background-size:27px 27px!important;
   }
 }
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px){
   html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
     background-size:32px 32px!important;
   }
@@ -1046,7 +1046,7 @@ html:root:root:root body.living-architecture .topbar > .fx-reference-mag-button{
 /* R1941j — award-grade first-frame control skin.
    The render-blocking layer owns the same dark optical-glass language as the
    settled UI, so mobile never flashes browser-default links or grey buttons. */
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px){
   html:root:root body.living-architecture .topbar{
     background:
       linear-gradient(180deg,rgba(2,8,12,.985),rgba(1,7,11,.955))!important;
@@ -1407,7 +1407,7 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     margin:0!important;transform:none!important;translate:none!important;
   }
 }
-@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+@media (max-width:900px){
   html:root:root body.living-architecture .topbar > #menu-toggle,
   html:root:root body.living-architecture .topbar > .fx-reference-menu-button{
     position:absolute!important;top:8px!important;right:12px!important;
@@ -1441,3 +1441,8 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1962-final-control-geometry-first-paint */
+
+/* R1965 — viewport width owns layout class.
+   Coarse input on a desktop/touch laptop does not make the page a phone.
+   Mobile geometry is <=900px; 901px+ keeps the stable desktop contract. */
+/* production-r1965-width-owned-mobile-layout */

@@ -4,7 +4,7 @@
    is stable from first paint and later visual layers may refine appearance,
    but never remove readable content from document flow. */
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   html:root:root body.living-architecture main#main-content section#hero.scene.hero {
     position: relative !important;
     box-sizing: border-box !important;

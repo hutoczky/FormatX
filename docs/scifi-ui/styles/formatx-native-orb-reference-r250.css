@@ -29,7 +29,7 @@ html:root:root body.living-architecture .topbar .fx-language-toggle::before {
 }
 html:root:root[lang="en"] body.living-architecture .topbar .fx-language-toggle::before { content: '🇬🇧' !important; }
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   html:root:root body.living-architecture main#main-content #hero,
   html:root:root body.living-architecture main#main-content #hero > .hero-grid {
     box-sizing: border-box !important;

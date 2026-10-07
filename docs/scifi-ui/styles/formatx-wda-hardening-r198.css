@@ -58,7 +58,7 @@ html body .fx-three-sound.fx-wda-sound-toggle:hover {
   outline-offset: 4px !important;
 }
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   html body .fx-three-sound.fx-wda-sound-toggle {
     top: max(80px, calc(env(safe-area-inset-top) + 74px)) !important;
     right: max(12px, env(safe-area-inset-right)) !important;
@@ -177,7 +177,7 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
   white-space: nowrap !important;
 }
 
-@media (max-width: 900px), (pointer: coarse) {
+@media (max-width: 900px) {
   html body.living-architecture .topbar > .brand {
     min-width: 0 !important;
     max-width: 112px !important;
@@ -322,7 +322,7 @@ html body.living-architecture #hero .fx-reference-controls-r204.fx-reference-con
   }
 }
 
-@media (min-width: 901px) and (pointer: fine) {
+@media (min-width: 901px) {
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r263 {
     position: absolute !important;
     top: auto !important;
