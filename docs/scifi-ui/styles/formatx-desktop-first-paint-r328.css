@@ -159,18 +159,18 @@
     box-sizing: border-box !important;
     display: grid !important;
     grid-template-columns: repeat(3, 54px) !important;
-    grid-template-rows: auto !important;
+    grid-template-rows: 76px !important;
     align-items: start !important;
     justify-content: center !important;
     gap: 14px !important;
-    width: 206px !important;
-    min-width: 206px !important;
-    max-width: 206px !important;
-    height: 82px !important;
-    min-height: 82px !important;
-    max-height: 82px !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    max-width: 190px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
     margin: 0 !important;
-    padding: 0 8px 24px !important;
+    padding: 0 !important;
     overflow: visible !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -181,7 +181,7 @@
 
   html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
     position: absolute !important;
-    inset: auto auto 28px 50% !important;
+    inset: auto auto 20px 50% !important;
     transform: translateX(-50%) !important;
     translate: none !important;
   }
@@ -264,63 +264,67 @@
 /* production-r1637-desktop-header-final-76-lock */
 
 
-/* R1647 — first paint must already use the final r244 control geometry.
-   This removes the 206x82 bottom-center -> 54px top-right relocation that
-   Lighthouse reported as a dominant desktop layout shift. */
+/* R1969 — canonical desktop controls are born in their settled MAG-bottom row.
+   Retire the historical top-right vertical rail. This selector intentionally
+   keeps the old specificity level so no earlier compatibility block can win
+   during the first frame. */
 @media (min-width:901px) {
   html:root:root:root:root:root body.living-architecture
-  #hero .fx-reference-controls-r204 {
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
     position:absolute!important;
-    inset:18px 18px auto auto!important;
-    z-index:10020!important;
-    display:block!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:20px!important;
+    left:50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
     box-sizing:border-box!important;
-    width:54px!important;
-    min-width:54px!important;
-    max-width:54px!important;
-    height:auto!important;
-    min-height:0!important;
-    max-height:none!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
     margin:0!important;
     padding:0!important;
+    column-gap:14px!important;
+    row-gap:0!important;
     overflow:visible!important;
-    pointer-events:none!important;
-    transform:none!important;
+    isolation:isolate!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
     translate:none!important;
+    animation:none!important;
+    transition:none!important;
   }
-
   html:root:root:root:root:root body.living-architecture
-  #hero .fx-reference-controls-r204 > .fx-reference-rail,
-  html:root:root:root:root:root body.living-architecture
-  #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
-    position:relative!important;
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
     inset:auto!important;
-    display:flex!important;
-    flex-direction:column!important;
-    align-items:center!important;
-    justify-content:flex-start!important;
-    gap:12px!important;
-    width:54px!important;
-    min-width:54px!important;
-    max-width:54px!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
     height:auto!important;
     min-height:0!important;
     margin:0!important;
     padding:0!important;
-    pointer-events:none!important;
     transform:none!important;
+    translate:none!important;
   }
-
   html:root:root:root:root:root body.living-architecture
-  #hero .fx-reference-controls-r204 > .fx-three-sound {
-    display:none!important;
-    visibility:hidden!important;
-    opacity:0!important;
-    pointer-events:none!important;
-  }
-
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
   html:root:root:root:root:root body.living-architecture
-  #hero .fx-reference-controls-r204 :is(.fx-reference-ask,.fx-reference-pause) {
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html:root:root:root:root:root body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
     position:relative!important;
     inset:auto!important;
     display:grid!important;
@@ -333,32 +337,6 @@
     min-height:54px!important;
     max-height:54px!important;
     margin:0!important;
-    padding:0!important;
-    pointer-events:auto!important;
-    transform:none!important;
-    translate:none!important;
-  }
-}
-/* production-r1647-desktop-controls-final-first-frame */
-
-
-/* R1650 — keep the canonical sound control visible without restoring the old
-   wide control carrier. All three controls live in the same 54px vertical rail. */
-@media (min-width:901px) {
-  html:root:root:root:root:root:root body.living-architecture
-  #hero .fx-reference-controls-r204 > .fx-three-sound {
-    position:relative!important;
-    inset:auto!important;
-    display:grid!important;
-    place-items:center!important;
-    box-sizing:border-box!important;
-    width:54px!important;
-    min-width:54px!important;
-    max-width:54px!important;
-    height:54px!important;
-    min-height:54px!important;
-    max-height:54px!important;
-    margin:0 0 12px!important;
     padding:0!important;
     opacity:1!important;
     visibility:visible!important;
@@ -367,8 +345,7 @@
     translate:none!important;
   }
 }
-/* production-r1650-desktop-sound-control-visible-no-cls */
-
+/* production-r1969-desktop-controls-single-first-frame-owner */
 
 /* R1710 — exact desktop hero reservation.
    Final R244 geometry is first-row clamp + 258px proof row + 30px gap +

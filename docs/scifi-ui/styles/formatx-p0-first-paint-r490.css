@@ -1502,12 +1502,12 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     margin:0!important;padding:0!important;opacity:1!important;visibility:visible!important;overflow:visible!important;
   }
   html:root:root:root body.living-architecture #hero .hero-space>.fx-reference-controls-r204{
-    position:absolute!important;inset:auto auto 28px 50%!important;z-index:12080!important;
+    position:absolute!important;inset:auto auto 20px 50%!important;z-index:12080!important;
     display:grid!important;grid-template-columns:repeat(3,54px)!important;grid-template-rows:54px!important;
     align-items:start!important;justify-items:center!important;justify-content:center!important;
     column-gap:14px!important;row-gap:0!important;width:190px!important;min-width:190px!important;max-width:190px!important;
     height:76px!important;min-height:76px!important;max-height:76px!important;
-    margin:0!important;padding:0 7px 22px!important;opacity:1!important;visibility:visible!important;
+    margin:0!important;padding:0!important;opacity:1!important;visibility:visible!important;
     pointer-events:auto!important;transform:translateX(-50%)!important;translate:none!important;overflow:visible!important;
   }
   html:root:root:root body.living-architecture #hero .fx-reference-controls-r204>.fx-reference-rail{
@@ -1535,3 +1535,29 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
 }
 /* production-r1967-parser-equivalent-desktop-p0 */
+
+/* R1969 — the raw canvas element is 300x150 before enhancement CSS exists.
+   It is a viewport decoration, never document content. Keep it out of normal
+   flow from the render-blocking P0 so the header cannot start ~154px too low. */
+html body > #fx-apex-canvas.fx-apex-canvas{
+  position:fixed!important;
+  inset:0!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  left:0!important;
+  display:block!important;
+  width:100vw!important;
+  height:100vh!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  pointer-events:none!important;
+  z-index:-10!important;
+  transform:none!important;
+}
+/* production-r1969-apex-canvas-zero-flow */
