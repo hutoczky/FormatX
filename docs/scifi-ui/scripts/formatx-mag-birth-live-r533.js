@@ -341,6 +341,10 @@
     <div class="fxb-axis fxb-axis-v" aria-hidden="true"></div>
     <div class="fxb-lens" aria-hidden="true"></div>
     <div class="fxb-flash" aria-hidden="true"></div>
+    <div class="fxb-core-ident" aria-hidden="true">
+      <span>MAG // AI CORE</span>
+      <small>ONLINE · LOCAL INTELLIGENCE</small>
+    </div>
     <div class="fxb-scan" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-top" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-bottom" aria-hidden="true"></div>
@@ -388,6 +392,7 @@
   const percent = overlay.querySelector('.fxb-percent');
   const progress = overlay.querySelector('.fxb-progress');
   const status = overlay.querySelector('.fxb-status');
+  const coreIdentity = overlay.querySelector('.fxb-core-ident');
   const canvas = prepaintCanvas;
   const dnaStage = overlay.querySelector('.fxb-dna-stage');
   const dnaHelix = overlay.querySelector('.fxb-dna-helix');
@@ -539,6 +544,7 @@
   let ignitionDone = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
+  let coreIdentityState = 'hidden';
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
   function clamp(value,min,max) { return Math.max(min,Math.min(max,value)); }
@@ -622,6 +628,17 @@
     let value = copy.statuses[0][1];
     for (const [limit,label] of copy.statuses) if (r >= limit) value = label;
     return value;
+  }
+
+  /* R1959 — one-shot boot telemetry identifier.
+     It belongs to the cinematic stabilization moment, not to the settled hero UI. */
+  function syncCoreIdentity(r,source='timeline'){
+    const next = r >= .835 && r < .970 ? 'show' : (r >= .970 ? 'hide' : 'hidden');
+    if(next===coreIdentityState)return;
+    coreIdentityState=next;
+    overlay.dataset.coreIdentity=next;
+    ROOT.dataset.fxMagCoreIdentityR1959=next;
+    ROOT.dataset.fxMagCoreIdentitySourceR1959=source;
   }
 
   function locateStage() {
@@ -965,6 +982,11 @@
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
+    try {
+      coreIdentityState='hide';
+      overlay.dataset.coreIdentity='hide';
+      ROOT.dataset.fxMagCoreIdentityR1959='hide';
+    } catch (_) {}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
 
     exitTimer=window.setTimeout(
@@ -1035,6 +1057,7 @@
       if(progress.value!==value)progress.value=value;
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
+      syncCoreIdentity(r,'runtime-r1959');
     }
     const phaseDrivenFallback=Boolean(filmRenderer)
       && softwareFallbackActive
@@ -1133,6 +1156,7 @@
     ROOT.dataset.fxMagBirthPerformanceR1618='stable-canonical-underlay-no-delayed-lcp-aria-dialog';
     ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
     ROOT.dataset.fxMagBirthDurationR1549='10000ms-full-studio-adaptive-60fps';
+    ROOT.dataset.fxMagBirthCoreIdentityR1959='mag-ai-core-online-local-intelligence-8.35s-to-9.70s-blur-fade';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
@@ -1156,6 +1180,7 @@
           percent.value=String(value).padStart(3,'0');
           progress.value=value;
           status.textContent=statusFor(fixedR);
+          syncCoreIdentity(fixedR,'visual-frame-r1959');
         }catch(_){}
         try{syncNativeCore(fixedR,fixedTime);}catch(_){}
         try{drawParticles(fixedR,fixedTime);}catch(error){
