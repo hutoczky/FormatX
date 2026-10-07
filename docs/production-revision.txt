@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1951-mag-core-identity
+token=20261007-r1951p-mag-core-identity-performance
 base_master=2e7c753e8c15a250bc4e625aa59c0f2322971413
-purpose=deploy one-shot MAG AI CORE boot telemetry, clean optical stabilization pulse and continuous studio intro-to-hero handoff on top of R1950c anti-aliased desktop MAG
-validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile, P0 fast loop, MAG intro keyframes, mobile proof, no-occlusion, R536 cinematic handoff, Worker CSP parity and semantic first paint
+purpose=deploy MAG AI CORE boot telemetry, clean optical stabilization, post-FCP full core CSS and lower-cost analytic mobile/software MAG startup topology on top of R1950c anti-aliased desktop MAG
+validation=production preflight, exact-revision convergence, Lighthouse desktop/mobile >=0.95, TBT <=200ms, P0 fast loop, explicit 8.60s/9.25s MAG identity keyframes, mobile proof, no-occlusion, R536 cinematic handoff, Worker CSP parity and semantic first paint
