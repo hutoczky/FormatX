@@ -274,7 +274,7 @@ function cacheBustR502Runtime(html) {
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260925-r1730-retired-r533-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20260920-r644-persistent-open')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism')
-    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20261006-r1949-award-final-parent')
+    .replace(/living-architecture\.js\?v=[^"']+/g, 'living-architecture.js?v=20261007-r1951-cinematic-material-parent')
     .replace(/platform-status\.js\?v=[^"']+/g, 'platform-status.js?v=20260902-r500-canonical-hero-state')
     .replace(/platform-status\.css\?v=[^"']+/g, 'platform-status.css?v=20260902-r500-canonical-hero-state');
 }
