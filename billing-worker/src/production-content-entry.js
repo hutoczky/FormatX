@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261007-r1950c-studio-intro-edge-aa';
+const STARTUP_REVISION = '20261007-r1959-cinematic-mag-finish';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-rhmFQokmSAFR/Wm4HCQIjTmhqiZMgt8xHgtl6IHtsak='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -21,7 +21,7 @@ const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-referen
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260923-r1666-source-production-parity">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261005-r1945-signature-header-icon">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260924-r1725c-ask-hit-first-paint">';
-const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261007-r1950-desktop-edge-aa';
+const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261007-r1959-cinematic-mag-finish';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20260831-r487-first-paint"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
@@ -167,12 +167,12 @@ const DEFERRED_STYLE_PATHS = new Set([
 
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
-    marker: 'scheduler-to-loader-r1950-desktop-edge-aa',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261007-r1950-desktop-edge-aa']],
+    marker: 'scheduler-to-loader-r1959-cinematic-mag-finish',
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261007-r1959-cinematic-mag-finish']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261007-r1950c-studio-intro']],
+    marker: 'intro-to-genesis-r1959-controlled-optical-finale',
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261007-r1959-controlled-optical-finale']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
@@ -180,14 +180,14 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/living-architecture.js', {
     marker: 'living-to-igloo-r1724-sitewide-habitat',
-    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20261007-r1950-desktop-edge-aa']],
+    rewrites: [[/igloo-parity\.js\?v=[^"']+/g, 'igloo-parity.js?v=20261007-r1959-cinematic-mag-finish']],
   }],
   ['/scifi-ui/scripts/igloo-parity.js', {
     marker: 'igloo-to-site-stability-and-mobile-surface-r1724-living-habitat',
     rewrites: [
       [/formatx-site-stability\.css\?v=[^"']+/g, 'formatx-site-stability.css?v=20260903-r502-mobile-box-model'],
       [/formatx-mobile-unified\.js\?v=[^"']+/g, 'formatx-mobile-unified.js?v=20260924-r1724-final-viewport-safe-living-habitat'],
-      [/formatx-desktop-unified\.css(?:\?v=[^"']+)?/g, 'formatx-desktop-unified.css?v=20261007-r1950-desktop-edge-aa'],
+      [/formatx-desktop-unified\.css(?:\?v=[^"']+)?/g, 'formatx-desktop-unified.css?v=20261007-r1959-cinematic-mag-finish'],
     ],
   }],
 ]);
