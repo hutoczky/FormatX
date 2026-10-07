@@ -104,7 +104,7 @@
   }
 
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
-    opacity:calc(.085 + var(--fx-c536-energy) * .12)!important;
+    opacity:calc(.055 + var(--fx-c536-energy) * .075)!important;
     box-shadow:
       0 0 48px rgba(var(--fx-c536-a),.018),
       inset 0 0 64px rgba(var(--fx-c536-b),.012)!important;
