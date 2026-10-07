@@ -108,7 +108,7 @@
     }
     ensureStyle(
       'data-fx-premium-finish',
-      './styles/formatx-premium-finish.css?v=20260805-motion-gate-3',
+      './styles/formatx-premium-finish.css?v=20261007-r1956-no-late-hero-reflow',
       'fxPremiumFinishStyle',
       'FormatX premium finish stylesheet failed to load.'
     );
