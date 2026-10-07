@@ -297,20 +297,19 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
    No background-position animation, no JS loop, and reduced-motion is static. */
 @media (prefers-reduced-motion:no-preference) {
   html body.living-architecture::before {
-    animation:fx-living-chamber-breath-r1371 12s ease-in-out infinite;
+    animation:fx-living-chamber-breath-r1371 18s ease-in-out infinite;
   }
   html body.living-architecture::after {
-    animation:fx-living-chamber-light-r1371 9.5s ease-in-out infinite;
+    animation:fx-living-chamber-light-r1371 15s ease-in-out infinite;
   }
 }
 @keyframes fx-living-chamber-breath-r1371 {
-  0%,100% { opacity:.82; transform:translate3d(0,0,0) scale(1); }
-  48% { opacity:.96; transform:translate3d(0,-.3%,0) scale(1.012); }
-  64% { opacity:.91; transform:translate3d(0,-.12%,0) scale(1.007); }
+  0%,100% { opacity:.86; transform:none; }
+  50% { opacity:.94; transform:none; }
 }
 @keyframes fx-living-chamber-light-r1371 {
-  0%,100% { opacity:.90; }
-  50% { opacity:1; }
+  0%,100% { opacity:.64; }
+  50% { opacity:.72; }
 }
 @media (prefers-reduced-motion:reduce) {
   html body.living-architecture::before,
@@ -956,13 +955,13 @@ html:root:root:root:root:root:root:root:root body.living-architecture::before {
 html:root:root:root:root:root:root:root:root body.living-architecture::after {
   inset:0!important;
   background:
-    linear-gradient(180deg,rgba(124,225,241,.032),transparent 23% 78%,rgba(45,89,111,.018)),
-    radial-gradient(ellipse 16% 54% at 69% 0%,rgba(112,214,235,.080),transparent 76%),
-    radial-gradient(ellipse 34% 18% at 52% 100%,rgba(30,89,112,.050),transparent 74%),
-    radial-gradient(circle,rgba(171,229,241,.10) 0 1px,transparent 1.2px)!important;
-  background-size:auto,auto,auto,116px 116px!important;
-  background-position:center,center,center,23px 37px!important;
-  opacity:.90!important;
+    linear-gradient(180deg,rgba(124,225,241,.022),transparent 26% 80%,rgba(45,89,111,.012)),
+    radial-gradient(ellipse 18% 52% at 69% 0%,rgba(112,214,235,.052),transparent 78%),
+    radial-gradient(ellipse 36% 18% at 52% 100%,rgba(30,89,112,.032),transparent 76%),
+    radial-gradient(circle,rgba(171,229,241,.045) 0 .8px,transparent 1px)!important;
+  background-size:auto,auto,auto,148px 148px!important;
+  background-position:center,center,center,31px 43px!important;
+  opacity:.68!important;
   transform:none!important;
 }
 
@@ -1009,3 +1008,5 @@ html:root:root:root:root:root:root:root:root body.living-architecture #hero .her
   }
 }
 /* production-r1490-realistic-full-page-chamber */
+
+/* production-r1951-luxury-low-noise-atmosphere */

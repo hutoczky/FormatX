@@ -772,11 +772,30 @@
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
     host.prepend(stage);
-    stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
+    stage.style.setProperty('background','transparent','important');
+
+    /* R1951 — studio depth field.
+       Static gradients provide contact shadow, restrained volumetric haze and
+       a tiny optical bloom without another renderer or idle animation loop. */
+    const depthField=document.createElement('div');
+    depthField.className='fx-mag-studio-depth-r1951';
+    depthField.setAttribute('aria-hidden','true');
+    depthField.style.setProperty('position','absolute','important');
+    depthField.style.setProperty('inset','0','important');
+    depthField.style.setProperty('pointer-events','none','important');
+    depthField.style.setProperty('z-index','0','important');
+    depthField.style.setProperty('background',[
+      'radial-gradient(ellipse 27% 12% at 50% 68%,rgba(0,0,0,.50) 0%,rgba(0,0,0,.24) 38%,transparent 78%)',
+      'radial-gradient(ellipse 35% 42% at 50% 49%,rgba(75,155,164,.085) 0%,rgba(28,73,80,.035) 42%,transparent 76%)',
+      'radial-gradient(ellipse 17% 22% at 50% 49%,rgba(108,227,228,.055) 0%,rgba(50,120,130,.018) 52%,transparent 78%)'
+    ].join(','),'important');
+    depthField.style.setProperty('opacity',mobile?'.72':'.88','important');
+    stage.appendChild(depthField);
 
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
+    canvas.style.setProperty('z-index','1','important');
     stage.appendChild(canvas);
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
@@ -784,7 +803,7 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     const compositorFilter=mobile
       ? 'brightness(1.12) contrast(1.15) saturate(.82)'
-      : 'brightness(1.04) contrast(1.15) saturate(.88)';
+      : 'brightness(1.025) contrast(1.085) saturate(.90)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -794,13 +813,13 @@
     if(!reduced.matches && typeof canvas.animate==='function'){
       const livingTimeline=canvas.animate(
         [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
+          {opacity:.988,offset:0},
+          {opacity:1,offset:.48},
+          {opacity:.992,offset:.76},
+          {opacity:.988,offset:1}
         ],
         {
-          duration:6800,
+          duration:7200,
           iterations:Infinity,
           easing:'cubic-bezier(.37,0,.20,1)',
           fill:'both'
@@ -1691,6 +1710,8 @@
     root.dataset.fxNativeMagGeometryR1721='smooth-cortical-fold-displacement-no-sawtooth';
     root.dataset.fxNativeMagQualityR1722='hidpi-msaa-mobile-no-blur-high-resolution-floor';
     root.dataset.fxNativeMagQualityR1950='desktop-hidpi-msaa-high-resolution-silhouette-aa-adaptive-governor';
+    root.dataset.fxNativeMagQualityR1951='desktop-progressive-1-08-to-1-32x-supersample-msaa-no-css-resample';
+    root.dataset.fxNativeMagDepthR1951='static-volumetric-haze-contact-shadow-optical-bloom-no-extra-render-loop';
     root.dataset.fxNativeMagGeometryR1950='desktop-72x144-signature-contour-tessellation-high-dpi-mobile-unchanged';
     root.dataset.fxNativeMagInteractionR1722='pointer-touch-drag-hover-press-release-scroll-wheel-click-key-input-change-submit-focus-menu-language-section-question-response-system-resize-orientation-visibility-one-physiology-loop';
     root.dataset.fxNativeMagDesktopInteractionR1944='fine-pointer-absolute-tilt-polling-safe-optical-parallax-zero-idle';
@@ -1834,19 +1855,27 @@
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      ? (mobile?.94:.80)
+      : (mobile ? 1.00 : (auditMode ? .93 : (constrained ? .89 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      ? (mobile?1.00:.94)
+      : (mobile?1.08:(auditMode?.98:(constrained?.97:1.06)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
-      : (mobile?.80:(constrained?.62:.74));
+      ? (mobile?.80:.62)
+      : (mobile?.80:(constrained?.76:.84));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let activeOrgan='hero',shapeLockUntil=0;
+    /* R1951b — progressive desktop supersampling.
+       First-time visitors are already covered by the intro, so the permanent
+       MAG can prepare at studio density immediately. Returning/no-intro visits
+       start with a lightweight MSAA+dense-mesh backing store and promote to the
+       full studio backing store on the first real interaction or after a calm
+       fallback window. */
+    let desktopSupersampleArmed=mobile || root.dataset.fxIntroPrepaintR1611==='show';
+    let desktopSupersampleSource=desktopSupersampleArmed?'intro-prewarm':'startup-fast';
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
     cinematic.corePosition=[0,0,.52];
@@ -1855,13 +1884,18 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        ? (mobile?1.58:1.34)
+        : (auditMode ? 1.38 : constrainedMobile?1.72:mobile?2.00:constrained?1.62:2.05);
       const cap=baseCap*qualityScale;
-      const dpr=Math.min(devicePixelRatio||1,cap);
+      const nativeDpr=devicePixelRatio||1;
+      const desktopSupersample=softwareRenderer?1.14:(constrained?1.20:1.32);
+      const desktopStartupSample=softwareRenderer?1.02:(constrained?1.05:1.08);
+      const desktopRequested=desktopSupersampleArmed?desktopSupersample:desktopStartupSample;
+      const requestedDpr=mobile?nativeDpr:Math.max(nativeDpr,desktopRequested);
+      const dpr=Math.min(requestedDpr,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        ? (mobile?920000:690000)
+        : (auditMode ? 1180000 : constrainedMobile?1280000:mobile?1900000:constrained?1750000:3800000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1871,6 +1905,15 @@
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
+      return true;
+    }
+
+    function armDesktopSupersample(source='interaction'){
+      if(mobile||desktopSupersampleArmed||disposed||contextLost)return false;
+      desktopSupersampleArmed=true;
+      desktopSupersampleSource=String(source||'interaction');
+      root.dataset.fxNativeMagSupersampleR1951='armed-'+desktopSupersampleSource;
+      if(resize())schedule(reduced.matches?1:2);
       return true;
     }
 
@@ -2116,7 +2159,10 @@
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
-          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
+          qualityScale=Math.max(
+            qualityFloor,
+            qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.08:.045))
+          );
           panicFrames=24;
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
@@ -2313,6 +2359,7 @@
     }
     let previousScrollY=scrollY;
     function onScroll(){
+      if(!mobile)armDesktopSupersample('scroll');
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
@@ -2349,6 +2396,7 @@
       tx=q.x*(touch?.46:.72);ty=q.y*(touch?.46:.72);
 
       if(desktopFine.matches&&!touch){
+        armDesktopSupersample('pointer');
         /* R1943 desktop: absolute camera bias, independent of mouse polling rate.
            Velocity only adds a tiny impulse; it never accumulates orientation. */
         targetPointerTiltY=clamp(q.x*.095 + dx*.020,-.12,.12);
@@ -2375,6 +2423,7 @@
       });
     }
     function onAmbientPress(event){
+      if(!mobile)armDesktopSupersample('press');
       const q=globalPoint(event);
       tx=q.x*.70;ty=q.y*.70;
       targetEnergy=Math.max(targetEnergy,.72);
@@ -2390,6 +2439,7 @@
       schedule(mobile?2:3);
     }
     function onAmbientWheel(event){
+      if(!mobile)armDesktopSupersample('wheel');
       const impulse=clamp(event.deltaY/180,-1,1);
       targetRotationY+=impulse*.018;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);
@@ -2398,6 +2448,7 @@
     }
     function onAmbientKey(event){
       if(event.repeat)return;
+      if(!mobile)armDesktopSupersample('keyboard');
       const horizontal=event.key==='ArrowLeft'?-1:event.key==='ArrowRight'?1:0;
       const vertical=event.key==='ArrowUp'?1:event.key==='ArrowDown'?-1:0;
       targetRotationY+=horizontal*.055;
@@ -2508,6 +2559,12 @@
       schedule(mobile?2:5);
     },{passive:true});
     listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
+    if(!mobile&&!desktopSupersampleArmed){
+      later(()=>armDesktopSupersample('calm-4200ms'),4200);
+      root.dataset.fxNativeMagSupersampleR1951='startup-fast-then-1-32x';
+    }else if(!mobile){
+      root.dataset.fxNativeMagSupersampleR1951='intro-prewarm-1-32x';
+    }
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
       scheduleSurfacePulse();

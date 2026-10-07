@@ -29,11 +29,11 @@ html[data-fx-mag-birth-live="active"] {
   pointer-events: none;
   opacity: 1;
   filter: brightness(1);
-  transition: opacity .72s cubic-bezier(.22,.61,.36,1), filter .72s cubic-bezier(.22,.61,.36,1);
+  transition: opacity .82s cubic-bezier(.16,.78,.18,1), filter .82s cubic-bezier(.16,.78,.18,1);
 }
 .fx-mag-birth-r533.is-leaving {
   opacity: 0;
-  filter: brightness(1.02);
+  filter: brightness(1.005) saturate(.985);
 }
 .fx-mag-birth-r533::after {
   content: "";
@@ -2256,3 +2256,114 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+/* production-r1951-optical-cinematic-handoff */
+
+
+/* R1952 — MAG boot identity.
+   Deliberately not a badge/panel. It behaves like a transient system
+   identifier etched into the cinematic telemetry layer. */
+.fxb-core-identity{
+  position:absolute;
+  left:50%;
+  top:68.5%;
+  z-index:9;
+  display:grid;
+  justify-items:center;
+  gap:7px;
+  min-width:210px;
+  pointer-events:none;
+  opacity:0;
+  filter:blur(8px);
+  transform:translate3d(-50%,8px,0);
+  will-change:opacity,filter,transform;
+  transition:
+    opacity .36s cubic-bezier(.16,.78,.18,1),
+    filter .42s cubic-bezier(.16,.78,.18,1),
+    transform .42s cubic-bezier(.16,.78,.18,1);
+  color:rgba(230,247,249,.92);
+  text-align:center;
+  isolation:isolate;
+}
+.fxb-core-identity::before{
+  content:"";
+  width:54px;
+  height:1px;
+  margin-bottom:2px;
+  background:
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(119,220,227,.18) 15%,
+      rgba(180,241,242,.70) 50%,
+      rgba(119,220,227,.18) 85%,
+      transparent 100%);
+  box-shadow:0 0 10px rgba(105,224,232,.10);
+}
+.fxb-core-identity::after{
+  content:"";
+  position:absolute;
+  top:-2px;
+  left:50%;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(143,239,235,.96);
+  box-shadow:
+    0 0 8px rgba(102,227,230,.44),
+    0 0 18px rgba(76,195,207,.16);
+}
+.fxb-core-identity-kicker{
+  display:block;
+  font:
+    640 clamp(11px,1.0vw,13px)/1
+    ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  letter-spacing:.205em;
+  text-transform:uppercase;
+  color:rgba(236,249,250,.94);
+  text-shadow:0 0 14px rgba(119,220,227,.06);
+  white-space:nowrap;
+}
+.fxb-core-identity-sub{
+  display:block;
+  font:
+    520 clamp(7px,.63vw,8px)/1
+    ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(151,188,194,.48);
+  white-space:nowrap;
+}
+.fxb-core-identity.is-visible{
+  opacity:1;
+  filter:blur(0);
+  transform:translate3d(-50%,0,0);
+}
+.fxb-core-identity.is-leaving{
+  opacity:0;
+  filter:blur(5px);
+  transform:translate3d(-50%,-5px,0);
+  transition-duration:.42s,.46s,.46s;
+}
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  .fxb-core-identity{
+    top:70%;
+    min-width:180px;
+    gap:6px;
+  }
+  .fxb-core-identity-kicker{
+    font-size:10px;
+    letter-spacing:.18em;
+  }
+  .fxb-core-identity-sub{
+    font-size:6.5px;
+    letter-spacing:.135em;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .fxb-core-identity{
+    transition:none!important;
+    filter:none!important;
+  }
+}
+/* production-r1952-mag-ai-core-transient-boot-identity */

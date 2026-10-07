@@ -1211,7 +1211,19 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
     transform:translate(-50%,-50%) scale(.74)!important;
     filter:blur(.15px);
   }
-  html[data-fx-cinematic-scene-r536="core"] .fx-c536-world{
+  html.fx-c536-cut[data-fx-cinematic-scene-r536="core"] .fx-c536-iris,
+html.fx-c536-cut[data-fx-cinematic-scene-r536="core"] .fx-c536-track{
+  animation:none!important;
+}
+html.fx-c536-cut[data-fx-cinematic-scene-r536="core"] .fx-c536-iris{
+  opacity:.08!important;
+}
+html.fx-c536-cut[data-fx-cinematic-scene-r536="core"] .fx-c536-track{
+  opacity:.012!important;
+}
+/* production-r1951b-core-iris-track-no-cut-spike */
+
+html[data-fx-cinematic-scene-r536="core"] .fx-c536-world{
     opacity:.10!important;
     transform:
       translate(-50%,-50%)

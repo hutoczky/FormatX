@@ -17,7 +17,9 @@ const SHOTS=[
   [3.50,'02-3.50s'],
   [5.50,'03-5.50s'],
   [7.50,'04-7.50s'],
-  [9.25,'05-9.25s']
+  [8.55,'05-8.55s-ai-core-visible'],
+  [9.85,'06-9.85s-ai-core-leaving'],
+  [10.15,'07-10.15s-clean-mag']
 ];
 
 (async()=>{
@@ -284,12 +286,34 @@ const SHOTS=[
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
-          overlay:document.querySelectorAll('.fx-mag-birth-r533').length
+          overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
+          identity:(()=>{
+            const el=document.querySelector('.fxb-core-identity');
+            if(!el)return {present:false,visible:false,leaving:false,text:'',sub:''};
+            return {
+              present:true,
+              visible:el.classList.contains('is-visible'),
+              leaving:el.classList.contains('is-leaving'),
+              text:el.querySelector('.fxb-core-identity-kicker')?.textContent?.trim()||'',
+              sub:el.querySelector('.fxb-core-identity-sub')?.textContent?.trim()||''
+            };
+          })()
         };
       });
 
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      }
+      if(Math.abs(seconds-8.55)<.01){
+        if(!state.identity.present||!state.identity.visible)errors.push('R1952 identity is not visible at 8.55s: '+JSON.stringify(state.identity));
+        if(state.identity.text!=='MAG // AI CORE')errors.push('R1952 identity title mismatch: '+state.identity.text);
+        if(state.identity.sub!=='ONLINE · LOCAL INTELLIGENCE')errors.push('R1952 identity subtitle mismatch: '+state.identity.sub);
+      }
+      if(Math.abs(seconds-9.85)<.01){
+        if(!state.identity.present||!state.identity.leaving)errors.push('R1952 identity is not leaving at 9.85s: '+JSON.stringify(state.identity));
+      }
+      if(seconds>=10.15&&state.identity.present&&(state.identity.visible||!state.identity.leaving)){
+        errors.push('R1952 identity survived into the clean MAG frame: '+JSON.stringify(state.identity));
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
