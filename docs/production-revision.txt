@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1956-menu-owner-mobile-desktop
-base_master=769dc28640ce5156873f815c3d64ac44ee474815
-purpose=ship deterministic hamburger navigation on phone and desktop with an early capture-phase owner, live-nav detachment from header hiding rules, and synchronous visible-open fallback styling
-validation=Chromium 1440x900 desktop and 390x844 touch mobile open-close geometry, aria-expanded state, pointer visibility, section navigation, language controls, infinite-scroll coexistence, production candidate validation
+token=20261007-r1957-cinematic-photoreal-polish
+base_master=eeeb698bd58bcc3432152454f2c22eb7c1dc3bdf
+purpose=finish the award-grade MAG with higher desktop contour fidelity, stable LOD, volumetric depth, continuous cinematic scroll, luxury spacing and MAG AI CORE boot telemetry
+validation=desktop and mobile Lighthouse, P0 fast loop, MAG visual proof, no-occlusion, R536 handoff, menu/account regression checks, Worker parity and exact production revision convergence
