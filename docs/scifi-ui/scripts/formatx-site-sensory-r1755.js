@@ -6,8 +6,7 @@
 const root=document.documentElement;
 if(root.dataset.fxSiteSensoryR1755==='ready'||root.dataset.fxSiteSensoryR1755==='booting')return;
 const params=new URLSearchParams(location.search);
-const audit=navigator.webdriver===true
-  ||/Chrome-Lighthouse/i.test(navigator.userAgent||'')
+const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')
   ||params.get('lighthouse')==='1'
   ||root.dataset.fxP0AuditModeR1728==='static-first-paint-no-late-webgl';
 if(audit){
