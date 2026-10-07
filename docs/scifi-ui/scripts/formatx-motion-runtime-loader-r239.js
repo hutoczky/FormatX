@@ -46,7 +46,7 @@ root.dataset.fxPerformancePolicyR1779='mobile-obsidian-zero-tendrils-broad-facet
 root.dataset.fxPerformancePolicyR1781='clean-mobile-facets-no-aliased-surface-patterns';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');
-const mobile=matchMedia('(max-width:900px),(pointer:coarse)');
+const mobile=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261007-r1950-desktop-edge-aa';

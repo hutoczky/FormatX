@@ -20,7 +20,7 @@
   // language/link scans, reveal observers and scene/flow observers during the
   // first-load critical window. Publish apexready only after the complete defer
   // chain has subscribed, so final control owners never miss the event.
-  const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const MOBILE_NATIVE_CORE = matchMedia('(max-width: 900px), (max-aspect-ratio: 27/25)').matches;
   if (MOBILE_NATIVE_CORE) {
     ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxApexMobileR293 = 'delegated-native-core-no-startup-scan';
