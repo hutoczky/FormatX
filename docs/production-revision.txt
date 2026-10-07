@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1955-registration-download-gate
-base_master=402b681b4055dcd127815ee0934522809d1e9bc7
-purpose=ship public FormatX registration and sign-in before official downloads, optional 30-day remembered login, secure D1-backed sessions, and the unified owner admin refinements
-validation=public account Worker tests, PBKDF2 password storage, HttpOnly Secure SameSite session cookie contract, anonymous download redirect to /account/, authenticated download gate, account UI, privacy/terms parity, bilingual download copy, production smoke and exact-revision convergence
+token=20261007-r1956-award-final-polish
+base_master=95a4b127570c05955bb19c908791f9f312944b69
+purpose=ship the award-final FormatX hero polish: persistent desktop MAG edge AA, smoked-silver volumetric/refraction depth, restrained chamber haze and contact grounding, continuous intro-to-MAG crossfade, stabilised MAG // AI CORE boot telemetry, and luxury desktop chapter spacing
+validation=desktop native MAG proof, intro keyframes, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, NET speed, no-occlusion, R536 cinematic handoff, Worker CSP/cache parity and exact-revision production convergence
