@@ -13,7 +13,41 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [] };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], geometryTimelineR1968c: [] };
+    try {
+      let lastKey='', frames=0;
+      const tick = now => {
+        frames += 1;
+        const read = selector => {
+          const el=document.querySelector(selector);
+          if(!(el instanceof Element)) return null;
+          const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+          return {
+            x:r.x,y:r.y,w:r.width,h:r.height,
+            transform:s.transform,scale:s.scale,zoom:s.zoom,
+            width:s.width,height:s.height,minWidth:s.minWidth,minHeight:s.minHeight,
+            position:s.position,top:s.top,right:s.right,bottom:s.bottom,left:s.left,
+            display:s.display,margin:s.margin,padding:s.padding,
+            cls:el.getAttribute('class')||'',inline:el.getAttribute('style')||''
+          };
+        };
+        const row={
+          t:performance.now(),
+          sound:read('#hero .fx-three-sound'),
+          ask:read('#hero .fx-reference-ask'),
+          controls:read('#hero .fx-reference-controls-r204'),
+          topbar:read('.topbar'),
+          hero:read('#hero')
+        };
+        const key=JSON.stringify(row,(k,v)=>k==='t'?undefined:v);
+        if(key!==lastKey && (row.sound||row.controls||row.topbar)){
+          window.__fxPerf.geometryTimelineR1968c.push(row);
+          lastKey=key;
+        }
+        if(now<900 && frames<90) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    } catch (_) {}
     try {
       new PerformanceObserver(list => {
         const entries = list.getEntries();
@@ -236,6 +270,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
+      geometryTimelineR1968c: window.__fxPerf.geometryTimelineR1968c,
       memory,
       styleOrigins: (() => {
         const targets = {
