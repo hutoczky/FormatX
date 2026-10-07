@@ -1446,3 +1446,92 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
    Coarse input on a desktop/touch laptop does not make the page a phone.
    Mobile geometry is <=900px; 901px+ keeps the stable desktop contract. */
 /* production-r1965-width-owned-mobile-layout */
+
+/* R1967 — parser-equivalent desktop geometry in the actual render-blocking P0.
+   FCP must already equal the settled desktop scene: no body-margin flash, no
+   132px legacy controls, no 178px header, no late proof/header relocation. */
+@media (min-width:901px){
+  html,html body,body.living-architecture{
+    margin:0!important;padding:0!important;width:100%!important;min-width:0!important;
+    box-sizing:border-box!important;overflow-x:clip!important;
+  }
+  html body.living-architecture .topbar{
+    position:relative!important;display:block!important;box-sizing:border-box!important;
+    width:100%!important;height:76px!important;min-height:76px!important;max-height:76px!important;
+    margin:0!important;padding:0!important;overflow:visible!important;
+  }
+  html body.living-architecture .topbar>.brand{
+    position:absolute!important;left:60px!important;top:0!important;
+    display:inline-flex!important;align-items:center!important;gap:10px!important;
+    width:auto!important;height:76px!important;min-height:76px!important;margin:0!important;
+    opacity:1!important;visibility:visible!important;transform:none!important;
+  }
+  html body.living-architecture .topbar>.brand img{
+    display:block!important;width:38px!important;min-width:38px!important;max-width:38px!important;
+    height:38px!important;min-height:38px!important;max-height:38px!important;
+  }
+  html body.living-architecture .topbar>.header-actions{display:none!important;visibility:hidden!important}
+  html body.living-architecture main#main-content section#hero.scene.hero{
+    position:relative!important;display:block!important;box-sizing:border-box!important;
+    width:100%!important;height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    min-height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    max-height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    margin:0!important;padding:36px 0 92px!important;overflow:visible!important;isolation:isolate!important;
+  }
+  html body.living-architecture #hero>.hero-grid{
+    position:relative!important;display:grid!important;
+    grid-template-columns:minmax(0,.86fr) minmax(430px,1.14fr)!important;
+    grid-template-rows:clamp(520px,42vw,620px) 258px!important;
+    grid-template-areas:"copy space" "heading proof"!important;align-items:center!important;
+    box-sizing:border-box!important;width:min(1320px,calc(100% - 80px))!important;max-width:1320px!important;
+    height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    min-height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    margin:0 auto!important;padding:0!important;gap:30px 56px!important;overflow:visible!important;
+  }
+  html body.living-architecture #hero>.hero-grid>.hero-copy{
+    grid-area:copy!important;position:relative!important;display:block!important;align-self:center!important;
+    width:100%!important;min-width:0!important;max-width:580px!important;min-height:575px!important;
+    margin:0!important;padding:0!important;opacity:1!important;visibility:visible!important;
+    transform:none!important;filter:none!important;overflow:visible!important;
+  }
+  html body.living-architecture #hero>.hero-grid>.hero-space{
+    grid-area:space!important;position:relative!important;display:block!important;align-self:center!important;
+    width:100%!important;max-width:100%!important;height:clamp(520px,42vw,620px)!important;
+    min-height:clamp(520px,42vw,620px)!important;max-height:620px!important;
+    margin:0!important;padding:0!important;opacity:1!important;visibility:visible!important;overflow:visible!important;
+  }
+  html:root:root:root body.living-architecture #hero .hero-space>.fx-reference-controls-r204{
+    position:absolute!important;inset:auto auto 28px 50%!important;z-index:12080!important;
+    display:grid!important;grid-template-columns:repeat(3,54px)!important;grid-template-rows:54px!important;
+    align-items:start!important;justify-items:center!important;justify-content:center!important;
+    column-gap:14px!important;row-gap:0!important;width:190px!important;min-width:190px!important;max-width:190px!important;
+    height:76px!important;min-height:76px!important;max-height:76px!important;
+    margin:0!important;padding:0 7px 22px!important;opacity:1!important;visibility:visible!important;
+    pointer-events:auto!important;transform:translateX(-50%)!important;translate:none!important;overflow:visible!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204>.fx-reference-rail{
+    display:contents!important;position:static!important;inset:auto!important;width:auto!important;height:auto!important;
+    margin:0!important;padding:0!important;transform:none!important;translate:none!important;
+  }
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204>.fx-three-sound,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html:root:root:root body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause{
+    position:relative!important;inset:auto!important;box-sizing:border-box!important;
+    width:54px!important;min-width:54px!important;max-width:54px!important;
+    height:54px!important;min-height:54px!important;max-height:54px!important;
+    margin:0!important;padding:0!important;border-radius:50%!important;transform:none!important;translate:none!important;
+    opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+  }
+  html body.living-architecture #hero>.hero-grid>.fx-reference-heading{
+    grid-area:heading!important;position:relative!important;display:flex!important;align-self:center!important;
+    width:100%!important;height:24px!important;min-height:24px!important;margin:0!important;
+    opacity:1!important;visibility:visible!important;transform:none!important;
+  }
+  html body.living-architecture #hero>.hero-grid>.fx-reference-proof{
+    grid-area:proof!important;position:relative!important;display:block!important;align-self:start!important;
+    box-sizing:border-box!important;width:100%!important;height:auto!important;min-height:258px!important;
+    margin:0!important;opacity:1!important;visibility:visible!important;transform:none!important;
+  }
+}
+/* production-r1967-parser-equivalent-desktop-p0 */
