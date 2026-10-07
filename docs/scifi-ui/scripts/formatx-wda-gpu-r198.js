@@ -7,7 +7,7 @@
   root.dataset.fxWdaTargetFps = '60';
   root.dataset.fxWdaFrameBudgetMs = '16.67';
 
-  const mobile = matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const mobile = matchMedia('(max-width: 900px), (max-aspect-ratio: 27/25)').matches;
   if (!mobile) {
     root.dataset.fxWdaGpuMode = 'desktop-native';
     root.dataset.fxWdaRenderScale = '1.00';

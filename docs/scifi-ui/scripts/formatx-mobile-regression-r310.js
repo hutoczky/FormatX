@@ -11,8 +11,8 @@
   const REFERENCE_LAYOUT_SCRIPT_URL = '/scifi-ui/scripts/formatx-mobile-reference-layout-v1.js?v=20260830-r458-static-first-paint-owner';
   const LANGUAGE_OWNER_URL = '/scifi-ui/scripts/formatx-language-query-owner-r329.js?v=20260824-r331-startup-query-authority';
   const WDA_R310_STYLE_CONTRACT = 'formatx-mobile-regression-r310.css?v=20260823-r310-live-mobile-regressions';
-  const DESKTOP_LOOP_QUERY = matchMedia('(min-width: 901px) and (pointer: fine)');
-  const MOBILE_REFERENCE_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
+  const DESKTOP_LOOP_QUERY = matchMedia('(min-width: 901px)');
+  const MOBILE_REFERENCE_QUERY = matchMedia('(max-width: 900px), (max-aspect-ratio: 27/25)');
   const PRODUCTION_FIRST_PAINT_SELECTOR = 'link[data-fx-production-first-paint-r370],link[data-fx-mobile-first-paint-r358]';
   root.dataset.fxMobileRegressionWdaContract = WDA_R310_STYLE_CONTRACT.includes('r310-live-mobile-regressions') ? 'r310-compatible' : 'unknown';
   let qrGeneration = 0;
