@@ -249,3 +249,35 @@
     transform: none;
   }
 }
+
+
+/* R1951 — luxury editorial breathing room.
+   More negative space, fewer simultaneous visual demands, no content removal. */
+@media (min-width:1100px) and (hover:hover) and (pointer:fine){
+  html body.living-architecture main > :is(
+    #experience,#capabilities,#pricing,#system
+  ).scene:not(#hero){
+    min-height:clamp(700px,88svh,920px)!important;
+    padding-block:clamp(92px,10vh,132px)!important;
+  }
+
+  html body.living-architecture main > :is(
+    #network,#resources
+  ).scene:not(#hero){
+    min-height:clamp(620px,78svh,820px)!important;
+    padding-block:clamp(80px,9vh,116px)!important;
+  }
+
+  html body.living-architecture main > :is(
+    #experience,#capabilities,#pricing,#system,#network,#resources
+  ).scene:not(#hero) > .section-heading{
+    margin-bottom:clamp(42px,5.4vh,70px)!important;
+  }
+
+  html body.living-architecture :is(
+    .cards,.pricing,.system-grid,.release-layout,.flow
+  ){
+    row-gap:clamp(26px,2.8vw,44px)!important;
+  }
+}
+/* production-r1951-luxury-editorial-breathing-room */
