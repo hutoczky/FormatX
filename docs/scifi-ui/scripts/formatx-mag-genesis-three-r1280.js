@@ -937,21 +937,21 @@
       // R1941 Signature body: four authored points with recessed curved valleys.
       const baseShape=new T.Shape();
       baseShape.moveTo(0,1.08);
-      baseShape.bezierCurveTo(.08,.76,.17,.42,.24,.25);
-      baseShape.bezierCurveTo(.43,.18,.74,.08,.99,0);
-      baseShape.bezierCurveTo(.72,-.08,.42,-.18,.23,-.26);
-      baseShape.bezierCurveTo(.16,-.45,.08,-.78,0,-1.03);
-      baseShape.bezierCurveTo(-.08,-.78,-.16,-.45,-.23,-.26);
-      baseShape.bezierCurveTo(-.42,-.18,-.72,-.08,-.99,0);
-      baseShape.bezierCurveTo(-.74,.08,-.43,.18,-.24,.25);
-      baseShape.bezierCurveTo(-.17,.42,-.08,.76,0,1.08);
+      baseShape.bezierCurveTo(.035,.84,.11,.53,.25,.30);
+      baseShape.bezierCurveTo(.44,.20,.73,.075,1.00,0);
+      baseShape.bezierCurveTo(.73,-.075,.44,-.20,.25,-.30);
+      baseShape.bezierCurveTo(.11,-.53,.035,-.84,0,-1.07);
+      baseShape.bezierCurveTo(-.035,-.84,-.11,-.53,-.25,-.30);
+      baseShape.bezierCurveTo(-.44,-.20,-.73,-.075,-1.00,0);
+      baseShape.bezierCurveTo(-.73,.075,-.44,.20,-.25,.30);
+      baseShape.bezierCurveTo(-.11,.53,-.035,.84,0,1.08);
       const baseGeo=new T.ExtrudeGeometry(baseShape,{
-        depth:.40,bevelEnabled:true,bevelSegments:6,steps:1,
-        bevelSize:.060,bevelThickness:.078,curveSegments:28
+        depth:.30,bevelEnabled:true,bevelSegments:8,steps:1,
+        bevelSize:.070,bevelThickness:.064,curveSegments:40
       });
       baseGeo.center();
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
-      this.mechBody.scale.set(1.02,1.02,1.00);
+      this.mechBody.scale.set(1.055,1.02,.92);
       this.mechBody.position.z=-.03;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
@@ -984,7 +984,7 @@
       });
       cradleGeo.center();
       this.mechCradle=new T.Mesh(cradleGeo,this.mechMidMaterial);
-      this.mechCradle.scale.set(.78,.78,.64);
+      this.mechCradle.scale.set(.64,.64,.54);
       this.mechCradle.position.z=.24;
       this.mechanicalGroup.add(this.mechCradle);
 
@@ -1404,29 +1404,29 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
+        mix(.031,.112,finale),
+        mix(.090,.132,finale),
         mix(.106,.132,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.066,finale),
-        mix(.125,.142,finale),
-        mix(.145,.150,finale)
+        mix(.039,.110,finale),
+        mix(.125,.146,finale),
+        mix(.145,.148,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
+        mix(.480,.585,finale),
+        mix(.575,.620,finale),
+        mix(.565,.605,finale)
       );
-      this.mechMaterial.transmission=mix(.34,.44,finale);
-      this.mechMidMaterial.transmission=mix(.40,.49,finale);
-      this.mechMaterial.roughness=mix(.110,.098,finale);
-      this.mechMidMaterial.roughness=mix(.102,.090,finale);
-      this.silverMaterial.roughness=mix(.085,.100,finale);
+      this.mechMaterial.transmission=mix(.34,.49,finale);
+      this.mechMidMaterial.transmission=mix(.40,.54,finale);
+      this.mechMaterial.roughness=mix(.110,.092,finale);
+      this.mechMidMaterial.roughness=mix(.102,.086,finale);
+      this.silverMaterial.roughness=mix(.085,.090,finale);
 
-      this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
+      this.mechMaterial.opacity=(.86+.035*finale)*grow;
+      this.mechMidMaterial.opacity=(.34+.035*finale)*grow;
+      this.silverMaterial.opacity=(.31+.045*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
@@ -1440,7 +1440,7 @@
       }
       if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
       if(this.innerPrism){
-        this.innerPrismMaterial.opacity=(.10+.16*finale)*grow;
+        this.innerPrismMaterial.opacity=(.08+.12*finale)*grow;
         this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
         this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
       }
@@ -1616,6 +1616,7 @@
   document.documentElement.dataset.fxMagReferenceR1940='r1280-armored-pod-cyan-eye-segmented-tendrils';
   document.documentElement.dataset.fxMagSignatureR1941='four-point-smoked-bioglass-central-optic-single-iconic-object';
   document.documentElement.dataset.fxMagSignatureR1942='four-point-prism-depth-recessed-optic-smoked-silver-bioglass';
+  document.documentElement.dataset.fxMagSignatureR1951='matched-curved-four-point-smoked-silver-optical-handoff';
   document.documentElement.dataset.fxMagIntroStudioR1950='desktop-msaa-2x-dpr-neutral-softbox-controlled-optical-finale';
   document.documentElement.dataset.fxMagIntroStudioR1950b='nested-prism-physical-lens-clean-finale-debris-fade';
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
