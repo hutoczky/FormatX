@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1951-cinematic-studio-final
+token=20261007-r1951b-progressive-studio-aa
 base_master=2e7c753e8c15a250bc4e625aa59c0f2322971413
-purpose=ship the final desktop Signature MAG anti-aliasing and cinematic studio pass with true DPR1 supersampling, no canvas scale resampling, volumetric haze, contact shadow, restrained bloom, continuous pointer and scroll camera, optical intro handoff and lower-noise luxury editorial rhythm
+purpose=ship the final desktop Signature MAG cinematic studio pass with progressive 1.08-to-1.32x supersampling, MSAA and dense topology without canvas resampling, volumetric haze, contact shadow, restrained bloom, continuous pointer and scroll camera, optical intro handoff, quiet core overlays and lower-noise luxury editorial rhythm
 validation=desktop hero contour proof, desktop intro keyframes, mobile MAG proof, Lighthouse desktop/mobile, P0 fast loop, canonical visual contracts, no-occlusion, R536 handoff, Worker rewrite parity and exact-revision production convergence
