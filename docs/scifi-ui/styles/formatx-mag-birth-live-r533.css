@@ -32,8 +32,11 @@ html[data-fx-mag-birth-live="active"] {
   transition: opacity .72s cubic-bezier(.22,.61,.36,1), filter .72s cubic-bezier(.22,.61,.36,1);
 }
 .fx-mag-birth-r533.is-leaving {
-  opacity: 0;
-  filter: brightness(1.02);
+  opacity:0;
+  filter:brightness(.985) saturate(.96) blur(1.2px);
+  transition:
+    opacity .82s cubic-bezier(.22,.61,.36,1),
+    filter .82s cubic-bezier(.22,.61,.36,1);
 }
 .fx-mag-birth-r533::after {
   content: "";
