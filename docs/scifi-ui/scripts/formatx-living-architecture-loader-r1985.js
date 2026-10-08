@@ -13,6 +13,7 @@
   let started = false;
   let pending = false;
   let idleHandle = 0;
+  let quietWindowTimer = 0;
   let observer = null;
 
   function start(reason) {
@@ -20,6 +21,7 @@
     started = true;
     observer?.disconnect();
     if (idleHandle && 'cancelIdleCallback' in window) cancelIdleCallback(idleHandle);
+    if (quietWindowTimer) clearTimeout(quietWindowTimer);
     root.dataset.fxLivingArchitectureLoaderR1985 = 'loading:' + reason;
     if (document.querySelector(runtimeSelector)) return;
 
@@ -43,11 +45,20 @@
     observer?.disconnect();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (started) return;
-      if ('requestIdleCallback' in window) {
-        idleHandle = requestIdleCallback(() => start(reason + '-idle'), { timeout: 1200 });
-      } else {
-        setTimeout(() => start(reason + '-fallback'), 0);
-      }
+      /* R2051: the optional commerce/organism initializer can monopolize
+         the main thread while the visible hero title is still painting.
+         Let the essential native content settle for 1400ms after FCP.
+         Any actual pointer/keyboard/wheel/immersive request calls start()
+         immediately; this window never blocks a user-initiated action. */
+      quietWindowTimer = setTimeout(() => {
+        quietWindowTimer = 0;
+        if (started) return;
+        if ('requestIdleCallback' in window) {
+          idleHandle = requestIdleCallback(() => start(reason + '-idle'), { timeout: 1100 });
+        } else {
+          start(reason + '-fallback');
+        }
+      }, 1400);
     }));
   }
 
