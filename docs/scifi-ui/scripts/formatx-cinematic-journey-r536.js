@@ -274,6 +274,21 @@
     const fastScroll=reason==='scroll'&&Math.abs(velocity)>.28;
     active=index;
 
+    /* R2034: a deferred scene commit may outlive the logical active index.
+       A resize/refresh or a second top-scroll event can see active===0 while
+       the visible committed scene remains non-core. The document origin is an
+       invariant, so make the semantic MAG state synchronous here, independent
+       of stale scene geometry or an animation-frame callback. */
+    if(index===0 && scrollY<=Math.max(2,innerHeight*.015)
+       && (committedSceneIndex!==0 || root.dataset.fxCinematicSceneR536!=='core')){
+      clearTimeout(sceneCommitTimer);
+      sceneCommitTimer=0;
+      pendingSceneIndex=-1;
+      commitScene(0,committedSceneIndex,'document-top-invariant-r2034');
+      root.dataset.fxCinematicTopReturnR2034='synchronous-core-commit';
+      return;
+    }
+
     /* R1976: the hero world floor follows the logical active scene immediately.
        Fast-scroll CSS may still keep compositor-lite opacity during motion, but
        the core-only inline !important floor must never survive into non-core
