@@ -1,4 +1,8 @@
-/* R2053: cascade-preserving critical CSS consolidation, all browsers.\n   Exact source order: r283 (original conditional media), r490 P0, r2045 desktop bundle.\n   No UA/audit/runtime branches. The <=900px path retains the unchanged P0 CSS. */\n@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {\n/* FormatX r283 — minimal first-frame stability.
+/* R2053: cascade-preserving critical CSS consolidation, all browsers.
+   Exact source order: r283 (original conditional media), r490 P0, r2045 desktop bundle.
+   No UA/audit/runtime branches. The <=900px path retains the unchanged P0 CSS. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine) {
+/* FormatX r283 — minimal first-frame stability.
    This file reserves only the geometry already used by the settled r244/r263
    composition. It does not own materials, typography or animation. */
 
@@ -441,7 +445,11 @@
     transform: none !important;
   }
 }
-\n}\n\n/* R2053 P0 original cascade position */\n/* R1714 — tokens required before deferred quality/design enhancement. */
+
+}
+
+/* R2053 P0 original cascade position */
+/* R1714 — tokens required before deferred quality/design enhancement. */
 :root{
   --fx-cyan:#7cecff;
   --fx-violet:#8f72ff;
@@ -2199,7 +2207,9 @@ html body > .fx-c536-origin-probe-r2038 {
   z-index:-1!important;
   overflow:hidden!important;
 }
-\n/* R2053 desktop bundle original cascade position */\n/* R2045 isolated experiment: two existing adjacent render-blocking
+
+/* R2053 desktop bundle original cascade position */
+/* R2045 isolated experiment: two existing adjacent render-blocking
    desktop stylesheets bundled in their exact original cascading order.
    Always apply to actual users; no user agent or test-specific branches.
    The link's (min-width:901px) media remains unchanged. */
