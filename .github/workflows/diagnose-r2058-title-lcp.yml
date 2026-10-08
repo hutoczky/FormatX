@@ -35,6 +35,7 @@ jobs:
           exit 1
       - name: Capture four desktop paths (no Lighthouse score overrides)
         run: |
+          set -o pipefail
           NODE_PATH="$RUNNER_TEMP/fx-probe/node_modules" \
           FORMATX_TEST_URL=http://127.0.0.1:4195/scifi-ui/index.html \
           FORMATX_LCP_DIAGNOSTICS=artifacts/diagnostics/r2058-lcp.json \
