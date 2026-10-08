@@ -1756,3 +1756,14 @@ html body > .fx-c536-origin-probe-r2038 {
   z-index:-1!important;
   overflow:hidden!important;
 }
+
+/* R2043 — experimental production-wide hero text style/layout containment.
+   Same CSS for every visitor; no audit or Lighthouse user-agent selector.
+   Keep paint containment disabled, so glyph glows and focus rings are visible.
+   Browser layout may reduce propagation into the full cinematic document. */
+@media (min-width:901px) {
+  html[data-fx-design-system="2"] body.living-architecture
+  #hero > .hero-grid > .hero-copy {
+    contain:layout style!important;
+  }
+}
