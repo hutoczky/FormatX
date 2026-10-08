@@ -42,6 +42,12 @@ async function evaluate(viewport,isMobile,browser){
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
+    let postRefresh=null;
+    if(state.scene!==scene.key){
+      await page.evaluate(()=>window.FormatXArchiveExperience.refresh());
+      await page.waitForTimeout(240);
+      postRefresh=await page.evaluate(()=>window.FormatXArchiveExperience.state);
+    }
     const diagnostics=await page.evaluate(sel=>{
       const node=document.querySelector(sel),r=node?.getBoundingClientRect();
       return {scrollY,scrollHeight:document.documentElement.scrollHeight,innerHeight,
@@ -49,7 +55,7 @@ async function evaluate(viewport,isMobile,browser){
         archive:document.documentElement.dataset.fxArchiveDock,
         nearby:[...document.querySelectorAll('[data-fx-archive-scene]')].map(n=>{const b=n.getBoundingClientRect();return{key:n.dataset.fxArchiveScene,top:Math.round(b.top),bottom:Math.round(b.bottom)};}).slice(0,12)};
     },selector);
-    console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,diagnostics}));
+    console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});

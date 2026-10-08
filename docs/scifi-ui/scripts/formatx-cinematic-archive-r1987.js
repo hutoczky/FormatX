@@ -26,7 +26,7 @@
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null,originalStyle='';
-  let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false;
+  let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null;
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
@@ -315,6 +315,9 @@ void main(){
   }
   function update(){
     raf=0;if(disposed||document.hidden||reduced.matches)return;
+    updates++;
+    root.dataset.fxArchiveUpdateCount=String(updates);
+    root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
     const hero=document.getElementById('hero'),end=hero?.getBoundingClientRect().bottom||0;
@@ -337,7 +340,11 @@ void main(){
       lastGpu=now;window.FormatXLivingCore?.requestRender?.(1);
     }
   }
-  function invalidate(){if(!raf&&!disposed)raf=requestAnimationFrame(update);}
+  function invalidate(){
+    if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
+      try{update();}catch(e){raf=0;root.dataset.fxArchiveError=String(e?.message||e);console.error('FormatX archive update error',e);}
+    });
+  }
   function connect(){
     if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
     const api=window.FormatXLivingCore;
@@ -361,6 +368,7 @@ void main(){
   function stop(){
     if(disposed)return;
     disposed=true;
+    root.dataset.fxArchiveStopReason='lifecycle-stop';
     if(raf)cancelAnimationFrame(raf);
     sceneObserver?.disconnect();
     sceneObserver=null;
@@ -390,7 +398,7 @@ void main(){
   }
   window.FormatXArchiveExperience={
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.node.id||s.selector}));},
-    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality};},
+    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
     refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
