@@ -536,6 +536,36 @@
     addEventListener('blur',onCinematicPointerLeave,{passive:true});
   }
 
+  /* R2038 — an actual document-origin sentinel provides a native visual
+     geometry signal when a headless/browser integration suppresses scroll
+     events. IntersectionObserver is compositor driven and idles completely:
+     no interval, no permanent RAF, and no global scrollTo monkeypatch. */
+  function bindOriginReentry() {
+    if (!('IntersectionObserver' in window) || !(document.body instanceof HTMLElement)) return;
+    let probe = document.querySelector('.fx-c536-origin-probe-r2038');
+    if (!(probe instanceof HTMLElement)) {
+      probe = document.createElement('span');
+      probe.className = 'fx-c536-origin-probe-r2038';
+      probe.setAttribute('aria-hidden', 'true');
+      document.body.prepend(probe);
+    }
+    const observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.target === probe && entry.isIntersecting)) return;
+      if (scrollY > Math.max(2, innerHeight * .015)) return;
+      if (committedSceneIndex === 0 && root.dataset.fxCinematicSceneR536 === 'core') return;
+      clearTimeout(sceneCommitTimer);
+      sceneCommitTimer = 0;
+      pendingSceneIndex = -1;
+      active = 0;
+      commitScene(0, committedSceneIndex, 'document-origin-intersection-r2038');
+      root.dataset.fxCinematicHeroWorldR1976 = 'core-floor-active';
+      root.dataset.fxCinematicTopReturnR2038 = 'native-origin-visible-core-commit';
+    }, { threshold: 0 });
+    observer.observe(probe);
+    root.dataset.fxCinematicOriginWatchR2038 = 'observer-active-no-idle-poll';
+    addEventListener('pagehide', () => { observer.disconnect(); probe.remove(); }, { once: true });
+  }
+
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -558,6 +588,7 @@
     updateHud(scenes[0]);
     bindDynamicDiscovery();
     bindCinematicInteraction();
+    bindOriginReentry();
 
     addEventListener('scroll',()=>{
       /* R1949 — document top is a semantic scene boundary, not a delayed
