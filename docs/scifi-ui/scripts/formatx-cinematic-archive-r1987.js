@@ -45,10 +45,16 @@
       if(!scenes.length)return null;
       // Absolute layout only, never alter document scroll position.
       let closest=null,score=Infinity;
+      const anchor=innerHeight*.52;
       for(const s of scenes){
         const r=s.node.getBoundingClientRect();
-        const anchor=innerHeight*.57;
-        const delta=Math.abs(r.top+r.height*.23-anchor);
+        if(r.height<1||r.width<1)continue;
+        const contains=r.top<=anchor&&r.bottom>=anchor;
+        const distance=contains ? Math.abs((r.top+r.bottom)*.5-anchor)/Math.max(1,r.height)
+          : r.top>anchor ? r.top-anchor : anchor-r.bottom;
+        // Prefer the real visible section containing the viewport's reading line.
+        // Tall sections must never lose to a neighbour's off-screen quarter point.
+        const delta=contains?distance*.01:10+distance;
         if(delta<score){score=delta;closest={s,rect:r};}
       }
       if(!closest)return null;

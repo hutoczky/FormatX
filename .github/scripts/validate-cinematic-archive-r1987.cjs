@@ -39,6 +39,7 @@ async function evaluate(viewport,isMobile,browser){
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
     await page.waitForTimeout(isMobile?160:90);
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
+    console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress}));
     if(state.scene===scene.key&&state.active){
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
