@@ -2,13 +2,13 @@
   'use strict';
 
   const root = document.documentElement;
-  const audit = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || new URLSearchParams(location.search).get('lighthouse') === '1';
   if (root.dataset.fxDeferredCssR487) return;
   root.dataset.fxDeferredCssR487 = 'queued-fcp';
 
   let activated = false;
   let frame = 0;
   let fallback = 0;
+  let quietTimer = 0;
   let observer = null;
 
   function activate(reason) {
@@ -16,19 +16,13 @@
     activated = true;
     if (frame) cancelAnimationFrame(frame);
     if (fallback) clearTimeout(fallback);
+    if (quietTimer) clearTimeout(quietTimer);
     observer?.disconnect?.();
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     let activatedCount = 0;
-    let auditSkippedCount = 0;
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
-      if (audit && link.hasAttribute('data-fx-critical-core-r227')) {
-        link.media = 'print';
-        link.dataset.fxR1970AuditDeferred = 'critical-core-skipped';
-        auditSkippedCount += 1;
-        continue;
-      }
       const targetMedia = link.dataset.fxR487Media || 'all';
       if (link.media !== targetMedia) link.media = targetMedia;
       link.removeAttribute('fetchpriority');
@@ -37,7 +31,6 @@
 
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
-    root.dataset.fxDeferredCssAuditSkippedR1970 = String(auditSkippedCount);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
       detail: { count: links.length, scheduler: 'post-first-contentful-paint-r526', reason }
@@ -52,7 +45,7 @@
      Give that real first frame time to settle. Real user intent activates
      every optional bundle immediately; no audit/user-agent branching. */
   function activateAfterCommittedFrame(reason) {
-    if (activated || frame || fallback) return;
+    if (activated || frame || quietTimer) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
       // R2020: hero disclosure is critical state, not optional below-fold UI.
@@ -62,8 +55,8 @@
       if (sceneCss instanceof HTMLLinkElement) {
         sceneCss.media = sceneCss.dataset.fxR487Media || 'all';
       }
-      fallback = setTimeout(() => {
-        fallback = 0;
+      quietTimer = setTimeout(() => {
+        quietTimer = 0;
         activate(reason + '-quiet-window');
       }, 2200);
     });
@@ -77,6 +70,7 @@
     for (const type of intentTypes) removeEventListener(type, onIntent, true);
     if (frame) cancelAnimationFrame(frame);
     if (fallback) clearTimeout(fallback);
+    if (quietTimer) clearTimeout(quietTimer);
   }, { once: true });
 
   function hasFcp() {
