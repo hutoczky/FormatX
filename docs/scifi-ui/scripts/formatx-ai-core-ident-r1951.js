@@ -8,7 +8,7 @@
   const PARAMS = new URLSearchParams(location.search);
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1' || /Chrome-Lighthouse/i.test(navigator.userAgent || '');
   const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
-  const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
+  const MOBILE = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let shown = false;
   let exitTimer = 0;
@@ -42,7 +42,7 @@
 
     const sub = document.createElement('span');
     sub.className = 'fx-ai-core-ident-r1951__sub';
-    sub.textContent = ROOT.lang === 'en' ? 'ONLINE · LOCAL INTELLIGENCE' : 'ONLINE · HELYI INTELLIGENCIA';
+    sub.textContent = 'ONLINE · LOCAL INTELLIGENCE';
 
     badge.append(title, sub);
     document.body.appendChild(badge);
