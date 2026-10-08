@@ -4,7 +4,6 @@
   'use strict';
   const root=document.documentElement;
   const section=document.querySelector('#network[data-fx-net-speed-r1800]');
-  const source=document.querySelector('template[data-fx-net-runtime-r2044] script[src]');
   // Query the inert template content explicitly: template descendants do not
   // appear in the document's regular selector tree.
   const tpl=document.querySelector('template[data-fx-net-runtime-r2044]');
