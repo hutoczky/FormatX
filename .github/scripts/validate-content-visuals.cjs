@@ -254,7 +254,7 @@ async function assertHeroDisclosure(page) {
 
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
   try {
-    await page.waitForFunction(() => document.documentElement.dataset.fxCinematicSceneR536 === 'core', null, { timeout: 8000 });
+    await page.waitForFunction(() => document.documentElement.dataset.fxCinematicSceneR536 === 'core', null, { timeout: 8000, polling: 80 });
   } catch(error) {
     const diagnostics=await page.evaluate(()=>({
       y:scrollY,
