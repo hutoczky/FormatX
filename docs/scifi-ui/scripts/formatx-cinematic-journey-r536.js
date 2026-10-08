@@ -70,6 +70,8 @@
   let scrollBudgetTimer=0;
   let lastNativeScrollEventAt=performance.now();
   let nativeSceneObserver=null;
+  let nativePositionCheckTimer=0;
+  let lastDeliveredScrollY=scrollY;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -239,6 +241,7 @@
     index=clamp(index,0,scenes.length-1);
     previous=clamp(previous,0,scenes.length-1);
     committedSceneIndex=index;
+    if (index!==0) armNativePositionCheck();
     const from=Math.min(previous,index);
     const to=Math.max(previous,index);
     for(let i=from;i<=to;i++){
@@ -598,6 +601,40 @@
     addEventListener('pagehide', () => nativeSceneObserver?.disconnect(), { once: true });
   }
 
+  /* R2040 — recover from lost native scroll/IO notifications. Only after a
+     non-core chapter has actually been committed, briefly sample scrollY at
+     160 ms cadence. No visual RAF, no getBoundingClientRect, and no DOM/CSS
+     mutation unless the browser's real position disagrees with its scene.
+     Stop completely upon successful return to the canonical MAG origin. */
+  function armNativePositionCheck() {
+    if (nativePositionCheckTimer || document.hidden || !scenes.length) return;
+    nativePositionCheckTimer = setTimeout(() => {
+      nativePositionCheckTimer = 0;
+      if (document.hidden) return;
+      const y = scrollY;
+      const atOrigin = y <= Math.max(2, innerHeight*.015);
+      const missingScrollNotification = Math.abs(y-lastDeliveredScrollY)>12;
+      const needsCore = atOrigin && (committedSceneIndex!==0
+        || root.dataset.fxCinematicSceneR536!=='core');
+      if (needsCore || (!atOrigin && missingScrollNotification)) {
+        const target = atOrigin ? 0 : pickActive(y);
+        if (target!==committedSceneIndex ||
+            root.dataset.fxCinematicSceneR536!==scenes[target]?.def.key) {
+          clearTimeout(sceneCommitTimer);
+          sceneCommitTimer=0;
+          pendingSceneIndex=-1;
+          active=target;
+          commitScene(target,committedSceneIndex,'native-position-recovery-r2040');
+          root.dataset.fxCinematicHeroWorldR1976=target===0
+            ? 'core-floor-active' : 'noncore-inline-floor-cleared';
+          root.dataset.fxCinematicNativePositionRecoveryR2040=scenes[target].def.key;
+        }
+        lastDeliveredScrollY=y;
+      }
+      if (!atOrigin && committedSceneIndex!==0) armNativePositionCheck();
+    },160);
+  }
+
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -625,6 +662,7 @@
 
     addEventListener('scroll',()=>{
       lastNativeScrollEventAt=performance.now();
+      lastDeliveredScrollY=scrollY;
       /* R1949 — document top is a semantic scene boundary, not a delayed
          heuristic. Commit core immediately so a cancelled settle/refresh can
          never strand the journey state below the hero. */
