@@ -194,14 +194,19 @@
   }
 
   function loadQrImage(card, image, planId, selectedCurrency, generation) {
-    const apiSource = qrApiUrl(planId, selectedCurrency);
     const localSource = qrLocalUrl(planId, selectedCurrency);
+    // A static/offline preview does not have the Cloudflare QR API. Use the
+    // shipped, accessible SVG QR assets directly instead of issuing 404s.
+    // This depends on the deployment origin, never on an audit/user agent.
+    const localPreview = location.protocol === 'file:' ||
+      ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+    const apiSource = localPreview ? localSource : qrApiUrl(planId, selectedCurrency);
 
     card.classList.remove('is-qr-ready', 'is-qr-error');
     card.classList.add('is-qr-loading');
     image.loading = 'lazy';
     image.decoding = 'async';
-    image.dataset.fxQrFallback = 'false';
+    image.dataset.fxQrFallback = localPreview ? 'true' : 'false';
 
     image.onload = () => {
       if (generation !== qrGeneration) return;
