@@ -252,27 +252,45 @@ async function assertHeroDisclosure(page) {
       `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify({ heroState, journeyState })}`);
   }
 
-  await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  try {
-    await page.waitForFunction(() => document.documentElement.dataset.fxCinematicSceneR536 === 'core', null, { timeout: 8000, polling: 80 });
-  } catch(error) {
-    const diagnostics=await page.evaluate(()=>({
-      y:scrollY,
-      maxY:Math.max(0,document.documentElement.scrollHeight-innerHeight),
-      scene:document.documentElement.dataset.fxCinematicSceneR536||null,
-      journey:document.documentElement.dataset.fxCinematicJourneyR536||null,
-      topReturn:document.documentElement.dataset.fxCinematicTopReturnR1949||null,
-      scrollBudget:document.documentElement.dataset.fxScrollBudgetR1660||null,
-      sceneCommit:document.documentElement.dataset.fxCinematicSceneCommitR1664||null,
-      loopCount:document.documentElement.dataset.fxLoopCount||null,
-      loopState:document.documentElement.dataset.fxLoopLandingState||null,
-      panelOpen:document.body.classList.contains('fx-organism-panel-open'),
-      overflow:getComputedStyle(document.body).overflow,
-      rootOverflow:getComputedStyle(document.documentElement).overflow,
-      heroRect:document.getElementById('hero')?.getBoundingClientRect().toJSON()
-    }));
-    throw new Error('R2023 top-return diagnostics '+JSON.stringify(diagnostics)+' :: '+error.message);
-  }
+  /* R2036 — measure actual source-to-core latency inside the page. Headless
+     software WebGL can starve Playwright's out-of-process waitForFunction
+     polling even when the semantic core has already been committed. A DOM
+     MutationObserver timestamps the REAL state transition. Keep a strict
+     1250 ms user-visible response budget, not an 8 s blind grace period. */
+  const returnResult = await page.evaluate(() => new Promise(resolve => {
+    const root = document.documentElement;
+    const start = performance.now();
+    let finished = false;
+    let timer = 0;
+    const observer = new MutationObserver(check);
+    const finish = (reason) => {
+      if (finished) return;
+      finished = true;
+      observer.disconnect();
+      clearTimeout(timer);
+      resolve({
+        reason, elapsedMs: performance.now() - start, y: scrollY,
+        scene: root.dataset.fxCinematicSceneR536 || null,
+        journey: root.dataset.fxCinematicJourneyR536 || null,
+        topReturn: root.dataset.fxCinematicTopReturnR1949 || root.dataset.fxCinematicTopReturnR2034 || null,
+        scrollBudget: root.dataset.fxScrollBudgetR1660 || null,
+        sceneCommit: root.dataset.fxCinematicSceneCommitR1664 || null,
+        panelOpen: document.body.classList.contains('fx-organism-panel-open')
+      });
+    };
+    function check() {
+      if (scrollY <= 2 && root.dataset.fxCinematicSceneR536 === 'core')
+        finish('native-document-top-core-committed');
+    }
+    observer.observe(root, { attributes: true, attributeFilter: ['data-fx-cinematic-scene-r536'] });
+    scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    check();
+    timer = setTimeout(() => finish('native-core-commit-deadline'), 1600);
+  }));
+  assert(returnResult.reason === 'native-document-top-core-committed'
+    && returnResult.elapsedMs <= 1250,
+    'R2036 real top-return exceeds 1250ms or not committed: ' + JSON.stringify(returnResult));
+  console.log('R2036_NATIVE_TOP_RETURN '+JSON.stringify(returnResult));
   await page.waitForTimeout(250);
 }
 
