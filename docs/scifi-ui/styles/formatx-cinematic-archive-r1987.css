@@ -1,7 +1,7 @@
 /* R1987 — Archive projection and semantic HTML handoff.
    The document owns readable, focusable controls. The renderer owns only the
    underlying spatial shelves, native MAG and flexible glass data surfaces. */
-html[data-fx-archive-dock="active"] body > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
   box-sizing:border-box!important;
   display:block!important;
   overflow:hidden!important;
@@ -16,7 +16,7 @@ html[data-fx-archive-dock="active"] body > .fx-crystal-organism-r326-stage.fx-ar
   user-select:none!important;
   touch-action:none!important;
 }
-html[data-fx-archive-dock="active"] body > .fx-archive-native-docked canvas.fx-crystal-organism-r326-canvas{
+html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-docked canvas.fx-crystal-organism-r326-canvas{
   display:block!important;
   position:absolute!important;
   inset:0!important;
@@ -60,7 +60,7 @@ html[data-fx-archive-dock="active"] [data-fx-archive-active="true"] > *{
 /* Only presentation transitions. No scroll locking, HTML clipping or
    pointer interception is allowed by the archive layer. */
 @media (max-width:900px){
-  html[data-fx-archive-dock="active"] body>.fx-crystal-organism-r326-stage.fx-archive-native-docked{
+  html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
     border:1px solid rgba(156,229,238,.08)!important;
     border-radius:26px!important;
     background:radial-gradient(ellipse at 50% 45%,rgba(3,17,25,.34),transparent 73%)!important;

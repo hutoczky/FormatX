@@ -24,7 +24,7 @@
     {selector:'.fx-category-deck--standalone',key:'intelligence',hu:'RENDSZERFOLYAMATOK',en:'SYSTEM WORKFLOWS',source:'inner-chamber',color:[.66,.88,1]},
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
-  let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null,originalStyle='',placeholder=null;
+  let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null,originalStyle='';
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false;
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
@@ -73,9 +73,8 @@
       if(!stage||archiveActive)return;
       if(!heroHost||!heroHost.isConnected)return;
       originalStyle=stage.getAttribute('style')||'';
-      placeholder=document.createComment('fx-native-mag-r1987-return-point');
-      stage.parentNode?.insertBefore(placeholder,stage);
-      document.body.appendChild(stage);
+      // Keep the canonical canvas inside #hero. Moving it would break the
+      // original MAG DOM contract and WebGL identity checks.
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
@@ -94,9 +93,6 @@
     static restore(){
       if(!archiveActive||!stage)return;
       stage.classList.remove('fx-archive-native-docked');
-      if(placeholder?.parentNode)placeholder.replaceWith(stage);
-      else heroHost?.prepend(stage);
-      placeholder=null;
       stage.setAttribute('style',originalStyle);
       root.dataset.fxArchiveDock='home';
       archiveActive=false;
