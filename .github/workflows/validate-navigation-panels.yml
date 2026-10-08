@@ -16,6 +16,7 @@ on:
       - 'docs/scifi-ui/scripts/organism-interface.js'
       - 'docs/scifi-ui/scripts/organism-menu-controller.js'
       - 'docs/scifi-ui/scripts/formatx-menu-owner-r1956.js'
+      - 'docs/scifi-ui/scripts/formatx-sensory-on-demand-r2000.js'
       - 'docs/scifi-ui/styles/formatx-menu-owner-r1956.css'
       - 'docs/scifi-ui/styles/formatx-interaction-contract-r1957.css'
       - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
@@ -83,6 +84,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-interface.js
           node --check docs/scifi-ui/scripts/organism-menu-controller.js
           node --check docs/scifi-ui/scripts/formatx-wda-controls-r198.js
+          node --check docs/scifi-ui/scripts/formatx-sensory-on-demand-r2000.js
           node --check docs/scifi-ui/scripts/formatx-audio-repair.js
           node --check docs/scifi-ui/scripts/organism-core-controller.js
           node --check docs/scifi-ui/scripts/organism-console-state.js
