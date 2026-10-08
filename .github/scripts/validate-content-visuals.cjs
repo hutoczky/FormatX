@@ -253,7 +253,26 @@ async function assertHeroDisclosure(page) {
   }
 
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  await page.waitForFunction(() => document.documentElement.dataset.fxCinematicSceneR536 === 'core', null, { timeout: 8000 });
+  try {
+    await page.waitForFunction(() => document.documentElement.dataset.fxCinematicSceneR536 === 'core', null, { timeout: 8000 });
+  } catch(error) {
+    const diagnostics=await page.evaluate(()=>({
+      y:scrollY,
+      maxY:Math.max(0,document.documentElement.scrollHeight-innerHeight),
+      scene:document.documentElement.dataset.fxCinematicSceneR536||null,
+      journey:document.documentElement.dataset.fxCinematicJourneyR536||null,
+      topReturn:document.documentElement.dataset.fxCinematicTopReturnR1949||null,
+      scrollBudget:document.documentElement.dataset.fxScrollBudgetR1660||null,
+      sceneCommit:document.documentElement.dataset.fxCinematicSceneCommitR1664||null,
+      loopCount:document.documentElement.dataset.fxLoopCount||null,
+      loopState:document.documentElement.dataset.fxLoopLandingState||null,
+      panelOpen:document.body.classList.contains('fx-organism-panel-open'),
+      overflow:getComputedStyle(document.body).overflow,
+      rootOverflow:getComputedStyle(document.documentElement).overflow,
+      heroRect:document.getElementById('hero')?.getBoundingClientRect().toJSON()
+    }));
+    throw new Error('R2023 top-return diagnostics '+JSON.stringify(diagnostics)+' :: '+error.message);
+  }
   await page.waitForTimeout(250);
 }
 
