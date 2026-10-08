@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r1987';
+  const VERSION='cinematic-archive-r2008';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -30,6 +30,9 @@
   let sceneObserver=null;
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
+  // CPU submission cost is not GPU frame time. Use sustained pressure with
+  // hysteresis instead of downgrading photographic detail on one slow frame.
+  let archiveCpuDrawMs=0,pressureFrames=0,recoveryFrames=0,lastQualityChange=0,manualQuality=false;
   root.dataset.fxArchiveExperience='pending';
   function discover(){
     const previous=scenes.map(x=>x.node);
@@ -71,8 +74,40 @@
     }
   }
   class PerformanceManager {
-    static frameInterval(){return mobile()?(mobilePerf?80:50):32;}
-    static setQuality(value){quality=value==='low'?'low':'high';root.dataset.fxArchiveQuality=quality;invalidate();}
+    // Preserve 60 Hz-compatible request cadence on capable desktops. The
+    // canonical MAG scheduler continues to own actual frame production.
+    static frameInterval(){
+      return mobile()?(quality==='low'?50:33):(quality==='low'?32:16);
+    }
+    static setQuality(value,reason='manual'){
+      if(!['high','low','auto'].includes(value))return;
+      if(reason==='manual')manualQuality=value!=='auto';
+      root.dataset.fxArchiveQualityMode=manualQuality?'manual':'auto';
+      if(value==='auto')return;
+      if(value===quality)return;
+      quality=value;
+      pressureFrames=0;recoveryFrames=0;
+      lastQualityChange=performance.now();
+      root.dataset.fxArchiveQuality=quality;
+      root.dataset.fxArchiveQualityReason=reason;
+      // Rebuild the panel VBO when changing LOD: do not keep expensive high
+      // tessellation alive under the low-quality label.
+      drawPass?.setQuality?.(quality);
+      invalidate();
+    }
+    static sampleCpuDraw(duration){
+      if(!Number.isFinite(duration)||duration<0||document.hidden)return;
+      archiveCpuDrawMs=archiveCpuDrawMs?archiveCpuDrawMs*.88+duration*.12:duration;
+      if(painted%8===0)root.dataset.fxArchiveCpuDrawMs=archiveCpuDrawMs.toFixed(2);
+      if(manualQuality||performance.now()-lastQualityChange<3000)return;
+      if(quality==='high'){
+        pressureFrames=archiveCpuDrawMs>(mobile()?8.2:9)?pressureFrames+1:Math.max(0,pressureFrames-2);
+        if(pressureFrames>=10)PerformanceManager.setQuality('low','sustained-cpu-draw-pressure');
+      }else if(!mobilePerf){
+        recoveryFrames=archiveCpuDrawMs<(mobile()?3.5:4.6)?recoveryFrames+1:0;
+        if(recoveryFrames>=100)PerformanceManager.setQuality('high','sustained-cpu-draw-headroom');
+      }
+    }
   }
   class ResponsiveExperience {
     static dock(){
@@ -134,6 +169,8 @@
       this.program=this.programFor(gl);
       this.box=this.buffer(cubeGeometry());
       this.panel=this.buffer(panelGeometry(quality==='high'));
+      this.panelQuality=quality;
+      root.dataset.fxArchivePanelTessellation=quality==='high'?'20x16':'10x9';
       this.uniform={};
       for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
@@ -214,6 +251,14 @@ void main(){
       return p;
     }
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
+    setQuality(next){
+      if(next===this.panelQuality)return;
+      const old=this.panel;
+      this.panel=this.buffer(panelGeometry(next==='high'));
+      this.panelQuality=next;
+      root.dataset.fxArchivePanelTessellation=next==='high'?'20x16':'10x9';
+      this.gl.deleteBuffer(old.buffer);
+    }
     mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0){
       const gl=this.gl,u=this.uniform;
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
@@ -344,7 +389,7 @@ void main(){
       root.dataset.fxArchiveNativePass='shared-webgl2';
        if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
-      if(painted>6&&performance.now()-start>12&&quality!=='low')PerformanceManager.setQuality('low');
+      PerformanceManager.sampleCpuDraw(performance.now()-start);
     }
     dispose(){
       const gl=this.gl;
@@ -417,10 +462,12 @@ void main(){
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
       api.canvas.addEventListener('webglcontextlost',()=>{if(archiveActive)ResponsiveExperience.restore();detach=null;},{once:true});
       drawPass=frame=>nativeScene.render(frame);
+      drawPass.setQuality=next=>nativeScene.setQuality(next);
       drawPass.dispose=()=>nativeScene.dispose();
       detach=api.registerScenePass(drawPass);
       root.dataset.fxArchiveExperience='ready';
       root.dataset.fxArchiveQuality=quality;
+      root.dataset.fxArchiveQualityMode=manualQuality?'manual':'auto';
       invalidate();
     }catch(error){
       root.dataset.fxArchiveExperience='context-error';
@@ -460,7 +507,7 @@ void main(){
   }
   window.FormatXArchiveExperience={
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.node.id||s.selector}));},
-    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
+    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,qualityMode:manualQuality?'manual':'auto',cpuDrawMs:Number(archiveCpuDrawMs.toFixed(2)),updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
     refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
