@@ -11,6 +11,16 @@ html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-crystal-organis
   transform:none!important;
   filter:none!important;
   background:transparent!important;
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  max-width:none!important;
+  max-height:none!important;
+  margin:0!important;
+  pointer-events:none!important;
+  z-index:2!important;
+  opacity:.68!important;
   contain:strict!important;
   isolation:isolate!important;
   user-select:none!important;
@@ -92,6 +102,9 @@ html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-
    pointer interception is allowed by the archive layer. */
 @media (max-width:900px){
   html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+    width:152px!important;
+    height:168px!important;
+    opacity:.86!important;
     border:1px solid rgba(156,229,238,.08)!important;
     border-radius:26px!important;
     background:radial-gradient(ellipse at 50% 45%,rgba(3,17,25,.34),transparent 73%)!important;

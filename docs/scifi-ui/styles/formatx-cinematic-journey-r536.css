@@ -1223,6 +1223,22 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-hud{
     opacity:.78;
   }
+  /* R1999 — scene disclosure is semantic state, independent of the temporary
+     fast-scroll paint budget. The stage itself remains hidden while input is
+     active; these values make the settled non-core state deterministic even
+     when a late layout event rearms the compositor-lite latch. */
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-world{
+    opacity:calc(.13 + var(--fx-c536-energy) * .30)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-iris{
+    opacity:calc(.14 + var(--fx-c536-energy) * .19)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-track{
+    opacity:calc(.035 + var(--fx-c536-energy) * .10)!important;
+  }
+  html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-scan{
+    opacity:calc(.025 + var(--fx-c536-energy) * .075)!important;
+  }
   /* The hero's own information remains, but its peripheral annotations are
      quieter so the optical core is the first read at desktop size. */
   html[data-fx-cinematic-scene-r536="core"] #hero :is(.hero-label,.fx-reference-heading){

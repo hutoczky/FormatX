@@ -25,7 +25,7 @@
     {selector:'#capabilities .cards .card:last-child',key:'intelligence',hu:'AI SEGÍTSÉG',en:'AI GUIDANCE',source:'inner-chamber',color:[.66,.88,1]},
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
-  let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null,originalStyle='';
+  let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null;
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
@@ -78,28 +78,18 @@
     static dock(){
       if(!stage||archiveActive)return;
       if(!heroHost||!heroHost.isConnected)return;
-      originalStyle=stage.getAttribute('style')||'';
       // Keep the canonical canvas inside #hero. Moving it would break the
-      // original MAG DOM contract and WebGL identity checks.
+      // original MAG DOM contract and WebGL identity checks. The external
+      // archive stylesheet owns docking geometry so strict style-src remains
+      // intact and renderer-authored canvas state is never overwritten.
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
-      stage.style.setProperty('position','fixed','important');
-      stage.style.setProperty('inset',mobile()?'auto auto 8px 8px':'0','important');
-      stage.style.setProperty('width',mobile()?'152px':'100vw','important');
-      stage.style.setProperty('height',mobile()?'168px':'100dvh','important');
-      stage.style.setProperty('max-width','none','important');
-      stage.style.setProperty('max-height','none','important');
-      stage.style.setProperty('margin','0','important');
-      stage.style.setProperty('pointer-events','none','important');
-      stage.style.setProperty('z-index','2','important');
-      stage.style.setProperty('opacity',mobile()?'.86':'.68','important');
       window.FormatXLivingCore?.requestRender?.(1);
     }
     static restore(){
       if(!archiveActive||!stage)return;
       stage.classList.remove('fx-archive-native-docked');
-      stage.setAttribute('style',originalStyle);
       root.dataset.fxArchiveDock='home';
       archiveActive=false;
       window.FormatXLivingCore?.requestRender?.(1);
