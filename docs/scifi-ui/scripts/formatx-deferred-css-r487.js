@@ -55,6 +55,13 @@
     if (activated || frame || fallback) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
+      // R2020: hero disclosure is critical state, not optional below-fold UI.
+      // Keep the single-organism scene overlay contract identical to the
+      // previous immediate-post-FCP activation on every device.
+      const sceneCss = document.querySelector('link[data-fx-cinematic-journey-r536][data-fx-r487-deferred-style]');
+      if (sceneCss instanceof HTMLLinkElement) {
+        sceneCss.media = sceneCss.dataset.fxR487Media || 'all';
+      }
       fallback = setTimeout(() => {
         fallback = 0;
         activate(reason + '-quiet-window');
