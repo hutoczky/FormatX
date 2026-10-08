@@ -302,6 +302,11 @@
 
   function pickActive(y=scrollY){
     if(!scenes.length)return 0;
+    // R2010 — the absolute document top is always the canonical MAG hero.
+    // Scene geometry can be stale during content-visibility remeasurement;
+    // selecting the nearest cached centre must not override the core after
+    // a native upward scroll or deferred ResizeObserver refresh.
+    if(y<=Math.max(2,innerHeight*.015))return 0;
     const viewportTop=y;
     const viewportBottom=y+innerHeight;
     const anchor=y+innerHeight*.43;
