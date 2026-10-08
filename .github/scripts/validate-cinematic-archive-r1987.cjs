@@ -29,7 +29,7 @@ async function evaluate(viewport,isMobile,browser){
   }));
   assert.equal(init.status,'ready',JSON.stringify(init));
   assert.equal(init.shared,true,JSON.stringify(init));
-  assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
+  assert.equal(init.sceneCount,8,'All eight real archive handoffs must be discoverable');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   let passed=0;
@@ -105,6 +105,25 @@ async function evaluate(viewport,isMobile,browser){
   }
   assert.equal(native.renderer,'shared-webgl2');
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
+  // R2008 — each quality transition must actually rebuild the native panel
+  // tessellation, without creating a second context or changing HTML content.
+  for(const [setting,segments] of [['low','10x9'],['high','20x16'],['low','10x9'],['high','20x16']]){
+    const check=await page.evaluate(setting=>{
+      window.FormatXArchiveExperience.setQuality(setting);
+      return{
+        quality:window.FormatXArchiveExperience.state.quality,
+        mode:window.FormatXArchiveExperience.state.qualityMode,
+        panel:document.documentElement.dataset.fxArchivePanelTessellation,
+        contexts:document.documentElement.dataset.fxCoreContexts
+      };
+    },setting);
+    assert.equal(check.quality,setting,'Public adaptive quality must match the requested LOD');
+    assert.equal(check.mode,'manual','Explicit LOD selection must not be overwritten by the governor');
+    assert.equal(check.panel,segments,'Panel GPU tessellation must track LOD');
+    assert.equal(check.contexts,'1','LOD switches must not allocate a new WebGL context');
+  }
+  await page.evaluate(()=>window.FormatXArchiveExperience.setQuality('auto'));
+  assert.equal(await page.evaluate(()=>window.FormatXArchiveExperience.state.qualityMode),'auto');
   await page.screenshot({path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,fullPage:false,timeout:30000});
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
