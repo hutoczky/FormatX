@@ -1564,3 +1564,16 @@ html body > #fx-apex-canvas.fx-apex-canvas{
   transform:none!important;
 }
 /* production-r1969-apex-canvas-zero-flow */
+
+/* R2025 early semantic core opacity fallback */
+/* The semantic R536 scene can boot before its large deferred presentation
+   stylesheet finishes loading. Preserve the *same* original R1948 opacity
+   contract in the already-critical paint sheet, so the first hero frame
+   never flashes a fully opaque universe while CSS is streaming. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-world { opacity:.10!important; }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-iris { opacity:.08!important; }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-track { opacity:.012!important; }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-scan { opacity:.012!important; }
+  html[data-fx-cinematic-scene-r536="core"] .fx-c536-hud { opacity:0!important; }
+}
