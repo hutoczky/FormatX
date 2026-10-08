@@ -1881,6 +1881,9 @@
     root.dataset.fxCoreDefaultShapeR1401='organism';
     root.dataset.fxCoreCanonicalIdentityR1723='one-living-organism-no-alternate-shapes';
     root.dataset.fxCoreShapeModeR413='single-living-organism-fixed-anatomy-r1723';
+    /* Archive extension passes share this native WebGL context and render loop.
+       The canonical MAG owns the canvas, topology, renderer and frame budget. */
+    const scenePasses=new Set();
     let disposed=false,contextLost=false,visible=true,paused=false;
     let raf=0,burstFrames=0,width=0,height=0,aspect=1,surfaceFrameTimer=0,slowRenderer=constrained;
     let px=0,py=0,tx=0,ty=0;
@@ -2172,6 +2175,12 @@
       gl.depthMask(true);
       gl.uniform1f(uniforms.uLayer,0);
       gl.drawArrays(gl.TRIANGLES,0,geometry.count);
+      /* Draw external WebGL2 scene passes only after the original MAG. Modules
+         must use their own VAO and restore GL state before returning. */
+      for(const pass of scenePasses){
+        try{pass({gl,canvas,stage,width,height,aspect,now,siteProgress});}
+        catch(error){scenePasses.delete(pass);console.warn('FormatX scene pass disabled:',error);}
+      }
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
@@ -2640,6 +2649,7 @@
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
+      for(const pass of scenePasses){try{pass.dispose?.();}catch(_){}}scenePasses.clear();
       stage.remove();
       if(window.FormatXCoreMobileV69?.destroy===destroy)delete window.FormatXCoreMobileV69;
       if(window.FormatXLivingCore?.destroy===destroy)delete window.FormatXLivingCore;
@@ -2683,6 +2693,12 @@
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       requestRender:schedule,
+      registerScenePass:(pass)=>{
+        if(!webgl2||typeof pass!=='function'||disposed)return()=>{};
+        scenePasses.add(pass);schedule(1);
+        return()=>{scenePasses.delete(pass);try{pass.dispose?.();}catch(_){}};
+      },
+      sharedWebGL2:webgl2,
       destroy,
       canvas,
       stage,
