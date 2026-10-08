@@ -47,7 +47,8 @@ async function run(name,options) {
       if(key.startsWith('data-fx-')||key==='class')state.rootChanges.push({
         ms:Math.round(performance.now()),key,value:document.documentElement.getAttribute(key)?.slice(0,100)});
     }});
-    obs.observe(document.documentElement,{attributes:true});
+    if(document.documentElement)obs.observe(document.documentElement,{attributes:true});
+    else document.addEventListener('DOMContentLoaded',()=>obs.observe(document.documentElement,{attributes:true}),{once:true});
     addEventListener('error',e=>state.errors.push(String(e.message||e.error)),{passive:true});
   });
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
