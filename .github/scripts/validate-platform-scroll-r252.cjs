@@ -107,8 +107,27 @@ async function verifyHeartInteraction(page, label) {
   await hit.scrollIntoViewIfNeeded();
   await hit.click();
 
-  await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
-  await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxCoreInteractionTarget), null, { timeout: 5000 });
+  /* R2035: Chromium's animation-frame polling can stall when the 3D MAG is
+     rendering in software. Assert the SAME semantic interaction contract
+     with bounded wall-clock polling, not a synthetic click or relaxed gate. */
+  try {
+    await page.waitForFunction(() => {
+      const root = document.documentElement;
+      return root.dataset.fxCoreInteractionMode === 'active-r252'
+        && Boolean(root.dataset.fxCoreInteractionTarget);
+    }, null, { timeout: 5000, polling: 80 });
+  } catch (error) {
+    const details = await page.evaluate(() => ({
+      mode: document.documentElement.dataset.fxCoreInteractionMode || null,
+      target: document.documentElement.dataset.fxCoreInteractionTarget || null,
+      source: document.documentElement.dataset.fxCoreInteractionSource || null,
+      heartReady: document.documentElement.dataset.fxHeartDelegatedR1744 || null,
+      currentScene: document.documentElement.dataset.fxCinematicSceneR536 || null,
+      overlayPresent: Boolean(document.querySelector('#fx-mag-birth-prepaint-r1606')),
+      hit: document.querySelector('#hero .fx-mag-heart-hit-r252')?.getBoundingClientRect().toJSON() || null
+    }));
+    throw new Error(`${label} MAG semantic click did not reach the canonical target: ${JSON.stringify(details)} :: ${error.message}`);
+  }
 
   const interaction = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxCoreInteractionMode || '',
@@ -196,11 +215,34 @@ async function verifyDesktop(browser) {
 
   const before = await state(page);
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
-  await page.evaluate(offset => {
-    const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    window.scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'auto' });
-  }, relative);
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+  // R2013: use the *reachable* physical boundary. On a native document
+  // the bridge offset may exceed the scrollable limit after lazy reflow,
+  // so a requested absolute y beyond the end is never actually visited.
+  const boundary=await page.evaluate(offset=>{
+    const root=document.documentElement;
+    const bridge=document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
+    const end=Math.max(0,root.scrollHeight-innerHeight);
+    const requested=(bridge?.offsetTop||0)+offset;
+    const target=Math.min(requested,end);
+    window.scrollTo({top:target,left:0,behavior:'instant'});
+    return{requested,target,end,bridgeTop:bridge?.offsetTop||0};
+  },relative);
+  try{
+    await page.waitForFunction(count=>Number(document.documentElement.dataset.fxLoopCount||0)>count,before.loopCount,{timeout:8000});
+  }catch(error){
+    const after=await state(page);
+    const recovery=await page.evaluate(()=>({
+      endIntent:document.documentElement.dataset.fxLoopEndIntentR1724,
+      loopLandingState:document.documentElement.dataset.fxLoopLandingState,
+      desktopRecovery:document.documentElement.dataset.fxLoopDesktopRecoveryR1724,
+      gestureBoundary:document.documentElement.dataset.fxLoopGestureBoundaryR1737,
+      activity:document.documentElement.dataset.fxScrollActivity,
+      panelOpen:document.body.classList.contains('fx-organism-panel-open'),
+      sectionNavigation:document.documentElement.classList.contains('fx-section-navigation-active'),
+      scrollEndRecovery:document.documentElement.dataset.fxLoopDesktopScrollEndRecoveryR1724
+    }));
+    throw new Error('Desktop native loop did not transfer: '+JSON.stringify({before,boundary,after,recovery})+' :: '+error.message);
+  }
   await page.waitForTimeout(500);
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);

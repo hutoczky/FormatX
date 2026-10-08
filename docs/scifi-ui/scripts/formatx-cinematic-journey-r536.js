@@ -68,6 +68,10 @@
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
+  let lastNativeScrollEventAt=performance.now();
+  let nativeSceneObserver=null;
+  let nativePositionCheckTimer=0;
+  let lastDeliveredScrollY=scrollY;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -237,6 +241,7 @@
     index=clamp(index,0,scenes.length-1);
     previous=clamp(previous,0,scenes.length-1);
     committedSceneIndex=index;
+    if (index!==0) armNativePositionCheck();
     const from=Math.min(previous,index);
     const to=Math.max(previous,index);
     for(let i=from;i<=to;i++){
@@ -274,6 +279,22 @@
     const fastScroll=reason==='scroll'&&Math.abs(velocity)>.28;
     active=index;
 
+    /* R2034: a deferred scene commit may outlive the logical active index.
+       A resize/refresh or a second top-scroll event can see active===0 while
+       the visible committed scene remains non-core. The document origin is an
+       invariant, so make the semantic MAG state synchronous here, independent
+       of stale scene geometry or an animation-frame callback. */
+    if(index===0 && scrollY<=Math.max(2,innerHeight*.015)
+       && (committedSceneIndex!==0 || root.dataset.fxCinematicSceneR536!=='core')){
+      clearTimeout(sceneCommitTimer);
+      sceneCommitTimer=0;
+      pendingSceneIndex=-1;
+      commitScene(0,committedSceneIndex,'document-top-invariant-r2034');
+      root.dataset.fxCinematicHeroWorldR1976='core-floor-active';
+      root.dataset.fxCinematicTopReturnR2034='synchronous-core-commit';
+      return;
+    }
+
     /* R1976: the hero world floor follows the logical active scene immediately.
        Fast-scroll CSS may still keep compositor-lite opacity during motion, but
        the core-only inline !important floor must never survive into non-core
@@ -302,6 +323,11 @@
 
   function pickActive(y=scrollY){
     if(!scenes.length)return 0;
+    // R2010 — the absolute document top is always the canonical MAG hero.
+    // Scene geometry can be stale during content-visibility remeasurement;
+    // selecting the nearest cached centre must not override the core after
+    // a native upward scroll or deferred ResizeObserver refresh.
+    if(y<=Math.max(2,innerHeight*.015))return 0;
     const viewportTop=y;
     const viewportBottom=y+innerHeight;
     const anchor=y+innerHeight*.43;
@@ -445,6 +471,8 @@
         return;
       }
       cacheGeometry(reason);
+      if (nativeSceneObserver)
+        for (const scene of scenes) nativeSceneObserver.observe(scene.node);
       const found=scenes.findIndex(scene=>scene.def.key===previousKey);
       if(found>=0)active=found;
       activate(pickActive(scrollY),reason);
@@ -515,6 +543,98 @@
     addEventListener('blur',onCinematicPointerLeave,{passive:true});
   }
 
+  /* R2038 — an actual document-origin sentinel provides a native visual
+     geometry signal when a headless/browser integration suppresses scroll
+     events. IntersectionObserver is compositor driven and idles completely:
+     no interval, no permanent RAF, and no global scrollTo monkeypatch. */
+  function bindOriginReentry() {
+    if (!('IntersectionObserver' in window) || !(document.body instanceof HTMLElement)) return;
+    let probe = document.querySelector('.fx-c536-origin-probe-r2038');
+    if (!(probe instanceof HTMLElement)) {
+      probe = document.createElement('span');
+      probe.className = 'fx-c536-origin-probe-r2038';
+      probe.setAttribute('aria-hidden', 'true');
+      document.body.prepend(probe);
+    }
+    const observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.target === probe && entry.isIntersecting)) return;
+      if (scrollY > Math.max(2, innerHeight * .015)) return;
+      if (committedSceneIndex === 0 && root.dataset.fxCinematicSceneR536 === 'core') return;
+      clearTimeout(sceneCommitTimer);
+      sceneCommitTimer = 0;
+      pendingSceneIndex = -1;
+      active = 0;
+      commitScene(0, committedSceneIndex, 'document-origin-intersection-r2038');
+      root.dataset.fxCinematicHeroWorldR1976 = 'core-floor-active';
+      root.dataset.fxCinematicTopReturnR2038 = 'native-origin-visible-core-commit';
+    }, { threshold: 0 });
+    observer.observe(probe);
+    root.dataset.fxCinematicOriginWatchR2038 = 'observer-active-no-idle-poll';
+    addEventListener('pagehide', () => { observer.disconnect(); probe.remove(); }, { once: true });
+  }
+
+  /* R2039 — a native viewport intersection gives real scene reentry when
+     an instant native scroll changes scrollY without dispatching the normal
+     scroll event to R536. This observer does nothing during normal scroll
+     delivery and has zero idle RAF/interval overhead. */
+  function observeNativeScenes() {
+    if (!('IntersectionObserver' in window)) return;
+    nativeSceneObserver = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      if (performance.now() - lastNativeScrollEventAt < 180) return;
+      const target = pickActive(scrollY);
+      const scene = scenes[target];
+      if (!scene) return;
+      if (target === committedSceneIndex
+          && root.dataset.fxCinematicSceneR536 === scene.def.key) return;
+      clearTimeout(sceneCommitTimer);
+      sceneCommitTimer = 0;
+      pendingSceneIndex = -1;
+      active = target;
+      commitScene(target, committedSceneIndex, 'native-viewport-intersection-r2039');
+      root.dataset.fxCinematicHeroWorldR1976 = target===0
+        ? 'core-floor-active' : 'noncore-inline-floor-cleared';
+      root.dataset.fxCinematicNativeSceneRecoveryR2039 = scene.def.key;
+    }, { rootMargin: '-28% 0px -28% 0px', threshold: 0 });
+    for (const scene of scenes) nativeSceneObserver.observe(scene.node);
+    root.dataset.fxCinematicNativeSceneObserverR2039='event-driven-no-idle-poll';
+    addEventListener('pagehide', () => nativeSceneObserver?.disconnect(), { once: true });
+  }
+
+  /* R2040 — recover from lost native scroll/IO notifications. Only after a
+     non-core chapter has actually been committed, briefly sample scrollY at
+     160 ms cadence. No visual RAF, no getBoundingClientRect, and no DOM/CSS
+     mutation unless the browser's real position disagrees with its scene.
+     Stop completely upon successful return to the canonical MAG origin. */
+  function armNativePositionCheck() {
+    if (nativePositionCheckTimer || document.hidden || !scenes.length) return;
+    nativePositionCheckTimer = setTimeout(() => {
+      nativePositionCheckTimer = 0;
+      if (document.hidden) return;
+      const y = scrollY;
+      const atOrigin = y <= Math.max(2, innerHeight*.015);
+      const missingScrollNotification = Math.abs(y-lastDeliveredScrollY)>12;
+      const needsCore = atOrigin && (committedSceneIndex!==0
+        || root.dataset.fxCinematicSceneR536!=='core');
+      if (needsCore || (!atOrigin && missingScrollNotification)) {
+        const target = atOrigin ? 0 : pickActive(y);
+        if (target!==committedSceneIndex ||
+            root.dataset.fxCinematicSceneR536!==scenes[target]?.def.key) {
+          clearTimeout(sceneCommitTimer);
+          sceneCommitTimer=0;
+          pendingSceneIndex=-1;
+          active=target;
+          commitScene(target,committedSceneIndex,'native-position-recovery-r2040');
+          root.dataset.fxCinematicHeroWorldR1976=target===0
+            ? 'core-floor-active' : 'noncore-inline-floor-cleared';
+          root.dataset.fxCinematicNativePositionRecoveryR2040=scenes[target].def.key;
+        }
+        lastDeliveredScrollY=y;
+      }
+      if (!atOrigin && committedSceneIndex!==0) armNativePositionCheck();
+    },160);
+  }
+
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -537,8 +657,12 @@
     updateHud(scenes[0]);
     bindDynamicDiscovery();
     bindCinematicInteraction();
+    bindOriginReentry();
+    observeNativeScenes();
 
     addEventListener('scroll',()=>{
+      lastNativeScrollEventAt=performance.now();
+      lastDeliveredScrollY=scrollY;
       /* R1949 — document top is a semantic scene boundary, not a delayed
          heuristic. Commit core immediately so a cancelled settle/refresh can
          never strand the journey state below the hero. */
@@ -648,6 +772,7 @@
     clearTimeout(coreSettleTimer);
     clearTimeout(sceneCommitTimer);
     clearTimeout(refreshTimer);
+    clearTimeout(nativePositionCheckTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
     removeEventListener('pointermove',onCinematicPointerMove);

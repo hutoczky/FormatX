@@ -39,10 +39,22 @@ async function waitForReady(page, name) {
     await page.evaluate(() => document.documentElement.dataset.fxImmersive !== 'active'),
     `${name}: immersive renderer started before explicit user activation`
   );
-  assert(
-    await page.evaluate(() => document.documentElement.dataset.fxThreeLoader === 'deferred-user-activation'),
-    `${name}: heavy Organism loader was not deferred`
-  );
+  // R2024: the optional living-architecture bootstrap mounts after the
+  // first paint. Do not mistake an asynchronously *not-yet-mounted* controller
+  // for an eagerly loaded heavy renderer. Require the actual deferred state
+  // before ASK and keep the strict "no auto-immersion" assertion above.
+  await page.waitForFunction(
+    () => document.documentElement.dataset.fxThreeLoader === 'deferred-user-activation',
+    null,
+    { timeout: 15000 }
+  ).catch(async error => {
+    const state = await page.evaluate(() => ({
+      loader: document.documentElement.dataset.fxLivingArchitectureLoaderR1985 || null,
+      threeLoader: document.documentElement.dataset.fxThreeLoader || null,
+      immersive: document.documentElement.dataset.fxImmersive || null
+    }));
+    throw new Error(`${name}: heavy Organism loader was not deferred: ${JSON.stringify(state)} :: ${error.message}`);
+  });
 
   const legacyLaunch = page.locator('.fx-immersive-launch').first();
   if (await legacyLaunch.count()) {
