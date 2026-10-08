@@ -354,19 +354,45 @@
     }, { once: true });
   }
 
-  function initialise() {
-    navigation();
-    applyLanguage(language, false);
+  /* R2061: navigation, prices, language, releases and real 3D ownership are
+     functional at DOM readiness for every user agent. Delay only below-viewport
+     reveal/flow observers and pointer-driven ambient effects until an idle slot,
+     or first real user intent. Avoid forced HTML/CSS tree scans in the LCP task. */
+  let optionalStarted = false;
+  let optionalIdle = 0;
+  function initialiseOptional() {
+    if (optionalStarted) return;
+    optionalStarted = true;
+    if (optionalIdle && 'cancelIdleCallback' in window) cancelIdleCallback(optionalIdle);
+    for (const kind of ['pointerdown','touchstart','keydown','wheel','scroll']) {
+      removeEventListener(kind, initialiseOptional);
+    }
     reveal();
     scenes();
     flow();
     pointerVariables();
+    ROOT.dataset.fxApexOptionalR2061 = 'ready-shared';
+  }
+  function scheduleOptional() {
+    for (const kind of ['pointerdown','touchstart','keydown','wheel','scroll']) {
+      addEventListener(kind, initialiseOptional, { passive: true, once: true });
+    }
+    if ('requestIdleCallback' in window) {
+      optionalIdle = requestIdleCallback(initialiseOptional, { timeout: 2200 });
+    } else {
+      setTimeout(initialiseOptional, 2200);
+    }
+  }
+  function initialise() {
+    navigation();
+    applyLanguage(language, false);
     updatePrice();
     latestRelease();
     setScene(activeScene);
     ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxRenderer = 'three-host';
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+    scheduleOptional();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });
