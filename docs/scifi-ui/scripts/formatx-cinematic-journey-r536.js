@@ -285,6 +285,7 @@
       sceneCommitTimer=0;
       pendingSceneIndex=-1;
       commitScene(0,committedSceneIndex,'document-top-invariant-r2034');
+      root.dataset.fxCinematicHeroWorldR1976='core-floor-active';
       root.dataset.fxCinematicTopReturnR2034='synchronous-core-commit';
       return;
     }
