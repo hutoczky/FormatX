@@ -3,21 +3,9 @@
 
   const ROOT = document.documentElement;
   const PARAMS = new URLSearchParams(location.search);
-  const AUDIT_MODE =
-    /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || PARAMS.get('lighthouse') === '1'
-    || ROOT.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
+  // R2017: the optional commerce layer has one behavior for all visitors.
+  // Its post-FCP scheduling is handled by the shared bootstrap loader.
   const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
-  if (AUDIT_MODE) {
-    const canvas = document.getElementById('fx-apex-canvas');
-    if (canvas) canvas.hidden = true;
-    ROOT.classList.add('fx-audit-mode');
-    ROOT.dataset.fxThree = 'audit-skip';
-    ROOT.dataset.fxLighthouse = 'ready';
-    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
-    dispatchEvent(new CustomEvent('formatx:livingready'));
-    return;
-  }
 
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
