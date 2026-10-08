@@ -20,6 +20,7 @@
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     let activatedCount = 0;
     let dormantIntroCount = 0;
+    let dormantCoreCount = 0;
     // R2030: If no birth film is present, activating its 3D, overlay and
     // identification styles after first paint triggers needless style work.
     // This is based on real scene ownership, never browser/benchmark identity.
@@ -45,6 +46,16 @@
         dormantIntroCount++;
         continue;
       }
+      // R2032: the full legacy core stylesheet is for the enhanced 3D
+      // renderer, not the static first frame. Keep it dormant until the
+      // actual MAG is requested, or a short unconditional safety fallback.
+      // P0 and r283 remain the canonical immediate hero typography/geometry.
+      if (!introActive && link.dataset.fxCriticalCoreR227 === 'true'
+          && !window.FormatXLivingCore?.sharedWebGL2) {
+        link.dataset.fxDormantCoreR2032 = 'true';
+        dormantCoreCount++;
+        continue;
+      }
       activateLink(link);
       activatedCount++;
     }
@@ -64,9 +75,36 @@
       }).observe(root, { attributes: true, attributeFilter: ['data-fx-intro-prepaint-r1611'] });
     }
 
+    if (dormantCoreCount) {
+      let coreTimer = 0;
+      let coreReady = false;
+      const wakeCore = event => {
+        if (coreReady) return;
+        coreReady = true;
+        if (coreTimer) clearTimeout(coreTimer);
+        document.querySelectorAll('link[data-fx-dormant-core-r2032]').forEach(link => {
+          activateLink(link);
+          link.removeAttribute('data-fx-dormant-core-r2032');
+        });
+        root.dataset.fxDeferredCoreR2032 = typeof event === 'string' ? event : 'real-user-intent';
+        for (const type of ['pointerdown','wheel','touchstart','keydown','scroll'])
+          removeEventListener(type, wakeCore);
+        for (const type of ['formatx:immersiveactivate','formatx:real3dready',
+          'formatx:magbirthcorewarmup','formatx:coreinteraction'])
+          removeEventListener(type, wakeCore);
+      };
+      for (const type of ['pointerdown','wheel','touchstart','keydown','scroll'])
+        addEventListener(type, wakeCore, { passive: true, once: true });
+      for (const type of ['formatx:immersiveactivate','formatx:real3dready',
+        'formatx:magbirthcorewarmup','formatx:coreinteraction'])
+        addEventListener(type, wakeCore, { once: true });
+      coreTimer = setTimeout(() => wakeCore('post-paint-auto-fallback'), 2600);
+    }
+
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
     root.dataset.fxDeferredIntroCountR2030 = String(dormantIntroCount);
+    root.dataset.fxDeferredCoreCountR2032 = String(dormantCoreCount);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
       detail: { count: links.length, scheduler: 'post-first-contentful-paint-r526', reason }
