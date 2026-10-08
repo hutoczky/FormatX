@@ -35,7 +35,7 @@ async function evaluate(viewport,isMobile,browser){
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
-    const selector=scene.id.startsWith('.')?scene.id:'#'+scene.id;
+    const selector=/^[#.]/.test(scene.id)?scene.id:'#'+scene.id;
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
     await page.waitForFunction(key=>{
       const state=window.FormatXArchiveExperience?.state;
