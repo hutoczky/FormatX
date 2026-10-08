@@ -205,6 +205,7 @@ void main(){
     }
     render(frame){
       if(!current||!archiveActive||document.hidden)return;
+      const start=performance.now();
       const gl=this.gl,scene=current.s,p=current.progress,index=scene.index;
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
@@ -219,7 +220,7 @@ void main(){
       const side=index%2?-1:1;
       const sx=side*2.4,sy=.12*Math.sin(index),sz=-.3;
       // Shared deep archive architectural rails. Fixed in one world, not separate scene backgrounds.
-      for(let k=-2;k<=2;k++){
+      for(let k=-2;k<=2;k+=(quality==='low'?2:1)){
         const x=k*1.48;
         box(x,-1.60,-1.45,.042,2.65,.035,[.14,.23,.28],0,.24);
         box(x,1.34,-1.45,1.18,.045,.10,[.15,.31,.38],0,.19);
@@ -252,10 +253,10 @@ void main(){
           box(sx,sy+1.1-.5*reveal,sz,.9,2.2,.33,metal,pro*.43,.75);
           box(sx,sy+.18,sz+.28,.54,1.65,.03,hue,.16,.84);break;
         case 'inner-chamber':
-          for(let j=0;j<12;j++){const a=j*Math.PI/6+pro*.34;box(Math.cos(a)*.83,Math.sin(a)*.72,.08,.34,.038,.038,hue,a,.4);}
+          for(let j=0;j<12;j+=(quality==='low'?2:1)){const a=j*Math.PI/6+pro*.34;box(Math.cos(a)*.83,Math.sin(a)*.72,.08,.34,.038,.038,hue,a,.4);}
           box(0,0,.16,.40,.40,.40,edge,pro*.24,.5);break;
         case 'assembled':
-          for(let j=0;j<7;j++){const a=j*Math.PI*2/7+pro*.30;plate(Math.cos(a)*1.9,Math.sin(a)*.95,-.3,.36,.57,hue,a*.12,.39,.1);}
+          for(let j=0;j<7;j+=(quality==='low'?2:1)){const a=j*Math.PI*2/7+pro*.30;plate(Math.cos(a)*1.9,Math.sin(a)*.95,-.3,.36,.57,hue,a*.12,.39,.1);}
           break;
       }
       // Archive data sheet: bent in storage, follows distinct 3D paths, becomes flat
@@ -280,10 +281,12 @@ void main(){
       gl.bindVertexArray(null);
       gl.depthMask(true);
       gl.disable(gl.BLEND);
-      gl.disable(gl.DEPTH_TEST);
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
       root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
       root.dataset.fxArchiveNativePass='shared-webgl2';
       painted++;
+      if(painted>6&&performance.now()-start>12&&quality!=='low')PerformanceManager.setQuality('low');
     }
     dispose(){
       const gl=this.gl;
@@ -335,6 +338,7 @@ void main(){
     stage=api.stage;heroHost=document.querySelector('#hero .hero-space');
     try{
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
+      api.canvas.addEventListener('webglcontextlost',()=>{if(archiveActive)ResponsiveExperience.restore();detach=null;},{once:true});
       drawPass=frame=>nativeScene.render(frame);
       drawPass.dispose=()=>nativeScene.dispose();
       detach=api.registerScenePass(drawPass);
@@ -365,6 +369,7 @@ void main(){
     addEventListener('scroll',invalidate,{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
+    addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
     addEventListener('pageshow',invalidate,{passive:true});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
