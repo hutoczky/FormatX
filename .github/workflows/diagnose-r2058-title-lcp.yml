@@ -1,0 +1,50 @@
+name: R2058 diagnostic hero LCP timeline
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-r2058-title-lcp.cjs'
+      - '.github/workflows/diagnose-r2058-title-lcp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-timeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser tooling
+        run: |
+          npm install --prefix "$RUNNER_TEMP/fx-probe" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/fx-probe/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve unmodified FormatX source
+        run: |
+          python3 -m http.server 4195 --directory docs > "$RUNNER_TEMP/r2058-http.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4195/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/r2058-http.log"
+          exit 1
+      - name: Capture four desktop paths (no Lighthouse score overrides)
+        run: |
+          NODE_PATH="$RUNNER_TEMP/fx-probe/node_modules" \
+          FORMATX_TEST_URL=http://127.0.0.1:4195/scifi-ui/index.html \
+          FORMATX_LCP_DIAGNOSTICS=artifacts/diagnostics/r2058-lcp.json \
+            node .github/scripts/diagnose-r2058-title-lcp.cjs | tee r2058-lcp-summary.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r2058-hero-lcp-timeline
+          path: |
+            artifacts/diagnostics/r2058-lcp.json
+            r2058-lcp-summary.txt
+          if-no-files-found: warn
+          retention-days: 14
