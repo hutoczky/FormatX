@@ -8,7 +8,6 @@
   let activated = false;
   let frame = 0;
   let fallback = 0;
-  let quietTimer = 0;
   let observer = null;
 
   function activate(reason) {
@@ -16,7 +15,6 @@
     activated = true;
     if (frame) cancelAnimationFrame(frame);
     if (fallback) clearTimeout(fallback);
-    if (quietTimer) clearTimeout(quietTimer);
     observer?.disconnect?.();
 
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
@@ -37,41 +35,17 @@
     }));
   }
 
-  /* R2020: the canonical hero is already painted and fully styled by the
-     render-blocking P0 and reference sheets. The remaining 15 optional CSS
-     bundles are for below-the-fold sections/interaction. Applying all of
-     them in the first post-FCP task forces a large site-wide style recalc
-     while the visible FORMATX heading is becoming the LCP candidate.
-     Give that real first frame time to settle. Real user intent activates
-     every optional bundle immediately; no audit/user-agent branching. */
+  /* R2022: always activate optional styles immediately after FCP. The
+     timed quiet window worsened desktop variance and mobile Speed Index.
+     Keep the same CSS for Lighthouse and real visitors; do not skip the
+     canonical core in automated browsers. */
   function activateAfterCommittedFrame(reason) {
-    if (activated || frame || quietTimer) return;
+    if (activated || frame) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      // R2020: hero disclosure is critical state, not optional below-fold UI.
-      // Keep the single-organism scene overlay contract identical to the
-      // previous immediate-post-FCP activation on every device.
-      const sceneCss = document.querySelector('link[data-fx-cinematic-journey-r536][data-fx-r487-deferred-style]');
-      if (sceneCss instanceof HTMLLinkElement) {
-        sceneCss.media = sceneCss.dataset.fxR487Media || 'all';
-      }
-      quietTimer = setTimeout(() => {
-        quietTimer = 0;
-        activate(reason + '-quiet-window');
-      }, 2200);
+      setTimeout(() => activate(reason), 0);
     });
   }
-  const intentTypes = ['pointerdown','wheel','touchstart','keydown','scroll'];
-  function onIntent() { activate('user-intent'); }
-  for (const type of intentTypes) {
-    addEventListener(type, onIntent, { passive: true, capture: true });
-  }
-  addEventListener('pagehide', () => {
-    for (const type of intentTypes) removeEventListener(type, onIntent, true);
-    if (frame) cancelAnimationFrame(frame);
-    if (fallback) clearTimeout(fallback);
-    if (quietTimer) clearTimeout(quietTimer);
-  }, { once: true });
 
   function hasFcp() {
     return performance.getEntriesByName('first-contentful-paint', 'paint').length > 0;
