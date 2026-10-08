@@ -305,9 +305,14 @@
       syncScene();
       updateCommerce();
     });
-    addEventListener('pageshow', () => {
-      revealQrDock();
-      updateCommerce();
+    // R2046: avoid eager QR pricing/image DOM work on a fresh navigation.
+    // The native near-pricing IntersectionObserver owns first activation;
+    // persisted back/forward restores must still resynchronize currency.
+    addEventListener('pageshow', event => {
+      if (event.persisted || qrDockActivated) {
+        revealQrDock();
+        updateCommerce();
+      }
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
@@ -319,11 +324,13 @@
   function initialise() {
     ROOT.dataset.fxQrOwner = 'living-v3-performance';
     scheduleThreeExperience();
-    revealQrDock();
     syncScene();
-    updateCommerce();
+    // The static HUF/EUR checkout content is immediately visible and handled
+    // by the R2009 delegate. QR images and locale formatting begin near the
+    // real pricing dock or after a genuine currency/language change.
     prepareQrDock();
     bind();
+    ROOT.dataset.fxQrInitR2046 = 'deferred-until-near-pricing-or-real-intent';
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
