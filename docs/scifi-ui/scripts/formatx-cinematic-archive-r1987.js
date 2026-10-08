@@ -17,16 +17,17 @@
   const mobile=()=>matchMedia('(max-width: 900px)').matches;
   const blueprint=[
     {selector:'#experience',key:'ecosystem',hu:'FORMATX ÖKOSZISZTÉMA',en:'FORMATX ECOSYSTEM',source:'left-shelf',color:[.50,.81,.94]},
-    {selector:'#live-os-overview',key:'live-os',hu:'LIVE OS',en:'LIVE OS',source:'rotor',color:[.65,.78,.99]},
+    {selector:'.fx-category-deck--standalone',key:'systems',hu:'RENDSZERKATEGÓRIÁK',en:'SYSTEM CATEGORIES',source:'rotor',color:[.65,.78,.99]},
     {selector:'#capabilities',key:'diagnostics',hu:'DIAGNOSZTIKA',en:'DIAGNOSTICS',source:'bottom-drawer',color:[.48,.95,.87]},
     {selector:'#network',key:'network',hu:'HÁLÓZATI ESZKÖZÖK',en:'NETWORK TOOLS',source:'right-cell',color:[.54,.80,.97]},
     {selector:'#system',key:'security',hu:'RENDSZER ÉS BIZTONSÁG',en:'SYSTEM & SECURITY',source:'sealed-vault',color:[.74,.86,.98]},
     {selector:'#pricing',key:'licensing',hu:'LICENCEK ÉS CSOMAGOK',en:'LICENSING & PLANS',source:'vertical-crystal',color:[.92,.77,.60]},
-    {selector:'.fx-category-deck--standalone',key:'intelligence',hu:'RENDSZERFOLYAMATOK',en:'SYSTEM WORKFLOWS',source:'inner-chamber',color:[.66,.88,1]},
+    {selector:'#capabilities .cards .card:last-child',key:'intelligence',hu:'AI SEGÍTSÉG',en:'AI GUIDANCE',source:'inner-chamber',color:[.66,.88,1]},
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null,originalStyle='';
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false;
+  let sceneObserver=null;
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
@@ -39,6 +40,10 @@
     scenes.sort((a,b)=>a.node.compareDocumentPosition(b.node)&Node.DOCUMENT_POSITION_PRECEDING?1:-1);
     for(const node of previous){if(!scenes.some(s=>s.node===node))node.removeAttribute('data-fx-archive-scene');}
     scenes.forEach((s,i)=>{s.index=i;s.node.dataset.fxArchiveScene=s.key;});
+    if(sceneObserver){
+      sceneObserver.disconnect();
+      scenes.forEach(s=>sceneObserver.observe(s.node));
+    }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
   }
   class ScrollTimelineController {
@@ -55,7 +60,7 @@
           : r.top>anchor ? r.top-anchor : anchor-r.bottom;
         // Prefer the real visible section containing the viewport's reading line.
         // Tall sections must never lose to a neighbour's off-screen quarter point.
-        const delta=contains?distance*.01:10+distance;
+        const delta=contains?(distance*.01+Math.min(r.height,innerHeight*5)*.0000003):10+distance;
         if(delta<score){score=delta;closest={s,rect:r};}
       }
       if(!closest)return null;
@@ -357,6 +362,8 @@ void main(){
     if(disposed)return;
     disposed=true;
     if(raf)cancelAnimationFrame(raf);
+    sceneObserver?.disconnect();
+    sceneObserver=null;
     ResponsiveExperience.restore();
     detach?.();detach=null;drawPass=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
@@ -365,6 +372,7 @@ void main(){
   function init(){
     if(reduced.matches){root.dataset.fxArchiveExperience='reduced-html';return;}
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    sceneObserver=new ResizeObserver(()=>invalidate());
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();

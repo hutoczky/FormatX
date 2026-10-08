@@ -37,7 +37,10 @@ async function evaluate(viewport,isMobile,browser){
   for(const scene of scenes){
     const selector=scene.id.startsWith('.')?scene.id:'#'+scene.id;
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
-    await page.waitForTimeout(isMobile?160:90);
+    await page.waitForFunction(key=>{
+      const state=window.FormatXArchiveExperience?.state;
+      return state?.active&&state?.scene===key;
+    },scene.key,{timeout:8000}).catch(()=>{});
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
     const diagnostics=await page.evaluate(sel=>{
       const node=document.querySelector(sel),r=node?.getBoundingClientRect();
@@ -57,7 +60,7 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(inside.nativeText,'Native semantic content is missing: '+scene.key);
     }
   }
-  assert.ok(passed>=Math.min(5,scenes.length),'Cinematic scenes did not activate: '+JSON.stringify(coverage));
+  assert.equal(passed,scenes.length,'Every real archive scene must activate: '+JSON.stringify({passed,total:scenes.length,coverage}));
   const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
   const selector=one.id.startsWith('.')?one.id:'#'+one.id;
   await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
