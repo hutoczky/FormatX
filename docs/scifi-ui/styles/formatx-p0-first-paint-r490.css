@@ -1756,3 +1756,30 @@ html body > .fx-c536-origin-probe-r2038 {
   z-index:-1!important;
   overflow:hidden!important;
 }
+
+
+/* R2041 experiment — use the exact existing production lazy-layout policy
+   at first paint rather than activating it after FCP via r227. Geometry hints
+   match the native cinematic archive's measured R1997 section sizes, avoiding
+   scroll-anchor jumps when later styles and WebGL scenes attach.
+   The hero, navigation, dialogue and mobile composition remain untouched. */
+@media (min-width:901px) {
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > .fx-category-deck,
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > section.scene:not(#hero),
+  html[data-fx-design-system="2"] body.living-architecture main#main-content .fx-origin-proof,
+  html[data-fx-design-system="2"] body.living-architecture .site-footer {
+    content-visibility:auto!important;
+    contain:layout paint style!important;
+    contain-intrinsic-size:auto 760px!important;
+  }
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > .fx-category-deck,
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > section.fx-category-deck--standalone {
+    contain-intrinsic-size:auto 700px!important;
+  }
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #experience {contain-intrinsic-size:auto 3170px!important}
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #capabilities {contain-intrinsic-size:auto 1430px!important}
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #pricing {contain-intrinsic-size:auto 2520px!important}
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #system {contain-intrinsic-size:auto 2040px!important}
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #network {contain-intrinsic-size:auto 1400px!important}
+  html[data-fx-design-system="2"] body.living-architecture main#main-content > #resources {contain-intrinsic-size:auto 1540px!important}
+}
