@@ -24,7 +24,7 @@
     if (document.querySelector(runtimeSelector)) return;
 
     const script = document.createElement('script');
-    script.src = '/scifi-ui/scripts/living-architecture.js?v=20261008-r2017-post-fcp';
+    script.src = '/scifi-ui/scripts/living-architecture.js?v=20261008-r2046-lazy-qr-pricing';
     script.async = true;
     script.dataset.fxLivingArchitectureRuntimeR1985 = 'true';
     script.addEventListener('load', () => {
