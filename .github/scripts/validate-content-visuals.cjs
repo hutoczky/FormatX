@@ -219,13 +219,26 @@ async function assertHeroDisclosure(page) {
       `R1948 hud must stay dormant in hero when mounted: ${JSON.stringify(heroState)}`);
   }
 
+  /* R2005: content-visibility:auto can make scrollIntoView a no-op before a
+     2–3kpx lazy section is materialized. Test native document scrolling as the
+     visitor does, then require the REAL non-core scene transition. */
+  const beforeScroll = await page.evaluate(() => scrollY);
   await page.locator('#experience').scrollIntoViewIfNeeded();
-  await page.evaluate(() => document.querySelector('#experience')?.scrollIntoView({ block: 'center', behavior: 'instant' }));
-  await page.waitForFunction(() =>
-    document.documentElement.dataset.fxCinematicSceneR536 &&
-    document.documentElement.dataset.fxCinematicSceneR536 !== 'core',
-    null, { timeout: 8000 }
-  );
+  await page.evaluate(() => {
+    const section = document.querySelector('#experience');
+    section?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    if (!(section instanceof HTMLElement)) return;
+    if (scrollY <= Math.max(2, innerHeight * .015)) {
+      const documentTop = section.getBoundingClientRect().top + scrollY;
+      scrollTo({ top: Math.max(innerHeight, documentTop + Math.min(section.offsetHeight * .12, innerHeight * .2)), behavior: 'instant' });
+    }
+  });
+  await page.waitForFunction(before => {
+    const root = document.documentElement;
+    return scrollY > Math.max(before + 2, innerHeight * .25)
+      && root.dataset.fxCinematicSceneR536
+      && root.dataset.fxCinematicSceneR536 !== 'core';
+  }, beforeScroll, { timeout: 10000 });
   await page.waitForTimeout(950);
 
   const journeyState = await readOpacity();
