@@ -107,8 +107,27 @@ async function verifyHeartInteraction(page, label) {
   await hit.scrollIntoViewIfNeeded();
   await hit.click();
 
-  await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
-  await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxCoreInteractionTarget), null, { timeout: 5000 });
+  /* R2035: Chromium's animation-frame polling can stall when the 3D MAG is
+     rendering in software. Assert the SAME semantic interaction contract
+     with bounded wall-clock polling, not a synthetic click or relaxed gate. */
+  try {
+    await page.waitForFunction(() => {
+      const root = document.documentElement;
+      return root.dataset.fxCoreInteractionMode === 'active-r252'
+        && Boolean(root.dataset.fxCoreInteractionTarget);
+    }, null, { timeout: 5000, polling: 80 });
+  } catch (error) {
+    const details = await page.evaluate(() => ({
+      mode: document.documentElement.dataset.fxCoreInteractionMode || null,
+      target: document.documentElement.dataset.fxCoreInteractionTarget || null,
+      source: document.documentElement.dataset.fxCoreInteractionSource || null,
+      heartReady: document.documentElement.dataset.fxHeartDelegatedR1744 || null,
+      currentScene: document.documentElement.dataset.fxCinematicSceneR536 || null,
+      overlayPresent: Boolean(document.querySelector('#fx-mag-birth-prepaint-r1606')),
+      hit: document.querySelector('#hero .fx-mag-heart-hit-r252')?.getBoundingClientRect().toJSON() || null
+    }));
+    throw new Error(`${label} MAG semantic click did not reach the canonical target: ${JSON.stringify(details)} :: ${error.message}`);
+  }
 
   const interaction = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxCoreInteractionMode || '',
