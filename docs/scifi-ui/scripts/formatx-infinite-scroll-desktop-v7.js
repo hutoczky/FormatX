@@ -775,7 +775,13 @@
       desktopGestureAnchorY = null;
       desktopGestureAnchorRelative = null;
       desktopGestureBoundaryLatched = false;
-      root.dataset.fxLoopLandingState = 'native-desktop';
+      // R2011: an idle no-boundary probe after successful native landing is
+      // not a new navigation. Preserve the completed transfer state; the
+      // previous unconditional reset hid the real settled landing from UI
+      // and automation while the viewport was already at the right position.
+      if(!['settled','heart-core-settled'].includes(root.dataset.fxLoopLandingState)){
+        root.dataset.fxLoopLandingState = 'native-desktop';
+      }
       return;
     }
     pendingDesktopRelative = relative;
