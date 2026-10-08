@@ -107,9 +107,13 @@
   }
   class CameraDirector {
     static forScene(scene,p){
-      const index=scene.index,pan=Math.sin(index*1.33)*.19;
+      // The camera lives in ONE archive, so chapter changes must not teleport
+      // it. Absolute native document scroll makes the track reversible.
+      const distance=scrollY/Math.max(1,innerHeight);
       const advance=smooth((p-.16)/.69);
-      return [pan*advance,mix(-.025,.04,advance),mix(0,.15,advance)];
+      return [Math.sin(distance*.31)*.125,
+        Math.sin(distance*.19)*.022+mix(-.025,.028,advance),
+        Math.cos(distance*.23)*.042+mix(0,.095,advance)];
     }
   }
   function cubeGeometry(){
@@ -141,7 +145,7 @@
       this.box=this.buffer(cubeGeometry());
       this.panel=this.buffer(panelGeometry(quality==='high'));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uBend','uOpacity','uPanel','uAspect']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uBend','uOpacity','uPanel','uFiber','uAspect']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -167,24 +171,42 @@ void main(){
       const frag=`#version 300 es
 precision highp float;
 in vec3 vNormal;in vec2 vUv;
-uniform vec3 uColor;uniform float uOpacity,uPanel;
+uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber;
 out vec4 outColor;
 void main(){
  vec3 N=normalize(vNormal+vec3(.0001));
- float n=max(.07,dot(N,normalize(vec3(-.4,.7,1.0))));
- float rim=pow(1.0-abs(N.z),3.0);
- vec3 base=mix(vec3(.024,.052,.069),uColor,uPanel>.5?.38:.19);
- float spec=pow(max(0.0,dot(N,normalize(vec3(.2,.3,1.0)))),15.0);
- vec3 col=base*(.35+.72*n)+uColor*(rim*.24+spec*.18);
- float a=uOpacity*(uPanel>.5?.78:.83);
+ vec3 V=normalize(vec3(.10,-.07,1.0));
+ vec3 L=normalize(vec3(-.38,.68,1.0));
+ vec3 H=normalize(L+V);
+ float ndl=max(.06,dot(N,L));
+ float facing=clamp(dot(N,V),0.0,1.0);
+ float fresnel=pow(1.0-facing,5.0);
+ float spec=pow(max(0.0,dot(N,H)),uPanel>.5?70.0:24.0);
+ vec3 base=mix(vec3(.025,.047,.060),uColor,uPanel>.5?.23:.18);
+ vec3 col=base*(.29+.70*ndl)+uColor*(fresnel*.23+spec*.25);
+ float a=uOpacity*(uPanel>.5?.68:.80);
  if(uPanel>.5){
+   // Smooth glass-membrane edge, directional internal light guides and
+   // antialiased micro-filaments; suppress high-frequency aliasing via fwidth.
    float edge=max(abs(vUv.x-.5)*2.0,abs(vUv.y-.5)*2.0);
-   float border=smoothstep(.92,.995,edge);
-   float guide=step(.988,fract(vUv.y*15.0))*step(.1,vUv.x)*step(vUv.x,.9);
-   col+=uColor*(border*.37+guide*.05);
-   a=mix(a,.98,border);
+   float rim=smoothstep(.943,.992,edge);
+   float strand=abs(fract(vUv.x*68.0)-.5);
+   float aa=max(fwidth(vUv.x*68.0)*.75,.028);
+   float micro=1.0-smoothstep(.012,.012+aa,strand);
+   float rail=abs(fract(vUv.y*13.0)-.5);
+   float railAA=max(fwidth(vUv.y*13.0)*.6,.035);
+   float guide=(1.0-smoothstep(.015,.015+railAA,rail))
+             *smoothstep(.07,.13,vUv.x)*(1.0-smoothstep(.87,.93,vUv.x));
+   col+=uColor*(rim*.31+guide*.060+micro*.037);
+   col+=vec3(1.0,.98,.91)*spec*.11;
+   a=mix(a,.91,rim);
+   a+=fresnel*.045;
+ }else if(uFiber>.5){
+   // Energy threads are hairline solid 3D geometry, not additive 2D strokes.
+   col=mix(uColor,vec3(.73,.91,.94),.15+spec*.29);
+   a*=.54+.36*ndl;
  }
- outColor=vec4(col,a);
+ outColor=vec4(col,clamp(a,0.0,1.0));
 }`;
       const shader=(type,source)=>{
         const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);
@@ -199,7 +221,7 @@ void main(){
       return p;
     }
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
-    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0]){
+    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false){
       const gl=this.gl,u=this.uniform;
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
@@ -208,7 +230,7 @@ void main(){
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
       gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);
       gl.uniform1f(u.uOpacity,alpha);gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
-      gl.uniform1f(u.uBend,bend);gl.drawArrays(gl.TRIANGLES,0,mesh.count);
+      gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);gl.drawArrays(gl.TRIANGLES,0,mesh.count);
       this.drawCalls++;
     }
     render(frame){
@@ -223,7 +245,7 @@ void main(){
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
       this.drawCalls=0;
-      const box=(x,y,z,w,h,d,c=metal,rot=0,a=.8)=>this.mesh(this.box,[x,y,z],[w,h,d],c,rot,a,0,cam);
+      const box=(x,y,z,w,h,d,c=metal,rot=0,a=.8,fiber=false)=>this.mesh(this.box,[x,y,z],[w,h,d],c,rot,a,0,cam,fiber);
       const plate=(x,y,z,w,h,c=hue,rot=0,a=1,bend=.2)=>this.mesh(this.panel,[x,y,z],[w,h,1],c,rot,a,bend,cam);
       const side=index%2?-1:1;
       const sx=side*2.4,sy=.12*Math.sin(index),sz=-.3;
@@ -280,12 +302,45 @@ void main(){
       const bend=mix(.44,.006,smooth((pro-.46)/.30));
       const rotation=(1-align)*(side*.74)+align*.02;
       const alpha=reveal*(1-release);
+      let filamentCount=0;
       if(alpha>.001){
         plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
-        for(let j=-1;j<=1;j++){
-          box(mix(sourceX,x,.60),y+j*.12,z-.16,.030,.012,.75,hue,rotation,.24*alpha);
+        // Optical micro-filaments connect the SAME living MAG to the glass
+        // membrane. Cubic paths are sampled in real scene-space; an individual
+        // thread stays deliberately thin and is shed first on low quality.
+        if(quality==='high'&&!mobile()){
+          const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
+          const segments=6,strands=3;
+          const bezier=(a,b,d,e,t)=>{
+            const q=1-t;
+            return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
+          };
+          for(let strand=0;strand<strands;strand++){
+            const dy=(strand-1)*.073;
+            let prev=null;
+            for(let k=0;k<=segments;k++){
+              const t=k/segments;
+              const point=[
+                bezier(from[0],from[0]+(side*.38),to[0]-(side*.32),to[0],t),
+                bezier(from[1]+dy,from[1]+dy+.27,to[1]+dy+.31,to[1]+dy,t),
+                bezier(from[2],from[2]+.33,to[2]-.39,to[2],t)
+              ];
+              if(prev){
+                const dx=point[0]-prev[0],dz=point[2]-prev[2];
+                const dist=Math.hypot(dx,dz);
+                const midpoint=[(point[0]+prev[0])*.5,(point[1]+prev[1])*.5,(point[2]+prev[2])*.5];
+                const thickness=.010+strand*.001;
+                // The box's long Z axis follows the filament path in XZ.
+                box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
+                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)),true);
+                filamentCount++;
+              }
+              prev=point;
+            }
+          }
         }
       }
+      root.dataset.fxArchiveFilamentCount=String(filamentCount);
       gl.bindVertexArray(null);
       gl.depthMask(true);
       gl.disable(gl.BLEND);

@@ -88,6 +88,7 @@ async function evaluate(viewport,isMobile,browser){
   const native=await page.evaluate(()=>({
     renderer:document.documentElement.dataset.fxArchiveNativePass,
     drawCalls:Number(document.documentElement.dataset.fxArchiveDrawCalls||0),
+    filamentCount:Number(document.documentElement.dataset.fxArchiveFilamentCount||0),
     frames:window.FormatXArchiveExperience.state.frames,
     controls:document.querySelectorAll('#menu-toggle,.fx-language-toggle,.fx-reference-ask').length,
     scrollHeight:document.documentElement.scrollHeight,
@@ -99,6 +100,9 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(native.magDomCanonical,'Native MAG must remain inside the original hero DOM');
   assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
+  if (!isMobile && native.filamentCount < 1 && await page.evaluate(()=>document.documentElement.dataset.fxArchiveQuality==='high')) {
+    throw new Error('High-quality archive scene did not emit any physical 3D filaments');
+  }
   assert.equal(native.renderer,'shared-webgl2');
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
   await page.screenshot({path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,fullPage:false,timeout:30000});
