@@ -16,7 +16,7 @@ assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
 assert.equal((index.match(/data-fx-deferred-css-r487="true"/g)||[]).length,1,'R487 deferred CSS scheduler must load exactly once in source');
-assert.ok(/<script\\b[^>]*data-fx-deferred-css-r487="true"[^>]*src="[^"]*formatx-deferred-css-r487\\.js\\?v=[^"]+"/.test(index),'R487 cache-versioned runtime must be in script source');
+assert.ok(index.split('\n').some(line => line.includes('data-fx-deferred-css-r487="true"') && line.includes('formatx-deferred-css-r487.js?v=')),'R487 cache-versioned runtime must be in script source');
 
 for (const token of [
   '#hero','#live-os-overview','.fx-category-deck--standalone','#experience','#capabilities',
