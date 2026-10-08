@@ -1313,6 +1313,11 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     line-height:1!important;
     letter-spacing:.12em!important;
     white-space:nowrap!important;
+    /* R2059: reproduce the canonical settled outline on the first frame.
+       The post-FCP critical-core stylesheet already sets these exact values.
+       This prevents a late solid-to-outline subtitle repaint on every desktop. */
+    color:transparent!important;
+    -webkit-text-stroke:1px rgba(225,241,249,.56)!important;
   }
   html:root:root:root body.living-architecture #hero .hero-lead {
     display:block!important;
