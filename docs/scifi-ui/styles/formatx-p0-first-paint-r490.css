@@ -1293,12 +1293,15 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
     line-height:.88!important;
     letter-spacing:-.075em!important;
     white-space:nowrap!important;
-    color:transparent!important;
-    -webkit-text-fill-color:transparent!important;
-    background:linear-gradient(115deg,#fff 0%,#c6f6ff 38%,#86caff 62%,#c8bcff 86%,#fff 100%)!important;
-    -webkit-background-clip:text!important;
-    background-clip:text!important;
-    text-shadow:none!important;
+    /* R2006: FORMATX is the measured desktop LCP. Keep real opaque glyphs
+       from first paint through the cinematic handoff, avoiding a second
+       expensive transparent background-clip:text rasterization. */
+    color:#f2fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    background:none!important;
+    -webkit-background-clip:initial!important;
+    background-clip:border-box!important;
+    text-shadow:0 1px 14px rgba(110,185,205,.075)!important;
   }
   html:root:root:root body.living-architecture #hero .hero-title-sub {
     display:block!important;
