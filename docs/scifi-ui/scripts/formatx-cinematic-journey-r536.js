@@ -772,6 +772,7 @@
     clearTimeout(coreSettleTimer);
     clearTimeout(sceneCommitTimer);
     clearTimeout(refreshTimer);
+    clearTimeout(nativePositionCheckTimer);
     observer?.disconnect?.();
     geometryObserver?.disconnect?.();
     removeEventListener('pointermove',onCinematicPointerMove);
