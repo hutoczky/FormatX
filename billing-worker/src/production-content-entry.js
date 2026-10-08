@@ -233,6 +233,22 @@ function injectReferenceModeBoot(html) {
 }
 function injectCriticalFirstPaint(html) {
   let source = String(html || '');
+  /* R2063: source HTML now owns a mobile P0 fallback and a paired desktop
+     first-paint CSS resource. Do not append the legacy global P0 again after
+     the new bundle, or the Worker would destroy source/production CSS parity.
+     This is based solely on a shipped HTML asset marker, not browser identity. */
+  if (/data-fx-desktop-early-bundle-r2063=["']true["']/.test(source)) {
+    const required = [
+      '/scifi-ui/styles/formatx-p0-desktop-bundle-r2063.css',
+      '/scifi-ui/styles/formatx-p0-first-paint-r490.css',
+      '/scifi-ui/styles/formatx-first-frame-stability-r283.css',
+      '/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
+    ];
+    const links = (source.match(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi) || [])
+      .map(stylesheetPath);
+    if (required.every(asset => links.includes(asset))) return source;
+    throw new Error('R2063 critical CSS asset contract is incomplete');
+  }
   source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
     if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') return '';
