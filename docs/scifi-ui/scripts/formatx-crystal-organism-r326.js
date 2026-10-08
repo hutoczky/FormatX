@@ -1957,7 +1957,10 @@
       return true;
     }
 
-    function blocked(){return disposed||contextLost||document.hidden||!visible||paused||root.dataset.fxReferenceMotionPaused==='true';}
+    function blocked(){
+      const archiveLive=root.dataset.fxArchiveDock==='active';
+      return disposed||contextLost||document.hidden||(!visible&&!archiveLive)||paused||root.dataset.fxReferenceMotionPaused==='true';
+    }
     function queueFrame(delay=0){
       if(blocked()||raf)return;
       if(delay<=0){

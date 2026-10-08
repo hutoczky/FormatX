@@ -66,9 +66,13 @@ async function evaluate(viewport,isMobile,browser){
     frames:window.FormatXArchiveExperience.state.frames,
     controls:document.querySelectorAll('#menu-toggle,.fx-language-toggle,.fx-reference-ask').length,
     scrollHeight:document.documentElement.scrollHeight,
-    viewport:innerHeight
+    viewport:innerHeight,
+    magDomCanonical:!!document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage'),
+    canvasRect:(()=>{const r=document.querySelector('#hero .fx-crystal-organism-r326-stage')?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})()
   }));
   assert.ok(native.frames>0,'Native WebGL archive never drew');
+  assert.ok(native.magDomCanonical,'Native MAG must remain inside the original hero DOM');
+  assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
   assert.equal(native.renderer,'shared-webgl2');
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');

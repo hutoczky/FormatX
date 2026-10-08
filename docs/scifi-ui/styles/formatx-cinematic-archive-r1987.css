@@ -57,6 +57,37 @@ html[data-fx-archive-dock="active"] [data-fx-archive-active="true"] > *{
   position:relative;
   z-index:1;
 }
+/* R1991: the native canvas remains a descendant of #hero to preserve the
+   canonical MAG selector, but becomes viewport-positioned during the archive.
+   Release inherited paint-containment and clipping only while archive is active,
+   otherwise fixed descendants are clipped inside the offscreen hero. */
+html[data-fx-archive-dock="active"] body #hero,
+html[data-fx-archive-dock="active"] body #hero .hero-grid,
+html[data-fx-archive-dock="active"] body #hero .hero-space{
+  overflow:visible!important;
+  overflow-x:visible!important;
+  overflow-y:visible!important;
+  clip-path:none!important;
+  contain:none!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  transform:none!important;
+}
+html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-docked{
+  position:fixed!important;
+  inset:0!important;
+  left:0!important;
+  top:0!important;
+  z-index:2!important;
+}
+@media(max-width:900px){
+  html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-docked{
+    top:auto!important;
+    right:auto!important;
+    left:8px!important;
+    bottom:8px!important;
+  }
+}
 /* Only presentation transitions. No scroll locking, HTML clipping or
    pointer interception is allowed by the archive layer. */
 @media (max-width:900px){
