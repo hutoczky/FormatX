@@ -39,13 +39,23 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  // Reuse the immutable formatter per language/currency across QR, price and language events.
+  // This cache is shared by all browsers; locale and formatting rules are unchanged.
+  const MONEY_FORMATTERS = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale = language() === 'hu' ? 'hu-HU' : 'en-GB';
+    const key = locale + ':' + selectedCurrency;
+    let formatter = MONEY_FORMATTERS.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: selectedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      MONEY_FORMATTERS.set(key, formatter);
+    }
+    return formatter.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {
