@@ -102,3 +102,41 @@ html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-
   html[data-fx-archive-dock="active"] [data-fx-archive-active="true"]::before{display:none!important;}
 }
 /* production-r1987-mag-archive-semantic-and-native-webgl */
+
+/* R1997 — geometry-stable lazy layout. The existing performance CSS supplied
+   the same ~900px placeholder for sections that actually occupy 1400–3200px.
+   The incorrect placeholder changed document.scrollHeight during a cinematic
+   scrub, selecting the wrong source after native scroll anchoring. Preserve
+   content-visibility:auto and its lazy rendering, but supply measured desktop
+   size hints to the browser until the real section has been laid out. */
+@media(min-width:901px){
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section.fx-category-deck--standalone{
+    contain-intrinsic-size:auto 700px!important;
+  }
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section#experience{
+    contain-intrinsic-size:auto 3170px!important;
+  }
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section#capabilities{
+    contain-intrinsic-size:auto 1430px!important;
+  }
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section#pricing{
+    contain-intrinsic-size:auto 2520px!important;
+  }
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section#system{
+    contain-intrinsic-size:auto 2040px!important;
+  }
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section#network{
+    contain-intrinsic-size:auto 1400px!important;
+  }
+  html:root:root[data-fx-archive-experience="ready"] body.living-architecture
+  main#main-content > section#resources{
+    contain-intrinsic-size:auto 1540px!important;
+  }
+}
+/* production-r1997-stable-archive-intrinsic-heights */
