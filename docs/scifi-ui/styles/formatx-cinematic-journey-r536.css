@@ -1224,9 +1224,11 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
      when a late layout event rearms the compositor-lite latch. */
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-world{
     opacity:calc(.13 + var(--fx-c536-energy) * .30)!important;
+    transition:transform .82s cubic-bezier(.18,.78,.2,1),filter .72s ease!important;
   }
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-iris{
     opacity:calc(.14 + var(--fx-c536-energy) * .19)!important;
+    transition:transform .82s cubic-bezier(.18,.78,.2,1),filter .72s ease!important;
   }
   html[data-fx-cinematic-journey-r536="ready"]:not([data-fx-cinematic-scene-r536="core"]) .fx-c536-track{
     opacity:calc(.035 + var(--fx-c536-energy) * .10)!important;
