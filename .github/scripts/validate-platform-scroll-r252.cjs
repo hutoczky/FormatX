@@ -111,11 +111,35 @@ async function verifyHeartInteraction(page, label) {
      rendering in software. Assert the SAME semantic interaction contract
      with bounded wall-clock polling, not a synthetic click or relaxed gate. */
   try {
-    await page.waitForFunction(() => {
+    /* R2062: the real MAG click may complete while a software WebGL frame
+       starves Playwright's page.waitForFunction polling. Observe the actual
+       semantic state transition (not a synthetic click or a weaker target).
+       Retain the 5-second timeout and require the canonical Voice/ASK target. */
+    await page.evaluate(() => new Promise((resolve, reject) => {
       const root = document.documentElement;
-      return root.dataset.fxCoreInteractionMode === 'active-r252'
-        && Boolean(root.dataset.fxCoreInteractionTarget);
-    }, null, { timeout: 5000, polling: 80 });
+      const valid = () => root.dataset.fxCoreInteractionMode === 'active-r252'
+        && /^(organism-voice|ask-control|thought-trigger)$/.test(root.dataset.fxCoreInteractionTarget || '');
+      if (valid()) { resolve(true); return; }
+      let deadline = 0;
+      const observer = new MutationObserver(() => {
+        if (!valid()) return;
+        observer.disconnect();
+        clearTimeout(deadline);
+        resolve(true);
+      });
+      observer.observe(root, { attributes: true, attributeFilter: [
+        'data-fx-core-interaction-mode', 'data-fx-core-interaction-target'
+      ] });
+      deadline = setTimeout(() => {
+        observer.disconnect();
+        reject(new Error('No canonical MAG interaction within 5000ms'));
+      }, 5000);
+      if (valid()) {
+        observer.disconnect();
+        clearTimeout(deadline);
+        resolve(true);
+      }
+    }));
   } catch (error) {
     const details = await page.evaluate(() => ({
       mode: document.documentElement.dataset.fxCoreInteractionMode || null,
