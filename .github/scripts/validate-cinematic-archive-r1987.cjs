@@ -37,6 +37,15 @@ async function evaluate(viewport,isMobile,browser){
   for(const scene of scenes){
     const selector=/^[#.]/.test(scene.id)?scene.id:'#'+scene.id;
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
+    // Some FormatX sections have independent content-visibility sizing and
+    // smooth-loop reconciliation. Use a native document scroll when a section
+    // remains entirely outside the viewport after scrollIntoView.
+    await page.evaluate(sel=>{
+      const n=document.querySelector(sel),r=n?.getBoundingClientRect();
+      if(r&&(r.top>innerHeight*.92||r.bottom<0)){
+        window.scrollTo({top:scrollY+r.top-innerHeight*.32,behavior:'instant'});
+      }
+    },selector);
     await page.waitForFunction(key=>{
       const state=window.FormatXArchiveExperience?.state;
       return state?.active&&state?.scene===key;

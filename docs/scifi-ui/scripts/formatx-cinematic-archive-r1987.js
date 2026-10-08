@@ -313,18 +313,27 @@ void main(){
       }
     }
   }
+  /* Lightweight selection is synchronous on native scroll. GPU rendering is
+     still requestAnimationFrame-budgeted. This prevents stale chapters when
+     content-visibility, infinite-scroll or a slow software GPU delays RAF. */
+  function selectLiveChapter(){
+    if(!scenes.length)discover();
+    const next=ScrollTimelineController.get();
+    const hero=document.getElementById('hero'),end=hero?.getBoundingClientRect().bottom||0;
+    const inArchive=Boolean(next&&end<innerHeight*.36&&next.rect.top<innerHeight*.95&&next.rect.bottom>0);
+    current=inArchive?next:null;
+    root.dataset.fxArchiveCurrent=current?.s.key||'none';
+    if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
+    return inArchive;
+  }
   function update(){
     raf=0;if(disposed||document.hidden||reduced.matches)return;
     updates++;
     root.dataset.fxArchiveUpdateCount=String(updates);
     root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
-    if(!scenes.length)discover();
-    const next=ScrollTimelineController.get();
-    const hero=document.getElementById('hero'),end=hero?.getBoundingClientRect().bottom||0;
-    const inArchive=Boolean(next&&end<innerHeight*.36&&next.rect.top<innerHeight*.95&&next.rect.bottom>0);
+    const inArchive=selectLiveChapter();
     if(inArchive&&stage)ResponsiveExperience.dock();
     else if(archiveActive)ResponsiveExperience.restore();
-    current=inArchive?next:null;
     setPanelState();
     if(current){
       const nextIndex=current.s.index;
@@ -341,6 +350,9 @@ void main(){
     }
   }
   function invalidate(){
+    if(!disposed&&!document.hidden&&!reduced.matches){
+      try{selectLiveChapter();}catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
+    }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
       try{update();}catch(e){raf=0;root.dataset.fxArchiveError=String(e?.message||e);console.error('FormatX archive update error',e);}
     });
