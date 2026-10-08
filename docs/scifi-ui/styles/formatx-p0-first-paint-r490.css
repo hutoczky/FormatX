@@ -1735,3 +1735,24 @@ html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living
 }
 /* production-r1979-audit-hero-copy-single-paint */
 
+
+
+/* R2038: zero-flow 1px document-origin sentinel for native IntersectionObserver.
+   Never alters hero layout, paints, captures input or participates in accessibility. */
+html body > .fx-c536-origin-probe-r2038 {
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  right:auto!important;
+  bottom:auto!important;
+  display:block!important;
+  width:1px!important;
+  height:1px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  z-index:-1!important;
+  overflow:hidden!important;
+}
