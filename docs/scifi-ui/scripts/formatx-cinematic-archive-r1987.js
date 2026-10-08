@@ -10,6 +10,7 @@
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
+  const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const mix=(a,b,t)=>a+(b-a)*t;
   const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -333,7 +334,7 @@ void main(){
   }
   function invalidate(){if(!raf&&!disposed)raf=requestAnimationFrame(update);}
   function connect(){
-    if(disposed||reduced.matches||(!force&&audit))return;
+    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     if(detach)return;
@@ -363,7 +364,7 @@ void main(){
   }
   function init(){
     if(reduced.matches){root.dataset.fxArchiveExperience='reduced-html';return;}
-    if(audit&&!force){root.dataset.fxArchiveExperience='audit-html';return;}
+    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();

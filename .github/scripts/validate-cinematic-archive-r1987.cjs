@@ -39,7 +39,14 @@ async function evaluate(viewport,isMobile,browser){
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
     await page.waitForTimeout(isMobile?160:90);
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
-    console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress}));
+    const diagnostics=await page.evaluate(sel=>{
+      const node=document.querySelector(sel),r=node?.getBoundingClientRect();
+      return {scrollY,scrollHeight:document.documentElement.scrollHeight,innerHeight,
+        target:r?{top:r.top,bottom:r.bottom,height:r.height,display:getComputedStyle(node).display}:null,
+        archive:document.documentElement.dataset.fxArchiveDock,
+        nearby:[...document.querySelectorAll('[data-fx-archive-scene]')].map(n=>{const b=n.getBoundingClientRect();return{key:n.dataset.fxArchiveScene,top:Math.round(b.top),bottom:Math.round(b.bottom)};}).slice(0,12)};
+    },selector);
+    console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,diagnostics}));
     if(state.scene===scene.key&&state.active){
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
