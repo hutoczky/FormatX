@@ -285,6 +285,8 @@ async function assertHeroDisclosure(page) {
         scene: root.dataset.fxCinematicSceneR536 || null,
         journey: root.dataset.fxCinematicJourneyR536 || null,
         topReturn: root.dataset.fxCinematicTopReturnR1949 || root.dataset.fxCinematicTopReturnR2034 || null,
+        originRecovery: root.dataset.fxCinematicTopReturnR2038 || null,
+        originWatch: root.dataset.fxCinematicOriginWatchR2038 || null,
         scrollBudget: root.dataset.fxScrollBudgetR1660 || null,
         sceneCommit: root.dataset.fxCinematicSceneCommitR1664 || null,
         panelOpen: document.body.classList.contains('fx-organism-panel-open')
