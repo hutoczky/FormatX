@@ -44,13 +44,33 @@
     }));
   }
 
+  /* R2020: the canonical hero is already painted and fully styled by the
+     render-blocking P0 and reference sheets. The remaining 15 optional CSS
+     bundles are for below-the-fold sections/interaction. Applying all of
+     them in the first post-FCP task forces a large site-wide style recalc
+     while the visible FORMATX heading is becoming the LCP candidate.
+     Give that real first frame time to settle. Real user intent activates
+     every optional bundle immediately; no audit/user-agent branching. */
   function activateAfterCommittedFrame(reason) {
-    if (activated || frame) return;
+    if (activated || frame || fallback) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      setTimeout(() => activate(reason), 0);
+      fallback = setTimeout(() => {
+        fallback = 0;
+        activate(reason + '-quiet-window');
+      }, 2200);
     });
   }
+  const intentTypes = ['pointerdown','wheel','touchstart','keydown','scroll'];
+  function onIntent() { activate('user-intent'); }
+  for (const type of intentTypes) {
+    addEventListener(type, onIntent, { passive: true, capture: true });
+  }
+  addEventListener('pagehide', () => {
+    for (const type of intentTypes) removeEventListener(type, onIntent, true);
+    if (frame) cancelAnimationFrame(frame);
+    if (fallback) clearTimeout(fallback);
+  }, { once: true });
 
   function hasFcp() {
     return performance.getEntriesByName('first-contentful-paint', 'paint').length > 0;
