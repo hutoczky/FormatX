@@ -1048,11 +1048,6 @@ html[data-fx-scroll-budget-r1660="fast"] .fx-c536-flare{
 html[data-fx-scroll-budget-r1660="fast"] .fx-c536-world{
   -webkit-mask-image:none!important;
   mask-image:none!important;
-  opacity:.10!important;
-}
-
-html[data-fx-scroll-budget-r1660="fast"] .fx-c536-iris{
-  opacity:.08!important;
 }
 
 html[data-fx-scroll-budget-r1660="fast"] .fx-c536-anatomy{

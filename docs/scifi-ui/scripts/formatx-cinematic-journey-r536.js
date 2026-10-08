@@ -225,15 +225,9 @@
 
   function applyHeroDisclosure(scene){
     if(!(stage instanceof HTMLElement) || !scene)return;
-    const world=stage.querySelector('.fx-c536-world');
-    if(!(world instanceof HTMLElement))return;
     if(scene.def.key==='core'){
-      /* R1949 — one-shot inline floor guarantees the hero world never flashes
-         at opacity:1 while deferred CSS/transition ownership settles. */
-      world.style.setProperty('opacity','.10','important');
-      root.dataset.fxCinematicHeroWorldR1949='restrained-inline-floor';
+      root.dataset.fxCinematicHeroWorldR1949='restrained-external-css-floor';
     }else{
-      world.style.removeProperty('opacity');
       root.dataset.fxCinematicHeroWorldR1949='journey-css-owned';
     }
   }
