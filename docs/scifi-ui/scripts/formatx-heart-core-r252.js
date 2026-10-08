@@ -286,6 +286,11 @@
     for (const delay of [0, 80, 220, 520, 1100, 2600]) setTimeout(scheduleBinding, delay);
   }
 
+  // R2012: register the semantic MAG click capture as soon as the module
+  // executes, not only after DOMContentLoaded. Lazy/native scroll shells can
+  // already expose the focusable MAG hit while the rest of the DOM is loading.
+  // The later boot call is idempotent and does not add duplicate listeners.
+  bindDelegatedHeartInput();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();
 
