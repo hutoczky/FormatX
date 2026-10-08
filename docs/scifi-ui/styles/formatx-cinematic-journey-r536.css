@@ -1180,7 +1180,7 @@ html[data-fx-scroll-budget-r1660="settled"] .fx-c536-stage{
    leaves the core scene, then opens as part of the system journey. Legacy rail
    and organism-status controls remain retired by the reference-production owner. No loop,
    no geometry ownership, desktop only. */
-@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+@media (min-width:901px) and (prefers-reduced-motion:no-preference){
   html[data-fx-cinematic-journey-r536="ready"] :is(
     .fx-c536-hud,.fx-c536-track,.fx-c536-scan,.fx-c536-iris,.fx-c536-world
   ){

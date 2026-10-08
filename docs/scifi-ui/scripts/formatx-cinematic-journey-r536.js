@@ -80,10 +80,10 @@
     stage.className = 'fx-c536-stage';
     stage.setAttribute('aria-hidden','true');
     stage.dataset.fxC536Primed='false';
-    stage.style.cssText='position:fixed;inset:0;z-index:7;overflow:hidden;pointer-events:none;contain:layout paint style;isolation:isolate;width:100%;height:100%;';
-    /* R1981: decorative geometry exists in its final absolute coordinate
-       system from creation. Keep markup style-free; seed geometry through the
-       same script-owned CSSOM path already used by the stage itself. */
+    /* R1998: geometry is owned by the already-loaded external cinematic
+       stylesheet, including the fixed stage itself. Writing duplicate
+       declarations through HTMLElement.style violated production style-src
+       and left the new layers with browser-dependent partial geometry. */
     stage.innerHTML = [
       '<div class="fx-c536-world"></div>',
       '<div class="fx-c536-iris"></div>',
@@ -93,19 +93,6 @@
       '<div class="fx-c536-grain"></div>',
       '<div class="fx-c536-flare"></div>'
     ].join('');
-    const seedGeometry={
-      '.fx-c536-world':'position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(92vw,1260px);aspect-ratio:1;border-radius:50%;',
-      '.fx-c536-iris':'position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:min(56vw,700px);aspect-ratio:1;border-radius:50%;',
-      '.fx-c536-track':'position:absolute;left:4vw;right:4vw;top:var(--fx-c536-track-y,50%);height:1px;',
-      '.fx-c536-scan':'position:absolute;left:0;right:0;height:22vh;top:calc(var(--fx-c536-track-y,50%) - 11vh);',
-      '.fx-c536-vignette':'position:absolute;inset:0;',
-      '.fx-c536-grain':'position:absolute;inset:0;',
-      '.fx-c536-flare':'position:absolute;left:var(--fx-c536-x,50%);top:var(--fx-c536-y,50%);width:2px;height:2px;border-radius:50%;transform:translate(-50%,-50%) scale(.01);opacity:0;'
-    };
-    for(const [selector,css] of Object.entries(seedGeometry)){
-      const node=stage.querySelector(selector);
-      if(node instanceof HTMLElement)node.style.cssText=css;
-    }
     document.body.appendChild(stage);
     hudCode = null;
     hudTitle = null;
