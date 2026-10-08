@@ -135,7 +135,7 @@
       this.box=this.buffer(cubeGeometry());
       this.panel=this.buffer(panelGeometry(quality==='high'));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uBend','uOpacity','uPanel','uFiber','uAspect']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -146,16 +146,19 @@
       const vert=`#version 300 es
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
-uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uBend,uAspect;
+uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect;
 out vec3 vNormal;out vec2 vUv;
 void main(){
  vec3 p=aPosition*uScale;
  p.z+=uBend*pow(2.0*aUv.x-1.0,2.0)*sin(3.14159*aUv.y);
+ float st=sin(uTilt),ct=cos(uTilt);
+ p=vec3(p.x,ct*p.y-st*p.z,st*p.y+ct*p.z);
  float s=sin(uRotation),c=cos(uRotation);
  p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+uOffset-uCamera;
  float d=max(2.4,6.2-p.z);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,(p.z-2.8)*.36,d);
- vNormal=vec3(c*aNormal.x+s*aNormal.z,aNormal.y,-s*aNormal.x+c*aNormal.z);
+ vec3 n=vec3(aNormal.x,ct*aNormal.y-st*aNormal.z,st*aNormal.y+ct*aNormal.z);
+ vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
  vUv=aUv;
 }`;
       const frag=`#version 300 es
@@ -211,14 +214,14 @@ void main(){
       return p;
     }
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
-    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false){
+    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0){
       const gl=this.gl,u=this.uniform;
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
       gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
       gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
-      gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);
+      gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
       gl.uniform1f(u.uOpacity,alpha);gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
       gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);gl.drawArrays(gl.TRIANGLES,0,mesh.count);
       this.drawCalls++;
@@ -235,7 +238,7 @@ void main(){
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
       this.drawCalls=0;
-      const box=(x,y,z,w,h,d,c=metal,rot=0,a=.8,fiber=false)=>this.mesh(this.box,[x,y,z],[w,h,d],c,rot,a,0,cam,fiber);
+      const box=(x,y,z,w,h,d,c=metal,rot=0,a=.8,fiber=false,tilt=0)=>this.mesh(this.box,[x,y,z],[w,h,d],c,rot,a,0,cam,fiber,tilt);
       const plate=(x,y,z,w,h,c=hue,rot=0,a=1,bend=.2)=>this.mesh(this.panel,[x,y,z],[w,h,1],c,rot,a,bend,cam);
       const side=index%2?-1:1;
       const sx=side*2.4,sy=.12*Math.sin(index),sz=-.3;
@@ -316,13 +319,14 @@ void main(){
                 bezier(from[2],from[2]+.33,to[2]-.39,to[2],t)
               ];
               if(prev){
-                const dx=point[0]-prev[0],dz=point[2]-prev[2];
-                const dist=Math.hypot(dx,dz);
+                const dx=point[0]-prev[0],dy3=point[1]-prev[1],dz=point[2]-prev[2];
+                const dist=Math.hypot(dx,dy3,dz);
+                 const tilt=-Math.atan2(dy3,Math.hypot(dx,dz));
                 const midpoint=[(point[0]+prev[0])*.5,(point[1]+prev[1])*.5,(point[2]+prev[2])*.5];
                 const thickness=.010+strand*.001;
                 // The box's long Z axis follows the filament path in XZ.
                 box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
-                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)),true);
+                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)),true,tilt);
                 filamentCount++;
               }
               prev=point;
@@ -338,6 +342,7 @@ void main(){
       gl.depthFunc(gl.LEQUAL);
       root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
       root.dataset.fxArchiveNativePass='shared-webgl2';
+       if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
       if(painted>6&&performance.now()-start>12&&quality!=='low')PerformanceManager.setQuality('low');
     }
