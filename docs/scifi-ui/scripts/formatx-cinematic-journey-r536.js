@@ -68,6 +68,8 @@
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
+  let lastNativeScrollEventAt=performance.now();
+  let nativeSceneObserver=null;
   let scrollRange=Math.max(1,document.documentElement.scrollHeight-innerHeight);
 
   function language() { return root.lang === 'en' ? 'en' : 'hu'; }
@@ -466,6 +468,8 @@
         return;
       }
       cacheGeometry(reason);
+      if (nativeSceneObserver)
+        for (const scene of scenes) nativeSceneObserver.observe(scene.node);
       const found=scenes.findIndex(scene=>scene.def.key===previousKey);
       if(found>=0)active=found;
       activate(pickActive(scrollY),reason);
@@ -566,6 +570,34 @@
     addEventListener('pagehide', () => { observer.disconnect(); probe.remove(); }, { once: true });
   }
 
+  /* R2039 — a native viewport intersection gives real scene reentry when
+     an instant native scroll changes scrollY without dispatching the normal
+     scroll event to R536. This observer does nothing during normal scroll
+     delivery and has zero idle RAF/interval overhead. */
+  function observeNativeScenes() {
+    if (!('IntersectionObserver' in window)) return;
+    nativeSceneObserver = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      if (performance.now() - lastNativeScrollEventAt < 180) return;
+      const target = pickActive(scrollY);
+      const scene = scenes[target];
+      if (!scene) return;
+      if (target === committedSceneIndex
+          && root.dataset.fxCinematicSceneR536 === scene.def.key) return;
+      clearTimeout(sceneCommitTimer);
+      sceneCommitTimer = 0;
+      pendingSceneIndex = -1;
+      active = target;
+      commitScene(target, committedSceneIndex, 'native-viewport-intersection-r2039');
+      root.dataset.fxCinematicHeroWorldR1976 = target===0
+        ? 'core-floor-active' : 'noncore-inline-floor-cleared';
+      root.dataset.fxCinematicNativeSceneRecoveryR2039 = scene.def.key;
+    }, { rootMargin: '-28% 0px -28% 0px', threshold: 0 });
+    for (const scene of scenes) nativeSceneObserver.observe(scene.node);
+    root.dataset.fxCinematicNativeSceneObserverR2039='event-driven-no-idle-poll';
+    addEventListener('pagehide', () => nativeSceneObserver?.disconnect(), { once: true });
+  }
+
   function introHandoff() {
     activate(0,'intro-handoff');
     root.classList.add('fx-c536-cut');
@@ -589,8 +621,10 @@
     bindDynamicDiscovery();
     bindCinematicInteraction();
     bindOriginReentry();
+    observeNativeScenes();
 
     addEventListener('scroll',()=>{
+      lastNativeScrollEventAt=performance.now();
       /* R1949 — document top is a semantic scene boundary, not a delayed
          heuristic. Commit core immediately so a cancelled settle/refresh can
          never strand the journey state below the hero. */
