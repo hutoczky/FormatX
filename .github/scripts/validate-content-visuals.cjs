@@ -260,16 +260,28 @@ async function assertHeroDisclosure(page) {
   const returnResult = await page.evaluate(() => new Promise(resolve => {
     const root = document.documentElement;
     const start = performance.now();
+    const initialY = scrollY;
     let finished = false;
     let timer = 0;
+    let syncScrollMs = null;
+    let positionAfterScroll = null;
+    let nextTickMs = null;
+    const scrollSamples = [];
+    const onScroll = () => {
+      if (scrollSamples.length < 14)
+        scrollSamples.push({ elapsedMs: Math.round(performance.now() - start), y: Math.round(scrollY) });
+    };
+    addEventListener('scroll', onScroll, { passive: true });
     const observer = new MutationObserver(check);
     const finish = (reason) => {
       if (finished) return;
       finished = true;
       observer.disconnect();
+      removeEventListener('scroll', onScroll);
       clearTimeout(timer);
       resolve({
         reason, elapsedMs: performance.now() - start, y: scrollY,
+        initialY, positionAfterScroll, syncScrollMs, nextTickMs, scrollSamples,
         scene: root.dataset.fxCinematicSceneR536 || null,
         journey: root.dataset.fxCinematicJourneyR536 || null,
         topReturn: root.dataset.fxCinematicTopReturnR1949 || root.dataset.fxCinematicTopReturnR2034 || null,
@@ -283,7 +295,11 @@ async function assertHeroDisclosure(page) {
         finish('native-document-top-core-committed');
     }
     observer.observe(root, { attributes: true, attributeFilter: ['data-fx-cinematic-scene-r536'] });
+    setTimeout(() => { nextTickMs = performance.now() - start; }, 0);
+    const synchronousStart = performance.now();
     scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    syncScrollMs = performance.now() - synchronousStart;
+    positionAfterScroll = scrollY;
     check();
     timer = setTimeout(() => finish('native-core-commit-deadline'), 1600);
   }));
