@@ -193,7 +193,18 @@ async function verifyMobile(browser) {
   assert(initial.overflow <= 2, `mobile horizontal overflow: ${JSON.stringify(initial)}`);
 
   await verifyHeartInteraction(page, 'mobile');
+  // Close the real MAG dialogue through its native accessible close control.
+  // Scroll transfer is intentionally suspended while a living interaction
+  // owns focus; do not weaken that user-facing accessibility constraint.
+  const voiceClose=page.locator('.fx-mini-mag-close-r459').first();
+  if(await voiceClose.isVisible().catch(()=>false))
+    await voiceClose.click();
   await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForFunction(()=>
+    !document.body.classList.contains('fx-organism-panel-open')
+    && !document.documentElement.classList.contains('fx-organism-menu-open')
+    && !document.querySelector('.fx-mini-mag-open-r459'),
+  null,{timeout:5000}).catch(()=>{});
   await page.waitForTimeout(200);
 
   for (let cycle = 0; cycle < 2; cycle += 1) {
