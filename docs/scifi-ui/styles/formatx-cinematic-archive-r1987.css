@@ -450,4 +450,18 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
  .fx-archive-physical-paper-r2026{display:none!important}
  .fx-archive-live-sheet-r2026{transform:none!important;opacity:1!important}
 }
+@media (max-width:360px) and (prefers-reduced-motion:no-preference){
+  html[data-fx-archive-dock="active"] .fx-archive-physical-paper-r2026[data-active="true"]{
+    min-height:145px!important;
+    max-height:40dvh!important;
+    padding:18px 18px 14px!important;
+    bottom:13dvh!important;
+  }
+  /* The full description remains visible in its original semantic HTML
+     section. The transfer folio preserves a readable chapter identity. */
+  .fx-archive-physical-paper-r2026__excerpt,
+  .fx-archive-physical-paper-r2026 .fx-archive-telemetry-r2022__foot{
+    display:none!important;
+  }
+}
 /* production-r2026-real-functional-native-mag-scroll-paper */
