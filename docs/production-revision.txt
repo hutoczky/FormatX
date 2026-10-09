@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2031-exclusive-gpu-ready-archive
-base_master=6ddabccf3972630d6d855f645d2868eaddcefccb
-purpose=Exclusive MAG cinematic one-chapter experience activates only after native WebGL2 is ready; no old content underneath; true interactive native HTML folio and separate MAG lane, graceful missing-WebGL/reduced-motion fallback.
-validation=Chromium 1440x900 and 390x844 eight-chapter, one-canvas, no-overlap and native controls; no-WebGL fallback preserves original DOM, original heights and links; 320-1920px information occlusion, production preflight and exact Cloudflare revision.
-limit=Real-device 60fps, photorealism and award score are not independently validated.
+token=20261009-r2033-canonical-proof-singleton
+base_master=adf6d6bf2e86d2cc36e9b1763a54eb922e6eb8fc
+purpose=Fix duplicate public evidence block without waiting for the separate unfinished MAG cinematic archive refactor; reuse server's existing verified proof links.
+validation=Canonical proof appears once, legacy hero proof hidden only if canonical exists; inert desktop mirror retains layout but never duplicates text visually; strict Cloudflare production revision check required.
+limits=MAG R2033 cinematics, native paper transfer and award-ready performance remain in separate PR 487.

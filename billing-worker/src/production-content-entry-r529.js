@@ -1,4 +1,5 @@
 import canonicalProduction from './production-content-entry.js';
+import {requireDownloadAccount} from './public-account.js';
 
 /* FormatX R529 — direct canonical production ownership + R527 FCP preservation
    + R528 living-core/mobile first-paint closeout.
@@ -124,8 +125,16 @@ function r529Headers(source) {
 
 export default {
   async fetch(request, env, ctx) {
-    const response = await canonicalProduction.fetch(request, env, ctx);
     const url = new URL(request.url);
+    // Defense in depth: the production entry must never serve an anonymous
+    // binary or an HTML 200 fallback for this account-gated release path.
+    if((request.method==='GET'||request.method==='HEAD')
+       && PUBLIC_HOSTS.has(url.hostname)
+       && ['/download/multiplatform','/download/android','/download/android-native-beta'].includes(url.pathname)){
+      const accountGate=await requireDownloadAccount(request,env);
+      if(accountGate)return accountGate;
+    }
+    const response = await canonicalProduction.fetch(request, env, ctx);
     if (!isSafeMethod(request) || !PUBLIC_HOSTS.has(url.hostname)) return response;
 
     const headers = r529Headers(response.headers);

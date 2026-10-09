@@ -1,0 +1,15 @@
+/* R2033: ONE visible public evidence module; the canonical proof strip
+   contains the original verification, technical and security destinations.
+   Keeping the mirrored scroll bridge box intact prevents loop geometry drift. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading{
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html:has([data-fx-award-proof]) .fx-award-proof{opacity:1!important}
+}
+/* production-r2033-canonical-proof-singleton-hotfix */
