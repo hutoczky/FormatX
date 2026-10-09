@@ -10,6 +10,7 @@
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
+  const requestedHtmlFallback=params.get('archive')==='off';
   const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const mix=(a,b,t)=>a+(b-a)*t;
@@ -848,7 +849,11 @@ void main(){
     root.dataset.fxArchiveExperience='disposed';
   }
   function init(){
-    if(reduced.matches){root.dataset.fxArchiveExperience='reduced-html';return;}
+    if(reduced.matches||requestedHtmlFallback){
+      root.dataset.fxArchiveExperience='reduced-html';
+      root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
+      return;
+    }
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
