@@ -1,0 +1,29 @@
+name: R2060 temporary source browser diagnostics
+on:
+  push:
+    branches: [dev/r2008-archive-adaptive-native-render]
+    paths:
+      - '.github/workflows/r2060-source-browser-diagnostics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack public site and browser validation inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -czf /tmp/formatx-r2060-public-source.tgz \
+            docs/scifi-ui .github/scripts lighthouserc.json lighthouserc.mobile.json
+          ls -lh /tmp/formatx-r2060-public-source.tgz
+          cp /tmp/formatx-r2060-public-source.tgz ./formatx-r2060-public-source.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2060-public-source
+          path: formatx-r2060-public-source.tgz
+          if-no-files-found: error
+          retention-days: 1
