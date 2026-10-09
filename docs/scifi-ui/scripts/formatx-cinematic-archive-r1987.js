@@ -252,6 +252,18 @@
     // coordinates instead of resetting those ancestors (doing so breaks
     // the living MAG renderer and the native pricing/menu consoles).
     const w=innerWidth,h=innerHeight,phone=mobile();
+    // A transformed chapter captures position:fixed descendants. Neutralize
+    // only the active cinematic scroll anchor (its original HTML has already
+    // been transferred into the folio), preserving the original parent state
+    // for the accessible HTML fallback and the existing MAG hero renderer.
+    const host=panel.parentElement;
+    if(host instanceof HTMLElement&&host.dataset.fxCinemaHostActive==='true'){
+      for(const [key,value] of [
+        ['transform','none'],['translate','none'],['rotate','none'],
+        ['scale','none'],['filter','none'],['perspective','none'],
+        ['contain','none'],['will-change','auto'],['content-visibility','visible']
+      ])host.style.setProperty(key,value,'important');
+    }
     // On portrait devices the folio has a strict fixed top/bottom lane in CSS.
     // Compensating viewport offsets on every scroll caused cumulative Y drift
     // (-394px) and the genuine native paper overlapped the MAG stage.
@@ -264,21 +276,13 @@
       const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
       const magBottom=stage?.getBoundingClientRect().bottom||h*.45;
       const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
-      // A fixed descendant is relative to the transformed chapter rather
-      // than the viewport. Resolve the actual screen gap by adjusting CSS
-      // 'top', not 'translate': this stays stable for all eight scroll anchors.
+      // No per-scroll cumulative coordinates: this is genuinely viewport-
+      // fixed once the source chapter no longer creates a containing block.
       panel.style.removeProperty('translate');
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
-      const rect=panel.getBoundingClientRect();
-      const previous=Number(panel.dataset.fxMobileScreenTop)
-        ||parseFloat(getComputedStyle(panel).top)||h*.48;
-      const delta=viewportTop-rect.top;
-      if(Math.abs(delta)>.6){
-        const next=Math.max(-h*12,Math.min(h*12,previous+delta));
-        panel.dataset.fxMobileScreenTop=next.toFixed(2);
-        panel.style.setProperty('top',next.toFixed(2)+'px','important');
-      }
+      panel.style.setProperty('top',viewportTop.toFixed(2)+'px','important');
+      panel.dataset.fxMobileScreenTop=viewportTop.toFixed(2);
       return;
     }
     const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
