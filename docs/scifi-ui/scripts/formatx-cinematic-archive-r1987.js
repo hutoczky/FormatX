@@ -31,6 +31,37 @@
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
   let cinemaControlHome=null,finalCtaHome=null;
+  const legacyHeroDisplay=new Map();
+  function setLegacyHeroHidden(hide){
+    if(hide){
+      // Older hero styles contain high-specificity !important declarations.
+      // CSS-only takeover still left the old heading on top of the archive.
+      // Inline CSSOM important guarantees one exclusive stage, and can be
+      // restored exactly, including the previous inline priority.
+      if(legacyHeroDisplay.size)return;
+      const hero=document.getElementById('hero');
+      if(!hero)return;
+      const furniture=[
+        ...hero.querySelectorAll(':scope .hero-grid > :not(.hero-space)'),
+        ...hero.querySelectorAll(':scope .scroll-cue')
+      ];
+      for(const node of new Set(furniture)){
+        legacyHeroDisplay.set(node,{
+          value:node.style.getPropertyValue('display'),
+          priority:node.style.getPropertyPriority('display')
+        });
+        node.style.setProperty('display','none','important');
+      }
+      root.dataset.fxArchiveLegacyHero='suppressed';
+    }else if(legacyHeroDisplay.size){
+      for(const [node,old] of legacyHeroDisplay){
+        if(old.value)node.style.setProperty('display',old.value,old.priority);
+        else node.style.removeProperty('display');
+      }
+      legacyHeroDisplay.clear();
+      root.dataset.fxArchiveLegacyHero='restored';
+    }
+  }
   function attachExistingFinalCta(){
     if(finalCtaHome)return;
     const anchor=document.getElementById('hero-download');
@@ -192,6 +223,7 @@
     const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     root.dataset.fxArchiveCinema=enabled?'active':'home';
     if(enabled)keepExistingCinemaControls();
+    setLegacyHeroHidden(enabled);
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
     root.dataset.fxArchiveCinemaChapter=key;
@@ -789,6 +821,8 @@ void main(){
         if(archiveActive)ResponsiveExperience.restore();
         root.dataset.fxArchiveExperience='context-lost';
         root.dataset.fxArchiveCinema='home';
+        setLegacyHeroHidden(false);
+        restoreExistingCinemaControls();
         delete root.dataset.fxArchiveCinemaPrepared;
         detach=null;
       },{once:true});
@@ -818,6 +852,7 @@ void main(){
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
+    setLegacyHeroHidden(false);
     document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
     delete root.dataset.fxArchiveCinemaPrepared;
