@@ -33,13 +33,41 @@
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
+  function ensureAIScrollStation(){
+    if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
+    const original=document.querySelector('#capabilities .cards .card:last-child');
+    const host=document.getElementById('capabilities');
+    if(!(original instanceof HTMLElement)||!host||!host.parentNode)return;
+    const anchor=document.createElement('section');
+    anchor.id='fx-mag-ai-scroll-station-r2030';
+    anchor.className='fx-mag-ai-scroll-station-r2030';
+    anchor.setAttribute('aria-hidden','true');
+    anchor.setAttribute('inert','');
+    const title=original.querySelector('h3')?.textContent?.trim()||'AI / AUTOMATION';
+    const description=original.querySelector('p')?.textContent?.trim()||'FormatX intelligence';
+    // This hidden scroll station is a stable chapter locator only. The
+    // actual AI card remains the original native DOM inside capabilities.
+    const textNode=document.createElement('div');
+    const heading=document.createElement('h3');
+    const body=document.createElement('p');
+    heading.textContent=title;
+    body.textContent=description;
+    textNode.append(heading,body);
+    anchor.append(textNode);
+    host.after(anchor);
+  }
   function discover(){
     const previous=scenes.map(x=>x.node);
     scenes=blueprint.map(def=>{
       const node=document.querySelector(def.selector);
       return node instanceof HTMLElement ? {...def,node} : null;
     }).filter(Boolean);
-    scenes.sort((a,b)=>a.node.compareDocumentPosition(b.node)&Node.DOCUMENT_POSITION_PRECEDING?1:-1);
+    for(const scene of scenes){
+      scene.scrollAnchor=scene.key==='intelligence'
+        ? document.getElementById('fx-mag-ai-scroll-station-r2030')||scene.node
+        : scene.node;
+    }
+    scenes.sort((a,b)=>a.scrollAnchor.compareDocumentPosition(b.scrollAnchor)&Node.DOCUMENT_POSITION_PRECEDING?1:-1);
     for(const node of previous){if(!scenes.some(s=>s.node===node))node.removeAttribute('data-fx-archive-scene');}
     scenes.forEach((s,i)=>{s.index=i;s.node.dataset.fxArchiveScene=s.key;});
     if(sceneObserver){
@@ -215,7 +243,7 @@
       let closest=null,score=Infinity;
       const anchor=innerHeight*.52;
       for(const s of scenes){
-        const r=s.node.getBoundingClientRect();
+        const r=(s.scrollAnchor||s.node).getBoundingClientRect();
         if(r.height<1||r.width<1)continue;
         const contains=r.top<=anchor&&r.bottom>=anchor;
         const distance=contains ? Math.abs((r.top+r.bottom)*.5-anchor)/Math.max(1,r.height)
@@ -701,6 +729,7 @@ void main(){
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
+    document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
     for(const host of cinemaHosts){
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
@@ -729,6 +758,7 @@ void main(){
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
+    ensureAIScrollStation();
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
@@ -745,7 +775,7 @@ void main(){
     invalidate();
   }
   window.FormatXArchiveExperience={
-    version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.node.id||s.selector}));},
+    version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
     refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
   };
