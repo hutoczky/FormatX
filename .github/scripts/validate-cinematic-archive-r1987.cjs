@@ -349,7 +349,9 @@ async function missingGpuFallback(browser){
   const page=await context.newPage();
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>Boolean(window.FormatXArchiveExperience),null,{timeout:20000});
-  await page.waitForTimeout(1300);
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxArchiveFallbackReason==='ready-timeout',
+    null,{timeout:16000});
   const state=await page.evaluate(()=>{
     const root=document.documentElement;
     const experience=document.querySelector('#experience');
@@ -361,11 +363,14 @@ async function missingGpuFallback(browser){
       stationCount:document.querySelectorAll('#fx-mag-ai-scroll-station-r2030').length,
       readable:!!experience&&experience.textContent.trim().length>80,
       visibility:css?.visibility,
-      height:experience?.getBoundingClientRect().height};
+      height:experience?.getBoundingClientRect().height,
+      heroWidth:document.querySelector('#hero .hero-copy')?.getBoundingClientRect().width||0};
   });
   assert.notEqual(state.cinema,'active','GPU-less browser hijacked into cinematic mode: '+JSON.stringify(state));
   assert.equal(state.wrapperCount,0,'No GPU: native HTML may not be reparented: '+JSON.stringify(state));
   assert.equal(state.stationCount,0,'No GPU: invisible scroll station must not be inserted: '+JSON.stringify(state));
+  assert.equal(state.status,'context-error','No GPU: fallback must not stay pending forever');
+  assert.ok(state.heroWidth>=240,'No GPU: mobile functional HTML must fill readable pixels: '+JSON.stringify(state));
   assert.ok(state.readable&&state.visibility==='visible','No GPU: semantic HTML unavailable: '+JSON.stringify(state));
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
