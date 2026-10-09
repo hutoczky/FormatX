@@ -512,6 +512,16 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     content-visibility:visible!important;
     overflow:visible!important;
     clip-path:none!important;
+    /* Perspective and transforms on the old native chapter would rebase a
+       position:fixed folio against the section (e.g. y=169+11vh) rather
+       than the real viewport, making it intersect the MAG camera lane. */
+    perspective:none!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:1!important;
+    filter:none!important;
+    backdrop-filter:none!important;
     isolation:auto!important;
     background:transparent!important;
     box-shadow:none!important;
