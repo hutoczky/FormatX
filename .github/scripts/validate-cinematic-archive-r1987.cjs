@@ -109,7 +109,7 @@ async function evaluate(viewport,isMobile,browser){
   // Regression: changing OS accessibility preferences must suspend and resume
   // the same live page without permanently disposing of the MAG experience.
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='reduced-html',{timeout:10000});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='reduced-html',null,{timeout:10000});
   const motionPaused=await page.evaluate(()=>({
     active:window.FormatXArchiveExperience.state.active,
     disposed:window.FormatXArchiveExperience.state.disposed
