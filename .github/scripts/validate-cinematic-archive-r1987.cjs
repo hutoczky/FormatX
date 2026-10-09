@@ -40,11 +40,16 @@ async function evaluate(viewport,isMobile,browser){
     const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
     return {mode:root.dataset.fxArchiveCinema,firstScene:root.dataset.fxArchiveCurrent,
       heroVisibility:hero?getComputedStyle(hero).visibility:null,
+      heroDisplay:hero?getComputedStyle(hero).display:null,
+      heroRectCount:hero?.getClientRects().length??-1,
+      firstCssLoaded:!!document.querySelector('link[data-fx-mag-exclusive-first-frame-r2032]')?.sheet,
+      bodyClass:document.body.className,
       panel:!!p&&getComputedStyle(p).visibility==='visible',
       source:root.dataset.fxArchiveSheetMotion||null};
   });
   assert.equal(first.mode,'active','MAG must take over on first frame after intro');
-  assert.equal(first.heroVisibility,'hidden','Old landing text competes with MAG: '+JSON.stringify(first));
+  assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
+    'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
   assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   let passed=0;
