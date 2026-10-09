@@ -389,10 +389,9 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     color:#c4e0e9;
     margin:0;
     max-width:39ch;
-    display:-webkit-box;
-    -webkit-box-orient:vertical;
-    -webkit-line-clamp:4;
-    overflow:hidden;
+    display:block;
+    overflow:visible;
+    overflow-wrap:anywhere;
   }
   .fx-archive-physical-paper-r2026 .fx-archive-telemetry-r2022__title{
     font-size:clamp(20px,2.1vw,31px)!important;
@@ -442,7 +441,8 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
   }
   .fx-archive-physical-paper-r2026__excerpt{
     font-size:12px!important;
-    -webkit-line-clamp:3;
+    overflow:visible!important;
+    overflow-wrap:anywhere;
   }
   .fx-archive-physical-paper-r2026__step{font-size:9px}
 }
