@@ -46,9 +46,12 @@ jobs:
         run: |
           set -o pipefail
           if [ "${{ matrix.profile }}" = desktop ]; then config='./lighthouserc.json'; else config='./lighthouserc.mobile.json'; fi
+          set +e
           lhci autorun --config="$config" 2>&1 | tee "lighthouse-${{ matrix.profile }}.log"
           result="${PIPESTATUS[0]}"
+          set -e
           PROFILE="${{ matrix.profile }}" node .github/scripts/report-lighthouse-metrics.cjs .lighthouseci | tee -a "lighthouse-${{ matrix.profile }}.log"
+          # Retain Lighthouse's strict failed assertion code, with evidence.
           exit "$result"
       - name: Save real reports and strict gate output
         if: always()
