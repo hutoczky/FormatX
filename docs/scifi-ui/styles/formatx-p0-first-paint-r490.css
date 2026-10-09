@@ -1,3 +1,9 @@
+/* R2062 — universal layout invariant. This rule is identical to the
+   original critical-core R227 box sizing, but must be available BEFORE
+   deferred WebGL styles. Prevents #network and other full-width sections
+   overflowing during first paint on every viewport. */
+* { box-sizing: border-box; }
+
 /* R1714 — tokens required before deferred quality/design enhancement. */
 :root{
   --fx-cyan:#7cecff;
