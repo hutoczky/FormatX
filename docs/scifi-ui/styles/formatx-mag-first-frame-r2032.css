@@ -43,3 +43,13 @@ html body.living-architecture #hero .hero-actions .button:focus-visible {
   outline:2px solid var(--fx-focus,#9ef7ff)!important;
   outline-offset:3px!important;
 }
+
+/* R2040 mobile: the canonical topbar menu receives real keyboard focus.
+   Some late mobile-specific overrides changed its focus outline to 1px. */
+html:root:root:root:root body.living-architecture #menu-toggle.fx-reference-menu-button:focus,
+html:root:root:root:root body.living-architecture #menu-toggle.fx-reference-menu-button:focus-visible {
+ outline-style:solid!important;
+ outline-width:2px!important;
+ outline-color:var(--fx-focus,#9ef7ff)!important;
+ outline-offset:3px!important;
+}
