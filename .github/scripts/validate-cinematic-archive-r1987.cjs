@@ -124,6 +124,15 @@ async function evaluate(viewport,isMobile,browser){
           paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height}:null
         };
       });
+      if(scene.key==='final'){
+        const existingCTA=await page.evaluate(()=>{
+          const p=document.querySelector('[data-fx-archive-scene="final"] .fx-archive-cinema-folio-r2030');
+          const link=p?.querySelector('#hero-download');
+          return {exists:!!link,href:link?.getAttribute('href'),inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p};
+        });
+        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
+          'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
+      }
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
       assert.equal(cinema.count,1,'More than one original content folio is visible: '+JSON.stringify(cinema));
       assert.equal(cinema.paperVisible,'visible','Current paper is not visible: '+JSON.stringify(cinema));
