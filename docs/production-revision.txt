@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261007-r1956-menu-owner-mobile-desktop
-base_master=769dc28640ce5156873f815c3d64ac44ee474815
-purpose=ship deterministic hamburger navigation on phone and desktop with an early capture-phase owner, live-nav detachment from header hiding rules, and synchronous visible-open fallback styling
-validation=Chromium 1440x900 desktop and 390x844 touch mobile open-close geometry, aria-expanded state, pointer visibility, section navigation, language controls, infinite-scroll coexistence, production candidate validation
+token=20261009-r2020-mag-archive-mobile-visible
+base_master=c229c967f79e91c53d97a4f361f98404bd0545fb
+purpose=enable full-width mobile MAG cinematic archive, portrait-aware physical WebGL shelves and flexible display retrieval; preserve semantic content and safe native scrolling
+validation=source syntax and browser archive desktop/mobile/reduced-motion CI required; independent real-device performance not yet verified
