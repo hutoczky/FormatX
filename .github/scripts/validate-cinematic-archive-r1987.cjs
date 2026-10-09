@@ -16,6 +16,18 @@ async function evaluate(viewport,isMobile,browser){
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  const firstFrame=await page.evaluate(()=>{
+    const label=document.querySelector('.fx-mag-first-visible-telemetry-r2039');
+    return {intro:document.documentElement.dataset.fxIntroPrepaintR1611,
+      label:label?.textContent?.replace(/\\s+/g,' ').trim(),
+      display:label?getComputedStyle(label).display:null,
+      rect:label?.getBoundingClientRect().toJSON()};
+  });
+  if(firstFrame.intro==='skip'){
+    assert.ok(firstFrame.label?.includes('MAG // AI CORE')&&firstFrame.label.includes('ONLINE · LOCAL INTELLIGENCE'),
+      'Missing the real first-frame MAG boot identifier: '+JSON.stringify(firstFrame));
+    assert.equal(firstFrame.display,'flex','Returning visitors must see MAG telemetry immediately: '+JSON.stringify(firstFrame));
+  }
   await page.waitForFunction(()=>Boolean(window.FormatXArchiveExperience),null,{timeout:60000});
   await page.waitForFunction(()=>{
     const s=document.documentElement.dataset.fxArchiveExperience;
