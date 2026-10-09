@@ -55,6 +55,7 @@
     textNode.append(heading,body);
     anchor.append(textNode);
     host.after(anchor);
+    for(const name of ['height','min-height','max-height'])anchor.style.setProperty(name,'165dvh','important');
   }
   function discover(){
     const previous=scenes.map(x=>x.node);
@@ -102,7 +103,12 @@
         const nodes=Array.from(host.childNodes);
         for(const node of nodes)panel.appendChild(node);
         host.appendChild(panel);
-        host.style.minHeight=Math.round(oldHeight)+'px';
+        // Inline important chapter sizing wins over older high-specificity
+        // content-visibility/intrinsic-height rules, which otherwise collapse
+        // mobile sections to ~62px during the DOM-to-paper handoff.
+        host.style.setProperty('min-height','165dvh','important');
+        host.style.setProperty('height','165dvh','important');
+        host.style.setProperty('max-height','165dvh','important');
         host.dataset.fxCinemaAnchorHeight=String(Math.round(oldHeight));
       }
       if(!cinemaHosts.includes(host))cinemaHosts.push(host);
@@ -740,6 +746,8 @@ void main(){
       host.removeAttribute('data-fx-cinema-host-active');
       host.removeAttribute('data-fx-cinema-anchor-height');
       host.style.removeProperty('min-height');
+      host.style.removeProperty('height');
+      host.style.removeProperty('max-height');
     }
     cinemaHosts=[];cinemaPrepared=false;
     for(const node of paperNodes){
