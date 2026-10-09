@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2035-cinematic-mag-master-integrated
-base_master=e91ad6123535d335ca4801bfde739e631430e222
-purpose=Integrate MAG-only cinematic archive, actual HTML papyrus transfers, film lights, responsive positioning and original working technical consoles onto verified canonical single-proof master.
-validation=Strict eight-scene desktop/mobile WebGL + HTML, accessibility fallback, 320-1920px information visibility, hero interaction, platform-scroll, original CTA, production Worker and exact two-domain smoke required before deploy.
-limits=Igloo.inc visual superiority, real hardware 60fps, full physical PBR and 95/100 Lighthouse not yet verified.
+token=20261009-r2036-mag-folded-critical-first-paint
+base_master=051eac9d16fd1d0e949866aa86b3de90cb64d873
+purpose=Eliminate one extra render-blocking MAG critical CSS request by folding unmodified first-frame rules into existing P0 CSS; keep all cinematic scenes, proof, interactions, SEO and fallback.
+validation=Re-run Lighthouse actual desktop and mobile plus 320-1920 visual + MAG WebGL all 8 scenes, actual navigation and production smoke.
+limits=If Lighthouse remains under 95, report real measured scores and do not claim optimization goal met.
