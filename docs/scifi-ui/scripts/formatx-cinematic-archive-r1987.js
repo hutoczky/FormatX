@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2026-real-content-handoff';
+  const VERSION='cinematic-archive-r2030-exclusive-mag-takeover';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -28,6 +28,7 @@
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
+  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
   const paperLast=new WeakMap();
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
@@ -46,7 +47,72 @@
       scenes.forEach(s=>sceneObserver.observe(s.node));
     }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
-    prepareRealContentSheets();
+    if(!cinemaPrepared)prepareRealContentSheets();
+    prepareCinemaHosts();
+  }
+
+  /* R2030 EXCLUSIVE FORMATX ARCHIVE.
+     The original live DOM nodes are moved ONCE into a semantic, scrollable
+     cinematic folio inside their original section, preserving their identity,
+     event handlers, links, IDs and delegated events on the section.
+     Every original section remains in the document as a scroll anchor.
+     No clones, dummy tiles, canvas text, videos or second 3D renderer. */
+  function prepareCinemaHosts(){
+    for(const scene of scenes){
+      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      if(!(host instanceof HTMLElement))continue;
+      scene.cinemaHost=host;
+      let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      if(!panel){
+        const oldHeight=Math.max(520,host.getBoundingClientRect().height||host.offsetHeight);
+        panel=document.createElement('div');
+        panel.className='fx-archive-cinema-folio-r2030';
+        panel.setAttribute('role','region');
+        panel.setAttribute('aria-label','FormatX MAG cinematic content');
+        // Adding one wrapper preserves the source section's layout anchor,
+        // its own events and all real interactive descendants.
+        const nodes=Array.from(host.childNodes);
+        for(const node of nodes)panel.appendChild(node);
+        host.appendChild(panel);
+        host.style.minHeight=Math.round(oldHeight)+'px';
+        host.dataset.fxCinemaAnchorHeight=String(Math.round(oldHeight));
+      }
+      if(!cinemaHosts.includes(host))cinemaHosts.push(host);
+      scene.cinemaPanel=panel;
+    }
+    if(cinemaHosts.length){
+      cinemaPrepared=true;
+      root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
+    }
+  }
+
+  function syncCinema(){
+    if(!cinemaPrepared)return;
+    const enabled=Boolean(archiveActive&&current&&!reduced.matches);
+    root.dataset.fxArchiveCinema=enabled?'active':'home';
+    const selected=enabled?current.s:null;
+    const key=selected?.key||'home';
+    root.dataset.fxArchiveCinemaChapter=key;
+    for(const host of cinemaHosts){
+      const active=Boolean(selected&&selected.cinemaHost===host);
+      host.dataset.fxCinemaHostActive=active?'true':'false';
+      const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      if(panel){
+        panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        if(active){
+          const p=clamp(current.progress);
+          const materialize=smooth((p-.06)/.46);
+          panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
+          panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
+          panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
+        }
+      }
+    }
+    if(enabled&&key!==lastCinemaKey){
+      const panel=selected.cinemaPanel;
+      if(panel)panel.scrollTop=0;
+      lastCinemaKey=key;
+    }else if(!enabled)lastCinemaKey='';
   }
 
   // R2026: The real existing HTML content is the handoff destination.
@@ -547,6 +613,7 @@ void main(){
     else if(archiveActive)ResponsiveExperience.restore();
     setPanelState();
     updateRealContentSheets();
+    syncCinema();
     updateHandoff();
     if(current){
       const nextIndex=current.s.index;
@@ -573,6 +640,7 @@ void main(){
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
         updateRealContentSheets();
+        syncCinema();
         updateHandoff();
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
@@ -608,6 +676,18 @@ void main(){
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
+    root.dataset.fxArchiveCinema='home';
+    for(const host of cinemaHosts){
+      const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      if(panel){
+        while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
+        panel.remove();
+      }
+      host.removeAttribute('data-fx-cinema-host-active');
+      host.removeAttribute('data-fx-cinema-anchor-height');
+      host.style.removeProperty('min-height');
+    }
+    cinemaHosts=[];cinemaPrepared=false;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');
