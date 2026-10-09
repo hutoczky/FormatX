@@ -1,3 +1,12 @@
+/* R2038 essential design tokens: always available before post-FCP
+   cinematic/optical enhancements, including in reduced-motion fallback. */
+:root{
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+/* production-r2038-first-paint-token-stability */
+
 /* FormatX R1956 — deterministic menu render contract for phone + PC.
    This stylesheet is intentionally synchronous and small: the navigation must
    remain operable even while cinematic/deferred style layers are still loading. */
