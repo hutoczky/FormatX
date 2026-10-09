@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261009-r2020-mag-archive-mobile-visible
-base_master=c229c967f79e91c53d97a4f361f98404bd0545fb
-purpose=enable full-width mobile MAG cinematic archive, portrait-aware physical WebGL shelves and flexible display retrieval; preserve semantic content and safe native scrolling
-validation=source syntax and browser archive desktop/mobile/reduced-motion CI required; independent real-device performance not yet verified
+token=20261009-r2026-mag-physical-native-scroll-handoff
+base_master=cf44f70c836a3fa2093605771ce1df353a40ee33
+purpose=Make the actual FormatX sections appear as physically delivered interactive glass/papyrus modules; reuse original MAG single WebGL2 archive across eight unique sources.
+validation=Desktop 1440x900 and mobile 320 to 390px browser checks required; original HTML, scroll reversibility, reduced-motion and production smoke must pass. Visual award readiness and real-device FPS are separate goals.
