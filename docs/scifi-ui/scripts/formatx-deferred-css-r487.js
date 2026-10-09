@@ -20,17 +20,11 @@
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     let activatedCount = 0;
     let dormantIntroCount = 0;
-    let dormantMagCount = 0;
     // R2030: If no birth film is present, activating its 3D, overlay and
     // identification styles after first paint triggers needless style work.
     // This is based on real scene ownership, never browser/benchmark identity.
     const introActive = root.dataset.fxIntroPrepaintR1611 === 'show'
       || root.dataset.fxMagBirthLiveR533 === 'active';
-    // The heavy desktop WebGL skin is only needed once the real MAG runtime
-    // begins. Apply exactly the same rule on every browser and all visitors.
-    const magStarting = /^(starting:|loaded:|runtime-already-present)/.test(
-      root.dataset.fxP0MotionSchedulerR490 || ''
-    ) || Boolean(window.FormatXLivingCore?.sharedWebGL2);
     const introOnly = new Set([
       'fxMagBirthCriticalR1572',
       'fxIntroCriticalR1588',
@@ -43,18 +37,12 @@
       if (link.media !== targetMedia) link.media = targetMedia;
       link.removeAttribute('fetchpriority');
       link.removeAttribute('data-fx-dormant-intro-r2030');
-      link.removeAttribute('data-fx-dormant-mag-r2061');
     };
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
       if (!introActive && [...introOnly].some(name => link.dataset[name] === 'true')) {
         link.dataset.fxDormantIntroR2030 = 'true';
         dormantIntroCount++;
-        continue;
-      }
-      if (!introActive && !magStarting && link.hasAttribute('data-fx-critical-core-r227')) {
-        link.dataset.fxDormantMagR2061 = 'true';
-        dormantMagCount++;
         continue;
       }
       activateLink(link);
@@ -76,18 +64,6 @@
       }).observe(root, { attributes: true, attributeFilter: ['data-fx-intro-prepaint-r1611'] });
     }
 
-    if (dormantMagCount) {
-      const activateMagSkin = () => {
-        document.querySelectorAll('link[data-fx-dormant-mag-r2061]').forEach(activateLink);
-        root.dataset.fxDeferredMagR2061 = 'activated-for-real-mag';
-      };
-      addEventListener('formatx:magstyleprewarm', activateMagSkin, { once: true });
-      addEventListener('formatx:real3dready', activateMagSkin, { once: true });
-      addEventListener('formatx:immersiveactivate', activateMagSkin, { once: true });
-      document.addEventListener('formatx:magbirthcorewarmup', activateMagSkin, { once: true });
-    }
-
-    root.dataset.fxDeferredMagCountR2061 = String(dormantMagCount);
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
     root.dataset.fxDeferredIntroCountR2030 = String(dormantIntroCount);
