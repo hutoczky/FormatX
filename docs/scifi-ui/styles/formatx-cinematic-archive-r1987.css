@@ -188,6 +188,8 @@ html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-
     z-index:2!important;
     pointer-events:none!important;
     touch-action:auto!important;
+    translate:none!important;
+    transform:none!important;
     isolation:isolate!important;
     -webkit-mask-image:linear-gradient(to bottom,transparent,rgba(0,0,0,.55) 18%,#000 43%)!important;
     mask-image:linear-gradient(to bottom,transparent,rgba(0,0,0,.55) 18%,#000 43%)!important;
