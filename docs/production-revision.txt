@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2031-exclusive-gpu-ready-archive
-base_master=6ddabccf3972630d6d855f645d2868eaddcefccb
-purpose=Exclusive MAG cinematic one-chapter experience activates only after native WebGL2 is ready; no old content underneath; true interactive native HTML folio and separate MAG lane, graceful missing-WebGL/reduced-motion fallback.
-validation=Chromium 1440x900 and 390x844 eight-chapter, one-canvas, no-overlap and native controls; no-WebGL fallback preserves original DOM, original heights and links; 320-1920px information occlusion, production preflight and exact Cloudflare revision.
-limit=Real-device 60fps, photorealism and award score are not independently validated.
+token=20261009-r2032-post-intro-mag-physical-handoff
+base_master=adf6d6bf2e86d2cc36e9b1763a54eb922e6eb8fc
+purpose=Exclusive live original HTML papyrus from first post-intro frame, unique shelf-to-screen handoff and return phase, normalized GGX glass specular, guaranteed MAG/content lane separation, account download defense-in-depth.
+validation=WebGL Chromium mobile 390/844 and desktop 1440/900, eight native modules and return phases, no-GPU & reduced-motion, public gated downloads must redirect anonymously, production exact revision and strict smoke required.
+limits=Not an independent proof of photo-realism, physical PBR completeness, award-readiness or 60FPS real-device performance.
