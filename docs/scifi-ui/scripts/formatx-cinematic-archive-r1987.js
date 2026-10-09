@@ -17,7 +17,7 @@
   const mobile=()=>matchMedia('(max-width: 900px)').matches;
   const blueprint=[
     {selector:'#experience',key:'ecosystem',hu:'FORMATX ÖKOSZISZTÉMA',en:'FORMATX ECOSYSTEM',source:'left-shelf',color:[.50,.81,.94]},
-    {selector:'.fx-category-deck--standalone',key:'systems',hu:'RENDSZERKATEGÓRIÁK',en:'SYSTEM CATEGORIES',source:'rotor',color:[.65,.78,.99]},
+    {selector:'#live-os-overview, .fx-category-deck--standalone',key:'systems',hu:'LIVE OS / RENDSZERKATEGÓRIÁK',en:'LIVE OS / SYSTEM CATEGORIES',source:'rotor',color:[.65,.78,.99]},
     {selector:'#capabilities',key:'diagnostics',hu:'DIAGNOSZTIKA',en:'DIAGNOSTICS',source:'bottom-drawer',color:[.48,.95,.87]},
     {selector:'#network',key:'network',hu:'HÁLÓZATI ESZKÖZÖK',en:'NETWORK TOOLS',source:'right-cell',color:[.54,.80,.97]},
     {selector:'#system',key:'security',hu:'RENDSZER ÉS BIZTONSÁG',en:'SYSTEM & SECURITY',source:'sealed-vault',color:[.74,.86,.98]},
@@ -60,7 +60,7 @@
       }
     }
     const mapping={
-      systems:[':scope > header',':scope > .fx-category-grid > *'],
+      systems:[':scope > header',':scope > .section-heading',':scope > *:first-child',':scope > .fx-category-grid > *'],
       ecosystem:[':scope > .section-heading',':scope > .flow .flow-chapters > article'],
       diagnostics:[':scope > .section-heading',':scope > .cards > .card:not(:last-child)'],
       intelligence:[':scope'],
