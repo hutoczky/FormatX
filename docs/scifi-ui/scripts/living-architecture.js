@@ -5,8 +5,9 @@
   const PARAMS = new URLSearchParams(location.search);
   // No hidden static alternative for Lighthouse or webdriver.
   // The same real runtime must own the site for every capable browser.
-  const AUDIT_MODE = PARAMS.get('archive')==='off'
-    || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The original technical console is functional content, not a visual
+  // effect. Never suppress it in accessible HTML or reduced-motion mode.
+  const AUDIT_MODE = false;
   const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
   if (AUDIT_MODE) {
     const canvas = document.getElementById('fx-apex-canvas');
