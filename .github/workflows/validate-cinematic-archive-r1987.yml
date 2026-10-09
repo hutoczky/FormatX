@@ -2,7 +2,7 @@ name: Validate MAG cinematic archive WebGL and eight-source scroll
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, mag-cinematic-r2032-first-frame]
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
@@ -11,7 +11,7 @@ on:
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
-    branches: [master]
+    branches: [master, mag-cinematic-r2032-first-frame]
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
