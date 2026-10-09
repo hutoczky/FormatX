@@ -3,10 +3,12 @@
 
   const root = document.documentElement;
   const params = new URLSearchParams(location.search);
+  // Only an explicit user-selected HTML fallback or reduced motion may
+  // omit the real living runtime. Lighthouse is a visitor, not a privileged
+  // alternate static product. This prevents misleading quality metrics.
   const audit =
-    /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || params.get('lighthouse') === '1'
-    || root.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
+    params.get('archive') === 'off'
+    || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (audit) {
     root.classList.add('fx-audit-mode');
