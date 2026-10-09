@@ -217,6 +217,10 @@
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
         panel.setAttribute('aria-label','FormatX MAG cinematic content');
+        // A real top-layer original HTML sheet: its DOM stays in the canonical
+        // source chapter, but CSS transform/contain/stacking ancestors can no
+        // longer hide it behind the fullscreen MAG's hero context.
+        if(typeof panel.showPopover==='function')panel.setAttribute('popover','manual');
         // Adding one wrapper preserves the source section's layout anchor,
         // its own events and all real interactive descendants.
         const nodes=Array.from(host.childNodes);
@@ -248,6 +252,22 @@
 
   function positionCinemaFolio(panel){
     if(!panel||!panel.isConnected)return;
+    if(panel.matches(':popover-open')){
+      // Manual popover creates a native top-layer viewport fixed box while
+      // preserving the same original DOM tree and its event listeners. There
+      // is NO ancestor-relative compensation and NO cumulative scroll drift.
+      panel.style.removeProperty('--fx-cinema-screen-x');
+      panel.style.removeProperty('--fx-cinema-screen-y');
+      panel.style.removeProperty('translate');
+      const viewportH=Math.max(1,innerHeight);
+      if(mobile()){
+        const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
+        const bottom=stage?.getBoundingClientRect().bottom||viewportH*.45;
+        panel.style.setProperty('top',Math.max(viewportH*.51,bottom+Math.min(24,viewportH*.034)).toFixed(2)+'px','important');
+      }else panel.style.removeProperty('top');
+      return;
+    }
+    // Compatibility fallback for browsers lacking the native popover top layer.
     // The canonical site contains ancestor perspective/transform contexts,
     // which change the containing block of a fixed child. Solve in viewport
     // coordinates instead of resetting those ancestors (doing so breaks
@@ -321,6 +341,19 @@
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        // Popover manual is only a layer primitive, not a separate UI and
+        // never a cloned page. Only ONE actual HTML sheet enters the top layer.
+        // Technical instrument dialogs must remain on top when they own focus.
+        const shouldPresent=active&&!document.body.classList.contains('fx-organism-panel-open');
+        if(panel.hasAttribute('popover')){
+          if(shouldPresent&&!panel.matches(':popover-open')){
+            try{panel.showPopover()}catch(error){
+              root.dataset.fxArchivePopoverError=String(error?.message||error).slice(0,90);
+            }
+          }else if(!shouldPresent&&panel.matches(':popover-open')){
+            try{panel.hidePopover()}catch(_){}
+          }
+        }
         if(active){
           const p=clamp(current.progress);
           const materialize=smooth((p-.06)/.46)*(1-smooth((p-.88)/.12));
@@ -983,6 +1016,7 @@ void main(){
     for(const host of cinemaHosts){
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
+        if(panel.matches(':popover-open'))try{panel.hidePopover()}catch(_){}
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
         panel.remove();
       }
