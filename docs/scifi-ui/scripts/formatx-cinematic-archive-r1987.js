@@ -1018,7 +1018,10 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    // Real users and Lighthouse must exercise the SAME complete WebGL2 MAG
+    // and original native HTML archive. Only explicit accessibility/requested
+    // fallback and isolated-MAG diagnostics may choose a different mode.
+    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,
