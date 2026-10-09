@@ -7,19 +7,12 @@
 
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)');
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)');
-  const PARAMS = new URLSearchParams(location.search);
-  const LIGHTHOUSE = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || PARAMS.get('lighthouse') === '1';
-  const VALIDATION = navigator.webdriver === true;
-  const AUDIT = LIGHTHOUSE || VALIDATION;
-  const LOW_POWER = AUDIT || (MOBILE.matches && (
+  // A single real-device budget applies to people and measurement tools alike.
+  // This backdrop is event-driven and starts after real interaction, not at FCP.
+  const LOW_POWER = MOBILE.matches && (
     Number(navigator.hardwareConcurrency || 8) <= 4 ||
     Number(navigator.deviceMemory || 8) <= 4
-  ));
-  if (LIGHTHOUSE) {
-    ROOT.dataset.fxLivingHabitatR1530='audit-static-skip-r1735';
-    ROOT.dataset.fxHabitatPerformanceR1530='audit-zero-canvas';
-    return;
-  }
+  );
 
   /* R1695 — every meaningful input reaches the habitat. Mobile/coarse devices
      stay compositor-only: interaction toggles a CSS-owned physical light pulse,
@@ -27,7 +20,6 @@
   let mobilePulseTimer=0;
   function habitatInput(kind='input'){
     ROOT.dataset.fxHabitatInputR1695=kind;
-    if(AUDIT)return;
     BODY.classList.add('fx-habitat-react-r1695');
     clearTimeout(mobilePulseTimer);
     mobilePulseTimer=setTimeout(()=>BODY.classList.remove('fx-habitat-react-r1695'),180);
@@ -144,7 +136,7 @@
   function resize(){
     if(!started)return;
     width=Math.max(1,innerWidth);height=Math.max(1,innerHeight);
-    dpr=Math.min(devicePixelRatio||1,AUDIT?.72:LOW_POWER?(MOBILE.matches?1.20:1):MOBILE.matches?1.80:1.24);
+    dpr=Math.min(devicePixelRatio||1,LOW_POWER?(MOBILE.matches?1.20:1):MOBILE.matches?1.80:1.24);
     canvas.width=Math.max(1,Math.round(width*dpr));
     canvas.height=Math.max(1,Math.round(height*dpr));
     canvas.style.width=width+'px';canvas.style.height=height+'px';
@@ -165,7 +157,7 @@
   }
 
   function pointer(event){
-    if(AUDIT||MOBILE.matches)return;
+    if(MOBILE.matches)return;
     targetX=(event.clientX/Math.max(1,width)-.5)*2;
     targetY=(event.clientY/Math.max(1,height)-.5)*2;
     /* R1710: pointer tracking stays compositor-cheap while the MAG owns 60 Hz.
@@ -498,7 +490,6 @@
   }
 
   function pulse(kind='pulse',strength=1){
-    if(AUDIT)return;
     if(!started)startHabitat('pulse-'+kind);
     impulse=Math.max(impulse,Math.max(0,Math.min(1.4,strength)));
     ROOT.dataset.fxHabitatInputR1695=kind;
@@ -509,7 +500,7 @@
   }
 
   function startHabitat(source='intent'){
-    if(started||LIGHTHOUSE)return;
+    if(started)return;
     clearTimeout(scrollStartTimer);scrollStartTimer=0;
     started=true;
     ROOT.dataset.fxLivingHabitatStartR1737=source;
@@ -620,5 +611,5 @@
   ROOT.dataset.fxLivingHabitatVisualR1754='neutral-filmic-smoky-biocrystal-world-low-chroma';
   ROOT.dataset.fxLivingHabitatMaterialR1754='desaturated-cyan-warm-stone-bioglass-reflection';
   ROOT.dataset.fxLivingHabitatWorldR1723='organic-pillars-membranes-cells-capillaries-neural-roots-no-mineral-stage';
-  ROOT.dataset.fxHabitatPerformanceR1530=AUDIT?'audit-static-low-dpr-world':LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
+  ROOT.dataset.fxHabitatPerformanceR1530=LOW_POWER?'constrained-living-world':MOBILE.matches?'mobile-living-world':'full-living-world';
 })();
