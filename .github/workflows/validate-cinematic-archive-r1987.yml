@@ -10,6 +10,15 @@ on:
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
+      - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
 permissions:

@@ -245,8 +245,30 @@
     }
   }
 
+  function syncPreviewCurrency(selectedCurrency) {
+    // The legacy desktop APEX controller intentionally skips automated runs.
+    // Currency selection must nevertheless remain a real, standalone function.
+    // Keep the price, currency tab, checkout link and native pricing cards in
+    // one consistent state for both ordinary and automated browser sessions.
+    const plan = PLANS.business_pro;
+    const other = selectedCurrency === 'EUR' ? 'HUF' : 'EUR';
+    const main = document.getElementById('preview-main-price');
+    const secondary = document.getElementById('preview-secondary-price');
+    const label = document.getElementById('preview-secondary-label');
+    const checkout = document.getElementById('preview-checkout-link');
+    if (main) main.textContent = money(plan[selectedCurrency], selectedCurrency);
+    if (secondary) secondary.textContent = money(plan[other], other);
+    if (label) {
+      label.dataset.hu = 'Összeg ' + other + '-ban';
+      label.dataset.en = 'Amount in ' + other;
+      label.textContent = language() === 'hu' ? label.dataset.hu : label.dataset.en;
+    }
+    if (checkout) checkout.href = checkoutHref('business_pro', selectedCurrency);
+  }
+
   function updateCommerce() {
     const selectedCurrency = currency();
+    syncPreviewCurrency(selectedCurrency);
     const otherCurrency = selectedCurrency === 'HUF' ? 'EUR' : 'HUF';
     const generation = ++qrGeneration;
     revealQrDock();
@@ -302,7 +324,18 @@
     });
     observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
     document.addEventListener('click', event => {
-      if (!event.target.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const chosen = target?.closest('[data-currency]');
+      if (chosen) {
+        // The semantic pressed state is the currency source of truth. Do not
+        // depend on the legacy APEX listener (which can be disabled for audits).
+        document.querySelectorAll('[data-currency]').forEach(button => {
+          button.setAttribute('aria-pressed', String(button === chosen));
+        });
+        updateCommerce();
+        return;
+      }
+      if (!target?.closest('.fx-language-toggle, [data-language], [data-language-choice]')) return;
       setTimeout(() => {
         syncScene();
         updateCommerce();

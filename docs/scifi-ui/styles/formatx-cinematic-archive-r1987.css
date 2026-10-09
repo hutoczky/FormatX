@@ -153,3 +153,37 @@ html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-
   }
 }
 /* production-r1997-stable-archive-intrinsic-heights */
+
+/* R2009 — Physically synchronized semantic-glass handoff.
+   The WebGL2 sheet becomes flat while its real, focusable HTML header gains
+   a restrained optical glass membrane. No content opacity or pointer changes. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference){
+  html[data-fx-archive-dock="active"] [data-fx-archive-active="true"] > :is(header.section-heading,header.fx-net-head){
+    position:relative;
+    isolation:isolate;
+  }
+  html[data-fx-archive-dock="active"] [data-fx-archive-active="true"] > :is(header.section-heading,header.fx-net-head)::before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    inset:-18px -24px;
+    border-radius:22px;
+    border:1px solid rgba(139,216,233,.23);
+    background:linear-gradient(115deg,rgba(48,96,116,.17),rgba(5,19,29,.08) 43%,rgba(138,202,230,.065) 82%,rgba(8,21,31,.12));
+    box-shadow:inset 0 1px 0 rgba(201,243,252,.12),0 18px 65px rgba(0,6,13,.15);
+    transform-origin:20% 50%;
+    transform:perspective(1100px)
+      translate3d(calc((1 - var(--fx-archive-handoff,1)) * -26px),0,0)
+      rotateY(calc((1 - var(--fx-archive-handoff,1)) * -7deg));
+    opacity:calc(.13 + var(--fx-archive-handoff,1) * .64);
+    pointer-events:none;
+    will-change:transform,opacity;
+  }
+}
+/* The mobile stage retains its compact presentation; native HTML remains
+   visible without a perspective effect or GPU-heavy filtered overlays. */
+@media (max-width:900px),(prefers-reduced-motion:reduce){
+  html[data-fx-archive-dock="active"] [data-fx-archive-active="true"] > :is(header.section-heading,header.fx-net-head)::before{
+    content:none!important;
+  }
+}

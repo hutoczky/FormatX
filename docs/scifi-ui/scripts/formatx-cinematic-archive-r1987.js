@@ -356,9 +356,13 @@ void main(){
     for(const s of scenes){
       if(current&&s===current.s){
         s.node.style.setProperty('--fx-archive-progress',current.progress.toFixed(4));
+        // Tie the semantic HTML glass hand-off to the physical 3D panel's
+        // alignment phase. No scroll capture or text rasterisation is needed.
+        s.node.style.setProperty('--fx-archive-handoff',smooth((current.progress-.42)/.35).toFixed(4));
         s.node.dataset.fxArchiveActive='true';
       }else{
         s.node.style.removeProperty('--fx-archive-progress');
+        s.node.style.removeProperty('--fx-archive-handoff');
         s.node.removeAttribute('data-fx-archive-active');
       }
     }
@@ -415,7 +419,16 @@ void main(){
     stage=api.stage;heroHost=document.querySelector('#hero .hero-space');
     try{
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
-      api.canvas.addEventListener('webglcontextlost',()=>{if(archiveActive)ResponsiveExperience.restore();detach=null;},{once:true});
+      api.canvas.addEventListener('webglcontextlost',()=>{
+        if(archiveActive)ResponsiveExperience.restore();
+        // The canonical renderer may recreate its context. Unregister the
+        // old pass before reconnecting to avoid accumulating stale GL passes.
+        const release=detach;
+        detach=null;
+        drawPass=null;
+        if(release){try{release();}catch(error){console.warn('FormatX archive pass release:',error);}}
+        root.dataset.fxArchiveExperience='context-lost';
+      },{once:true});
       drawPass=frame=>nativeScene.render(frame);
       drawPass.dispose=()=>nativeScene.dispose();
       detach=api.registerScenePass(drawPass);
@@ -436,17 +449,24 @@ void main(){
     sceneObserver=null;
     ResponsiveExperience.restore();
     detach?.();detach=null;drawPass=null;
-    scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
+    scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.style.removeProperty('--fx-archive-handoff');s.node.removeAttribute('data-fx-archive-active');});
     root.dataset.fxArchiveExperience='disposed';
   }
   function init(){
-    if(reduced.matches){root.dataset.fxArchiveExperience='reduced-html';return;}
+    if(reduced.matches)root.dataset.fxArchiveExperience='reduced-html';
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
-    addEventListener('formatx:real3dready',()=>{detach=null;connect();},{passive:true});
+    addEventListener('formatx:real3dready',()=>{
+      // Repeated readiness events must not install duplicate scene passes.
+      const release=detach;
+      detach=null;
+      drawPass=null;
+      if(release){try{release();}catch(error){console.warn('FormatX archive pass release:',error);}}
+      connect();
+    },{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
@@ -454,9 +474,33 @@ void main(){
     addEventListener('formatx:languagechange',invalidate,{passive:true});
     addEventListener('pageshow',invalidate,{passive:true});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
-    reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
-    addEventListener('pagehide',stop,{once:true});
-    invalidate();
+    reduced.addEventListener('change',()=>{
+      if(reduced.matches){
+        // Pausing motion is reversible; do not dispose the archive on an
+        // accessibility preference change during the current page session.
+        if(raf)cancelAnimationFrame(raf);
+        raf=0;
+        current=null;
+        ResponsiveExperience.restore();
+        setPanelState();
+        root.dataset.fxArchiveExperience='reduced-html';
+      }else{
+        root.dataset.fxArchiveExperience=detach?'ready':'pending';
+        connect();
+        invalidate();
+      }
+    },{passive:true});
+    addEventListener('pagehide',event=>{
+      if(event.persisted){
+        // A page stored in the back-forward cache must resume on pageshow.
+        if(raf)cancelAnimationFrame(raf);
+        raf=0;
+        current=null;
+        ResponsiveExperience.restore();
+        setPanelState();
+      }else stop();
+    });
+    if(!reduced.matches)invalidate();
   }
   window.FormatXArchiveExperience={
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.node.id||s.selector}));},

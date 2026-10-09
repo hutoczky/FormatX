@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-organism-main.cjs'
+      - '.github/scripts/diagnose-hero-lcp-r2011.cjs'
       - '.github/workflows/validate-organism-main.yml'
   workflow_dispatch:
 
@@ -55,6 +56,11 @@ jobs:
       - name: Test desktop and mobile organism interactions
         shell: bash
         run: node .github/scripts/validate-organism-main.cjs
+
+      - name: Inspect desktop hero LCP and delayed styles
+        if: always()
+        shell: bash
+        run: node .github/scripts/diagnose-hero-lcp-r2011.cjs
 
       - name: Upload visual evidence and diagnostics
         if: always()

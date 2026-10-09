@@ -76,7 +76,7 @@ async function evaluate(viewport,isMobile,browser){
     }
   }
   assert.equal(passed,scenes.length,'Every real archive scene must activate: '+JSON.stringify({passed,total:scenes.length,coverage}));
-  const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
+  const one=scenes.find(s=>s.key==='diagnostics')||scenes[0];
   const selector=one.id.startsWith('.')?one.id:'#'+one.id;
   await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
   await sleep(150);
@@ -105,6 +105,22 @@ async function evaluate(viewport,isMobile,browser){
   }
   assert.equal(native.renderer,'shared-webgl2');
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
+
+  // Regression: changing OS accessibility preferences must suspend and resume
+  // the same live page without permanently disposing of the MAG experience.
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='reduced-html',null,{timeout:10000});
+  const motionPaused=await page.evaluate(()=>({
+    active:window.FormatXArchiveExperience.state.active,
+    disposed:window.FormatXArchiveExperience.state.disposed
+  }));
+  assert.equal(motionPaused.active,false,'Reduced motion must undock 3D archive');
+  assert.equal(motionPaused.disposed,false,'Reduced motion must not permanently dispose the archive');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='ready',null,{timeout:10000});
+  assert.equal(await page.evaluate(()=>window.FormatXArchiveExperience.state.disposed),false,
+    'Animation must resume after reduced motion is disabled');
+
   await page.screenshot({path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,fullPage:false,timeout:30000});
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
