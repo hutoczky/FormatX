@@ -327,6 +327,9 @@ async function firstPaintTouch(browser){
   const ctx=await browser.newContext({viewport:{width:320,height:568},
     isMobile:true,hasTouch:true,reducedMotion:'no-preference'});
   const page=await ctx.newPage();
+  // Simulate a stalled heavy optical sheet. The 320px header must still
+  // appear premium and fully interactive from the small critical stylesheet.
+  await page.route('**/formatx-p0-first-paint-r490.css*',route=>route.abort());
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForTimeout(900);
   const proof=await page.evaluate(()=>{
@@ -336,8 +339,13 @@ async function firstPaintTouch(browser){
     const sources=links.map(l=>({media:l.media,loading:l.sheet!==null,
       deferred:l.dataset.fxR487DeferredStyle||null}));
     const e=brand?getComputedStyle(brand):null;
+    const menu=document.querySelector('#menu-toggle');
+    const ms=menu?getComputedStyle(menu):null;
     return {brand:rect?{width:rect.width,height:rect.height}:null,
-      pointerEvents:e?.pointerEvents,p0:sources,
+      pointerEvents:e?.pointerEvents,
+      brandColor:e?.color,
+      menuHasPremiumSkin:!!ms&&/gradient/.test(ms.backgroundImage)&&Number.parseFloat(ms.borderRadius)>8,
+      p0:sources,
       firstPaintMs:performance.getEntriesByName('first-contentful-paint','paint')[0]?.startTime||0,
       cssReason:document.documentElement.dataset.fxDeferredCssReasonR526||null};
   });
@@ -345,6 +353,8 @@ async function firstPaintTouch(browser){
     '320px phone must have actual >=44x44 accessible brand target: '+JSON.stringify(proof));
   assert.ok(proof.pointerEvents!=='none',
     'Brand must stay clickable inside MAG cinematic mode: '+JSON.stringify(proof));
+  assert.ok(proof.menuHasPremiumSkin&&proof.brandColor==='rgb(245, 251, 255)',
+    'Prepaint menu and brand must be premium without the deferred optical CSS: '+JSON.stringify(proof));
   assert.ok(proof.p0.some(x=>x.deferred=== 'true'),
     'Phone P0 optical enhancement must be deferred after FCP: '+JSON.stringify(proof));
   console.log('ARCHIVE_PHONE_TOUCH_FCP_PASS',JSON.stringify(proof));
