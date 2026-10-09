@@ -230,19 +230,40 @@ async function verifyDesktop(browser) {
      organism dialogue/panel owns focus. Close it before validating the
      document-level seamless loop. */
   await page.keyboard.press('Escape').catch(() => {});
+  // The real public dialogue API mirrors its close button; make sure its
+  // native scroll guard is released before exercising the page's own loop.
+  await page.evaluate(()=>window.FormatXOrganismVoice?.close?.());
   await page.waitForFunction(() => (
     !document.body.classList.contains('fx-organism-panel-open')
     && !document.documentElement.classList.contains('fx-organism-menu-open')
-  ), null, { timeout: 3000 }).catch(() => {});
-  await page.waitForTimeout(200);
+  ), null, { timeout: 3500 });
+  await page.waitForTimeout(240);
 
   const before = await state(page);
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
-  await page.evaluate(offset => {
+  const scrollTarget=await page.evaluate(offset => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    window.scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'auto' });
-  }, relative);
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+    const maximum=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const target=Math.min(maximum,Math.max((bridge?.offsetTop||0)+offset,maximum-3));
+    window.scrollTo({ top:target,left:0,behavior:'auto' });
+    return {target,maximum,bridgeTop:bridge?.offsetTop||null};
+  },relative);
+  // One genuine wheel gesture at the reachable bottom (rather than an
+  // unreachable bridge coordinate) is how keyboard/mouse visitors loop.
+  await page.mouse.wheel(0,300);
+  const transfer=await page.waitForFunction(count=>
+    Number(document.documentElement.dataset.fxLoopCount||0)>count,
+    before.loopCount,{timeout:7000}).then(()=>true).catch(()=>false);
+  if(!transfer){
+    const afterTimeout=await state(page);
+    const telem=await page.evaluate(()=>{
+      const d=document.documentElement.dataset;
+      return {activity:d.fxScrollActivity,landing:d.fxLoopLandingState,automation:d.fxLoopAutomationBoundaryR1742,
+        geometry:d.fxLoopGestureGeometryR1727,bridgeThreshold:d.fxLoopBridgeThresholdR1724,
+        loopTail:d.fxLoopTailMaterializedR1727,voice:d.fxOrganismVoice,escape:d.fxOrganismEscapeCloseR1741};
+    });
+    throw new Error(`desktop loop did not transfer after real wheel gesture: ${JSON.stringify({before,scrollTarget,afterTimeout,telem})}`);
+  }
   await page.waitForTimeout(500);
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);
