@@ -76,7 +76,7 @@ async function evaluate(viewport,isMobile,browser){
         const current=document.querySelector('[data-fx-archive-scene="'+key+'"]');
         const headings=current?.querySelector('h2,h3');
         const folioTitle=folio?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent?.trim()||'';
-        return {folio:!!folio,liveCount:live.length,currentLive:current?.querySelectorAll('.fx-archive-live-sheet-r2026').length||0,
+        return {folio:!!folio,liveCount:live.length,currentLive:(current?.classList.contains('fx-archive-live-sheet-r2026')?1:0)+(current?.querySelectorAll('.fx-archive-live-sheet-r2026').length||0),
           actualContent:!!headings&&folioTitle===headings.textContent.trim().slice(0,140),
           mode:document.documentElement.dataset.fxArchiveRealContent||null};
       },scene.key);
