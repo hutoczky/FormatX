@@ -36,6 +36,14 @@
   const canvas = document.createElement('canvas');
   canvas.className = 'fx-living-habitat-r1530';
   canvas.setAttribute('aria-hidden','true');
+  // R2065: never let an inserted, subsequently resized Canvas2D enter
+  // document flow while deferred skin CSS is still loading. The canonical
+  // habitat is a fixed, non-interactive visual layer on every device.
+  // Assign positioning BEFORE prepend(), not in a later CSS/RAF task.
+  canvas.style.setProperty('position', 'fixed', 'important');
+  canvas.style.setProperty('inset', '0', 'important');
+  canvas.style.setProperty('pointer-events', 'none', 'important');
+  canvas.style.setProperty('z-index', '0', 'important');
   canvas.dataset.renderer = 'canvas2d-event-driven-atmospheric-habitat';
   const ctx = canvas.getContext('2d',{alpha:true,desynchronized:true});
   if (!ctx) {
