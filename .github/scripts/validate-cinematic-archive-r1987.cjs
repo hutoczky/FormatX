@@ -368,6 +368,8 @@ async function auditParity(browser){
     userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Chrome-Lighthouse'
   });
   const page=await context.newPage();
+  // No UA-specific renderer bypass: the viewport/capability-dependent
+  // quality levels may differ, but one shared WebGL2 MAG must always boot.
   // Deliberately NOT ?archive=1: prove the normal public page does not
   // serve the old hero to a Lighthouse user agent.
   await page.goto('http://127.0.0.1:4178/scifi-ui/index.html?lighthouse=1&r2039-parity=1',
