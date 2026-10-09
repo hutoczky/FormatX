@@ -3,10 +3,10 @@
 
   const ROOT = document.documentElement;
   const PARAMS = new URLSearchParams(location.search);
-  const AUDIT_MODE =
-    /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || PARAMS.get('lighthouse') === '1'
-    || ROOT.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
+  // Business controls, pricing, currency, QR and dialogs must remain truly
+  // functional for every browser and in explicitly accessible HTML mode.
+  // Motion capability is owned by the MAG controllers, never by this UI.
+  const AUDIT_MODE = false;
   const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
   if (AUDIT_MODE) {
     const canvas = document.getElementById('fx-apex-canvas');

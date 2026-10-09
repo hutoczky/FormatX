@@ -171,7 +171,9 @@
 
     const download = document.getElementById('hero-download');
     if (download instanceof HTMLAnchorElement) {
-      download.href = './downloads/';
+      download.href = '/download/multiplatform';
+      download.removeAttribute('target');
+      download.removeAttribute('rel');
       download.dataset.releaseDownload = 'multiplatform';
       download.removeAttribute('download');
       const label = download.querySelector('[data-release-download-label], span');

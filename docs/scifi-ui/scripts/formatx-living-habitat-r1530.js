@@ -8,14 +8,14 @@
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)');
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse)');
   const PARAMS = new URLSearchParams(location.search);
-  const LIGHTHOUSE = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || PARAMS.get('lighthouse') === '1';
-  const VALIDATION = navigator.webdriver === true;
-  const AUDIT = LIGHTHOUSE || VALIDATION;
+  // Ambient atmosphere follows actual device limits, never user agent or
+  // automation status. Deliberate HTML/reduced-motion remain static.
+  const AUDIT = PARAMS.get('archive')==='off' || REDUCED.matches;
   const LOW_POWER = AUDIT || (MOBILE.matches && (
     Number(navigator.hardwareConcurrency || 8) <= 4 ||
     Number(navigator.deviceMemory || 8) <= 4
   ));
-  if (LIGHTHOUSE) {
+  if (AUDIT) {
     ROOT.dataset.fxLivingHabitatR1530='audit-static-skip-r1735';
     ROOT.dataset.fxHabitatPerformanceR1530='audit-zero-canvas';
     return;
@@ -509,7 +509,7 @@
   }
 
   function startHabitat(source='intent'){
-    if(started||LIGHTHOUSE)return;
+    if(started||AUDIT)return;
     clearTimeout(scrollStartTimer);scrollStartTimer=0;
     started=true;
     ROOT.dataset.fxLivingHabitatStartR1737=source;

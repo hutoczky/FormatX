@@ -147,8 +147,11 @@
     link.dataset.releaseChannel = 'multiplatform';
     link.removeAttribute('download');
     if (asset) {
-      link.href = asset.download_url;
-      secureExternalLink(link, asset.download_url);
+      // Keep official account-gated first-party download even when a signed
+      // release asset is discoverable. Direct GitHub ZIP bypassed sign-in.
+      link.href = '/download/multiplatform';
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
       link.removeAttribute('aria-disabled');
       link.classList.remove('is-disabled', 'is-metadata-fallback');
       if (link.dataset.releaseDescription) link.setAttribute('aria-describedby', link.dataset.releaseDescription);

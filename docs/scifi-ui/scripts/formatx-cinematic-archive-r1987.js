@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2032-first-frame-physical-archive';
+  const VERSION='cinematic-archive-r2041-parity-physical-archive';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -112,8 +112,20 @@
     const anchor=document.getElementById('hero-download');
     const scene=scenes.find(s=>s.key==='final');
     const panel=scene?.cinemaPanel;
-    if(!anchor||!panel||!anchor.parentNode)return;
-    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling};
+    if(!(anchor instanceof HTMLAnchorElement)||!panel||!anchor.parentNode)return;
+    // Preserve the *real* original anchor and business flow. Metadata
+    // refreshes must not override authenticated first-party downloads with a
+    // direct release asset (or move the customer outside the account flow).
+    const keepAccountGate=()=>{
+      if(anchor.getAttribute('href')!=='/download/multiplatform')
+        anchor.setAttribute('href','/download/multiplatform');
+      if(anchor.hasAttribute('target'))anchor.removeAttribute('target');
+      if(anchor.hasAttribute('rel'))anchor.removeAttribute('rel');
+    };
+    const observer=new MutationObserver(keepAccountGate);
+    observer.observe(anchor,{attributes:true,attributeFilter:['href','target','rel']});
+    keepAccountGate();
+    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling,observer};
     const holder=document.createElement('div');
     holder.className='fx-archive-final-cta-r2032';
     holder.appendChild(anchor);
@@ -122,7 +134,8 @@
   }
   function restoreExistingFinalCta(){
     if(!finalCtaHome)return;
-    const {node,parent,next,holder}=finalCtaHome;
+    const {node,parent,next,holder,observer}=finalCtaHome;
+    observer?.disconnect();
     if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
     holder.remove();
     finalCtaHome=null;
@@ -918,7 +931,9 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    // One renderer and one experience for real users and audit clients.
+    // Never suppress the original WebGL2 MAG for a Lighthouse UA.
+    if(disposed||reduced.matches||(!force&&isolatedMagCheck))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1018,7 +1033,9 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    // A real visitor and a Lighthouse client initialize the exact same
+    // eight-stage archive; only explicit isolated shader diagnostics bypass.
+    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,

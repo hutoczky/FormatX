@@ -2,29 +2,15 @@
   'use strict';
 
   const root = document.documentElement;
-  const params = new URLSearchParams(location.search);
-  const audit =
-    /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || params.get('lighthouse') === '1'
-    || root.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
-
-  if (audit) {
-    root.classList.add('fx-audit-mode');
-    root.dataset.fxThree = 'audit-skip';
-    root.dataset.fxLighthouse = 'ready';
-    root.dataset.fxLivingArchitecture = 'audit-zero-fetch-r1985';
-    root.dataset.fxLivingArchitectureLoaderR1985 = 'audit-skip-heavy-runtime';
-    queueMicrotask(() => {
-      dispatchEvent(new CustomEvent('formatx:livingready'));
-    });
-    return;
-  }
-
+  // R2040: HTML fallback and reduced-motion do NOT mean no interactive
+  // application. The original pricing, network, diagnostics and licensing
+  // controller must initialize on all capable browsers. Only visuals fall
+  // back, through independent MAG/animation capability checks.
   if (document.querySelector('script[data-fx-living-architecture-runtime-r1985]')) return;
 
   root.dataset.fxLivingArchitectureLoaderR1985 = 'loading-normal-runtime';
   const script = document.createElement('script');
-  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261008-r1985-normal-runtime';
+  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261009-r2041-unified-technical-ui';
   script.async = false;
   script.dataset.fxLivingArchitectureRuntimeR1985 = 'true';
   script.addEventListener('load', () => {
