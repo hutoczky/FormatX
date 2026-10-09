@@ -381,7 +381,19 @@ async function auditParity(browser){
   assert.equal(parity.experience,'ready','A Lighthouse UA was served noncinematic HTML: '+JSON.stringify(parity));
   assert.equal(parity.contexts,'1','Lighthouse and real visitors need same single WebGL renderer');
   assert.ok(parity.sceneCount>=8,'Lighthouse must receive same eight real archiving scenes');
-  console.log('MAG_LIGHTHOUSE_PARITY_PASS',JSON.stringify(parity));
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,
+    {timeout:20000});
+  const active=await page.evaluate(()=>{
+    const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const legacy=document.querySelector('#hero .hero-copy');
+    return {cinema:document.documentElement.dataset.fxArchiveCinema,
+      nativeFolio:folio?.classList.contains('fx-archive-cinema-folio-r2030')||false,
+      title:folio?.querySelector('h2,h3')?.textContent?.trim().slice(0,100)||'',
+      legacyHidden:legacy?getComputedStyle(legacy).display==='none':false};
+  });
+  assert.ok(active.nativeFolio&&active.legacyHidden,
+    'Lighthouse still saw old hero instead of original delivered HTML folio: '+JSON.stringify(active));
+  console.log('MAG_LIGHTHOUSE_PARITY_PASS',JSON.stringify({...parity,...active}));
   await context.close();
 }
 async function missingGpuFallback(browser){
