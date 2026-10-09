@@ -242,6 +242,41 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function missingGpuFallback(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  await context.addInitScript(()=>{
+    const nativeGet=HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext=function(type,...args){
+      if(typeof type==='string'&&/^(webgl|webgl2|experimental-webgl)$/i.test(type))return null;
+      return nativeGet.call(this,type,...args);
+    };
+  });
+  const page=await context.newPage();
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>Boolean(window.FormatXArchiveExperience),null,{timeout:20000});
+  await page.waitForTimeout(1300);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const experience=document.querySelector('#experience');
+    const css=experience?getComputedStyle(experience):null;
+    return {status:root.dataset.fxArchiveExperience,
+      cinema:root.dataset.fxArchiveCinema||'home',
+      prepared:root.dataset.fxArchiveCinemaPrepared||'',
+      wrapperCount:document.querySelectorAll('.fx-archive-cinema-folio-r2030').length,
+      stationCount:document.querySelectorAll('#fx-mag-ai-scroll-station-r2030').length,
+      readable:!!experience&&experience.textContent.trim().length>80,
+      visibility:css?.visibility,
+      height:experience?.getBoundingClientRect().height};
+  });
+  assert.notEqual(state.cinema,'active','GPU-less browser hijacked into cinematic mode: '+JSON.stringify(state));
+  assert.equal(state.wrapperCount,0,'No GPU: native HTML may not be reparented: '+JSON.stringify(state));
+  assert.equal(state.stationCount,0,'No GPU: invisible scroll station must not be inserted: '+JSON.stringify(state));
+  assert.ok(state.readable&&state.visibility==='visible','No GPU: semantic HTML unavailable: '+JSON.stringify(state));
+  console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
+  await context.close();
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -265,6 +300,7 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
 })().catch(e=>{console.error('ARCHIVE_FAIL',e.stack||String(e));process.exitCode=1;});
