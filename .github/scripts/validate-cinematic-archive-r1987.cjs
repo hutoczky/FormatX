@@ -323,6 +323,33 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function firstPaintTouch(browser){
+  const ctx=await browser.newContext({viewport:{width:320,height:568},
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'});
+  const page=await ctx.newPage();
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForTimeout(900);
+  const proof=await page.evaluate(()=>{
+    const brand=document.querySelector('header.topbar > a.brand');
+    const rect=brand?.getBoundingClientRect();
+    const links=[...document.querySelectorAll('link[href*="formatx-p0-first-paint-r490.css"]')];
+    const sources=links.map(l=>({media:l.media,loading:l.sheet!==null,
+      deferred:l.dataset.fxR487DeferredStyle||null}));
+    const e=brand?getComputedStyle(brand):null;
+    return {brand:rect?{width:rect.width,height:rect.height}:null,
+      pointerEvents:e?.pointerEvents,p0:sources,
+      firstPaintMs:performance.getEntriesByName('first-contentful-paint','paint')[0]?.startTime||0,
+      cssReason:document.documentElement.dataset.fxDeferredCssReasonR526||null};
+  });
+  assert.ok(proof.brand&&proof.brand.width>=44&&proof.brand.height>=44,
+    '320px phone must have actual >=44x44 accessible brand target: '+JSON.stringify(proof));
+  assert.ok(proof.pointerEvents!=='none',
+    'Brand must stay clickable inside MAG cinematic mode: '+JSON.stringify(proof));
+  assert.ok(proof.p0.some(x=>x.deferred=== 'true'),
+    'Phone P0 optical enhancement must be deferred after FCP: '+JSON.stringify(proof));
+  console.log('ARCHIVE_PHONE_TOUCH_FCP_PASS',JSON.stringify(proof));
+  await ctx.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -381,6 +408,7 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await firstPaintTouch(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
