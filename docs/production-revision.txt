@@ -1,5 +1,6 @@
 FormatX production revision
-token=20261009-r2030-exclusive-mag-cinematic-archive
-base_master=118e99d46f47bba7918f9b2e8d412bc0d92218b2
-purpose=Make the new MAG cinematic scene the ONLY visible experience after the introduction: one living 3D MAG, eight distinct physical retrieval locations, one original interactive HTML module in a glass-papyrus folio at any time; remove competing legacy content layout from sight. Desktop side by side, mobile top-and-bottom, no MAG-text overlay.
-validation=Real desktop and 320-390 mobile browser assertions on exclusive content, nonoverlap geometry, eight chapters, reverse scroll, original controls, reduced motion, production smoke; real-device FPS unverified.
+token=20261009-r2031-exclusive-gpu-ready-archive
+base_master=6ddabccf3972630d6d855f645d2868eaddcefccb
+purpose=Exclusive MAG cinematic one-chapter experience activates only after native WebGL2 is ready; no old content underneath; true interactive native HTML folio and separate MAG lane, graceful missing-WebGL/reduced-motion fallback.
+validation=Chromium 1440x900 and 390x844 eight-chapter, one-canvas, no-overlap and native controls; no-WebGL fallback preserves original DOM, original heights and links; 320-1920px information occlusion, production preflight and exact Cloudflare revision.
+limit=Real-device 60fps, photorealism and award score are not independently validated.
