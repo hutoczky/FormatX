@@ -812,7 +812,8 @@ void main(){
     createHandoff();
     // If the introductory film completed before this deferred module loaded,
     // its overlay will already have been removed. It must never replay here.
-    if(!document.getElementById('fx-mag-birth-prepaint-r1606')
+    if(root.dataset.fxMagBirthOwnerR533!=='active'
+        && !document.getElementById('fx-mag-birth-prepaint-r1606')
         && !document.querySelector('[data-fx-mag-birth-live]'))introDone=true;
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
