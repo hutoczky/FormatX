@@ -43,6 +43,13 @@ const ORIGIN=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index
       deferred:document.documentElement.dataset.fxDeferredCssR487};
   });
   console.log('MOBILE_CLS_ROOT_CAUSES '+JSON.stringify(result));
+  const assert=require('node:assert/strict');
+  assert.ok(result.cls<=0.10,'Measured throttled mobile CLS exceeds 0.10: '+JSON.stringify(result.shifts));
+  const main=result.elements.find(x=>x.q==='#main-content');
+  const head=result.elements.find(x=>x.q==='.topbar');
+  assert.ok(main?.rect&&head?.rect&&Math.abs(main.rect.y-head.rect.h)<=2,
+    'Hidden status/rail stole document flow above main: '+JSON.stringify({main,head}));
+  console.log('MOBILE_CLS_GEOMETRY_PASS',JSON.stringify({cls:result.cls,mainTop:main.rect.y,headerHeight:head.rect.h}));
   await context.close();
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
