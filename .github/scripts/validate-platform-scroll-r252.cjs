@@ -33,7 +33,10 @@ async function prepare(page) {
   await page.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
-  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
+  // Verify platform-scrolling compatibility in the preserved classic HTML
+  // mode. The R2032 exclusive MAG-only view has its own strict browser suite
+  // for native chapter handoffs and real technical interactions.
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252&archive=off', { waitUntil: 'domcontentloaded' });
   await activateImmersiveRuntime(page, 'platform-scroll-validation');
   await page.waitForFunction(() => {
     const root = document.documentElement;
