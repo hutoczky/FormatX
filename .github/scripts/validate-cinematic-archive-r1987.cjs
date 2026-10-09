@@ -347,6 +347,13 @@ async function auditSameLiveArchive(browser){
     },null,{timeout:40000});
     await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
       null,{timeout:10000});
+    await page.waitForFunction(()=>{
+      const core=document.querySelector('link[data-fx-critical-core-r227]');
+      const style=document.querySelector('link[data-fx-r487-deferred-style][href*="formatx-cinematic-archive-r1987.css"]');
+      return document.documentElement.dataset.fxDeferredCssR487==='ready-fcp'
+        && !!style && style.media!=='print'
+        && (!core||core.media!=='print');
+    },null,{timeout:12000});
     success=true;
   }finally{
     const proof=await page.evaluate(()=>{
