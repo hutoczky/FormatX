@@ -144,7 +144,9 @@ async function evaluate(viewport,isMobile,browser){
           paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height,
             top:active?.top,translate:active?.translate,
             shift:panel?.dataset.fxMobileScreenTop||null}:null,
-          hostTop:hostRect?.top
+          hostTop:hostRect?.top,
+          hostTransform:visibleHosts[0]?getComputedStyle(visibleHosts[0]).transform:null,
+          mainTransform:getComputedStyle(document.getElementById('main-content')).transform
         };
       });
       if(scene.key==='final'){
