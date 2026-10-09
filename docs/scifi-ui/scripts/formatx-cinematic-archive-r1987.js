@@ -32,6 +32,29 @@
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
   let cinemaControlHome=null,finalCtaHome=null;
   const legacyHeroDisplay=new Map();
+  let heroVisualState=null;
+  function setHeroCanvasLaneFront(active){
+    const hero=document.getElementById('hero');
+    if(!hero)return;
+    const properties=['z-index','pointer-events','background','box-shadow'];
+    if(active&&!heroVisualState){
+      heroVisualState={hero,prior:properties.map(name=>[
+        name,hero.style.getPropertyValue(name),hero.style.getPropertyPriority(name)
+      ])};
+      // The MAG owns the visual lane without stealing gestures from the
+      // active native HTML paper. The original Ask/Pause controls stay live.
+      hero.style.setProperty('z-index','180','important');
+      hero.style.setProperty('pointer-events','none','important');
+      hero.style.setProperty('background','transparent','important');
+      hero.style.setProperty('box-shadow','none','important');
+    }else if(!active&&heroVisualState){
+      for(const [name,value,priority] of heroVisualState.prior){
+        if(value)heroVisualState.hero.style.setProperty(name,value,priority);
+        else heroVisualState.hero.style.removeProperty(name);
+      }
+      heroVisualState=null;
+    }
+  }
   function setLegacyHeroHidden(hide){
     if(hide){
       // Older hero styles contain high-specificity !important declarations.
@@ -224,6 +247,7 @@
     root.dataset.fxArchiveCinema=enabled?'active':'home';
     if(enabled)keepExistingCinemaControls();
     setLegacyHeroHidden(enabled);
+    setHeroCanvasLaneFront(enabled);
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
     root.dataset.fxArchiveCinemaChapter=key;
@@ -822,6 +846,7 @@ void main(){
         root.dataset.fxArchiveExperience='context-lost';
         root.dataset.fxArchiveCinema='home';
         setLegacyHeroHidden(false);
+        setHeroCanvasLaneFront(false);
         restoreExistingCinemaControls();
         delete root.dataset.fxArchiveCinemaPrepared;
         detach=null;
@@ -853,6 +878,7 @@ void main(){
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
     setLegacyHeroHidden(false);
+    setHeroCanvasLaneFront(false);
     document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
     delete root.dataset.fxArchiveCinemaPrepared;
