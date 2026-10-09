@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2038-mag-consolidated-first-frame
+token=20261009-r2039-mag-premium-first-frame
 base_master=ec7883ed68512253a9236133892d921864316123
-purpose=One native cinematic MAG, original HTML panels and contact optics preserved. Fix 320px mobile brand to 46px; consolidate 3 original critical stylesheets into canonical desktop and mobile first-paint owners. Mobile heavy optical P0 deferred until first paint.
+purpose=R2038 critical CSS consolidation plus the original premium header/interactive controls skin moved into genuinely render-blocking mobile first-paint layer to prevent unstyled 1–3s filmstrip; authentic MAG, eight source handoffs and semantic SEO remain.
 validation=Strict desktop/phone WebGL 8-source, native fallback, 320px touch, design/menu/SEO, 320-1920 occlusion, Lighthouse desktop and phone; production exact-revision smoke before claiming live.
 limits=No fabricated stable FPS or quality superiority. Lighthouse scores may remain below thresholds and must be reported truthfully.
