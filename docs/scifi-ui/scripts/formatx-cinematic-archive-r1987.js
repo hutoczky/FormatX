@@ -30,7 +30,7 @@
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
-  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',cinemaUiObserver=null;
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
@@ -344,7 +344,11 @@
         // Popover manual is only a layer primitive, not a separate UI and
         // never a cloned page. Only ONE actual HTML sheet enters the top layer.
         // Technical instrument dialogs must remain on top when they own focus.
-        const shouldPresent=active&&!document.body.classList.contains('fx-organism-panel-open');
+        const shouldPresent=active
+          && !document.body.classList.contains('fx-organism-panel-open')
+          && !root.classList.contains('fx-organism-menu-open')
+          && !document.querySelector('#main-nav.open')
+          && !document.querySelector('.fx-mini-mag-open-r459');
         if(panel.hasAttribute('popover')){
           if(shouldPresent&&!panel.matches(':popover-open')){
             try{panel.showPopover()}catch(error){
@@ -1003,6 +1007,8 @@ void main(){
     if(raf)cancelAnimationFrame(raf);
     sceneObserver?.disconnect();
     sceneObserver=null;
+    cinemaUiObserver?.disconnect();
+    cinemaUiObserver=null;
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
@@ -1055,6 +1061,13 @@ void main(){
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
+    // The native menu and original instrument dialogs must always outrank
+    // the original HTML paper while they own focus. Browser top-layer popovers
+    // cannot rely on ordinary z-index for that; close/reopen on class changes.
+    cinemaUiObserver=new MutationObserver(()=>invalidate());
+    if(document.body)cinemaUiObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+    const nav=document.getElementById('main-nav');
+    if(nav)cinemaUiObserver.observe(nav,{attributes:true,attributeFilter:['class']});
     // If the introductory film completed before this deferred module loaded,
     // its overlay will already have been removed. It must never replay here.
     if(root.dataset.fxMagBirthOwnerR533!=='active'
