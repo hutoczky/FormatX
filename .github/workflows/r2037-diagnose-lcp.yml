@@ -5,6 +5,11 @@ on:
     paths:
       - '.github/scripts/r2037-desktop-lcp-trace.cjs'
       - '.github/workflows/r2037-diagnose-lcp.yml'
+  pull_request:
+    branches: [mag-cinematic-r2036-integrated]
+    paths:
+      - '.github/scripts/r2037-desktop-lcp-trace.cjs'
+      - '.github/workflows/r2037-diagnose-lcp.yml'
   workflow_dispatch:
 permissions:
   contents: read
