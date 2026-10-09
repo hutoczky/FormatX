@@ -321,6 +321,11 @@
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        // Invisible chapters contain real buttons and links. Make these
+        // inaccessible to keyboard tabbing until the MAG physically delivers
+        // their original HTML. This never clones or disables the active paper.
+        panel.inert=!active;
+        panel.setAttribute('aria-hidden',active?'false':'true');
         if(active){
           const p=clamp(current.progress);
           const materialize=smooth((p-.06)/.46)*(1-smooth((p-.88)/.12));
@@ -983,6 +988,8 @@ void main(){
     for(const host of cinemaHosts){
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
+        panel.inert=false;
+        panel.removeAttribute('aria-hidden');
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
         panel.remove();
       }
