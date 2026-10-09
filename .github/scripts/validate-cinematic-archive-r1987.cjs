@@ -21,7 +21,21 @@ async function evaluate(viewport,isMobile,browser){
     const s=document.documentElement.dataset.fxArchiveExperience;
     return s==='ready'||s==='context-error'||s==='no-scenes';
   },null,{timeout:90000});
-  const init=await page.evaluate(()=>({
+  if(isMobile){
+    const brandHit=await page.evaluate(()=>{
+      const el=document.querySelector('header.topbar > a.brand');
+      const rect=el?.getBoundingClientRect();
+      return {present:!!el,width:rect?.width||0,height:rect?.height||0,
+        visible:el?getComputedStyle(el).visibility:null,
+        label:el?.textContent.trim()||'',
+        inViewport:rect?.top>=0&&rect?.bottom<=innerHeight};
+    });
+    assert.ok(brandHit.present&&brandHit.width>=44&&brandHit.height>=44
+      &&brandHit.visible==='visible'&&brandHit.inViewport,
+      'Real mobile header brand interactive target below 44px: '+JSON.stringify(brandHit));
+    console.log('MAG_MOBILE_BRAND_TARGET_PASS',JSON.stringify({viewport,brandHit}));
+  }
+    const init=await page.evaluate(()=>({
     status:document.documentElement.dataset.fxArchiveExperience,
     shared:window.FormatXLivingCore?.sharedWebGL2||false,
     sceneCount:window.FormatXArchiveExperience.scenes.length,
@@ -380,6 +394,7 @@ async function fallback(browser){
   ]});
   try{
     await evaluate({width:1440,height:900},false,browser);
+    await evaluate({width:320,height:568},true,browser);
     await evaluate({width:390,height:844},true,browser);
     await missingGpuFallback(browser);
     await fallback(browser);
