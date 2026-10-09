@@ -1,0 +1,62 @@
+name: R2034 MAG strict Lighthouse production candidate
+
+on:
+  push:
+    branches: [mag-cinematic-r2032-first-frame]
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - '.github/workflows/r2034-mag-lighthouse.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'billing-worker/src/production-content-entry.js'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - '.github/workflows/r2034-mag-lighthouse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-r2034-mag-lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [desktop, mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.13.x
+      - name: Measure and ASSERT three independent runs
+        shell: bash
+        run: |
+          set -o pipefail
+          if [ "${{ matrix.profile }}" = desktop ]; then config='./lighthouserc.json'; else config='./lighthouserc.mobile.json'; fi
+          lhci autorun --config="$config" 2>&1 | tee "lighthouse-${{ matrix.profile }}.log"
+          result="${PIPESTATUS[0]}"
+          PROFILE="${{ matrix.profile }}" node .github/scripts/report-lighthouse-metrics.cjs .lighthouseci | tee -a "lighthouse-${{ matrix.profile }}.log"
+          exit "$result"
+      - name: Save real reports and strict gate output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r2034-lighthouse-${{ matrix.profile }}
+          path: |
+            .lighthouseci/
+            lighthouse-${{ matrix.profile }}.log
+          if-no-files-found: warn
+          retention-days: 14
