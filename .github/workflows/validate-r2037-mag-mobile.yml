@@ -37,6 +37,10 @@ jobs:
           done
           cat "$RUNNER_TEMP/formatx-r2037-http.log"
           exit 1
+      - name: Trace actual four-times-CPU-throttled mobile layout shifts
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-mag-r2037/node_modules
+        run: node .github/scripts/r2037-diagnose-mobile-cls.cjs
       - name: Verify real MAG and phone/desktop 44px targets
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-mag-r2037/node_modules
