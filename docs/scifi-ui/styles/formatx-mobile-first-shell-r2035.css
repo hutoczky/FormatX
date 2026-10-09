@@ -101,6 +101,28 @@
  html body.living-architecture #hero .hero-label{display:none!important}
 }
 
+/* R2037 third measured LayoutShift source.
+   The original sound/ASK/pause control group was first laid out as a 390x96px
+   flow item at the top of the MAG, then moved to its settled screen position
+   (126x90px, 18px above the bottom of the real hero-space). Reserve that
+   SAME position immediately, keep every original semantic button. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+ html:root:root:root:root:root:root body.living-architecture
+ #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+   position:absolute!important;
+   top:auto!important;bottom:18px!important;
+   left:50%!important;right:auto!important;
+   box-sizing:border-box!important;
+   width:126px!important;min-width:126px!important;max-width:126px!important;
+   height:90px!important;min-height:90px!important;max-height:90px!important;
+   margin:0!important;padding:0!important;
+   transform:translateX(-50%)!important;translate:none!important;
+   opacity:1!important;visibility:visible!important;
+   pointer-events:auto!important;z-index:12040!important;
+ }
+}
+/* production-r2037-actual-controls-zero-layout-shift */
+
 /* R2037 second measured LayoutShift root cause: the legacy chapter
    navigation <aside class="fx-rail"> occupied 24.8px of document flow
    before the deferred original styles gave it a floating position.
