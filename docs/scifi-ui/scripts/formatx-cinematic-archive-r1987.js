@@ -7,7 +7,8 @@
   const VERSION='cinematic-archive-r2008';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
-  const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
+  // Archive capability is determined by user settings and the shared MAG
+  // context, never the browser user agent or a benchmark indicator.
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
   const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
@@ -453,7 +454,7 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    if(disposed||reduced.matches||(!force&&isolatedMagCheck))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     if(detach)return;
@@ -488,7 +489,7 @@ void main(){
   }
   function init(){
     if(reduced.matches){root.dataset.fxArchiveExperience='reduced-html';return;}
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
