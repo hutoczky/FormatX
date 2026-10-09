@@ -1604,3 +1604,10 @@ html:has([data-fx-award-proof]) #hero .fx-reference-proof,
 html:has([data-fx-award-proof]) #hero .fx-reference-heading,
 html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
 
+
+/* R2036: keep the decorative Thought Genome below all real interactive
+   instruments regardless of first-paint CSS consolidation ordering. */
+html body .fx-thought-genome-layer {
+  z-index:4!important;
+  pointer-events:none!important;
+}
