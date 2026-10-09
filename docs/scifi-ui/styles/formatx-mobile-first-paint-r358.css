@@ -1003,3 +1003,19 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+/* R2037: exact 320×568 automated P0 matrix regression. The canonical
+   FormatX brand navigation link remained 132×34 CSS px on small phones;
+   expand its semantic hit area without changing the artwork or layout. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+ html:root:root:root:root body.living-architecture .topbar > a.brand{
+   box-sizing:border-box!important;
+   display:inline-flex!important;
+   align-items:center!important;
+   min-height:44px!important;
+   height:auto!important;
+   padding-block:max(5px,env(safe-area-inset-top,0px))!important;
+   touch-action:manipulation;
+ }
+}
+/* production-r2037-semantic-brand-touch-target-44px */
