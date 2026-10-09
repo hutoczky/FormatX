@@ -88,7 +88,7 @@ for (const file of htmlFiles) {
 }
 
 const homepage = read('docs/scifi-ui/index.html');
-const canonicalEvidenceHeadingCount = (homepage.match(/<h2\\b[^>]*>Bizonyíték a látvány mögött\\.<\\/h2>/g) || []).length;
+const canonicalEvidenceHeadingCount = (homepage.match(/<h2\b[^>]*>Bizonyíték a látvány mögött\.<\/h2>/g) || []).length;
 if (canonicalEvidenceHeadingCount !== 1) report('home: proof headline must be exactly one semantic H2, not an extra MAG preview');
 if (!homepage.includes('<h2>MAG // ÉLŐ RENDSZERBEMUTATÓ</h2>')) report('home: distinct MAG archive heading missing');
 const introPresentationRuntime = read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');
