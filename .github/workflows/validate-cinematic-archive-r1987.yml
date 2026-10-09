@@ -9,6 +9,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -18,6 +19,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
