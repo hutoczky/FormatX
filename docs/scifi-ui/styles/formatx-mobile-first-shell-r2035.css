@@ -101,6 +101,23 @@
  html body.living-architecture #hero .hero-label{display:none!important}
 }
 
+/* R2037 real Lighthouse LayoutShift fix.
+   The original .fx-organism-status is a fixed status instrument in settled
+   living-architecture.css. Before deferred CSS it was briefly in normal
+   document flow (main-content y144px -> y70px), generating CLS > 0.5.
+   Match its final non-flow positioning at the FIRST mobile paint. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+ html:root:root:root:root body.living-architecture > .fx-organism-status{
+   position:fixed!important;
+   top:70px!important;bottom:auto!important;left:0!important;right:auto!important;
+   width:100%!important;max-width:100%!important;
+   box-sizing:border-box!important;
+   margin:0!important;
+   transform:none!important;translate:none!important;
+ }
+}
+/* production-r2037-real-status-layout-shift-zero-flow */
+
 /* R2037 P0 verified touch target: do not shrink the primary brand anchor
    below 44 CSS px on 320px phones. The logo itself may stay 44px. */
 @media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
