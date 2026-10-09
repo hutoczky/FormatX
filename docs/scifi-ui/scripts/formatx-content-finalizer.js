@@ -271,7 +271,9 @@
     link.removeAttribute('download');
 
     if (asset?.available === true && allowed(asset.download_url)) {
-      link.href = asset.download_url;
+      link.href = '/download/multiplatform';
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
       link.classList.remove('is-metadata-fallback', 'is-disabled');
       link.removeAttribute('aria-disabled');
     } else {
