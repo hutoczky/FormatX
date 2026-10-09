@@ -4,7 +4,7 @@ run-name: Validate platform scroll policy from ${{ github.sha }}
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, mag-cinematic-r2032-first-frame]
     paths:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
@@ -15,9 +15,13 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-production-r5.css'
       - 'docs/scifi-ui/styles/formatx-mobile-seamless-loop.css'
       - '.github/scripts/validate-platform-scroll-r252.cjs'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
+      - 'docs/scifi-ui/styles/formatx-mag-first-frame-r2032.css'
+      - 'docs/scifi-ui/index.html'
       - '.github/workflows/validate-laptop-loop.yml'
   pull_request:
-    branches: [master]
+    branches: [master, mag-cinematic-r2032-first-frame]
     paths:
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
@@ -28,6 +32,10 @@ on:
       - 'docs/scifi-ui/styles/formatx-mobile-production-r5.css'
       - 'docs/scifi-ui/styles/formatx-mobile-seamless-loop.css'
       - '.github/scripts/validate-platform-scroll-r252.cjs'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
+      - 'docs/scifi-ui/styles/formatx-mag-first-frame-r2032.css'
+      - 'docs/scifi-ui/index.html'
       - '.github/workflows/validate-laptop-loop.yml'
 
 permissions:
