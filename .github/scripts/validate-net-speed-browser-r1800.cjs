@@ -11,7 +11,11 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   });
   const page=await context.newPage();
   const errors=[];
+  const missingAssets=[];
   let apiRequests=0;
+  page.on('response',response=>{
+    if(response.status()===404)missingAssets.push(new URL(response.url()).pathname);
+  });
 
   page.on('pageerror',error=>errors.push(String(error)));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
@@ -75,7 +79,7 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   assert.match((await page.locator('[data-net-edge]').textContent()||''),/TEST/);
 
   const meaningful=errors.filter(x=>!/favicon|WebGL|WebGPU|GPU|Permissions policy/i.test(x));
-  assert.deepEqual(meaningful,[]);
+  assert.deepEqual(meaningful,[],`Missing assets: ${JSON.stringify([...new Set(missingAssets)])}`);
 
   await context.close();
   await browser.close();
