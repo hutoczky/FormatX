@@ -7,7 +7,7 @@
 (() => {
   'use strict';
   const root = document.documentElement;
-  const url = './scripts/formatx-living-habitat-r1530.js?v=20261009-r2065-zero-flow-canvas';
+  const url = '/scifi-ui/scripts/formatx-living-habitat-r1530.js?v=20261009-r2065-zero-flow-canvas';
   const EVENTS = ['pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'];
   let timer = 0;
   let pending = false;
