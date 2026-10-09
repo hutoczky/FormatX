@@ -1709,16 +1709,16 @@ html.fx-organism-menu-open body.living-architecture #main-nav.fx-organism-system
 /* production-r1974-desktop-title-single-paint-owner */
 
 
-/* R1979 — parser-owned Lighthouse hero single-paint contract.
-   The parser bootstrap publishes the audit flag before body paint. Keep the
-   full readable hero parent chain compositor-neutral so deferred visual layers
-   cannot repaint the FORMATX LCP candidate. Normal production users are not
-   affected by this scope. */
-html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero > .hero-grid,
-html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-copy,
-html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-copy > *,
-html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero #hero-title,
-html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-title-main{
+/* R2059 — identical hero first-paint stability for every visitor.
+   The readable title must remain compositor-neutral during the cinematic
+   handoff in normal browsers as well as performance measurements. This
+   replaces the former Lighthouse-only selectors without changing the MAG,
+   archive scene materials, native HTML or any accessibility behavior. */
+html:root body.living-architecture #hero > .hero-grid,
+html:root body.living-architecture #hero .hero-copy,
+html:root body.living-architecture #hero .hero-copy > *,
+html:root body.living-architecture #hero #hero-title,
+html:root body.living-architecture #hero .hero-title-main{
   opacity:1!important;
   visibility:visible!important;
   transform:none!important;
@@ -1730,7 +1730,7 @@ html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living
   transition:none!important;
   will-change:auto!important;
 }
-html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-copy{
+html:root body.living-architecture #hero .hero-copy{
   contain:layout style!important;
 }
 /* production-r1979-audit-hero-copy-single-paint */
