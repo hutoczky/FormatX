@@ -6,6 +6,16 @@ const ORIGIN=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index
  try{
   const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
   const page=await context.newPage();
+  const cdp=await context.newCDPSession(page);
+  // Match Lighthouse mobile throttling: the plain unthrottled Chromium run
+  // showed CLS=.0004 while real 4xCPU/slow network Lighthouse scored .55.
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  await cdp.send('Network.emulateNetworkConditions',{
+    offline:false,latency:150,
+    downloadThroughput:1600*1024/8,
+    uploadThroughput:750*1024/8,
+    connectionType:'cellular4g'
+  });
   await page.addInitScript(()=>{
    window.__shiftRecord=[];
    new PerformanceObserver(list=>{
@@ -22,7 +32,7 @@ const ORIGIN=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index
    }).observe({type:'layout-shift',buffered:true});
   });
   await page.goto(ORIGIN,{waitUntil:'domcontentloaded',timeout:60000});
-  await page.waitForTimeout(8500);
+  await page.waitForTimeout(14000);
   const result=await page.evaluate(()=>{
     const shifts=window.__shiftRecord||[];
     const selectors=['#hero','.hero-grid','.hero-space','.hero-copy','#experience','.fx-category-deck--standalone','.fx-award-proof','.topbar','#main-content','.site-footer'];
