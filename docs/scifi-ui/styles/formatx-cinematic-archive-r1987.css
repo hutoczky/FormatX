@@ -819,3 +819,211 @@ html:not([data-fx-archive-experience="ready"]) body.living-architecture
 main#main-content > .fx-mag-ai-scroll-station-r2030{
   display:none!important;
 }
+
+/* R2032 — cinematic from first post-intro frame. The original hero remains in
+   DOM for its WebGL/canonical selectors and accessibility fallback, but its
+   former page furniture cannot compete with the MAG-only archive story. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero :is(.hero-copy,.scroll-cue,.hero-proof,.hero-cta,.hero-quick-nav){
+   opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero .hero-grid > :not(.hero-space){
+   opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ /* During retrieval the folio travels in depth, but the MAG never masks
+    the interactive HTML lane or catches mouse/touch scroll gestures. */
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+   overflow:hidden!important;pointer-events:none!important;
+ }
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   will-change:transform,opacity;
+ }
+}
+/* production-r2032-mag-post-intro-exclusive-no-legacy-overlay */
+
+@media (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032{
+   position:sticky;
+   bottom:0;
+   z-index:12;
+   display:flex;
+   justify-content:center;
+   padding:clamp(12px,2vw,20px);
+   margin-top:clamp(25px,3vw,44px);
+   border-top:1px solid rgba(169,228,245,.21);
+   background:linear-gradient(180deg,rgba(5,15,28,0),rgba(4,15,29,.96) 24%);
+ }
+ html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032 > #hero-download{
+   position:relative!important;
+   opacity:1!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+   display:inline-flex!important;
+   min-height:48px;
+   max-width:100%;
+   text-align:center;
+ }
+}
+
+/* Only the delivered native HTML folio owns pointer events. Its full-height
+   invisible chapter scroll-anchor must not swallow the floating MAG controls
+   or topbar, particularly on mobile and at scrollY=0. */
+@media(prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]{
+   pointer-events:none!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   pointer-events:auto!important;
+ }
+}
+
+/* R2032 portrait folio remains screen-fixed; desktop-only viewport compensation
+   must not pull the original HTML module up over the MAG. */
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   translate:none!important;
+   transform:perspective(900px) rotateX(calc(var(--fx-cinema-orbit,0) * 7deg))!important;
+ }
+}
+
+/* R2033 — proof is ONE canonical live block, delivered by MAG in FINAL.
+   The older hero copy and an inert scroll-loop duplicate must not repeat it.
+   Never remove the real verification routes or the native anchors. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading,
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{
+ display:none!important;
+}
+html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033{
+ position:relative;
+ width:100%;
+ max-width:100%;
+ margin:clamp(12px,3vw,30px) auto;
+ padding:clamp(12px,2vw,20px);
+ border:1px solid rgba(153,220,244,.19);
+ border-radius:14px;
+ background:linear-gradient(125deg,rgba(11,31,45,.44),rgba(4,15,26,.57));
+}
+html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 .fx-award-proof{
+ display:block!important;position:relative!important;inset:auto!important;
+ width:100%!important;max-width:100%!important;
+ padding:0!important;margin:0!important;
+ opacity:1!important;visibility:visible!important;
+ pointer-events:auto!important;
+}
+html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 .fx-award-proof__grid{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));
+ gap:12px;
+}
+html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
+ pointer-events:auto!important;
+ min-height:44px;
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   /* Local transform/perspective ancestor must never pull up the reading
+      folio over the top 43dvh MAG aperture. Runtime corrects live geometry. */
+   transform:none!important;
+   transform-origin:center top!important;
+ }
+}
+@media(prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console{
+   z-index:215!important;
+   pointer-events:auto!important;
+   background:transparent!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console-backdrop{
+   background:rgba(2,7,13,.22)!important;
+   backdrop-filter:blur(4px)!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console-shell{
+   width:min(54vw,860px)!important;
+   height:min(90dvh,880px)!important;
+   margin:5dvh 2vw 5dvh auto!important;
+   border:1px solid rgba(167,226,245,.34)!important;
+   border-radius:11px 29px 29px 11px!important;
+   box-shadow:0 30px 90px rgba(0,0,0,.67),inset 1px 0 16px rgba(125,222,246,.07)!important;
+   background:linear-gradient(126deg,rgba(9,32,46,.98),rgba(2,13,27,.98))!important;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console{
+   padding:0!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console-shell{
+   position:absolute!important;
+   grid-column:auto!important;
+   inset:46dvh 2vw 1dvh 2vw!important;
+   margin:0!important;
+   width:96vw!important;
+   height:53dvh!important;
+   border-radius:12px 12px 0 0!important;
+   min-height:0!important;
+   overflow:hidden!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console-head{
+   padding:12px 16px 10px!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console-title{
+   font-size:clamp(19px,5.3vw,28px)!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-console-nav{
+   display:flex;overflow-x:auto;
+   padding:8px!important;
+ }
+ html[data-fx-archive-cinema="active"] body.fx-organism-panel-open
+ .fx-organism-panel{
+   padding:14px 14px 100px!important;
+   overflow:auto!important;
+ }
+}
+/* r2033-canonical-proof-optical-continuity-technical-console */
+
+/* R2033 — the semantic chapter is only a scroll anchor in MAG mode. Do not
+   let KWin-like transforms, perspective, CSS containment or paint isolation
+   redefine the containing block for a viewport-fixed native technical folio. */
+@media(prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]{
+   transform:none!important;
+   translate:none!important;
+   rotate:none!important;
+   scale:none!important;
+   filter:none!important;
+   perspective:none!important;
+   contain:none!important;
+   will-change:auto!important;
+   content-visibility:visible!important;
+   overflow:visible!important;
+ }
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content{
+   transform:none!important;
+   translate:none!important;
+   filter:none!important;
+   perspective:none!important;
+   contain:none!important;
+ }
+}
+/* r2033-mobile-viewport-fixed-native-paper-no-scroll-containing-block */
