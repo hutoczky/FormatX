@@ -1027,3 +1027,52 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* r2033-mobile-viewport-fixed-native-paper-no-scroll-containing-block */
+
+/* R2039 — ORIGINAL native interactive HTML sheets are a one-at-a-time
+   top-layer surface. Native popover="manual" is a rendering primitive:
+   never a clone, rasterized canvas label, video or separate scroll view.
+   It escapes older hero/section stacking contexts and transformed ancestors. */
+@media (prefers-reduced-motion:no-preference){
+ html:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030:popover-open{
+   position:fixed!important;
+   margin:0!important;
+   box-sizing:border-box!important;
+   visibility:visible!important;
+   display:block!important;
+   opacity:var(--fx-cinema-materialize,1)!important;
+   pointer-events:auto!important;
+   z-index:2147483000!important;
+   translate:none!important;
+   will-change:opacity,transform;
+ }
+ html:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030:popover-open::backdrop{
+   background:transparent!important;
+   pointer-events:none!important;
+ }
+}
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030:popover-open{
+   left:4vw!important;
+   right:4vw!important;
+   width:92vw!important;
+   height:49dvh!important;
+   max-height:49dvh!important;
+   bottom:3dvh!important;
+   transform:none!important;
+ }
+}
+@media (min-width:901px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030:popover-open{
+   left:auto!important;right:2.7vw!important;
+   top:11dvh!important;bottom:auto!important;
+   width:51vw!important;height:78dvh!important;
+   max-width:920px!important;
+   transform:perspective(1400px) translateZ(var(--fx-cinema-depth,0px))
+     rotateY(calc(var(--fx-cinema-orbit,0) * -12deg))!important;
+ }
+}
+/* production-r2039-native-top-layer-single-real-archive-paper */
