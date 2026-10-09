@@ -47,12 +47,14 @@ jobs:
           set -o pipefail
           if [ "${{ matrix.profile }}" = desktop ]; then config='./lighthouserc.json'; else config='./lighthouserc.mobile.json'; fi
           set +e
-          lhci autorun --config="$config" 2>&1 | tee "lighthouse-${{ matrix.profile }}.log"
-          result="${PIPESTATUS[0]}"
+          lhci collect --config="$config" 2>&1 | tee "lighthouse-${{ matrix.profile }}.log"
+          collect_result="${PIPESTATUS[0]}"
           set -e
+          if [ "$collect_result" -ne 0 ]; then exit "$collect_result"; fi
           PROFILE="${{ matrix.profile }}" node .github/scripts/report-lighthouse-metrics.cjs .lighthouseci | tee -a "lighthouse-${{ matrix.profile }}.log"
-          # Retain Lighthouse's strict failed assertion code, with evidence.
-          exit "$result"
+          PROFILE="${{ matrix.profile }}" node .github/scripts/report-lighthouse-opportunities.cjs .lighthouseci | tee -a "lighthouse-${{ matrix.profile }}.log"
+          # The very same 95/100 and FCP/LCP checks remain hard release gates.
+          lhci assert --config="$config" 2>&1 | tee -a "lighthouse-${{ matrix.profile }}.log"
       - name: Save real reports and strict gate output
         if: always()
         uses: actions/upload-artifact@v4
