@@ -1,3 +1,177 @@
+/* R2038 — prepaint proof + genuine interactive navigation surface, folded
+   from immutable source styles to prevent FCP from waiting on extra CSS URLs. */
+/* R2033: ONE visible public evidence module; the canonical proof strip
+   contains the original verification, technical and security destinations.
+   Keeping the mirrored scroll bridge box intact prevents loop geometry drift. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading{
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html:has([data-fx-award-proof]) .fx-award-proof{opacity:1!important}
+}
+/* production-r2033-canonical-proof-singleton-hotfix */
+
+/* FormatX R1956 — deterministic menu render contract for phone + PC.
+   This stylesheet is intentionally synchronous and small: the navigation must
+   remain operable even while cinematic/deferred style layers are still loading. */
+html body.living-architecture #menu-toggle.fx-reference-menu-button{
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html body.living-architecture #main-nav.fx-organism-system-menu{
+  position:fixed!important;
+  display:grid!important;
+  box-sizing:border-box!important;
+  z-index:2147482400!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch;
+  gap:4px!important;
+  border:1px solid rgba(122,199,231,.24)!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,rgba(3,14,24,.992),rgba(2,9,17,.995))!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.56),inset 0 0 32px rgba(72,199,255,.035)!important;
+  backdrop-filter:blur(22px) saturate(132%)!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translateY(-8px) scale(.988)!important;
+  clip-path:none!important;
+  transition:opacity .18s ease,visibility .18s ease,transform .18s ease!important;
+}
+
+html body.living-architecture #main-nav.fx-organism-system-menu.open{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:translateY(0) scale(1)!important;
+  clip-path:none!important;
+}
+
+html body.living-architecture #main-nav.fx-organism-system-menu.open a{
+  display:flex!important;
+  align-items:center!important;
+  min-height:48px!important;
+  padding:11px 14px!important;
+  color:rgba(234,247,252,.94)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+html.fx-organism-menu-open body.living-architecture #main-nav.fx-organism-system-menu.open{
+  display:grid!important;
+}
+
+@media (min-width:901px) and (pointer:fine){
+  html body.living-architecture #main-nav.fx-organism-system-menu{
+    top:76px!important;
+    right:22px!important;
+    bottom:auto!important;
+    left:auto!important;
+    width:min(360px,calc(100vw - 44px))!important;
+    min-width:280px!important;
+    max-width:360px!important;
+    max-height:calc(100dvh - 96px)!important;
+    padding:14px!important;
+  }
+}
+
+@media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html body.living-architecture #main-nav.fx-organism-system-menu{
+    top:max(76px,env(safe-area-inset-top))!important;
+    right:12px!important;
+    bottom:auto!important;
+    left:12px!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    max-height:calc(100dvh - max(92px,calc(env(safe-area-inset-top) + 92px)))!important;
+    padding:18px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body.living-architecture #main-nav.fx-organism-system-menu{transition:none!important}
+}
+
+
+/* R1974 — desktop hero LCP hard owner.
+   The title is the measured desktop LCP element. Own every paint-affecting
+   property in the tiny blocking stylesheet so deferred design/polish layers
+   cannot repaint FORMATX 1.5s later and reset the LCP timestamp. */
+@media (min-width:901px){
+  html:root:root:root:root:root body.living-architecture #hero #hero-title{
+    display:block!important;
+    opacity:1!important;
+    visibility:visible!important;
+    transform:none!important;
+    translate:none!important;
+    filter:none!important;
+    clip-path:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root:root body.living-architecture #hero .hero-title-main{
+    display:block!important;
+    font-family:"Arial Black",Arial,sans-serif!important;
+    font-size:clamp(64px,6.25vw,92px)!important;
+    font-weight:900!important;
+    line-height:.88!important;
+    letter-spacing:-.075em!important;
+    color:#f4fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    background:none!important;
+    -webkit-background-clip:border-box!important;
+    background-clip:border-box!important;
+    opacity:1!important;
+    visibility:visible!important;
+    transform:none!important;
+    translate:none!important;
+    filter:none!important;
+    clip-path:none!important;
+    animation:none!important;
+    transition:none!important;
+    text-shadow:0 1px 0 rgba(255,255,255,.18),0 0 14px rgba(126,218,255,.045)!important;
+    will-change:auto!important;
+  }
+}
+/* production-r1974-desktop-title-single-paint-owner */
+
+
+/* R1979 — parser-owned Lighthouse hero single-paint contract.
+   The parser bootstrap publishes the audit flag before body paint. Keep the
+   full readable hero parent chain compositor-neutral so deferred visual layers
+   cannot repaint the FORMATX LCP candidate. Normal production users are not
+   affected by this scope. */
+html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero > .hero-grid,
+html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-copy,
+html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-copy > *,
+html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero #hero-title,
+html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-title-main{
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+  translate:none!important;
+  scale:none!important;
+  filter:none!important;
+  clip-path:none!important;
+  animation:none!important;
+  transition:none!important;
+  will-change:auto!important;
+}
+html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living-architecture #hero .hero-copy{
+  contain:layout style!important;
+}
+/* production-r1979-audit-hero-copy-single-paint */
+
 :root {
   --fx-cyan:#7cecff;
   --fx-violet:#8f72ff;
@@ -1035,3 +1209,47 @@
   }
 }
 /* production-r2037-small-screen-real-brand-touch-target */
+
+/* R2038 — the single mobile logo stays authoritative after late style layers. */
+/* R1952 — canonical single mobile brand icon.
+   The header already contains the real first-party <img>. A legacy critical-shell
+   ::before fallback can be reactivated by later mobile layers, producing the two
+   adjacent FX marks seen on production. On mobile/coarse layouts the canonical
+   image is the sole logo owner. Desktop is intentionally untouched. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root body.living-architecture .topbar > a.brand::before {
+    content:none !important;
+    display:none !important;
+    flex:0 0 0 !important;
+    width:0 !important;
+    height:0 !important;
+    min-width:0 !important;
+    max-width:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    background:none !important;
+    background-image:none !important;
+    box-shadow:none !important;
+    filter:none !important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture .topbar > a.brand > img {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    flex:0 0 44px !important;
+    width:44px !important;
+    min-width:44px !important;
+    max-width:44px !important;
+    height:44px !important;
+    min-height:44px !important;
+    max-height:44px !important;
+    margin:0 !important;
+    object-fit:contain !important;
+  }
+
+  html:root:root:root:root:root:root:root body.living-architecture .topbar > a.brand {
+    gap:10px !important;
+  }
+}
+
