@@ -29,6 +29,17 @@ html:has([data-fx-award-proof]) .fx-loop-reference-proof{
       transform:translateX(-50%);
       text-align:center;font-family:ui-monospace,SFMono-Regular,monospace;
       color:#dcf5ff;text-shadow:0 0 18px rgba(108,215,247,.32);
+      opacity:1;visibility:visible;
+    }
+    /* The system identifier stays genuinely visible while the one shared
+       WebGL2 MAG initializes. Once stabilized, it holds 1.45s and dissolves
+       without an arbitrary blank interval on slower mobile hardware. */
+    html[data-fx-intro-prepaint-r1611="skip"][data-fx-archive-experience="ready"]
+      body.living-architecture > .fx-mag-first-visible-telemetry-r2039,
+    html[data-fx-intro-prepaint-r1611="skip"][data-fx-archive-experience="context-error"]
+      body.living-architecture > .fx-mag-first-visible-telemetry-r2039,
+    html[data-fx-intro-prepaint-r1611="skip"][data-fx-archive-experience="no-scenes"]
+      body.living-architecture > .fx-mag-first-visible-telemetry-r2039{
       animation:fx-mag-first-visible-telemetry-r2039 1.45s ease-out both;
     }
     .fx-mag-first-visible-telemetry-r2039 strong{
