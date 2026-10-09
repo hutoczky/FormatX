@@ -29,6 +29,24 @@
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  let cinemaControlHome=null;
+  function keepExistingCinemaControls(){
+    if(cinemaControlHome)return;
+    const rail=document.querySelector('#hero .fx-reference-rail');
+    const hero=document.getElementById('hero');
+    if(!rail||!hero||!rail.parentNode)return;
+    cinemaControlHome={node:rail,parent:rail.parentNode,next:rail.nextSibling};
+    // Same DOM button instances and event listeners, never clones.
+    hero.appendChild(rail);
+    rail.classList.add('fx-cinema-controls-r2032');
+  }
+  function restoreExistingCinemaControls(){
+    if(!cinemaControlHome)return;
+    const {node,parent,next}=cinemaControlHome;
+    node.classList.remove('fx-cinema-controls-r2032');
+    if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
+    cinemaControlHome=null;
+  }
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
   const paperLast=new WeakMap();
@@ -151,6 +169,7 @@
     if(!cinemaPrepared)return;
     const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     root.dataset.fxArchiveCinema=enabled?'active':'home';
+    if(enabled)keepExistingCinemaControls();
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
     root.dataset.fxArchiveCinemaChapter=key;
@@ -775,6 +794,7 @@ void main(){
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
+    restoreExistingCinemaControls();
     document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
     delete root.dataset.fxArchiveCinemaPrepared;
