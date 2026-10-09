@@ -374,7 +374,7 @@ async function mobileHtmlFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
   });
-  const testUrl=new URL(URL);
+  const testUrl=new globalThis.URL(URL);
   testUrl.searchParams.set('archive','off');
   testUrl.searchParams.delete('r486-optics-energy-check');
   const page=await context.newPage();
