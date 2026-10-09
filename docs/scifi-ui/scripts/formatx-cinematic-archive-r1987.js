@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2020-mobile-unified';
+  const VERSION='cinematic-archive-r2022-visible-handoff';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -27,7 +27,7 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
-  let sceneObserver=null;
+  let sceneObserver=null,handoff=null,handoffKey='';
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
@@ -65,9 +65,14 @@
       }
       if(!closest)return null;
       const r=closest.rect;
-      const travel=innerHeight+Math.min(r.height,innerHeight*.9);
-      const p=clamp((innerHeight*.87-r.top)/Math.max(1,travel));
-      return {...closest,progress:p};
+      // R2022: In long chapters the prior scrub saturated at 1 while the
+      // section was still on screen. release=1 then made the panel invisible.
+      // Hold the physically flattened membrane through the reading interval
+      // and only release once the section actually exits the viewport.
+      const entering=clamp((innerHeight*.88-r.top)/Math.max(1,innerHeight*1.15));
+      const exiting=clamp((innerHeight*.25-r.bottom)/Math.max(1,innerHeight*.2));
+      const p=Math.min(.78,entering)+.22*exiting;
+      return {...closest,progress:clamp(p)};
     }
   }
   class PerformanceManager {
@@ -356,6 +361,44 @@ void main(){
       gl.deleteVertexArray(this.vao);gl.deleteProgram(this.program);
     }
   }
+
+  const sourceNames={
+    'left-shelf':['BAL ARCHÍVUMPOLC','LEFT ARCHIVE SHELF'],
+    rotor:['FORGÓ ADATÁLLVÁNY','ROTATING DATA RACK'],
+    'bottom-drawer':['MECHANIKUS REKESZ','MECHANICAL DRAWER'],
+    'right-cell':['HOLOGRAFIKUS CELLA','HOLOGRAPHIC CELL'],
+    'sealed-vault':['ZÁRT ARCHÍVUM','SEALED ARCHIVE'],
+    'vertical-crystal':['KRISTÁLYTÁROLÓ','CRYSTAL STORAGE'],
+    'inner-chamber':['MAG BELSŐ MAG','MAG INNER CORE'],
+    assembled:['ÖKOSZISZTÉMA','ECOSYSTEM']
+  };
+  function createHandoff(){
+    if(handoff?.isConnected)return;
+    handoff=document.createElement('div');
+    handoff.className='fx-archive-telemetry-r2022';
+    handoff.setAttribute('aria-hidden','true');
+    handoff.dataset.active='false';
+    // Presentation metadata only. Native HTML owns all readable content
+    // and actions; this HUD cannot intercept clicks or keyboard focus.
+    handoff.innerHTML='<span class="fx-archive-telemetry-r2022__eyebrow">MAG // ARCHIVE INTERFACE</span><strong class="fx-archive-telemetry-r2022__title"></strong><span class="fx-archive-telemetry-r2022__source"></span><span class="fx-archive-telemetry-r2022__foot">FORMATX // LIVE SYSTEM</span>';
+    document.body.appendChild(handoff);
+  }
+  function updateHandoff(){
+    if(!handoff?.isConnected)return;
+    const showing=Boolean(current&&archiveActive&&!reduced.matches);
+    handoff.dataset.active=showing?'true':'false';
+    if(!showing){handoffKey='';return;}
+    const english=root.lang==='en',scene=current.s;
+    const key=scene.key+':'+(english?'en':'hu');
+    if(handoffKey!==key){
+      handoffKey=key;
+      handoff.querySelector('.fx-archive-telemetry-r2022__title').textContent=english?scene.en:scene.hu;
+      handoff.querySelector('.fx-archive-telemetry-r2022__source').textContent=(sourceNames[scene.source]||[scene.source,scene.source])[english?1:0];
+      handoff.dataset.scene=scene.key;
+    }
+    root.dataset.fxArchiveVisibleHandoff='active';
+  }
+
   function setPanelState(){
     for(const s of scenes){
       if(current&&s===current.s){
@@ -389,6 +432,7 @@ void main(){
     if(inArchive&&stage)ResponsiveExperience.dock();
     else if(archiveActive)ResponsiveExperience.restore();
     setPanelState();
+    updateHandoff();
     if(current){
       const nextIndex=current.s.index;
       root.dataset.fxArchiveCurrent=current.s.key;
@@ -405,7 +449,16 @@ void main(){
   }
   function invalidate(){
     if(!disposed&&!document.hidden&&!reduced.matches){
-      try{selectLiveChapter();}catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
+      try{
+        // R2022: synchronize the visible archive layer and chapter identity
+        // with the native scroll event, not a deferred GPU RAF. A slow WebGL
+        // frame must never strand a previous panel/HUD over the next chapter.
+        const active=selectLiveChapter();
+        if(active&&stage)ResponsiveExperience.dock();
+        else if(archiveActive)ResponsiveExperience.restore();
+        setPanelState();
+        updateHandoff();
+      }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
       try{update();}catch(e){raf=0;root.dataset.fxArchiveError=String(e?.message||e);console.error('FormatX archive update error',e);}
@@ -438,6 +491,7 @@ void main(){
     if(raf)cancelAnimationFrame(raf);
     sceneObserver?.disconnect();
     sceneObserver=null;
+    handoff?.remove();handoff=null;
     ResponsiveExperience.restore();
     detach?.();detach=null;drawPass=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
@@ -447,6 +501,7 @@ void main(){
     if(reduced.matches){root.dataset.fxArchiveExperience='reduced-html';return;}
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
+    createHandoff();
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();

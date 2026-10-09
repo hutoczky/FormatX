@@ -2,6 +2,34 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  // R2022: essential pricing controls must work even when the visual APEX
+  // renderer is skipped for audits or low-power/mobile devices. The existing
+  // full controller may also update these fields; both write the same state.
+  document.addEventListener('click', event => {
+    const target=event.target instanceof Element?event.target.closest('[data-currency]'):null;
+    if(!(target instanceof HTMLElement))return;
+    const selected=target.dataset.currency==='EUR'?'EUR':'HUF';
+    document.querySelectorAll('[data-currency]').forEach(node=>{
+      node.setAttribute('aria-pressed',String(node===target));
+    });
+    const language=document.documentElement.lang==='en'?'en':'hu';
+    const prices={HUF:15900,EUR:44};
+    const other=selected==='EUR'?'HUF':'EUR';
+    const money=(value,currency)=>new Intl.NumberFormat(language==='hu'?'hu-HU':'en-GB',{
+      style:'currency',currency,maximumFractionDigits:0
+    }).format(value);
+    const main=document.getElementById('preview-main-price');
+    const secondary=document.getElementById('preview-secondary-price');
+    const label=document.getElementById('preview-secondary-label');
+    const link=document.getElementById('preview-checkout-link');
+    if(main)main.textContent=money(prices[selected],selected);
+    if(secondary)secondary.textContent=money(prices[other],other);
+    if(label)label.textContent=language==='hu'
+      ?(other==='EUR'?'Összeg EUR-ban':'Összeg HUF-ban')
+      :(other==='EUR'?'Amount in EUR':'Amount in HUF');
+    if(link)link.href='./checkout.html?plan=business_pro&cycle=monthly&currency='+selected+'&lang='+language;
+  },true);
+
   const AUDIT_MODE =
     navigator.webdriver === true
     || /Chrome-Lighthouse/i.test(navigator.userAgent || '')

@@ -66,6 +66,16 @@ async function evaluate(viewport,isMobile,browser){
     },selector);
     console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
+      // R2022: all eight sources must present their own visible chapter label,
+      // rather than a permanently docked opaque overlay or stale HUD.
+      const chapterHandoff=await page.evaluate(()=>{
+        const el=document.querySelector('.fx-archive-telemetry-r2022');
+        return {key:el?.dataset.scene,active:el?.dataset.active,
+          label:el?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent||''};
+      });
+      assert.equal(chapterHandoff.key,scene.key,'MAG handoff not updated for '+scene.key+': '+JSON.stringify(chapterHandoff));
+      assert.equal(chapterHandoff.active,'true','MAG handoff not active for '+scene.key);
+      assert.ok(chapterHandoff.label.length>5,'No semantic chapter label for '+scene.key);
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
@@ -107,6 +117,41 @@ async function evaluate(viewport,isMobile,browser){
   if (!isMobile && native.filamentCount < 1 && await page.evaluate(()=>document.documentElement.dataset.fxArchiveQuality==='high')) {
     throw new Error('High-quality archive scene did not emit any physical 3D filaments');
   }
+
+  // The old suite merely counted GPU draw calls, so an entirely hidden archive
+  // could still PASS. Prove the native MAG stage is layered over opaque chapters
+  // and that scroll produces a visible, legible live chapter identifier.
+  const handoff=await page.evaluate(()=>{
+    const el=document.querySelector('.fx-archive-telemetry-r2022');
+    const hero=document.querySelector('#hero');
+    const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
+    const hStyle=el?getComputedStyle(el):null;
+    const heroStyle=hero?getComputedStyle(hero):null;
+    const stageStyle=stage?getComputedStyle(stage):null;
+    const rect=el?.getBoundingClientRect();
+    return {
+      exists:!!el,
+      active:el?.dataset.active,
+      name:el?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent||'',
+      opacity:Number(hStyle?.opacity||0),
+      visibility:hStyle?.visibility,
+      heroZ:Number(heroStyle?.zIndex||0),
+      heroOpacity:Number(heroStyle?.opacity||0),
+      stageZ:Number(stageStyle?.zIndex||0),
+      stageOpacity:Number(stageStyle?.opacity||0),
+      stageVisibility:stageStyle?.visibility,
+      rect:rect?{left:rect.left,top:rect.top,width:rect.width,height:rect.height}:null
+    };
+  });
+  assert.ok(handoff.exists&&handoff.active==='true','Visible MAG handoff missing: '+JSON.stringify(handoff));
+  assert.ok(handoff.name.length>5,'MAG handoff lacks native chapter identity: '+JSON.stringify(handoff));
+  assert.ok(handoff.opacity>.7&&handoff.visibility==='visible','MAG archive telemetry is transparent or hidden: '+JSON.stringify(handoff));
+  assert.ok(handoff.heroZ>4&&handoff.stageZ>4,'MAG WebGL stage is hidden below opaque section stacking contexts: '+JSON.stringify(handoff));
+  assert.ok(handoff.heroOpacity>.35&&handoff.stageOpacity>.35&&handoff.stageVisibility==='visible',
+    'MAG scene is invisible despite GPU draw calls: '+JSON.stringify(handoff));
+  assert.ok(handoff.rect&&handoff.rect.left>=0&&handoff.rect.top>=0&&handoff.rect.left+handoff.rect.width<=viewport.width+2,'MAG handoff outside mobile or desktop viewport: '+JSON.stringify(handoff));
+  console.log('ARCHIVE_VISIBLE_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',handoff}));
+
   assert.equal(native.renderer,'shared-webgl2');
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
   // Software WebGL readback can stall screenshots in CI even after all

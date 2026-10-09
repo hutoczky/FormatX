@@ -89,9 +89,13 @@
     if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
   }, { passive: true });
 
-  // Background tabs may never publish an FCP entry. Activating while hidden is
-  // safe because no user-visible first paint can be displaced.
+  // R2022 visible-tab fail-open: certain clients report no buffered FCP and
+  // lose the PerformanceObserver event. Without a watchdog every cinematic
+  // stylesheet remains at media=print indefinitely and the MAG appears missing.
+  // Keep the critical first paint asynchronous, then guarantee activation.
   fallback = setTimeout(() => {
-    if (!activated && document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
-  }, 8000);
+    if (activated) return;
+    if (document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
+    else activateAfterCommittedFrame('visible-tab-fcp-watchdog');
+  }, 3500);
 }());
