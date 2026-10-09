@@ -777,3 +777,37 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
   }
 }
 /* production-r2030-mag-only-archive-physical-chapter-viewport */
+
+/* R2030 stable dramaturgical scroll beats. These sizes are invariant before
+   and after handoff, eliminating native scroll height changes and the lost
+   infinity-loop landing. All sections remain their original DOM/IDs. */
+@media (prefers-reduced-motion:no-preference){
+  html:root:root:root:root[data-fx-archive-cinema-prepared]
+  body.living-architecture main#main-content >
+  :is(section.scene,section.fx-category-deck--standalone)[data-fx-cinema-anchor-height]{
+    box-sizing:border-box!important;
+    height:165dvh!important;
+    min-height:165dvh!important;
+    max-height:165dvh!important;
+    overflow:visible!important;
+    contain:none!important;
+  }
+  html:root:root:root:root[data-fx-archive-cinema-prepared]
+  body.living-architecture main#main-content > .fx-mag-ai-scroll-station-r2030{
+    position:relative!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    height:165dvh!important;
+    min-height:165dvh!important;
+    max-height:165dvh!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    overflow:hidden!important;
+    contain:layout style!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+  }
+}
+/* R2030 scroll geometry: eight distinct, deterministic handoff beats. */
