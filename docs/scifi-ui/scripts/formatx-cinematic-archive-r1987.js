@@ -29,6 +29,7 @@
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
+  let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
@@ -920,11 +921,19 @@ void main(){
     if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
-    if(detach)return;
+    // `formatx:real3dready` may fire again for the same canonical MAG
+    // renderer. Never register a duplicate render pass or orphan GPU buffers.
+    if(detach&&registeredCanvas===api.canvas&&registeredApi===api)return;
+    if(detach){
+      detach();
+      detach=null;drawPass=null;
+      registeredCanvas=null;registeredApi=null;
+    }
     stage=api.stage;heroHost=document.querySelector('#hero .hero-space');
     try{
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
       api.canvas.addEventListener('webglcontextlost',()=>{
+        if(registeredCanvas!==api.canvas)return;
         if(archiveActive)ResponsiveExperience.restore();
         root.dataset.fxArchiveExperience='context-lost';
         root.dataset.fxArchiveCinema='home';
@@ -939,6 +948,8 @@ void main(){
       drawPass=frame=>nativeScene.render(frame);
       drawPass.dispose=()=>nativeScene.dispose();
       detach=api.registerScenePass(drawPass);
+      registeredCanvas=api.canvas;
+      registeredApi=api;
       root.dataset.fxArchiveExperience='ready';
       root.dataset.fxArchiveQuality=quality;
       // Only after one real shared WebGL2 renderer exists may the original
@@ -997,6 +1008,7 @@ void main(){
     }
     ResponsiveExperience.restore();
     detach?.();detach=null;drawPass=null;
+    registeredCanvas=null;registeredApi=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
     root.dataset.fxArchiveExperience='disposed';
   }
@@ -1017,7 +1029,7 @@ void main(){
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
-    addEventListener('formatx:real3dready',()=>{detach=null;connect();},{passive:true});
+    addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
