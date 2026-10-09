@@ -312,12 +312,7 @@
       '</div>',
       '<div class="fx-loop-reference-visual" aria-hidden="true"><span class="fx-loop-reference-core-fallback"></span><img class="fx-loop-reference-image" alt="" decoding="async"></div>',
       '<div class="fx-loop-reference-heading" data-hu="A MŰKÖDÉS MEGISMERÉSE" data-en="DISCOVER HOW IT WORKS">A MŰKÖDÉS MEGISMERÉSE</div>',
-      '<article class="fx-loop-reference-proof">',
-      '<span>PUBLIC PROOF LAYER</span>',
-      '<h2 data-hu="Bizonyíték a látvány mögött." data-en="Proof behind the visual.">Bizonyíték a látvány mögött.</h2>',
-      '<p data-hu="A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető." data-en="FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.">A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.</p>',
-      '<i>Live OS</i>',
-      '</article>'
+      '<div class="fx-loop-reference-spacer-r2033" aria-hidden="true"></div>'
     ].join('');
     setBilingualText(section);
     return section;
