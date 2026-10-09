@@ -28,6 +28,22 @@ async function evaluate(viewport,isMobile,browser){
     contextCount:document.documentElement.dataset.fxCoreContexts
   }));
   assert.equal(init.status,'ready',JSON.stringify(init));
+  // The renderer can re-announce readiness after a restored tab or a
+  // responsive layout change. This MUST NOT allocate duplicate WebGL passes.
+  const rendererProbe=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const before=root.dataset.fxArchiveExperience;
+    const canvas=window.FormatXLivingCore?.canvas;
+    const refBefore=window.FormatXArchiveExperience?.version;
+    window.dispatchEvent(new CustomEvent('formatx:real3dready'));
+    window.dispatchEvent(new CustomEvent('formatx:real3dready'));
+    return {before,after:root.dataset.fxArchiveExperience,
+      stable:canvas===window.FormatXLivingCore?.canvas,
+      version:refBefore};
+  });
+  assert.ok(rendererProbe.stable&&rendererProbe.after==='ready',
+    'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
+  
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
