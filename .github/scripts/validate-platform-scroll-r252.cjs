@@ -108,8 +108,28 @@ async function verifyHeartInteraction(page, label) {
   const hit = page.locator('#hero .fx-mag-heart-hit-r252').first();
   assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
   await hit.scrollIntoViewIfNeeded();
+  const clickDiagnostics=await page.evaluate(()=>{
+    const button=document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const rect=button?.getBoundingClientRect();
+    const center=rect?{x:rect.x+rect.width*.5,y:rect.y+rect.height*.5}:null;
+    return {center,
+      before:document.documentElement.dataset.fxCoreInteractionMode||'none',
+      clip:rect?JSON.stringify({x:rect.x,y:rect.y,w:rect.width,h:rect.height}):null,
+      target:center?document.elementFromPoint(center.x,center.y)?.outerHTML?.slice(0,210):null,
+      delegated:document.documentElement.dataset.fxHeartDelegatedR1723,
+      hitEvent:button?.dataset.fxHeartBound,
+      archive:document.documentElement.dataset.fxArchiveExperience,
+      active:document.documentElement.dataset.fxArchiveCinema};
+  });
   await hit.click();
-
+  const clickAfter=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.fxCoreInteractionMode||'none',
+    target:document.documentElement.dataset.fxCoreInteractionTarget||'none',
+    node:document.activeElement?.outerHTML?.slice(0,230)||null,
+    menu:document.documentElement.className,
+    dialog:document.querySelector('.fx-organism-console:not([hidden])')?.id||null
+  }));
+  console.log('HEART_DESKTOP_CLICK_DIAGNOSTICS',JSON.stringify({label,clickDiagnostics,clickAfter}));
   await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
   // The current ASK/dialog owner can clear the legacy R252 target hint after
   // accepting the click; the semantic activation mode is the durable state.
