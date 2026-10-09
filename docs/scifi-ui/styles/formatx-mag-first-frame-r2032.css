@@ -34,3 +34,12 @@
 html:has([data-fx-award-proof]) #hero .fx-reference-proof,
 html:has([data-fx-award-proof]) #hero .fx-reference-heading,
 html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
+
+/* R2040: a functional HTML fallback does not weaken keyboard focus. The
+   old hero CTA is live in that mode and must expose the same visible 2px
+   design-system indicator as the MAG-delivered native controls. */
+html body.living-architecture #hero .hero-actions .button:focus,
+html body.living-architecture #hero .hero-actions .button:focus-visible {
+  outline:2px solid var(--fx-focus,#9ef7ff)!important;
+  outline-offset:3px!important;
+}
