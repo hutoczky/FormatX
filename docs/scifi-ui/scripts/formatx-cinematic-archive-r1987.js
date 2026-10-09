@@ -230,6 +230,15 @@
     // coordinates instead of resetting those ancestors (doing so breaks
     // the living MAG renderer and the native pricing/menu consoles).
     const w=innerWidth,h=innerHeight,phone=mobile();
+    // On portrait devices the folio has a strict fixed top/bottom lane in CSS.
+    // Compensating viewport offsets on every scroll caused cumulative Y drift
+    // (-394px) and the genuine native paper overlapped the MAG stage.
+    // Never apply legacy transform-ancestor compensation on a phone.
+    if(phone){
+      panel.style.removeProperty('--fx-cinema-screen-x');
+      panel.style.removeProperty('--fx-cinema-screen-y');
+      return;
+    }
     const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
     const x=phone?w*.04:w-w*.027-desiredWidth;
     const y=phone?h*.48:h*.11;
