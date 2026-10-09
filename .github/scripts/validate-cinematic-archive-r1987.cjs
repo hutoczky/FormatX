@@ -51,6 +51,20 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
     'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
   assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
+  const proofContract=await page.evaluate(()=>{
+    const all=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
+    const loopCopy=document.querySelectorAll('.fx-loop-reference-proof').length;
+    const oldHero=document.querySelector('#hero .fx-reference-proof');
+    const oldVisible=oldHero?getComputedStyle(oldHero).display!=='none'&&oldHero.getClientRects().length>0:false;
+    const canonical=all[0];
+    const inFinal=canonical?.closest('[data-fx-archive-scene="final"] .fx-archive-cinema-folio-r2030');
+    return {count:all.length,loopCopy,oldVisible,inFinal:!!inFinal,links:canonical?.querySelectorAll('a[href]').length||0};
+  });
+  assert.equal(proofContract.count,1,'Expected one canonical visual-proof block: '+JSON.stringify(proofContract));
+  assert.equal(proofContract.loopCopy,0,'Infinite loop duplicates visible proof content: '+JSON.stringify(proofContract));
+  assert.ok(!proofContract.oldVisible,'Duplicate legacy hero proof block still visible: '+JSON.stringify(proofContract));
+  assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
+
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   let passed=0;
   const coverage=[];
@@ -247,7 +261,25 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_VISIBLE_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',handoff}));
 
   assert.equal(native.renderer,'shared-webgl2');
-  assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
+  // Existing organism technical panels remain genuine working UI; opening
+  // pricing must keep the same MAG renderer visible behind its glass console.
+  await page.evaluate(()=>window.scrollTo({top:document.querySelector('#pricing')?.offsetTop||0,behavior:'instant'}));
+  await page.waitForTimeout(350);
+  const pricingTrigger=page.locator('[data-organism-open="pricing"]').first();
+  if(await pricingTrigger.count()){
+    await pricingTrigger.evaluate(el=>el.click());
+    await page.waitForFunction(()=>document.body.classList.contains('fx-organism-panel-open'),null,{timeout:6000});
+    const technical=await page.evaluate(()=>{
+      const modal=document.querySelector('#fx-organism-console');
+      const panel=modal?.querySelector('[data-organism-panel="pricing"]');
+      return {on:!!modal&&!modal.hidden,mag:document.documentElement.dataset.fxArchiveCinema,
+        controls:panel?.querySelectorAll('a[href],button,input,select').length||0};
+    });
+    assert.ok(technical.on&&technical.controls>=2&&technical.mag==='active',
+      'Real licensing tech console must open inside MAG environment: '+JSON.stringify(technical));
+    await page.locator('#fx-organism-console [data-organism-close]').first().evaluate(el=>el.click());
+  }
+    assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
   // Software WebGL readback can stall screenshots in CI even after all
   // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
   // for functional testing; report incomplete captures explicitly.
