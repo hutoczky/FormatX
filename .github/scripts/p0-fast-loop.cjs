@@ -207,7 +207,10 @@ function ruleBody(css, selector, startMarker) {
 }
 function propertyValue(body, property) {
   const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = body.match(new RegExp(`(?:^|\\n)\\s*${escaped}\\s*:\\s*([^;!]+?)\\s*!important\\s*;`, 'm'));
+  /* R2066: minified CSS places properties after semicolons rather than newlines.
+     Preserve the exact !important/value equality contract for both original
+     and compact stylesheets; do not weaken visual/CLS assertions. */
+  const match = body.match(new RegExp(`(?:^|;)\\s*${escaped}\\s*:\\s*([^;!]+?)\\s*!important\\s*;`, 'm'));
   assert.ok(match, `missing CSS property ${property}`);
   return match[1].trim().replace(/\\s+/g, ' ');
 }
