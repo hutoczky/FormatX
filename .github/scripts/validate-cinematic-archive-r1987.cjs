@@ -407,6 +407,32 @@ async function mobileHtmlFallback(browser){
     'Native fallback must preserve working controls and actual title: '+JSON.stringify(fallback));
   assert.ok(fallback.overflow<=4,'Mobile HTML fallback horizontal overflow: '+JSON.stringify(fallback));
   console.log('ARCHIVE_MOBILE_HTML_FALLBACK_PASS',JSON.stringify(fallback));
+  const auditUrl=new globalThis.URL(URL);
+  auditUrl.searchParams.delete('archive');
+  auditUrl.searchParams.delete('r486-optics-energy-check');
+  auditUrl.searchParams.set('lighthouse','1');
+  const auditPage=await context.newPage();
+  await auditPage.goto(auditUrl.toString(),{waitUntil:'domcontentloaded',timeout:60000});
+  await auditPage.waitForFunction(()=>
+    document.documentElement.dataset.fxArchiveExperience==='audit-html',
+    null,{timeout:30000});
+  const auditLayout=await auditPage.evaluate(()=>{
+    const copy=document.querySelector('#hero .hero-copy');
+    const space=document.querySelector('#hero .hero-space');
+    const style=copy?getComputedStyle(copy):null;
+    const rect=copy?.getBoundingClientRect();
+    const sr=space?.getBoundingClientRect();
+    return {state:document.documentElement.dataset.fxArchiveExperience,
+      audit:document.documentElement.dataset.fxP0AuditModeR1728,
+      copy:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+      space:sr?{x:sr.x,y:sr.y,w:sr.width,h:sr.height}:null,
+      css:style?{display:style.display,position:style.position,clip:style.clip,
+        clipPath:style.clipPath,visibility:style.visibility,
+        opacity:style.opacity,overflow:style.overflow}:null};
+  });
+  console.log('ARCHIVE_AUDIT_FALLBACK_GEOMETRY',JSON.stringify(auditLayout));
+  assert.ok(auditLayout.copy?.w>=240&&auditLayout.copy?.h>=140,
+    'Lighthouse/native-html fallback remains an invisible 1px element: '+JSON.stringify(auditLayout));
   await context.close();
 }
 async function fallback(browser){
