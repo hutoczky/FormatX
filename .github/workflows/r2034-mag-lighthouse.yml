@@ -9,6 +9,7 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/r2034-mag-lighthouse.yml'
+      - '.github/scripts/report-lighthouse-opportunities.cjs'
   pull_request:
     branches: [master]
     paths:
@@ -17,6 +18,7 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/r2034-mag-lighthouse.yml'
+      - '.github/scripts/report-lighthouse-opportunities.cjs'
   workflow_dispatch:
 
 permissions:
