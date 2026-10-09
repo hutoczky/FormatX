@@ -449,7 +449,16 @@ void main(){
   }
   function invalidate(){
     if(!disposed&&!document.hidden&&!reduced.matches){
-      try{selectLiveChapter();}catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
+      try{
+        // R2022: synchronize the visible archive layer and chapter identity
+        // with the native scroll event, not a deferred GPU RAF. A slow WebGL
+        // frame must never strand a previous panel/HUD over the next chapter.
+        const active=selectLiveChapter();
+        if(active&&stage)ResponsiveExperience.dock();
+        else if(archiveActive)ResponsiveExperience.restore();
+        setPanelState();
+        updateHandoff();
+      }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
       try{update();}catch(e){raf=0;root.dataset.fxArchiveError=String(e?.message||e);console.error('FormatX archive update error',e);}
