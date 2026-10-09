@@ -108,6 +108,13 @@ async function verifyHeartInteraction(page, label) {
   const hit = page.locator('#hero .fx-mag-heart-hit-r252').first();
   assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
   await hit.scrollIntoViewIfNeeded();
+  // Require a FRESH semantic activation from a real pointer click. The voice
+  // or ASK dialog may take ownership and clear the old transient R252 mode
+  // immediately after acceptance; the activation marker remains authoritative.
+  await page.evaluate(()=>{
+    delete document.documentElement.dataset.fxHeartLastActivation;
+    delete document.documentElement.dataset.fxHeartLastCapture;
+  });
   const clickDiagnostics=await page.evaluate(()=>{
     const button=document.querySelector('#hero .fx-mag-heart-hit-r252');
     const rect=button?.getBoundingClientRect();
@@ -130,7 +137,10 @@ async function verifyHeartInteraction(page, label) {
     dialog:document.querySelector('.fx-organism-console:not([hidden])')?.id||null
   }));
   console.log('HEART_DESKTOP_CLICK_DIAGNOSTICS',JSON.stringify({label,clickDiagnostics,clickAfter}));
-  await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
+  await page.waitForFunction(() => {
+    const r=document.documentElement.dataset;
+    return Boolean(r.fxHeartLastActivation)||r.fxCoreInteractionMode==='active-r252';
+  }, null, { timeout: 5000 });
   // The current ASK/dialog owner can clear the legacy R252 target hint after
   // accepting the click; the semantic activation mode is the durable state.
   // The dedicated MAG archive suite verifies actual interactive HTML controls.
@@ -138,13 +148,16 @@ async function verifyHeartInteraction(page, label) {
 
   const interaction = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxCoreInteractionMode || '',
+    source: document.documentElement.dataset.fxHeartLastActivation || '',
+    capture: document.documentElement.dataset.fxHeartLastCapture || '',
     target: document.documentElement.dataset.fxCoreInteractionTarget || '',
     thoughtOpen: (() => {
       const bubble = document.querySelector('.fx-organism-thought');
       return Boolean(bubble && bubble.hidden === false);
     })()
   }));
-  assert(interaction.mode === 'active-r252', `${label} MAG did not activate core interaction: ${JSON.stringify(interaction)}`);
+  assert(interaction.mode === 'active-r252'||/^(pointer|core|keyboard)$/.test(interaction.source),
+    `${label} MAG did not accept a semantic click: ${JSON.stringify(interaction)}`);
   if(interaction.target){
     assert(/organism-voice|ask-control|thought-trigger|native-core-pulse/.test(interaction.target),
       `${label} MAG interaction target is unknown: ${JSON.stringify(interaction)}`);
