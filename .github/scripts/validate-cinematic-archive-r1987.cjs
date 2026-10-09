@@ -235,7 +235,25 @@ async function evaluate(viewport,isMobile,browser){
     magDomCanonical:!!document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage'),
     canvasRect:(()=>{const r=document.querySelector('#hero .fx-crystal-organism-r326-stage')?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})()
   }));
-  assert.ok(native.frames>0,'Native WebGL archive never drew');
+  // GPU pressure may switch the real archive renderer to LOW quality. MAG
+  // must still physically manipulate the papyrus via one genuine 3D field
+  // rather than dropping all strands and only fading HTML content.
+  await page.evaluate(()=>window.FormatXArchiveExperience.setQuality('low'));
+  await page.waitForTimeout(260);
+  await page.evaluate(()=>window.FormatXLivingCore?.requestRender?.(2));
+  await page.waitForTimeout(260);
+  const lowLod=await page.evaluate(()=>({
+    quality:document.documentElement.dataset.fxArchiveQuality,
+    active:window.FormatXArchiveExperience.state.active,
+    scene:window.FormatXArchiveExperience.state.scene,
+    filaments:Number(document.documentElement.dataset.fxArchiveFilamentCount||0)
+  }));
+  assert.equal(lowLod.quality,'low','Failed to activate reduced 3D magnetic field quality: '+JSON.stringify(lowLod));
+  if(lowLod.active)assert.ok(lowLod.filaments>=1,
+    'Low GPU quality must retain a physical MAG-to-papyrus energy filament: '+JSON.stringify(lowLod));
+  await page.evaluate(()=>window.FormatXArchiveExperience.setQuality('high'));
+  console.log('ARCHIVE_LOW_LOD_FILAMENT_PASS',JSON.stringify(lowLod));
+    assert.ok(native.frames>0,'Native WebGL archive never drew');
   assert.ok(native.magDomCanonical,'Native MAG must remain inside the original hero DOM');
   assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
   if(isMobile){
@@ -323,6 +341,43 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function firstPaintTouch(browser){
+  const ctx=await browser.newContext({viewport:{width:320,height:568},
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'});
+  const page=await ctx.newPage();
+  // Simulate a stalled heavy optical sheet. The 320px header must still
+  // appear premium and fully interactive from the small critical stylesheet.
+  await page.route('**/formatx-p0-first-paint-r490.css*',route=>route.abort());
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForTimeout(900);
+  const proof=await page.evaluate(()=>{
+    const brand=document.querySelector('header.topbar > a.brand');
+    const rect=brand?.getBoundingClientRect();
+    const links=[...document.querySelectorAll('link[href*="formatx-p0-first-paint-r490.css"]')];
+    const sources=links.map(l=>({media:l.media,loading:l.sheet!==null,
+      deferred:l.dataset.fxR487DeferredStyle||null}));
+    const e=brand?getComputedStyle(brand):null;
+    const menu=document.querySelector('#menu-toggle');
+    const ms=menu?getComputedStyle(menu):null;
+    return {brand:rect?{width:rect.width,height:rect.height}:null,
+      pointerEvents:e?.pointerEvents,
+      brandColor:e?.color,
+      menuHasPremiumSkin:!!ms&&/gradient/.test(ms.backgroundImage)&&Number.parseFloat(ms.borderRadius)>8,
+      p0:sources,
+      firstPaintMs:performance.getEntriesByName('first-contentful-paint','paint')[0]?.startTime||0,
+      cssReason:document.documentElement.dataset.fxDeferredCssReasonR526||null};
+  });
+  assert.ok(proof.brand&&proof.brand.width>=44&&proof.brand.height>=44,
+    '320px phone must have actual >=44x44 accessible brand target: '+JSON.stringify(proof));
+  assert.ok(proof.pointerEvents!=='none',
+    'Brand must stay clickable inside MAG cinematic mode: '+JSON.stringify(proof));
+  assert.ok(proof.menuHasPremiumSkin&&proof.brandColor==='rgb(245, 251, 255)',
+    'Prepaint menu and brand must be premium without the deferred optical CSS: '+JSON.stringify(proof));
+  assert.ok(proof.p0.some(x=>x.deferred=== 'true'),
+    'Phone P0 optical enhancement must be deferred after FCP: '+JSON.stringify(proof));
+  console.log('ARCHIVE_PHONE_TOUCH_FCP_PASS',JSON.stringify(proof));
+  await ctx.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -381,6 +436,7 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await firstPaintTouch(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
