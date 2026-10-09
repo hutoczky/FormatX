@@ -884,3 +884,14 @@ main#main-content > .fx-mag-ai-scroll-station-r2030{
    pointer-events:auto!important;
  }
 }
+
+/* R2032 portrait folio remains screen-fixed; desktop-only viewport compensation
+   must not pull the original HTML module up over the MAG. */
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   translate:none!important;
+   transform:perspective(900px) rotateX(calc(var(--fx-cinema-orbit,0) * 7deg))!important;
+ }
+}
