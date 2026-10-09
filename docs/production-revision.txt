@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2033-canonical-proof-singleton
-base_master=adf6d6bf2e86d2cc36e9b1763a54eb922e6eb8fc
-purpose=Fix duplicate public evidence block without waiting for the separate unfinished MAG cinematic archive refactor; reuse server's existing verified proof links.
-validation=Canonical proof appears once, legacy hero proof hidden only if canonical exists; inert desktop mirror retains layout but never duplicates text visually; strict Cloudflare production revision check required.
-limits=MAG R2033 cinematics, native paper transfer and award-ready performance remain in separate PR 487.
+token=20261009-r2035-cinematic-mag-master-integrated
+base_master=e91ad6123535d335ca4801bfde739e631430e222
+purpose=Integrate MAG-only cinematic archive, actual HTML papyrus transfers, film lights, responsive positioning and original working technical consoles onto verified canonical single-proof master.
+validation=Strict eight-scene desktop/mobile WebGL + HTML, accessibility fallback, 320-1920px information visibility, hero interaction, platform-scroll, original CTA, production Worker and exact two-domain smoke required before deploy.
+limits=Igloo.inc visual superiority, real hardware 60fps, full physical PBR and 95/100 Lighthouse not yet verified.
