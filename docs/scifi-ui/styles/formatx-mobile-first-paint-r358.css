@@ -1003,3 +1003,28 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+/* R2037 | Real 44px navigation hit area, measured against strict 320px
+   production viewport. Do not enlarge the glyph/icon: only the existing
+   keyboard- and touch-accessible anchor's interactive surface. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root body.living-architecture
+  header.topbar > a.brand {
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    box-sizing:border-box!important;
+    min-height:46px!important;
+    height:46px!important;
+    max-height:none!important;
+    padding-block:6px!important;
+    padding-inline:0!important;
+    touch-action:manipulation!important;
+    pointer-events:auto!important;
+  }
+  html:root:root:root:root:root:root:root body.living-architecture
+  header.topbar > a.brand > img{
+    flex-shrink:0!important;
+  }
+}
+/* production-r2037-small-screen-real-brand-touch-target */
