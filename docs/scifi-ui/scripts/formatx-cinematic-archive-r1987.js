@@ -129,18 +129,24 @@
   }
   function keepExistingCinemaControls(){
     if(cinemaControlHome)return;
-    const rail=document.querySelector('#hero .fx-reference-rail');
+    const controls=document.querySelector('#hero .fx-reference-controls-r204');
     const hero=document.getElementById('hero');
-    if(!rail||!hero||!rail.parentNode)return;
-    cinemaControlHome={node:rail,parent:rail.parentNode,next:rail.nextSibling};
-    // Same DOM button instances and event listeners, never clones.
-    hero.appendChild(rail);
-    rail.classList.add('fx-cinema-controls-r2032');
+    if(!(controls instanceof HTMLElement)||!hero||!controls.parentNode)return;
+    // The original SOUND and ASK controls belong together. The earlier move
+    // split off ASK while SOUND stayed behind the 3D/archive top layer.
+    // Keep precisely the same source DOM nodes, handlers and accessibility.
+    if(typeof controls.showPopover!=='function')return;
+    cinemaControlHome={node:controls,parent:controls.parentNode,next:controls.nextSibling};
+    controls.setAttribute('popover','manual');
+    controls.classList.add('fx-cinema-controls-r2039');
+    hero.appendChild(controls);
   }
   function restoreExistingCinemaControls(){
     if(!cinemaControlHome)return;
     const {node,parent,next}=cinemaControlHome;
-    node.classList.remove('fx-cinema-controls-r2032');
+    if(node.matches(':popover-open'))try{node.hidePopover()}catch(_){}
+    node.removeAttribute('popover');
+    node.classList.remove('fx-cinema-controls-r2039');
     if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
     cinemaControlHome=null;
   }
@@ -365,6 +371,24 @@
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
           positionCinemaFolio(panel);
+        }
+      }
+    }
+    // Keep the original semantic MAG controls in their own narrow top-layer
+    // HUD at the MAG side. This must be ordered AFTER the paper, otherwise
+    // native top-layer hit-testing prevents SOUND/ASK clicks on desktop.
+    const controls=cinemaControlHome?.node;
+    if(controls?.hasAttribute('popover')){
+      const uiBlocked=document.body.classList.contains('fx-organism-panel-open')
+        ||root.classList.contains('fx-organism-menu-open')
+        ||Boolean(document.querySelector('#main-nav.open,.fx-mini-mag-open-r459'));
+      const shouldControls=enabled&&!uiBlocked;
+      if(!shouldControls&&controls.matches(':popover-open')){
+        try{controls.hidePopover()}catch(_){}
+      }else if(shouldControls&&(key!==lastCinemaKey||!controls.matches(':popover-open'))){
+        if(controls.matches(':popover-open'))try{controls.hidePopover()}catch(_){}
+        try{controls.showPopover()}catch(error){
+          root.dataset.fxArchiveControlsPopoverError=String(error?.message||error).slice(0,90);
         }
       }
     }
