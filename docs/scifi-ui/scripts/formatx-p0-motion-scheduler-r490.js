@@ -25,7 +25,7 @@ root.dataset.fxP0MotionCacheR1723='motion-loader-r1723-canonical-living-organism
 root.dataset.fxP0MotionCacheR1723V2='motion-loader-r1723-physiology-v2';
 root.dataset.fxP0MotionCacheR1724='motion-loader-r1724-living-crystal-organism';
 root.dataset.fxP0MotionCacheR1725='motion-loader-r1725-photoreal-living-biocrystal';
-root.dataset.fxP0MotionCacheR1729='webdriver-validation-runs-real-r326-explicit-lighthouse-static-only';
+root.dataset.fxP0MotionCacheR1729='all-browsers-shared-late-native-webgl-activation';
 root.dataset.fxP0MotionCacheR1749='final-photoreal-mag-intro-material-parity';
 root.dataset.fxP0MotionCacheR1755='photoreal-living-60fps-site-sensory';
 root.dataset.fxP0MotionCacheR1775='photoreal-intro-core-physical-materials';
@@ -45,12 +45,9 @@ root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
 const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1950-desktop-edge-aa';
-const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
-const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
 const AUTO_DELAY_MS=5500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
-if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
 let idleId=0;
 let timer=0;
@@ -92,10 +89,6 @@ function start(reason){
 
 function runLateAuto(){
   if(started)return;
-  if(AUDIT){
-    root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
-    return;
-  }
   if(document.visibilityState!=='visible'){
     root.dataset.fxP0MotionSchedulerR490='waiting-visible-r493';
     timer=setTimeout(runLateAuto,2000);
@@ -129,10 +122,6 @@ function magBirthActive(){
 }
 
 function armStartup(){
-  if(AUDIT){
-    root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
-    return;
-  }
   if(magBirthActive()){
     root.dataset.fxP0MotionSchedulerR490='mag-birth-priority-r605';
     requestAnimationFrame(()=>start('mag-birth-r605'));
