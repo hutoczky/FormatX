@@ -356,9 +356,13 @@ void main(){
     for(const s of scenes){
       if(current&&s===current.s){
         s.node.style.setProperty('--fx-archive-progress',current.progress.toFixed(4));
+        // Tie the semantic HTML glass hand-off to the physical 3D panel's
+        // alignment phase. No scroll capture or text rasterisation is needed.
+        s.node.style.setProperty('--fx-archive-handoff',smooth((current.progress-.42)/.35).toFixed(4));
         s.node.dataset.fxArchiveActive='true';
       }else{
         s.node.style.removeProperty('--fx-archive-progress');
+        s.node.style.removeProperty('--fx-archive-handoff');
         s.node.removeAttribute('data-fx-archive-active');
       }
     }
@@ -445,7 +449,7 @@ void main(){
     sceneObserver=null;
     ResponsiveExperience.restore();
     detach?.();detach=null;drawPass=null;
-    scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
+    scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.style.removeProperty('--fx-archive-handoff');s.node.removeAttribute('data-fx-archive-active');});
     root.dataset.fxArchiveExperience='disposed';
   }
   function init(){
