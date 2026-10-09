@@ -5,34 +5,7 @@
   <!-- The original MAG identity is a meaningful, immediately paintable
        system identifier, not a decorative fake loading card. It only appears
        when the ten-second first-visit birth sequence was intentionally skipped. -->
-  <style data-fx-mag-boot-telemetry-r2039="true">
-    @keyframes fx-mag-first-visible-telemetry-r2039 {
-      0%,66%{opacity:1;visibility:visible}
-      100%{opacity:0;visibility:hidden}
-    }
-    .fx-mag-first-visible-telemetry-r2039{display:none}
-    html[data-fx-intro-prepaint-r1611="skip"] body.living-architecture > .fx-mag-first-visible-telemetry-r2039{
-      display:flex;flex-direction:column;gap:5px;
-      position:fixed;left:50%;top:clamp(132px,24dvh,240px);
-      width:max-content;max-width:calc(100vw - 36px);
-      z-index:165;pointer-events:none;
-      transform:translateX(-50%);
-      text-align:center;font-family:ui-monospace,SFMono-Regular,monospace;
-      color:#dcf5ff;text-shadow:0 0 18px rgba(108,215,247,.32);
-      animation:fx-mag-first-visible-telemetry-r2039 1.45s ease-out both;
-    }
-    .fx-mag-first-visible-telemetry-r2039 strong{
-      font-size:clamp(12px,3.5vw,15px);font-weight:650;letter-spacing:.15em;
-      line-height:1.45;
-    }
-    .fx-mag-first-visible-telemetry-r2039 small{
-      font-size:clamp(8px,2.35vw,10px);font-weight:400;
-      letter-spacing:.17em;color:#87b9cb;
-    }
-    @media(prefers-reduced-motion:reduce){
-      .fx-mag-first-visible-telemetry-r2039{display:none!important}
-    }
-  </style>
+
   <!-- production-r1950-desktop-mag-edge-aa -->
   <!-- production-r1949-award-final-seal -->
   <!-- production-r1948-award-final-combined -->
