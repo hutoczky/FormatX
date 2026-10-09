@@ -147,8 +147,17 @@ async function evaluate(viewport,isMobile,browser){
         const hostRect=visibleHosts[0]?.getBoundingClientRect();
         const old=hosts.filter(h=>h!==visibleHosts[0]).map(h=>getComputedStyle(h).visibility);
         const hasActualInputs=Boolean(panel?.querySelector('a[href],button,input,select,textarea'));
+        const pixel=pr&&pr.width>10&&pr.height>10
+          ?document.elementFromPoint(Math.min(innerWidth-2,Math.max(2,pr.x+pr.width*.58)),
+            Math.min(innerHeight-2,Math.max(2,pr.y+pr.height*.53)))
+          :null;
         return {
           mode:root.dataset.fxArchiveCinema,
+          topLayerCount:document.querySelectorAll('.fx-archive-cinema-folio-r2030:popover-open').length,
+          paperTopLayer:!!panel?.matches(':popover-open'),
+          hitTopLayer:!!pixel&&!!panel?.contains(pixel),
+          hitElement:pixel?.tagName||null,
+          paperOpacity:active?.opacity||null,
           count:visibleHosts.length,
           paperVisible:active?.visibility,
           paperPosition:active?.position,
@@ -180,6 +189,15 @@ async function evaluate(viewport,isMobile,browser){
       assert.equal(cinema.paperPosition,'fixed','Original HTML module is not physically presented in front of visitor');
       assert.equal(cinema.paperPointer,'auto','Interactive original controls are disabled');
       assert.ok(cinema.paperText>70,'Original functional content is not present in MAG folio');
+      // An invisible native card used to pass all eight scene tests because
+      // its computed visibility was 'visible' while it painted BEHIND hero.
+      // Require the same ORIGINAL HTML to actually own a top-layer painted hit
+      // point (rather than a generic telemetry label or blank canvas).
+      assert.equal(cinema.topLayerCount,1,'Precisely one HTML papyrus must occupy the visual top layer: '+JSON.stringify(cinema));
+      assert.ok(cinema.paperTopLayer&&cinema.hitTopLayer,
+        'Original HTML papyrus is not visibly paintable above MAG backdrop: '+JSON.stringify(cinema));
+      assert.ok(cinema.paper.w>=viewport.width*.35&&cinema.paper.h>=viewport.height*.35,
+        'Presenting papyrus has collapsed geometry: '+JSON.stringify(cinema));
       assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
       assert.ok(cinema.mag&&cinema.paper,'Missing two cinematic lanes');
       if(isMobile){
