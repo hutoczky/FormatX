@@ -30,7 +30,7 @@
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
-  let cinemaControlHome=null,finalCtaHome=null;
+  let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
   function setHeroCanvasLaneFront(active){
@@ -84,6 +84,27 @@
       legacyHeroDisplay.clear();
       root.dataset.fxArchiveLegacyHero='restored';
     }
+  }
+  function attachExistingProofBlock(){
+    if(uniqueProofHome)return;
+    const proof=document.querySelector('main#main-content > .fx-award-proof[data-fx-award-proof]');
+    const scene=scenes.find(s=>s.key==='final');
+    if(!proof||!scene?.cinemaPanel)return;
+    uniqueProofHome={node:proof,parent:proof.parentNode,next:proof.nextSibling};
+    const holder=document.createElement('div');
+    holder.className='fx-archive-canonical-proof-r2033';
+    holder.appendChild(proof);
+    scene.cinemaPanel.appendChild(holder);
+    uniqueProofHome.holder=holder;
+    root.dataset.fxArchiveUniqueProof='final-native-folio';
+  }
+  function restoreExistingProofBlock(){
+    if(!uniqueProofHome)return;
+    const {node,parent,next,holder}=uniqueProofHome;
+    if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
+    holder.remove();
+    uniqueProofHome=null;
+    delete root.dataset.fxArchiveUniqueProof;
   }
   function attachExistingFinalCta(){
     if(finalCtaHome)return;
@@ -220,6 +241,7 @@
       cinemaPrepared=true;
       root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
       attachExistingFinalCta();
+      attachExistingProofBlock();
     }
   }
 
@@ -235,6 +257,19 @@
     // (-394px) and the genuine native paper overlapped the MAG stage.
     // Never apply legacy transform-ancestor compensation on a phone.
     if(phone){
+      // CSS fixed positioned descendants can still be captured by transformed
+      // chapter ancestors. Correct their ACTUAL screen box, once per scrub.
+      // Use a bounded, absolute-in-screen translation, not an accumulating
+      // transform offset from a previous scroll chapter.
+      const viewportTop=h*.51;
+      const rect=panel.getBoundingClientRect();
+      const previous=Number(panel.dataset.fxMobileViewportShift)||0;
+      const delta=viewportTop-rect.top;
+      const next=Math.max(-h*3,Math.min(h*3,previous+delta));
+      if(Math.abs(delta)>.75){
+        panel.dataset.fxMobileViewportShift=next.toFixed(2);
+        panel.style.setProperty('translate','0px '+next.toFixed(2)+'px','important');
+      }
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
       return;
@@ -252,7 +287,9 @@
 
   function syncCinema(){
     if(!cinemaPrepared)return;
-    const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
+    // Technical dialogs retain the same living MAG stage; only the native
+    // interactive paper expands into a focused technical instrument.
+    const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches);
     root.dataset.fxArchiveCinema=enabled?'active':'home';
     if(enabled)keepExistingCinemaControls();
     setLegacyHeroHidden(enabled);
@@ -418,10 +455,14 @@
       // The camera lives in ONE archive, so chapter changes must not teleport
       // it. Absolute native document scroll makes the track reversible.
       const distance=scrollY/Math.max(1,innerHeight);
-      const advance=smooth((p-.16)/.69);
-      return [Math.sin(distance*.31)*.125,
-        Math.sin(distance*.19)*.022+mix(-.025,.028,advance),
-        Math.cos(distance*.23)*.042+mix(0,.095,advance)];
+      const approach=smooth((p-.16)/.69);
+      // One continuous world-space dolly/orbit track. Every component depends
+      // on absolute scroll, not discrete chapter indices (no camera teleport).
+      const orbit=Math.sin(distance*.18)*.085+Math.sin(distance*.37)*.026;
+      const dolly=Math.sin(distance*.13)*.11;
+      const lift=Math.sin(distance*.12)*.035;
+      return [orbit,lift+mix(-.025,.027,approach),
+        dolly+mix(-.035,.085,approach)];
     }
   }
   function cubeGeometry(){
@@ -453,7 +494,7 @@
       this.box=this.buffer(cubeGeometry());
       this.panel=this.buffer(panelGeometry(quality==='high'));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -485,7 +526,7 @@ void main(){
       const frag=`#version 300 es
 precision highp float;
 in vec3 vNormal;in vec2 vUv;
-uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber;
+uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
  vec3 N=normalize(vNormal+vec3(.0001));
@@ -512,12 +553,22 @@ void main(){
  float spec=clamp(dot(specular,vec3(.33)),0.0,1.0);
  vec3 base=mix(vec3(.025,.047,.060),uColor,uPanel>.5?.23:.18);
  vec3 col=base*(.27+.68*ndl)*(1.0-max(F.r,max(F.g,F.b)))+specular*.65+uColor*fresnel*.12;
+ if(uShadow>.5){
+   // Soft analytical contact penumbra underneath the moving archive drawer.
+   // No second depth buffer, post-process or fake bloom. Cost: one shared
+   // panel mesh. This is a planar approximation, not shadow-map tracing.
+   vec2 q=(vUv-vec2(.5))*vec2(2.1,2.5);
+   float shadow=exp(-3.8*dot(q,q))*(1.0-smoothstep(.76,1.20,length(q)));
+   outColor=vec4(vec3(.003,.010,.018),uOpacity*shadow*.65);
+   return;
+ }
  float a=uOpacity*(uPanel>.5?.68:.80);
  if(uPanel>.5){
    // Smooth glass-membrane edge, directional internal light guides and
    // antialiased micro-filaments; suppress high-frequency aliasing via fwidth.
    float edge=max(abs(vUv.x-.5)*2.0,abs(vUv.y-.5)*2.0);
-   float rim=smoothstep(.943,.992,edge);
+   float edgeWidth=max(fwidth(edge)*1.35,.004);
+   float rim=smoothstep(.972-edgeWidth,.972+edgeWidth,edge);
    float strand=abs(fract(vUv.x*68.0)-.5);
    float aa=max(fwidth(vUv.x*68.0)*.75,.028);
    float micro=1.0-smoothstep(.012,.012+aa,strand);
@@ -549,7 +600,7 @@ void main(){
       return p;
     }
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
-    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0){
+    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false){
       const gl=this.gl,u=this.uniform;
       gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
       gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
@@ -558,7 +609,9 @@ void main(){
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
       gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
       gl.uniform1f(u.uOpacity,alpha);gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
-      gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);gl.drawArrays(gl.TRIANGLES,0,mesh.count);
+      gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);
+      gl.uniform1f(u.uShadow,shadow?1:0);
+      gl.drawArrays(gl.TRIANGLES,0,mesh.count);
       this.drawCalls++;
     }
     render(frame){
@@ -578,6 +631,9 @@ void main(){
       const plate=(x,y,z,w,h,c=hue,rot=0,a=1,bend=.2)=>this.mesh(this.panel,[x,y,z],[w,h,1],c,rot,a,bend,cam);
       const side=index%2?-1:1;
       const sx=side*2.4,sy=.12*Math.sin(index),sz=-.3;
+      // One modest-depth contact penumbra connects drawer/shelf to archive.
+      this.mesh(this.panel,[sx,sy-.74,-.72],[1.52,.37,1],[.06,.10,.14],
+        0,.66,0,cam,false,0,true);
       // Shared deep archive architectural rails. Fixed in one world, not separate scene backgrounds.
       for(let k=-2;k<=2;k+=(quality==='low'?2:1)){
         const x=k*1.48;
@@ -631,6 +687,7 @@ void main(){
       const bend=mix(.44,.006,smooth((pro-.46)/.30));
       const rotation=(1-align)*(side*.74)+align*.02;
       const alpha=reveal*(1-release);
+      root.dataset.fxArchiveOptics='ggx-microfacet-analytic-contact-fwidth';
       root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
         pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
@@ -886,6 +943,7 @@ void main(){
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
+    restoreExistingProofBlock();
     setLegacyHeroHidden(false);
     setHeroCanvasLaneFront(false);
     document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
