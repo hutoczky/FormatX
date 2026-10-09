@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2036-mag-folded-critical-first-paint
-base_master=051eac9d16fd1d0e949866aa86b3de90cb64d873
-purpose=Eliminate one extra render-blocking MAG critical CSS request by folding unmodified first-frame rules into existing P0 CSS; keep all cinematic scenes, proof, interactions, SEO and fallback.
-validation=Re-run Lighthouse actual desktop and mobile plus 320-1920 visual + MAG WebGL all 8 scenes, actual navigation and production smoke.
-limits=If Lighthouse remains under 95, report real measured scores and do not claim optimization goal met.
+token=20261009-r2038-mag-consolidated-first-frame
+base_master=ec7883ed68512253a9236133892d921864316123
+purpose=One native cinematic MAG, original HTML panels and contact optics preserved. Fix 320px mobile brand to 46px; consolidate 3 original critical stylesheets into canonical desktop and mobile first-paint owners. Mobile heavy optical P0 deferred until first paint.
+validation=Strict desktop/phone WebGL 8-source, native fallback, 320px touch, design/menu/SEO, 320-1920 occlusion, Lighthouse desktop and phone; production exact-revision smoke before claiming live.
+limits=No fabricated stable FPS or quality superiority. Lighthouse scores may remain below thresholds and must be reported truthfully.
