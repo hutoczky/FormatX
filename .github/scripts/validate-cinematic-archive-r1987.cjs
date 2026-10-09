@@ -31,6 +31,8 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
+  assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   let passed=0;
   const coverage=[];
@@ -83,6 +85,51 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(physical.folio,'Missing physical MAG paper for '+scene.key);
       assert.ok(physical.liveCount>=8,'Native content sheets were not prepared: '+JSON.stringify(physical));
       assert.ok(physical.currentLive>=1,'Real HTML lacks MAG-delivered elements for '+scene.key+': '+JSON.stringify(physical));
+      // R2030: old site surfaces must be invisible, with ONE original working
+      // HTML folio presented at a time. Geometry must reserve a separate
+      // MAG camera lane, never paint the living core on top of actual text.
+      const cinema=await page.evaluate(()=>{
+        const root=document.documentElement;
+        const hosts=[...document.querySelectorAll('main#main-content > [data-fx-cinema-host-active]')];
+        const visibleHosts=hosts.filter(h=>h.dataset.fxCinemaHostActive==='true');
+        const panel=visibleHosts[0]?.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+        const mag=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
+        const mr=mag?.getBoundingClientRect(),pr=panel?.getBoundingClientRect();
+        const active=panel?getComputedStyle(panel):null;
+        const old=hosts.filter(h=>h!==visibleHosts[0]).map(h=>getComputedStyle(h).visibility);
+        const hasActualInputs=Boolean(panel?.querySelector('a[href],button,input,select,textarea'));
+        return {
+          mode:root.dataset.fxArchiveCinema,
+          count:visibleHosts.length,
+          paperVisible:active?.visibility,
+          paperPosition:active?.position,
+          paperPointer:active?.pointerEvents,
+          paperText:(panel?.textContent||'').trim().length,
+          oldHidden:old.every(v=>v==='hidden'),
+          hasActualInputs,
+          mag:mr?{x:mr.x,y:mr.y,w:mr.width,h:mr.height}:null,
+          paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height}:null
+        };
+      });
+      assert.equal(cinema.mode,'active','MAG did not replace legacy site');
+      assert.equal(cinema.count,1,'More than one original content folio is visible: '+JSON.stringify(cinema));
+      assert.equal(cinema.paperVisible,'visible','Current paper is not visible: '+JSON.stringify(cinema));
+      assert.equal(cinema.paperPosition,'fixed','Original HTML module is not physically presented in front of visitor');
+      assert.equal(cinema.paperPointer,'auto','Interactive original controls are disabled');
+      assert.ok(cinema.paperText>70,'Original functional content is not present in MAG folio');
+      assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
+      assert.ok(cinema.mag&&cinema.paper,'Missing two cinematic lanes');
+      if(isMobile){
+        assert.ok(cinema.mag.y+cinema.mag.h <= cinema.paper.y+10,
+          'MAG overlaps reading panel on phone: '+JSON.stringify(cinema));
+      }else{
+        assert.ok(cinema.mag.x+cinema.mag.w <= cinema.paper.x+10,
+          'MAG jumps over reading panel on desktop: '+JSON.stringify(cinema));
+      }
+      if(scene.key==='network'||scene.key==='licensing'){
+        assert.ok(cinema.hasActualInputs,'Original functional controls not transferred with '+scene.key);
+      }
+
       assert.ok(physical.actualContent,'The MAG paper is not connected to the real section copy: '+JSON.stringify(physical));
       assert.equal(physical.mode,'native-paper-handoff','Native document transfer missing');
       // R2022: all eight sources must present their own visible chapter label,
@@ -130,7 +177,8 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
   if(isMobile){
     assert.ok(native.canvasRect.w>=viewport.width*.88,'Mobile archive must use the available screen width rather than a thumbnail: '+JSON.stringify(native.canvasRect));
-    assert.ok(native.canvasRect.h>=Math.min(viewport.height*.50,400),'Mobile archive must show cinematic panel retrieval at a readable height: '+JSON.stringify(native.canvasRect));
+    assert.ok(native.canvasRect.h>=viewport.height*.33&&native.canvasRect.h<=viewport.height*.48,
+      'Mobile MAG must occupy its own upper cinematic stage without covering the native HTML paper: '+JSON.stringify(native.canvasRect));
   }
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
   if (!isMobile && native.filamentCount < 1 && await page.evaluate(()=>document.documentElement.dataset.fxArchiveQuality==='high')) {

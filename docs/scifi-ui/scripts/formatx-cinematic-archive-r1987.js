@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2026-real-content-handoff';
+  const VERSION='cinematic-archive-r2030-exclusive-mag-takeover';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -28,17 +28,47 @@
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
+  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
   const paperLast=new WeakMap();
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
+  function ensureAIScrollStation(){
+    if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
+    const original=document.querySelector('#capabilities .cards .card:last-child');
+    const host=document.getElementById('capabilities');
+    if(!(original instanceof HTMLElement)||!host||!host.parentNode)return;
+    const anchor=document.createElement('section');
+    anchor.id='fx-mag-ai-scroll-station-r2030';
+    anchor.className='fx-mag-ai-scroll-station-r2030';
+    anchor.setAttribute('aria-hidden','true');
+    anchor.setAttribute('inert','');
+    const title=original.querySelector('h3')?.textContent?.trim()||'AI / AUTOMATION';
+    const description=original.querySelector('p')?.textContent?.trim()||'FormatX intelligence';
+    // This hidden scroll station is a stable chapter locator only. The
+    // actual AI card remains the original native DOM inside capabilities.
+    const textNode=document.createElement('div');
+    const heading=document.createElement('h3');
+    const body=document.createElement('p');
+    heading.textContent=title;
+    body.textContent=description;
+    textNode.append(heading,body);
+    anchor.append(textNode);
+    host.after(anchor);
+    for(const name of ['height','min-height','max-height'])anchor.style.setProperty(name,'165dvh','important');
+  }
   function discover(){
     const previous=scenes.map(x=>x.node);
     scenes=blueprint.map(def=>{
       const node=document.querySelector(def.selector);
       return node instanceof HTMLElement ? {...def,node} : null;
     }).filter(Boolean);
-    scenes.sort((a,b)=>a.node.compareDocumentPosition(b.node)&Node.DOCUMENT_POSITION_PRECEDING?1:-1);
+    for(const scene of scenes){
+      scene.scrollAnchor=scene.key==='intelligence'
+        ? document.getElementById('fx-mag-ai-scroll-station-r2030')||scene.node
+        : scene.node;
+    }
+    scenes.sort((a,b)=>a.scrollAnchor.compareDocumentPosition(b.scrollAnchor)&Node.DOCUMENT_POSITION_PRECEDING?1:-1);
     for(const node of previous){if(!scenes.some(s=>s.node===node))node.removeAttribute('data-fx-archive-scene');}
     scenes.forEach((s,i)=>{s.index=i;s.node.dataset.fxArchiveScene=s.key;});
     if(sceneObserver){
@@ -46,7 +76,96 @@
       scenes.forEach(s=>sceneObserver.observe(s.node));
     }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
-    prepareRealContentSheets();
+    if(!cinemaPrepared)prepareRealContentSheets();
+    prepareCinemaHosts();
+  }
+
+  /* R2030 EXCLUSIVE FORMATX ARCHIVE.
+     The original live DOM nodes are moved ONCE into a semantic, scrollable
+     cinematic folio inside their original section, preserving their identity,
+     event handlers, links, IDs and delegated events on the section.
+     Every original section remains in the document as a scroll anchor.
+     No clones, dummy tiles, canvas text, videos or second 3D renderer. */
+  function prepareCinemaHosts(){
+    for(const scene of scenes){
+      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      if(!(host instanceof HTMLElement))continue;
+      scene.cinemaHost=host;
+      let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      if(!panel){
+        const oldHeight=Math.max(520,host.getBoundingClientRect().height||host.offsetHeight);
+        panel=document.createElement('div');
+        panel.className='fx-archive-cinema-folio-r2030';
+        panel.setAttribute('role','region');
+        panel.setAttribute('aria-label','FormatX MAG cinematic content');
+        // Adding one wrapper preserves the source section's layout anchor,
+        // its own events and all real interactive descendants.
+        const nodes=Array.from(host.childNodes);
+        for(const node of nodes)panel.appendChild(node);
+        host.appendChild(panel);
+        // Inline important chapter sizing wins over older high-specificity
+        // content-visibility/intrinsic-height rules, which otherwise collapse
+        // mobile sections to ~62px during the DOM-to-paper handoff.
+        host.style.setProperty('min-height','165dvh','important');
+        host.style.setProperty('height','165dvh','important');
+        host.style.setProperty('max-height','165dvh','important');
+        host.dataset.fxCinemaAnchorHeight=String(Math.round(oldHeight));
+      }
+      if(!cinemaHosts.includes(host))cinemaHosts.push(host);
+      scene.cinemaPanel=panel;
+    }
+    if(cinemaHosts.length){
+      cinemaPrepared=true;
+      root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
+    }
+  }
+
+  function positionCinemaFolio(panel){
+    if(!panel||!panel.isConnected)return;
+    // The canonical site contains ancestor perspective/transform contexts,
+    // which change the containing block of a fixed child. Solve in viewport
+    // coordinates instead of resetting those ancestors (doing so breaks
+    // the living MAG renderer and the native pricing/menu consoles).
+    const w=innerWidth,h=innerHeight,phone=mobile();
+    const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
+    const x=phone?w*.04:w-w*.027-desiredWidth;
+    const y=phone?h*.48:h*.11;
+    const r=panel.getBoundingClientRect();
+    const previousX=parseFloat(panel.style.getPropertyValue('--fx-cinema-screen-x'))||0;
+    const previousY=parseFloat(panel.style.getPropertyValue('--fx-cinema-screen-y'))||0;
+    const dx=x-r.left,dy=y-r.top;
+    if(Math.abs(dx)>1)panel.style.setProperty('--fx-cinema-screen-x',(previousX+dx).toFixed(2)+'px');
+    if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
+  }
+
+  function syncCinema(){
+    if(!cinemaPrepared)return;
+    const enabled=Boolean(archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
+    root.dataset.fxArchiveCinema=enabled?'active':'home';
+    const selected=enabled?current.s:null;
+    const key=selected?.key||'home';
+    root.dataset.fxArchiveCinemaChapter=key;
+    for(const host of cinemaHosts){
+      const active=Boolean(selected&&selected.cinemaHost===host);
+      host.dataset.fxCinemaHostActive=active?'true':'false';
+      const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      if(panel){
+        panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        if(active){
+          const p=clamp(current.progress);
+          const materialize=smooth((p-.06)/.46);
+          panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
+          panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
+          panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
+          positionCinemaFolio(panel);
+        }
+      }
+    }
+    if(enabled&&key!==lastCinemaKey){
+      const panel=selected.cinemaPanel;
+      if(panel)panel.scrollTop=0;
+      lastCinemaKey=key;
+    }else if(!enabled)lastCinemaKey='';
   }
 
   // R2026: The real existing HTML content is the handoff destination.
@@ -130,7 +249,7 @@
       let closest=null,score=Infinity;
       const anchor=innerHeight*.52;
       for(const s of scenes){
-        const r=s.node.getBoundingClientRect();
+        const r=(s.scrollAnchor||s.node).getBoundingClientRect();
         if(r.height<1||r.width<1)continue;
         const contains=r.top<=anchor&&r.bottom>=anchor;
         const distance=contains ? Math.abs((r.top+r.bottom)*.5-anchor)/Math.max(1,r.height)
@@ -471,7 +590,7 @@ void main(){
   }
   function updateHandoff(){
     if(!handoff?.isConnected)return;
-    const showing=Boolean(current&&archiveActive&&!reduced.matches);
+    const showing=Boolean(current&&archiveActive&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     handoff.dataset.active=showing?'true':'false';
     if(!showing){handoffKey='';return;}
     const english=root.lang==='en',scene=current.s;
@@ -496,6 +615,12 @@ void main(){
       handoff.dataset.source=scene.source;
       handoff.dataset.scene=scene.key;
     }
+    // Site language/content modules may rerender the original heading within
+    // the same cinematic chapter. Do not hold an outdated telemetry copy.
+    const actualHeading=scene.node.querySelector('h2,h3')||scene.node;
+    const actualTitle=String(actualHeading.textContent||scene[english?'en':'hu']).trim().slice(0,140);
+    const liveTitle=handoff.querySelector('.fx-archive-telemetry-r2022__title');
+    if(liveTitle.textContent!==actualTitle)liveTitle.textContent=actualTitle;
     // The membrane unfolds from its unique archive location and approaches
     // the reader. After the handoff, the *actual* HTML headings/cards continue
     // the same motion as a native, functional interactive display.
@@ -547,6 +672,7 @@ void main(){
     else if(archiveActive)ResponsiveExperience.restore();
     setPanelState();
     updateRealContentSheets();
+    syncCinema();
     updateHandoff();
     if(current){
       const nextIndex=current.s.index;
@@ -573,6 +699,7 @@ void main(){
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
         updateRealContentSheets();
+        syncCinema();
         updateHandoff();
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
@@ -608,6 +735,21 @@ void main(){
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
+    document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
+    root.dataset.fxArchiveCinema='home';
+    for(const host of cinemaHosts){
+      const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      if(panel){
+        while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
+        panel.remove();
+      }
+      host.removeAttribute('data-fx-cinema-host-active');
+      host.removeAttribute('data-fx-cinema-anchor-height');
+      host.style.removeProperty('min-height');
+      host.style.removeProperty('height');
+      host.style.removeProperty('max-height');
+    }
+    cinemaHosts=[];cinemaPrepared=false;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');
@@ -624,6 +766,7 @@ void main(){
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
+    ensureAIScrollStation();
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
@@ -640,7 +783,7 @@ void main(){
     invalidate();
   }
   window.FormatXArchiveExperience={
-    version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.node.id||s.selector}));},
+    version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
     refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
   };

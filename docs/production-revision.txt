@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261009-r2026-mag-physical-native-scroll-handoff
-base_master=cf44f70c836a3fa2093605771ce1df353a40ee33
-purpose=Make the actual FormatX sections appear as physically delivered interactive glass/papyrus modules; reuse original MAG single WebGL2 archive across eight unique sources.
-validation=Desktop 1440x900 and mobile 320 to 390px browser checks required; original HTML, scroll reversibility, reduced-motion and production smoke must pass. Visual award readiness and real-device FPS are separate goals.
+token=20261009-r2030-exclusive-mag-cinematic-archive
+base_master=118e99d46f47bba7918f9b2e8d412bc0d92218b2
+purpose=Make the new MAG cinematic scene the ONLY visible experience after the introduction: one living 3D MAG, eight distinct physical retrieval locations, one original interactive HTML module in a glass-papyrus folio at any time; remove competing legacy content layout from sight. Desktop side by side, mobile top-and-bottom, no MAG-text overlay.
+validation=Real desktop and 320-390 mobile browser assertions on exclusive content, nonoverlap geometry, eight chapters, reverse scroll, original controls, reduced motion, production smoke; real-device FPS unverified.

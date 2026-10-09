@@ -469,3 +469,345 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
   }
 }
 /* production-r2026-real-functional-native-mag-scroll-paper */
+
+/* R2030 / MAG ARCHIVE TAKEOVER
+   ONLY the MAG's currently handed-off ORIGINAL interactive DOM chapter is
+   visible. The former site remains an invisible native-scroll/SEO anchor,
+   never a competing foreground. Desktop: split set. Mobile: stacked set.
+   Reversible progressive enhancements: home and reduced-motion stay native. */
+@media (prefers-reduced-motion:no-preference) {
+  html:root:root:root[data-fx-archive-cinema="active"] body{
+    background:#02070e!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"] body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:8;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse 51% 59% at 21% 47%,rgba(24,109,144,.16),transparent 72%),
+      radial-gradient(ellipse 45% 72% at 17% 27%,rgba(55,65,118,.13),transparent 75%),
+      linear-gradient(112deg,#01050c 0%,#06111c 42%,#02060d 100%);
+    opacity:1;
+    isolation:isolate;
+  }
+  /* Keep the full original page in layout as navigable scroll anchors,
+     but NEVER display the old layout behind the incoming 3D folio. */
+  html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > :is(section.scene,section.fx-category-deck--standalone):not(#hero){
+    opacity:0!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    background:transparent!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > :is(section.scene,section.fx-category-deck--standalone)[data-fx-cinema-host-active="true"]{
+    position:relative!important;
+    z-index:75!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    contain:none!important;
+    content-visibility:visible!important;
+    overflow:visible!important;
+    clip-path:none!important;
+    /* Perspective and transforms on the old native chapter would rebase a
+       position:fixed folio against the section (e.g. y=169+11vh) rather
+       than the real viewport, making it intersect the MAG camera lane. */
+    perspective:none!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:1!important;
+    filter:none!important;
+    backdrop-filter:none!important;
+    isolation:auto!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    border:0!important;
+  }
+  /* Cinematic split-screen camera. The MAG never sweeps across readable HTML. */
+  html:root:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+    position:fixed!important;
+    top:0!important;
+    bottom:0!important;
+    left:0!important;
+    right:auto!important;
+    inset:0 auto 0 0!important;
+    width:44vw!important;
+    min-width:44vw!important;
+    max-width:44vw!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    max-height:100dvh!important;
+    z-index:18!important;
+    opacity:1!important;
+    contain:layout size style!important;
+    isolation:isolate!important;
+    overflow:hidden!important;
+    translate:none!important;
+    transform:none!important;
+    filter:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
+    pointer-events:none!important;
+  }
+  html:root:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  #hero .hero-space > .fx-archive-native-docked canvas.fx-crystal-organism-r326-canvas{
+    display:block!important;
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    min-width:100%!important;
+    min-height:100%!important;
+    opacity:1!important;
+    scale:1.19!important;
+    filter:brightness(1.1) contrast(1.12)!important;
+    transform:none!important;
+    mask-image:none!important;
+    pointer-events:none!important;
+  }
+  /* Every REAL card / heading / plan / tool remains live native DOM.
+     The single active source becomes the thin interactive glass folio.
+     Inactive sources are invisible, including the legacy section chrome. */
+  html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  .fx-archive-cinema-folio-r2030{
+    visibility:hidden!important;
+    pointer-events:none!important;
+    opacity:0!important;
+  }
+  html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > [data-fx-cinema-host-active="true"]
+  > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+    position:fixed!important;
+    inset:auto!important;
+    top:11dvh!important;
+    bottom:auto!important;
+    left:auto!important;
+    right:2.7vw!important;
+    width:51vw!important;
+    min-width:0!important;
+    max-width:920px!important;
+    height:78dvh!important;
+    min-height:0!important;
+    max-height:78dvh!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+    display:block!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(111,208,237,.45) transparent;
+    overscroll-behavior-y:auto;
+    padding:clamp(25px,3.5vw,62px)!important;
+    border:1px solid rgba(149,223,248,.42)!important;
+    border-left:2px solid rgba(185,245,255,.78)!important;
+    border-radius:12px 34px 34px 12px!important;
+    background:
+      radial-gradient(ellipse 90% 35% at 0% 3%,rgba(90,171,210,.105),transparent 78%),
+      repeating-linear-gradient(178deg,transparent 0 19px,rgba(176,227,240,.011) 20px,transparent 22px),
+      linear-gradient(117deg,rgba(6,17,29,.985),rgba(11,29,44,.975) 54%,rgba(5,17,27,.99))!important;
+    box-shadow:
+      0 40px 120px rgba(0,0,0,.73),
+      0 0 68px rgba(52,134,183,.08),
+      inset 0 1px 0 rgba(229,250,255,.19),
+      inset 17px 0 28px rgba(95,190,218,.055)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    color:#e7f5fa!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    opacity:var(--fx-cinema-materialize,1)!important;
+    z-index:90!important;
+    isolation:isolate!important;
+    transform-origin:0% 50%!important;
+    /* Compensate only this original fixed element for its legacy section
+       containing block. Never reset body or MAG rendering transforms. */
+    translate:var(--fx-cinema-screen-x,0px) var(--fx-cinema-screen-y,0px)!important;
+    transform:perspective(1400px)
+      translate3d(0,0,var(--fx-cinema-depth,0px))
+      rotateY(calc(var(--fx-cinema-orbit,0) * -12deg))!important;
+    transition:border-color .3s,box-shadow .3s;
+    touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030::before{
+    content:"";
+    position:sticky;
+    display:block;
+    z-index:2;
+    pointer-events:none;
+    margin:-18px auto 18px;
+    height:1px;
+    width:96%;
+    background:linear-gradient(90deg,transparent,rgba(184,238,249,.5),transparent);
+    box-shadow:0 0 24px rgba(65,209,245,.3);
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030 :is([data-reveal],.fx-archive-live-sheet-r2026){
+    visibility:visible!important;
+    opacity:1!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:1!important;
+    animation:none!important;
+    transform:none!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030 :is(.section-heading,h2,h3,p,li,strong,a,button){
+    color:inherit;
+    max-width:100%;
+    overflow-wrap:break-word;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030 :is(.cards,.pricing,.system-grid,.fx-category-grid){
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))!important;
+    max-width:100%!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030 :is(.flow,.fx-net-grid,.release-layout){
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  /* Compact chapter source label stays in MAG lane: no duplicate hero card. */
+  html:root:root:root:root[data-fx-archive-cinema="active"]
+  .fx-archive-physical-paper-r2026[data-active="true"]{
+    top:auto!important;
+    bottom:7dvh!important;
+    left:clamp(15px,3vw,46px)!important;
+    right:auto!important;
+    width:min(250px,34vw)!important;
+    min-height:0!important;
+    max-height:110px!important;
+    padding:11px 14px!important;
+    border-radius:5px 14px 14px 5px!important;
+    z-index:22!important;
+    transform:none!important;
+    overflow:hidden!important;
+    background:rgba(3,15,24,.87)!important;
+  }
+  html:root[data-fx-archive-cinema="active"] .fx-archive-physical-paper-r2026__excerpt,
+  html:root[data-fx-archive-cinema="active"] .fx-archive-physical-paper-r2026__foot{
+    display:none!important;
+  }
+  html:root[data-fx-archive-cinema="active"] .fx-archive-physical-paper-r2026
+  .fx-archive-telemetry-r2022__title{
+    font-size:clamp(12px,1.2vw,18px)!important;
+    line-height:1.2!important;
+  }
+  /* Single AI paper: real AI article is last capabilities card.
+     Hide neighbouring diagnostics modules when the MAG opens its core. */
+  html:root:root[data-fx-archive-cinema="active"][data-fx-archive-cinema-chapter="intelligence"]
+  #capabilities .fx-archive-cinema-folio-r2030 :is(.section-heading,.cards > .card:not(:last-child)){
+    display:none!important;
+  }
+  html:root:root[data-fx-archive-cinema="active"][data-fx-archive-cinema-chapter="diagnostics"]
+  #capabilities .fx-archive-cinema-folio-r2030 .cards > .card:last-child{
+    display:none!important;
+  }
+}
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+    inset:2dvh 0 auto 0!important;
+    left:0!important;
+    right:0!important;
+    top:2dvh!important;
+    bottom:auto!important;
+    width:100vw!important;
+    min-width:100vw!important;
+    max-width:100vw!important;
+    height:43dvh!important;
+    min-height:0!important;
+    max-height:43dvh!important;
+    opacity:1!important;
+    mask-image:none!important;
+    -webkit-mask-image:none!important;
+  }
+  html:root:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  #hero .hero-space > .fx-archive-native-docked canvas.fx-crystal-organism-r326-canvas{
+    scale:1.11!important;
+    filter:brightness(1.08) contrast(1.07)!important;
+  }
+  html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > [data-fx-cinema-host-active="true"]
+  > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+    inset:auto!important;
+    top:48dvh!important;
+    bottom:3dvh!important;
+    left:4vw!important;
+    right:4vw!important;
+    width:92vw!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:49dvh!important;
+    min-height:0!important;
+    max-height:49dvh!important;
+    padding:clamp(16px,4.8vw,26px)!important;
+    border-radius:7px 25px 25px 7px!important;
+    transform:perspective(900px) rotateX(calc(var(--fx-cinema-orbit,0) * 7deg))!important;
+  }
+  html:root:root:root:root[data-fx-archive-cinema="active"]
+  .fx-archive-physical-paper-r2026[data-active="true"]{
+    top:10dvh!important;
+    bottom:auto!important;
+    left:4vw!important;
+    width:min(170px,42vw)!important;
+    max-height:78px!important;
+    padding:8px 10px!important;
+    opacity:.9!important;
+  }
+  html:root:root[data-fx-archive-cinema="active"] .fx-archive-physical-paper-r2026 :is(
+    .fx-archive-physical-paper-r2026__step,.fx-archive-telemetry-r2022__source,
+    .fx-archive-telemetry-r2022__foot){display:none!important}
+  html:root[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030
+  :is(.fx-category-grid,.cards,.pricing,.system-grid){grid-template-columns:1fr!important}
+}
+@media (max-width:380px) and (prefers-reduced-motion:no-preference){
+  html:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > [data-fx-cinema-host-active="true"]
+  > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+    padding:15px!important;
+    top:46dvh!important;
+    height:51dvh!important;
+    max-height:51dvh!important;
+  }
+}
+/* production-r2030-mag-only-archive-physical-chapter-viewport */
+
+/* R2030 stable dramaturgical scroll beats. These sizes are invariant before
+   and after handoff, eliminating native scroll height changes and the lost
+   infinity-loop landing. All sections remain their original DOM/IDs. */
+@media (prefers-reduced-motion:no-preference){
+  html:root:root:root:root[data-fx-archive-cinema-prepared]
+  body.living-architecture main#main-content >
+  :is(section.scene,section.fx-category-deck--standalone)[data-fx-cinema-anchor-height]{
+    box-sizing:border-box!important;
+    height:165dvh!important;
+    min-height:165dvh!important;
+    max-height:165dvh!important;
+    overflow:visible!important;
+    contain:none!important;
+  }
+  html:root:root:root:root[data-fx-archive-cinema-prepared]
+  body.living-architecture main#main-content > .fx-mag-ai-scroll-station-r2030{
+    position:relative!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    height:165dvh!important;
+    min-height:165dvh!important;
+    max-height:165dvh!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    overflow:hidden!important;
+    contain:layout style!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+  }
+}
+/* R2030 scroll geometry: eight distinct, deterministic handoff beats. */

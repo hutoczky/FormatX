@@ -118,7 +118,23 @@ async function assertPure3d(page,profile){
 
 async function scanInformation(page,label){
   const result=await page.evaluate(()=>{
-    const visible=el=>{const s=getComputedStyle(el),r=el.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity||1)>.02&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight&&r.right>0&&r.left<innerWidth;};
+    const visible=el=>{
+      const s=getComputedStyle(el),r=el.getBoundingClientRect();
+      if(s.display==='none'||s.visibility==='hidden'||r.width<=0||r.height<=0
+        ||r.bottom<=0||r.top>=innerHeight||r.right<=0||r.left>=innerWidth)return false;
+      // A child's computed opacity can equal 1 under an opacity:0 legacy
+      // chapter. Such content cannot actually paint and must not be counted
+      // as obstructed by the one visible, fixed MAG handoff. Multiply
+      // composited ancestor opacities while preserving strict visible checks.
+      let composite=1;
+      for(let parent=el;parent;parent=parent.parentElement){
+        const style=getComputedStyle(parent);
+        if(style.display==='none')return false;
+        composite*=Number(style.opacity||1);
+        if(composite<=.02)return false;
+      }
+      return true;
+    };
     const ownText=el=>[...el.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent||'').join(' ').replace(/\s+/g,' ').trim();
     const info=[...document.querySelectorAll('h1,h2,h3,h4,p,li,a,button,label,small,th,td,output')].filter(el=>visible(el)&&((ownText(el)||(el.textContent||'').trim()).length>0));
     const clipped=[];
