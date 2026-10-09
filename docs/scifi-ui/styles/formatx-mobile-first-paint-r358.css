@@ -1,3 +1,10 @@
+:root {
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+/* R2037: original first-frame design tokens also exist BEFORE heavy mobile
+   optical enhancement; deferred P0 never delays readable first paint. */
 /* FormatX r418 — render-blocking mobile first-paint lock.
    The first frame owns the phone header, skip-link hiding and hero geometry so
    late runtimes cannot create a detached MAG button or a second header row.
