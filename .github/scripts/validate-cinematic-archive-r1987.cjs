@@ -156,6 +156,18 @@ async function evaluate(viewport,isMobile,browser){
           topLayerCount:document.querySelectorAll('.fx-archive-cinema-folio-r2030:popover-open').length,
           paperTopLayer:!!panel?.matches(':popover-open'),
           hitTopLayer:!!pixel&&!!panel?.contains(pixel),
+          controlTopLayer:!!document.querySelector('#hero > .fx-reference-controls-r204:popover-open'),
+          controlsHit:(()=>{
+            const button=document.querySelector('#hero .fx-three-sound');
+            const b=button?.getBoundingClientRect();
+            if(!b)return false;
+            return button.contains(document.elementFromPoint(b.x+b.width*.5,b.y+b.height*.5));
+          })(),
+          controlRect:(()=>{
+            const ctl=document.querySelector('#hero > .fx-reference-controls-r204:popover-open');
+            const b=ctl?.getBoundingClientRect();
+            return b?{left:b.left,right:b.right,top:b.top,bottom:b.bottom}:null;
+          })(),
           hitElement:pixel?.tagName||null,
           paperOpacity:active?.opacity||null,
           count:visibleHosts.length,
@@ -196,6 +208,8 @@ async function evaluate(viewport,isMobile,browser){
       assert.equal(cinema.topLayerCount,1,'Precisely one HTML papyrus must occupy the visual top layer: '+JSON.stringify(cinema));
       assert.ok(cinema.paperTopLayer&&cinema.hitTopLayer,
         'Original HTML papyrus is not visibly paintable above MAG backdrop: '+JSON.stringify(cinema));
+      assert.ok(cinema.controlTopLayer&&cinema.controlsHit,
+        'The ORIGINAL living MAG SOUND/ASK controls are obstructed by the paper: '+JSON.stringify(cinema));
       assert.ok(cinema.paper.w>=viewport.width*.35&&cinema.paper.h>=viewport.height*.35,
         'Presenting papyrus has collapsed geometry: '+JSON.stringify(cinema));
       assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
