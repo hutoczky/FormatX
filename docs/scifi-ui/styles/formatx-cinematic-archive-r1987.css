@@ -999,3 +999,31 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* r2033-canonical-proof-optical-continuity-technical-console */
+
+/* R2033 — the semantic chapter is only a scroll anchor in MAG mode. Do not
+   let KWin-like transforms, perspective, CSS containment or paint isolation
+   redefine the containing block for a viewport-fixed native technical folio. */
+@media(prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]{
+   transform:none!important;
+   translate:none!important;
+   rotate:none!important;
+   scale:none!important;
+   filter:none!important;
+   perspective:none!important;
+   contain:none!important;
+   will-change:auto!important;
+   content-visibility:visible!important;
+   overflow:visible!important;
+ }
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content{
+   transform:none!important;
+   translate:none!important;
+   filter:none!important;
+   perspective:none!important;
+   contain:none!important;
+ }
+}
+/* r2033-mobile-viewport-fixed-native-paper-no-scroll-containing-block */
