@@ -400,12 +400,16 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     letter-spacing:-.025em;
     max-width:24ch;
   }
+  html[data-fx-archive-dock="active"] [data-fx-archive-scene]{
+    perspective:1150px;
+  }
   html[data-fx-archive-dock="active"] .fx-archive-live-sheet-r2026{
     position:relative;
-    transform:perspective(1150px)
-      translate3d(var(--fx-archive-paper-x,0px),var(--fx-archive-paper-y,0px),0)
-      rotateY(var(--fx-archive-paper-rot,0deg))
-      scale(var(--fx-archive-paper-scale,1))!important;
+    /* Independent transform channels preserve the site's original hover,
+       reveal and interaction transforms on real, focusable modules. */
+    translate:var(--fx-archive-paper-x,0px) var(--fx-archive-paper-y,0px)!important;
+    rotate:y var(--fx-archive-paper-rot,0deg)!important;
+    scale:var(--fx-archive-paper-scale,1)!important;
     opacity:var(--fx-archive-paper-opacity,1)!important;
     transform-origin:50% 10%;
     backface-visibility:hidden;
