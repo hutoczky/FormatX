@@ -29,7 +29,27 @@
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
-  let cinemaControlHome=null;
+  let cinemaControlHome=null,finalCtaHome=null;
+  function attachExistingFinalCta(){
+    if(finalCtaHome)return;
+    const anchor=document.getElementById('hero-download');
+    const scene=scenes.find(s=>s.key==='final');
+    const panel=scene?.cinemaPanel;
+    if(!anchor||!panel||!anchor.parentNode)return;
+    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling};
+    const holder=document.createElement('div');
+    holder.className='fx-archive-final-cta-r2032';
+    holder.appendChild(anchor);
+    panel.appendChild(holder);
+    finalCtaHome.holder=holder;
+  }
+  function restoreExistingFinalCta(){
+    if(!finalCtaHome)return;
+    const {node,parent,next,holder}=finalCtaHome;
+    if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
+    holder.remove();
+    finalCtaHome=null;
+  }
   function keepExistingCinemaControls(){
     if(cinemaControlHome)return;
     const rail=document.querySelector('#hero .fx-reference-rail');
@@ -144,6 +164,7 @@
     if(cinemaHosts.length){
       cinemaPrepared=true;
       root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
+      attachExistingFinalCta();
     }
   }
 
@@ -795,6 +816,7 @@ void main(){
     sceneObserver=null;
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
+    restoreExistingFinalCta();
     document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
     delete root.dataset.fxArchiveCinemaPrepared;
