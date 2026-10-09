@@ -16,6 +16,18 @@ async function evaluate(viewport,isMobile,browser){
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  const firstFrame=await page.evaluate(()=>{
+    const label=document.querySelector('.fx-mag-first-visible-telemetry-r2039');
+    return {intro:document.documentElement.dataset.fxIntroPrepaintR1611,
+      label:label?.textContent?.replace(/\s+/g,' ').trim(),
+      display:label?getComputedStyle(label).display:null,
+      rect:label?.getBoundingClientRect().toJSON()};
+  });
+  if(firstFrame.intro==='skip'){
+    assert.ok(firstFrame.label?.includes('MAG // AI CORE')&&firstFrame.label.includes('ONLINE · LOCAL INTELLIGENCE'),
+      'Missing the real first-frame MAG boot identifier: '+JSON.stringify(firstFrame));
+    assert.equal(firstFrame.display,'flex','Returning visitors must see MAG telemetry immediately: '+JSON.stringify(firstFrame));
+  }
   await page.waitForFunction(()=>Boolean(window.FormatXArchiveExperience),null,{timeout:60000});
   await page.waitForFunction(()=>{
     const s=document.documentElement.dataset.fxArchiveExperience;
@@ -337,7 +349,9 @@ async function missingGpuFallback(browser){
   const page=await context.newPage();
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>Boolean(window.FormatXArchiveExperience),null,{timeout:20000});
-  await page.waitForTimeout(1300);
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxArchiveFallbackReason==='ready-timeout',
+    null,{timeout:16000});
   const state=await page.evaluate(()=>{
     const root=document.documentElement;
     const experience=document.querySelector('#experience');
@@ -349,13 +363,91 @@ async function missingGpuFallback(browser){
       stationCount:document.querySelectorAll('#fx-mag-ai-scroll-station-r2030').length,
       readable:!!experience&&experience.textContent.trim().length>80,
       visibility:css?.visibility,
-      height:experience?.getBoundingClientRect().height};
+      height:experience?.getBoundingClientRect().height,
+      heroWidth:document.querySelector('#hero .hero-copy')?.getBoundingClientRect().width||0};
   });
   assert.notEqual(state.cinema,'active','GPU-less browser hijacked into cinematic mode: '+JSON.stringify(state));
   assert.equal(state.wrapperCount,0,'No GPU: native HTML may not be reparented: '+JSON.stringify(state));
   assert.equal(state.stationCount,0,'No GPU: invisible scroll station must not be inserted: '+JSON.stringify(state));
+  assert.equal(state.status,'context-error','No GPU: fallback must not stay pending forever');
+  assert.ok(state.heroWidth>=240,'No GPU: mobile functional HTML must fill readable pixels: '+JSON.stringify(state));
   assert.ok(state.readable&&state.visibility==='visible','No GPU: semantic HTML unavailable: '+JSON.stringify(state));
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
+  await context.close();
+}
+async function mobileHtmlFallback(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  const testUrl=new globalThis.URL(URL);
+  testUrl.searchParams.set('archive','off');
+  testUrl.searchParams.delete('r486-optics-energy-check');
+  const page=await context.newPage();
+  await page.goto(testUrl.toString(),{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const el=document.querySelector('#hero .hero-copy');
+    return document.documentElement.dataset.fxArchiveExperience==='reduced-html'&&
+      el&&el.getBoundingClientRect().width>=240;
+  },null,{timeout:30000});
+  const fallback=await page.evaluate(()=>{
+    const node=document.querySelector('#hero .hero-copy');
+    const rect=node?.getBoundingClientRect();
+    const style=node?getComputedStyle(node):null;
+    return {status:document.documentElement.dataset.fxArchiveExperience,
+      rectangle:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+      clipping:style?.clipPath,visible:style?.visibility,
+      controls:node?.querySelectorAll('a[href],button').length||0,
+      title:node?.querySelector('h1')?.textContent?.trim()||'',
+      viewport:innerWidth,overflow:document.documentElement.scrollWidth-innerWidth};
+  });
+  assert.ok(fallback.rectangle&&fallback.rectangle.w>=240&&fallback.rectangle.h>=140,
+    'Mobile without cinematic WebGL must not have a 1px/blank hero: '+JSON.stringify(fallback));
+  assert.equal(fallback.visible,'visible');
+  assert.ok(fallback.controls>=1&&fallback.title.includes('FORMATX'),
+    'Native fallback must preserve working controls and actual title: '+JSON.stringify(fallback));
+  assert.ok(fallback.overflow<=4,'Mobile HTML fallback horizontal overflow: '+JSON.stringify(fallback));
+  console.log('ARCHIVE_MOBILE_HTML_FALLBACK_PASS',JSON.stringify(fallback));
+  const auditUrl=new globalThis.URL(URL);
+  auditUrl.searchParams.delete('archive');
+  auditUrl.searchParams.delete('r486-optics-energy-check');
+  auditUrl.searchParams.set('lighthouse','1');
+  const auditPage=await context.newPage();
+  await auditPage.goto(auditUrl.toString(),{waitUntil:'domcontentloaded',timeout:60000});
+  await auditPage.waitForFunction(()=>
+    document.documentElement.dataset.fxArchiveExperience==='audit-html',
+    null,{timeout:30000});
+  const auditLayout=await auditPage.evaluate(()=>{
+    const copy=document.querySelector('#hero .hero-copy');
+    const space=document.querySelector('#hero .hero-space');
+    const style=copy?getComputedStyle(copy):null;
+    const rect=copy?.getBoundingClientRect();
+    const sr=space?.getBoundingClientRect();
+    const hit=rect?document.elementFromPoint(rect.x+Math.min(rect.width/2,100),
+      Math.min(innerHeight-24,rect.y+Math.min(70,rect.height/2))):null;
+    const ancestor=[];
+    for(let el=copy;el&&ancestor.length<6;el=el.parentElement){
+      const v=getComputedStyle(el);
+      ancestor.push({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,85),
+        display:v.display,opacity:v.opacity,visibility:v.visibility,
+        zIndex:v.zIndex,position:v.position,pointerEvents:v.pointerEvents,
+        clipPath:v.clipPath,transform:v.transform});
+    }
+    return {state:document.documentElement.dataset.fxArchiveExperience,
+      hit:hit?hit.outerHTML.slice(0,230):null,
+      ancestor,
+      audit:document.documentElement.dataset.fxP0AuditModeR1728,
+      copy:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+      space:sr?{x:sr.x,y:sr.y,w:sr.width,h:sr.height}:null,
+      css:style?{display:style.display,position:style.position,clip:style.clip,
+        clipPath:style.clipPath,visibility:style.visibility,
+        opacity:style.opacity,overflow:style.overflow}:null};
+  });
+  console.log('ARCHIVE_AUDIT_FALLBACK_GEOMETRY',JSON.stringify(auditLayout));
+  try{await auditPage.screenshot({path:`${out}/archive-audit-mobile-fallback.png`,
+    fullPage:false,timeout:7000});}
+  catch(err){console.warn('ARCHIVE_AUDIT_SCREENSHOT_UNAVAILABLE',String(err?.message||err).slice(0,250));}
+  assert.ok(auditLayout.copy?.w>=240&&auditLayout.copy?.h>=140,
+    'Lighthouse/native-html fallback remains an invisible 1px element: '+JSON.stringify(auditLayout));
   await context.close();
 }
 async function fallback(browser){
@@ -382,6 +474,7 @@ async function fallback(browser){
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
     await missingGpuFallback(browser);
+    await mobileHtmlFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
 })().catch(e=>{console.error('ARCHIVE_FAIL',e.stack||String(e));process.exitCode=1;});

@@ -918,7 +918,8 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck))
+      ||root.dataset.fxArchiveFallbackReason==='ready-timeout')return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1029,6 +1030,18 @@ void main(){
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
+    // A device without WebGL2 never emits real3dready. Do not trap visitors
+    // in an indefinite dark MAG boot: after a bounded startup grace period,
+    // reveal the ORIGINAL native HTML (the user may reload to retry WebGL).
+    // The first-visit cinematic birth can own its full ten seconds first.
+    setTimeout(()=>{
+      if(root.dataset.fxArchiveExperience==='pending'
+         &&root.dataset.fxMagBirthOwnerR533!=='active'){
+        root.dataset.fxArchiveFallbackReason='ready-timeout';
+        root.dataset.fxArchiveExperience='context-error';
+        root.dataset.fxArchiveCinema='home';
+      }
+    },11000);
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
     addEventListener('resize',invalidate,{passive:true});
