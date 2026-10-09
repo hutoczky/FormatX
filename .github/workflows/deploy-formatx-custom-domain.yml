@@ -242,6 +242,9 @@ jobs:
             verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$ORIGIN/verification" || true)"
             account_code="$(curl -sS -L --max-time 30 -o "$tmp/account.html" -w '%{http_code}' "$ORIGIN/account/" || true)"
             package_code="$(curl -sS --max-time 30 -D "$tmp/package.headers" -o /dev/null -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
+            if (( attempt == 1 || attempt % 10 == 0 || attempt == 30 )); then
+              echo "PRODUCTION_SMOKE_HTTP attempt=$attempt home=$home_code www=$www_code scroll_bootstrap=$bootstrap_code seamless=$seamless_code continuous_css=$continuous_code mobile_css=$mobile_code mobile_loop_css=$mobile_loop_code scroll_policy=$policy_code release=$release_code feedback=$summary_code downloads=$downloads_code verification=$verification_code account=$account_code gated_package=$package_code"
+            fi
 
             if [[ "$home_code" == 200 && "$www_code" == 200 && "$bootstrap_code" == 200 && "$seamless_code" == 200 \
               && "$continuous_code" == 200 && "$mobile_code" == 200 && "$mobile_loop_code" == 200 && "$policy_code" == 200 \
