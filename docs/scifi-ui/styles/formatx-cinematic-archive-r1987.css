@@ -227,3 +227,94 @@ html[data-fx-archive-dock="active"] body #hero .hero-space > .fx-archive-native-
   }
 }
 /* R2020-mobile-archive-physical-glass-visible-no-scroll-hijack */
+
+/* R2022 — visibility contract: the archive MAG must paint ABOVE the
+   independent opaque content sections, without taking their interactions.
+   The hero is an explicit stacking context; a child z-index alone cannot
+   escape the original hero's stacking order. */
+@media (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root[data-fx-archive-dock="active"] body.living-architecture #hero{
+    position:relative!important;
+    z-index:12!important;
+    isolation:isolate!important;
+    contain:none!important;
+    clip-path:none!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root:root[data-fx-archive-dock="active"] body.living-architecture #hero .hero-grid,
+  html:root:root:root:root:root[data-fx-archive-dock="active"] body.living-architecture #hero .hero-space{
+    contain:none!important;
+    clip-path:none!important;
+    transform:none!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root:root[data-fx-archive-dock="active"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+    z-index:13!important;
+    opacity:.93!important;
+    pointer-events:none!important;
+  }
+}
+.fx-archive-telemetry-r2022{
+  position:fixed;
+  z-index:130;
+  right:clamp(14px,3vw,45px);
+  top:calc(env(safe-area-inset-top) + 96px);
+  width:min(285px,calc(100vw - 32px));
+  box-sizing:border-box;
+  pointer-events:none;
+  user-select:none;
+  display:grid;
+  gap:8px;
+  padding:15px 17px 14px 18px;
+  color:#e7f9fc;
+  border:1px solid rgba(157,226,242,.5);
+  border-left:2px solid rgba(173,238,245,.9);
+  border-radius:3px 16px 16px 3px;
+  background:linear-gradient(122deg,rgba(4,18,30,.93),rgba(6,19,27,.87));
+  box-shadow:0 12px 48px rgba(0,0,0,.56),inset 0 1px 0 rgba(204,246,252,.09);
+  font:inherit;
+  opacity:0;
+  visibility:hidden;
+  transform:translate3d(16px,-8px,0);
+  transition:opacity .34s ease,transform .42s cubic-bezier(.2,.75,.2,1),visibility .34s;
+}
+html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="true"]{
+  opacity:1;
+  visibility:visible;
+  transform:none;
+}
+.fx-archive-telemetry-r2022__eyebrow,
+.fx-archive-telemetry-r2022__source,
+.fx-archive-telemetry-r2022__foot{
+  font-size:10px;
+  letter-spacing:.14em;
+  font-weight:600;
+  line-height:1.45;
+}
+.fx-archive-telemetry-r2022__eyebrow{color:#84dce9}
+.fx-archive-telemetry-r2022__title{font-size:15px;letter-spacing:.04em;line-height:1.35}
+.fx-archive-telemetry-r2022__source{color:#d1e5ed}
+.fx-archive-telemetry-r2022__foot{
+  color:#80b1be;
+  padding-top:8px;
+  border-top:1px solid rgba(149,227,243,.18);
+}
+@media(max-width:900px){
+  .fx-archive-telemetry-r2022{
+    top:calc(env(safe-area-inset-top) + 70px);
+    right:12px;
+    width:min(225px,calc(100vw - 34px));
+    gap:6px;
+    padding:11px 12px;
+    background:linear-gradient(122deg,rgba(3,17,27,.96),rgba(6,20,30,.94));
+  }
+  .fx-archive-telemetry-r2022__title{font-size:13px}
+  .fx-archive-telemetry-r2022__eyebrow,
+  .fx-archive-telemetry-r2022__source,
+  .fx-archive-telemetry-r2022__foot{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .fx-archive-telemetry-r2022{display:none!important}
+}
+/* production-r2022-mag-visible-scroll-handoff */
