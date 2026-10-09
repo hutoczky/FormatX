@@ -258,6 +258,12 @@
     // for the accessible HTML fallback and the existing MAG hero renderer.
     const host=panel.parentElement;
     if(host instanceof HTMLElement&&host.dataset.fxCinemaHostActive==='true'){
+      if(!host._fxCinemaOriginalTransform){
+        host._fxCinemaOriginalTransform=[
+          'transform','translate','rotate','scale','filter','perspective',
+          'contain','will-change','content-visibility'
+        ].map(name=>[name,host.style.getPropertyValue(name),host.style.getPropertyPriority(name)]);
+      }
       for(const [key,value] of [
         ['transform','none'],['translate','none'],['rotate','none'],
         ['scale','none'],['filter','none'],['perspective','none'],
@@ -926,7 +932,9 @@ void main(){
         setHeroCanvasLaneFront(false);
         restoreExistingCinemaControls();
         delete root.dataset.fxArchiveCinemaPrepared;
-        detach=null;
+        // Return all ORIGINAL section nodes to their canonical locations.
+        // A lost WebGL renderer must never strand content inside 3D panels.
+        queueMicrotask(()=>stop());
       },{once:true});
       drawPass=frame=>nativeScene.render(frame);
       drawPass.dispose=()=>nativeScene.dispose();
@@ -974,6 +982,11 @@ void main(){
         else host.style.removeProperty(name);
       }
       delete host._fxArchiveOriginalHeights;
+      for(const [name,value,priority] of host._fxCinemaOriginalTransform||[]){
+        if(value)host.style.setProperty(name,value,priority);
+        else host.style.removeProperty(name);
+      }
+      delete host._fxCinemaOriginalTransform;
     }
     cinemaHosts=[];cinemaPrepared=false;
     for(const node of paperNodes){
