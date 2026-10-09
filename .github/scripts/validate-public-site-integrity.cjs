@@ -109,7 +109,7 @@ if ((homepage.match(/<h1\b/gi) || []).length !== 1) report('homepage: exactly on
 if (!homepage.includes('id="resources"')) report('homepage: release section missing');
 if (!homepage.includes('data-fx-sitewide-living-habitat-r1724="true"')) report('homepage: sitewide living habitat activation marker missing');
 if (!homepage.includes('formatx-living-habitat-r1530.css?v=20260928-r1781-clean-photographic-facets')) report('homepage: sitewide living habitat CSS cache identity missing');
-if (!homepage.includes('formatx-living-habitat-r1530.js?v=20260924-r1724-sitewide-living-world')) report('homepage: sitewide living habitat runtime cache identity missing');
+if (!homepage.includes('formatx-living-habitat-r1530.js?v=20261009-r2060-uniform-event-driven-world')) report('homepage: sitewide living habitat runtime cache identity missing');
 if (!livingHabitatCss.includes('production-r1724-sitewide-living-habitat')) report('living habitat: sitewide CSS owner missing');
 if (!livingHabitatCss.includes('production-r1724-zero-blend-sitewide-habitat') || !livingHabitatCss.includes('mix-blend-mode:normal!important')) report('living habitat: zero-blend compositor contract missing');
 if (!livingHabitatCss.includes('production-r1724-mobile-ask-52px-hit-target') || !livingHabitatCss.includes('min-width:52px!important')) report('living habitat: canonical mobile ASK hit target missing');
