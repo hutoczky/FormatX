@@ -22,10 +22,9 @@ r.dataset.fxIntroPrepaintOwnerR1611=o;
 r.dataset.fxMagBirthOwnerR533=v?'active':o;
 
 function activateStyles(){
-  for(const selector of ['link[data-fx-mag-birth-live-r533]','link[data-fx-mag-birth-critical-r1572]','link[data-fx-intro-critical-r1588]','link[data-fx-ai-core-ident-r1951]']){
+  for(const selector of ['link[data-fx-mag-birth-live-r533]','link[data-fx-mag-birth-critical-r1572]']){
     const style=document.querySelector(selector);
     if(style instanceof HTMLLinkElement){
-      if(style.dataset.fxIntroHref&&!style.getAttribute('href'))style.setAttribute('href',style.dataset.fxIntroHref);
       style.media='all';
       style.dataset.fxR1755IntroRescueStyle='active';
     }
