@@ -240,7 +240,17 @@ function injectCriticalFirstPaint(html) {
     if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
     return tag;
   });
-  const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n`;
+  // R2038 retains the single canonical desktop paint links, while mobile
+  // uses the new one-request bundle that already includes the full five
+  // original stylesheet sources in their stable CSS order. Do not reinsert
+  // a second mobile-first-paint link after its bundled source.
+  const bundled=source.includes('data-fx-mobile-critical-r2038="true"');
+  const p0=bundled
+    ? P0_FIRST_PAINT_LINK.replace('data-fx-p0-first-paint-r503', 'media="(min-width:901px)" data-fx-p0-first-paint-r503')
+    : P0_FIRST_PAINT_LINK;
+  const critical=bundled
+    ? `  ${FIRST_FRAME_STABILITY_LINK}\n  ${p0}\n`
+    : `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${p0}\n`;
   return source.replace('</head>', `${critical}</head>`);
 }
 function normalizeMobileStylesheetMedia(html) {
