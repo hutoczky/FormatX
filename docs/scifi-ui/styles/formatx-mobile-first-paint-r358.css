@@ -94,7 +94,7 @@
   }
   html body.living-architecture .topbar>.brand {
     position:absolute!important;
-    top:18px!important;
+    top:11px!important;
     left:18px!important;
     right:auto!important;
     bottom:auto!important;
@@ -104,7 +104,9 @@
     box-sizing:border-box!important;
     width:auto!important;
     max-width:none!important;
-    height:34px!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
     margin:0!important;
     overflow:hidden!important;
     transform:none!important;
