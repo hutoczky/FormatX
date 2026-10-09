@@ -8,7 +8,7 @@ const html=load('docs/scifi-ui/index.html');
 const archive=load('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js');
 const folio=load('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css');
 const heart=load('docs/scifi-ui/scripts/formatx-heart-core-r252.js');
-const worker=load('billing-worker/src/production-content-entry.js');
+const worker=load('billing-worker/src/production-feedback-entry.js');
 const loop=load('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 const matches=(str,regex)=>[...str.matchAll(regex)].length;
 assert.equal(matches(html,/class="fx-award-proof" data-fx-award-proof/g),1,
