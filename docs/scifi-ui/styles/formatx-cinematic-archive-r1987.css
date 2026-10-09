@@ -492,23 +492,6 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     opacity:1;
     isolation:isolate;
   }
-  /* Reset every former cinema containing block, not only the chapter.
-     The main/scene can inherit perspective and transform containment from
-     the previous page design. A fixed paper must use the VIEWPORT origin. */
-  html:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture,
-  html:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture main#main-content,
-  html:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
-  main#main-content > [data-fx-cinema-host-active="true"] {
-    transform:none!important;
-    translate:none!important;
-    rotate:none!important;
-    scale:1!important;
-    perspective:none!important;
-    filter:none!important;
-    backdrop-filter:none!important;
-    contain:none!important;
-    will-change:auto!important;
-  }
   /* Keep the full original page in layout as navigable scroll anchors,
      but NEVER display the old layout behind the incoming 3D folio. */
   html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
@@ -641,6 +624,9 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     z-index:90!important;
     isolation:isolate!important;
     transform-origin:0% 50%!important;
+    /* Compensate only this original fixed element for its legacy section
+       containing block. Never reset body or MAG rendering transforms. */
+    translate:var(--fx-cinema-screen-x,0px) var(--fx-cinema-screen-y,0px)!important;
     transform:perspective(1400px)
       translate3d(0,0,var(--fx-cinema-depth,0px))
       rotateY(calc(var(--fx-cinema-orbit,0) * -12deg))!important;
