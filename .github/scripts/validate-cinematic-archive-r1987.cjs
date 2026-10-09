@@ -21,7 +21,39 @@ async function evaluate(viewport,isMobile,browser){
     const s=document.documentElement.dataset.fxArchiveExperience;
     return s==='ready'||s==='context-error'||s==='no-scenes';
   },null,{timeout:90000});
-  const init=await page.evaluate(()=>({
+  if(isMobile){
+    const cssBudget=await page.evaluate(()=>{
+      const links=[...document.querySelectorAll('link[rel="stylesheet"]')];
+      const names=['formatx-proof-singleton-r2033.css','formatx-p0-first-paint-r490.css',
+        'formatx-menu-owner-r1956.css','formatx-mobile-first-paint-r358.css',
+        'formatx-mobile-brand-dedupe-r1952.css'];
+      const loaded=links.filter(link=>names.some(name=>link.href.includes(name)))
+        .map(link=>({href:link.href,media:link.media||'all',active:matchMedia(link.media||'all').matches}));
+      const bundle=links.find(link=>link.href.includes('formatx-mobile-critical-bundle-r2038.css'));
+      const resource=performance.getEntriesByType('resource')
+        .filter(r=>r.name.includes('/styles/')&&r.initiatorType==='link')
+        .map(r=>r.name.split('/').pop());
+      return {hasBundle:!!bundle,bundleActive:!!bundle&&matchMedia(bundle.media||'all').matches,
+        activeDuplicates:loaded.filter(x=>x.active),bundleRequests:resource.filter(x=>x.includes('mobile-critical-bundle')).length,
+        originalFiles:loaded.length};
+    });
+    assert.ok(cssBudget.hasBundle&&cssBudget.bundleActive&&cssBudget.activeDuplicates.length===0,
+      'Five individually blocking mobile stylesheets replaced the single critical bundle: '+JSON.stringify(cssBudget));
+    console.log('MAG_MOBILE_CRITICAL_BUNDLE_PASS',JSON.stringify({viewport,cssBudget}));
+    const brandHit=await page.evaluate(()=>{
+      const el=document.querySelector('header.topbar > a.brand');
+      const rect=el?.getBoundingClientRect();
+      return {present:!!el,width:rect?.width||0,height:rect?.height||0,
+        visible:el?getComputedStyle(el).visibility:null,
+        label:el?.textContent.trim()||'',
+        inViewport:rect?.top>=0&&rect?.bottom<=innerHeight};
+    });
+    assert.ok(brandHit.present&&brandHit.width>=44&&brandHit.height>=44
+      &&brandHit.visible==='visible'&&brandHit.inViewport,
+      'Real mobile header brand interactive target below 44px: '+JSON.stringify(brandHit));
+    console.log('MAG_MOBILE_BRAND_TARGET_PASS',JSON.stringify({viewport,brandHit}));
+  }
+    const init=await page.evaluate(()=>({
     status:document.documentElement.dataset.fxArchiveExperience,
     shared:window.FormatXLivingCore?.sharedWebGL2||false,
     sceneCount:window.FormatXArchiveExperience.scenes.length,
@@ -171,8 +203,14 @@ async function evaluate(viewport,isMobile,browser){
           const link=p?.querySelector('#hero-download');
           return {exists:!!link,href:link?.getAttribute('href'),inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p};
         });
-        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
-          'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
+        // Both supported real destinations are allowed: the canonical
+        // account-gated download endpoint OR the current official GitHub
+        // release asset. Reject empty links, placeholders and off-brand URLs.
+        const href=existingCTA.href||'';
+        const validRelease=/^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/[^/]+\/[^?#]+\.zip(?:[?#].*)?$/.test(href);
+        assert.ok(existingCTA.exists&&existingCTA.inPaper
+          &&(href==='/download/multiplatform'||validRelease),
+          'Final scene must deliver an original, real, official CTA: '+JSON.stringify(existingCTA));
       }
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
       assert.equal(cinema.count,1,'More than one original content folio is visible: '+JSON.stringify(cinema));
@@ -323,6 +361,49 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function auditParity(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference',
+    userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Chrome-Lighthouse'
+  });
+  const page=await context.newPage();
+  // No UA-specific renderer bypass: the viewport/capability-dependent
+  // quality levels may differ, but one shared WebGL2 MAG must always boot.
+  // Deliberately NOT ?archive=1: prove the normal public page does not
+  // serve the old hero to a Lighthouse user agent.
+  await page.goto('http://127.0.0.1:4178/scifi-ui/index.html?lighthouse=1&r2039-parity=1',
+    {waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const state=document.documentElement.dataset.fxArchiveExperience;
+    return state==='ready'||state==='context-error'||state==='no-scenes'||state==='audit-html';
+  },null,{timeout:60000});
+  const parity=await page.evaluate(()=>{
+    const r=document.documentElement;
+    return {experience:r.dataset.fxArchiveExperience,
+      cinema:r.dataset.fxArchiveCinema||'home',
+      sceneCount:window.FormatXArchiveExperience?.scenes?.length||0,
+      canvas:!!window.FormatXLivingCore?.canvas,
+      contexts:r.dataset.fxCoreContexts||'0'};
+  });
+  assert.equal(parity.experience,'ready','A Lighthouse UA was served noncinematic HTML: '+JSON.stringify(parity));
+  assert.equal(parity.contexts,'1','Lighthouse and real visitors need same single WebGL renderer');
+  assert.ok(parity.sceneCount>=8,'Lighthouse must receive same eight real archiving scenes');
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,
+    {timeout:20000});
+  const active=await page.evaluate(()=>{
+    const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const legacy=document.querySelector('#hero .hero-copy');
+    return {cinema:document.documentElement.dataset.fxArchiveCinema,
+      nativeFolio:folio?.classList.contains('fx-archive-cinema-folio-r2030')||false,
+      title:folio?.querySelector('h2,h3')?.textContent?.trim().slice(0,100)||'',
+      legacyHidden:legacy?getComputedStyle(legacy).display==='none':false};
+  });
+  assert.ok(active.nativeFolio&&active.legacyHidden,
+    'Lighthouse still saw old hero instead of original delivered HTML folio: '+JSON.stringify(active));
+  console.log('MAG_LIGHTHOUSE_PARITY_PASS',JSON.stringify({...parity,...active}));
+  await context.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -380,7 +461,9 @@ async function fallback(browser){
   ]});
   try{
     await evaluate({width:1440,height:900},false,browser);
+    await evaluate({width:320,height:568},true,browser);
     await evaluate({width:390,height:844},true,browser);
+    await auditParity(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}

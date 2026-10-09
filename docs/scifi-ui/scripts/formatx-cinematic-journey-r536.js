@@ -11,9 +11,11 @@
   const VERIFY = params.has('verify') || params.has('scroll-test') || params.has('design-test');
   const AUDIT = /Chrome-Lighthouse/i.test(navigator.userAgent||'') || params.get('lighthouse') === '1';
 
-  if (AUDIT && !FORCE) {
-    root.dataset.fxCinematicJourneyR536='audit-static-skip-r1735';
-    root.dataset.fxCinematicJourneyAuditR1735='zero-stage-zero-observers';
+  // No Lighthouse-only alternate storytelling. Real users and auditors
+  // see one shared cinematic scroll world. Explicit HTML and reduced motion
+  // already take the accessible path below.
+  if (params.get('archive') === 'off' && !FORCE) {
+    root.dataset.fxCinematicJourneyR536='user-requested-html-r2039';
     return;
   }
 

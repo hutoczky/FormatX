@@ -30,11 +30,9 @@
     if(link)link.href='./checkout.html?plan=business_pro&cycle=monthly&currency='+selected+'&lang='+language;
   },true);
 
-  const AUDIT_MODE =
-    navigator.webdriver === true
-    || /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || new URLSearchParams(location.search).get('lighthouse') === '1'
-    || document.documentElement.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
+  // Benchmark and visitors use the same APEX behavior. No UA-based skip.
+  const AUDIT_MODE = new URLSearchParams(location.search).get('archive') === 'off'
+    || matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (AUDIT_MODE) {
     ROOT.dataset.fxApex = 'audit-skip';
     ROOT.dataset.fxRenderer = 'static-audit';
