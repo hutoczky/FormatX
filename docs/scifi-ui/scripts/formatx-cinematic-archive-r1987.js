@@ -86,9 +86,27 @@
     }
   }
 
+  function positionCinemaFolio(panel){
+    if(!panel||!panel.isConnected)return;
+    // The canonical site contains ancestor perspective/transform contexts,
+    // which change the containing block of a fixed child. Solve in viewport
+    // coordinates instead of resetting those ancestors (doing so breaks
+    // the living MAG renderer and the native pricing/menu consoles).
+    const w=innerWidth,h=innerHeight,phone=mobile();
+    const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
+    const x=phone?w*.04:w-w*.027-desiredWidth;
+    const y=phone?h*.48:h*.11;
+    const r=panel.getBoundingClientRect();
+    const previousX=parseFloat(panel.style.getPropertyValue('--fx-cinema-screen-x'))||0;
+    const previousY=parseFloat(panel.style.getPropertyValue('--fx-cinema-screen-y'))||0;
+    const dx=x-r.left,dy=y-r.top;
+    if(Math.abs(dx)>1)panel.style.setProperty('--fx-cinema-screen-x',(previousX+dx).toFixed(2)+'px');
+    if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
+  }
+
   function syncCinema(){
     if(!cinemaPrepared)return;
-    const enabled=Boolean(archiveActive&&current&&!reduced.matches);
+    const enabled=Boolean(archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     root.dataset.fxArchiveCinema=enabled?'active':'home';
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
@@ -105,6 +123,7 @@
           panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
+          positionCinemaFolio(panel);
         }
       }
     }
@@ -537,7 +556,7 @@ void main(){
   }
   function updateHandoff(){
     if(!handoff?.isConnected)return;
-    const showing=Boolean(current&&archiveActive&&!reduced.matches);
+    const showing=Boolean(current&&archiveActive&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     handoff.dataset.active=showing?'true':'false';
     if(!showing){handoffKey='';return;}
     const english=root.lang==='en',scene=current.s;
