@@ -235,7 +235,25 @@ async function evaluate(viewport,isMobile,browser){
     magDomCanonical:!!document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage'),
     canvasRect:(()=>{const r=document.querySelector('#hero .fx-crystal-organism-r326-stage')?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})()
   }));
-  assert.ok(native.frames>0,'Native WebGL archive never drew');
+  // GPU pressure may switch the real archive renderer to LOW quality. MAG
+  // must still physically manipulate the papyrus via one genuine 3D field
+  // rather than dropping all strands and only fading HTML content.
+  await page.evaluate(()=>window.FormatXArchiveExperience.setQuality('low'));
+  await page.waitForTimeout(260);
+  await page.evaluate(()=>window.FormatXLivingCore?.requestRender?.(2));
+  await page.waitForTimeout(260);
+  const lowLod=await page.evaluate(()=>({
+    quality:document.documentElement.dataset.fxArchiveQuality,
+    active:window.FormatXArchiveExperience.state.active,
+    scene:window.FormatXArchiveExperience.state.scene,
+    filaments:Number(document.documentElement.dataset.fxArchiveFilamentCount||0)
+  }));
+  assert.equal(lowLod.quality,'low','Failed to activate reduced 3D magnetic field quality: '+JSON.stringify(lowLod));
+  if(lowLod.active)assert.ok(lowLod.filaments>=1,
+    'Low GPU quality must retain a physical MAG-to-papyrus energy filament: '+JSON.stringify(lowLod));
+  await page.evaluate(()=>window.FormatXArchiveExperience.setQuality('high'));
+  console.log('ARCHIVE_LOW_LOD_FILAMENT_PASS',JSON.stringify(lowLod));
+    assert.ok(native.frames>0,'Native WebGL archive never drew');
   assert.ok(native.magDomCanonical,'Native MAG must remain inside the original hero DOM');
   assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
   if(isMobile){
