@@ -22,6 +22,24 @@ async function evaluate(viewport,isMobile,browser){
     return s==='ready'||s==='context-error'||s==='no-scenes';
   },null,{timeout:90000});
   if(isMobile){
+    const cssBudget=await page.evaluate(()=>{
+      const links=[...document.querySelectorAll('link[rel="stylesheet"]')];
+      const names=['formatx-proof-singleton-r2033.css','formatx-p0-first-paint-r490.css',
+        'formatx-menu-owner-r1956.css','formatx-mobile-first-paint-r358.css',
+        'formatx-mobile-brand-dedupe-r1952.css'];
+      const loaded=links.filter(link=>names.some(name=>link.href.includes(name)))
+        .map(link=>({href:link.href,media:link.media||'all',active:matchMedia(link.media||'all').matches}));
+      const bundle=links.find(link=>link.href.includes('formatx-mobile-critical-bundle-r2038.css'));
+      const resource=performance.getEntriesByType('resource')
+        .filter(r=>r.name.includes('/styles/')&&r.initiatorType==='link')
+        .map(r=>r.name.split('/').pop());
+      return {hasBundle:!!bundle,bundleActive:!!bundle&&matchMedia(bundle.media||'all').matches,
+        activeDuplicates:loaded.filter(x=>x.active),bundleRequests:resource.filter(x=>x.includes('mobile-critical-bundle')).length,
+        originalFiles:loaded.length};
+    });
+    assert.ok(cssBudget.hasBundle&&cssBudget.bundleActive&&cssBudget.activeDuplicates.length===0,
+      'Five individually blocking mobile stylesheets replaced the single critical bundle: '+JSON.stringify(cssBudget));
+    console.log('MAG_MOBILE_CRITICAL_BUNDLE_PASS',JSON.stringify({viewport,cssBudget}));
     const brandHit=await page.evaluate(()=>{
       const el=document.querySelector('header.topbar > a.brand');
       const rect=el?.getBoundingClientRect();
