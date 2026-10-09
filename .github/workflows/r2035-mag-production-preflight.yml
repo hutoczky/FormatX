@@ -39,7 +39,7 @@ jobs:
           const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
           const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
           const loop=fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js','utf8');
-          assert.equal((html.match(/data-fx-award-proof=/g)||[]).length,1,'Exactly one evidence block must be in original HTML');
+          assert.equal((html.match(/<section[^>]*class="fx-award-proof"[^>]*\bdata-fx-award-proof\b/g)||[]).length,1,'Exactly one evidence block must be in original HTML');
           assert.ok(!loop.includes('<article class="fx-loop-reference-proof">'),'No copied evidence panel in scrolling mirror');
           assert.ok(html.includes('formatx-mobile-first-shell-r2035.css'),'The real mobile shell is a critical resource');
           assert.ok(html.includes('data-fx-r487-media="(max-width:900px)" media="print" data-fx-mobile-first-paint-r358'),'Full mobile CSS must not block first paint');
