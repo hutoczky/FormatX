@@ -19,7 +19,7 @@ async function evaluate(viewport,isMobile,browser){
   const firstFrame=await page.evaluate(()=>{
     const label=document.querySelector('.fx-mag-first-visible-telemetry-r2039');
     return {intro:document.documentElement.dataset.fxIntroPrepaintR1611,
-      label:label?.textContent?.replace(/\\s+/g,' ').trim(),
+      label:label?.textContent?.replace(/\s+/g,' ').trim(),
       display:label?getComputedStyle(label).display:null,
       rect:label?.getBoundingClientRect().toJSON()};
   });
