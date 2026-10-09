@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2036-mag-folded-critical-first-paint
-base_master=051eac9d16fd1d0e949866aa86b3de90cb64d873
-purpose=Eliminate one extra render-blocking MAG critical CSS request by folding unmodified first-frame rules into existing P0 CSS; keep all cinematic scenes, proof, interactions, SEO and fallback.
-validation=Re-run Lighthouse actual desktop and mobile plus 320-1920 visual + MAG WebGL all 8 scenes, actual navigation and production smoke.
-limits=If Lighthouse remains under 95, report real measured scores and do not claim optimization goal met.
+token=20261009-r2037-single-canonical-proof-live
+base_master=ec7883ed68512253a9236133892d921864316123
+purpose=Remove duplicate public evidence headline from original hero, preserve a single canonical proof panel with real verifiable links and both Hungarian and English language switching.
+validation=Single-proof source assertion, original MAG 8 scene desktop/mobile browser, navigation, bilingual labels, design system, production Worker and exact revision convergence + live smoke.
+limits=Lighthouse 95 threshold and photographic visual parity remain open quality targets; do not misrepresent those as complete.

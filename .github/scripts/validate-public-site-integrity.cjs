@@ -88,6 +88,18 @@ for (const file of htmlFiles) {
 }
 
 const homepage = read('docs/scifi-ui/index.html');
+const canonicalEvidenceHeadingCount = (homepage.match(/<h2\b[^>]*>Bizonyíték a látvány mögött\.<\/h2>/g) || []).length;
+if (canonicalEvidenceHeadingCount !== 1) report('home: proof headline must be exactly one semantic H2, not an extra MAG preview');
+if (!homepage.includes('<h2>MAG // ÉLŐ RENDSZERBEMUTATÓ</h2>')) report('home: distinct MAG archive heading missing');
+const introPresentationRuntime = read('docs/scifi-ui/scripts/formatx-reference-production-r244.js');
+const languageSwitchRuntime = read('docs/scifi-ui/scripts/single-language-toggle.js');
+if (!introPresentationRuntime.includes("title: 'MAG // ÉLŐ RENDSZERBEMUTATÓ'") ||
+    !introPresentationRuntime.includes("title: 'MAG // LIVE SYSTEM PRESENTATION'")) {
+  report('home: language-dependent MAG preview reintroduces evidence heading');
+}
+if (!languageSwitchRuntime.includes("['#hero .fx-reference-proof h2','MAG // ÉLŐ RENDSZERBEMUTATÓ','MAG // LIVE SYSTEM PRESENTATION']")) {
+  report('home: switch language reintroduces duplicate public evidence heading');
+}
 const downloads = read('docs/scifi-ui/downloads/index.html');
 const checkout = read('docs/scifi-ui/scripts/checkout-v100.js');
 const pricingApi = read('billing-worker/src/pricing-v100-api.js');

@@ -29,13 +29,13 @@
   const isMobile = () => matchMedia('(max-width: 900px)').matches;
   const copy = () => root.lang === 'en' ? {
     heading: 'DISCOVER HOW IT WORKS',
-    title: 'Proof behind the visual.',
-    body: 'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',
+    title: 'MAG // LIVE SYSTEM PRESENTATION',
+    body: 'MAG retrieves each real FormatX module from its cinematic archive and presents it as a working interactive glass display.',
     ask: 'ASK'
   } : {
     heading: 'A MŰKÖDÉS MEGISMERÉSE',
-    title: 'Bizonyíték a látvány mögött.',
-    body: 'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',
+    title: 'MAG // ÉLŐ RENDSZERBEMUTATÓ',
+    body: 'A MAG különböző tárolórekeszekből egyesével előveszi és működő webes kijelzőként átadja a FormatX valódi moduljait.',
     ask: 'KÉRDEZZ'
   };
 

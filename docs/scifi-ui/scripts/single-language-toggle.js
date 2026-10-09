@@ -34,7 +34,7 @@ const FIXED_COPY=[
   ['#pricing .price-card:nth-child(2) header b','AJÁNLOTT','RECOMMENDED'],
   ['#pricing .price-card:nth-child(3) header b','CSAPAT','TEAM'],
   ['#hero .fx-reference-ask span','KÉRDEZZ','ASK'],
-  ['#hero .fx-reference-proof h2','Bizonyíték a látvány mögött.','Proof behind the visual.'],
+  ['#hero .fx-reference-proof h2','MAG // ÉLŐ RENDSZERBEMUTATÓ','MAG // LIVE SYSTEM PRESENTATION'],
   ['#hero .fx-method-inline li:nth-child(1)','Felderítés','Discover'],
   ['#hero .fx-method-inline li:nth-child(2)','Terv','Plan'],
   ['#hero .fx-method-inline li:nth-child(3)','Kontrollált végrehajtás','Controlled execution'],
