@@ -1,3 +1,12 @@
+/* R2038 essential design tokens: always available before post-FCP
+   cinematic/optical enhancements, including in reduced-motion fallback. */
+:root{
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+/* production-r2038-first-paint-token-stability */
+
 /* FormatX R1956 — deterministic menu render contract for phone + PC.
    This stylesheet is intentionally synchronous and small: the navigation must
    remain operable even while cinematic/deferred style layers are still loading. */
@@ -153,3 +162,21 @@ html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living
   contain:layout style!important;
 }
 /* production-r1979-audit-hero-copy-single-paint */
+
+/* R2033: ONE visible public evidence module; the canonical proof strip
+   contains the original verification, technical and security destinations.
+   Keeping the mirrored scroll bridge box intact prevents loop geometry drift. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading{
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html:has([data-fx-award-proof]) .fx-award-proof{opacity:1!important}
+}
+/* production-r2033-canonical-proof-singleton-hotfix */
+
+/* R2038: canonical proof singleton folded into existing blocking menu sheet. */

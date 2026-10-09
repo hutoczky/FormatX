@@ -100,6 +100,9 @@ async function evaluate(viewport,isMobile,browser){
       const state=window.FormatXArchiveExperience?.state;
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
+    // The state may already name the same source before its next native
+    // requestAnimationFrame publishes the newly scrubbed physical handoff.
+    await page.waitForTimeout(180);
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
     let postRefresh=null;
     if(state.scene!==scene.key){
@@ -147,8 +150,39 @@ async function evaluate(viewport,isMobile,browser){
         const hostRect=visibleHosts[0]?.getBoundingClientRect();
         const old=hosts.filter(h=>h!==visibleHosts[0]).map(h=>getComputedStyle(h).visibility);
         const hasActualInputs=Boolean(panel?.querySelector('a[href],button,input,select,textarea'));
+        const pixel=pr&&pr.width>10&&pr.height>10
+          ?document.elementFromPoint(Math.min(innerWidth-2,Math.max(2,pr.x+pr.width*.58)),
+            Math.min(innerHeight-2,Math.max(2,pr.y+pr.height*.53)))
+          :null;
         return {
           mode:root.dataset.fxArchiveCinema,
+          topLayerCount:document.querySelectorAll('.fx-archive-cinema-folio-r2030:popover-open').length,
+          paperTopLayer:!!panel?.matches(':popover-open'),
+          hitTopLayer:!!pixel&&!!panel?.contains(pixel),
+          controlTopLayer:!!document.querySelector('#hero > .fx-reference-controls-r204:popover-open'),
+          controlDebug:(()=>{
+            const c=document.querySelector('#hero .fx-reference-controls-r204');
+            return {exists:!!c,parent:c?.parentElement?.className||c?.parentElement?.id,
+              popover:c?.getAttribute('popover'),open:c?.matches(':popover-open'),
+              display:c?getComputedStyle(c).display:null,visibility:c?getComputedStyle(c).visibility:null,
+              error:root.dataset.fxArchiveControlsPopoverError||'',
+              menuOpen:root.classList.contains('fx-organism-menu-open'),
+              modalOpen:document.body.classList.contains('fx-organism-panel-open'),
+              miniMagOpen:!!document.querySelector('.fx-mini-mag-open-r459')};
+          })(),
+          controlsHit:(()=>{
+            const button=document.querySelector('#hero .fx-three-sound');
+            const b=button?.getBoundingClientRect();
+            if(!b)return false;
+            return button.contains(document.elementFromPoint(b.x+b.width*.5,b.y+b.height*.5));
+          })(),
+          controlRect:(()=>{
+            const ctl=document.querySelector('#hero > .fx-reference-controls-r204:popover-open');
+            const b=ctl?.getBoundingClientRect();
+            return b?{left:b.left,right:b.right,top:b.top,bottom:b.bottom}:null;
+          })(),
+          hitElement:pixel?.tagName||null,
+          paperOpacity:active?.opacity||null,
           count:visibleHosts.length,
           paperVisible:active?.visibility,
           paperPosition:active?.position,
@@ -180,6 +214,17 @@ async function evaluate(viewport,isMobile,browser){
       assert.equal(cinema.paperPosition,'fixed','Original HTML module is not physically presented in front of visitor');
       assert.equal(cinema.paperPointer,'auto','Interactive original controls are disabled');
       assert.ok(cinema.paperText>70,'Original functional content is not present in MAG folio');
+      // An invisible native card used to pass all eight scene tests because
+      // its computed visibility was 'visible' while it painted BEHIND hero.
+      // Require the same ORIGINAL HTML to actually own a top-layer painted hit
+      // point (rather than a generic telemetry label or blank canvas).
+      assert.equal(cinema.topLayerCount,1,'Precisely one HTML papyrus must occupy the visual top layer: '+JSON.stringify(cinema));
+      assert.ok(cinema.paperTopLayer&&cinema.hitTopLayer,
+        'Original HTML papyrus is not visibly paintable above MAG backdrop: '+JSON.stringify(cinema));
+      assert.ok(cinema.controlTopLayer&&cinema.controlsHit,
+        'The ORIGINAL living MAG SOUND/ASK controls are obstructed by the paper: '+JSON.stringify(cinema));
+      assert.ok(cinema.paper.w>=viewport.width*.35&&cinema.paper.h>=viewport.height*.35,
+        'Presenting papyrus has collapsed geometry: '+JSON.stringify(cinema));
       assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
       assert.ok(cinema.mag&&cinema.paper,'Missing two cinematic lanes');
       if(isMobile){
@@ -305,15 +350,31 @@ async function evaluate(viewport,isMobile,browser){
   // Software WebGL readback can stall screenshots in CI even after all
   // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
   // for functional testing; report incomplete captures explicitly.
+  const capturePath=`${out}/archive-${isMobile?'mobile':'desktop'}.png`;
   try {
+    // Allow the living MAG animation: disabling CSS animation can wait for a
+    // perpetually moving WebGL composition to reach a non-existent stable frame.
     await page.screenshot({
-      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
+      path:capturePath,fullPage:false,animations:'allow',timeout:12000
     });
+    console.log('ARCHIVE_VISUAL_CAPTURE_PASS',JSON.stringify({capturePath,method:'playwright'}));
   } catch(error) {
-    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
-    }));
+    // Chrome DevTools captures the actual composited viewport without
+    // Playwright's animation-stability or font readiness watchdog.
+    try {
+      const cdp=await context.newCDPSession(page);
+      await cdp.send('Page.enable');
+      const image=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+      fs.writeFileSync(capturePath,Buffer.from(image.data,'base64'));
+      await cdp.detach();
+      console.log('ARCHIVE_VISUAL_CAPTURE_PASS',JSON.stringify({capturePath,method:'cdp',bytes:fs.statSync(capturePath).size}));
+    }catch(fallbackError){
+      console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        playwright:String(error?.message||error).slice(0,250),
+        cdp:String(fallbackError?.message||fallbackError).slice(0,250)
+      }));
+    }
   }
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
@@ -358,6 +419,32 @@ async function missingGpuFallback(browser){
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
 }
+async function narrowPhoneTapTarget(browser){
+  const context=await browser.newContext({
+    viewport:{width:320,height:568},
+    isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'
+  });
+  try{
+    const page=await context.newPage();
+    await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForTimeout(350);
+    const result=await page.evaluate(()=>{
+      const anchor=document.querySelector('header.topbar > a.brand');
+      const r=anchor?.getBoundingClientRect();
+      const heavy=document.querySelector('link[data-fx-p0-first-paint-r503]');
+      const optical=document.querySelector('link[data-fx-mobile-p0-polish-r2038]');
+      return {width:r?.width||0,height:r?.height||0,
+        p0Media:heavy?.media||null,optical:!!optical};
+    });
+    assert.ok(result.width>=40&&result.height>=44,
+      '320px original brand touch target must meet 44px: '+JSON.stringify(result));
+    assert.equal(result.p0Media,'(min-width: 901px)',
+      'Mobile may not render-block on 71KB desktop P0 optical CSS');
+    assert.ok(result.optical,'Mobile P0 polish must be present for post-FCP enhancement');
+    console.log('ARCHIVE_NARROW_PHONE_PASS',JSON.stringify(result));
+  }finally{await context.close();}
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -381,6 +468,7 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await narrowPhoneTapTarget(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}

@@ -30,7 +30,7 @@
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
-  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',cinemaUiObserver=null;
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
@@ -129,18 +129,24 @@
   }
   function keepExistingCinemaControls(){
     if(cinemaControlHome)return;
-    const rail=document.querySelector('#hero .fx-reference-rail');
+    const controls=document.querySelector('#hero .fx-reference-controls-r204');
     const hero=document.getElementById('hero');
-    if(!rail||!hero||!rail.parentNode)return;
-    cinemaControlHome={node:rail,parent:rail.parentNode,next:rail.nextSibling};
-    // Same DOM button instances and event listeners, never clones.
-    hero.appendChild(rail);
-    rail.classList.add('fx-cinema-controls-r2032');
+    if(!(controls instanceof HTMLElement)||!hero||!controls.parentNode)return;
+    // The original SOUND and ASK controls belong together. The earlier move
+    // split off ASK while SOUND stayed behind the 3D/archive top layer.
+    // Keep precisely the same source DOM nodes, handlers and accessibility.
+    if(typeof controls.showPopover!=='function')return;
+    cinemaControlHome={node:controls,parent:controls.parentNode,next:controls.nextSibling};
+    controls.setAttribute('popover','manual');
+    controls.classList.add('fx-cinema-controls-r2039');
+    hero.appendChild(controls);
   }
   function restoreExistingCinemaControls(){
     if(!cinemaControlHome)return;
     const {node,parent,next}=cinemaControlHome;
-    node.classList.remove('fx-cinema-controls-r2032');
+    if(node.matches(':popover-open'))try{node.hidePopover()}catch(_){}
+    node.removeAttribute('popover');
+    node.classList.remove('fx-cinema-controls-r2039');
     if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
     cinemaControlHome=null;
   }
@@ -217,6 +223,10 @@
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
         panel.setAttribute('aria-label','FormatX MAG cinematic content');
+        // A real top-layer original HTML sheet: its DOM stays in the canonical
+        // source chapter, but CSS transform/contain/stacking ancestors can no
+        // longer hide it behind the fullscreen MAG's hero context.
+        if(typeof panel.showPopover==='function')panel.setAttribute('popover','manual');
         // Adding one wrapper preserves the source section's layout anchor,
         // its own events and all real interactive descendants.
         const nodes=Array.from(host.childNodes);
@@ -248,6 +258,22 @@
 
   function positionCinemaFolio(panel){
     if(!panel||!panel.isConnected)return;
+    if(panel.matches(':popover-open')){
+      // Manual popover creates a native top-layer viewport fixed box while
+      // preserving the same original DOM tree and its event listeners. There
+      // is NO ancestor-relative compensation and NO cumulative scroll drift.
+      panel.style.removeProperty('--fx-cinema-screen-x');
+      panel.style.removeProperty('--fx-cinema-screen-y');
+      panel.style.removeProperty('translate');
+      const viewportH=Math.max(1,innerHeight);
+      if(mobile()){
+        const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
+        const bottom=stage?.getBoundingClientRect().bottom||viewportH*.45;
+        panel.style.setProperty('top',Math.max(viewportH*.51,bottom+Math.min(24,viewportH*.034)).toFixed(2)+'px','important');
+      }else panel.style.removeProperty('top');
+      return;
+    }
+    // Compatibility fallback for browsers lacking the native popover top layer.
     // The canonical site contains ancestor perspective/transform contexts,
     // which change the containing block of a fixed child. Solve in viewport
     // coordinates instead of resetting those ancestors (doing so breaks
@@ -321,6 +347,23 @@
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        // Popover manual is only a layer primitive, not a separate UI and
+        // never a cloned page. Only ONE actual HTML sheet enters the top layer.
+        // Technical instrument dialogs must remain on top when they own focus.
+        const shouldPresent=active
+          && !document.body.classList.contains('fx-organism-panel-open')
+          && !root.classList.contains('fx-organism-menu-open')
+          && !document.querySelector('#main-nav.open')
+          && !document.querySelector('.fx-mini-mag-open-r459');
+        if(panel.hasAttribute('popover')){
+          if(shouldPresent&&!panel.matches(':popover-open')){
+            try{panel.showPopover()}catch(error){
+              root.dataset.fxArchivePopoverError=String(error?.message||error).slice(0,90);
+            }
+          }else if(!shouldPresent&&panel.matches(':popover-open')){
+            try{panel.hidePopover()}catch(_){}
+          }
+        }
         if(active){
           const p=clamp(current.progress);
           const materialize=smooth((p-.06)/.46)*(1-smooth((p-.88)/.12));
@@ -328,6 +371,24 @@
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
           positionCinemaFolio(panel);
+        }
+      }
+    }
+    // Keep the original semantic MAG controls in their own narrow top-layer
+    // HUD at the MAG side. This must be ordered AFTER the paper, otherwise
+    // native top-layer hit-testing prevents SOUND/ASK clicks on desktop.
+    const controls=cinemaControlHome?.node;
+    if(controls?.hasAttribute('popover')){
+      const uiBlocked=document.body.classList.contains('fx-organism-panel-open')
+        ||root.classList.contains('fx-organism-menu-open')
+        ||Boolean(document.querySelector('#main-nav.open,.fx-mini-mag-open-r459'));
+      const shouldControls=enabled&&!uiBlocked;
+      if(!shouldControls&&controls.matches(':popover-open')){
+        try{controls.hidePopover()}catch(_){}
+      }else if(shouldControls&&(key!==lastCinemaKey||!controls.matches(':popover-open'))){
+        if(controls.matches(':popover-open'))try{controls.hidePopover()}catch(_){}
+        try{controls.showPopover()}catch(error){
+          root.dataset.fxArchiveControlsPopoverError=String(error?.message||error).slice(0,90);
         }
       }
     }
@@ -970,6 +1031,8 @@ void main(){
     if(raf)cancelAnimationFrame(raf);
     sceneObserver?.disconnect();
     sceneObserver=null;
+    cinemaUiObserver?.disconnect();
+    cinemaUiObserver=null;
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
@@ -983,6 +1046,7 @@ void main(){
     for(const host of cinemaHosts){
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
+        if(panel.matches(':popover-open'))try{panel.hidePopover()}catch(_){}
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
         panel.remove();
       }
@@ -1021,6 +1085,13 @@ void main(){
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
+    // The native menu and original instrument dialogs must always outrank
+    // the original HTML paper while they own focus. Browser top-layer popovers
+    // cannot rely on ordinary z-index for that; close/reopen on class changes.
+    cinemaUiObserver=new MutationObserver(()=>invalidate());
+    if(document.body)cinemaUiObserver.observe(document.body,{attributes:true,attributeFilter:['class']});
+    const nav=document.getElementById('main-nav');
+    if(nav)cinemaUiObserver.observe(nav,{attributes:true,attributeFilter:['class']});
     // If the introductory film completed before this deferred module loaded,
     // its overlay will already have been removed. It must never replay here.
     if(root.dataset.fxMagBirthOwnerR533!=='active'

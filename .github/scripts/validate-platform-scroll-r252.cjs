@@ -200,17 +200,38 @@ async function verifyMobile(browser) {
   if(await voiceClose.isVisible().catch(()=>false))
     await voiceClose.click();
   await page.keyboard.press('Escape').catch(() => {});
+  // The original MAG voice is a full focus-owning control, not just a modal
+  // body class. Its actual API must finish closing before a native scroll is
+  // permitted; a mere close-button click can animate for several frames.
+  await page.evaluate(()=>window.FormatXOrganismVoice?.close?.());
   await page.waitForFunction(()=>
     !document.body.classList.contains('fx-organism-panel-open')
     && !document.documentElement.classList.contains('fx-organism-menu-open')
     && !document.querySelector('.fx-mini-mag-open-r459'),
-  null,{timeout:5000}).catch(()=>{});
-  await page.waitForTimeout(200);
+  null,{timeout:5000});
+  await page.waitForTimeout(280);
 
   for (let cycle = 0; cycle < 2; cycle += 1) {
     const before = await state(page);
     await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: 'auto' }));
-    await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+    try{
+      await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+    }catch(error){
+      const diagnostic=await page.evaluate(()=>({
+        scrollY,docEnd:document.documentElement.scrollHeight-innerHeight,
+        bridge:document.querySelector('.fx-loop-bridge')?.offsetTop,
+        viewportBottom:scrollY+innerHeight,
+        heart:document.documentElement.dataset.fxHeartLoopR252||'',
+        policy:document.documentElement.dataset.fxHeartLoopPolicy||'',
+        count:document.documentElement.dataset.fxLoopCount,
+        state:document.documentElement.dataset.fxLoopLandingState,
+        source:document.documentElement.dataset.fxLoopSource,
+        menu:document.documentElement.classList.contains('fx-organism-menu-open'),
+        panel:document.body.classList.contains('fx-organism-panel-open'),
+        voice:!!document.querySelector('.fx-mini-mag-open-r459')
+      }));
+      throw new Error('Real mobile native loop failed: '+JSON.stringify({cycle,diagnostic})+' :: '+error.message);
+    }
     await page.waitForFunction(() => document.documentElement.dataset.fxLoopLandingState === 'heart-core-settled', null, { timeout: 4000 });
     await page.waitForTimeout(180);
     const after = await state(page);

@@ -1003,3 +1003,21 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+/* R2038 P0 mobile keyboard/touch usability:
+   The 320px phone audit found the original FORMATX brand link measured
+   132×34, below the 40×40 minimum. Reserve a 44px physical hit area
+   without enlarging the logo or changing text flow. */
+@media (max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25) {
+  html:root:root:root body.living-architecture header.topbar > a.brand,
+  html:root:root:root body.living-architecture header.topbar a.brand {
+    min-height: 44px !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    touch-action: manipulation;
+  }
+}
+/* production-r2038-native-mag-header-tap-target */

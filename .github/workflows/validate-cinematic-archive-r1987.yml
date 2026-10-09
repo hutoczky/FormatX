@@ -65,4 +65,5 @@ jobs:
         with:
           name: formatx-archive-visual-proof
           path: .archive-artifacts/
-          if-no-files-found: ignore
+          include-hidden-files: true
+          if-no-files-found: error
