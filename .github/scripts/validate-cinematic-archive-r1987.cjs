@@ -422,7 +422,19 @@ async function mobileHtmlFallback(browser){
     const style=copy?getComputedStyle(copy):null;
     const rect=copy?.getBoundingClientRect();
     const sr=space?.getBoundingClientRect();
+    const hit=rect?document.elementFromPoint(rect.x+Math.min(rect.width/2,100),
+      Math.min(innerHeight-24,rect.y+Math.min(70,rect.height/2))):null;
+    const ancestor=[];
+    for(let el=copy;el&&ancestor.length<6;el=el.parentElement){
+      const v=getComputedStyle(el);
+      ancestor.push({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,85),
+        display:v.display,opacity:v.opacity,visibility:v.visibility,
+        zIndex:v.zIndex,position:v.position,pointerEvents:v.pointerEvents,
+        clipPath:v.clipPath,transform:v.transform});
+    }
     return {state:document.documentElement.dataset.fxArchiveExperience,
+      hit:hit?hit.outerHTML.slice(0,230):null,
+      ancestor,
       audit:document.documentElement.dataset.fxP0AuditModeR1728,
       copy:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
       space:sr?{x:sr.x,y:sr.y,w:sr.width,h:sr.height}:null,
@@ -431,6 +443,9 @@ async function mobileHtmlFallback(browser){
         opacity:style.opacity,overflow:style.overflow}:null};
   });
   console.log('ARCHIVE_AUDIT_FALLBACK_GEOMETRY',JSON.stringify(auditLayout));
+  try{await auditPage.screenshot({path:`${out}/archive-audit-mobile-fallback.png`,
+    fullPage:false,timeout:7000});}
+  catch(err){console.warn('ARCHIVE_AUDIT_SCREENSHOT_UNAVAILABLE',String(err?.message||err).slice(0,250));}
   assert.ok(auditLayout.copy?.w>=240&&auditLayout.copy?.h>=140,
     'Lighthouse/native-html fallback remains an invisible 1px element: '+JSON.stringify(auditLayout));
   await context.close();
