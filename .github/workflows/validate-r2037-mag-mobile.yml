@@ -1,0 +1,68 @@
+name: R2037 MAG real mobile first paint and touch gate
+on:
+  push:
+    branches: [mag-r2037-mobile-firstpaint-touch]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict source syntax and production contracts
+        run: |
+          set -euo pipefail
+          node --check billing-worker/src/production-content-entry.js
+          node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
+          node --check .github/scripts/validate-r2037-mobile-firstpaint.cjs
+          node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-public-site-integrity.cjs
+      - name: Install real Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-mag-r2037" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-mag-r2037/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve actual site
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-r2037-http.log" 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-r2037-http.log"
+          exit 1
+      - name: Verify real MAG and phone/desktop 44px targets
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-mag-r2037/node_modules
+        run: node .github/scripts/validate-r2037-mobile-firstpaint.cjs
+      - name: Verify full eight-shelf cinematic archive
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-mag-r2037/node_modules
+        run: node .github/scripts/validate-cinematic-archive-r1987.cjs
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [desktop, mobile]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Lighthouse
+        run: npm install -g @lhci/cli@0.13.x
+      - name: Measure and ASSERT same strict 95 score; never relax limits
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.profile }}" = desktop ]; then cfg="./lighthouserc.json"; else cfg="./lighthouserc.mobile.json"; fi
+          lhci collect --config="$cfg"
+          PROFILE="${{ matrix.profile }}" node .github/scripts/report-lighthouse-metrics.cjs .lighthouseci
+          lhci assert --config="$cfg"
