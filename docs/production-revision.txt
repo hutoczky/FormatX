@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2037-single-canonical-proof-live
-base_master=ec7883ed68512253a9236133892d921864316123
-purpose=Remove duplicate public evidence headline from original hero, preserve a single canonical proof panel with real verifiable links and both Hungarian and English language switching.
-validation=Single-proof source assertion, original MAG 8 scene desktop/mobile browser, navigation, bilingual labels, design system, production Worker and exact revision convergence + live smoke.
-limits=Lighthouse 95 threshold and photographic visual parity remain open quality targets; do not misrepresent those as complete.
+token=20261009-r2041-same-real-mag-for-all-browsers
+base_master=0c00160fffeac55e8e39f928f9f39a665646b6db
+purpose=Run the identical original single-WebGL2 MAG and eight scroll-controlled native HTML archive scenes in real-user and Lighthouse UAs; no UA-based static replacement; preserve true accessibility fallback.
+validation=Browser check at 390x844 including Lighthouse UA, desktop and 320px mobile all eight scenes, real pointer/keyboard interaction, reduced-motion/no-WebGL fallback, production Worker security, exact revision on both domains, live smoke.
+limits=This release is not evidence of 95 Lighthouse, 60 FPS on physical phones, ray-traced shadows or Igloo.inc award superiority without separate measurements.
