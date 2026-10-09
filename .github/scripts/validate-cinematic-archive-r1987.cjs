@@ -99,13 +99,29 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(native.frames>0,'Native WebGL archive never drew');
   assert.ok(native.magDomCanonical,'Native MAG must remain inside the original hero DOM');
   assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
+  if(isMobile){
+    assert.ok(native.canvasRect.w>=viewport.width*.88,'Mobile archive must use the available screen width rather than a thumbnail: '+JSON.stringify(native.canvasRect));
+    assert.ok(native.canvasRect.h>=Math.min(viewport.height*.50,400),'Mobile archive must show cinematic panel retrieval at a readable height: '+JSON.stringify(native.canvasRect));
+  }
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
   if (!isMobile && native.filamentCount < 1 && await page.evaluate(()=>document.documentElement.dataset.fxArchiveQuality==='high')) {
     throw new Error('High-quality archive scene did not emit any physical 3D filaments');
   }
   assert.equal(native.renderer,'shared-webgl2');
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
-  await page.screenshot({path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,fullPage:false,timeout:30000});
+  // Software WebGL readback can stall screenshots in CI even after all
+  // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
+  // for functional testing; report incomplete captures explicitly.
+  try {
+    await page.screenshot({
+      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
+      fullPage:false,animations:'disabled',timeout:12000
+    });
+  } catch(error) {
+    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
+      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
+    }));
+  }
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
   const restored=await page.evaluate(()=>({dock:document.documentElement.dataset.fxArchiveDock,stage:!!document.querySelector('#hero .fx-crystal-organism-r326-stage')}));

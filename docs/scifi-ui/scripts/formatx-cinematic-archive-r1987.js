@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r1987';
+  const VERSION='cinematic-archive-r2020-mobile-unified';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -71,7 +71,7 @@
     }
   }
   class PerformanceManager {
-    static frameInterval(){return mobile()?(mobilePerf?80:50):32;}
+    static frameInterval(){return mobile()?(mobilePerf?50:33):16;}
     static setQuality(value){quality=value==='low'?'low':'high';root.dataset.fxArchiveQuality=quality;invalidate();}
   }
   class ResponsiveExperience {
@@ -135,7 +135,7 @@
       this.box=this.buffer(cubeGeometry());
       this.panel=this.buffer(panelGeometry(quality==='high'));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -146,7 +146,7 @@
       const vert=`#version 300 es
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
-uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect;
+uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile;
 out vec3 vNormal;out vec2 vUv;
 void main(){
  vec3 p=aPosition*uScale;
@@ -155,6 +155,9 @@ void main(){
  p=vec3(p.x,ct*p.y-st*p.z,st*p.y+ct*p.z);
  float s=sin(uRotation),c=cos(uRotation);
  p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+uOffset-uCamera;
+ // Portrait atlas projection: make every physical shelf AND the flexible
+ // panel visible in the mobile archive instead of clipping at the sides.
+ if(uMobile>.5){p.x*=.34;p.y=p.y*.63-.18;}
  float d=max(2.4,6.2-p.z);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,(p.z-2.8)*.36,d);
  vec3 n=vec3(aNormal.x,ct*aNormal.y-st*aNormal.z,st*aNormal.y+ct*aNormal.z);
@@ -235,6 +238,7 @@ void main(){
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
+      gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
       this.drawCalls=0;
@@ -301,9 +305,9 @@ void main(){
         // Optical micro-filaments connect the SAME living MAG to the glass
         // membrane. Cubic paths are sampled in real scene-space; an individual
         // thread stays deliberately thin and is shed first on low quality.
-        if(quality==='high'&&!mobile()){
+        if(quality==='high'){
           const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
-          const segments=6,strands=3;
+          const segments=mobile()?4:6,strands=mobile()?1:3;
           const bezier=(a,b,d,e,t)=>{
             const q=1-t;
             return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
