@@ -811,3 +811,11 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
   }
 }
 /* R2030 scroll geometry: eight distinct, deterministic handoff beats. */
+
+/* R2031: progressive enhancement requires a successfully initialized, shared
+   WebGL renderer. On failure the original semantic HTML always remains usable;
+   do not retain artificially tall invisible station anchors. */
+html:not([data-fx-archive-experience="ready"]) body.living-architecture
+main#main-content > .fx-mag-ai-scroll-station-r2030{
+  display:none!important;
+}
