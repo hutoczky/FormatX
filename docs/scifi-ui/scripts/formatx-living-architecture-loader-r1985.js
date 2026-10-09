@@ -2,26 +2,10 @@
   'use strict';
 
   const root = document.documentElement;
-  const params = new URLSearchParams(location.search);
-  // Only an explicit user-selected HTML fallback or reduced motion may
-  // omit the real living runtime. Lighthouse is a visitor, not a privileged
-  // alternate static product. This prevents misleading quality metrics.
-  const audit =
-    params.get('archive') === 'off'
-    || matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (audit) {
-    root.classList.add('fx-audit-mode');
-    root.dataset.fxThree = 'audit-skip';
-    root.dataset.fxLighthouse = 'ready';
-    root.dataset.fxLivingArchitecture = 'audit-zero-fetch-r1985';
-    root.dataset.fxLivingArchitectureLoaderR1985 = 'audit-skip-heavy-runtime';
-    queueMicrotask(() => {
-      dispatchEvent(new CustomEvent('formatx:livingready'));
-    });
-    return;
-  }
-
+  // R2040: HTML fallback and reduced-motion do NOT mean no interactive
+  // application. The original pricing, network, diagnostics and licensing
+  // controller must initialize on all capable browsers. Only visuals fall
+  // back, through independent MAG/animation capability checks.
   if (document.querySelector('script[data-fx-living-architecture-runtime-r1985]')) return;
 
   root.dataset.fxLivingArchitectureLoaderR1985 = 'loading-normal-runtime';
