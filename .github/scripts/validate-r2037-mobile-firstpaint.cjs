@@ -7,7 +7,10 @@ const compact=fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-first-shell-r
 const full=fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css','utf8');
 const main=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 assert.match(html,/data-fx-mobile-compact-first-frame-r2037="true"/);
-assert.match(html,/data-fx-mag-mobile-critical-r2037="true"/);
+assert.ok(!html.includes('data-fx-mag-mobile-critical-r2037'),'MAG must be folded into one real first-frame request');
+assert.match(compact,/production-r2032-critical-exclusive-first-frame-hero-and-controls/);
+assert.match(compact,/production-r2033-canonical-proof-singleton-hotfix/);
+assert.ok(!html.includes('data-fx-proof-singleton-r2033="true"'),'Proof must not require another render-blocking request');
 assert.match(html,/data-fx-p0-first-paint-r503="true"/);
 assert.match(html,/data-fx-r487-media="\(max-width:900px\)" media="print" href="\/scifi-ui\/styles\/formatx-p0-first-paint-r490\.css/);
 assert.match(html,/data-fx-mobile-first-paint-r358="true"[^>]*data-fx-r487-deferred-style="true"/);
