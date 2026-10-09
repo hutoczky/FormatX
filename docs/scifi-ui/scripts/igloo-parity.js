@@ -230,9 +230,9 @@
   const queue = [
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260820-r248-footer-licence',
-    './scripts/release-metadata.js?v=20260807-full-release-1',
+    './scripts/release-metadata.js?v=20261009-r2041-account-gated-download',
     './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70',
-    './scripts/platform-status.js?v=20260807-full-release-1',
+    './scripts/platform-status.js?v=20261009-r2041-account-gated-download',
     './scripts/formatx-license-links.js?v=20260729-local-licence-2',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260824-menu-race-r251',
