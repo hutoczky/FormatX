@@ -240,7 +240,7 @@ function injectCriticalFirstPaint(html) {
       // The mobile enhancement is intentionally post-first-paint and must
       // survive the Worker HTML normalizer. Keep ONLY this scoped variant,
       // while replacing the desktop critical copy with the canonical link.
-      if (/data-fx-r487-media=["']\\(max-width:900px\\)["']/i.test(tag)) return tag;
+      if (tag.includes('data-fx-r487-media="(max-width:900px)"')) return tag;
       return '';
     }
     if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
