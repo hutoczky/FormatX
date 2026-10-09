@@ -29,12 +29,12 @@
   const isMobile = () => matchMedia('(max-width: 900px)').matches;
   const copy = () => root.lang === 'en' ? {
     heading: 'DISCOVER HOW IT WORKS',
-    title: 'Proof behind the visual.',
+    title: 'MAG // LIVE SYSTEM PRESENTATION',
     body: 'FormatX does not ask for blind trust: releases, tests, limitations and the security model are separately and publicly verifiable.',
     ask: 'ASK'
   } : {
     heading: 'A MŰKÖDÉS MEGISMERÉSE',
-    title: 'Bizonyíték a látvány mögött.',
+    title: 'MAG // ÉLŐ RENDSZERBEMUTATÓ',
     body: 'A FormatX nem kér vak bizalmat: a kiadás, a tesztek, a korlátozások és a biztonsági modell külön, nyilvánosan ellenőrizhető.',
     ask: 'KÉRDEZZ'
   };
