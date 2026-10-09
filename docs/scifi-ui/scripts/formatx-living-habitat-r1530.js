@@ -45,12 +45,11 @@
   canvas.style.setProperty('pointer-events', 'none', 'important');
   canvas.style.setProperty('z-index', '0', 'important');
   canvas.dataset.renderer = 'canvas2d-event-driven-atmospheric-habitat';
-  const ctx = canvas.getContext('2d',{alpha:true,desynchronized:true});
-  if (!ctx) {
-    canvas.remove();
-    ROOT.dataset.fxLivingHabitatR1530='canvas-unavailable';
-    return;
-  }
+  /* R2067: Canvas2D context allocation is a GPU/software backing-store task.
+     The habitat DOM is already deferred until meaningful interaction; defer
+     getContext too. It must be the same real Canvas2D visual on every browser. */
+  let ctx=null;
+  let contextUnavailable=false;
 
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,scrollStartTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let started=false;
@@ -508,7 +507,16 @@
   }
 
   function startHabitat(source='intent'){
-    if(started)return;
+    if(started||contextUnavailable)return;
+    if(!ctx){
+      ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
+      if(!ctx){
+        contextUnavailable=true;
+        canvas.remove();
+        ROOT.dataset.fxLivingHabitatR1530='canvas-unavailable';
+        return;
+      }
+    }
     clearTimeout(scrollStartTimer);scrollStartTimer=0;
     started=true;
     ROOT.dataset.fxLivingHabitatStartR1737=source;
