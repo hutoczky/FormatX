@@ -112,8 +112,20 @@
     const anchor=document.getElementById('hero-download');
     const scene=scenes.find(s=>s.key==='final');
     const panel=scene?.cinemaPanel;
-    if(!anchor||!panel||!anchor.parentNode)return;
-    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling};
+    if(!(anchor instanceof HTMLAnchorElement)||!panel||!anchor.parentNode)return;
+    // Preserve the *real* original anchor and business flow. Metadata
+    // refreshes must not override authenticated first-party downloads with a
+    // direct release asset (or move the customer outside the account flow).
+    const keepAccountGate=()=>{
+      if(anchor.getAttribute('href')!=='/download/multiplatform')
+        anchor.setAttribute('href','/download/multiplatform');
+      if(anchor.hasAttribute('target'))anchor.removeAttribute('target');
+      if(anchor.hasAttribute('rel'))anchor.removeAttribute('rel');
+    };
+    const observer=new MutationObserver(keepAccountGate);
+    observer.observe(anchor,{attributes:true,attributeFilter:['href','target','rel']});
+    keepAccountGate();
+    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling,observer};
     const holder=document.createElement('div');
     holder.className='fx-archive-final-cta-r2032';
     holder.appendChild(anchor);
@@ -122,7 +134,8 @@
   }
   function restoreExistingFinalCta(){
     if(!finalCtaHome)return;
-    const {node,parent,next,holder}=finalCtaHome;
+    const {node,parent,next,holder,observer}=finalCtaHome;
+    observer?.disconnect();
     if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
     holder.remove();
     finalCtaHome=null;
