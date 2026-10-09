@@ -845,3 +845,27 @@ main#main-content > .fx-mag-ai-scroll-station-r2030{
  }
 }
 /* production-r2032-mag-post-intro-exclusive-no-legacy-overlay */
+
+@media (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032{
+   position:sticky;
+   bottom:0;
+   z-index:12;
+   display:flex;
+   justify-content:center;
+   padding:clamp(12px,2vw,20px);
+   margin-top:clamp(25px,3vw,44px);
+   border-top:1px solid rgba(169,228,245,.21);
+   background:linear-gradient(180deg,rgba(5,15,28,0),rgba(4,15,29,.96) 24%);
+ }
+ html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032 > #hero-download{
+   position:relative!important;
+   opacity:1!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+   display:inline-flex!important;
+   min-height:48px;
+   max-width:100%;
+   text-align:center;
+ }
+}
