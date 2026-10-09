@@ -28,11 +28,59 @@ async function evaluate(viewport,isMobile,browser){
     contextCount:document.documentElement.dataset.fxCoreContexts
   }));
   assert.equal(init.status,'ready',JSON.stringify(init));
+  // The renderer can re-announce readiness after a restored tab or a
+  // responsive layout change. This MUST NOT allocate duplicate WebGL passes.
+  const rendererProbe=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const before=root.dataset.fxArchiveExperience;
+    const canvas=window.FormatXLivingCore?.canvas;
+    const refBefore=window.FormatXArchiveExperience?.version;
+    window.dispatchEvent(new CustomEvent('formatx:real3dready'));
+    window.dispatchEvent(new CustomEvent('formatx:real3dready'));
+    return {before,after:root.dataset.fxArchiveExperience,
+      stable:canvas===window.FormatXLivingCore?.canvas,
+      version:refBefore};
+  });
+  assert.ok(rendererProbe.stable&&rendererProbe.after==='ready',
+    'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
+  
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
+  const first=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const hero=document.querySelector('#hero .hero-copy');
+    const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+    return {mode:root.dataset.fxArchiveCinema,firstScene:root.dataset.fxArchiveCurrent,
+      heroVisibility:hero?getComputedStyle(hero).visibility:null,
+      heroDisplay:hero?getComputedStyle(hero).display:null,
+      heroRectCount:hero?.getClientRects().length??-1,
+      firstCssLoaded:!!document.querySelector('link[data-fx-mag-exclusive-first-frame-r2032]')?.sheet,
+      bodyClass:document.body.className,
+      panel:!!p&&getComputedStyle(p).visibility==='visible',
+      source:root.dataset.fxArchiveSheetMotion||null};
+  });
+  assert.equal(first.mode,'active','MAG must take over on first frame after intro');
+  assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
+    'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
+  assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
+  const proofContract=await page.evaluate(()=>{
+    const all=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
+    const loopCopy=document.querySelectorAll('.fx-loop-reference-proof').length;
+    const oldHero=document.querySelector('#hero .fx-reference-proof');
+    const oldVisible=oldHero?getComputedStyle(oldHero).display!=='none'&&oldHero.getClientRects().length>0:false;
+    const canonical=all[0];
+    const inFinal=canonical?.closest('[data-fx-archive-scene="final"] .fx-archive-cinema-folio-r2030');
+    return {count:all.length,loopCopy,oldVisible,inFinal:!!inFinal,links:canonical?.querySelectorAll('a[href]').length||0};
+  });
+  assert.equal(proofContract.count,1,'Expected one canonical visual-proof block: '+JSON.stringify(proofContract));
+  assert.equal(proofContract.loopCopy,0,'Infinite loop duplicates visible proof content: '+JSON.stringify(proofContract));
+  assert.ok(!proofContract.oldVisible,'Duplicate legacy hero proof block still visible: '+JSON.stringify(proofContract));
+  assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
+
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   let passed=0;
   const coverage=[];
@@ -96,6 +144,7 @@ async function evaluate(viewport,isMobile,browser){
         const mag=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
         const mr=mag?.getBoundingClientRect(),pr=panel?.getBoundingClientRect();
         const active=panel?getComputedStyle(panel):null;
+        const hostRect=visibleHosts[0]?.getBoundingClientRect();
         const old=hosts.filter(h=>h!==visibleHosts[0]).map(h=>getComputedStyle(h).visibility);
         const hasActualInputs=Boolean(panel?.querySelector('a[href],button,input,select,textarea'));
         return {
@@ -108,9 +157,23 @@ async function evaluate(viewport,isMobile,browser){
           oldHidden:old.every(v=>v==='hidden'),
           hasActualInputs,
           mag:mr?{x:mr.x,y:mr.y,w:mr.width,h:mr.height}:null,
-          paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height}:null
+          paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height,
+            top:active?.top,translate:active?.translate,
+            shift:panel?.dataset.fxMobileScreenTop||null}:null,
+          hostTop:hostRect?.top,
+          hostTransform:visibleHosts[0]?getComputedStyle(visibleHosts[0]).transform:null,
+          mainTransform:getComputedStyle(document.getElementById('main-content')).transform
         };
       });
+      if(scene.key==='final'){
+        const existingCTA=await page.evaluate(()=>{
+          const p=document.querySelector('[data-fx-archive-scene="final"] .fx-archive-cinema-folio-r2030');
+          const link=p?.querySelector('#hero-download');
+          return {exists:!!link,href:link?.getAttribute('href'),inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p};
+        });
+        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
+          'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
+      }
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
       assert.equal(cinema.count,1,'More than one original content folio is visible: '+JSON.stringify(cinema));
       assert.equal(cinema.paperVisible,'visible','Current paper is not visible: '+JSON.stringify(cinema));
@@ -220,7 +283,25 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_VISIBLE_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',handoff}));
 
   assert.equal(native.renderer,'shared-webgl2');
-  assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
+  // Existing organism technical panels remain genuine working UI; opening
+  // pricing must keep the same MAG renderer visible behind its glass console.
+  await page.evaluate(()=>window.scrollTo({top:document.querySelector('#pricing')?.offsetTop||0,behavior:'instant'}));
+  await page.waitForTimeout(350);
+  const pricingTrigger=page.locator('[data-organism-open="pricing"]').first();
+  if(await pricingTrigger.count()){
+    await pricingTrigger.evaluate(el=>el.click());
+    await page.waitForFunction(()=>document.body.classList.contains('fx-organism-panel-open'),null,{timeout:6000});
+    const technical=await page.evaluate(()=>{
+      const modal=document.querySelector('#fx-organism-console');
+      const panel=modal?.querySelector('[data-organism-panel="pricing"]');
+      return {on:!!modal&&!modal.hidden,mag:document.documentElement.dataset.fxArchiveCinema,
+        controls:panel?.querySelectorAll('a[href],button,input,select').length||0};
+    });
+    assert.ok(technical.on&&technical.controls>=2&&technical.mag==='active',
+      'Real licensing tech console must open inside MAG environment: '+JSON.stringify(technical));
+    await page.locator('#fx-organism-console [data-organism-close]').first().evaluate(el=>el.click());
+  }
+    assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
   // Software WebGL readback can stall screenshots in CI even after all
   // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
   // for functional testing; report incomplete captures explicitly.
