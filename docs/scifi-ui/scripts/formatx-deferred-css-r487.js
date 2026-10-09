@@ -33,10 +33,6 @@
     ]);
     const activateLink = link => {
       if (!(link instanceof HTMLLinkElement)) return;
-      // An intro-only stylesheet has no href until the actual film is started.
-      if (link.dataset.fxIntroHref && !link.getAttribute('href')) {
-        link.setAttribute('href', link.dataset.fxIntroHref);
-      }
       const targetMedia = link.dataset.fxR487Media || 'all';
       if (link.media !== targetMedia) link.media = targetMedia;
       link.removeAttribute('fetchpriority');
