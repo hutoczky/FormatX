@@ -17,4 +17,5 @@ deferred_css=r526-first-contentful-paint-observer
 production_wrapper=r529-direct-canonical-r527-fcp-preserved
 semantic_mag=r528-living-core-current-contract
 legacy_r482=r528-semantic-replacement
-trigger=r529-final-same-sha
+trigger=r2038-unique-browser-production-proof
+requested_revision=20261009-r2038-mag-consolidated-first-frame
