@@ -1027,3 +1027,31 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* r2033-mobile-viewport-fixed-native-paper-no-scroll-containing-block */
+
+/* R2035 — MAG is the protagonist, not a dim background decoration.
+   The active native renderer stays in its dedicated cinematic lane; do not
+   project over the live HTML paper, its links, the header or original ASK.
+   This never changes reduced-motion and WebGL-less semantic fallbacks. */
+@media (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root[data-fx-archive-dock="active"]
+ body.living-architecture #hero .hero-space >
+ .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+   opacity:1!important;
+   filter:none!important;
+   mix-blend-mode:normal!important;
+ }
+ html:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   color:rgba(235,250,255,.98)!important;
+   -webkit-font-smoothing:antialiased;
+   text-rendering:optimizeLegibility;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root[data-fx-archive-dock="active"]
+ body.living-architecture #hero .hero-space >
+ .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+   opacity:1!important;
+ }
+}
+/* production-r2035-full-optical-mag-clarity-without-html-occlusion */
