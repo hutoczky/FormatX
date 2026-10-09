@@ -1,0 +1,41 @@
+name: R2037 desktop LCP rendering timeline
+on:
+  push:
+    branches: [formatx-r2037-lcp-diagnostics]
+    paths:
+      - '.github/scripts/r2037-desktop-lcp-trace.cjs'
+      - '.github/workflows/r2037-diagnose-lcp.yml'
+  pull_request:
+    branches: [mag-cinematic-r2036-integrated]
+    paths:
+      - '.github/scripts/r2037-desktop-lcp-trace.cjs'
+      - '.github/workflows/r2037-diagnose-lcp.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/mag-lcp" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/mag-lcp/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start real page
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/lcp-http.log" 2>&1 &
+          for i in $(seq 1 80); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html > /dev/null && exit 0
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/lcp-http.log"
+          exit 1
+      - name: Capture exact hero LCP repaint owners
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-lcp/node_modules
+        run: node .github/scripts/r2037-desktop-lcp-trace.cjs
