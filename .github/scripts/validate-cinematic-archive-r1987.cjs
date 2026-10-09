@@ -305,15 +305,31 @@ async function evaluate(viewport,isMobile,browser){
   // Software WebGL readback can stall screenshots in CI even after all
   // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
   // for functional testing; report incomplete captures explicitly.
+  const capturePath=`${out}/archive-${isMobile?'mobile':'desktop'}.png`;
   try {
+    // Allow the living MAG animation: disabling CSS animation can wait for a
+    // perpetually moving WebGL composition to reach a non-existent stable frame.
     await page.screenshot({
-      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
+      path:capturePath,fullPage:false,animations:'allow',timeout:12000
     });
+    console.log('ARCHIVE_VISUAL_CAPTURE_PASS',JSON.stringify({capturePath,method:'playwright'}));
   } catch(error) {
-    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
-    }));
+    // Chrome DevTools captures the actual composited viewport without
+    // Playwright's animation-stability or font readiness watchdog.
+    try {
+      const cdp=await context.newCDPSession(page);
+      await cdp.send('Page.enable');
+      const image=await cdp.send('Page.captureScreenshot',{format:'png',fromSurface:true,captureBeyondViewport:false});
+      fs.writeFileSync(capturePath,Buffer.from(image.data,'base64'));
+      await cdp.detach();
+      console.log('ARCHIVE_VISUAL_CAPTURE_PASS',JSON.stringify({capturePath,method:'cdp',bytes:fs.statSync(capturePath).size}));
+    }catch(fallbackError){
+      console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        playwright:String(error?.message||error).slice(0,250),
+        cdp:String(fallbackError?.message||fallbackError).slice(0,250)
+      }));
+    }
   }
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
