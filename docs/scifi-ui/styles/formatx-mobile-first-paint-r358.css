@@ -1003,3 +1003,21 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+/* R2037 — P0 mobile 320x568 observed brand anchor was 132x34 CSS px.
+   Enlarge its ACTUAL interactive box, not an invisible ::before proxy.
+   Keep the 34px icon and label aligned inside the 70px header. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root body.living-architecture
+  .topbar > a.brand {
+    top:13px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    padding:5px 0!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    touch-action:manipulation;
+  }
+}
+/* production-r2037-real-touch-target-no-invisible-hit-overlay */
