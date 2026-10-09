@@ -44,6 +44,7 @@
   }
 
   function activateCore(source) {
+    root.dataset.fxHeartLastActivation = source;
     const visualCooldown = interactionCooldown;
     if (!visualCooldown) {
       interactionCooldown = true;
@@ -110,6 +111,7 @@
     window.addEventListener('click', event => {
       const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
       if (!(target instanceof HTMLButtonElement)) return;
+      root.dataset.fxHeartLastCapture = 'window-click';
       event.preventDefault();
       activateCore('core');
     }, true);
