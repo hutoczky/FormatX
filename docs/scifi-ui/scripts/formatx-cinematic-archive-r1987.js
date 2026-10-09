@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2031-gpu-ready-exclusive-mag';
+  const VERSION='cinematic-archive-r2032-first-frame-physical-archive';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -29,6 +29,8 @@
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  // Do not displace the original MAG while the first-visit ten-second film owns it.
+  let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
   const paperLast=new WeakMap();
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
@@ -160,7 +162,7 @@
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
         if(active){
           const p=clamp(current.progress);
-          const materialize=smooth((p-.06)/.46);
+          const materialize=smooth((p-.06)/.46)*(1-smooth((p-.88)/.12));
           panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
@@ -273,7 +275,9 @@
       // Hold the physically flattened membrane through the reading interval
       // and only release once the section actually exits the viewport.
       const entering=clamp((innerHeight*.88-r.top)/Math.max(1,innerHeight*1.15));
-      const exiting=clamp((innerHeight*.25-r.bottom)/Math.max(1,innerHeight*.2));
+      // R2032: the old sheet MUST finish its physical return before the
+      // reading line advances to the next shelf, not after leaving the screen.
+      const exiting=clamp((innerHeight*.94-r.bottom)/Math.max(1,innerHeight*.44));
       const p=Math.min(.78,entering)+.22*exiting;
       return {...closest,progress:clamp(p)};
     }
@@ -385,9 +389,23 @@ void main(){
  float ndl=max(.06,dot(N,L));
  float facing=clamp(dot(N,V),0.0,1.0);
  float fresnel=pow(1.0-facing,5.0);
- float spec=pow(max(0.0,dot(N,H)),uPanel>.5?70.0:24.0);
+ // Normalized GGX microfacet reflection and Fresnel-Schlick form a
+ // single physically coherent lighting response for the archival glass.
+ float roughness=uPanel>.5?.20:.44;
+ float a2=roughness*roughness; a2*=a2;
+ float ndh=max(.001,dot(N,H));
+ float ndv=max(.001,dot(N,V));
+ float denom=ndh*ndh*(a2-1.0)+1.0;
+ float D=a2/(3.14159265*denom*denom+1e-5);
+ float k=pow(roughness+1.0,2.0)*.125;
+ float G=(ndl/(ndl*(1.0-k)+k))*(ndv/(ndv*(1.0-k)+k));
+ float vh=max(0.0,dot(V,H));
+ vec3 F0=mix(vec3(.038),uColor*.22,uPanel>.5?.24:.08);
+ vec3 F=F0+(1.0-F0)*pow(1.0-vh,5.0);
+ vec3 specular=(D*G*F)/max(.02,4.0*ndl*ndv);
+ float spec=clamp(dot(specular,vec3(.33)),0.0,1.0);
  vec3 base=mix(vec3(.025,.047,.060),uColor,uPanel>.5?.23:.18);
- vec3 col=base*(.29+.70*ndl)+uColor*(fresnel*.23+spec*.25);
+ vec3 col=base*(.27+.68*ndl)*(1.0-max(F.r,max(F.g,F.b)))+specular*.65+uColor*fresnel*.12;
  float a=uOpacity*(uPanel>.5?.68:.80);
  if(uPanel>.5){
    // Smooth glass-membrane edge, directional internal light guides and
@@ -507,6 +525,8 @@ void main(){
       const bend=mix(.44,.006,smooth((pro-.46)/.30));
       const rotation=(1-align)*(side*.74)+align*.02;
       const alpha=reveal*(1-release);
+      root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
+        pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
       if(alpha>.001){
         plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
@@ -662,8 +682,10 @@ void main(){
   function selectLiveChapter(){
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
-    const hero=document.getElementById('hero'),end=hero?.getBoundingClientRect().bottom||0;
-    const inArchive=Boolean(next&&end<innerHeight*.36&&next.rect.top<innerHeight*.95&&next.rect.bottom>0);
+    // From the moment the intro ends, the MAG owns the page. Do not leave the
+    // old landing page visible for a whole first viewport of scrolling.
+    // The same native scrolling and eight source anchors remain intact.
+    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
@@ -788,6 +810,10 @@ void main(){
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
+    // If the introductory film completed before this deferred module loaded,
+    // its overlay will already have been removed. It must never replay here.
+    if(!document.getElementById('fx-mag-birth-prepaint-r1606')
+        && !document.querySelector('[data-fx-mag-birth-live]'))introDone=true;
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
@@ -796,6 +822,10 @@ void main(){
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
+    document.addEventListener('formatx:magbirthcomplete',()=>{
+      introDone=true;
+      invalidate();
+    },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
     addEventListener('pageshow',invalidate,{passive:true});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
