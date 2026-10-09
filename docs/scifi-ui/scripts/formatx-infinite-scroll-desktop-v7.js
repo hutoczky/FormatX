@@ -312,7 +312,7 @@
       '</div>',
       '<div class="fx-loop-reference-visual" aria-hidden="true"><span class="fx-loop-reference-core-fallback"></span><img class="fx-loop-reference-image" alt="" decoding="async"></div>',
       '<div class="fx-loop-reference-heading" data-hu="A MŰKÖDÉS MEGISMERÉSE" data-en="DISCOVER HOW IT WORKS">A MŰKÖDÉS MEGISMERÉSE</div>',
-      '<span class="fx-loop-reference-endmarker" aria-hidden="true">FORMATX // MAG ARCHIVE</span>'
+      '<div class="fx-loop-reference-spacer-r2033" aria-hidden="true"></div>'
     ].join('');
     setBilingualText(section);
     return section;
