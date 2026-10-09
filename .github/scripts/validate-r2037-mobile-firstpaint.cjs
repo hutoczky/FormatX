@@ -36,15 +36,17 @@ for(const width of [320,390,768,1440]){
   const root=document.documentElement;
   const styles=[...document.querySelectorAll('link[rel="stylesheet"]')];
   const deferredMobile=styles.filter(x=>x.href.includes('formatx-mobile-first-paint-r358.css'));
-  const c=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+  const nativeMAGAsset=document.querySelector('script[data-fx-cinematic-archive-r1987]');
   return {brand:!!brand,brandHeight:rect?.height||0,brandWidth:rect?.width||0,
     overflow:root.scrollWidth-root.clientWidth,
-    mobileCSS:deferredMobile.length,mag:!!c,
+    mobileCSS:deferredMobile.length,magModule:!!nativeMAGAsset,
     html:document.querySelector('main#main-content')?.textContent?.trim().length||0,
     ready:root.dataset.fxArchiveExperience||'unset',
     url:location.pathname};
  });
- assert.ok(data.mag&&data.html>800,'Lost the native MAG or genuine HTML: '+JSON.stringify(data));
+ // The real WebGL2 scene may still legitimately be "pending" immediately
+ // after first paint: the dedicated 8-shelf test waits for actual readiness.
+ assert.ok(data.magModule&&data.html>800,'Lost the original MAG module or genuine HTML: '+JSON.stringify(data));
  assert.ok(data.brand&&data.brandHeight>=44,'Brand touch target <44px: '+JSON.stringify({width,...data}));
  assert.ok(data.overflow<=3,'Horizontal overflow: '+JSON.stringify({width,...data}));
  assert.equal(data.mobileCSS,1,'Duplicated mobile stylesheet: '+JSON.stringify({width,...data}));
