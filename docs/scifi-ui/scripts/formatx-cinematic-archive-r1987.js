@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2030-exclusive-mag-takeover';
+  const VERSION='cinematic-archive-r2031-gpu-ready-exclusive-mag';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -76,8 +76,10 @@
       scenes.forEach(s=>sceneObserver.observe(s.node));
     }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
-    if(!cinemaPrepared)prepareRealContentSheets();
-    prepareCinemaHosts();
+    if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'){
+      prepareRealContentSheets();
+      prepareCinemaHosts();
+    }
   }
 
   /* R2030 EXCLUSIVE FORMATX ARCHIVE.
@@ -106,6 +108,11 @@
         // Inline important chapter sizing wins over older high-specificity
         // content-visibility/intrinsic-height rules, which otherwise collapse
         // mobile sections to ~62px during the DOM-to-paper handoff.
+        if(!host._fxArchiveOriginalHeights){
+          host._fxArchiveOriginalHeights=['min-height','height','max-height'].map(name=>[
+            name,host.style.getPropertyValue(name),host.style.getPropertyPriority(name)
+          ]);
+        }
         host.style.setProperty('min-height','165dvh','important');
         host.style.setProperty('height','165dvh','important');
         host.style.setProperty('max-height','165dvh','important');
@@ -140,7 +147,7 @@
 
   function syncCinema(){
     if(!cinemaPrepared)return;
-    const enabled=Boolean(archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
+    const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     root.dataset.fxArchiveCinema=enabled?'active':'home';
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
@@ -715,12 +722,23 @@ void main(){
     stage=api.stage;heroHost=document.querySelector('#hero .hero-space');
     try{
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
-      api.canvas.addEventListener('webglcontextlost',()=>{if(archiveActive)ResponsiveExperience.restore();detach=null;},{once:true});
+      api.canvas.addEventListener('webglcontextlost',()=>{
+        if(archiveActive)ResponsiveExperience.restore();
+        root.dataset.fxArchiveExperience='context-lost';
+        root.dataset.fxArchiveCinema='home';
+        delete root.dataset.fxArchiveCinemaPrepared;
+        detach=null;
+      },{once:true});
       drawPass=frame=>nativeScene.render(frame);
       drawPass.dispose=()=>nativeScene.dispose();
       detach=api.registerScenePass(drawPass);
       root.dataset.fxArchiveExperience='ready';
       root.dataset.fxArchiveQuality=quality;
+      // Only after one real shared WebGL2 renderer exists may the original
+      // website be replaced by the one-chapter cinematic archive. A blocked
+      // WebGL context must retain the usable original HTML experience.
+      ensureAIScrollStation();
+      discover();
       invalidate();
     }catch(error){
       root.dataset.fxArchiveExperience='context-error';
@@ -737,6 +755,8 @@ void main(){
     handoff?.remove();handoff=null;
     document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
+    delete root.dataset.fxArchiveCinemaPrepared;
+    delete root.dataset.fxArchiveCinemaChapter;
     for(const host of cinemaHosts){
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
@@ -745,9 +765,11 @@ void main(){
       }
       host.removeAttribute('data-fx-cinema-host-active');
       host.removeAttribute('data-fx-cinema-anchor-height');
-      host.style.removeProperty('min-height');
-      host.style.removeProperty('height');
-      host.style.removeProperty('max-height');
+      for(const [name,value,priority] of host._fxArchiveOriginalHeights||[]){
+        if(value)host.style.setProperty(name,value,priority);
+        else host.style.removeProperty(name);
+      }
+      delete host._fxArchiveOriginalHeights;
     }
     cinemaHosts=[];cinemaPrepared=false;
     for(const node of paperNodes){
@@ -766,7 +788,6 @@ void main(){
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
-    ensureAIScrollStation();
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
