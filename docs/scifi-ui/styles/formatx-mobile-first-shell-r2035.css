@@ -110,3 +110,33 @@
    border-radius:24px!important;
  }
 }
+
+/* R2036 CLS fix, identified by throttled real DOM LayoutShift sources:
+   the chapter-status aside (49.6px) and rail (24.8px) originally occupy
+   normal flow before async styles, then disappear from the flow at ~2.9s.
+   Keep them out of flow from FIRST paint, without removing aria-live text.
+   This preserves the actual MAG visual stage and native user navigation. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+ html:root:root:root:root:root:root body.living-architecture
+ > :is(aside.fx-organism-status,aside.fx-rail){
+   position:fixed!important;
+   top:0!important;
+   left:0!important;
+   bottom:auto!important;
+   right:auto!important;
+   width:1px!important;
+   height:1px!important;
+   min-width:0!important;
+   min-height:0!important;
+   max-width:1px!important;
+   max-height:1px!important;
+   margin:0!important;
+   padding:0!important;
+   border:0!important;
+   overflow:hidden!important;
+   clip-path:inset(50%)!important;
+   pointer-events:none!important;
+   transform:none!important;
+   translate:none!important;
+ }
+}
