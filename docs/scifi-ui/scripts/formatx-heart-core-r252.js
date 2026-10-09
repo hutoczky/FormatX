@@ -11,6 +11,7 @@
   let bindingFrame = 0;
   let interactionCooldown = false;
   let delegatedInputBound = false;
+  let lastSemanticPointerUp = -1000;
 
   if (root.dataset.fxHeartCoreR252 === 'ready') return;
 
@@ -108,11 +109,23 @@
        document capture; window capture runs before them, so a real MAG click
        always publishes the canonical interaction state. Visual duplicates are
        still absorbed by the short interaction cooldown. */
+    // Desktop story stages occasionally intercept bubbling click while the
+    // MAG's semantic hit region is retained. Pointer-up is also a legitimate
+    // user activation, even if the subsequent click is intercepted. Never
+    // trigger on movement, touch scroll, right-click or a non-primary pointer.
+    window.addEventListener('pointerup', event => {
+      const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
+      if (!(target instanceof HTMLButtonElement)||!event.isPrimary||event.button!==0)return;
+      lastSemanticPointerUp=performance.now();
+      root.dataset.fxHeartLastCapture='window-pointerup';
+      activateCore('pointer');
+    }, true);
     window.addEventListener('click', event => {
       const target = event.target instanceof Element ? event.target.closest('.fx-mag-heart-hit-r252') : null;
       if (!(target instanceof HTMLButtonElement)) return;
       root.dataset.fxHeartLastCapture = 'window-click';
       event.preventDefault();
+      if(performance.now()-lastSemanticPointerUp<240)return;
       activateCore('core');
     }, true);
     window.addEventListener('keydown', event => {
@@ -149,6 +162,7 @@
       hit.dataset.fxHeartBound = 'true';
       hit.addEventListener('click', event => {
         event.preventDefault();
+        if(performance.now()-lastSemanticPointerUp<240)return;
         activateCore('core');
       });
       hit.addEventListener('keydown', event => {
