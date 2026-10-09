@@ -100,3 +100,13 @@
  html body.living-architecture #hero .hero-ring,
  html body.living-architecture #hero .hero-label{display:none!important}
 }
+
+/* R2036: the ordinary HTML fallback retains the verified 24px card radii
+   even if older reset layers load after the critical phone shell.
+   The exclusive MAG folio has its own physically edged glass design. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+ html:root:root:root:root:root:root[data-fx-design-system="2"]
+ body.living-architecture main#main-content > section.fx-category-deck--standalone{
+   border-radius:24px!important;
+ }
+}
