@@ -106,7 +106,7 @@ async function evaluate(viewport,isMobile,browser){
   }
   assert.equal(passed,scenes.length,'Every real archive scene must activate: '+JSON.stringify({passed,total:scenes.length,coverage}));
   const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
-  const selector=one.id.startsWith('.')?one.id:'#'+one.id;
+  const selector=/^[#.]/.test(one.id)?one.id:'#'+one.id;
   await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
   await sleep(150);
   const center=await page.evaluate(()=>window.FormatXArchiveExperience.state);
