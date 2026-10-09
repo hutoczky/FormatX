@@ -7,9 +7,10 @@
  const root=document.documentElement;
  if(root.dataset.fxSensoryLoaderR2000)return;
  const params=new URLSearchParams(location.search);
- const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')
-   ||params.get('lighthouse')==='1'
-   ||root.dataset.fxP0AuditModeR1728==='static-first-paint-no-late-webgl';
+ // Keep progressive sensory enhancements genuinely user-triggered in every
+ // browser. Browser/automation identity must not change the actual site.
+ const audit=params.get('archive')==='off'
+   ||matchMedia('(prefers-reduced-motion: reduce)').matches;
  root.dataset.fxSensoryLoaderR2000=audit?'audit-no-activation':'armed';
  if(audit){
    root.dataset.fxSiteSensoryR1755='audit-static-r2000';
