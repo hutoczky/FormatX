@@ -770,7 +770,14 @@
       desktopGestureAnchorY = null;
       desktopGestureAnchorRelative = null;
       desktopGestureBoundaryLatched = false;
-      root.dataset.fxLoopLandingState = 'native-desktop';
+      // A trailing idle scrollend after a completed loop must not regress the
+      // already committed transfer from 'settled' to 'native-desktop'.
+      // This happened on desktop cycle two after deferred style reflow,
+      // even though the actual landing and loop counter were correct.
+      if(root.dataset.fxLoopLandingState!=='settled'
+          && root.dataset.fxLoopLandingState!=='heart-core-settled'){
+        root.dataset.fxLoopLandingState = 'native-desktop';
+      }
       return;
     }
     pendingDesktopRelative = relative;
