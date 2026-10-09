@@ -261,17 +261,24 @@
       // chapter ancestors. Correct their ACTUAL screen box, once per scrub.
       // Use a bounded, absolute-in-screen translation, not an accumulating
       // transform offset from a previous scroll chapter.
-      const viewportTop=h*.51;
-      const rect=panel.getBoundingClientRect();
-      const previous=Number(panel.dataset.fxMobileViewportShift)||0;
-      const delta=viewportTop-rect.top;
-      const next=Math.max(-h*3,Math.min(h*3,previous+delta));
-      if(Math.abs(delta)>.75){
-        panel.dataset.fxMobileViewportShift=next.toFixed(2);
-        panel.style.setProperty('translate','0px '+next.toFixed(2)+'px','important');
-      }
+      const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
+      const magBottom=stage?.getBoundingClientRect().bottom||h*.45;
+      const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
+      // A fixed descendant is relative to the transformed chapter rather
+      // than the viewport. Resolve the actual screen gap by adjusting CSS
+      // 'top', not 'translate': this stays stable for all eight scroll anchors.
+      panel.style.removeProperty('translate');
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
+      const rect=panel.getBoundingClientRect();
+      const previous=Number(panel.dataset.fxMobileScreenTop)
+        ||parseFloat(getComputedStyle(panel).top)||h*.48;
+      const delta=viewportTop-rect.top;
+      if(Math.abs(delta)>.6){
+        const next=Math.max(-h*12,Math.min(h*12,previous+delta));
+        panel.dataset.fxMobileScreenTop=next.toFixed(2);
+        panel.style.setProperty('top',next.toFixed(2)+'px','important');
+      }
       return;
     }
     const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
