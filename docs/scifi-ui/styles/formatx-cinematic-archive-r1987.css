@@ -1076,3 +1076,17 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* production-r2039-native-top-layer-single-real-archive-paper */
+
+/* R2039 — no duplicate floating caption in the actual one-paper universe.
+   The canonical headings and controls live on the delivered HTML papyrus;
+   a second floating "ARCHIVE INTERFACE" box over the MAG is misleading.
+   Keep the brief source identifier only before a physical paper is visible. */
+@media(prefers-reduced-motion:no-preference){
+ html:root:root:root[data-fx-archive-cinema="active"]:has(.fx-archive-cinema-folio-r2030:popover-open)
+ .fx-archive-physical-paper-r2026{
+   display:none!important;
+   visibility:hidden!important;
+   pointer-events:none!important;
+ }
+}
+/* production-r2039-one-mag-one-working-folio-no-duplicate-telemetry */
