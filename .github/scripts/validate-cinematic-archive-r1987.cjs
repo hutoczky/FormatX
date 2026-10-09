@@ -147,6 +147,10 @@ async function evaluate(viewport,isMobile,browser){
         const hostRect=visibleHosts[0]?.getBoundingClientRect();
         const old=hosts.filter(h=>h!==visibleHosts[0]).map(h=>getComputedStyle(h).visibility);
         const hasActualInputs=Boolean(panel?.querySelector('a[href],button,input,select,textarea'));
+        const otherPapers=hosts.filter(h=>h!==visibleHosts[0])
+          .map(h=>h.querySelector(':scope > .fx-archive-cinema-folio-r2030')).filter(Boolean);
+        const keyboardIsolation=Boolean(panel&&!panel.inert
+          &&otherPapers.every(p=>p.inert&&p.getAttribute('aria-hidden')==='true'));
         return {
           mode:root.dataset.fxArchiveCinema,
           count:visibleHosts.length,
@@ -156,6 +160,7 @@ async function evaluate(viewport,isMobile,browser){
           paperText:(panel?.textContent||'').trim().length,
           oldHidden:old.every(v=>v==='hidden'),
           hasActualInputs,
+          keyboardIsolation,
           mag:mr?{x:mr.x,y:mr.y,w:mr.width,h:mr.height}:null,
           paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height,
             top:active?.top,translate:active?.translate,
@@ -181,6 +186,7 @@ async function evaluate(viewport,isMobile,browser){
       assert.equal(cinema.paperPointer,'auto','Interactive original controls are disabled');
       assert.ok(cinema.paperText>70,'Original functional content is not present in MAG folio');
       assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
+      assert.ok(cinema.keyboardIsolation,'Hidden archive cards must not be tabbable: '+JSON.stringify(cinema));
       assert.ok(cinema.mag&&cinema.paper,'Missing two cinematic lanes');
       if(isMobile){
         assert.ok(cinema.mag.y+cinema.mag.h <= cinema.paper.y+10,
