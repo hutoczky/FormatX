@@ -99,6 +99,10 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(native.frames>0,'Native WebGL archive never drew');
   assert.ok(native.magDomCanonical,'Native MAG must remain inside the original hero DOM');
   assert.ok(native.canvasRect?.w>110&&native.canvasRect?.h>110,'Archive canvas must have usable viewport geometry');
+  if(isMobile){
+    assert.ok(native.canvasRect.w>=viewport.width*.88,'Mobile archive must use the available screen width rather than a thumbnail: '+JSON.stringify(native.canvasRect));
+    assert.ok(native.canvasRect.h>=Math.min(viewport.height*.50,400),'Mobile archive must show cinematic panel retrieval at a readable height: '+JSON.stringify(native.canvasRect));
+  }
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
   if (!isMobile && native.filamentCount < 1 && await page.evaluate(()=>document.documentElement.dataset.fxArchiveQuality==='high')) {
     throw new Error('High-quality archive scene did not emit any physical 3D filaments');
