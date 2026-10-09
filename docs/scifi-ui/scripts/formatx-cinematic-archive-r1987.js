@@ -714,15 +714,19 @@ void main(){
         // Optical micro-filaments connect the SAME living MAG to the glass
         // membrane. Cubic paths are sampled in real scene-space; an individual
         // thread stays deliberately thin and is shed first on low quality.
-        if(quality==='high'){
+        {
+          // A single authentic 3D magnetic thread survives GPU LOD reduction.
+          // Never remove the physical handoff and substitute a fake card fade.
           const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
-          const segments=mobile()?4:6,strands=mobile()?1:3;
+          const full=quality==='high';
+          const segments=full?(mobile()?4:6):(mobile()?2:3);
+          const strands=full?(mobile()?1:3):1;
           const bezier=(a,b,d,e,t)=>{
             const q=1-t;
             return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
           };
           for(let strand=0;strand<strands;strand++){
-            const dy=(strand-1)*.073;
+            const dy=(strand-(strands-1)*.5)*.073;
             let prev=null;
             for(let k=0;k<=segments;k++){
               const t=k/segments;
