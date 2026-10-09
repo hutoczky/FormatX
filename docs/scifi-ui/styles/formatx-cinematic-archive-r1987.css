@@ -1090,3 +1090,49 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* production-r2039-one-mag-one-working-folio-no-duplicate-telemetry */
+
+/* R2039 — the SAME original SOUND and ASK controls, now a non-modal top-layer
+   MAG control strip. Each real 44px+ control remains on the MAG side, away
+   from the native interactive archive reading pane. No copies or new IDs. */
+@media(prefers-reduced-motion:no-preference){
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-reference-controls-r204.fx-cinema-controls-r2039:popover-open{
+   position:fixed!important;inset:auto!important;
+   top:auto!important;bottom:clamp(18px,3dvh,36px)!important;
+   left:clamp(16px,3vw,48px)!important;right:auto!important;
+   display:flex!important;align-items:center!important;justify-content:flex-start!important;
+   flex-direction:row!important;gap:10px!important;
+   width:max-content!important;min-width:0!important;max-width:min(44vw,420px)!important;
+   height:auto!important;min-height:0!important;max-height:none!important;
+   margin:0!important;padding:0!important;
+   background:transparent!important;border:0!important;box-shadow:none!important;
+   transform:none!important;translate:none!important;rotate:none!important;scale:1!important;
+   visibility:visible!important;opacity:1!important;pointer-events:none!important;
+   z-index:2147483400!important;
+ }
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-cinema-controls-r2039:popover-open :is(.fx-three-sound,.fx-reference-ask){
+   display:inline-flex!important;position:relative!important;inset:auto!important;
+   transform:none!important;translate:none!important;
+   min-width:48px!important;min-height:48px!important;
+   visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+ }
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-cinema-controls-r2039:popover-open .fx-reference-rail{
+   display:flex!important;position:relative!important;inset:auto!important;
+   width:auto!important;min-height:48px!important;max-height:none!important;
+   margin:0!important;padding:0!important;align-items:center!important;
+   transform:none!important;translate:none!important;gap:10px!important;
+   visibility:visible!important;opacity:1!important;pointer-events:none!important;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-reference-controls-r204.fx-cinema-controls-r2039:popover-open{
+   top:42dvh!important;bottom:auto!important;
+   left:50%!important;right:auto!important;
+   transform:translateX(-50%)!important;
+   max-width:94vw!important;gap:12px!important;
+ }
+}
+/* production-r2039-original-semantic-mag-controls-on-unobstructed-lane */
