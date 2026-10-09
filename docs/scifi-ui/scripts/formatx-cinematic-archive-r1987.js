@@ -581,6 +581,12 @@ void main(){
       handoff.dataset.source=scene.source;
       handoff.dataset.scene=scene.key;
     }
+    // Site language/content modules may rerender the original heading within
+    // the same cinematic chapter. Do not hold an outdated telemetry copy.
+    const actualHeading=scene.node.querySelector('h2,h3')||scene.node;
+    const actualTitle=String(actualHeading.textContent||scene[english?'en':'hu']).trim().slice(0,140);
+    const liveTitle=handoff.querySelector('.fx-archive-telemetry-r2022__title');
+    if(liveTitle.textContent!==actualTitle)liveTitle.textContent=actualTitle;
     // The membrane unfolds from its unique archive location and approaches
     // the reader. After the handoff, the *actual* HTML headings/cards continue
     // the same motion as a native, functional interactive display.
