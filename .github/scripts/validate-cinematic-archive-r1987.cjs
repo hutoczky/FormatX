@@ -128,6 +128,7 @@ async function evaluate(viewport,isMobile,browser){
         const mag=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
         const mr=mag?.getBoundingClientRect(),pr=panel?.getBoundingClientRect();
         const active=panel?getComputedStyle(panel):null;
+        const hostRect=visibleHosts[0]?.getBoundingClientRect();
         const old=hosts.filter(h=>h!==visibleHosts[0]).map(h=>getComputedStyle(h).visibility);
         const hasActualInputs=Boolean(panel?.querySelector('a[href],button,input,select,textarea'));
         return {
@@ -140,7 +141,10 @@ async function evaluate(viewport,isMobile,browser){
           oldHidden:old.every(v=>v==='hidden'),
           hasActualInputs,
           mag:mr?{x:mr.x,y:mr.y,w:mr.width,h:mr.height}:null,
-          paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height}:null
+          paper:pr?{x:pr.x,y:pr.y,w:pr.width,h:pr.height,
+            top:active?.top,translate:active?.translate,
+            shift:panel?.dataset.fxMobileScreenTop||null}:null,
+          hostTop:hostRect?.top
         };
       });
       if(scene.key==='final'){
