@@ -358,6 +358,32 @@ async function missingGpuFallback(browser){
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
 }
+async function narrowPhoneTapTarget(browser){
+  const context=await browser.newContext({
+    viewport:{width:320,height:568},
+    isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'
+  });
+  try{
+    const page=await context.newPage();
+    await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForTimeout(350);
+    const result=await page.evaluate(()=>{
+      const anchor=document.querySelector('header.topbar > a.brand');
+      const r=anchor?.getBoundingClientRect();
+      const heavy=document.querySelector('link[data-fx-p0-first-paint-r503]');
+      const optical=document.querySelector('link[data-fx-mobile-p0-polish-r2038]');
+      return {width:r?.width||0,height:r?.height||0,
+        p0Media:heavy?.media||null,optical:!!optical};
+    });
+    assert.ok(result.width>=40&&result.height>=44,
+      '320px original brand touch target must meet 44px: '+JSON.stringify(result));
+    assert.equal(result.p0Media,'(min-width: 901px)',
+      'Mobile may not render-block on 71KB desktop P0 optical CSS');
+    assert.ok(result.optical,'Mobile P0 polish must be present for post-FCP enhancement');
+    console.log('ARCHIVE_NARROW_PHONE_PASS',JSON.stringify(result));
+  }finally{await context.close();}
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -381,6 +407,7 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await narrowPhoneTapTarget(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
