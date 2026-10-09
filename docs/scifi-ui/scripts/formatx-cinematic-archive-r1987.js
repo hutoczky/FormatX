@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2022-visible-handoff';
+  const VERSION='cinematic-archive-r2026-real-content-handoff';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -17,7 +17,7 @@
   const mobile=()=>matchMedia('(max-width: 900px)').matches;
   const blueprint=[
     {selector:'#experience',key:'ecosystem',hu:'FORMATX ÖKOSZISZTÉMA',en:'FORMATX ECOSYSTEM',source:'left-shelf',color:[.50,.81,.94]},
-    {selector:'.fx-category-deck--standalone',key:'systems',hu:'RENDSZERKATEGÓRIÁK',en:'SYSTEM CATEGORIES',source:'rotor',color:[.65,.78,.99]},
+    {selector:'#live-os-overview, .fx-category-deck--standalone',key:'systems',hu:'LIVE OS / RENDSZERKATEGÓRIÁK',en:'LIVE OS / SYSTEM CATEGORIES',source:'rotor',color:[.65,.78,.99]},
     {selector:'#capabilities',key:'diagnostics',hu:'DIAGNOSZTIKA',en:'DIAGNOSTICS',source:'bottom-drawer',color:[.48,.95,.87]},
     {selector:'#network',key:'network',hu:'HÁLÓZATI ESZKÖZÖK',en:'NETWORK TOOLS',source:'right-cell',color:[.54,.80,.97]},
     {selector:'#system',key:'security',hu:'RENDSZER ÉS BIZTONSÁG',en:'SYSTEM & SECURITY',source:'sealed-vault',color:[.74,.86,.98]},
@@ -27,7 +27,8 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
-  let sceneObserver=null,handoff=null,handoffKey='';
+  let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
+  const paperLast=new WeakMap();
   const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
@@ -45,7 +46,83 @@
       scenes.forEach(s=>sceneObserver.observe(s.node));
     }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
+    prepareRealContentSheets();
   }
+
+  // R2026: The real existing HTML content is the handoff destination.
+  // Keep DOM elements and their listeners in place: no cloning, portals,
+  // duplicated element IDs, fake buttons or canvas-rendered text.
+  function prepareRealContentSheets(){
+    for(const node of paperNodes){
+      if(!node.isConnected){
+        node.classList.remove('fx-archive-live-sheet-r2026');
+        node.removeAttribute('data-fx-archive-paper-source');
+      }
+    }
+    const mapping={
+      systems:[':scope > header',':scope > .section-heading',':scope > *:first-child',':scope > .fx-category-grid > *'],
+      ecosystem:[':scope > .section-heading',':scope > .flow .flow-chapters > article'],
+      diagnostics:[':scope > .section-heading',':scope > .cards > .card:not(:last-child)'],
+      intelligence:[':scope'],
+      licensing:[':scope > .section-heading',':scope > .pricing > .price-card'],
+      security:[':scope > .section-heading',':scope > .system-grid > article'],
+      network:[':scope > .fx-net-head',':scope > .fx-net-grid > .fx-net-console'],
+      final:[':scope > .release-layout']
+    };
+    const all=new Set();
+    for(const scene of scenes){
+      const next=[];
+      for(const selector of (mapping[scene.key]||[])){
+        const targets=selector===':scope'?[scene.node]:Array.from(scene.node.querySelectorAll(selector));
+        for(const target of targets){
+          if(!(target instanceof HTMLElement)||next.includes(target))continue;
+          next.push(target);
+          target.classList.add('fx-archive-live-sheet-r2026');
+          target.dataset.fxArchivePaperSource=scene.source;
+          all.add(target);
+        }
+      }
+      scene.paperNodes=next;
+    }
+    paperNodes=Array.from(all);
+    root.dataset.fxArchivePhysicalSheetCount=String(paperNodes.length);
+  }
+
+  function updateRealContentSheets(){
+    if(!archiveActive||reduced.matches)return;
+    const vh=Math.max(1,innerHeight);
+    // Limit viewport geometry reads to the current and adjacent chapters.
+    const nearby=new Set();
+    if(current){
+      const i=current.s.index;
+      for(const scene of scenes){
+        if(Math.abs(scene.index-i)<=1)for(const node of scene.paperNodes||[])nearby.add(node);
+      }
+    }
+    for(const node of nearby){
+      if(!node.isConnected)continue;
+      const bounds=node.getBoundingClientRect();
+      const entry=clamp((vh*.89-bounds.top)/Math.max(160,vh*.37));
+      const last=paperLast.get(node);
+      if(last!==undefined&&Math.abs(entry-last)<.007)continue;
+      paperLast.set(node,entry);
+      const away=1-smooth(entry);
+      const s=sceneForElement(node);
+      const dir=mobile()?0:(s?.index%2===0?-1:1);
+      node.style.setProperty('--fx-archive-paper-x',(away*dir*46).toFixed(1)+'px');
+      node.style.setProperty('--fx-archive-paper-y',(away*36).toFixed(1)+'px');
+      node.style.setProperty('--fx-archive-paper-rot',(away*dir*-13).toFixed(2)+'deg');
+      node.style.setProperty('--fx-archive-paper-scale',(1-away*.075).toFixed(4));
+      node.style.setProperty('--fx-archive-paper-opacity',(.66+smooth(entry)*.34).toFixed(3));
+      node.dataset.fxArchivePaperPhase=entry>=.99?'presented':'being-handed';
+    }
+    root.dataset.fxArchiveRealContent='native-paper-handoff';
+  }
+  function sceneForElement(node){
+    for(const s of scenes)if((s.paperNodes||[]).includes(node))return s;
+    return null;
+  }
+
   class ScrollTimelineController {
     static get(){
       if(!scenes.length)return null;
@@ -380,7 +457,16 @@ void main(){
     handoff.dataset.active='false';
     // Presentation metadata only. Native HTML owns all readable content
     // and actions; this HUD cannot intercept clicks or keyboard focus.
-    handoff.innerHTML='<span class="fx-archive-telemetry-r2022__eyebrow">MAG // ARCHIVE INTERFACE</span><strong class="fx-archive-telemetry-r2022__title"></strong><span class="fx-archive-telemetry-r2022__source"></span><span class="fx-archive-telemetry-r2022__foot">FORMATX // LIVE SYSTEM</span>';
+    // A flexible glass/papyrus display with source-derived real site content,
+    // not a telemetry-only status badge. Original controls remain in-place.
+    handoff.classList.add('fx-archive-physical-paper-r2026');
+    handoff.innerHTML='<span class="fx-archive-physical-paper-r2026__rail" aria-hidden="true"></span>'+
+      '<span class="fx-archive-telemetry-r2022__eyebrow">MAG // ARCHIVE INTERFACE</span>'+
+      '<span class="fx-archive-physical-paper-r2026__step"></span>'+
+      '<strong class="fx-archive-telemetry-r2022__title"></strong>'+
+      '<p class="fx-archive-physical-paper-r2026__excerpt"></p>'+
+      '<span class="fx-archive-telemetry-r2022__source"></span>'+
+      '<span class="fx-archive-telemetry-r2022__foot">FORMATX // LIVE SYSTEM</span>';
     document.body.appendChild(handoff);
   }
   function updateHandoff(){
@@ -394,9 +480,37 @@ void main(){
       handoffKey=key;
       handoff.querySelector('.fx-archive-telemetry-r2022__title').textContent=english?scene.en:scene.hu;
       handoff.querySelector('.fx-archive-telemetry-r2022__source').textContent=(sourceNames[scene.source]||[scene.source,scene.source])[english?1:0];
+      handoff.querySelector('.fx-archive-physical-paper-r2026__step').textContent=
+        '0'+(scene.index+1)+' / 0'+scenes.length;
+      // Titles and copy come from the current, live DOM (including language).
+      const h=scene.node.querySelector('h2,h3')||scene.node;
+      const paragraphs=Array.from(scene.node.querySelectorAll('p'));
+      const excerpt=paragraphs.find(p=>p.classList.contains('section-index')===false
+        && p.textContent.trim().length>=28);
+      handoff.querySelector('.fx-archive-telemetry-r2022__title').textContent=
+        String(h.textContent||scene[english?'en':'hu']).trim().slice(0,140);
+      handoff.querySelector('.fx-archive-physical-paper-r2026__excerpt').textContent=
+        String(excerpt?.textContent||'').trim().slice(0,mobile()?100:210);
+      const rgb=scene.color.map(x=>Math.round(x*255)).join(',');
+      handoff.style.setProperty('--fx-archive-paper-light',rgb);
+      handoff.dataset.source=scene.source;
       handoff.dataset.scene=scene.key;
     }
-    root.dataset.fxArchiveVisibleHandoff='active';
+    // The membrane unfolds from its unique archive location and approaches
+    // the reader. After the handoff, the *actual* HTML headings/cards continue
+    // the same motion as a native, functional interactive display.
+    const p=current.progress;
+    const push=smooth((p-.06)/.38);
+    const settle=smooth((p-.44)/.31);
+    const dir=mobile()?0:(scene.index%2===0?-1:1);
+    handoff.style.setProperty('--fx-folio-translate-x',(dir*(1-push)*95+settle*dir*14).toFixed(1)+'px');
+    handoff.style.setProperty('--fx-folio-translate-y',((1-push)*42+settle*14).toFixed(1)+'px');
+    handoff.style.setProperty('--fx-folio-rotate-y',(dir*(1-push)*-24).toFixed(1)+'deg');
+    handoff.style.setProperty('--fx-folio-rotate-x',((1-push)*12).toFixed(1)+'deg');
+    handoff.style.setProperty('--fx-folio-scale',(0.82+push*.18-settle*.035).toFixed(3));
+    handoff.style.setProperty('--fx-folio-bend',(1-push).toFixed(3));
+    handoff.dataset.phase=p<.24?'extracting':p<.52?'transferring':'presented';
+    root.dataset.fxArchiveVisibleHandoff='physical-paper-active';
   }
 
   function setPanelState(){
@@ -432,6 +546,7 @@ void main(){
     if(inArchive&&stage)ResponsiveExperience.dock();
     else if(archiveActive)ResponsiveExperience.restore();
     setPanelState();
+    updateRealContentSheets();
     updateHandoff();
     if(current){
       const nextIndex=current.s.index;
@@ -457,6 +572,7 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
+        updateRealContentSheets();
         updateHandoff();
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
@@ -492,6 +608,12 @@ void main(){
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
+    for(const node of paperNodes){
+      node.classList.remove('fx-archive-live-sheet-r2026');
+      node.removeAttribute('data-fx-archive-paper-source');
+      node.removeAttribute('data-fx-archive-paper-phase');
+      for(const prop of ['--fx-archive-paper-x','--fx-archive-paper-y','--fx-archive-paper-rot','--fx-archive-paper-scale','--fx-archive-paper-opacity'])node.style.removeProperty(prop);
+    }
     ResponsiveExperience.restore();
     detach?.();detach=null;drawPass=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});

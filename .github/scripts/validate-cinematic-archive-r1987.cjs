@@ -66,6 +66,25 @@ async function evaluate(viewport,isMobile,browser){
     },selector);
     console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
+
+      // R2026: a status label alone cannot satisfy the requested cinematic
+      // archival handoff. The active folio must use actual section copy, and
+      // the ORIGINAL semantic content must itself receive a 3D arrival.
+      const physical=await page.evaluate(key=>{
+        const folio=document.querySelector('.fx-archive-physical-paper-r2026');
+        const live=[...document.querySelectorAll('.fx-archive-live-sheet-r2026')];
+        const current=document.querySelector('[data-fx-archive-scene="'+key+'"]');
+        const headings=current?.querySelector('h2,h3');
+        const folioTitle=folio?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent?.trim()||'';
+        return {folio:!!folio,liveCount:live.length,currentLive:(current?.classList.contains('fx-archive-live-sheet-r2026')?1:0)+(current?.querySelectorAll('.fx-archive-live-sheet-r2026').length||0),
+          actualContent:!!headings&&folioTitle===headings.textContent.trim().slice(0,140),
+          mode:document.documentElement.dataset.fxArchiveRealContent||null};
+      },scene.key);
+      assert.ok(physical.folio,'Missing physical MAG paper for '+scene.key);
+      assert.ok(physical.liveCount>=8,'Native content sheets were not prepared: '+JSON.stringify(physical));
+      assert.ok(physical.currentLive>=1,'Real HTML lacks MAG-delivered elements for '+scene.key+': '+JSON.stringify(physical));
+      assert.ok(physical.actualContent,'The MAG paper is not connected to the real section copy: '+JSON.stringify(physical));
+      assert.equal(physical.mode,'native-paper-handoff','Native document transfer missing');
       // R2022: all eight sources must present their own visible chapter label,
       // rather than a permanently docked opaque overlay or stale HUD.
       const chapterHandoff=await page.evaluate(()=>{
@@ -87,7 +106,7 @@ async function evaluate(viewport,isMobile,browser){
   }
   assert.equal(passed,scenes.length,'Every real archive scene must activate: '+JSON.stringify({passed,total:scenes.length,coverage}));
   const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
-  const selector=one.id.startsWith('.')?one.id:'#'+one.id;
+  const selector=/^[#.]/.test(one.id)?one.id:'#'+one.id;
   await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
   await sleep(150);
   const center=await page.evaluate(()=>window.FormatXArchiveExperience.state);
