@@ -7,6 +7,13 @@ on:
       - '.github/workflows/r2035-diagnose-layout.yml'
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/styles/formatx-mobile-first-shell-r2035.css'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/scripts/r2035-find-layout-shifts.cjs'
+      - '.github/workflows/r2035-diagnose-layout.yml'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-shell-r2035.css'
   workflow_dispatch:
 permissions:
   contents: read
