@@ -10,6 +10,10 @@ on:
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-critical-bundle-r2038.css'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/styles/formatx-menu-owner-r1956.css'
+      - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -20,6 +24,10 @@ on:
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-critical-bundle-r2038.css'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/styles/formatx-menu-owner-r1956.css'
+      - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
