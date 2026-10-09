@@ -869,3 +869,18 @@ main#main-content > .fx-mag-ai-scroll-station-r2030{
    text-align:center;
  }
 }
+
+/* Only the delivered native HTML folio owns pointer events. Its full-height
+   invisible chapter scroll-anchor must not swallow the floating MAG controls
+   or topbar, particularly on mobile and at scrollY=0. */
+@media(prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]{
+   pointer-events:none!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   pointer-events:auto!important;
+ }
+}
