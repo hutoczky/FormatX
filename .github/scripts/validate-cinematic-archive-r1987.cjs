@@ -100,6 +100,9 @@ async function evaluate(viewport,isMobile,browser){
       const state=window.FormatXArchiveExperience?.state;
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
+    // The state may already name the same source before its next native
+    // requestAnimationFrame publishes the newly scrubbed physical handoff.
+    await page.waitForTimeout(180);
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
     let postRefresh=null;
     if(state.scene!==scene.key){
@@ -157,6 +160,16 @@ async function evaluate(viewport,isMobile,browser){
           paperTopLayer:!!panel?.matches(':popover-open'),
           hitTopLayer:!!pixel&&!!panel?.contains(pixel),
           controlTopLayer:!!document.querySelector('#hero > .fx-reference-controls-r204:popover-open'),
+          controlDebug:(()=>{
+            const c=document.querySelector('#hero .fx-reference-controls-r204');
+            return {exists:!!c,parent:c?.parentElement?.className||c?.parentElement?.id,
+              popover:c?.getAttribute('popover'),open:c?.matches(':popover-open'),
+              display:c?getComputedStyle(c).display:null,visibility:c?getComputedStyle(c).visibility:null,
+              error:root.dataset.fxArchiveControlsPopoverError||'',
+              menuOpen:root.classList.contains('fx-organism-menu-open'),
+              modalOpen:document.body.classList.contains('fx-organism-panel-open'),
+              miniMagOpen:!!document.querySelector('.fx-mini-mag-open-r459')};
+          })(),
           controlsHit:(()=>{
             const button=document.querySelector('#hero .fx-three-sound');
             const b=button?.getBoundingClientRect();
