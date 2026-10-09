@@ -918,7 +918,9 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    // Public visitors and Lighthouse run the SAME native MAG renderer. Only
+    // the explicit isolated-MAG diagnostic may disable this archive pass.
+    if(disposed||reduced.matches||(!force&&isolatedMagCheck))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
