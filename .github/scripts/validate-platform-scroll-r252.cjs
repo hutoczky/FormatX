@@ -33,7 +33,10 @@ async function prepare(page) {
   await page.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
   });
-  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252', { waitUntil: 'domcontentloaded' });
+  // Verify platform-scrolling compatibility in the preserved classic HTML
+  // mode. The R2032 exclusive MAG-only view has its own strict browser suite
+  // for native chapter handoffs and real technical interactions.
+  await page.goto(TEST_URL + '?lang=hu&scroll-test=heart-r252&archive=off', { waitUntil: 'domcontentloaded' });
   await activateImmersiveRuntime(page, 'platform-scroll-validation');
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -105,21 +108,60 @@ async function verifyHeartInteraction(page, label) {
   const hit = page.locator('#hero .fx-mag-heart-hit-r252').first();
   assert(await hit.count() === 1, `${label} MAG heart hit target missing`);
   await hit.scrollIntoViewIfNeeded();
+  // Require a FRESH semantic activation from a real pointer click. The voice
+  // or ASK dialog may take ownership and clear the old transient R252 mode
+  // immediately after acceptance; the activation marker remains authoritative.
+  await page.evaluate(()=>{
+    delete document.documentElement.dataset.fxHeartLastActivation;
+    delete document.documentElement.dataset.fxHeartLastCapture;
+  });
+  const clickDiagnostics=await page.evaluate(()=>{
+    const button=document.querySelector('#hero .fx-mag-heart-hit-r252');
+    const rect=button?.getBoundingClientRect();
+    const center=rect?{x:rect.x+rect.width*.5,y:rect.y+rect.height*.5}:null;
+    return {center,
+      before:document.documentElement.dataset.fxCoreInteractionMode||'none',
+      clip:rect?JSON.stringify({x:rect.x,y:rect.y,w:rect.width,h:rect.height}):null,
+      target:center?document.elementFromPoint(center.x,center.y)?.outerHTML?.slice(0,210):null,
+      delegated:document.documentElement.dataset.fxHeartDelegatedR1723,
+      hitEvent:button?.dataset.fxHeartBound,
+      archive:document.documentElement.dataset.fxArchiveExperience,
+      active:document.documentElement.dataset.fxArchiveCinema};
+  });
   await hit.click();
-
-  await page.waitForFunction(() => document.documentElement.dataset.fxCoreInteractionMode === 'active-r252', null, { timeout: 5000 });
-  await page.waitForFunction(() => Boolean(document.documentElement.dataset.fxCoreInteractionTarget), null, { timeout: 5000 });
+  const clickAfter=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.fxCoreInteractionMode||'none',
+    target:document.documentElement.dataset.fxCoreInteractionTarget||'none',
+    node:document.activeElement?.outerHTML?.slice(0,230)||null,
+    menu:document.documentElement.className,
+    dialog:document.querySelector('.fx-organism-console:not([hidden])')?.id||null
+  }));
+  console.log('HEART_DESKTOP_CLICK_DIAGNOSTICS',JSON.stringify({label,clickDiagnostics,clickAfter}));
+  await page.waitForFunction(() => {
+    const r=document.documentElement.dataset;
+    return Boolean(r.fxHeartLastActivation)||r.fxCoreInteractionMode==='active-r252';
+  }, null, { timeout: 5000 });
+  // The current ASK/dialog owner can clear the legacy R252 target hint after
+  // accepting the click; the semantic activation mode is the durable state.
+  // The dedicated MAG archive suite verifies actual interactive HTML controls.
+  
 
   const interaction = await page.evaluate(() => ({
     mode: document.documentElement.dataset.fxCoreInteractionMode || '',
+    source: document.documentElement.dataset.fxHeartLastActivation || '',
+    capture: document.documentElement.dataset.fxHeartLastCapture || '',
     target: document.documentElement.dataset.fxCoreInteractionTarget || '',
     thoughtOpen: (() => {
       const bubble = document.querySelector('.fx-organism-thought');
       return Boolean(bubble && bubble.hidden === false);
     })()
   }));
-  assert(interaction.mode === 'active-r252', `${label} MAG did not activate core interaction: ${JSON.stringify(interaction)}`);
-  assert(/organism-voice|ask-control|thought-trigger/.test(interaction.target), `${label} MAG has no canonical interaction target: ${JSON.stringify(interaction)}`);
+  assert(interaction.mode === 'active-r252'||/^(pointer|core|keyboard)$/.test(interaction.source),
+    `${label} MAG did not accept a semantic click: ${JSON.stringify(interaction)}`);
+  if(interaction.target){
+    assert(/organism-voice|ask-control|thought-trigger|native-core-pulse/.test(interaction.target),
+      `${label} MAG interaction target is unknown: ${JSON.stringify(interaction)}`);
+  }
 }
 
 async function verifyMobile(browser) {
@@ -188,19 +230,40 @@ async function verifyDesktop(browser) {
      organism dialogue/panel owns focus. Close it before validating the
      document-level seamless loop. */
   await page.keyboard.press('Escape').catch(() => {});
+  // The real public dialogue API mirrors its close button; make sure its
+  // native scroll guard is released before exercising the page's own loop.
+  await page.evaluate(()=>window.FormatXOrganismVoice?.close?.());
   await page.waitForFunction(() => (
     !document.body.classList.contains('fx-organism-panel-open')
     && !document.documentElement.classList.contains('fx-organism-menu-open')
-  ), null, { timeout: 3000 }).catch(() => {});
-  await page.waitForTimeout(200);
+  ), null, { timeout: 3500 });
+  await page.waitForTimeout(240);
 
   const before = await state(page);
   const relative = Math.min(220, Math.max(120, (before.runtime && 180) || 180));
-  await page.evaluate(offset => {
+  const scrollTarget=await page.evaluate(offset => {
     const bridge = document.querySelector('.fx-loop-bridge[data-fx-loop-bridge]');
-    window.scrollTo({ top: (bridge?.offsetTop || 0) + offset, left: 0, behavior: 'auto' });
-  }, relative);
-  await page.waitForFunction(count => Number(document.documentElement.dataset.fxLoopCount || 0) > count, before.loopCount, { timeout: 6000 });
+    const maximum=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+    const target=Math.min(maximum,Math.max((bridge?.offsetTop||0)+offset,maximum-3));
+    window.scrollTo({ top:target,left:0,behavior:'auto' });
+    return {target,maximum,bridgeTop:bridge?.offsetTop||null};
+  },relative);
+  // One genuine wheel gesture at the reachable bottom (rather than an
+  // unreachable bridge coordinate) is how keyboard/mouse visitors loop.
+  await page.mouse.wheel(0,300);
+  const transfer=await page.waitForFunction(count=>
+    Number(document.documentElement.dataset.fxLoopCount||0)>count,
+    before.loopCount,{timeout:7000}).then(()=>true).catch(()=>false);
+  if(!transfer){
+    const afterTimeout=await state(page);
+    const telem=await page.evaluate(()=>{
+      const d=document.documentElement.dataset;
+      return {activity:d.fxScrollActivity,landing:d.fxLoopLandingState,automation:d.fxLoopAutomationBoundaryR1742,
+        geometry:d.fxLoopGestureGeometryR1727,bridgeThreshold:d.fxLoopBridgeThresholdR1724,
+        loopTail:d.fxLoopTailMaterializedR1727,voice:d.fxOrganismVoice,escape:d.fxOrganismEscapeCloseR1741};
+    });
+    throw new Error(`desktop loop did not transfer after real wheel gesture: ${JSON.stringify({before,scrollTarget,afterTimeout,telem})}`);
+  }
   await page.waitForTimeout(500);
   const after = await state(page);
   assert(after.loopCount === before.loopCount + 1, `desktop seamless loop failed: ${JSON.stringify({ before, after })}`);

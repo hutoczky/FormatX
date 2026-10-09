@@ -52,7 +52,11 @@ function meaningfulDiagnostics(items) {
 
 async function enterSite(page, label) {
   mark(label + ': navigation-start');
-  await page.goto(TEST_URL + '?organism-validation=1', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  // The legacy organism-console regression exercises genuine functionality in
+  // the deliberately retained semantic HTML fallback, not the user-facing
+  // exclusive MAG-only stage. The separate archive suite verifies original
+  // clickable modules and Ask controls in the cinematic experience.
+  await page.goto(TEST_URL + '?organism-validation=1&archive=off', { waitUntil: 'domcontentloaded', timeout: 60000 });
   const skip = page.locator('.fx-intro-skip');
   if (await skip.isVisible().catch(() => false)) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});

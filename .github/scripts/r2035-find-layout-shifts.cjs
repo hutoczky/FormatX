@@ -1,0 +1,55 @@
+'use strict';
+const {chromium}=require('playwright');
+const ORIGIN=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
+ try{
+  const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'hu-HU',reducedMotion:'no-preference'});
+  const page=await context.newPage();
+  const cdp=await context.newCDPSession(page);
+  // Match Lighthouse mobile throttling: the plain unthrottled Chromium run
+  // showed CLS=.0004 while real 4xCPU/slow network Lighthouse scored .55.
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  await cdp.send('Network.emulateNetworkConditions',{
+    offline:false,latency:150,
+    downloadThroughput:1600*1024/8,
+    uploadThroughput:750*1024/8,
+    connectionType:'cellular4g'
+  });
+  await page.addInitScript(()=>{
+   window.__shiftRecord=[];
+   new PerformanceObserver(list=>{
+    for(const e of list.getEntries()){
+      if(e.hadRecentInput)continue;
+      window.__shiftRecord.push({
+        value:e.value,start:e.startTime,source:e.sources.map(s=>{
+          const n=s.node;
+          return {node:n?(n.id?'#'+n.id:(n.className&&typeof n.className==='string'?n.tagName.toLowerCase()+'.'+n.className.trim().replace(/\s+/g,'.').slice(0,90):n.tagName)):null,
+           previous:s.previousRect,current:s.currentRect};
+        })
+      });
+    }
+   }).observe({type:'layout-shift',buffered:true});
+  });
+  await page.goto(ORIGIN,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForTimeout(14000);
+  const result=await page.evaluate(()=>{
+    const shifts=window.__shiftRecord||[];
+    const selectors=['#hero','.hero-grid','.hero-space','.hero-copy','#experience','.fx-category-deck--standalone','.fx-award-proof','.topbar','#main-content','.site-footer'];
+    return {cls:shifts.reduce((a,e)=>a+e.value,0),shifts:shifts.sort((a,b)=>b.value-a.value).slice(0,13),
+      elements:selectors.map(q=>{const n=document.querySelector(q);const r=n?.getBoundingClientRect();return {q,rect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,display:n?getComputedStyle(n).display:null}}),
+      mode:document.documentElement.dataset.fxArchiveCinema,
+      fcp:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,
+      deferred:document.documentElement.dataset.fxDeferredCssR487};
+  });
+  console.log('MOBILE_CLS_ROOT_CAUSES '+JSON.stringify(result));
+  const assert=require('node:assert/strict');
+  assert.ok(result.cls<=0.10,'Measured throttled mobile CLS exceeds 0.10: '+JSON.stringify(result.shifts));
+  const main=result.elements.find(x=>x.q==='#main-content');
+  const head=result.elements.find(x=>x.q==='.topbar');
+  assert.ok(main?.rect&&head?.rect&&Math.abs(main.rect.y-head.rect.h)<=2,
+    'Hidden status/rail stole document flow above main: '+JSON.stringify({main,head}));
+  console.log('MOBILE_CLS_GEOMETRY_PASS',JSON.stringify({cls:result.cls,mainTop:main.rect.y,headerHeight:head.rect.h}));
+  await context.close();
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1)});

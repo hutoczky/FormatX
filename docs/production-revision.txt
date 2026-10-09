@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2033-canonical-proof-singleton
-base_master=adf6d6bf2e86d2cc36e9b1763a54eb922e6eb8fc
-purpose=Fix duplicate public evidence block without waiting for the separate unfinished MAG cinematic archive refactor; reuse server's existing verified proof links.
-validation=Canonical proof appears once, legacy hero proof hidden only if canonical exists; inert desktop mirror retains layout but never duplicates text visually; strict Cloudflare production revision check required.
-limits=MAG R2033 cinematics, native paper transfer and award-ready performance remain in separate PR 487.
+token=20261009-r2036-candidate-mag-singleton-integrated
+base_master=e91ad6123535d335ca4801bfde739e631430e222
+purpose=Release candidate: one native MAG WebGL2 world; eight scroll-reversible archive sources, interactive HTML folios, original accessible CTA and technical glass consoles, first-visit intro, camera continuity and mobile optimizations. Preserves r2033 live proof singleton hotfix.
+validation=Must pass strict 8-scene Playwright, 320-1920 occlusion/interaction, mobile/desktop Lighthouse >=95 and stated FCP budgets, platform scroll, no-WebGL/reduced-motion, bilingual, Worker security, production preflight and exact Cloudflare smoke BEFORE merge/deploy.
+limits=Candidate only; not certified as real-device 60FPS, physically complete PBR, award-ready or objectively superior to Igloo.inc. Never claim live until verified.

@@ -1,0 +1,45 @@
+name: R2035 diagnose mobile layout shifts
+on:
+  push:
+    branches: [mag-cinematic-r2036-integrated]
+    paths:
+      - '.github/scripts/r2035-find-layout-shifts.cjs'
+      - '.github/workflows/r2035-diagnose-layout.yml'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-shell-r2035.css'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/scripts/r2035-find-layout-shifts.cjs'
+      - '.github/workflows/r2035-diagnose-layout.yml'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-shell-r2035.css'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/mag-cls" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/mag-cls/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Launch website
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/cls-http.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/cls-http.log"
+          exit 1
+      - name: Capture exact layout-shift DOM nodes
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-cls/node_modules
+        run: node .github/scripts/r2035-find-layout-shifts.cjs

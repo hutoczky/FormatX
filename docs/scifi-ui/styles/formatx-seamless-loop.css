@@ -616,3 +616,21 @@ body > .site-footer {
     transition-duration: .01ms !important;
   }
 }
+
+/* R2033 one genuine proof source, but preserve the inert desktop bridge
+   footprint so the legacy seamless loop still lands at its real MAG. */
+.fx-loop-reference-spacer-r2033{
+  position:relative;
+  box-sizing:border-box;
+  display:block;
+  width:calc(100% - clamp(20px,6vw,26px) - clamp(22px,7.4vw,32px));
+  max-width:680px;
+  min-height:258px;
+  margin:0 0 38px clamp(20px,6vw,26px);
+  visibility:hidden;
+  pointer-events:none;
+  border:0;
+  background:none;
+}
+@media(max-width:374px){.fx-loop-reference-spacer-r2033{min-height:278px}}
+/* r2033-preserve-real-bridge-height-without-duplicate-proof */

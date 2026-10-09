@@ -1,0 +1,49 @@
+name: R2035 FormatX MAG production preflight
+on:
+  push:
+    branches: [mag-cinematic-r2036-integrated]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test production and native MAG source syntax
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-heart-core-r252.js
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --check billing-worker/src/production-content-entry.js
+          node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Strict production preflight
+        run: node .github/scripts/production-preflight.cjs
+      - name: Public navigation and integrity
+        run: node .github/scripts/validate-public-site-integrity.cjs
+      - name: Canonical archive, proof and first paint invariants
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const assert=require('node:assert/strict');
+          const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+          const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+          const loop=fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js','utf8');
+          assert.equal((html.match(/<section[^>]*class="fx-award-proof"[^>]*\bdata-fx-award-proof\b/g)||[]).length,1,'Exactly one evidence block must be in original HTML');
+          assert.ok(!loop.includes('<article class="fx-loop-reference-proof">'),'No copied evidence panel in scrolling mirror');
+          assert.ok(html.includes('formatx-mobile-first-shell-r2035.css'),'The real mobile shell is a critical resource');
+          assert.ok(html.includes('data-fx-r487-media="(max-width:900px)" media="print" data-fx-mobile-first-paint-r358'),'Full mobile CSS must not block first paint');
+          assert.ok(worker.includes('data-fx-r487-media="(max-width:900px)"'),'Production Worker must preserve deferred mobile quality');
+          assert.ok(html.includes('formatx-cinematic-archive-r1987.js'),'Native MAG 3D handoff script must load');
+          console.log('R2035 MAG_PRODUCTION_INTEGRITY_PASS');
+          NODE
