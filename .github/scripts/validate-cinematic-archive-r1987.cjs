@@ -323,6 +323,47 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function auditSameLiveArchive(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference',
+    userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Chrome-Lighthouse'
+  });
+  const page=await context.newPage();
+  await page.addInitScript(()=>{
+    try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}
+  });
+  const consoleErrors=[];
+  page.on('pageerror',error=>consoleErrors.push(String(error)));
+  await page.goto('http://127.0.0.1:4178/scifi-ui/index.html?lighthouse=1&r2041-equal-mag=1',
+    {waitUntil:'domcontentloaded',timeout:60000});
+  let success=false;
+  try{
+    await page.waitForFunction(()=>{
+      const root=document.documentElement;
+      return root.dataset.fxArchiveExperience==='ready'
+        && Number(root.dataset.fxArchiveSceneCount)>=8
+        && root.dataset.fxCoreContexts==='1';
+    },null,{timeout:40000});
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+      null,{timeout:10000});
+    success=true;
+  }finally{
+    const proof=await page.evaluate(()=>{
+      const r=document.documentElement;
+      return {status:r.dataset.fxArchiveExperience||'none',
+        cinema:r.dataset.fxArchiveCinema||'home',
+        scenes:r.dataset.fxArchiveSceneCount||'0',
+        contexts:r.dataset.fxCoreContexts||'0',
+        fallback:r.dataset.fxArchiveHtmlFallback||'none',
+        canvas:!!window.FormatXLivingCore?.canvas,
+        ready:!!window.FormatXArchiveExperience};
+    }).catch(error=>({diagnosticError:String(error)}));
+    console.log(success?'ARCHIVE_LIGHTHOUSE_PARITY_PASS':'ARCHIVE_LIGHTHOUSE_PARITY_FAIL',
+      JSON.stringify({proof,consoleErrors:consoleErrors.slice(0,8)}));
+    await context.close();
+  }
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -381,6 +422,7 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await auditSameLiveArchive(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
