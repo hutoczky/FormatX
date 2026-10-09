@@ -8,7 +8,10 @@ const BASE = 'http://127.0.0.1:4181/scifi-ui/';
 const CASES = [
   {
     name: 'main',
-    url: 'index.html?lang=hu',
+    // Design-system token regression covers the accessible, functional HTML
+    // fallback. The exclusive MAG cinematic view has its OWN Chromium suite
+    // asserting eight real native pages, clickability and lane separation.
+    url: 'index.html?lang=hu&archive=off',
     ready: '.fx-category-deck',
     panel: '.fx-category-deck',
     header: '.topbar',
