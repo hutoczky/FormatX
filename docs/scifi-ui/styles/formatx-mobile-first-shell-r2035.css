@@ -140,3 +140,32 @@
    translate:none!important;
  }
 }
+
+/* R2036.1: measured shift 0.125 at 2.9s came from the MAG control
+   carrier switching from a full-width 390x96 normal-flow block into a
+   centered 126x90 stage overlay. Reserve FINAL geometry at first paint.
+   Preserve the SAME semantic live ASK, Pause and sound buttons. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+ html:root:root:root:root:root:root body.living-architecture
+ #hero>.hero-grid>.hero-space>.fx-reference-controls-r204{
+   position:absolute!important;
+   inset:auto auto 18px 50%!important;
+   width:126px!important;
+   min-width:126px!important;
+   max-width:126px!important;
+   height:90px!important;
+   min-height:90px!important;
+   max-height:90px!important;
+   margin:0!important;
+   padding:0!important;
+   display:flex!important;
+   justify-content:center!important;
+   align-items:center!important;
+   transform:translateX(-50%)!important;
+   translate:none!important;
+   z-index:80!important;
+ }
+ html:root:root:root:root:root:root body.living-architecture .topbar>a.brand{
+   left:14px!important;
+ }
+}
