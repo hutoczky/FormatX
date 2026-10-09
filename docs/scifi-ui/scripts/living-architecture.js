@@ -3,10 +3,10 @@
 
   const ROOT = document.documentElement;
   const PARAMS = new URLSearchParams(location.search);
-  const AUDIT_MODE =
-    /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || PARAMS.get('lighthouse') === '1'
-    || ROOT.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
+  // No hidden static alternative for Lighthouse or webdriver.
+  // The same real runtime must own the site for every capable browser.
+  const AUDIT_MODE = PARAMS.get('archive')==='off'
+    || matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
   if (AUDIT_MODE) {
     const canvas = document.getElementById('fx-apex-canvas');
