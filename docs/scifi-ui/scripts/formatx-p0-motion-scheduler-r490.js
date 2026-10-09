@@ -63,9 +63,6 @@ function start(reason){
   started=true;
   clearPending();
   root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
-  // Prewarm the full real-3D skin before requesting the shared MAG runtime.
-  // This event is sent for every visitor, never by audit/browser identity.
-  dispatchEvent(new CustomEvent('formatx:magstyleprewarm',{detail:{reason}}));
   if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
     root.dataset.fxP0MotionSchedulerR490='runtime-already-present';
     return;
