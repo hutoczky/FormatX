@@ -355,6 +355,35 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function auditParity(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference',
+    userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Chrome-Lighthouse'
+  });
+  const page=await context.newPage();
+  // Deliberately NOT ?archive=1: prove the normal public page does not
+  // serve the old hero to a Lighthouse user agent.
+  await page.goto('http://127.0.0.1:4178/scifi-ui/index.html?lighthouse=1&r2039-parity=1',
+    {waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const state=document.documentElement.dataset.fxArchiveExperience;
+    return state==='ready'||state==='context-error'||state==='no-scenes'||state==='audit-html';
+  },null,{timeout:60000});
+  const parity=await page.evaluate(()=>{
+    const r=document.documentElement;
+    return {experience:r.dataset.fxArchiveExperience,
+      cinema:r.dataset.fxArchiveCinema||'home',
+      sceneCount:window.FormatXArchiveExperience?.scenes?.length||0,
+      canvas:!!window.FormatXLivingCore?.canvas,
+      contexts:r.dataset.fxCoreContexts||'0'};
+  });
+  assert.equal(parity.experience,'ready','A Lighthouse UA was served noncinematic HTML: '+JSON.stringify(parity));
+  assert.equal(parity.contexts,'1','Lighthouse and real visitors need same single WebGL renderer');
+  assert.ok(parity.sceneCount>=8,'Lighthouse must receive same eight real archiving scenes');
+  console.log('MAG_LIGHTHOUSE_PARITY_PASS',JSON.stringify(parity));
+  await context.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -414,6 +443,7 @@ async function fallback(browser){
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:320,height:568},true,browser);
     await evaluate({width:390,height:844},true,browser);
+    await auditParity(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
