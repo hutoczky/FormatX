@@ -370,6 +370,40 @@ async function missingGpuFallback(browser){
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
 }
+async function mobileHtmlFallback(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  const testUrl=new URL(URL);
+  testUrl.searchParams.set('archive','off');
+  testUrl.searchParams.delete('r486-optics-energy-check');
+  const page=await context.newPage();
+  await page.goto(testUrl.toString(),{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const el=document.querySelector('#hero .hero-copy');
+    return document.documentElement.dataset.fxArchiveExperience==='reduced-html'&&
+      el&&el.getBoundingClientRect().width>=240;
+  },null,{timeout:30000});
+  const fallback=await page.evaluate(()=>{
+    const node=document.querySelector('#hero .hero-copy');
+    const rect=node?.getBoundingClientRect();
+    const style=node?getComputedStyle(node):null;
+    return {status:document.documentElement.dataset.fxArchiveExperience,
+      rectangle:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+      clipping:style?.clipPath,visible:style?.visibility,
+      controls:node?.querySelectorAll('a[href],button').length||0,
+      title:node?.querySelector('h1')?.textContent?.trim()||'',
+      viewport:innerWidth,overflow:document.documentElement.scrollWidth-innerWidth};
+  });
+  assert.ok(fallback.rectangle&&fallback.rectangle.w>=240&&fallback.rectangle.h>=140,
+    'Mobile without cinematic WebGL must not have a 1px/blank hero: '+JSON.stringify(fallback));
+  assert.equal(fallback.visible,'visible');
+  assert.ok(fallback.controls>=1&&fallback.title.includes('FORMATX'),
+    'Native fallback must preserve working controls and actual title: '+JSON.stringify(fallback));
+  assert.ok(fallback.overflow<=4,'Mobile HTML fallback horizontal overflow: '+JSON.stringify(fallback));
+  console.log('ARCHIVE_MOBILE_HTML_FALLBACK_PASS',JSON.stringify(fallback));
+  await context.close();
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -394,6 +428,7 @@ async function fallback(browser){
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
     await missingGpuFallback(browser);
+    await mobileHtmlFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
 })().catch(e=>{console.error('ARCHIVE_FAIL',e.stack||String(e));process.exitCode=1;});
