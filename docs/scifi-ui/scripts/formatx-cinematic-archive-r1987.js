@@ -108,7 +108,7 @@
       paperLast.set(node,entry);
       const away=1-smooth(entry);
       const s=sceneForElement(node);
-      const dir=s?.index%2===0?-1:1;
+      const dir=mobile()?0:(s?.index%2===0?-1:1);
       node.style.setProperty('--fx-archive-paper-x',(away*dir*46).toFixed(1)+'px');
       node.style.setProperty('--fx-archive-paper-y',(away*36).toFixed(1)+'px');
       node.style.setProperty('--fx-archive-paper-rot',(away*dir*-13).toFixed(2)+'deg');
@@ -490,7 +490,7 @@ void main(){
       handoff.querySelector('.fx-archive-telemetry-r2022__title').textContent=
         String(h.textContent||scene[english?'en':'hu']).trim().slice(0,140);
       handoff.querySelector('.fx-archive-physical-paper-r2026__excerpt').textContent=
-        String(excerpt?.textContent||'').trim().slice(0,230);
+        String(excerpt?.textContent||'').trim().slice(0,mobile()?100:210);
       const rgb=scene.color.map(x=>Math.round(x*255)).join(',');
       handoff.style.setProperty('--fx-archive-paper-light',rgb);
       handoff.dataset.source=scene.source;
@@ -502,7 +502,7 @@ void main(){
     const p=current.progress;
     const push=smooth((p-.06)/.38);
     const settle=smooth((p-.44)/.31);
-    const dir=scene.index%2===0?-1:1;
+    const dir=mobile()?0:(scene.index%2===0?-1:1);
     handoff.style.setProperty('--fx-folio-translate-x',(dir*(1-push)*95+settle*dir*14).toFixed(1)+'px');
     handoff.style.setProperty('--fx-folio-translate-y',((1-push)*42+settle*14).toFixed(1)+'px');
     handoff.style.setProperty('--fx-folio-rotate-y',(dir*(1-push)*-24).toFixed(1)+'deg');
