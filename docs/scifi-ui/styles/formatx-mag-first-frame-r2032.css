@@ -1,0 +1,36 @@
+/* R2034: tiny first-frame design tokens on phones. Render the real HTML
+   hero immediately; defer only nonessential heavy P0 optical polish. */
+:root{
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+/* The exclusive MAG archive must not reveal the old page while the larger
+   deferred cinematic stylesheet is still loading. Self-hosted, CSP-safe. */
+@media (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture #hero .hero-grid > :not(.hero-space),
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture #hero .hero-copy,
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture #hero .scroll-cue{
+   display:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-reference-rail.fx-cinema-controls-r2032{
+   position:fixed!important;top:clamp(76px,11dvh,125px)!important;
+   left:clamp(12px,2.3vw,38px)!important;right:auto!important;bottom:auto!important;
+   display:flex!important;flex-wrap:wrap!important;gap:8px!important;
+   z-index:190!important;visibility:visible!important;opacity:1!important;
+   pointer-events:auto!important;transform:none!important;translate:none!important;
+ }
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-reference-rail.fx-cinema-controls-r2032 > button{
+   position:relative!important;inset:auto!important;opacity:1!important;
+   visibility:visible!important;pointer-events:auto!important;transform:none!important;
+ }
+}
+/* production-r2032-critical-exclusive-first-frame-hero-and-controls */
+
+/* R2033 remove duplicate hero proof when canonical evidence exists.
+   The real, accessible verification links remain in FINAL. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading,
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
