@@ -2,6 +2,41 @@
   'use strict';
 
   const ROOT = document.documentElement;
+  /* R2009: Currency is a commerce control, not a 3D controller feature.
+     It must work in a browser running automated accessibility checks, on
+     phones without the legacy APEX runtime, and with ordinary desktop MAG.
+     Delegation survives organism console DOM reparenting. */
+  const CURRENCY_PRICES = Object.freeze({HUF:15900,EUR:44});
+  document.addEventListener('click',event=>{
+    const button=event.target instanceof Element?event.target.closest('[data-currency]'):null;
+    if(!(button instanceof HTMLButtonElement)||!['HUF','EUR'].includes(button.dataset.currency))return;
+    const selected=button.dataset.currency,other=selected==='HUF'?'EUR':'HUF';
+    document.querySelectorAll('[data-currency]').forEach(el=>{
+      el.setAttribute('aria-pressed',String(el.dataset.currency===selected));
+    });
+    const language=document.documentElement.lang==='en'?'en':'hu';
+    const money=(value,currency)=>new Intl.NumberFormat(language==='en'?'en-GB':'hu-HU',{
+      style:'currency',currency,minimumFractionDigits:0,maximumFractionDigits:0
+    }).format(value);
+    const main=document.getElementById('preview-main-price');
+    const secondary=document.getElementById('preview-secondary-price');
+    const label=document.getElementById('preview-secondary-label');
+    const checkout=document.getElementById('preview-checkout-link');
+    if(main)main.textContent=money(CURRENCY_PRICES[selected],selected);
+    if(secondary)secondary.textContent=money(CURRENCY_PRICES[other],other);
+    if(label)label.textContent=language==='hu'
+      ?(other==='EUR'?'Összeg EUR-ban':'Összeg HUF-ban')
+      :(other==='EUR'?'Amount in EUR':'Amount in HUF');
+    if(checkout){
+      const url=new URL('./checkout.html',document.baseURI);
+      url.searchParams.set('plan','business_pro');
+      url.searchParams.set('cycle','monthly');
+      url.searchParams.set('currency',selected);
+      url.searchParams.set('lang',language);
+      checkout.href=url.href;
+    }
+    ROOT.dataset.fxCommerceCurrencyR2009=selected;
+  });
   const AUDIT_MODE =
     navigator.webdriver === true
     || /Chrome-Lighthouse/i.test(navigator.userAgent || '')
@@ -46,7 +81,7 @@
   const RELEASE_API = './data/current-release.json';
   const DOWNLOAD_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/download/';
   const PAGE_PREFIX = 'https://github.com/hutoczky/FormatX-Updates/releases/';
-  const PRICES = { HUF: 15900, EUR: 44 };
+  const PRICES = CURRENCY_PRICES;
   const SCENES = [
     ['hero', '120,210,255'],
     ['experience', '183,163,255'],
@@ -174,14 +209,7 @@
     document.querySelectorAll('[data-language]').forEach(button => {
       button.addEventListener('click', () => applyLanguage(button.dataset.language, true));
     });
-    document.querySelectorAll('[data-currency]').forEach(button => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('[data-currency]').forEach(item => {
-          item.setAttribute('aria-pressed', String(item === button));
-        });
-        updatePrice();
-      });
-    });
+    // R2009: delegated global commerce controller owns every currency click.
   }
 
   function trusted(value, prefix) {

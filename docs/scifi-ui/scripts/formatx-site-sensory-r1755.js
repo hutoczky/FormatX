@@ -5,16 +5,8 @@
 'use strict';
 const root=document.documentElement;
 if(root.dataset.fxSiteSensoryR1755==='ready'||root.dataset.fxSiteSensoryR1755==='booting')return;
-const params=new URLSearchParams(location.search);
-const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')
-  ||params.get('lighthouse')==='1'
-  ||root.dataset.fxP0AuditModeR1728==='static-first-paint-no-late-webgl';
-if(audit){
-  root.dataset.fxSiteSensoryR1755='audit-static-r1818';
-  root.dataset.fxSiteSensorySchedulerR1755='audit-zero-listeners-zero-css-zero-raf';
-  root.dataset.fxSiteSensoryBudgetR1755='audit-no-deviceorientation-no-compositor-work';
-  return;
-}
+// Interaction-triggered sensory behavior has no UA- or audit-dependent skip.
+// No RAF or extra WebGL context is allocated before interaction.
 root.dataset.fxSiteSensoryR1755='booting';
 
 const reduced=matchMedia('(prefers-reduced-motion:reduce)');

@@ -1,0 +1,632 @@
+/* R2045 isolated experiment: two existing adjacent render-blocking
+   desktop stylesheets bundled in their exact original cascading order.
+   Always apply to actual users; no user agent or test-specific branches.
+   The link's (min-width:901px) media remains unchanged. */
+
+/* FormatX r328 — desktop first-paint geometry owner.
+   This stylesheet is intentionally render-blocking. It mirrors the final r244
+   desktop reference frame before enhancement runtimes mount, preventing the
+   hero copy, MAG stage and controls from changing layout after first paint. */
+
+@media (min-width: 901px) {
+  /* R1631 — match the final desktop header carrier before any deferred owner
+     arrives. Absolute controls then cannot change the document flow later. */
+  html body.living-architecture .topbar {
+    position:relative!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
+  /* R1611: final r244 desktop state already hides this legacy action cluster.
+     Match that state on the first paint so the topbar never shifts later. */
+  html body.living-architecture .topbar > .header-actions {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html body.living-architecture main#main-content section#hero.scene.hero {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 36px 0 92px !important;
+    overflow: visible !important;
+    isolation: isolate !important;
+  }
+
+  html body.living-architecture #hero > .hero-grid {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, .86fr) minmax(430px, 1.14fr) !important;
+    grid-template-rows: clamp(520px, 42vw, 620px) minmax(258px, auto) !important;
+    grid-template-areas: "copy space" "heading proof" !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    height: auto !important;
+    min-height: 808px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    gap: 30px 56px !important;
+    overflow: visible !important;
+  }
+
+  html body.living-architecture #hero .hero-grid > .hero-copy {
+    grid-area: copy !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 12 !important;
+    display: block !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 580px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    clip-path: none !important;
+    white-space: normal !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .hero-grid > .hero-space {
+    grid-area: space !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: clamp(520px, 42vw, 620px) !important;
+    min-height: 520px !important;
+    max-height: 620px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-heading {
+    grid-area: heading !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-proof {
+    grid-area: proof !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: start !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 258px !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .hero-title-main {
+    font-size: clamp(64px, 6.25vw, 92px) !important;
+    line-height: .88 !important;
+    letter-spacing: -.075em !important;
+    white-space: nowrap !important;
+  }
+
+  html body.living-architecture #hero .hero-title-sub {
+    margin: 7px 2px 0 0 !important;
+    font-size: clamp(27px, 2.7vw, 40px) !important;
+    line-height: 1 !important;
+    letter-spacing: .12em !important;
+    white-space: nowrap !important;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Reserve the final r264/r268 three-cell control geometry whether the boot
+     owner has already moved the controls into .hero-space or they are still a
+     direct grid child during the first paint. */
+  html body.living-architecture #hero .fx-reference-controls-r204 {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 54px) !important;
+    grid-template-rows: 76px !important;
+    align-items: start !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    max-width: 190px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    isolation: isolate !important;
+    z-index: 12040 !important;
+  }
+
+  html body.living-architecture #hero .hero-space > .fx-reference-controls-r204 {
+    position: absolute !important;
+    inset: auto auto 20px 50% !important;
+    transform: translateX(-50%) !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero > .hero-grid > .fx-reference-controls-r204 {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    position: relative !important;
+    inset: auto !important;
+    align-self: end !important;
+    justify-self: center !important;
+    margin-bottom: 28px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail,
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-reference-rail-r264 {
+    display: contents !important;
+    position: static !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask,
+  html body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-pause {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    max-height: 54px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    translate: none !important;
+  }
+
+  html body.living-architecture #main-content > .fx-category-deck--standalone {
+    position: relative !important;
+    inset: auto !important;
+    width: min(1320px, calc(100% - 80px)) !important;
+    max-width: 1320px !important;
+    margin: 0 auto 90px !important;
+    transform: none !important;
+    translate: none !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1120px) {
+  html body.living-architecture #hero > .hero-grid {
+    width: calc(100% - 48px) !important;
+    grid-template-columns: minmax(0, .82fr) minmax(430px, 1.18fr) !important;
+    gap: 26px 30px !important;
+  }
+}
+
+/* production-r1611-zero-cls-desktop-header-actions */
+
+/* production-r1631-desktop-first-frame-geometry-lock */
+
+/* production-r1634-desktop-first-final-geometry-lock */
+
+/* production-r1637-desktop-header-final-76-lock */
+
+
+/* R1969 — canonical desktop controls are born in their settled MAG-bottom row.
+   Retire the historical top-right vertical rail. This selector intentionally
+   keeps the old specificity level so no earlier compatibility block can win
+   during the first frame. */
+@media (min-width:901px) {
+  html:root:root:root:root:root body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position:absolute!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:20px!important;
+    left:50%!important;
+    z-index:12080!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,54px)!important;
+    grid-template-rows:76px!important;
+    align-items:start!important;
+    justify-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    width:190px!important;
+    min-width:190px!important;
+    max-width:190px!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+    column-gap:14px!important;
+    row-gap:0!important;
+    overflow:visible!important;
+    isolation:isolate!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translateX(-50%)!important;
+    translate:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root:root body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264){
+    display:contents!important;
+    position:static!important;
+    inset:auto!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root:root:root:root body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound,
+  html:root:root:root:root:root body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask,
+  html:root:root:root:root:root body.living-architecture
+  #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-pause {
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    box-sizing:border-box!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+/* production-r1969-desktop-controls-single-first-frame-owner */
+
+/* R1710 — exact desktop hero reservation.
+   Final R244 geometry is first-row clamp + 258px proof row + 30px gap +
+   36/92px section padding. Reserve that complete box before any runtime owner
+   mounts so the hero cannot become a CLS source. */
+@media (prefers-reduced-motion:no-preference) and (min-width:901px) and (pointer:fine){
+  html:root:root body.living-architecture main#main-content section#hero.scene.hero{
+    height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    min-height:calc(clamp(520px,42vw,620px) + 416px)!important;
+    max-height:calc(clamp(520px,42vw,620px) + 416px)!important;
+  }
+  html:root:root body.living-architecture #hero>.hero-grid{
+    height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    min-height:calc(clamp(520px,42vw,620px) + 288px)!important;
+    max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
+  }
+  html:root:root body.living-architecture #hero>.hero-grid>.hero-copy{
+    min-height:575px!important;
+  }
+}
+/* production-r1710-desktop-hero-geometry-lock */
+
+
+/* R2045 preserve original second link media condition. */
+@media (hover: hover) and (pointer: fine) {
+/* FormatX desktop composition contract.
+   Keeps the visual system intact while preventing oversized empty hero space. */
+
+/* Desktop and laptop input remains continuous. Mobile keeps its guided snap flow. */
+@media (min-width: 901px) {
+  html body.living-architecture {
+    scroll-snap-type: none !important;
+  }
+}
+
+@media (min-width: 1100px) and (pointer: fine) {
+  html body.living-architecture #hero {
+    display: grid;
+    box-sizing: border-box;
+    height: min(860px, calc(100svh - 69px));
+    max-height: min(860px, calc(100svh - 69px));
+    min-height: 680px;
+    padding: clamp(82px, 8.2vh, 108px) 0 clamp(48px, 5.8vh, 72px);
+    align-items: center;
+    overflow: clip;
+  }
+
+  html body.living-architecture #hero .hero-grid {
+    position: relative;
+    display: grid;
+    box-sizing: border-box;
+    grid-template-columns: minmax(500px, .92fr) minmax(520px, 1.08fr);
+    width: min(1680px, calc(100% - clamp(72px, 8vw, 150px)));
+    height: 100%;
+    min-height: 0;
+    margin-inline: auto;
+    padding: 0;
+    gap: clamp(34px, 5vw, 96px);
+    align-items: center;
+  }
+
+  html body.living-architecture #hero .hero-copy {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    display: grid;
+    grid-template-rows: repeat(7, auto);
+    row-gap: clamp(7px, 1.05vh, 14px);
+    align-content: center;
+    align-self: center;
+    width: min(700px, 100%);
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    transform: none;
+    overflow: visible;
+  }
+
+  html body.living-architecture #hero .hero-copy > .kicker {
+    grid-row: 1;
+    margin-bottom: 0;
+  }
+
+  html body.living-architecture #hero .hero-copy > .fx-category-definition {
+    grid-row: 2;
+    align-self: start;
+    width: min(620px, 100%);
+    max-width: 620px;
+    margin: 0;
+    overflow: visible;
+  }
+
+  html body.living-architecture #hero .hero-copy > #hero-title {
+    grid-row: 3;
+    margin-block: clamp(2px, .5vh, 8px);
+  }
+
+  html body.living-architecture #hero .hero-copy > .hero-lead {
+    grid-row: 4;
+  }
+
+  html body.living-architecture #hero .hero-copy > .fx-method-inline {
+    grid-row: 5;
+    align-self: start;
+    margin-block: clamp(4px, .7vh, 10px);
+    overflow: visible;
+  }
+
+  html body.living-architecture #hero .hero-copy > .hero-actions {
+    grid-row: 6;
+  }
+
+  html body.living-architecture #hero .hero-copy > .hero-facts {
+    grid-row: 7;
+  }
+
+  html body.living-architecture #hero .hero-title-main {
+    font-size: clamp(66px, 7.1vw, 124px);
+    line-height: .84;
+  }
+
+  html body.living-architecture #hero .hero-title-sub {
+    font-size: clamp(27px, 2.9vw, 48px);
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    max-width: 620px;
+    margin-top: clamp(8px, 1.2vh, 16px);
+    font-size: clamp(15px, 1.05vw, 18px);
+    line-height: 1.58;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    display: flex !important;
+    width: min(620px, 100%);
+    margin-top: clamp(10px, 1.5vh, 20px);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  html body.living-architecture #hero .hero-actions .button {
+    min-height: 48px;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    display: flex !important;
+    width: min(620px, 100%);
+    margin-top: clamp(8px, 1.2vh, 16px);
+    flex-wrap: wrap;
+  }
+
+  html body.living-architecture #hero .hero-space {
+    position: relative;
+    inset: auto;
+    align-self: center;
+    width: 100%;
+    height: min(100%, 650px);
+    min-height: 480px;
+    pointer-events: none;
+  }
+
+  html body.living-architecture #hero .hero-space::before {
+    content: '';
+    position: absolute;
+    inset: 8% 3% 7%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent, 56 222 255), .055), transparent 66%);
+    filter: blur(28px);
+    pointer-events: none;
+  }
+
+  html body.living-architecture #hero .scroll-cue {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    bottom: clamp(16px, 2.2vh, 28px);
+    margin: 0;
+    transform: translateX(-50%);
+  }
+
+  /* The hero already exposes download and navigation actions. The duplicate
+     fixed dock must not cover the composition while the core is active. */
+  html.fx-organism-core-active .fx-organism-actionbar {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(16px) !important;
+  }
+
+  /* R1948 — editorial chapter rhythm.
+     Content drives height; compact chapters no longer reserve almost a full
+     viewport of empty black space. */
+  html body.living-architecture main > .scene:not(#hero) {
+    min-height: clamp(640px, 82svh, 860px);
+    padding-block: clamp(72px, 9vh, 112px);
+  }
+
+  html body.living-architecture main > :is(
+    #network,#resources
+  ).scene:not(#hero){
+    min-height: clamp(560px, 72svh, 760px);
+    padding-block: clamp(64px, 8vh, 96px);
+  }
+
+  html body.living-architecture main > :is(
+    #experience,#capabilities,#pricing,#system
+  ).scene:not(#hero) > .section-heading{
+    margin-bottom:clamp(34px,4.2vh,54px);
+  }
+}
+
+@media (min-width: 1100px) and (max-height: 820px) and (pointer: fine) {
+  html body.living-architecture #hero {
+    height: calc(100svh - 69px);
+    min-height: 640px;
+    padding-top: 72px;
+    padding-bottom: 44px;
+  }
+
+  html body.living-architecture #hero .hero-copy {
+    grid-template-rows: repeat(7, auto);
+    row-gap: 6px;
+    transform: none;
+  }
+
+  html body.living-architecture #hero .fx-category-definition {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  html body.living-architecture #hero .fx-category-definition strong {
+    margin-bottom: 4px;
+  }
+
+  html body.living-architecture #hero .fx-method-inline {
+    margin-block: 2px;
+  }
+
+  html body.living-architecture #hero .hero-space {
+    height: min(100%, 520px);
+    min-height: 460px;
+  }
+
+  html body.living-architecture #hero .hero-title-main {
+    font-size: clamp(60px, 6.5vw, 106px);
+  }
+
+  html body.living-architecture #hero .hero-lead {
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+
+  html body.living-architecture #hero .hero-actions {
+    margin-top: 6px;
+  }
+
+  html body.living-architecture #hero .hero-facts {
+    margin-top: 4px;
+  }
+}
+
+@media (min-width: 1600px) and (min-height: 900px) and (pointer: fine) {
+  html body.living-architecture #hero .hero-grid {
+    grid-template-columns: minmax(600px, .95fr) minmax(650px, 1.05fr);
+  }
+
+  html body.living-architecture #hero .hero-space {
+    height: min(100%, 700px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body.living-architecture #hero .hero-copy {
+    transform: none;
+  }
+}
+
+}
+/* production-r2045-adjacent-desktop-first-frame-bundle */

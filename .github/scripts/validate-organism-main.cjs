@@ -78,6 +78,10 @@ async function state(page) {
     qrCards: document.querySelectorAll('[data-organism-panel="pricing"] [data-plan-qr]').length,
     overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
     footerInResources: Boolean(document.querySelector('[data-organism-panel="resources"] .site-footer')),
+    footerInDocument: Boolean(document.querySelector('body > .site-footer')),
+    footerTotal: document.querySelectorAll('.site-footer').length,
+    loopBridgeReady: document.documentElement.dataset.fxLoopBridge === 'ready-v3',
+    releaseHubLinks: document.querySelectorAll('[data-organism-panel="resources"] .fx-release-download-hub .fx-release-download-card[href]').length,
     scripts: Array.from(document.scripts, item => item.src || '').join('|')
   }));
 }
@@ -100,7 +104,16 @@ async function validateDesktop() {
     assert(current.overlayHidden === true, 'console must start hidden');
     assert(current.pricingTriggers === 1, 'pricing section must expose exactly one organism trigger: ' + JSON.stringify(current));
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
-    assert(current.footerInResources, 'footer must be inside the release/support console');
+    // R2018: the native seamless loop owns the visible document footer.
+    // Prior assertion contradicted the final scroll contract: the loop moves
+    // that ONE footer back to body and inserts four functional release/support
+    // actions into the Resources console instead of duplicating the footer.
+    assert(current.footerTotal === 1, 'exactly one accessible site footer must exist: ' + JSON.stringify(current));
+    assert(
+      current.footerInResources
+        || (current.footerInDocument && current.loopBridgeReady && current.releaseHubLinks === 4),
+      'footer and resources must both remain accessible under the active loop contract: ' + JSON.stringify(current)
+    );
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
 
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
