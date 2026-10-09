@@ -203,8 +203,14 @@ async function evaluate(viewport,isMobile,browser){
           const link=p?.querySelector('#hero-download');
           return {exists:!!link,href:link?.getAttribute('href'),inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p};
         });
-        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
-          'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
+        // Both supported real destinations are allowed: the canonical
+        // account-gated download endpoint OR the current official GitHub
+        // release asset. Reject empty links, placeholders and off-brand URLs.
+        const href=existingCTA.href||'';
+        const validRelease=/^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/[^/]+\/[^?#]+\.zip(?:[?#].*)?$/.test(href);
+        assert.ok(existingCTA.exists&&existingCTA.inPaper
+          &&(href==='/download/multiplatform'||validRelease),
+          'Final scene must deliver an original, real, official CTA: '+JSON.stringify(existingCTA));
       }
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
       assert.equal(cinema.count,1,'More than one original content folio is visible: '+JSON.stringify(cinema));
