@@ -819,3 +819,29 @@ html:not([data-fx-archive-experience="ready"]) body.living-architecture
 main#main-content > .fx-mag-ai-scroll-station-r2030{
   display:none!important;
 }
+
+/* R2032 — cinematic from first post-intro frame. The original hero remains in
+   DOM for its WebGL/canonical selectors and accessibility fallback, but its
+   former page furniture cannot compete with the MAG-only archive story. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero :is(.hero-copy,.scroll-cue,.hero-proof,.hero-cta,.hero-quick-nav){
+   opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero .hero-grid > :not(.hero-space){
+   opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ /* During retrieval the folio travels in depth, but the MAG never masks
+    the interactive HTML lane or catches mouse/touch scroll gestures. */
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+   overflow:hidden!important;pointer-events:none!important;
+ }
+ html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ main#main-content > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   will-change:transform,opacity;
+ }
+}
+/* production-r2032-mag-post-intro-exclusive-no-legacy-overlay */
