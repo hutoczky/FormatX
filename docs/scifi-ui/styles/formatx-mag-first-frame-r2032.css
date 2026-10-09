@@ -21,3 +21,9 @@
  }
 }
 /* production-r2032-critical-exclusive-first-frame-hero-and-controls */
+
+/* R2033 remove duplicate hero proof when canonical evidence exists.
+   The real, accessible verification links remain in FINAL. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading,
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
