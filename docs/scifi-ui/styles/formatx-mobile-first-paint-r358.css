@@ -1003,3 +1003,23 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+/* R2039 — essential brand accessibility and design tokens are render-critical.
+   They must exist before deferred desktop-quality CSS loads on a phone. */
+:root{
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root body.living-architecture .topbar > a.brand{
+    top:13px!important;
+    height:44px!important;
+    min-height:44px!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+}
+/* production-r2039-mobile-design-tokens-and-44px-real-brand-target */
