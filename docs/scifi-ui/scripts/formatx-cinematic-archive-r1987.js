@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2041-single-native-hero-folio';
+  const VERSION='cinematic-archive-r2042-adaptive-mobile-cinematic';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -139,7 +139,10 @@
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
   const paperLast=new WeakMap();
-  const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
+  const memoryGB=Number(navigator.deviceMemory||0);
+  const cores=Number(navigator.hardwareConcurrency||0);
+  const mobilePerf=Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
+  const veryLowPower=Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
   function ensureAIScrollStation(){
@@ -483,8 +486,46 @@
     }
   }
   class PerformanceManager {
-    static frameInterval(){return mobile()?(mobilePerf?50:33):16;}
-    static setQuality(value){quality=value==='low'?'low':'high';root.dataset.fxArchiveQuality=quality;invalidate();}
+    // 60 Hz render-request TARGET on capable phones; no device FPS is inferred.
+    // The existing MAG renderer remains the sole owner of WebGL presentation.
+    static emaMs=0;
+    static samples=0;
+    static slowSamples=0;
+    static fastSamples=0;
+    static frameInterval(){
+      if(!mobile())return 16.7;
+      if(veryLowPower)return 50;
+      return quality==='low'?33.3:16.7;
+    }
+    static setQuality(value){
+      const next=value==='low'?'low':'high';
+      if(quality===next)return;
+      quality=next;
+      root.dataset.fxArchiveQuality=quality;
+      root.dataset.fxArchiveTargetFrameMs=String(this.frameInterval());
+      invalidate();
+    }
+    static observeSubmission(ms){
+      // CPU command submission only: this does not measure GPU swap or FPS.
+      if(!Number.isFinite(ms)||ms<0||ms>120)return;
+      this.emaMs=this.samples?this.emaMs*.86+ms*.14:ms;
+      this.samples++;
+      if(this.samples%8===0)root.dataset.fxArchiveCpuSubmitMs=this.emaMs.toFixed(2);
+      if(!mobile()||mobilePerf||this.samples<20)return;
+      // Hysteresis: neither first shader compilation nor one GC pause
+      // can permanently reduce MAG's native filament quality.
+      if(quality==='high'){
+        this.slowSamples=this.emaMs>13.5?this.slowSamples+1:Math.max(0,this.slowSamples-2);
+        if(this.slowSamples>=12){
+          this.slowSamples=0;this.fastSamples=0;this.setQuality('low');
+        }
+      }else{
+        this.fastSamples=this.emaMs<7?this.fastSamples+1:0;
+        if(this.fastSamples>=65){
+          this.slowSamples=0;this.fastSamples=0;this.setQuality('high');
+        }
+      }
+    }
   }
   class ResponsiveExperience {
     static dock(){
@@ -796,7 +837,7 @@ void main(){
       root.dataset.fxArchiveNativePass='shared-webgl2';
        if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
-      if(painted>6&&performance.now()-start>12&&quality!=='low')PerformanceManager.setQuality('low');
+      PerformanceManager.observeSubmission(performance.now()-start);
     }
     dispose(){
       const gl=this.gl;
@@ -994,6 +1035,7 @@ void main(){
       registeredApi=api;
       root.dataset.fxArchiveExperience='ready';
       root.dataset.fxArchiveQuality=quality;
+      root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
       // Only after one real shared WebGL2 renderer exists may the original
       // website be replaced by the one-chapter cinematic archive. A blocked
       // WebGL context must retain the usable original HTML experience.
@@ -1092,7 +1134,10 @@ void main(){
   }
   window.FormatXArchiveExperience={
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
-    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
+    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
+      targetFrameMs:PerformanceManager.frameInterval(),
+      cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
+      cpuSamples:PerformanceManager.samples};},
     refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
