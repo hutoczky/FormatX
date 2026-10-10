@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2040-deterministic-folio-3d-handoff';
+  const VERSION='cinematic-archive-r2041-single-native-hero-folio';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -214,6 +214,13 @@
         const nodes=Array.from(host.childNodes);
         for(const node of nodes)panel.appendChild(node);
         host.appendChild(panel);
+        // The actual original HTML is the ONLY readable archive display.
+        // One discreet physical source ID lives inside that same document,
+        // never as a second overlapping card near the living MAG.
+        const sourceMarker=document.createElement('span');
+        sourceMarker.className='fx-mag-folio-origin-r2041';
+        sourceMarker.setAttribute('aria-hidden','true');
+        panel.prepend(sourceMarker);
         // Inline important chapter sizing wins over older high-specificity
         // content-visibility/intrinsic-height rules, which otherwise collapse
         // mobile sections to ~62px during the DOM-to-paper handoff.
@@ -314,6 +321,14 @@
       if(panel){
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
         if(active){
+          const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
+          const english=root.lang==='en';
+          const sourceName=(sourceNames[selected.source]||[selected.source,selected.source])[english?1:0];
+          if(marker){
+            const expected='MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
+            if(marker.textContent!==expected)marker.textContent=expected;
+          }
+          root.dataset.fxArchiveVisibleInterface='single-native-folio';
           const p=clamp(current.progress);
           // R2038: deliver the REAL interactive folio throughout the scroll beat.
           // Previously opacity zero hid all actual content while a small
@@ -824,6 +839,9 @@ void main(){
     if(!handoff?.isConnected)return;
     const showing=Boolean(current&&archiveActive&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
     handoff.dataset.active=showing?'true':'false';
+    // Legacy R2022 telemetry remains available to nonvisual diagnostics but
+    // must never compete with the only ORIGINAL working HTML folio.
+    handoff.dataset.fxArchiveScreenVisible='false';
     if(!showing){handoffKey='';return;}
     const english=root.lang==='en',scene=current.s;
     const key=scene.key+':'+(english?'en':'hu');
@@ -1017,6 +1035,7 @@ void main(){
         else host.style.removeProperty(name);
       }
       delete host._fxArchiveOriginalHeights;
+      panel?.querySelector(':scope > .fx-mag-folio-origin-r2041')?.remove();
       for(const [name,value,priority] of host._fxCinemaOriginalTransform||[]){
         if(value)host.style.setProperty(name,value,priority);
         else host.style.removeProperty(name);
