@@ -1025,6 +1025,9 @@ void main(){
     for(const host of cinemaHosts){
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
+        // Synthetic source telemetry is not part of the original product UI:
+        // remove it BEFORE restoring exactly the native source DOM children.
+        panel.querySelector(':scope > .fx-mag-folio-origin-r2041')?.remove();
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
         panel.remove();
       }
@@ -1035,7 +1038,6 @@ void main(){
         else host.style.removeProperty(name);
       }
       delete host._fxArchiveOriginalHeights;
-      panel?.querySelector(':scope > .fx-mag-folio-origin-r2041')?.remove();
       for(const [name,value,priority] of host._fxCinemaOriginalTransform||[]){
         if(value)host.style.setProperty(name,value,priority);
         else host.style.removeProperty(name);
