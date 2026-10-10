@@ -1,6 +1,7 @@
 FormatX production revision
-token=20261010-r2038-mag-screenshot-visible-native-folio
-base_master=0c00160fffeac55e8e39f928f9f39a665646b6db
-purpose=Fix real desktop screenshot: overlarge cropped MAG masks native original interactive papyrus; restore split MAG+folio scene and functional SOUND/ASK controls. Keep canonical proof singleton and existing eight unique archive shelves.
-validation=8 original WebGL2 MAG scenes with native functional paper, click hit testing and visibility, 320-1920 px occlusion checks, navigation and native sound/ASK, accessibility fallback, Worker production preflight, exact domain revision and live smoke.
-limits=Lighthouse quality gate of 95/100 not yet met (92 desktop and 87 mobile), mobile FCP 2.5s >1.8s, photographic/Igloo quality and real-device 60 FPS not certified.
+token=20261010-r2039-native-mag-mobile-fcp-p0-verified
+base_master=378614cff6a4be08cb22a3d5e5c071eec983c461
+purpose=Speed up genuine mobile first paint, align production Worker/style preload cache identity, restore real design tokens, ensure native interactive modules' 44px finger targets, and verify eight source MAG handoffs at the normal public URL without a forced archive parameter.
+validation=8 WebGL2 MAG scenes desktop/mobile, normal URL MAG and original native papyrus, mobile 320-3840 responsive P0, keyboard/reduced-motion/no-WebGL fallback, responsive occlusion, mobile design-system, production Worker smoke and exact both-domain revision. Full real-device FPS and studio photorealism not yet certified.
+performance=Three-run Lighthouse mobile FCP approximately 1.335 s versus prior 2.47 s, mobile performance 92-93/100; desktop performance 91-93/100. Lighthouse >=95 target NOT MET, no relaxed thresholds.
+limits=Visual Igloo.inc superiority and 60 FPS real phone remain open; Lighthouse scores based on audit HTML fallback not the fully rendered WebGL2 MAG.
