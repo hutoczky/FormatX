@@ -592,7 +592,8 @@
       this.gl=gl;
       this.program=this.programFor(gl);
       this.box=this.buffer(cubeGeometry());
-      this.panel=this.buffer(panelGeometry(quality==='high'));
+      this.panelDetail=quality==='high';
+      this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
       for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
@@ -718,6 +719,17 @@ void main(){
       if(!current||!archiveActive||document.hidden)return;
       const start=performance.now();
       const gl=this.gl,scene=current.s,p=current.progress,index=scene.index;
+      const detail=quality==='high';
+      if(detail!==this.panelDetail){
+        // Switch VBO data in-place. No duplicate buffer, VAO, new context or
+        // stale high-poly mesh when power-saving switches to lower detail.
+        const vertices=panelGeometry(detail);
+        gl.bindBuffer(gl.ARRAY_BUFFER,this.panel.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+        this.panel.count=vertices.length/8;
+        this.panelDetail=detail;
+      }
+      root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
