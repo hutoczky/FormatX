@@ -182,6 +182,32 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(cinema.paperText>70,'Original functional content is not present in MAG folio');
       assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
       assert.ok(cinema.mag&&cinema.paper,'Missing two cinematic lanes');
+      // R2038 screenshot regression: a GPU draw-call and 8 scene labels are
+      // insufficient if the original working HTML pane is invisible behind
+      // the full-width old hero's z-index, as seen on an actual 1660px desktop.
+      const painted=await page.evaluate(()=>{
+        const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        const hero=document.getElementById('hero');
+        const host=panel?.parentElement;
+        const pr=panel?.getBoundingClientRect();
+        const st=panel?getComputedStyle(panel):null;
+        const point=pr?{x:pr.x+pr.width*.55,y:pr.y+Math.min(pr.height*.52,innerHeight*.42)}:null;
+        const topmost=point?document.elementFromPoint(point.x,point.y):null;
+        return {exists:!!panel,paperOpacity:Number(st?.opacity||0),
+          paperVisibility:st?.visibility,hit:!!topmost&&panel.contains(topmost),
+          paperWidth:pr?.width||0,paperHeight:pr?.height||0,
+          heroZ:Number(getComputedStyle(hero).zIndex)||0,hostZ:Number(getComputedStyle(host).zIndex)||0,
+          obstruction:topmost?.className?.toString().slice(0,80)||topmost?.tagName||'none'};
+      });
+      assert.ok(painted.paperOpacity>=.7&&painted.paperVisibility==='visible',
+        'User screenshot defect: handed-off original HTML paper invisible: '+JSON.stringify(painted));
+      assert.ok(painted.paperWidth>=viewport.width*(isMobile?.78:.43)&&painted.paperHeight>=viewport.height*(isMobile?.35:.61),
+        'User screenshot defect: original interactive paper is thumbnail-sized: '+JSON.stringify(painted));
+      assert.ok(painted.hostZ>painted.heroZ,
+        'User screenshot defect: full-width legacy hero masks the handed-off page: '+JSON.stringify(painted));
+      assert.ok(painted.hit,
+        'User screenshot defect: something else covers the native paper at reading center: '+JSON.stringify(painted));
+
       if(isMobile){
         assert.ok(cinema.mag.y+cinema.mag.h <= cinema.paper.y+10,
           'MAG overlaps reading panel on phone: '+JSON.stringify(cinema));

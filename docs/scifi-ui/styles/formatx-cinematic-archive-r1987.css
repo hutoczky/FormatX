@@ -1027,3 +1027,245 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* r2033-mobile-viewport-fixed-native-paper-no-scroll-containing-block */
+
+/* R2038 — screenshot-driven actual visual fix:
+   The source 1660x900 frame showed an enormous cut-off faceted MAG at left,
+   an empty right side and a miniature status card. Restore the original MAG's
+   natural proportions and render the live, accessible native HTML folio
+   AHEAD of the legacy hero stacking context. These are two separate lanes,
+   not a 3D object placed across text. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero {
+   position:relative!important;
+   z-index:55!important;
+   background:transparent!important;
+   pointer-events:none!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .hero-space
+ > .fx-crystal-organism-r326-stage.fx-archive-native-docked {
+   position:fixed!important;
+   top:12dvh!important;
+   bottom:auto!important;
+   left:2.5vw!important;
+   right:auto!important;
+   inset:12dvh auto auto 2.5vw!important;
+   width:38vw!important;
+   min-width:38vw!important;
+   max-width:38vw!important;
+   height:74dvh!important;
+   min-height:74dvh!important;
+   max-height:74dvh!important;
+   overflow:hidden!important;
+   border:0!important;
+   z-index:22!important;
+   opacity:1!important;
+   transform:none!important;
+   mask-image:none!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .hero-space
+ > .fx-crystal-organism-r326-stage.fx-archive-native-docked
+ > canvas.fx-crystal-organism-r326-canvas {
+   scale:.74!important;
+   transform:none!important;
+   transform-origin:50% 50%!important;
+   filter:brightness(1.10) contrast(1.05)!important;
+   object-fit:contain!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content
+ > [data-fx-cinema-host-active="true"] {
+   position:relative!important;
+   z-index:140!important;
+   pointer-events:none!important;
+   overflow:visible!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content
+ > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"] {
+   position:fixed!important;
+   top:10dvh!important;
+   right:3vw!important;
+   left:auto!important;
+   bottom:auto!important;
+   width:53vw!important;
+   height:80dvh!important;
+   max-height:80dvh!important;
+   opacity:var(--fx-cinema-materialize,.9)!important;
+   visibility:visible!important;
+   display:block!important;
+   pointer-events:auto!important;
+   z-index:145!important;
+   box-sizing:border-box!important;
+   translate:none!important;
+   transform:none!important;
+   isolation:isolate!important;
+   background:linear-gradient(124deg,rgba(5,18,32,.985),rgba(12,30,43,.974) 52%,rgba(4,15,27,.99))!important;
+ }
+ html:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-archive-physical-paper-r2026[data-active="true"] {
+   top:15dvh!important;
+   bottom:auto!important;
+   left:3.5vw!important;
+   right:auto!important;
+   width:min(340px,33vw)!important;
+   max-height:140px!important;
+   padding:16px 18px!important;
+   opacity:.92!important;
+   transform:none!important;
+   z-index:65!important;
+   font-size:14px!important;
+   border-radius:9px 22px 22px 9px!important;
+   background:linear-gradient(130deg,rgba(5,23,36,.93),rgba(9,34,48,.86))!important;
+ }
+ html:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-archive-physical-paper-r2026 .fx-archive-telemetry-r2022__title {
+   font-size:clamp(17px,1.55vw,24px)!important;
+   line-height:1.35!important;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero {z-index:55!important;pointer-events:none!important;}
+ html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .hero-space
+ > .fx-crystal-organism-r326-stage.fx-archive-native-docked
+ > canvas.fx-crystal-organism-r326-canvas {
+   scale:.86!important;
+   transform-origin:center center!important;
+   object-fit:contain!important;
+   filter:brightness(1.1) contrast(1.05)!important;
+ }
+ html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content
+ > [data-fx-cinema-host-active="true"]{z-index:140!important;pointer-events:none!important;}
+ html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content
+ > [data-fx-cinema-host-active="true"]
+ > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+   z-index:145!important;
+   opacity:var(--fx-cinema-materialize,.9)!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+ }
+}
+
+/* R2038 original sound, ASK and pause controls must remain in their original
+   shared functional holder; never move individual button instances away from
+   their delegated handler and don't allow the 3D paper to cover their clicks. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 {
+   position:fixed!important;
+   top:clamp(84px,14dvh,150px)!important;
+   left:clamp(10px,2.5vw,40px)!important;
+   right:auto!important;
+   bottom:auto!important;
+   inset:clamp(84px,14dvh,150px) auto auto clamp(10px,2.5vw,40px)!important;
+   width:56px!important;
+   min-width:56px!important;
+   max-width:56px!important;
+   height:auto!important;
+   min-height:0!important;
+   max-height:none!important;
+   box-sizing:border-box!important;
+   display:flex!important;
+   flex-direction:column!important;
+   align-items:center!important;
+   justify-content:flex-start!important;
+   gap:12px!important;
+   z-index:210!important;
+   pointer-events:auto!important;
+   opacity:1!important;
+   visibility:visible!important;
+   transform:none!important;
+   translate:none!important;
+   overflow:visible!important;
+ }
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask {
+   position:relative!important;
+   inset:auto!important;
+   display:grid!important;
+   place-items:center!important;
+   flex:0 0 50px!important;
+   width:50px!important;
+   height:50px!important;
+   min-width:50px!important;
+   min-height:50px!important;
+   max-width:50px!important;
+   max-height:50px!important;
+   opacity:1!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+   transform:none!important;
+   translate:none!important;
+   margin:0!important;
+ }
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-rail {
+   display:flex!important;
+   flex-direction:column!important;
+   position:relative!important;
+   inset:auto!important;
+   transform:none!important;
+   margin:0!important;
+   opacity:1!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 {
+   top:76px!important;
+   left:10px!important;
+   inset:76px auto auto 10px!important;
+   width:52px!important;
+ }
+}
+
+/* R2038 strict 320px–1920px information-occlusion contract:
+   original SOUND and ASK share one horizontal row; both remain 50px live
+   hit targets and neither steals paper clicks. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 {
+   display:flex!important;
+   flex-direction:row!important;
+   flex-wrap:nowrap!important;
+   width:116px!important;
+   min-width:116px!important;
+   max-width:116px!important;
+   height:50px!important;
+   min-height:50px!important;
+   max-height:50px!important;
+   align-items:center!important;
+   justify-content:flex-start!important;
+   gap:12px!important;
+ }
+ html:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-rail {
+   flex:0 0 50px!important;
+   display:flex!important;
+   flex-direction:row!important;
+   width:50px!important;
+   height:50px!important;
+   margin:0!important;
+   gap:0!important;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 {
+   width:116px!important;
+   max-width:116px!important;
+   min-width:116px!important;
+   height:50px!important;
+ }
+}

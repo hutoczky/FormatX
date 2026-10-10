@@ -44,7 +44,7 @@
       ])};
       // The MAG owns the visual lane without stealing gestures from the
       // active native HTML paper. The original Ask/Pause controls stay live.
-      hero.style.setProperty('z-index','180','important');
+      hero.style.setProperty('z-index','55','important');
       hero.style.setProperty('pointer-events','none','important');
       hero.style.setProperty('background','transparent','important');
       hero.style.setProperty('box-shadow','none','important');
@@ -128,21 +128,13 @@
     finalCtaHome=null;
   }
   function keepExistingCinemaControls(){
-    if(cinemaControlHome)return;
-    const rail=document.querySelector('#hero .fx-reference-rail');
-    const hero=document.getElementById('hero');
-    if(!rail||!hero||!rail.parentNode)return;
-    cinemaControlHome={node:rail,parent:rail.parentNode,next:rail.nextSibling};
-    // Same DOM button instances and event listeners, never clones.
-    hero.appendChild(rail);
-    rail.classList.add('fx-cinema-controls-r2032');
+    // R2038: keep the real SOUND + ASK controls in their original shared
+    // .fx-reference-controls-r204 container. Moving the rail alone broke
+    // both the original control contract and real pointer hit testing.
+    root.dataset.fxCinemaControls='original-shared-live-controls';
   }
   function restoreExistingCinemaControls(){
-    if(!cinemaControlHome)return;
-    const {node,parent,next}=cinemaControlHome;
-    node.classList.remove('fx-cinema-controls-r2032');
-    if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
-    cinemaControlHome=null;
+    delete root.dataset.fxCinemaControls;
   }
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
@@ -323,7 +315,11 @@
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
         if(active){
           const p=clamp(current.progress);
-          const materialize=smooth((p-.06)/.46)*(1-smooth((p-.88)/.12));
+          // R2038: deliver the REAL interactive folio throughout the scroll beat.
+          // Previously opacity zero hid all actual content while a small
+          // decorative status card remained visible in production screenshots.
+          const entry=smooth((p-.035)/.28),exit=smooth((p-.94)/.06);
+          const materialize=(.83+.17*entry)*(1-.09*exit);
           panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
