@@ -1023,3 +1023,25 @@
   }
 }
 /* production-r2039-mobile-design-tokens-and-44px-real-brand-target */
+
+/* R2039: genuine 44px targets in the native modules delivered by MAG.
+   These are the actual checkout links, hero scroll cue, and footer brand;
+   keeping them functional also fixes keyboard and finger accessibility. */
+@media(max-width:900px),(pointer:coarse){
+  html:root:root:root body.living-architecture #hero a.scroll-cue,
+  html:root:root:root body.living-architecture .price-card > a.button,
+  html:root:root:root body.living-architecture footer.site-footer a.brand{
+    display:inline-flex!important;
+    box-sizing:border-box!important;
+    align-items:center!important;
+    justify-content:center;
+    min-height:44px!important;
+    padding-block:11px!important;
+    pointer-events:auto;
+    touch-action:manipulation;
+  }
+  html:root:root:root body.living-architecture footer.site-footer a.brand{
+    justify-content:flex-start;
+  }
+}
+/* production-r2039-real-pricing-scroll-footer-44px-touch-targets */
