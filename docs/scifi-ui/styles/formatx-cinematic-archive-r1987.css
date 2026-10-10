@@ -1152,3 +1152,80 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    pointer-events:auto!important;
  }
 }
+
+/* R2038 original sound, ASK and pause controls must remain in their original
+   shared functional holder; never move individual button instances away from
+   their delegated handler and don't allow the 3D paper to cover their clicks. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 {
+   position:fixed!important;
+   top:clamp(84px,14dvh,150px)!important;
+   left:clamp(10px,2.5vw,40px)!important;
+   right:auto!important;
+   bottom:auto!important;
+   inset:clamp(84px,14dvh,150px) auto auto clamp(10px,2.5vw,40px)!important;
+   width:56px!important;
+   min-width:56px!important;
+   max-width:56px!important;
+   height:auto!important;
+   min-height:0!important;
+   max-height:none!important;
+   box-sizing:border-box!important;
+   display:flex!important;
+   flex-direction:column!important;
+   align-items:center!important;
+   justify-content:flex-start!important;
+   gap:12px!important;
+   z-index:210!important;
+   pointer-events:auto!important;
+   opacity:1!important;
+   visibility:visible!important;
+   transform:none!important;
+   translate:none!important;
+   overflow:visible!important;
+ }
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 > .fx-three-sound,
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-ask {
+   position:relative!important;
+   inset:auto!important;
+   display:grid!important;
+   place-items:center!important;
+   flex:0 0 50px!important;
+   width:50px!important;
+   height:50px!important;
+   min-width:50px!important;
+   min-height:50px!important;
+   max-width:50px!important;
+   max-height:50px!important;
+   opacity:1!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+   transform:none!important;
+   translate:none!important;
+   margin:0!important;
+ }
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 .fx-reference-rail {
+   display:flex!important;
+   flex-direction:column!important;
+   position:relative!important;
+   inset:auto!important;
+   transform:none!important;
+   margin:0!important;
+   opacity:1!important;
+   visibility:visible!important;
+   pointer-events:auto!important;
+ }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture #hero .fx-reference-controls-r204 {
+   top:76px!important;
+   left:10px!important;
+   inset:76px auto auto 10px!important;
+   width:52px!important;
+ }
+}
