@@ -1269,3 +1269,40 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    height:50px!important;
  }
 }
+
+/* R2040 — the previously static native content receives the SAME deterministic
+   retrieval/settle/return progress as the GL membrane. This is only the final
+   HTML phase of a real WebGL2 3D extraction, not a substitute for 3D geometry.
+   Motion is strictly bounded to the independent reading lane. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content >
+ [data-fx-cinema-host-active="true"] >
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"] {
+   transform:
+     perspective(1700px)
+     translate3d(var(--fx-cinema-handoff-x,0px),
+       var(--fx-cinema-handoff-y,0px),
+       var(--fx-cinema-handoff-z,0px))
+     rotateY(var(--fx-cinema-handoff-yaw,0deg))
+     rotateX(var(--fx-cinema-handoff-pitch,0deg))
+     scale(var(--fx-cinema-handoff-scale,1))!important;
+   transform-origin:12% 48%!important;
+   backface-visibility:hidden!important;
+ }
+}
+@media (max-width:900px) and (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content >
+ [data-fx-cinema-host-active="true"] >
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"] {
+   transform:
+     perspective(1200px)
+     translate3d(0,var(--fx-cinema-handoff-y,0px),
+       var(--fx-cinema-handoff-z,0px))
+     rotateX(var(--fx-cinema-handoff-pitch,0deg))
+     scale(var(--fx-cinema-handoff-scale,1))!important;
+   transform-origin:center 10%!important;
+ }
+}
+/* production-r2040-real-native-3d-paper-bridge */

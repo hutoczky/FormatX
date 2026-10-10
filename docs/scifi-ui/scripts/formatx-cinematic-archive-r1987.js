@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2032-first-frame-physical-archive';
+  const VERSION='cinematic-archive-r2040-deterministic-folio-3d-handoff';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -323,6 +323,34 @@
           panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
+          // Each original native HTML module physically settles out of the
+          // existing source's 3D retrieval trajectory. The small travel range
+          // stays INSIDE its reading lane; unlike old hero animation it can
+          // never sweep over MAG or cover functional controls.
+          const sourceAxis={
+            'left-shelf':-1,rotor:1,'bottom-drawer':0,
+            'right-cell':1,'sealed-vault':-1,'vertical-crystal':0,
+            'inner-chamber':0,assembled:1
+          }[selected.source]||0;
+          const paperExit=smooth((p-.94)/.06);
+          const paperArrival=smooth((p-.08)/.38);
+          const unresolved=1-paperArrival;
+          const phone=mobile();
+          const lateral=phone?0:sourceAxis*(unresolved*14-paperExit*9);
+          const vertical=(phone?7:12)*unresolved+(phone?5:10)*paperExit;
+          const yaw=phone?0:sourceAxis*(unresolved*-5.5+paperExit*3.5);
+          const pitch=phone?unresolved*3.5-paperExit*2:unresolved*1.5-paperExit;
+          const depth=-(phone?25:48)*unresolved-25*paperExit;
+          const scale=1-.025*unresolved-.018*paperExit;
+          panel.style.setProperty('--fx-cinema-handoff-x',lateral.toFixed(2)+'px');
+          panel.style.setProperty('--fx-cinema-handoff-y',vertical.toFixed(2)+'px');
+          panel.style.setProperty('--fx-cinema-handoff-z',depth.toFixed(2)+'px');
+          panel.style.setProperty('--fx-cinema-handoff-yaw',yaw.toFixed(3)+'deg');
+          panel.style.setProperty('--fx-cinema-handoff-pitch',pitch.toFixed(3)+'deg');
+          panel.style.setProperty('--fx-cinema-handoff-scale',scale.toFixed(4));
+          panel.dataset.fxCinemaSource=selected.source;
+          panel.dataset.fxCinemaHandoff=paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving';
+          root.dataset.fxArchiveNativeHandoff='scroll-coupled-real-3d-paper';
           positionCinemaFolio(panel);
         }
       }
