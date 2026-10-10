@@ -44,7 +44,7 @@
       ])};
       // The MAG owns the visual lane without stealing gestures from the
       // active native HTML paper. The original Ask/Pause controls stay live.
-      hero.style.setProperty('z-index','180','important');
+      hero.style.setProperty('z-index','55','important');
       hero.style.setProperty('pointer-events','none','important');
       hero.style.setProperty('background','transparent','important');
       hero.style.setProperty('box-shadow','none','important');
@@ -323,7 +323,11 @@
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
         if(active){
           const p=clamp(current.progress);
-          const materialize=smooth((p-.06)/.46)*(1-smooth((p-.88)/.12));
+          // R2038: deliver the REAL interactive folio throughout the scroll beat.
+          // Previously opacity zero hid all actual content while a small
+          // decorative status card remained visible in production screenshots.
+          const entry=smooth((p-.035)/.28),exit=smooth((p-.94)/.06);
+          const materialize=(.83+.17*entry)*(1-.09*exit);
           panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
