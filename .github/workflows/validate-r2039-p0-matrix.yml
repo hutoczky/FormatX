@@ -1,0 +1,51 @@
+name: Validate R2039 P0 browser matrix
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/validate-p0-production-browser.cjs'
+      - '.github/workflows/validate-r2039-p0-matrix.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-p0-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Prepare Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/fx-r2039" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/fx-r2039/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve actual prospective site
+        shell: bash
+        run: |
+          python3 -m http.server 4189 --directory docs > "$RUNNER_TEMP/formatx-r2039-server.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4189/scifi-ui/index.html -o /dev/null; then exit 0; fi
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/formatx-r2039-server.log"
+          exit 1
+      - name: Verify 11 real viewport sizes and technical fallbacks
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-r2039/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4189/scifi-ui/index.html
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/validate-p0-production-browser.cjs 2>&1 | tee r2039-p0-matrix.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r2039-p0-matrix
+          path: r2039-p0-matrix.log
+          retention-days: 7
