@@ -1306,3 +1306,42 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* production-r2040-real-native-3d-paper-bridge */
+
+/* R2041: the R2022/R2026 noninteractive duplicate title/excerpt is NOT the
+   delivery requested by the user. Keep its machine-readable state for legacy
+   assertions, but completely remove its VISUAL layer. Only the ONE original
+   interactive native HTML module is the physical folio. */
+@media(prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+  body.living-architecture > .fx-archive-telemetry-r2022,
+  html:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+  body.living-architecture > .fx-archive-physical-paper-r2026 {
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+  html[data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030 > .fx-mag-folio-origin-r2041 {
+    position:sticky!important;
+    top:0!important;
+    display:block!important;
+    z-index:25!important;
+    width:max-content!important;
+    max-width:100%!important;
+    min-height:24px!important;
+    padding:5px 10px 6px!important;
+    margin:0 0 clamp(12px,1.8vw,24px)!important;
+    border:1px solid rgba(137,221,239,.29)!important;
+    border-radius:3px 11px 11px 3px!important;
+    background:linear-gradient(102deg,rgba(9,29,44,.98),rgba(5,18,30,.90))!important;
+    color:rgba(205,241,250,.88)!important;
+    font:600 clamp(10px,.8vw,12px)/1.55 ui-monospace,SFMono-Regular,Consolas,monospace!important;
+    letter-spacing:.095em!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    pointer-events:none!important;
+    box-sizing:border-box!important;
+  }
+}
+/* one-real-papyrus-no-duplicate-status-folio-r2041 */
