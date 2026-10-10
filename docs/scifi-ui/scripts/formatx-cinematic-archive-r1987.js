@@ -504,7 +504,7 @@
       if(quality===next)return;
       quality=next;
       root.dataset.fxArchiveQuality=quality;
-      root.dataset.fxArchiveTargetFrameMs=String(this.frameInterval());
+      root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
       invalidate();
     }
     static observeSubmission(ms){
@@ -1140,7 +1140,7 @@ void main(){
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples};},
-    refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
+    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
