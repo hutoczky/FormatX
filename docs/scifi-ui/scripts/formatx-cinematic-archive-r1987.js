@@ -141,8 +141,8 @@
   const paperLast=new WeakMap();
   const memoryGB=Number(navigator.deviceMemory||0);
   const cores=Number(navigator.hardwareConcurrency||0);
-  const mobilePerf=Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
-  const veryLowPower=Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
+  const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
+  const veryLowPower=mobile()&&Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
   function ensureAIScrollStation(){
@@ -793,12 +793,13 @@ void main(){
       let filamentCount=0;
       if(alpha>.001){
         plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
-        // Optical micro-filaments connect the SAME living MAG to the glass
-        // membrane. Cubic paths are sampled in real scene-space; an individual
-        // thread stays deliberately thin and is shed first on low quality.
-        if(quality==='high'){
+        // Every hardware tier keeps an actual 3D energy filament attached
+        // to the SAME MAG. Low-end phones use 2 Bezier segments, not zero
+        // filament geometry; higher tiers get subpixel-stable refinement.
+        {
           const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
-          const segments=mobile()?4:6,strands=mobile()?1:3;
+          const segments=quality==='high'?(mobile()?4:6):(mobile()?2:3);
+          const strands=quality==='high'&&!mobile()?3:1;
           const bezier=(a,b,d,e,t)=>{
             const q=1-t;
             return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
