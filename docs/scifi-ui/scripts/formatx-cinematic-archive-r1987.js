@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2041-single-native-hero-folio';
+  const VERSION='cinematic-archive-r2042-adaptive-mobile-cinematic';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -139,7 +139,10 @@
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
   const paperLast=new WeakMap();
-  const mobilePerf=Boolean(navigator.deviceMemory&&navigator.deviceMemory<=4);
+  const memoryGB=Number(navigator.deviceMemory||0);
+  const cores=Number(navigator.hardwareConcurrency||0);
+  const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
+  const veryLowPower=mobile()&&Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
   root.dataset.fxArchiveExperience='pending';
   function ensureAIScrollStation(){
@@ -483,8 +486,48 @@
     }
   }
   class PerformanceManager {
-    static frameInterval(){return mobile()?(mobilePerf?50:33):16;}
-    static setQuality(value){quality=value==='low'?'low':'high';root.dataset.fxArchiveQuality=quality;invalidate();}
+    // 60 Hz render-request TARGET on capable phones; no device FPS is inferred.
+    // The existing MAG renderer remains the sole owner of WebGL presentation.
+    static emaMs=0;
+    static samples=0;
+    static slowSamples=0;
+    static fastSamples=0;
+    static frameInterval(){
+      // Allow for fractional rAF timestamps: using 16.7ms on a 60Hz
+      // display can miss every 16.667ms paint and accidentally cap at 30Hz.
+      if(!mobile())return 15.5;
+      if(veryLowPower)return 48;
+      return quality==='low'?32:15.5;
+    }
+    static setQuality(value){
+      const next=value==='low'?'low':'high';
+      if(quality===next)return;
+      quality=next;
+      root.dataset.fxArchiveQuality=quality;
+      root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
+      invalidate();
+    }
+    static observeSubmission(ms){
+      // CPU command submission only: this does not measure GPU swap or FPS.
+      if(!Number.isFinite(ms)||ms<0||ms>120)return;
+      this.emaMs=this.samples?this.emaMs*.86+ms*.14:ms;
+      this.samples++;
+      if(this.samples%8===0)root.dataset.fxArchiveCpuSubmitMs=this.emaMs.toFixed(2);
+      if(!mobile()||mobilePerf||this.samples<20)return;
+      // Hysteresis: neither first shader compilation nor one GC pause
+      // can permanently reduce MAG's native filament quality.
+      if(quality==='high'){
+        this.slowSamples=this.emaMs>13.5?this.slowSamples+1:Math.max(0,this.slowSamples-2);
+        if(this.slowSamples>=12){
+          this.slowSamples=0;this.fastSamples=0;this.setQuality('low');
+        }
+      }else{
+        this.fastSamples=this.emaMs<7?this.fastSamples+1:0;
+        if(this.fastSamples>=65){
+          this.slowSamples=0;this.fastSamples=0;this.setQuality('high');
+        }
+      }
+    }
   }
   class ResponsiveExperience {
     static dock(){
@@ -549,7 +592,8 @@
       this.gl=gl;
       this.program=this.programFor(gl);
       this.box=this.buffer(cubeGeometry());
-      this.panel=this.buffer(panelGeometry(quality==='high'));
+      this.panelDetail=quality==='high';
+      this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
       for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
@@ -675,6 +719,17 @@ void main(){
       if(!current||!archiveActive||document.hidden)return;
       const start=performance.now();
       const gl=this.gl,scene=current.s,p=current.progress,index=scene.index;
+      const detail=quality==='high';
+      if(detail!==this.panelDetail){
+        // Switch VBO data in-place. No duplicate buffer, VAO, new context or
+        // stale high-poly mesh when power-saving switches to lower detail.
+        const vertices=panelGeometry(detail);
+        gl.bindBuffer(gl.ARRAY_BUFFER,this.panel.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
+        this.panel.count=vertices.length/8;
+        this.panelDetail=detail;
+      }
+      root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
@@ -750,12 +805,13 @@ void main(){
       let filamentCount=0;
       if(alpha>.001){
         plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
-        // Optical micro-filaments connect the SAME living MAG to the glass
-        // membrane. Cubic paths are sampled in real scene-space; an individual
-        // thread stays deliberately thin and is shed first on low quality.
-        if(quality==='high'){
+        // Every hardware tier keeps an actual 3D energy filament attached
+        // to the SAME MAG. Low-end phones use 2 Bezier segments, not zero
+        // filament geometry; higher tiers get subpixel-stable refinement.
+        {
           const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
-          const segments=mobile()?4:6,strands=mobile()?1:3;
+          const segments=quality==='high'?(mobile()?4:6):(mobile()?2:3);
+          const strands=quality==='high'&&!mobile()?3:1;
           const bezier=(a,b,d,e,t)=>{
             const q=1-t;
             return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
@@ -796,7 +852,7 @@ void main(){
       root.dataset.fxArchiveNativePass='shared-webgl2';
        if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
-      if(painted>6&&performance.now()-start>12&&quality!=='low')PerformanceManager.setQuality('low');
+      PerformanceManager.observeSubmission(performance.now()-start);
     }
     dispose(){
       const gl=this.gl;
@@ -994,6 +1050,7 @@ void main(){
       registeredApi=api;
       root.dataset.fxArchiveExperience='ready';
       root.dataset.fxArchiveQuality=quality;
+      root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
       // Only after one real shared WebGL2 renderer exists may the original
       // website be replaced by the one-chapter cinematic archive. A blocked
       // WebGL context must retain the usable original HTML experience.
@@ -1092,8 +1149,11 @@ void main(){
   }
   window.FormatXArchiveExperience={
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
-    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null};},
-    refresh:()=>{discover();invalidate();},setQuality:PerformanceManager.setQuality
+    get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
+      targetFrameMs:PerformanceManager.frameInterval(),
+      cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
+      cpuSamples:PerformanceManager.samples};},
+    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
