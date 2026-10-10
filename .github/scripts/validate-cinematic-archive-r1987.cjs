@@ -350,7 +350,7 @@ async function evaluate(viewport,isMobile,browser){
   await context.close();
 }
 async function verifyNormalEntry(browser,isMobile){
-  const address=new URL(URL);
+  const address=new (require('node:url').URL)(URL);
   for(const key of ['archive','r486-optics-energy-check','mobileproof','lighthouse','visualintro'])
     address.searchParams.delete(key);
   const context=await browser.newContext({
