@@ -1045,3 +1045,18 @@
   }
 }
 /* production-r2039-real-pricing-scroll-footer-44px-touch-targets */
+
+/* R2039: the real final archive's GitHub release link is a full-size
+   accessible control also when the lightweight first paint CSS is active. */
+@media(max-width:900px),(pointer:coarse){
+  html:root:root:root body.living-architecture #release-page-link.button{
+    display:inline-flex!important;
+    box-sizing:border-box!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:44px!important;
+    padding:11px 16px!important;
+    touch-action:manipulation;
+  }
+}
+/* production-r2039-release-link-touch-44px */
