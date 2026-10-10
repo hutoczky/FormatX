@@ -48,17 +48,22 @@ const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261007-r1
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=5500;
+const AUTO_DELAY_MS=180;
+const MAX_WAIT_FOR_ACTUAL_FCP_MS=2400;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
 let idleId=0;
 let timer=0;
 let pendingCanonicalAsk=false;
+let firstPaintObserver=null;
+let firstPaintFallback=0;
 
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
   if(idleId&&'cancelIdleCallback' in window){cancelIdleCallback(idleId);idleId=0;}
+  if(firstPaintFallback){clearTimeout(firstPaintFallback);firstPaintFallback=0;}
+  firstPaintObserver?.disconnect?.();firstPaintObserver=null;
 }
 
 function start(reason){
@@ -105,18 +110,46 @@ function runLateAuto(){
     root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r493';
     return;
   }
-  const launch=()=>start('late-auto-r1971-stable-window');
+  // R2040 keeps the same single original native WebGL2 MAG but avoids a
+  // former 5.5s timer followed by up to another 3.5s idle delay.
+  const launch=()=>start('post-fcp-real-mag-r2040');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:3500});
+    idleId=requestIdleCallback(launch,{timeout:650});
   }else{
-    timer=setTimeout(launch,900);
+    timer=setTimeout(launch,180);
   }
 }
 
 function armLateFallback(){
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  let queued=false;
+  const commit=(source)=>{
+    if(queued||started)return;
+    queued=true;
+    clearPending();
     root.dataset.fxP0FirstPaintR490='committed-r493';
+    root.dataset.fxP0FcpSourceR2040=source;
+    root.dataset.fxP0FcpAtR2040=String(Math.round(performance.now()));
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(started)return;
+    // Normal visitor: real first-contentful-paint before allocating the MAG
+    // shaders. First-visit cinematic intro still gets immediate priority.
+    if(performance.getEntriesByType?.('paint')?.some(e=>e.name==='first-contentful-paint')){
+      commit('buffered-real-fcp');
+      return;
+    }
+    if('PerformanceObserver' in window){
+      try{
+        firstPaintObserver=new PerformanceObserver(list=>{
+          if(list.getEntries().some(e=>e.name==='first-contentful-paint'))commit('observed-real-fcp');
+        });
+        firstPaintObserver.observe({type:'paint',buffered:true});
+      }catch(_){firstPaintObserver=null;}
+    }
+    // Some privacy modes hide the Paint Timing API. Keep original working
+    // HTML visible until a bounded, nonblocking fallback starts the MAG.
+    firstPaintFallback=setTimeout(()=>commit('paint-entry-unavailable-bounded'),MAX_WAIT_FOR_ACTUAL_FCP_MS);
   }));
 }
 
