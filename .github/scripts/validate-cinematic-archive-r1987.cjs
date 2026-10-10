@@ -349,6 +349,54 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function verifyNormalEntry(browser,isMobile){
+  const address=new (require('node:url').URL)(URL);
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','lighthouse','visualintro'])
+    address.searchParams.delete(key);
+  const context=await browser.newContext({
+    viewport:isMobile?{width:390,height:844}:{width:1440,height:900},
+    isMobile,hasTouch:isMobile,reducedMotion:'no-preference'
+  });
+  await context.addInitScript(()=>{
+    try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1')}catch(_){}
+    try{localStorage.setItem('formatx:intro-seen-v1','1')}catch(_){}
+  });
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(String(e.message)));
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxArchiveExperience==='ready'
+      && root.dataset.fxArchiveCinema==='active';
+  },null,{timeout:65000});
+  const result=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const hero=document.querySelector('#hero .hero-copy');
+    const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+    const folioStyle=folio&&getComputedStyle(folio);
+    return {
+      version:window.FormatXArchiveExperience?.version,
+      experience:root.dataset.fxArchiveExperience,
+      mode:root.dataset.fxArchiveCinema,
+      scene:root.dataset.fxArchiveCurrent,
+      activeFolio:!!folio&&folioStyle.visibility==='visible'
+        &&folioStyle.display!=='none'&&folio.getBoundingClientRect().width>90,
+      legacyVisible:!!hero&&getComputedStyle(hero).display!=='none'
+        &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
+      originalMAG:!!canvas,
+      nativeLinkCount:folio?.querySelectorAll('a[href],button').length||0,
+      source:location.search
+    };
+  });
+  assert.equal(result.mode,'active','Plain public URL must enter exclusive MAG archive: '+JSON.stringify(result));
+  assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG,
+    'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
+  assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
+  console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
+  await context.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -407,6 +455,8 @@ async function fallback(browser){
   try{
     await evaluate({width:1440,height:900},false,browser);
     await evaluate({width:390,height:844},true,browser);
+    await verifyNormalEntry(browser,false);
+    await verifyNormalEntry(browser,true);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}

@@ -51,6 +51,10 @@
   <!-- production-r1901d-stable-bootstrap-hash-r1901-visual-assets-live -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <!-- production-r2039-phone-critical-css-preload: same hrefs as actual stylesheets; keep cascade unchanged -->
+  <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="./styles/formatx-menu-owner-r1956.css?v=20261008-r1979-audit-parent-lock">
+  <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">
+  <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="./styles/formatx-mobile-brand-dedupe-r1952.css?v=20261007-r1952-single-mobile-brand-icon">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="description" content="FormatX Suite Pro — élő rendszerarchitektúraként bemutatott, interaktív technikusi platform meghajtókezeléshez, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz.">
   <meta name="theme-color" content="#01040b">
@@ -79,7 +83,7 @@
   <link rel="stylesheet" data-fx-interaction-contract-r1957="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" media="print" href="./styles/formatx-interaction-contract-r1957.css?v=20261007-r1960-post-fcp">
   <link rel="stylesheet" data-fx-desktop-depth-r1958="true" data-fx-r487-deferred-style="true" data-fx-r487-media="(min-width:901px) and (pointer:fine)" media="print" href="./styles/formatx-desktop-depth-r1958.css?v=20261007-r1960-post-fcp-depth">
   <script defer data-fx-menu-owner-r1956="true" src="./scripts/formatx-menu-owner-r1956.js?v=20261007-r1960-deferred-owner"></script>
-  <link rel="stylesheet" fetchpriority="high" media="(max-width: 900px)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20260925-r1735-open-dialogue-exemption">
+  <link rel="stylesheet" fetchpriority="high" media="(max-width: 900px)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">
   <link rel="stylesheet" data-fx-quality-r461="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" href="./styles/formatx-quality-r461.css?v=20260927-r1756-post-fcp-quality" media="print">
   <link rel="stylesheet" data-fx-mag-birth-critical-r1572="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" media="print" href="./styles/formatx-mag-birth-critical-r1572.css?v=20260922-r1572-photographic-three-shell">
   <link rel="stylesheet" fetchpriority="high" media="(min-width: 901px)" data-fx-desktop-first-paint-r1600="true" href="./styles/formatx-desktop-first-paint-r328.css?v=20261007-r1969-single-control-owner">
@@ -275,7 +279,7 @@
           <span class="fx-reference-proof-kicker">MAG // CINEMATIC ARCHIVE</span>
           <h2>MAG // ÉLŐ RENDSZERBEMUTATÓ</h2>
           <p>A MAG különböző tárolórekeszekből egyesével előveszi és működő webes kijelzőként átadja a FormatX valódi moduljait.</p>
-          <a class="fx-reference-liveos" data-fx-live-os-launcher="true" href="#experience">Live OS</a>
+          <a class="fx-reference-liveos" data-fx-live-os="true" data-fx-live-os-launcher="true" href="#experience">Live OS</a>
         </article>
       </div>
       <a class="scroll-cue" href="#experience"><span data-hu="Belépés az élő rendszerbe" data-en="Enter the living system">Belépés az élő rendszerbe</span><i></i></a>
