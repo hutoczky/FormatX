@@ -1,7 +1,6 @@
 FormatX production revision
-token=20261010-r2039-native-mag-mobile-fcp-p0-verified
-base_master=378614cff6a4be08cb22a3d5e5c071eec983c461
-purpose=Speed up genuine mobile first paint, align production Worker/style preload cache identity, restore real design tokens, ensure native interactive modules' 44px finger targets, and verify eight source MAG handoffs at the normal public URL without a forced archive parameter.
-validation=8 WebGL2 MAG scenes desktop/mobile, normal URL MAG and original native papyrus, mobile 320-3840 responsive P0, keyboard/reduced-motion/no-WebGL fallback, responsive occlusion, mobile design-system, production Worker smoke and exact both-domain revision. Full real-device FPS and studio photorealism not yet certified.
-performance=Three-run Lighthouse mobile FCP approximately 1.335 s versus prior 2.47 s, mobile performance 92-93/100; desktop performance 91-93/100. Lighthouse >=95 target NOT MET, no relaxed thresholds.
-limits=Visual Igloo.inc superiority and 60 FPS real phone remain open; Lighthouse scores based on audit HTML fallback not the fully rendered WebGL2 MAG.
+token=20261010-r2040-scroll-coupled-native-papyrus
+base_master=3221b6b7de933e34b61f545f53672614686f30ea
+purpose=Restore visible, subtle three-dimensional scroll-scrubbed handoff on the original interactive HTML folio synchronized to eight native WebGL archive locations; retain separate MAG and text lanes, no scroll hijack or duplicate DOM. Confirm intentionally aborted deferred CSS is actually present instead of misclassifying all aborted styles as 404.
+validation=Require desktop and mobile Chromium archive, actual computed matrix3d source-specific paper transform, eight scenes, reduced motion and no WebGL fallback, no information occlusion, production Worker and live smoke.
+limitations=60FPS physical hardware and Igloo-level photorealism not yet measured. Lighthouse P0 thresholds may remain unmet, do not weaken thresholds.
