@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261009-r2037-single-canonical-proof-live
-base_master=ec7883ed68512253a9236133892d921864316123
-purpose=Remove duplicate public evidence headline from original hero, preserve a single canonical proof panel with real verifiable links and both Hungarian and English language switching.
-validation=Single-proof source assertion, original MAG 8 scene desktop/mobile browser, navigation, bilingual labels, design system, production Worker and exact revision convergence + live smoke.
-limits=Lighthouse 95 threshold and photographic visual parity remain open quality targets; do not misrepresent those as complete.
+token=20261010-r2038-mag-screenshot-visible-native-folio
+base_master=0c00160fffeac55e8e39f928f9f39a665646b6db
+purpose=Fix real desktop screenshot: overlarge cropped MAG masks native original interactive papyrus; restore split MAG+folio scene and functional SOUND/ASK controls. Keep canonical proof singleton and existing eight unique archive shelves.
+validation=8 original WebGL2 MAG scenes with native functional paper, click hit testing and visibility, 320-1920 px occlusion checks, navigation and native sound/ASK, accessibility fallback, Worker production preflight, exact domain revision and live smoke.
+limits=Lighthouse quality gate of 95/100 not yet met (92 desktop and 87 mobile), mobile FCP 2.5s >1.8s, photographic/Igloo quality and real-device 60 FPS not certified.
