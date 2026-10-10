@@ -493,9 +493,11 @@
     static slowSamples=0;
     static fastSamples=0;
     static frameInterval(){
-      if(!mobile())return 16.7;
-      if(veryLowPower)return 50;
-      return quality==='low'?33.3:16.7;
+      // Allow for fractional rAF timestamps: using 16.7ms on a 60Hz
+      // display can miss every 16.667ms paint and accidentally cap at 30Hz.
+      if(!mobile())return 15.5;
+      if(veryLowPower)return 48;
+      return quality==='low'?32:15.5;
     }
     static setQuality(value){
       const next=value==='low'?'low':'high';
