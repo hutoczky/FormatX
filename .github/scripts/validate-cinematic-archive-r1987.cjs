@@ -235,12 +235,26 @@ async function evaluate(viewport,isMobile,browser){
       // rather than a permanently docked opaque overlay or stale HUD.
       const chapterHandoff=await page.evaluate(()=>{
         const el=document.querySelector('.fx-archive-telemetry-r2022');
+        const live=document.querySelector('[data-fx-cinema-panel-active="true"]');
+        const marker=live?.querySelector(':scope > .fx-mag-folio-origin-r2041');
+        const style=el?getComputedStyle(el):null;
+        const markerStyle=marker?getComputedStyle(marker):null;
         return {key:el?.dataset.scene,active:el?.dataset.active,
-          label:el?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent||''};
+          label:el?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent||'',
+          duplicateHidden:style?.display==='none'||style?.visibility==='hidden',
+          marker:marker?.textContent||'',
+          markerVisible:!!marker&&markerStyle?.display!=='none'&&markerStyle?.visibility!=='hidden',
+          realCount:document.querySelectorAll('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]').length
+        };
       });
       assert.equal(chapterHandoff.key,scene.key,'MAG handoff not updated for '+scene.key+': '+JSON.stringify(chapterHandoff));
       assert.equal(chapterHandoff.active,'true','MAG handoff not active for '+scene.key);
       assert.ok(chapterHandoff.label.length>5,'No semantic chapter label for '+scene.key);
+      assert.ok(chapterHandoff.duplicateHidden,'Decorative second papyrus competes with MAG: '+JSON.stringify(chapterHandoff));
+      assert.equal(chapterHandoff.realCount,1,'Exactly ONE original, functional folio must be visible: '+JSON.stringify(chapterHandoff));
+      assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
+        &&chapterHandoff.marker.includes('/ 08'),
+        'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
@@ -295,7 +309,14 @@ async function evaluate(viewport,isMobile,browser){
     const heroStyle=hero?getComputedStyle(hero):null;
     const stageStyle=stage?getComputedStyle(stage):null;
     const rect=el?.getBoundingClientRect();
+    const folio=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const nativeStyle=folio?getComputedStyle(folio):null;
+    const paperRect=folio?.getBoundingClientRect();
+    const marker=folio?.querySelector(':scope > .fx-mag-folio-origin-r2041');
     return {
+      nativeVisible:!!folio&&nativeStyle?.visibility==='visible'&&nativeStyle?.display!=='none',
+      nativeTag:marker?.textContent||'',
+      nativeRect:paperRect?{left:paperRect.left,top:paperRect.top,width:paperRect.width,height:paperRect.height}:null,
       exists:!!el,
       active:el?.dataset.active,
       name:el?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent||'',
@@ -311,11 +332,16 @@ async function evaluate(viewport,isMobile,browser){
   });
   assert.ok(handoff.exists&&handoff.active==='true','Visible MAG handoff missing: '+JSON.stringify(handoff));
   assert.ok(handoff.name.length>5,'MAG handoff lacks native chapter identity: '+JSON.stringify(handoff));
-  assert.ok(handoff.opacity>.7&&handoff.visibility==='visible','MAG archive telemetry is transparent or hidden: '+JSON.stringify(handoff));
+  assert.ok(handoff.visibility==='hidden'||handoff.opacity<.1,
+    'Old duplicate telemetry must NOT be visible above original native paper: '+JSON.stringify(handoff));
+  assert.ok(handoff.nativeVisible&&handoff.nativeTag.startsWith('MAG // '),
+    'Single original functional native papyrus must replace redundant overlay: '+JSON.stringify(handoff));
   assert.ok(handoff.heroZ>4&&handoff.stageZ>4,'MAG WebGL stage is hidden below opaque section stacking contexts: '+JSON.stringify(handoff));
   assert.ok(handoff.heroOpacity>.35&&handoff.stageOpacity>.35&&handoff.stageVisibility==='visible',
     'MAG scene is invisible despite GPU draw calls: '+JSON.stringify(handoff));
-  assert.ok(handoff.rect&&handoff.rect.left>=0&&handoff.rect.top>=0&&handoff.rect.left+handoff.rect.width<=viewport.width+2,'MAG handoff outside mobile or desktop viewport: '+JSON.stringify(handoff));
+  assert.ok(handoff.nativeRect&&handoff.nativeRect.left>=-1
+    &&handoff.nativeRect.left+handoff.nativeRect.width<=viewport.width+3,
+    'Original folio outside mobile/desktop reading corridor: '+JSON.stringify(handoff));
   console.log('ARCHIVE_VISIBLE_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',handoff}));
 
   assert.equal(native.renderer,'shared-webgl2');
