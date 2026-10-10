@@ -294,9 +294,8 @@ async function evaluate(viewport,isMobile,browser){
       'Mobile MAG must occupy its own upper cinematic stage without covering the native HTML paper: '+JSON.stringify(native.canvasRect));
   }
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
-  if (!isMobile && native.filamentCount < 1 && await page.evaluate(()=>document.documentElement.dataset.fxArchiveQuality==='high')) {
-    throw new Error('High-quality archive scene did not emit any physical 3D filaments');
-  }
+  assert.ok(native.filamentCount>=1,
+    'Every quality tier must render actual 3D MAG energy filaments, including low-power mobile: '+JSON.stringify(native));
 
   // The old suite merely counted GPU draw calls, so an entirely hidden archive
   // could still PASS. Prove the native MAG stage is layered over opaque chapters
