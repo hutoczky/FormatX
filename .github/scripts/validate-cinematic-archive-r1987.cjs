@@ -174,6 +174,16 @@ async function evaluate(viewport,isMobile,browser){
         assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
           'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
       }
+      const real3D=await page.evaluate(()=>{
+        const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        return {bridge:document.documentElement.dataset.fxArchiveNativeHandoff,
+          source:panel?.dataset.fxCinemaSource,phase:panel?.dataset.fxCinemaHandoff,
+          transform:panel?getComputedStyle(panel).transform:'none'};
+      });
+      assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
+      assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');
+      assert.ok(real3D.phase&&real3D.transform.startsWith('matrix3d('),
+        'Actual HTML papyrus lacks GPU-composited 3D presentation: '+JSON.stringify(real3D));
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
       assert.equal(cinema.count,1,'More than one original content folio is visible: '+JSON.stringify(cinema));
       assert.equal(cinema.paperVisible,'visible','Current paper is not visible: '+JSON.stringify(cinema));
