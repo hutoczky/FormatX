@@ -363,7 +363,31 @@ async function evaluate(viewport,isMobile,browser){
       'Real licensing tech console must open inside MAG environment: '+JSON.stringify(technical));
     await page.locator('#fx-organism-console [data-organism-close]').first().evaluate(el=>el.click());
   }
-    assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
+    const renderBudget=await page.evaluate(()=>{
+    const api=window.FormatXArchiveExperience;
+    const original=document.documentElement.dataset.fxArchiveQuality||'high';
+    const active=api.state;
+    api.setQuality('low');
+    const low=api.state.targetFrameMs;
+    api.setQuality('high');
+    const high=api.state.targetFrameMs;
+    api.setQuality(original);
+    const restored=api.state.targetFrameMs;
+    return {before:active.targetFrameMs,low,high,restored,
+      cpuSamples:active.cpuSamples,cpuSubmitMs:active.cpuSubmitMs,
+      memoryGB:navigator.deviceMemory||null,cores:navigator.hardwareConcurrency||null};
+  });
+  assert.ok(renderBudget.cpuSamples>=1,'Archive never recorded actual WebGL CPU submissions: '+JSON.stringify(renderBudget));
+  assert.ok(renderBudget.low>=renderBudget.high&&renderBudget.high>0,
+    'Adaptive renderer fails low/high quality cadence contract: '+JSON.stringify(renderBudget));
+  if(isMobile&&!(renderBudget.memoryGB&&renderBudget.memoryGB<=2)
+      &&!(renderBudget.cores&&renderBudget.cores<=2)){
+    assert.ok(renderBudget.high<16.7&&renderBudget.low>=30,
+      'High-capability mobile should allow 60Hz request pacing: '+JSON.stringify(renderBudget));
+  }
+  console.log('ARCHIVE_ADAPTIVE_CADENCE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...renderBudget}));
+
+  assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
   // Software WebGL readback can stall screenshots in CI even after all
   // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
   // for functional testing; report incomplete captures explicitly.
