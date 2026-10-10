@@ -128,21 +128,13 @@
     finalCtaHome=null;
   }
   function keepExistingCinemaControls(){
-    if(cinemaControlHome)return;
-    const rail=document.querySelector('#hero .fx-reference-rail');
-    const hero=document.getElementById('hero');
-    if(!rail||!hero||!rail.parentNode)return;
-    cinemaControlHome={node:rail,parent:rail.parentNode,next:rail.nextSibling};
-    // Same DOM button instances and event listeners, never clones.
-    hero.appendChild(rail);
-    rail.classList.add('fx-cinema-controls-r2032');
+    // R2038: keep the real SOUND + ASK controls in their original shared
+    // .fx-reference-controls-r204 container. Moving the rail alone broke
+    // both the original control contract and real pointer hit testing.
+    root.dataset.fxCinemaControls='original-shared-live-controls';
   }
   function restoreExistingCinemaControls(){
-    if(!cinemaControlHome)return;
-    const {node,parent,next}=cinemaControlHome;
-    node.classList.remove('fx-cinema-controls-r2032');
-    if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
-    cinemaControlHome=null;
+    delete root.dataset.fxCinemaControls;
   }
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
