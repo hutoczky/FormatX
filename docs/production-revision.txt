@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261010-r2040-scroll-coupled-native-papyrus
+token=20261010-r2041-single-original-interactive-mag-folio
 base_master=3221b6b7de933e34b61f545f53672614686f30ea
-purpose=Restore visible, subtle three-dimensional scroll-scrubbed handoff on the original interactive HTML folio synchronized to eight native WebGL archive locations; retain separate MAG and text lanes, no scroll hijack or duplicate DOM. Confirm intentionally aborted deferred CSS is actually present instead of misclassifying all aborted styles as 404.
-validation=Require desktop and mobile Chromium archive, actual computed matrix3d source-specific paper transform, eight scenes, reduced motion and no WebGL fallback, no information occlusion, production Worker and live smoke.
+purpose=Remove visual duplicate R2026 status-paper that competes with the sole MAG-delivered interactive real HTML papyrus. Identify all eight sources within that original panel and retain one original MAG, zero clones, full native actions, reduced-motion/HTML fallbacks.
+validation=Eight physical WebGL2 sources desktop and mobile, every stage exactly ONE actual visible native HTML folio and no second telemetry display, original source identifier, controls, keyboard, no occlusion, no WebGL and reduced-motion, production custom domains proof.
 limitations=60FPS physical hardware and Igloo-level photorealism not yet measured. Lighthouse P0 thresholds may remain unmet, do not weaken thresholds.
