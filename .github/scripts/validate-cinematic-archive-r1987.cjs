@@ -364,12 +364,14 @@ async function verifyNormalEntry(browser,isMobile){
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
+  const entryStartedAt=Date.now();
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>{
     const root=document.documentElement;
     return root.dataset.fxArchiveExperience==='ready'
       && root.dataset.fxArchiveCinema==='active';
   },null,{timeout:65000});
+  const entryReadyMs=Date.now()-entryStartedAt;
   const result=await page.evaluate(()=>{
     const root=document.documentElement;
     const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
@@ -378,6 +380,9 @@ async function verifyNormalEntry(browser,isMobile){
     const folioStyle=folio&&getComputedStyle(folio);
     return {
       version:window.FormatXArchiveExperience?.version,
+      firstContentfulPaint:performance.getEntriesByName('first-contentful-paint','paint')[0]?.startTime||0,
+      postPaintMagSource:root.dataset.fxP0FcpSourceR2040||'legacy-or-intro-priority',
+      postPaintMagAt:Number(root.dataset.fxP0FcpAtR2040)||0,
       experience:root.dataset.fxArchiveExperience,
       mode:root.dataset.fxArchiveCinema,
       scene:root.dataset.fxArchiveCurrent,
@@ -394,7 +399,7 @@ async function verifyNormalEntry(browser,isMobile){
   assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG,
     'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
-  console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
+  console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',entryReadyMs,...result}));
   await context.close();
 }
 async function missingGpuFallback(browser){
