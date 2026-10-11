@@ -72,7 +72,7 @@ assert.ok(scheduler.includes('AUTO_DELAY_MS=MOBILE_SCHEDULE?1900:5500')
   'The optimized MAG startup must shorten only the redundant mobile wait');
 assert.ok(mobile.includes("matches ? 400 : 1100"),
   'The core loader must not add a second 3s mobile delay');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2045-cached-vao-scene',
+for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2051-one-native-paper-dom-pass',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
  assert.ok(html.includes(resource),'Canonical public page must request its current MAG optical resource: '+resource);
