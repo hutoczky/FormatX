@@ -222,6 +222,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Check out candidate repository sources
+        uses: actions/checkout@v5
       - name: Install Chromium visual verifier
         shell: bash
         run: |
