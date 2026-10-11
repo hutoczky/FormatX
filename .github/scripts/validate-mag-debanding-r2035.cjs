@@ -15,6 +15,13 @@ const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
 const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk],['mobile-loader',mobile]])
   assert.doesNotThrow(()=>new Function(s),name+' JavaScript parsing failed');
+// R2048: shared analytical grid vertices retain exact triangles but remove
+// redundant surface powers/trigonometry, without reducing mobile geometry LOD.
+assert.ok(core.includes('const gridVertexCache=Array.from({length:latitudeSegments+1}') &&
+  core.includes('const a=gridVertex(lat,lon);') &&
+  core.includes('const d=gridVertex(lat+1,lon+1);') &&
+  core.includes('fxCoreGeometryBuildMsR2048'),
+  'R2048 production renderer must cache original body vertices and measure real CPU construction duration');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
