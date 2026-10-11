@@ -410,15 +410,26 @@
       });
     }
 
+    /* R2048 — calculate each integral body-grid vertex ONCE. Previously each
+       adjacent triangle cell recalculated all four transcendental/pow-heavy
+       surface samples; they share three/four vertices with neighbours. This
+       keeps identical topology, normals, microfilaments, native material and
+       output vertex order while removing roughly 75% of body-vertex math. */
+    const gridVertexCache=Array.from({length:latitudeSegments+1},
+      ()=>new Array(longitudeSegments+1));
+    function gridVertex(lat,lon){
+      const row=gridVertexCache[lat];
+      return row[lon]||(row[lon]=vertex(lat,lon));
+    }
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
     for(let lat=0;lat<latitudeSegments;lat+=1){
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=gridVertex(lat,lon);
+        const b=gridVertex(lat,lon+1);
+        const c=gridVertex(lat+1,lon);
+        const d=gridVertex(lat+1,lon+1);
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
@@ -1830,6 +1841,7 @@
 
     function finishBoot(program) {
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryReuseR2048='shared-grid-surface-samples-original-topology';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
