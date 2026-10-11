@@ -469,6 +469,46 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function auditSameLiveArchive(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference',
+    userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Chrome-Lighthouse'
+  });
+  const page=await context.newPage();
+  await page.addInitScript(()=>{
+    try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}
+  });
+  const audited=URL.replace(/\\?.*$/,'')+'?lighthouse=1&r2054-parity=1';
+  try{
+    await page.goto(audited,{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>{
+      const root=document.documentElement;
+      return root.dataset.fxArchiveExperience==='ready'
+        && Number(root.dataset.fxArchiveSceneCount)>=8
+        && root.dataset.fxCoreContexts==='1';
+    },null,{timeout:45000});
+    const result=await page.evaluate(()=>{
+      const root=document.documentElement;
+      const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+      const style=document.querySelector('link[data-fx-critical-core-r227]');
+      const proof=document.querySelectorAll('.fx-award-proof[data-fx-award-proof]');
+      return {archive:root.dataset.fxArchiveExperience,
+        scenes:Number(root.dataset.fxArchiveSceneCount||0),
+        contexts:Number(root.dataset.fxCoreContexts||0),
+        canvas:!!canvas&&canvas.getBoundingClientRect().width>120,
+        proofCount:proof.length,criticalCss:style?.media||'missing',
+        p0AuditOverride:root.dataset.fxP0AuditModeR1728||''};
+    });
+    assert.equal(result.archive,'ready','Audit browser got HTML instead of real MAG');
+    assert.ok(result.scenes>=8&&result.contexts===1&&result.canvas,'Auditor did not receive canonical MAG: '+JSON.stringify(result));
+    assert.equal(result.proofCount,1,'Auditor has duplicated proof: '+JSON.stringify(result));
+    assert.notEqual(result.criticalCss,'print','Auditor has skipped real optical CSS');
+    assert.notEqual(result.p0AuditOverride,'static-first-paint-no-late-webgl',
+      'Auditor received static-only performance bypass');
+    console.log('ARCHIVE_LIGHTHOUSE_PARITY_PASS',JSON.stringify(result));
+  }finally{await context.close();}
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -545,6 +585,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await auditSameLiveArchive(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
