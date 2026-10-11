@@ -28,6 +28,7 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
+  let lastImmediateDomSync=null,duplicateDomReadsAvoided=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
@@ -1033,13 +1034,29 @@ void main(){
     updates++;
     root.dataset.fxArchiveUpdateCount=String(updates);
     root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
-    const inArchive=selectLiveChapter();
-    if(inArchive&&stage)ResponsiveExperience.dock();
-    else if(archiveActive)ResponsiveExperience.restore();
-    setPanelState();
-    updateRealContentSheets();
-    syncCinema();
-    updateHandoff();
+    // The native scroll handler already updated the SAME original HTML folio
+    // synchronously. A second getBoundingClientRect/style pass in the very next
+    // RAF forced unnecessary layout work on 320px software WebGL devices.
+    // Keep its GPU draw request and chapter event, but skip truly redundant DOM
+    // work only when the viewport, scroll and chapter identity are unchanged.
+    const duplicate=lastImmediateDomSync
+      &&performance.now()-lastImmediateDomSync.at<44
+      &&scrollY===lastImmediateDomSync.y
+      &&innerWidth===lastImmediateDomSync.w
+      &&innerHeight===lastImmediateDomSync.h
+      &&current?.s.key===lastImmediateDomSync.key;
+    if(!duplicate){
+      const inArchive=selectLiveChapter();
+      if(inArchive&&stage)ResponsiveExperience.dock();
+      else if(archiveActive)ResponsiveExperience.restore();
+      setPanelState();
+      updateRealContentSheets();
+      syncCinema();
+      updateHandoff();
+    }else{
+      duplicateDomReadsAvoided++;
+      root.dataset.fxArchiveRedundantDomPassesAvoided=String(duplicateDomReadsAvoided);
+    }
     if(current){
       const nextIndex=current.s.index;
       root.dataset.fxArchiveCurrent=current.s.key;
@@ -1067,7 +1084,15 @@ void main(){
         updateRealContentSheets();
         syncCinema();
         updateHandoff();
-      }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
+        lastImmediateDomSync={
+          at:performance.now(),y:scrollY,w:innerWidth,h:innerHeight,
+          key:current?.s.key
+        };
+        root.dataset.fxArchiveDomSchedulingR2051='immediate-native-paper-single-pass-next-raf-gpu';
+      }catch(e){
+        lastImmediateDomSync=null;
+        root.dataset.fxArchiveError=String(e?.message||e);
+      }
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
       try{update();}catch(e){raf=0;root.dataset.fxArchiveError=String(e?.message||e);console.error('FormatX archive update error',e);}
