@@ -229,10 +229,12 @@ html:root:root:root:root body.living-architecture
   60% { --fx-primary-mag-live-alpha-r2045: 0.985; }
 }
 @media (max-width:900px) and (prefers-reduced-motion:no-preference){
-  html:root:root:root:root:root:root:root:root:root:root:root:root
-  [data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space >
-  .fx-crystal-organism-r326-stage > canvas.fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"]{
+  .fx-crystal-organism-r326-stage > canvas.fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space >
+  .fx-crystal-organism-r326-stage > canvas.fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"]{
     opacity:var(--fx-primary-mag-live-alpha-r2045)!important;
     animation-name:fx-primary-mag-r2045-alpha!important;
     animation-duration:6.2s!important;
