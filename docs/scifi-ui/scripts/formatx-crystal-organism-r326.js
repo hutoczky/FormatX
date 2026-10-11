@@ -1922,14 +1922,23 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    // R2052: adaptive low-power quality is based on the real GL renderer
+    // identity, NEVER the user agent or Lighthouse detection. Software GL
+    // shades each physical pixel on the main thread: start around 1.2 device
+    // pixels per CSS pixel (antialias remains enabled), then recover quality
+    // via the existing measured dynamic-resolution governor when headroom
+    // becomes available. Real mobile GPU keeps its original 2.0 DPR ceiling.
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.76:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+    root.dataset.fxCoreStartupQualityR2052=softwareRenderer
+      ? (mobile?'adaptive-software-mobile-1p2':'adaptive-software-desktop')
+      : 'unchanged-hardware-physical-quality';
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.70:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
@@ -1959,6 +1968,7 @@
       width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
+      if(softwareRenderer)root.dataset.fxCoreSoftwarePixelsR2052=String(w*h);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
       return true;
     }
