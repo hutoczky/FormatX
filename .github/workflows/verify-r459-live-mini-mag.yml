@@ -77,6 +77,7 @@ jobs:
           grep -Fq 'fx-mini-mag-live-breath-r479' "$SYNC_CSS"
           grep -Fq 'data-fx-mag-life="pulse"' "$SYNC_CSS"
           grep -Fq 'production-r479-colour-depth-soft-alpha-edge-living-primary-mag' "$SYNC_CSS"
+          grep -Fq 'production-r2045-registered-opacity-source-unblocks-live-mag' "$SYNC_CSS"
 
           grep -Fq '"revision": "R479"' "$MARKER"
           grep -Fq 'lower-centre-luminance-cobalt-cyan-violet-soft-alpha-edge' "$MARKER"
@@ -290,7 +291,7 @@ jobs:
             assert.match(state.filter,/contrast\(1\.14\)/);
             assert.match(state.filter,/saturate\(0\.98\)/);
             assert.ok(!/blur\((?!0(?:px)?\))/i.test(state.filter),state.filter);
-            assert.ok(/fx-primary-mag-(?:mobile-heart-r488|live-breath-r479)/.test(state.animationName),state.animationName);
+            assert.ok(/fx-primary-mag-(?:r2045-alpha|mobile-heart-r488|live-breath-r479)/.test(state.animationName),state.animationName);
             assert.equal(state.controls.length,2);
             assert.equal(state.manualPauseCount,0,'obsolete manual PAUSE returned');
             assert.ok(state.controls.every(c=>c.width>=44&&c.height>=44&&c.display!=='none'&&c.visibility!=='hidden'&&c.opacity>.2),JSON.stringify(state.controls));
@@ -300,7 +301,10 @@ jobs:
 
             const samples=[];
             for(let i=0;i<4;i++){
-              samples.push(await page.evaluate(()=>{const s=getComputedStyle(document.querySelector('#hero .fx-crystal-organism-r326-canvas'));return{opacity:Number(s.opacity),scale:s.scale};}));
+              samples.push(await page.evaluate(()=>{
+                const s=getComputedStyle(document.querySelector('#hero .fx-crystal-organism-r326-canvas'));
+                return{opacity:Number(s.opacity),scale:s.scale,registered:s.getPropertyValue('--fx-primary-mag-live-alpha-r2045').trim()};
+              }));
               await page.waitForTimeout(700);
             }
             const opacitySpan=Math.max(...samples.map(x=>x.opacity))-Math.min(...samples.map(x=>x.opacity));
