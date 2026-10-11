@@ -71,16 +71,19 @@
       ];
       for(const node of new Set(furniture)){
         legacyHeroDisplay.set(node,{
-          value:node.style.getPropertyValue('display'),
-          priority:node.style.getPropertyPriority('display')
+          value:node.style.getPropertyValue('visibility'),
+          priority:node.style.getPropertyPriority('visibility')
         });
-        node.style.setProperty('display','none','important');
+        // Visibility hides legacy text without collapsing the hero's original
+        // grid dimensions. Display:none caused a >1 CLS when WebGL boot
+        // completed between Lighthouse film frames.
+        node.style.setProperty('visibility','hidden','important');
       }
       root.dataset.fxArchiveLegacyHero='suppressed';
     }else if(legacyHeroDisplay.size){
       for(const [node,old] of legacyHeroDisplay){
-        if(old.value)node.style.setProperty('display',old.value,old.priority);
-        else node.style.removeProperty('display');
+        if(old.value)node.style.setProperty('visibility',old.value,old.priority);
+        else node.style.removeProperty('visibility');
       }
       legacyHeroDisplay.clear();
       root.dataset.fxArchiveLegacyHero='restored';
