@@ -9,6 +9,7 @@ const archive=load('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js');
 const folio=load('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css');
 const heart=load('docs/scifi-ui/scripts/formatx-heart-core-r252.js');
 const core=load('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const old3dStyle=load('docs/scifi-ui/styles/formatx-core-real3d-v20.css');
 const mobileLoader=load('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
 const currentLoader=load('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const worker=load('billing-worker/src/production-feedback-entry.js');
@@ -51,6 +52,11 @@ assert.ok(html.includes('data-fx-r487-media="(max-width:900px)" media="print" hr
 // R2035: optical stripe regression on both PC and phone.
 assert.ok(core.includes("const fragmentSource = constrainedFragmentSource;"),
   'One coherent physically sculpted MAG must serve desktop and phone');
+assert.ok(!old3dStyle.includes('repeating-linear-gradient(180deg, rgba(62, 190, 255')
+ &&!old3dStyle.includes('repeating-linear-gradient(180deg, rgba(64, 195, 255'),
+ 'No retired PC/mobile grid scanlines may overlay the physical MAG');
+assert.ok(html.includes('r2035-no-pc-mobile-scanlines'),
+  'Production must request the fresh CSS without cached scanlines');
 assert.ok(core.includes("debanded-single-body-broad-softboxes-subpixel-safe"),
   'Canonical original MAG material still contains old striping');
 const opticalSection=core.split('const constrainedFragmentSource = ')[1]?.split('const softwareFragmentSource = ')[0]||'';
