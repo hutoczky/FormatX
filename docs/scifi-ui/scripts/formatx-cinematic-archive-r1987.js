@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2045-frame-cadence-adaptive';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -492,6 +492,45 @@
     static samples=0;
     static slowSamples=0;
     static fastSamples=0;
+    static lastFrameNow=0;
+    static cadenceEmaMs=0;
+    static cadenceSamples=0;
+    static cadenceSlowStreak=0;
+    static observeFrameCadence(now){
+      // Genuine rAF render opportunity spacing from the original MAG renderer.
+      // This is a measured frame gap, NOT GPU frame time or display FPS.
+      if(!mobile()||!Number.isFinite(now))return;
+      const last=this.lastFrameNow;
+      this.lastFrameNow=now;
+      if(!last)return;
+      const gap=now-last;
+      // Background tabs, page restores and first shader compilation must not
+      // trip power saving after a single long gap.
+      if(gap<6||gap>160){
+        this.cadenceSlowStreak=0;
+        this.cadenceEmaMs=0;
+        return;
+      }
+      this.cadenceEmaMs=this.cadenceSamples?
+        this.cadenceEmaMs*.85+gap*.15:gap;
+      this.cadenceSamples++;
+      if(this.cadenceSamples%12===0)
+        root.dataset.fxArchiveObservedFrameGapMs=this.cadenceEmaMs.toFixed(2);
+      // The canonical renderer owns resolution, scheduling and WebGL swap.
+      // Quality here only reduces the archive mesh and filament draw budget.
+      // Only dynamically qualify devices that were initially high quality:
+      // an intentionally throttled low-power phone is not a regression.
+      if(quality!=='high'||mobilePerf||this.cadenceSamples<28)return;
+      const slow=this.cadenceEmaMs>25.5;
+      this.cadenceSlowStreak=slow?this.cadenceSlowStreak+1:
+        Math.max(0,this.cadenceSlowStreak-3);
+      if(this.cadenceSlowStreak>=18){
+        this.cadenceSlowStreak=0;
+        this.fastSamples=0;
+        root.dataset.fxArchiveAdaptiveReason='observed-mobile-rAF-gap';
+        this.setQuality('low');
+      }
+    }
     static frameInterval(){
       // Allow for fractional rAF timestamps: using 16.7ms on a 60Hz
       // display can miss every 16.667ms paint and accidentally cap at 30Hz.
@@ -503,6 +542,7 @@
       const next=value==='low'?'low':'high';
       if(quality===next)return;
       quality=next;
+      this.cadenceSlowStreak=0;
       root.dataset.fxArchiveQuality=quality;
       root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
       invalidate();
@@ -724,6 +764,7 @@ void main(){
     render(frame){
       if(!current||!archiveActive||document.hidden)return;
       const start=performance.now();
+      PerformanceManager.observeFrameCadence(frame?.now);
       const gl=this.gl,scene=current.s,p=current.progress,index=scene.index;
       const detail=quality==='high';
       if(detail!==this.panelDetail){
@@ -1188,7 +1229,11 @@ void main(){
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples};},
+      cpuSamples:PerformanceManager.samples,
+      observedFrameGapMs:PerformanceManager.cadenceSamples?
+        Number(PerformanceManager.cadenceEmaMs.toFixed(2)):null,
+      observedFrameSamples:PerformanceManager.cadenceSamples,
+      adaptiveReason:root.dataset.fxArchiveAdaptiveReason||null};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
