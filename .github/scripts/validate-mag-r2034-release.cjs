@@ -8,6 +8,9 @@ const html=load('docs/scifi-ui/index.html');
 const archive=load('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js');
 const folio=load('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css');
 const heart=load('docs/scifi-ui/scripts/formatx-heart-core-r252.js');
+const core=load('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const mobileLoader=load('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
+const currentLoader=load('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const worker=load('billing-worker/src/production-feedback-entry.js');
 const loop=load('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js');
 const matches=(str,regex)=>[...str.matchAll(regex)].length;
@@ -45,7 +48,33 @@ assert.ok(html.includes('media="(min-width:901px)" data-fx-p0-first-paint-r503')
   'Heavy desktop P0 stylesheet cannot render-block mobile');
 assert.ok(html.includes('data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css'),
   'Phone P0 optical polish must become active after initial content paint');
-for(const s of [archive,heart,loop])new Function(s);
+// R2035: optical stripe regression on both PC and phone.
+assert.ok(core.includes("const fragmentSource = constrainedFragmentSource;"),
+  'One coherent physically sculpted MAG must serve desktop and phone');
+assert.ok(core.includes("debanded-single-body-broad-softboxes-subpixel-safe"),
+  'Canonical original MAG material still contains old striping');
+const opticalSection=core.split('const constrainedFragmentSource = ')[1]?.split('const softwareFragmentSource = ')[0]||'';
+assert.ok(opticalSection.includes('Broadband depth density replaces periodic'),
+  'Periodic scanlines must be removed from MAG');
+assert.ok(!opticalSection.includes('sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4)'),
+  'Old stripe-forming periodic strata still active');
+assert.ok(opticalSection.includes('ribbonB*.052'),
+  'Specular stripe intensity must be attenuated');
+assert.ok(opticalSection.includes('pow(abs(cos(polar*4.0)),4.0)'),
+  'Subpixel prism ridges must be softened');
+assert.ok(archive.includes('fxArchiveDepthPolicyR2035'),
+  'Archive shelves need a shared depth policy behind canonical MAG');
+assert.ok(archive.includes('opticalDepth*d,d'),
+  'Correct homogeneous depth projection missing');
+const opticalDepth=z=>Math.max(-.16,Math.min(.86,.33-.15*z));
+assert.ok(opticalDepth(-1.45)>.4&&opticalDepth(-1.15)>.4,
+  'Far archive rails must never draw stripes across the foreground MAG');
+assert.ok(opticalDepth(2.30)<.02,
+  'Physically retrieved panel must still approach the viewer');
+assert.ok(mobileLoader.includes('r2035-debanded-photographic-mag')&&
+          currentLoader.includes('r2035-debanded-photographic-mag'),
+  'Both display paths must invalidate stale shaders');
+for(const code of [core,archive,heart,loop,mobileLoader,currentLoader])new Function(code);
 console.log('MAG_R2034_STATIC_RELEASE_CONTRACT_PASS',JSON.stringify({
   proofSections:1,duplicateLegacyProofTitles:0,
   singleWebglRenderer:true,originalHtml:true,interactiveCta:true,
