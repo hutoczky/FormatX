@@ -47,6 +47,20 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  // Observed native MAG render gaps are surfaced as neutral milliseconds,
+  // never fictional GPU timings or inferred 60 FPS figures.
+  const paceContract=await page.evaluate(()=>{
+    const state=window.FormatXArchiveExperience?.state;
+    return {gap:state?.observedFrameGapMs??null,
+      sampleCount:state?.observedFrameSamples,
+      cpu:state?.cpuSubmitMs??null,
+      declaredFps:document.documentElement.dataset.fxArchiveMeasuredFPS||null};
+  });
+  assert.ok(Number.isInteger(paceContract.sampleCount)&&paceContract.sampleCount>=0,
+    'Frame-cadence instrumentation unavailable: '+JSON.stringify(paceContract));
+  assert.equal(paceContract.declaredFps,null,
+    'Do not present rAF spacing as measured GPU FPS: '+JSON.stringify(paceContract));
+
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
@@ -393,18 +407,98 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_ADAPTIVE_CADENCE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...renderBudget}));
 
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
-  // Software WebGL readback can stall screenshots in CI even after all
-  // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
-  // for functional testing; report incomplete captures explicitly.
-  try {
-    await page.screenshot({
-      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
-    });
-  } catch(error) {
-    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
-    }));
+  const geometry=await page.evaluate(()=>{
+    const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+    const host=panel?.parentElement;
+    const r=panel?.getBoundingClientRect();
+    const css=panel?getComputedStyle(panel):null;
+    const hc=host?getComputedStyle(host):null;
+    const main=document.querySelector('main#main-content');
+    const mc=main?getComputedStyle(main):null;
+    const px=Math.round(innerWidth*.74),py=Math.round(innerHeight*.52);
+    const hit=document.elementFromPoint(px,py);
+    return {
+      scene:document.documentElement.dataset.fxArchiveCinemaChapter,
+      mode:document.documentElement.dataset.fxArchiveCinema,
+      activePanels:document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length,
+      panelText:panel?.textContent?.trim().slice(0,100)||'',
+      heading:(()=>{
+        const h=panel?.querySelector('.section-heading h2');
+        if(!h)return null;
+        const c=getComputedStyle(h),child=h.querySelector('span,em');
+        const cs=child?getComputedStyle(child):null;
+        return {size:parseFloat(c.fontSize),stroke:c.webkitTextStrokeWidth,
+          textFill:c.webkitTextFillColor,childSize:cs?parseFloat(cs.fontSize):null,
+          childStroke:cs?.webkitTextStrokeWidth||null};
+      })(),
+      panelRect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,
+      panelStyle:css?{display:css.display,visibility:css.visibility,opacity:css.opacity,
+        position:css.position,top:css.top,left:css.left,z:css.zIndex,
+        transform:css.transform,translate:css.translate,contentVisibility:css.contentVisibility}:null,
+      hostStyle:hc?{opacity:hc.opacity,display:hc.display,visibility:hc.visibility,
+        transform:hc.transform,contain:hc.contain,z:hc.zIndex,contentVisibility:hc.contentVisibility}:null,
+      mainStyle:mc?{opacity:mc.opacity,transform:mc.transform,z:mc.zIndex}:null,
+      hit:hit?{tag:hit.tagName,id:hit.id,cls:String(hit.className).slice(0,90),
+        isNativeFolio:hit===panel||panel?.contains(hit)}:null,
+      viewport:{w:innerWidth,h:innerHeight}
+    };
+  });
+  console.log('ARCHIVE_COMPOSITED_CONTENT_GEOMETRY',JSON.stringify({mode:isMobile?'mobile':'desktop',...geometry}));
+  assert.ok(geometry.panelRect?.w>140&&geometry.panelRect?.h>120,
+    'The native papyrus has no usable visual surface: '+JSON.stringify(geometry));
+  assert.equal(geometry.hostStyle?.visibility,'visible',
+    'The real papyrus has a hidden original section ancestor: '+JSON.stringify(geometry));
+  assert.ok(Number(geometry.hostStyle?.opacity)>.95,
+    'The native papyrus is invisible inside opacity-zero section: '+JSON.stringify(geometry));
+  assert.ok(geometry.hit?.isNativeFolio,
+    'Another legacy layer blocks the live interactive paper: '+JSON.stringify(geometry));
+  if(geometry.heading){
+    assert.ok(geometry.heading.size<=(isMobile?38:55),
+      'Old oversize hero heading clips the MAG-delivered paper: '+JSON.stringify(geometry));
+    assert.ok(geometry.heading.childSize===null||geometry.heading.childSize<=(isMobile?38:55),
+      'A nested legacy headline ignores the archive editorial size: '+JSON.stringify(geometry));
+    assert.ok(parseFloat(geometry.heading.stroke||'0')===0,
+      'Hollow text fails readability in native paper: '+JSON.stringify(geometry));
+  }
+  // Collect ACTUAL composited Chromium pixels for a visual audit.
+  // Playwright's screenshot helper can hang trying to disable animation
+  // on software WebGL; Chrome DevTools compositor capture avoids that setup.
+  // A failed capture remains explicitly reported, never treated as proof.
+  const imagePath=`${out}/archive-${isMobile?'mobile':'desktop'}.png`;
+  let captured=false,captureError='';
+  let session=null;
+  try{
+    session=await context.newCDPSession(page);
+    const screenshot=await Promise.race([
+      session.send('Page.captureScreenshot',{
+        format:'png',captureBeyondViewport:false,fromSurface:true
+      }),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('CDP capture timeout')),9000))
+    ]);
+    if(screenshot?.data){
+      fs.writeFileSync(imagePath,Buffer.from(screenshot.data,'base64'));
+      captured=true;
+      console.log('ARCHIVE_COMPOSITOR_CAPTURE_PASS',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        bytes:fs.statSync(imagePath).size,
+        method:'chromium-cdp-real-composited-frame'
+      }));
+    }
+  }catch(error){captureError=String(error?.message||error).slice(0,280);}
+  try{await session?.detach();}catch(_){}
+  if(!captured){
+    try{
+      await page.screenshot({path:imagePath,fullPage:false,timeout:8000});
+      captured=true;
+      console.log('ARCHIVE_SCREENSHOT_CAPTURE_PASS',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',bytes:fs.statSync(imagePath).size
+      }));
+    }catch(error){
+      console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        reason:captureError+'; fallback: '+String(error?.message||error).slice(0,240)
+      }));
+    }
   }
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
