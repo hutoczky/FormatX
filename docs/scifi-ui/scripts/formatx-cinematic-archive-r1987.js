@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2042-adaptive-mobile-cinematic';
+  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -739,8 +739,14 @@ void main(){
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
       this.drawCalls=0;
-      const box=(x,y,z,w,h,d,c=metal,rot=0,a=.8,fiber=false,tilt=0)=>this.mesh(this.box,[x,y,z],[w,h,d],c,rot,a,0,cam,fiber,tilt);
-      const plate=(x,y,z,w,h,c=hue,rot=0,a=1,bend=.2)=>this.mesh(this.panel,[x,y,z],[w,h,1],c,rot,a,bend,cam);
+      // Source-specific mechanics are attenuated on entry and return, not
+      // teleported into view at full intensity when the reading line changes.
+      // Architectural geometry below keeps its own stable opacity.
+      let sourceOpacity=1;
+      const box=(x,y,z,w,h,d,c=metal,rot=0,a=.8,fiber=false,tilt=0)=>
+        this.mesh(this.box,[x,y,z],[w,h,d],c,rot,a*sourceOpacity,0,cam,fiber,tilt);
+      const plate=(x,y,z,w,h,c=hue,rot=0,a=1,bend=.2)=>
+        this.mesh(this.panel,[x,y,z],[w,h,1],c,rot,a*sourceOpacity,bend,cam);
       const side=index%2?-1:1;
       const sx=side*2.4,sy=.12*Math.sin(index),sz=-.3;
       // One modest-depth contact penumbra connects drawer/shelf to archive.
@@ -756,6 +762,28 @@ void main(){
         const y=-.95+k*.91;
         box(0,y,-1.15,7.2,.028,.065,[.18,.31,.38],0,.17);
       }
+      // Eight architecturally fixed bays coexist in the SAME WebGL2 world.
+      // In the previous release only the current source existed, making each
+      // chapter feel like an abrupt environment replacement. A fixed
+      // perforated atlas persists while exactly one bay animates its drawer.
+      // Keep the hardware budget: 8 low-poly calls on mobile; 16 on desktop.
+      const rackCount=Math.min(8,scenes.length);
+      for(let rack=0;rack<rackCount;rack++){
+        const side=rack%2===0?-1:1;
+        const level=Math.floor(rack/2);
+        const rx=side*2.78,ry=1.05-level*.68,rz=-.88-level*.10;
+        const active=rack===index;
+        const rc=scenes[rack].color;
+        box(rx,ry,rz,.90,.042,.18,active?rc:metal,0,active?.53:.19);
+        if(!mobile()){
+          box(rx+side*.45,ry-.14,rz-.08,.032,.46,.10,active?rc:edge,0,active?.45:.13);
+        }
+      }
+      root.dataset.fxArchivePersistentRackCount=String(rackCount);
+      root.dataset.fxArchiveWorldContinuity='persistent-one-world-r2044';
+      // Only the selected bay moves; an arriving section gradually energizes
+      // its own mechanisms. On reverse-scroll it settles back into storage.
+      sourceOpacity=.20+.80*smooth(pro/.30)*(1-.78*smooth((pro-.86)/.14));
       // Eight distinct physical retrieval sources; geometry and trajectories differ.
       switch(scene.source){
         case 'left-shelf':
@@ -786,6 +814,7 @@ void main(){
           for(let j=0;j<7;j+=(quality==='low'?2:1)){const a=j*Math.PI*2/7+pro*.30;plate(Math.cos(a)*1.9,Math.sin(a)*.95,-.3,.36,.57,hue,a*.12,.39,.1);}
           break;
       }
+      sourceOpacity=1;
       // Archive data sheet: bent in storage, follows distinct 3D paths, becomes flat
       // at hand-off. It never contains rasterised application text.
       const sourceX=scene.source==='inner-chamber'?0:sx;
