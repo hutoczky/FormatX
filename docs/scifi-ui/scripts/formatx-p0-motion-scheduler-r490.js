@@ -48,7 +48,7 @@ const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261011-r2
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=5500;
+// On a normal returning visit, the MAG must become real before a second late\n// UI repaint (previously ~12s on mobile). Intro still gets priority.\n// Preserve the desktop/LCP budget; warm mobile only after the first paint.\nconst MOBILE_SCHEDULE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;\nconst AUTO_DELAY_MS=MOBILE_SCHEDULE?3900:5500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -107,7 +107,7 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:3500});
+    idleId=requestIdleCallback(launch,{timeout:MOBILE_SCHEDULE?650:3500});
   }else{
     timer=setTimeout(launch,900);
   }
@@ -115,7 +115,7 @@ function runLateAuto(){
 
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.dataset.fxP0FirstPaintR490='committed-r493';
+    root.dataset.fxP0FirstPaintR490='committed-r493';\n    root.dataset.fxMagFastHandoffR2047=MOBILE_SCHEDULE?'post-paint-mobile-3900ms':'desktop-conservative';
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
