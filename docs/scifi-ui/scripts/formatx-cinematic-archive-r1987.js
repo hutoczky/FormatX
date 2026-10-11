@@ -305,6 +305,26 @@
     if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
   }
 
+  // Older page owners hide every nonhero section. An opacity:0 ancestor
+  // invisibly swallows its entire interactive child even if the folio itself
+  // is fixed, has opacity 1 and passes all hit tests.
+  function syncLiveHostVisibility(host,active){
+    if(active){
+      if(!host._fxCinemaVisualOriginal){
+        host._fxCinemaVisualOriginal=['opacity','visibility'].map(name=>[
+          name,host.style.getPropertyValue(name),host.style.getPropertyPriority(name)
+        ]);
+      }
+      host.style.setProperty('opacity','1','important');
+      host.style.setProperty('visibility','visible','important');
+    }else if(host._fxCinemaVisualOriginal){
+      for(const [name,value,priority] of host._fxCinemaVisualOriginal){
+        if(value)host.style.setProperty(name,value,priority);
+        else host.style.removeProperty(name);
+      }
+      delete host._fxCinemaVisualOriginal;
+    }
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -320,6 +340,7 @@
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
       host.dataset.fxCinemaHostActive=active?'true':'false';
+      syncLiveHostVisibility(host,active);
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
@@ -1157,6 +1178,7 @@ void main(){
     delete root.dataset.fxArchiveCinemaPrepared;
     delete root.dataset.fxArchiveCinemaChapter;
     for(const host of cinemaHosts){
+      syncLiveHostVisibility(host,false);
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         // Synthetic source telemetry is not part of the original product UI:
