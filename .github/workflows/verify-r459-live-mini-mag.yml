@@ -13,6 +13,13 @@ on:
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - '.github/workflows/verify-r459-live-mini-mag.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-shape-sync-r476.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - '.github/workflows/verify-r459-live-mini-mag.yml'
   workflow_dispatch:
 
 permissions:
@@ -225,9 +232,26 @@ jobs:
           npm install --silent playwright@1.62.0
           npx playwright install --with-deps chromium >/dev/null
 
-      - name: Validate live 390x844 MAG optics and breathing
+      - name: Serve candidate locally for source and PR optical tests
+        if: github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[deploy-production]'))
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          nohup python3 -m http.server 4179 --directory docs > "$RUNNER_TEMP/r479-local-server.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl -fsS --max-time 5 http://127.0.0.1:4179/scifi-ui/index.html >/dev/null; then
+              echo 'Candidate MAG assets available for real Chromium'
+              exit 0
+            fi
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/r479-local-server.log"
+          exit 1
+
+      - name: Validate 390x844 MAG optics and breathing in candidate or exact production
         env:
           NODE_PATH: ${{ runner.temp }}/r479-visual/node_modules
+          FORMATX_R479_URL: ${{ (github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[deploy-production]'))) && 'http://127.0.0.1:4179/scifi-ui/index.html' || 'https://formatxsuite.com/' }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -242,7 +266,7 @@ jobs:
             const errors=[];
             page.on('pageerror',error=>errors.push(String(error)));
             page.on('console',message=>{if(message.type()==='error'&&!/favicon|WebGL|WebGPU|GPU/i.test(message.text()))errors.push(message.text());});
-            await page.goto(`https://formatxsuite.com/?verify=r479-visual-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            const target=new URL(process.env.FORMATX_R479_URL||'https://formatxsuite.com/');target.searchParams.set('verify',`r479-visual-${Date.now()}`);await page.goto(target.href,{waitUntil:'domcontentloaded',timeout:120000});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
               const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -310,6 +334,8 @@ jobs:
             const opacitySpan=Math.max(...samples.map(x=>x.opacity))-Math.min(...samples.map(x=>x.opacity));
             const scaleValues=samples.map(x=>Number.parseFloat(x.scale)||1);
             const scaleSpan=Math.max(...scaleValues)-Math.min(...scaleValues);
+            assert.ok(samples.every(x=>x.registered!==''),
+              'R2045 registered lifetime alpha not applied to the actual MAG canvas: '+JSON.stringify(samples));
             assert.ok(opacitySpan>.004||scaleSpan>.002,JSON.stringify({samples,opacitySpan,scaleSpan}));
             assert.equal(errors.length,0,errors.join(' | '));
 
