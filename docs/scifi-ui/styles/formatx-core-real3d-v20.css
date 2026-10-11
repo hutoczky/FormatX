@@ -45,8 +45,7 @@
   transform-origin: 50% 0;
   background:
     radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(76, 222, 255, .27), rgba(29, 106, 198, .075) 31%, transparent 62%),
-    repeating-radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(97, 221, 255, .055) 0 1px, transparent 3px 17px),
-    repeating-linear-gradient(180deg, rgba(62, 190, 255, .085) 0 1px, transparent 2px 12px),
+    radial-gradient(ellipse at var(--fx-core-x, 71%) 0%, rgba(97, 221, 255, .028), transparent 69%),
     linear-gradient(90deg, transparent 4%, rgba(39, 119, 223, .07) 31%, rgba(85, 219, 255, .135) 50%, rgba(145, 58, 229, .085) 70%, transparent 96%);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, .86), transparent 83%);
@@ -123,8 +122,7 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
     opacity: .52;
     background:
       radial-gradient(ellipse at 50% 0%, rgba(62, 211, 255, .28), rgba(28, 104, 190, .075) 32%, transparent 63%),
-      repeating-radial-gradient(ellipse at 50% 0%, rgba(93, 218, 255, .052) 0 1px, transparent 3px 16px),
-      repeating-linear-gradient(180deg, rgba(64, 195, 255, .085) 0 1px, transparent 2px 12px),
+      radial-gradient(ellipse at 50% 0%, rgba(93, 218, 255, .029), transparent 69%),
       linear-gradient(90deg, transparent 2%, rgba(40, 117, 215, .065) 29%, rgba(83, 220, 255, .14) 50%, rgba(139, 61, 229, .08) 71%, transparent 98%);
   }
 
@@ -430,3 +428,5 @@ body.fx-organism-panel-open .fx-core-real3d-stage {
     flex: 0 0 40px !important;
   }
 }
+
+/* R2035 — no scanline/reticle CSS may project stripes through the physical MAG. */
