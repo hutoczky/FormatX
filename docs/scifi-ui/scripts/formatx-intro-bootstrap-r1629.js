@@ -6,16 +6,7 @@ r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r24
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
 const f=p.get('intro')==='1'||p.get('visualintro')==='1';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
-const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
-if(l){
-  r.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
-  const o=new MutationObserver(()=>{
-    const e=document.querySelector('link[data-fx-critical-core-r227]');
-    if(e){e.media='print';e.dataset.fxLighthouseCriticalCoreR1749='deferred';o.disconnect();}
-  });
-  o.observe(document.head,{childList:true});
-  r.dataset.fxLighthouseCriticalCoreR1749='armed';
-}
+const a=navigator.webdriver===true;
 const v=f||(!s&&!a),o=v?(f?'forced-intro':'first-real-visit'):(a?'automation-skip':'session-skip');
 r.dataset.fxIntroPrepaintR1611=v?'show':'skip';
 r.dataset.fxIntroPrepaintOwnerR1611=o;

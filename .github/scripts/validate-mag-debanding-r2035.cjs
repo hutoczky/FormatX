@@ -48,14 +48,14 @@ assert.ok(intro.includes('Continuous cinematographic atmosphere'),
 assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('r2035-debanded-photographic-mag'),
+  assert.ok(/r2035-debanded-photographic-mag|r2055-reused-vertex-mag/.test(loader),
     'A renderer loader may serve the cached banded MAG shader');
 }
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2054-equal-runtime'),
   'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2054-fast-real-mag'),
   'Canonical HTML must load the new scheduler');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
+for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2055-layout-stable-archive',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);

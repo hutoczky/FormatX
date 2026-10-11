@@ -7,7 +7,7 @@
   const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
-  const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
+  // All user agents enter the same archive; only explicit fallbacks differ.
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
   const requestedHtmlFallback=params.get('archive')==='off';
@@ -71,16 +71,19 @@
       ];
       for(const node of new Set(furniture)){
         legacyHeroDisplay.set(node,{
-          value:node.style.getPropertyValue('display'),
-          priority:node.style.getPropertyPriority('display')
+          value:node.style.getPropertyValue('visibility'),
+          priority:node.style.getPropertyPriority('visibility')
         });
-        node.style.setProperty('display','none','important');
+        // Visibility hides legacy text without collapsing the hero's original
+        // grid dimensions. Display:none caused a >1 CLS when WebGL boot
+        // completed between Lighthouse film frames.
+        node.style.setProperty('visibility','hidden','important');
       }
       root.dataset.fxArchiveLegacyHero='suppressed';
     }else if(legacyHeroDisplay.size){
       for(const [node,old] of legacyHeroDisplay){
-        if(old.value)node.style.setProperty('display',old.value,old.priority);
-        else node.style.removeProperty('display');
+        if(old.value)node.style.setProperty('visibility',old.value,old.priority);
+        else node.style.removeProperty('visibility');
       }
       legacyHeroDisplay.clear();
       root.dataset.fxArchiveLegacyHero='restored';
@@ -112,8 +115,19 @@
     const anchor=document.getElementById('hero-download');
     const scene=scenes.find(s=>s.key==='final');
     const panel=scene?.cinemaPanel;
-    if(!anchor||!panel||!anchor.parentNode)return;
-    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling};
+    if(!(anchor instanceof HTMLAnchorElement)||!panel||!anchor.parentNode)return;
+    // Keep the existing authenticated first-party download flow in the
+    // original anchor as late release-metadata updates arrive.
+    const keepAccountGate=()=>{
+      if(anchor.getAttribute('href')!=='/download/multiplatform')
+        anchor.setAttribute('href','/download/multiplatform');
+      anchor.removeAttribute('target');
+      anchor.removeAttribute('rel');
+    };
+    const observer=new MutationObserver(keepAccountGate);
+    observer.observe(anchor,{attributes:true,attributeFilter:['href','target','rel']});
+    keepAccountGate();
+    finalCtaHome={node:anchor,parent:anchor.parentNode,next:anchor.nextSibling,observer};
     const holder=document.createElement('div');
     holder.className='fx-archive-final-cta-r2032';
     holder.appendChild(anchor);
@@ -122,7 +136,8 @@
   }
   function restoreExistingFinalCta(){
     if(!finalCtaHome)return;
-    const {node,parent,next,holder}=finalCtaHome;
+    const {node,parent,next,holder,observer}=finalCtaHome;
+    observer?.disconnect();
     if(parent.isConnected)parent.insertBefore(node,next&&next.parentNode===parent?next:null);
     holder.remove();
     finalCtaHome=null;
@@ -1052,7 +1067,7 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    if(disposed||reduced.matches||(!force&&isolatedMagCheck))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1156,7 +1171,7 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,

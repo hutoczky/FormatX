@@ -12,7 +12,7 @@
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
   const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  const auditMode = auditParams.get('archive') === 'off' || reduced.matches;
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -413,12 +413,19 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    // Reuse the identical anisotropic surface sample across adjacent
+    // triangles. Original normals, microfibrils, topology and draw order stay.
+    const surfaceRows=Array.from({length:latitudeSegments+1},()=>new Array(longitudeSegments+1));
+    function sharedVertex(lat,lon){
+      const row=surfaceRows[lat];
+      return row[lon]||(row[lon]=vertex(lat,lon));
+    }
     for(let lat=0;lat<latitudeSegments;lat+=1){
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=sharedVertex(lat,lon);
+        const b=sharedVertex(lat,lon+1);
+        const c=sharedVertex(lat+1,lon);
+        const d=sharedVertex(lat+1,lon+1);
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
@@ -1839,7 +1846,10 @@
     return;
 
     function finishBoot(program) {
+    const geometryStartMs=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryBuildMsR2054=(performance.now()-geometryStartMs).toFixed(2);
+    root.dataset.fxCoreGeometryReuseR2054='reused-original-vertex-field';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -1918,14 +1928,17 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    // Start software-rendered mobile WebGL at a sustainable physical pixel
+    // budget; genuine GPU devices retain the original full-resolution optics.
+    // The existing measured governor can raise quality when frames permit.
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.80:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.73:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;

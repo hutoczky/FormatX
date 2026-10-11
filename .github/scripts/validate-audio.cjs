@@ -175,9 +175,14 @@ async function runCase(browser, name, contextOptions) {
   assert(await button.count() === 1, name + ': exactly one music button is required');
   await assertClickable(page, name);
 
+  const beforeAudioUrl=page.url();
   if (contextOptions.isMobile) await button.evaluate(node => node.click());
-  else await button.click();
+  else await button.click({ noWaitAfter: true });
+  assert(page.url() === beforeAudioUrl,
+    name + ': SOUND unexpectedly initiated navigation');
   await waitForAudioOn(page, name);
+  assert(page.url() === beforeAudioUrl,
+    name + ': SOUND changed location after activation');
   await page.waitForFunction(() => ['signal-verified', 'wav-fallback'].includes(document.documentElement.dataset.fxAudioOutput || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => ['playing', 'fallback-playing'].includes(document.documentElement.dataset.fxAudioMusic || ''), null, { timeout: 15000 });
   await page.waitForFunction(() => {

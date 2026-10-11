@@ -211,3 +211,44 @@ html:root:root:root:root body.living-architecture
   transform:translate(-50%,-50%) rotate(-31deg)!important;
 }
 /* production-r1723-canonical-organism-glyph */
+
+/* R2045 — fix the real R479 mobile regression:
+   the older R480/R481 and cinematic stage force opacity: 1 !important,
+   which defeats keyframed opacity even though animation-name appears active.
+   Animate a registered, interpolated number and use it as the SOURCE of the
+   important opacity. This preserves full-resolution WebGL geometry, zero JS
+   idle RAF and the canonical MAG single renderer. */
+@property --fx-primary-mag-live-alpha-r2045 {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0.97;
+}
+@keyframes fx-primary-mag-r2045-alpha {
+  0%,100% { --fx-primary-mag-live-alpha-r2045: 0.968; }
+  40% { --fx-primary-mag-live-alpha-r2045: 1; }
+  60% { --fx-primary-mag-live-alpha-r2045: 0.985; }
+}
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space >
+  .fx-crystal-organism-r326-stage > canvas.fx-crystal-organism-r326-canvas[data-fx-mag-life="breath"],
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
+  body.living-architecture #hero .hero-space >
+  .fx-crystal-organism-r326-stage > canvas.fx-crystal-organism-r326-canvas[data-fx-mag-life="pulse"]{
+    opacity:var(--fx-primary-mag-live-alpha-r2045)!important;
+    animation-name:fx-primary-mag-r2045-alpha!important;
+    animation-duration:6.2s!important;
+    animation-iteration-count:infinite!important;
+    animation-timing-function:cubic-bezier(.38,0,.22,1)!important;
+    animation-play-state:running!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space >
+  .fx-crystal-organism-r326-stage > canvas.fx-crystal-organism-r326-canvas{
+    animation:none!important;
+    opacity:1!important;
+  }
+}
+/* production-r2045-registered-opacity-source-unblocks-live-mag */
