@@ -11,10 +11,28 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   });
   const page=await context.newPage();
   const errors=[];
+  const missingAssets=[];
   let apiRequests=0;
 
   page.on('pageerror',error=>errors.push(String(error)));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+  page.on('response',response=>{
+    if(response.status()===404)missingAssets.push(new URL(response.url()).pathname);
+  });
+  // The static test server has no checkout-QR Worker endpoint. Use the
+  // repository's exact published fallback SVG for VALID plan/currency cases.
+  // An invalid request must still propagate and fail.
+  await page.route('**/api/checkout-qr?**',async route=>{
+    const url=new URL(route.request().url());
+    const plan=url.searchParams.get('plan')||'';
+    const currency=(url.searchParams.get('currency')||'').toUpperCase();
+    if(!/^(business_lite|business_pro|technician_team)$/.test(plan)
+       ||!['HUF','EUR'].includes(currency)){
+      await route.continue();return;
+    }
+    await route.fulfill({status:200,contentType:'image/svg+xml',
+      path:`docs/scifi-ui/assets/qr/${plan}-${currency.toLowerCase()}.svg`});
+  });
 
   await page.route('**/api/net/**',async route=>{
     apiRequests+=1;
@@ -75,7 +93,7 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   assert.match((await page.locator('[data-net-edge]').textContent()||''),/TEST/);
 
   const meaningful=errors.filter(x=>!/favicon|WebGL|WebGPU|GPU|Permissions policy/i.test(x));
-  assert.deepEqual(meaningful,[]);
+  assert.deepEqual(meaningful,[],`Missing resources: ${JSON.stringify([...new Set(missingAssets)])}`);
 
   await context.close();
   await browser.close();
