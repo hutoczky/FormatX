@@ -52,7 +52,7 @@ const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('ligh
 // UI repaint (previously ~12s on mobile). Intro still gets priority.
 // Preserve the desktop/LCP budget; warm mobile only after the first paint.
 const MOBILE_SCHEDULE=matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
-const AUTO_DELAY_MS=MOBILE_SCHEDULE?1900:5500;
+const AUTO_DELAY_MS=MOBILE_SCHEDULE?900:5500;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -111,7 +111,7 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:MOBILE_SCHEDULE?450:3500});
+    idleId=requestIdleCallback(launch,{timeout:MOBILE_SCHEDULE?250:3500});
   }else{
     timer=setTimeout(launch,900);
   }
@@ -120,7 +120,7 @@ function runLateAuto(){
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     root.dataset.fxP0FirstPaintR490='committed-r493';
-    root.dataset.fxMagFastHandoffR2047=MOBILE_SCHEDULE?'post-paint-mobile-1900ms':'desktop-conservative';
+    root.dataset.fxMagFastHandoffR2047=MOBILE_SCHEDULE?'post-paint-mobile-900ms':'desktop-conservative';
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
