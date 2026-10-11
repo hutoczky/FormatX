@@ -1388,3 +1388,89 @@ html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032{
     overflow-wrap:anywhere!important;
   }
 }
+
+/* R2048: the ORIGINAL section headlines cannot keep legacy full-width 120px
+   hollow hero typography inside a 53vw glass/papyrus. Exactly the same native
+   headings, labels, links and controls remain, but gain an editorial scale
+   coherent with the screen-filling MAG and the flexible archive folio. */
+@media (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading{
+   width:100%!important;
+   max-width:100%!important;
+   min-width:0!important;
+   margin:0 0 clamp(15px,2.4vw,28px)!important;
+   text-align:left!important;
+ }
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading h2,
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 > h2{
+   display:block!important;
+   width:100%!important;
+   max-width:100%!important;
+   font-size:clamp(27px,3.15vw,48px)!important;
+   line-height:1.13!important;
+   font-weight:630!important;
+   letter-spacing:-.038em!important;
+   text-wrap:balance;
+   overflow-wrap:normal!important;
+   word-break:normal!important;
+   color:#eaf6fd!important;
+   -webkit-text-stroke:0 transparent!important;
+   -webkit-text-fill-color:currentColor!important;
+   text-shadow:none!important;
+   filter:none!important;
+   opacity:1!important;
+ }
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading h2 :is(span,em,strong){
+   display:inline!important;
+   font-family:inherit!important;
+   font-size:inherit!important;
+   line-height:inherit!important;
+   font-weight:inherit!important;
+   letter-spacing:inherit!important;
+   -webkit-text-stroke:0 transparent!important;
+   -webkit-text-fill-color:currentColor!important;
+   background-image:none!important;
+   text-shadow:none!important;
+   color:inherit!important;
+   opacity:1!important;
+ }
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading h2 em{
+   font-style:normal!important;
+   color:#a8e6f3!important;
+ }
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading .section-index{
+   font:600 10px/1.5 ui-monospace,Consolas,monospace!important;
+   letter-spacing:.19em!important;
+   color:#91cfe0!important;
+   margin:0 0 14px!important;
+   text-transform:uppercase;
+ }
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .price-card h3{
+   font-size:clamp(18px,1.4vw,24px)!important;
+   line-height:1.22!important;
+   -webkit-text-stroke:0 transparent!important;
+   -webkit-text-fill-color:currentColor!important;
+ }
+}
+@media (max-width:900px) and (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading h2{
+   font-size:clamp(24px,6.15vw,32px)!important;
+   line-height:1.18!important;
+   letter-spacing:-.03em!important;
+ }
+ html[data-fx-archive-cinema="active"] body.living-architecture
+ .fx-archive-cinema-folio-r2030 .section-heading .section-index{
+   font-size:9px!important;
+   letter-spacing:.16em!important;
+   margin-bottom:10px!important;
+ }
+}
+/* production-r2048-native-paper-editorial-hierarchy */
