@@ -479,7 +479,7 @@ async function auditSameLiveArchive(browser){
   await page.addInitScript(()=>{
     try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1');}catch(_){}
   });
-  const audited=URL.replace(/\\?.*$/,'')+'?lighthouse=1&r2054-parity=1';
+  const audited=URL.split('?')[0]+'?lighthouse=1&r2054-parity=1';
   try{
     await page.goto(audited,{waitUntil:'domcontentloaded',timeout:60000});
     await page.waitForFunction(()=>{
