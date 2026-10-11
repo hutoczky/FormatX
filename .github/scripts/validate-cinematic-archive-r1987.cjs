@@ -47,6 +47,12 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  const meshResources=await page.evaluate(()=>({
+    vaoCount:document.documentElement.dataset.fxArchiveMeshVaoCount,
+    layout:document.documentElement.dataset.fxArchiveMeshVertexLayout
+  }));
+  assert.equal(meshResources.vaoCount,'2','Exactly two cached geometry VAOs for one MAG archive: '+JSON.stringify(meshResources));
+  assert.equal(meshResources.layout,'vao-bound-once-r2045','Repeated per-draw vertex attribute setup must be removed');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
