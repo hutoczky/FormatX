@@ -1357,3 +1357,34 @@ html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032{
   z-index:1!important;
   pointer-events:auto!important;
 }
+
+/* R2047 — 1024px release detail overflow. Two older desktop release columns
+   forced the GitHub release-date/link beyond the viewport by ~10px. Keep the
+   original native link, make the module an intrinsically sized one-column
+   technical document before the two-column layout has enough space. */
+@media (min-width:901px) and (max-width:1100px){
+  html body.living-architecture #resources .release-layout{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    width:min(100%,calc(100vw - 48px))!important;
+    max-width:100%!important;
+    min-width:0!important;
+    box-sizing:border-box!important;
+  }
+  html body.living-architecture #resources .release-card{
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    translate:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+  html body.living-architecture #resources #release-published,
+  html body.living-architecture #resources #release-page-link{
+    max-width:100%!important;
+    box-sizing:border-box!important;
+    overflow-wrap:anywhere!important;
+  }
+}
