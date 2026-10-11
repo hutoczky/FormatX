@@ -407,6 +407,34 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_ADAPTIVE_CADENCE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...renderBudget}));
 
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
+  const geometry=await page.evaluate(()=>{
+    const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+    const host=panel?.parentElement;
+    const r=panel?.getBoundingClientRect();
+    const css=panel?getComputedStyle(panel):null;
+    const hc=host?getComputedStyle(host):null;
+    const main=document.querySelector('main#main-content');
+    const mc=main?getComputedStyle(main):null;
+    const px=Math.round(innerWidth*.74),py=Math.round(innerHeight*.52);
+    const hit=document.elementFromPoint(px,py);
+    return {
+      scene:document.documentElement.dataset.fxArchiveCinemaChapter,
+      mode:document.documentElement.dataset.fxArchiveCinema,
+      activePanels:document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length,
+      panelText:panel?.textContent?.trim().slice(0,100)||'',
+      panelRect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,
+      panelStyle:css?{display:css.display,visibility:css.visibility,opacity:css.opacity,
+        position:css.position,top:css.top,left:css.left,z:css.zIndex,
+        transform:css.transform,translate:css.translate,contentVisibility:css.contentVisibility}:null,
+      hostStyle:hc?{opacity:hc.opacity,display:hc.display,visibility:hc.visibility,
+        transform:hc.transform,contain:hc.contain,z:hc.zIndex,contentVisibility:hc.contentVisibility}:null,
+      mainStyle:mc?{opacity:mc.opacity,transform:mc.transform,z:mc.zIndex}:null,
+      hit:hit?{tag:hit.tagName,id:hit.id,cls:String(hit.className).slice(0,90),
+        isNativeFolio:hit===panel||panel?.contains(hit)}:null,
+      viewport:{w:innerWidth,h:innerHeight}
+    };
+  });
+  console.log('ARCHIVE_COMPOSITED_CONTENT_GEOMETRY',JSON.stringify({mode:isMobile?'mobile':'desktop',...geometry}));
   // Collect ACTUAL composited Chromium pixels for a visual audit.
   // Playwright's screenshot helper can hang trying to disable animation
   // on software WebGL; Chrome DevTools compositor capture avoids that setup.
