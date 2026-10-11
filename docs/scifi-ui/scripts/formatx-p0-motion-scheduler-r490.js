@@ -44,7 +44,7 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261011-r2054-equal-runtime';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=PARAMS.get('archive')==='off'||matchMedia('(prefers-reduced-motion: reduce)').matches;
