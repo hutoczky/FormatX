@@ -207,9 +207,10 @@ jobs:
 
   visual-r479-live-mag:
     needs: verify-r479-living-mag
-    if: >-
-      needs.verify-r479-living-mag.result == 'success' &&
-      (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[deploy-production]'))
+    # Optical checks must actually execute whenever a renderer/loader or this
+    # workflow changes, not only for deploy-tagged commits. The workflow push
+    # paths already scope these expensive checks to genuine MAG source changes.
+    if: needs.verify-r479-living-mag.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
