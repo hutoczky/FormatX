@@ -22,7 +22,7 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
 
   html:root:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: 1 !important;
+    opacity: 1;
     image-rendering: auto !important;
     filter:
       brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
