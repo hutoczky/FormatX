@@ -20,6 +20,14 @@ assert.ok(archive.includes('lastImmediateDomSync') &&
   archive.includes('requestRender?.(1)') &&
   archive.includes('selectLiveChapter();'),
   'R2051 must preserve immediate scroll handoff and original GPU request while avoiding duplicate RAF forced layouts');
+// R2052: low-power software GL reduces raster pixel cost on every real
+// software renderer, not by detecting automation/Lighthouse. Hardware keeps
+// the exact original high-quality surface, MSAA and dynamic resolution.
+assert.ok(core.includes("(mobile?.76:.72)") &&
+  core.includes("(mobile?.70:.48)") &&
+  core.includes("'unchanged-hardware-physical-quality'") &&
+  core.includes("fxCoreSoftwarePixelsR2052"),
+  'The software startup pixel budget must be adaptive without touching hardware PBR');
 // R2048: shared analytical grid vertices retain exact triangles but remove
 // redundant surface powers/trigonometry, without reducing mobile geometry LOD.
 assert.ok(core.includes('const gridVertexCache=Array.from({length:latitudeSegments+1}') &&
