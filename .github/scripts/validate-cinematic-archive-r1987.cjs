@@ -50,7 +50,17 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(rendererProbe.stable&&rendererProbe.after==='ready',
     'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
   
-  assert.equal(init.shared,true,JSON.stringify(init));
+  const realGeometryCost=await page.evaluate(()=>({
+    ms:Number(document.documentElement.dataset.fxCoreGeometryBuildMsR2048),
+    profile:document.documentElement.dataset.fxCoreGeometryProfileR1603,
+    cache:document.documentElement.dataset.fxCoreGeometryReuseR2048
+  }));
+  assert.ok(Number.isFinite(realGeometryCost.ms)&&realGeometryCost.ms>0&&
+    realGeometryCost.cache==='shared-grid-surface-samples-original-topology',
+    'Native MAG must record genuine CPU geometry-build cost and cache its real vertices: '+
+      JSON.stringify(realGeometryCost));
+  console.log('ARCHIVE_NATIVE_GEOMETRY_CPU_MS',JSON.stringify({mobile:isMobile,...realGeometryCost}));
+    assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const animationOwners=await page.evaluate(()=>{
