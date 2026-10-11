@@ -19,7 +19,9 @@
      and razor-cut OLED edge visible in physical mobile captures. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .965 !important;
+    /* One real compositor-owned CSSAnimation controls opacity. A declaration
+       marked !important prevents animation keyframes from breathing at all. */
+    opacity: .965;
     filter:
       brightness(1.06)
       contrast(1.14)

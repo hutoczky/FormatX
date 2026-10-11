@@ -14,6 +14,13 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - 'docs/scifi-ui/styles/formatx-core-life-r455.css'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-mag-living-balance-r481.css'
+      - 'docs/scifi-ui/styles/formatx-unified-background-r616.css'
+      - 'docs/scifi-ui/styles/formatx-living-habitat-r1530.css'
+      - 'docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -28,6 +35,13 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - 'docs/scifi-ui/styles/formatx-core-life-r455.css'
+      - 'docs/scifi-ui/styles/formatx-core-shapeshifter-r337.css'
+      - 'docs/scifi-ui/styles/formatx-mag-living-balance-r481.css'
+      - 'docs/scifi-ui/styles/formatx-unified-background-r616.css'
+      - 'docs/scifi-ui/styles/formatx-living-habitat-r1530.css'
+      - 'docs/scifi-ui/styles/formatx-mag-visual-sync-r476.css'
+      - 'docs/scifi-ui/styles/formatx-mobile-r416-stability.css'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 

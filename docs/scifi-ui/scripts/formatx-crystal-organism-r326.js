@@ -410,15 +410,26 @@
       });
     }
 
+    /* R2048 — calculate each integral body-grid vertex ONCE. Previously each
+       adjacent triangle cell recalculated all four transcendental/pow-heavy
+       surface samples; they share three/four vertices with neighbours. This
+       keeps identical topology, normals, microfilaments, native material and
+       output vertex order while removing roughly 75% of body-vertex math. */
+    const gridVertexCache=Array.from({length:latitudeSegments+1},
+      ()=>new Array(longitudeSegments+1));
+    function gridVertex(lat,lon){
+      const row=gridVertexCache[lat];
+      return row[lon]||(row[lon]=vertex(lat,lon));
+    }
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
     for(let lat=0;lat<latitudeSegments;lat+=1){
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=gridVertex(lat,lon);
+        const b=gridVertex(lat,lon+1);
+        const c=gridVertex(lat+1,lon);
+        const d=gridVertex(lat+1,lon+1);
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
@@ -849,26 +860,16 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R1930 — one slow compositor breath on every capable screen.
-       No idle JS RAF is introduced; reduced-motion remains fully respected. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
-        {
-          duration:6800,
-          iterations:Infinity,
-          easing:'cubic-bezier(.37,0,.20,1)',
-          fill:'both'
-        }
-      );
-      livingTimeline.id='fx-primary-mag-living-breath-r1930';
-      root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
-      root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+    /* R2046 — one true compositor owner for MAG breathing.
+       The existing CSSAnimation fx-primary-mag-mobile-heart-r488 already
+       provides the carefully attenuated living-core heartbeat on both PC
+       and phone, and the root PAUSE governor owns that same timeline.
+       The duplicate WAAPI opacity/transform animation raced it, causing
+       non-composited frames and mobile Lighthouse animation conflicts.
+       Do not replace the living MAG model or disable its idle pulse. */
+    if(!reduced.matches){
+      root.dataset.fxNativeMagDesktopLifeR1902='single-css-compositor-opacity-no-raf';
+      root.dataset.fxNativeMagBreathR1930='single-owner-css-breath-r2046';
     }
 
     const options = {
@@ -1839,7 +1840,10 @@
     return;
 
     function finishBoot(program) {
+    const geometryBuildStart=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryBuildMsR2048=(performance.now()-geometryBuildStart).toFixed(2);
+    root.dataset.fxCoreGeometryReuseR2048='shared-grid-surface-samples-original-topology';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -1918,14 +1922,23 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    // R2052: adaptive low-power quality is based on the real GL renderer
+    // identity, NEVER the user agent or Lighthouse detection. Software GL
+    // shades each physical pixel on the main thread: start around 1.2 device
+    // pixels per CSS pixel (antialias remains enabled), then recover quality
+    // via the existing measured dynamic-resolution governor when headroom
+    // becomes available. Real mobile GPU keeps its original 2.0 DPR ceiling.
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.76:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+    root.dataset.fxCoreStartupQualityR2052=softwareRenderer
+      ? (mobile?'adaptive-software-mobile-1p2':'adaptive-software-desktop')
+      : 'unchanged-hardware-physical-quality';
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.70:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
@@ -1955,6 +1968,7 @@
       width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
+      if(softwareRenderer)root.dataset.fxCoreSoftwarePixelsR2052=String(w*h);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
       return true;
     }

@@ -140,7 +140,7 @@ html:root:root:root:root:root:root:root:root:root:root body.living-architecture 
   background:transparent!important;
 }
 html:root:root:root:root:root:root:root:root:root:root body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  opacity:1!important;
+  opacity:1;
   image-rendering:auto!important;
   filter:brightness(.985) contrast(1.10) saturate(.94) drop-shadow(0 18px 24px rgba(0,0,0,.34))!important;
   -webkit-filter:brightness(.985) contrast(1.10) saturate(.94) drop-shadow(0 18px 24px rgba(0,0,0,.34))!important;
@@ -220,7 +220,7 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
 
 html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
 body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  opacity:1!important;
+  opacity:1;
   image-rendering:auto!important;
   filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
   -webkit-filter:brightness(1.045) contrast(1.075) saturate(.90) drop-shadow(0 19px 25px rgba(0,0,0,.32))!important;
@@ -230,7 +230,7 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:1!important;
+    opacity:1;
     filter:brightness(1.07) contrast(1.11) saturate(1) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
     -webkit-filter:brightness(1.07) contrast(1.11) saturate(1) drop-shadow(0 15px 20px rgba(0,0,0,.28))!important;
   }
@@ -1363,7 +1363,7 @@ html:root:root body.living-architecture{
 }
 html[data-fx-crystal-organism-r326="ready"]:root:root:root
 body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas{
-  opacity:1!important;
+  opacity:1;
   image-rendering:auto!important;
   filter:brightness(1.145) contrast(1.055) saturate(1.14)!important;
   -webkit-filter:brightness(1.145) contrast(1.055) saturate(1.14)!important;

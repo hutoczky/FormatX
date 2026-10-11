@@ -1336,6 +1336,14 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},{passive:true});
 
   skip.addEventListener('click',()=>finish('user-skip'));
+  // Global keyboard handlers must never intercept the focused cinematic
+  // SKIP button. This supports real keyboard users, not only pointer input.
+  skip.addEventListener('keydown',event=>{
+    if(event.repeat||(event.key!=='Enter'&&event.key!==' '))return;
+    event.preventDefault();
+    event.stopPropagation();
+    finish('user-skip-keyboard');
+  },{capture:true});
   addEventListener('formatx:real3dready',()=>{
     locateStage();
     syncTarget(true);

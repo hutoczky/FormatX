@@ -10,7 +10,7 @@
 
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:1 !important;
+    opacity:1;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
     filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
@@ -167,7 +167,7 @@
 @media (max-width:430px) {
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:1 !important;
+    opacity:1;
     filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
     -webkit-filter:brightness(1.04) contrast(1.12) saturate(.88) blur(0) !important;
   }
@@ -184,7 +184,7 @@
 @media (min-width:901px) and (pointer:fine) {
   html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas,
   html:root:root:root[data-fx-crystal-organism-r326="ready"] body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:1 !important;
+    opacity:1;
     mix-blend-mode:normal !important;
     image-rendering:auto !important;
     filter:brightness(1.08) contrast(1.05) saturate(1.08) blur(0) !important;

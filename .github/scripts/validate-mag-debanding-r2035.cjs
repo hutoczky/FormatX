@@ -15,6 +15,26 @@ const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
 const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk],['mobile-loader',mobile]])
   assert.doesNotThrow(()=>new Function(s),name+' JavaScript parsing failed');
+assert.ok(archive.includes('lastImmediateDomSync') &&
+  archive.includes('duplicateDomReadsAvoided++') &&
+  archive.includes('requestRender?.(1)') &&
+  archive.includes('selectLiveChapter();'),
+  'R2051 must preserve immediate scroll handoff and original GPU request while avoiding duplicate RAF forced layouts');
+// R2052: low-power software GL reduces raster pixel cost on every real
+// software renderer, not by detecting automation/Lighthouse. Hardware keeps
+// the exact original high-quality surface, MSAA and dynamic resolution.
+assert.ok(core.includes("(mobile?.76:.72)") &&
+  core.includes("(mobile?.70:.48)") &&
+  core.includes("'unchanged-hardware-physical-quality'") &&
+  core.includes("fxCoreSoftwarePixelsR2052"),
+  'The software startup pixel budget must be adaptive without touching hardware PBR');
+// R2048: shared analytical grid vertices retain exact triangles but remove
+// redundant surface powers/trigonometry, without reducing mobile geometry LOD.
+assert.ok(core.includes('const gridVertexCache=Array.from({length:latitudeSegments+1}') &&
+  core.includes('const a=gridVertex(lat,lon);') &&
+  core.includes('const d=gridVertex(lat+1,lon+1);') &&
+  core.includes('fxCoreGeometryBuildMsR2048'),
+  'R2048 production renderer must cache original body vertices and measure real CPU construction duration');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
@@ -51,15 +71,22 @@ for(const loader of [desk,mobile,motion]){
   assert.ok(loader.includes('r2035-debanded-photographic-mag'),
     'A renderer loader may serve the cached banded MAG shader');
 }
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2048-pulse-grid-vertex-optimization'),
   'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
-  'Canonical HTML must load the new scheduler');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2053-post-first-paint-fast-mobile'),
+  'Canonical HTML must load the refreshed post-paint mobile scheduler');
+assert.ok(scheduler.includes('AUTO_DELAY_MS=MOBILE_SCHEDULE?900:5500')
+  && scheduler.includes('timeout:MOBILE_SCHEDULE?250:3500'),
+  'The optimized MAG startup must shorten only the redundant mobile wait');
+assert.ok(mobile.includes("matches ? 180 : 1100"),
+  'The core loader must not add a second 3s mobile delay');
+for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2051-one-native-paper-dom-pass',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
- assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
+ assert.ok(html.includes(resource),'Canonical public page must request its current MAG optical resource: '+resource);
 }
+assert.ok(!html.includes('formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth'),
+  'The old archive JS query must not mask the R2045 geometry optimization');
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
  correctedRearDepth:depth(-1.15),retrievedSheetDepth:depth(2.30),

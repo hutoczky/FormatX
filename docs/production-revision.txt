@@ -1,7 +1,9 @@
 FormatX production revision
-token=20261011-r2044-r2035-no-pc-mobile-mag-stripes
-base_master=5541278e464b08516733edc0b00548f53d8db556
-purpose=Keep the existing R2044 eight-bay native MAG cinematic world while eliminating shader, stage-grid and improper archive depth stripes from the original MAG on PC and mobile.
-quality=Eight GPU-drawn persistent racks, 8 additional box draws per mobile frame and 16 on desktop; one existing native MAG renderer, no extra WebGL contexts, no video, no rasterized application text.
-validation=Mandatory R2035 source anti-banding test, Chromium mobile/desktop eight chapters and native controls, no WebGL/reduced-motion fallback, responsive occlusion and strict production smoke with exact domain revision.
-limitations=FPS and Igloo.inc photographic superiority are goals, not confirmed claims; no fake performance measurements.
+token=20261011-r2052-adaptive-native-mag-one-world
+purpose=Original R2044 eight-rack living MAG preserved: R2045 GPU draw-call VAO reuse, nonblocking canonical evidence CSS, deterministic keyboard Skip for first-visit intro, R2046 one CSSAnimation compositor owner instead of duplicate conflicting WAAPI; R2049 true compositor opacity, mobile post-first-paint accelerated handoff and strict first-visit visible native paper.
+architecture=One original WebGL2 context; two VAOs plus two VBOs for the eight-source cinematic archive; one real interactive native HTML folio, one canonical public proof; 8 persistent 3D rack positions and physically connected filaments.
+performance=Avoid one redundant DOM/layout pass per native scroll-triggered RAF while retaining immediate native HTML handoff and GPU request; GPU attribute binding VAOs reused; living CSS pulse verified in Chromium (opacity amplitude 0.025843); legacy important opacity overrides removed; exact original grid vertices reused without changing topology; real software-WebGL CPU geometry-build measurements 32.7ms desktop and 20.9ms mobile; mobile reduced loader idle/renderer delay; no unverified 60 FPS/95 Lighthouse claim.
+verification=Strict Chrome desktop/mobile 8 scene DOM/GL interactions, pointer/keyboard intro Skip, no WebGL/reduced-motion fallback, 320–1920px occlusion, source anti-banding, production preflight, real Lighthouse >=95 before declaring complete, exact revision on both domains after deploy.
+status=R2052 staged source only, not currently on public domains; do not merge/deploy or claim Igloo 120% until actual strict Lighthouse >=95, full regression QA and exact revision check on BOTH production domains all pass.
+quality_r2052=Original canonical GPU MAG photoreal shaders and geometry are unchanged; detected software renderer starts at native-lean mobile scale (1.2 physical pixels per CSS pixel) and can scale up with the existing performance governor. Same reduced-motion and no-WebGL fallbacks.
+performance_r2051=Native scroll synchronizes real HTML paper immediately. Following rAF avoids duplicate layout reads if viewport, progress and chapter have not changed; GPU render request remains active. Browser time and Lighthouse TBT remain required, not assumed.

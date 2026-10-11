@@ -4,6 +4,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html?archive=1&r486-optics-energy-check=1';
 const out='.archive-artifacts';
+const indexSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+assert.ok(indexSource.includes('data-fx-r487-media="all" data-fx-proof-singleton-r2033="true"'),
+ 'Canonical evidence deduplication CSS must load post-FCP, not block first paint');
+assert.equal((indexSource.match(/data-fx-proof-singleton-r2033="true"/g)||[]).length,1,
+ 'Only one verified canonical public-proof stylesheet is permitted');
+
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function evaluate(viewport,isMobile,browser){
@@ -44,9 +50,71 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(rendererProbe.stable&&rendererProbe.after==='ready',
     'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
   
-  assert.equal(init.shared,true,JSON.stringify(init));
+  const softwareRaster=await page.evaluate(()=>({
+    renderer:document.documentElement.dataset.fxCoreRendererClassR1541,
+    quality:document.documentElement.dataset.fxCoreStartupQualityR2052,
+    pixels:Number(document.documentElement.dataset.fxCoreSoftwarePixelsR2052)||0,
+    cssScale:Number(document.documentElement.dataset.fxCoreReal3dScale)||0
+  }));
+  if(softwareRaster.renderer==='software-adaptive'){
+    assert.ok(softwareRaster.pixels>0&&softwareRaster.cssScale>0,
+      'Software MAG raster budget must expose real renderer pixels: '+JSON.stringify(softwareRaster));
+    if(isMobile)assert.ok(softwareRaster.quality==='adaptive-software-mobile-1p2',
+      'Mobile software-only adaptive first frame missing: '+JSON.stringify(softwareRaster));
+  }
+  console.log('ARCHIVE_RENDERER_ADAPTIVE_RASTER',JSON.stringify({mobile:isMobile,...softwareRaster}));
+    const realGeometryCost=await page.evaluate(()=>({
+    ms:Number(document.documentElement.dataset.fxCoreGeometryBuildMsR2048),
+    profile:document.documentElement.dataset.fxCoreGeometryProfileR1603,
+    cache:document.documentElement.dataset.fxCoreGeometryReuseR2048
+  }));
+  assert.ok(Number.isFinite(realGeometryCost.ms)&&realGeometryCost.ms>0&&
+    realGeometryCost.cache==='shared-grid-surface-samples-original-topology',
+    'Native MAG must record genuine CPU geometry-build cost and cache its real vertices: '+
+      JSON.stringify(realGeometryCost));
+  console.log('ARCHIVE_NATIVE_GEOMETRY_CPU_MS',JSON.stringify({mobile:isMobile,...realGeometryCost}));
+    assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  const animationOwners=await page.evaluate(()=>{
+    const canvas=window.FormatXLivingCore?.canvas;
+    const active=(canvas?.getAnimations?.()||[]).filter(animation=>animation.playState!=='idle');
+    return {cssPulse:active.filter(animation=>animation.animationName==='fx-primary-mag-mobile-heart-r488').length,
+      competingWaapi:active.filter(animation=>animation.id==='fx-primary-mag-living-breath-r1930').length,
+      revision:document.documentElement.dataset.fxNativeMagBreathR1930};
+  });
+  if(isMobile){
+    // A declared animation name alone is insufficient: important opacity
+    // overrides previously froze the original MAG at exactly 1.00.
+    // Record real computed compositor samples after the source CSS loaded.
+    await page.waitForFunction(()=>{
+      const c=window.FormatXLivingCore?.canvas;
+      return !!c && getComputedStyle(c).animationName.includes('fx-primary-mag-mobile-heart-r488');
+    },null,{timeout:20000});
+    const pulses=[];
+    for(let i=0;i<5;i++){
+      pulses.push(await page.evaluate(()=>{
+        const canvas=window.FormatXLivingCore?.canvas;
+        const style=canvas?getComputedStyle(canvas):null;
+        return {opacity:Number(style?.opacity||0),scale:style?.scale,playState:style?.animationPlayState};
+      }));
+      await page.waitForTimeout(360);
+    }
+    const values=pulses.map(x=>x.opacity);
+    const span=Math.max(...values)-Math.min(...values);
+    assert.ok(span>.002,'One animated CSS pulse must VISIBLY breathe instead of being defeated by important opacity: '+JSON.stringify({span,pulses}));
+    console.log('ARCHIVE_NATIVE_PULSE_PASS',JSON.stringify({span,pulses}));
+  }
+  assert.equal(animationOwners.competingWaapi,0,
+    'Two simultaneous opacity/transform animations compete for the original MAG: '+JSON.stringify(animationOwners));
+  assert.equal(animationOwners.revision,'single-owner-css-breath-r2046',
+    'One living MAG, one compositor-only breath (reduced motion tested separately): '+JSON.stringify(animationOwners));
+  const meshResources=await page.evaluate(()=>({
+    vaoCount:document.documentElement.dataset.fxArchiveMeshVaoCount,
+    layout:document.documentElement.dataset.fxArchiveMeshVertexLayout
+  }));
+  assert.equal(meshResources.vaoCount,'2','Exactly two cached geometry VAOs for one MAG archive: '+JSON.stringify(meshResources));
+  assert.equal(meshResources.layout,'vao-bound-once-r2045','Repeated per-draw vertex attribute setup must be removed');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
@@ -441,6 +509,9 @@ async function verifyNormalEntry(browser,isMobile){
     const hero=document.querySelector('#hero .hero-copy');
     const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
     const folioStyle=folio&&getComputedStyle(folio);
+    const rect=folio?.getBoundingClientRect();
+    const cx=rect?.left+rect?.width*.5,cy=rect?.top+rect?.height*.5;
+    const target=rect?document.elementFromPoint(cx,cy):null;
     return {
       version:window.FormatXArchiveExperience?.version,
       experience:root.dataset.fxArchiveExperience,
@@ -452,15 +523,70 @@ async function verifyNormalEntry(browser,isMobile){
         &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
       originalMAG:!!canvas,
       nativeLinkCount:folio?.querySelectorAll('a[href],button').length||0,
+      documentChars:folio?.textContent.trim().length||0,
+      opacity:Number(folioStyle?.opacity||0),
+      viewport:{w:innerWidth,h:innerHeight},
+      rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height,bottom:rect.bottom,right:rect.right}:null,
+      inViewport:!!rect&&rect.left>=-6&&rect.right<=innerWidth+6
+        &&rect.top>=0&&rect.bottom<=innerHeight+6,
+      hitTest:!!folio&&!!target&&(folio===target||folio.contains(target)),
       source:location.search
     };
   });
   assert.equal(result.mode,'active','Plain public URL must enter exclusive MAG archive: '+JSON.stringify(result));
-  assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG,
-    'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
+  assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG
+    &&result.inViewport&&result.hitTest&&result.opacity>=.7&&result.documentChars>=50,
+    'Normal returning visitor must visibly receive one CLICKABLE native paper in viewport: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
+}
+async function verifyFirstVisitMobile(browser){
+  const address=new (require('node:url').URL)(URL);
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','lighthouse','visualintro'])
+    address.searchParams.delete(key);
+  const ctx=await browser.newContext({
+    viewport:{width:390,height:844},deviceScaleFactor:2,
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  await ctx.addInitScript(()=>{
+    window.__magIntroCompletes=0;
+    document.addEventListener('formatx:magbirthcomplete',()=>{window.__magIntroCompletes++},{passive:true});
+  });
+  const page=await ctx.newPage();
+  const errors=[];
+  page.on('pageerror',error=>errors.push(String(error.message)));
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const r=document.documentElement.dataset;
+    return r.fxArchiveExperience==='ready'&&r.fxArchiveCinema==='active'
+      &&(window.__magIntroCompletes||r.fxIntroPrepaintR1611==='skip');
+  },null,{timeout:45000});
+  const result=await page.evaluate(()=>{
+    const folio=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const rect=folio?.getBoundingClientRect();
+    const style=folio?getComputedStyle(folio):null;
+    const center=rect?document.elementFromPoint(rect.left+rect.width*.5,rect.top+rect.height*.5):null;
+    const hero=document.querySelector('#hero .hero-copy');
+    return {introCompletes:window.__magIntroCompletes,
+      mode:document.documentElement.dataset.fxArchiveCinema,
+      screen:{width:innerWidth,height:innerHeight},
+      rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height,right:rect.right,bottom:rect.bottom}:null,
+      opacity:Number(style?.opacity||0),
+      hits:!!folio&&(center===folio||folio.contains(center)),
+      readable:!!folio&&(folio.textContent?.trim().length||0)>65,
+      legacyVisible:!!hero&&getComputedStyle(hero).display!=='none'
+        &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
+      links:folio?.querySelectorAll('a[href],button').length||0};
+  });
+  const v=result.rect;
+  assert.ok(result.mode==='active'&&v&&v.x>=-6&&v.right<=result.screen.width+6
+    &&v.y>=0&&v.bottom<=result.screen.height+6&&result.hits&&result.readable
+    &&result.opacity>=.7&&!result.legacyVisible,
+    'First-visit intro MUST transition into a visible interactive native MAG paper: '+JSON.stringify(result));
+  assert.equal(errors.length,0,'First-visit errors: '+errors.join(' | '));
+  console.log('ARCHIVE_FIRST_VISIT_PASS',JSON.stringify(result));
+  await ctx.close();
 }
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
@@ -522,6 +648,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyFirstVisitMobile(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}

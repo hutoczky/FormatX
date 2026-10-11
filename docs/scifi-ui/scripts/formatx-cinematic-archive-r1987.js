@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2045-reusable-geometry-vao';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -28,6 +28,7 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
+  let lastImmediateDomSync=null,duplicateDomReadsAvoided=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
@@ -598,8 +599,13 @@
       for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
-      this.vao=gl.createVertexArray();
-      if(!this.vao)throw new Error('VAO unavailable');
+      // Each of the two immutable geometry layouts owns ONE VAO. A mesh draw
+      // now binds its cached VAO rather than rebinding the same buffer and
+      // redefining 3 vertex-attribute pointers for each of the 20–50 draws.
+      // No extra rendering context, model replacement or per-frame allocation.
+      if(!this.box.vao||!this.panel.vao)throw new Error('Archive mesh VAO unavailable');
+      root.dataset.fxArchiveMeshVaoCount='2';
+      root.dataset.fxArchiveMeshVertexLayout='vao-bound-once-r2045';
       this.drawCalls=0;
     }
     programFor(gl){
@@ -706,13 +712,25 @@ void main(){
       if(!gl.getProgramParameter(p,gl.LINK_STATUS)){const e=gl.getProgramInfoLog(p);gl.deleteProgram(p);throw new Error(e);}
       return p;
     }
-    buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
-    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false){
-      const gl=this.gl,u=this.uniform;
-      gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
+    buffer(data){
+      const gl=this.gl,b=gl.createBuffer();
+      if(!b)throw new Error('Archive geometry buffer unavailable');
+      gl.bindBuffer(gl.ARRAY_BUFFER,b);
+      gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+      const vao=gl.createVertexArray();
+      if(!vao){gl.deleteBuffer(b);throw new Error('Archive geometry VAO unavailable');}
+      gl.bindVertexArray(vao);
+      gl.bindBuffer(gl.ARRAY_BUFFER,b);
       gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
       gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
       gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
+      gl.bindVertexArray(null);
+      gl.bindBuffer(gl.ARRAY_BUFFER,null);
+      return{buffer:b,vao,count:data.length/8};
+    }
+    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false){
+      const gl=this.gl,u=this.uniform;
+      gl.bindVertexArray(mesh.vao);
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
       gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
       gl.uniform1f(u.uOpacity,alpha);gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
@@ -739,7 +757,7 @@ void main(){
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
-      gl.useProgram(this.program);gl.bindVertexArray(this.vao);
+      gl.useProgram(this.program);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
@@ -892,8 +910,13 @@ void main(){
     }
     dispose(){
       const gl=this.gl;
+      gl.deleteVertexArray(this.box.vao);gl.deleteVertexArray(this.panel.vao);
       gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);
-      gl.deleteVertexArray(this.vao);gl.deleteProgram(this.program);
+      gl.deleteProgram(this.program);
+      if(root.dataset.fxArchiveMeshVertexLayout==='vao-bound-once-r2045'){
+        delete root.dataset.fxArchiveMeshVaoCount;
+        delete root.dataset.fxArchiveMeshVertexLayout;
+      }
     }
   }
 
@@ -1011,13 +1034,29 @@ void main(){
     updates++;
     root.dataset.fxArchiveUpdateCount=String(updates);
     root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
-    const inArchive=selectLiveChapter();
-    if(inArchive&&stage)ResponsiveExperience.dock();
-    else if(archiveActive)ResponsiveExperience.restore();
-    setPanelState();
-    updateRealContentSheets();
-    syncCinema();
-    updateHandoff();
+    // The native scroll handler already updated the SAME original HTML folio
+    // synchronously. A second getBoundingClientRect/style pass in the very next
+    // RAF forced unnecessary layout work on 320px software WebGL devices.
+    // Keep its GPU draw request and chapter event, but skip truly redundant DOM
+    // work only when the viewport, scroll and chapter identity are unchanged.
+    const duplicate=lastImmediateDomSync
+      &&performance.now()-lastImmediateDomSync.at<44
+      &&scrollY===lastImmediateDomSync.y
+      &&innerWidth===lastImmediateDomSync.w
+      &&innerHeight===lastImmediateDomSync.h
+      &&current?.s.key===lastImmediateDomSync.key;
+    if(!duplicate){
+      const inArchive=selectLiveChapter();
+      if(inArchive&&stage)ResponsiveExperience.dock();
+      else if(archiveActive)ResponsiveExperience.restore();
+      setPanelState();
+      updateRealContentSheets();
+      syncCinema();
+      updateHandoff();
+    }else{
+      duplicateDomReadsAvoided++;
+      root.dataset.fxArchiveRedundantDomPassesAvoided=String(duplicateDomReadsAvoided);
+    }
     if(current){
       const nextIndex=current.s.index;
       root.dataset.fxArchiveCurrent=current.s.key;
@@ -1045,7 +1084,15 @@ void main(){
         updateRealContentSheets();
         syncCinema();
         updateHandoff();
-      }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
+        lastImmediateDomSync={
+          at:performance.now(),y:scrollY,w:innerWidth,h:innerHeight,
+          key:current?.s.key
+        };
+        root.dataset.fxArchiveDomSchedulingR2051='immediate-native-paper-single-pass-next-raf-gpu';
+      }catch(e){
+        lastImmediateDomSync=null;
+        root.dataset.fxArchiveError=String(e?.message||e);
+      }
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
       try{update();}catch(e){raf=0;root.dataset.fxArchiveError=String(e?.message||e);console.error('FormatX archive update error',e);}

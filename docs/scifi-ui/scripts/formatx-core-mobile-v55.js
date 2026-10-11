@@ -10,14 +10,14 @@
   root.dataset.fxCoreCrystalRevision = 'r615-armored-biomechanical-genesis-mag';
   root.dataset.fxCoreMobileOpticsRevision = 'r454-visible-electric-native-webgl';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261011-r2035-debanded-photographic-mag';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261011-r2035-debanded-photographic-mag-r2046-single-compositor-r2052-adaptive-software';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   const LANGUAGE_OWNER_SCRIPT = '/scifi-ui/scripts/formatx-mobile-language-owner-r423.js?v=20260829-r423-direct-topbar-language';
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
   // first header frame; later layers reassert final header ownership after legacy
   // WDA/control styles have mounted. Native r454 shader optics are never softened.
-  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
+  // Avoid stacking a second three-second mobile delay on top of the\n  // already post-FCP motion scheduler. One original R326 renderer only.\n  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 180 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
 
