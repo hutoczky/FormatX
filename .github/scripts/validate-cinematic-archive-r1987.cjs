@@ -47,6 +47,20 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  // Observed native MAG render gaps are surfaced as neutral milliseconds,
+  // never fictional GPU timings or inferred 60 FPS figures.
+  const paceContract=await page.evaluate(()=>{
+    const state=window.FormatXArchiveExperience?.state;
+    return {gap:state?.observedFrameGapMs??null,
+      sampleCount:state?.observedFrameSamples,
+      cpu:state?.cpuSubmitMs??null,
+      declaredFps:document.documentElement.dataset.fxArchiveMeasuredFPS||null};
+  });
+  assert.ok(Number.isInteger(paceContract.sampleCount)&&paceContract.sampleCount>=0,
+    'Frame-cadence instrumentation unavailable: '+JSON.stringify(paceContract));
+  assert.equal(paceContract.declaredFps,null,
+    'Do not present rAF spacing as measured GPU FPS: '+JSON.stringify(paceContract));
+
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
