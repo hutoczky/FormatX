@@ -4,6 +4,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html?archive=1&r486-optics-energy-check=1';
 const out='.archive-artifacts';
+const indexSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+assert.ok(indexSource.includes('data-fx-r487-media="all" data-fx-proof-singleton-r2033="true"'),
+ 'Canonical evidence deduplication CSS must load post-FCP, not block first paint');
+assert.equal((indexSource.match(/data-fx-proof-singleton-r2033="true"/g)||[]).length,1,
+ 'Only one verified canonical public-proof stylesheet is permitted');
+
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function evaluate(viewport,isMobile,browser){
