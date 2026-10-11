@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261011-r2044-eight-persistent-bay-cinematic-world
+token=20261011-r2044-r2035-no-pc-mobile-mag-stripes
 base_master=5541278e464b08516733edc0b00548f53d8db556
-purpose=Keep all eight physical data-storage bays in the SAME WebGL2 archive scene while MAG extracts a real native HTML papyrus from one active bay. Gradually energize and close source mechanisms instead of making the environment teleport at chapter changes.
+purpose=Keep the existing R2044 eight-bay native MAG cinematic world while eliminating shader, stage-grid and improper archive depth stripes from the original MAG on PC and mobile.
 quality=Eight GPU-drawn persistent racks, 8 additional box draws per mobile frame and 16 on desktop; one existing native MAG renderer, no extra WebGL contexts, no video, no rasterized application text.
-validation=Mandatory Chromium mobile/desktop 8 chapters, persistent rack count, 3D filament draw counts, real original interactive controls/CTA, no WebGL/reduced-motion fallback, responsive occlusion and production smoke.
+validation=Mandatory R2035 source anti-banding test, Chromium mobile/desktop eight chapters and native controls, no WebGL/reduced-motion fallback, responsive occlusion and strict production smoke with exact domain revision.
 limitations=FPS and Igloo.inc photographic superiority are goals, not confirmed claims; no fake performance measurements.
