@@ -849,26 +849,16 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R1930 — one slow compositor breath on every capable screen.
-       No idle JS RAF is introduced; reduced-motion remains fully respected. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
-        [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
-        ],
-        {
-          duration:6800,
-          iterations:Infinity,
-          easing:'cubic-bezier(.37,0,.20,1)',
-          fill:'both'
-        }
-      );
-      livingTimeline.id='fx-primary-mag-living-breath-r1930';
-      root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
-      root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+    /* R2046 — one true compositor owner for MAG breathing.
+       The existing CSSAnimation fx-primary-mag-mobile-heart-r488 already
+       provides the carefully attenuated living-core heartbeat on both PC
+       and phone, and the root PAUSE governor owns that same timeline.
+       The duplicate WAAPI opacity/transform animation raced it, causing
+       non-composited frames and mobile Lighthouse animation conflicts.
+       Do not replace the living MAG model or disable its idle pulse. */
+    if(!reduced.matches){
+      root.dataset.fxNativeMagDesktopLifeR1902='single-css-compositor-opacity-no-raf';
+      root.dataset.fxNativeMagBreathR1930='single-owner-css-breath-r2046';
     }
 
     const options = {
