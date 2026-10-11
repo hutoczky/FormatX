@@ -77,6 +77,13 @@ async function evaluate(viewport,isMobile,browser){
     return {count:all.length,loopCopy,oldVisible,inFinal:!!inFinal,links:canonical?.querySelectorAll('a[href]').length||0};
   });
   assert.equal(proofContract.count,1,'Expected one canonical visual-proof block: '+JSON.stringify(proofContract));
+  const proofHeadings=await page.evaluate(()=>{
+    const headings=[...document.querySelectorAll('h1,h2,h3')].filter(node=>
+      /Bizonyíték a látvány mögött|Evidence behind the experience/i.test(String(node.textContent||'').trim()));
+    return {headings:headings.length,ids:document.querySelectorAll('#fx-award-proof-title').length};
+  });
+  assert.equal(proofHeadings.headings,1,'Duplicated public-proof heading: '+JSON.stringify(proofHeadings));
+  assert.equal(proofHeadings.ids,1,'Duplicated proof heading ID: '+JSON.stringify(proofHeadings));
   assert.equal(proofContract.loopCopy,0,'Infinite loop duplicates visible proof content: '+JSON.stringify(proofContract));
   assert.ok(!proofContract.oldVisible,'Duplicate legacy hero proof block still visible: '+JSON.stringify(proofContract));
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
@@ -509,6 +516,22 @@ async function fallback(browser){
   }));
   assert.equal(v.state,'reduced-html');
   assert.ok(v.text>20,'Reduced motion must preserve native HTML');
+  const proof=await page.evaluate(()=>{
+    const sections=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
+    const headings=[...document.querySelectorAll('h2')].filter(node=>
+      /Bizonyíték a látvány mögött|Evidence behind the experience/i.test(node.textContent||''));
+    const links=[...(sections[0]?.querySelectorAll('a[href]')||[])];
+    const visible=sections.filter(node=>{
+      const style=getComputedStyle(node),rect=node.getBoundingClientRect();
+      return style.display!=='none'&&style.visibility!=='hidden'&&rect.width>0&&rect.height>0;
+    });
+    return {sections:sections.length,headings:headings.length,visible:visible.length,
+      workingLinks:links.filter(node=>node.getAttribute('href')?.startsWith('/')).length};
+  });
+  assert.equal(proof.sections,1,'Duplicated proof in reduced-motion mode: '+JSON.stringify(proof));
+  assert.equal(proof.headings,1,'Duplicated proof heading in reduced-motion mode: '+JSON.stringify(proof));
+  assert.equal(proof.visible,1,'Canonical proof must remain visible without WebGL: '+JSON.stringify(proof));
+  assert.ok(proof.workingLinks>=3,'Verification links missing in fallback: '+JSON.stringify(proof));
   console.log('ARCHIVE_REDUCED_PASS',JSON.stringify(v));
   await ctx.close();
 }
