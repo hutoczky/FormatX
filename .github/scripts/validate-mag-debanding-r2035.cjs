@@ -58,9 +58,9 @@ for(const loader of [desk,mobile,motion]){
   assert.ok(loader.includes('r2035-debanded-photographic-mag'),
     'A renderer loader may serve the cached banded MAG shader');
 }
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag-r2046-single-compositor'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2048-pulse-grid-vertex-optimization'),
   'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2049-early-cinematic-mobile-handoff'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2048-pulse-grid-vertex-optimization'),
   'Canonical HTML must load the refreshed post-paint mobile scheduler');
 assert.ok(scheduler.includes('AUTO_DELAY_MS=MOBILE_SCHEDULE?1900:5500')
   && scheduler.includes('timeout:MOBILE_SCHEDULE?450:3500'),
