@@ -435,6 +435,14 @@ async function evaluate(viewport,isMobile,browser){
     };
   });
   console.log('ARCHIVE_COMPOSITED_CONTENT_GEOMETRY',JSON.stringify({mode:isMobile?'mobile':'desktop',...geometry}));
+  assert.ok(geometry.panelRect?.w>140&&geometry.panelRect?.h>120,
+    'The native papyrus has no usable visual surface: '+JSON.stringify(geometry));
+  assert.equal(geometry.hostStyle?.visibility,'visible',
+    'The real papyrus has a hidden original section ancestor: '+JSON.stringify(geometry));
+  assert.ok(Number(geometry.hostStyle?.opacity)>.95,
+    'The native papyrus is invisible inside opacity-zero section: '+JSON.stringify(geometry));
+  assert.ok(geometry.hit?.isNativeFolio,
+    'Another legacy layer blocks the live interactive paper: '+JSON.stringify(geometry));
   // Collect ACTUAL composited Chromium pixels for a visual audit.
   // Playwright's screenshot helper can hang trying to disable animation
   // on software WebGL; Chrome DevTools compositor capture avoids that setup.
