@@ -407,18 +407,45 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_ADAPTIVE_CADENCE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...renderBudget}));
 
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
-  // Software WebGL readback can stall screenshots in CI even after all
-  // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
-  // for functional testing; report incomplete captures explicitly.
-  try {
-    await page.screenshot({
-      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
-    });
-  } catch(error) {
-    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
-    }));
+  // Collect ACTUAL composited Chromium pixels for a visual audit.
+  // Playwright's screenshot helper can hang trying to disable animation
+  // on software WebGL; Chrome DevTools compositor capture avoids that setup.
+  // A failed capture remains explicitly reported, never treated as proof.
+  const imagePath=`${out}/archive-${isMobile?'mobile':'desktop'}.png`;
+  let captured=false,captureError='';
+  let session=null;
+  try{
+    session=await context.newCDPSession(page);
+    const screenshot=await Promise.race([
+      session.send('Page.captureScreenshot',{
+        format:'png',captureBeyondViewport:false,fromSurface:true
+      }),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('CDP capture timeout')),9000))
+    ]);
+    if(screenshot?.data){
+      fs.writeFileSync(imagePath,Buffer.from(screenshot.data,'base64'));
+      captured=true;
+      console.log('ARCHIVE_COMPOSITOR_CAPTURE_PASS',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        bytes:fs.statSync(imagePath).size,
+        method:'chromium-cdp-real-composited-frame'
+      }));
+    }
+  }catch(error){captureError=String(error?.message||error).slice(0,280);}
+  try{await session?.detach();}catch(_){}
+  if(!captured){
+    try{
+      await page.screenshot({path:imagePath,fullPage:false,timeout:8000});
+      captured=true;
+      console.log('ARCHIVE_SCREENSHOT_CAPTURE_PASS',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',bytes:fs.statSync(imagePath).size
+      }));
+    }catch(error){
+      console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        reason:captureError+'; fallback: '+String(error?.message||error).slice(0,240)
+      }));
+    }
   }
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
