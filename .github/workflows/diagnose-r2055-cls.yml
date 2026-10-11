@@ -1,0 +1,50 @@
+name: Diagnose R2055 genuine Lighthouse layout shift
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/diagnose-r2055-cls.yml'
+      - '.github/scripts/diagnose-lighthouse-cls-r502.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-layout-shift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-cls" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-cls/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve exact candidate
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/cls-http.log" 2>&1 &
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/cls-http.log"
+          exit 1
+      - name: Measure actual layout-shift DOM transitions
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-cls/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_R502_DIAG_RUNS: '5'
+          FORMATX_R502_LIGHTHOUSE_UA: '1'
+          FORMATX_R502_DIAG_DIR: artifacts/r2055-lighthouse-cls
+        run: node .github/scripts/diagnose-lighthouse-cls-r502.cjs
+      - name: Attach complete layout shift evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2055-real-lighthouse-cls
+          path: artifacts/r2055-lighthouse-cls/
+          if-no-files-found: warn
