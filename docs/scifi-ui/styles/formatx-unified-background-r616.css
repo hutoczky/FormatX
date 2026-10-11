@@ -277,7 +277,7 @@ html body.living-architecture :is(h1,h2,h3,strong,.hero-title-main) {
 
   html:root:root:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.96!important;
+    opacity:.96;
     image-rendering:auto!important;
     /* R1755 — the physical shader owns highlights and depth. Avoid full-canvas
        drop-shadow passes on mobile: they look synthetic and consume GPU budget. */
@@ -576,7 +576,7 @@ html[data-fx-lighthouse-audit-r1391="true"] body.living-architecture :is(
 
   html:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root:root
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.97!important;
+    opacity:.97;
     filter:brightness(1.0) contrast(1.20) saturate(1.06) drop-shadow(0 0 6px rgba(72,226,255,.12))!important;
     -webkit-filter:brightness(1.0) contrast(1.20) saturate(1.06) drop-shadow(0 0 6px rgba(72,226,255,.12))!important;
   }
