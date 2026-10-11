@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261011-r2045-cached-native-webgl-geometry
-purpose=Preserve R2044 eight-bay cinematic MAG with one original WebGL2 context and one real native HTML papyrus, eliminate per-draw vertex attribute setup by reusing exactly two immutable-layout VAOs.
-resource_policy=One context; two VAOs and two VBOs for archive geometry; dispose both VAOs and both VBOs, including WebGL loss/teardown.
-quality=No degradation to 8-source shelf geometry, 3D filaments, GGX shading, accessibility or native interactive controls.
-validation=Strict desktop/mobile eight-source Chromium scroll, 320-1920 no-occlusion, no-WebGL/reduced-motion, platform heart and keyboard interaction, source anti-banding, no duplicate proof, security/preflight and exact production revision before deployment.
-limitations=GPU FPS, physical ray tracing, and Igloo superiority require measured and visual evidence. No fabricated benchmarks.
+token=20261011-r2046-mag-cached-vaos-single-compositor
+purpose=Original R2044 eight-rack living MAG preserved: R2045 GPU draw-call VAO reuse, nonblocking canonical evidence CSS, deterministic keyboard Skip for first-visit intro, R2046 one CSSAnimation compositor owner instead of duplicate conflicting WAAPI.
+architecture=One original WebGL2 context; two VAOs plus two VBOs for the eight-source cinematic archive; one real interactive native HTML folio, one canonical public proof; 8 persistent 3D rack positions and physically connected filaments.
+performance=CPU vertex attribute redefinition removed per draw; duplicate living canvas animation removed; critical first-paint proof singleton CSS deferred; no unverified FPS/95 performance claim.
+verification=Strict Chrome desktop/mobile 8 scene DOM/GL interactions, pointer/keyboard intro Skip, no WebGL/reduced-motion fallback, 320–1920px occlusion, source anti-banding, production preflight, real Lighthouse >=95 before declaring complete, exact revision on both domains after deploy.
+status=Not ready for production merge until performance budget, accessibility intro and all QA gates pass.
