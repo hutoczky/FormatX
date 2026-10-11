@@ -73,12 +73,12 @@ for(const loader of [desk,mobile,motion]){
 }
 assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2048-pulse-grid-vertex-optimization'),
   'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2048-pulse-grid-vertex-optimization'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2053-post-first-paint-fast-mobile'),
   'Canonical HTML must load the refreshed post-paint mobile scheduler');
-assert.ok(scheduler.includes('AUTO_DELAY_MS=MOBILE_SCHEDULE?1900:5500')
-  && scheduler.includes('timeout:MOBILE_SCHEDULE?450:3500'),
+assert.ok(scheduler.includes('AUTO_DELAY_MS=MOBILE_SCHEDULE?900:5500')
+  && scheduler.includes('timeout:MOBILE_SCHEDULE?250:3500'),
   'The optimized MAG startup must shorten only the redundant mobile wait');
-assert.ok(mobile.includes("matches ? 400 : 1100"),
+assert.ok(mobile.includes("matches ? 180 : 1100"),
   'The core loader must not add a second 3s mobile delay');
 for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2051-one-native-paper-dom-pass',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
