@@ -422,6 +422,15 @@ async function evaluate(viewport,isMobile,browser){
       mode:document.documentElement.dataset.fxArchiveCinema,
       activePanels:document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length,
       panelText:panel?.textContent?.trim().slice(0,100)||'',
+      heading:(()=>{
+        const h=panel?.querySelector('.section-heading h2');
+        if(!h)return null;
+        const c=getComputedStyle(h),child=h.querySelector('span,em');
+        const cs=child?getComputedStyle(child):null;
+        return {size:parseFloat(c.fontSize),stroke:c.webkitTextStrokeWidth,
+          textFill:c.webkitTextFillColor,childSize:cs?parseFloat(cs.fontSize):null,
+          childStroke:cs?.webkitTextStrokeWidth||null};
+      })(),
       panelRect:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,
       panelStyle:css?{display:css.display,visibility:css.visibility,opacity:css.opacity,
         position:css.position,top:css.top,left:css.left,z:css.zIndex,
@@ -443,6 +452,14 @@ async function evaluate(viewport,isMobile,browser){
     'The native papyrus is invisible inside opacity-zero section: '+JSON.stringify(geometry));
   assert.ok(geometry.hit?.isNativeFolio,
     'Another legacy layer blocks the live interactive paper: '+JSON.stringify(geometry));
+  if(geometry.heading){
+    assert.ok(geometry.heading.size<=(isMobile?38:55),
+      'Old oversize hero heading clips the MAG-delivered paper: '+JSON.stringify(geometry));
+    assert.ok(geometry.heading.childSize===null||geometry.heading.childSize<=(isMobile?38:55),
+      'A nested legacy headline ignores the archive editorial size: '+JSON.stringify(geometry));
+    assert.ok(parseFloat(geometry.heading.stroke||'0')===0,
+      'Hollow text fails readability in native paper: '+JSON.stringify(geometry));
+  }
   // Collect ACTUAL composited Chromium pixels for a visual audit.
   // Playwright's screenshot helper can hang trying to disable animation
   // on software WebGL; Chrome DevTools compositor capture avoids that setup.
