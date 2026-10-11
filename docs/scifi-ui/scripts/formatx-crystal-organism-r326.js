@@ -1840,7 +1840,9 @@
     return;
 
     function finishBoot(program) {
+    const geometryBuildStart=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryBuildMsR2048=(performance.now()-geometryBuildStart).toFixed(2);
     root.dataset.fxCoreGeometryReuseR2048='shared-grid-surface-samples-original-topology';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
