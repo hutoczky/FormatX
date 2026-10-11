@@ -19,7 +19,7 @@ html[data-fx-core-shape-r337] #hero .fx-reference-controls-r204 :is(button,.fx-t
 
 html:root:root:root[data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture
 #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-  opacity: 1 !important;
+  opacity: 1;
   scale: 1 !important;
   transform: none !important;
   translate: none !important;
@@ -67,7 +67,7 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
      a sub-pixel feather removes staircase/razor edges without smearing facets. */
   html:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"] body.living-architecture #hero .hero-space >
   .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .965 !important;
+    opacity: .965;
     scale: 1 !important;
     transform: none !important;
     translate: none !important;
@@ -274,7 +274,7 @@ html:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"] 
 
   html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.97!important;
+    opacity:.97;
     filter:brightness(1) contrast(1.20) saturate(1.06) drop-shadow(0 0 5px rgba(74,225,255,.10))!important;
     -webkit-filter:brightness(1) contrast(1.20) saturate(1.06) drop-shadow(0 0 5px rgba(74,225,255,.10))!important;
   }
@@ -315,7 +315,7 @@ html:root:root:root:root:root:root body.living-architecture #hero :is(.hero-ring
 
   html:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.99!important;
+    opacity:.99;
     filter:brightness(.92) contrast(1.20) saturate(1.02) drop-shadow(0 0 4px rgba(68,202,230,.035))!important;
     -webkit-filter:brightness(.92) contrast(1.20) saturate(1.02) drop-shadow(0 0 4px rgba(68,202,230,.035))!important;
   }
@@ -334,7 +334,7 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.98!important;
+    opacity:.98;
     filter:brightness(.96) contrast(1.22) saturate(1.01)!important;
     -webkit-filter:brightness(.96) contrast(1.22) saturate(1.01)!important;
   }
@@ -342,7 +342,7 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
 @media (min-width:901px) and (pointer:fine) {
   html:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:.99!important;
+    opacity:.99;
     filter:brightness(.90) contrast(1.22) saturate(1.00)!important;
     -webkit-filter:brightness(.90) contrast(1.22) saturate(1.00)!important;
   }
@@ -385,7 +385,7 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:1!important;
+    opacity:1;
     filter:brightness(1.08) contrast(1.13) saturate(1.02) drop-shadow(0 0 5px rgba(74,220,255,.09))!important;
     -webkit-filter:brightness(1.08) contrast(1.13) saturate(1.02) drop-shadow(0 0 5px rgba(74,220,255,.09))!important;
   }
@@ -394,7 +394,7 @@ body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage {
 @media (min-width:901px) and (pointer:fine) {
   html:root:root:root:root:root:root:root:root:root[data-fx-core-renderer="single-webgl-crystal-organism-r326"]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:1!important;
+    opacity:1;
     filter:brightness(1.03) contrast(1.13) saturate(1.01) drop-shadow(0 0 4px rgba(72,210,242,.06))!important;
     -webkit-filter:brightness(1.03) contrast(1.13) saturate(1.01) drop-shadow(0 0 4px rgba(72,210,242,.06))!important;
   }
