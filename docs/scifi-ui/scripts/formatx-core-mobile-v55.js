@@ -17,7 +17,7 @@
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
   // first header frame; later layers reassert final header ownership after legacy
   // WDA/control styles have mounted. Native r454 shader optics are never softened.
-  // Avoid stacking a second three-second mobile delay on top of the\n  // already post-FCP motion scheduler. One original R326 renderer only.\n  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 550 : 1100;
+  // Avoid stacking a second three-second mobile delay on top of the\n  // already post-FCP motion scheduler. One original R326 renderer only.\n  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 400 : 1100;
   let rendererRequested = false;
   let rendererTimer = 0;
 
