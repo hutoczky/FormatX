@@ -1345,3 +1345,15 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* one-real-papyrus-no-duplicate-status-folio-r2041 */
+
+/* R2046 — the ORIGINAL final call-to-action belongs at the bottom of its
+   scrollable MAG-delivered document. A sticky footer was covering the real
+   release paragraph at 320px width. Keep the same button/action, without an
+   overlay or scroll hijack. */
+html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032{
+  position:relative!important;
+  inset:auto!important;
+  bottom:auto!important;
+  z-index:1!important;
+  pointer-events:auto!important;
+}
