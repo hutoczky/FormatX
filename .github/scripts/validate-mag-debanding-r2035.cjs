@@ -15,6 +15,11 @@ const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
 const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk],['mobile-loader',mobile]])
   assert.doesNotThrow(()=>new Function(s),name+' JavaScript parsing failed');
+assert.ok(archive.includes('lastImmediateDomSync') &&
+  archive.includes('duplicateDomReadsAvoided++') &&
+  archive.includes('requestRender?.(1)') &&
+  archive.includes('selectLiveChapter();'),
+  'R2051 must preserve immediate scroll handoff and original GPU request while avoiding duplicate RAF forced layouts');
 // R2048: shared analytical grid vertices retain exact triangles but remove
 // redundant surface powers/trigonometry, without reducing mobile geometry LOD.
 assert.ok(core.includes('const gridVertexCache=Array.from({length:latitudeSegments+1}') &&
