@@ -1156,7 +1156,7 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;
+    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,
