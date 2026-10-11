@@ -619,7 +619,13 @@ void main(){
  // panel visible in the mobile archive instead of clipping at the sides.
  if(uMobile>.5){p.x*=.34;p.y=p.y*.63-.18;}
  float d=max(2.4,6.2-p.z);
- gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,(p.z-2.8)*.36,d);
+ // R2035: canonical MAG uses NDC depth close to zero. The old background
+ // projection produced negative NDC z for far rack rails, incorrectly placing
+ // long horizontal strips in FRONT of the original MAG on desktop and mobile.
+ // Keep shelves behind the existing 3D core, while the retrieved sheet alone
+ // can approach the audience. No renderer/canvas/geometry replacement.
+ float opticalDepth=clamp(.33-.15*p.z,-.16,.86);
+ gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
  vec3 n=vec3(aNormal.x,ct*aNormal.y-st*aNormal.z,st*aNormal.y+ct*aNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
  vUv=aUv;
@@ -878,6 +884,7 @@ void main(){
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
       root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
+      root.dataset.fxArchiveDepthPolicyR2035='canonical-mag-front-deep-shelves-behind';
       root.dataset.fxArchiveNativePass='shared-webgl2';
        if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
