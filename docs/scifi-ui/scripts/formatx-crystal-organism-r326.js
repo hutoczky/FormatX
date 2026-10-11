@@ -952,8 +952,8 @@
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
         float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
-        float cortex=(cortexA*.62+cortexB*.38)*.0058*cortexEnvelope;
-        float microFold=sin(aUv.x*62.832+aUv.y*43.982)*.0009*cortexEnvelope;
+        float cortex=(cortexA*.62+cortexB*.38)*.0026*cortexEnvelope;
+        float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
         /* R1923 — the smooth cubic body is now authoritative. The legacy
@@ -1356,15 +1356,16 @@
         vec3 refl=reflect(-view,n);
         float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
         float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.13)/.145,2.0)-pow((refl.y-.10)/.76,2.0))*smoothstep(-.10,.72,refl.z);
-        float ribbonB=exp(-pow((refl.x-.31)/.085,2.0)-pow((refl.y+.10)/.62,2.0))*smoothstep(-.10,.70,refl.z);
+        float ribbonA=exp(-pow((refl.x+.13)/.29,2.0)-pow((refl.y-.10)/.82,2.0))*smoothstep(-.10,.72,refl.z);
+        float ribbonB=exp(-pow((refl.x-.31)/.25,2.0)-pow((refl.y+.10)/.70,2.0))*smoothstep(-.10,.70,refl.z);
 
         float frontDepth=smoothstep(-.46,.58,vLocal.z);
         float backDepth=1.0-frontDepth;
         float edge=pow(1.0-facing,2.20);
         float deepEdge=pow(1.0-facing,3.20);
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
-        float strata=.5+.5*sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4);
+        /* Broadband depth density replaces periodic high-contrast scanlines. */
+        float strata=smoothstep(-.68,.72,vLocal.y*.82+vLocal.x*.16-vLocal.z*.19);
         float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
 
         if(uLayer>.5){
@@ -1399,8 +1400,8 @@
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
-        c+=vec3(.92,.98,.96)*ribbonA*.040;
-        c+=vec3(.18,.47,.50)*ribbonB*.175;
+        c+=vec3(.92,.98,.96)*ribbonA*.012;
+        c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
@@ -1432,10 +1433,10 @@
            These echo the layered crystalline anatomy from the selected historic
            MAG without adding geometry or a second render pass. */
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.095':'.125'}+${mobile?'.035':'.045'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.070':'.090'}+${mobile?'.030':'.038'}*fresnel);
+        float prismShellA=exp(-pow((l1Prism-.315)/.125,2.0))*frontDepth;
+        float prismShellB=exp(-pow((l1Prism-.475)/.16,2.0))*frontDepth;
+        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.048':'.060'}+${mobile?'.017':'.023'}*softboxB);
+        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.035':'.043'}+${mobile?'.014':'.019'}*fresnel);
         c*=1.0-.020*prismShellB;
 
         /* R1942d — four authored fold ridges from optic to signature tips.
@@ -1445,12 +1446,12 @@
           smoothstep(.075,.19,radialXY)*
           (1.0-smoothstep(.55,.76,radialXY))*
           frontDepth;
-        float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
-        float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.115':'.155'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.060':'.085'};
-        c*=1.0-${mobile?'.085':'.110'}*foldValley;
+        float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
+        float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
+        float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
+        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
+        c*=1.0-${mobile?'.027':'.037'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
@@ -1666,6 +1667,7 @@
     /* R1930 visual parity: one authored studio shader on desktop, mobile and
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
+    root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
       : (mobilePhysical?'r1716-mobile-physical-constrained-photographic':'photographic-full-desktop');
