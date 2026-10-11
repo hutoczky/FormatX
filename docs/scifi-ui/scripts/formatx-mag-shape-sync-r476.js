@@ -7,7 +7,7 @@
 const root=document.documentElement;
 if(root.dataset.fxMagShapeSyncR476==='ready-r528')return;
 root.dataset.fxMagShapeSyncR476='booting-r528';
-const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260924-r1723-canonical-organism-glyph';
+const STYLE='/scifi-ui/styles/formatx-mag-visual-sync-r476.css?v=20260924-r1723-canonical-organism-glyph-r2045-alpha';
 const MOBILE_OPTICS='/scifi-ui/styles/formatx-mag-mobile-optics-r480.css?v=20260924-r1723-canonical-organism';
 const LIVING_BALANCE='/scifi-ui/styles/formatx-mag-living-balance-r481.css?v=20260924-r1723-canonical-organism';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
