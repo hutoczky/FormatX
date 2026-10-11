@@ -11,6 +11,8 @@ const retro=read('docs/scifi-ui/styles/formatx-core-real3d-v20.css');
 const intro=read('docs/scifi-ui/styles/formatx-mag-birth-live-r533.css');
 const desk=read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const mobile=read('docs/scifi-ui/scripts/formatx-core-mobile-v55.js');
+const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
+const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk],['mobile-loader',mobile]])
   assert.doesNotThrow(()=>new Function(s),name+' JavaScript parsing failed');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
@@ -45,10 +47,14 @@ assert.ok(intro.includes('Continuous cinematographic atmosphere'),
   'Cinematic MAG intro still overlays 4px raster stripes');
 assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
-for(const loader of [desk,mobile]){
+for(const loader of [desk,mobile,motion]){
   assert.ok(loader.includes('r2035-debanded-photographic-mag'),
     'A renderer loader may serve the cached banded MAG shader');
 }
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag'),
+  'Desktop startup scheduler must not cache the old renderer loader');
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
+  'Canonical HTML must load the new scheduler');
 for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
