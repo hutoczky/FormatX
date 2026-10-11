@@ -60,6 +60,28 @@ async function evaluate(viewport,isMobile,browser){
       competingWaapi:active.filter(animation=>animation.id==='fx-primary-mag-living-breath-r1930').length,
       revision:document.documentElement.dataset.fxNativeMagBreathR1930};
   });
+  if(isMobile){
+    // A declared animation name alone is insufficient: important opacity
+    // overrides previously froze the original MAG at exactly 1.00.
+    // Record real computed compositor samples after the source CSS loaded.
+    await page.waitForFunction(()=>{
+      const c=window.FormatXLivingCore?.canvas;
+      return !!c && getComputedStyle(c).animationName.includes('fx-primary-mag-mobile-heart-r488');
+    },null,{timeout:20000});
+    const pulses=[];
+    for(let i=0;i<5;i++){
+      pulses.push(await page.evaluate(()=>{
+        const canvas=window.FormatXLivingCore?.canvas;
+        const style=canvas?getComputedStyle(canvas):null;
+        return {opacity:Number(style?.opacity||0),scale:style?.scale,playState:style?.animationPlayState};
+      }));
+      await page.waitForTimeout(360);
+    }
+    const values=pulses.map(x=>x.opacity);
+    const span=Math.max(...values)-Math.min(...values);
+    assert.ok(span>.002,'One animated CSS pulse must VISIBLY breathe instead of being defeated by important opacity: '+JSON.stringify({span,pulses}));
+    console.log('ARCHIVE_NATIVE_PULSE_PASS',JSON.stringify({span,pulses}));
+  }
   assert.equal(animationOwners.competingWaapi,0,
     'Two simultaneous opacity/transform animations compete for the original MAG: '+JSON.stringify(animationOwners));
   assert.equal(animationOwners.revision,'single-owner-css-breath-r2046',
