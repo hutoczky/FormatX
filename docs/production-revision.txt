@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261011-r2046-mag-cached-vaos-single-compositor
-purpose=Original R2044 eight-rack living MAG preserved: R2045 GPU draw-call VAO reuse, nonblocking canonical evidence CSS, deterministic keyboard Skip for first-visit intro, R2046 one CSSAnimation compositor owner instead of duplicate conflicting WAAPI.
+token=20261011-r2049-native-mag-interactive-paper-mobile-optics
+purpose=Original R2044 eight-rack living MAG preserved: R2045 GPU draw-call VAO reuse, nonblocking canonical evidence CSS, deterministic keyboard Skip for first-visit intro, R2046 one CSSAnimation compositor owner instead of duplicate conflicting WAAPI; R2049 true compositor opacity, mobile post-first-paint accelerated handoff and strict first-visit visible native paper.
 architecture=One original WebGL2 context; two VAOs plus two VBOs for the eight-source cinematic archive; one real interactive native HTML folio, one canonical public proof; 8 persistent 3D rack positions and physically connected filaments.
-performance=CPU vertex attribute redefinition removed per draw; duplicate living canvas animation removed; critical first-paint proof singleton CSS deferred; no unverified FPS/95 performance claim.
+performance=CPU vertex attribute redefinition removed per draw; duplicate living canvas animation removed; working subtle compositor opacity enabled; critical first-paint proof singleton CSS deferred; mobile reduced loader idle/renderer delay; no unverified FPS/95 performance claim.
 verification=Strict Chrome desktop/mobile 8 scene DOM/GL interactions, pointer/keyboard intro Skip, no WebGL/reduced-motion fallback, 320–1920px occlusion, source anti-banding, production preflight, real Lighthouse >=95 before declaring complete, exact revision on both domains after deploy.
-status=Not ready for production merge until performance budget, accessibility intro and all QA gates pass.
+status=Staged for release; do not claim complete or deploy until actual strict Lighthouse 95 and all QA gates pass.
