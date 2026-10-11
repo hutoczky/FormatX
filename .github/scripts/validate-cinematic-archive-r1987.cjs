@@ -464,6 +464,9 @@ async function verifyNormalEntry(browser,isMobile){
     const hero=document.querySelector('#hero .hero-copy');
     const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
     const folioStyle=folio&&getComputedStyle(folio);
+    const rect=folio?.getBoundingClientRect();
+    const cx=rect?.left+rect?.width*.5,cy=rect?.top+rect?.height*.5;
+    const target=rect?document.elementFromPoint(cx,cy):null;
     return {
       version:window.FormatXArchiveExperience?.version,
       experience:root.dataset.fxArchiveExperience,
@@ -475,15 +478,70 @@ async function verifyNormalEntry(browser,isMobile){
         &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
       originalMAG:!!canvas,
       nativeLinkCount:folio?.querySelectorAll('a[href],button').length||0,
+      documentChars:folio?.textContent.trim().length||0,
+      opacity:Number(folioStyle?.opacity||0),
+      viewport:{w:innerWidth,h:innerHeight},
+      rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height,bottom:rect.bottom,right:rect.right}:null,
+      inViewport:!!rect&&rect.left>=-6&&rect.right<=innerWidth+6
+        &&rect.top>=0&&rect.bottom<=innerHeight+6,
+      hitTest:!!folio&&!!target&&(folio===target||folio.contains(target)),
       source:location.search
     };
   });
   assert.equal(result.mode,'active','Plain public URL must enter exclusive MAG archive: '+JSON.stringify(result));
-  assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG,
-    'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
+  assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG
+    &&result.inViewport&&result.hitTest&&result.opacity>=.7&&result.documentChars>=50,
+    'Normal returning visitor must visibly receive one CLICKABLE native paper in viewport: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
+}
+async function verifyFirstVisitMobile(browser){
+  const address=new (require('node:url').URL)(URL);
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','lighthouse','visualintro'])
+    address.searchParams.delete(key);
+  const ctx=await browser.newContext({
+    viewport:{width:390,height:844},deviceScaleFactor:2,
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  await ctx.addInitScript(()=>{
+    window.__magIntroCompletes=0;
+    document.addEventListener('formatx:magbirthcomplete',()=>{window.__magIntroCompletes++},{passive:true});
+  });
+  const page=await ctx.newPage();
+  const errors=[];
+  page.on('pageerror',error=>errors.push(String(error.message)));
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const r=document.documentElement.dataset;
+    return r.fxArchiveExperience==='ready'&&r.fxArchiveCinema==='active'
+      &&(window.__magIntroCompletes||r.fxIntroPrepaintR1611==='skip');
+  },null,{timeout:45000});
+  const result=await page.evaluate(()=>{
+    const folio=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const rect=folio?.getBoundingClientRect();
+    const style=folio?getComputedStyle(folio):null;
+    const center=rect?document.elementFromPoint(rect.left+rect.width*.5,rect.top+rect.height*.5):null;
+    const hero=document.querySelector('#hero .hero-copy');
+    return {introCompletes:window.__magIntroCompletes,
+      mode:document.documentElement.dataset.fxArchiveCinema,
+      screen:{width:innerWidth,height:innerHeight},
+      rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height,right:rect.right,bottom:rect.bottom}:null,
+      opacity:Number(style?.opacity||0),
+      hits:!!folio&&(center===folio||folio.contains(center)),
+      readable:!!folio&&(folio.textContent?.trim().length||0)>65,
+      legacyVisible:!!hero&&getComputedStyle(hero).display!=='none'
+        &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
+      links:folio?.querySelectorAll('a[href],button').length||0};
+  });
+  const v=result.rect;
+  assert.ok(result.mode==='active'&&v&&v.x>=-6&&v.right<=result.screen.width+6
+    &&v.y>=0&&v.bottom<=result.screen.height+6&&result.hits&&result.readable
+    &&result.opacity>=.7&&!result.legacyVisible,
+    'First-visit intro MUST transition into a visible interactive native MAG paper: '+JSON.stringify(result));
+  assert.equal(errors.length,0,'First-visit errors: '+errors.join(' | '));
+  console.log('ARCHIVE_FIRST_VISIT_PASS',JSON.stringify(result));
+  await ctx.close();
 }
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
@@ -545,6 +603,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyFirstVisitMobile(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
