@@ -17,7 +17,19 @@
   // Content wins the critical path. The render-blocking r418 stylesheet owns the
   // first header frame; later layers reassert final header ownership after legacy
   // WDA/control styles have mounted. Native r454 shader optics are never softened.
-  const START_DELAY = matchMedia('(max-width: 900px), (pointer: coarse)').matches ? 3000 : 1100;
+  // R2045 — high-tier phones should not wait three seconds looking at an
+  // empty MAG aperture. Preserve content-first rendering and a longer
+  // preparation window on memory/CPU constrained mobile devices. Both tiers
+  // still load the SAME existing native WebGL organism with no 2D substitute.
+  const MOBILE_RENDERER=matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  const AVAILABLE_MEMORY=Number(navigator.deviceMemory||0);
+  const LOGICAL_CORES=Number(navigator.hardwareConcurrency||0);
+  const CONSTRAINED_MOBILE=Boolean((AVAILABLE_MEMORY>0&&AVAILABLE_MEMORY<=4)
+    ||(LOGICAL_CORES>0&&LOGICAL_CORES<=4));
+  const START_DELAY = MOBILE_RENDERER ? (CONSTRAINED_MOBILE?2200:1400) : 1100;
+  root.dataset.fxMagNativeStartupDelayMs=String(START_DELAY);
+  root.dataset.fxMagStartupPolicyR2045=CONSTRAINED_MOBILE?
+    'content-first-constrained-native-webgl':'content-first-earlier-original-mag';
   let rendererRequested = false;
   let rendererTimer = 0;
 
