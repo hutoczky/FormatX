@@ -47,6 +47,15 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  await page.waitForFunction(()=>{
+    const d=document.documentElement.dataset;
+    return d.fxCoreOpticsR2035==='debanded-single-body-broad-softboxes-subpixel-safe'
+       &&d.fxArchiveDepthPolicyR2035==='canonical-mag-front-deep-shelves-behind';
+  },null,{timeout:18000});
+  console.log('MAG_R2035_OPTICS_PASS',JSON.stringify(await page.evaluate(()=>{
+    const d=document.documentElement.dataset;
+    return {profile:d.fxCoreOpticsR2035,depth:d.fxArchiveDepthPolicyR2035,renderer:d.fxCoreRenderer,contexts:d.fxCoreContexts};
+  })));
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
