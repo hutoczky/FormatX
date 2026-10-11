@@ -42,10 +42,11 @@ html[data-fx-mag-birth-live="active"] {
   z-index: 50;
   pointer-events: none;
   opacity: .055;
-  background:
-    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
-    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px);
-  background-size: 4px 4px;
+  /* Continuous cinematographic atmosphere: the old 4px reticle/grid was
+     projected on top of the MAG and appeared as stripes on high-DPI PC
+     screens as well as on phones. Keep the intro but not a scanline veil. */
+  background:radial-gradient(ellipse at 50% 46%,rgba(143,216,240,.11),transparent 72%);
+  background-size:auto;
   mix-blend-mode: screen;
 }
 
