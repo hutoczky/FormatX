@@ -84,7 +84,7 @@ html[data-fx-crystal-organism-r326="ready"] #hero .fx-crystal-organism-r326-canv
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .91;
-    opacity: var(--fx-mag-life-opacity) !important;
+    opacity: var(--fx-mag-life-opacity);
     scale: var(--fx-mag-life-scale) !important;
   }
 }
@@ -139,7 +139,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
     --fx-mag-life-scale: 1;
     --fx-mag-life-opacity: .94;
-    opacity: var(--fx-mag-life-opacity) !important;
+    opacity: var(--fx-mag-life-opacity);
     image-rendering: auto !important;
     filter:
       brightness(.965)
@@ -229,7 +229,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
     animation: none !important;
     transition: none !important;
     scale: var(--fx-mag-life-scale) !important;
-    opacity: var(--fx-mag-life-opacity) !important;
+    opacity: var(--fx-mag-life-opacity);
     will-change: auto !important;
   }
 }
@@ -256,7 +256,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 
   html:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1350]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: var(--fx-mag-life-opacity, .96) !important;
+    opacity: var(--fx-mag-life-opacity, .96);
     filter:
       brightness(.98)
       contrast(1.20)
@@ -285,7 +285,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1500]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:var(--fx-mag-life-opacity,.98)!important;
+    opacity:var(--fx-mag-life-opacity,.98);
     filter:brightness(.985) contrast(1.12) saturate(.94)!important;
     -webkit-filter:brightness(.985) contrast(1.12) saturate(.94)!important;
     mix-blend-mode:normal!important;
@@ -352,7 +352,7 @@ body.living-architecture #hero > .fx-signature-core-trigger::after {
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root:root:root:root:root:root[data-fx-native-mag-visual-r1520]
   body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity:var(--fx-mag-life-opacity,.99)!important;
+    opacity:var(--fx-mag-life-opacity,.99);
     filter:brightness(1.12) contrast(1.06) saturate(.91)!important;
     -webkit-filter:brightness(1.12) contrast(1.06) saturate(.91)!important;
     mix-blend-mode:normal!important;
