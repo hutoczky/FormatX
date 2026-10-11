@@ -69,7 +69,7 @@ html:root:root:root:root body.living-architecture .topbar .fx-reference-mag-butt
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
   html:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-living-organic-core-r413="ready"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .965 !important;
+    opacity: .965;
     filter:
       brightness(.99)
       contrast(1.18)
