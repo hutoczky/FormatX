@@ -53,6 +53,17 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
+  const animationOwners=await page.evaluate(()=>{
+    const canvas=window.FormatXLivingCore?.canvas;
+    const active=(canvas?.getAnimations?.()||[]).filter(animation=>animation.playState!=='idle');
+    return {cssPulse:active.filter(animation=>animation.animationName==='fx-primary-mag-mobile-heart-r488').length,
+      competingWaapi:active.filter(animation=>animation.id==='fx-primary-mag-living-breath-r1930').length,
+      revision:document.documentElement.dataset.fxNativeMagBreathR1930};
+  });
+  assert.equal(animationOwners.competingWaapi,0,
+    'Two simultaneous opacity/transform animations compete for the original MAG: '+JSON.stringify(animationOwners));
+  assert.equal(animationOwners.revision,'single-owner-css-breath-r2046',
+    'One living MAG, one compositor-only breath (reduced motion tested separately): '+JSON.stringify(animationOwners));
   const meshResources=await page.evaluate(()=>({
     vaoCount:document.documentElement.dataset.fxArchiveMeshVaoCount,
     layout:document.documentElement.dataset.fxArchiveMeshVertexLayout
