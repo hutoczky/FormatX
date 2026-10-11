@@ -55,11 +55,13 @@ assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r
   'Desktop startup scheduler must not cache the old renderer loader');
 assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
   'Canonical HTML must load the new scheduler');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
+for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2045-cached-vao-scene',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
- assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
+ assert.ok(html.includes(resource),'Canonical public page must request its current MAG optical resource: '+resource);
 }
+assert.ok(!html.includes('formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth'),
+  'The old archive JS query must not mask the R2045 geometry optimization');
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
  correctedRearDepth:depth(-1.15),retrievedSheetDepth:depth(2.30),
