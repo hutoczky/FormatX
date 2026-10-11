@@ -278,6 +278,8 @@ async function evaluate(viewport,isMobile,browser){
     renderer:document.documentElement.dataset.fxArchiveNativePass,
     drawCalls:Number(document.documentElement.dataset.fxArchiveDrawCalls||0),
     filamentCount:Number(document.documentElement.dataset.fxArchiveFilamentCount||0),
+    permanentRacks:Number(document.documentElement.dataset.fxArchivePersistentRackCount||0),
+    continuity:document.documentElement.dataset.fxArchiveWorldContinuity||'',
     frames:window.FormatXArchiveExperience.state.frames,
     controls:document.querySelectorAll('#menu-toggle,.fx-language-toggle,.fx-reference-ask').length,
     scrollHeight:document.documentElement.scrollHeight,
@@ -294,6 +296,10 @@ async function evaluate(viewport,isMobile,browser){
       'Mobile MAG must occupy its own upper cinematic stage without covering the native HTML paper: '+JSON.stringify(native.canvasRect));
   }
   assert.ok(native.drawCalls>0,'Archive WebGL geometry did not render');
+  assert.equal(native.permanentRacks,8,
+    'The cinematic world must retain all eight physical archive bays: '+JSON.stringify(native));
+  assert.equal(native.continuity,'persistent-one-world-r2044',
+    'The archive background must be a persistent 3D world, not a section swap');
   assert.ok(native.filamentCount>=1,
     'Every quality tier must render actual 3D MAG energy filaments, including low-power mobile: '+JSON.stringify(native));
 
