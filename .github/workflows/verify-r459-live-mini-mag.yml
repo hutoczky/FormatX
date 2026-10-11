@@ -263,6 +263,7 @@ jobs:
               return{
                 renderer:root.dataset.fxCoreRenderer,
                 shapeSync:root.dataset.fxMagShapeSyncR476,
+                shape:root.dataset.fxCoreShapeR337,
                 life:root.dataset.fxMiniMagLifeR479,
                 lifeContract:root.dataset.fxMiniMagLifeContractR479,
                 scheduler:root.dataset.fxCoreScheduler,
@@ -279,14 +280,14 @@ jobs:
             });
             assert.equal(state.renderer,'single-webgl-crystal-organism-r326');
             assert.equal(state.shapeSync,'ready-r528');
-            assert.equal(document.documentElement.dataset.fxCoreShapeR337,'organism');
+            assert.equal(state.shape,'organism');
             assert.ok(['breath','pulse'].includes(state.life),JSON.stringify(state));
             assert.equal(state.lifeContract,'primary-and-mini-compositor-breath-colour-depth-zero-js-idle');
             assert.equal(state.scheduler,'interaction-bursts-idle-zero-frame-r441');
             assert.equal(state.idle,'zero-frame');
-            assert.match(state.filter,/brightness\(1\.03\)/);
-            assert.match(state.filter,/contrast\(1\.13\)/);
-            assert.match(state.filter,/saturate\(0\.96\)/);
+            assert.match(state.filter,/brightness\(1\.06\)/);
+            assert.match(state.filter,/contrast\(1\.14\)/);
+            assert.match(state.filter,/saturate\(0\.98\)/);
             assert.ok(!/blur\((?!0(?:px)?\))/i.test(state.filter),state.filter);
             assert.ok(/fx-primary-mag-(?:mobile-heart-r488|live-breath-r479)/.test(state.animationName),state.animationName);
             assert.equal(state.controls.length,2);
