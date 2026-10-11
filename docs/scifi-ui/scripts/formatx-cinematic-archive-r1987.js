@@ -7,7 +7,7 @@
   const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
-  const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
+  // All user agents enter the same archive; only explicit fallbacks differ.
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
   const requestedHtmlFallback=params.get('archive')==='off';
@@ -1052,7 +1052,7 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    if(disposed||reduced.matches||(!force&&isolatedMagCheck))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1156,7 +1156,7 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    if(!force&&isolatedMagCheck){root.dataset.fxArchiveExperience='isolated-mag-test';return;
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,

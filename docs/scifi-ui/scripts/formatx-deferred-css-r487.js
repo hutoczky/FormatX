@@ -2,7 +2,7 @@
   'use strict';
 
   const root = document.documentElement;
-  const audit = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || new URLSearchParams(location.search).get('lighthouse') === '1';
+  // Use identical optical styles for normal and Lighthouse browsers.
   if (root.dataset.fxDeferredCssR487) return;
   root.dataset.fxDeferredCssR487 = 'queued-fcp';
 
@@ -23,12 +23,6 @@
     let auditSkippedCount = 0;
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
-      if (audit && link.hasAttribute('data-fx-critical-core-r227')) {
-        link.media = 'print';
-        link.dataset.fxR1970AuditDeferred = 'critical-core-skipped';
-        auditSkippedCount += 1;
-        continue;
-      }
       const targetMedia = link.dataset.fxR487Media || 'all';
       if (link.media !== targetMedia) link.media = targetMedia;
       link.removeAttribute('fetchpriority');
