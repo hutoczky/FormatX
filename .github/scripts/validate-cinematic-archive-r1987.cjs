@@ -50,7 +50,20 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(rendererProbe.stable&&rendererProbe.after==='ready',
     'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
   
-  const realGeometryCost=await page.evaluate(()=>({
+  const softwareRaster=await page.evaluate(()=>({
+    renderer:document.documentElement.dataset.fxCoreRendererClassR1541,
+    quality:document.documentElement.dataset.fxCoreStartupQualityR2052,
+    pixels:Number(document.documentElement.dataset.fxCoreSoftwarePixelsR2052)||0,
+    cssScale:Number(document.documentElement.dataset.fxCoreReal3dScale)||0
+  }));
+  if(softwareRaster.renderer==='software-adaptive'){
+    assert.ok(softwareRaster.pixels>0&&softwareRaster.cssScale>0,
+      'Software MAG raster budget must expose real renderer pixels: '+JSON.stringify(softwareRaster));
+    if(isMobile)assert.ok(softwareRaster.quality==='adaptive-software-mobile-1p2',
+      'Mobile software-only adaptive first frame missing: '+JSON.stringify(softwareRaster));
+  }
+  console.log('ARCHIVE_RENDERER_ADAPTIVE_RASTER',JSON.stringify({mobile:isMobile,...softwareRaster}));
+    const realGeometryCost=await page.evaluate(()=>({
     ms:Number(document.documentElement.dataset.fxCoreGeometryBuildMsR2048),
     profile:document.documentElement.dataset.fxCoreGeometryProfileR1603,
     cache:document.documentElement.dataset.fxCoreGeometryReuseR2048
