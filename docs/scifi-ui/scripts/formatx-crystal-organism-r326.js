@@ -413,12 +413,19 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    // Reuse the identical anisotropic surface sample across adjacent
+    // triangles. Original normals, microfibrils, topology and draw order stay.
+    const surfaceRows=Array.from({length:latitudeSegments+1},()=>new Array(longitudeSegments+1));
+    function sharedVertex(lat,lon){
+      const row=surfaceRows[lat];
+      return row[lon]||(row[lon]=vertex(lat,lon));
+    }
     for(let lat=0;lat<latitudeSegments;lat+=1){
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=sharedVertex(lat,lon);
+        const b=sharedVertex(lat,lon+1);
+        const c=sharedVertex(lat+1,lon);
+        const d=sharedVertex(lat+1,lon+1);
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
@@ -1839,7 +1846,10 @@
     return;
 
     function finishBoot(program) {
+    const geometryStartMs=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreGeometryBuildMsR2054=(performance.now()-geometryStartMs).toFixed(2);
+    root.dataset.fxCoreGeometryReuseR2054='reused-original-vertex-field';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
