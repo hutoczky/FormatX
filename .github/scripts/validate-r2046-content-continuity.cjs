@@ -28,6 +28,10 @@ async function verify(browser,viewport){
     const inViewport=r=>!!r&&r.width>100&&r.height>15
       &&r.bottom>0&&r.top<innerHeight-8;
     const actualText=(title?.textContent||'').trim();
+    // Ancestor opacity/visibility also matter: a child can report opacity=1
+    // while a global post-intro overlay has hidden the entire parent tree.
+    const paintedHero=hero?.checkVisibility({checkOpacity:true,checkVisibilityCSS:true})||false;
+    const paintedTitle=title?.checkVisibility({checkOpacity:true,checkVisibilityCSS:true})||false;
     const hasOriginalLinks=!!hero?.querySelector('a[href]');
     return {
       cinema:root.dataset.fxArchiveCinema||'home',
@@ -38,7 +42,7 @@ async function verify(browser,viewport){
         x:tr.x,y:tr.y,w:tr.width,h:tr.height,inViewport:inViewport(tr),text:actualText}:null,
       workingFolio:!!folio&&folioStyle.display!=='none'&&folioStyle.visibility!=='hidden'
         &&inViewport(folio.getBoundingClientRect()),
-      hasOriginalLinks,
+      hasOriginalLinks,paintedHero,paintedTitle,
       scrollY,viewport:{width:innerWidth,height:innerHeight}
     };
   });
@@ -47,9 +51,22 @@ async function verify(browser,viewport){
     &&Number(state.hero?.opacity)>.2&&state.hero?.inViewport
     &&state.title?.display!=='none'&&state.title?.visibility==='visible'
     &&state.title?.inViewport&&state.title?.text?.includes('FORMATX')
-    &&state.hasOriginalLinks
+    &&state.paintedHero&&state.paintedTitle&&state.hasOriginalLinks
   ),'After delayed rendering, show the true interactive HTML or real MAG folio, never an empty MAG-only viewport: '+JSON.stringify(state));
-  assert.ok(errors.length===0,'Uncaught errors: '+errors.join(' | '));
+  // Real visual audit artefact: the screenshot is optional when software
+  // WebGL compositor cannot capture within eight seconds. DOM checks above
+  // remain mandatory.
+  try{
+    const fs=require('node:fs');
+    fs.mkdirSync('.archive-artifacts',{recursive:true});
+    await page.screenshot({
+      path:'.archive-artifacts/r2046-long-load-'+(mobile?'phone':'desktop')+'.png',
+      timeout:8000
+    });
+  }catch(error){
+    console.log('R2046_CAPTURE_UNAVAILABLE',String(error.message).slice(0,190));
+  }
+    assert.ok(errors.length===0,'Uncaught errors: '+errors.join(' | '));
   console.log('MAG_CONTENT_CONTINUITY_PASS',JSON.stringify(state));
   await context.close();
 }
