@@ -581,6 +581,57 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function verifyFirstVisitIntroHandoff(browser){
+  // The normal-entry suite above uses a returning visitor. Production must
+  // ALSO deliver a real paper on the FIRST visit after the full 10s genesis.
+  // Guard against a late intro teardown blanking the actual interactive UI.
+  const u=new (require('node:url').URL)(URL);
+  for(const k of ['r486-optics-energy-check','lighthouse','visualintro','mobileproof'])u.searchParams.delete(k);
+  u.searchParams.set('archive','1');
+  u.searchParams.set('intro','1');
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(String(e.message)));
+  await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:65000});
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxMagBirthOwnerR533==='active';
+  },null,{timeout:30000});
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxArchiveCinema==='active'
+      && root.dataset.fxArchiveExperience==='ready'
+      && !document.querySelector('.fx-mag-birth-r533:not([hidden])');
+  },null,{timeout:45000});
+  await page.waitForTimeout(1800);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const rect=folio?.getBoundingClientRect();
+    const style=folio&&getComputedStyle(folio);
+    const magRect=stage?.getBoundingClientRect();
+    const buttons=[...folio?.querySelectorAll('a[href],button')||[]]
+      .filter(x=>x.getBoundingClientRect().width>30).length;
+    return {intro:root.dataset.fxMagBirthOwnerR533,mode:root.dataset.fxArchiveCinema,
+      chapter:root.dataset.fxArchiveCurrent,folio:!!folio,
+      visible:style?.display!=='none'&&style?.visibility!=='hidden'&&Number(style?.opacity)>.4,
+      rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+      mag:magRect?{y:magRect.y,h:magRect.height,bottom:magRect.bottom}:null,
+      validOriginal:folio?.textContent?.trim().length>100,buttons,
+      errors:root.dataset.fxArchiveError||''};
+  });
+  assert.ok(state.folio&&state.visible&&state.validOriginal&&state.rect?.w>260
+    &&state.rect.y>=0
+    &&state.rect.y<844&&state.rect.h>230,
+    'First-ever user must see real interactive MAG paper after 10s cinematic intro: '+JSON.stringify(state));
+  assert.deepEqual(errors,[],'First-visit intro JavaScript error');
+  console.log('ARCHIVE_FIRST_VISIT_MAG_HANDOFF_PASS',JSON.stringify(state));
+  await context.close();
+}
+
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -641,6 +692,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyFirstVisitIntroHandoff(browser);
     await verifyMobileLivingPulse(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
