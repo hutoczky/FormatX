@@ -195,7 +195,14 @@
     const previous=scenes.map(x=>x.node);
     const retained=new Map(scenes.map(s=>[s.key,s]));
     scenes=blueprint.map(def=>{
-      const node=document.querySelector(def.selector);
+      // querySelector() respects DOCUMENT order, not comma-separated selector
+      // order. Once the original AI card moves to the final rack, the old
+      // capabilities "last-child" is a different diagnostic card. Prefer the
+      // original node in its real separate archive; fallback only pre-WebGL.
+      const node=def.key==='intelligence'
+        ?(document.querySelector('#fx-mag-ai-scroll-station-r2030 .cards .card')
+          ||document.querySelector('#capabilities .cards .card:last-child'))
+        :document.querySelector(def.selector);
       if(!(node instanceof HTMLElement))return null;
       const prior=retained.get(def.key);
       // Survives readiness/resize/language/locale rediscovery. Newly minted
