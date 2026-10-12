@@ -723,6 +723,26 @@ async function fallback(browser){
   assert.ok(fallbackPaint.criticalCSS&&fallbackPaint.display!=='none'
        &&fallbackPaint.visibility==='visible'&&Number(fallbackPaint.opacity)>.98,
        'Real HTML fallback must have painted hero copy: '+JSON.stringify(fallbackPaint));
+  // First-frame compliance alone is inadequate: introductory MAG/CSS stage
+  // timers have previously collapsed the original HTML after ~15 seconds.
+  await page.waitForTimeout(15500);
+  const persistent=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const hero=document.querySelector('#hero .hero-copy');
+    const title=document.querySelector('#hero .hero-title-main');
+    const a=hero&&getComputedStyle(hero),b=title&&getComputedStyle(title);
+    return {mode:root.dataset.fxArchiveExperience,
+      hero:{display:a?.display,visibility:a?.visibility,opacity:a?.opacity},
+      title:{display:b?.display,visibility:b?.visibility,opacity:b?.opacity},
+      heroText:hero?.innerText?.trim().length||0};
+  });
+  assert.ok(persistent.heroText>20
+    &&persistent.hero.display!=='none'&&persistent.hero.visibility==='visible'
+    &&Number(persistent.hero.opacity)>.98
+    &&persistent.title.display!=='none'&&persistent.title.visibility==='visible'
+    &&Number(persistent.title.opacity)>.98,
+    'Fallback disappeared after late cinematic intro reflow: '+JSON.stringify(persistent));
+  console.log('ARCHIVE_LATE_HTML_FALLBACK_PASS',JSON.stringify(persistent));
   assert.ok(v.text>20,'Reduced motion must preserve native HTML');
   console.log('ARCHIVE_REDUCED_PASS',JSON.stringify(v));
   await ctx.close();
