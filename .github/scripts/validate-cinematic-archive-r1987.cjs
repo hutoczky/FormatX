@@ -542,9 +542,18 @@ async function verifyMobileFeedbackProtection(browser){
     'MAG and controls must not cover actual feedback stars or text input: '+JSON.stringify(feedback));
   await page.locator('#user-feedback textarea[name="comment"]').fill('Mobil teszt: élő adatbevitel.');
   assert.ok((await page.locator('#user-feedback textarea[name="comment"]').inputValue()).includes('teszt'));
-  await page.locator('#experience').scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
-    null,{timeout:8000});
+  await page.locator('#user-feedback textarea[name="comment"]').evaluate(el=>el.blur());
+  await page.evaluate(()=>{
+    const anchor=document.querySelector('#experience');
+    if(anchor)window.scrollTo({top:Math.max(0,scrollY+anchor.getBoundingClientRect().top-innerHeight*.22),
+      behavior:'instant'});
+  });
+  await page.waitForFunction(()=>{
+    const data=document.documentElement.dataset;
+    return data.fxArchiveFeedbackFocus==='inactive'
+      &&data.fxArchiveCinema==='active'
+      &&Boolean(document.querySelector('[data-fx-cinema-panel-active="true"]'));
+  },null,{timeout:10000});
   console.log('ARCHIVE_FEEDBACK_MOBILE_PASS',JSON.stringify({folio,feedback}));
   await context.close();
 }
