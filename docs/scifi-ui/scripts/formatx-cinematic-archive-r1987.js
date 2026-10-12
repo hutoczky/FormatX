@@ -1004,7 +1004,32 @@ void main(){
   /* Lightweight selection is synchronous on native scroll. GPU rendering is
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
-  let feedbackOwnsViewport=false;
+  let feedbackOwnsViewport=false,feedbackWatchTarget=null;
+  let feedbackIntersection=null,feedbackMutation=null;
+  function watchRealFeedback(){
+    const main=document.getElementById('main-content');
+    if(!main||feedbackMutation)return;
+    feedbackIntersection=new IntersectionObserver(()=>invalidate(),{
+      root:null,rootMargin:'-8% 0px -8% 0px',
+      threshold:[0,.01,.15,.40,.75,1]
+    });
+    const attach=()=>{
+      const next=document.getElementById('user-feedback');
+      if(next===feedbackWatchTarget)return;
+      if(feedbackWatchTarget)feedbackIntersection.unobserve(feedbackWatchTarget);
+      feedbackWatchTarget=next instanceof HTMLElement?next:null;
+      if(feedbackWatchTarget){
+        feedbackIntersection.observe(feedbackWatchTarget);
+        invalidate();
+      }
+    };
+    // Production feedback is inserted by the HTML Worker. Test and client
+    // navigation can also insert it after the original MAG scene has mounted.
+    // A scroll listener alone misses those content-visibility transitions.
+    feedbackMutation=new MutationObserver(attach);
+    feedbackMutation.observe(main,{childList:true,subtree:true});
+    attach();
+  }
   function feedbackInReadingWindow(){
     const feedback=document.getElementById('user-feedback');
     if(!(feedback instanceof HTMLElement)){feedbackOwnsViewport=false;return false;}
@@ -1131,6 +1156,8 @@ void main(){
     if(raf)cancelAnimationFrame(raf);
     sceneObserver?.disconnect();
     sceneObserver=null;
+    feedbackIntersection?.disconnect();feedbackIntersection=null;
+    feedbackMutation?.disconnect();feedbackMutation=null;feedbackWatchTarget=null;
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
@@ -1195,6 +1222,7 @@ void main(){
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
+    watchRealFeedback();
     document.addEventListener('focusin',event=>{
       if(event.target instanceof Element&&event.target.closest('#user-feedback')){
         feedbackOwnsViewport=true;
