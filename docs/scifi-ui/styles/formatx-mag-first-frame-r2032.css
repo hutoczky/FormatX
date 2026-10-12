@@ -34,3 +34,80 @@
 html:has([data-fx-award-proof]) #hero .fx-reference-proof,
 html:has([data-fx-award-proof]) #hero .fx-reference-heading,
 html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
+
+/* R2045: announce only the real delivered semantic document, never paint a
+   second floating title or an additional focusable button. */
+.fx-mag-archive-announcer-r2045{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important;
+  pointer-events:none!important;
+}
+
+/* R2046 / mobile first pixel: these are THE final 70px header coordinates
+   from the existing R358 owner, promoted to the first 2.5k critical sheet.
+   No delayed full-width navigation links or horizontal control migration.
+   The native on-demand menus/buttons are kept, never cloned or replaced. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25){
+  html body.living-architecture .topbar{
+    position:relative!important;display:block!important;box-sizing:border-box!important;
+    inset:auto!important;width:100%!important;min-width:0!important;max-width:100%!important;
+    height:70px!important;min-height:70px!important;max-height:70px!important;
+    padding:0!important;margin:0!important;overflow:visible!important;
+    border-bottom:1px solid rgba(116,206,242,.18)!important;
+    background:linear-gradient(180deg,rgba(2,14,24,.985),rgba(2,11,20,.965))!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.26)!important;
+    transform:none!important;translate:none!important;z-index:12060!important;
+  }
+  html body.living-architecture .topbar>.brand{
+    position:absolute!important;inset:18px auto auto 18px!important;
+    display:inline-flex!important;align-items:center!important;gap:12px!important;
+    box-sizing:border-box!important;height:34px!important;
+    max-width:132px!important;white-space:nowrap!important;
+    color:#f6fbff!important;transform:none!important;translate:none!important;
+  }
+  html body.living-architecture .topbar>.brand img{
+    width:34px!important;min-width:34px!important;height:34px!important;flex:0 0 34px!important;
+  }
+  html body.living-architecture .topbar>.brand strong{
+    font:780 12.2px/1 system-ui,sans-serif!important;letter-spacing:.145em!important;
+  }
+  html body.living-architecture .topbar>.brand small{
+    display:block!important;margin-top:5px!important;
+    font:650 6.5px/1 system-ui,sans-serif!important;letter-spacing:.21em!important;
+  }
+  html body.living-architecture .topbar>.header-actions,
+  html body.living-architecture .fx-rail,
+  html body.living-architecture .topbar>#main-nav:not(.open){
+    display:none!important;visibility:hidden!important;pointer-events:none!important;
+  }
+  html body.living-architecture .topbar :is(.fx-reference-mag-button,.fx-language-toggle,.fx-reference-menu-button){
+    position:absolute!important;bottom:auto!important;left:auto!important;
+    display:grid!important;place-items:center!important;box-sizing:border-box!important;
+    margin:0!important;padding:0!important;visibility:visible!important;opacity:1!important;
+    pointer-events:auto!important;transform:none!important;translate:none!important;
+    color:#eff8fd!important;background:rgba(3,17,29,.9)!important;
+    border:1px solid rgba(122,199,231,.26)!important;
+    border-radius:14px!important;z-index:12070!important;
+    font:760 10px/1 ui-monospace,monospace!important;
+  }
+  html body.living-architecture .topbar>.fx-reference-mag-button{
+    top:15px!important;right:calc(clamp(16px,6.5vw,28px) + 113px)!important;
+    width:50px!important;height:40px!important;
+  }
+  html body.living-architecture .topbar>.fx-language-toggle{
+    top:15px!important;right:calc(clamp(16px,6.5vw,28px) + 58px)!important;
+    width:42px!important;height:40px!important;
+  }
+  html body.living-architecture .topbar>.fx-reference-menu-button{
+    top:8px!important;right:clamp(16px,6.5vw,28px)!important;
+    width:50px!important;height:54px!important;
+  }
+}
+/* production-r2046-first-paint-real-mobile-header-and-announcer */

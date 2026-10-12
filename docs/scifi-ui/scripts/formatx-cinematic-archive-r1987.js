@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2045-semantic-eight-scene-presentation';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -31,6 +31,7 @@
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  let chapterAnnouncer=null,lastAnnouncedChapter='';
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
@@ -201,6 +202,14 @@
      Every original section remains in the document as a scroll anchor.
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
+    if(!chapterAnnouncer){
+      chapterAnnouncer=document.createElement('div');
+      chapterAnnouncer.className='fx-mag-archive-announcer-r2045';
+      chapterAnnouncer.setAttribute('role','status');
+      chapterAnnouncer.setAttribute('aria-live','polite');
+      chapterAnnouncer.setAttribute('aria-atomic','true');
+      document.body.appendChild(chapterAnnouncer);
+    }
     for(const scene of scenes){
       const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
       if(!(host instanceof HTMLElement))continue;
@@ -212,6 +221,9 @@
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
         panel.setAttribute('aria-label','FormatX MAG cinematic content');
+        // A delivered native HTML region can receive focus after an actual
+        // chapter change, without introducing an extra Tab stop.
+        panel.tabIndex=-1;
         // Adding one wrapper preserves the source section's layout anchor,
         // its own events and all real interactive descendants.
         const nodes=Array.from(host.childNodes);
@@ -317,13 +329,44 @@
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
     root.dataset.fxArchiveCinemaChapter=key;
+    const activePanel=selected?.cinemaPanel;
+    if(enabled&&activePanel instanceof HTMLElement){
+      const focused=document.activeElement;
+      // When a keyboard user scrolls from a control in the old document to a
+      // new document, transfer ONLY that outgoing focus to the delivered
+      // native HTML region. Don't steal focus from header or external dialogs.
+      if(focused instanceof HTMLElement && focused!==document.body
+        && !activePanel.contains(focused)
+        && cinemaHosts.some(host=>{
+          const previous=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+          return previous!==activePanel&&previous?.contains(focused);
+        }))activePanel.focus({preventScroll:true});
+    }
+    const language=root.lang==='en'?'en':'hu';
+    const announcement=key+':'+language;
+    if(enabled&&selected&&announcement!==lastAnnouncedChapter){
+      lastAnnouncedChapter=announcement;
+      if(chapterAnnouncer)chapterAnnouncer.textContent=
+        (language==='en'?'MAG has presented ':'A MAG átadta: ')
+        +(language==='en'?selected.en:selected.hu)
+        +' · '+(selected.index+1)+' / '+scenes.length;
+    }else if(!enabled)lastAnnouncedChapter='';
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
       host.dataset.fxCinemaHostActive=active?'true':'false';
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        // Inactive source chapters remain real DOM scroll anchors but must
+        // not expose invisible hyperlinks to Tab or screen readers.
+        const hidden=enabled&&!active;
+        if(panel.inert!==hidden)panel.inert=hidden;
+        if(hidden){
+          if(panel.getAttribute('aria-hidden')!=='true')panel.setAttribute('aria-hidden','true');
+        }else if(panel.hasAttribute('aria-hidden'))panel.removeAttribute('aria-hidden');
         if(active){
+          const title=root.lang==='en'?selected.en:selected.hu;
+          if(panel.getAttribute('aria-label')!==title)panel.setAttribute('aria-label',title);
           const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
           const english=root.lang==='en';
           const sourceName=(sourceNames[selected.source]||[selected.source,selected.source])[english?1:0];
@@ -1106,6 +1149,8 @@ void main(){
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
+    chapterAnnouncer?.remove();chapterAnnouncer=null;
+    lastAnnouncedChapter='';
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
     restoreExistingProofBlock();

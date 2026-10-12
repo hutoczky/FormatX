@@ -53,12 +53,24 @@ for(const loader of [desk,mobile,motion]){
 }
 assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag'),
   'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
-  'Canonical HTML must load the new scheduler');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2047-native-mag-fast-return'),
+  'Canonical HTML must load the native R2047 scheduler');
+assert.ok(scheduler.includes('const AUTO_DELAY_MS=750;') &&
+  scheduler.includes('requestIdleCallback(launch,{timeout:1100})'),
+  'Returning visitors must see the real MAG promptly without delaying first-paint HTML');
+// Each new release must fingerprint the current native archive. Do NOT
+// require an outdated R2035 JS URL: doing so blocked valid fixes after a
+// cache bust. Still require the actual original MAG anti-banding assets.
+const archiveScript=html.match(/<script[^>]+src=["']([^"']*formatx-cinematic-archive-r1987\.js\?v=[^"']+)["']/i)?.[1];
+assert.ok(archiveScript?.includes('r2045-semantic-stage'),
+  'HTML must fingerprint the latest audited R2045 MAG archive (not serve a stale script)');
+assert.ok(!html.includes('formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth'),
+  'Old cached R2035 archive cannot override the R2045 original MAG scene');
+for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
- assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
+ 'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid'
+]){
+  assert.ok(html.includes(resource),'MAG anti-banding asset missing: '+resource);
 }
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),

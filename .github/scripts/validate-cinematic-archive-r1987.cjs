@@ -67,6 +67,57 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
     'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
   assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
+  // R2045: only ONE original native module may be reachable by keyboard or
+  // screenreader at any moment. The scroll anchors still exist geometrically.
+  const semantic=await page.evaluate(()=>{
+    const folios=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
+    const active=folios.filter(n=>n.dataset.fxCinemaPanelActive==='true');
+    const inactive=folios.filter(n=>n.dataset.fxCinemaPanelActive!=='true');
+    const announced=document.querySelector('[role="status"].fx-mag-archive-announcer-r2045');
+    const firstInactiveLink=inactive.map(n=>n.querySelector('a[href],button')).find(Boolean);
+    let inactiveReceivedFocus=false;
+    if(firstInactiveLink){
+      firstInactiveLink.focus({preventScroll:true});
+      inactiveReceivedFocus=document.activeElement===firstInactiveLink;
+    }
+    const controls=[...active[0]?.querySelectorAll('a[href],button,input,select,[tabindex]:not([tabindex="-1"])')||[]];
+    const visibleControls=controls.filter(n=>{
+      const style=getComputedStyle(n);
+      return !n.closest('[hidden],[inert]')&&n.getClientRects().length>0
+        &&style.visibility==='visible'&&style.display!=='none'
+        &&!n.disabled;
+    });
+    let activeControlFocus=false;
+    for(const control of visibleControls){
+      control.focus({preventScroll:true});
+      if(document.activeElement===control){activeControlFocus=true;break;}
+    }
+    // The native paper itself is a labelled region with tabindex=-1 and MUST
+    // accept programmatic focus when an old active module is archived.
+    const region=active[0];
+    region?.focus({preventScroll:true});
+    const activeReceivesFocus=document.activeElement===region;
+    return {active:active.length,inactive:inactive.length,
+      inert:inactive.every(n=>n.inert&&n.getAttribute('aria-hidden')==='true'),
+      readable:active.every(n=>!n.inert&&!n.hasAttribute('aria-hidden')),
+      hasStatus:!!announced&&announced.textContent.includes('MAG'),
+      inactiveReceivedFocus,activeReceivesFocus,activeControlFocus,
+      controls:controls.length,visibleControls:visibleControls.length,
+      originalText:active[0]?.textContent?.trim().length||0,
+      stageElement:document.activeElement?.tagName};
+  });
+  assert.equal(semantic.active,1,'Exactly one active native folio must exist: '+JSON.stringify(semantic));
+  assert.ok(semantic.inactive>=6&&semantic.inert&&semantic.readable,
+    'Inactive native modules must be truly hidden from keyboard and screen readers: '+JSON.stringify(semantic));
+  assert.ok(semantic.hasStatus&&!semantic.inactiveReceivedFocus&&semantic.activeReceivesFocus,
+    'MAG semantic delivery lacks a focusable original paper and screenreader announcement: '+JSON.stringify(semantic));
+  // The opening ecosystem chapter is an authentic editorial HTML section,
+  // not a fabricated CTA. Verify its real text, and check actual functionality
+  // separately on chapters that actually contain buttons and links.
+  assert.ok(semantic.originalText>=70,
+    'MAG opening papyrus lost authentic original HTML content: '+JSON.stringify(semantic));
+  await page.evaluate(()=>document.activeElement?.blur?.());
+
   const proofContract=await page.evaluate(()=>{
     const all=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
     const loopCopy=document.querySelectorAll('.fx-loop-reference-proof').length;
