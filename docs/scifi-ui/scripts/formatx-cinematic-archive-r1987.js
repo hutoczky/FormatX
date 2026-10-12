@@ -1084,7 +1084,7 @@ void main(){
     root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
     // Native scroll/resize invalidate() has already selected the chapter and
     // positioned the actual interactive HTML folio, synchronously.
-    // Calling selectLiveChapter() again here forced a second read of all
+    // Running the chapter selector again here forced a second read of all
     // eight getBoundingClientRect() anchors on the queued GPU-only frame.
     // RAF only publishes chapter events and requests GPU presentation.
     // The native scroll/resize event has ALREADY synchronously composed the
