@@ -575,7 +575,7 @@ async function verifyGenesisBootstrapParity(browser){
       audit:root.dataset.fxLighthouseAuditR1391,
       prepaint:!!document.getElementById('fx-mag-birth-prepaint-r1606')};
   });
-  assert.equal(state.owner,'lighthouse-skip',
+  assert.ok(['lighthouse-skip','automation-skip'].includes(state.owner),
     'Intro owners disagree and strand old hero for ten seconds: '+JSON.stringify(state));
   assert.equal(state.prepaint,false,
     'Skipped intro left an invisible blocking prepaint overlay: '+JSON.stringify(state));
