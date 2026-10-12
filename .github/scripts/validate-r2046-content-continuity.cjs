@@ -53,20 +53,64 @@ async function verify(browser,viewport){
     &&state.title?.inViewport&&state.title?.text?.includes('FORMATX')
     &&state.paintedHero&&state.paintedTitle&&state.hasOriginalLinks
   ),'After delayed rendering, show the true interactive HTML or real MAG folio, never an empty MAG-only viewport: '+JSON.stringify(state));
-  // Real visual audit artefact: the screenshot is optional when software
-  // WebGL compositor cannot capture within eight seconds. DOM checks above
-  // remain mandatory.
-  try{
-    const fs=require('node:fs');
-    fs.mkdirSync('.archive-artifacts',{recursive:true});
-    await page.screenshot({
-      path:'.archive-artifacts/r2046-long-load-'+(mobile?'phone':'desktop')+'.png',
-      timeout:8000
-    });
-  }catch(error){
-    console.log('R2046_CAPTURE_UNAVAILABLE',String(error.message).slice(0,190));
-  }
-    assert.ok(errors.length===0,'Uncaught errors: '+errors.join(' | '));
+  // A CSS visibility check is insufficient: our October 12 filmstrip
+  // showed a MAG-only image even when the real H1 reported visible.
+  // Require actual contrasting title pixels in a real Chromium screenshot.
+  const fs=require('node:fs');
+  fs.mkdirSync('.archive-artifacts',{recursive:true});
+  const png=await page.screenshot({
+    path:'.archive-artifacts/r2046-long-load-'+(mobile?'phone':'desktop')+'.png',
+    timeout:30000
+  });
+  const visual=await page.evaluate(async (encoded)=>{
+    const title=document.getElementById('hero-title');
+    const rect=title?.getBoundingClientRect();
+    const stack=rect?document.elementsFromPoint(
+      Math.min(innerWidth-2,Math.max(2,rect.left+rect.width*.5)),
+      Math.min(innerHeight-2,Math.max(2,rect.top+rect.height*.5))
+    ).slice(0,12).map(el=>{
+      const st=getComputedStyle(el);
+      return {tag:el.tagName,id:el.id,cls:String(el.className||'').slice(0,65),
+        z:st.zIndex,opacity:st.opacity,background:st.backgroundColor,
+        position:st.position,pointer:st.pointerEvents};
+    }):[];
+    const ancestors=[];
+    for(let el=title;el&&ancestors.length<10;el=el.parentElement){
+      const st=getComputedStyle(el);
+      ancestors.push({tag:el.tagName,id:el.id,cls:String(el.className||'').slice(0,50),
+        visible:st.visibility,opacity:st.opacity,display:st.display,
+        z:st.zIndex,transform:st.transform,clip:st.clipPath});
+    }
+    if(!rect)return {bright:0,ratio:0,stack,ancestors};
+    const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+    const bitmap=await createImageBitmap(new Blob([bytes],{type:'image/png'}));
+    const canvas=document.createElement('canvas');
+    canvas.width=bitmap.width;canvas.height=bitmap.height;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(bitmap,0,0);
+    bitmap.close();
+    const scaleX=canvas.width/innerWidth,scaleY=canvas.height/innerHeight;
+    const x=Math.max(0,Math.floor(rect.left*scaleX));
+    const y=Math.max(0,Math.floor(rect.top*scaleY));
+    const w=Math.min(canvas.width-x,Math.ceil(rect.width*scaleX));
+    const h=Math.min(canvas.height-y,Math.ceil(rect.height*scaleY));
+    if(w<=0||h<=0)return {bright:0,ratio:0,stack,ancestors};
+    const pixels=ctx.getImageData(x,y,w,h).data;
+    let bright=0,examined=0;
+    for(let i=0;i<pixels.length;i+=16){
+      examined++;
+      if(pixels[i]>.67*255&&pixels[i+1]>.67*255&&pixels[i+2]>.67*255)bright++;
+    }
+    return {bright,ratio:bright/Math.max(1,examined),w,h,stack,ancestors};
+  },png.toString('base64'));
+  console.log('MAG_CONTENT_ACTUAL_PAINT',JSON.stringify({
+    viewport:state.viewport,mode:state.cinema,ratio:visual.ratio,
+    bright:visual.bright,stack:visual.stack,ancestors:visual.ancestors
+  }));
+  assert.ok(visual.ratio>.005&&visual.bright>=75,
+    'MAG-only compositor overpainted the real native H1 despite CSS being visible: '+
+    JSON.stringify({state,visual}));
+  assert.ok(errors.length===0,'Uncaught errors: '+errors.join(' | '));
   console.log('MAG_CONTENT_CONTINUITY_PASS',JSON.stringify(state));
   await context.close();
 }
