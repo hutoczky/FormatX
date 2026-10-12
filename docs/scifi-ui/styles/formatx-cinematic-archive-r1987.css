@@ -1393,8 +1393,16 @@ html[data-fx-archive-feedback-focus="active"] body.living-architecture #user-fee
     overflow-x:hidden!important;
     overflow-y:auto!important;
     scrollbar-width:thin;
-    transform:none!important;
+    /* Keep the actual shared WebGL2-to-native 3D retrieval trajectory.
+       Only clamp the mobile lane; never flatten the real handoff. */
+    transform:
+      perspective(1200px)
+      translate3d(0,var(--fx-cinema-handoff-y,0px),
+        var(--fx-cinema-handoff-z,0px))
+      rotateX(var(--fx-cinema-handoff-pitch,0deg))
+      scale(var(--fx-cinema-handoff-scale,1))!important;
     translate:none!important;
+    transform-origin:center 10%!important;
     isolation:isolate!important;
     z-index:180!important;
   }
