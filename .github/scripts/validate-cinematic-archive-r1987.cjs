@@ -87,7 +87,10 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(!proofContract.oldVisible,'Duplicate legacy hero proof block still visible: '+JSON.stringify(proofContract));
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
 
-  const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
+  const hostSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+  assert.ok((hostSource.match(/closest\\('main#main-content > section'\\)/g)||[]).length>=2,
+    'Dynamically inserted REAL Live OS sections without .scene must be accepted as original folio hosts');
+    const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   assert.equal(scenes.length,8,'Exactly eight original MAG shelf sources required');
   assert.equal(new Set(scenes.map(s=>s.key)).size,8,'MAG shelf keys must be unique');
   const uniquePapers=await page.evaluate(()=>{
