@@ -579,6 +579,34 @@ async function verifyNormalEntry(browser,isMobile){
     'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
+  if(isMobile){
+    // Lighthouse's authentic filmstrip found that the first native folio
+    // could DISAPPEAR after ~14s despite passing immediate-entry assertions.
+    // Keep this NORMAL browser session alive beyond all late intro/idle timers.
+    await page.waitForTimeout(14800);
+    const late=await page.evaluate(()=>{
+      const root=document.documentElement;
+      const p=document.querySelector('[data-fx-cinema-panel-active="true"]');
+      const b=p?.getBoundingClientRect(),cs=p&&getComputedStyle(p);
+      const mag=document.querySelector('#hero .fx-crystal-organism-r326-stage')?.getBoundingClientRect();
+      const x=b?Math.max(4,Math.min(innerWidth-4,b.left+b.width/2)):0;
+      const y=b?Math.max(4,Math.min(innerHeight-4,b.top+Math.min(b.height/2,140))):0;
+      const overlay=p&&document.elementFromPoint(x,y);
+      return {state:root.dataset.fxArchiveExperience,mode:root.dataset.fxArchiveCinema,
+        chapter:root.dataset.fxArchiveCinemaChapter,
+        p:!!p,box:b?{x:b.x,y:b.y,w:b.width,h:b.height}:null,
+        display:cs?.display,visibility:cs?.visibility,opacity:cs?.opacity,
+        ancestor:getComputedStyle(p?.parentElement||document.body).transform,
+        hit:overlay?.tagName,withinPaper:!!p&&p.contains(overlay),
+        magBottom:mag?.bottom||0,viewport:{w:innerWidth,h:innerHeight},
+        error:root.dataset.fxArchiveError||null};
+    });
+    assert.ok(late.mode==='active'&&late.p&&late.display!=='none'&&late.visibility==='visible'
+      &&Number(late.opacity)>.4&&late.box?.w>300&&late.box.y<innerHeight
+      &&late.box.y>=0&&late.withinPaper,
+      'Mobile MAG native paper disappeared after 14s (Lighthouse filmstrip regression): '+JSON.stringify(late));
+    console.log('ARCHIVE_MOBILE_LATE_15S_VISIBLE_PASS',JSON.stringify(late));
+  }
   await context.close();
 }
 async function verifyFirstVisitIntroHandoff(browser){
