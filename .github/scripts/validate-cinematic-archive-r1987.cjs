@@ -568,6 +568,52 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function verifyDynamicOriginalLiveOs(browser){
+  // Production creates its real Live OS <section> dynamically, without the
+  // old .scene/.fx-category-deck classes. This fixture reproduces exactly
+  // that structural condition: ONE genuine section node in main, never a
+  // second GL renderer or a synthetic canvas-text display.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'
+  });
+  await context.addInitScript(()=>{
+    document.addEventListener('DOMContentLoaded',()=>{
+      const main=document.querySelector('main#main-content');
+      if(!main||document.getElementById('live-os-overview'))return;
+      const section=document.createElement('section');
+      section.id='live-os-overview';
+      section.dataset.fxLiveOsFixture='original-native-section';
+      const title=document.createElement('h2');
+      title.textContent='LIVE OS';
+      const description=document.createElement('p');
+      description.textContent='A valódi, dinamikusan beszúrt szekció foglal helyet ebben az archívumban.';
+      section.append(title,description);
+      main.insertBefore(section,main.querySelector('#experience'));
+    },{once:true});
+  });
+  const page=await context.newPage();
+  try{
+    await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='ready'
+      &&document.documentElement.dataset.fxArchiveDistinctFolios==='8',
+      null,{timeout:65000});
+    const result=await page.evaluate(()=>{
+      const original=document.getElementById('live-os-overview');
+      const host=original?.closest('main#main-content > section');
+      const panel=original?.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      return{original:!!original,hasClass:original?.classList.contains('scene'),
+        parent:host?.id,panel:!!panel,
+        genuine:panel?.contains(original.querySelector('h2')),
+        sceneCount:window.FormatXArchiveExperience?.scenes?.length,
+        uniqueFolios:Number(document.documentElement.dataset.fxArchiveDistinctFolios)};
+    });
+    assert.ok(result.original&&!result.hasClass&&result.panel&&result.genuine,
+      'Original Live OS section must become a REAL native MAG document despite missing .scene: '+JSON.stringify(result));
+    assert.equal(result.uniqueFolios,8,'Eight distinct native MAG papers required for dynamically injected LIVE OS: '+JSON.stringify(result));
+    console.log('ARCHIVE_DYNAMIC_LIVE_OS_PASS',JSON.stringify(result));
+  }finally{await context.close();}
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -629,6 +675,7 @@ async function fallback(browser){
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
     await verifyMobileLivingPulse(browser);
+    await verifyDynamicOriginalLiveOs(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
