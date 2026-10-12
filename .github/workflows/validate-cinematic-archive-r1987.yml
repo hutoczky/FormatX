@@ -15,6 +15,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-live-mag-default-r2048.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -30,6 +31,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-live-mag-default-r2048.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
@@ -54,6 +56,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+          node --check .github/scripts/validate-live-mag-default-r2048.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -73,6 +76,13 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Verify currently live canonical visitor journey without archive=1
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          FORMATX_TEST_URL: https://formatxsuite.com/
+          FORMATX_LIVE_MAG_EVIDENCE_DIR: .archive-artifacts/live-r2048-visitor
+        run: node .github/scripts/validate-live-mag-default-r2048.cjs
+
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
