@@ -396,7 +396,9 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        // Adjacent triangles share the same authored body/fiber normal,
+        // keeping the broad studio reflection continuous during close-ups.
+        const smoothWeight=facet<2.0?1:(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -967,7 +969,10 @@
            after geometry cleanup and created a mouth/visor-like horizontal seam. */
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        // Radial physiological deformation preserves the closed thin valleys.
+        // Moving these non-ellipsoidal points along a sphere normal can push
+        // the two shell sides through each other at high desktop tessellation.
+        vec3 local=base*(1.0+(living+cortex+microFold)*.65)*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
@@ -1345,6 +1350,10 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      vec3 toDisplay(vec3 c){
+        return mix(c*12.92,1.055*pow(max(c,vec3(0)),vec3(1.0/2.4))-.055,
+          step(vec3(.0031308),c));
+      }
       // R2046: one energy-conserving dielectric response for every studio light.
       // Finite roughness prevents single-pixel specular spikes during movement.
       vec3 dielectricLight(vec3 n,vec3 view,vec3 light,vec3 tint,float roughness){
@@ -1420,7 +1429,7 @@
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
+        c+=vec3(.98,1.00,.97)*softboxA*${mobile?'.110':'.145'};
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
@@ -1556,7 +1565,7 @@
           +vec3(.54,.62,.58)*anisotropic*.080;
         c=mix(c,strandColor,fiberGeometryMask);
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        ${outputName}=vec4(toDisplay(tone(c*${mobile?'1.68':'1.42'})),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;

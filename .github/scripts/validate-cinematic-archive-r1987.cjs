@@ -410,8 +410,24 @@ async function evaluate(viewport,isMobile,browser){
   try {
     await page.screenshot({
       path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
+      fullPage:false,animations:'allow',timeout:12000
     });
+    const painted=await page.evaluate(()=>{
+      const r=document.documentElement;
+      const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+      const heading=panel?.querySelector('h2,h3');
+      const box=heading?.getBoundingClientRect();
+      const parents=[];
+      for(let n=panel;n&&n instanceof HTMLElement;n=n.parentElement){
+        const s=getComputedStyle(n);
+        parents.push({tag:n.id||n.className,opacity:s.opacity,visibility:s.visibility,
+          display:s.display,content:s.contentVisibility,clip:s.clipPath});
+      }
+      return {mode:r.dataset.fxArchiveCinema,scene:r.dataset.fxArchiveCurrent,
+        heading:heading?.textContent?.trim(),box:box?{x:box.x,y:box.y,w:box.width,h:box.height}:null,parents};
+    });
+    fs.writeFileSync(`${out}/paint-${isMobile?'mobile':'desktop'}.json`,JSON.stringify(painted,null,2));
+    console.log('ARCHIVE_PAINT_STATE',JSON.stringify(painted));
   } catch(error) {
     console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
       mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
@@ -514,6 +530,9 @@ async function verifyNativeFooter(browser){
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:90000});
   const footer=page.locator('.site-footer');
+  // Native keyboard focus represents a real reader opening a footer link.
+  // It must also inhibit the idle infinite-loop transfer at this boundary.
+  await footer.locator('a[href]').first().focus();
   await footer.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='home',null,{timeout:10000});
   const state=await page.evaluate(()=>{
@@ -526,7 +545,7 @@ async function verifyNativeFooter(browser){
       link:!!link,visible:!!r&&r.y>=0&&r.bottom<=innerHeight,
       clickable:!!link&&(hit===link||link.contains(hit))};
   });
-  assert.equal(state.protected,'active','Native footer was covered by the fixed cinema');
+  assert.equal(state.protected,'active','Native footer was covered by the fixed cinema: '+JSON.stringify(state));
   assert.ok(state.link&&state.visible&&state.clickable,'Actual footer link is blocked: '+JSON.stringify(state));
   await page.screenshot({path:`${out}/native-footer-mobile.png`,animations:'disabled',timeout:15000});
   console.log('ARCHIVE_NATIVE_FOOTER_PASS',JSON.stringify(state));
