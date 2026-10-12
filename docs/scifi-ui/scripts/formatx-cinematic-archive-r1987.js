@@ -551,18 +551,21 @@
     }
   }
   class CameraDirector {
-    static forScene(scene,p){
-      // The camera lives in ONE archive, so chapter changes must not teleport
-      // it. Absolute native document scroll makes the track reversible.
-      const distance=scrollY/Math.max(1,innerHeight);
-      const approach=smooth((p-.16)/.69);
-      // One continuous world-space dolly/orbit track. Every component depends
-      // on absolute scroll, not discrete chapter indices (no camera teleport).
+    // This is a SINGLE world-space camera rail, mathematically continuous
+    // even across an instantaneous eight-bay chapter change. The previous
+    // per-chapter "approach" value jumped from .99 to .05 at the boundary,
+    // moving the camera abruptly despite identical absolute scrollY.
+    // Neither the source identity nor individual chapter progress can alter
+    // the camera origin. Source-specific action happens in real 3D props.
+    static at(distance){
+      if(!Number.isFinite(distance))distance=0;
       const orbit=Math.sin(distance*.18)*.085+Math.sin(distance*.37)*.026;
-      const dolly=Math.sin(distance*.13)*.11;
-      const lift=Math.sin(distance*.12)*.035;
-      return [orbit,lift+mix(-.025,.027,approach),
-        dolly+mix(-.035,.085,approach)];
+      const lift=Math.sin(distance*.12)*.035+Math.sin(distance*.29)*.023;
+      const dolly=Math.sin(distance*.13)*.11+Math.sin(distance*.31)*.043;
+      return [orbit,lift,dolly];
+    }
+    static forScene(_scene,_p){
+      return this.at(scrollY/Math.max(1,innerHeight));
     }
   }
   function cubeGeometry(){
@@ -1187,9 +1190,13 @@ void main(){
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
+      // Expose the same continuous camera math for visual regression tests.
+      // This is a mathematical debug probe, NOT a measured FPS metric.
+      camera:CameraDirector.forScene(current?.s,current?.progress),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples};},
-    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
+    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value),
+    cameraForQA:(absoluteY,viewportH)=>CameraDirector.at(Number(absoluteY)/Math.max(1,Number(viewportH)||innerHeight))
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
