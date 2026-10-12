@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2046-eight-unique-original-html-folios';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -23,7 +23,7 @@
     {selector:'#network',key:'network',hu:'HÁLÓZATI ESZKÖZÖK',en:'NETWORK TOOLS',source:'right-cell',color:[.54,.80,.97]},
     {selector:'#system',key:'security',hu:'RENDSZER ÉS BIZTONSÁG',en:'SYSTEM & SECURITY',source:'sealed-vault',color:[.74,.86,.98]},
     {selector:'#pricing',key:'licensing',hu:'LICENCEK ÉS CSOMAGOK',en:'LICENSING & PLANS',source:'vertical-crystal',color:[.92,.77,.60]},
-    {selector:'#capabilities .cards .card:last-child',key:'intelligence',hu:'AI SEGÍTSÉG',en:'AI GUIDANCE',source:'inner-chamber',color:[.66,.88,1]},
+    {selector:'#fx-mag-ai-scroll-station-r2030 .cards .card, #capabilities .cards .card:last-child',key:'intelligence',hu:'AI SEGÍTSÉG',en:'AI GUIDANCE',source:'inner-chamber',color:[.66,.88,1]},
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
@@ -31,6 +31,8 @@
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  let aiCardHome=null; // the real sixth module, never a cloned/placeholder AI scene
+
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
@@ -148,32 +150,58 @@
   function ensureAIScrollStation(){
     if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
     const original=document.querySelector('#capabilities .cards .card:last-child');
-    const host=document.getElementById('capabilities');
-    if(!(original instanceof HTMLElement)||!host||!host.parentNode)return;
+    const destination=document.getElementById('network')||document.getElementById('pricing');
+    if(!(original instanceof HTMLElement)||!destination?.parentNode||!original.parentNode)return;
     const anchor=document.createElement('section');
     anchor.id='fx-mag-ai-scroll-station-r2030';
-    anchor.className='fx-mag-ai-scroll-station-r2030';
-    anchor.setAttribute('aria-hidden','true');
-    anchor.setAttribute('inert','');
-    const title=original.querySelector('h3')?.textContent?.trim()||'AI / AUTOMATION';
-    const description=original.querySelector('p')?.textContent?.trim()||'FormatX intelligence';
-    // This hidden scroll station is a stable chapter locator only. The
-    // actual AI card remains the original native DOM inside capabilities.
-    const textNode=document.createElement('div');
-    const heading=document.createElement('h3');
-    const body=document.createElement('p');
-    heading.textContent=title;
-    body.textContent=description;
-    textNode.append(heading,body);
-    anchor.append(textNode);
-    host.after(anchor);
+    anchor.className='scene fx-mag-ai-scroll-station-r2030';
+    anchor.dataset.fxArchivePhysicalAi='original-card';
+    anchor.setAttribute('aria-label','MAG // AI / AUTOMATION');
+    // Preserve the SAME six-module original card and its listeners; only the
+    // successful WebGL experience may move this content out of diagnostics.
+    aiCardHome={node:original,parent:original.parentNode,next:original.nextSibling};
+    const realCards=document.createElement('div');
+    realCards.className='cards fx-mag-ai-native-cards-r2046';
+    realCards.appendChild(original);
+    const ask=document.createElement('button');
+    ask.type='button';
+    ask.className='fx-mag-ai-real-ask-r2046';
+    ask.dataset.hu='Kérdezd a MAG-ot';
+    ask.dataset.en='Ask the MAG';
+    ask.textContent=root.lang==='en'?ask.dataset.en:ask.dataset.hu;
+    ask.addEventListener('click',()=>{
+      if(window.FormatXOrganismVoice?.open)window.FormatXOrganismVoice.open();
+      else document.querySelector('.fx-reference-ask')?.click();
+    });
+    realCards.appendChild(ask);
+    anchor.appendChild(realCards);
+    // Placed after the REAL network chapter and before the final release:
+    // the chapter has its own physical source and its own real document.
+    destination.after(anchor);
     for(const name of ['height','min-height','max-height'])anchor.style.setProperty(name,'165dvh','important');
+    root.dataset.fxArchiveAiOriginal='moved-once';
+  }
+  function restoreOriginalAI(){
+    const prior=aiCardHome;
+    if(prior){
+      const {node,parent,next}=prior;
+      if(parent.isConnected)parent.insertBefore(node,next?.parentNode===parent?next:null);
+      aiCardHome=null;
+    }
+    document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
+    delete root.dataset.fxArchiveAiOriginal;
   }
   function discover(){
     const previous=scenes.map(x=>x.node);
+    const retained=new Map(scenes.map(s=>[s.key,s]));
     scenes=blueprint.map(def=>{
       const node=document.querySelector(def.selector);
-      return node instanceof HTMLElement ? {...def,node} : null;
+      if(!(node instanceof HTMLElement))return null;
+      const prior=retained.get(def.key);
+      // Survives readiness/resize/language/locale rediscovery. Newly minted
+      // scene objects previously lost cinemaHost and cinemaPanel, leaving
+      // native document content invisible after refresh.
+      return prior?.node===node?{...prior,...def,node}:{...def,node};
     }).filter(Boolean);
     for(const scene of scenes){
       scene.scrollAnchor=scene.key==='intelligence'
@@ -191,7 +219,15 @@
     if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'){
       prepareRealContentSheets();
       prepareCinemaHosts();
+    }else if(cinemaPrepared){
+      // Rebind existing ONLY; no new WebGL context, no second paper or clone.
+      for(const scene of scenes){
+        const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+        scene.cinemaHost=host;
+        scene.cinemaPanel=host?.querySelector(':scope > .fx-archive-cinema-folio-r2030')||null;
+      }
     }
+    root.dataset.fxArchiveDistinctFolios=String(new Set(scenes.map(s=>s.cinemaPanel).filter(Boolean)).size);
   }
 
   /* R2030 EXCLUSIVE FORMATX ARCHIVE.
@@ -322,6 +358,9 @@
       host.dataset.fxCinemaHostActive=active?'true':'false';
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
+        // Hidden chapters must never remain in tab/screen-reader order.
+        // The HTML stays native and focusable again on its own turn.
+        panel.inert=!active;
         panel.dataset.fxCinemaPanelActive=active?'true':'false';
         if(active){
           const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
@@ -1111,7 +1150,6 @@ void main(){
     restoreExistingProofBlock();
     setLegacyHeroHidden(false);
     setHeroCanvasLaneFront(false);
-    document.getElementById('fx-mag-ai-scroll-station-r2030')?.remove();
     root.dataset.fxArchiveCinema='home';
     delete root.dataset.fxArchiveCinemaPrepared;
     delete root.dataset.fxArchiveCinemaChapter;
@@ -1121,6 +1159,7 @@ void main(){
         // Synthetic source telemetry is not part of the original product UI:
         // remove it BEFORE restoring exactly the native source DOM children.
         panel.querySelector(':scope > .fx-mag-folio-origin-r2041')?.remove();
+        panel.inert=false;
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
         panel.remove();
       }
@@ -1137,6 +1176,7 @@ void main(){
       }
       delete host._fxCinemaOriginalTransform;
     }
+    restoreOriginalAI();
     cinemaHosts=[];cinemaPrepared=false;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
