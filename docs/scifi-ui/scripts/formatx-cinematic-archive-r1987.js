@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2047-single-scroll-dom-composition';
+  const VERSION='cinematic-archive-r2048-anchor-transition-only-optics';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -291,6 +291,34 @@
     }
   }
 
+  const cinematicAnchorOverrides=[
+    ['transform','none'],['translate','none'],['rotate','none'],
+    ['scale','none'],['filter','none'],['perspective','none'],
+    ['contain','none'],['will-change','auto'],['content-visibility','visible']
+  ];
+  // An active MAG scroll chapter is an anchor, not a styled page section.
+  // Switching these nine geometry overrides every wheel/touch event forced
+  // repeated style invalidation and stole CPU time from the one WebGL2 MAG.
+  // Apply only on actual scene transitions and restore exact inline priorities.
+  function setArchiveAnchorNeutral(host,active){
+    if(!(host instanceof HTMLElement))return;
+    if(active){
+      if(host._fxCinemaOriginalTransform)return;
+      host._fxCinemaOriginalTransform=cinematicAnchorOverrides.map(([name])=>
+        [name,host.style.getPropertyValue(name),host.style.getPropertyPriority(name)]);
+      for(const [name,value] of cinematicAnchorOverrides)
+        host.style.setProperty(name,value,'important');
+    }else{
+      if(!host._fxCinemaOriginalTransform)return;
+      for(const [name,value,priority] of host._fxCinemaOriginalTransform){
+        if(value)host.style.setProperty(name,value,priority);
+        else host.style.removeProperty(name);
+      }
+      delete host._fxCinemaOriginalTransform;
+    }
+    root.dataset.fxArchiveAnchorTransitions=String(
+      (Number(root.dataset.fxArchiveAnchorTransitions)||0)+1);
+  }
   function positionCinemaFolio(panel){
     if(!panel||!panel.isConnected)return;
     // The canonical site contains ancestor perspective/transform contexts,
@@ -302,20 +330,8 @@
     // only the active cinematic scroll anchor (its original HTML has already
     // been transferred into the folio), preserving the original parent state
     // for the accessible HTML fallback and the existing MAG hero renderer.
-    const host=panel.parentElement;
-    if(host instanceof HTMLElement&&host.dataset.fxCinemaHostActive==='true'){
-      if(!host._fxCinemaOriginalTransform){
-        host._fxCinemaOriginalTransform=[
-          'transform','translate','rotate','scale','filter','perspective',
-          'contain','will-change','content-visibility'
-        ].map(name=>[name,host.style.getPropertyValue(name),host.style.getPropertyPriority(name)]);
-      }
-      for(const [key,value] of [
-        ['transform','none'],['translate','none'],['rotate','none'],
-        ['scale','none'],['filter','none'],['perspective','none'],
-        ['contain','none'],['will-change','auto'],['content-visibility','visible']
-      ])host.style.setProperty(key,value,'important');
-    }
+    // The selected scroll anchor is already neutralized by syncCinema().
+    // Do not mutate the same nine ancestor properties again per frame.
     // On portrait devices the folio has a strict fixed top/bottom lane in CSS.
     // Compensating viewport offsets on every scroll caused cumulative Y drift
     // (-394px) and the genuine native paper overlapped the MAG stage.
@@ -333,8 +349,11 @@
       panel.style.removeProperty('translate');
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
-      panel.style.setProperty('top',viewportTop.toFixed(2)+'px','important');
-      panel.dataset.fxMobileScreenTop=viewportTop.toFixed(2);
+      const screenTop=viewportTop.toFixed(2);
+      if(panel.dataset.fxMobileScreenTop!==screenTop){
+        panel.style.setProperty('top',screenTop+'px','important');
+        panel.dataset.fxMobileScreenTop=screenTop;
+      }
       return;
     }
     const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
@@ -364,7 +383,10 @@
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
       const hostState=active?'true':'false';
-      if(host.dataset.fxCinemaHostActive!==hostState)host.dataset.fxCinemaHostActive=hostState;
+      if(host.dataset.fxCinemaHostActive!==hostState){
+        host.dataset.fxCinemaHostActive=hostState;
+        setArchiveAnchorNeutral(host,active);
+      }
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
@@ -1182,11 +1204,8 @@ void main(){
         else host.style.removeProperty(name);
       }
       delete host._fxArchiveOriginalHeights;
-      for(const [name,value,priority] of host._fxCinemaOriginalTransform||[]){
-        if(value)host.style.setProperty(name,value,priority);
-        else host.style.removeProperty(name);
-      }
-      delete host._fxCinemaOriginalTransform;
+      // Idempotent, including WebGL context loss during a scene transition.
+      setArchiveAnchorNeutral(host,false);
     }
     restoreOriginalAI();
     cinemaHosts=[];cinemaPrepared=false;
