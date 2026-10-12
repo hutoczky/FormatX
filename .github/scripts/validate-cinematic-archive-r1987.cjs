@@ -20,10 +20,33 @@ async function captureVisibleChapter(page,context,isMobile,chapter){
   assert.equal(active.chapter,chapter,'Visual proof would capture wrong chapter: '+JSON.stringify(active));
   assert.ok(active.panel&&active.visible==='visible'&&active.opacity>=.7,
     'Visual proof cannot be captured without the real interactive papyrus: '+JSON.stringify(active));
+  // Paint-tree diagnostics rather than just computed styles on the leaf.
+  // Content-visibility/opacity/clip on ANY ancestor can make an apparently
+  // visible and clickable fixed HTML sheet fully invisible to the compositor.
+  const paintTree=await page.evaluate(()=>{
+    const panel=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const nodes=[];
+    let n=panel;
+    for(let i=0;n&&i<12;i++,n=n.parentElement){
+      const c=getComputedStyle(n),r=n.getBoundingClientRect();
+      nodes.push({tag:n.tagName,id:n.id,cls:String(n.className).slice(0,110),
+        rect:[Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)],
+        display:c.display,visibility:c.visibility,opacity:c.opacity,
+        contentVisibility:c.contentVisibility,contain:c.contain,transform:c.transform.slice(0,90),
+        filter:c.filter,clipPath:c.clipPath,maskImage:c.maskImage,
+        overflow:c.overflow,background:c.backgroundColor,z:c.zIndex});
+    }
+    const h=panel?.querySelector('h2,h3,p,a');
+    const c=h?getComputedStyle(h):null,r=h?.getBoundingClientRect();
+    return {nodes,child:h?{text:h.textContent.trim().slice(0,100),
+      visibility:c.visibility,display:c.display,opacity:c.opacity,color:c.color,
+      rect:[r.x,r.y,r.width,r.height]}:null};
+  });
+  console.log('ARCHIVE_REAL_PAINT_TREE',JSON.stringify({chapter,mode:isMobile?'mobile':'desktop',paintTree}));
   const basename=`${out}/archive-${isMobile?'mobile':'desktop'}-${chapter}-active`;
   let method='playwright';
   try{
-    await page.screenshot({path:basename+'.png',fullPage:false,animations:'disabled',timeout:12000});
+    await page.screenshot({path:basename+'.png',fullPage:false,animations:'allow',timeout:12000});
   }catch(primary){
     // Keep a real Chromium compositor alternative for software WebGL.
     method='chromium-cdp';
