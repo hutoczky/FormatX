@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2045-continuous-camera-track';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -555,14 +555,15 @@
       // The camera lives in ONE archive, so chapter changes must not teleport
       // it. Absolute native document scroll makes the track reversible.
       const distance=scrollY/Math.max(1,innerHeight);
-      const approach=smooth((p-.16)/.69);
-      // One continuous world-space dolly/orbit track. Every component depends
-      // on absolute scroll, not discrete chapter indices (no camera teleport).
+      // Keep ALL camera coordinates as continuous functions of absolute
+      // document scroll. The old chapter-local "approach" term reset at each
+      // section boundary, visibly snapping MAG/papyrus even on slow scrolling.
+      // This track reverses at identical coordinates and cannot accumulate
+      // queued animations during a flick or rapid direction change.
       const orbit=Math.sin(distance*.18)*.085+Math.sin(distance*.37)*.026;
-      const dolly=Math.sin(distance*.13)*.11;
-      const lift=Math.sin(distance*.12)*.035;
-      return [orbit,lift+mix(-.025,.027,approach),
-        dolly+mix(-.035,.085,approach)];
+      const dolly=Math.sin(distance*.13)*.11+Math.sin(distance*.29)*.018;
+      const lift=Math.sin(distance*.12)*.035+Math.sin(distance*.25)*.012;
+      return [orbit,lift-.005,dolly+.018];
     }
   }
   function cubeGeometry(){

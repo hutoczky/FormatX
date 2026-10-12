@@ -81,7 +81,17 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(!proofContract.oldVisible,'Duplicate legacy hero proof block still visible: '+JSON.stringify(proofContract));
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
 
-  const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
+  // Camera continuity is a numeric geometric property, not an aesthetic
+  // guess. Sample the shared scroll path across a chapter boundary in both
+  // directions. A chapter-local reset previously caused a discontinuity.
+  const cameraContract=await page.evaluate(()=>{
+    const code=document.querySelector('script[data-fx-cinematic-archive-r1987]')?.getAttribute('src')||'';
+    const source=document.documentElement.dataset.fxArchiveExperience||'';
+    return {source,asset:code};
+  });
+  assert.ok(cameraContract.asset.includes('r2045-continuous-camera'),
+    'Stale cinematic archive asset: '+JSON.stringify(cameraContract));
+    const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
