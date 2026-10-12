@@ -602,7 +602,7 @@ async function verifyNormalEntry(browser,isMobile){
         error:root.dataset.fxArchiveError||null};
     });
     assert.ok(late.mode==='active'&&late.p&&late.display!=='none'&&late.visibility==='visible'
-      &&Number(late.opacity)>.4&&late.box?.w>300&&late.box.y<innerHeight
+      &&Number(late.opacity)>.4&&late.box?.w>300&&late.box.y<late.viewport.h
       &&late.box.y>=0&&late.withinPaper,
       'Mobile MAG native paper disappeared after 14s (Lighthouse filmstrip regression): '+JSON.stringify(late));
     console.log('ARCHIVE_MOBILE_LATE_15S_VISIBLE_PASS',JSON.stringify(late));
