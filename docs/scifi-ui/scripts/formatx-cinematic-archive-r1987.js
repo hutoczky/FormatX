@@ -457,6 +457,16 @@
   class ScrollTimelineController {
     static get(){
       if(!scenes.length)return null;
+      // Once the final delivered module has left the reader, the footer and
+      // legal/feedback surfaces must regain native navigation. The old
+      // nearest-chapter logic incorrectly kept a distant MAG over a blank
+      // viewport forever after the last archive bay.
+      const finalAnchor=scenes[scenes.length-1].scrollAnchor||scenes[scenes.length-1].node;
+      if(finalAnchor.getBoundingClientRect().bottom<innerHeight*.24){
+        root.dataset.fxArchiveAfterFinal='native-footer';
+        return null;
+      }
+      root.dataset.fxArchiveAfterFinal='false';
       // Absolute layout only, never alter document scroll position.
       let closest=null,score=Infinity;
       const anchor=innerHeight*.52;
