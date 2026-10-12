@@ -305,3 +305,17 @@ body.living-architecture #hero :is(.hero-copy,.hero-copy > *,.hero-title-main,.h
  }
 }
 /* production-r2049-mobile-simulator-44px-native-touch-target */
+
+/* R2049: all actual, visible hero operational CTAs share the same minimum
+   touch box on narrow phones. Preserve every original href and display
+   decision (including the cinematic mode's hidden old hero). */
+@media(max-width:900px){
+ html body #hero .hero-actions > a.button{
+   min-height:44px!important;
+   padding-block:13px!important;
+   box-sizing:border-box!important;
+   line-height:1.35!important;
+   touch-action:manipulation;
+ }
+}
+/* production-r2049-all-original-hero-actions-touch-44 */
