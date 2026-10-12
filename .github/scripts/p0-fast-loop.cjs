@@ -265,7 +265,12 @@ function verifySourceContracts() {
   const p0FirstPaintMatch = entry.match(/const P0_FIRST_PAINT_LINK = '([^']+)'/);
   assert.ok(p0FirstPaintMatch, 'apex: current P0 first-paint link missing');
   assert.match(p0FirstPaintMatch[1], /data-fx-p0-first-paint-r\d+="true"/, 'apex: current P0 first-paint revision marker missing');
-  assert.match(p0FirstPaintMatch[1], /\/scifi-ui\/styles\/formatx-p0-first-paint-r490\.css\?v=/, 'apex: current P0 first-paint asset missing');
+  assert.match(p0FirstPaintMatch[1], /\/scifi-ui\/styles\/formatx-mag-desktop-p0-r2048\.css\?v=/,
+    'apex: new 3KB desktop P0 cannot be skipped on first paint');
+  assert.match(entry, /const P0_DESKTOP_OPTICAL_LINK = /,
+    'apex: full original desktop optical CSS must still load after first paint');
+  assert.match(entry, /P0_DESKTOP_OPTICAL_LINK/,
+    'apex: original P0 optical material style was removed instead of deferred');
   assert.match(entry, /platform-status\.js\?v=/, 'apex: platform status production owner missing');
   assert.match(entry, /const P0_MOTION_SCHEDULER = ['\"]\/scifi-ui\/scripts\/formatx-p0-motion-scheduler-r490\.js\?v=/, 'apex: production P0 motion scheduler asset missing');
   assert.match(entry, /function scheduleMotionRuntime\(html\)/, 'apex: production motion scheduler replacement function missing');
