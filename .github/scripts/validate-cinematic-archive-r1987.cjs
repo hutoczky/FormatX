@@ -82,6 +82,55 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
 
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
+  assert.equal(scenes.length,8,'Exactly eight original MAG shelf sources required');
+  assert.equal(new Set(scenes.map(s=>s.key)).size,8,'MAG shelf keys must be unique');
+  const uniquePapers=await page.evaluate(()=>{
+    const scenes=window.FormatXArchiveExperience.scenes;
+    const records=scenes.map(s=>{
+      const node=document.querySelector('[data-fx-archive-scene="'+s.key+'"]');
+      const host=node?.closest('main#main-content > section.scene, main#main-content > section.fx-category-deck--standalone');
+      const panel=host?.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      return {key:s.key,source:s.source,host:host?.id||host?.className||null,
+        panel:!!panel,aiNative:node?.closest('#fx-mag-ai-scroll-station-r2030')!==null};
+    });
+    const hostElements=scenes.map(s=>document.querySelector('[data-fx-archive-scene="'+s.key+'"]')
+      ?.closest('main#main-content > section.scene, main#main-content > section.fx-category-deck--standalone'));
+    const ai=document.querySelector('#fx-mag-ai-scroll-station-r2030 .fx-mag-ai-native-cards-r2046 > .card');
+    const diag=document.querySelector('#capabilities .fx-archive-cinema-folio-r2030');
+    const aiPanel=document.querySelector('#fx-mag-ai-scroll-station-r2030 > .fx-archive-cinema-folio-r2030');
+    return {records,uniqueHosts:new Set(hostElements).size,
+      nativeAi:!!ai,aiDistinct:!!aiPanel&&aiPanel!==diag,
+      legacyAiCardCount:document.querySelectorAll('#capabilities .cards > .card').length,
+      interactiveAi:!!aiPanel?.querySelector('.fx-mag-ai-real-ask-r2046'),
+      originalMoved:document.documentElement.dataset.fxArchiveAiOriginal,
+      eightFolios:document.documentElement.dataset.fxArchiveDistinctFolios};
+  });
+  assert.equal(uniquePapers.uniqueHosts,8,'Two MAG shelf scenes illegally share a native paper: '+JSON.stringify(uniquePapers));
+  assert.equal(Number(uniquePapers.eightFolios),8,'Renderer lost its eight original semantic folios: '+JSON.stringify(uniquePapers));
+  assert.ok(uniquePapers.records.every(r=>r.panel),'Every source needs a real original HTML folio: '+JSON.stringify(uniquePapers));
+  assert.ok(uniquePapers.nativeAi&&uniquePapers.aiDistinct&&uniquePapers.interactiveAi
+    &&uniquePapers.originalMoved==='moved-once','AI still a false eighth scene: '+JSON.stringify(uniquePapers));
+  await page.evaluate(()=>{
+    const real=document.querySelector('#fx-mag-ai-scroll-station-r2030 .card');
+    window.__fxAICardReferenceR2046=real;
+    window.FormatXArchiveExperience.refresh();
+    window.dispatchEvent(new CustomEvent('formatx:livingready'));
+  });
+  await page.waitForTimeout(180);
+  const refreshContract=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const ai=document.querySelector('#fx-mag-ai-scroll-station-r2030 .card');
+    const scenes=window.FormatXArchiveExperience.scenes;
+    const unique=new Set(scenes.map(s=>document.querySelector('[data-fx-archive-scene="'+s.key+'"]')
+      ?.closest('main#main-content > section.scene, main#main-content > section.fx-category-deck--standalone')));
+    return {sameAi:window.__fxAICardReferenceR2046===ai,hostCount:unique.size,
+      panelCount:Number(root.dataset.fxArchiveDistinctFolios||0),
+      sceneCount:scenes.length};
+  });
+  assert.ok(refreshContract.sameAi&&refreshContract.hostCount===8
+    &&refreshContract.panelCount===8&&refreshContract.sceneCount===8,
+    'Ready/refresh erased real MAG native paper identity: '+JSON.stringify(refreshContract));
+  console.log('ARCHIVE_EIGHT_UNIQUE_NATIVE_FOLIOS_PASS',JSON.stringify({uniquePapers,refreshContract}));
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
@@ -180,7 +229,16 @@ async function evaluate(viewport,isMobile,browser){
           source:panel?.dataset.fxCinemaSource,phase:panel?.dataset.fxCinemaHandoff,
           transform:panel?getComputedStyle(panel).transform:'none'};
       });
-      assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
+      const tabSafety=await page.evaluate(()=>{
+        const panels=[...document.querySelectorAll('main#main-content > [data-fx-cinema-host-active] > .fx-archive-cinema-folio-r2030')];
+        const active=panels.filter(p=>p.dataset.fxCinemaPanelActive==='true');
+        const inactive=panels.filter(p=>p.dataset.fxCinemaPanelActive==='false');
+        return {count:panels.length,active:active.length,
+          activeInert:active.some(p=>p.inert),hiddenFocus:inactive.filter(p=>!p.inert).length};
+      });
+      assert.ok(tabSafety.count===8&&tabSafety.active===1&&!tabSafety.activeInert&&!tabSafety.hiddenFocus,
+        'Hidden native papers stole keyboard focus: '+JSON.stringify(tabSafety));
+            assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
       assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');
       assert.ok(real3D.phase&&real3D.transform.startsWith('matrix3d('),
         'Actual HTML papyrus lacks GPU-composited 3D presentation: '+JSON.stringify(real3D));
