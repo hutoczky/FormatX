@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261012-r2048-analytic-glass-normal-filament-lod
+token=20261012-r2049-analytic-mag-glass-fast-proof-css
 base_master=eb91a64a36722ce6e02a334ec6b637d6221199b2
 purpose=Preserve the live R2045 shared WebGL MAG and fix duplicate diagnostics/AI delivery: the real original AI assistance card gets its own genuine native paper and separate physical archive chapter; scene rediscovery retains all eight original folio references.
 quality=One existing unchanged shared MAG/WebGL context; no AI card clone or placeholder; eight distinct active native folios; inactive papyri inert; original HTML/links/voice and CTA restored on WebGL failure and ordinary teardown.
@@ -11,3 +11,5 @@ qualitygate=Real Lighthouse 95+ and live smoke are required to call the quality 
 
 optics=R2048 physical analytic curved membrane normals, world-space GGX specular follow glass bend, antialiased high-frequency filament fade on narrow display; no new WebGL context, shader program or draw pass.
 verification=Existing desktop/mobile Playwright validates live WebGL shader compilation and eight scenes; source asserts the optical equations; real-device FPS and subjective photorealism remain unverified.
+
+first_paint=The canonical public proof stylesheet is non-critical to the MAG hero and now activates after first-contentful-paint; the first-frame proof deduplication remains synchronous. Lighthouse >=95 stays unchanged.
