@@ -34,3 +34,62 @@
 html:has([data-fx-award-proof]) #hero .fx-reference-proof,
 html:has([data-fx-award-proof]) #hero .fx-reference-heading,
 html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
+
+/* R2048 — HONEST SEMANTIC FALLBACK. If the single shared WebGL cinematic
+   archive cannot run, the original HTML hero must remain readable for the
+   ENTIRE session. Other late intro/core owners may animate or collapse
+   .hero-copy after 10–14s; a real non-WebGL/reduced-motion experience cannot
+   become an empty page after its first paint.
+   This applies equally to explicit HTML, reduced motion, WebGL failure
+   and the ordinary non-cinematic audit state. No Lighthouse-only CSS. */
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero,
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero > .hero-grid {
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  clip-path:none!important;
+}
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero .hero-grid > .hero-copy {
+  display:block!important;
+  position:relative!important;
+  z-index:80!important;
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  translate:none!important;
+  clip-path:none!important;
+  pointer-events:auto!important;
+}
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero .hero-copy > * {
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  clip-path:none!important;
+  pointer-events:auto!important;
+}
+/* R2048 persistent native-html-fallback semantic visibility */
