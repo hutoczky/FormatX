@@ -141,6 +141,8 @@
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
   const paperLast=new WeakMap();
+  const paperScene=new WeakMap();
+  let paperGeometryReads=0;
   const memoryGB=Number(navigator.deviceMemory||0);
   const cores=Number(navigator.hardwareConcurrency||0);
   const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
@@ -479,6 +481,7 @@
         for(const target of targets){
           if(!(target instanceof HTMLElement)||next.includes(target))continue;
           next.push(target);
+          paperScene.set(target,scene);
           target.classList.add('fx-archive-live-sheet-r2026');
           target.dataset.fxArchivePaperSource=scene.source;
           all.add(target);
@@ -491,25 +494,22 @@
   }
 
   function updateRealContentSheets(){
-    if(!archiveActive||reduced.matches)return;
+    if(!archiveActive||reduced.matches||!current)return;
     const vh=Math.max(1,innerHeight);
-    // Limit viewport geometry reads to the current and adjacent chapters.
-    const nearby=new Set();
-    if(current){
-      const i=current.s.index;
-      for(const scene of scenes){
-        if(Math.abs(scene.index-i)<=1)for(const node of scene.paperNodes||[])nearby.add(node);
-      }
-    }
-    for(const node of nearby){
+    // Three contiguous chapters are enough, even in fast reverse scroll.
+    // Avoid scanning all scenes and allocating a Set for every native scroll.
+    const index=current?.s.index??-1;
+    for(let i=Math.max(0,index-1);i<=Math.min(scenes.length-1,index+1);i++){
+      for(const node of scenes[i]?.paperNodes||[]){
       if(!node.isConnected)continue;
       const bounds=node.getBoundingClientRect();
+      paperGeometryReads++;
       const entry=clamp((vh*.89-bounds.top)/Math.max(160,vh*.37));
       const last=paperLast.get(node);
       if(last!==undefined&&Math.abs(entry-last)<.007)continue;
       paperLast.set(node,entry);
       const away=1-smooth(entry);
-      const s=sceneForElement(node);
+      const s=paperScene.get(node);
       const dir=mobile()?0:(s?.index%2===0?-1:1);
       node.style.setProperty('--fx-archive-paper-x',(away*dir*46).toFixed(1)+'px');
       node.style.setProperty('--fx-archive-paper-y',(away*36).toFixed(1)+'px');
@@ -517,14 +517,10 @@
       node.style.setProperty('--fx-archive-paper-scale',(1-away*.075).toFixed(4));
       node.style.setProperty('--fx-archive-paper-opacity',(.66+smooth(entry)*.34).toFixed(3));
       node.dataset.fxArchivePaperPhase=entry>=.99?'presented':'being-handed';
+      }
     }
     root.dataset.fxArchiveRealContent='native-paper-handoff';
   }
-  function sceneForElement(node){
-    for(const s of scenes)if((s.paperNodes||[]).includes(node))return s;
-    return null;
-  }
-
   class ScrollTimelineController {
     static get(){
       if(!scenes.length)return null;
@@ -1259,7 +1255,7 @@ void main(){
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples,domComposes};},
+      cpuSamples:PerformanceManager.samples,domComposes,paperGeometryReads};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
