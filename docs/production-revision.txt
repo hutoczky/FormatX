@@ -1,7 +1,8 @@
 FormatX production revision
-token=20261012-r2046-mag-premium-first-frame-semantic-stage
+token=20261012-r2047-mag-fast-return-semantic-stage
 base_master=db078c8884a1cfdaf3521f53184e318c4f5c8c9f
 purpose=Preserve the live R2044 8-bay WebGL2 MAG cinematic world while making the one real delivered HTML folio the only keyboard-accessible/screenreader-presented chapter. Announce scene changes once per chapter without visible duplicate headings, rehome outgoing document focus without scroll hijacking, and restore the fallback on WebGL loss.
 validation=Require 8 scenes on desktop and phone, single native MAG and interactive original HTML, original CTA, one proof, focus/inert and aria-live contract, reduced-motion/no-WebGL fallback, whole-site occlusion and exact domain production verification.
 limitations=No unsupported 60FPS or Igloo.inc 120-percent claims; phone GPU memory/photorealistic quality remains unmeasured.
 first_paint=Use the actual final R358 mobile header/brand/menu geometry in a small synchronous stylesheet, no JS clones; suppress unstyled mobile navigation until the functional menu opens. The same sheet owns R2045 visually hidden ARIA status and exclusive hero.
+render_warmup=Actual original shared WebGL2 MAG starts after 750ms post-first-paint instead of 5500ms, with max 1100ms idle wait, no extra renderer, reduced-motion and audit fallback preserved. R533 first-visit intro retains immediate priority.
