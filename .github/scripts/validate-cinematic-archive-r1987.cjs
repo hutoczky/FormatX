@@ -137,6 +137,22 @@ async function evaluate(viewport,isMobile,browser){
     &&refreshContract.panelCount===8&&refreshContract.sceneCount===8,
     'Ready/refresh erased real MAG native paper identity: '+JSON.stringify(refreshContract));
   console.log('ARCHIVE_EIGHT_UNIQUE_NATIVE_FOLIOS_PASS',JSON.stringify({uniquePapers,refreshContract}));
+
+  // R2048: native wheel/touch events within the SAME chapter must not
+  // reapply nine ancestor CSSOM transform overrides on every scroll tick.
+  // Test actual DOM state; do not turn this into an invented FPS metric.
+  const anchorChanges=await page.evaluate(()=>{
+    const before=Number(document.documentElement.dataset.fxArchiveAnchorTransitions||0);
+    const chapter=document.documentElement.dataset.fxArchiveCinemaChapter||'';
+    for(let i=0;i<7;i++)window.dispatchEvent(new Event('scroll'));
+    const after=Number(document.documentElement.dataset.fxArchiveAnchorTransitions||0);
+    return {before,after,chapter,afterChapter:document.documentElement.dataset.fxArchiveCinemaChapter};
+  });
+  assert.ok(anchorChanges.after<=anchorChanges.before+1
+      &&anchorChanges.chapter===anchorChanges.afterChapter,
+    'R2048 regressed into per-scroll CSSOM ancestor overrides: '+JSON.stringify(anchorChanges));
+  console.log('ARCHIVE_TRANSITION_ONLY_STYLE_PASS',JSON.stringify(anchorChanges));
+
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
