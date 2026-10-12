@@ -1256,6 +1256,13 @@ void main(){
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      // Progressive fallback activates only when the first-visit film has
+      // finished and no actual shared WebGL2 renderer is ready. Never
+      // re-layout the hero in the middle of its first meaningful paint.
+      if(root.dataset.fxArchiveExperience==='pending'&&!detach){
+        root.dataset.fxArchiveExperience='no-webgl-html';
+        root.dataset.fxArchiveHtmlFallback='renderer-not-ready-at-handoff';
+      }
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
