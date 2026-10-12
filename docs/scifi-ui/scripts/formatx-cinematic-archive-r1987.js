@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2048-anchor-transition-only-optics';
+  const VERSION='cinematic-archive-r2049-observed-frame-pacing';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -563,6 +563,53 @@
     static samples=0;
     static slowSamples=0;
     static fastSamples=0;
+    static frameSamples=0;
+    static frameEmaMs=0;
+    static lastFrameAt=0;
+    static inputAt=0;
+    static consecutiveLate=0;
+    static consecutiveClear=0;
+    static manualQuality=false;
+    static noteScroll(){
+      this.inputAt=performance.now();
+    }
+    static observeFrameCadence(now){
+      // Time *between calls* of the canonical native WebGL draw pass. This
+      // is a measured frame-submission cadence, NOT GPU presentation FPS.
+      if(!archiveActive||document.hidden){
+        this.lastFrameAt=0;
+        return;
+      }
+      const dt=this.lastFrameAt?now-this.lastFrameAt:0;
+      this.lastFrameAt=now;
+      // Ignore idle/on-demand paints and cold-start intervals. Sample only
+      // during actual user scroll, never during idle or the 10-second intro.
+      if(!mobile()||!this.inputAt||now-this.inputAt>1800||dt<6||dt>85)return;
+      this.frameEmaMs=this.frameSamples?this.frameEmaMs*.92+dt*.08:dt;
+      this.frameSamples++;
+      if(this.frameSamples%8===0){
+        root.dataset.fxArchiveObservedCadenceMs=this.frameEmaMs.toFixed(2);
+        root.dataset.fxArchiveObservedCadenceSamples=String(this.frameSamples);
+      }
+      if(this.manualQuality||mobilePerf||veryLowPower||this.frameSamples<24)return;
+      // Sustained pacing drops degrade geometry once, rather than oscillate
+      // quality in reaction to a single GC pause or touch-scroll hitch.
+      if(quality==='high'){
+        this.consecutiveLate=dt>25?this.consecutiveLate+1:Math.max(0,this.consecutiveLate-2);
+        this.consecutiveClear=0;
+        if(this.consecutiveLate>=36){
+          this.consecutiveLate=0;
+          this.setQuality('low',true);
+        }
+      }else{
+        this.consecutiveClear=dt<19?this.consecutiveClear+1:Math.max(0,this.consecutiveClear-2);
+        this.consecutiveLate=0;
+        if(this.consecutiveClear>=150){
+          this.consecutiveClear=0;
+          this.setQuality('high',true);
+        }
+      }
+    }
     static frameInterval(){
       // Allow for fractional rAF timestamps: using 16.7ms on a 60Hz
       // display can miss every 16.667ms paint and accidentally cap at 30Hz.
@@ -570,7 +617,8 @@
       if(veryLowPower)return 48;
       return quality==='low'?32:15.5;
     }
-    static setQuality(value){
+    static setQuality(value,automatic=false){
+      if(!automatic)this.manualQuality=true;
       const next=value==='low'?'low':'high';
       if(quality===next)return;
       quality=next;
@@ -590,12 +638,12 @@
       if(quality==='high'){
         this.slowSamples=this.emaMs>13.5?this.slowSamples+1:Math.max(0,this.slowSamples-2);
         if(this.slowSamples>=12){
-          this.slowSamples=0;this.fastSamples=0;this.setQuality('low');
+          this.slowSamples=0;this.fastSamples=0;this.setQuality('low',true);
         }
       }else{
         this.fastSamples=this.emaMs<7?this.fastSamples+1:0;
         if(this.fastSamples>=65){
-          this.slowSamples=0;this.fastSamples=0;this.setQuality('high');
+          this.slowSamples=0;this.fastSamples=0;this.setQuality('high',true);
         }
       }
     }
@@ -795,6 +843,7 @@ void main(){
     render(frame){
       if(!current||!archiveActive||document.hidden)return;
       const start=performance.now();
+      PerformanceManager.observeFrameCadence(start);
       const gl=this.gl,scene=current.s,p=current.progress,index=scene.index;
       const detail=quality==='high';
       if(detail!==this.panelDetail){
@@ -1239,7 +1288,10 @@ void main(){
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
-    addEventListener('scroll',invalidate,{passive:true});
+    addEventListener('scroll',()=>{
+      PerformanceManager.noteScroll();
+      invalidate();
+    },{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
@@ -1259,7 +1311,12 @@ void main(){
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples,domComposes};},
+      cpuSamples:PerformanceManager.samples,domComposes,
+      // rAF/native draw pass cadence; does not claim measured display FPS.
+      observedCadenceMs:PerformanceManager.frameSamples
+        ?Number(PerformanceManager.frameEmaMs.toFixed(2)):null,
+      observedCadenceSamples:PerformanceManager.frameSamples,
+      manualQuality:PerformanceManager.manualQuality};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
