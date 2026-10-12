@@ -1421,4 +1421,11 @@ html[data-fx-archive-feedback-focus="active"] body.living-architecture #user-fee
     z-index:36!important;
   }
 }
+/* After the last real MAG-delivered chapter, do not float the original
+   control cluster or idle core over native footer/legal navigation. */
+html[data-fx-archive-after-final="native-footer"] body.living-architecture
+#hero :is(.fx-crystal-organism-r326-stage,.fx-reference-controls-r204,.fx-mag-heart-hit-r252){
+  display:none!important;
+  pointer-events:none!important;
+}
 /* production-r2045-feedback-no-mag-occlusion-and-real-mobile-folio */
