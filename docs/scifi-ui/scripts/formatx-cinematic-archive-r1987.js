@@ -1052,7 +1052,10 @@ void main(){
     const focused=document.activeElement instanceof Element&&feedback.contains(document.activeElement);
     const enters=rect.top<innerHeight*.86&&rect.bottom>innerHeight*.14;
     const remains=rect.top<innerHeight*.98&&rect.bottom>innerHeight*.02;
-    feedbackOwnsViewport=focused||(feedbackOwnsViewport?remains:enters);
+    // A focused textarea cannot own the MAG after its entire section
+    // has left the phone viewport. Otherwise even reverse navigation cannot
+    // re-activate the real 3D archive, leaving a blank frame on return.
+    feedbackOwnsViewport=(focused&&remains)||(feedbackOwnsViewport?remains:enters);
     return feedbackOwnsViewport;
   }
   function selectLiveChapter(){
