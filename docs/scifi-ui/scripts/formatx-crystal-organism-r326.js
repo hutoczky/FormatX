@@ -849,6 +849,25 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
+    /* R2045: the original canvas is also subject to older !important opacity
+       overrides. They outrank CSS and WAAPI animations, leaving MAG visually
+       frozen even while its registered --fx-mag-life-opacity animates.
+       Bind the SAME original canvas's inline important opacity to that
+       compositor-only numeric custom property. Do this once at creation,
+       never in a JS RAF; preserve system reduced-motion changes. */
+    const mobileBreathPreference=mobile?matchMedia('(prefers-reduced-motion: reduce)'):null;
+    const syncMobileBreathOpacity=()=>{
+      if(!mobileBreathPreference)return;
+      if(mobileBreathPreference.matches){
+        canvas.style.removeProperty('opacity');
+      }else{
+        canvas.style.setProperty('opacity','var(--fx-mag-life-opacity,.965)','important');
+      }
+    };
+    syncMobileBreathOpacity();
+    mobileBreathPreference?.addEventListener?.('change',syncMobileBreathOpacity);
+    if(mobile)root.dataset.fxMagMobileBreathBindingR2045='inline-important-registered-compositor';
+
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     if(!reduced.matches && typeof canvas.animate==='function'){
@@ -2649,6 +2668,7 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
+      mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;
