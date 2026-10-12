@@ -549,6 +549,15 @@ async function fallback(browser){
   await ctx.close();
 }
 (async()=>{
+  // Verify the deployed HTML requests the actual, current cinematic assets.
+  // Stale asset URLs allow a CDN/browser to keep the old overlay version even
+  // when the GitHub source and production-revision token have changed.
+  const fs=require('fs'),path=require('path');
+  const siteHtml=fs.readFileSync(path.resolve(__dirname,'../../docs/scifi-ui/index.html'),'utf8');
+  assert.ok(siteHtml.includes('formatx-cinematic-archive-r1987.js?v=20261012-r2046-eight-bay-real-mag'),
+    'Production still references a stale R2035 MAG JavaScript cache key');
+  assert.ok(siteHtml.includes('formatx-cinematic-archive-r1987.css?v=20261012-r2046-eight-bay-real-mag'),
+    'Production still references a stale R2043 MAG CSS cache key');
   const browser=await chromium.launch({headless:true,args:[
     '--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
     '--enable-unsafe-swiftshader','--disable-dev-shm-usage'

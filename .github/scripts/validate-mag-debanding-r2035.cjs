@@ -59,10 +59,10 @@ assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261012-r
   'Desktop startup scheduler may cache the old renderer loader');
 assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2045-living-mag-pulse'),
   'Canonical HTML must load the R2045 scheduler');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
+for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261012-r2046-eight-bay-real-mag',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
- assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
+ assert.ok(html.includes(resource),'Public site must load its exact current optical resource '+resource);
 }
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
