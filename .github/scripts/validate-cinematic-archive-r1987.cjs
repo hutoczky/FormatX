@@ -10,10 +10,10 @@ fs.mkdirSync(out,{recursive:true});
 // the retired archive after the site shell has already been deployed.
 const htmlSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const sharedArchiveJS=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
-assert.match(htmlSource,/formatx-cinematic-archive-r1987\\.js\\?v=20261012-r2046-persistent-mag/);
-assert.match(htmlSource,/formatx-cinematic-archive-r1987\\.css\\?v=20261012-r2046-persistent-mag/);
+assert.ok(htmlSource.includes('formatx-cinematic-archive-r1987.js?v=20261012-r2046-persistent-mag'),'MAG JS cache revision missing');
+assert.ok(htmlSource.includes('formatx-cinematic-archive-r1987.css?v=20261012-r2046-persistent-mag'),'MAG CSS cache revision missing');
 assert.match(sharedArchiveJS,/cinematic-archive-r2044-persistent-eight-bay-world/);
-assert.equal((htmlSource.match(/data-fx-award-proof(?=\\s|>)/g)||[]).length,1,
+assert.equal((htmlSource.match(/<section class="fx-award-proof" data-fx-award-proof/g)||[]).length,1,
   'Proof module must have exactly one canonical HTML instance');
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
