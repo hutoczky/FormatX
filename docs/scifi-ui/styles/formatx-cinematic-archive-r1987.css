@@ -698,16 +698,8 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     font-size:clamp(12px,1.2vw,18px)!important;
     line-height:1.2!important;
   }
-  /* Single AI paper: real AI article is last capabilities card.
-     Hide neighbouring diagnostics modules when the MAG opens its core. */
-  html:root:root[data-fx-archive-cinema="active"][data-fx-archive-cinema-chapter="intelligence"]
-  #capabilities .fx-archive-cinema-folio-r2030 :is(.section-heading,.cards > .card:not(:last-child)){
-    display:none!important;
-  }
-  html:root:root[data-fx-archive-cinema="active"][data-fx-archive-cinema-chapter="diagnostics"]
-  #capabilities .fx-archive-cinema-folio-r2030 .cards > .card:last-child{
-    display:none!important;
-  }
+  /* R2046: the original AI card has its own independent physical chapter;
+     no diagnostics content needs to be hidden or duplicated. */
 }
 @media (max-width:900px) and (prefers-reduced-motion:no-preference){
   html:root:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
@@ -1345,3 +1337,39 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* one-real-papyrus-no-duplicate-status-folio-r2041 */
+
+/* R2046 — EIGHT genuine interactive paper sources, not a phantom eighth
+   chapter pointing at the exact same diagnostics folio. The GL source shelf
+   and original AI card now share a real native section/scroll anchor. */
+@media (prefers-reduced-motion:no-preference) {
+ html:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ body.living-architecture main#main-content >
+ .fx-mag-ai-scroll-station-r2030[data-fx-cinema-host-active="true"]{
+   visibility:visible!important;
+   opacity:1!important;
+   contain:none!important;
+   overflow:visible!important;
+ }
+ html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ .fx-mag-ai-native-cards-r2046 {
+   display:grid;
+   grid-template-columns:minmax(0,1fr)!important;
+   gap:clamp(12px,2vw,22px);
+   width:100%;
+ }
+ html:root:root[data-fx-archive-cinema="active"]
+ .fx-mag-ai-real-ask-r2046 {
+   display:inline-flex;align-items:center;justify-content:center;
+   min-height:48px;min-width:160px;padding:12px 20px;
+   border:1px solid rgba(139,230,255,.5);border-radius:8px 18px 18px 8px;
+   background:linear-gradient(105deg,rgba(9,44,60,.9),rgba(11,27,47,.95));
+   color:#e6f9ff;cursor:pointer;
+   font:600 13px/1.4 inherit;
+   font-family:inherit;letter-spacing:.04em;
+ }
+ html:root:root[data-fx-archive-cinema="active"]
+ .fx-mag-ai-real-ask-r2046:focus-visible {
+   outline:2px solid #b6f3ff;outline-offset:4px;
+ }
+}
+/* r2046-original-ai-source-unique-native-interactive-folio */
