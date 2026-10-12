@@ -1373,3 +1373,25 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 /* r2046-original-ai-source-unique-native-interactive-folio */
+
+/* R2049 | ONE living 3D paper, zero layout work for the seven archived papers.
+   Each real source remains in the DOM and retains links/events. Its parent
+   scroll anchor owns the fixed height; content-visibility only isolates the
+   HIDDEN native HTML subtree while the MAG is delivering another source.
+   Never use this on reduced-motion or WebGL fallback pages. */
+@media (prefers-reduced-motion:no-preference) {
+  html[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+  body.living-architecture main#main-content >
+  [data-fx-cinema-host-active="false"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="false"] {
+    content-visibility:hidden!important;
+    contain-intrinsic-size:1px 1px!important;
+    pointer-events:none!important;
+  }
+  html[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+  body.living-architecture main#main-content >
+  [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"] {
+    content-visibility:visible!important;
+    contain-intrinsic-size:auto!important;
+  }
+}
+/* production-r2049-inactive-original-folio-layout-isolation */
