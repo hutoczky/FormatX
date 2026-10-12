@@ -3,13 +3,17 @@
    surface-energy sweep. R502 keeps the canonical CSSAnimation declared across
    PAUSE so the root playback governor freezes/resumes the same timeline object. */
 
+/* A registered, numeric custom property carries the compositor heartbeat
+   through the intentional, high-specificity !important opacity owner below.
+   Animating opacity directly loses against !important, leaving four samples
+   flat at 1.000. Keep the same R326 single WebGL canvas: no draw-loop. */
 @keyframes fx-primary-mag-mobile-heart-r488 {
-  0%,100% { scale: 1; opacity: .945; }
-  24% { scale: 1; opacity: .975; }
-  33% { scale: 1; opacity: .960; }
-  43% { scale: 1; opacity: 1; }
-  54% { scale: 1; opacity: .982; }
-  73% { scale: 1; opacity: .955; }
+  0%,100% { scale: 1; opacity: .945; --fx-mag-life-opacity:.945; }
+  24% { scale: 1; opacity: .975; --fx-mag-life-opacity:.975; }
+  33% { scale: 1; opacity: .960; --fx-mag-life-opacity:.960; }
+  43% { scale: 1; opacity: 1; --fx-mag-life-opacity:1; }
+  54% { scale: 1; opacity: .982; --fx-mag-life-opacity:.982; }
+  73% { scale: 1; opacity: .955; --fx-mag-life-opacity:.955; }
 }
 
 @media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
@@ -19,7 +23,7 @@
      and razor-cut OLED edge visible in physical mobile captures. */
   html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-core-mobile-v55][data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"] body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas {
-    opacity: .965 !important;
+    opacity: var(--fx-mag-life-opacity,.965) !important;
     filter:
       brightness(1.06)
       contrast(1.14)
@@ -159,3 +163,28 @@
   }
 }
 /* production-r1902-desktop-living-timeline */
+
+/* R2045: the mobile opacity owner must consume the animated registered
+   variable rather than pinning a constant value. R481 registers the property;
+   the normal R488 animation runs with the original single MAG WebGL canvas.
+   Reduced motion and the global pause governor still own the motion state. */
+@media (prefers-reduced-motion:no-preference) and (max-width:900px),
+       (prefers-reduced-motion:no-preference) and (pointer:coarse),
+       (prefers-reduced-motion:no-preference) and (max-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:root:root:root:root:root:root:root:root
+  [data-fx-core-renderer="single-webgl-crystal-organism-r326"][data-fx-crystal-organism-r326="ready"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage
+  > .fx-crystal-organism-r326-canvas{
+    opacity:var(--fx-mag-life-opacity,.965)!important;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html:root:root:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage
+  > .fx-crystal-organism-r326-canvas{
+    opacity:.82!important;
+    animation:none!important;
+    will-change:auto!important;
+  }
+}
+/* production-r2045-compositor-mobile-heart-visible-important-var */
