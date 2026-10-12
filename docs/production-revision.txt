@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261011-r2044-r2035-no-pc-mobile-mag-stripes
-base_master=5541278e464b08516733edc0b00548f53d8db556
-purpose=Keep the existing R2044 eight-bay native MAG cinematic world while eliminating shader, stage-grid and improper archive depth stripes from the original MAG on PC and mobile.
-quality=Eight GPU-drawn persistent racks, 8 additional box draws per mobile frame and 16 on desktop; one existing native MAG renderer, no extra WebGL contexts, no video, no rasterized application text.
-validation=Mandatory R2035 source anti-banding test, Chromium mobile/desktop eight chapters and native controls, no WebGL/reduced-motion fallback, responsive occlusion and strict production smoke with exact domain revision.
-limitations=FPS and Igloo.inc photographic superiority are goals, not confirmed claims; no fake performance measurements.
+token=20261012-r2045-mobile-feedback-native-reader
+base_master=db078c8884a1cfdaf3521f53184e318c4f5c8c9f
+purpose=Resolve observed S24-style phone captures where the original MAG covered live feedback ratings, or an archive scene appeared as a tiny frame in otherwise empty space. Preserve the sole native WebGL2 MAG and eight unique shelves.
+changes=Feedback visual-viewport ownership with DOM insertion/IntersectionObserver, capture-phase scroll and bounded 200ms watchdog; guaranteed true feedback form front stacking; native 92vw x 50dvh phone reading paper with real 3D delivery; return to native footer beyond last scene.
+validation=Strict original eight-scene Chromium desktop/mobile, first-frame real HTML, actual production feedback template scroll/focus/edit/return, no-WebGL/reduced-motion, 320-1920px occlusion, P0 security, Lighthouse, exact Cloudflare revision on both canonical domains and live production smoke.
+limitations=Award readiness, Igloo.inc 120% creative benchmark, 60FPS real S24 hardware and photo-level material fidelity are not automatically established by browser CI.
