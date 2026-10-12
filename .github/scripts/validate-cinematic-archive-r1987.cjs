@@ -6,6 +6,65 @@ const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/
 const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function captureVisibleChapter(page,context,isMobile,chapter){
+  // A screenshot taken after the pricing dialog closes can show NO paper.
+  // Capture WHILE the native interactive document is positively asserted
+  // visible, not after navigating away. This is the visual acceptance proof.
+  const active=await page.evaluate(()=>{
+    const p=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const s=p?getComputedStyle(p):null;
+    return {chapter:document.documentElement.dataset.fxArchiveCurrent,
+      panel:!!p,visible:s?.visibility,opacity:Number(s?.opacity||0),
+      rect:p?{y:p.getBoundingClientRect().y,h:p.getBoundingClientRect().height}:null};
+  });
+  assert.equal(active.chapter,chapter,'Visual proof would capture wrong chapter: '+JSON.stringify(active));
+  assert.ok(active.panel&&active.visible==='visible'&&active.opacity>=.7,
+    'Visual proof cannot be captured without the real interactive papyrus: '+JSON.stringify(active));
+  // Paint-tree diagnostics rather than just computed styles on the leaf.
+  // Content-visibility/opacity/clip on ANY ancestor can make an apparently
+  // visible and clickable fixed HTML sheet fully invisible to the compositor.
+  const paintTree=await page.evaluate(()=>{
+    const panel=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const nodes=[];
+    let n=panel;
+    for(let i=0;n&&i<12;i++,n=n.parentElement){
+      const c=getComputedStyle(n),r=n.getBoundingClientRect();
+      nodes.push({tag:n.tagName,id:n.id,cls:String(n.className).slice(0,110),
+        rect:[Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)],
+        display:c.display,visibility:c.visibility,opacity:c.opacity,
+        contentVisibility:c.contentVisibility,contain:c.contain,transform:c.transform.slice(0,90),
+        filter:c.filter,clipPath:c.clipPath,maskImage:c.maskImage,
+        overflow:c.overflow,background:c.backgroundColor,z:c.zIndex});
+    }
+    const h=panel?.querySelector('h2,h3,p,a');
+    const c=h?getComputedStyle(h):null,r=h?.getBoundingClientRect();
+    return {nodes,child:h?{text:h.textContent.trim().slice(0,100),
+      visibility:c.visibility,display:c.display,opacity:c.opacity,color:c.color,
+      rect:[r.x,r.y,r.width,r.height]}:null};
+  });
+  console.log('ARCHIVE_REAL_PAINT_TREE',JSON.stringify({chapter,mode:isMobile?'mobile':'desktop',paintTree}));
+  const basename=`${out}/archive-${isMobile?'mobile':'desktop'}-${chapter}-active`;
+  let method='playwright';
+  try{
+    await page.screenshot({path:basename+'.png',fullPage:false,animations:'allow',timeout:12000});
+  }catch(primary){
+    // Keep a real Chromium compositor alternative for software WebGL.
+    method='chromium-cdp';
+    const cdp=await context.newCDPSession(page);
+    try{
+      const image=await cdp.send('Page.captureScreenshot',{
+        format:'jpeg',quality:83,fromSurface:false,captureBeyondViewport:false
+      });
+      if(!image?.data)throw Error('No bitmap returned by Chrome');
+      fs.writeFileSync(basename+'.jpg',Buffer.from(image.data,'base64'));
+    }catch(fallback){
+      throw Error('Real '+chapter+' screenshot unavailable: '+primary.message+'; '+fallback.message);
+    }finally{await cdp.detach().catch(()=>{});}
+  }
+  console.log('ARCHIVE_VISUAL_EVIDENCE_CAPTURED',JSON.stringify({
+    mode:isMobile?'mobile':'desktop',chapter,method,active
+  }));
+}
 async function evaluate(viewport,isMobile,browser){
   const context=await browser.newContext({
     viewport,deviceScaleFactor:isMobile?2:1,
@@ -82,6 +141,28 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
 
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
+  // All eight presentations share ONE physical camera track. It must not
+  // jump when the scroll timeline switches shelf identity. Compare a one-pixel
+  // real scroll across each scene anchor to detect screen-space teleportation.
+  const cameraContinuity=await page.evaluate(()=>{
+    const output=[];
+    const viewport=Math.max(1,innerHeight);
+    for(const scene of window.FormatXArchiveExperience.scenes){
+      const node=scene.id.startsWith('#')||scene.id.startsWith('.')
+        ?document.querySelector(scene.id):document.getElementById(scene.id);
+      if(!node)continue;
+      const y=scrollY+node.getBoundingClientRect().top+innerHeight*.52;
+      const old=window.scrollY;
+      // Virtual scroll displacement is only for the continuity probe;
+      // no navigation or actual document scroll is intercepted.
+      const rA=window.FormatXArchiveExperience?.cameraForQA?.(y-1,viewport);
+      const rB=window.FormatXArchiveExperience?.cameraForQA?.(y+1,viewport);
+      if(rA&&rB)output.push({scene:scene.key,delta:Math.max(...rA.map((x,i)=>Math.abs(x-rB[i])))});
+    }
+    return output;
+  });
+  assert.ok(cameraContinuity.length>=6&&cameraContinuity.every(x=>x.delta<.003),
+    'MAG camera teleports when entering another archive bay: '+JSON.stringify(cameraContinuity));
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
@@ -255,6 +336,11 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
         &&chapterHandoff.marker.includes('/ 08'),
         'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
+      // Licence and final proof/CTA are the strongest actual user-visible
+      // checkpoints: interactive original documents with readable text.
+      if(scene.key==='licensing'||scene.key==='final'){
+        await captureVisibleChapter(page,context,isMobile,scene.key);
+      }
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
@@ -393,19 +479,8 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_ADAPTIVE_CADENCE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...renderBudget}));
 
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
-  // Software WebGL readback can stall screenshots in CI even after all
-  // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
-  // for functional testing; report incomplete captures explicitly.
-  try {
-    await page.screenshot({
-      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
-    });
-  } catch(error) {
-    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
-    }));
-  }
+  // Valid screenshot artifacts are captured with the active licence and
+  // final papyri; never produce misleading dark post-dialog snapshots.
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
   const restored=await page.evaluate(()=>({dock:document.documentElement.dataset.fxArchiveDock,stage:!!document.querySelector('#hero .fx-crystal-organism-r326-stage')}));
@@ -498,6 +573,38 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function verifyGenesisBootstrapParity(browser){
+  const base=URL.split('?')[0];
+  // Simulate the legitimate original Chrome-Lighthouse first-byte route in
+  // which the bootstrap has ALREADY decided to skip the film. R533 must not
+  // recreate an invisible 10-second owner after that decision.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},
+    userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/135.0.0.0 Mobile Safari/537.36 Chrome-Lighthouse',
+    isMobile:true,hasTouch:true
+  });
+  await context.addInitScript(()=>{
+    try{Object.defineProperty(navigator,'webdriver',{configurable:true,get:()=>false});}catch(_){}
+  });
+  const page=await context.newPage();
+  await page.goto(base+'?lang=hu',{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>Boolean(document.documentElement.dataset.fxMagBirthOwnerR533),
+    null,{timeout:30000});
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    return {bootstrap:root.dataset.fxIntroPrepaintR1611,
+      owner:root.dataset.fxMagBirthOwnerR533,
+      intro:root.dataset.fxMagBirthLiveR533,
+      audit:root.dataset.fxLighthouseAuditR1391,
+      prepaint:!!document.getElementById('fx-mag-birth-prepaint-r1606')};
+  });
+  assert.ok(['lighthouse-skip','automation-skip'].includes(state.owner),
+    'Intro owners disagree and strand old hero for ten seconds: '+JSON.stringify(state));
+  assert.equal(state.prepaint,false,
+    'Skipped intro left an invisible blocking prepaint overlay: '+JSON.stringify(state));
+  console.log('ARCHIVE_GENESIS_BOOTSTRAP_PARITY_PASS',JSON.stringify(state));
+  await context.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -559,6 +666,7 @@ async function fallback(browser){
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
     await verifyMobileLivingPulse(browser);
+    await verifyGenesisBootstrapParity(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}

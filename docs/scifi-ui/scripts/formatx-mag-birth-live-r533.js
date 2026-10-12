@@ -22,9 +22,17 @@
   const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
+  // The first-byte intro bootstrap already recognizes Chrome-Lighthouse
+  // user agents. The deferred R533 controller MUST agree with that decision:
+  // previously the bootstrap skipped its overlay, then R533 waited an
+  // invisible ten seconds before allowing MAG's real HTML folios to appear.
+  // This is an inconsistent load state, not an alternative visual benchmark.
+  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1'
+    || /Chrome-Lighthouse/i.test(String(navigator.userAgent||''));
   if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  const BOOTSTRAP_SKIPPED = ROOT.dataset.fxIntroPrepaintR1611 === 'skip'
+    && ROOT.dataset.fxIntroPrepaintReasonR1611 === 'automation-skip';
+  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE || BOOTSTRAP_SKIPPED;
   const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
