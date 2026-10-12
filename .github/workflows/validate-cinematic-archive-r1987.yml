@@ -76,13 +76,9 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-cinematic-archive-r1987.cjs
-      - name: Verify currently live canonical visitor journey without archive=1
-        env:
-          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
-          FORMATX_TEST_URL: https://formatxsuite.com/
-          FORMATX_LIVE_MAG_EVIDENCE_DIR: .archive-artifacts/live-r2048-visitor
-        run: node .github/scripts/validate-live-mag-default-r2048.cjs
-
+      # R2049: do not fail a pull request by checking the PREVIOUS live build.
+      # The ACTUAL default URL test is MANDATORY after this commit is deployed
+      # to both domains in deploy-formatx-custom-domain.yml.
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
