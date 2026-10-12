@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2048-anchor-transition-only-optics';
+  const VERSION='cinematic-archive-r2049-single-scroll-layout-read';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1082,9 +1082,11 @@ void main(){
     updates++;
     root.dataset.fxArchiveUpdateCount=String(updates);
     root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
-    const inArchive=selectLiveChapter();
-    if(inArchive&&stage)ResponsiveExperience.dock();
-    else if(archiveActive)ResponsiveExperience.restore();
+    // Native scroll/resize invalidate() has already selected the chapter and
+    // positioned the actual interactive HTML folio, synchronously.
+    // Calling selectLiveChapter() again here forced a second read of all
+    // eight getBoundingClientRect() anchors on the queued GPU-only frame.
+    // RAF only publishes chapter events and requests GPU presentation.
     // The native scroll/resize event has ALREADY synchronously composed the
     // visible HTML papyrus inside invalidate(). A second full DOM read/write
     // cycle on the queued animation frame caused avoidable layout work on
