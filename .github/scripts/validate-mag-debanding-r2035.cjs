@@ -53,8 +53,11 @@ for(const loader of [desk,mobile,motion]){
 }
 assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag'),
   'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
-  'Canonical HTML must load the new scheduler');
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2047-native-mag-fast-return'),
+  'Canonical HTML must load the native R2047 scheduler');
+assert.ok(scheduler.includes('const AUTO_DELAY_MS=750;') &&
+  scheduler.includes('requestIdleCallback(launch,{timeout:1100})'),
+  'Returning visitors must see the real MAG promptly without delaying first-paint HTML');
 // Each new release must fingerprint the current native archive. Do NOT
 // require an outdated R2035 JS URL: doing so blocked valid fixes after a
 // cache bust. Still require the actual original MAG anti-banding assets.
