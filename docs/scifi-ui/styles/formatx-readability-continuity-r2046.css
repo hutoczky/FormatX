@@ -1,0 +1,60 @@
+/* R2033: ONE visible public evidence module; the canonical proof strip
+   contains the original verification, technical and security destinations.
+   Keeping the mirrored scroll bridge box intact prevents loop geometry drift. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading{
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html:has([data-fx-award-proof]) .fx-award-proof{opacity:1!important}
+}
+/* production-r2033-canonical-proof-singleton-hotfix */
+
+/* FormatX R2046 — keep the genuine, semantic hero readable until the
+   same native MAG renderer has a real, interactive archived folio ready.
+   A failed, slow or deferred GPU transition must never leave a dark screen
+   with only an ornament. This rule is for every browser, not audit-only. */
+@media (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-grid > .hero-copy{
+    opacity:1!important;
+    visibility:visible!important;
+    clip-path:none!important;
+    filter:none!important;
+    content-visibility:visible!important;
+    pointer-events:auto!important;
+  }
+  html:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-grid > .hero-copy > :is(
+    .kicker,.fx-category-definition,#hero-title,.hero-lead,
+    .fx-hero-product-state,.fx-method-inline,.hero-actions,.hero-facts){
+    opacity:1!important;
+    visibility:visible!important;
+  }
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-grid > .hero-copy{
+    display:block!important;
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    translate:none!important;
+    width:calc(100% - 24px)!important;
+    max-width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  html:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-grid > .hero-copy #hero-title{
+    display:grid!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+}
+/* R2046 first-frame and long-running native fallback continuity */
