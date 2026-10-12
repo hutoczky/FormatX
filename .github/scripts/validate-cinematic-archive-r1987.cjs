@@ -7,6 +7,15 @@ const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+// Optical correctness gate: verify the physically curved paper has matching
+// analytic normals, and its hairline micro-guides use stable screen-space LOD.
+// Chromium's live GL compilation below covers vertex/fragment linking.
+assert.match(jsSource,/vec3 sourceNormal=uPanel>\.5\?normalize\(vec3\(-du,-dv,1\.0\)\):aNormal/,
+  'R2048 bent membrane must illuminate with real deformation normals');
+assert.match(jsSource,/filamentLod=1\.0-smoothstep\(\.35,\.95,footprintX\)/,
+  'R2048 tiny phone filaments must fade below pixel resolution');
+assert.match(jsSource,/vNormal=normalize\(vec3\(c\*n\.x\+s\*n\.z/,
+  'R2048 normal must follow the same world-space rotation as the glass');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
 assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff)\s*\(/,
