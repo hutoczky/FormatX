@@ -8,6 +8,17 @@ fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
+assert.match(jsSource,/PerformanceManager\.observeFrameCadence\(start\)/,
+  'Missing genuine native WebGL draw-pass cadence observations');
+assert.match(jsSource,/PerformanceManager\.noteScroll\(\)/,
+  'Only real native document scrolling may open the adaptive quality sample window');
+assert.match(jsSource,/static observeFrameCadence\(now\)/,
+  'Native frame cadence observer missing');
+assert.match(jsSource,/this\.setQuality\('low',true\)/,
+  'Sustained measured frame gaps must trigger automatic reduced geometry');
+assert.match(jsSource,/manualQuality:PerformanceManager\.manualQuality/,
+  'The public diagnostic API must disclose and honour a manual quality override');
+
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
 assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff)\s*\(/,
   'R2047 prohibits running the same heavy native layout composition twice per scroll input');
