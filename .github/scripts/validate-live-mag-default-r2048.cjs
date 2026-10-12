@@ -55,11 +55,22 @@ async function checkViewport(browser,isMobile){
         oldHeroVisible:!!hero&&getComputedStyle(hero).display!=='none'
           &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
         stage:!!stage,canvas:!!canvas,
-        shared:window.FormatXLivingCore?.sharedWebGL2||false};
+        shared:window.FormatXLivingCore?.sharedWebGL2||false,
+        sources:window.FormatXArchiveExperience.scenes.map(scene=>{
+          const node=document.querySelector('[data-fx-archive-scene="'+scene.key+'"]');
+          const host=node?.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+          const closestSection=node?.closest('section');
+          return {key:scene.key,node:node?.tagName||null,nodeId:node?.id||null,
+            hostId:host?.id||null,hostClass:host?.className||null,
+            nearestSectionId:closestSection?.id||null,
+            parentClass:node?.parentElement?.className||null,
+            directPanelCount:host?.querySelectorAll(':scope > .fx-archive-cinema-folio-r2030')?.length||0};
+        })};
     });
     assert.equal(initial.webdriver,undefined,'Not a real visitor-equivalent browser');
     assert.equal(initial.contexts,'1','Multiple MAG WebGL contexts allocated');
     assert.equal(initial.shared,true,'A second noncanonical MAG renderer was substituted');
+    console.log('MAG_LIVE_DEFAULT_DIAGNOSTICS',JSON.stringify({profile:isMobile?'mobile':'desktop',initial}));
     assert.equal(initial.originals,8,'Exactly eight real native HTML papyri required');
     assert.equal(initial.uniqueHosts,8,'Diagnostics/AI or another chapter shares a fake duplicate folio');
     assert.equal(initial.active,1,'Every chapter must show exactly ONE native folio');
