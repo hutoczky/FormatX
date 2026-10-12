@@ -1428,4 +1428,19 @@ html[data-fx-archive-after-final="native-footer"] body.living-architecture
   display:none!important;
   pointer-events:none!important;
 }
+/* Defense in depth: a live feedback form must paint ABOVE the WebGL stage
+   even if old infinite-scroll handlers delay cinematic state synchronization.
+   Original rating, consent, and textarea remain first-class HTML controls. */
+html body.living-architecture main#main-content > #user-feedback {
+  position:relative!important;
+  z-index:1000!important;
+  isolation:isolate!important;
+  content-visibility:visible!important;
+  background:linear-gradient(145deg,rgba(7,19,33,.995),rgba(4,11,24,.995))!important;
+}
+html body.living-architecture #user-feedback .fx-feedback-form{
+  position:relative!important;
+  z-index:1!important;
+  isolation:isolate;
+}
 /* production-r2045-feedback-no-mag-occlusion-and-real-mobile-folio */
