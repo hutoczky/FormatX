@@ -21,8 +21,20 @@
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     let activatedCount = 0;
     let auditSkippedCount = 0;
+    let retiredIntroCount = 0;
+    // The ten-second live MAG birth only runs once per visit. When its
+    // prepaint owner explicitly says "skip", loading the dedicated film CSS
+    // needlessly recalculates the entire mobile page after first paint.
+    // Forced or genuine first-visit introductions retain their full styling.
+    const birthSkipped = root.dataset.fxIntroPrepaintR1611 === 'skip';
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
+      if (birthSkipped && link.hasAttribute('data-fx-mag-birth-live-r533')) {
+        link.media = 'print';
+        link.dataset.fxBirthFilmCssR2049 = 'inactive-until-real-intro';
+        retiredIntroCount += 1;
+        continue;
+      }
       if (audit && link.hasAttribute('data-fx-critical-core-r227')) {
         link.media = 'print';
         link.dataset.fxR1970AuditDeferred = 'critical-core-skipped';
@@ -38,6 +50,7 @@
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
     root.dataset.fxDeferredCssAuditSkippedR1970 = String(auditSkippedCount);
+    root.dataset.fxDeferredCssIntroSkippedR2049 = String(retiredIntroCount);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
       detail: { count: links.length, scheduler: 'post-first-contentful-paint-r526', reason }
