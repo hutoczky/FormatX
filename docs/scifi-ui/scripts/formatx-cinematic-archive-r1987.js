@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2047-single-scroll-dom-composition';
+  const VERSION='cinematic-archive-r2048-curved-glass-physical-normals';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -655,7 +655,7 @@
       const vert=`#version 300 es
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
-uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile;
+uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile,uPanel;
 out vec3 vNormal;out vec2 vUv;
 void main(){
  vec3 p=aPosition*uScale;
@@ -675,8 +675,19 @@ void main(){
  // can approach the audience. No renderer/canvas/geometry replacement.
  float opticalDepth=clamp(.33-.15*p.z,-.16,.86);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
- vec3 n=vec3(aNormal.x,ct*aNormal.y-st*aNormal.z,st*aNormal.y+ct*aNormal.z);
- vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
+ // The membrane is genuinely curved: the specular normal MUST follow the
+ // exact analytic slope of its actual vertex displacement. Reusing the
+ // original flat (0,0,1) normal gave a fake stationary highlight while the
+ // ultra-thin display unrolled. Boxes and metal hardware stay unchanged.
+ float warpX=2.0*aUv.x-1.0;
+ float du=uBend*4.0*warpX*sin(3.14159*aUv.y)
+   /max(.001,1.55*abs(uScale.x));
+ float dv=uBend*3.14159*warpX*warpX*cos(3.14159*aUv.y)
+   /max(.001,1.06*abs(uScale.y));
+ vec3 sourceNormal=uPanel>.5?normalize(vec3(-du,-dv,1.0)):aNormal;
+ vec3 n=vec3(sourceNormal.x,ct*sourceNormal.y-st*sourceNormal.z,
+   st*sourceNormal.y+ct*sourceNormal.z);
+ vNormal=normalize(vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z));
  vUv=aUv;
 }`;
       const frag=`#version 300 es
@@ -726,12 +737,19 @@ void main(){
    float edgeWidth=max(fwidth(edge)*1.35,.004);
    float rim=smoothstep(.972-edgeWidth,.972+edgeWidth,edge);
    float strand=abs(fract(vUv.x*68.0)-.5);
-   float aa=max(fwidth(vUv.x*68.0)*.75,.028);
-   float micro=1.0-smoothstep(.012,.012+aa,strand);
+   float footprintX=fwidth(vUv.x*68.0);
+   float aa=max(footprintX*.75,.028);
+   // When a 68-filament lattice becomes subpixel on a phone, smoothly fade
+   // its high frequencies instead of brightening the whole surface. This is
+   // a stable spatial LOD, not temporal noise or an extra render pass.
+   float filamentLod=1.0-smoothstep(.35,.95,footprintX);
+   float micro=(1.0-smoothstep(.012,.012+aa,strand))*filamentLod;
    float rail=abs(fract(vUv.y*13.0)-.5);
-   float railAA=max(fwidth(vUv.y*13.0)*.6,.035);
+   float footprintY=fwidth(vUv.y*13.0);
+   float railAA=max(footprintY*.6,.035);
    float guide=(1.0-smoothstep(.015,.015+railAA,rail))
-             *smoothstep(.07,.13,vUv.x)*(1.0-smoothstep(.87,.93,vUv.x));
+             *smoothstep(.07,.13,vUv.x)*(1.0-smoothstep(.87,.93,vUv.x))
+             *(1.0-smoothstep(.45,1.0,footprintY));
    col+=uColor*(rim*.31+guide*.060+micro*.037);
    col+=vec3(1.0,.98,.91)*spec*.11;
    a=mix(a,.91,rim);
@@ -785,6 +803,8 @@ void main(){
         this.panelDetail=detail;
       }
       root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
+      root.dataset.fxArchiveGlassNormals='analytic-bent-membrane-r2048';
+      root.dataset.fxArchiveFilamentLOD='derivative-subpixel-r2048';
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
