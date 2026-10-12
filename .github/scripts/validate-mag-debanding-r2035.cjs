@@ -32,7 +32,7 @@ assert.ok(core.includes('float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*corte
   'Thin vertex-fold ripples would reintroduce temporal aliasing');
 assert.ok(archive.includes('opticalDepth*d,d'),
   'Archive and MAG must share correct homogeneous depth ordering');
-const archiveRevision=archive.match(/const VERSION='cinematic-archive-(r\\d{4})-[^']*'/)?.[1];
+const archiveRevision=archive.match(/const VERSION='cinematic-archive-(r\d{4})-[^']*'/)?.[1];
 assert.ok(archiveRevision,'The WebGL MAG archive must publish one recognized cinematic revision');
 assert.ok(html.includes('formatx-cinematic-archive-r1987.js?v=20261012-'+archiveRevision+'-'),
   'The HTML and native eight-module MAG archive must load the SAME revision; never accept stale caches');
