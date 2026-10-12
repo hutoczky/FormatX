@@ -1004,15 +1004,19 @@ void main(){
   /* Lightweight selection is synchronous on native scroll. GPU rendering is
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
+  let feedbackOwnsViewport=false;
   function feedbackInReadingWindow(){
     const feedback=document.getElementById('user-feedback');
-    if(!(feedback instanceof HTMLElement))return false;
+    if(!(feedback instanceof HTMLElement)){feedbackOwnsViewport=false;return false;}
     const rect=feedback.getBoundingClientRect();
-    // The genuine form is not a decorative 3D artifact. Do not let a MAG
-    // viewport canvas or its floating controls intercept its rating fields.
-    // A focused form also retains exclusive ownership during keyboard input.
+    // The original real form owns its full visible page. Use Schmitt-trigger
+    // margins: while scrolling or the async rating UI expands, a boundary
+    // cannot switch MAG back on over the 1–5 star inputs and textarea.
     const focused=document.activeElement instanceof Element&&feedback.contains(document.activeElement);
-    return focused||(rect.top<innerHeight*.72&&rect.bottom>innerHeight*.24);
+    const enters=rect.top<innerHeight*.86&&rect.bottom>innerHeight*.14;
+    const remains=rect.top<innerHeight*.98&&rect.bottom>innerHeight*.02;
+    feedbackOwnsViewport=focused||(feedbackOwnsViewport?remains:enters);
+    return feedbackOwnsViewport;
   }
   function selectLiveChapter(){
     if(!scenes.length)discover();
@@ -1191,6 +1195,12 @@ void main(){
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
+    document.addEventListener('focusin',event=>{
+      if(event.target instanceof Element&&event.target.closest('#user-feedback')){
+        feedbackOwnsViewport=true;
+        invalidate();
+      }
+    },{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
