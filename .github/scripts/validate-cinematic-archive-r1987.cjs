@@ -414,6 +414,42 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
+async function verifyMobileLivingPulse(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'
+  });
+  await context.addInitScript(()=>{
+    try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1')}catch(_){}
+    try{localStorage.setItem('formatx:intro-seen-v1','1')}catch(_){}
+  });
+  const page=await context.newPage();
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+    return root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+      && !!canvas&&getComputedStyle(canvas).animationName.includes('fx-primary-mag');
+  },null,{timeout:65000});
+  const samples=[];
+  for(let i=0;i<5;i++){
+    samples.push(await page.evaluate(()=>{
+      const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+      const style=getComputedStyle(canvas);
+      return {opacity:Number(style.opacity),animation:style.animationName,
+        state:style.animationPlayState,
+        registered:style.getPropertyValue('--fx-mag-life-opacity').trim()};
+    }));
+    await sleep(540);
+  }
+  const span=Math.max(...samples.map(x=>x.opacity))-Math.min(...samples.map(x=>x.opacity));
+  assert.ok(samples.every(x=>x.state==='running'),
+    'Living MAG unexpectedly paused on a normal visit: '+JSON.stringify(samples));
+  assert.ok(span>.004,
+    'MAG life animation masked by !important; no visible heartbeat: '+JSON.stringify({span,samples}));
+  console.log('ARCHIVE_MOBILE_LIVING_PULSE_PASS',JSON.stringify({span,samples}));
+  await context.close();
+}
 async function verifyNormalEntry(browser,isMobile){
   const address=new (require('node:url').URL)(URL);
   for(const key of ['archive','r486-optics-energy-check','mobileproof','lighthouse','visualintro'])
@@ -522,6 +558,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyMobileLivingPulse(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
