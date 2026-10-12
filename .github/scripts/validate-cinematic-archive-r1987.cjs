@@ -504,7 +504,10 @@ async function verifyMobileFeedbackProtection(browser){
     const feedback=document.querySelector('#user-feedback');
     const formRect=feedback?.getBoundingClientRect();
     return {focus:root.dataset.fxArchiveFeedbackFocus,mode:root.dataset.fxArchiveCinema,
-      scrollY,sectionRect:formRect?{y:formRect.y,b:formRect.bottom,h:formRect.height}:null,
+      scrollY,lastProcessedScroll:root.dataset.fxArchiveUpdateScroll,
+      updateCount:root.dataset.fxArchiveUpdateCount,
+      watched:!!document.getElementById('user-feedback'),
+      sectionRect:formRect?{y:formRect.y,b:formRect.bottom,h:formRect.height}:null,
       stageDisplay:stage?getComputedStyle(stage).display:'missing',
       controlsDisplay:controls?getComputedStyle(controls).display:'missing',
       form:!!document.querySelector('#user-feedback textarea[name="comment"]')};
