@@ -58,7 +58,7 @@ assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-de
 // Each new release must fingerprint the current native archive. Do NOT
 // require an outdated R2035 JS URL: doing so blocked valid fixes after a
 // cache bust. Still require the actual original MAG anti-banding assets.
-const archiveScript=html.match(/<script[^>]+src=["']([^"']*formatx-cinematic-archive-r1987\\.js\\?v=[^"']+)["']/i)?.[1];
+const archiveScript=html.match(/<script[^>]+src=["']([^"']*formatx-cinematic-archive-r1987\.js\?v=[^"']+)["']/i)?.[1];
 assert.ok(archiveScript?.includes('r2045-semantic-stage'),
   'HTML must fingerprint the latest audited R2045 MAG archive (not serve a stale script)');
 assert.ok(!html.includes('formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth'),
