@@ -47,14 +47,18 @@ assert.ok(intro.includes('Continuous cinematographic atmosphere'),
   'Cinematic MAG intro still overlays 4px raster stripes');
 assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
+// R2045 must bust the R2035 browser cache while RETAINING every strict
+// R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('r2035-debanded-photographic-mag'),
-    'A renderer loader may serve the cached banded MAG shader');
+  assert.ok(loader.includes('20261012-r2045-living-mag-pulse'),
+    'R2045 renderer loader is stale and may serve the old shader/compositor');
 }
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261011-r2035-debanded-mag'),
-  'Desktop startup scheduler must not cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261011-r2035-debanded-mag'),
-  'Canonical HTML must load the new scheduler');
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261012-r2045-living-mag-pulse'),
+  'Motion owner may boot the old cached MAG runtime');
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261012-r2045-living-mag-pulse'),
+  'Desktop startup scheduler may cache the old renderer loader');
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2045-living-mag-pulse'),
+  'Canonical HTML must load the R2045 scheduler');
 for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261011-r2035-debanded-depth',
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
