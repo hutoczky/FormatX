@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2046-eight-unique-original-html-folios';
+  const VERSION='cinematic-archive-r2047-single-scroll-dom-composition';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -27,7 +27,7 @@
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
-  let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0;
+  let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
@@ -353,22 +353,25 @@
     // Technical dialogs retain the same living MAG stage; only the native
     // interactive paper expands into a focused technical instrument.
     const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches);
-    root.dataset.fxArchiveCinema=enabled?'active':'home';
+    const sceneMode=enabled?'active':'home';
+    if(root.dataset.fxArchiveCinema!==sceneMode)root.dataset.fxArchiveCinema=sceneMode;
     if(enabled)keepExistingCinemaControls();
     setLegacyHeroHidden(enabled);
     setHeroCanvasLaneFront(enabled);
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
-    root.dataset.fxArchiveCinemaChapter=key;
+    if(root.dataset.fxArchiveCinemaChapter!==key)root.dataset.fxArchiveCinemaChapter=key;
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
-      host.dataset.fxCinemaHostActive=active?'true':'false';
+      const hostState=active?'true':'false';
+      if(host.dataset.fxCinemaHostActive!==hostState)host.dataset.fxCinemaHostActive=hostState;
       const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
-        panel.inert=!active;
-        panel.dataset.fxCinemaPanelActive=active?'true':'false';
+        if(panel.inert===active)panel.inert=!active;
+        const panelState=active?'true':'false';
+        if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
         if(active){
           const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
           const english=root.lang==='en';
@@ -1060,10 +1063,10 @@ void main(){
     const inArchive=selectLiveChapter();
     if(inArchive&&stage)ResponsiveExperience.dock();
     else if(archiveActive)ResponsiveExperience.restore();
-    setPanelState();
-    updateRealContentSheets();
-    syncCinema();
-    updateHandoff();
+    // The native scroll/resize event has ALREADY synchronously composed the
+    // visible HTML papyrus inside invalidate(). A second full DOM read/write
+    // cycle on the queued animation frame caused avoidable layout work on
+    // 60 Hz phones. This RAF owns the render request and chapter event only.
     if(current){
       const nextIndex=current.s.index;
       root.dataset.fxArchiveCurrent=current.s.key;
@@ -1091,6 +1094,8 @@ void main(){
         updateRealContentSheets();
         syncCinema();
         updateHandoff();
+        domComposes++;
+        root.dataset.fxArchiveDomComposes=String(domComposes);
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
@@ -1235,7 +1240,7 @@ void main(){
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples};},
+      cpuSamples:PerformanceManager.samples,domComposes};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();

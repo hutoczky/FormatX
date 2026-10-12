@@ -32,8 +32,10 @@ assert.ok(core.includes('float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*corte
   'Thin vertex-fold ripples would reintroduce temporal aliasing');
 assert.ok(archive.includes('opticalDepth*d,d'),
   'Archive and MAG must share correct homogeneous depth ordering');
-assert.ok(archive.includes("const VERSION='cinematic-archive-r2046-eight-unique-original-html-folios'"),
-  'The HTML and true eight-module native archive must use the same current renderer');
+const archiveRevision=archive.match(/const VERSION='cinematic-archive-(r\d{4})-[^']*'/)?.[1];
+assert.ok(archiveRevision,'The WebGL MAG archive must publish one recognized cinematic revision');
+assert.ok(html.includes('formatx-cinematic-archive-r1987.js?v=20261012-'+archiveRevision+'-'),
+  'The HTML and native eight-module MAG archive must load the SAME revision; never accept stale caches');
 assert.ok(archive.includes('fxArchiveDepthPolicyR2035'),
   'Wrong archive-depth revision active');
 const depth=z=>Math.max(-.16,Math.min(.86,.33-.15*z));
@@ -61,7 +63,7 @@ assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261012-r
   'Desktop startup scheduler may cache the old renderer loader');
 assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2045-living-mag-pulse'),
   'Canonical HTML must load the R2045 scheduler');
-for(const resource of ['formatx-cinematic-archive-r1987.js?v=20261012-r2046-eight-originals',
+for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);

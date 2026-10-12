@@ -6,6 +6,12 @@ const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/
 const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
+assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
+assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff)\s*\(/,
+  'R2047 prohibits running the same heavy native layout composition twice per scroll input');
+
 async function evaluate(viewport,isMobile,browser){
   const context=await browser.newContext({
     viewport,deviceScaleFactor:isMobile?2:1,
@@ -438,9 +444,12 @@ async function evaluate(viewport,isMobile,browser){
     const restored=api.state.targetFrameMs;
     return {before:active.targetFrameMs,low,high,restored,
       cpuSamples:active.cpuSamples,cpuSubmitMs:active.cpuSubmitMs,
+      domComposes:active.domComposes,
       memoryGB:navigator.deviceMemory||null,cores:navigator.hardwareConcurrency||null};
   });
-  assert.ok(renderBudget.cpuSamples>=1,'Archive never recorded actual WebGL CPU submissions: '+JSON.stringify(renderBudget));
+  assert.ok(Number.isInteger(renderBudget.domComposes)&&renderBudget.domComposes>=1,
+    'Archive must synchronously compose the real original HTML folio: '+JSON.stringify(renderBudget));
+    assert.ok(renderBudget.cpuSamples>=1,'Archive never recorded actual WebGL CPU submissions: '+JSON.stringify(renderBudget));
   assert.ok(renderBudget.low>=renderBudget.high&&renderBudget.high>0,
     'Adaptive renderer fails low/high quality cadence contract: '+JSON.stringify(renderBudget));
   if(isMobile&&!(renderBudget.memoryGB&&renderBudget.memoryGB<=2)
