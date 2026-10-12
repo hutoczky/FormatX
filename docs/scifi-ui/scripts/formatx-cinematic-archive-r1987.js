@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2045-feedback-protected-mobile-reader';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -994,9 +994,21 @@ void main(){
   /* Lightweight selection is synchronous on native scroll. GPU rendering is
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
+  function feedbackInReadingWindow(){
+    const feedback=document.getElementById('user-feedback');
+    if(!(feedback instanceof HTMLElement))return false;
+    const rect=feedback.getBoundingClientRect();
+    // The genuine form is not a decorative 3D artifact. Do not let a MAG
+    // viewport canvas or its floating controls intercept its rating fields.
+    // A focused form also retains exclusive ownership during keyboard input.
+    const focused=document.activeElement instanceof Element&&feedback.contains(document.activeElement);
+    return focused||(rect.top<innerHeight*.72&&rect.bottom>innerHeight*.24);
+  }
   function selectLiveChapter(){
     if(!scenes.length)discover();
-    const next=ScrollTimelineController.get();
+    const feedbackActive=feedbackInReadingWindow();
+    root.dataset.fxArchiveFeedbackFocus=feedbackActive?'active':'inactive';
+    const next=feedbackActive?null:ScrollTimelineController.get();
     // From the moment the intro ends, the MAG owns the page. Do not leave the
     // old landing page visible for a whole first viewport of scrolling.
     // The same native scrolling and eight source anchors remain intact.
