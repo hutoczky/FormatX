@@ -1221,7 +1221,13 @@ void main(){
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
-    addEventListener('scroll',invalidate,{passive:true});
+    // Existing mobile infinite-scroll code sometimes stops a bubbling
+    // scroll event before the archive's ordinary window listener sees it.
+    // Document capture receives real page + nested-reader scroll BEFORE
+    // client-side handlers can suppress it. No scroll hijacking is added.
+    addEventListener('scroll',invalidate,{passive:true,capture:true});
+    document.addEventListener('scroll',invalidate,{passive:true,capture:true});
+    window.visualViewport?.addEventListener('scroll',invalidate,{passive:true});
     watchRealFeedback();
     document.addEventListener('focusin',event=>{
       if(event.target instanceof Element&&event.target.closest('#user-feedback')){
