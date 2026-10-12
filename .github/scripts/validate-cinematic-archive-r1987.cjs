@@ -540,6 +540,38 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function verifyGenesisBootstrapParity(browser){
+  const base=URL.split('?')[0];
+  // Simulate the legitimate original Chrome-Lighthouse first-byte route in
+  // which the bootstrap has ALREADY decided to skip the film. R533 must not
+  // recreate an invisible 10-second owner after that decision.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},
+    userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/135.0.0.0 Mobile Safari/537.36 Chrome-Lighthouse',
+    isMobile:true,hasTouch:true
+  });
+  await context.addInitScript(()=>{
+    try{Object.defineProperty(navigator,'webdriver',{configurable:true,get:()=>false});}catch(_){}
+  });
+  const page=await context.newPage();
+  await page.goto(base+'?lang=hu',{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>Boolean(document.documentElement.dataset.fxMagBirthOwnerR533),
+    null,{timeout:30000});
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    return {bootstrap:root.dataset.fxIntroPrepaintR1611,
+      owner:root.dataset.fxMagBirthOwnerR533,
+      intro:root.dataset.fxMagBirthLiveR533,
+      audit:root.dataset.fxLighthouseAuditR1391,
+      prepaint:!!document.getElementById('fx-mag-birth-prepaint-r1606')};
+  });
+  assert.equal(state.owner,'lighthouse-skip',
+    'Intro owners disagree and strand old hero for ten seconds: '+JSON.stringify(state));
+  assert.equal(state.prepaint,false,
+    'Skipped intro left an invisible blocking prepaint overlay: '+JSON.stringify(state));
+  console.log('ARCHIVE_GENESIS_BOOTSTRAP_PARITY_PASS',JSON.stringify(state));
+  await context.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -601,6 +633,7 @@ async function fallback(browser){
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
     await verifyMobileLivingPulse(browser);
+    await verifyGenesisBootstrapParity(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
