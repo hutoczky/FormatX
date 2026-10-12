@@ -9,6 +9,9 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
+assert.doesNotMatch(rafUpdate,/\b(?:selectLiveChapter|ResponsiveExperience\.dock|ResponsiveExperience\.restore)\s*\(/,
+  'R2049 GPU-only RAF cannot remeasure all scene layouts or redock the MAG');
+
 assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff)\s*\(/,
   'R2047 prohibits running the same heavy native layout composition twice per scroll input');
 
