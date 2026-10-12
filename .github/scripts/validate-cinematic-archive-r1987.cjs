@@ -5,6 +5,17 @@ const fs=require('node:fs');
 const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html?archive=1&r486-optics-energy-check=1';
 const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
+
+// R2046: prevent stale cached JS/CSS from making the living MAG look like
+// the retired archive after the site shell has already been deployed.
+const htmlSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const sharedArchiveJS=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+assert.ok(htmlSource.includes('formatx-cinematic-archive-r1987.js?v=20261012-r2046-persistent-mag'),'MAG JS cache revision missing');
+assert.ok(htmlSource.includes('formatx-cinematic-archive-r1987.css?v=20261012-r2046-persistent-mag'),'MAG CSS cache revision missing');
+assert.match(sharedArchiveJS,/cinematic-archive-r2044-persistent-eight-bay-world/);
+assert.equal((htmlSource.match(/<section class="fx-award-proof" data-fx-award-proof/g)||[]).length,1,
+  'Proof module must have exactly one canonical HTML instance');
+
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function evaluate(viewport,isMobile,browser){
   const context=await browser.newContext({

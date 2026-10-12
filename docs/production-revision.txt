@@ -1,7 +1,6 @@
 FormatX production revision
-token=20261012-r2045-visible-mobile-mag-heart
-base_master=db078c8884a1cfdaf3521f53184e318c4f5c8c9f
-purpose=Preserve R2044 persistent eight-source cinematic MAG archival world and restore visibly breathing original R326 WebGL MAG on mobile; correct high-specificity important opacity cascade with a single registered compositor custom property.
-quality=One unchanged shared WebGL2 MAG with eight physical racks, native interactive HTML papyrus, no secondary video/canvas renderer or additional JS idle frame.
-validation=Playwright desktop/mobile eight reversible chapters and actual opacity span > .004; reduced motion and no WebGL fallback; original controls and proof; production revision and domain exact smoke required.
-limitations=Lighthouse mobile and desktop scored 93/100 against 95 target in CI; no proof of 60FPS on physical phones or photo-realism parity.
+token=20261012-r2046-canonical-archive-cache-proof
+base_master=eb91a64a36722ce6e02a334ec6b637d6221199b2
+purpose=Ensure both MAG cinematic source assets are cache-busted in sync with R2044 persistent eight-bay world, preventing legacy cached renderers from rendering the old website with a floating MAG. Guarantee one canonical proof source.
+validation=Strict source assertions plus existing MAG eight-scene desktop/mobile browser, reduced motion and no-WebGL fallbacks; exact revision custom-domain production smoke on deployment.
+limits=This is a cache-integrity reliability patch, not proof of cinematic award readiness or measured mobile 60 FPS.
