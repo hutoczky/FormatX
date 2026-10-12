@@ -82,6 +82,28 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
 
   const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
+  // All eight presentations share ONE physical camera track. It must not
+  // jump when the scroll timeline switches shelf identity. Compare a one-pixel
+  // real scroll across each scene anchor to detect screen-space teleportation.
+  const cameraContinuity=await page.evaluate(()=>{
+    const output=[];
+    const viewport=Math.max(1,innerHeight);
+    for(const scene of window.FormatXArchiveExperience.scenes){
+      const node=scene.id.startsWith('#')||scene.id.startsWith('.')
+        ?document.querySelector(scene.id):document.getElementById(scene.id);
+      if(!node)continue;
+      const y=scrollY+node.getBoundingClientRect().top+innerHeight*.52;
+      const old=window.scrollY;
+      // Virtual scroll displacement is only for the continuity probe;
+      // no navigation or actual document scroll is intercepted.
+      const rA=window.FormatXArchiveExperience?.cameraForQA?.(y-1,viewport);
+      const rB=window.FormatXArchiveExperience?.cameraForQA?.(y+1,viewport);
+      if(rA&&rB)output.push({scene:scene.key,delta:Math.max(...rA.map((x,i)=>Math.abs(x-rB[i])))});
+    }
+    return output;
+  });
+  assert.ok(cameraContinuity.length>=6&&cameraContinuity.every(x=>x.delta<.003),
+    'MAG camera teleports when entering another archive bay: '+JSON.stringify(cameraContinuity));
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
