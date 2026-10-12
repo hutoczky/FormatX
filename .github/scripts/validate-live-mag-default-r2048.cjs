@@ -66,7 +66,6 @@ async function checkViewport(browser,isMobile){
     assert.ok(initial.activeText>40,'First MAG handoff is blank');
     assert.ok(initial.stage&&initial.canvas&&!initial.oldHeroVisible,
       'Old homepage competes with living MAG or the actual 3D core is absent');
-    const keys=window=>window; // deliberately no synthetic UI or mock content
     const chapters=await page.evaluate(()=>window.FormatXArchiveExperience.scenes.map(s=>s.key));
     assert.equal(new Set(chapters).size,8,'Repeated MAG source chapter');
     const journey=[];
