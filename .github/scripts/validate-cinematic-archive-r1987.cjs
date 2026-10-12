@@ -256,10 +256,18 @@ async function evaluate(viewport,isMobile,browser){
         const active=panels.filter(p=>p.dataset.fxCinemaPanelActive==='true');
         const inactive=panels.filter(p=>p.dataset.fxCinemaPanelActive==='false');
         return {count:panels.length,active:active.length,
-          activeInert:active.some(p=>p.inert),hiddenFocus:inactive.filter(p=>!p.inert).length};
+          activeInert:active.some(p=>p.inert),hiddenFocus:inactive.filter(p=>!p.inert).length,
+          activeContentVisibility:active.map(p=>getComputedStyle(p).contentVisibility),
+          archivedContentVisibility:inactive.map(p=>getComputedStyle(p).contentVisibility),
+          remainingNativeNodes:inactive.every(p=>p.querySelectorAll('*').length>1)};
       });
       assert.ok(tabSafety.count===8&&tabSafety.active===1&&!tabSafety.activeInert&&!tabSafety.hiddenFocus,
         'Hidden native papers stole keyboard focus: '+JSON.stringify(tabSafety));
+      assert.ok(tabSafety.activeContentVisibility.every(v=>v==='visible')
+          &&tabSafety.archivedContentVisibility.every(v=>v==='hidden')
+          &&tabSafety.remainingNativeNodes,
+        'Inactive archived native HTML must skip expensive offscreen layout without deleting original content: '+JSON.stringify(tabSafety));
+      console.log('ARCHIVE_SINGLE_LIVE_LAYOUT_PASS',JSON.stringify({scene:scene.key,active:tabSafety.activeContentVisibility,archived:tabSafety.archivedContentVisibility.length}));
             assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
       assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');
       assert.ok(real3D.phase&&real3D.transform.startsWith('matrix3d('),
