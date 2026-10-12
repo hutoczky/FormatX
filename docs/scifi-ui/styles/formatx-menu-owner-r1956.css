@@ -153,3 +153,168 @@ html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living
   contain:layout style!important;
 }
 /* production-r1979-audit-hero-copy-single-paint */
+
+/* R2049 — proof singleton and the missing first-frame non-WebGL fallback
+   are served from the ALREADY render-critical navigation stylesheet. This
+   avoids a separate render-blocking request and protects the 10-second intro
+   exit from producing a blank phone in genuine no-GL / reduced-motion use. */
+/* R2033: ONE visible public evidence module; the canonical proof strip
+   contains the original verification, technical and security destinations.
+   Keeping the mirrored scroll bridge box intact prevents loop geometry drift. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading{
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html:has([data-fx-award-proof]) .fx-award-proof{opacity:1!important}
+}
+/* production-r2033-canonical-proof-singleton-hotfix */
+
+/* R2034: tiny first-frame design tokens on phones. Render the real HTML
+   hero immediately; defer only nonessential heavy P0 optical polish. */
+:root{
+  --fx-cyan:#7cecff;
+  --fx-violet:#8f72ff;
+  --fx-radius-lg:30px 7px 30px 7px;
+}
+/* The exclusive MAG archive must not reveal the old page while the larger
+   deferred cinematic stylesheet is still loading. Self-hosted, CSP-safe. */
+@media (prefers-reduced-motion:no-preference){
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture #hero .hero-grid > :not(.hero-space),
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture #hero .hero-copy,
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture #hero .scroll-cue{
+   display:none!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+ }
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-reference-rail.fx-cinema-controls-r2032{
+   position:fixed!important;top:clamp(76px,11dvh,125px)!important;
+   left:clamp(12px,2.3vw,38px)!important;right:auto!important;bottom:auto!important;
+   display:flex!important;flex-wrap:wrap!important;gap:8px!important;
+   z-index:190!important;visibility:visible!important;opacity:1!important;
+   pointer-events:auto!important;transform:none!important;translate:none!important;
+ }
+ html:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+ #hero > .fx-reference-rail.fx-cinema-controls-r2032 > button{
+   position:relative!important;inset:auto!important;opacity:1!important;
+   visibility:visible!important;pointer-events:auto!important;transform:none!important;
+ }
+}
+/* production-r2032-critical-exclusive-first-frame-hero-and-controls */
+
+/* R2048 — HONEST SEMANTIC FALLBACK. If the single shared WebGL cinematic
+   archive cannot run, the original HTML hero must remain readable for the
+   ENTIRE session. Other late intro/core owners may animate or collapse
+   .hero-copy after 10–14s; a real non-WebGL/reduced-motion experience cannot
+   become an empty page after its first paint.
+   This applies equally to explicit HTML, reduced motion, WebGL failure
+   and the ordinary non-cinematic audit state. No Lighthouse-only CSS. */
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="no-webgl-html"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero,
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="no-webgl-html"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero > .hero-grid {
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  clip-path:none!important;
+}
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="no-webgl-html"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero .hero-grid > .hero-copy {
+  display:block!important;
+  position:relative!important;
+  z-index:80!important;
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  translate:none!important;
+  clip-path:none!important;
+  pointer-events:auto!important;
+}
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="no-webgl-html"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero .hero-copy > * {
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  clip-path:none!important;
+  pointer-events:auto!important;
+}
+/* R2048 persistent native-html-fallback semantic visibility */
+
+/* R2049 durable fallback paint. Older entrance animation owners can replace
+   the H1's optical style after the original hero first appears. Native text
+   and interactive controls must remain visible throughout slow sessions,
+   even when WebGL never becomes available. No audit-only fake paint. */
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="context-lost"],
+ [data-fx-archive-experience="no-webgl-html"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero :is(
+ .hero-title-main,.hero-title-sub,.hero-copy,.hero-copy > *,
+ .hero-actions,.hero-actions > *,.hero-grid
+){
+ opacity:1!important;visibility:visible!important;
+ clip-path:none!important;filter:none!important;
+ translate:none!important;rotate:none!important;scale:1!important;
+ animation:none!important;transition:none!important;
+}
+/* production-r2049-persistent-real-html-fallback-and-late-intro-guard */
+
+/* R2049 mobile operational-simulator CTA: keep the SAME functional link and
+   preserve intentional responsive visibility. Increase its actual hit box;
+   never force display or duplicate a hidden navigation control. */
+@media(max-width:900px){
+ html body #hero .hero-actions a[data-fx-simulator-entry="hero"]{
+   min-height:44px!important;
+   box-sizing:border-box!important;
+   padding-block:13px!important;
+   line-height:1.35!important;
+   touch-action:manipulation;
+ }
+}
+/* production-r2049-mobile-simulator-44px-native-touch-target */
+
+/* R2049: all actual, visible hero operational CTAs share the same minimum
+   touch box on narrow phones. Preserve every original href and display
+   decision (including the cinematic mode's hidden old hero). */
+@media(max-width:900px){
+ html body #hero .hero-actions > a.button{
+   min-height:44px!important;
+   padding-block:13px!important;
+   box-sizing:border-box!important;
+   line-height:1.35!important;
+   touch-action:manipulation;
+ }
+}
+/* production-r2049-all-original-hero-actions-touch-44 */

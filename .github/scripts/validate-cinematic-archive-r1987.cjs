@@ -7,6 +7,11 @@ const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+// The single native cinematic folio owns presentation. The old card-by-card
+// geometry path must be dormant while the live WebGL archive is active.
+const legacySheetFunction=jsSource.split('function updateRealContentSheets(){')[1]?.split('function sceneForElement')[0]||'';
+assert.ok(legacySheetFunction.includes('if(cinemaPrepared){'),
+  'MAG has one real 3D folio: old nested cards must not animate independently');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
 assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff)\s*\(/,
@@ -203,6 +208,9 @@ async function evaluate(viewport,isMobile,browser){
       },scene.key);
       assert.ok(physical.folio,'Missing physical MAG paper for '+scene.key);
       assert.ok(physical.liveCount>=8,'Native content sheets were not prepared: '+JSON.stringify(physical));
+      const legacyReads=await page.evaluate(()=>Number(document.documentElement.dataset.fxArchiveLegacySheetReads||0));
+      assert.equal(legacyReads,0,
+        'Native folio is active: per-card layout reads should be zero (R2049)');
       assert.ok(physical.currentLive>=1,'Real HTML lacks MAG-delivered elements for '+scene.key+': '+JSON.stringify(physical));
       // R2030: old site surfaces must be invisible, with ONE original working
       // HTML folio presented at a time. Geometry must reserve a separate
@@ -706,6 +714,35 @@ async function fallback(browser){
     text:document.querySelector('#experience')?.textContent?.trim().length||0
   }));
   assert.equal(v.state,'reduced-html');
+  const fallbackPaint=await page.evaluate(()=>{
+    const hero=document.querySelector('#hero .hero-copy');
+    const st=hero&&getComputedStyle(hero);
+    return {display:st?.display||null,visibility:st?.visibility||null,
+      opacity:st?.opacity||null,criticalCSS:document.querySelector('link[data-fx-menu-owner-r1956]')?.sheet!=null};
+  });
+  assert.ok(fallbackPaint.criticalCSS&&fallbackPaint.display!=='none'
+       &&fallbackPaint.visibility==='visible'&&Number(fallbackPaint.opacity)>.98,
+       'Real HTML fallback must have painted hero copy: '+JSON.stringify(fallbackPaint));
+  // First-frame compliance alone is inadequate: introductory MAG/CSS stage
+  // timers have previously collapsed the original HTML after ~15 seconds.
+  await page.waitForTimeout(15500);
+  const persistent=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const hero=document.querySelector('#hero .hero-copy');
+    const title=document.querySelector('#hero .hero-title-main');
+    const a=hero&&getComputedStyle(hero),b=title&&getComputedStyle(title);
+    return {mode:root.dataset.fxArchiveExperience,
+      hero:{display:a?.display,visibility:a?.visibility,opacity:a?.opacity},
+      title:{display:b?.display,visibility:b?.visibility,opacity:b?.opacity},
+      heroText:hero?.innerText?.trim().length||0};
+  });
+  assert.ok(persistent.heroText>20
+    &&persistent.hero.display!=='none'&&persistent.hero.visibility==='visible'
+    &&Number(persistent.hero.opacity)>.98
+    &&persistent.title.display!=='none'&&persistent.title.visibility==='visible'
+    &&Number(persistent.title.opacity)>.98,
+    'Fallback disappeared after late cinematic intro reflow: '+JSON.stringify(persistent));
+  console.log('ARCHIVE_LATE_HTML_FALLBACK_PASS',JSON.stringify(persistent));
   assert.ok(v.text>20,'Reduced motion must preserve native HTML');
   console.log('ARCHIVE_REDUCED_PASS',JSON.stringify(v));
   await ctx.close();
