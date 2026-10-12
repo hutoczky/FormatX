@@ -9,6 +9,14 @@ async function verify(browser,viewport){
     colorScheme:'dark'
   });
   const page=await context.newPage();
+  if(mobile){
+    const cdp=await context.newCDPSession(page);
+    await cdp.send('Network.enable');
+    await cdp.send('Network.emulateNetworkConditions',{
+      offline:false,latency:150,downloadThroughput:200*1024,uploadThroughput:200*1024
+    });
+    await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  }
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(URL+'?lighthouse=1&lang=hu',{waitUntil:'domcontentloaded',timeout:60000});
