@@ -1345,3 +1345,72 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* one-real-papyrus-no-duplicate-status-folio-r2041 */
+
+/* R2045: User-provided mobile defect proof, not a stylistic preference.
+   A full feedback form must NEVER have the living MAG or sound/ASK overlay
+   above rating stars, text, consent or submit. The real form remains native.
+   Reading-lane stage is restored by the JS scroll controller as soon as
+   the pointer or viewport enters the real feedback section. */
+html[data-fx-archive-feedback-focus="active"] body.living-architecture
+#hero .fx-crystal-organism-r326-stage,
+html[data-fx-archive-feedback-focus="active"] body.living-architecture
+#hero .fx-reference-controls-r204,
+html[data-fx-archive-feedback-focus="active"] body.living-architecture
+#hero .fx-mag-heart-hit-r252{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html[data-fx-archive-feedback-focus="active"] body.living-architecture #user-feedback{
+  position:relative!important;
+  z-index:160!important;
+  content-visibility:visible!important;
+  isolation:isolate;
+}
+html[data-fx-archive-feedback-focus="active"] body.living-architecture #user-feedback :is(
+  .fx-feedback-form,.fx-feedback-rating,.fx-feedback-field,
+  textarea,input,button,.fx-rating-stars
+){
+  pointer-events:auto!important;
+}
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+  body.living-architecture main#main-content
+  > [data-fx-cinema-host-active="true"]
+  > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+    position:fixed!important;
+    inset:48dvh 4vw 2dvh 4vw!important;
+    width:92vw!important;
+    min-width:0!important;
+    max-width:92vw!important;
+    height:50dvh!important;
+    max-height:50dvh!important;
+    min-height:260px!important;
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    scrollbar-width:thin;
+    transform:none!important;
+    translate:none!important;
+    isolation:isolate!important;
+    z-index:180!important;
+  }
+  html:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+  body.living-architecture #hero .hero-space
+  > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
+    position:fixed!important;
+    top:1dvh!important;
+    bottom:auto!important;
+    height:44dvh!important;
+    min-height:0!important;
+    max-height:44dvh!important;
+    overflow:hidden!important;
+    mask-image:none!important;
+    pointer-events:none!important;
+    z-index:36!important;
+  }
+}
+/* production-r2045-feedback-no-mag-occlusion-and-real-mobile-folio */
