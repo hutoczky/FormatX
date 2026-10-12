@@ -6,6 +6,42 @@ const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/
 const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function captureVisibleChapter(page,context,isMobile,chapter){
+  // A screenshot taken after the pricing dialog closes can show NO paper.
+  // Capture WHILE the native interactive document is positively asserted
+  // visible, not after navigating away. This is the visual acceptance proof.
+  const active=await page.evaluate(()=>{
+    const p=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    const s=p?getComputedStyle(p):null;
+    return {chapter:document.documentElement.dataset.fxArchiveCurrent,
+      panel:!!p,visible:s?.visibility,opacity:Number(s?.opacity||0),
+      rect:p?{y:p.getBoundingClientRect().y,h:p.getBoundingClientRect().height}:null};
+  });
+  assert.equal(active.chapter,chapter,'Visual proof would capture wrong chapter: '+JSON.stringify(active));
+  assert.ok(active.panel&&active.visible==='visible'&&active.opacity>=.7,
+    'Visual proof cannot be captured without the real interactive papyrus: '+JSON.stringify(active));
+  const basename=`${out}/archive-${isMobile?'mobile':'desktop'}-${chapter}-active`;
+  let method='playwright';
+  try{
+    await page.screenshot({path:basename+'.png',fullPage:false,animations:'disabled',timeout:12000});
+  }catch(primary){
+    // Keep a real Chromium compositor alternative for software WebGL.
+    method='chromium-cdp';
+    const cdp=await context.newCDPSession(page);
+    try{
+      const image=await cdp.send('Page.captureScreenshot',{
+        format:'jpeg',quality:83,fromSurface:false,captureBeyondViewport:false
+      });
+      if(!image?.data)throw Error('No bitmap returned by Chrome');
+      fs.writeFileSync(basename+'.jpg',Buffer.from(image.data,'base64'));
+    }catch(fallback){
+      throw Error('Real '+chapter+' screenshot unavailable: '+primary.message+'; '+fallback.message);
+    }finally{await cdp.detach().catch(()=>{});}
+  }
+  console.log('ARCHIVE_VISUAL_EVIDENCE_CAPTURED',JSON.stringify({
+    mode:isMobile?'mobile':'desktop',chapter,method,active
+  }));
+}
 async function evaluate(viewport,isMobile,browser){
   const context=await browser.newContext({
     viewport,deviceScaleFactor:isMobile?2:1,
@@ -277,6 +313,11 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
         &&chapterHandoff.marker.includes('/ 08'),
         'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
+      // Licence and final proof/CTA are the strongest actual user-visible
+      // checkpoints: interactive original documents with readable text.
+      if(scene.key==='licensing'||scene.key==='final'){
+        await captureVisibleChapter(page,context,isMobile,scene.key);
+      }
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
@@ -415,39 +456,8 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_ADAPTIVE_CADENCE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...renderBudget}));
 
   assert.ok(native.scrollHeight>native.viewport,'Native scrolling was lost');
-  // Software WebGL readback can stall screenshots in CI even after all
-  // native scroll/WebGL assertions pass. Capture is evidence, not a substitute
-  // for functional testing; report incomplete captures explicitly.
-  try {
-    await page.screenshot({
-      path:`${out}/archive-${isMobile?'mobile':'desktop'}.png`,
-      fullPage:false,animations:'disabled',timeout:12000
-    });
-  } catch(error) {
-    // Chromium's full compositor capture can hang on software WebGL readback.
-    // Try the lighter browser compositor JPEG route as visual proof before
-    // declaring the screenshot unavailable; never fabricate visual results.
-    try {
-      const cdp=await context.newCDPSession(page);
-      const image=await cdp.send('Page.captureScreenshot',{
-        format:'jpeg',quality:80,fromSurface:false,captureBeyondViewport:false
-      });
-      if(!image?.data)throw new Error('Empty compositor capture');
-      fs.writeFileSync(`${out}/archive-${isMobile?'mobile':'desktop'}-fallback.jpg`,
-        Buffer.from(image.data,'base64'));
-      console.log('ARCHIVE_CAPTURE_CDP_PASS',JSON.stringify({
-        mode:isMobile?'mobile':'desktop',
-        source:'chromium-compositor',bytes:image.data.length*3/4
-      }));
-      await cdp.detach().catch(()=>{});
-    } catch(fallbackError) {
-      console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-        mode:isMobile?'mobile':'desktop',
-        primary:String(error?.message||error).slice(0,180),
-        fallback:String(fallbackError?.message||fallbackError).slice(0,180)
-      }));
-    }
-  }
+  // Valid screenshot artifacts are captured with the active licence and
+  // final papyri; never produce misleading dark post-dialog snapshots.
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
   const restored=await page.evaluate(()=>({dock:document.documentElement.dataset.fxArchiveDock,stage:!!document.querySelector('#hero .fx-crystal-organism-r326-stage')}));
