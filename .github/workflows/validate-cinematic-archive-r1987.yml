@@ -15,6 +15,8 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-r2046-content-continuity.cjs'
+      - 'docs/scifi-ui/styles/formatx-readability-continuity-r2046.css'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -30,6 +32,8 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-r2046-content-continuity.cjs'
+      - 'docs/scifi-ui/styles/formatx-readability-continuity-r2046.css'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
@@ -54,6 +58,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+          node --check .github/scripts/validate-r2046-content-continuity.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -73,6 +78,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Verify long-load readable hero and genuine MAG folio
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-r2046-content-continuity.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
