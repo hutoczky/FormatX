@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261012-r2049-single-live-paper-layout
-base_master=21cc1cf8a444f2bb2b85f44e1c5dd05403f451a1
-purpose=Preserve the original real WebGL2 MAG and all eight physically scroll-delivered HTML folios while preventing expensive layout and paint for seven inactive native HTML paper subtrees. Active source stays fully interactive and visibly foregrounded. No cloning or deleting original content.
-verification=Chromium eight-scene shared native MAG desktop/mobile, original eight sources and CTA, inactive content-visibility hidden while active is visible, keyboard and pointer interactivity, 320-1920 screen lane occlusion, no-WebGL and reduced-motion HTML fallback; production smoke and exact custom-domain revision required.
-performance_note=Layout containment is an implementation optimization, not a measured FPS gain; compare Lighthouse against baseline 92-93 desktop/93 mobile. The 95+ Lighthouse, physical device FPS and Igloo.inc visual quality are still unverified unless independently measured.
+token=20261012-r2050-native-surface-endpoint
+base_master=b392dd80eadbb72c960c33a7838902ed07157d14
+purpose=Final full-sweep native WebGL frame before returning the already-established MAG to zero-idle, so intermittent SwiftShader/Chromium rAF pauses cannot strand an autonomous surface-energy filament at only 37% of its path. Retain the exact original MAG renderer, eight interactive archive sources, and real original HTML folios.
+validation=Canonical native MAG surface-energy browser suite on 390px, 430px and 1440px; correct monotonic sweep endpoint, zero idle frames between bursts, offscreen and reduced-motion suspension; eight original interactive MAG archive chapters, no occlusion, original navigation and technical functionality; two Cloudflare domains revision and smoke tests.
+limits=Not verified photorealistic or native 60 FPS on a physical device. Strict Lighthouse 95+ desktop/mobile remains unmet.

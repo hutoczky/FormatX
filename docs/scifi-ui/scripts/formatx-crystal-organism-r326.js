@@ -2093,6 +2093,19 @@
       if(!blocked())schedule(1);
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
+        // R2050: Chromium can pause intermediate rAF callbacks while native
+        // CSS/compositor work is busy. The end timer must then submit the
+        // physically FINAL surface-pulse frame before restoring idle, rather
+        // than leaving the moving luminous filament frozen at 37% of its
+        // travel for the remaining ~700 ms. No new context, hidden interval
+        // or continuous idle renderer is created.
+        if(!blocked()&&Number.isFinite(surfacePulseStart)){
+          const finish=Math.min(performance.now(),surfacePulseStart+SURFACE_PULSE_WINDOW_MS-1);
+          if(finish>surfacePulseStart)render(finish);
+          root.dataset.fxCoreSweepEndpointR2050='rendered-native-final-phase';
+        }else{
+          root.dataset.fxCoreSweepEndpointR2050='suspended-when-invisible-or-paused';
+        }
         surfacePulseStart=-Infinity;
         burstFrames=0;
         if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}

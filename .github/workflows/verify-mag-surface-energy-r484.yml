@@ -10,6 +10,12 @@ on:
       - '.github/scripts/validate-mag-pause-owner-r485.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/workflows/verify-mag-surface-energy-r484.yml'
+  pull_request:
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - '.github/scripts/validate-mag-surface-energy-r484.cjs'
+      - '.github/workflows/verify-mag-surface-energy-r484.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
     types: [completed]
