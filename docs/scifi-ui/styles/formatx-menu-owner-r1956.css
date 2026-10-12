@@ -291,3 +291,17 @@ body.living-architecture #hero :is(.hero-copy,.hero-copy > *,.hero-title-main,.h
  transition:none!important;translate:none!important;
 }
 /* production-r2049-persistent-real-html-fallback-and-late-intro-guard */
+
+/* R2049 mobile operational-simulator CTA: keep the SAME functional link and
+   preserve intentional responsive visibility. Increase its actual hit box;
+   never force display or duplicate a hidden navigation control. */
+@media(max-width:900px){
+ html body #hero .hero-actions a[data-fx-simulator-entry="hero"]{
+   min-height:44px!important;
+   box-sizing:border-box!important;
+   padding-block:13px!important;
+   line-height:1.35!important;
+   touch-action:manipulation;
+ }
+}
+/* production-r2049-mobile-simulator-44px-native-touch-target */
