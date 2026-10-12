@@ -16,7 +16,10 @@ assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
 assert.equal((index.match(/data-fx-deferred-css-r487="true"/g)||[]).length,1,'R487 deferred CSS scheduler must load exactly once in source');
-assert.ok(index.includes('formatx-deferred-css-r487.js?v=20261009-r2022-visible-fcp-watchdog'),'R487 updated FCP scheduler revision missing from source');
+assert.equal((index.match(/formatx-deferred-css-r487\.js\?v=[^"']+/g)||[]).length,1,
+  'R487 must have exactly one cache-versioned deferred CSS controller entry, regardless of release date');
+assert.ok(read('docs/scifi-ui/scripts/formatx-deferred-css-r487.js').includes('fxIntroPrepaintR1611'),
+  'R2049 deferred CSS must respect the genuine MAG first-visit vs returning-visit prepaint owner');
 assert.ok(read('docs/scifi-ui/scripts/formatx-deferred-css-r487.js').includes('visible-tab-fcp-watchdog'),'R487 must activate when the FCP observer fails to fire');
 
 for (const token of [

@@ -51,13 +51,24 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  // A single price refresh previously instantiated a new Intl formatter
+  // for every HUF/EUR business card and QR label. Reuse only four immutable
+  // locale/currency combinations across real language and currency changes.
+  const currencyFormatters = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale=language()==='hu'?'hu-HU':'en-GB';
+    const key=locale+':'+selectedCurrency;
+    let format=currencyFormatters.get(key);
+    if(!format){
+      format=new Intl.NumberFormat(locale,{
+        style:'currency',
+        currency:selectedCurrency,
+        minimumFractionDigits:0,
+        maximumFractionDigits:0
+      });
+      currencyFormatters.set(key,format);
+    }
+    return format.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {

@@ -24,7 +24,7 @@
 
   root.dataset.fxLivingArchitectureLoaderR1985 = 'loading-normal-runtime';
   const script = document.createElement('script');
-  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261008-r1985-normal-runtime';
+  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261012-r2049-cached-currency';
   script.async = false;
   script.dataset.fxLivingArchitectureRuntimeR1985 = 'true';
   script.addEventListener('load', () => {

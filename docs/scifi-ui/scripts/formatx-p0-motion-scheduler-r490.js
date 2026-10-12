@@ -48,7 +48,12 @@ const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261012-r2
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=5500;
+// The original 5.5s timer plus a 3.5s idle timeout could leave returning
+// visitors staring at the legacy hero for nine seconds before the native MAG
+// even began compiling. Start the SAME shared renderer shortly after the
+// already-committed first paint, never in the LCP-critical initial frame.
+// Genuine first-visit film and direct user gesture already take priority.
+const AUTO_DELAY_MS=1700;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -107,9 +112,9 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:3500});
+    idleId=requestIdleCallback(launch,{timeout:1500});
   }else{
-    timer=setTimeout(launch,900);
+    timer=setTimeout(launch,450);
   }
 }
 

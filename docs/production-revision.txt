@@ -1,6 +1,9 @@
 FormatX production revision
-token=20261012-r2048-mag-transition-only-scroll
-base_master=8089555ec1e863dcbda13a31589344d52f1ddb7c
-purpose=R2048 retain real native WebGL2 MAG and eight original interactive archive folios while removing nine expensive repeated ancestor CSSOM writes per native scroll event; restore original inline transform styles on scene exit and context loss.
-verification=Chromium native shared MAG desktop/mobile, actual eight distinct interactive folios, normal first-visit entry, contact/readability bounds, original navigation, original proof/CTA, no-GPU/reduced-motion, real scene switching and transition-only scroll invariant.
-performance_note=Reduced JS/CSSOM operations per scroll tick. Do not label a CPU/GL command-submission budget as measured 60 FPS. Lighthouse >=95 both desktop and mobile and physical hardware quality remain explicit separate targets requiring measurement.
+token=20261012-r2049-early-living-mag-single-layout
+base_master=21cc1cf8a444f2bb2b85f44e1c5dd05403f451a1
+purpose=Preserve R2048 shared WebGL2 MAG, eight unique physically retrieved interactive HTML folios and canonical CTA/proof; eliminate duplicate eight-scene DOM layout read and MAG re-dock from GPU-only animation frame.
+verification=Chromium eight-source desktop/mobile, physical viewport separation, original interactive native HTML, scroll reversibility, no WebGL and reduced-motion fallback, production exact revision and two-domain smoke.
+performance=No second selectLiveChapter() in queued RAF after synchronous scroll; expected fewer main-thread layout reads, but no unmeasured FPS claims. Lighthouse >=95 for desktop/mobile remains an explicit unwaived target.
+first-visit=Keep 10.0-second cinematic MAG formation and native scroll handoff.
+returning-visit=Start real living MAG from committed first paint after 1.7-second timer and at most 1.5-second idle timeout, instead of 5.5s plus 3.5s, preserving explicit input immediate startup.
+currency=Reuse immutable HUF/EUR NumberFormat instances for native pricing and QR labels.
