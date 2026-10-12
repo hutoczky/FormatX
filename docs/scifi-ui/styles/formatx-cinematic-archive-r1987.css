@@ -602,19 +602,18 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     scrollbar-width:thin;
     scrollbar-color:rgba(111,208,237,.45) transparent;
     overscroll-behavior-y:auto;
-    padding:clamp(25px,3.5vw,62px)!important;
-    border:1px solid rgba(149,223,248,.42)!important;
-    border-left:2px solid rgba(185,245,255,.78)!important;
-    border-radius:12px 34px 34px 12px!important;
+    padding:clamp(24px,3.1vw,52px)!important;
+    border:1px solid rgba(192,222,228,.22)!important;
+    border-left:1px solid rgba(216,241,241,.54)!important;
+    border-radius:4px 22px 22px 4px!important;
     background:
-      radial-gradient(ellipse 90% 35% at 0% 3%,rgba(90,171,210,.105),transparent 78%),
-      repeating-linear-gradient(178deg,transparent 0 19px,rgba(176,227,240,.011) 20px,transparent 22px),
-      linear-gradient(117deg,rgba(6,17,29,.985),rgba(11,29,44,.975) 54%,rgba(5,17,27,.99))!important;
+      radial-gradient(ellipse 90% 50% at 0% 0%,rgba(127,165,169,.075),transparent 78%),
+      linear-gradient(124deg,rgba(7,15,20,.985),rgba(15,26,31,.985) 54%,rgba(5,13,19,.99))!important;
     box-shadow:
-      0 40px 120px rgba(0,0,0,.73),
-      0 0 68px rgba(52,134,183,.08),
-      inset 0 1px 0 rgba(229,250,255,.19),
-      inset 17px 0 28px rgba(95,190,218,.055)!important;
+      0 30px 90px rgba(0,0,0,.55),
+      0 4px 14px rgba(0,0,0,.30),
+      inset 0 1px 0 rgba(229,250,255,.12),
+      inset 12px 0 24px rgba(170,213,218,.025)!important;
     backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
     color:#e7f5fa!important;
@@ -640,11 +639,11 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     display:block;
     z-index:2;
     pointer-events:none;
-    margin:-18px auto 18px;
+    margin:0 auto 18px;
     height:1px;
     width:96%;
     background:linear-gradient(90deg,transparent,rgba(184,238,249,.5),transparent);
-    box-shadow:0 0 24px rgba(65,209,245,.3);
+    box-shadow:none;
   }
   html:root:root:root[data-fx-archive-cinema="active"]
   .fx-archive-cinema-folio-r2030 :is([data-reveal],.fx-archive-live-sheet-r2026){
@@ -661,6 +660,37 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     color:inherit;
     max-width:100%;
     overflow-wrap:break-word;
+  }
+  /* R2046: a consistent reading hierarchy inside each actual working folio. */
+  html[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030 h2{
+    font-size:clamp(26px,2.7vw,43px)!important;
+    line-height:1.09!important;
+    letter-spacing:-.036em!important;
+    font-weight:650!important;
+    color:#f1f7f7!important;
+    text-wrap:balance;
+    margin-block:12px 22px!important;
+  }
+  html[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030 h3{
+    font-size:clamp(18px,1.5vw,23px)!important;
+    line-height:1.25!important;
+    letter-spacing:-.02em!important;
+  }
+  html[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030 p:not(.section-index){
+    font-size:clamp(15px,1.08vw,17px)!important;
+    line-height:1.65!important;
+    color:#bdcdd3!important;
+    text-wrap:pretty;
+  }
+  html[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030 :is(.card,.system-card){
+    border-color:rgba(167,204,214,.14)!important;
+    border-radius:12px!important;
+    background:rgba(17,32,39,.55)!important;
+    box-shadow:none!important;
+  }
+  html[data-fx-archive-cinema="active"] .fx-archive-cinema-folio-r2030 :is(a,button):focus-visible{
+    outline:2px solid #c3f0f0!important;
+    outline-offset:4px!important;
   }
   html:root:root:root[data-fx-archive-cinema="active"]
   .fx-archive-cinema-folio-r2030 :is(.cards,.pricing,.system-grid,.fx-category-grid){
@@ -747,7 +777,7 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     min-height:0!important;
     max-height:49dvh!important;
     padding:clamp(16px,4.8vw,26px)!important;
-    border-radius:7px 25px 25px 7px!important;
+    border-radius:4px 18px 18px 4px!important;
     transform:perspective(900px) rotateX(calc(var(--fx-cinema-orbit,0) * 7deg))!important;
   }
   html:root:root:root:root[data-fx-archive-cinema="active"]
@@ -1068,7 +1098,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  body.living-architecture #hero .hero-space
  > .fx-crystal-organism-r326-stage.fx-archive-native-docked
  > canvas.fx-crystal-organism-r326-canvas {
-   scale:.74!important;
+   scale:.90!important;
    transform:none!important;
    transform-origin:50% 50%!important;
    filter:brightness(1.10) contrast(1.05)!important;
@@ -1103,7 +1133,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    translate:none!important;
    transform:none!important;
    isolation:isolate!important;
-   background:linear-gradient(124deg,rgba(5,18,32,.985),rgba(12,30,43,.974) 52%,rgba(4,15,27,.99))!important;
+   background:radial-gradient(ellipse 90% 50% at 0% 0%,rgba(127,165,169,.075),transparent 78%),linear-gradient(124deg,rgba(7,15,20,.985),rgba(15,26,31,.985) 54%,rgba(5,13,19,.99))!important;
  }
  html:root:root:root:root[data-fx-archive-cinema="active"]
  .fx-archive-physical-paper-r2026[data-active="true"] {
@@ -1134,7 +1164,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  body.living-architecture #hero .hero-space
  > .fx-crystal-organism-r326-stage.fx-archive-native-docked
  > canvas.fx-crystal-organism-r326-canvas {
-   scale:.86!important;
+   scale:.96!important;
    transform-origin:center center!important;
    object-fit:contain!important;
    filter:brightness(1.1) contrast(1.05)!important;
@@ -1330,12 +1360,13 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
     width:max-content!important;
     max-width:100%!important;
     min-height:24px!important;
-    padding:5px 10px 6px!important;
+    padding:5px 0 6px!important;
     margin:0 0 clamp(12px,1.8vw,24px)!important;
-    border:1px solid rgba(137,221,239,.29)!important;
-    border-radius:3px 11px 11px 3px!important;
-    background:linear-gradient(102deg,rgba(9,29,44,.98),rgba(5,18,30,.90))!important;
-    color:rgba(205,241,250,.88)!important;
+    border:0!important;
+    border-bottom:1px solid rgba(168,209,217,.26)!important;
+    border-radius:0!important;
+    background:#0b171e!important;
+    color:rgba(200,222,226,.88)!important;
     font:600 clamp(10px,.8vw,12px)/1.55 ui-monospace,SFMono-Regular,Consolas,monospace!important;
     letter-spacing:.095em!important;
     white-space:normal!important;

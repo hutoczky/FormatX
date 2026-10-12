@@ -396,7 +396,9 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        // Adjacent triangles share the same authored body/fiber normal,
+        // keeping the broad studio reflection continuous during close-ups.
+        const smoothWeight=facet<2.0?1:(software?.95:(mobile?.985:(constrained?.972:.978)));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -843,8 +845,8 @@
     /* R1959: physically neutral compositor tone. The previous inline
        !important saturation overrode the canonical material CSS. */
     const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
-      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
+      ? 'brightness(1.035) contrast(1.065) saturate(.99) blur(0px)'
+      : 'brightness(1.015) contrast(1.045) saturate(.99) blur(0px)';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
@@ -906,6 +908,12 @@
       return;
     }
 
+    // Use screen-space derivatives where supported. WebGL1 keeps the same
+    // material with conservative widths when OES_standard_derivatives is absent.
+    const materialDerivatives=webgl2||Boolean(gl.getExtension('OES_standard_derivatives'));
+    const materialExtensions=!webgl2&&materialDerivatives
+      ? '#extension GL_OES_standard_derivatives : enable\n' : '';
+
     const debugInfo=gl.getExtension('WEBGL_debug_renderer_info');
     const rendererName=String(debugInfo?gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
     const softwareRenderer=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(rendererName);
@@ -961,7 +969,10 @@
            after geometry cleanup and created a mouth/visor-like horizontal seam. */
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        // Radial physiological deformation preserves the closed thin valleys.
+        // Moving these non-ellipsoidal points along a sphere normal can push
+        // the two shell sides through each other at high desktop tessellation.
+        vec3 local=base*(1.0+(living+cortex+microFold)*.65)*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
@@ -1327,7 +1338,7 @@
        One clean material, no procedural dirt/speckles, no black button optic.
        The four-point silhouette carries the identity; the shader only gives it
        physical depth, broad softbox reflections and restrained living energy. */
-    const constrainedFragmentSource = `${versionLine}precision highp float;
+    const constrainedFragmentSource = `${versionLine}${materialExtensions}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
@@ -1339,11 +1350,33 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      vec3 toDisplay(vec3 c){
+        return mix(c*12.92,1.055*pow(max(c,vec3(0)),vec3(1.0/2.4))-.055,
+          step(vec3(.0031308),c));
+      }
+      // R2046: one energy-conserving dielectric response for every studio light.
+      // Finite roughness prevents single-pixel specular spikes during movement.
+      vec3 dielectricLight(vec3 n,vec3 view,vec3 light,vec3 tint,float roughness){
+        vec3 h=normalize(view+light);
+        float nv=max(.025,abs(dot(n,view)));
+        float nl=max(.0,dot(n,light));
+        float nh=max(.0,dot(n,h));
+        float vh=max(.0,dot(view,h));
+        float a=roughness*roughness,a2=a*a;
+        float d=nh*nh*(a2-1.0)+1.0;
+        float distribution=a2/(3.14159265*d*d+.0001);
+        float k=(roughness+1.0)*(roughness+1.0)*.125;
+        float geometry=(nv/(nv*(1.0-k)+k))*(nl/(nl*(1.0-k)+k+.0001));
+        vec3 fresnel=vec3(.042)+vec3(.958)*pow(1.0-vh,5.0);
+        return tint*fresnel*distribution*geometry*nl/max(.10,4.0*nv*max(.025,nl));
+      }
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
+        float fiberGeometryMask=step(1.60,vFacet)*(1.0-step(2.0,vFacet));
+        float bodyMaterialMask=1.0-fiberGeometryMask;
 
         vec3 keyDir=normalize(vec3(-.50,.78,.38));
         vec3 sideDir=normalize(vec3(.72,.08,.69));
@@ -1396,7 +1429,7 @@
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
+        c+=vec3(.98,1.00,.97)*softboxA*${mobile?'.110':'.145'};
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
@@ -1463,6 +1496,32 @@
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
         c+=vec3(.015,.050,.060)*frontDepth*.10;
 
+        /* R2046: the microfibril material now runs in the ACTIVE shader.
+           Irregularly spaced, curved strands replace the dormant high-frequency
+           comb pattern. Pixel footprints fade unresolved detail rather than
+           producing moire or dark speckles. No extra draw or WebGL context. */
+        float fiberPhase=vUv.x*${mobile?'118.0':'224.0'}
+          +sin(vUv.y*17.0+vLocal.z*3.0)*1.15
+          +sin(vUv.y*7.0+vLocal.x*2.0)*.65;
+        float strandId=floor(fiberPhase);
+        float strandSeed=fract(sin(strandId*127.1+13.7)*43758.5453);
+        float strandDistance=abs(fract(fiberPhase)-.5);
+        float strandFootprint=${materialDerivatives?'max(fwidth(fiberPhase),.025)':'.18'};
+        float strandCoverage=1.0-smoothstep(.018,.018+strandFootprint,strandDistance);
+        float resolved=1.0-smoothstep(.20,.80,strandFootprint);
+        float fiberEnvelope=smoothstep(.12,.26,vUv.y)*(1.0-smoothstep(.72,.89,vUv.y));
+        float surfaceFibers=strandCoverage*resolved*step(.64,strandSeed)
+          *fiberEnvelope*bodyMaterialMask;
+        vec3 tangent=normalize(cross(abs(n.y)<.92?vec3(0,1,0):vec3(1,0,0),n));
+        float anisotropic=pow(max(0.0,1.0-abs(dot(normalize(keyDir+view),tangent))),12.0);
+        c+=vec3(.29,.34,.33)*surfaceFibers*(.012+.042*anisotropic+.018*fresnel);
+        float roughness=mix(.26,.34,1.0-frontDepth);
+        c+=dielectricLight(n,view,keyDir,vec3(.98,.96,.91),roughness)*.11;
+        c+=dielectricLight(n,view,sideDir,vec3(.29,.52,.58),roughness+.06)*.09;
+        // Beer-Lambert attenuation adds depth without a painted horizontal seam.
+        vec3 absorption=exp(-vec3(.17,.085,.060)*(backDepth*.55+centreHaze*.24));
+        c*=absorption;
+
         /* R1942 — recessed optical organ.
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
@@ -1499,7 +1558,14 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        // Actual tapered 3D hairs receive a distinct neutral grazing-light
+        // response; the old shader shaded them as solid chunks of MAG glass.
+        vec3 strandColor=vec3(.030,.044,.048)
+          +vec3(.22,.28,.27)*(.15*key+.28*side+.33*fresnel)
+          +vec3(.54,.62,.58)*anisotropic*.080;
+        c=mix(c,strandColor,fiberGeometryMask);
+
+        ${outputName}=vec4(toDisplay(tone(c*${mobile?'1.68':'1.42'})),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1667,6 +1733,8 @@
     /* R1930 visual parity: one authored studio shader on desktop, mobile and
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
+    root.dataset.fxCoreMaterialR2046='shared-dielectric-ggx-active-filtered-microfibrils';
+    root.dataset.fxCoreMaterialDerivativesR2046=materialDerivatives?'screen-space':'conservative-width';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

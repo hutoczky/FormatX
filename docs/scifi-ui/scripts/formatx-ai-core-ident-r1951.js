@@ -7,7 +7,7 @@
 
   const PARAMS = new URLSearchParams(location.search);
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1' || /Chrome-Lighthouse/i.test(navigator.userAgent || '');
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  const AUTOMATION = (navigator.webdriver === true && PARAMS.get('intro') !== '1') || LIGHTHOUSE;
   const MOBILE = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let shown = false;
@@ -25,7 +25,7 @@
     document.querySelectorAll('.fx-ai-core-ident-r1951').forEach(node => node.remove());
   }
 
-  function showIdentity(source = 'magbirthcomplete') {
+  function showIdentity(source = 'genesis-stabilization') {
     if (shown || AUTOMATION || document.hidden) return;
     shown = true;
     clearTimers();
@@ -53,7 +53,7 @@
       requestAnimationFrame(() => badge.classList.add('is-visible'));
     });
 
-    const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
+    const hold = REDUCED ? 800 : 1500;
     exitTimer = window.setTimeout(() => {
       badge.classList.remove('is-visible');
       badge.classList.add('is-exiting');
@@ -65,8 +65,15 @@
     }, hold);
   }
 
+  document.addEventListener('formatx:magbirthstabilizing', event => {
+    showIdentity(event.detail?.source || 'genesis-stabilization');
+  }, { once: true, passive: true });
+
+  // Slow/unsupported intro renderers still get the one identifier. Skipping
+  // voluntarily never reopens it over a functioning content panel.
   document.addEventListener('formatx:magbirthcomplete', event => {
-    showIdentity(event.detail?.source || 'magbirthcomplete');
+    const source=event.detail?.source||'';
+    if(!shown&&!/skip|pagehide|reduced-motion/.test(source))showIdentity(source);
   }, { once: true, passive: true });
 
   addEventListener('pagehide', () => {

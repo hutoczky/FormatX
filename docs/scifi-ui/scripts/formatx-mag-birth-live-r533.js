@@ -538,6 +538,7 @@
   let warmupDispatched = false;
   let ignitionDone = false;
   let visiblePhase = 0;
+  let stabilizationAnnounced = false;
   let phaseChangedAt = 0;
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
 
@@ -604,6 +605,21 @@
       },Math.max(120,Math.round(DURATION*ratio)));
       phaseTimers.add(timer);
     }
+    const identityTimer=setTimeout(()=>{
+      phaseTimers.delete(identityTimer);
+      if(!finished)announceStabilization();
+    },Math.round(DURATION*.81));
+    phaseTimers.add(identityTimer);
+  }
+  function announceStabilization(){
+    if(stabilizationAnnounced||finished)return;
+    if(ROOT.dataset.fxCrystalOrganismR326!=='ready'&&!filmRenderer)return;
+    stabilizationAnnounced=true;
+    // Identity is synchronized with the actual final living shot, not the
+    // start of the DNA phase or a delayed post-film overlay.
+    document.dispatchEvent(new CustomEvent('formatx:magbirthstabilizing',{
+      detail:{source:'genesis-stabilization',phase:visiblePhase}
+    }));
   }
   function catchUpPhase(r){
     const target=phaseTargetFor(r);
@@ -1026,6 +1042,7 @@
       lastNativeSync=now;
       syncNativeCore(r,now);
     }
+    if(r>=.81)announceStabilization();
 
     if(!lastTelemetryUpdate || now-lastTelemetryUpdate>=(MOBILE?240:80) || r>=1){
       lastTelemetryUpdate=now;

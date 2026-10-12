@@ -77,4 +77,5 @@ jobs:
         with:
           name: formatx-archive-visual-proof
           path: .archive-artifacts/
+          include-hidden-files: true
           if-no-files-found: ignore

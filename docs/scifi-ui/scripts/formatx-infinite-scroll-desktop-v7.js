@@ -100,6 +100,11 @@
     return MOBILE_FLOW_QUERY.matches;
   }
 
+  function protectedNativeFocus(){
+    const active=document.activeElement;
+    return active instanceof HTMLElement&&Boolean(active.closest('#user-feedback,.site-footer'));
+  }
+
   function ensureStyle() {
     const existing=document.querySelector('link[data-fx-seamless-loop-style]');
     if(existing instanceof HTMLLinkElement){
@@ -608,6 +613,7 @@
 
   function performTransfer(relative, source, sourceTopOverride=null) {
     if (relative == null || Date.now() < transferLockedUntil) return false;
+    if(protectedNativeFocus())return false;
     if (document.body.classList.contains('fx-organism-panel-open')) return false;
     if (root.classList.contains('fx-organism-menu-open') || root.classList.contains('fx-intro-running') || root.classList.contains('fx-section-navigation-active')) return false;
 
@@ -640,6 +646,7 @@
     mobileSettleTimer = 0;
     if (touchActive) return;
     const uiBlocked=document.body.classList.contains('fx-organism-panel-open')
+      || protectedNativeFocus()
       || root.classList.contains('fx-organism-menu-open')
       || root.classList.contains('fx-intro-running')
       || root.classList.contains('fx-section-navigation-active');
@@ -702,6 +709,7 @@
 
   function commitDesktopTransfer() {
     if (isMobileFlow()) return;
+    if(protectedNativeFocus())return;
     if(root.classList.contains('fx-section-navigation-active')){
       pendingDesktopRelative=null;
       pendingDesktopSourceTop=null;
@@ -791,6 +799,10 @@
 
   function transferIfNeeded() {
     scrollFrame = 0;
+    if(protectedNativeFocus()){
+      root.dataset.fxLoopLandingState='protected-native-focus';
+      return;
+    }
     if(root.classList.contains('fx-section-navigation-active')){
       pendingDesktopRelative=null;
       pendingDesktopSourceTop=null;

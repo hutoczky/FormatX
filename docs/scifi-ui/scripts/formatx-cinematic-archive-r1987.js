@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2046-studio-native-reader';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -284,13 +284,16 @@
       // transform offset from a previous scroll chapter.
       const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
       const magBottom=stage?.getBoundingClientRect().bottom||h*.45;
-      const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
+      const viewportTop=Math.max(h*.48,magBottom+Math.min(16,h*.022));
+      const readerHeight=Math.max(120,h-viewportTop-Math.max(14,h*.028));
       // No per-scroll cumulative coordinates: this is genuinely viewport-
       // fixed once the source chapter no longer creates a containing block.
       panel.style.removeProperty('translate');
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
       panel.style.setProperty('top',viewportTop.toFixed(2)+'px','important');
+      panel.style.setProperty('height',readerHeight.toFixed(2)+'px','important');
+      panel.style.setProperty('max-height',readerHeight.toFixed(2)+'px','important');
       panel.dataset.fxMobileScreenTop=viewportTop.toFixed(2);
       return;
     }
@@ -337,7 +340,7 @@
           // Previously opacity zero hid all actual content while a small
           // decorative status card remained visible in production screenshots.
           const entry=smooth((p-.035)/.28),exit=smooth((p-.94)/.06);
-          const materialize=(.83+.17*entry)*(1-.09*exit);
+          const materialize=(.96+.04*entry)*(1-.025*exit);
           panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
           panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
           panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
@@ -354,12 +357,12 @@
           const paperArrival=smooth((p-.08)/.38);
           const unresolved=1-paperArrival;
           const phone=mobile();
-          const lateral=phone?0:sourceAxis*(unresolved*14-paperExit*9);
-          const vertical=(phone?7:12)*unresolved+(phone?5:10)*paperExit;
-          const yaw=phone?0:sourceAxis*(unresolved*-5.5+paperExit*3.5);
-          const pitch=phone?unresolved*3.5-paperExit*2:unresolved*1.5-paperExit;
-          const depth=-(phone?25:48)*unresolved-25*paperExit;
-          const scale=1-.025*unresolved-.018*paperExit;
+          const lateral=phone?0:sourceAxis*(unresolved*11-paperExit*7);
+          const vertical=(phone?4:9)*unresolved+(phone?3:7)*paperExit;
+          const yaw=phone?0:sourceAxis*(unresolved*-4.2+paperExit*2.5);
+          const pitch=phone?unresolved*2.2-paperExit*1.2:unresolved*1.2-paperExit*.7;
+          const depth=-(phone?16:38)*unresolved-18*paperExit;
+          const scale=1-.016*unresolved-.012*paperExit;
           panel.style.setProperty('--fx-cinema-handoff-x',lateral.toFixed(2)+'px');
           panel.style.setProperty('--fx-cinema-handoff-y',vertical.toFixed(2)+'px');
           panel.style.setProperty('--fx-cinema-handoff-z',depth.toFixed(2)+'px');
@@ -997,10 +1000,21 @@ void main(){
   function selectLiveChapter(){
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
+    // The genuine feedback form and footer are native page destinations.
+    // A fixed cinematic layer must release its lane while they are being read
+    // or edited; focus also protects a mobile keyboard/zoomed viewport.
+    const protectedRegion=[document.getElementById('user-feedback'),document.querySelector('.site-footer')]
+      .find(node=>{
+        if(!(node instanceof HTMLElement))return false;
+        if(node.contains(document.activeElement)&&document.activeElement!==document.body)return true;
+        const r=node.getBoundingClientRect();
+        return r.height>0&&r.top<innerHeight*.58&&r.bottom>innerHeight*.22;
+      });
+    root.dataset.fxArchiveProtectedFocus=protectedRegion?'active':'inactive';
     // From the moment the intro ends, the MAG owns the page. Do not leave the
     // old landing page visible for a whole first viewport of scrolling.
     // The same native scrolling and eight source anchors remain intact.
-    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
+    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next&&!protectedRegion);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
@@ -1170,6 +1184,9 @@ void main(){
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
     addEventListener('resize',invalidate,{passive:true});
+    window.visualViewport?.addEventListener('resize',invalidate,{passive:true});
+    document.addEventListener('focusin',invalidate,{passive:true});
+    document.addEventListener('focusout',()=>queueMicrotask(invalidate),{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
