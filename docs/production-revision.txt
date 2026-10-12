@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261012-r2048-mag-transition-only-scroll
-base_master=8089555ec1e863dcbda13a31589344d52f1ddb7c
-purpose=R2048 retain real native WebGL2 MAG and eight original interactive archive folios while removing nine expensive repeated ancestor CSSOM writes per native scroll event; restore original inline transform styles on scene exit and context loss.
-verification=Chromium native shared MAG desktop/mobile, actual eight distinct interactive folios, normal first-visit entry, contact/readability bounds, original navigation, original proof/CTA, no-GPU/reduced-motion, real scene switching and transition-only scroll invariant.
-performance_note=Reduced JS/CSSOM operations per scroll tick. Do not label a CPU/GL command-submission budget as measured 60 FPS. Lighthouse >=95 both desktop and mobile and physical hardware quality remain explicit separate targets requiring measurement.
+token=20261012-r2049-real-draw-frame-cadence
+base_master=21cc1cf8a444f2bb2b85f44e1c5dd05403f451a1
+purpose=Continue native R2048 eight-shelf cinematic MAG; measure actual WebGL render callback pacing during native scroll, adaptive low/high detail with hysteresis, preserve manual quality setting and prevent false measured-FPS claims.
+validation=Run strict PR 8-stage native WebGL2 desktop/mobile, no-information-occlusion, original HTML interaction, reduced motion, no-GPU fallback, production Worker validation and exact domain revision smoke before release.
+limits=Lighthouse >=95 / live P0 100 remain targets: observed R2048 real-experience desktop 92-93, mobile 93; no simulated or claimed physical FPS.
