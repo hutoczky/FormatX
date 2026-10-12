@@ -1005,7 +1005,7 @@ void main(){
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
   let feedbackOwnsViewport=false,feedbackWatchTarget=null;
-  let feedbackIntersection=null,feedbackMutation=null;
+  let feedbackIntersection=null,feedbackMutation=null,feedbackWatchdog=0;
   function watchRealFeedback(){
     const main=document.getElementById('main-content');
     if(!main||feedbackMutation)return;
@@ -1020,7 +1020,19 @@ void main(){
       feedbackWatchTarget=next instanceof HTMLElement?next:null;
       if(feedbackWatchTarget){
         feedbackIntersection.observe(feedbackWatchTarget);
+        // A low-cost visual-state watchdog is a last-resort fallback for
+        // browsers/legacy infinite-scroll controllers that suppress BOTH
+        // scroll and IntersectionObserver notifications. Only active while
+        // the real feedback section exists; no WebGL work is performed here.
+        if(!feedbackWatchdog)feedbackWatchdog=setInterval(()=>{
+          if(disposed||document.hidden)return;
+          const isFormOwner=feedbackInReadingWindow();
+          if((root.dataset.fxArchiveFeedbackFocus==='active')!==isFormOwner)
+            invalidate();
+        },200);
         invalidate();
+      }else if(feedbackWatchdog){
+        clearInterval(feedbackWatchdog);feedbackWatchdog=0;
       }
     };
     // Production feedback is inserted by the HTML Worker. Test and client
@@ -1158,6 +1170,8 @@ void main(){
     sceneObserver=null;
     feedbackIntersection?.disconnect();feedbackIntersection=null;
     feedbackMutation?.disconnect();feedbackMutation=null;feedbackWatchTarget=null;
+    if(feedbackWatchdog)clearInterval(feedbackWatchdog);
+    feedbackWatchdog=0;
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
