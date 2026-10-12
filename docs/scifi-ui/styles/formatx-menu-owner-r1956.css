@@ -263,3 +263,31 @@ html:is(
   pointer-events:auto!important;
 }
 /* R2048 persistent native-html-fallback semantic visibility */
+
+/* R2049 durable fallback paint. Older entrance animation owners can replace
+   the H1's optical style after the original hero first appears. Native text
+   and interactive controls must remain visible throughout slow sessions,
+   even when WebGL never becomes available. No audit-only fake paint. */
+html:is(
+ [data-fx-archive-experience="audit-html"],
+ [data-fx-archive-experience="reduced-html"],
+ [data-fx-archive-experience="no-scenes"],
+ [data-fx-archive-experience="context-error"],
+ [data-fx-archive-experience="context-lost"],
+ [data-fx-archive-experience="isolated-mag-test"]
+) body.living-architecture #hero :is(
+ .hero-title-main,.hero-title-sub,.hero-copy,.hero-copy > *,
+ .hero-actions,.hero-actions > *,.hero-grid
+){
+ opacity:1!important;visibility:visible!important;
+ clip-path:none!important;filter:none!important;
+ translate:none!important;rotate:none!important;scale:1!important;
+ animation:none!important;transition:none!important;
+}
+html[data-fx-archive-experience="pending"]:not([data-fx-mag-birth-live="active"]):not(:has(#fx-mag-birth-prepaint-r1606))
+body.living-architecture #hero :is(.hero-copy,.hero-copy > *,.hero-title-main,.hero-title-sub){
+ display:block!important;opacity:1!important;visibility:visible!important;
+ clip-path:none!important;filter:none!important;animation:none!important;
+ transition:none!important;translate:none!important;
+}
+/* production-r2049-persistent-real-html-fallback-and-late-intro-guard */
