@@ -1364,7 +1364,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    border:1px solid rgba(139,230,255,.5);border-radius:8px 18px 18px 8px;
    background:linear-gradient(105deg,rgba(9,44,60,.9),rgba(11,27,47,.95));
    color:#e6f9ff;cursor:pointer;
-   font:600 13px/1.4 inherit;
+   font-size:13px;font-weight:600;line-height:1.4;
    font-family:inherit;letter-spacing:.04em;
  }
  html:root:root[data-fx-archive-cinema="active"]
