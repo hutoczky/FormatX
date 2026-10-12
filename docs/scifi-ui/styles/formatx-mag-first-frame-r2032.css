@@ -34,3 +34,18 @@
 html:has([data-fx-award-proof]) #hero .fx-reference-proof,
 html:has([data-fx-award-proof]) #hero .fx-reference-heading,
 html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
+
+/* R2045: announce only the real delivered semantic document, never paint a
+   second floating title or an additional focusable button. */
+.fx-mag-archive-announcer-r2045{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important;
+  pointer-events:none!important;
+}
