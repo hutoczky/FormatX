@@ -233,6 +233,14 @@
         scene.cinemaHost=host;
         scene.cinemaPanel=host?.querySelector(':scope > .fx-archive-cinema-folio-r2030')||null;
       }
+      // Live OS (and other real modules) can be inserted by a separate
+      // production content owner AFTER the archive was initially prepared.
+      // Rediscovery must create their genuine semantic folios then, not just
+      // register an eighth chapter key while retaining seven papers.
+      if(scenes.some(scene=>scene.cinemaHost&&!scene.cinemaPanel)){
+        prepareRealContentSheets();
+        prepareCinemaHosts();
+      }
     }
     root.dataset.fxArchiveDistinctFolios=String(new Set(scenes.map(s=>s.cinemaPanel).filter(Boolean)).size);
   }
