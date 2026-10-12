@@ -495,8 +495,17 @@ async function verifyMobileFeedbackProtection(browser){
     resources.insertAdjacentHTML('beforebegin',markup);
   },match[1]);
   await page.locator('#user-feedback .fx-feedback-form').scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveFeedbackFocus==='active',
-    null,{timeout:8000});
+  // Browser-level smooth scroll and content-visibility may keep moving for
+  // one or more frames AFTER scrollIntoViewIfNeeded() resolves. Finish the
+  // real native jump and assert the STABLE end state, not an intermediate
+  // state caught during an animation.
+  await page.evaluate(()=>document.getElementById('user-feedback')
+    .scrollIntoView({block:'start',behavior:'instant'}));
+  await page.waitForTimeout(500);
+  await page.waitForFunction(()=>{
+    const r=document.documentElement.dataset;
+    return r.fxArchiveFeedbackFocus==='active'&&r.fxArchiveCinema==='home';
+  },null,{timeout:9000});
   const feedback=await page.evaluate(()=>{
     const root=document.documentElement;
     const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
