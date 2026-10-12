@@ -632,7 +632,7 @@
       this.emaMs=this.samples?this.emaMs*.86+ms*.14:ms;
       this.samples++;
       if(this.samples%8===0)root.dataset.fxArchiveCpuSubmitMs=this.emaMs.toFixed(2);
-      if(!mobile()||mobilePerf||this.samples<20)return;
+      if(!mobile()||mobilePerf||this.manualQuality||this.samples<20)return;
       // Hysteresis: neither first shader compilation nor one GC pause
       // can permanently reduce MAG's native filament quality.
       if(quality==='high'){
