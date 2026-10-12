@@ -61,8 +61,10 @@ assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261012-r2045-l
   'Motion owner may boot the old cached MAG runtime');
 assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261012-r2045-living-mag-pulse'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2045-living-mag-pulse'),
-  'Canonical HTML must load the R2045 scheduler');
+assert.equal((html.match(/formatx-p0-motion-scheduler-r490\.js\?v=[^"']+/g)||[]).length,1,
+  'Canonical HTML must load exactly one cache-versioned real MAG scheduler');
+assert.ok(scheduler.includes("formatx-motion-runtime-loader-r239.js?v=20261012-r2045-living-mag-pulse"),
+  'The faster returning-visitor scheduler must still launch the original unchanged native R2045 MAG renderer');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
