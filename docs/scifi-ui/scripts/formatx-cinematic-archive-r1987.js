@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2044-persistent-eight-bay-world';
+  const VERSION='cinematic-archive-r2045-feedback-protected-mobile-reader';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -457,6 +457,16 @@
   class ScrollTimelineController {
     static get(){
       if(!scenes.length)return null;
+      // Once the final delivered module has left the reader, the footer and
+      // legal/feedback surfaces must regain native navigation. The old
+      // nearest-chapter logic incorrectly kept a distant MAG over a blank
+      // viewport forever after the last archive bay.
+      const finalAnchor=scenes[scenes.length-1].scrollAnchor||scenes[scenes.length-1].node;
+      if(finalAnchor.getBoundingClientRect().bottom<innerHeight*.24){
+        root.dataset.fxArchiveAfterFinal='native-footer';
+        return null;
+      }
+      root.dataset.fxArchiveAfterFinal='false';
       // Absolute layout only, never alter document scroll position.
       let closest=null,score=Infinity;
       const anchor=innerHeight*.52;
@@ -994,9 +1004,65 @@ void main(){
   /* Lightweight selection is synchronous on native scroll. GPU rendering is
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
+  let feedbackOwnsViewport=false,feedbackWatchTarget=null;
+  let feedbackIntersection=null,feedbackMutation=null,feedbackWatchdog=0;
+  function watchRealFeedback(){
+    const main=document.getElementById('main-content');
+    if(!main||feedbackMutation)return;
+    feedbackIntersection=new IntersectionObserver(()=>invalidate(),{
+      root:null,rootMargin:'-8% 0px -8% 0px',
+      threshold:[0,.01,.15,.40,.75,1]
+    });
+    const attach=()=>{
+      const next=document.getElementById('user-feedback');
+      if(next===feedbackWatchTarget)return;
+      if(feedbackWatchTarget)feedbackIntersection.unobserve(feedbackWatchTarget);
+      feedbackWatchTarget=next instanceof HTMLElement?next:null;
+      if(feedbackWatchTarget){
+        feedbackIntersection.observe(feedbackWatchTarget);
+        // A low-cost visual-state watchdog is a last-resort fallback for
+        // browsers/legacy infinite-scroll controllers that suppress BOTH
+        // scroll and IntersectionObserver notifications. Only active while
+        // the real feedback section exists; no WebGL work is performed here.
+        if(!feedbackWatchdog)feedbackWatchdog=setInterval(()=>{
+          if(disposed||document.hidden)return;
+          const isFormOwner=feedbackInReadingWindow();
+          if((root.dataset.fxArchiveFeedbackFocus==='active')!==isFormOwner)
+            invalidate();
+        },200);
+        invalidate();
+      }else if(feedbackWatchdog){
+        clearInterval(feedbackWatchdog);feedbackWatchdog=0;
+      }
+    };
+    // Production feedback is inserted by the HTML Worker. Test and client
+    // navigation can also insert it after the original MAG scene has mounted.
+    // A scroll listener alone misses those content-visibility transitions.
+    feedbackMutation=new MutationObserver(attach);
+    feedbackMutation.observe(main,{childList:true,subtree:true});
+    attach();
+  }
+  function feedbackInReadingWindow(){
+    const feedback=document.getElementById('user-feedback');
+    if(!(feedback instanceof HTMLElement)){feedbackOwnsViewport=false;return false;}
+    const rect=feedback.getBoundingClientRect();
+    // The original real form owns its full visible page. Use Schmitt-trigger
+    // margins: while scrolling or the async rating UI expands, a boundary
+    // cannot switch MAG back on over the 1–5 star inputs and textarea.
+    const focused=document.activeElement instanceof Element&&feedback.contains(document.activeElement);
+    const enters=rect.top<innerHeight*.86&&rect.bottom>innerHeight*.14;
+    const remains=rect.top<innerHeight*.98&&rect.bottom>innerHeight*.02;
+    // A focused textarea cannot own the MAG after its entire section
+    // has left the phone viewport. Otherwise even reverse navigation cannot
+    // re-activate the real 3D archive, leaving a blank frame on return.
+    feedbackOwnsViewport=(focused&&remains)||(feedbackOwnsViewport?remains:enters);
+    return feedbackOwnsViewport;
+  }
   function selectLiveChapter(){
     if(!scenes.length)discover();
-    const next=ScrollTimelineController.get();
+    const feedbackActive=feedbackInReadingWindow();
+    root.dataset.fxArchiveFeedbackFocus=feedbackActive?'active':'inactive';
+    const next=feedbackActive?null:ScrollTimelineController.get();
     // From the moment the intro ends, the MAG owns the page. Do not leave the
     // old landing page visible for a whole first viewport of scrolling.
     // The same native scrolling and eight source anchors remain intact.
@@ -1105,6 +1171,10 @@ void main(){
     if(raf)cancelAnimationFrame(raf);
     sceneObserver?.disconnect();
     sceneObserver=null;
+    feedbackIntersection?.disconnect();feedbackIntersection=null;
+    feedbackMutation?.disconnect();feedbackMutation=null;feedbackWatchTarget=null;
+    if(feedbackWatchdog)clearInterval(feedbackWatchdog);
+    feedbackWatchdog=0;
     handoff?.remove();handoff=null;
     restoreExistingCinemaControls();
     restoreExistingFinalCta();
@@ -1168,7 +1238,20 @@ void main(){
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
-    addEventListener('scroll',invalidate,{passive:true});
+    // Existing mobile infinite-scroll code sometimes stops a bubbling
+    // scroll event before the archive's ordinary window listener sees it.
+    // Document capture receives real page + nested-reader scroll BEFORE
+    // client-side handlers can suppress it. No scroll hijacking is added.
+    addEventListener('scroll',invalidate,{passive:true,capture:true});
+    document.addEventListener('scroll',invalidate,{passive:true,capture:true});
+    window.visualViewport?.addEventListener('scroll',invalidate,{passive:true});
+    watchRealFeedback();
+    document.addEventListener('focusin',event=>{
+      if(event.target instanceof Element&&event.target.closest('#user-feedback')){
+        feedbackOwnsViewport=true;
+        invalidate();
+      }
+    },{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});

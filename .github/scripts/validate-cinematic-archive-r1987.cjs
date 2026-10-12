@@ -462,6 +462,101 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function verifyMobileFeedbackProtection(browser){
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},deviceScaleFactor:2,
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  await context.addInitScript(()=>{
+    try{sessionStorage.setItem('formatx:mag-birth-live-r533-seen','1')}catch(_){}
+    try{localStorage.setItem('formatx:intro-seen-v1','1')}catch(_){}
+  });
+  const page=await context.newPage();
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+    null,{timeout:65000});
+  const folio=await page.evaluate(()=>{
+    const p=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const st=p?getComputedStyle(p):null,r=p?.getBoundingClientRect();
+    return {box:r?{x:r.x,y:r.y,w:r.width,h:r.height}:null,
+      opacity:st?Number(st.opacity):0,visible:st?.visibility,
+      labels:p?.querySelectorAll('h2,h3,a[href],button')?.length||0,
+      text:p?.textContent?.trim().length||0};
+  });
+  assert.ok(folio.box&&folio.box.w>=310&&folio.box.h>=250
+    &&folio.box.y>=844*.34&&folio.box.y<844*.74
+    &&folio.labels>0&&folio.text>80&&folio.opacity>.55,
+    'Mobile start must show large readable NATIVE paper rather than tiny GL frame on empty page: '+JSON.stringify(folio));
+  const worker=fs.readFileSync('billing-worker/src/production-content-base.js','utf8');
+  const match=worker.match(/const USER_FEEDBACK_SECTION = \`([\s\S]*?)\`;/);
+  assert.ok(match,'The original production feedback HTML template is missing');
+  await page.evaluate(markup=>{
+    const resources=document.querySelector('#resources');
+    resources.insertAdjacentHTML('beforebegin',markup);
+  },match[1]);
+  await page.locator('#user-feedback .fx-feedback-form').scrollIntoViewIfNeeded();
+  // Browser-level smooth scroll and content-visibility may keep moving for
+  // one or more frames AFTER scrollIntoViewIfNeeded() resolves. Finish the
+  // real native jump and assert the STABLE end state, not an intermediate
+  // state caught during an animation.
+  await page.evaluate(()=>document.getElementById('user-feedback')
+    .scrollIntoView({block:'start',behavior:'instant'}));
+  await page.waitForTimeout(500);
+  await page.waitForFunction(()=>{
+    const r=document.documentElement.dataset;
+    return r.fxArchiveFeedbackFocus==='active'&&r.fxArchiveCinema==='home';
+  },null,{timeout:9000});
+  // The source sections must keep their original scroll height throughout
+  // the transition. Re-navigate to the actual rendered feedback section and
+  // demand that it remain inside the PHONE viewport, not 1500px below it.
+  for(let attempt=0;attempt<3;attempt++){
+    await page.evaluate(()=>document.getElementById('user-feedback')
+      .scrollIntoView({block:'start',behavior:'instant'}));
+    await page.waitForTimeout(240);
+    const visible=await page.evaluate(()=>{
+      const r=document.getElementById('user-feedback').getBoundingClientRect();
+      return r.top<innerHeight*.82&&r.bottom>innerHeight*.12;
+    });
+    if(visible)break;
+  }
+  const feedback=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    const controls=document.querySelector('#hero .fx-reference-controls-r204');
+    const feedback=document.querySelector('#user-feedback');
+    const formRect=feedback?.getBoundingClientRect();
+    return {focus:root.dataset.fxArchiveFeedbackFocus,mode:root.dataset.fxArchiveCinema,
+      scrollY,lastProcessedScroll:root.dataset.fxArchiveUpdateScroll,
+      updateCount:root.dataset.fxArchiveUpdateCount,
+      watched:!!document.getElementById('user-feedback'),
+      sectionRect:formRect?{y:formRect.y,b:formRect.bottom,h:formRect.height}:null,
+      stageDisplay:stage?getComputedStyle(stage).display:'missing',
+      controlsDisplay:controls?getComputedStyle(controls).display:'missing',
+      form:!!document.querySelector('#user-feedback textarea[name="comment"]')};
+  });
+  assert.equal(feedback.mode,'home','Feedback form must suspend MAG cinema: '+JSON.stringify(feedback));
+  assert.ok(feedback.sectionRect&&feedback.sectionRect.y<844*.82
+    &&feedback.sectionRect.b>844*.12,
+    'Native feedback form must remain ACTUALLY on screen after MAG withdraws: '+JSON.stringify(feedback));
+  assert.ok(feedback.stageDisplay==='none'&&feedback.controlsDisplay==='none'&&feedback.form,
+    'MAG and controls must not cover actual feedback stars or text input: '+JSON.stringify(feedback));
+  await page.locator('#user-feedback textarea[name="comment"]').fill('Mobil teszt: élő adatbevitel.');
+  assert.ok((await page.locator('#user-feedback textarea[name="comment"]').inputValue()).includes('teszt'));
+  await page.locator('#user-feedback textarea[name="comment"]').evaluate(el=>el.blur());
+  await page.evaluate(()=>{
+    const anchor=document.querySelector('#experience');
+    if(anchor)window.scrollTo({top:Math.max(0,scrollY+anchor.getBoundingClientRect().top-innerHeight*.22),
+      behavior:'instant'});
+  });
+  await page.waitForFunction(()=>{
+    const data=document.documentElement.dataset;
+    return data.fxArchiveFeedbackFocus==='inactive'
+      &&data.fxArchiveCinema==='active'
+      &&Boolean(document.querySelector('[data-fx-cinema-panel-active="true"]'));
+  },null,{timeout:10000});
+  console.log('ARCHIVE_FEEDBACK_MOBILE_PASS',JSON.stringify({folio,feedback}));
+  await context.close();
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -522,6 +617,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyMobileFeedbackProtection(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
