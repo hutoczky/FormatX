@@ -6,6 +6,7 @@ async function verify(browser,viewport){
   const mobile=viewport.width<=900;
   const context=await browser.newContext({
     viewport,isMobile:mobile,hasTouch:mobile,reducedMotion:'no-preference',
+    deviceScaleFactor:mobile&&viewport.width===412?1.75:1,
     colorScheme:'dark'
   });
   const page=await context.newPage();
@@ -67,7 +68,7 @@ async function verify(browser,viewport){
   const fs=require('node:fs');
   fs.mkdirSync('.archive-artifacts',{recursive:true});
   const png=await page.screenshot({
-    path:'.archive-artifacts/r2046-long-load-'+(mobile?'phone':'desktop')+'.png',
+    path:'.archive-artifacts/r2046-long-load-'+(mobile?'phone-'+viewport.width:'desktop')+'.png',
     timeout:30000
   });
   const visual=await page.evaluate(async (encoded)=>{
@@ -129,6 +130,9 @@ async function verify(browser,viewport){
   ]});
   try{
     await verify(browser,{width:390,height:844});
+    // Exact Lighthouse mobile viewport in the saved R2045 trace: 412 CSS
+    // pixels, 823 high, device-scale-factor 1.75 and 4x CPU slowdown.
+    await verify(browser,{width:412,height:823});
     await verify(browser,{width:1440,height:900});
   }finally{await browser.close();}
 })().catch(error=>{console.error('MAG_CONTENT_CONTINUITY_FAIL',error.stack||String(error));process.exitCode=1;});
