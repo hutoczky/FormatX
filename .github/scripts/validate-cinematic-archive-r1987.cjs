@@ -424,9 +424,29 @@ async function evaluate(viewport,isMobile,browser){
       fullPage:false,animations:'disabled',timeout:12000
     });
   } catch(error) {
-    console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
-      mode:isMobile?'mobile':'desktop',reason:String(error?.message||error).slice(0,400)
-    }));
+    // Chromium's full compositor capture can hang on software WebGL readback.
+    // Try the lighter browser compositor JPEG route as visual proof before
+    // declaring the screenshot unavailable; never fabricate visual results.
+    try {
+      const cdp=await context.newCDPSession(page);
+      const image=await cdp.send('Page.captureScreenshot',{
+        format:'jpeg',quality:80,fromSurface:false,captureBeyondViewport:false
+      });
+      if(!image?.data)throw new Error('Empty compositor capture');
+      fs.writeFileSync(`${out}/archive-${isMobile?'mobile':'desktop'}-fallback.jpg`,
+        Buffer.from(image.data,'base64'));
+      console.log('ARCHIVE_CAPTURE_CDP_PASS',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        source:'chromium-compositor',bytes:image.data.length*3/4
+      }));
+      await cdp.detach().catch(()=>{});
+    } catch(fallbackError) {
+      console.warn('ARCHIVE_CAPTURE_UNAVAILABLE',JSON.stringify({
+        mode:isMobile?'mobile':'desktop',
+        primary:String(error?.message||error).slice(0,180),
+        fallback:String(fallbackError?.message||fallbackError).slice(0,180)
+      }));
+    }
   }
   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
   await sleep(200);
