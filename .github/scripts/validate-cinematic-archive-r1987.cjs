@@ -25,9 +25,14 @@ async function evaluate(viewport,isMobile,browser){
     status:document.documentElement.dataset.fxArchiveExperience,
     shared:window.FormatXLivingCore?.sharedWebGL2||false,
     sceneCount:window.FormatXArchiveExperience.scenes.length,
-    contextCount:document.documentElement.dataset.fxCoreContexts
+    contextCount:document.documentElement.dataset.fxCoreContexts,
+    material:document.documentElement.dataset.fxCoreMaterialR2046,
+    shader:document.documentElement.dataset.fxCoreShaderCompileR600
   }));
   assert.equal(init.status,'ready',JSON.stringify(init));
+  assert.equal(init.material,'shared-dielectric-ggx-active-filtered-microfibrils',
+    'The visible MAG must run the detailed studio material, not a dormant shader');
+  assert.ok(/ready$/.test(init.shader||''),'Real MAG shader did not compile/link: '+JSON.stringify(init));
   // The renderer can re-announce readiness after a restored tab or a
   // responsive layout change. This MUST NOT allocate duplicate WebGL passes.
   const rendererProbe=await page.evaluate(()=>{
@@ -192,6 +197,12 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(cinema.paperText>70,'Original functional content is not present in MAG folio');
       assert.ok(cinema.oldHidden,'Other legacy sections remain visible behind MAG');
       assert.ok(cinema.mag&&cinema.paper,'Missing two cinematic lanes');
+      if(isMobile){
+        assert.ok(cinema.paper.y>=cinema.mag.y+cinema.mag.h-1,
+          'The mobile reader crosses the MAG lane: '+JSON.stringify(cinema));
+        assert.ok(cinema.paper.y+cinema.paper.h<=viewport.height+1,
+          'The mobile reader extends below the usable viewport: '+JSON.stringify(cinema));
+      }
       // R2038 screenshot regression: a GPU draw-call and 8 scene labels are
       // insufficient if the original working HTML pane is invisible behind
       // the full-width old hero's z-index, as seen on an actual 1660px desktop.
@@ -497,6 +508,30 @@ async function missingGpuFallback(browser){
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
 }
+async function verifyNativeFooter(browser){
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const page=await context.newPage();
+  await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:90000});
+  const footer=page.locator('.site-footer');
+  await footer.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='home',null,{timeout:10000});
+  const state=await page.evaluate(()=>{
+    const footer=document.querySelector('.site-footer');
+    const link=footer?.querySelector('a[href]');
+    const r=link?.getBoundingClientRect();
+    const hit=r?document.elementFromPoint(r.x+r.width/2,r.y+r.height/2):null;
+    return {mode:document.documentElement.dataset.fxArchiveCinema,
+      protected:document.documentElement.dataset.fxArchiveProtectedFocus,
+      link:!!link,visible:!!r&&r.y>=0&&r.bottom<=innerHeight,
+      clickable:!!link&&(hit===link||link.contains(hit))};
+  });
+  assert.equal(state.protected,'active','Native footer was covered by the fixed cinema');
+  assert.ok(state.link&&state.visible&&state.clickable,'Actual footer link is blocked: '+JSON.stringify(state));
+  await page.screenshot({path:`${out}/native-footer-mobile.png`,animations:'disabled',timeout:15000});
+  console.log('ARCHIVE_NATIVE_FOOTER_PASS',JSON.stringify(state));
+  await context.close();
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -522,6 +557,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyNativeFooter(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}
