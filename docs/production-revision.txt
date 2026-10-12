@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261012-r2045-visible-mobile-mag-heart
-base_master=db078c8884a1cfdaf3521f53184e318c4f5c8c9f
-purpose=Preserve R2044 persistent eight-source cinematic MAG archival world and restore visibly breathing original R326 WebGL MAG on mobile; correct high-specificity important opacity cascade with a single registered compositor custom property.
-quality=One unchanged shared WebGL2 MAG with eight physical racks, native interactive HTML papyrus, no secondary video/canvas renderer or additional JS idle frame.
-validation=Playwright desktop/mobile eight reversible chapters and actual opacity span > .004; reduced motion and no WebGL fallback; original controls and proof; production revision and domain exact smoke required.
-limitations=Lighthouse mobile and desktop scored 93/100 against 95 target in CI; no proof of 60FPS on physical phones or photo-realism parity.
+token=20261012-r2046-mag-readable-cinematic-continuity
+base_master=eb91a64a36722ce6e02a334ec6b637d6221199b2
+purpose=Preserve real readable original interactive HTML until the existing living MAG WebGL2 renderer and sole 8-source original DOM folio are physically ready, preventing real mobile empty-screen regressions during delayed handoff.
+quality=One original shared WebGL2 MAG, eight unique persistent archive bays and native interactive 3D papyrus; render-blocking proof singleton CSS combined into the small first-frame stylesheet with original verification links preserved.
+validation=Chromium 8-source desktop/mobile, normal public URL, 390x844 delayed 14.5s visibly painted original content, 1440x900 first-frame, no-GPU/reduced-motion, full production browser, security and both-domain exact revision smoke.
+limit=Lighthouse desktop 95 and mobile 95 targets are strict and must be actually measured on this revision; no claim of real 60FPS phone/GPU proof or externally validated Igloo superiority.
