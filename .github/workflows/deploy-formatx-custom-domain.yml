@@ -346,6 +346,20 @@ jobs:
           FORMATX_TEST_URL: https://formatxsuite.com/
         run: node .github/scripts/validate-r533-r536-handoff.cjs
 
+      - name: Verify actual default public MAG and all eight native interactive folios
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_TEST_URL: https://formatxsuite.com/
+          FORMATX_LIVE_MAG_EVIDENCE_DIR: artifacts/live-r2048-mag-canonical
+        run: node .github/scripts/validate-live-mag-default-r2048.cjs
+
+      - name: Verify actual www mobile and desktop MAG folios
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_TEST_URL: https://www.formatxsuite.com/
+          FORMATX_LIVE_MAG_EVIDENCE_DIR: artifacts/live-r2048-mag-www
+        run: node .github/scripts/validate-live-mag-default-r2048.cjs
+
       - name: Verify www domain resolves the same live cinematic contract
         env:
           NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
@@ -361,6 +375,8 @@ jobs:
           path: |
             artifacts/live-r533-r536-canonical/
             artifacts/live-r533-r536-www/
+            artifacts/live-r2048-mag-canonical/
+            artifacts/live-r2048-mag-www/
           if-no-files-found: warn
           retention-days: 30
 
