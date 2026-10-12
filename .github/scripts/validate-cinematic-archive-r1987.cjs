@@ -501,7 +501,10 @@ async function verifyMobileFeedbackProtection(browser){
     const root=document.documentElement;
     const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
     const controls=document.querySelector('#hero .fx-reference-controls-r204');
+    const feedback=document.querySelector('#user-feedback');
+    const formRect=feedback?.getBoundingClientRect();
     return {focus:root.dataset.fxArchiveFeedbackFocus,mode:root.dataset.fxArchiveCinema,
+      scrollY,sectionRect:formRect?{y:formRect.y,b:formRect.bottom,h:formRect.height}:null,
       stageDisplay:stage?getComputedStyle(stage).display:'missing',
       controlsDisplay:controls?getComputedStyle(controls).display:'missing',
       form:!!document.querySelector('#user-feedback textarea[name="comment"]')};
