@@ -137,6 +137,22 @@ async function evaluate(viewport,isMobile,browser){
     &&refreshContract.panelCount===8&&refreshContract.sceneCount===8,
     'Ready/refresh erased real MAG native paper identity: '+JSON.stringify(refreshContract));
   console.log('ARCHIVE_EIGHT_UNIQUE_NATIVE_FOLIOS_PASS',JSON.stringify({uniquePapers,refreshContract}));
+
+  // R2048: native wheel/touch events within the SAME chapter must not
+  // reapply nine ancestor CSSOM transform overrides on every scroll tick.
+  // Test actual DOM state; do not turn this into an invented FPS metric.
+  const anchorChanges=await page.evaluate(()=>{
+    const before=Number(document.documentElement.dataset.fxArchiveAnchorTransitions||0);
+    const chapter=document.documentElement.dataset.fxArchiveCinemaChapter||'';
+    for(let i=0;i<7;i++)window.dispatchEvent(new Event('scroll'));
+    const after=Number(document.documentElement.dataset.fxArchiveAnchorTransitions||0);
+    return {before,after,chapter,afterChapter:document.documentElement.dataset.fxArchiveCinemaChapter};
+  });
+  assert.ok(anchorChanges.after<=anchorChanges.before+1
+      &&anchorChanges.chapter===anchorChanges.afterChapter,
+    'R2048 regressed into per-scroll CSSOM ancestor overrides: '+JSON.stringify(anchorChanges));
+  console.log('ARCHIVE_TRANSITION_ONLY_STYLE_PASS',JSON.stringify(anchorChanges));
+
   let passed=0;
   const coverage=[];
   for(const scene of scenes){
@@ -563,8 +579,87 @@ async function verifyNormalEntry(browser,isMobile){
     'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
+  if(isMobile){
+    // Lighthouse's authentic filmstrip found that the first native folio
+    // could DISAPPEAR after ~14s despite passing immediate-entry assertions.
+    // Keep this NORMAL browser session alive beyond all late intro/idle timers.
+    await page.waitForTimeout(14800);
+    const late=await page.evaluate(()=>{
+      const root=document.documentElement;
+      const p=document.querySelector('[data-fx-cinema-panel-active="true"]');
+      const b=p?.getBoundingClientRect(),cs=p&&getComputedStyle(p);
+      const mag=document.querySelector('#hero .fx-crystal-organism-r326-stage')?.getBoundingClientRect();
+      const x=b?Math.max(4,Math.min(innerWidth-4,b.left+b.width/2)):0;
+      const y=b?Math.max(4,Math.min(innerHeight-4,b.top+Math.min(b.height/2,140))):0;
+      const overlay=p&&document.elementFromPoint(x,y);
+      return {state:root.dataset.fxArchiveExperience,mode:root.dataset.fxArchiveCinema,
+        chapter:root.dataset.fxArchiveCinemaChapter,
+        p:!!p,box:b?{x:b.x,y:b.y,w:b.width,h:b.height}:null,
+        display:cs?.display,visibility:cs?.visibility,opacity:cs?.opacity,
+        ancestor:getComputedStyle(p?.parentElement||document.body).transform,
+        hit:overlay?.tagName,withinPaper:!!p&&p.contains(overlay),
+        magBottom:mag?.bottom||0,viewport:{w:innerWidth,h:innerHeight},
+        error:root.dataset.fxArchiveError||null};
+    });
+    assert.ok(late.mode==='active'&&late.p&&late.display!=='none'&&late.visibility==='visible'
+      &&Number(late.opacity)>.4&&late.box?.w>300&&late.box.y<late.viewport.h
+      &&late.box.y>=0&&late.withinPaper,
+      'Mobile MAG native paper disappeared after 14s (Lighthouse filmstrip regression): '+JSON.stringify(late));
+    console.log('ARCHIVE_MOBILE_LATE_15S_VISIBLE_PASS',JSON.stringify(late));
+  }
   await context.close();
 }
+async function verifyFirstVisitIntroHandoff(browser){
+  // The normal-entry suite above uses a returning visitor. Production must
+  // ALSO deliver a real paper on the FIRST visit after the full 10s genesis.
+  // Guard against a late intro teardown blanking the actual interactive UI.
+  const u=new (require('node:url').URL)(URL);
+  for(const k of ['r486-optics-energy-check','lighthouse','visualintro','mobileproof'])u.searchParams.delete(k);
+  u.searchParams.set('archive','1');
+  u.searchParams.set('intro','1');
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'});
+  const page=await context.newPage();
+  const errors=[];
+  page.on('pageerror',e=>errors.push(String(e.message)));
+  await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:65000});
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxMagBirthOwnerR533==='active';
+  },null,{timeout:30000});
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxArchiveCinema==='active'
+      && root.dataset.fxArchiveExperience==='ready'
+      && !document.querySelector('.fx-mag-birth-r533:not([hidden])');
+  },null,{timeout:45000});
+  await page.waitForTimeout(1800);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const rect=folio?.getBoundingClientRect();
+    const style=folio&&getComputedStyle(folio);
+    const magRect=stage?.getBoundingClientRect();
+    const buttons=[...folio?.querySelectorAll('a[href],button')||[]]
+      .filter(x=>x.getBoundingClientRect().width>30).length;
+    return {intro:root.dataset.fxMagBirthOwnerR533,mode:root.dataset.fxArchiveCinema,
+      chapter:root.dataset.fxArchiveCurrent,folio:!!folio,
+      visible:style?.display!=='none'&&style?.visibility!=='hidden'&&Number(style?.opacity)>.4,
+      rect:rect?{x:rect.x,y:rect.y,w:rect.width,h:rect.height}:null,
+      mag:magRect?{y:magRect.y,h:magRect.height,bottom:magRect.bottom}:null,
+      validOriginal:folio?.textContent?.trim().length>100,buttons,
+      errors:root.dataset.fxArchiveError||''};
+  });
+  assert.ok(state.folio&&state.visible&&state.validOriginal&&state.rect?.w>260
+    &&state.rect.y>=0
+    &&state.rect.y<844&&state.rect.h>230,
+    'First-ever user must see real interactive MAG paper after 10s cinematic intro: '+JSON.stringify(state));
+  assert.deepEqual(errors,[],'First-visit intro JavaScript error');
+  console.log('ARCHIVE_FIRST_VISIT_MAG_HANDOFF_PASS',JSON.stringify(state));
+  await context.close();
+}
+
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -625,6 +720,7 @@ async function fallback(browser){
     await evaluate({width:390,height:844},true,browser);
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
+    await verifyFirstVisitIntroHandoff(browser);
     await verifyMobileLivingPulse(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
