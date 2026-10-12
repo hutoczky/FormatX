@@ -1443,4 +1443,39 @@ html body.living-architecture #user-feedback .fx-feedback-form{
   z-index:1!important;
   isolation:isolate;
 }
+/* Feedback mode keeps the SAME chapter scroll geometry while the MAG
+   withdraws. If old folios re-enter document flow, the user's real feedback
+   jumps ~1500px down after the release animation (reported phone defect).
+   Preserve the original 165dvh archive anchors and remove every folio
+   from layout until the next actual 3D chapter is selected. */
+html[data-fx-archive-feedback-focus="active"] body.living-architecture
+main#main-content > [data-fx-cinema-host-active] > .fx-archive-cinema-folio-r2030{
+  position:fixed!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  height:0!important;
+  max-height:0!important;
+}
+html[data-fx-archive-feedback-focus="active"] body.living-architecture
+main#main-content > [data-fx-cinema-host-active]{
+  min-height:165dvh!important;
+  height:165dvh!important;
+  max-height:165dvh!important;
+  overflow:visible!important;
+}
+/* Override earlier archive-style rules with equally strong specificity.
+   The original MAG must not remain rendered over the form or its stars. */
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-feedback-focus="active"]
+body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-feedback-focus="active"]
+body.living-architecture #hero .fx-reference-controls-r204,
+html:root:root:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-archive-feedback-focus="active"]
+body.living-architecture #hero .fx-mag-heart-hit-r252{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
 /* production-r2045-feedback-no-mag-occlusion-and-real-mobile-folio */
