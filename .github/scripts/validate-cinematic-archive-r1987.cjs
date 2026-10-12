@@ -506,6 +506,19 @@ async function verifyMobileFeedbackProtection(browser){
     const r=document.documentElement.dataset;
     return r.fxArchiveFeedbackFocus==='active'&&r.fxArchiveCinema==='home';
   },null,{timeout:9000});
+  // The source sections must keep their original scroll height throughout
+  // the transition. Re-navigate to the actual rendered feedback section and
+  // demand that it remain inside the PHONE viewport, not 1500px below it.
+  for(let attempt=0;attempt<3;attempt++){
+    await page.evaluate(()=>document.getElementById('user-feedback')
+      .scrollIntoView({block:'start',behavior:'instant'}));
+    await page.waitForTimeout(240);
+    const visible=await page.evaluate(()=>{
+      const r=document.getElementById('user-feedback').getBoundingClientRect();
+      return r.top<innerHeight*.82&&r.bottom>innerHeight*.12;
+    });
+    if(visible)break;
+  }
   const feedback=await page.evaluate(()=>{
     const root=document.documentElement;
     const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
@@ -522,6 +535,9 @@ async function verifyMobileFeedbackProtection(browser){
       form:!!document.querySelector('#user-feedback textarea[name="comment"]')};
   });
   assert.equal(feedback.mode,'home','Feedback form must suspend MAG cinema: '+JSON.stringify(feedback));
+  assert.ok(feedback.sectionRect&&feedback.sectionRect.y<844*.82
+    &&feedback.sectionRect.b>844*.12,
+    'Native feedback form must remain ACTUALLY on screen after MAG withdraws: '+JSON.stringify(feedback));
   assert.ok(feedback.stageDisplay==='none'&&feedback.controlsDisplay==='none'&&feedback.form,
     'MAG and controls must not cover actual feedback stars or text input: '+JSON.stringify(feedback));
   await page.locator('#user-feedback textarea[name="comment"]').fill('Mobil teszt: élő adatbevitel.');
