@@ -494,7 +494,7 @@
   }
 
   function updateRealContentSheets(){
-    if(!archiveActive||reduced.matches)return;
+    if(!archiveActive||reduced.matches||!current)return;
     const vh=Math.max(1,innerHeight);
     // Three contiguous chapters are enough, even in fast reverse scroll.
     // Avoid scanning all scenes and allocating a Set for every native scroll.
