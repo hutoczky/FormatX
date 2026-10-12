@@ -9,6 +9,12 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
+const deferredCssSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-deferred-css-r487.js','utf8');
+assert.ok(deferredCssSource.includes("root.dataset.fxIntroPrepaintR1611 === 'skip'") &&
+  deferredCssSource.includes("data-fx-mag-birth-live-r533") &&
+  deferredCssSource.includes("inactive-until-real-intro"),
+  'R2049 must avoid restyling ordinary returning mobile visits with the unused cinematic birth film, while preserving first-visit intro');
+
 assert.doesNotMatch(rafUpdate,/\b(?:selectLiveChapter|ResponsiveExperience\.dock|ResponsiveExperience\.restore)\s*\(/,
   'R2049 GPU-only RAF cannot remeasure all scene layouts or redock the MAG');
 
