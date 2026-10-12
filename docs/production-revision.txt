@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261012-r2048-mag-transition-only-scroll
-base_master=8089555ec1e863dcbda13a31589344d52f1ddb7c
-purpose=R2048 retain real native WebGL2 MAG and eight original interactive archive folios while removing nine expensive repeated ancestor CSSOM writes per native scroll event; restore original inline transform styles on scene exit and context loss.
-verification=Chromium native shared MAG desktop/mobile, actual eight distinct interactive folios, normal first-visit entry, contact/readability bounds, original navigation, original proof/CTA, no-GPU/reduced-motion, real scene switching and transition-only scroll invariant.
-performance_note=Reduced JS/CSSOM operations per scroll tick. Do not label a CPU/GL command-submission budget as measured 60 FPS. Lighthouse >=95 both desktop and mobile and physical hardware quality remain explicit separate targets requiring measurement.
+token=20261012-r2049-single-live-paper-layout
+base_master=21cc1cf8a444f2bb2b85f44e1c5dd05403f451a1
+purpose=Preserve the original real WebGL2 MAG and all eight physically scroll-delivered HTML folios while preventing expensive layout and paint for seven inactive native HTML paper subtrees. Active source stays fully interactive and visibly foregrounded. No cloning or deleting original content.
+verification=Chromium eight-scene shared native MAG desktop/mobile, original eight sources and CTA, inactive content-visibility hidden while active is visible, keyboard and pointer interactivity, 320-1920 screen lane occlusion, no-WebGL and reduced-motion HTML fallback; production smoke and exact custom-domain revision required.
+performance_note=Layout containment is an implementation optimization, not a measured FPS gain; compare Lighthouse against baseline 92-93 desktop/93 mobile. The 95+ Lighthouse, physical device FPS and Igloo.inc visual quality are still unverified unless independently measured.
