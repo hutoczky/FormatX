@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2047-single-scroll-dom-composition';
+  const VERSION='cinematic-archive-r2049-live-os-native-folio';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -229,9 +229,17 @@
     }else if(cinemaPrepared){
       // Rebind existing ONLY; no new WebGL context, no second paper or clone.
       for(const scene of scenes){
-        const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+        const host=scene.node.closest('main#main-content > section');
         scene.cinemaHost=host;
         scene.cinemaPanel=host?.querySelector(':scope > .fx-archive-cinema-folio-r2030')||null;
+      }
+      // Live OS (and other real modules) can be inserted by a separate
+      // production content owner AFTER the archive was initially prepared.
+      // Rediscovery must create their genuine semantic folios then, not just
+      // register an eighth chapter key while retaining seven papers.
+      if(scenes.some(scene=>scene.cinemaHost&&!scene.cinemaPanel)){
+        prepareRealContentSheets();
+        prepareCinemaHosts();
       }
     }
     root.dataset.fxArchiveDistinctFolios=String(new Set(scenes.map(s=>s.cinemaPanel).filter(Boolean)).size);
@@ -245,7 +253,7 @@
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
     for(const scene of scenes){
-      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      const host=scene.node.closest('main#main-content > section');
       if(!(host instanceof HTMLElement))continue;
       scene.cinemaHost=host;
       let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');

@@ -87,7 +87,10 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(!proofContract.oldVisible,'Duplicate legacy hero proof block still visible: '+JSON.stringify(proofContract));
   assert.ok(proofContract.inFinal&&proofContract.links>=2,'Original public proof must be in final MAG folio with real links: '+JSON.stringify(proofContract));
 
-  const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
+  const hostSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+  assert.ok((hostSource.match(/closest\('main#main-content > section'\)/g)||[]).length>=2,
+    'Dynamically inserted REAL Live OS sections without .scene must be accepted as original folio hosts');
+    const scenes=await page.evaluate(()=>window.FormatXArchiveExperience.scenes);
   assert.equal(scenes.length,8,'Exactly eight original MAG shelf sources required');
   assert.equal(new Set(scenes.map(s=>s.key)).size,8,'MAG shelf keys must be unique');
   const uniquePapers=await page.evaluate(()=>{
@@ -565,6 +568,52 @@ async function verifyNormalEntry(browser,isMobile){
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   await context.close();
 }
+async function verifyDynamicOriginalLiveOs(browser){
+  // Production creates its real Live OS <section> dynamically, without the
+  // old .scene/.fx-category-deck classes. This fixture reproduces exactly
+  // that structural condition: ONE genuine section node in main, never a
+  // second GL renderer or a synthetic canvas-text display.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    reducedMotion:'no-preference'
+  });
+  await context.addInitScript(()=>{
+    document.addEventListener('DOMContentLoaded',()=>{
+      const main=document.querySelector('main#main-content');
+      if(!main||document.getElementById('live-os-overview'))return;
+      const section=document.createElement('section');
+      section.id='live-os-overview';
+      section.dataset.fxLiveOsFixture='original-native-section';
+      const title=document.createElement('h2');
+      title.textContent='LIVE OS';
+      const description=document.createElement('p');
+      description.textContent='A valódi, dinamikusan beszúrt szekció foglal helyet ebben az archívumban.';
+      section.append(title,description);
+      main.insertBefore(section,main.querySelector('#experience'));
+    },{once:true});
+  });
+  const page=await context.newPage();
+  try{
+    await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='ready'
+      &&document.documentElement.dataset.fxArchiveDistinctFolios==='8',
+      null,{timeout:65000});
+    const result=await page.evaluate(()=>{
+      const original=document.getElementById('live-os-overview');
+      const host=original?.closest('main#main-content > section');
+      const panel=original?.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      return{original:!!original,hasClass:original?.classList.contains('scene'),
+        parent:host?.id,panel:!!panel,
+        genuine:panel?.contains(original.querySelector('h2')),
+        sceneCount:window.FormatXArchiveExperience?.scenes?.length,
+        uniqueFolios:Number(document.documentElement.dataset.fxArchiveDistinctFolios)};
+    });
+    assert.ok(result.original&&!result.hasClass&&result.panel&&result.genuine,
+      'Original Live OS section must become a REAL native MAG document despite missing .scene: '+JSON.stringify(result));
+    assert.equal(result.uniqueFolios,8,'Eight distinct native MAG papers required for dynamically injected LIVE OS: '+JSON.stringify(result));
+    console.log('ARCHIVE_DYNAMIC_LIVE_OS_PASS',JSON.stringify(result));
+  }finally{await context.close();}
+}
 async function missingGpuFallback(browser){
   const context=await browser.newContext({
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
@@ -626,6 +675,7 @@ async function fallback(browser){
     await verifyNormalEntry(browser,false);
     await verifyNormalEntry(browser,true);
     await verifyMobileLivingPulse(browser);
+    await verifyDynamicOriginalLiveOs(browser);
     await missingGpuFallback(browser);
     await fallback(browser);
   }finally{await browser.close();}

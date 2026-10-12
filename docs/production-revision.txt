@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261012-r2047-single-scroll-layout-composition
+token=20261012-r2049-live-os-real-eight-folios
 base_master=eb91a64a36722ce6e02a334ec6b637d6221199b2
 purpose=Preserve the live R2045 shared WebGL MAG and fix duplicate diagnostics/AI delivery: the real original AI assistance card gets its own genuine native paper and separate physical archive chapter; scene rediscovery retains all eight original folio references.
 quality=One existing unchanged shared MAG/WebGL context; no AI card clone or placeholder; eight distinct active native folios; inactive papyri inert; original HTML/links/voice and CTA restored on WebGL failure and ordinary teardown.
@@ -8,3 +8,6 @@ limitations=Desktop/mobile Lighthouse 95, real 60FPS on physical phones and phot
 
 performance=Eliminate redundant second native DOM/folio composition in queued requestAnimationFrame and only mutate inactive chapter inert/visibility state when it changes; preserve all eight original semantic HTML folios and exact shared WebGL renderer.
 qualitygate=Real Lighthouse 95+ and live smoke are required to call the quality target achieved; previous R2046 source 92-93 desktop/mobile.
+
+fix=Recognize ANY direct child main#main-content section as a valid original real archive host; dynamically added Live OS section can be a real native paper even when it lacks .scene and .fx-category-deck--standalone. No cloned modules, no injected placeholders.
+validation=Static local eight-scene Chromium plus late inserted live-os DOM fixture, actual default HTTPs URL after deployment on BOTH canonical domains, original proof and CTA.
