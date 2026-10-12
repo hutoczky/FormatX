@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2048-anchor-transition-only-optics';
+  const VERSION='cinematic-archive-r2049-single-folio-compose';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -28,7 +28,7 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
-  let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
+  let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[],legacySheetReads=0;
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
   let aiCardHome=null; // the real sixth module, never a cloned/placeholder AI scene
@@ -492,6 +492,16 @@
 
   function updateRealContentSheets(){
     if(!archiveActive||reduced.matches)return;
+    // R2049: The final R2030 cinema folio already transforms the ORIGINAL
+    // interactive HTML. Moving every nested card a second time meant repeated
+    // getBoundingClientRect()/five CSSOM writes per native scroll and visually
+    // competing paper choreography. Preserve R2026 semantic markers, but let
+    // one physical 3D paper be the ONLY motion owner. No layout reads here.
+    if(cinemaPrepared){
+      root.dataset.fxArchiveRealContent='native-paper-handoff';
+      root.dataset.fxArchiveLegacySheetReads=String(legacySheetReads);
+      return;
+    }
     const vh=Math.max(1,innerHeight);
     // Limit viewport geometry reads to the current and adjacent chapters.
     const nearby=new Set();
@@ -504,6 +514,7 @@
     for(const node of nearby){
       if(!node.isConnected)continue;
       const bounds=node.getBoundingClientRect();
+      legacySheetReads++;
       const entry=clamp((vh*.89-bounds.top)/Math.max(160,vh*.37));
       const last=paperLast.get(node);
       if(last!==undefined&&Math.abs(entry-last)<.007)continue;
