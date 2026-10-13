@@ -224,9 +224,11 @@
       scenes.forEach(s=>sceneObserver.observe(s.node));
     }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
-    if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'){
+    if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'
+      &&root.dataset.fxArchiveNativePrimeR2071==='requested'){
       prepareRealContentSheets();
       prepareCinemaHosts();
+      root.dataset.fxArchiveNativePrimeR2071='prepared';
     }else if(cinemaPrepared){
       // Rebind existing ONLY; no new WebGL context, no second paper or clone.
       for(const scene of scenes){
@@ -1211,6 +1213,16 @@ void main(){
   function invalidate(){
     if(!disposed&&!document.hidden&&!reduced.matches){
       try{
+        // R2071: the first real viewport does not need eight distant HTML
+        // chapters moved into heavy fixed paper wrappers. Compose native folios
+        // only after real scroll motion (or an explicit forced archive route).
+        // All eight original sources and the shared WebGL context stay intact.
+        if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'
+          &&(scrollY>56||force)){
+          root.dataset.fxArchiveNativePrimeR2071='requested';
+          ensureAIScrollStation();
+          discover();
+        }
         // R2022: synchronize the visible archive layer and chapter identity
         // with the native scroll event, not a deferred GPU RAF. A slow WebGL
         // frame must never strand a previous panel/HUD over the next chapter.
@@ -1275,12 +1287,15 @@ void main(){
       registeredCanvas=api.canvas;
       registeredApi=api;
       root.dataset.fxArchiveExperience='ready';
+      root.dataset.fxArchiveCinema='home';
+      root.dataset.fxArchiveCtaLane='original-home';
+      root.dataset.fxArchiveNativePrimeR2071=force?'requested':'awaiting-user-scroll';
       root.dataset.fxArchiveQuality=quality;
       root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
       // Only after one real shared WebGL2 renderer exists may the original
       // website be replaced by the one-chapter cinematic archive. A blocked
       // WebGL context must retain the usable original HTML experience.
-      ensureAIScrollStation();
+      if(force)ensureAIScrollStation();
       discover();
       invalidate();
     }catch(error){
