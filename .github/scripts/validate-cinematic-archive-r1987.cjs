@@ -543,11 +543,11 @@ async function evaluate(viewport,isMobile,browser){
   // Keyboard focus must follow the original HTML to its next native folio,
   // never become trapped inside an inert hidden archived chapter.
   await page.evaluate(()=>{
-    const section=document.querySelector('#experience');
+    const section=document.querySelector('#network');
     section?.scrollIntoView({behavior:'instant',block:'center'});
     window.FormatXArchiveExperience?.refresh?.();
   });
-  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='ecosystem',null,{timeout:9000});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='network',null,{timeout:9000});
   const focusBefore=await page.evaluate(()=>{
     const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
     const options=[...panel?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled])')||[]];
@@ -567,13 +567,13 @@ async function evaluate(viewport,isMobile,browser){
   });
   assert.ok(focusBefore.focused,'Original interactive HTML control could not receive keyboard focus: '+JSON.stringify(focusBefore));
   await page.evaluate(()=>{
-    document.querySelector('#live-os-overview')?.scrollIntoView({behavior:'instant',block:'center'});
+    document.querySelector('#pricing')?.scrollIntoView({behavior:'instant',block:'center'});
     window.FormatXArchiveExperience?.refresh?.();
   });
-  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='systems',null,{timeout:9000});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='licensing',null,{timeout:9000});
   const focusAfter=await page.evaluate(()=>{
     const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
-    const old=document.querySelector('#experience .fx-archive-cinema-folio-r2030');
+    const old=document.querySelector('#network .fx-archive-cinema-folio-r2030');
     return {insideNew:!!panel&&panel.contains(document.activeElement),
       oldInert:!!old&&old.inert,
       text:document.activeElement?.textContent?.trim().slice(0,90),
