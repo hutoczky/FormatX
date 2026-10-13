@@ -108,11 +108,11 @@
       const T=this.THREE;
       /* R1950 — studio lighting, not game-VFX lighting.
          Neutral soft key + restrained cyan transmission + very faint cool rim. */
-      this.scene.add(new T.HemisphereLight(0x8fb8bd,0x05080b,0.54));
-      const key=new T.DirectionalLight(0xe7f2ef,1.62);
+      this.scene.add(new T.HemisphereLight(0xaac6cb,0x090c13,0.68));
+      const key=new T.DirectionalLight(0xe7f2ef,1.90);
       key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
-      const fill=new T.DirectionalLight(0x9fb9b8,.42);
+      const fill=new T.DirectionalLight(0xafc8c7,.56);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
@@ -228,12 +228,12 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.046,8,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.046,8,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.078,7,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.078,7,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.031,10,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.031,10,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.052,8,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.052,8,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.027,.027,1,8,1,false);
+      const rungGeo=new T.CylinderGeometry(.018,.018,1,10,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -666,16 +666,16 @@
       const microFiberTexture=this.makeMicroFiberTexture();
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x160d20,roughness:.66,metalness:.010,
-        clearcoat:.11,clearcoatRoughness:.54,
+        color:0x292332,roughness:.60,metalness:.010,
+        clearcoat:.18,clearcoatRoughness:.48,
         bumpMap:microFiberTexture,bumpScale:.036,
         transparent:true,opacity:0,
         emissive:0x1c0b29,emissiveIntensity:.18,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x25162e,roughness:.70,metalness:.006,
-        clearcoat:.08,clearcoatRoughness:.62,
+        color:0x403448,roughness:.62,metalness:.006,
+        clearcoat:.14,clearcoatRoughness:.52,
         bumpMap:microFiberTexture,bumpScale:.031,
         transparent:true,opacity:0,
         emissive:0x170a22,emissiveIntensity:.10,
@@ -718,7 +718,7 @@
       }
 
       this.organicFoldMaterial=new T.MeshPhysicalMaterial({
-        color:0x36283d,roughness:.68,metalness:.004,
+        color:0x53465c,roughness:.60,metalness:.004,
         emissive:0x140b1b,emissiveIntensity:.038,
         bumpMap:microFiberTexture,bumpScale:.019,
         transparent:true,opacity:0,depthWrite:true
@@ -863,8 +863,8 @@
       }
 
       this.organicHoodMaterial=new T.MeshPhysicalMaterial({
-        color:0x241829,
-        roughness:.68,
+        color:0x383040,
+        roughness:.60,
         metalness:.035,
         clearcoat:.12,
         clearcoatRoughness:.52,
@@ -1520,12 +1520,12 @@
       const bodyScale=.001+visible*.82;
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
-      this.organicShellMaterial.opacity=.27*visible;
-      this.organicLobeMaterial.opacity=.24*visible;
+      this.organicShellMaterial.opacity=.54*visible;
+      this.organicLobeMaterial.opacity=.46*visible;
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.105*visible;
-      this.organicHoodMaterial.opacity=.18*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
+      this.organicVeinMaterial.opacity=.16*visible;
+      this.organicHoodMaterial.opacity=.36*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.32*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
       if(this.organicFibers){
@@ -1668,8 +1668,13 @@
         v.impulse=Math.min(1.35,v.impulse+
           clamp(Number.isFinite(strength)?strength:.30,0,1.2)*.36);
       }
-      document.documentElement.dataset.fxMagIntroInteractionR2073=
-        /press|click|touch/.test(kind)?'physical-core-pulse':'inertial-camera-parallax';
+      // Keep the evidence of genuine physical touch/pulse latched through
+      // subsequent synthetic move, focus or scroll events on touch devices.
+      const root=document.documentElement;
+      if(/press|click|touch|release/.test(kind))
+        root.dataset.fxMagIntroInteractionR2073='physical-core-pulse';
+      else if(root.dataset.fxMagIntroInteractionR2073!=='physical-core-pulse')
+        root.dataset.fxMagIntroInteractionR2073='inertial-camera-parallax';
     }
     updateCamera(t,time){
       const glide=(a,b,v)=>smooth((v-a)/(b-a));
