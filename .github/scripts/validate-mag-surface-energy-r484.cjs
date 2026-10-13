@@ -32,7 +32,11 @@ const EXPECTED_MOBILE_FILTER = [
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [] };
+  const audit = window.__magEnergyAudit = {
+    frames:0, maximumPhase:-1, phases:[], events:[],
+    activeSweep:false, sawSweepEnd:false, interSweepFrames:0,
+    interSweepSamples:0
+  };
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -41,6 +45,11 @@ function instrumentNativeFrames() {
   };
   addEventListener('formatx:coresurfacesweep', event => {
     audit.events.push({ ...event.detail, at: performance.now() });
+    if(event.detail?.phase==='start')audit.activeSweep=true;
+    else if(event.detail?.phase==='end'){
+      audit.activeSweep=false;
+      audit.sawSweepEnd=true;
+    }
   });
   for (const Type of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
     if (!Type) continue;
@@ -75,6 +84,12 @@ function instrumentNativeFrames() {
       const state = stateFor(this);
       if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas') && state.layer === 0 && state.depthWrite) {
         audit.frames++;
+        // Measure actual inter-sweep GPU work, not a wall-clock sample that
+        // may overlap the NEXT legitimate sweep if SwiftShader stalls the
+        // browser's event loop by several seconds under runner load.
+        if(audit.sawSweepEnd&&!audit.activeSweep){
+          audit.interSweepFrames++;
+        }
         audit.maximumPhase = Math.max(audit.maximumPhase, state.phase);
         if (state.phase >= 0) {
           audit.phases.push(state.phase);
@@ -160,9 +175,11 @@ async function verify(browser, name, viewport, mobile) {
     // No click, artificial API pulse, hover or pointer movement is used here.
     await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 30000 });
     await page.waitForTimeout(600);
-    const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
     await page.waitForTimeout(1000);
-    report.idleFrames = await page.evaluate(before => __magEnergyAudit.frames - before, frameCount);
+    // Inspect the exact start/end event boundaries for BOTH autonomous
+    // sweeps. Genuine idle redraws still fail with the same zero tolerance.
+    // Frames rendered by the next documented sweep are not idle work.
+    report.idleFrames = await page.evaluate(()=>__magEnergyAudit.interSweepFrames);
     if(report.idleFrames!==0){
       report.idleWakeDiagnostics=await page.evaluate(()=>({
         callerLog:window.__fxMagIdleWakeDiagnostics||[],
@@ -176,6 +193,8 @@ async function verify(browser, name, viewport, mobile) {
     }
     assert.equal(report.idleFrames, 0, `${name}: native renderer must rest between sweeps`);
     await page.waitForFunction(() => __magEnergyAudit.events.filter(e => e.phase === 'end' && e.source === 'autonomous').length >= 2, null, { timeout: 14000 });
+    report.idleFrames = await page.evaluate(()=>__magEnergyAudit.interSweepFrames);
+    assert.equal(report.idleFrames, 0, `${name}: genuine native frames rendered between documented surface sweeps`);
     await page.waitForTimeout(250);
 
     const audit = await page.evaluate(() => window.__magEnergyAudit);
