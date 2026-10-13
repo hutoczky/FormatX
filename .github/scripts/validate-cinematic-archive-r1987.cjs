@@ -84,22 +84,6 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   // Native focus must be delivered to the next real document when scrolling
   // away from a focused module. The old folio becomes inert and inaccessible.
-  const focusContract=await page.evaluate(()=>{
-    const root=document.documentElement;
-    const panels=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
-    const first=panels.find(p=>p.dataset.fxCinemaPanelActive==='true');
-    const next=panels.find(p=>p!==first);
-    if(!first||!next)return {prepared:false};
-    const original=first.querySelector('a[href],button:not([disabled])');
-    if(!(original instanceof HTMLElement))return {prepared:false};
-    original.focus({preventScroll:true});
-    const before=document.activeElement===original;
-    const previous=first.inert;
-    const originalNext=next.dataset.fxCinemaPanelActive;
-    return {prepared:true,before,wasActive:!previous,oldNext:originalNext};
-  });
-  assert.ok(focusContract.prepared&&focusContract.before,
-    'Expected original native HTML keyboard control to be focusable: '+JSON.stringify(focusContract));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
@@ -122,6 +106,23 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
     'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
   assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
+  const focusContract=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const panels=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
+    const first=panels.find(p=>p.dataset.fxCinemaPanelActive==='true');
+    const next=panels.find(p=>p!==first);
+    if(!first||!next)return {prepared:false};
+    const original=first.querySelector('a[href],button:not([disabled])');
+    if(!(original instanceof HTMLElement))return {prepared:false};
+    original.focus({preventScroll:true});
+    const before=document.activeElement===original;
+    const previous=first.inert;
+    const originalNext=next.dataset.fxCinemaPanelActive;
+    return {prepared:true,before,wasActive:!previous,oldNext:originalNext};
+  });
+  assert.ok(focusContract.prepared&&focusContract.before,
+    'Expected original native HTML keyboard control to be focusable: '+JSON.stringify(focusContract));
+
   const proofContract=await page.evaluate(()=>{
     const all=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
     const loopCopy=document.querySelectorAll('.fx-loop-reference-proof').length;
@@ -228,6 +229,14 @@ async function evaluate(viewport,isMobile,browser){
     });
     assert.ok(!focusAfterScroll.insideInertFolio,
       'Scroll archived a document while keyboard focus remained trapped in inert HTML: '+JSON.stringify(focusAfterScroll));
+    const transitionFocus=await page.evaluate(()=>{
+      const current=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+      const focus=document.activeElement;
+      const active=focus?.closest?.('.fx-archive-cinema-folio-r2030');
+      return {stranded:!!active&&active.inert,active:current?.dataset.fxCinemaPanelActive,
+        focused:focus?.tagName||'none'};
+    });
+    assert.ok(!transitionFocus.stranded,'Focused native control stranded after chapter change: '+JSON.stringify(transitionFocus));
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
     let postRefresh=null;
     if(state.scene!==scene.key){
