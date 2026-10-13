@@ -48,6 +48,12 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      // Only the explicit fixed-frame visual proof reads the actual WebGL
+      // framebuffer; the normal 10s user film has zero readback stalls.
+      const proofParams=new URLSearchParams(location.search);
+      this.proofReadbackR2073=proofParams.get('visualintro')==='1'
+        &&Number.isFinite(Number.parseFloat(proofParams.get('introframe')||''));
+      this.proofPixelR2073=new Uint8Array(4);
       // R2073: organic, inertial camera input remains inside this original
       // Three.js renderer. No overlay renderer and no CSS parallax substitute.
       this.cameraInput={targetX:0,targetY:0,x:0,y:0,impulse:0,lastTime:0};
@@ -1786,6 +1792,34 @@
       if(this.mechLight)this.mechLight.intensity+=flash*.34;
 
       this.renderer.render(this.scene,this.camera);
+      if(this.proofReadbackR2073){
+        // R2073: inspect the REAL pixels of the original Three framebuffer.
+        // A black frame with a DOM label is not acceptable visual proof.
+        // Sample the broad object volume, not just the exact optical center.
+        try{
+          const gl=this.renderer.getContext();
+          const w=gl.drawingBufferWidth,h=gl.drawingBufferHeight;
+          let peak=0,lit=0;
+          for(let yi=1;yi<=7;yi++){
+            for(let xi=1;xi<=11;xi++){
+              const px=Math.min(w-1,Math.round(w*xi/12));
+              const py=Math.min(h-1,Math.round(h*yi/8));
+              gl.readPixels(px,py,1,1,gl.RGBA,gl.UNSIGNED_BYTE,
+                this.proofPixelR2073);
+              const value=Math.max(this.proofPixelR2073[0],
+                this.proofPixelR2073[1],this.proofPixelR2073[2]);
+              peak=Math.max(peak,value);
+              if(value>=25)lit+=1;
+            }
+          }
+          document.documentElement.dataset.fxMagBirthFramePeakR1557=String(peak);
+          document.documentElement.dataset.fxMagBirthFrameR1557=
+            lit>=2?'r2073-physical-webgl-pixels-visible':'r2073-unlit-physical-film';
+          document.documentElement.dataset.fxMagBirthFrameLitSamplesR2073=String(lit);
+        }catch(_){
+          document.documentElement.dataset.fxMagBirthFrameR1557='r2073-readback-unavailable';
+        }
+      }
     }
 
     destroy(){
