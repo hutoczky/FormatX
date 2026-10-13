@@ -287,7 +287,9 @@
     if(cinemaHosts.length){
       cinemaPrepared=true;
       root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
-      attachExistingFinalCta();
+      // R2070: the only real download CTA belongs to the first-visit hero
+      // until the visitor actually reaches the eighth (final) chapter.
+      // Do not remove it from the living home before any cinematic scroll.
       attachExistingProofBlock();
     }
   }
@@ -379,6 +381,13 @@
     setLegacyHeroHidden(enabled);
     setHeroCanvasLaneFront(enabled);
     const selected=enabled?current.s:null;
+    // R2070: physically hand the SAME original CTA to the final native folio
+    // only while that real chapter is being presented. The home stays usable
+    // after WebGL loads and restores the button on any reverse-scroll.
+    if(selected?.key==='final')attachExistingFinalCta();
+    else restoreExistingFinalCta();
+    root.dataset.fxArchiveCtaLane=selected?.key==='final'
+      ?'final-native-folio':'original-home';
     const key=selected?.key||'home';
     if(root.dataset.fxArchiveCinemaChapter!==key)root.dataset.fxArchiveCinemaChapter=key;
     let transferKeyboardFocus=false;
