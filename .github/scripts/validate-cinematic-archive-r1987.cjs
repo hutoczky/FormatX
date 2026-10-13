@@ -572,8 +572,8 @@ async function evaluate(viewport,isMobile,browser){
     'Keyboard focus stranded in archived HTML: '+JSON.stringify({focusBefore,focusAfter}));
   console.log('ARCHIVE_KEYBOARD_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',focusAfter}));
   const writeStats=await page.evaluate(()=>({
-    writes:Number(document.documentElement.dataset.fxArchiveFolioStyleWrites||0),
-    skips:Number(document.documentElement.dataset.fxArchiveFolioStyleSkips||0)
+    writes:window.FormatXArchiveExperience.state.folioStyleWrites,
+    skips:window.FormatXArchiveExperience.state.folioStyleSkips
   }));
   assert.ok(writeStats.writes>0&&writeStats.skips>0,
     'Native folio CSS value deduplication never activated: '+JSON.stringify(writeStats));
