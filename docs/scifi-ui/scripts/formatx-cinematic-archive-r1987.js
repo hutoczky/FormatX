@@ -725,7 +725,7 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile;
-out vec3 vNormal;out vec2 vUv;out float vViewDistance;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;out vec3 vViewRay;
 void main(){
  vec3 p=aPosition*uScale;
  float bendX=2.0*aUv.x-1.0;
@@ -751,6 +751,9 @@ void main(){
  if(uMobile>.5){p.x*=.34;p.y=p.y*.63-.18;}
  float d=max(2.4,6.2-p.z);
  vViewDistance=d;
+ // A camera-space eye ray gives the glass a genuine viewing-angle response
+ // as the persistent archive camera travels between its eight physical bays.
+ vViewRay=normalize(vec3(-p.x,-p.y,max(.25,1.0-p.z)));
  // R2035: canonical MAG uses NDC depth close to zero. The old background
  // projection produced negative NDC z for far rack rails, incorrectly placing
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
@@ -764,12 +767,14 @@ void main(){
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;in float vViewDistance;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;in vec3 vViewRay;
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
  vec3 N=normalize(vNormal+vec3(.0001));
- vec3 V=normalize(vec3(.10,-.07,1.0));
+ // Preserve studio key-light composition while adding geometrically correct
+ // grazing-angle Fresnel to the moving original camera; no second renderer.
+ vec3 V=normalize(mix(vec3(.10,-.07,1.0),normalize(vViewRay),uPanel>.5?.40:.22));
  vec3 L=normalize(vec3(-.38,.68,1.0));
  vec3 H=normalize(L+V);
  float ndl=max(.06,dot(N,L));
