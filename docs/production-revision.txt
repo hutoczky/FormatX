@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261013-r2056-mag-proof-first-paint-lighthouse-savings
-base_master=2baa21b016303c4f69b3f88f66cbc289c040f376
-purpose=Remove render-blocking offscreen canonical public-proof CSS, move tiny duplicate-proof first-frame rules to existing critical menu stylesheet, replace expensive dynamic html:has selectors with static canonical root marker; preserve single visible proof in final native MAG folio, all eight original interactive WebGL2 archive scenes, and no-WebGL/reduced-motion fallback. Instruct browser to fetch cache-busted proof and critical menu CSS.
-validation=19 successful PR functional/production checks on prior R2056 candidate including eight native folios, no occlusion, Design System, bilingual, semantic first paint, and production candidate. Revalidate after final cache-bust and exact two-domain Cloudflare revision.
-measured=Desktop Lighthouse 92-93; mobile Lighthouse 93, Speed Index improved approximately 7.44s to 6.94s in measured local runs. Lighthouse >=95 is NOT yet met.
-limits=Award quality, full PBR photorealism, real-phone FPS, Lighthouse >=95 and independent Igloo.inc superiority remain unverified.
+token=20261013-r2057-native-mag-frame-coalesced-paper
+base_master=cb92f28111ad994a76b5aadbf1243a7d6269303b
+purpose=Preserve one canonical MAG and eight original interactive archive folios, while coalescing repeated native HTML paper geometry/style updates to one pre-paint animation frame. Keep instant semantic chapter selection and return all original controls on fallback. Revert experimental r244 CSS deferral after measured desktop CLS 0.154 regression.
+validation=19 PR checks passed for R2057 including 8 desktop and mobile original WebGL2 MAG folios, 320-1920 px no occlusion, live original controls, reduced motion, no WebGL, design system, bilingual and production dry run. Unique content revision will be checked on both custom domains after deploy.
+measured=R2057 32 artificial scroll-event CPU benchmark desktop mean 0.316ms, mobile mean 0.628ms, one WebGL2 context; these are not FPS. Lighthouse desktop 92-93 mobile 93, below independent 95 goal, and unchanged from stable R2056 baseline.
+limits=Photorealistic studio finish, real-device 60fps, objective Igloo.inc superiority and >=95 Lighthouse are unverified; do not claim globally finished.
