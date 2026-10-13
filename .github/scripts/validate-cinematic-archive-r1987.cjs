@@ -82,6 +82,24 @@ async function evaluate(viewport,isMobile,browser){
     'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
   
   assert.equal(init.shared,true,JSON.stringify(init));
+  // Native focus must be delivered to the next real document when scrolling
+  // away from a focused module. The old folio becomes inert and inaccessible.
+  const focusContract=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const panels=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
+    const first=panels.find(p=>p.dataset.fxCinemaPanelActive==='true');
+    const next=panels.find(p=>p!==first);
+    if(!first||!next)return {prepared:false};
+    const original=first.querySelector('a[href],button:not([disabled])');
+    if(!(original instanceof HTMLElement))return {prepared:false};
+    original.focus({preventScroll:true});
+    const before=document.activeElement===original;
+    const previous=first.inert;
+    const originalNext=next.dataset.fxCinemaPanelActive;
+    return {prepared:true,before,wasActive:!previous,oldNext:originalNext};
+  });
+  assert.ok(focusContract.prepared&&focusContract.before,
+    'Expected original native HTML keyboard control to be focusable: '+JSON.stringify(focusContract));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
