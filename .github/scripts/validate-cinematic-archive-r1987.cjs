@@ -220,6 +220,14 @@ async function evaluate(viewport,isMobile,browser){
       const state=window.FormatXArchiveExperience?.state;
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
+    const focusAfterScroll=await page.evaluate(()=>{
+      const focused=document.activeElement;
+      const folio=focused?.closest?.('.fx-archive-cinema-folio-r2030');
+      return {insideInertFolio:!!folio&&folio.inert,
+        focusedTag:focused?.tagName||'none',cinema:document.documentElement.dataset.fxArchiveCinema};
+    });
+    assert.ok(!focusAfterScroll.insideInertFolio,
+      'Scroll archived a document while keyboard focus remained trapped in inert HTML: '+JSON.stringify(focusAfterScroll));
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
     let postRefresh=null;
     if(state.scene!==scene.key){
