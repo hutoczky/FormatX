@@ -1172,7 +1172,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
-        try{announceCoreIdentityR2072(fixedR);}catch(_){}}
+        try{announceCoreIdentityR2072(fixedR);}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');
