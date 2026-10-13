@@ -1757,6 +1757,13 @@
       const after=smooth((t-9.44)/.38);
       this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
       this.coreLight.intensity+=flash*.42+after*.12;
+      // R2073: touch / pointer impulses affect the ACTUAL physical lighting
+      // inside the existing Three world, not a fake 2D glow overlay. The
+      // response decays fast, is capped, and locks before the native handoff.
+      const reactiveLight=this.cameraInput.impulse*
+        (1-smooth((t-8.65)/1.0));
+      this.coreLight.intensity+=reactiveLight*.36;
+      if(this.mechLight)this.mechLight.intensity+=reactiveLight*.18;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
