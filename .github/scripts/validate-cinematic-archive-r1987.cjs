@@ -103,10 +103,11 @@ async function evaluate(viewport,isMobile,browser){
     return {scrollY,mode:root.dataset.fxArchiveCinema,
       continuity:root.dataset.fxArchiveHomeContinuity,hero:visible(hero),
       title:visible(title),download:visible(cta),
+      ctaOnOriginalHero:!!document.querySelector('#hero .hero-actions')?.contains(cta),
       focusable:!cta?.closest('[inert]'),renderer:root.dataset.fxArchiveExperience};
   });
   assert.ok(home.scrollY<8&&home.mode!=='active'
-    &&home.hero&&home.title&&home.download&&home.focusable,
+    &&home.hero&&home.title&&home.download&&home.focusable&&home.ctaOnOriginalHero,
     'R2064: delayed real WebGL must never blank the original hero: '+JSON.stringify(home));
   console.log('ARCHIVE_LATE_HOME_HERO_REMAINS_VISIBLE_PASS',JSON.stringify(home));
   await page.evaluate(()=>{
