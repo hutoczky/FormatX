@@ -797,6 +797,56 @@ async function auditHtmlContinuity(browser){
   console.log('ARCHIVE_PROGRESSIVE_HTML_CONTINUITY_PASS',JSON.stringify({genuineHtml,genuineCinema,...state}));
   await context.close();
 }
+async function lighthousePhoneRealThrottling(browser){
+  // Match Lighthouse's real 412x823 / DPR 1.75 / 4x CPU throttle, rather than
+  // trusting a faster generic 390px phone. This previously rendered an empty
+  // reading lane after the MAG autonomous wake-up at ~13 seconds.
+  const context=await browser.newContext({
+    viewport:{width:412,height:823},deviceScaleFactor:1.75,
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  const page=await context.newPage();
+  const cdp=await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  const address=new (require('node:url').URL)(URL);
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','visualintro'])
+    address.searchParams.delete(key);
+  address.searchParams.set('lighthouse','1');
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:85000});
+  await page.waitForTimeout(18500);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement,hero=document.querySelector('#hero .hero-copy');
+    const title=document.getElementById('hero-title');
+    const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const box=el=>{
+      if(!el)return null;
+      const b=el.getBoundingClientRect(),cs=getComputedStyle(el);
+      const x=Math.max(2,Math.min(innerWidth-2,b.left+b.width/2));
+      const y=Math.max(2,Math.min(innerHeight-2,b.top+Math.min(b.height/2,100)));
+      return {display:cs.display,visibility:cs.visibility,opacity:Number(cs.opacity),
+        rect:[b.x,b.y,b.width,b.height],onScreen:b.width>100&&b.height>60
+          &&b.bottom>0&&b.top<innerHeight,
+        hitInside:el.contains(document.elementFromPoint(x,y))};
+    };
+    return {mode:root.dataset.fxArchiveExperience,
+      cinema:root.dataset.fxArchiveCinema||'home',
+      scrollY,viewport:{w:innerWidth,h:innerHeight},
+      owner:root.dataset.fxMagBirthOwnerR533,
+      hero:box(hero),title:box(title),paper:box(panel),
+      rootClass:root.className,
+      rootError:root.dataset.fxArchiveError||null};
+  });
+  const visible=p=>p&&p.display!=='none'&&p.visibility==='visible'
+    &&p.opacity>.55&&p.onScreen;
+  assert.ok((visible(state.hero)&&visible(state.title))
+    ||(state.cinema==='active'&&visible(state.paper)&&state.paper.hitInside),
+    '412px 4x CPU-throttled Lighthouse viewport blank after 18s: '+JSON.stringify(state));
+  assert.ok(state.scrollY<=3,
+    'Lighthouse visit must not hijack/auto-scroll the original page: '+JSON.stringify(state));
+  console.log('ARCHIVE_LIGHTHOUSE_PHONE_4X_CONTINUITY_PASS',JSON.stringify(state));
+  await cdp.detach();
+  await context.close();
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -826,6 +876,7 @@ async function fallback(browser){
     await verifyMobileLivingPulse(browser);
     await missingGpuFallback(browser);
     await auditHtmlContinuity(browser);
+    await lighthousePhoneRealThrottling(browser);
     await fallback(browser);
   }finally{await browser.close();}
 })().catch(e=>{console.error('ARCHIVE_FAIL',e.stack||String(e));process.exitCode=1;});
