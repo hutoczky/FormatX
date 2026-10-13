@@ -11,6 +11,10 @@
   // Explicit intro replay is the real user path even in browser screenshot
   // validation. Ordinary automated non-intro audits still never show the film.
   const EXPLICIT_INTRO = PARAMS.get('intro') === '1' || PARAMS.get('visualintro') === '1';
+  // A manually requested fixed-frame storyboard is a still photo, not the
+  // chronological 10-second playback. Hold its already-faded-in telemetry
+  // for deterministic real-GPU screenshots; never change ordinary visitors.
+  const FIXED_STILL = EXPLICIT_INTRO && PARAMS.has('introframe');
   const MOBILE = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let shown = false;
@@ -71,7 +75,7 @@
       });
     });
 
-    const hold = REDUCED ? 600 : (MOBILE ? 1100 : 1200);
+    const hold = FIXED_STILL ? 5200 : (REDUCED ? 600 : (MOBILE ? 1100 : 1200));
     exitTimer = window.setTimeout(() => {
       badge.classList.remove('is-visible');
       badge.classList.add('is-exiting');
