@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261012-r2050-native-surface-endpoint
-base_master=b392dd80eadbb72c960c33a7838902ed07157d14
-purpose=Final full-sweep native WebGL frame before returning the already-established MAG to zero-idle, so intermittent SwiftShader/Chromium rAF pauses cannot strand an autonomous surface-energy filament at only 37% of its path. Retain the exact original MAG renderer, eight interactive archive sources, and real original HTML folios.
-validation=Canonical native MAG surface-energy browser suite on 390px, 430px and 1440px; correct monotonic sweep endpoint, zero idle frames between bursts, offscreen and reduced-motion suspension; eight original interactive MAG archive chapters, no occlusion, original navigation and technical functionality; two Cloudflare domains revision and smoke tests.
-limits=Not verified photorealistic or native 60 FPS on a physical device. Strict Lighthouse 95+ desktop/mobile remains unmet.
+token=20261013-r2051-real-mag-nonblocking-loop-css
+base_master=e9dca2e3666cf35ac1d5a4c5f508b3156650a644
+purpose=Deliver the original unchanged native MAG cinematic archive and seamless-scroll CSS without a new render-blocking network request, and refresh the original page geometry when the existing post-first-paint style scheduler activates. Preserve eight genuine original interactive HTML folios, stable MAG input, and mobile accessibility.
+validation=Original eight-scene WebGL2 Chromium and mobile checks, no information occlusion, platform scroll desktop+mobile, production Worker preflight and exact revision on both live domains. This revision is not an assertion of full Lighthouse award-readiness.
+limits=As of October 13 2026 Lighthouse still below 95: desktop 92, mobile 93 on local real-experience CI. Photorealism vs Igloo.inc and real-hardware stable 60 FPS are not verified.
