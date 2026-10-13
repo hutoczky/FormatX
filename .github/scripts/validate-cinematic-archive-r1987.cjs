@@ -7,7 +7,16 @@ const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
-const r2057Invalidate=jsSource.split('function invalidate(){')[1]?.split('function connect(){')[0]||'';
+// R2058: film lighting follows the actual flexible membrane geometry,
+ // rather than shading a curled display with a permanently flat surface
+ // normal. Aerial depth haze is in the same shader and adds no draw calls.
+ assert.match(jsSource,/localNormal=normalize\(vec3\(-dzdx,-dzdy,1\.0\)\)/,
+   'R2058 missing physically curved glass normals');
+ assert.match(jsSource,/in float vViewDistance;/,
+   'R2058 missing interpolated archive depth for stable atmospheric extinction');
+ assert.match(jsSource,/uPanel<\.5 && uFiber<\.5/,
+   'R2058 depth treatment must never blur readable glass or energy filaments');
+ const r2057Invalidate=jsSource.split('function invalidate(){')[1]?.split('function connect(){')[0]||'';
 assert.match(r2057Invalidate,/if\(!domRaf\)/,
   'R2057 must coalesce repeated touch/wheel DOM transformations before next paint');
 assert.match(r2057Invalidate,/requestAnimationFrame\(\(\)=>/,
@@ -390,6 +399,7 @@ async function evaluate(viewport,isMobile,browser){
     filamentCount:Number(document.documentElement.dataset.fxArchiveFilamentCount||0),
     permanentRacks:Number(document.documentElement.dataset.fxArchivePersistentRackCount||0),
     continuity:document.documentElement.dataset.fxArchiveWorldContinuity||'',
+    optics:document.documentElement.dataset.fxArchiveOptics||'',
     frames:window.FormatXArchiveExperience.state.frames,
     controls:document.querySelectorAll('#menu-toggle,.fx-language-toggle,.fx-reference-ask').length,
     scrollHeight:document.documentElement.scrollHeight,
