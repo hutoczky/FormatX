@@ -32,7 +32,7 @@ const EXPECTED_MOBILE_FILTER = [
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [] };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [] };
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -75,6 +75,11 @@ function instrumentNativeFrames() {
       const state = stateFor(this);
       if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas') && state.layer === 0 && state.depthWrite) {
         audit.frames++;
+        audit.recent.push({at:Math.round(performance.now()),phase:state.phase,
+          pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
+          scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484||'',
+          scene:document.documentElement.dataset.fxArchiveCinema||''});
+        if(audit.recent.length>240)audit.recent.shift();
         audit.maximumPhase = Math.max(audit.maximumPhase, state.phase);
         if (state.phase >= 0) {
           audit.phases.push(state.phase);
@@ -163,6 +168,18 @@ async function verify(browser, name, viewport, mobile) {
     const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
     await page.waitForTimeout(1000);
     report.idleFrames = await page.evaluate(before => __magEnergyAudit.frames - before, frameCount);
+    if(report.idleFrames>0){
+      report.idleDiagnostic=await page.evaluate(()=>({
+        events:__magEnergyAudit.events,
+        frames:__magEnergyAudit.recent.slice(-100),
+        pulse:document.documentElement.dataset.fxCoreSurfacePulseR454,
+        scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484,
+        quality:document.documentElement.dataset.fxCoreGovernorR1660,
+        dock:document.documentElement.dataset.fxArchiveDock,
+        native:document.documentElement.dataset.fxCoreIdleBoundaryR1710
+      }));
+      console.error('R2055_IDLE_GAP_DIAGNOSTIC',JSON.stringify(report.idleDiagnostic));
+    }
     assert.equal(report.idleFrames, 0, `${name}: native renderer must rest between sweeps`);
     await page.waitForFunction(() => __magEnergyAudit.events.filter(e => e.phase === 'end' && e.source === 'autonomous').length >= 2, null, { timeout: 14000 });
     await page.waitForTimeout(250);
