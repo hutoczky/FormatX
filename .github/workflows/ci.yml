@@ -8,6 +8,7 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
+      - '.github/scripts/report-lighthouse-metrics.cjs'
   push:
     branches: [master]
     paths:
@@ -15,6 +16,7 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
+      - '.github/scripts/report-lighthouse-metrics.cjs'
   workflow_dispatch:
 
 permissions:
