@@ -55,8 +55,12 @@ const SHOTS=[
         });
         assert.equal(info.camera,shot.expected,
           'R2073 3D camera is not travelling through its authored cinematic arc: '+JSON.stringify(info));
-        assert.ok(info.canvasWidth>0&&info.canvasHeight>0&&info.coreCount===1,
-          'Original renderer and final living MAG must remain unique: '+JSON.stringify(info));
+        // The permanent hero MAG is allowed to bootstrap later: at an early
+        // 1.4s deterministic frame it is not yet mounted. The real scene must
+        // have its own live Three renderer, but never duplicate the hero MAG.
+        assert.ok(info.canvasWidth>0&&info.canvasHeight>0
+          &&info.renderer==='threejs-active'&&info.coreCount<=1,
+          'Cinematic Three renderer unavailable or duplicate living MAG: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
         if(shot.second>=8.05){
           assert.equal(info.identity,'MAG // AI CORE');
