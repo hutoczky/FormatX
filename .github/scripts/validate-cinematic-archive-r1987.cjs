@@ -187,6 +187,17 @@ async function evaluate(viewport,isMobile,browser){
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
+    if(state.scene===scene.key&&state.active){
+      const focus=await page.evaluate(()=>{
+        const focused=document.activeElement;
+        const activePaper=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        const hiddenFocused=!!focused?.closest?.('.fx-archive-cinema-folio-r2030[inert]');
+        return {hiddenFocused,activePaper:!!activePaper,
+          restored:document.documentElement.dataset.fxArchiveFocusRestored||''};
+      });
+      assert.ok(!focus.hiddenFocused,
+        'Keyboard focus remained trapped inside an archived inert HTML paper: '+JSON.stringify({scene:scene.key,...focus}));
+    }
     let postRefresh=null;
     if(state.scene!==scene.key){
       await page.evaluate(()=>window.FormatXArchiveExperience.refresh());
