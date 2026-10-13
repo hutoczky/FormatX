@@ -488,12 +488,6 @@
       if(keyboardLeaving)recoverNativeFocus(panel);
       lastCinemaKey=key;
     }else if(!enabled)lastCinemaKey='';
-    // Infrequent telemetry; never create a replacement DOM mutation for
-    // every style write we successfully avoided.
-    if(domComposes%64===0){
-      root.dataset.fxArchiveFolioStyleWrites=String(folioStyleWrites);
-      root.dataset.fxArchiveFolioStyleSkips=String(folioStyleSkips);
-    }
   }
 
   // R2026: The real existing HTML content is the handoff destination.
@@ -1316,7 +1310,7 @@ void main(){
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples,domComposes};},
+      cpuSamples:PerformanceManager.samples,domComposes,folioStyleWrites,folioStyleSkips};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
