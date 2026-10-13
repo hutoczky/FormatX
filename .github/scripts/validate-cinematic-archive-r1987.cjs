@@ -6,6 +6,17 @@ const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/
 const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const htmlSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+assert.ok(!/<link\\b[^>]*formatx-proof-singleton-r2033\\.css/i.test(htmlSource),
+  'R2057 must not add a redundant render-blocking proof CSS request');
+for(const path of ['docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css',
+                   'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css']){
+  const critical=fs.readFileSync(path,'utf8');
+  assert.ok(critical.includes('production-r2057-proof-first-frame-no-extra-stylesheet')
+    && critical.includes('.fx-loop-reference-proof')
+    && critical.includes('#hero .fx-reference-proof'),
+    'R2057 original proof visibility protection missing in first paint: '+path);
+}
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
