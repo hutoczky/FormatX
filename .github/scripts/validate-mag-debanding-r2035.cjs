@@ -34,7 +34,8 @@ assert.ok(archive.includes('opticalDepth*d,d'),
   'Archive and MAG must share correct homogeneous depth ordering');
 const archiveRevision=archive.match(/const VERSION='cinematic-archive-(r\d{4})-[^']*'/)?.[1];
 assert.ok(archiveRevision,'The WebGL MAG archive must publish one recognized cinematic revision');
-assert.ok(html.includes('formatx-cinematic-archive-r1987.js?v=20261012-'+archiveRevision+'-'),
+const scriptRevision=html.match(/formatx-cinematic-archive-r1987\.js\?v=(\d{8})-(r\d{4})-[^"]+/);
+assert.ok(scriptRevision&&scriptRevision[1]>='20261012'&&scriptRevision[2]===archiveRevision,
   'The HTML and native eight-module MAG archive must load the SAME revision; never accept stale caches');
 assert.ok(archive.includes('fxArchiveDepthPolicyR2035'),
   'Wrong archive-depth revision active');
