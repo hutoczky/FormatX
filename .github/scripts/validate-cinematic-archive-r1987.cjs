@@ -577,9 +577,12 @@ async function evaluate(viewport,isMobile,browser){
     return {insideNew:!!panel&&panel.contains(document.activeElement),
       oldInert:!!old&&old.inert,
       text:document.activeElement?.textContent?.trim().slice(0,90),
-      handoff:document.documentElement.dataset.fxArchiveFocusHandoff||null};
+      handoff:document.documentElement.dataset.fxArchiveFocusHandoff||null,
+      accessibleLabel:panel?.getAttribute('aria-label')||null};
   });
-  assert.ok(focusAfter.insideNew&&focusAfter.oldInert&&focusAfter.handoff==='native-document',
+  assert.ok(focusAfter.insideNew&&focusAfter.oldInert
+    &&focusAfter.handoff==='native-document'
+    &&focusAfter.accessibleLabel?.startsWith('MAG // '),
     'Keyboard focus stranded in archived HTML: '+JSON.stringify({focusBefore,focusAfter}));
   console.log('ARCHIVE_KEYBOARD_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',focusAfter}));
   const writeStats=await page.evaluate(()=>({
