@@ -45,6 +45,9 @@ const SHOTS=[
             camera:root.dataset.fxMagIntroCameraR2073,
             renderer:root.dataset.fxMagBirthRendererR1360,
             birthState:root.dataset.fxMagBirthLiveR533,
+            realPixelPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+            realLitSamples:Number(root.dataset.fxMagBirthFrameLitSamplesR2073||0),
+            realReadback:root.dataset.fxMagBirthFrameR1557,
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
@@ -59,8 +62,9 @@ const SHOTS=[
         // 1.4s deterministic frame it is not yet mounted. The real scene must
         // have its own live Three renderer, but never duplicate the hero MAG.
         assert.ok(info.canvasWidth>0&&info.canvasHeight>0
-          &&info.renderer==='threejs-active'&&info.coreCount<=1,
-          'Cinematic Three renderer unavailable or duplicate living MAG: '+JSON.stringify(info));
+          &&info.renderer==='threejs-active'&&info.coreCount<=1
+          &&info.realPixelPeak>=20&&info.realLitSamples>=2,
+          'Cinematic original Three framebuffer is black or MAG scene missing: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
         if(shot.second>=8.05){
           assert.equal(info.identity,'MAG // AI CORE');
