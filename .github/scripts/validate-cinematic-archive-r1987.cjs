@@ -205,6 +205,15 @@ async function evaluate(viewport,isMobile,browser){
       const state=window.FormatXArchiveExperience?.state;
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
+    // A camera's selected scene and the real semantic panel are committed in
+    // separate animation-frame phases. Require both to agree before measuring
+    // the physical 3D folio; a genuinely stuck handoff still fails on timeout.
+    await page.waitForFunction(source=>{
+      const active=document.querySelector(
+        'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+      );
+      return active?.dataset.fxCinemaSource===source;
+    },scene.source,{timeout:4000});
     const focusAfterScroll=await page.evaluate(()=>{
       const focused=document.activeElement;
       const folio=focused?.closest?.('.fx-archive-cinema-folio-r2030');
