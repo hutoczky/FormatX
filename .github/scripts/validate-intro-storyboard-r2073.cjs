@@ -34,6 +34,15 @@ const SHOTS=[
           {waitUntil:'domcontentloaded',timeout:60000});
         await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
           null,{timeout:45000});
+        if(shot.second>=8.05){
+          await page.waitForFunction(()=>{
+            const label=document.querySelector('.fx-ai-core-ident-r1951.is-visible');
+            return !!label&&Number(getComputedStyle(label).opacity)>.90;
+          },null,{timeout:3000});
+          // Photograph the settled optical label, not the first blurred
+          // transition frame that immediately follows its DOM insertion.
+          await page.waitForTimeout(150);
+        }
         const info=await page.evaluate(()=>{
           const root=document.documentElement;
           const overlay=document.querySelector('.fx-mag-birth-r533');
@@ -51,6 +60,9 @@ const SHOTS=[
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
+            identityX:badge?badge.getBoundingClientRect().left+
+              badge.getBoundingClientRect().width*.5:null,
+            innerWidth,
             canvasWidth:canvas?.width,canvasHeight:canvas?.height,
             coreCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             duplicateIdentity:document.querySelectorAll('.fx-ai-core-ident-r1951').length
@@ -76,7 +88,9 @@ const SHOTS=[
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
         if(shot.second>=8.05){
           assert.equal(info.identity,'MAG // AI CORE');
-          assert.ok(info.insideFilm,'MAG identity must belong to stabilized film shot');
+          assert.ok(info.insideFilm&&info.identityAlpha>.90
+            &&Math.abs(info.identityX-info.innerWidth*.5)<12,
+            'MAG identity must settle sharply on its real 3D optical axis: '+JSON.stringify(info));
         }else{
           assert.ok(!info.identity,'AI telemetry should not precede stabilization');
         }
