@@ -103,7 +103,15 @@
   function ensureStyle() {
     const existing=document.querySelector('link[data-fx-seamless-loop-style]');
     if(existing instanceof HTMLLinkElement){
+      // Production injects this sheet in print mode, so it never blocks the
+      // first paint. The existing R487 scheduler reveals it after FCP. When
+      // the sheet is revealed, geometry must be refreshed even if it loaded
+      // successfully while still inactive (load is not equivalent to apply).
       if(!existing.sheet)existing.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
+      if(existing.hasAttribute('data-fx-r487-deferred-style')){
+        addEventListener('formatx:deferredcssready',scheduleGeometryRefresh,{once:true,passive:true});
+        if(root.dataset.fxDeferredCssR487==='ready-fcp')scheduleGeometryRefresh();
+      }
       return;
     }
     const link = document.createElement('link');

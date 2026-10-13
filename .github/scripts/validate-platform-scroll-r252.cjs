@@ -237,9 +237,11 @@ async function verifyDesktop(browser) {
   assert((!initial.stageExists || initial.stagePointerEvents === 'none') && initial.hitPointerEvents !== 'none', `desktop R1724 reference visual / semantic hit ownership invalid: ${JSON.stringify(initial)}`);
   assert(initial.overflow <= 2, `desktop horizontal overflow: ${JSON.stringify(initial)}`);
   await verifyHeartInteraction(page, 'desktop');
-  /* Match the mobile path: scrolling is intentionally blocked while the
-     organism dialogue/panel owns focus. Close it before validating the
-     document-level seamless loop. */
+  /* The native MAG may open its own mini assistant in addition to the
+     organism voice dialogue. Use the actual visible, accessible close control
+     before checking scrolling; never bypass the document's focus lock. */
+  const miniClose=page.locator('.fx-mini-mag-close-r459').first();
+  if(await miniClose.isVisible().catch(()=>false))await miniClose.click();
   await page.keyboard.press('Escape').catch(() => {});
   // The real public dialogue API mirrors its close button; make sure its
   // native scroll guard is released before exercising the page's own loop.

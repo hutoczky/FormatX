@@ -5,6 +5,9 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'billing-worker/src/production-entry.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - '.github/scripts/validate-r2051-deferred-loop-css.cjs'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
@@ -20,6 +23,9 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'billing-worker/src/production-entry.js'
+      - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
+      - '.github/scripts/validate-r2051-deferred-loop-css.cjs'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
@@ -51,6 +57,9 @@ jobs:
           node-version: '22'
       - name: Validate JavaScript syntax
         run: |
+          node --check billing-worker/src/production-entry.js
+          node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
+          node .github/scripts/validate-r2051-deferred-loop-css.cjs
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
