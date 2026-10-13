@@ -9,8 +9,23 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
-assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff)\s*\(/,
-  'R2047 prohibits running the same heavy native layout composition twice per scroll input');
+assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff|selectLiveChapter|ResponsiveExperience\.dock|ResponsiveExperience\.restore)\s*\(/,
+  'R2053 must not remeasure eight live chapter anchors in the GPU RAF after synchronous scroll composition');
+const folioUpdate=jsSource.split('function updateRealContentSheets(){')[1]?.split('function sceneForElement(')[0]||'';
+const readStart=folioUpdate.indexOf('for(const node of nearby)');
+const writeStart=folioUpdate.indexOf('for(const {node,entry,dir} of writes)');
+assert.ok(readStart>=0&&writeStart>readStart,'R2053 missing measure-first/native-HTML-write-second passes');
+assert.ok(folioUpdate.slice(readStart,writeStart).includes('node.getBoundingClientRect()'),
+  'R2053 geometry snapshot no longer samples the actual original HTML documents');
+assert.doesNotMatch(folioUpdate.slice(readStart,writeStart),/\.style\.setProperty\(/,
+  'R2053 prohibits interleaving geometry reads with native HTML style writes');
+assert.doesNotMatch(folioUpdate.slice(writeStart),/\.getBoundingClientRect\(/,
+  'R2053 prohibits reading geometry after applying per-card layout transforms');
+const panelState=jsSource.split('function setPanelState(){')[1]?.split('function selectLiveChapter(){')[0]||'';
+assert.ok(panelState.includes('lastPanelNode')&&panelState.includes('lastPanelNode!==next'),
+  'R2053 must clear only the previous physical paper when changing chapters');
+assert.doesNotMatch(panelState,/for\s*\(const s of scenes\)/,
+  'R2053 inactive archive sections must not receive redundant style writes per scroll');
 
 async function evaluate(viewport,isMobile,browser){
   const context=await browser.newContext({
@@ -502,6 +517,29 @@ async function evaluate(viewport,isMobile,browser){
   const restored=await page.evaluate(()=>({dock:document.documentElement.dataset.fxArchiveDock,stage:!!document.querySelector('#hero .fx-crystal-organism-r326-stage')}));
   assert.ok(restored.stage,'MAG was not returned to original hero');
   assert.ok(errors.length===0,'Uncaught script errors: '+errors.join(' | '));
+  // R2053: quantitative input-path time on this CI Chromium instance only.
+  // No synthetic FPS claim: this records synchronous native scroll dispatch
+  // and original HTML folio layout composition, not GPU paint time.
+  const scrollMetrics=await page.evaluate(()=>{
+    const y=scrollY,start=performance.now(),samples=[];
+    const base=Math.max(0,document.querySelector('#experience')?.offsetTop||0);
+    for(let i=0;i<32;i++){
+      window.scrollTo({top:base+(i%2?18:58),behavior:'instant'});
+      const t=performance.now();
+      window.dispatchEvent(new Event('scroll'));
+      samples.push(performance.now()-t);
+    }
+    window.scrollTo({top:y,behavior:'instant'});
+    window.dispatchEvent(new Event('scroll'));
+    samples.sort((a,b)=>a-b);
+    const mean=samples.reduce((a,b)=>a+b,0)/samples.length;
+    return {sampleCount:samples.length,meanMs:Number(mean.toFixed(3)),
+      p95Ms:Number(samples[Math.floor(samples.length*.95)].toFixed(3)),
+      totalWallMs:Number((performance.now()-start).toFixed(2)),
+      contextCount:document.documentElement.dataset.fxCoreContexts||null};
+  });
+  assert.equal(scrollMetrics.sampleCount,32,'Scroll input benchmark must exercise real synchronous composition');
+  console.log('ARCHIVE_SCROLL_INPUT_PROFILE_R2053',JSON.stringify({mode:isMobile?'mobile':'desktop',...scrollMetrics}));
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }

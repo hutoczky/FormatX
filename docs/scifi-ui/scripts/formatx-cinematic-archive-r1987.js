@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2048-anchor-transition-only-optics';
+  const VERSION='cinematic-archive-r2053-batched-native-scroll-layout';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -27,6 +27,7 @@
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
+  let lastPanelNode=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
@@ -492,9 +493,13 @@
 
   function updateRealContentSheets(){
     if(!archiveActive||reduced.matches)return;
-    const vh=Math.max(1,innerHeight);
-    // Limit viewport geometry reads to the current and adjacent chapters.
-    const nearby=new Set();
+    const vh=Math.max(1,innerHeight),portrait=mobile();
+    // R2053: read every source document rectangle BEFORE writing a single
+    // transform/opacity. Previously each write invalidated geometry read for
+    // the next native HTML card, creating layout thrash on mobile scroll.
+    // One deterministic snapshot keeps all original interactive cards and
+    // exact reversible scroll coordinates, without blocking native scrolling.
+    const nearby=new Set(),writes=[];
     if(current){
       const i=current.s.index;
       for(const scene of scenes){
@@ -507,15 +512,17 @@
       const entry=clamp((vh*.89-bounds.top)/Math.max(160,vh*.37));
       const last=paperLast.get(node);
       if(last!==undefined&&Math.abs(entry-last)<.007)continue;
-      paperLast.set(node,entry);
-      const away=1-smooth(entry);
       const s=sceneForElement(node);
-      const dir=mobile()?0:(s?.index%2===0?-1:1);
+      writes.push({node,entry,dir:portrait?0:(s?.index%2===0?-1:1)});
+    }
+    for(const {node,entry,dir} of writes){
+      paperLast.set(node,entry);
+      const settled=smooth(entry),away=1-settled;
       node.style.setProperty('--fx-archive-paper-x',(away*dir*46).toFixed(1)+'px');
       node.style.setProperty('--fx-archive-paper-y',(away*36).toFixed(1)+'px');
       node.style.setProperty('--fx-archive-paper-rot',(away*dir*-13).toFixed(2)+'deg');
       node.style.setProperty('--fx-archive-paper-scale',(1-away*.075).toFixed(4));
-      node.style.setProperty('--fx-archive-paper-opacity',(.66+smooth(entry)*.34).toFixed(3));
+      node.style.setProperty('--fx-archive-paper-opacity',(.66+settled*.34).toFixed(3));
       node.dataset.fxArchivePaperPhase=entry>=.99?'presented':'being-handed';
     }
     root.dataset.fxArchiveRealContent='native-paper-handoff';
@@ -1052,15 +1059,22 @@ void main(){
   }
 
   function setPanelState(){
-    for(const s of scenes){
-      if(current&&s===current.s){
-        s.node.style.setProperty('--fx-archive-progress',current.progress.toFixed(4));
-        s.node.dataset.fxArchiveActive='true';
-      }else{
-        s.node.style.removeProperty('--fx-archive-progress');
-        s.node.removeAttribute('data-fx-archive-active');
-      }
+    // R2053: there can only be one presented papyrus. Reset the previous
+    // physical source ONCE on chapter change; don't rewrite seven inactive
+    // source DOM/style attributes on every native pointer/touch scroll.
+    const next=current?.s.node||null;
+    if(lastPanelNode&&lastPanelNode!==next){
+      lastPanelNode.style.removeProperty('--fx-archive-progress');
+      lastPanelNode.removeAttribute('data-fx-archive-active');
     }
+    if(next){
+      const progress=current.progress.toFixed(4);
+      if(next.style.getPropertyValue('--fx-archive-progress')!==progress)
+        next.style.setProperty('--fx-archive-progress',progress);
+      if(next.dataset.fxArchiveActive!=='true')
+        next.dataset.fxArchiveActive='true';
+    }
+    lastPanelNode=next;
   }
   /* Lightweight selection is synchronous on native scroll. GPU rendering is
      still requestAnimationFrame-budgeted. This prevents stale chapters when
@@ -1082,13 +1096,11 @@ void main(){
     updates++;
     root.dataset.fxArchiveUpdateCount=String(updates);
     root.dataset.fxArchiveUpdateScroll=String(Math.round(scrollY));
-    const inArchive=selectLiveChapter();
-    if(inArchive&&stage)ResponsiveExperience.dock();
-    else if(archiveActive)ResponsiveExperience.restore();
-    // The native scroll/resize event has ALREADY synchronously composed the
-    // visible HTML papyrus inside invalidate(). A second full DOM read/write
-    // cycle on the queued animation frame caused avoidable layout work on
-    // 60 Hz phones. This RAF owns the render request and chapter event only.
+    // R2053: invalidate() has already selected and docked the correct
+    // chapter synchronously. Never measure the same eight physical anchors
+    // again AFTER CSS writes in a queued GPU rAF: the re-measurement caused
+    // forced style/layout and redundant stage docking on native scroll.
+    // This frame owns only renderer scheduling and semantic scene events.
     if(current){
       const nextIndex=current.s.index;
       root.dataset.fxArchiveCurrent=current.s.key;
@@ -1219,6 +1231,7 @@ void main(){
     detach?.();detach=null;drawPass=null;
     registeredCanvas=null;registeredApi=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
+    lastPanelNode=null;
     root.dataset.fxArchiveExperience='disposed';
   }
   function init(){
