@@ -48,7 +48,10 @@ const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261012-r2
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=5500;
+/* R2055 real navigation: the first cinematic MAG birth still starts instantly;
+   returning visitors should not see the CSS surrogate for up to 9s before
+   the single native core loads. This delay begins AFTER two committed frames. */
+const AUTO_DELAY_MS=2600;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -107,15 +110,15 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:3500});
+    idleId=requestIdleCallback(launch,{timeout:1650});
   }else{
-    timer=setTimeout(launch,900);
+    timer=setTimeout(launch,450);
   }
 }
 
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.dataset.fxP0FirstPaintR490='committed-r493';
+    root.dataset.fxP0FirstPaintR490='committed-r2055-postpaint-native-prewarm';
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
 }
