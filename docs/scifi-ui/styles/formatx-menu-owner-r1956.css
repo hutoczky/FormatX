@@ -153,3 +153,15 @@ html[data-fx-p0-audit-mode-r1728="static-first-paint-no-late-webgl"] body.living
   contain:layout style!important;
 }
 /* production-r1979-audit-hero-copy-single-paint */
+
+/* R2056 — canonical proof deduplication is tiny first-paint geometry, not a
+   render-blocking separate stylesheet. Preserve precisely one semantic proof
+   with all original links; the final 3D MAG paper owns that real module. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading {
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof {
+ visibility:hidden!important;pointer-events:none!important;
+}
+/* production-r2056-singleton-first-frame-no-blocking-remote-css */
