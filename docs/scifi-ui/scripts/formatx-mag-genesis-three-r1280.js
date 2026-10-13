@@ -48,6 +48,9 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      // R2073: organic, inertial camera input remains inside this original
+      // Three.js renderer. No overlay renderer and no CSS parallax substitute.
+      this.cameraInput={targetX:0,targetY:0,x:0,y:0,impulse:0,lastTime:0};
 
       this.mobileRender=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
@@ -1639,35 +1642,92 @@
       if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
     }
 
-    updateCamera(t,time){
-      let z=5.18,y=.012,x=0;
-      if(t<2.70){
-        const k=smooth(t/2.70);
-        z=mix(5.42,5.12,k);
-        x=Math.sin(time*.00027)*.024*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.009;
-      }else if(t<3.30){
-        const k=smooth((t-2.70)/.60);
-        z=mix(5.12,3.86,k);
-        x=mix(.018,0,k);y=mix(.012,0,k);
-      }else if(t<5.55){
-        z=3.86+Math.sin(time*.00020)*.0035;
-        x=Math.sin(time*.00015)*.0018;
-        y=Math.cos(time*.00018)*.0018;
-      }else if(t<7.25){
-        const k=smooth((t-5.55)/1.70);
-        z=mix(3.86,4.28,k);
-        y=mix(0,.003,k);
-      }else if(t<9.10){
-        z=4.28+Math.sin(time*.00018)*.006;
-        y=.003;
-      }else{
-        z=mix(4.28,4.40,smooth((t-9.10)/.60));
-        y=.003;
+    /* R2073 — three reference disciplines in one continuous 10s film:
+       - Igloo: spatial depth and physically continuous object lighting
+       - Lando: purposeful approach / orbit / settle camera arcs
+       - Lusion: spring-smoothed physical pointer, touch and pulse response.
+       Every curve uses C1-smooth ease and converges to exactly one canonical
+       final front-camera frame before the existing R326 native MAG handoff. */
+    interact(input={}){
+      if(this.disposed)return;
+      const v=this.cameraInput;
+      const kind=String(input.kind||'');
+      const x=Number(input.x),y=Number(input.y);
+      if(Number.isFinite(x)&&Number.isFinite(y)){
+        v.targetX=clamp(x,-1,1);
+        v.targetY=clamp(y,-1,1);
       }
+      if(/press|click|pulse|release|wheel|scroll|key|touch/.test(kind)){
+        const strength=Number(input.strength);
+        v.impulse=Math.min(1.35,v.impulse+
+          clamp(Number.isFinite(strength)?strength:.30,0,1.2)*.36);
+      }
+      document.documentElement.dataset.fxMagIntroInteractionR2073=
+        /press|click|touch/.test(kind)?'physical-core-pulse':'inertial-camera-parallax';
+    }
+    updateCamera(t,time){
+      const glide=(a,b,v)=>smooth((v-a)/(b-a));
+      const lerp=(a,b,v)=>mix(a,b,clamp(v));
+      let z=5.42,x=0,y=0,focusX=0,focusY=0,bank=0;
+      // 0–2.7s: DNA field emerges as the lens pushes toward it.
+      const establish=glide(0,2.70,t);
+      z=lerp(6.04,5.12,establish);
+      x=lerp(-.18,.080,establish);
+      y=lerp(.14,.025,establish);
+      focusX=lerp(-.055,0,establish);
+      bank=lerp(-.016,.008,establish);
+      // 2.7–3.3s: decisive close-in reveal of the living embryo.
+      const close=glide(2.70,3.30,t);
+      z=lerp(z,3.86,close);
+      x=lerp(x,.135,close);
+      y=lerp(y,.040,close);
+      focusX=lerp(focusX,-.042,close);
+      bank=lerp(bank,.012,close);
+      // 3.3–5.55s: restrained orbital reveal of physical cortical depth.
+      const orbit=glide(3.30,5.55,t);
+      x=lerp(x,-.13,orbit);
+      y=lerp(y,-.038,orbit);
+      focusX=lerp(focusX,.042,orbit);
+      bank=lerp(bank,-.009,orbit);
+      // 5.55–7.25s: pull back to see a single organism, not disconnected
+      // CSS scenes. A parallax reversal gives the shell readable depth.
+      const reveal=glide(5.55,7.25,t);
+      z=lerp(z,4.28,reveal);
+      x=lerp(x,.090,reveal);
+      y=lerp(y,.016,reveal);
+      focusX=lerp(focusX,0,reveal);
+      bank=lerp(bank,.008,reveal);
+      // 7.25–8.05s: the nervous system settles into its iconic axis.
+      const stabilize=glide(7.25,8.05,t);
+      x=lerp(x,0,stabilize);
+      y=lerp(y,.003,stabilize);
+      focusX=lerp(focusX,0,stabilize);
+      focusY=lerp(focusY,0,stabilize);
+      bank=lerp(bank,0,stabilize);
+      // 9.1–9.7s: tiny clean handoff push; last 300ms are stable.
+      z=lerp(z,4.40,glide(9.10,9.70,t));
+      const input=this.cameraInput;
+      const dt=input.lastTime?
+        Math.max(0,Math.min(48,time-input.lastTime)):16.667;
+      input.lastTime=time;
+      const spring=1-Math.exp(-dt/110);
+      input.x+=(input.targetX-input.x)*spring;
+      input.y+=(input.targetY-input.y)*spring;
+      input.impulse*=Math.exp(-dt/290);
+      // Physical input is a bounded inspection, not a new camera controller.
+      // The last 1.2s deliberately converge to the original native view.
+      const responsiveness=1-glide(8.65,9.65,t);
+      const movement=.075*responsiveness;
+      x+=input.x*movement;
+      y+=input.y*movement*.72;
+      z-=input.impulse*.035*responsiveness;
       if(this.width<this.height)z+=.90;
       this.camera.position.set(x,y,z);
-      this.camera.lookAt(0,0,0);
+      this.camera.up.set(Math.sin(bank),Math.cos(bank),0);
+      this.camera.lookAt(focusX,focusY,0);
+      document.documentElement.dataset.fxMagIntroCameraR2073=
+        t<3.30?'dna-approach':t<5.55?'cortical-orbit':
+        t<8.05?'organism-pullback':t<9.65?'identity-stabilized':'handoff-locked';
     }
 
     render(r,time){
@@ -1763,6 +1823,7 @@
       return {
         resize:()=>engine.resize(),
         draw:(r,time)=>engine.render(r,time),
+        interact:input=>engine.interact(input),
         destroy:()=>engine.destroy(),
         engine,
         revision:'r1240-organic-gyri-lock'
