@@ -27,6 +27,7 @@
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
+  let lastPanelNode=null;
   let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
@@ -1058,15 +1059,22 @@ void main(){
   }
 
   function setPanelState(){
-    for(const s of scenes){
-      if(current&&s===current.s){
-        s.node.style.setProperty('--fx-archive-progress',current.progress.toFixed(4));
-        s.node.dataset.fxArchiveActive='true';
-      }else{
-        s.node.style.removeProperty('--fx-archive-progress');
-        s.node.removeAttribute('data-fx-archive-active');
-      }
+    // R2053: there can only be one presented papyrus. Reset the previous
+    // physical source ONCE on chapter change; don't rewrite seven inactive
+    // source DOM/style attributes on every native pointer/touch scroll.
+    const next=current?.s.node||null;
+    if(lastPanelNode&&lastPanelNode!==next){
+      lastPanelNode.style.removeProperty('--fx-archive-progress');
+      lastPanelNode.removeAttribute('data-fx-archive-active');
     }
+    if(next){
+      const progress=current.progress.toFixed(4);
+      if(next.style.getPropertyValue('--fx-archive-progress')!==progress)
+        next.style.setProperty('--fx-archive-progress',progress);
+      if(next.dataset.fxArchiveActive!=='true')
+        next.dataset.fxArchiveActive='true';
+    }
+    lastPanelNode=next;
   }
   /* Lightweight selection is synchronous on native scroll. GPU rendering is
      still requestAnimationFrame-budgeted. This prevents stale chapters when
@@ -1223,6 +1231,7 @@ void main(){
     detach?.();detach=null;drawPass=null;
     registeredCanvas=null;registeredApi=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
+    lastPanelNode=null;
     root.dataset.fxArchiveExperience='disposed';
   }
   function init(){
