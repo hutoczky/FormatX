@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261013-r2057-native-mag-frame-coalesced-paper
-base_master=cb92f28111ad994a76b5aadbf1243a7d6269303b
-purpose=Preserve one canonical MAG and eight original interactive archive folios, while coalescing repeated native HTML paper geometry/style updates to one pre-paint animation frame. Keep instant semantic chapter selection and return all original controls on fallback. Revert experimental r244 CSS deferral after measured desktop CLS 0.154 regression.
-validation=19 PR checks passed for R2057 including 8 desktop and mobile original WebGL2 MAG folios, 320-1920 px no occlusion, live original controls, reduced motion, no WebGL, design system, bilingual and production dry run. Unique content revision will be checked on both custom domains after deploy.
-measured=R2057 32 artificial scroll-event CPU benchmark desktop mean 0.316ms, mobile mean 0.628ms, one WebGL2 context; these are not FPS. Lighthouse desktop 92-93 mobile 93, below independent 95 goal, and unchanged from stable R2056 baseline.
-limits=Photorealistic studio finish, real-device 60fps, objective Igloo.inc superiority and >=95 Lighthouse are unverified; do not claim globally finished.
+token=20261013-r2058-curvature-correct-mag-lighting
+base_master=6da61cf2752ac8b77c0773e1c628c26b2f1aff5d
+purpose=Physically correct flexible archive papyrus shading: analytic bend derivatives rotate surface normals with the actual sheet geometry; Fresnel/GGX response follows bending and flattening. Add slight distance-dependent aerial attenuation to permanent deep metal racks without fogging the native HTML papyrus or physical energy filaments. Remove redundant immutable telemetry DOM writes on the render hot path. Preserve one canonical MAG/WebGL2 pass, 8 functional HTML content handoffs, mobile layout, intro and zero-WebGL/reduced-motion fallback.
+validation=Real desktop and mobile eight-source WebGL2 browser checks and 320-1920 no-information-occlusion passed on R2058 code; native controls, bilingual, design system, security and production candidate passed. Exact revision on formatxsuite.com and www.formatxsuite.com must be verified after deploy.
+measured=R2058 Lighthouse desktop 0.91-0.93, mobile 0.93. Prior R2057 desktop 0.93-0.94, mobile approximately 0.93; variation may reflect run noise. No claim of 95 score or improved real device FPS.
+limits=Real-hardware sustained 60fps, film-grade full photorealism, objective Igloo.inc superiority and >=95 Lighthouse remain open goals.
