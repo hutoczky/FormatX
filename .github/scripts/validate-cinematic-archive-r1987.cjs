@@ -88,6 +88,20 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
     'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
   assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
+  // Focus may start in a live link; a scene transition must never strand it
+  // in an inert, archived paper. The real DOM (not duplicate controls) owns it.
+  const focusContract=await page.evaluate(()=>{
+    const active=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')]
+      .filter(node=>node.dataset.fxCinemaPanelActive==='true');
+    const inactive=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')]
+      .filter(node=>node.dataset.fxCinemaPanelActive!=='true');
+    return {active:active.length,inertActive:active.some(node=>node.inert),
+      inactiveNonInert:inactive.filter(node=>!node.inert).length};
+  });
+  assert.equal(focusContract.active,1,'Exactly one accessible native paper must be active: '+JSON.stringify(focusContract));
+  assert.ok(!focusContract.inertActive&&!focusContract.inactiveNonInert,
+    'Inactive archive chapters may not remain in Tab order: '+JSON.stringify(focusContract));
+
   const proofContract=await page.evaluate(()=>{
     const all=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
     const loopCopy=document.querySelectorAll('.fx-loop-reference-proof').length;
