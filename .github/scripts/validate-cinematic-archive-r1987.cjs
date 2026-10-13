@@ -660,11 +660,22 @@ async function verifyMobileLivingPulse(browser){
   const page=await context.newPage();
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>{
+    return document.documentElement.dataset.fxArchiveExperience==='ready'
+      && window.FormatXArchiveExperience?.scenes?.length===8;
+  },null,{timeout:65000});
+  // The reader's scroll, not idle GPU activation, initiates cinematic archive.
+  await page.evaluate(()=>{
+    const first=window.FormatXArchiveExperience.scenes[0];
+    const node=document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+    (node?.closest('main#main-content > section')||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
+  await page.waitForFunction(()=>{
     const root=document.documentElement;
     const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-    return root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+    return root.dataset.fxArchiveCinema==='active'
+      && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
       && !!canvas&&getComputedStyle(canvas).animationName.includes('fx-primary-mag');
-  },null,{timeout:65000});
+  },null,{timeout:25000});
   const samples=[];
   for(let i=0;i<5;i++){
     samples.push(await page.evaluate(()=>{
@@ -701,10 +712,25 @@ async function verifyNormalEntry(browser,isMobile){
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>{
-    const root=document.documentElement;
-    return root.dataset.fxArchiveExperience==='ready'
-      && root.dataset.fxArchiveCinema==='active';
+    return document.documentElement.dataset.fxArchiveExperience==='ready'
+      && document.documentElement.dataset.fxArchiveCinema==='home';
   },null,{timeout:65000});
+  const home=await page.evaluate(()=>{
+    const hero=document.querySelector('#hero .hero-copy');
+    const cta=document.getElementById('hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'&&node.getClientRects().length>0;
+    return {scrollY,hero:visible(hero),cta:visible(cta),mode:document.documentElement.dataset.fxArchiveCinema};
+  });
+  assert.ok(home.scrollY<8&&home.hero&&home.cta,
+    'Real normal-entry browser hid the original home content: '+JSON.stringify(home));
+  await page.evaluate(()=>{
+    const first=window.FormatXArchiveExperience.scenes[0];
+    const node=document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+    (node?.closest('main#main-content > section')||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+    null,{timeout:12000});
   const result=await page.evaluate(()=>{
     const root=document.documentElement;
     const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
@@ -761,9 +787,9 @@ async function verifyNormalEntry(browser,isMobile){
   await context.close();
 }
 async function verifyFirstVisitIntroHandoff(browser){
-  // The normal-entry suite above uses a returning visitor. Production must
-  // ALSO deliver a real paper on the FIRST visit after the full 10s genesis.
-  // Guard against a late intro teardown blanking the actual interactive UI.
+  // First visit: the 10s MAG genesis must return to a readable hero.
+  // The first actual shelf entry then delivers the native interactive paper.
+  // A late intro teardown must never blank the home viewport.
   const u=new (require('node:url').URL)(URL);
   for(const k of ['r486-optics-energy-check','lighthouse','visualintro','mobileproof'])u.searchParams.delete(k);
   u.searchParams.set('archive','1');
@@ -780,11 +806,28 @@ async function verifyFirstVisitIntroHandoff(browser){
   },null,{timeout:30000});
   await page.waitForFunction(()=>{
     const root=document.documentElement;
-    return root.dataset.fxArchiveCinema==='active'
-      && root.dataset.fxArchiveExperience==='ready'
+    return root.dataset.fxArchiveExperience==='ready'
+      && root.dataset.fxArchiveCinema==='home'
       && !document.querySelector('.fx-mag-birth-r533:not([hidden])');
   },null,{timeout:45000});
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(350);
+  const home=await page.evaluate(()=>{
+    const hero=document.querySelector('#hero .hero-copy');
+    const cta=document.getElementById('hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'&&node.getClientRects().length>0;
+    return {scrollY,hero:visible(hero),cta:visible(cta)};
+  });
+  assert.ok(home.scrollY<8&&home.hero&&home.cta,
+    'R2064 first-visit MAG birth erased original home content: '+JSON.stringify(home));
+  await page.evaluate(()=>{
+    const first=window.FormatXArchiveExperience.scenes[0];
+    const node=document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+    (node?.closest('main#main-content > section')||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+    null,{timeout:12000});
+  await page.waitForTimeout(350);
   const state=await page.evaluate(()=>{
     const root=document.documentElement;
     const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
