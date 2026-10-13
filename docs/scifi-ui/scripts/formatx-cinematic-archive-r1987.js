@@ -381,6 +381,7 @@
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
     if(root.dataset.fxArchiveCinemaChapter!==key)root.dataset.fxArchiveCinemaChapter=key;
+    let transferKeyboardFocus=false;
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
       const hostState=active?'true':'false';
@@ -392,30 +393,7 @@
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
-        if(!active&&panel.contains(document.activeElement)){
-          // Native scroll can deactivate the previously focused folio. An
-          // inert ancestor containing document.activeElement strands keyboard
-          // users without a visible focus ring or working Enter action.
-          // Transfer focus to the active REAL folio, without scroll hijacking.
-          const nextPanel=selected?.cinemaPanel;
-          const candidate=nextPanel?.querySelector(
-            'a[href]:not([tabindex="-1"]),button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex="0"]'
-          );
-          const target=candidate||nextPanel;
-          if(target instanceof HTMLElement){
-            if(target===nextPanel&&!target.hasAttribute('tabindex')){
-              target.setAttribute('tabindex','-1');
-              target.dataset.fxArchiveTemporaryFocus='true';
-            }
-            target.focus({preventScroll:true});
-            root.dataset.fxArchiveKeyboardFocus='retargeted-native-content';
-          }else{
-            // Never leave a hidden, inert document controlling focus.
-            const fallback=document.querySelector('.topbar a[href],.topbar button');
-            fallback?.focus({preventScroll:true});
-            root.dataset.fxArchiveKeyboardFocus='retargeted-navigation';
-          }
-        }
+        if(!active&&panel.contains(document.activeElement))transferKeyboardFocus=true;
         if(panel.inert===active)panel.inert=!active;
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
@@ -467,6 +445,26 @@
           root.dataset.fxArchiveNativeHandoff='scroll-coupled-real-3d-paper';
           positionCinemaFolio(panel);
         }
+      }
+    }
+    // Activate the target folio BEFORE moving focus. During forward scroll
+    // the new source is usually later in DOM order and was still inert when
+    // the outgoing panel was processed.
+    if(transferKeyboardFocus){
+      const targetPanel=selected?.cinemaPanel;
+      const candidate=targetPanel?.querySelector(
+        'a[href]:not([tabindex="-1"]),button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex="0"]'
+      );
+      const target=candidate||targetPanel
+        ||document.querySelector('.topbar a[href],.topbar button');
+      if(target instanceof HTMLElement){
+        if(target===targetPanel&&!target.hasAttribute('tabindex')){
+          target.setAttribute('tabindex','-1');
+          target.dataset.fxArchiveTemporaryFocus='true';
+        }
+        target.focus({preventScroll:true});
+        root.dataset.fxArchiveKeyboardFocus=targetPanel?.contains(target)
+          ?'retargeted-native-content':'retargeted-navigation';
       }
     }
     if(enabled&&key!==lastCinemaKey){
