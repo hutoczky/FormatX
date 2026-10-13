@@ -57,6 +57,7 @@ const SHOTS=[
             realPixelPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
             realLitSamples:Number(root.dataset.fxMagBirthFrameLitSamplesR2073||0),
             realReadback:root.dataset.fxMagBirthFrameR1557,
+            physicalGeometryR2075:root.dataset.fxMagIntroGeometryR2075,
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
@@ -86,6 +87,10 @@ const SHOTS=[
           &&info.realPixelPeak>=20&&info.realLitSamples>=2,
           'Cinematic original Three framebuffer is black or MAG scene missing: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
+        assert.ok(/closed-beveled-3d-rim-8-physical-inset-rails-3-coaxial-metal-rings-and-8-iris-blades/.test(
+          info.physicalGeometryR2075||''),
+          'The living MAG must have the actual new machined 3D shell/optic assemblies: '+
+            JSON.stringify(info));
         if(shot.second>=8.05){
           assert.equal(info.identity,'MAG // AI CORE');
           assert.ok(info.insideFilm&&info.identityAlpha>.90
