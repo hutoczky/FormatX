@@ -1060,3 +1060,18 @@
   }
 }
 /* production-r2039-release-link-touch-44px */
+
+/* R2057 canonical proof is part of both already-loaded critical paint sheets.
+   No separate network request may delay the first meaningful paint. */
+html:has([data-fx-award-proof]) #hero .fx-reference-proof,
+html:has([data-fx-award-proof]) #hero .fx-reference-heading {
+ display:none!important;
+}
+html:has([data-fx-award-proof]) .fx-loop-reference-proof {
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce) {
+ html:has([data-fx-award-proof]) .fx-award-proof {opacity:1!important}
+}
+/* production-r2057-proof-first-frame-no-extra-stylesheet */
