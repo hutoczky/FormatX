@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261013-r2051-real-mag-nonblocking-loop-css
-base_master=e9dca2e3666cf35ac1d5a4c5f508b3156650a644
-purpose=Deliver the original unchanged native MAG cinematic archive and seamless-scroll CSS without a new render-blocking network request, and refresh the original page geometry when the existing post-first-paint style scheduler activates. Preserve eight genuine original interactive HTML folios, stable MAG input, and mobile accessibility.
-validation=Original eight-scene WebGL2 Chromium and mobile checks, no information occlusion, platform scroll desktop+mobile, production Worker preflight and exact revision on both live domains. This revision is not an assertion of full Lighthouse award-readiness.
-limits=As of October 13 2026 Lighthouse still below 95: desktop 92, mobile 93 on local real-experience CI. Photorealism vs Igloo.inc and real-hardware stable 60 FPS are not verified.
+token=20261013-r2052-native-mag-zero-idle-final-sweep
+base_master=b41292b88752c4d516dbd29b863a30a74f6f3062
+purpose=Preserve original one-WebGL2 living MAG while coalescing adaptive-quality pixel-buffer updates into the last completed surface-energy filament frame. Suppress any queued governor wakeups between autonomous sweeps without changing genuine user-triggered rendering. Retain R2051 post-first-paint native scroll CSS, eight physical original interactive HTML archive paper modules, and original ASK.
+validation=Native instrumented WebGL2 framebuffer sweep and strictly zero renderer-idle-frame verification on mobile 390px/430px and desktop 1440px PASSED; browser eight-scene MAG scroll and reduced-motion fallback PASSED, no occlusion PASSED, production candidate validation PASSED. Two-domain exact production revision and live cinematic smoke required after merge.
+limits=Strict real-experience Lighthouse 95+ not achieved (currently desktop 92-93, mobile 93); no measured native hardware 60fps or independent IGLOO-grade photorealism certification.
