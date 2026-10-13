@@ -113,7 +113,7 @@
    no second WebGL context, no pseudo-HUD over the 3D organism. */
 .fx-ai-core-ident-r1951{
   left:var(--fx-ident-x,50%);
-  top:min(calc(var(--fx-ident-y,45vh) + clamp(134px,17vh,186px)),calc(100dvh - 82px));
+  top:min(calc(var(--fx-ident-y,50vh) + clamp(205px,30vh,270px)),calc(100dvh - 82px));
   gap:8px;
   min-width:clamp(248px,22vw,348px);
   max-width:min(84vw,460px);
@@ -171,7 +171,7 @@
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   .fx-ai-core-ident-r1951{
     left:var(--fx-ident-x,50%);
-    top:min(calc(var(--fx-ident-y,42vh) + clamp(119px,16vh,155px)),calc(100dvh - 68px));
+    top:min(calc(var(--fx-ident-y,50vh) + clamp(188px,27vh,238px)),calc(100dvh - 74px));
     min-width:0;
     width:max-content;
     max-width:calc(100vw - 34px);
