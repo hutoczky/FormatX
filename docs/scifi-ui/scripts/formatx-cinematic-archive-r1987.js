@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2057-frame-coalesced-native-paper';
+  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -685,10 +685,23 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile;
-out vec3 vNormal;out vec2 vUv;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;
 void main(){
  vec3 p=aPosition*uScale;
- p.z+=uBend*pow(2.0*aUv.x-1.0,2.0)*sin(3.14159*aUv.y);
+ float bendX=2.0*aUv.x-1.0;
+ float sinY=sin(3.14159265*aUv.y);
+ p.z+=uBend*bendX*bendX*sinY;
+ // Analytic differential normal of the *actual* curved glass membrane:
+ // previous lighting used the flat sheet normal after bending vertices.
+ // Derivatives divide by physical mesh width/height, so reflections stay
+ // stable through the eight different extraction and flattening paths.
+ vec3 localNormal=aNormal;
+ if(abs(uBend)>.00001){
+   float dzdx=4.0*uBend*bendX*sinY/max(.001,1.55*uScale.x);
+   float dzdy=3.14159265*uBend*bendX*bendX*cos(3.14159265*aUv.y)
+              /max(.001,1.06*uScale.y);
+   localNormal=normalize(vec3(-dzdx,-dzdy,1.0));
+ }
  float st=sin(uTilt),ct=cos(uTilt);
  p=vec3(p.x,ct*p.y-st*p.z,st*p.y+ct*p.z);
  float s=sin(uRotation),c=cos(uRotation);
@@ -697,6 +710,7 @@ void main(){
  // panel visible in the mobile archive instead of clipping at the sides.
  if(uMobile>.5){p.x*=.34;p.y=p.y*.63-.18;}
  float d=max(2.4,6.2-p.z);
+ vViewDistance=d;
  // R2035: canonical MAG uses NDC depth close to zero. The old background
  // projection produced negative NDC z for far rack rails, incorrectly placing
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
@@ -704,13 +718,13 @@ void main(){
  // can approach the audience. No renderer/canvas/geometry replacement.
  float opticalDepth=clamp(.33-.15*p.z,-.16,.86);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
- vec3 n=vec3(aNormal.x,ct*aNormal.y-st*aNormal.z,st*aNormal.y+ct*aNormal.z);
+ vec3 n=vec3(localNormal.x,ct*localNormal.y-st*localNormal.z,st*localNormal.y+ct*localNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
  vUv=aUv;
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
@@ -769,6 +783,13 @@ void main(){
    // Energy threads are hairline solid 3D geometry, not additive 2D strokes.
    col=mix(uColor,vec3(.73,.91,.94),.15+spec*.29);
    a*=.54+.36*ndl;
+ }
+ // Monotonic, view-distance dependent atmospheric extinction unifies the
+ // permanent rear racks into the same deep physical archive. The approaching
+ // display and filament remain crisp; no second bloom/post-process pass.
+ if(uPanel<.5 && uFiber<.5){
+   float aerial=clamp((vViewDistance-5.4)*.095,0.0,.25);
+   col=mix(col,vec3(.013,.029,.044),aerial);
  }
  outColor=vec4(col,clamp(a,0.0,1.0));
 }`;
@@ -863,8 +884,10 @@ void main(){
           box(rx+side*.45,ry-.14,rz-.08,.032,.46,.10,active?rc:edge,0,active?.45:.13);
         }
       }
-      root.dataset.fxArchivePersistentRackCount=String(rackCount);
-      root.dataset.fxArchiveWorldContinuity='persistent-one-world-r2044';
+      if(root.dataset.fxArchivePersistentRackCount!==String(rackCount))
+        root.dataset.fxArchivePersistentRackCount=String(rackCount);
+      if(root.dataset.fxArchiveWorldContinuity!=='persistent-one-world-r2044')
+        root.dataset.fxArchiveWorldContinuity='persistent-one-world-r2044';
       // Only the selected bay moves; an arriving section gradually energizes
       // its own mechanisms. On reverse-scroll it settles back into storage.
       sourceOpacity=.20+.80*smooth(pro/.30)*(1-.78*smooth((pro-.86)/.14));
@@ -912,7 +935,8 @@ void main(){
       const bend=mix(.44,.006,smooth((pro-.46)/.30));
       const rotation=(1-align)*(side*.74)+align*.02;
       const alpha=reveal*(1-release);
-      root.dataset.fxArchiveOptics='ggx-microfacet-analytic-contact-fwidth';
+      if(root.dataset.fxArchiveOptics!=='ggx-curved-normal-analytic-contact-aerial-fwidth')
+        root.dataset.fxArchiveOptics='ggx-curved-normal-analytic-contact-aerial-fwidth';
       root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
         pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
@@ -962,8 +986,10 @@ void main(){
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
       root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
-      root.dataset.fxArchiveDepthPolicyR2035='canonical-mag-front-deep-shelves-behind';
-      root.dataset.fxArchiveNativePass='shared-webgl2';
+      if(root.dataset.fxArchiveDepthPolicyR2035!=='canonical-mag-front-deep-shelves-behind')
+        root.dataset.fxArchiveDepthPolicyR2035='canonical-mag-front-deep-shelves-behind';
+      if(root.dataset.fxArchiveNativePass!=='shared-webgl2')
+        root.dataset.fxArchiveNativePass='shared-webgl2';
        if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
       PerformanceManager.observeSubmission(performance.now()-start);
