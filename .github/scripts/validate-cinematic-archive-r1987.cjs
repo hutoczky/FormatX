@@ -188,6 +188,7 @@ async function evaluate(viewport,isMobile,browser){
 
   let passed=0;
   const coverage=[];
+  let precedingNativeFocus=false;
   for(const scene of scenes){
     const selector=/^[#.]/.test(scene.id)?scene.id:'#'+scene.id;
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
@@ -236,6 +237,21 @@ async function evaluate(viewport,isMobile,browser){
     },selector);
     console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
+      // The previous native control was intentionally focused. Scrolling to
+      // the next real document must move focus to that document (or navigation),
+      // not merely blur the outgoing control when its folio becomes inert.
+      if(precedingNativeFocus){
+        const focusHop=await page.evaluate(()=>{
+          const active=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+          const element=document.activeElement;
+          return {onNativeFolio:!!active&&active.contains(element),
+            onNavigation:!!element?.closest?.('.topbar'),
+            focused:element?.tagName||'none',
+            status:document.documentElement.dataset.fxArchiveKeyboardFocus||null};
+        });
+        assert.ok(focusHop.onNativeFolio||focusHop.onNavigation,
+          'Keyboard focus lost during original HTML chapter handoff: '+JSON.stringify({scene:scene.key,focusHop}));
+      }
 
       // R2026: a status label alone cannot satisfy the requested cinematic
       // archival handoff. The active folio must use actual section copy, and
@@ -396,7 +412,10 @@ async function evaluate(viewport,isMobile,browser){
       // source takes over; runtime must never leave it stranded in inert HTML.
       const focusProbe=await page.evaluate(()=>{
         const paper=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
-        const control=paper?.querySelector('a[href]:not([tabindex="-1"]),button:not([disabled])');
+        const control=[...(paper?.querySelectorAll('a[href]:not([tabindex="-1"]),button:not([disabled]),input:not([disabled])')||[])]
+          .find(el=>el instanceof HTMLElement
+            && !el.closest('[inert],[hidden],[aria-hidden="true"]')
+            && el.getClientRects().length>0);
         if(!(control instanceof HTMLElement))return {found:false};
         control.focus({preventScroll:true});
         return {found:true,focused:document.activeElement===control,
@@ -404,6 +423,7 @@ async function evaluate(viewport,isMobile,browser){
       });
       if(focusProbe.found)assert.ok(focusProbe.focused&&!focusProbe.inert,
         'Original live MAG control cannot take keyboard focus: '+JSON.stringify(focusProbe));
+      precedingNativeFocus=focusProbe.found&&focusProbe.focused&&!focusProbe.inert;
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
