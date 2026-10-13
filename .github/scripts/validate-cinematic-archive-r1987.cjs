@@ -21,6 +21,11 @@ assert.doesNotMatch(folioUpdate.slice(readStart,writeStart),/\.style\.setPropert
   'R2053 prohibits interleaving geometry reads with native HTML style writes');
 assert.doesNotMatch(folioUpdate.slice(writeStart),/\.getBoundingClientRect\(/,
   'R2053 prohibits reading geometry after applying per-card layout transforms');
+const panelState=jsSource.split('function setPanelState(){')[1]?.split('function selectLiveChapter(){')[0]||'';
+assert.ok(panelState.includes('lastPanelNode')&&panelState.includes('lastPanelNode!==next'),
+  'R2053 must clear only the previous physical paper when changing chapters');
+assert.doesNotMatch(panelState,/for\s*\(const s of scenes\)/,
+  'R2053 inactive archive sections must not receive redundant style writes per scroll');
 
 async function evaluate(viewport,isMobile,browser){
   const context=await browser.newContext({
