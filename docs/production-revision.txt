@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261013-r2053-batched-native-folio-scroll
-base_master=d548faea15096b80d63545c7cb53223fb9a30e4d
-purpose=Coalesce original native HTML archive panel geometry measurements into one read-only pass BEFORE any per-card style writes. Eliminate duplicate eight-chapter getBoundingClientRect pass from deferred GPU RAF, because synchronous scroll already selected and docked the correct stage. One canonical MAG WebGL2 renderer, eight distinct shelves, original functional CTA/technical panels/proof and GPU zero-idle frame gate remain unchanged.
-validation=Must pass Chromium eight-scene scroll mobile+desktop, no-occlusion, keyboard/technical native HTML and no-WebGL/reduced-motion; 32-sample real synchronous scroll input-path profile recorded. Production candidate + security + Lighthouse strict gates still required.
-limits=This source-level performance optimization is not yet a measured improvement in Lighthouse score or real hardware FPS; Lighthouse >=95 goal remains unproven, no award-grade comparison claim.
+token=20261013-r2054-verified-cinematic-css-recovery
+base_master=1dd0d18aa8b1847b033b1fc61668ab4a794e3a7e
+purpose=Recover actual cinema CSS when a delayed stylesheet fails on one network request. One bounded same-origin retry only, never mask unrecovered network failures. Keep original single MAG WebGL2 renderer, eight real native HTML archive folios, original CTA, technical functions, one canonical proof, responsive no-WebGL/reduced-motion fallback unchanged.
+validation=Require explicit forced CSS network failure and real applied-style recovery in phone and desktop Chromium; normal page without archive debug param visibly presents one original native HTML panel at 320x640, 390x844, 412x823 and 1440x900; eight-source WebGL/scroll, no content occlusion, production security and exact revision domain check.
+limits=Lighthouse >=95 still a quality target, not automatically satisfied by a network-resilience repair. Real device stable 60FPS, photorealistic appearance and Igloo visual comparison remain separate unverified evidence.
