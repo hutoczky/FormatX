@@ -1,0 +1,55 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:[
+  '--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist',
+  '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
+ ]});
+ try {
+  for(const cfg of [{name:'phone',width:390,height:844,mobile:true},
+                    {name:'desktop',width:1440,height:900,mobile:false}]){
+   const context=await browser.newContext({
+    viewport:{width:cfg.width,height:cfg.height},
+    isMobile:cfg.mobile,hasTouch:cfg.mobile,reducedMotion:'no-preference'
+   });
+   try{
+    const page=await context.newPage();
+    let aborted=0;
+    const errors=[];
+    page.on('pageerror',error=>errors.push(String(error)));
+    await page.route('**/formatx-living-habitat-r1530.css*',async route=>{
+      if(!aborted){aborted++;await route.abort('failed');}
+      else await route.continue();
+    });
+    await page.goto(ROOT+'?r2054-css-resilience='+cfg.name,{
+      waitUntil:'domcontentloaded',timeout:60000
+    });
+    await page.waitForFunction(()=>{
+      const sheet=document.querySelector('link[data-fx-living-habitat-r1530]');
+      return sheet&&sheet.dataset.fxCssRetryR2054==='loaded'&&
+        Boolean(sheet.sheet)&&sheet.media==='all';
+    },null,{timeout:20000});
+    const data=await page.evaluate(()=>{
+      const sheet=document.querySelector('link[data-fx-living-habitat-r1530]');
+      return {
+       retry:sheet.dataset.fxCssRetryR2054,
+       reason:sheet.dataset.fxCssRecoveryReasonR2054,
+       media:sheet.media,loaded:Boolean(sheet.sheet),
+       retryCount:Number(document.documentElement.dataset.fxCssRecoveriesR2054||0),
+       chapterCount:document.querySelectorAll('#experience,#pricing,#system,#network').length,
+       primaryCTA:Boolean(document.querySelector('#hero-download'))
+      };
+    });
+    assert.equal(aborted,1,'Did not inject exactly one true failed CSS request');
+    assert.equal(data.retry,'loaded','Missing independently recovered CSS');
+    assert.equal(data.loaded,true,'Recovered CSS is not applied to document');
+    assert.equal(data.retryCount,1,'Must retry only the failed asset once');
+    assert.ok(data.chapterCount>=2&&data.primaryCTA,'Actual page functions missing');
+    assert.equal(errors.length,0,errors.join(' | '));
+    console.log('R2054_CSS_RECOVERY_PASS',JSON.stringify({viewport:cfg.name,...data}));
+   }finally{await context.close();}
+  }
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e.stack||e);process.exit(1);});
