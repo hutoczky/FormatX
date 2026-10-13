@@ -452,20 +452,38 @@
     // the outgoing panel was processed.
     if(transferKeyboardFocus){
       const targetPanel=selected?.cinemaPanel;
-      const candidate=targetPanel?.querySelector(
-        'a[href]:not([tabindex="-1"]),button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex="0"]'
+      // A hidden/collapsed control may match a[href] but cannot receive focus.
+      // Prefer visible native controls, then the already active semantic folio.
+      const focusables=targetPanel&&!targetPanel.inert
+        ?targetPanel.querySelectorAll(
+          'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        ): [];
+      const candidate=Array.from(focusables).find(node=>
+        node instanceof HTMLElement
+        && !node.closest('[inert],[hidden],[aria-hidden="true"]')
+        && getComputedStyle(node).visibility!=='hidden'
+        && getComputedStyle(node).display!=='none'
+        && node.getClientRects().length>0
       );
-      const target=candidate||targetPanel
-        ||document.querySelector('.topbar a[href],.topbar button');
-      if(target instanceof HTMLElement){
-        if(target===targetPanel&&!target.hasAttribute('tabindex')){
-          target.setAttribute('tabindex','-1');
-          target.dataset.fxArchiveTemporaryFocus='true';
+      const preparePanel=()=>{
+        if(!(targetPanel instanceof HTMLElement)||targetPanel.inert)return null;
+        if(!targetPanel.hasAttribute('tabindex')){
+          targetPanel.setAttribute('tabindex','-1');
+          targetPanel.dataset.fxArchiveTemporaryFocus='true';
         }
+        return targetPanel;
+      };
+      const navigation=document.querySelector('.topbar a[href],.topbar button');
+      const candidates=[candidate,preparePanel(),navigation];
+      let focused=null;
+      for(const target of candidates){
+        if(!(target instanceof HTMLElement))continue;
         target.focus({preventScroll:true});
-        root.dataset.fxArchiveKeyboardFocus=targetPanel?.contains(target)
-          ?'retargeted-native-content':'retargeted-navigation';
+        if(document.activeElement===target){focused=target;break;}
       }
+      root.dataset.fxArchiveKeyboardFocus=focused
+        ?(targetPanel?.contains(focused)?'retargeted-native-content':'retargeted-navigation')
+        :'focus-target-unavailable';
     }
     if(enabled&&key!==lastCinemaKey){
       const panel=selected.cinemaPanel;
