@@ -550,9 +550,20 @@ async function evaluate(viewport,isMobile,browser){
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='ecosystem',null,{timeout:9000});
   const focusBefore=await page.evaluate(()=>{
     const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
-    const target=panel?.querySelector('a[href],button:not([disabled])');
+    const options=[...panel?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled])')||[]];
+    const target=options.find(n=>{
+      const cs=getComputedStyle(n);
+      return n.getClientRects().length>0&&cs.visibility==='visible'
+        &&cs.display!=='none'&&!n.closest('[inert]');
+    });
     target?.focus({preventScroll:true});
-    return {focused:!!target&&document.activeElement===target,text:target?.textContent?.trim().slice(0,70)};
+    return {focused:!!target&&document.activeElement===target,
+      text:target?.textContent?.trim().slice(0,70),
+      target:target?.outerHTML?.slice(0,280),
+      candidates:options.length,
+      activeScene:document.documentElement.dataset.fxArchiveCinemaChapter,
+      panelInert:panel?.inert,
+      activeElement:document.activeElement?.outerHTML?.slice(0,240)};
   });
   assert.ok(focusBefore.focused,'Original interactive HTML control could not receive keyboard focus: '+JSON.stringify(focusBefore));
   await page.evaluate(()=>{
