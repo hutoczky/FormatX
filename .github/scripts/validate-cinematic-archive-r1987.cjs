@@ -748,7 +748,7 @@ async function auditHtmlContinuity(browser){
     viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
   });
   const page=await context.newPage();
-  const address=new URL(URL);address.searchParams.set('lighthouse','1');
+  const address=new (require('node:url').URL)(URL);address.searchParams.set('lighthouse','1');
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='audit-html',null,{timeout:40000});
   await page.waitForTimeout(13300);
