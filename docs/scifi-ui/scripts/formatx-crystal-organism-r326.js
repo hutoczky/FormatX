@@ -2166,8 +2166,11 @@
           ? 5400+(surfacePulseCount%3)*520
           : 4100+(surfacePulseCount%3)*360;
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
+      const dueAt=performance.now()+delay;
+      root.dataset.fxCoreSurfaceScheduledDelayR2055=String(Math.round(delay));
       surfacePulseTimer=setTimeout(()=>{
         surfacePulseTimer=0;
+        root.dataset.fxCoreSurfaceTimerLagR2055=String(Math.round(Math.max(0,performance.now()-dueAt)));
         const started=startSurfacePulse('autonomous');
         if(!started)scheduleSurfacePulse();
       },delay);
