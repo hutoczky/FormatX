@@ -7,6 +7,22 @@ const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+// R2058: film lighting follows the actual flexible membrane geometry,
+ // rather than shading a curled display with a permanently flat surface
+ // normal. Aerial depth haze is in the same shader and adds no draw calls.
+ assert.match(jsSource,/localNormal=normalize\(vec3\(-dzdx,-dzdy,1\.0\)\)/,
+   'R2058 missing physically curved glass normals');
+ assert.match(jsSource,/in float vViewDistance;/,
+   'R2058 missing interpolated archive depth for stable atmospheric extinction');
+ assert.match(jsSource,/uPanel<\.5 && uFiber<\.5/,
+   'R2058 depth treatment must never blur readable glass or energy filaments');
+ const r2057Invalidate=jsSource.split('function invalidate(){')[1]?.split('function connect(){')[0]||'';
+assert.match(r2057Invalidate,/if\(!domRaf\)/,
+  'R2057 must coalesce repeated touch/wheel DOM transformations before next paint');
+assert.match(r2057Invalidate,/requestAnimationFrame\(\(\)=>/,
+  'R2057 must compose native HTML before the following browser paint');
+assert.ok(r2057Invalidate.indexOf('setPanelState();')<r2057Invalidate.indexOf('if(!domRaf)'),
+  'R2057 must keep source change and MAG selection synchronous for rapid reversing');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
 assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff|selectLiveChapter|ResponsiveExperience\.dock|ResponsiveExperience\.restore)\s*\(/,
@@ -255,9 +271,16 @@ async function evaluate(viewport,isMobile,browser){
         const existingCTA=await page.evaluate(()=>{
           const p=document.querySelector('[data-fx-archive-scene="final"] .fx-archive-cinema-folio-r2030');
           const link=p?.querySelector('#hero-download');
-          return {exists:!!link,href:link?.getAttribute('href'),inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p};
+          const href=link?.getAttribute('href')||'';
+          let trusted=false;
+          try{
+            const url=new URL(href,location.href);
+            trusted=(url.origin===location.origin&&url.pathname==='/download/multiplatform')
+              ||(url.origin==='https://github.com'&&url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/download/'));
+          }catch{}
+          return {exists:!!link,href,inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p,trusted};
         });
-        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
+        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.trusted,
           'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
       }
       const real3D=await page.evaluate(()=>{
@@ -383,6 +406,7 @@ async function evaluate(viewport,isMobile,browser){
     filamentCount:Number(document.documentElement.dataset.fxArchiveFilamentCount||0),
     permanentRacks:Number(document.documentElement.dataset.fxArchivePersistentRackCount||0),
     continuity:document.documentElement.dataset.fxArchiveWorldContinuity||'',
+    optics:document.documentElement.dataset.fxArchiveOptics||'',
     frames:window.FormatXArchiveExperience.state.frames,
     controls:document.querySelectorAll('#menu-toggle,.fx-language-toggle,.fx-reference-ask').length,
     scrollHeight:document.documentElement.scrollHeight,
@@ -453,6 +477,8 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_VISIBLE_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',handoff}));
 
   assert.equal(native.renderer,'shared-webgl2');
+  assert.equal(native.optics,'ggx-curved-normal-analytic-contact-aerial-fwidth',
+    'The actual shared WebGL renderer did not activate R2058 curved glass optics');
   // Existing organism technical panels remain genuine working UI; opening
   // pricing must keep the same MAG renderer visible behind its glass console.
   await page.evaluate(()=>window.scrollTo({top:document.querySelector('#pricing')?.offsetTop||0,behavior:'instant'}));

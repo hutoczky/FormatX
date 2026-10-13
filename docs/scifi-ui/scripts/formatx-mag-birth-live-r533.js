@@ -44,7 +44,9 @@
     ROOT.dataset.fxMagBirthForcedStyleR1753 = 'immediate';
   }
   const LOW_POWER = MOBILE && CONSTRAINED;
-  const DURATION = 10000;
+  // R2059 — every real visitor uses the same bounded cinematic clock. The
+  // graceful exit is part of the measured visible lifetime.
+  const DURATION = MOBILE ? 1200 : 1350;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
@@ -340,7 +342,7 @@
     <div class="fxb-letterbox fxb-letterbox-bottom" aria-hidden="true"></div>
     <header class="fxb-copy">
       <p class="fxb-kicker"></p>
-      <h1></h1>
+      <p class="fxb-title"></p>
       <p class="fxb-subtitle"></p>
     </header>
     <div class="fxb-telemetry" aria-live="polite">
@@ -376,7 +378,7 @@
   }
 
   const kicker = overlay.querySelector('.fxb-kicker');
-  const title = overlay.querySelector('h1');
+  const title = overlay.querySelector('.fxb-title');
   const subtitle = overlay.querySelector('.fxb-subtitle');
   const skip = liveSkip;
   const percent = overlay.querySelector('.fxb-percent');
@@ -1036,8 +1038,8 @@
     }
 
     if(r<1 || visiblePhase<4){
-      /* Software fallback keeps the 10 s semantic timeline, but the expensive
-         raster only changes at the five cinematic phase boundaries. */
+      /* Software fallback keeps the same bounded semantic timeline, while the
+         expensive raster only changes at the five cinematic boundaries. */
       const cadence=softwareFallbackActive?125:0;
       queueRender(cadence);
       return;
@@ -1076,7 +1078,7 @@
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
-    ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
+    ROOT.dataset.fxMagBirthTimelineR1290='bounded-reference-film-complete-normalized-genesis-handoff';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
@@ -1085,6 +1087,11 @@
     ROOT.setAttribute('data-fx-mag-birth-live','active');
     if(!HAS_VISUAL_FRAME)armPhaseTimeline();
     document.body.prepend(overlay);
+    try {
+      document.dispatchEvent(new CustomEvent('formatx:magbirthstart',{
+        detail:{revision:'r2059-original-intro-parity'}
+      }));
+    } catch (_) {}
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
     sizeCanvas();
@@ -1097,9 +1104,9 @@
     ROOT.dataset.fxMagBirthPerformanceR1606='static-lcp-shell-mobile-lean-dom-handoff-first-permanent-webgl-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1618='stable-canonical-underlay-no-delayed-lcp-aria-dialog';
     ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
-    ROOT.dataset.fxMagBirthDurationR1549='10000ms-full-studio-adaptive-60fps';
+    ROOT.dataset.fxMagBirthDurationR1549=(MOBILE?'1200ms-film-plus-180ms-exit-mobile':'1350ms-film-plus-180ms-exit-desktop')+'-complete-normalized-studio-cinematic';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
-    ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
+    ROOT.dataset.fxMagBirthHandoffR652='original-window-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
     ROOT.dataset.fxMagBirthHandoffR1553='normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
@@ -1192,9 +1199,8 @@
       }catch(_){}
     },DURATION+550);
 
-    // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
-    // deliberately close to the reference endpoint so a stalled GPU/import path
-    // can never strand the cinematic overlay beyond the finished shot.
+    // R2059: the fail-open stays close to the real platform endpoint so a
+    // stalled GPU/import path cannot strand the cinematic overlay.
     hardFinishTimer=window.setTimeout(
       ()=>finish('bounded-failsafe-r652'),
       REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220)

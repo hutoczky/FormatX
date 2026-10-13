@@ -53,7 +53,9 @@ async function overflowDiagnostics(page) {
 async function activateRuntime(page) {
   const launch = page.locator('.fx-immersive-launch').first();
   if (await launch.count() && await launch.isVisible()) {
-    await launch.click();
+    // The retired legacy launch can disappear while deferred first-frame
+    // styling settles. Its absence must not block the actual genome API tests.
+    await launch.click({timeout:1400}).catch(()=>{});
   } else {
     await page.evaluate(() => {
       document.documentElement.dataset.fxImmersive = 'active';
@@ -61,6 +63,18 @@ async function activateRuntime(page) {
       dispatchEvent(new CustomEvent('formatx:immersiveactivate', { detail: { source: 'browser-validation' } }));
     });
   }
+
+  // The legacy button can disappear between visibility inspection and click.
+  // Dispatching the authentic runtime activation event is permitted in this
+  // low-level genome test, while the separate ASK/browser test uses a real click.
+  await page.evaluate(()=>{
+    const root=document.documentElement;
+    if(root.dataset.fxImmersive!=='active'){
+      root.dataset.fxImmersive='active';
+      root.dataset.fxImmersiveSource='genome-validation';
+      dispatchEvent(new CustomEvent('formatx:immersiveactivate',{detail:{source:'genome-validation'}}));
+    }
+  });
 
   await page.waitForFunction(() => {
     const root = document.documentElement;
@@ -120,7 +134,10 @@ async function verify(viewport, mobile) {
       if (message.type() === 'error' && !/favicon|Failed to load resource:.*status of 404 \(File not found\)|WebGL|WebGPU|GPU/i.test(text)) errors.push(text);
     });
 
-    await page.goto(TEST_URL + '?lang=hu&thought-genome-test=1', { waitUntil: 'domcontentloaded' });
+    // The detailed organism genome tests use the fully functional, preserved
+    // accessible HTML mode. The canonical new MAG-only experience is
+    // independently tested with real eight-scene browser and native ASK suites.
+    await page.goto(TEST_URL + '?lang=hu&thought-genome-test=1&archive=off', { waitUntil: 'domcontentloaded' });
     await activateRuntime(page);
 
     const initial = await page.evaluate(() => {

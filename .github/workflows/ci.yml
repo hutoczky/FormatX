@@ -9,6 +9,7 @@ on:
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
       - '.github/scripts/assert-p0-lighthouse-r2054.cjs'
+      - '.github/scripts/report-lighthouse-metrics.cjs'
   push:
     branches: [master]
     paths:
@@ -17,6 +18,7 @@ on:
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
       - '.github/scripts/assert-p0-lighthouse-r2054.cjs'
+      - '.github/scripts/report-lighthouse-metrics.cjs'
   workflow_dispatch:
 
 permissions:

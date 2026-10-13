@@ -9,6 +9,32 @@
   let frame = 0;
   let fallback = 0;
   let observer = null;
+  const observedStyles = new WeakSet();
+  function recoverStyle(link, reason) {
+    if (!(link instanceof HTMLLinkElement) || link.dataset.fxCssRetryR2054) return;
+    // Never loop indefinitely on an unavailable asset or replace the content
+    // with a visually misleading success state.
+    link.dataset.fxCssRetryR2054 = 'attempted';
+    const url = new URL(link.href, location.href);
+    url.searchParams.set('fx-style-retry', 'r2054');
+    link.href = url.href;
+    root.dataset.fxCssRecoveriesR2054 = String(
+      Number(root.dataset.fxCssRecoveriesR2054 || 0) + 1
+    );
+    link.dataset.fxCssRecoveryReasonR2054 = reason;
+  }
+  function observeStyleLinks() {
+    for (const link of document.querySelectorAll('link[data-fx-r487-deferred-style]')) {
+      if (!(link instanceof HTMLLinkElement) || observedStyles.has(link)) continue;
+      observedStyles.add(link);
+      link.addEventListener('error', () => recoverStyle(link, 'stylesheet-load-error'));
+      link.addEventListener('load', () => {
+        if (link.dataset.fxCssRetryR2054 === 'attempted')
+          link.dataset.fxCssRetryR2054 = 'loaded';
+      });
+    }
+  }
+  observeStyleLinks();
 
   function activate(reason) {
     if (activated) return;
@@ -17,6 +43,7 @@
     if (fallback) clearTimeout(fallback);
     observer?.disconnect?.();
 
+    observeStyleLinks();
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     let activatedCount = 0;
     for (const link of links) {
@@ -27,6 +54,16 @@
       activatedCount += 1;
     }
 
+    // A CSS link can fail before its deferred media is activated. Validate
+    // materialized browser styles after paint, then retry once if unavailable.
+    // This covers transient CDN/cache failures without hiding permanent faults.
+    setTimeout(() => {
+      for (const link of links) {
+        if (link.media !== 'print' && link.media !== 'not all'
+            && !link.sheet && !link.dataset.fxCssRetryR2054)
+          recoverStyle(link, 'missing-active-stylesheet');
+      }
+    }, 1600);
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
     root.dataset.fxDeferredCssReasonR526 = reason;

@@ -56,15 +56,18 @@ async function enterSite(page, label) {
   // the deliberately retained semantic HTML fallback, not the user-facing
   // exclusive MAG-only stage. The separate archive suite verifies original
   // clickable modules and Ask controls in the cinematic experience.
-  await page.goto(TEST_URL + '?organism-validation=1&archive=off', { waitUntil: 'domcontentloaded', timeout: 60000 });
-  const skip = page.locator('.fx-intro-skip');
+  await page.goto(TEST_URL + '?archive=off', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  const skip = page.locator('.fxb-skip');
   if (await skip.isVisible().catch(() => false)) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
+  await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
+  const ask = page.locator('#hero .fx-reference-ask').first();
+  await ask.waitFor({ state: 'visible', timeout: 30000 });
+  await ask.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => ['ready','delegated-r264'].includes(document.documentElement.dataset.fxOrganismMenu || ''), null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxControlOwnerR268 === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
 

@@ -15,7 +15,7 @@ const write = () => fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringi
 // Observers record the real rendering calls and event order. They do not
 // alter shaders, uniforms, timing, geometry, session state or readiness.
 function observe() {
-  const evidence = window.__fxVisitorEvidence = { draws: 0, ready: [], birth: [], sweeps: [], options: null, shaders: [] };
+  const evidence = window.__fxVisitorEvidence = { draws: 0, ready: [], birth: [], birthStart: [], sweeps: [], options: null, shaders: [] };
   const nativeCanvas = canvas => canvas?.classList?.contains('fx-crystal-organism-r326-canvas');
   const getContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function(type, options) {
@@ -43,7 +43,11 @@ function observe() {
       firstFrame: document.documentElement.dataset.fxCoreFirstFrameR1913,
       vertexCount: core?.vertexCount, width: core?.canvas?.width, height: core?.canvas?.height });
   });
-  document.addEventListener('formatx:magbirthcomplete', event => evidence.birth.push({ at: performance.now(), detail: event.detail }));
+  document.addEventListener('formatx:magbirthstart', event => evidence.birthStart.push({ at: performance.now(), detail: event.detail }));
+  document.addEventListener('formatx:magbirthcomplete', event => {
+    const at = performance.now(), startedAt = evidence.birthStart[0]?.at;
+    evidence.birth.push({ at, duration: Number.isFinite(startedAt) ? at - startedAt : null, detail: event.detail });
+  });
   addEventListener('formatx:coresurfacesweep', event => evidence.sweeps.push({ at: performance.now(), ...event.detail }));
 }
 

@@ -288,8 +288,11 @@ const SHOTS=[
         };
       });
 
-      if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
-        errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active|constrained-reference-film|native-canvas-reference-film)$/.test(state.renderer)){
+        errors.push('R2059 intro has no supported real cinematic renderer: '+state.renderer);
+      }
+      if(state.proof!=='ready'||state.overlay!==1||state.seconds!==seconds.toFixed(3)){
+        errors.push('R2059 deterministic cinematic frame did not publish complete visual evidence: '+JSON.stringify(state));
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});

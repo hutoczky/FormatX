@@ -32,7 +32,14 @@ const EXPECTED_MOBILE_FILTER = [
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [] };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [], idleWindows: [], longTasks:[] };
+  try{
+    const observer=new PerformanceObserver(list=>{
+      for(const x of list.getEntries())audit.longTasks.push({at:Math.round(x.startTime),duration:Math.round(x.duration)});
+      if(audit.longTasks.length>100)audit.longTasks.splice(0,audit.longTasks.length-100);
+    });
+    observer.observe({type:'longtask',buffered:true});
+  }catch(_){}
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -40,7 +47,15 @@ function instrumentNativeFrames() {
     return states.get(gl);
   };
   addEventListener('formatx:coresurfacesweep', event => {
-    audit.events.push({ ...event.detail, at: performance.now() });
+    const at=performance.now();
+    const {phase,source}=event.detail||{};
+    audit.events.push({ ...event.detail, at });
+    if(source!=='autonomous')return;
+    if(phase==='end')audit.idleWindows.push({from:at,to:null,frames:0});
+    if(phase==='start'&&audit.idleWindows.length){
+      const last=audit.idleWindows[audit.idleWindows.length-1];
+      if(last.to===null)last.to=at;
+    }
   });
   for (const Type of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
     if (!Type) continue;
@@ -75,6 +90,17 @@ function instrumentNativeFrames() {
       const state = stateFor(this);
       if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas') && state.layer === 0 && state.depthWrite) {
         audit.frames++;
+        const gap=audit.idleWindows[audit.idleWindows.length-1];
+        // A native draw is idle work only if it occurs AFTER the previous
+        // autonomous pulse's end event and BEFORE the next pulse's start.
+        // CI may pause a one-second Playwright wait for 6 seconds; draws from
+        // the NEXT legitimate sweep must not be misclassified as idle.
+        if(gap&&gap.to===null)gap.frames++;
+        audit.recent.push({at:Math.round(performance.now()),phase:state.phase,
+          pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
+          scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484||'',
+          scene:document.documentElement.dataset.fxArchiveCinema||''});
+        if(audit.recent.length>240)audit.recent.shift();
         audit.maximumPhase = Math.max(audit.maximumPhase, state.phase);
         if (state.phase >= 0) {
           audit.phases.push(state.phase);
@@ -160,9 +186,31 @@ async function verify(browser, name, viewport, mobile) {
     // No click, artificial API pulse, hover or pointer movement is used here.
     await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 30000 });
     await page.waitForTimeout(600);
-    const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
     await page.waitForTimeout(1000);
-    report.idleFrames = await page.evaluate(before => __magEnergyAudit.frames - before, frameCount);
+    const idleRecord=await page.evaluate(()=>{
+      const a=window.__magEnergyAudit;
+      const first=a.idleWindows[0]||null;
+      if(!first)return null;
+      return {frames:first.frames,elapsedMs:(first.to??performance.now())-first.from,
+        ended:first.to!==null,windows:a.idleWindows.map(x=>({...x}))};
+    });
+    assert.ok(idleRecord&&idleRecord.elapsedMs>=600,
+      `${name}: no meaningful observed autonomous idle interval: ${JSON.stringify(idleRecord)}`);
+    report.idleFrames=idleRecord.frames;
+    report.idleWindows=idleRecord.windows;
+    if(report.idleFrames>0){
+      report.idleDiagnostic=await page.evaluate(()=>({
+        events:__magEnergyAudit.events,
+        idleWindows:__magEnergyAudit.idleWindows,
+        frames:__magEnergyAudit.recent.slice(-100),
+        pulse:document.documentElement.dataset.fxCoreSurfacePulseR454,
+        scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484,
+        quality:document.documentElement.dataset.fxCoreGovernorR1660,
+        dock:document.documentElement.dataset.fxArchiveDock,
+        native:document.documentElement.dataset.fxCoreIdleBoundaryR1710
+      }));
+      console.error('R2055_IDLE_GAP_DIAGNOSTIC',JSON.stringify(report.idleDiagnostic));
+    }
     assert.equal(report.idleFrames, 0, `${name}: native renderer must rest between sweeps`);
     await page.waitForFunction(() => __magEnergyAudit.events.filter(e => e.phase === 'end' && e.source === 'autonomous').length >= 2, null, { timeout: 14000 });
     await page.waitForTimeout(250);
@@ -189,6 +237,21 @@ async function verify(browser, name, viewport, mobile) {
     assert.ok(starts.length >= 2 && ends.length >= 2, `${name}: recurring autonomous sweep missing`);
     report.intervalMs = starts[1].at - starts[0].at;
     report.durationMs = ends[0].at - starts[0].at;
+    if(report.intervalMs<4500||report.intervalMs>=8500){
+      report.intervalDiagnostic=await page.evaluate(()=>({
+        events:__magEnergyAudit.events,
+        idleWindows:__magEnergyAudit.idleWindows,
+        scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484,
+        requestedDelay:document.documentElement.dataset.fxCoreSurfaceScheduledDelayR2055,
+        actualTimerLag:document.documentElement.dataset.fxCoreSurfaceTimerLagR2055,
+        visibility:document.visibilityState,
+        quality:document.documentElement.dataset.fxCoreQualityScaleR1600,
+        renderMs:document.documentElement.dataset.fxCoreRenderMs,
+        frameMs:document.documentElement.dataset.fxCoreFrameMs,
+        longTasks:__magEnergyAudit.longTasks||[]
+      }));
+      console.error('R2055_SCHEDULER_LATE_DIAGNOSTIC',JSON.stringify(report.intervalDiagnostic));
+    }
     assert.ok(report.intervalMs >= 4500 && report.intervalMs < 8500, `${name}: interval ${report.intervalMs}ms`);
     assert.ok(report.durationMs >= 1100 && report.durationMs < 2300, `${name}: duration ${report.durationMs}ms`);
     report.dom = await page.evaluate(() => {
@@ -251,26 +314,39 @@ async function verify(browser, name, viewport, mobile) {
     assert.equal(manualPauseCount, 0, `${name}: obsolete manual PAUSE control returned`);
     report.motionControl = 'automatic-lifecycle-reduced-motion-only';
 
-    // Stay in a middle section. The production desktop intentionally loops
-    // from the footer back to MAG, so scrolling to the bottom is not an
-    // offscreen test. Verify the actual canvas bounds as well as the timer.
+    // Evaluate actual rendered ownership. The archive may dock the canonical
+    // MAG into a visible scene; a visible dock stays alive, while a genuinely
+    // offscreen canvas must suspend. Never infer lifecycle from a section name.
     await page.locator('#pricing').evaluate(section => section.scrollIntoView({ block: 'center', behavior: 'instant' }));
-    await page.waitForFunction(() => {
+    await page.waitForTimeout(300);
+    const lifecycleAtPricing = await page.evaluate(() => {
       const box = document.querySelector('#hero .fx-crystal-organism-r326-canvas').getBoundingClientRect();
-      return (box.bottom <= 0 || box.top >= innerHeight)
-        && document.documentElement.dataset.fxCoreSurfaceSchedulerR484 === 'suspended';
-    }, null, { timeout: 10000 });
-    const offscreenCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
-    await page.waitForTimeout(6800);
-    report.offscreenBounds = await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => {
-      const box = canvas.getBoundingClientRect();
-      return { top: box.top, bottom: box.bottom, viewportHeight: innerHeight };
+      const stage = document.querySelector('#hero .fx-crystal-organism-r326-stage');
+      return { visible: box.bottom > 0 && box.top < innerHeight,
+        docked: Boolean(stage?.classList.contains('fx-archive-native-docked')),
+        top: box.top, bottom: box.bottom, viewportHeight: innerHeight,
+        scheduler: document.documentElement.dataset.fxCoreSurfaceSchedulerR484 || '' };
     });
-    assert.ok(report.offscreenBounds.bottom <= 0 || report.offscreenBounds.top >= report.offscreenBounds.viewportHeight,
-      `${name}: page returned to MAG during the offscreen test`);
-    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
-    assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), offscreenCount, `${name}: offscreen sweep still running`);
-    report.offscreen = 'passed';
+    const offscreenCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
+    if (lifecycleAtPricing.visible) {
+      assert.ok(lifecycleAtPricing.docked, `${name}: visible pricing MAG is not owned by the archive dock`);
+      assert.notEqual(lifecycleAtPricing.scheduler, 'suspended', `${name}: visible docked MAG was suspended`);
+      await page.waitForFunction(before => __magEnergyAudit.events.filter(e => e.phase === 'start').length > before,
+        offscreenCount, { timeout: 10000 });
+      report.pricingLifecycle = { mode: 'visible-docked-active', ...lifecycleAtPricing };
+    } else {
+      await page.waitForFunction(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484 === 'suspended', null, { timeout: 10000 });
+      await page.waitForTimeout(6800);
+      report.offscreenBounds = await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => {
+        const box = canvas.getBoundingClientRect();
+        return { top: box.top, bottom: box.bottom, viewportHeight: innerHeight };
+      });
+      assert.ok(report.offscreenBounds.bottom <= 0 || report.offscreenBounds.top >= report.offscreenBounds.viewportHeight,
+        `${name}: page returned to MAG during the offscreen test`);
+      assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
+      assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), offscreenCount, `${name}: offscreen sweep still running`);
+      report.pricingLifecycle = { mode: 'offscreen-suspended', ...lifecycleAtPricing };
+    }
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
