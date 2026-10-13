@@ -27,7 +27,7 @@ const URL='http://127.0.0.1:4178/scifi-ui/index.html';
           }).observe({type:'largest-contentful-paint',buffered:true});
           new PerformanceObserver(list=>{
             for(const e of list.getEntries()){
-              if(/\\.css(?:\\?|$)/.test(e.name)){
+              if(/\.css(?:\?|$)/.test(e.name)){
                 window.__lcpR2065.resources.push({name:e.name.split('/').pop(),
                   responseEnd:Math.round(e.responseEnd),duration:Math.round(e.duration)});
               }
@@ -94,5 +94,5 @@ const URL='http://127.0.0.1:4178/scifi-ui/index.html';
     }
   }finally{await browser.close();}
   fs.mkdirSync('artifacts/r2065-lcp-probe',{recursive:true});
-  fs.writeFileSync('artifacts/r2065-lcp-probe/results.json',JSON.stringify(reports,null,2)+'\\n');
+  fs.writeFileSync('artifacts/r2065-lcp-probe/results.json',JSON.stringify(reports,null,2)+'\n');
 })().catch(e=>{console.error(e.stack||String(e));process.exitCode=1});
