@@ -115,6 +115,9 @@
       const fill=new T.DirectionalLight(0xafc8c7,.56);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
+      const studioEdge=new T.DirectionalLight(0xcaf6f6,.88);
+      studioEdge.position.set(2.5,3.6,4.8);
+      this.scene.add(studioEdge);
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
@@ -1088,6 +1091,83 @@
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
+      /* R2075 — the four-point MAG is now an optically machined *3D artifact*.
+         Real beveled metallic perimeter, paired inset arm-rails and micro-scale
+         radial signatures give photographs clear material stratification.
+         These are meshes within the SAME scene, not an HTML/SVG overlay.
+         The outline derives from the same canonical signature shape. */
+      this.r2075RimMaterial=new T.MeshPhysicalMaterial({
+        color:0x9bced0,metalness:.73,roughness:.19,
+        clearcoat:.85,clearcoatRoughness:.12,
+        emissive:0x0b292e,emissiveIntensity:.12,
+        transparent:true,opacity:.88,depthWrite:false
+      });
+      this.r2075RailMaterial=new T.MeshPhysicalMaterial({
+        color:0x729fa8,metalness:.66,roughness:.24,
+        clearcoat:.70,clearcoatRoughness:.15,
+        emissive:0x082027,emissiveIntensity:.10,
+        transparent:true,opacity:.70,depthWrite:false
+      });
+      this.r2075MicroMaterial=new T.LineBasicMaterial({
+        color:0xb6e8e5,transparent:true,opacity:.33,depthWrite:false
+      });
+      const rimPts=baseShape.getSpacedPoints(this.mobileRender?128:256);
+      const rimCurve=new T.CatmullRomCurve3(
+        rimPts.slice(0,-1).map(p=>new T.Vector3(p.x*1.035,p.y*1.035,.270)),
+        true,'centripetal'
+      );
+      const rim=new T.Mesh(
+        new T.TubeGeometry(rimCurve,this.mobileRender?128:256,.0080,6,true),
+        this.r2075RimMaterial
+      );
+      rim.renderOrder=7;
+      this.mechanicalGroup.add(rim);
+      this.r2075SignatureRim=rim;
+      this.r2075ArmRails=[];
+      const micro=[];
+      const railGeoLength=this.mobileRender?22:36;
+      for(let q=0;q<4;q++){
+        const angle=q*Math.PI*.5;
+        const vx=Math.cos(angle),vy=Math.sin(angle);
+        const nx=-vy,ny=vx;
+        for(const side of [-1,1]){
+          const pts=[];
+          for(let i=0;i<=9;i++){
+            const u=i/9;
+            const reach=.18+.66*u;
+            const offset=side*(.065+.075*u);
+            pts.push(new T.Vector3(
+              vx*reach+nx*offset,vy*reach+ny*offset,
+              .315-.055*u+.020*Math.sin(Math.PI*u)
+            ));
+          }
+          const curve=new T.CatmullRomCurve3(pts,false,'centripetal');
+          const rail=new T.Mesh(
+            new T.TubeGeometry(curve,railGeoLength,.0065,5,false),
+            this.r2075RailMaterial
+          );
+          rail.renderOrder=7;
+          this.mechanicalGroup.add(rail);
+          this.r2075ArmRails.push(rail);
+        }
+        // Fine engraved contour rhythm: 11 short transverse strokes per arm.
+        // All geometry is batched into one BufferGeometry/LineSegments draw call.
+        const ribs=this.mobileRender?7:11;
+        for(let k=0;k<ribs;k++){
+          const u=(k+.65)/(ribs+.8),r=.21+u*.60;
+          const w=.045+u*.035,z=.321-u*.05;
+          micro.push(
+            vx*r+nx*(-w),vy*r+ny*(-w),z,
+            vx*r+nx*w,vy*r+ny*w,z
+          );
+        }
+      }
+      const microGeo=new T.BufferGeometry();
+      microGeo.setAttribute('position',new T.Float32BufferAttribute(micro,3));
+      this.r2075Engraving=new T.LineSegments(microGeo,this.r2075MicroMaterial);
+      this.r2075Engraving.renderOrder=8;
+      this.mechanicalGroup.add(this.r2075Engraving);
+
       /* R1984 — final-stage edge fibrils.
          Sample the actual four-point signature outline and grow one-pixel fibers
          out of its silhouette. This keeps microscopic detail visible through the
@@ -1312,6 +1392,57 @@
       );
       this.mechInnerRing.position.set(0,.01,.49);
       this.mechanicalGroup.add(this.mechInnerRing);
+
+      /* R2075: dual-depth optical collar with an actual cut-glass iris.
+         The small central cyan point becomes a meaningful macro lens: two
+         separately machined annuli, eight precision-cut inward facets, and
+         one physically illuminated sapphire pupil. These are 3D geometry. */
+      this.r2075OpticMaterial=new T.MeshPhysicalMaterial({
+        color:0xc1e4e0,metalness:.72,roughness:.12,
+        clearcoat:1,clearcoatRoughness:.07,
+        emissive:0x0a2d34,emissiveIntensity:.13,
+        transparent:true,opacity:.90,depthWrite:false
+      });
+      this.r2075OpticInnerMaterial=new T.MeshPhysicalMaterial({
+        color:0x296675,metalness:.38,roughness:.16,
+        transmission:.20,thickness:.17,ior:1.46,
+        clearcoat:1,clearcoatRoughness:.09,
+        emissive:0x07333e,emissiveIntensity:.16,
+        transparent:true,opacity:.85,depthWrite:false,
+        side:T.DoubleSide
+      });
+      this.r2075LensPieces=[];
+      for(const [radius,tube,z] of [
+        [.191,.010,.540],[.263,.0055,.495],[.113,.0038,.572]
+      ]){
+        const ring=new T.Mesh(
+          new T.TorusGeometry(radius,tube,10,96),
+          this.r2075OpticMaterial
+        );
+        ring.position.set(0,.01,z);
+        this.mechanicalGroup.add(ring);
+        this.r2075LensPieces.push(ring);
+      }
+      const bladeGeo=new T.BufferGeometry();
+      const blades=[],indices=[];
+      for(let i=0;i<8;i++){
+        const a=i*Math.PI/4;
+        const b=a+Math.PI/4;
+        const mid=a+Math.PI/8;
+        const start=blades.length/3;
+        blades.push(
+          Math.cos(a)*.128,Math.sin(a)*.128,.563,
+          Math.cos(b)*.130,Math.sin(b)*.130,.560,
+          Math.cos(mid)*.199,Math.sin(mid)*.199,.546
+        );
+        indices.push(start,start+1,start+2);
+      }
+      bladeGeo.setAttribute('position',new T.Float32BufferAttribute(blades,3));
+      bladeGeo.setIndex(indices);
+      bladeGeo.computeVertexNormals();
+      this.r2075Iris=new T.Mesh(bladeGeo,this.r2075OpticInnerMaterial);
+      this.r2075Iris.position.y=.01;
+      this.mechanicalGroup.add(this.r2075Iris);
 
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
       this.mechLight.position.set(0,0,.90);
@@ -1591,9 +1722,9 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
-        mix(.106,.132,finale)
+        mix(.048,.098,finale),
+        mix(.105,.172,finale),
+        mix(.120,.205,finale)
       );
       this.mechMidMaterial.color.setRGB(
         mix(.039,.066,finale),
@@ -1620,6 +1751,12 @@
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
+      // Physical optic stabilizes on the same cinematic timeline; no second
+      // composited CGI element appears after the handoff.
+      if(this.r2075Iris)this.r2075Iris.rotation.z=
+        .065*Math.sin(time*.00022)*grow*(1-finale*.82);
+      if(this.r2075Engraving)this.r2075Engraving.material.opacity=
+        (this.mobileRender?.19:.34)*grow*(.70+.30*finale);
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
