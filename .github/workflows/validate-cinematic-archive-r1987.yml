@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
+      - '.github/scripts/validate-deferred-css-recovery-r2054.cjs'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
       - '.github/scripts/validate-r2051-deferred-loop-css.cjs'
@@ -23,6 +25,8 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
+      - '.github/scripts/validate-deferred-css-recovery-r2054.cjs'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
       - '.github/scripts/validate-r2051-deferred-loop-css.cjs'
@@ -63,6 +67,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --check .github/scripts/validate-deferred-css-recovery-r2054.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -82,6 +88,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Verify single-request recovery of real MAG habitat CSS
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-deferred-css-recovery-r2054.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
