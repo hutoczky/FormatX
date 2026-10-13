@@ -86,8 +86,16 @@ async function evaluate(viewport,isMobile,browser){
   // away from a focused module. The old folio becomes inert and inaccessible.
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
-  const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
-  assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
+  // R2071: genuine offscreen lazy paper preparation. At scrollY=0 the
+  // shared MAG is already ready but the eight remote semantic sections must
+  // NOT be eagerly reparented; actual first scroll then builds all eight.
+  const prepared=await page.evaluate(()=>({
+    count:Number(document.documentElement.dataset.fxArchiveCinemaPrepared||0),
+    scrollY,readiness:document.documentElement.dataset.fxArchiveNativePrimeR2071
+  }));
+  assert.ok(prepared.scrollY<8&&prepared.count===0
+    &&prepared.readiness==='awaiting-user-scroll',
+    'Native papers mutated first viewport instead of awaiting scroll: '+JSON.stringify(prepared));
   // R2064 genuine late-WebGL first-visit regression. A renderer becoming
   // ready at scrollY=0 must not erase the original hero or download CTA.
   // Tested on the real 3D path, never a special audit-only CSS mode.
