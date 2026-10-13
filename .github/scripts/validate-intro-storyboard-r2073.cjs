@@ -56,6 +56,14 @@ const SHOTS=[
             duplicateIdentity:document.querySelectorAll('.fx-ai-core-ident-r1951').length
           };
         });
+        // Keep the photographic evidence even on an assertion failure:
+        // an unreadable black visual should never be hidden by test failure.
+        await page.screenshot({
+          path:OUT+'/'+shot.label+'.png',animations:'allow'
+        });
+        console.log('R2073_FRAME_EVIDENCE '+JSON.stringify({shot:shot.label,
+          renderer:info.renderer,peak:info.realPixelPeak,
+          lit:info.realLitSamples,camera:info.camera,phase:info.phase}));
         assert.equal(info.camera,shot.expected,
           'R2073 3D camera is not travelling through its authored cinematic arc: '+JSON.stringify(info));
         // The permanent hero MAG is allowed to bootstrap later: at an early
