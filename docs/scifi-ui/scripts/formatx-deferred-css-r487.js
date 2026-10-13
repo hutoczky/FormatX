@@ -93,12 +93,9 @@
   // lose the PerformanceObserver event. Without a watchdog every cinematic
   // stylesheet remains at media=print indefinitely and the MAG appears missing.
   // Keep the critical first paint asynchronous, then guarantee activation.
-  // R2051: 3.5s left slow/no-paint-observer clients on an incompletely styled
-  // MAG frame. A 2s watchdog is an upper bound for recovering cinematic CSS;
-  // the normal buffered FCP observer path is unchanged.
   fallback = setTimeout(() => {
     if (activated) return;
     if (document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
     else activateAfterCommittedFrame('visible-tab-fcp-watchdog');
-  }, 2000);
+  }, 3500);
 }());
