@@ -1,0 +1,80 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {chromium}=require('playwright');
+const HOME='http://127.0.0.1:4178/scifi-ui/index.html';
+const OUT='artifacts/r2073-intro-storyboard';
+const SHOTS=[
+  {label:'dna-approach',second:1.40,expected:'dna-approach',mobile:false},
+  {label:'cortical-orbit',second:4.40,expected:'cortical-orbit',mobile:false},
+  {label:'organism-pullback',second:6.45,expected:'organism-pullback',mobile:false},
+  {label:'identity-stabilized',second:8.50,expected:'identity-stabilized',mobile:false},
+  {label:'mobile-depth',second:4.40,expected:'cortical-orbit',mobile:true},
+  {label:'mobile-identity',second:8.50,expected:'identity-stabilized',mobile:true}
+];
+(async()=>{
+  fs.mkdirSync(OUT,{recursive:true});
+  const browser=await chromium.launch({headless:true,args:[
+    '--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist',
+    '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
+  ]});
+  const result=[];
+  try{
+    for(const shot of SHOTS){
+      const context=await browser.newContext({
+        viewport:shot.mobile?{width:390,height:844}:{width:1440,height:900},
+        isMobile:shot.mobile,hasTouch:shot.mobile,
+        locale:'hu-HU',reducedMotion:'no-preference'
+      });
+      try{
+        const page=await context.newPage();
+        const issues=[];
+        page.on('pageerror',e=>issues.push(e.message));
+        await page.goto(HOME+'?visualintro=1&introframe='+shot.second+'&r2073-film='+shot.label,
+          {waitUntil:'domcontentloaded',timeout:60000});
+        await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
+          null,{timeout:45000});
+        const info=await page.evaluate(()=>{
+          const root=document.documentElement;
+          const overlay=document.querySelector('.fx-mag-birth-r533');
+          const badge=document.querySelector('.fx-ai-core-ident-r1951');
+          const canvas=overlay?.querySelector('canvas.fxb-particles');
+          const badgeCss=badge?getComputedStyle(badge):null;
+          return {
+            phase:overlay?.dataset.phase,progress:root.dataset.fxMagBirthVisualFrameSeconds,
+            camera:root.dataset.fxMagIntroCameraR2073,
+            renderer:root.dataset.fxMagBirthRendererR1360,
+            birthState:root.dataset.fxMagBirthLiveR533,
+            identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
+            insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
+            identityAlpha:Number(badgeCss?.opacity||0),
+            canvasWidth:canvas?.width,canvasHeight:canvas?.height,
+            coreCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
+            duplicateIdentity:document.querySelectorAll('.fx-ai-core-ident-r1951').length
+          };
+        });
+        assert.equal(info.camera,shot.expected,
+          'R2073 3D camera is not travelling through its authored cinematic arc: '+JSON.stringify(info));
+        assert.ok(info.canvasWidth>0&&info.canvasHeight>0&&info.coreCount===1,
+          'Original renderer and final living MAG must remain unique: '+JSON.stringify(info));
+        assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
+        if(shot.second>=8.05){
+          assert.equal(info.identity,'MAG // AI CORE');
+          assert.ok(info.insideFilm,'MAG identity must belong to stabilized film shot');
+        }else{
+          assert.ok(!info.identity,'AI telemetry should not precede stabilization');
+        }
+        assert.deepEqual(issues,[],'Intro runtime exceptions: '+JSON.stringify(issues));
+        await page.screenshot({
+          path:OUT+'/'+shot.label+'.png',animations:'allow'
+        });
+        result.push({shot:shot.label,...info});
+        console.log('R2073_REAL_THREE_STORYBOARD_PASS '+JSON.stringify({
+          shot:shot.label,phase:info.phase,camera:info.camera,
+          coreCount:info.coreCount,renderer:info.renderer,identity:info.identity
+        }));
+      }finally{await context.close();}
+    }
+  }finally{await browser.close();}
+  fs.writeFileSync(OUT+'/storyboard.json',JSON.stringify(result,null,2)+'\n');
+})().catch(e=>{console.error(e.stack||String(e));process.exitCode=1});
