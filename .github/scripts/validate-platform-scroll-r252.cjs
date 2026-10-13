@@ -49,6 +49,17 @@ async function prepare(page) {
     try { await document.fonts?.ready; } catch (_) {}
     dispatchEvent(new Event('resize'));
   });
+  await page.waitForFunction(()=>{
+    const links=[...document.querySelectorAll('link[data-fx-seamless-loop-style]')];
+    return links.length===1&&Boolean(links[0].sheet);
+  },null,{timeout:15000});
+  const singleCSS=await page.evaluate(()=>({
+    count:document.querySelectorAll('link[data-fx-seamless-loop-style]').length,
+    loaded:!!document.querySelector('link[data-fx-seamless-loop-style]')?.sheet,
+    state:document.documentElement.dataset.fxSeamlessCssState
+  }));
+  assert(singleCSS.count===1&&singleCSS.loaded,
+    'MAG archive must load exactly one real seamless scroll stylesheet: '+JSON.stringify(singleCSS));
   await page.waitForTimeout(1200);
 }
 
