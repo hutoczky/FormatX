@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2053-batched-native-scroll-layout';
+  const VERSION='cinematic-archive-r2057-native-focus-handoff';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -370,6 +370,14 @@
 
   function syncCinema(){
     if(!cinemaPrepared)return;
+    // A keyboard user may be operating a real button while native scrolling
+    // changes which archive shelf owns the HTML. Capture focus BEFORE the
+    // previous paper becomes inert; otherwise focus disappears into body.
+    const focused=document.activeElement;
+    const focusedPaper=focused instanceof HTMLElement
+      ?focused.closest('.fx-archive-cinema-folio-r2030'):null;
+    const focusWasInCurrentPaper=Boolean(focusedPaper&&
+      focusedPaper.dataset.fxCinemaPanelActive==='true');
     // Technical dialogs retain the same living MAG stage; only the native
     // interactive paper expands into a focused technical instrument.
     const enabled=Boolean(root.dataset.fxArchiveExperience==='ready'&&archiveActive&&current&&!reduced.matches);
@@ -448,6 +456,21 @@
     if(enabled&&key!==lastCinemaKey){
       const panel=selected.cinemaPanel;
       if(panel)panel.scrollTop=0;
+      if(focusWasInCurrentPaper&&focusedPaper!==panel&&panel){
+        const newTarget=panel.querySelector(
+          'h2,h3,[role="heading"],a[href],button:not([disabled]),input:not([disabled])'
+        );
+        const target=newTarget instanceof HTMLElement?newTarget:panel;
+        // A native heading is not normally focusable. Make it a programmatic
+        // focus destination without injecting it into the Tab sequence.
+        if(!target.hasAttribute('tabindex')&&
+           !target.matches('a[href],button,input,select,textarea,[tabindex]')){
+          target.setAttribute('tabindex','-1');
+          target.dataset.fxArchiveFocusTarget='true';
+        }
+        target.focus({preventScroll:true});
+        root.dataset.fxArchiveFocusHandoff='preserved-on-scene-switch';
+      }
       lastCinemaKey=key;
     }else if(!enabled)lastCinemaKey='';
   }
@@ -1221,6 +1244,10 @@ void main(){
     }
     restoreOriginalAI();
     cinemaHosts=[];cinemaPrepared=false;
+    document.querySelectorAll('[data-fx-archive-focus-target="true"]').forEach(node=>{
+      if(node.getAttribute('tabindex')==='-1')node.removeAttribute('tabindex');
+      node.removeAttribute('data-fx-archive-focus-target');
+    });
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');
