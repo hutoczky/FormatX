@@ -537,6 +537,7 @@
   let lastTelemetryUpdate = 0;
   let warmupDispatched = false;
   let ignitionDone = false;
+  let identityAnnouncedR2072 = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
@@ -719,6 +720,25 @@
         coreApi.requestRender?.(MOBILE?1:2);
       } catch (_) {}
     }
+  }
+
+  /* R2072 — identity is part of the ONE 10s physical genesis shot,
+     not a second post-intro splash. Dispatch once when the living MAG has
+     stabilized, with the actual hero-stage optical center. The existing
+     R1951 identification node owns the typography and its exit. */
+  function announceCoreIdentityR2072(r) {
+    if (identityAnnouncedR2072 || r < .805 || finished) return;
+    identityAnnouncedR2072 = true;
+    syncTarget(true);
+    ROOT.dataset.fxMagBirthIdentityR2072 = 'mag-stabilized-within-film';
+    ROOT.dataset.fxMagBirthIdentityProgressR2072 = r.toFixed(3);
+    document.dispatchEvent(new CustomEvent('formatx:magbirthstabilized', {
+      detail: {
+        source:'single-genesis-shot-r2072',progress:r,
+        x:Math.round(targetX),y:Math.round(targetY),
+        timelineMs:Math.round(r*DURATION)
+      }
+    }));
   }
 
   function seedParticles(w,h) {
@@ -1020,6 +1040,7 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
+    announceCoreIdentityR2072(r);
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
@@ -1151,6 +1172,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{announceCoreIdentityR2072(fixedR);}catch(_){}}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');
