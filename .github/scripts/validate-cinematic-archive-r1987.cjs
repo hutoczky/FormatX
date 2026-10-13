@@ -68,7 +68,14 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
-  const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
+  // A retired native folio must never keep focus after a chapter transition.
+  // This remains a real DOM/keyboard regression, not a mocked button.
+  await page.evaluate(()=>{
+    const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const button=panel?.querySelector('a[href],button');
+    if(button)button.focus({preventScroll:true});
+  });
+    const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
   const first=await page.evaluate(()=>{
