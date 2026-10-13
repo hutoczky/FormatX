@@ -41,6 +41,7 @@
     const badge = document.createElement('div');
     badge.className = 'fx-ai-core-ident-r1951';
     badge.setAttribute('aria-hidden', 'true');
+    if (FIXED_STILL) badge.dataset.fxAiCoreStill = 'true';
     badge.dataset.fxAiCoreSource = source;
     badge.dataset.fxAiCoreShot = source === 'single-genesis-shot-r2072'
       ? 'inside-the-original-10s-film' : 'fallback-after-genesis';
@@ -75,7 +76,7 @@
       });
     });
 
-    const hold = FIXED_STILL ? 5200 : (REDUCED ? 600 : (MOBILE ? 1100 : 1200));
+    const hold = FIXED_STILL ? 24000 : (REDUCED ? 600 : (MOBILE ? 1100 : 1200));
     exitTimer = window.setTimeout(() => {
       badge.classList.remove('is-visible');
       badge.classList.add('is-exiting');
