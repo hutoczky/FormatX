@@ -1826,31 +1826,31 @@
       // 0–2.7s: DNA field emerges as the lens pushes toward it.
       const establish=glide(0,2.70,t);
       z=lerp(6.04,5.12,establish);
-      x=lerp(-.18,.080,establish);
-      y=lerp(.14,.025,establish);
+      x=lerp(-.25,.12,establish);
+      y=lerp(.16,.050,establish);
       focusX=lerp(-.055,0,establish);
-      bank=lerp(-.016,.008,establish);
+      bank=lerp(-.021,.014,establish);
       // 2.7–3.3s: decisive close-in reveal of the living embryo.
       const close=glide(2.70,3.30,t);
       z=lerp(z,3.86,close);
-      x=lerp(x,.135,close);
-      y=lerp(y,.040,close);
-      focusX=lerp(focusX,-.042,close);
-      bank=lerp(bank,.012,close);
+      x=lerp(x,.40,close);
+      y=lerp(y,.11,close);
+      focusX=lerp(focusX,-.055,close);
+      bank=lerp(bank,.020,close);
       // 3.3–5.55s: restrained orbital reveal of physical cortical depth.
       const orbit=glide(3.30,5.55,t);
-      x=lerp(x,-.13,orbit);
-      y=lerp(y,-.038,orbit);
-      focusX=lerp(focusX,.042,orbit);
-      bank=lerp(bank,-.009,orbit);
+      x=lerp(x,-.46,orbit);
+      y=lerp(y,-.105,orbit);
+      focusX=lerp(focusX,.055,orbit);
+      bank=lerp(bank,-.018,orbit);
       // 5.55–7.25s: pull back to see a single organism, not disconnected
       // CSS scenes. A parallax reversal gives the shell readable depth.
       const reveal=glide(5.55,7.25,t);
       z=lerp(z,4.28,reveal);
-      x=lerp(x,.090,reveal);
-      y=lerp(y,.016,reveal);
+      x=lerp(x,.22,reveal);
+      y=lerp(y,.046,reveal);
       focusX=lerp(focusX,0,reveal);
-      bank=lerp(bank,.008,reveal);
+      bank=lerp(bank,.013,reveal);
       // 7.25–8.05s: the nervous system settles into its iconic axis.
       const stabilize=glide(7.25,8.05,t);
       x=lerp(x,0,stabilize);
