@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261012-r2050-native-surface-endpoint
-base_master=b392dd80eadbb72c960c33a7838902ed07157d14
-purpose=Final full-sweep native WebGL frame before returning the already-established MAG to zero-idle, so intermittent SwiftShader/Chromium rAF pauses cannot strand an autonomous surface-energy filament at only 37% of its path. Retain the exact original MAG renderer, eight interactive archive sources, and real original HTML folios.
-validation=Canonical native MAG surface-energy browser suite on 390px, 430px and 1440px; correct monotonic sweep endpoint, zero idle frames between bursts, offscreen and reduced-motion suspension; eight original interactive MAG archive chapters, no occlusion, original navigation and technical functionality; two Cloudflare domains revision and smoke tests.
-limits=Not verified photorealistic or native 60 FPS on a physical device. Strict Lighthouse 95+ desktop/mobile remains unmet.
+token=20261013-r2051-single-owner-mag-seamless-css
+base_master=e9dca2e3666cf35ac1d5a4c5f508b3156650a644
+purpose=Remove stale, duplicated render-blocking Worker seamless-loop CSS injection and ensure one actual CSSOM-ready stylesheet with a single retry on genuine failure. Preserve native scroll, eight original interactive WebGL2 MAG archives and canonical CTA.
+validation=Require new Cloudflare revision on both custom domains; real native MAG and ASK, the single CSSOM stylesheet, platform scroll policy, eight archive scenes, zero information occlusion, technical panel interactivity and reduced-motion/no-WebGL fallback. Lighthouse quality gate remains a separate failure until measured otherwise.
+limits=No invented 60fps, photorealism or award superiority; not a full site completion claim.
