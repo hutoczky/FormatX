@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2053-batched-native-scroll-layout';
+  const VERSION='cinematic-archive-r2056-native-focus-style-write-guard';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -368,6 +368,34 @@
     if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
   }
 
+  let folioStyleWrites=0,folioStyleSkips=0;
+  function writeFolioVariable(panel,name,value){
+    // Read only the CSSOM declaration, never a computed style or layout box.
+    // Long reading sections keep most phase values identical for hundreds of
+    // native wheel/touch updates. Rewriting them invalidates the styled tree.
+    if(panel.style.getPropertyValue(name)===value){
+      folioStyleSkips++;
+      return;
+    }
+    panel.style.setProperty(name,value);
+    folioStyleWrites++;
+  }
+  function recoverNativeFocus(panel){
+    // Focus never remains inside the inert paper we have just archived.
+    // A native heading provides a spoken chapter name for keyboard/AT users.
+    if(!(panel instanceof HTMLElement))return;
+    const target=panel.querySelector('h2,h3,[role="heading"]')||panel;
+    if(!(target instanceof HTMLElement))return;
+    const original=target.getAttribute('tabindex');
+    if(original===null){
+      target.setAttribute('tabindex','-1');
+      target.addEventListener('blur',()=>{
+        if(target.getAttribute('tabindex')==='-1')target.removeAttribute('tabindex');
+      },{once:true});
+    }
+    target.focus({preventScroll:true});
+    root.dataset.fxArchiveFocusHandoff='native-document';
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -380,6 +408,14 @@
     setHeroCanvasLaneFront(enabled);
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
+    // Capture focus BEFORE rendering the previous chapter inert. No focus
+    // teleport occurs for ordinary pointer/scroll users, menu or dialogs.
+    const focused=document.activeElement;
+    const keyboardLeaving=Boolean(enabled&&lastCinemaKey&&key!==lastCinemaKey
+      &&focused instanceof HTMLElement&&!document.body.classList.contains('fx-organism-panel-open')
+      &&cinemaHosts.some(host=>host!==selected.cinemaHost
+        &&host.contains(focused)
+        &&host.querySelector(':scope > .fx-archive-cinema-folio-r2030')?.contains(focused)));
     if(root.dataset.fxArchiveCinemaChapter!==key)root.dataset.fxArchiveCinemaChapter=key;
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
@@ -410,9 +446,9 @@
           // decorative status card remained visible in production screenshots.
           const entry=smooth((p-.035)/.28),exit=smooth((p-.94)/.06);
           const materialize=(.83+.17*entry)*(1-.09*exit);
-          panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
-          panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
-          panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
+          writeFolioVariable(panel,'--fx-cinema-materialize',materialize.toFixed(4));
+          writeFolioVariable(panel,'--fx-cinema-orbit',(1-materialize).toFixed(4));
+          writeFolioVariable(panel,'--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
           // Each original native HTML module physically settles out of the
           // existing source's 3D retrieval trajectory. The small travel range
           // stays INSIDE its reading lane; unlike old hero animation it can
@@ -432,14 +468,15 @@
           const pitch=phone?unresolved*3.5-paperExit*2:unresolved*1.5-paperExit;
           const depth=-(phone?25:48)*unresolved-25*paperExit;
           const scale=1-.025*unresolved-.018*paperExit;
-          panel.style.setProperty('--fx-cinema-handoff-x',lateral.toFixed(2)+'px');
-          panel.style.setProperty('--fx-cinema-handoff-y',vertical.toFixed(2)+'px');
-          panel.style.setProperty('--fx-cinema-handoff-z',depth.toFixed(2)+'px');
-          panel.style.setProperty('--fx-cinema-handoff-yaw',yaw.toFixed(3)+'deg');
-          panel.style.setProperty('--fx-cinema-handoff-pitch',pitch.toFixed(3)+'deg');
-          panel.style.setProperty('--fx-cinema-handoff-scale',scale.toFixed(4));
-          panel.dataset.fxCinemaSource=selected.source;
-          panel.dataset.fxCinemaHandoff=paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving';
+          writeFolioVariable(panel,'--fx-cinema-handoff-x',lateral.toFixed(2)+'px');
+          writeFolioVariable(panel,'--fx-cinema-handoff-y',vertical.toFixed(2)+'px');
+          writeFolioVariable(panel,'--fx-cinema-handoff-z',depth.toFixed(2)+'px');
+          writeFolioVariable(panel,'--fx-cinema-handoff-yaw',yaw.toFixed(3)+'deg');
+          writeFolioVariable(panel,'--fx-cinema-handoff-pitch',pitch.toFixed(3)+'deg');
+          writeFolioVariable(panel,'--fx-cinema-handoff-scale',scale.toFixed(4));
+          if(panel.dataset.fxCinemaSource!==selected.source)panel.dataset.fxCinemaSource=selected.source;
+          const phase=paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving';
+          if(panel.dataset.fxCinemaHandoff!==phase)panel.dataset.fxCinemaHandoff=phase;
           root.dataset.fxArchiveNativeHandoff='scroll-coupled-real-3d-paper';
           positionCinemaFolio(panel);
         }
@@ -448,8 +485,15 @@
     if(enabled&&key!==lastCinemaKey){
       const panel=selected.cinemaPanel;
       if(panel)panel.scrollTop=0;
+      if(keyboardLeaving)recoverNativeFocus(panel);
       lastCinemaKey=key;
     }else if(!enabled)lastCinemaKey='';
+    // Infrequent telemetry; never create a replacement DOM mutation for
+    // every style write we successfully avoided.
+    if(domComposes%64===0){
+      root.dataset.fxArchiveFolioStyleWrites=String(folioStyleWrites);
+      root.dataset.fxArchiveFolioStyleSkips=String(folioStyleSkips);
+    }
   }
 
   // R2026: The real existing HTML content is the handoff destination.
