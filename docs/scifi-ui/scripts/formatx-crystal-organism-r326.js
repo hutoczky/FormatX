@@ -1291,7 +1291,7 @@
         vec2 lensVector=vUv-vec2(.5);
         float lensRadial=length(lensVector);
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
-        float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
+        float lensRimMesh=exp(-pow((lensRadial-.430)/.030,2.0));
         float lensEdge=smoothstep(.410,.490,lensRadial);
         float sensorHalo=exp(-pow(lensVector.x/.320,2.0)-pow(lensVector.y/.150,2.0));
         float sensorCore=exp(-pow(lensVector.x/.250,2.0)-pow(lensVector.y/.060,2.0));
@@ -1305,7 +1305,7 @@
         physicalLens+=vec3(.50,.58,.58)*sideSpec*.10;
         physicalLens+=vec3(.055,.14,.17)*fresnel*.12;
         physicalLens+=vec3(.008,.065,.080)*lensInner*(.09+.08*uEnergy);
-        physicalLens+=vec3(.64,.70,.68)*lensRim*.050;
+        physicalLens+=vec3(.64,.70,.68)*lensRimMesh*.050;
         physicalLens+=vec3(.018,.18,.22)*sensorHalo*(.08+.06*uEnergy);
         physicalLens+=vec3(.30,.78,.84)*sensorArc*(.10+.07*uEnergy);
         physicalLens+=vec3(.70,.96,.96)*sensorCore*(.12+.06*uEnergy);
