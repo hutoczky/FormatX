@@ -1106,16 +1106,16 @@
         color:0x9bced0,metalness:.73,roughness:.19,
         clearcoat:.85,clearcoatRoughness:.12,
         emissive:0x0b292e,emissiveIntensity:.12,
-        transparent:true,opacity:.88,depthWrite:false
+        transparent:true,opacity:.76,depthWrite:false
       });
       this.r2075RailMaterial=new T.MeshPhysicalMaterial({
         color:0x729fa8,metalness:.66,roughness:.24,
         clearcoat:.70,clearcoatRoughness:.15,
         emissive:0x082027,emissiveIntensity:.10,
-        transparent:true,opacity:.70,depthWrite:false
+        transparent:true,opacity:.56,depthWrite:false
       });
       this.r2075MicroMaterial=new T.LineBasicMaterial({
-        color:0xb6e8e5,transparent:true,opacity:.33,depthWrite:false
+        color:0xb6e8e5,transparent:true,opacity:.18,depthWrite:false
       });
       const rimPts=baseShape.getSpacedPoints(this.mobileRender?128:256);
       const rimCurve=new T.CatmullRomCurve3(
@@ -1141,7 +1141,7 @@
           for(let i=0;i<=9;i++){
             const u=i/9;
             const reach=.18+.66*u;
-            const offset=side*(.065+.075*u);
+            const offset=side*(.080*(1-u)+.009);
             pts.push(new T.Vector3(
               vx*reach+nx*offset,vy*reach+ny*offset,
               .315-.055*u+.020*Math.sin(Math.PI*u)
@@ -1161,7 +1161,7 @@
         const ribs=this.mobileRender?7:11;
         for(let k=0;k<ribs;k++){
           const u=(k+.65)/(ribs+.8),r=.21+u*.60;
-          const w=.045+u*.035,z=.321-u*.05;
+          const w=.062*(1-u)+.012,z=.321-u*.05;
           micro.push(
             vx*r+nx*(-w),vy*r+ny*(-w),z,
             vx*r+nx*w,vy*r+ny*w,z
@@ -1762,7 +1762,7 @@
       if(this.r2075Iris)this.r2075Iris.rotation.z=
         .065*Math.sin(time*.00022)*grow*(1-finale*.82);
       if(this.r2075Engraving)this.r2075Engraving.material.opacity=
-        (this.mobileRender?.19:.34)*grow*(.70+.30*finale);
+        (this.mobileRender?.11:.18)*grow*(.70+.30*finale);
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
