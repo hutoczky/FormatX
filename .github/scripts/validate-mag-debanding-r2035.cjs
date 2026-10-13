@@ -66,7 +66,7 @@ assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2050-su
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
+ 'formatx-mag-birth-live-r533.css?v=20261014-r2072-intro-boot-identity']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
