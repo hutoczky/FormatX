@@ -540,6 +540,44 @@ async function evaluate(viewport,isMobile,browser){
   });
   assert.equal(scrollMetrics.sampleCount,32,'Scroll input benchmark must exercise real synchronous composition');
   console.log('ARCHIVE_SCROLL_INPUT_PROFILE_R2053',JSON.stringify({mode:isMobile?'mobile':'desktop',...scrollMetrics}));
+  // Keyboard focus must follow the original HTML to its next native folio,
+  // never become trapped inside an inert hidden archived chapter.
+  await page.evaluate(()=>{
+    const section=document.querySelector('#experience');
+    section?.scrollIntoView({behavior:'instant',block:'center'});
+    window.FormatXArchiveExperience?.refresh?.();
+  });
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='ecosystem',null,{timeout:9000});
+  const focusBefore=await page.evaluate(()=>{
+    const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const target=panel?.querySelector('a[href],button:not([disabled])');
+    target?.focus({preventScroll:true});
+    return {focused:!!target&&document.activeElement===target,text:target?.textContent?.trim().slice(0,70)};
+  });
+  assert.ok(focusBefore.focused,'Original interactive HTML control could not receive keyboard focus: '+JSON.stringify(focusBefore));
+  await page.evaluate(()=>{
+    document.querySelector('#live-os-overview')?.scrollIntoView({behavior:'instant',block:'center'});
+    window.FormatXArchiveExperience?.refresh?.();
+  });
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinemaChapter==='systems',null,{timeout:9000});
+  const focusAfter=await page.evaluate(()=>{
+    const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const old=document.querySelector('#experience .fx-archive-cinema-folio-r2030');
+    return {insideNew:!!panel&&panel.contains(document.activeElement),
+      oldInert:!!old&&old.inert,
+      text:document.activeElement?.textContent?.trim().slice(0,90),
+      handoff:document.documentElement.dataset.fxArchiveFocusHandoff||null};
+  });
+  assert.ok(focusAfter.insideNew&&focusAfter.oldInert&&focusAfter.handoff==='native-document',
+    'Keyboard focus stranded in archived HTML: '+JSON.stringify({focusBefore,focusAfter}));
+  console.log('ARCHIVE_KEYBOARD_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',focusAfter}));
+  const writeStats=await page.evaluate(()=>({
+    writes:Number(document.documentElement.dataset.fxArchiveFolioStyleWrites||0),
+    skips:Number(document.documentElement.dataset.fxArchiveFolioStyleSkips||0)
+  }));
+  assert.ok(writeStats.writes>0&&writeStats.skips>0,
+    'Native folio CSS value deduplication never activated: '+JSON.stringify(writeStats));
+  console.log('ARCHIVE_STYLE_DEDUP_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',writeStats}));
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
