@@ -741,6 +741,39 @@ async function missingGpuFallback(browser){
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
 }
+async function auditHtmlContinuity(browser){
+  // It is a real product fallback. If WebGL/cinematic enhancement is absent,
+  // the original semantic page must NEVER blank after delayed styles settle.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  const page=await context.newPage();
+  const address=new (require('node:url').URL)(URL);address.searchParams.set('lighthouse','1');
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='audit-html',null,{timeout:40000});
+  await page.waitForTimeout(13300);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const copy=document.querySelector('#hero .hero-grid > .hero-copy');
+    const title=document.getElementById('hero-title');
+    const rect=copy?.getBoundingClientRect();
+    const style=copy?getComputedStyle(copy):null;
+    const titleStyle=title?getComputedStyle(title):null;
+    return {mode:root.dataset.fxArchiveExperience,crossfade:root.dataset.fxArchiveCinema||'home',
+      intro:root.dataset.fxMagBirthOwnerR533,
+      copy:{display:style?.display,opacity:style?.opacity,visibility:style?.visibility,
+        top:rect?.top,height:rect?.height,width:rect?.width},
+      title:{text:title?.textContent?.trim().slice(0,65),display:titleStyle?.display,
+        opacity:titleStyle?.opacity,visibility:titleStyle?.visibility}};
+  });
+  assert.ok(state.mode==='audit-html'&&state.copy.display!=='none'
+    &&state.copy.visibility==='visible'&&Number(state.copy.opacity)>.85
+    &&state.copy.height>130&&state.copy.width>200
+    &&state.title.display!=='none'&&state.title.visibility==='visible',
+    'Progressive semantic HTML was hidden after deferred cinematic loading: '+JSON.stringify(state));
+  console.log('ARCHIVE_PROGRESSIVE_HTML_CONTINUITY_PASS',JSON.stringify(state));
+  await context.close();
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -769,6 +802,7 @@ async function fallback(browser){
     await verifyFirstVisitIntroHandoff(browser);
     await verifyMobileLivingPulse(browser);
     await missingGpuFallback(browser);
+    await auditHtmlContinuity(browser);
     await fallback(browser);
   }finally{await browser.close();}
 })().catch(e=>{console.error('ARCHIVE_FAIL',e.stack||String(e));process.exitCode=1;});
