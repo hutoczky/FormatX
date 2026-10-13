@@ -30,7 +30,7 @@ const SHOTS=[
         const page=await context.newPage();
         const issues=[];
         page.on('pageerror',e=>issues.push(e.message));
-        await page.goto(HOME+'?visualintro=1&introframe='+shot.second+'&r2073-film='+shot.label,
+        await page.goto(HOME+'?intro=1&visualintro=1&introframe='+shot.second+'&r2073-film='+shot.label,
           {waitUntil:'domcontentloaded',timeout:60000});
         await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
           null,{timeout:45000});
