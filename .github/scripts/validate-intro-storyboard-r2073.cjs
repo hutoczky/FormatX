@@ -64,6 +64,21 @@ const SHOTS=[
         }else{
           assert.ok(!info.identity,'AI telemetry should not precede stabilization');
         }
+        // A native pointer or touch reaches the same physical Three.js scene:
+        // Lusion-level interaction means input changes its camera/light
+        // state, not merely a CSS hover pseudo-element.
+        if(shot.second===4.40){
+          if(shot.mobile){
+            await page.touchscreen.tap(180,320);
+          }else{
+            await page.mouse.move(540,390);
+            await page.mouse.down();
+            await page.mouse.up();
+          }
+          await page.waitForFunction(()=>
+            document.documentElement.dataset.fxMagIntroInteractionR2073==='physical-core-pulse',
+            null,{timeout:4000});
+        }
         assert.deepEqual(issues,[],'Intro runtime exceptions: '+JSON.stringify(issues));
         await page.screenshot({
           path:OUT+'/'+shot.label+'.png',animations:'allow'
