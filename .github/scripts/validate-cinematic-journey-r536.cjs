@@ -16,7 +16,7 @@ assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
 assert.equal((index.match(/data-fx-deferred-css-r487="true"/g)||[]).length,1,'R487 deferred CSS scheduler must load exactly once in source');
-assert.match(index,/formatx-deferred-css-r487\\.js\\?v=20261013-r2054-one-retry-post-fcp/,'R2054 resilient FCP scheduler must be explicitly cache-busted in source');
+assert.ok(index.includes('formatx-deferred-css-r487.js?v=20261013-r2054-one-retry-post-fcp'),'R2054 resilient FCP scheduler must be explicitly cache-busted in source');
 assert.ok(read('docs/scifi-ui/scripts/formatx-deferred-css-r487.js').includes('fx_css_retry'),'R2054 stylesheet recovery must be present alongside the FCP watchdog');
 assert.ok(read('docs/scifi-ui/scripts/formatx-deferred-css-r487.js').includes('visible-tab-fcp-watchdog'),'R487 must activate when the FCP observer fails to fire');
 
