@@ -101,6 +101,12 @@
       this.makeCellularLayer();
       this.makeMechanicalLayer();
       this.makeTentacles();
+      // R2075: objective structural contract for the real source Three mesh.
+      // A flat title-only frame or legacy un-detailed star cannot pass this.
+      document.documentElement.dataset.fxMagIntroGeometryR2075=
+        'closed-beveled-3d-rim-'+this.r2075ArmRails.length+
+        '-physical-inset-rails-'+this.r2075LensPieces.length+
+        '-coaxial-metal-rings-and-8-iris-blades';
       this.resize();
     }
 
