@@ -269,6 +269,8 @@ async function assertHeroDisclosure(page) {
     return scrollY<8&&root.dataset.fxArchiveCinema==='home'
       &&root.dataset.fxArchiveHomeContinuity==='original-hero-readable'
       &&visible(hero)&&visible(cta)
+      &&!!document.querySelector('#hero .hero-actions')?.contains(cta)
+      &&root.dataset.fxArchiveCtaLane==='original-home'
       &&!cta.closest('[inert]');
   }, null, { timeout: 9000 });
   await page.waitForTimeout(250);
