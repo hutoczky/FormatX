@@ -68,14 +68,7 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.shared,true,JSON.stringify(init));
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
-  // A retired native folio must never keep focus after a chapter transition.
-  // This remains a real DOM/keyboard regression, not a mocked button.
-  await page.evaluate(()=>{
-    const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
-    const button=panel?.querySelector('a[href],button');
-    if(button)button.focus({preventScroll:true});
-  });
-    const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
+  const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
   const first=await page.evaluate(()=>{
@@ -194,6 +187,17 @@ async function evaluate(viewport,isMobile,browser){
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
+    if(state.scene===scene.key&&state.active){
+      const focus=await page.evaluate(()=>{
+        const focused=document.activeElement;
+        const activePaper=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        const hiddenFocused=!!focused?.closest?.('.fx-archive-cinema-folio-r2030[inert]');
+        return {hiddenFocused,activePaper:!!activePaper,
+          restored:document.documentElement.dataset.fxArchiveFocusRestored||''};
+      });
+      assert.ok(!focus.hiddenFocused,
+        'Keyboard focus remained trapped inside an archived inert HTML paper: '+JSON.stringify({scene:scene.key,...focus}));
+    }
     let postRefresh=null;
     if(state.scene!==scene.key){
       await page.evaluate(()=>window.FormatXArchiveExperience.refresh());
