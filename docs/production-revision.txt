@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261013-r2054-verified-cinematic-css-recovery
+token=20261013-r2055-early-native-mag-event-window-proof
 base_master=1dd0d18aa8b1847b033b1fc61668ab4a794e3a7e
-purpose=Recover actual cinema CSS when a delayed stylesheet fails on one network request. One bounded same-origin retry only, never mask unrecovered network failures. Keep original single MAG WebGL2 renderer, eight real native HTML archive folios, original CTA, technical functions, one canonical proof, responsive no-WebGL/reduced-motion fallback unchanged.
-validation=Require explicit forced CSS network failure and real applied-style recovery in phone and desktop Chromium; normal page without archive debug param visibly presents one original native HTML panel at 320x640, 390x844, 412x823 and 1440x900; eight-source WebGL/scroll, no content occlusion, production security and exact revision domain check.
+purpose=Preserve one real native MAG and eight real HTML archive folios while starting the native renderer sooner on returning visits; establish zero extra rendering specifically BETWEEN valid autonomous sweeps, robust against software GPU timer stalls; first-visit intro and no-WebGL fallback unchanged.
+validation=Repeat mobile 390/430 and desktop 1440 actual WebGL2 zero-idle event-boundary tests; desktop/mobile 8-source scroll and content, responsive 11-viewpoint geometry, navigation, accessible fallback, Cloudflare exact production revision on both domains. Lighthouse >=95 remains a separate unsatisfied quality goal until measured.
 limits=Lighthouse >=95 still a quality target, not automatically satisfied by a network-resilience repair. Real device stable 60FPS, photorealistic appearance and Igloo visual comparison remain separate unverified evidence.

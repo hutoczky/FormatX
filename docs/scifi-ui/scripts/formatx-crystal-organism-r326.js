@@ -1950,6 +1950,9 @@
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
+    let lastAutonomousSweepEnd=0;
+    const idleWakeDiagnostics=[];
+    if(surfaceEnergyFunctionalCheck)window.__fxMagIdleWakeDiagnostics=idleWakeDiagnostics;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
@@ -1996,6 +1999,15 @@
     }
     function schedule(frames=1){
       if(blocked())return;
+      if(surfaceEnergyFunctionalCheck&&lastAutonomousSweepEnd
+        &&performance.now()-lastAutonomousSweepEnd<2800){
+        idleWakeDiagnostics.push({
+          t:Math.round(performance.now()-lastAutonomousSweepEnd),
+          frames,
+          caller:String(new Error().stack||'').split('\n').slice(1,4).join(' | ')
+        });
+        if(idleWakeDiagnostics.length>32)idleWakeDiagnostics.shift();
+      }
       const frameCap=auditMode?1:(mobile?4:24);
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
@@ -2132,6 +2144,7 @@
         settleAfterBurst();
         root.dataset.fxCoreSurfacePulseR454='idle';
         root.dataset.fxCoreIdleBoundaryR1710='hard-zero-frame-after-sweep';
+        if(source==='autonomous')lastAutonomousSweepEnd=performance.now();
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
           detail:{phase:'end',source,duration:SURFACE_PULSE_WINDOW_MS}
         }));

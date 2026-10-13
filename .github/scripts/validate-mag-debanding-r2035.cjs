@@ -62,8 +62,9 @@ assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261012-r2050-s
   'Motion owner may boot the old cached MAG runtime');
 assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261012-r2050-surface-sweep-endpoint'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2050-surface-sweep-endpoint'),
-  'Canonical HTML must load the R2045 scheduler');
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261013-r2055-postpaint-native-prewarm')
+  && scheduler.includes('const AUTO_DELAY_MS=2600;'),
+  'Canonical HTML must load the current R2055 measured post-paint MAG runtime scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261011-r2035-no-intro-grid']){
