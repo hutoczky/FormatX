@@ -43,6 +43,22 @@ const SHOTS=[
           // transition frame that immediately follows its DOM insertion.
           await page.waitForTimeout(150);
         }
+        // Real touch/pointer must reach the live Three instance BEFORE
+        // expensive CPU/software-WebGL screenshot readback or film teardown.
+        // Otherwise headless photography can wait until after the 10s shot
+        // and falsely diagnose physical input as broken.
+        if(shot.second===4.40){
+          if(shot.mobile){
+            await page.touchscreen.tap(180,320);
+          }else{
+            await page.mouse.move(540,390);
+            await page.mouse.down();
+            await page.mouse.up();
+          }
+          await page.waitForFunction(()=>
+            document.documentElement.dataset.fxMagIntroInteractionR2073==='physical-core-pulse',
+            null,{timeout:4000});
+        }
         const info=await page.evaluate(()=>{
           const root=document.documentElement;
           const overlay=document.querySelector('.fx-mag-birth-r533');
@@ -98,21 +114,6 @@ const SHOTS=[
             'MAG identity must settle sharply on its real 3D optical axis: '+JSON.stringify(info));
         }else{
           assert.ok(!info.identity,'AI telemetry should not precede stabilization');
-        }
-        // A native pointer or touch reaches the same physical Three.js scene:
-        // Lusion-level interaction means input changes its camera/light
-        // state, not merely a CSS hover pseudo-element.
-        if(shot.second===4.40){
-          if(shot.mobile){
-            await page.touchscreen.tap(180,320);
-          }else{
-            await page.mouse.move(540,390);
-            await page.mouse.down();
-            await page.mouse.up();
-          }
-          await page.waitForFunction(()=>
-            document.documentElement.dataset.fxMagIntroInteractionR2073==='physical-core-pulse',
-            null,{timeout:4000});
         }
         assert.deepEqual(issues,[],'Intro runtime exceptions: '+JSON.stringify(issues));
         await page.screenshot({
