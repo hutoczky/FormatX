@@ -1,0 +1,27 @@
+name: FormatX R2073 cinematic integration contract
+
+on:
+  push:
+    branches:
+      - feature/r2073-igloo-lando-lusion-single-world
+  pull_request:
+    paths:
+      - docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
+      - docs/scifi-ui/index.html
+      - .github/scripts/verify-r2073-triad.cjs
+      - .github/workflows/formatx-r2073-triad.yml
+
+permissions:
+  contents: read
+
+jobs:
+  native-cinema-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check live source, physical 3D continuity and fallback invariants
+        run: node .github/scripts/verify-r2073-triad.cjs
