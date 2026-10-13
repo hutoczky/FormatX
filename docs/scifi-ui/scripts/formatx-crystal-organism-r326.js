@@ -1918,6 +1918,9 @@
     let ambientPointerFrame=0,pendingAmbientPointer=null;
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
+    // Operational telemetry needs four updates/second, not 60 DOM
+    // attribute mutations/second per field. Shader simulation stays 60Hz.
+    let lastRuntimeTelemetryAt=-Infinity;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
@@ -2204,7 +2207,10 @@
       cinematic.shape=shapeName();
       cinematic.rotation=[rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ];
       cinematic.siteProgress=siteProgress;
-      publishShape();
+      // The MAG's shape is physically immutable during archive presentation.
+      // Re-emitting nine identical DOM attributes every GPU frame needlessly
+      // wakes document observers and can induce redundant layout work.
+      if(root.dataset.fxCoreShapeR337!=='organism'||stage.dataset.shape!=='organism')publishShape();
 
       gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
       gl.useProgram(program);
@@ -2312,6 +2318,8 @@
         }
       }
 
+      if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity){
+        lastRuntimeTelemetryAt=now;
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
       root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
@@ -2331,6 +2339,7 @@
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
+      }
     }
 
     function settleAfterBurst(){
