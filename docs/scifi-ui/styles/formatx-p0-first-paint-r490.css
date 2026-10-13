@@ -1785,3 +1785,23 @@ html[data-fx-proof-singleton="present"] .fx-loop-reference-proof {
 /* production-r2056-singleton-first-frame-no-blocking-remote-css */
 
 }
+
+/* R2065 — same R1593 physical hero material from the very first raster.
+   The already deferred R1530 stylesheet otherwise changes the live hero-copy
+   background, border and shadow after FCP. Keep material visually identical,
+   but avoid a late expensive ancestor paint of the original FORMATX LCP. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+  html:root:root:root:root:root:root:root:root:root:root
+  body.living-architecture #hero .hero-copy {
+    background:
+      radial-gradient(circle at 78% 8%,rgba(178,225,229,.030),transparent 34%),
+      linear-gradient(146deg,rgba(4,15,21,.50),rgba(1,7,10,.64)) !important;
+    border-color:rgba(154,218,224,.095) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.025),
+      0 26px 70px rgba(0,0,0,.18) !important;
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+  }
+}
+/* production-candidate-r2065-early-original-hero-material */
