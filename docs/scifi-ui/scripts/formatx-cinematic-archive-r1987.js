@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2053-batched-native-scroll-layout';
+  const VERSION='cinematic-archive-r2057-frame-coalesced-native-paper';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -28,7 +28,7 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let lastPanelNode=null;
-  let raf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
+  let raf=0,domRaf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
@@ -1125,11 +1125,23 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
-        updateRealContentSheets();
-        syncCinema();
-        updateHandoff();
-        domComposes++;
-        root.dataset.fxArchiveDomComposes=String(domComposes);
+        // R2057: keep chapter identity and canonical MAG docking synchronous.
+        // Expensive native-document transformations share one pre-paint
+        // animation frame, so wheel/touch bursts cannot repeatedly recompute
+        // styles in the same 16.7ms visual interval. The GPU pass is separate.
+        if(!domRaf){
+          domRaf=requestAnimationFrame(()=>{
+            domRaf=0;
+            if(disposed||document.hidden||reduced.matches)return;
+            try{
+              updateRealContentSheets();
+              syncCinema();
+              updateHandoff();
+              domComposes++;
+              root.dataset.fxArchiveDomComposes=String(domComposes);
+            }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
+          });
+        }
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
@@ -1188,6 +1200,8 @@ void main(){
     disposed=true;
     root.dataset.fxArchiveStopReason='lifecycle-stop';
     if(raf)cancelAnimationFrame(raf);
+    if(domRaf)cancelAnimationFrame(domRaf);
+    domRaf=0;
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
