@@ -67,7 +67,7 @@ async function activateRuntime(page) {
   // The legacy button can disappear between visibility inspection and click.
   // Dispatching the authentic runtime activation event is permitted in this
   // low-level genome test, while the separate ASK/browser test uses a real click.
-  if(document.readyState)await page.evaluate(()=>{
+  await page.evaluate(()=>{
     const root=document.documentElement;
     if(root.dataset.fxImmersive!=='active'){
       root.dataset.fxImmersive='active';
