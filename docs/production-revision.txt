@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261013-r2052-native-mag-zero-idle-final-sweep
-base_master=b41292b88752c4d516dbd29b863a30a74f6f3062
-purpose=Preserve original one-WebGL2 living MAG while coalescing adaptive-quality pixel-buffer updates into the last completed surface-energy filament frame. Suppress any queued governor wakeups between autonomous sweeps without changing genuine user-triggered rendering. Retain R2051 post-first-paint native scroll CSS, eight physical original interactive HTML archive paper modules, and original ASK.
-validation=Native instrumented WebGL2 framebuffer sweep and strictly zero renderer-idle-frame verification on mobile 390px/430px and desktop 1440px PASSED; browser eight-scene MAG scroll and reduced-motion fallback PASSED, no occlusion PASSED, production candidate validation PASSED. Two-domain exact production revision and live cinematic smoke required after merge.
-limits=Strict real-experience Lighthouse 95+ not achieved (currently desktop 92-93, mobile 93); no measured native hardware 60fps or independent IGLOO-grade photorealism certification.
+token=20261013-r2053-batched-native-folio-scroll
+base_master=d548faea15096b80d63545c7cb53223fb9a30e4d
+purpose=Coalesce original native HTML archive panel geometry measurements into one read-only pass BEFORE any per-card style writes. Eliminate duplicate eight-chapter getBoundingClientRect pass from deferred GPU RAF, because synchronous scroll already selected and docked the correct stage. One canonical MAG WebGL2 renderer, eight distinct shelves, original functional CTA/technical panels/proof and GPU zero-idle frame gate remain unchanged.
+validation=Must pass Chromium eight-scene scroll mobile+desktop, no-occlusion, keyboard/technical native HTML and no-WebGL/reduced-motion; 32-sample real synchronous scroll input-path profile recorded. Production candidate + security + Lighthouse strict gates still required.
+limits=This source-level performance optimization is not yet a measured improvement in Lighthouse score or real hardware FPS; Lighthouse >=95 goal remains unproven, no award-grade comparison claim.
