@@ -7,6 +7,13 @@ const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+const r2057Invalidate=jsSource.split('function invalidate(){')[1]?.split('function connect(){')[0]||'';
+assert.match(r2057Invalidate,/if\(!domRaf\)/,
+  'R2057 must coalesce repeated touch/wheel DOM transformations before next paint');
+assert.match(r2057Invalidate,/requestAnimationFrame\(\(\)=>/,
+  'R2057 must compose native HTML before the following browser paint');
+assert.ok(r2057Invalidate.indexOf('setPanelState();')<r2057Invalidate.indexOf('if(!domRaf)'),
+  'R2057 must keep source change and MAG selection synchronous for rapid reversing');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
 assert.ok(rafUpdate.length>180,'Missing canonical archive RAF update function');
 assert.doesNotMatch(rafUpdate,/\b(?:setPanelState|updateRealContentSheets|syncCinema|updateHandoff|selectLiveChapter|ResponsiveExperience\.dock|ResponsiveExperience\.restore)\s*\(/,
