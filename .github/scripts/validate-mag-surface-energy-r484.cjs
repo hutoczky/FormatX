@@ -32,7 +32,7 @@ const EXPECTED_MOBILE_FILTER = [
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [] };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [], idleWindows: [] };
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -40,7 +40,15 @@ function instrumentNativeFrames() {
     return states.get(gl);
   };
   addEventListener('formatx:coresurfacesweep', event => {
-    audit.events.push({ ...event.detail, at: performance.now() });
+    const at=performance.now();
+    const {phase,source}=event.detail||{};
+    audit.events.push({ ...event.detail, at });
+    if(source!=='autonomous')return;
+    if(phase==='end')audit.idleWindows.push({from:at,to:null,frames:0});
+    if(phase==='start'&&audit.idleWindows.length){
+      const last=audit.idleWindows[audit.idleWindows.length-1];
+      if(last.to===null)last.to=at;
+    }
   });
   for (const Type of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
     if (!Type) continue;
@@ -75,6 +83,12 @@ function instrumentNativeFrames() {
       const state = stateFor(this);
       if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas') && state.layer === 0 && state.depthWrite) {
         audit.frames++;
+        const gap=audit.idleWindows[audit.idleWindows.length-1];
+        // A native draw is idle work only if it occurs AFTER the previous
+        // autonomous pulse's end event and BEFORE the next pulse's start.
+        // CI may pause a one-second Playwright wait for 6 seconds; draws from
+        // the NEXT legitimate sweep must not be misclassified as idle.
+        if(gap&&gap.to===null)gap.frames++;
         audit.recent.push({at:Math.round(performance.now()),phase:state.phase,
           pulse:document.documentElement.dataset.fxCoreSurfacePulseR454||'',
           scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484||'',
@@ -165,12 +179,22 @@ async function verify(browser, name, viewport, mobile) {
     // No click, artificial API pulse, hover or pointer movement is used here.
     await page.waitForFunction(() => __magEnergyAudit.events.some(e => e.phase === 'end' && e.source === 'autonomous'), null, { timeout: 30000 });
     await page.waitForTimeout(600);
-    const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
     await page.waitForTimeout(1000);
-    report.idleFrames = await page.evaluate(before => __magEnergyAudit.frames - before, frameCount);
+    const idleRecord=await page.evaluate(()=>{
+      const a=window.__magEnergyAudit;
+      const first=a.idleWindows[0]||null;
+      if(!first)return null;
+      return {frames:first.frames,elapsedMs:(first.to??performance.now())-first.from,
+        ended:first.to!==null,windows:a.idleWindows.map(x=>({...x}))};
+    });
+    assert.ok(idleRecord&&idleRecord.elapsedMs>=600,
+      `${name}: no meaningful observed autonomous idle interval: ${JSON.stringify(idleRecord)}`);
+    report.idleFrames=idleRecord.frames;
+    report.idleWindows=idleRecord.windows;
     if(report.idleFrames>0){
       report.idleDiagnostic=await page.evaluate(()=>({
         events:__magEnergyAudit.events,
+        idleWindows:__magEnergyAudit.idleWindows,
         frames:__magEnergyAudit.recent.slice(-100),
         pulse:document.documentElement.dataset.fxCoreSurfacePulseR454,
         scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484,
