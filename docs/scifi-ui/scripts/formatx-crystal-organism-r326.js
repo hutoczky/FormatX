@@ -1970,8 +1970,17 @@
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
+      const measuredAspect=rect.width/Math.max(1,rect.height);
+      const changed=canvas.width!==w||canvas.height!==h||Math.abs(measuredAspect-aspect)>.001;
+      // R2055: ResizeObserver is also called for harmless ancestor paint and
+      // layout changes during the archive story. Such notifications are NOT a
+      // reason to wake the expensive native MAG between autonomous sweeps.
+      if(!changed){
+        root.dataset.fxCoreResizeIdleR2055='unchanged-size-no-gpu-wakeup';
+        return false;
+      }
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
-      width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
+      width=w;height=h;aspect=measuredAspect;gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
@@ -2445,7 +2454,7 @@
       if(paused){
         surfacePulseStart=-Infinity;
         root.dataset.fxCoreSurfacePulseR454='idle';
-        if(!disposed&&!contextLost&&resize())render(performance.now());
+        if(!disposed&&!contextLost){resize();render(performance.now());}
       }else schedule(1);
       scheduleSurfacePulse();
     }
@@ -2680,9 +2689,14 @@
     const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
+      const wasVisible=visible;
       visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
-      if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;}
-      scheduleSurfacePulse();
+      // A threshold callback while still visible should not create another
+      // native frame in the explicitly idle period. Scroll and interaction
+      // each have independent, deliberately bounded scheduling paths.
+      if(visible&&!wasVisible)schedule(1);
+      else if(!visible&&raf){cancelAnimationFrame(raf);raf=0;}
+      if(visible!==wasVisible)scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
     const sectionPhysiology={
