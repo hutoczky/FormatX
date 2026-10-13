@@ -106,23 +106,6 @@ async function evaluate(viewport,isMobile,browser){
   assert.ok(first.heroDisplay==='none'||first.heroVisibility==='hidden'||first.heroRectCount===0,
     'Old landing text is visibly competing with MAG: '+JSON.stringify(first));
   assert.ok(first.panel,'The first archival papyrus must be on screen: '+JSON.stringify(first));
-  const focusContract=await page.evaluate(()=>{
-    const root=document.documentElement;
-    const panels=[...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
-    const first=panels.find(p=>p.dataset.fxCinemaPanelActive==='true');
-    const next=panels.find(p=>p!==first);
-    if(!first||!next)return {prepared:false};
-    const original=first.querySelector('a[href],button:not([disabled])');
-    if(!(original instanceof HTMLElement))return {prepared:false};
-    original.focus({preventScroll:true});
-    const before=document.activeElement===original;
-    const previous=first.inert;
-    const originalNext=next.dataset.fxCinemaPanelActive;
-    return {prepared:true,before,wasActive:!previous,oldNext:originalNext};
-  });
-  assert.ok(focusContract.prepared&&focusContract.before,
-    'Expected original native HTML keyboard control to be focusable: '+JSON.stringify(focusContract));
-
   const proofContract=await page.evaluate(()=>{
     const all=[...document.querySelectorAll('.fx-award-proof[data-fx-award-proof]')];
     const loopCopy=document.querySelectorAll('.fx-loop-reference-proof').length;
@@ -409,6 +392,18 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
         &&chapterHandoff.marker.includes('/ 08'),
         'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
+      // Retain keyboard focus in the actual original control until the next
+      // source takes over; runtime must never leave it stranded in inert HTML.
+      const focusProbe=await page.evaluate(()=>{
+        const paper=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        const control=paper?.querySelector('a[href]:not([tabindex="-1"]),button:not([disabled])');
+        if(!(control instanceof HTMLElement))return {found:false};
+        control.focus({preventScroll:true});
+        return {found:true,focused:document.activeElement===control,
+          inert:paper.inert,tag:control.tagName};
+      });
+      if(focusProbe.found)assert.ok(focusProbe.focused&&!focusProbe.inert,
+        'Original live MAG control cannot take keyboard focus: '+JSON.stringify(focusProbe));
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
