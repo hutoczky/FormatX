@@ -403,9 +403,13 @@
             const heading=destination?.querySelector('h2,h3');
             const target=heading||destination;
             if(target instanceof HTMLElement){
+              // The destination was inert on the previous chapter. Activate
+              // before calling focus, independent of cinemaHosts loop order.
+              if(destination)destination.inert=false;
               if(!target.hasAttribute('tabindex'))target.setAttribute('tabindex','-1');
               target.focus({preventScroll:true});
-              root.dataset.fxArchiveFocusRestored='current-native-folio';
+              root.dataset.fxArchiveFocusRestored=
+                document.activeElement===target?'current-native-folio':'focus-unavailable';
             }else{
               document.activeElement?.blur?.();
               root.dataset.fxArchiveFocusRestored='safe-blur';
