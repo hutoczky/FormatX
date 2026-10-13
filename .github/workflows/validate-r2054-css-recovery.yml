@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
+      - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
   push:
     branches: [master]
@@ -14,6 +15,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - 'docs/scifi-ui/index.html'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
+      - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
   workflow_dispatch:
 
@@ -34,6 +36,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
           node --check .github/scripts/validate-live-mag-functional.cjs
           node --check .github/scripts/validate-r2054-css-recovery.cjs
+          node --check .github/scripts/validate-r2054-default-entry.cjs
       - name: Install browser
         run: |
           npm install --prefix "$RUNNER_TEMP/mag-r2054" --no-audit --no-fund playwright@1.62.0
@@ -53,3 +56,7 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
         run: node .github/scripts/validate-r2054-css-recovery.cjs
+      - name: Require visible original HTML papyrus on ordinary MAG entry
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/validate-r2054-default-entry.cjs
