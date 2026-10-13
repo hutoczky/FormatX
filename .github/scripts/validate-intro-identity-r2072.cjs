@@ -27,7 +27,7 @@ const OUTPUT='artifacts/r2072-intro-proof';
         page.on('pageerror',error=>errors.push(String(error.message)));
         // Genuine user-replay route: webdriver is deliberately allowed by
         // the original intro, never simulating an audit-only alternative.
-        await page.goto(ROOT+'?intro=1&r2072-cinematic-proof='+vp.name,
+        await page.goto(ROOT+'?intro=1&visualintro=1&r2072-cinematic-proof='+vp.name,
           {waitUntil:'domcontentloaded',timeout:60000});
         await page.waitForFunction(()=>
           document.documentElement.dataset.fxMagBirthLiveR533==='active',
@@ -68,13 +68,16 @@ const OUTPUT='artifacts/r2072-intro-proof';
             coreX,coreY,center,
             rect:rect?{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom}:null,
             viewport:{w:innerWidth,h:innerHeight},
-            realCTA:!!document.querySelector('#hero .hero-actions #hero-download')
+            realCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
+          actualFilmCanvas:!!film?.querySelector('canvas.fxb-particles:not([hidden])'),
+          renderer:root.dataset.fxMagBirthRendererR1360
           };
         });
         assert.equal(proof.title,'MAG // AI CORE');
         assert.equal(proof.sub,'ONLINE · LOCAL INTELLIGENCE');
         assert.ok(proof.introActive&&proof.labelCount===1&&proof.rendered
-          &&proof.opacity>.48&&proof.styleLoaded&&proof.realCTA,
+          &&proof.opacity>.48&&proof.styleLoaded&&proof.realCTA
+          &&proof.actualFilmCanvas&&proof.renderer!=='automation-handoff-lightweight',
           'System identity must appear inside ONE live physical film: '+JSON.stringify(proof));
         assert.equal(proof.shot,'inside-the-original-10s-film');
         assert.ok(proof.percentage>=.805&&proof.percentage<.95,
