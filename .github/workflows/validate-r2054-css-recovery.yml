@@ -11,6 +11,7 @@ on:
       - '.github/scripts/validate-intro-identity-r2072.cjs'
       - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
       - '.github/scripts/validate-intro-storyboard-r2073.cjs'
+      - '.github/scripts/capture-mag-intro-movies-r2077.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
@@ -26,6 +27,7 @@ on:
       - '.github/scripts/validate-intro-identity-r2072.cjs'
       - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
       - '.github/scripts/validate-intro-storyboard-r2073.cjs'
+      - '.github/scripts/capture-mag-intro-movies-r2077.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
@@ -51,6 +53,7 @@ jobs:
           node --check .github/scripts/validate-r2054-default-entry.cjs
           node --check .github/scripts/validate-intro-identity-r2072.cjs
           node --check .github/scripts/validate-intro-storyboard-r2073.cjs
+          node --check .github/scripts/capture-mag-intro-movies-r2077.cjs
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js
@@ -86,6 +89,17 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
         run: node .github/scripts/validate-intro-storyboard-r2073.cjs
+      - name: Record the actual 10-second R2077 Three.js cinema in desktop and mobile video
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/capture-mag-intro-movies-r2077.cjs
+      - name: Preserve actual R2077 cinematic playback files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2077-real-webgl-intro-videos
+          path: artifacts/r2077-real-mag-movie/FormatX_MAG_R2077_*.webm
+          if-no-files-found: warn
       - name: Save R2073 3D storyboard images
         if: always()
         uses: actions/upload-artifact@v4
