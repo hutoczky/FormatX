@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2059-keyboard-focus-continuity';
+  const VERSION='cinematic-archive-r2073-single-world-director-optics';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -681,19 +681,49 @@
       window.FormatXLivingCore?.requestRender?.(1);
     }
   }
+  // R2073: the visitor never changes cameras or enters a second WebGL world.
+  // Native scroll drives a single reversible director's rail. On fine pointers
+  // a bounded inertial shift changes the actual 3D view, never the real HTML.
+  let pointerX=0,pointerY=0,pointerTargetX=0,pointerTargetY=0,pointerRaf=0;
+  const finePointer=matchMedia('(hover: hover) and (pointer: fine)');
+  function tickDirectorPointer(){
+    pointerRaf=0;
+    if(disposed||document.hidden||reduced.matches||!archiveActive)return;
+    const dx=pointerTargetX-pointerX,dy=pointerTargetY-pointerY;
+    pointerX+=dx*.17;
+    pointerY+=dy*.17;
+    // Only the existing canonical renderer repaints. No layout measurements,
+    // duplicate requestAnimationFrame scene, or scroll event is synthesized.
+    window.FormatXLivingCore?.requestRender?.(1);
+    if(Math.abs(dx)>.002||Math.abs(dy)>.002)
+      pointerRaf=requestAnimationFrame(tickDirectorPointer);
+  }
+  function trackDirectorPointer(event){
+    if(disposed||!archiveActive||reduced.matches||!finePointer.matches||event.pointerType==='touch')return;
+    pointerTargetX=clamp(event.clientX/Math.max(1,innerWidth)*2-1,-1,1);
+    pointerTargetY=clamp(event.clientY/Math.max(1,innerHeight)*2-1,-1,1);
+    if(!pointerRaf)pointerRaf=requestAnimationFrame(tickDirectorPointer);
+  }
+  function centerDirectorPointer(){
+    pointerTargetX=0;pointerTargetY=0;
+    if(!pointerRaf&&!disposed&&archiveActive)pointerRaf=requestAnimationFrame(tickDirectorPointer);
+  }
   class CameraDirector {
     static forScene(scene,p){
-      // The camera lives in ONE archive, so chapter changes must not teleport
-      // it. Absolute native document scroll makes the track reversible.
-      const distance=scrollY/Math.max(1,innerHeight);
-      const approach=smooth((p-.16)/.69);
-      // One continuous world-space dolly/orbit track. Every component depends
-      // on absolute scroll, not discrete chapter indices (no camera teleport).
-      const orbit=Math.sin(distance*.18)*.085+Math.sin(distance*.37)*.026;
-      const dolly=Math.sin(distance*.13)*.11;
-      const lift=Math.sin(distance*.12)*.035;
-      return [orbit,lift+mix(-.025,.027,approach),
-        dolly+mix(-.035,.085,approach)];
+      // Deliberate long-take choreography: no index-locked cuts or position
+      // reset when any of the eight real archival chapters crosses a boundary.
+      // A multi-frequency rail gives the film a slow approach, elevation and
+      // orbit without shaking or moving readable native HTML content.
+      const distance=Math.max(0,scrollY/Math.max(1,innerHeight));
+      const rail=distance*.34;
+      const orbit=Math.sin(rail*.46)*.104+Math.sin(rail*.91+.3)*.023;
+      const lift=Math.sin(rail*.35)*.049+Math.sin(rail*.72)*.012-.014;
+      const dolly=Math.sin(rail*.31)*.137+Math.sin(rail*.67)*.029;
+      return [
+        clamp(orbit+pointerX*.031,-.20,.20),
+        clamp(lift+pointerY*.018,-.12,.12),
+        clamp(dolly,-.19,.19)
+      ];
     }
   }
   function cubeGeometry(){
@@ -835,6 +865,19 @@ void main(){
              *smoothstep(.07,.13,vUv.x)*(1.0-smoothstep(.87,.93,vUv.x));
    col+=uColor*(rim*.31+guide*.060+micro*.037);
    col+=vec3(1.0,.98,.91)*spec*.11;
+   // R2073 / Lusion-inspired optical response: subtly wavelength-separated
+   // thin-film reflection from the same physically curved glass. The spectrum
+   // is angle-dependent and edge-weighted, not a second glowing DOM layer.
+   float glancing=pow(1.0-facing,2.0);
+   float filmPhase=16.0*facing+2.1*vUv.x-1.4*vUv.y;
+   vec3 filmSpectral=vec3(
+     0.5+0.5*cos(filmPhase),
+     0.5+0.5*cos(filmPhase+2.0943951),
+     0.5+0.5*cos(filmPhase+4.1887902)
+   );
+   col+=filmSpectral*(.010+.055*glancing)*(.14+.86*glancing);
+   float clearCoat=pow(max(0.0,dot(reflect(-L,N),V)),48.0);
+   col+=vec3(.88,.96,1.0)*clearCoat*.065*(.35+.65*ndl);
    a=mix(a,.91,rim);
    a+=fresnel*.045;
  }else if(uFiber>.5){
@@ -993,8 +1036,8 @@ void main(){
       const bend=mix(.44,.006,smooth((pro-.46)/.30));
       const rotation=(1-align)*(side*.74)+align*.02;
       const alpha=reveal*(1-release);
-      if(root.dataset.fxArchiveOptics!=='ggx-curved-normal-analytic-contact-aerial-fwidth')
-        root.dataset.fxArchiveOptics='ggx-curved-normal-analytic-contact-aerial-fwidth';
+      if(root.dataset.fxArchiveOptics!=='ggx-curved-glass-thinfilm-clearcoat-contact-fwidth-r2073')
+        root.dataset.fxArchiveOptics='ggx-curved-glass-thinfilm-clearcoat-contact-fwidth-r2073';
       root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
         pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
@@ -1294,6 +1337,11 @@ void main(){
     root.dataset.fxArchiveStopReason='lifecycle-stop';
     if(raf)cancelAnimationFrame(raf);
     if(domRaf)cancelAnimationFrame(domRaf);
+    if(pointerRaf)cancelAnimationFrame(pointerRaf);
+    pointerRaf=0;
+    removeEventListener('pointermove',trackDirectorPointer);
+    removeEventListener('pointerleave',centerDirectorPointer);
+    removeEventListener('blur',centerDirectorPointer);
     domRaf=0;
     sceneObserver?.disconnect();
     sceneObserver=null;
@@ -1364,6 +1412,9 @@ void main(){
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
+    addEventListener('pointermove',trackDirectorPointer,{passive:true});
+    addEventListener('pointerleave',centerDirectorPointer,{passive:true});
+    addEventListener('blur',centerDirectorPointer,{passive:true});
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
@@ -1383,7 +1434,9 @@ void main(){
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples,domComposes};},
+      cpuSamples:PerformanceManager.samples,domComposes,
+      cameraTrack:'single-reversible-scroll-rail-r2073',
+      cameraPointer:[Number(pointerX.toFixed(3)),Number(pointerY.toFixed(3))]};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
