@@ -55,8 +55,8 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2045 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261012-r2050-surface-sweep-endpoint'),
-    'R2050 native sweep endpoint renderer loader is stale and may serve the old WebGL timing');
+  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261014-r2075-machined-iris-native-optics'),
+    'R2075 native WebGL 3D MAG renderer loader is stale and may serve pre-iris material');
 }
 assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261012-r2050-surface-sweep-endpoint'),
   'Motion owner may boot the old cached MAG runtime');
