@@ -1395,3 +1395,13 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* production-r2049-inactive-original-folio-layout-isolation */
+
+/* R2056: keyboard users get a restrained, clearly visible landing state when
+   the MAG hands them the next original HTML folio. No pointer-only decoration. */
+html[data-fx-archive-cinema="active"]
+.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+:is(h2,h3,[role="heading"])[tabindex="-1"]:focus-visible {
+  outline:2px solid rgba(172,236,250,.88);
+  outline-offset:5px;
+  border-radius:4px;
+}
