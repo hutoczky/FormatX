@@ -470,6 +470,8 @@ async function evaluate(viewport,isMobile,browser){
   console.log('ARCHIVE_VISIBLE_HANDOFF_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',handoff}));
 
   assert.equal(native.renderer,'shared-webgl2');
+  assert.equal(native.optics,'ggx-curved-normal-analytic-contact-aerial-fwidth',
+    'The actual shared WebGL renderer did not activate R2058 curved glass optics');
   // Existing organism technical panels remain genuine working UI; opening
   // pricing must keep the same MAG renderer visible behind its glass console.
   await page.evaluate(()=>window.scrollTo({top:document.querySelector('#pricing')?.offsetTop||0,behavior:'instant'}));
