@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - '.github/scripts/validate-deferred-css-recovery-r2054.cjs'
+      - '.github/scripts/validate-live-mag-functional.cjs'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
       - '.github/scripts/validate-r2051-deferred-loop-css.cjs'
@@ -27,6 +28,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - '.github/scripts/validate-deferred-css-recovery-r2054.cjs'
+      - '.github/scripts/validate-live-mag-functional.cjs'
       - 'billing-worker/src/production-entry.js'
       - 'docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js'
       - '.github/scripts/validate-r2051-deferred-loop-css.cjs'
@@ -69,6 +71,7 @@ jobs:
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
           node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
           node --check .github/scripts/validate-deferred-css-recovery-r2054.cjs
+          node --check .github/scripts/validate-live-mag-functional.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
