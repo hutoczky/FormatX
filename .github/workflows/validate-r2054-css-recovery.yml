@@ -1,0 +1,55 @@
+name: Validate MAG cinematic CSS recovery R2054
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/validate-live-mag-functional.cjs'
+      - '.github/scripts/validate-r2054-css-recovery.cjs'
+      - '.github/workflows/validate-r2054-css-recovery.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/validate-r2054-css-recovery.cjs'
+      - '.github/workflows/validate-r2054-css-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  css-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check script syntax
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --check .github/scripts/validate-live-mag-functional.cjs
+          node --check .github/scripts/validate-r2054-css-recovery.cjs
+      - name: Install browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/mag-r2054" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/mag-r2054/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve actual website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/r2054-server.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/r2054-server.log"
+          exit 1
+      - name: Require real recovery and applied CSS in phone + desktop Chromium
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/validate-r2054-css-recovery.cjs
