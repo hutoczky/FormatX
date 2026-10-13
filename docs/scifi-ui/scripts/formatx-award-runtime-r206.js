@@ -39,17 +39,6 @@
     document.head.appendChild(script);
   }
 
-  /* R1964: the CI intentionally audits the real URL, so Chrome-Lighthouse is
-     detected by UA rather than requiring an audit-only query string. Keep the
-     same production DOM/content but do not re-activate deferred 3D/regression
-     enhancement work inside the metric window. */
-  const auditMode = /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || new URLSearchParams(location.search).get('lighthouse') === '1';
-  if (auditMode) {
-    root.dataset.fxAwardRuntimeMode = 'audit-passive-r1964';
-    return;
-  }
-
   ensureMobileRegressionR310();
 
   const STYLE_URL = '/scifi-ui/styles/formatx-wda-hardening-r198.css?v=20260824-native-orb-r250';

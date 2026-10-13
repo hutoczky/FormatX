@@ -4,14 +4,11 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2053-batched-native-scroll-layout';
+  const VERSION='cinematic-archive-r2054-visitor-runtime-parity';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
-  const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const force=params.get('archive')==='1';
   const requestedHtmlFallback=params.get('archive')==='off';
-  const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const mix=(a,b,t)=>a+(b-a)*t;
   const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -1137,7 +1134,7 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    if(disposed||reduced.matches||requestedHtmlFallback)return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1240,7 +1237,6 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,

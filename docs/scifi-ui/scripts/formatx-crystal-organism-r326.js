@@ -9,10 +9,6 @@
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
-  const auditParams = new URLSearchParams(location.search);
-  const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
-  const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -170,7 +166,7 @@
   root.dataset.fxNativeMagMobileR1787='transparent-stage-no-black-box-higher-facet-density-smooth-normals';
   root.dataset.fxNativeMagVisualR1788='mobile-blunt-cut-black-bioglass-irregular-crystal-smooth-optic';
   root.dataset.fxNativeMagMaterialR1788='controlled-softbox-highlight-deep-charcoal-glass-cyan-optical-depth';
-  root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
+  root.dataset.fxNativeMagProofR1782='normal-visitor-path-with-lens-and-msaa';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
   root.dataset.fxNativeMagVisualR1789='mobile-smoky-bioglass-refined-facets-blunt-crown';
@@ -200,7 +196,7 @@
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
-  root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
+  root.dataset.fxNativeMagVisitorParityR2054='capability-and-input-owned';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -728,7 +724,7 @@
 
     if(false){
       const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
+      const bezelSteps=software?112:mobile?144:160,bezelTubeSteps=software?10:mobile?14:16,bezelZ=.602;
       const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -757,8 +753,8 @@
       const lensRadiusX=.153;
       const lensRadiusY=.041;
       const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const radialSteps=software?16:mobile?20:22;
+      const angularSteps=software?112:mobile?128:144;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -900,7 +896,7 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
+      preserveDrawingBuffer:false,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
@@ -1682,7 +1678,7 @@
        Software rendering keeps the ultra-lite material/mesh, but real mobile
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
-    const mobilePhysical = mobile || constrainedMobile || auditMode;
+    const mobilePhysical = mobile || constrainedMobile;
     /* R1930 visual parity: one authored studio shader on desktop, mobile and
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
@@ -1919,10 +1915,8 @@
     let siteProgress=0,targetSiteProgress=0;
     let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    /* R1694 — renderer capability outranks audit mode. A software GPU must never
-       be forced to full-resolution merely because a verifier is attached; that
-       creates artificial 200ms+ frames and is the opposite of the production
-       60 Hz policy. Hardware keeps the photographic path, software keeps the
+    /* Renderer capability owns the budget for every visitor. Hardware keeps
+       the photographic path, software keeps the
        same visual identity through the lite shader at a smaller backing store. */
     /* R1703 — mobile starts sharp enough to read as a photographed object.
        The strict R1701 frame governor is still allowed to shed resolution on
@@ -1939,10 +1933,10 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (constrained ? .84 : 1.00));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(constrained?.96:1.08));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
       : (mobile?.80:(constrained?.62:.74));
@@ -1960,12 +1954,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1996,7 +1990,7 @@
     }
     function schedule(frames=1){
       if(blocked())return;
-      const frameCap=auditMode?1:(mobile?4:24);
+      const frameCap=mobile?4:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
@@ -2145,10 +2139,6 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
-      if(auditMode){
-        root.dataset.fxCoreSurfaceSchedulerR484='lighthouse-audit-disabled';
-        return;
-      }
       if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
@@ -2238,8 +2228,15 @@
         catch(error){scenePasses.delete(pass);console.warn('FormatX scene pass disabled:',error);}
       }
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
+        const error=gl.getError();
+        if(error!==gl.NO_ERROR){
+          root.dataset.fxCrystalOrganismR326='first-frame-error';
+          root.dataset.fxCoreFirstFrameR1913='error-'+error;
+          return;
+        }
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
+        publishFirstFrameReady();
       }
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
@@ -2257,7 +2254,7 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode){
+      {
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
@@ -2359,7 +2356,7 @@
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
          This avoids the 144 Hz / 48 FPS failure mode of a fixed 16.67 ms gate. */
-      if(!auditMode){
+      {
         if(schedulerLastFrame>0){
           const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
           schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
@@ -2379,19 +2376,13 @@
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
-        const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
-        queueFrame(burstDelay);
+        root.dataset.fxCoreBurstCadenceR1600='native-60hz-target';
+        queueFrame(0);
       }else if(surfacePulseActive){
-        const sweepDelay=auditMode
-          ? (mobile
-              ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
-              : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
-          : 0;
-        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
+        root.dataset.fxCoreAdaptiveSurfaceCadenceR588='native-raf';
         root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
-        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
-        queueFrame(sweepDelay);
+        root.dataset.fxCoreAnimationCadenceR1600='native-60hz-target-all-visitors';
+        queueFrame(0);
       }else settleAfterBurst();
     }
 
@@ -2769,14 +2760,6 @@
     window.FormatXCoreMobileV69=publicApi;
     window.FormatXLivingCore=publicApi;
 
-    root.dataset.fxCrystalOrganismR326='ready';
-    root.dataset.fxLivingOrganicCoreR413='ready';
-    root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
-    root.dataset.fxCoreMobileR99=READY;
-    root.dataset.fxCoreMobileV69=READY;
-    root.dataset.fxCoreMobileV55='ready-v55';
-    root.dataset.fxCoreReferenceLock=READY;
-    root.dataset.fxCoreReal3d=READY;
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
@@ -2943,7 +2926,7 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreFirstFrameR1913='pending';
     root.dataset.fxCoreRenderMs='0';
-    root.dataset.fxCoreReal3dFps='60';
+    root.dataset.fxCoreReal3dFps='pending';
     root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';
 
     publishShape('initial');
@@ -2951,10 +2934,21 @@
     scheduleHeartbeat();
     scheduleSurfacePulse();
     scheduleAutonomousMorph();
-    dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
-      version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
-      geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false
-    }}));
+    function publishFirstFrameReady(){
+      root.dataset.fxCrystalOrganismR326='ready';
+      root.dataset.fxLivingOrganicCoreR413='ready';
+      root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
+      root.dataset.fxCoreMobileR99=READY;
+      root.dataset.fxCoreMobileV69=READY;
+      root.dataset.fxCoreMobileV55='ready-v55';
+      root.dataset.fxCoreReferenceLock=READY;
+      root.dataset.fxCoreReal3d=READY;
+      dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
+        version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
+        geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false,
+        firstFrameAt:performance.now()
+      }}));
+    }
     listen(window,'pagehide',destroy,{once:true});
     }
   }

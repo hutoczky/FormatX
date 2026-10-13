@@ -19,19 +19,13 @@
   const VISUAL_PROOF = PARAMS.get('visualintro') === '1';
   const VISUAL_FRAME = Number.parseFloat(PARAMS.get('introframe') || '');
   const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
-  const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
-  if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
-  const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
-  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
-  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
+  const SOFTWARE_SAFE = CONSTRAINED;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
      The R533/critical birth styles are normally deferred for first-paint cost,
      but ?intro=1 / visualintro must own their geometry immediately so the
@@ -64,16 +58,16 @@
      source for compatibility validators, but is removed before its deferred
      controller executes, so users never see two intros back-to-back. */
   document.getElementById('formatx-event-horizon')?.remove();
-  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : (seen && !FORCE ? 'session-skip' : 'active');
+  ROOT.dataset.fxMagBirthOwnerR533 = seen && !FORCE && !VISUAL_PROOF ? 'session-skip' : 'active';
   if (ROOT.dataset.fxMagBirthOwnerR533 === 'active') {
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthOwnershipR1673='genesis-contract-published-before-visible-live-shell';
   }
 
-  if (!FORCE && (seen || AUTOMATION)) {
+  if (!FORCE && !VISUAL_PROOF && seen) {
     prepaintOverlay?.remove();
-    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'session-skip';
+    ROOT.dataset.fxMagBirthLiveR533 = 'session-skip';
     return;
   }
 
@@ -788,23 +782,13 @@
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
-    if(AUTOMATION && FORCE && !VISUAL_PROOF){
-      ROOT.dataset.fxMagBirthRendererR1360='automation-handoff-lightweight';
-      canvas.hidden=true;
-      return;
-    }
-    if(PROOF_REFERENCE_RENDERER){
-      ROOT.dataset.fxMagBirthProofRendererR1407='reference-film-no-swiftshader-block';
-      startR649Fallback();
-      return;
-    }
     /* R1727c — never force a heavyweight continuous Three intro onto a
        constrained CPU/GPU path. The existing R649 cinematic keeps the same
-       10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
-       proof frames remain on the Three owner so design evidence stays exact. */
-    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
-      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
-      overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
+       10 s story and visual handoff while avoiding >50 ms frame tasks. The same
+       capability policy also applies when the timeline is previewed. */
+    if(SOFTWARE_SAFE){
+      ROOT.dataset.fxMagBirthRendererR1729='constrained-reference-film';
+      overlay.dataset.fxRenderer='fallback-constrained';
       startR649Fallback();
       if(filmRenderer)filmRenderer.resize?.();
       return;
@@ -999,7 +983,7 @@
     /* R1622 — stable display divisor with a 60 FPS floor target.
        The accepted render cadence is always an integer divisor of the actual
        display refresh and never deliberately below 60 Hz on >=60 Hz panels. */
-    if(!(AUTOMATION&&FORCE)){
+    {
       if(schedulerLastFrame>0){
         const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
         schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
@@ -1054,7 +1038,7 @@
     if(r<1 || visiblePhase<4){
       /* Software fallback keeps the 10 s semantic timeline, but the expensive
          raster only changes at the five cinematic phase boundaries. */
-      const cadence=softwareFallbackActive?125:((AUTOMATION&&FORCE)?72:0);
+      const cadence=softwareFallbackActive?125:0;
       queueRender(cadence);
       return;
     }
@@ -1062,19 +1046,6 @@
     if(MOBILE && FORCE && !nativeReady && now-startedAt<10500){
       requestCoreWarmup('forced-mobile-handoff-wait');
       ROOT.dataset.fxMagBirthHandoffR623='waiting-for-native-core';
-      queueRender(120);
-      return;
-    }
-    /* R1553: automated mobile skip validation must be able to focus the real
-       skip control after the native MAG becomes ready. Keep the completed film
-       mounted briefly in webdriver runs instead of racing its teardown. */
-    if(VALIDATED_SKIP_MODE && nativeReady){
-      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-validated-skip-r1557';
-      queueRender(120);
-      return;
-    }
-    if(MOBILE && FORCE && AUTOMATION && nativeReady && now-startedAt<10500){
-      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-automation-handoff';
       queueRender(120);
       return;
     }
@@ -1117,12 +1088,6 @@
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
     sizeCanvas();
-    if(VALIDATED_SKIP_MODE){
-      /* Publish the warmup latch immediately in the forced skip contract.
-         The runtime loader consumes the latch even if it loads after this shell. */
-      requestCoreWarmup('validated-skip-bootstrap-r1560');
-      ROOT.dataset.fxMagBirthSkipBootstrapR1560='canonical-mag-warmup-requested';
-    }
     ROOT.dataset.fxMagBirthRenderClockR631='superseded-by-r1601-adaptive-60hz';
     ROOT.dataset.fxMagBirthRenderClockR649='adaptive-60hz-target-fallback-canvas';
     ROOT.dataset.fxMagBirthPerformanceR1541='superseded-by-r1601-adaptive-60hz';
@@ -1136,10 +1101,9 @@
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
     ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
-    ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
+    ROOT.dataset.fxMagBirthHandoffR1553='normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
-    ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
-    ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
+    ROOT.dataset.fxMagBirthHandoffR1557='normal-product-handoff';
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
         try{clearTimeout(timer);}catch(_){}
@@ -1226,14 +1190,14 @@
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
         }));
       }catch(_){}
-    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
+    },DURATION+550);
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path
     // can never strand the cinematic overlay beyond the finished shot.
     hardFinishTimer=window.setTimeout(
-      ()=>finish(VALIDATED_SKIP_MODE?'validated-skip-timeout-r1557':'bounded-failsafe-r652'),
-      VALIDATED_SKIP_MODE ? 35000 : (REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220))
+      ()=>finish('bounded-failsafe-r652'),
+      REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220)
     );
 
     if(REDUCED){

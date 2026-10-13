@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261013-r2053-batched-native-folio-scroll
-base_master=d548faea15096b80d63545c7cb53223fb9a30e4d
-purpose=Coalesce original native HTML archive panel geometry measurements into one read-only pass BEFORE any per-card style writes. Eliminate duplicate eight-chapter getBoundingClientRect pass from deferred GPU RAF, because synchronous scroll already selected and docked the correct stage. One canonical MAG WebGL2 renderer, eight distinct shelves, original functional CTA/technical panels/proof and GPU zero-idle frame gate remain unchanged.
-validation=Must pass Chromium eight-scene scroll mobile+desktop, no-occlusion, keyboard/technical native HTML and no-WebGL/reduced-motion; 32-sample real synchronous scroll input-path profile recorded. Production candidate + security + Lighthouse strict gates still required.
-limits=This source-level performance optimization is not yet a measured improvement in Lighthouse score or real hardware FPS; Lighthouse >=95 goal remains unproven, no award-grade comparison claim.
+token=20261013-r2054-visitor-runtime-parity
+base_master=1dd0d18aa8b1847b033b1fc61668ab4a794e3a7e
+purpose=Preserve the R2052 zero-idle MAG sweep and R2053 batched archive geometry while removing automated-client and proof-query runtime substitutions. Every first visit uses the same intro, native MAG geometry/material, autonomous surface energy, archive, sensory and scroll lifecycle. Publish native readiness only after a successful first WebGL draw.
+validation=Local source contracts, 60 prepaint identity comparisons, JavaScript/YAML syntax, source/Worker CSP and cache parity passed on the R2053 base. Chromium visitor/webdriver/Lighthouse identity comparisons, Firefox, exact first-visit intro duration and six strict Lighthouse measurements require CI evidence on this candidate.
+limits=Draft candidate, not approved for production. The inherited 10-second introductory story violates the original mobile 1180-1450ms and desktop 1350-1650ms duration contract. Full visual, performance, responsive, worker/fallback and production SHA certification remains incomplete.

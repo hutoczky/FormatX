@@ -5,9 +5,6 @@
   if (ROOT.dataset.fxAiCoreIdentityR1951) return;
   ROOT.dataset.fxAiCoreIdentityR1951 = 'armed';
 
-  const PARAMS = new URLSearchParams(location.search);
-  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1' || /Chrome-Lighthouse/i.test(navigator.userAgent || '');
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
   const MOBILE = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let shown = false;
@@ -26,7 +23,7 @@
   }
 
   function showIdentity(source = 'magbirthcomplete') {
-    if (shown || AUTOMATION || document.hidden) return;
+    if (shown || document.hidden) return;
     shown = true;
     clearTimers();
     removeExisting();
