@@ -2100,6 +2100,16 @@
         // travel for the remaining ~700 ms. No new context, hidden interval
         // or continuous idle renderer is created.
         if(!blocked()&&Number.isFinite(surfacePulseStart)){
+          // R2052: absorb any LOD/quality-induced canvas resize into this
+          // existing final surface-pulse frame. A resize timer left pending
+          // after the sweep can otherwise wake the MAG during its idle gap.
+          if(qualityResizeTimer){
+            clearTimeout(qualityResizeTimer);
+            delayed.delete(qualityResizeTimer);
+            qualityResizeTimer=0;
+            resize();
+            root.dataset.fxCoreSweepQualityResizeR2052='coalesced-in-final-frame';
+          }
           const finish=Math.min(performance.now(),surfacePulseStart+SURFACE_PULSE_WINDOW_MS-1);
           if(finish>surfacePulseStart)render(finish);
           root.dataset.fxCoreSweepEndpointR2050='rendered-native-final-phase';
@@ -2109,6 +2119,15 @@
         surfacePulseStart=-Infinity;
         burstFrames=0;
         if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
+        // The final render can itself trip the adaptive pixel governor, so
+        // flush its callback too before entering the strict zero-RAF state.
+        // Next genuine interaction or autonomous sweep recalculates quality.
+        if(qualityResizeTimer){
+          clearTimeout(qualityResizeTimer);
+          delayed.delete(qualityResizeTimer);
+          qualityResizeTimer=0;
+          root.dataset.fxCoreSweepQualityResizeR2052='discarded-after-final-frame';
+        }
         if(raf){cancelAnimationFrame(raf);raf=0;}
         settleAfterBurst();
         root.dataset.fxCoreSurfacePulseR454='idle';
