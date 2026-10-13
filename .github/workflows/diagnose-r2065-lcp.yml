@@ -1,0 +1,44 @@
+name: Diagnose R2065 desktop LCP paint
+on:
+  push:
+    branches:
+      - exp/r2065-desktop-lcp-probe-20261013
+    paths:
+      - .github/scripts/diagnose-r2065-lcp.cjs
+      - .github/workflows/diagnose-r2065-lcp.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sample-lcp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Playwright
+        run: |
+          mkdir -p "$RUNNER_TEMP/formatx-r2065"
+          cd "$RUNNER_TEMP/formatx-r2065"
+          npm install --no-save --no-package-lock playwright@1.62.0
+          npx playwright install --with-deps chromium
+          echo "NODE_PATH=$RUNNER_TEMP/formatx-r2065/node_modules" >> "$GITHUB_ENV"
+      - name: Serve source pages
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-r2065.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .2
+          done
+          exit 1
+      - name: Measure actual text paint and late resource transitions
+        run: node .github/scripts/diagnose-r2065-lcp.cjs
+      - name: Publish diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2065-lcp-evidence
+          path: artifacts/r2065-lcp-probe/
+          if-no-files-found: warn
