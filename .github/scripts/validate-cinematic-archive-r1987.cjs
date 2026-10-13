@@ -88,6 +88,33 @@ async function evaluate(viewport,isMobile,browser){
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
+  // R2064 genuine late-WebGL first-visit regression. A renderer becoming
+  // ready at scrollY=0 must not erase the original hero or download CTA.
+  // Tested on the real 3D path, never a special audit-only CSS mode.
+  await page.waitForTimeout(420);
+  const home=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const hero=document.querySelector('#hero .hero-copy');
+    const title=document.querySelector('#hero-title');
+    const cta=document.querySelector('#hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'
+      &&node.getClientRects().length>0;
+    return {scrollY,mode:root.dataset.fxArchiveCinema,
+      continuity:root.dataset.fxArchiveHomeContinuity,hero:visible(hero),
+      title:visible(title),download:visible(cta),
+      focusable:!cta?.closest('[inert]'),renderer:root.dataset.fxArchiveExperience};
+  });
+  assert.ok(home.scrollY<8&&home.mode!=='active'
+    &&home.hero&&home.title&&home.download&&home.focusable,
+    'R2064: delayed real WebGL must never blank the original hero: '+JSON.stringify(home));
+  console.log('ARCHIVE_LATE_HOME_HERO_REMAINS_VISIBLE_PASS',JSON.stringify(home));
+  await page.evaluate(()=>{
+    const scene=window.FormatXArchiveExperience?.scenes?.[0];
+    const node=scene&&document.querySelector('[data-fx-archive-scene="'+scene.key+'"]');
+    const host=node?.closest('main#main-content > section');
+    (host||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
   const first=await page.evaluate(()=>{
     const root=document.documentElement;
