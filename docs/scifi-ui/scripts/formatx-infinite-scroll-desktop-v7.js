@@ -102,15 +102,48 @@
 
   function ensureStyle() {
     const existing=document.querySelector('link[data-fx-seamless-loop-style]');
+    const resource='/scifi-ui/styles/formatx-seamless-loop.css';
+    // Single owner for the seamless-loop stylesheet. A stale Worker-injected
+    // link used to race this lazy loader, occasionally aborting a request and
+    // keeping Lighthouse on a render-blocking CSS path unnecessarily.
+    function wire(link,retry=false){
+      if(link.dataset.fxSeamlessCssBound==='true')return;
+      link.dataset.fxSeamlessCssBound='true';
+      link.addEventListener('load',()=>{
+        root.dataset.fxSeamlessCssState='loaded';
+        scheduleGeometryRefresh();
+      },{once:true});
+      link.addEventListener('error',()=>{
+        if(retry){
+          root.dataset.fxSeamlessCssState='failed-after-retry';
+          return;
+        }
+        // Transient edge/network failures get one genuine retry. A missing
+        // resource is not reported ready, and existing HTML scrolling remains
+        // fully native even if both attempts fail.
+        root.dataset.fxSeamlessCssState='retrying';
+        const replacement=document.createElement('link');
+        replacement.rel='stylesheet';
+        replacement.href=resource+'?v=20261013-r2051-single-owner-retry';
+        replacement.dataset.fxSeamlessLoopStyle='true';
+        replacement.dataset.fxSeamlessCssRetry='true';
+        wire(replacement,true);
+        link.replaceWith(replacement);
+      },{once:true});
+    }
     if(existing instanceof HTMLLinkElement){
-      if(!existing.sheet)existing.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
+      wire(existing,existing.dataset.fxSeamlessCssRetry==='true');
+      if(existing.sheet){
+        root.dataset.fxSeamlessCssState='loaded';
+        scheduleGeometryRefresh();
+      }
       return;
     }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260924-r1715-idle-geometry-refresh';
-    link.dataset.fxSeamlessLoopStyle = 'true';
-    link.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href=resource+'?v=20261013-r2051-single-owner';
+    link.dataset.fxSeamlessLoopStyle='true';
+    wire(link);
     document.head.appendChild(link);
   }
 
