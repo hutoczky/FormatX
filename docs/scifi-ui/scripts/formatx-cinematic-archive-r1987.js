@@ -394,7 +394,11 @@
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
         if(!active&&panel.contains(document.activeElement))transferKeyboardFocus=true;
-        if(panel.inert===active)panel.inert=!active;
+        // Before the first real shelf enters the viewport, the original site
+        // must remain fully interactive; an unpresented archive must not
+        // silently mark the existing semantic sections inert.
+        const shouldBeInert=enabled&&!active;
+        if(panel.inert!==shouldBeInert)panel.inert=shouldBeInert;
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
         if(active){
@@ -1153,10 +1157,19 @@ void main(){
   function selectLiveChapter(){
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
-    // From the moment the intro ends, the MAG owns the page. Do not leave the
-    // old landing page visible for a whole first viewport of scrolling.
-    // The same native scrolling and eight source anchors remain intact.
-    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
+    // R2064: keep the REAL first-visit hero, CTAs and MAG readable at scroll=0.
+    // Previously simply registering WebGL2 made the nearest (far offscreen)
+    // shelf "active", hiding the complete hero around 12s after load.
+    // Handoff starts only when the FIRST real source approaches the reading
+    // viewport. The single original renderer and all eight shelf documents
+    // remain prepared and take over naturally as the visitor scrolls.
+    const first=scenes[0]?.scrollAnchor||scenes[0]?.node;
+    const firstTop=first?.getBoundingClientRect().top??Infinity;
+    const atFirstRealShelf=firstTop<=innerHeight*.86;
+    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'
+      &&next&&atFirstRealShelf);
+    root.dataset.fxArchiveHomeContinuity=atFirstRealShelf
+      ?'real-native-shelf-approaching':'original-hero-readable';
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
