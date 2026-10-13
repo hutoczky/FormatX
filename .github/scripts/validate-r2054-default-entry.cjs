@@ -40,10 +40,12 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
         &&getComputedStyle(node).visibility==='visible'&&node.getClientRects().length>0;
       return {scrollY,cinema:document.documentElement.dataset.fxArchiveCinema,
         heroVisible:visible(hero),ctaVisible:visible(cta),focusable:!cta?.closest('[inert]'),
+        ctaOnOriginalHero:!!document.querySelector('#hero .hero-actions')?.contains(cta),
+        ctaOwner:document.documentElement.dataset.fxArchiveCtaLane,
         continuity:document.documentElement.dataset.fxArchiveHomeContinuity};
     });
     assert.ok(entry.scrollY<8&&entry.cinema!=='active'&&entry.heroVisible
-      &&entry.ctaVisible&&entry.focusable,
+      &&entry.ctaVisible&&entry.focusable&&entry.ctaOnOriginalHero,
       'R2064 normal first-visit hero disappeared during delayed MAG readiness: '+JSON.stringify(entry));
     console.log('R2064_NORMAL_HOME_CONTINUITY_PASS',JSON.stringify({viewport:c.label,...entry}));
     await page.evaluate(()=>{
