@@ -1996,6 +1996,14 @@
     }
     function schedule(frames=1){
       if(blocked())return;
+      // Native trace only in the explicit test query; no production stack
+      // collection or ongoing idle instrumentation.
+      if(surfaceEnergyFunctionalCheck){
+        const trace=window.__magR2053ScheduleTrace||(window.__magR2053ScheduleTrace=[]);
+        trace.push({at:Math.round(performance.now()),duringPulse:Number.isFinite(surfacePulseStart),
+          burstFrames,frames,stack:(new Error()).stack?.split('\\n').slice(1,4).join(' | ')});
+        if(trace.length>80)trace.shift();
+      }
       const frameCap=auditMode?1:(mobile?4:24);
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);

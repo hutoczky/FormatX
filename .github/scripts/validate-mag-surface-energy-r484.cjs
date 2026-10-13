@@ -163,6 +163,16 @@ async function verify(browser, name, viewport, mobile) {
     const frameCount = await page.evaluate(() => __magEnergyAudit.frames);
     await page.waitForTimeout(1000);
     report.idleFrames = await page.evaluate(before => __magEnergyAudit.frames - before, frameCount);
+    if(report.idleFrames!==0){
+      const debug=await page.evaluate(()=>({events:window.__magEnergyAudit.events.slice(-6),
+        scheduleTrace:window.__magR2053ScheduleTrace?.slice(-40),
+        state:{energy:document.documentElement.dataset.fxCoreSurfacePulseR454,
+          idle:document.documentElement.dataset.fxCoreIdleRenderR441,
+          governor:document.documentElement.dataset.fxCoreSweepQualityResizeR2052,
+          current:document.documentElement.dataset.fxArchiveCurrent,
+          archive:document.documentElement.dataset.fxArchiveExperience}}));
+      console.error('R2053_MAG_IDLE_CAUSE',JSON.stringify({name,frames:report.idleFrames,debug}));
+    }
     assert.equal(report.idleFrames, 0, `${name}: native renderer must rest between sweeps`);
     await page.waitForFunction(() => __magEnergyAudit.events.filter(e => e.phase === 'end' && e.source === 'autonomous').length >= 2, null, { timeout: 14000 });
     await page.waitForTimeout(250);
