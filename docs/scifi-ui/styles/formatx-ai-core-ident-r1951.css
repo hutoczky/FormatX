@@ -21,9 +21,9 @@
   filter:blur(9px);
   will-change:opacity,transform,filter;
   transition:
-    opacity .48s cubic-bezier(.22,.61,.36,1),
-    transform .68s cubic-bezier(.16,.84,.24,1),
-    filter .62s ease;
+    opacity .28s cubic-bezier(.22,.61,.36,1),
+    transform .43s cubic-bezier(.16,.84,.24,1),
+    filter .24s ease;
   text-align:center;
   isolation:isolate;
 }
@@ -194,3 +194,15 @@
   }
 }
 /* end-r2072-single-scene-optical-boot-signature */
+
+/* R2076 dedicated visual-storyboard still-frame contract. This only affects
+   an explicitly paused cinematic photography capture; no real first-load or
+   first-visit timeline changes. Even slow software WebGL capture must show
+   genuinely sharp optical lettering, not a half-faded CSS transition. */
+.fx-ai-core-ident-r1951[data-fx-ai-core-still="true"].is-visible{
+  opacity:.96!important;
+  filter:none!important;
+  transform:translate3d(-50%,0,0) scale(1)!important;
+  transition:none!important;
+}
+/* end-r2076-sharp-mag-visual-storyboard */
