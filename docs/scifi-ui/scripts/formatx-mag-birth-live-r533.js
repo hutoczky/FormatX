@@ -735,7 +735,10 @@
     document.dispatchEvent(new CustomEvent('formatx:magbirthstabilized', {
       detail: {
         source:'single-genesis-shot-r2072',progress:r,
-        x:Math.round(targetX),y:Math.round(targetY),
+        // The intro Three organism remains centered on its own camera
+        // until the final 0.22s position handoff. Do not anchor its boot
+        // telemetry to the distant HOME-stage location yet.
+        x:Math.round(innerWidth*.5),y:Math.round(innerHeight*.50),
         timelineMs:Math.round(r*DURATION)
       }
     }));
