@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
+  const VERSION='cinematic-archive-r2059-keyboard-focus-continuity';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -392,6 +392,30 @@
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
+        if(!active&&panel.contains(document.activeElement)){
+          // Native scroll can deactivate the previously focused folio. An
+          // inert ancestor containing document.activeElement strands keyboard
+          // users without a visible focus ring or working Enter action.
+          // Transfer focus to the active REAL folio, without scroll hijacking.
+          const nextPanel=selected?.cinemaPanel;
+          const candidate=nextPanel?.querySelector(
+            'a[href]:not([tabindex="-1"]),button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex="0"]'
+          );
+          const target=candidate||nextPanel;
+          if(target instanceof HTMLElement){
+            if(target===nextPanel&&!target.hasAttribute('tabindex')){
+              target.setAttribute('tabindex','-1');
+              target.dataset.fxArchiveTemporaryFocus='true';
+            }
+            target.focus({preventScroll:true});
+            root.dataset.fxArchiveKeyboardFocus='retargeted-native-content';
+          }else{
+            // Never leave a hidden, inert document controlling focus.
+            const fallback=document.querySelector('.topbar a[href],.topbar button');
+            fallback?.focus({preventScroll:true});
+            root.dataset.fxArchiveKeyboardFocus='retargeted-navigation';
+          }
+        }
         if(panel.inert===active)panel.inert=!active;
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
@@ -1250,6 +1274,10 @@ void main(){
         panel.remove();
       }
       host.removeAttribute('data-fx-cinema-host-active');
+      host.querySelectorAll('[data-fx-archive-temporary-focus="true"]').forEach(node=>{
+        node.removeAttribute('tabindex');
+        delete node.dataset.fxArchiveTemporaryFocus;
+      });
       host.removeAttribute('data-fx-cinema-anchor-height');
       for(const [name,value,priority] of host._fxArchiveOriginalHeights||[]){
         if(value)host.style.setProperty(name,value,priority);
