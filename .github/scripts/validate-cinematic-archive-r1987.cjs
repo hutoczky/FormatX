@@ -750,6 +750,11 @@ async function auditHtmlContinuity(browser){
   });
   const page=await context.newPage();
   const address=new (require('node:url').URL)(URL);
+  // The suite's base URL forces archive=1 and the R486 isolated renderer.
+  // A real Lighthouse/fallback visit contains NEITHER override. Without
+  // stripping these, we would test a forced cinema instead of public HTML.
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','visualintro'])
+    address.searchParams.delete(key);
   address.searchParams.set('lighthouse','1');
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForTimeout(13300);
