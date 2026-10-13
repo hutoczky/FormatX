@@ -8,7 +8,9 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
   '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
  ]});
  try{
-  for(const c of [{label:'mobile',w:390,h:844,mobile:true},
+  for(const c of [{label:'mobile-390',w:390,h:844,mobile:true},
+                  {label:'mobile-412-lighthouse-geometry',w:412,h:823,mobile:true},
+                  {label:'mobile-320-narrow',w:320,h:640,mobile:true},
                   {label:'desktop',w:1440,h:900,mobile:false}]){
    const context=await browser.newContext({
     viewport:{width:c.w,height:c.h},isMobile:c.mobile,hasTouch:c.mobile,
