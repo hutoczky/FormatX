@@ -5,6 +5,10 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js'
+      - 'docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css'
+      - '.github/scripts/validate-intro-identity-r2072.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
@@ -14,6 +18,10 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js'
+      - 'docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css'
+      - '.github/scripts/validate-intro-identity-r2072.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
@@ -37,6 +45,9 @@ jobs:
           node --check .github/scripts/validate-live-mag-functional.cjs
           node --check .github/scripts/validate-r2054-css-recovery.cjs
           node --check .github/scripts/validate-r2054-default-entry.cjs
+          node --check .github/scripts/validate-intro-identity-r2072.cjs
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js
       - name: Install browser
         run: |
           npm install --prefix "$RUNNER_TEMP/mag-r2054" --no-audit --no-fund playwright@1.62.0
@@ -60,3 +71,15 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
         run: node .github/scripts/validate-r2054-default-entry.cjs
+
+      - name: Prove R2072 one-shot MAG boot identity on real desktop and mobile first visit
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/validate-intro-identity-r2072.cjs
+      - name: Preserve R2072 cinematic visual frames and timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2072-mag-genesis-intro-proof
+          path: artifacts/r2072-intro-proof/
+          if-no-files-found: warn
