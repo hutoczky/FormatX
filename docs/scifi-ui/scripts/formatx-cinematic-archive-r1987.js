@@ -434,6 +434,9 @@
         if(active){
           const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
           const english=root.lang==='en';
+          const nativeAccessibleLabel='MAG // '+(english?selected.en:selected.hu);
+          if(panel.getAttribute('aria-label')!==nativeAccessibleLabel)
+            panel.setAttribute('aria-label',nativeAccessibleLabel);
           const sourceName=(sourceNames[selected.source]||[selected.source,selected.source])[english?1:0];
           if(marker){
             const expected='MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
