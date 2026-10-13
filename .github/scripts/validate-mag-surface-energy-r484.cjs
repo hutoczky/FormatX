@@ -32,7 +32,14 @@ const EXPECTED_MOBILE_FILTER = [
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [], idleWindows: [] };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [], idleWindows: [], longTasks:[] };
+  try{
+    const observer=new PerformanceObserver(list=>{
+      for(const x of list.getEntries())audit.longTasks.push({at:Math.round(x.startTime),duration:Math.round(x.duration)});
+      if(audit.longTasks.length>100)audit.longTasks.splice(0,audit.longTasks.length-100);
+    });
+    observer.observe({type:'longtask',buffered:true});
+  }catch(_){}
   const names = new WeakMap();
   const states = new WeakMap();
   const stateFor = gl => {
@@ -230,6 +237,21 @@ async function verify(browser, name, viewport, mobile) {
     assert.ok(starts.length >= 2 && ends.length >= 2, `${name}: recurring autonomous sweep missing`);
     report.intervalMs = starts[1].at - starts[0].at;
     report.durationMs = ends[0].at - starts[0].at;
+    if(report.intervalMs<4500||report.intervalMs>=8500){
+      report.intervalDiagnostic=await page.evaluate(()=>({
+        events:__magEnergyAudit.events,
+        idleWindows:__magEnergyAudit.idleWindows,
+        scheduler:document.documentElement.dataset.fxCoreSurfaceSchedulerR484,
+        requestedDelay:document.documentElement.dataset.fxCoreSurfaceScheduledDelayR2055,
+        actualTimerLag:document.documentElement.dataset.fxCoreSurfaceTimerLagR2055,
+        visibility:document.visibilityState,
+        quality:document.documentElement.dataset.fxCoreQualityScaleR1600,
+        renderMs:document.documentElement.dataset.fxCoreRenderMs,
+        frameMs:document.documentElement.dataset.fxCoreFrameMs,
+        longTasks:__magEnergyAudit.longTasks||[]
+      }));
+      console.error('R2055_SCHEDULER_LATE_DIAGNOSTIC',JSON.stringify(report.intervalDiagnostic));
+    }
     assert.ok(report.intervalMs >= 4500 && report.intervalMs < 8500, `${name}: interval ${report.intervalMs}ms`);
     assert.ok(report.durationMs >= 1100 && report.durationMs < 2300, `${name}: duration ${report.durationMs}ms`);
     report.dom = await page.evaluate(() => {
