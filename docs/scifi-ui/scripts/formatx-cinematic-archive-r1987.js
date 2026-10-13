@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2053-batched-native-scroll-layout';
+  const VERSION='cinematic-archive-r2056-focus-safe-native-archive';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -392,7 +392,27 @@
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
-        if(panel.inert===active)panel.inert=!active;
+        if(panel.inert===active){
+          // A physically archived panel must not retain keyboard focus.
+          // Native scroll may turn the old focused folio inert. Restore focus
+          // to the newly presented section only when the user is actively
+          // navigating with the keyboard, without hijacking wheel/touch.
+          const lostFocus=!active&&panel.contains(document.activeElement);
+          if(lostFocus){
+            const destination=selected?.cinemaPanel;
+            const heading=destination?.querySelector('h2,h3');
+            const target=heading||destination;
+            if(target instanceof HTMLElement){
+              if(!target.hasAttribute('tabindex'))target.setAttribute('tabindex','-1');
+              target.focus({preventScroll:true});
+              root.dataset.fxArchiveFocusRestored='current-native-folio';
+            }else{
+              document.activeElement?.blur?.();
+              root.dataset.fxArchiveFocusRestored='safe-blur';
+            }
+          }
+          panel.inert=!active;
+        }
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
         if(active){
