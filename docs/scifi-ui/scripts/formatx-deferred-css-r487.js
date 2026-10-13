@@ -11,6 +11,53 @@
   let fallback = 0;
   let observer = null;
 
+  /* R2054 — a lost deferred WebGL/archival stylesheet must not strand the
+     cinematic MAG in its bare first-paint shell. Recover exactly once from
+     a same-origin CSS failure, *after* the meaningful first paint. */
+  const trackedStyles=Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'))
+    .filter(link=>link instanceof HTMLLinkElement
+      && new URL(link.href,location.href).origin===location.origin);
+  const recoverQueued=new Set();
+  let recovered=0;
+  function recover(link,reason){
+    if(!link.isConnected||link.dataset.fxCssRetry==='1')return;
+    const u=new URL(link.href,location.href);
+    if(u.origin!==location.origin||!u.pathname.startsWith('/scifi-ui/styles/'))return;
+    link.dataset.fxCssRetry='1';
+    link.dataset.fxCssRetryReason=reason;
+    u.searchParams.set('fx_css_retry','1');
+    // Changing the URL forces a fresh Cloudflare asset request, without
+    // duplicate stylesheet nodes or a second active layer.
+    link.href=u.href;
+    root.dataset.fxDeferredCssRecovery='retried';
+  }
+  function flushRecovery(){
+    for(const link of recoverQueued){
+      recoverQueued.delete(link);
+      recover(link,'network-error');
+    }
+  }
+  for(const link of trackedStyles){
+    link.addEventListener('error',()=>{
+      if(link.dataset.fxCssRetry==='1'){
+        link.dataset.fxCssRecoveryState='failed';
+        root.dataset.fxDeferredCssRecovery='failed';
+        return;
+      }
+      recoverQueued.add(link);
+      if(activated)setTimeout(flushRecovery,160);
+    });
+    link.addEventListener('load',()=>{
+      if(link.dataset.fxCssRetry==='1'){
+        link.dataset.fxCssRecoveryState='recovered';
+        recovered+=1;
+        root.dataset.fxDeferredCssRecovered=String(recovered);
+        root.dataset.fxDeferredCssRecovery='recovered';
+      }
+      recoverQueued.delete(link);
+    });
+  }
+
   function activate(reason) {
     if (activated) return;
     activated = true;
@@ -35,7 +82,19 @@
       activatedCount += 1;
     }
 
-    root.dataset.fxDeferredCssR487 = 'ready-fcp';
+    // First painting takes priority over decorative CSS recovery requests.
+    // A slow/hung file gets one post-FCP retry only after the browser has
+    // been allowed time to finish the ordinary stylesheet download.
+    if(recoverQueued.size)setTimeout(flushRecovery,160);
+    setTimeout(()=>{
+      if(document.visibilityState==='hidden')return;
+      for(const link of trackedStyles){
+        if(link.dataset.fxCssRetry==='1'||link.sheet)continue;
+        if(/formatx-(?:living-habitat-r1530|cinematic-archive-r1987)\.css/.test(
+          new URL(link.href,location.href).pathname)) recover(link,'late-missing-stylesheet');
+      }
+    },5200);
+        root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
     root.dataset.fxDeferredCssAuditSkippedR1970 = String(auditSkippedCount);
     root.dataset.fxDeferredCssReasonR526 = reason;

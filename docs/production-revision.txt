@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261013-r2053-batched-native-folio-scroll
-base_master=d548faea15096b80d63545c7cb53223fb9a30e4d
-purpose=Coalesce original native HTML archive panel geometry measurements into one read-only pass BEFORE any per-card style writes. Eliminate duplicate eight-chapter getBoundingClientRect pass from deferred GPU RAF, because synchronous scroll already selected and docked the correct stage. One canonical MAG WebGL2 renderer, eight distinct shelves, original functional CTA/technical panels/proof and GPU zero-idle frame gate remain unchanged.
-validation=Must pass Chromium eight-scene scroll mobile+desktop, no-occlusion, keyboard/technical native HTML and no-WebGL/reduced-motion; 32-sample real synchronous scroll input-path profile recorded. Production candidate + security + Lighthouse strict gates still required.
-limits=This source-level performance optimization is not yet a measured improvement in Lighthouse score or real hardware FPS; Lighthouse >=95 goal remains unproven, no award-grade comparison claim.
+token=20261013-r2054-mag-habitat-network-resilience
+base_master=1dd0d18aa8b1847b033b1fc61668ab4a794e3a7e
+purpose=Keep the existing original 3D MAG, eight live interactive HTML archive folios, first-visit intro, technical tools, singleton public proof, mobile reading lane and no-WebGL fallback stable when one deferred photographic stylesheet request fails transiently. One same-origin CSS retry post-first-paint with explicit recovery verification, no duplicate stylesheet or fake successful visuals.
+validation=Must pass real desktop+mobile Chromium eight-source scroll, first-visit film, original HTML/fallback, interrupted CSS request fault-injection with exactly one successful recovery, strict production Worker and both-domain exact revision, live MAG visual with no unrecovered missing resources.
+limits=Lighthouse 95/100 threshold, photographic fidelity vs Igloo.inc and real-device FPS are NOT proved by a stylesheet-recovery fix. Do not modify performance-quality thresholds.
