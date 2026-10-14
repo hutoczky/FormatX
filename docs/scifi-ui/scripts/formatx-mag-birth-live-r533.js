@@ -731,7 +731,7 @@
      stabilized, with the actual hero-stage optical center. The existing
      R1951 identification node owns the typography and its exit. */
   function announceCoreIdentityR2072(r) {
-    if (identityAnnouncedR2072 || r < .805 || finished) return;
+    if (identityAnnouncedR2072 || r < .805 || finished || (HAS_VISUAL_FRAME && r >= .95)) return;
     identityAnnouncedR2072 = true;
     syncTarget(true);
     ROOT.dataset.fxMagBirthIdentityR2072 = 'mag-stabilized-within-film';
