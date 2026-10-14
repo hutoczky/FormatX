@@ -94,13 +94,15 @@ const OUTPUT='artifacts/r2072-intro-proof';
           null,{timeout:10000});
         const after=await page.evaluate(()=>({
           identity:document.documentElement.dataset.fxAiCoreIdentityR1951,
+          filmHandoff:document.documentElement.dataset.fxAiCoreIdentityR2072,
           labelCount:document.querySelectorAll('.fx-ai-core-ident-r1951').length,
           overlayCount:document.querySelectorAll('.fx-mag-birth-r533').length,
           originalCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
           scrollY
         }));
         assert.ok(after.labelCount===0&&after.overlayCount===0
-          &&after.originalCTA&&after.scrollY===0,
+          &&after.originalCTA&&after.scrollY===0
+          &&after.filmHandoff==='cleared-exactly-at-film-handoff',
           'Film-to-original-MAG hero handoff failed: '+JSON.stringify(after));
         assert.deepEqual(errors,[],'Real intro JS exceptions: '+JSON.stringify(errors));
         reports.push({viewport:vp.name,proof,after});
