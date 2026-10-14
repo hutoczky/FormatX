@@ -1595,25 +1595,40 @@
         /* R2105: actual front-facing depth-tested metal, glass and iris
            geometry have distinct reflectance instead of inheriting the
            flat cyan base material painted on the four-point mineral. */
+        /* R2109: the eight real front rails are facet 5.86, while the
+           recessed titanium mount is 5.7x. Previously the bezel mask ran
+           through 5.90, silently painting OVER every machined rail; on
+           real desktop captures the intended highlights looked black.
+           Keep all three physical parts disjoint and depth-tested. */
         float physicalRail=step(5.81,vFacet)*(1.0-step(5.91,vFacet));
-        vec3 channelTitanium=vec3(.042,.072,.077)+
-          vec3(.48,.58,.53)*(softboxA*.62+softboxB*.28+key*.12);
-        c=mix(c,channelTitanium,physicalRail*.92);
-        float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
+        float physicalBezel=step(5.70,vFacet)*(1.0-step(5.81,vFacet));
         float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
         float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
-        vec3 machinedTitanium=vec3(.022,.040,.048)+
-          vec3(.54,.60,.56)*(softboxA*.56+softboxB*.31+key*.13)+
-          vec3(.065,.13,.15)*fresnel*.36;
-        vec3 shutterTitanium=vec3(.011,.028,.037)+
-          vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
-          vec3(.08,.14,.15)*fresnel*.28;
-        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),12.0);
-        vec3 sapphireGlass=vec3(.005,.019,.034)+
-          vec3(.045,.13,.16)*(.25+.75*key)+
-          vec3(.28,.33,.30)*sapphireSpec*.62+
-          vec3(.025,.12,.16)*fresnel*.21;
+
+        /* R2109 native broad photographic illumination, NOT a raster line.
+           One moving sapphire-glass surface, four metallic arms, recessed
+           bezel and eight 3D shutter blades remain in the SAME draw call. */
+        float collarKey=pow(sat(dot(n,normalize(vec3(-.43,.61,.66)))),4.0);
+        float collarFill=pow(sat(dot(n,normalize(vec3(.63,-.10,.77)))),4.0);
+        vec3 channelTitanium=vec3(.034,.058,.065)+
+          vec3(.39,.45,.42)*(.18+.49*key+.18*fill)+
+          vec3(.30,.42,.44)*collarKey*.22;
+        vec3 machinedTitanium=vec3(.030,.048,.055)+
+          vec3(.52,.59,.55)*(.14+.38*key+.24*softboxB)+
+          vec3(.36,.44,.43)*collarKey*.24+
+          vec3(.08,.15,.17)*fresnel*.29;
+        vec3 shutterTitanium=vec3(.020,.034,.043)+
+          vec3(.28,.40,.42)*(.14+.36*key+.25*fill)+
+          vec3(.18,.24,.24)*collarFill*.23+
+          vec3(.06,.13,.14)*fresnel*.19;
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),9.0);
+        vec3 sapphireGlass=vec3(.007,.024,.039)+
+          vec3(.050,.15,.18)*(.27+.73*key)+
+          vec3(.31,.42,.41)*sapphireSpec*.49+
+          vec3(.040,.12,.15)*fresnel*.22+
+          vec3(.015,.065,.080)*(.5+.5*sin(uTime*.0019))*.12;
         c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,channelTitanium,physicalRail*.96);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
