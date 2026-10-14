@@ -20,6 +20,10 @@
   const VISUAL_FRAME = Number.parseFloat(PARAMS.get('introframe') || '');
   const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
   const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
+  // Explicit full-length creative review requests the real Three scene even
+  // on software Chromium. Ordinary low-power visitors retain the safe film.
+  // This never applies to Lighthouse or default first-visit paths.
+  const PROOF_FULL_FILM = VISUAL_PROOF && PARAMS.get('fullfilm') === '1';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
@@ -825,7 +829,7 @@
        constrained CPU/GPU path. The existing R649 cinematic keeps the same
        10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
        proof frames remain on the Three owner so design evidence stays exact. */
-    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
+    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME && !PROOF_FULL_FILM){
       ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
       overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
       startR649Fallback();
