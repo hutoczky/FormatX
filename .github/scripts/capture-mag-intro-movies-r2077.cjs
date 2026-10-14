@@ -67,6 +67,7 @@ const OUT='artifacts/r2077-real-mag-movie';
           geometry:document.documentElement.dataset.fxMagIntroGeometryR2075,
           nativeMorphR2080:document.documentElement.dataset.fxMagIntroMorphR2080,
           nativeMorphProgressR2080:Number(document.documentElement.dataset.fxMagIntroMorphProgressR2080||0),
+          finalHandoffR2081:document.documentElement.dataset.fxMagIntroFinalFrameR2081,
           identityCount:document.querySelectorAll('.fx-ai-core-ident-r1951').length,
           overlayCount:document.querySelectorAll('.fx-mag-birth-r533').length,
           nativeCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
@@ -91,6 +92,7 @@ const OUT='artifacts/r2077-real-mag-movie';
         &&summary.geometry?.includes('8-physical-inset-rails-3-coaxial-metal-rings')
         &&summary.nativeMorphR2080==='canonical-native-organism'
         &&summary.nativeMorphProgressR2080>.999
+        &&summary.finalHandoffR2081==='real-three-living-handoff-rendered'
         &&summary.identityCount===0&&summary.overlayCount===0
         &&summary.nativeCTA&&summary.scrollY===0
         &&summary.errors.length===0;
