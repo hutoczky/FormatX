@@ -33,7 +33,12 @@
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
-  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
+  /* R2103: navigator.deviceMemory is a coarse and sometimes capped hint.
+     A fast phone with 8+ logical cores may still report 4GB and should
+     receive the genuine single-Three MAG instead of the obsolete low-end
+     movie. Reserve the 2D fallback for genuinely low-core or <=2GB paths,
+     and retain GPU/WebGL failure fallback on actual attach errors. */
+  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 2;
   const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
   const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
