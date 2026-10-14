@@ -205,4 +205,18 @@
   transform:translate3d(-50%,0,0) scale(1)!important;
   transition:none!important;
 }
+/* R2088: the title belongs BELOW the physical four-point silhouette.
+   Earlier desktop film photographs showed the original sharp crystal tip
+   passing through the label frame.  Keep the phone's original framing
+   untouched, never duplicate identity text and never add new UI surfaces. */
+@media (min-width:901px) and (min-aspect-ratio:27/25){
+  .fx-ai-core-ident-r1951{
+    top:min(
+      calc(var(--fx-ident-y,50vh) + clamp(325px,42vh,390px)),
+      calc(100dvh - 86px)
+    );
+  }
+}
+/* end-r2088-optical-identity-no-overlap */
+
 /* end-r2076-sharp-mag-visual-storyboard */
