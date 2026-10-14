@@ -23,7 +23,14 @@ function activateStyles(){
 
 const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261014-r2059-original-intro-parity';
 let retryCount=0,retryTimer=0;
-const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+let introCompleted=false;
+document.addEventListener('formatx:magbirthcomplete',()=>{
+  introCompleted=true;
+  clearTimeout(retryTimer);
+  retryTimer=0;
+  r.dataset.fxIntroBootstrapRescueR1755='completed-no-restart';
+},{once:true});
+const runtimeReady=()=>introCompleted||document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){
   if(runtimeReady()){
     r.dataset.fxIntroBootstrapRescueR1755='runtime-ready';

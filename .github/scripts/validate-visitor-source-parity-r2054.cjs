@@ -62,3 +62,4 @@ const hash = 'sha256-' + crypto.createHash('sha256').update(bootstrap).digest('b
 assert.ok(html.includes(hash), 'Authored CSP must permit the current inline bootstrap');
 assert.ok(read('billing-worker/src/production-content-entry.js').includes(hash), 'Production CSP must permit the same bootstrap');
 console.log(JSON.stringify({ sourceFiles: names.length + 1, prepaintIdentityComparisons: cases, cspHash: hash, result: 'pass' }));
+require('./validate-intro-rescue-lifecycle-r2060.cjs');

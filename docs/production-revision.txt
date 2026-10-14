@@ -1,7 +1,7 @@
 FormatX production revision
-token=20261014-r2059-original-intro-parity
+token=20261014-r2060-completion-latch
 base_master=053b393c2b3b22727634b97ff3b2ed1bea88b942
 purpose=Integrate R2058 curvature-correct archive lighting, R2057 paper compositing, R2056 faster mobile paint and R2055 zero-idle telemetry with one visitor runtime for every browser identity. Restore the complete visible intro to the original mobile 1180-1450ms and desktop 1350-1650ms windows, publish readiness only after a real draw, keep one document h1 and preserve the canonical MAG renderer, eight functional archive folios and CSS recovery.
 validation=Local source, CSP/cache, single-heading, Living Core, public integrity, WDA, workflow syntax and production contracts pass on the integrated tree. Browser CI must still prove Chromium visitor/webdriver/Lighthouse parity, Firefox, actual magbirthstart-to-magbirthcomplete duration, responsive lifecycle, worker/fallback and six strict Lighthouse measurements on the exact candidate SHA.
-measured=R2058 master Lighthouse desktop 0.91-0.93 and mobile 0.93 before this integration. No R2059 browser or Lighthouse result exists yet.
+measured=R2059 50967c5632b42a59d82a1ac4924584ad45c1e7f5 completed 31 workflows: 25 success and 6 failure. Desktop Lighthouse performance 87/66/66 and mobile 70/84/69; desktop CLS up to 0.82025056 and mobile CLS 0.27961703. Intro timing and visitor sweep parity failed. R2060 only prevents rescue restarting a completed intro and adds URL-level NET resource diagnostics; no R2060 browser result exists yet.
 limits=Draft candidate, not approved for production. Full visual, performance, real-hardware 60fps, objective Igloo.inc superiority and production SHA certification remain incomplete.

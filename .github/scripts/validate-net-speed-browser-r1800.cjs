@@ -15,6 +15,9 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
 
   page.on('pageerror',error=>errors.push(String(error)));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+  page.on('response',response=>{
+    if(response.status()>=400)console.error(JSON.stringify({resourceFailure:{status:response.status(),url:response.url(),type:response.request().resourceType()}}));
+  });
 
   await page.route('**/api/net/**',async route=>{
     apiRequests+=1;
