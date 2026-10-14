@@ -1,0 +1,71 @@
+name: R2103 real mobile MAG fallback screenshot acceptance
+
+on:
+  push:
+    branches:
+      - hotfix/r2103-mobile-intro-actual-egg-replacement
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/styles/formatx-mag-birth-live-r533.css'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/validate-r2103-mobile-intro-fallback.cjs'
+      - '.github/workflows/verify-r2103-mobile-fallback.yml'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2103-mobile-mag-portrait-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actual-low-end-mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify actual fallback and film JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check .github/scripts/validate-r2103-mobile-intro-fallback.cjs
+      - name: Install real mobile Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/fallback" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/fallback/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start exact built repository website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >/tmp/r2103-site.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat /tmp/r2103-site.log
+          exit 1
+      - name: Prove four-point identity and physically bounded phone footprint
+        env:
+          NODE_PATH: ${{ runner.temp }}/fallback/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/validate-r2103-mobile-intro-fallback.cjs
+      - name: Publish real 390px and 360px screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2103-real-mobile-four-point-intro
+          path: artifacts/r2103-real-mobile-fallback/
+          retention-days: 21
+          if-no-files-found: warn
