@@ -74,8 +74,12 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2103-four-point-mobile-fallback'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2104-photographic-moving-softbox'),
   'Missing actual cache-busted four-point R2103 Android replacement');
+assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
+  fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
+  fallback.includes('const studioTravel=.5+.5*Math.sin(time*.00053)'),
+  'R2104 movie must use a real animated optical studio-light material');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
   intro.includes('min-height:44px!important;'),
