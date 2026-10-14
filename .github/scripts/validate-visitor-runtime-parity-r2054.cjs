@@ -15,11 +15,25 @@ const write = () => fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringi
 // Observers record the real rendering calls and event order. They do not
 // alter shaders, uniforms, timing, geometry, session state or readiness.
 function observe() {
-  const evidence = window.__fxVisitorEvidence = { draws: 0, ready: [], birth: [], birthStart: [], sweeps: [], options: null, shaders: [] };
+  const evidence = window.__fxVisitorEvidence = { draws: 0, ready: [], birth: [], birthStart: [], sweeps: [], options: null, shaders: [], glWork: [], longTasks: [], warmup: [] };
+  const recordGlWork = (operation, startedAt, canvas, error) => {
+    const returnedAt=performance.now();
+    if(evidence.glWork.length<160)evidence.glWork.push({operation,startedAt,returnedAt,duration:returnedAt-startedAt,
+      canvasClass:canvas?.className||'',error:error?String(error):null});
+  };
+  if(window.PerformanceObserver?.supportedEntryTypes?.includes('longtask')){
+    new PerformanceObserver(list=>{
+      for(const task of list.getEntries())if(evidence.longTasks.length<100)evidence.longTasks.push({startTime:task.startTime,duration:task.duration,name:task.name});
+    }).observe({type:'longtask',buffered:true});
+  }
+  document.addEventListener('formatx:magbirthcorewarmup',event=>evidence.warmup.push({at:performance.now(),detail:event.detail}));
   const nativeCanvas = canvas => canvas?.classList?.contains('fx-crystal-organism-r326-canvas');
   const getContext = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function(type, options) {
-    const gl = getContext.call(this, type, options);
+    const startedAt=performance.now();
+    let gl,error;
+    try{gl=getContext.call(this,type,options);}catch(caught){error=caught;throw caught;}
+    finally{if(/webgl|2d/.test(type))recordGlWork('getContext:'+type,startedAt,this,error);}
     if (gl && nativeCanvas(this) && /webgl/.test(type)) evidence.options = gl.getContextAttributes();
     return gl;
   };
@@ -27,6 +41,16 @@ function observe() {
     if (!Type) continue;
     const source = Type.prototype.shaderSource;
     const draw = Type.prototype.drawArrays;
+    for(const method of ['compileShader','linkProgram','getProgramParameter']){
+      const original=Type.prototype[method];
+      if(typeof original!=='function')continue;
+      Type.prototype[method]=function(...args){
+        if(!nativeCanvas(this.canvas))return original.apply(this,args);
+        const startedAt=performance.now();let error;
+        try{return original.apply(this,args);}catch(caught){error=caught;throw caught;}
+        finally{recordGlWork(method,startedAt,this.canvas,error);}
+      };
+    }
     Type.prototype.shaderSource = function(shader, text) {
       if (nativeCanvas(this.canvas)) evidence.shaders.push(text);
       return source.call(this, shader, text);
@@ -107,6 +131,10 @@ async function visit(browser, engine, profile, identity, userAgent) {
       dataset: { ...document.documentElement.dataset } })).catch(() => null);
     await page.screenshot({ path: path.join(OUT, name + '-failure.png'), timeout: 10000 }).catch(() => {});
   } finally {
+    const observed=result.evidence||result.partial?.evidence;
+    console.log('VISITOR_STARTUP_BLOCKING_EVIDENCE',JSON.stringify({name,birth:observed?.birth,warmup:observed?.warmup,
+      ready:observed?.ready,glWork:observed?.glWork,longTasks:observed?.longTasks,
+      rendererState:result.partial?.dataset?.fxCrystalOrganismR326,failures}));
     report.cases.push(result);
     report.failures.push(...failures.map(message => `${name}: ${message}`));
     write();
