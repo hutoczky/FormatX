@@ -14,13 +14,6 @@ const pairs = [
     media: 'media="(min-width: 901px)"'
   },
   {
-    source: 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css',
-    compact: 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.desktop-r2101.css',
-    desktopProjection: 6,
-    selector: 'data-fx-p0-first-paint-r503="true"',
-    media: 'media="(min-width:901px)"'
-  },
-  {
     source: 'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.css',
     compact: 'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.min-r2099.css',
     selector: 'data-fx-desktop-first-paint-r1600="true"',
