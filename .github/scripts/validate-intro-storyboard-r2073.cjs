@@ -80,6 +80,9 @@ const SHOTS=[
             morphR2080:root.dataset.fxMagIntroMorphR2080,
             morphProgressR2080:Number(root.dataset.fxMagIntroMorphProgressR2080||'0'),
             opticEnergyR2082:Number(root.dataset.fxMagIntroOpticEnergyR2082||'0'),
+            studioR2083:JSON.parse(root.dataset.fxMagIntroStudioR2083||'null'),
+            genesisVersion:[...document.scripts]
+              .find(x=>x.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
@@ -109,6 +112,33 @@ const SHOTS=[
           &&info.realPixelPeak>=20&&info.realLitSamples>=2,
           'Cinematic original Three framebuffer is black or MAG scene missing: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
+        // R2083: verify real moving physical lights INSIDE the original
+        // Three renderer, not a CSS screenshot or passive metadata marker.
+        const studio=info.studioR2083;
+        assert.ok(info.genesisVersion.includes('r2083-studio-cinema-reactive-mag'),
+          'Stale cached MAG film asset: '+JSON.stringify(info));
+        assert.ok(studio&&Number.isFinite(studio.key)
+          &&Number.isFinite(studio.fill)&&Number.isFinite(studio.rim)
+          &&Number.isFinite(studio.back)&&Number.isFinite(studio.optic)
+          &&studio.key>1.80&&studio.key<2.60
+          &&studio.fill>.45&&studio.fill<1.10
+          &&studio.rim>.80&&studio.rim<1.50
+          &&studio.back>.40&&studio.back<1.10,
+          'The REAL Three.js studio-light rig is not responding to the film: '+JSON.stringify(info));
+        if(shot.second===1.40){
+          assert.ok(studio.key<2.08&&studio.rim<1.02,
+            'DNA setup must use the original restrained studio light: '+JSON.stringify(studio));
+        }
+        if(shot.second===4.40){
+          assert.ok(studio.key>2.15&&studio.fill>.68,
+            'Cortical camera orbit must activate actual brighter photographic key/fill: '+
+              JSON.stringify(studio));
+        }
+        if(shot.second===8.50){
+          assert.ok(studio.rim>1.15&&studio.optic>.18,
+            'Identity phase must visibly illuminate the machined optic: '+
+              JSON.stringify(studio));
+        }
         if(shot.second<8.96){
           assert.equal(info.morphR2080,'physical-metal-crest',
             'The iconic optical four-point metal crest must remain throughout the main intro: '+JSON.stringify(info));
