@@ -12,6 +12,7 @@ const OUT='artifacts/r2077-real-mag-movie';
     '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
   ]});
   const results=[];
+  const failures=[];
   try{
     for(const profile of [
       {name:'desktop-1280',viewport:{width:1280,height:720},mobile:false},
@@ -25,7 +26,7 @@ const OUT='artifacts/r2077-real-mag-movie';
         reducedMotion:'no-preference',
         recordVideo:{dir:directory,size:profile.viewport}
       });
-      let video=null,summary=null,renderedInTimedFilm=false;
+      let video=null,summary=null,renderedInTimedFilm=false,recordingError=null;
       try{
         // Warm the exact SOURCE Three shader in the same Chromium context
         // before starting the real recorded 10-second film. Without this,
@@ -43,7 +44,7 @@ const OUT='artifacts/r2077-real-mag-movie';
         video=page.video();
         const errors=[];
         page.on('pageerror',error=>errors.push(String(error.message)));
-        await page.goto(PAGE+'?intro=1&visualintro=1&r2077-film='+profile.name,
+        await page.goto(PAGE+'?intro=1&visualintro=1&fullfilm=1&r2077-film='+profile.name,
           {waitUntil:'domcontentloaded',timeout:60000});
         await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthLiveR533==='active',
           null,{timeout:40000});
@@ -74,6 +75,8 @@ const OUT='artifacts/r2077-real-mag-movie';
         summary.errors=errors;
         // Video must be safely saved before verifying strict acceptance; a
         // failing software-renderer environment still yields useful evidence.
+      }catch(error){
+        recordingError=String(error?.stack||error);
       }finally{
         await context.close();
       }
@@ -82,18 +85,21 @@ const OUT='artifacts/r2077-real-mag-movie';
       await video.saveAs(file);
       const bytes=fs.statSync(file).size;
       assert.ok(bytes>12000,'Chromium recording produced an empty video: '+bytes);
-      assert.ok(summary?.renderedInTimedFilm
+      const accepted=!recordingError&&!!summary?.renderedInTimedFilm
         &&summary.geometry?.includes('8-physical-inset-rails-3-coaxial-metal-rings')
         &&summary.identityCount===0&&summary.overlayCount===0
-        &&summary.nativeCTA&&summary.scrollY===0,
-        'Actual source Three film did not hand off to original MAG: '+JSON.stringify(summary));
-      assert.deepEqual(summary.errors,[],'Actual film threw JavaScript exceptions');
-      results.push({profile:profile.name,file,bytes,summary});
-      console.log('R2077_ACTUAL_THREE_MOVIE_RECORDED_PASS '+JSON.stringify({
-        profile:profile.name,bytes,geometry:summary?.geometry,
-        nativeCTA:summary?.nativeCTA
+        &&summary.nativeCTA&&summary.scrollY===0
+        &&summary.errors.length===0;
+      results.push({profile:profile.name,file,bytes,accepted,summary,
+        error:recordingError});
+      if(!accepted)failures.push(profile.name+': '+JSON.stringify({summary,recordingError}));
+      console.log((accepted?'R2077_ACTUAL_THREE_MOVIE_RECORDED_PASS ':'R2077_ACTUAL_THREE_MOVIE_RECORDED_FAIL ')+JSON.stringify({
+        profile:profile.name,bytes,renderedInTimedFilm,
+        renderer:summary?.renderer,geometry:summary?.geometry,
+        nativeCTA:summary?.nativeCTA,error:recordingError
       }));
     }
   }finally{await browser.close();}
   fs.writeFileSync(path.join(OUT,'recording-proof.json'),JSON.stringify(results,null,2)+'\n');
+  assert.deepEqual(failures,[],'Recorded genuine Three cinema contains regressions: '+JSON.stringify(failures));
 })().catch(error=>{console.error(error.stack||String(error));process.exitCode=1});
