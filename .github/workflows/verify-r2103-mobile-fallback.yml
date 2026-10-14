@@ -1,9 +1,9 @@
-name: R2103 real mobile MAG fallback screenshot acceptance
+name: R2104 photographic mobile MAG cinematic proof
 
 on:
   push:
     branches:
-      - hotfix/r2103-mobile-intro-actual-egg-replacement
+      - feature/r2104-cinematic-machined-mag-intro
     paths:
       - 'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: r2103-mobile-mag-portrait-${{ github.ref }}
+  group: r2104-photographic-mag-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: formatx-r2103-real-mobile-four-point-intro
+          name: formatx-r2104-real-mobile-photographic-mag
           path: artifacts/r2103-real-mobile-fallback/
           retention-days: 21
           if-no-files-found: warn
