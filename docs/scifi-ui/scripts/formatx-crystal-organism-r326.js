@@ -800,6 +800,49 @@
       }
     }
 
+    /* R2091: eight genuine precision inset metal rails that trace the exact
+       closed superellipsoid, submitted in the existing ONE WebGL draw call.
+       This gives the permanent MAG the same machined-arm architecture as the
+       10-second R2075/2084 birth film.  No second canvas, HUD or texture. */
+    function frontSurfaceZ(x,y){
+      const e=mobile?.78:.61;
+      const xx=x>=0?(mobile?.88:1.02):(mobile?.86:.98);
+      const yy=y>=0?(mobile?1.09:1.18):(mobile?.97:1.06);
+      const zAxis=mobile?.64:.49;
+      const remaining=1-
+        Math.pow(Math.abs(x)/xx,e)-
+        Math.pow(Math.abs(y)/yy,e);
+      return zAxis*Math.pow(Math.max(.0005,remaining),1/e);
+    }
+    const railSegmentCount=mobile?10:14;
+    for(let arm=0;arm<4;arm++){
+      const angle=arm*Math.PI*.5;
+      const axisX=Math.cos(angle),axisY=Math.sin(angle);
+      const tangentX=-axisY,tangentY=axisX;
+      for(const side of [-1,1]){
+        let previousLeft=null,previousRight=null;
+        for(let step=0;step<=railSegmentCount;step++){
+          const u=step/railSegmentCount;
+          const reach=.17+(mobile?.60:.66)*u;
+          const offset=side*(.058*(1-u)+.015);
+          const centerX=axisX*reach+tangentX*offset;
+          const centerY=axisY*reach+tangentY*offset;
+          const halfWidth=.0048*(1-.23*u);
+          const lx=centerX+tangentX*halfWidth;
+          const ly=centerY+tangentY*halfWidth;
+          const rx=centerX-tangentX*halfWidth;
+          const ry=centerY-tangentY*halfWidth;
+          const left=[lx,ly,frontSurfaceZ(lx,ly)+.020];
+          const right=[rx,ry,frontSurfaceZ(rx,ry)+.020];
+          if(previousLeft&&previousRight){
+            armorQuad(previousLeft,previousRight,right,left,5.86);
+          }
+          previousLeft=left;
+          previousRight=right;
+        }
+      }
+    }
+
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
@@ -1592,6 +1635,14 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
+        /* R2091: true thin, surface-conforming precision metal strips are
+           geometry tagged 5.86. A brushed silver response comes from their
+           ACTUAL front normals, not painted streaks on the background. */
+        float railMask=step(5.80,vFacet)*(1.0-step(6.0,vFacet));
+        vec3 railMetal=vec3(.078,.102,.110)+
+          vec3(.50,.58,.55)*(softboxA*.46+softboxB*.28+key*.19)+
+          vec3(.05,.12,.13)*fresnel*.18;
+        c=mix(c,railMetal,railMask*.96);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
