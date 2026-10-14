@@ -1,0 +1,75 @@
+name: R2100 real native archive loading and first-paint parity
+
+on:
+  push:
+    branches:
+      - feature/r2083-studio-cinema-reactive-mag
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-loader-r2100.js'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - '.github/scripts/validate-archive-loader-r2100.cjs'
+      - '.github/workflows/verify-r2100-archive-loader.yml'
+  pull_request:
+    branches:
+      - mag-r2059-native-focus-continuity-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2100-real-archive-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-browser-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check both complete JavaScript runtimes and real tests
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-cinematic-archive-loader-r2100.js
+          node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
+          node --check .github/scripts/validate-archive-loader-r2100.cjs
+          node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Install real desktop/mobile Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/r2100" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/r2100/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start canonical unmodified website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/r2100-site.log" 2>&1 &
+          for count in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/r2100-site.log"
+          exit 1
+      - name: Verify lazy first paint, scroll-triggered real scenes and original MAG
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2100/node_modules
+        run: node .github/scripts/validate-archive-loader-r2100.cjs
+      - name: Verify all eight original WebGL cinematic archive scenes
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2100/node_modules
+        run: node .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Save original eight-scene and new lazy-loader browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2100-real-archive-proof
+          path: |
+            artifacts/r2100-archive-loader/
+            .archive-artifacts/
+          retention-days: 21
+          if-no-files-found: warn

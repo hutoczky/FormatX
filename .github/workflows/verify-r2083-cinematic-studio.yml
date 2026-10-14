@@ -1,0 +1,98 @@
+name: R2083 real Three studio cinema evidence
+
+on:
+  push:
+    branches:
+      - feature/r2083-studio-cinema-reactive-mag
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - 'billing-worker/src/production-content-entry.js'
+      - '.github/scripts/validate-intro-storyboard-r2073.cjs'
+      - '.github/scripts/validate-intro-identity-r2072.cjs'
+      - '.github/scripts/capture-mag-intro-movies-r2077.cjs'
+      - '.github/workflows/verify-r2083-cinematic-studio.yml'
+  pull_request:
+    branches:
+      - mag-r2059-native-focus-continuity-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2083-real-studio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-webgl-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate original runtime syntax
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
+          node --check .github/scripts/validate-intro-storyboard-r2073.cjs
+          node --check .github/scripts/validate-intro-identity-r2072.cjs
+          node --check .github/scripts/capture-mag-intro-movies-r2077.cjs
+      - name: Install real Chrome-equivalent Chromium and browser driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/r2083" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/r2083/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve unmodified real local site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/r2083-site.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then
+              exit 0
+            fi
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/r2083-site.log"
+          exit 1
+      - name: Assert live original Three film, optics, lighting and handoff
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2083/node_modules
+        run: node .github/scripts/validate-intro-storyboard-r2073.cjs
+      - name: Verify real first-visit 10s intro teardown and original hero CTA
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2083/node_modules
+        run: node .github/scripts/validate-intro-identity-r2072.cjs
+      - name: Record live ten-second 3D camera motion on desktop and phone
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2083/node_modules
+        run: node .github/scripts/capture-mag-intro-movies-r2077.cjs
+      - name: Preserve real 8-frame WebGL storyboard and numeric evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2083-native-three-studio-storyboard
+          path: |
+            artifacts/r2073-intro-storyboard/
+            artifacts/r2072-intro-proof/
+          retention-days: 21
+          if-no-files-found: warn
+      - name: Preserve real 10s desktop and mobile source WebGL movies
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2083-real-cinematic-source-videos
+          path: artifacts/r2077-real-mag-movie/
+          retention-days: 21
+          if-no-files-found: warn

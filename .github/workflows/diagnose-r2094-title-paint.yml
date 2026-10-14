@@ -1,0 +1,66 @@
+name: R2094 diagnose actual FORMATX title LCP delay
+
+on:
+  push:
+    branches:
+      - feature/r2083-studio-cinema-reactive-mag
+    paths:
+      - '.github/scripts/diagnose-r2094-title-paint.cjs'
+      - '.github/workflows/diagnose-r2094-title-paint.yml'
+  pull_request:
+    branches:
+      - mag-r2059-native-focus-continuity-20261013
+    paths:
+      - '.github/scripts/diagnose-r2094-title-paint.cjs'
+      - '.github/workflows/diagnose-r2094-title-paint.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2094-title-lcp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-browser-lcp-timeline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate complete diagnostic
+        run: node --check .github/scripts/diagnose-r2094-title-paint.cjs
+      - name: Install actual desktop and mobile Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/r2094" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/r2094/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start exact local public site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4186 --directory docs > "$RUNNER_TEMP/r2094-site.log" 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4186/scifi-ui/index.html >/dev/null; then
+              exit 0
+            fi
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/r2094-site.log"
+          exit 1
+      - name: Record real chronological FORMATX heading paints and styles
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2094/node_modules
+        run: node .github/scripts/diagnose-r2094-title-paint.cjs
+      - name: Save all actual browser paint traces and images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2094-hero-lcp-diagnostics
+          path: artifacts/r2094-hero-title-paint/
+          if-no-files-found: warn
+          retention-days: 14

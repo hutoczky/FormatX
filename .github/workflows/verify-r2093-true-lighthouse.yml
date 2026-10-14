@@ -1,0 +1,87 @@
+name: R2093 real feature-branch desktop and mobile Lighthouse
+
+on:
+  push:
+    branches:
+      - feature/r2083-studio-cinema-reactive-mag
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - '.github/workflows/verify-r2093-true-lighthouse.yml'
+  pull_request:
+    branches:
+      - mag-r2059-native-focus-continuity-20261013
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - '.github/workflows/verify-r2093-true-lighthouse.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2093-feature-lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Real Lighthouse 3x ${{ matrix.profile }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: desktop
+            config: lighthouserc.json
+          - profile: mobile
+            config: lighthouserc.mobile.json
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install actual LHCI 0.13 and headless Chromium dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global --no-audit --no-fund @lhci/cli@0.13.x
+          google-chrome --version || chromium --version
+      - name: Run three unmodified user-page Lighthouse audits with strict thresholds
+        shell: bash
+        env:
+          LHCI_GITHUB_APP_TOKEN: ''
+        run: |
+          set -uo pipefail
+          mkdir -p lighthouse-r2093/${{ matrix.profile }}
+          set +e
+          lhci autorun --config=./${{ matrix.config }} \
+            > lighthouse-r2093/${{ matrix.profile }}/lhci-output.log 2>&1
+          result=$?
+          set -e
+          cat lighthouse-r2093/${{ matrix.profile }}/lhci-output.log
+          if [ -d .lighthouseci ]; then
+            cp -a .lighthouseci/. lighthouse-r2093/${{ matrix.profile }}/
+          fi
+          if ls lighthouse-r2093/${{ matrix.profile }}/lhr-*.json >/dev/null 2>&1; then
+            PROFILE=${{ matrix.profile }} node .github/scripts/report-lighthouse-metrics.cjs \
+              lighthouse-r2093/${{ matrix.profile }} \
+              | tee lighthouse-r2093/${{ matrix.profile }}/metrics.log
+          else
+            echo 'ERROR: Real Lighthouse did not produce an LHR report.'
+            exit 1
+          fi
+          node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync('lighthouse-r2093/${{ matrix.profile }}/metrics-summary.json','utf8'));if(d.runs.length!==3)throw Error('Need 3 real Lighthouse runs, got '+d.runs.length)"
+          exit "$result"
+      - name: Save actual reports even if a strict 95/100 gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2093-lighthouse-${{ matrix.profile }}
+          path: lighthouse-r2093/${{ matrix.profile }}/
+          include-hidden-files: true
+          retention-days: 21
+          if-no-files-found: warn

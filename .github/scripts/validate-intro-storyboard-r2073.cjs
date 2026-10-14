@@ -71,6 +71,7 @@ const SHOTS=[
             phase:overlay?.dataset.phase,progress:root.dataset.fxMagBirthVisualFrameSeconds,
             camera:root.dataset.fxMagIntroCameraR2073,
             mobileCameraDepth:Number(root.dataset.fxMagIntroMobileCameraDepthR2079||0),
+            macroDollyR2089:Number(root.dataset.fxMagIntroDollyR2089||0),
             renderer:root.dataset.fxMagBirthRendererR1360,
             birthState:root.dataset.fxMagBirthLiveR533,
             realPixelPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
@@ -80,12 +81,19 @@ const SHOTS=[
             morphR2080:root.dataset.fxMagIntroMorphR2080,
             morphProgressR2080:Number(root.dataset.fxMagIntroMorphProgressR2080||'0'),
             opticEnergyR2082:Number(root.dataset.fxMagIntroOpticEnergyR2082||'0'),
+            studioR2083:JSON.parse(root.dataset.fxMagIntroStudioR2083||'null'),
+            finalSignatureR2084:
+              JSON.parse(root.dataset.fxMagIntroFinalSignatureR2084||'null'),
+            genesisVersion:[...document.scripts]
+              .find(x=>x.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
             identityX:badge?badge.getBoundingClientRect().left+
               badge.getBoundingClientRect().width*.5:null,
-            innerWidth,
+            identityTop:badge?.getBoundingClientRect().top,
+            identityBottom:badge?.getBoundingClientRect().bottom,
+            innerWidth,innerHeight,
             canvasWidth:canvas?.width,canvasHeight:canvas?.height,
             coreCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             duplicateIdentity:document.querySelectorAll('.fx-ai-core-ident-r1951').length
@@ -101,6 +109,16 @@ const SHOTS=[
           lit:info.realLitSamples,camera:info.camera,phase:info.phase}));
         assert.equal(info.camera,shot.expected,
           'R2073 3D camera is not travelling through its authored cinematic arc: '+JSON.stringify(info));
+        if(shot.label==='organism-pullback'){
+          assert.ok(info.macroDollyR2089>.95,
+            'R2089 original physical three-dimensional organ pullback must '+
+            'include a dramatic authored real camera zoom: '+JSON.stringify(info));
+        }
+        if(shot.second>=8.5||shot.mobile){
+          assert.ok(info.macroDollyR2089<.001,
+            'Cinematic macro camera may not clip the mobile MAG, the centered '+
+            'boot identity or the original native R326 handoff: '+JSON.stringify(info));
+        }
         // The permanent hero MAG is allowed to bootstrap later: at an early
         // 1.4s deterministic frame it is not yet mounted. The real scene must
         // have its own live Three renderer, but never duplicate the hero MAG.
@@ -109,6 +127,50 @@ const SHOTS=[
           &&info.realPixelPeak>=20&&info.realLitSamples>=2,
           'Cinematic original Three framebuffer is black or MAG scene missing: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
+        // R2083: verify real moving physical lights INSIDE the original
+        // Three renderer, not a CSS screenshot or passive metadata marker.
+        const studio=info.studioR2083;
+        assert.ok(info.genesisVersion.includes('r2083-studio-cinema-reactive-mag'),
+          'Stale cached MAG film asset: '+JSON.stringify(info));
+        assert.ok(studio&&Number.isFinite(studio.key)
+          &&Number.isFinite(studio.fill)&&Number.isFinite(studio.rim)
+          &&Number.isFinite(studio.back)&&Number.isFinite(studio.optic)
+          &&studio.key>1.80&&studio.key<2.60
+          &&studio.fill>.45&&studio.fill<1.10
+          &&studio.rim>.80&&studio.rim<1.50
+          &&studio.back>.40&&studio.back<1.10,
+          'The REAL Three.js studio-light rig is not responding to the film: '+JSON.stringify(info));
+        if(shot.second===1.40){
+          assert.ok(studio.key<2.08&&studio.rim<1.02,
+            'DNA setup must use the original restrained studio light: '+JSON.stringify(studio));
+        }
+        if(shot.second===4.40){
+          assert.ok(studio.key>2.15&&studio.fill>.68,
+            'Cortical camera orbit must activate actual brighter photographic key/fill: '+
+              JSON.stringify(studio));
+        }
+        if(shot.second===8.50){
+          assert.ok(studio.rim>1.15&&studio.optic>.18,
+            'Identity phase must visibly illuminate the machined optic: '+
+              JSON.stringify(studio));
+        }
+        const signature=info.finalSignatureR2084;
+        assert.ok(signature&&Number.isFinite(signature.coreScale)
+          &&Number.isFinite(signature.shellOpacity)
+          &&Number.isFinite(signature.organicScale),
+          'Real source Three MAG geometry signature was not measured: '+JSON.stringify(info));
+        if(shot.second===4.40){
+          assert.ok(signature.coreScale>.49&&signature.organicScale<.70,
+            'The four-point MAG must dominate the cortical orbit, not an oversized ball: '+
+              JSON.stringify(signature));
+        }
+        if(shot.second>=9.98){
+          assert.ok(signature.coreScale>.78&&signature.shellOpacity>.75
+            &&signature.organicScale<.44&&signature.cellScale<.48
+            &&signature.mechanicalVisible===false,
+            'Final MAG must remain a readable original four-point living crystal: '+
+              JSON.stringify(signature));
+        }
         if(shot.second<8.96){
           assert.equal(info.morphR2080,'physical-metal-crest',
             'The iconic optical four-point metal crest must remain throughout the main intro: '+JSON.stringify(info));
@@ -131,6 +193,13 @@ const SHOTS=[
           assert.ok(info.insideFilm&&info.identityAlpha>.90
             &&Math.abs(info.identityX-info.innerWidth*.5)<12,
             'MAG identity must settle sharply on its real 3D optical axis: '+JSON.stringify(info));
+          /* R2088 optical composition: the actual metal/glass tip must remain
+             unobstructed, so the caption sits in lower negative space in both
+             genuinely rendered desktop and phone photographs. */
+          assert.ok(info.identityTop>info.innerHeight*(shot.mobile?.72:.86)
+            &&info.identityBottom<info.innerHeight-3,
+            'MAG optical caption overlaps the physical glass crystal or clips '+
+              'the real viewport: '+JSON.stringify(info));
         }else{
           assert.ok(!info.identity,'AI telemetry should not precede stabilization');
         }

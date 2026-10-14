@@ -726,10 +726,19 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(false){
-      const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
-      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
+    /* R2097: restore the ACTUAL original physical optical assembly. The
+       previous if(false) disabled both its circular metal housing and convex
+       living-glass lens, leaving only a flat shader dot after the intro.
+       Keep the native single-buffer WebGL ownership, budget geometry per tier,
+       and retain the same physical optical assembly under reduced motion. */
+    {
+      const opticalTrianglesBefore=facets.length/3;
+      const centreX=.075,centreY=.018;
+      const bezelSteps=auditMode?40:(software?48:mobile?56:72);
+      const bezelTubeSteps=mobile||auditMode?6:8;
+      const bezelZ=mobile?.729:.613;
+      const bezelMajorX=.198,bezelMajorY=.137,bezelTube=.008;
+
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -753,12 +762,12 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.609];
-      const lensRadiusX=.153;
-      const lensRadiusY=.041;
-      const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const lensCenter=[centreX,centreY,bezelZ+.008];
+      const lensRadiusX=.185;
+      const lensRadiusY=.125;
+      const lensDepth=.033;
+      const radialSteps=auditMode?8:(software?9:mobile?10:12);
+      const angularSteps=auditMode?40:(software?48:mobile?56:72);
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -797,6 +806,75 @@
           }
         }
         previous=current;
+      }
+      /* R2098: eight actual machined shutter blades ABOVE the convex sapphire.
+         Sixteen native triangles, one existing WebGL buffer and draw call.
+         Each blade follows the lens curvature, avoiding z-fighting while the
+         four-point outside silhouette and mobile geometry budget stay intact. */
+      const physicalIrisStart=facets.length/3;
+      for(let blade=0;blade<8;blade++){
+        const theta=blade*Math.PI/4;
+        const shutterVertex=(radial,angle)=>{
+          const vertex=lensVertex(radial,angle);
+          vertex.crystal[2]+=.006;
+          return vertex;
+        };
+        const insideLeft=shutterVertex(.70,theta-.27);
+        const outsideLeft=shutterVertex(.96,theta-.32);
+        const outsideRight=shutterVertex(.96,theta+.20);
+        const insideRight=shutterVertex(.70,theta+.15);
+        triangle([insideLeft,outsideLeft,outsideRight],6.18);
+        triangle([insideLeft,outsideRight,insideRight],6.18);
+      }
+      root.dataset.fxMagNativeIrisTrianglesR2098=
+        String(Math.round(facets.length/3-physicalIrisStart));
+      root.dataset.fxMagNativeIrisR2098='eight-physical-curved-shutter-blades';
+      root.dataset.fxMagNativeOpticTrianglesR2097=
+        String(Math.round(facets.length/3-opticalTrianglesBefore));
+      root.dataset.fxMagNativeOpticR2097=
+        'real-metal-bezel-convex-glass-one-native-webgl-draw';
+    }
+
+    /* R2091: eight genuine precision inset metal rails that trace the exact
+       closed superellipsoid, submitted in the existing ONE WebGL draw call.
+       This gives the permanent MAG the same machined-arm architecture as the
+       10-second R2075/2084 birth film.  No second canvas, HUD or texture. */
+    function frontSurfaceZ(x,y){
+      const e=mobile?.78:.61;
+      const xx=x>=0?(mobile?.88:1.02):(mobile?.86:.98);
+      const yy=y>=0?(mobile?1.09:1.18):(mobile?.97:1.06);
+      const zAxis=mobile?.64:.49;
+      const remaining=1-
+        Math.pow(Math.abs(x)/xx,e)-
+        Math.pow(Math.abs(y)/yy,e);
+      return zAxis*Math.pow(Math.max(.0005,remaining),1/e);
+    }
+    const railSegmentCount=mobile?10:14;
+    for(let arm=0;arm<4;arm++){
+      const angle=arm*Math.PI*.5;
+      const axisX=Math.cos(angle),axisY=Math.sin(angle);
+      const tangentX=-axisY,tangentY=axisX;
+      for(const side of [-1,1]){
+        let previousLeft=null,previousRight=null;
+        for(let step=0;step<=railSegmentCount;step++){
+          const u=step/railSegmentCount;
+          const reach=.17+(mobile?.60:.66)*u;
+          const offset=side*(.058*(1-u)+.015);
+          const centerX=axisX*reach+tangentX*offset;
+          const centerY=axisY*reach+tangentY*offset;
+          const halfWidth=.0048*(1-.23*u);
+          const lx=centerX+tangentX*halfWidth;
+          const ly=centerY+tangentY*halfWidth;
+          const rx=centerX-tangentX*halfWidth;
+          const ry=centerY-tangentY*halfWidth;
+          const left=[lx,ly,frontSurfaceZ(lx,ly)+.020];
+          const right=[rx,ry,frontSurfaceZ(rx,ry)+.020];
+          if(previousLeft&&previousRight){
+            armorQuad(previousLeft,previousRight,right,left,5.86);
+          }
+          previousLeft=left;
+          previousRight=right;
+        }
       }
     }
 
@@ -1359,7 +1437,23 @@
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
+        /* R2087: macro-polished four-point bioglass planes.  The material
+           normal is bent across the actual camera-rotated solid rather than
+           drawing fake streaks or high-frequency bands.  Lighting remains
+           consistent when the user rotates the ONE original WebGL object. */
         vec3 n=normalize(vNormal);
+        float rFac=length(vLocal.xy);
+        float armFac=abs(cos(atan(vLocal.y,vLocal.x)*2.0));
+        float outerFac=smoothstep(.16,.42,rFac)*
+          (1.0-smoothstep(.72,.96,rFac));
+        float faceFac=outerFac*pow(armFac,1.8)*
+          smoothstep(.01,.36,vLocal.z);
+        vec3 cutNormal=normalize(vec3(
+          n.x*.72+sign(vLocal.x+.0001)*.39,
+          n.y*.72+sign(vLocal.y+.0001)*.29,
+          max(.25,n.z)*1.08
+        ));
+        n=normalize(mix(n,cutNormal,faceFac*.56));
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
@@ -1393,7 +1487,7 @@
         }
 
         /* Smoked blue-silver glass volume. */
-        float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
+        float lift=sat(.13+.34*key+.24*side+.15*fill+.08*top);
         float macroAngle=atan(vLocal.y,vLocal.x);
         float macroRadius=length(vLocal.xy);
         float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
@@ -1404,7 +1498,7 @@
           : '.955+.070*macroFacet'}; 
         /* R2075 one-pass native body matches the readable smoked silver
            bioceramic optical material of the real 3D birth film. */
-        vec3 c=mix(vec3(.006,.012,.016),vec3(.158,.215,.224),lift)*facetTone;
+        vec3 c=mix(vec3(.006,.009,.013),vec3(.097,.125,.132),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1418,14 +1512,14 @@
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.032;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.56,.70,.69)*softboxB*${mobile?'.185':'.155'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        c+=vec3(.86,.91,.88)*softboxC*${mobile?'.215':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.004;
+        c+=vec3(.68,.79,.74)*glassBlade*.065;
 
         /* R1942 — internal prism architecture.
            Four broad refractive planes run toward the signature tips. They are
@@ -1440,14 +1534,18 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.155+.055*prismSweep);
+        c+=vec3(.35,.43,.42)*axisRidge*(.29+.075*prismSweep);
         /* R2075 real native 3D radial engraved optical mineral: UV-free
            in volume coordinates, with mobile-safe lower frequency. */
-        float machinedGroove=pow(abs(sin(radialXY*${mobile?'55.0':'92.0'})),11.0)
-          *axisRidge*frontDepth;
-        c+=vec3(.65,.82,.81)*machinedGroove*${mobile?'.063':'.082'};
+        /* R2085: subpixel radial sine bands produced visible moire,
+           the dense cyan concentric rings in genuine browser screenshots.
+           Replace periodic rings with angular machined facets. */
+        float engravedAngle=abs(cos(polar*4.0+vLocal.z*.43));
+        float machinedGroove=pow(engravedAngle,14.0)*axisRidge*
+          frontDepth*(1.0-smoothstep(.67,.88,radialXY));
+        c+=vec3(.70,.79,.76)*machinedGroove*${mobile?'.075':'.105'};
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-.29*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1475,15 +1573,52 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.49,.57,.53)*foldRidge*${mobile?'.16':'.21'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
+        c*=1.0-${mobile?'.14':'.18'}*foldValley;
+        /* R2086: variable-depth corner facets across the actual 3D
+           surface, no high-frequency scanlines or flat decal layers. */
+        float broadSilverPlane=pow(sat(dot(
+          normalize(vec3(vLocal.x*.46-.34,vLocal.y*.62+.46,vLocal.z*.82+.73)),
+          normalize(vec3(-.50,.61,.62))
+        )),3.0)*frontDepth;
+        float silverLamina=exp(-pow(
+          (abs(vLocal.x)*.68+abs(vLocal.y)*.43-.48)/.17,2.0
+        ))*frontDepth;
+        c+=vec3(.50,.58,.56)*broadSilverPlane*.17;
+        c+=vec3(.62,.70,.66)*silverLamina*.11;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
+        /* A broad, physically coherent studio bevel adds sculptural
+           silver depth instead of raising the entire teal base. */
+        float metalShoulder=pow(
+          max(dot(n,normalize(vec3(-.29,.66,.69))),0.0),3.5
+        )*frontDepth;
+        float coolFacet=pow(
+          max(dot(n,normalize(vec3(.68,.12,.71))),0.0),5.0
+        )*frontDepth;
+        c+=vec3(.72,.76,.72)*metalShoulder*.23;
+        c+=vec3(.29,.45,.47)*coolFacet*.16;
+
+        /* R2090: broad actual crystal-arm optical planes, rather than a
+           flat teal silhouette or artificial fine concentric stripes.
+           The planes follow the existing four real 3D facets and their
+           current studio light, leaving the center optic unmasked. */
+        float armFace=pow(abs(cos(polar*2.0)),2.4);
+        float armSeam=pow(abs(sin(polar*2.0)),3.2);
+        float armRim=pow(abs(cos(polar*2.0)),17.0);
+        float laminaDepth=smoothstep(.18,.36,radialXY)*
+          (1.0-smoothstep(.71,.94,radialXY))*frontDepth;
+        vec3 smokedSilver=vec3(.026,.043,.048)+
+          vec3(.24,.30,.29)*(.24+.47*key+.26*softboxA)+
+          vec3(.035,.09,.11)*softboxB;
+        c=mix(c,smokedSilver,armFace*laminaDepth*.60);
+        c*=1.0-.30*armSeam*laminaDepth;
+        c+=vec3(.31,.37,.34)*armRim*laminaDepth*.25;
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.034,.095,.115)*fresnel*.27;
+        c+=vec3(.055,.145,.165)*deepEdge*.19;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1493,11 +1628,11 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.160':'.258'},vLocal.y/${mobile?'.160':'.258'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
+        c=mix(c,vec3(.004,.012,.018)+c*.23,cavity*.38);
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
         float rim=exp(-pow((od-.74)/.060,2.0))*front;
@@ -1506,7 +1641,7 @@
         float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
+        c=mix(c,opticBase+c*.34,lens*.39);
         /* R2075 compact physical iris: two machined annuli plus eight
            aperture facets, shaded by the original real single WebGL body. */
         float collarOuter=exp(-pow((od-1.08)/.065,2.0))*front;
@@ -1514,13 +1649,13 @@
         float bladeAngle=atan(oq.y,oq.x);
         float apertureBlades=pow(abs(cos(bladeAngle*4.0+.12)),15.0)
           *smoothstep(.28,.45,od)*(1.0-smoothstep(.75,.91,od))*front;
-        c+=vec3(.85,.98,.96)*collarOuter*${mobile?'.16':'.21'};
-        c+=vec3(.50,.78,.80)*collarInner*${mobile?'.095':'.13'};
-        c+=vec3(.52,.80,.83)*apertureBlades*${mobile?'.085':'.13'};
+        c+=vec3(.88,.95,.91)*collarOuter*${mobile?'.30':'.42'};
+        c+=vec3(.64,.80,.79)*collarInner*${mobile?'.20':'.26'};
+        c+=vec3(.60,.79,.80)*apertureBlades*${mobile?'.17':'.21'};
         c+=vec3(.78,.88,.84)*rim*${mobile?'.190':'.250'};
-        c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        c+=vec3(.020,.24,.27)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
+        c+=vec3(.31,.83,.85)*core*(${mobile?'.52':'.58'}+${mobile?'.17':'.18'}*uEnergy);
+        c+=vec3(.98,.99,.96)*hot*(${mobile?'.75':'.84'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
@@ -1529,12 +1664,58 @@
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
-          float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          /* R2092: track across the broad 3D shell at both .38 and .68
+             phase. The old .68 crest traveled onto the narrow upper point
+             and disappeared visually on 390px phone hardware. */
+          float head=-.13+1.12*sat(uSurfacePulse);
+          sweep=exp(-pow((coordinate-head)/.088,2.0))*
+            (.34+.66*fresnel);
         }
-        c+=vec3(.08,.30,.34)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
+        c+=vec3(.11,.33,.37)*sweep*${mobile?'.36':'.29'};
+        c+=vec3(.70,.78,.74)*sweep*softboxA*${mobile?'.12':'.09'};
 
+        /* R2091: true thin, surface-conforming precision metal strips are
+           geometry tagged 5.86. A brushed silver response comes from their
+           ACTUAL front normals, not painted streaks on the background. */
+        float railMask=step(5.80,vFacet)*(1.0-step(6.0,vFacet));
+        vec3 railMetal=vec3(.078,.102,.110)+
+          vec3(.50,.58,.55)*(softboxA*.46+softboxB*.28+key*.19)+
+          vec3(.05,.12,.13)*fresnel*.18+
+          vec3(.18,.31,.33)*sweep*.40;
+        c=mix(c,railMetal,railMask*.96);
+        /* R2097: convex sapphire eye and machined titanium ring are physically
+           tessellated geometry inside the original SINGLE MAG vertex buffer.
+           vFacet distinguishes their actual surfaces from the shell. */
+        float physicalBezel=step(5.69,vFacet)*(1.0-step(5.80,vFacet));
+        float physicalLens=step(6.30,vFacet)*(1.0-step(6.54,vFacet));
+        float glassRadial=length((vUv-vec2(.5))*2.0);
+        vec3 machinedTitanium=vec3(.07,.095,.106)+
+          vec3(.43,.52,.53)*(softboxA*.54+softboxB*.36+key*.22)+
+          vec3(.14,.19,.20)*fresnel*.24;
+        float irisVein=exp(-pow((glassRadial-.53)/.075,2.0));
+        float lensCore=exp(-glassRadial*glassRadial*8.2);
+        float opticRing=exp(-pow((glassRadial-.77)/.038,2.0));
+        float reactiveSpec=pow(max(dot(n,normalize(vec3(
+          -.33+uPointer.x*.14,.62+uPointer.y*.14,.81))),0.0),15.0);
+        vec3 physicalGlass=vec3(.005,.023,.032)+
+          vec3(.028,.12,.15)*(1.0-glassRadial*.48)+
+          vec3(.17,.26,.28)*reactiveSpec*.33+
+          vec3(.20,.60,.68)*irisVein*(.22+.08*uEnergy)+
+          vec3(.32,.88,.95)*lensCore*(.24+.16*uEnergy)+
+          vec3(.35,.46,.48)*opticRing*.30+
+          vec3(.09,.29,.32)*sweep*.22;
+        c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,physicalGlass,physicalLens);
+        /* R2098 physical eight-blade shutter. Its curved titanium blades are
+           drawn by the existing depth-tested triangle geometry, not a flat
+           overlay, texture, SVG or another WebGL pass. Pointer light remains
+           reactive through the canonical native uPointer uniform. */
+        float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
+        vec3 shutterMetal=vec3(.016,.035,.042)+
+          vec3(.24,.33,.35)*(softboxA*.51+softboxB*.34+key*.18)+
+          vec3(.06,.13,.15)*reactiveSpec*(.32+.24*uEnergy)+
+          vec3(.14,.22,.22)*sweep*.19;
+        c=mix(c,shutterMetal,physicalIris*.97);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
