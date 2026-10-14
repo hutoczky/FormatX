@@ -46,7 +46,7 @@ jobs:
           python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/fx-parity-http.log" 2>&1 &
           FX_PARITY_SERVER_PID=$!
           trap 'kill "$FX_PARITY_SERVER_PID"' EXIT
-          node .github/scripts/validate-visitor-runtime-parity-r2054.cjs
+          xvfb-run -a node .github/scripts/validate-visitor-runtime-parity-r2054.cjs
       - name: Enforce measured original intro duration
         if: always()
         run: node .github/scripts/assert-actual-intro-timing-r2054.cjs

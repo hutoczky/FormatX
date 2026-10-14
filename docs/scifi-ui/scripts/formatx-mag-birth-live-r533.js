@@ -529,6 +529,7 @@
   let coreApi = null;
   let canonicalStageHome=null;
   let canonicalIntroActive=false;
+  let canonicalFrameProofDetach=null;
   let lastTargetSync = 0;
   let lastMorphSync = 0;
   let lastNativeSync = 0;
@@ -572,7 +573,7 @@
       percent.value=String(progressValue).padStart(3,'0');
       progress.value=progressValue;
       status.textContent=copy.statuses[statusIndex][1];
-      if(value===3){
+      if(value===3&&!canonicalIntroActive){
         locateStage();
         try{
           coreApi?.setMorph?.(.72,'r631-mobile-css-genome-handoff');
@@ -580,7 +581,7 @@
         }catch(_){}
         if(stage instanceof HTMLElement)setStageOpacity(.72);
       }
-      if(value===4){
+      if(value===4&&!canonicalIntroActive){
         locateStage();
         try{
           coreApi?.setMorph?.(0,'r631-mobile-css-final-handoff');
@@ -649,10 +650,23 @@
     canonicalIntroActive=true;
     overlay.dataset.fxRenderer='canonical';
     ROOT.dataset.fxMagBirthRendererR1360='canonical-webgl-organism';
+    ROOT.dataset.fxMagBirthRendererR2063='canonical-webgl-organism';
     ROOT.dataset.fxMagBirthContinuityR2063='same-canvas-context-geometry-input-and-lifecycle';
     canvas.hidden=true;
     try{filmRenderer?.destroy?.();}catch(_){}
     filmRenderer=null;
+    if(HAS_VISUAL_FRAME&&coreApi.sharedWebGL2){
+      canonicalFrameProofDetach=coreApi.registerScenePass(({gl,width,height})=>{
+        const sample=new Uint8Array(4);
+        let peak=0;
+        for(const x of [.2,.35,.5,.65,.8])for(const y of [.2,.35,.5,.65,.8]){
+          gl.readPixels(Math.min(width-1,Math.round(width*x)),Math.min(height-1,Math.round(height*y)),1,1,gl.RGBA,gl.UNSIGNED_BYTE,sample);
+          peak=Math.max(peak,sample[0],sample[1],sample[2]);
+        }
+        ROOT.dataset.fxMagBirthFramePeakR1557=String(peak);
+      });
+    }
+    try{interactionController.abort();}catch(_){}
     coreApi.genesis(REDUCED?1:Math.min(1,(performance.now()-startedAt)/DURATION));
     return true;
   }
@@ -689,7 +703,7 @@
   function setStageOpacity(value) {
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
-    if(canonicalIntroActive)return;
+    if(canonicalIntroActive||typeof coreApi?.genesis==='function')return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
     stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
   }
@@ -697,6 +711,7 @@
   function releaseStageStyle() {
     if (!(stage instanceof HTMLElement)) return;
     if(canonicalStageHome){
+      canonicalFrameProofDetach?.();canonicalFrameProofDetach=null;
       const home=canonicalStageHome;
       canonicalStageHome=null;
       canonicalIntroActive=false;
@@ -728,6 +743,7 @@
     if (!coreApi) return;
     adoptCanonicalStage();
     if(canonicalIntroActive){coreApi.genesis(REDUCED?1:r);return;}
+    if(typeof coreApi.genesis==='function')return;
 
     if (r < .50) {
       setStageOpacity(Math.max(.008,r*.035));
@@ -787,6 +803,7 @@
     if(window.FormatXMagReferenceFilmR649?.attach){
       overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
+      if(filmRenderer)ROOT.dataset.fxMagBirthRendererR2063='native-canvas-reference-film';
       ROOT.dataset.fxMagBirthRendererR1360=filmRenderer?'native-canvas-reference-film':'fallback-particles';
       ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
@@ -908,9 +925,12 @@
 
     try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
-      coreApi?.setMorph?.(0,'r611-final-living-handoff');
-      coreApi?.setShape?.('organism','r611-final-living-handoff');
-      coreApi?.requestRender?.(2);
+      if(typeof coreApi?.genesis==='function')coreApi.genesis(1);
+      else{
+        coreApi?.setMorph?.(0,'r611-final-living-handoff');
+        coreApi?.setShape?.('organism','r611-final-living-handoff');
+        coreApi?.requestRender?.(2);
+      }
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
 
@@ -1147,12 +1167,10 @@
         };
         requestAnimationFrame(()=>requestAnimationFrame(settleProof));
       };
-      const rendererReady=filmRendererPromise
-        ? Promise.race([
-            Promise.resolve(filmRendererPromise),
-            new Promise(resolve=>setTimeout(resolve,6000))
-          ])
-        : Promise.resolve();
+      const rendererReady=canonicalIntroActive?Promise.resolve():Promise.race([
+        new Promise(resolve=>addEventListener('formatx:real3dready',resolve,{once:true})),
+        new Promise(resolve=>setTimeout(resolve,6000))
+      ]);
       rendererReady.then(()=>{
         requestAnimationFrame(()=>requestAnimationFrame(renderFixedFrame));
       }).catch(()=>{

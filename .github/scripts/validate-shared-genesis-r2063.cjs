@@ -35,7 +35,8 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   stage.parentNode=parent;stage.nextSibling=sibling;sibling.parentNode=parent;
   const overlay={isConnected:true,dataset:{},appendChild(){throw new Error('The real MAG must retain its original DOM owner');}};
   const context={HTMLElement:Element,stage,overlay,ROOT:{dataset:{fxCrystalOrganismR326:'initializing'},removeAttribute(){}},
-    finished:false,overlayTornDown:false,canonicalIntroActive:false,canonicalStageHome:null,canvas:{hidden:false},filmRenderer:{destroy(){movements.push('destroy-reference');}},
+    finished:false,overlayTornDown:false,canonicalIntroActive:false,canonicalStageHome:null,canonicalFrameProofDetach:null,HAS_VISUAL_FRAME:false,
+    interactionController:{abort(){movements.push('release-genesis-input');}},canvas:{hidden:false},filmRenderer:{destroy(){movements.push('destroy-reference');}},
     coreApi:{genesis(value){progress.push(value);},requestRender(){}},REDUCED:false,startedAt:100,DURATION:1350,
     performance:{now:()=>500},innerWidth:1440,innerHeight:900,locateStage(){return stage;}};
   vm.createContext(context);vm.runInContext(adopt+'\n'+release,context);
@@ -53,7 +54,7 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   assert.equal(stage.style.getPropertyValue('--another-owner'),'preserved','Unrelated runtime style changes must survive intro teardown');
   assert.equal(stage.style.getPropertyValue('--fxb-genesis-x'),'');
   assert.equal(progress.at(-1),null,'The page camera must be restored after the cinematic');
-  assert.deepEqual(movements,['destroy-reference']);
+  assert.deepEqual(movements,['destroy-reference','release-genesis-input']);
   context.finished=true;
   assert.equal(context.adoptCanonicalStage(),false,'Late readiness must not reinsert the completed intro');
   context.finished=false;overlay.isConnected=false;

@@ -15,7 +15,24 @@ const write = () => fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringi
 // Observers record the real rendering calls and event order. They do not
 // alter shaders, uniforms, timing, geometry, session state or readiness.
 function observe() {
-  const evidence = window.__fxVisitorEvidence = { draws: 0, ready: [], birth: [], birthStart: [], sweeps: [], options: null, shaders: [], glWork: [], longTasks: [], warmup: [] };
+  const evidence = window.__fxVisitorEvidence = { draws: 0, ready: [], birth: [], birthStart: [], sweeps: [], options: null, shaders: [], glWork: [], longTasks: [], warmup: [], introTimers: [] };
+  const actualSetTimeout=window.setTimeout,actualClearTimeout=window.clearTimeout;
+  const observedTimers=new Map();
+  window.setTimeout=function(callback,delay,...args){
+    const source=typeof callback==='function'?Function.prototype.toString.call(callback):'';
+    if(!/timeline-end-r2063|safeTeardownOverlay|bounded-failsafe-r652|absolute-dom-watchdog-r653/.test(source)){
+      return Reflect.apply(actualSetTimeout,this,[callback,delay,...args]);
+    }
+    const timer={registeredAt:performance.now(),delay:Number(delay)||0,source:source.slice(0,500)};
+    evidence.introTimers.push(timer);
+    const wrapper=function(...values){timer.firedAt=performance.now();return Reflect.apply(callback,this,values);};
+    const id=Reflect.apply(actualSetTimeout,this,[wrapper,delay,...args]);
+    observedTimers.set(id,timer);return id;
+  };
+  window.clearTimeout=function(id){
+    const timer=observedTimers.get(id);if(timer)timer.clearedAt=performance.now();
+    return Reflect.apply(actualClearTimeout,this,[id]);
+  };
   const recordGlWork = (operation, startedAt, canvas, error) => {
     const returnedAt=performance.now();
     if(evidence.glWork.length<160)evidence.glWork.push({operation,startedAt,returnedAt,duration:returnedAt-startedAt,
@@ -133,7 +150,7 @@ async function visit(browser, engine, profile, identity, userAgent) {
   } finally {
     const observed=result.evidence||result.partial?.evidence;
     console.log('VISITOR_STARTUP_BLOCKING_EVIDENCE',JSON.stringify({name,birth:observed?.birth,warmup:observed?.warmup,
-      ready:observed?.ready,glWork:observed?.glWork,longTasks:observed?.longTasks,
+      ready:observed?.ready,glWork:observed?.glWork,longTasks:observed?.longTasks,introTimers:observed?.introTimers,
       rendererState:result.partial?.dataset?.fxCrystalOrganismR326,failures}));
     report.cases.push(result);
     report.failures.push(...failures.map(message => `${name}: ${message}`));
@@ -164,7 +181,7 @@ async function visit(browser, engine, profile, identity, userAgent) {
       }
     }
   } finally { await browser.close(); }
-  const gecko = await firefox.launch({ headless: true });
+  const gecko = await firefox.launch({ headless: !process.env.DISPLAY });
   try { for (const profile of ['desktop', 'mobile']) await visit(gecko, 'firefox', profile, 'visitor'); }
   finally { await gecko.close(); }
   write();
