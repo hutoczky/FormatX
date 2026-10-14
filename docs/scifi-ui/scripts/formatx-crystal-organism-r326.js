@@ -732,8 +732,8 @@
     if(true){
       const centreX=.025,centreY=-.012;
       const bezelSteps=software?24:mobile?32:48;
-      const bezelTubeSteps=4,bezelZ=.632;
-      const bezelMajorX=.180,bezelMajorY=.162,bezelTube=.009;
+      const bezelTubeSteps=4,bezelZ=.648;
+      const bezelMajorX=.245,bezelMajorY=.218,bezelTube=.010;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -757,10 +757,10 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.643];
-      const lensRadiusX=.162;
-      const lensRadiusY=.145;
-      const lensDepth=.022;
+      const lensCenter=[centreX,centreY,.660];
+      const lensRadiusX=.222;
+      const lensRadiusY=.198;
+      const lensDepth=.027;
       const radialSteps=software?4:mobile?5:6;
       const angularSteps=software?24:mobile?32:48;
       function lensVertex(radial,angle){
@@ -1550,7 +1550,7 @@
         float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
         float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
         vec3 machinedTitanium=vec3(.022,.040,.048)+
-          vec3(.43,.49,.46)*(softboxA*.56+softboxB*.31+key*.13)+
+          vec3(.54,.60,.56)*(softboxA*.56+softboxB*.31+key*.13)+
           vec3(.065,.13,.15)*fresnel*.36;
         vec3 shutterTitanium=vec3(.011,.028,.037)+
           vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
@@ -1558,7 +1558,7 @@
         float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),12.0);
         vec3 sapphireGlass=vec3(.005,.019,.034)+
           vec3(.045,.13,.16)*(.25+.75*key)+
-          vec3(.19,.24,.22)*sapphireSpec*.48+
+          vec3(.28,.33,.30)*sapphireSpec*.62+
           vec3(.025,.12,.16)*fresnel*.21;
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,shutterTitanium,physicalIris);
