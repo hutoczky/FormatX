@@ -1656,7 +1656,12 @@
     updateOrganic(t,time){
       const grow=smooth((t-2.48)/.72);
       const fade=1-smooth((t-6.20)/1.15)*.96;
-      const visible=grow*fade;
+      // R2080: the birth film and the permanent native MAG use the SAME
+      // organic identity at handoff. The sculpted metal 4-point crest at
+      // t=8.5 is a transient living exoskeleton, not an abrupt replacement.
+      // Re-emerge through it in the final ~900ms, with C1-smooth optics.
+      const handoffOrganic=smooth((t-8.96)/.88);
+      const visible=Math.max(grow*fade,handoffOrganic);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.82;
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
@@ -1704,7 +1709,9 @@
     updateCells(t,time){
       const grow=smooth((t-2.60)/.70);
       const fade=1-smooth((t-6.25)/1.10)*.96;
-      const visible=grow*fade;
+      // Preserve the same cellular outer mantle as the native R326 organism.
+      const handoffCellular=smooth((t-9.04)/.84);
+      const visible=Math.max(grow*fade,handoffCellular);
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.99;
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
@@ -1723,7 +1730,9 @@
     }
 
     updateMechanical(t,time){
-      const grow=smooth((t-6.25)/.90);
+      const bodyGain=smooth((t-6.25)/.90);
+      const handoffRelease=1-smooth((t-9.00)/.88);
+      const grow=bodyGain*handoffRelease;
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
@@ -1908,6 +1917,15 @@
       this.updateCells(t,time);
       this.updateMechanical(t,time);
       this.updateTentacles(t,time);
+      // Expose the real scene ownership and crossfade progress to the
+      // authentic WebGL screenshot and handoff contract.
+      const handoff=smooth((t-8.96)/.88);
+      document.documentElement.dataset.fxMagIntroMorphR2080=
+        handoff<.001?'physical-metal-crest':
+        handoff>.999?'canonical-native-organism':
+        'metal-to-living-organism';
+      document.documentElement.dataset.fxMagIntroMorphProgressR2080=
+        handoff.toFixed(3);
 
       this.particles.rotation.z=time*.000018;
       this.particles.rotation.y=time*.000012;
