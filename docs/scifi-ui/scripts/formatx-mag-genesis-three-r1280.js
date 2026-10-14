@@ -1973,6 +1973,22 @@
       focusX=lerp(focusX,0,stabilize);
       focusY=lerp(focusY,0,stabilize);
       bank=lerp(bank,0,stabilize);
+      /* R2089: decisive Lando-style macrophotographic revelation.
+         The earlier 6.45s shot hid the physical MAG in negative space.
+         A C1-smooth desktop-only lens push reveals the actual glass relief,
+         then returns to the ORIGINAL stabilization and native handoff pose.
+         Portrait framing retains the independently verified R2079 optics. */
+      const macroDolly=glide(5.55,6.20,t)*
+        (1-glide(7.03,7.87,t));
+      const desktopDolly=this.width>=this.height&&!this.mobileRender;
+      if(desktopDolly){
+        z-=.60*macroDolly;
+        x+=.062*macroDolly;
+      }
+      if(this.proofReadbackR2073){
+        document.documentElement.dataset.fxMagIntroDollyR2089=
+          (desktopDolly?macroDolly:0).toFixed(3);
+      }
       // 9.1–9.7s: tiny clean handoff push; last 300ms are stable.
       z=lerp(z,4.40,glide(9.10,9.70,t));
       const input=this.cameraInput;
