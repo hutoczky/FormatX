@@ -71,6 +71,7 @@ const SHOTS=[
             phase:overlay?.dataset.phase,progress:root.dataset.fxMagBirthVisualFrameSeconds,
             camera:root.dataset.fxMagIntroCameraR2073,
             mobileCameraDepth:Number(root.dataset.fxMagIntroMobileCameraDepthR2079||0),
+            macroDollyR2089:Number(root.dataset.fxMagIntroDollyR2089||0),
             renderer:root.dataset.fxMagBirthRendererR1360,
             birthState:root.dataset.fxMagBirthLiveR533,
             realPixelPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
@@ -108,6 +109,16 @@ const SHOTS=[
           lit:info.realLitSamples,camera:info.camera,phase:info.phase}));
         assert.equal(info.camera,shot.expected,
           'R2073 3D camera is not travelling through its authored cinematic arc: '+JSON.stringify(info));
+        if(shot.label==='organism-pullback'){
+          assert.ok(info.macroDollyR2089>.95,
+            'R2089 original physical three-dimensional organ pullback must '+
+            'include a dramatic authored real camera zoom: '+JSON.stringify(info));
+        }
+        if(shot.second>=8.5||shot.mobile){
+          assert.ok(info.macroDollyR2089<.001,
+            'Cinematic macro camera may not clip the mobile MAG, the centered '+
+            'boot identity or the original native R326 handoff: '+JSON.stringify(info));
+        }
         // The permanent hero MAG is allowed to bootstrap later: at an early
         // 1.4s deterministic frame it is not yet mounted. The real scene must
         // have its own live Three renderer, but never duplicate the hero MAG.
