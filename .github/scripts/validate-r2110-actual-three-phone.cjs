@@ -68,6 +68,9 @@ const frames=[
             buffer:[canvas?.width||0,canvas?.height||0],
             oneCanvas:owner?.querySelectorAll('canvas.fxb-particles').length===1,
             mobileThreeDistance:Number(root.dataset.fxMagThreeMobileDistanceR2112||0),
+            irisBlades:Number(root.dataset.fxMagThreeIrisBladesR2113||0),
+            collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
+            optics:root.dataset.fxMagThreeOpticsR2113||'',
             threeSource:[...document.scripts]
               .find(el=>el.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             skip:{width:box?.width||0,height:box?.height||0,
@@ -88,17 +91,23 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2112-full-fourpoint-mobile-cinema'),
+        assert.ok(info.threeSource.includes('r2113-physical-three-iris-mobile-frame'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
-          assert.ok(info.mobileThreeDistance>=9.0&&
-            info.mobileThreeDistance<=12.0,
+          assert.ok(info.mobileThreeDistance>=7.7&&
+            info.mobileThreeDistance<=10.3,
             'The premium mobile camera is still too close for the four-point width: '+
               JSON.stringify(info));
         }
         assert.ok(info.skip.width>=90&&info.skip.height>=44&&
           info.skip.opacity>.95,
           'Real Three intro must retain an accessible Skip control');
+        assert.equal(info.irisBlades,8,
+          'Every authored titanium iris blade must exist in the ACTUAL Three scene');
+        assert.equal(info.collars,3,
+          'All three precision optical collars must exist in the ACTUAL Three scene');
+        assert.equal(info.optics,'three-metal-collars-eight-physical-iris-blades',
+          'Optic provenance must be the real new 3D mesh, not a 2D illustration');
         assert.deepEqual(errors,[],'Three film runtime errors');
         results.push({frame,info});
         console.log('R2110_REAL_THREE_FILM_PASS',
