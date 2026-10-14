@@ -864,6 +864,13 @@
       }
     }
     root.dataset.fxNativeMagRailsR2107='8-sculpted-front-surface-channels';
+    /* R2108: report the actual adaptive real-mesh tessellation level.
+       SwiftShader/software WebGL intentionally uses seven rail sections,
+       mobile hardware ten, and desktop hardware fourteen. Every case still
+       builds all eight original surface-following titanium channels. */
+    root.dataset.fxNativeMagRailSectionsR2108=String(sections);
+    root.dataset.fxNativeMagRailDetailR2108=
+      software?'software-7':mobile?'mobile-10':'desktop-14';
     root.dataset.fxNativeMagRailTrianglesR2107=
       String((facets.length-railStart)/3);
 
