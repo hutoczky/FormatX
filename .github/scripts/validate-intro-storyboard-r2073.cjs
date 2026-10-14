@@ -90,7 +90,9 @@ const SHOTS=[
             identityAlpha:Number(badgeCss?.opacity||0),
             identityX:badge?badge.getBoundingClientRect().left+
               badge.getBoundingClientRect().width*.5:null,
-            innerWidth,
+            identityTop:badge?.getBoundingClientRect().top,
+            identityBottom:badge?.getBoundingClientRect().bottom,
+            innerWidth,innerHeight,
             canvasWidth:canvas?.width,canvasHeight:canvas?.height,
             coreCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             duplicateIdentity:document.querySelectorAll('.fx-ai-core-ident-r1951').length
@@ -180,6 +182,13 @@ const SHOTS=[
           assert.ok(info.insideFilm&&info.identityAlpha>.90
             &&Math.abs(info.identityX-info.innerWidth*.5)<12,
             'MAG identity must settle sharply on its real 3D optical axis: '+JSON.stringify(info));
+          /* R2088 optical composition: the actual metal/glass tip must remain
+             unobstructed, so the caption sits in lower negative space in both
+             genuinely rendered desktop and phone photographs. */
+          assert.ok(info.identityTop>info.innerHeight*(shot.mobile?.72:.86)
+            &&info.identityBottom<info.innerHeight-3,
+            'MAG optical caption overlaps the physical glass crystal or clips '+
+              'the real viewport: '+JSON.stringify(info));
         }else{
           assert.ok(!info.identity,'AI telemetry should not precede stabilization');
         }
