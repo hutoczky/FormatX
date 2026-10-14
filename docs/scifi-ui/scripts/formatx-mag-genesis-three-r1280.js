@@ -1619,7 +1619,11 @@
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
-      const surfaceZ=cellular*1.10;
+      // R2082: the physical cyan optic resurfaces above the organic cortex
+      // as the mechanical armor retracts, retaining a readable center in
+      // the native MAG on desktop AND 390px portrait screens.
+      const nativeEye=smooth((t-8.96)/.88);
+      const surfaceZ=cellular*1.10+nativeEye*.96;
 
       this.coreGroup.position.set(tx,ty,surfaceZ);
       this.organicGroup.position.set(tx,ty,0);
@@ -1633,7 +1637,10 @@
 
       const stage1=1-smooth((t-2.60)/.42);
       const reveal=smooth((t-2.68)/.46);
-      const eyeHold=reveal*(1-smooth((t-6.35)/.78));
+      const eyeHold=Math.max(
+        reveal*(1-smooth((t-6.35)/.78)),
+        nativeEye*.84
+      );
       const preFlash=1-smooth((t-6.55)/.72);
       const pulse=.988+.012*Math.sin(time*.0046);
 
@@ -1666,8 +1673,9 @@
       const bodyScale=.001+visible*.82;
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
-      this.organicShellMaterial.opacity=.54*visible;
-      this.organicLobeMaterial.opacity=.46*visible;
+      const finalMaterialGlow=smooth((t-8.96)/.88);
+      this.organicShellMaterial.opacity=(.54+.08*finalMaterialGlow)*visible;
+      this.organicLobeMaterial.opacity=(.46+.045*finalMaterialGlow)*visible;
       this.organicWireMaterial.opacity=.0003*visible;
       this.organicVeinMaterial.opacity=.16*visible;
       this.organicHoodMaterial.opacity=.36*visible;
