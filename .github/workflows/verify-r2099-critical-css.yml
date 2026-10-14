@@ -6,6 +6,9 @@ on:
       - feature/r2083-studio-cinema-reactive-mag
     paths:
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.desktop-r2101.css'
+      - 'docs/scifi-ui/styles/formatx-reference-production-r244.desktop-r2100.css'
       - 'docs/scifi-ui/styles/formatx-reference-production-r244.css'
       - 'docs/scifi-ui/styles/formatx-reference-production-r244.min-r2099.css'
       - 'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.css'
