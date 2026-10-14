@@ -76,10 +76,11 @@ assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
   html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2107-machined-sapphire-depth'),
   'Missing actual cache-busted four-point R2103 Android replacement');
-assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
-  fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
-  fallback.includes('const studioTravel=.5+.5*Math.sin(time*.00053)'),
-  'R2104 movie must use a real animated optical studio-light material');
+assert.ok(fallback.includes('const lightSweep=Math.sin(time*.00038)')&&
+  fallback.includes('S*.09*lightSweep')&&
+  fallback.includes("hull.addColorStop(.14,'#3b555e')")&&
+  fallback.includes('for(let arm=0;arm<4;arm++)'),
+  'R2107 moving studio light and distinct metallic facet gradients must remain active');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
   intro.includes('min-height:44px!important;'),
