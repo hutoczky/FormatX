@@ -54,6 +54,8 @@
   <!-- production-r2039-phone-critical-css-preload: same hrefs as actual stylesheets; keep cascade unchanged -->
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261013-r2061-menu-critical-fused">
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="./styles/formatx-mobile-brand-dedupe-r1952.css?v=20261007-r1952-single-mobile-brand-icon">
+  <!-- R2096: start the SAME desktop reference stylesheet download before other head resources. The original render-blocking link and its cascade position remain unchanged: no FOUC, no CLS. -->
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="./styles/formatx-reference-production-r244.css?v=20261007-r1972-first-frame-stability">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="description" content="FormatX Suite Pro — élő rendszerarchitektúraként bemutatott, interaktív technikusi platform meghajtókezeléshez, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz.">
   <meta name="theme-color" content="#01040b">
