@@ -636,13 +636,20 @@
     if(finished||overlayTornDown||!overlay.isConnected||canonicalIntroActive||!(stage instanceof HTMLElement)
       ||ROOT.dataset.fxCrystalOrganismR326!=='ready'||typeof coreApi?.genesis!=='function')return false;
     const rect=stage.getBoundingClientRect();
-    const names=['--fxb-genesis-x','--fxb-genesis-y','--fxb-genesis-scale','opacity','transition','transform','transform-origin'];
+    const names=['--fxb-genesis-x','--fxb-genesis-y','--fxb-genesis-scale','opacity','transition','transform','transform-origin',
+      'position','inset','left','top','right','bottom','width','height','max-width','max-height','margin','filter'];
     canonicalStageHome={hadStyle:stage.hasAttribute('style'),
       style:names.map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)])};
-    stage.style.setProperty('--fxb-genesis-x',(innerWidth*.5-rect.left-rect.width*.5).toFixed(2)+'px');
-    stage.style.setProperty('--fxb-genesis-y',(innerHeight*.47-rect.top-rect.height*.5).toFixed(2)+'px');
-    stage.style.setProperty('--fxb-genesis-scale',String(Math.min(1.65,Math.max(1,Math.min(innerWidth,innerHeight)*.82/Math.max(rect.width,rect.height)))));
-    stage.style.setProperty('transform','translate(var(--fxb-genesis-x,0px),var(--fxb-genesis-y,0px)) scale(var(--fxb-genesis-scale,1))','important');
+    // The measured native surface retains its dimensions and original DOM
+    // owner. Viewport positioning prevents later hero styles from displacing
+    // the cinematic subject while the same WebGL camera moves through it.
+    for(const [name,value] of [['position','fixed'],['inset','auto'],['left','50vw'],['top','47dvh'],
+      ['right','auto'],['bottom','auto'],['width',rect.width.toFixed(2)+'px'],['height',rect.height.toFixed(2)+'px'],
+      ['max-width','none'],['max-height','none'],['margin','0'],['filter','none']])stage.style.setProperty(name,value,'important');
+    stage.style.setProperty('--fxb-genesis-x','-50%');
+    stage.style.setProperty('--fxb-genesis-y','-50%');
+    stage.style.setProperty('--fxb-genesis-scale','1');
+    stage.style.setProperty('transform','translate(-50%,-50%)','important');
     stage.style.setProperty('transform-origin','center','important');
     stage.style.setProperty('opacity','1','important');
     stage.style.setProperty('transition','transform 180ms ease','important');
@@ -947,9 +954,6 @@
     try { overlay.classList.add('is-leaving'); } catch (_) {}
     if(canonicalIntroActive){
       ROOT.dataset.fxNativeGenesisR2064='leaving';
-      stage.style.setProperty('--fxb-genesis-x','0px');
-      stage.style.setProperty('--fxb-genesis-y','0px');
-      stage.style.setProperty('--fxb-genesis-scale','1');
       coreApi?.genesis?.(1);
     }
 

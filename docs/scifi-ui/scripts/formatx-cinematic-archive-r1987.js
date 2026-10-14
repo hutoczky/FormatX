@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2059-curvature-visitor-parity';
+  const VERSION='cinematic-archive-r2066-after-genesis-shared-context';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -1172,7 +1172,9 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||requestedHtmlFallback)return;
+    // The existing MAG owns its first-visit camera before the archive may
+    // compile its shared-context pass or reorganize the original HTML folios.
+    if(disposed||reduced.matches||requestedHtmlFallback||!introDone)return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1294,6 +1296,7 @@ void main(){
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      connect();
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});

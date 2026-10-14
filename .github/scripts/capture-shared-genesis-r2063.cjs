@@ -27,6 +27,8 @@ const report={sha:process.env.AUDITED_SHA,url,cases:[]};
           returnedHome:Boolean(window.__fxGenesisCanvas?.closest('#hero'))}));
       });
       const page=await context.newPage();
+      const trace=await context.newCDPSession(page);
+      await trace.send('Tracing.start',{categories:'devtools.timeline,disabled-by-default-devtools.timeline,v8',transferMode:'ReturnAsStream'});
       const errors=[];page.on('pageerror',error=>errors.push(String(error)));
       const item={profile,errors};
       try{
@@ -38,6 +40,9 @@ const report={sha:process.env.AUDITED_SHA,url,cases:[]};
             stageOpacity:style?.opacity,stageVisibility:style?.visibility,transform:style?.transform,
             bounds:stage?.getBoundingClientRect().toJSON(),originalParent:Boolean(stage?.closest('#hero'))};
         });
+        const box=item.intro.bounds;
+        assert.ok(box&&box.width>100&&box.height>100&&box.right>0&&box.left<(mobile?390:1440)
+          &&box.bottom>0&&box.top<(mobile?844:900),'The actual native intro subject must remain inside the viewport');
         await page.waitForFunction(()=>window.__fxGenesisCapture.complete.length>0,null,{timeout:5000});
         await page.waitForFunction(()=>document.documentElement.dataset.fxCoreFirstFrameR1913==='painted',null,{timeout:5000});
         await page.screenshot({path:path.join(output,profile+'-mag.png')});
@@ -51,6 +56,20 @@ const report={sha:process.env.AUDITED_SHA,url,cases:[]};
         assert.equal(item.evidence.events.complete[0].returnedHome,true);
         assert.equal(errors.length,0);
       }catch(error){item.failure=String(error);await page.screenshot({path:path.join(output,profile+'-failure.png')}).catch(()=>{});}
+      const completed=new Promise(resolve=>trace.once('Tracing.tracingComplete',resolve));
+      await trace.send('Tracing.end');
+      const {stream}=await completed;
+      let encoded='';
+      for(;;){const part=await trace.send('IO.read',{handle:stream});encoded+=part.data;if(part.eof)break;}
+      await trace.send('IO.close',{handle:stream});
+      const events=JSON.parse(encoded).traceEvents;
+      const names=new Map(events.filter(event=>event.name==='thread_name').map(event=>[event.pid+':'+event.tid,event.args?.name]));
+      item.trace={longest:events.filter(event=>event.ph==='X'&&event.dur>=50000)
+        .sort((a,b)=>b.dur-a.dur).slice(0,30).map(event=>({name:event.name,ms:event.dur/1000,
+          at:event.ts/1000,thread:names.get(event.pid+':'+event.tid)||'',data:event.args?.data})),
+        layoutMs:events.filter(event=>event.ph==='X'&&/^(Layout|UpdateLayoutTree)$/.test(event.name)).reduce((sum,event)=>sum+event.dur/1000,0)};
+      fs.writeFileSync(path.join(output,profile+'-trace-summary.json'),JSON.stringify(item.trace,null,2));
+      await trace.detach();
       const video=page.video();
       await context.close();
       if(video){const saved=path.join(output,profile+'-intro-to-mag.webm');await video.saveAs(saved);item.video=saved;}

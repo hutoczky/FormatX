@@ -2265,9 +2265,23 @@ html[data-fx-native-genesis-r2064] body>#main-content{
   position:relative!important;
   z-index:2147483001!important;
   pointer-events:none!important;
+  visibility:hidden!important;
+  transform:none!important;
+  contain:none!important;
+  filter:none!important;
+}
+html[data-fx-native-genesis-r2064] body #hero,
+html[data-fx-native-genesis-r2064] body #hero .hero-grid,
+html[data-fx-native-genesis-r2064] body #hero .hero-space{
+  overflow:visible!important;
+  clip-path:none!important;
+  contain:none!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  transform:none!important;
 }
 html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
-  transform:translate(var(--fxb-genesis-x,0px),var(--fxb-genesis-y,0px)) scale(var(--fxb-genesis-scale,1))!important;
+  transform:translate(-50%,-50%)!important;
   transform-origin:center!important;
   transition:transform 180ms ease!important;
   visibility:visible!important;
@@ -2276,7 +2290,14 @@ html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero
   pointer-events:auto!important;
 }
 html:root:root:root[data-fx-native-genesis-r2064="leaving"] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
-  transform:translate(0px,0px) scale(1)!important;
+  transform:translate(-50%,-50%)!important;
+}
+html[data-fx-native-genesis-r2064] body #hero .fx-crystal-organism-r326-stage canvas{
+  visibility:visible!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"] :is(.fxb-deep,.fxb-veil,.fxb-stars,.fxb-biotic-field,.fxb-genome-field,
+  .fxb-dna-stage,.fxb-embryo,.fxb-grid,.fxb-halo,.fxb-axis,.fxb-lens,.fxb-flash,.fxb-scan,.fxb-letterbox,.fxb-telemetry){
+  display:none!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="canonical"]>.fxb-particles{
   display:none!important;
@@ -2308,7 +2329,7 @@ html:root:root:root[data-fx-native-genesis-r2064="leaving"] body.living-architec
 }
 @media (prefers-reduced-motion:reduce){
   .fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{transition:none!important;}
-  html[data-fx-native-genesis-r2064] #hero .fx-crystal-organism-r326-stage{transform:none!important;transition:none!important;}
+  html[data-fx-native-genesis-r2064] #hero .fx-crystal-organism-r326-stage{transition:none!important;}
 }
 /* production-r1903-gallery-studio-bioglass-depth */
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */

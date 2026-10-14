@@ -44,6 +44,9 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   assert.equal(stage.parentNode,parent);
   context.ROOT.dataset.fxCrystalOrganismR326='ready';
   assert.equal(context.adoptCanonicalStage(),true);
+  assert.equal(stage.style.getPropertyValue('position'),'fixed','Deferred page geometry must not displace the actual native intro subject');
+  assert.equal(stage.style.getPropertyValue('width'),'500.00px','Intro dimensions must come from the actual native stage');
+  assert.equal(stage.style.getPropertyValue('height'),'500.00px');
   assert.equal(stage.parentNode,parent,'The original stage must stay in its existing reserved layout');
   assert.equal(context.adoptCanonicalStage(),false,'Repeated native readiness must not adopt twice');
   stage.style.setProperty('--another-owner','preserved');
@@ -53,6 +56,9 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   assert.equal(stage.style.getPropertyValue('transform'),initialStyle===null?'':'rotate(2deg)');
   assert.equal(stage.style.getPropertyValue('--another-owner'),'preserved','Unrelated runtime style changes must survive intro teardown');
   assert.equal(stage.style.getPropertyValue('--fxb-genesis-x'),'');
+  assert.equal(stage.style.getPropertyValue('position'),'','Viewport docking must be fully released after the real intro');
+  assert.equal(stage.style.getPropertyValue('width'),'');
+  assert.equal(stage.style.getPropertyValue('height'),'');
   assert.equal(progress.at(-1),null,'The page camera must be restored after the cinematic');
   assert.deepEqual(movements,['destroy-reference','release-genesis-input']);
   context.finished=true;
