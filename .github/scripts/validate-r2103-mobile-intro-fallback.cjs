@@ -62,6 +62,7 @@ const CASES=[
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
             premium:root.dataset.fxMagFallbackSilhouetteR2107||'',
             optic:root.dataset.fxMagFallbackOpticR2107||'',
+            cameraScale:Number(root.dataset.fxMagFallbackCinemaScaleR2107||0),
             filmStyle:getComputedStyle(overlay?.querySelector('.fxb-genome-field')||overlay).display,
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             width:innerWidth,height:innerHeight,
@@ -92,6 +93,13 @@ const CASES=[
         assert.equal(info.optic,'eight-deep-shutter-blades-sapphire-glass');
         assert.equal(info.filmStyle,'none',
           'Old overlaid DNA waveform is still covering the premium MAG');
+        if(shot.second===4.40){
+          assert.ok(info.cameraScale>1.10&&info.cameraScale<1.13,
+            'Midfilm must approach the physical MAG using real camera transform');
+        }else if(shot.second===8.50){
+          assert.ok(info.cameraScale>=.999&&info.cameraScale<1.005,
+            'Handoff must return to stable identity rather than clipping the MAG');
+        }
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
