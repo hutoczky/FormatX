@@ -1418,6 +1418,18 @@
       this.magIrisLight.position.set(0,.008,.60);
       this.magOptics.add(this.magIrisLight);
 
+      /* Report real geometry counts from the constructed mesh tree.
+         The R2081 browser proof must also confirm actual native WebGL
+         framebuffer pixels, so geometry metadata alone cannot pass it. */
+      this.opticProof={
+        collars:this.magLensCollars.filter(mesh=>mesh.isMesh).length,
+        rails:this.magInsetRails.filter(mesh=>mesh.isMesh).length,
+        etchSegments:this.magEtching.geometry.getAttribute('position').count/2,
+        irisBlades:this.magIris.children.filter(mesh=>mesh.isMesh).length,
+        sharedScene:this.magOptics.parent===this.mechanicalGroup
+      };
+      document.documentElement.dataset.fxMagIntroOpticsR2081=JSON.stringify(this.opticProof);
+
       this.mechanicalGroup.scale.setScalar(.001);
     }
 
