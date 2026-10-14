@@ -1522,6 +1522,22 @@
         c+=vec3(.72,.76,.72)*metalShoulder*.23;
         c+=vec3(.29,.45,.47)*coolFacet*.16;
 
+        /* R2090: broad actual crystal-arm optical planes, rather than a
+           flat teal silhouette or artificial fine concentric stripes.
+           The planes follow the existing four real 3D facets and their
+           current studio light, leaving the center optic unmasked. */
+        float armFace=pow(abs(cos(polar*2.0)),2.4);
+        float armSeam=pow(abs(sin(polar*2.0)),3.2);
+        float armRim=pow(abs(cos(polar*2.0)),17.0);
+        float laminaDepth=smoothstep(.18,.36,radialXY)*
+          (1.0-smoothstep(.71,.94,radialXY))*frontDepth;
+        vec3 smokedSilver=vec3(.026,.043,.048)+
+          vec3(.24,.30,.29)*(.24+.47*key+.26*softboxA)+
+          vec3(.035,.09,.11)*softboxB;
+        c=mix(c,smokedSilver,armFace*laminaDepth*.60);
+        c*=1.0-.30*armSeam*laminaDepth;
+        c+=vec3(.31,.37,.34)*armRim*laminaDepth*.25;
+
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.034,.095,.115)*fresnel*.27;
         c+=vec3(.055,.145,.165)*deepEdge*.19;
@@ -1534,7 +1550,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.160':'.258'},vLocal.y/${mobile?'.160':'.258'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
