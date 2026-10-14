@@ -63,6 +63,7 @@ assert.ok(html.includes(hash), 'Authored CSP must permit the current inline boot
 assert.ok(read('billing-worker/src/production-content-entry.js').includes(hash), 'Production CSP must permit the same bootstrap');
 console.log(JSON.stringify({ sourceFiles: names.length + 1, prepaintIdentityComparisons: cases, cspHash: hash, result: 'pass' }));
 require('./validate-intro-rescue-lifecycle-r2060.cjs');
+require('./validate-shared-genesis-r2063.cjs');
 const criticalControls=read('docs/scifi-ui/styles/formatx-menu-owner-r1956.css');
 const downloadHitArea=criticalControls.match(/html body\.living-architecture a#hero-download\{([^}]+)\}/)?.[1];
 assert.ok(downloadHitArea,'The original download anchor needs an unconditional critical hit area after archive relocation');

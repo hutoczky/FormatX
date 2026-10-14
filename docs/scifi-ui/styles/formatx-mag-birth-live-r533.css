@@ -2253,6 +2253,63 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1862-deep-photographic-studio-chamber */
 
 /* production-r1871-silver-ice-studio-horizon */
+
+/* R2063 — the permanent MAG is the cinematic subject. Its canvas and context
+   survive the cut from the macro camera to the actual page. */
+.fx-mag-birth-r533[data-fx-renderer="canonical"]{
+  background:
+    radial-gradient(ellipse 44% 62% at 52% 46%,rgba(57,90,111,.18),transparent 74%),
+    linear-gradient(160deg,#010405,#061017 60%,#010407)!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"]>.fx-crystal-organism-r326-stage{
+  position:absolute!important;
+  inset:auto!important;
+  left:50%!important;
+  top:47%!important;
+  width:min(86vw,86vh)!important;
+  height:min(86vw,86vh)!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  transform:translate(-50%,-50%)!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:30!important;
+  contain:layout paint size!important;
+  pointer-events:auto!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"]>.fxb-particles{
+  display:none!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"] .fxb-copy{
+  display:block!important;
+  position:absolute!important;
+  inset:auto!important;
+  left:5vw!important;
+  bottom:max(5vh,28px)!important;
+  width:90vw!important;
+  max-width:none!important;
+  text-align:left!important;
+  transform:none!important;
+  opacity:1!important;
+  z-index:40!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"] .fxb-title{
+  color:#d8e8f0!important;
+  font:500 clamp(24px,4.2vw,64px)/1 system-ui,sans-serif!important;
+  letter-spacing:-.055em!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"] .fxb-subtitle{
+  color:#8ca6b8!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{
+  opacity:0!important;
+  transition:opacity 180ms ease!important;
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{transition:none!important;}
+}
 /* production-r1903-gallery-studio-bioglass-depth */
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 

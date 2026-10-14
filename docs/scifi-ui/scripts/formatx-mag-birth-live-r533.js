@@ -527,6 +527,8 @@
   let targetY = innerHeight * .48;
   let stage = null;
   let coreApi = null;
+  let canonicalStageHome=null;
+  let canonicalIntroActive=false;
   let lastTargetSync = 0;
   let lastMorphSync = 0;
   let lastNativeSync = 0;
@@ -562,6 +564,7 @@
       const turns=['-24deg','18deg','46deg','72deg','86deg'];
       dnaStage.style.setProperty('--fxb-dna-turn',turns[value]||'86deg');
     }
+    if(value===2)requestCoreWarmup('genesis-phase-2-r2063');
     if(MOBILE){
       const values=[8,34,62,86,100];
       const statusIndex=[0,2,4,6,7][value]||0;
@@ -569,7 +572,6 @@
       percent.value=String(progressValue).padStart(3,'0');
       progress.value=progressValue;
       status.textContent=copy.statuses[statusIndex][1];
-      if(value===2)requestCoreWarmup('mobile-css-phase-2-r631');
       if(value===3){
         locateStage();
         try{
@@ -622,10 +624,27 @@
   }
 
   function locateStage() {
-    const candidate = document.querySelector('#hero .fx-crystal-organism-r326-stage');
-    if (candidate instanceof HTMLElement) stage = candidate;
     coreApi = window.FormatXLivingCore || window.FormatXCoreMobileV69 || coreApi;
+    const candidate = coreApi?.stage || document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    if (candidate instanceof HTMLElement) stage = candidate;
     return stage;
+  }
+
+  function adoptCanonicalStage(){
+    locateStage();
+    if(finished||overlayTornDown||!overlay.isConnected||canonicalIntroActive||!(stage instanceof HTMLElement)
+      ||ROOT.dataset.fxCrystalOrganismR326!=='ready'||typeof coreApi?.genesis!=='function')return false;
+    canonicalStageHome={parent:stage.parentNode,next:stage.nextSibling,style:stage.getAttribute('style')};
+    overlay.appendChild(stage);
+    canonicalIntroActive=true;
+    overlay.dataset.fxRenderer='canonical';
+    ROOT.dataset.fxMagBirthRendererR1360='canonical-webgl-organism';
+    ROOT.dataset.fxMagBirthContinuityR2063='same-canvas-context-geometry-input-and-lifecycle';
+    canvas.hidden=true;
+    try{filmRenderer?.destroy?.();}catch(_){}
+    filmRenderer=null;
+    coreApi.genesis(REDUCED?1:Math.min(1,(performance.now()-startedAt)/DURATION));
+    return true;
   }
 
   function syncTarget(force=false) {
@@ -666,6 +685,18 @@
 
   function releaseStageStyle() {
     if (!(stage instanceof HTMLElement)) return;
+    if(canonicalStageHome){
+      const home=canonicalStageHome;
+      canonicalStageHome=null;
+      canonicalIntroActive=false;
+      if(home.next?.parentNode===home.parent)home.parent.insertBefore(stage,home.next);
+      else home.parent?.appendChild(stage);
+      if(home.style===null)stage.removeAttribute('style');
+      else stage.setAttribute('style',home.style);
+      coreApi?.genesis?.(null);
+      coreApi?.requestRender?.(1);
+      return;
+    }
     stage.style.removeProperty('opacity');
     stage.style.removeProperty('transition');
   }
@@ -682,6 +713,8 @@
   function syncNativeCore(r, now) {
     locateStage();
     if (!coreApi) return;
+    adoptCanonicalStage();
+    if(canonicalIntroActive){coreApi.genesis(REDUCED?1:r);return;}
 
     if (r < .50) {
       setStageOpacity(Math.max(.008,r*.035));
@@ -785,92 +818,16 @@
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
-    /* R1727c — never force a heavyweight continuous Three intro onto a
-       constrained CPU/GPU path. The existing R649 cinematic keeps the same
-       10 s story and visual handoff while avoiding >50 ms frame tasks. The same
-       capability policy also applies when the timeline is previewed. */
-    if(SOFTWARE_SAFE){
-      ROOT.dataset.fxMagBirthRendererR1729='constrained-reference-film';
-      overlay.dataset.fxRenderer='fallback-constrained';
-      startR649Fallback();
-      if(filmRenderer)filmRenderer.resize?.();
-      return;
-    }
-    ensureThreeOwner();
-    if(filmRenderer){
-      filmRenderer.resize?.();
-      return;
-    }
-    if(window.FormatXMagGenesisThreeR1360?.attach){
-      if(threeWaitTimer){clearTimeout(threeWaitTimer);threeWaitTimer=0;}
-      if(!filmRendererPromise){
-        ROOT.dataset.fxMagBirthRendererR1360='loading-threejs';
-        ROOT.dataset.fxMagBirthRendererR1450='three-primary-loading';
-        overlay.dataset.fxRenderer='three-loading';
-        filmRendererPromise=Promise.resolve(
-          window.FormatXMagGenesisThreeR1360.attach(canvas,()=>({x:targetX,y:targetY}))
-        ).then(renderer=>{
-          filmRendererPromise=null;
-          if(finished){
-            renderer?.destroy?.();
-            return null;
-          }
-          if(renderer){
-            filmRenderer=renderer;
-            if(pendingRendererInteraction){
-              try{filmRenderer.interact?.(pendingRendererInteraction);}catch(_){}
-              pendingRendererInteraction=null;
-            }
-            ROOT.dataset.fxMagBirthRendererR1360='threejs-active';
-            ROOT.dataset.fxMagBirthRendererR1430='threejs-active-production-path';
-            ROOT.dataset.fxMagBirthRendererR1450='three-primary-active';
-            ROOT.dataset.fxMagBirthRendererR1460='cinematic-three-active';
-            ROOT.dataset.fxMagBirthRendererR1470='cinematic-cortical-three-active';
-            ROOT.dataset.fxMagBirthRendererR1490='realistic-cinematic-three-active';
-            overlay.dataset.fxRenderer='three';
-            renderer.resize?.();
-            return renderer;
-          }
-          ROOT.dataset.fxMagBirthRendererR1360='threejs-failed-r649-fallback';
-          ROOT.dataset.fxMagBirthRendererR1450='three-explicit-failure-fallback';
-          if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
-          startR649Fallback();
-          return null;
-        }).catch(error=>{
-          filmRendererPromise=null;
-          ROOT.dataset.fxMagBirthRendererR1360='threejs-error-r649-fallback';
-          ROOT.dataset.fxMagBirthRendererR1450='three-error-fallback';
-          console.error('FormatX R1360 intro attach failed:',error);
-          startR649Fallback();
-        });
-      }
-      return;
-    }
-
-    /* R1450 — never lock the production intro into the 2D fallback because
-       the deferred Three owner is a few milliseconds late. Wait for the real
-       renderer for a bounded window; only an actual missing/failed Three path
-       is allowed to fall back. */
-    const now=performance.now();
-    if(!threeWaitStartedAt)threeWaitStartedAt=now;
-    const waited=now-threeWaitStartedAt;
-    if(waited<4800){
-      ROOT.dataset.fxMagBirthRendererR1450='waiting-for-three-owner';
-      overlay.dataset.fxRenderer='three-loading';
-      if(!threeWaitTimer){
-        threeWaitTimer=setTimeout(()=>{
-          threeWaitTimer=0;
-          sizeCanvas();
-        },80);
-      }
-      return;
-    }
-    ROOT.dataset.fxMagBirthRendererR1450='three-owner-timeout-fallback';
-    overlay.dataset.fxRenderer='fallback';
+    /* The permanent WebGL owner also owns genesis. The canvas reference film
+       provides an honest waiting/unavailable fallback, with no second GL owner. */
+    if(adoptCanonicalStage()||canonicalIntroActive)return;
     startR649Fallback();
+    if(filmRenderer)filmRenderer.resize?.();
+    return;
   }
 
   function drawParticles(r,time) {
+    if(canonicalIntroActive)return;
     if(filmRenderer){ filmRenderer.draw?.(r,time); return; }
     if(filmRendererPromise)return;
     if(!ctx)return;
@@ -1005,7 +962,6 @@
       }
     }
 
-    if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
@@ -1043,7 +999,7 @@
     if(r<1 || visiblePhase<4){
       /* Software fallback keeps the same bounded semantic timeline, while the
          expensive raster only changes at the five cinematic boundaries. */
-      const cadence=softwareFallbackActive?125:0;
+      const cadence=canonicalIntroActive?0:softwareFallbackActive?125:0;
       queueRender(cadence);
       return;
     }
@@ -1090,11 +1046,18 @@
     ROOT.setAttribute('data-fx-mag-birth-live','active');
     if(!HAS_VISUAL_FRAME)armPhaseTimeline();
     document.body.prepend(overlay);
+    startedAt=performance.now();
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthstart',{
         detail:{revision:'r2059-original-intro-parity'}
       }));
     } catch (_) {}
+    /* R2063 — the actual inserted overlay owns the clock, independently of
+       the first GPU/compositor frame. Rendering cannot restart that clock. */
+    if(!HAS_VISUAL_FRAME&&!REDUCED){
+      hardFinishTimer=window.setTimeout(()=>finish('timeline-end-r2063'),DURATION);
+    }
+    requestCoreWarmup('canonical-genesis-start-r2063');
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
     sizeCanvas();
@@ -1197,10 +1160,7 @@
 
     // R2059: the fail-open stays close to the real platform endpoint so a
     // stalled GPU/import path cannot strand the cinematic overlay.
-    hardFinishTimer=window.setTimeout(
-      ()=>finish('bounded-failsafe-r652'),
-      REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220)
-    );
+    if(REDUCED)hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r652'),900);
 
     if(REDUCED){
       requestCoreWarmup('reduced-motion');
@@ -1304,6 +1264,7 @@
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
     locateStage();
+    adoptCanonicalStage();
     syncTarget(true);
     coreApi=window.FormatXLivingCore||window.FormatXCoreMobileV69||coreApi;
   },{passive:true});

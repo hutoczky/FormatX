@@ -50,6 +50,15 @@ jobs:
       - name: Enforce measured original intro duration
         if: always()
         run: node .github/scripts/assert-actual-intro-timing-r2054.cjs
+      - name: Capture normal shared-canvas intro and MAG
+        if: always()
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-parity/node_modules
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/fx-genesis-http.log" 2>&1 &
+          FX_GENESIS_SERVER_PID=$!
+          trap 'kill "$FX_GENESIS_SERVER_PID"' EXIT
+          node .github/scripts/capture-shared-genesis-r2063.cjs
       - name: Upload complete visitor evidence
         if: always()
         uses: actions/upload-artifact@v4

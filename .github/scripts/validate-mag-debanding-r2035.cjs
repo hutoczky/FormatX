@@ -20,16 +20,21 @@ assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
   'Original MAG must publish stripe-free material selection');
 const body=core.split('const constrainedFragmentSource = ')[1]?.split('const softwareFragmentSource = ')[0]||'';
-assert.ok(body.includes('Broadband depth density replaces periodic'),
+assert.ok(body.includes('vec3 absorption=exp(-vec3(')&&body.includes('float thickness='),
   'MAG optical density must be continuous, not repeated scanlines');
 assert.ok(!body.includes('sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4)'),
   'Legacy procedural MAG scanlines are present');
-assert.ok(body.includes('ribbonB*.052'),
+assert.ok(body.includes('gaussian(d.x-.46,.105+softness)'),
   'PC and phone cannot reintroduce the thin high-intensity studio stripe');
-assert.ok(body.includes('pow(abs(cos(polar*4.0)),4.0)'),
+assert.ok(body.includes('float fold=gaussian(abs(inside.x)*.92+abs(inside.y)*.75-.27,.037)'),
   'Thin fourfold faceting streaks must be optically widened');
-assert.ok(core.includes('float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*cortexEnvelope'),
+assert.ok(core.includes('float microFold=sin(aUv.x*18.8495559215+aUv.y*15.4)*.00028*cortexEnvelope'),
   'Thin vertex-fold ripples would reintroduce temporal aliasing');
+for(const latitude of [.05,.25,.5,.75,.95]){
+  const first=Math.sin(latitude*15.4)*.00028;
+  const last=Math.sin(18.8495559215+latitude*15.4)*.00028;
+  assert.ok(Math.abs(first-last)<1e-12,'The actual closed longitude seam must not acquire a displaced gap');
+}
 assert.ok(archive.includes('opticalDepth*d,d'),
   'Archive and MAG must share correct homogeneous depth ordering');
 const archiveRevision=archive.match(/const VERSION='cinematic-archive-(r\d{4})-[^']*'/)?.[1];
@@ -55,18 +60,18 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2045 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261014-r2061-single-completion-live-cadence'),
+  assert.ok(loader.includes('20261014-r2063-shared-genesis-dielectric'),
     'R2059 normal visitor runtime renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2061-single-completion-live-cadence'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2063-shared-genesis-dielectric'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2061-single-completion-live-cadence'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2063-shared-genesis-dielectric'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2061-single-completion-live-cadence'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2063-shared-genesis-dielectric'),
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2061-single-completion-live-cadence']){
+ 'formatx-mag-birth-live-r533.css?v=20261014-r2063-shared-genesis-dielectric']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
