@@ -8,6 +8,18 @@ const BASE=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT='artifacts/r2105-native-physical-optics';
 fs.mkdirSync(OUT,{recursive:true});
+
+/* R2109 static material-ownership protection complements runtime screenshots:
+   the separate real front rails cannot disappear below the optic bezel
+   merely because two facet-id masks overlap. */
+const shader=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8'
+);
+assert.ok(shader.includes('float physicalRail=step(5.81,vFacet)*(1.0-step(5.91,vFacet));')&&
+  shader.includes('float physicalBezel=step(5.70,vFacet)*(1.0-step(5.81,vFacet));')&&
+  shader.includes('c=mix(c,channelTitanium,physicalRail*.96);')&&
+  shader.includes('c=mix(c,sapphireGlass,physicalLens);'),
+  'The physically distinct titanium channels, bezel and sapphire must survive shader edits');
 const views=[
   {name:'desktop-1440',width:1440,height:900,mobile:false,scale:1},
   {name:'phone-390',width:390,height:844,mobile:true,scale:2},
