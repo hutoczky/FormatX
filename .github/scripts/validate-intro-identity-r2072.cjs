@@ -122,6 +122,10 @@ const OUTPUT='artifacts/r2072-intro-proof';
             physicalOpticR2097:document.documentElement.dataset.fxMagNativeOpticR2097||'',
             physicalTrianglesR2097:
               Number(document.documentElement.dataset.fxMagNativeOpticTrianglesR2097||0),
+            physicalIrisR2098:
+              document.documentElement.dataset.fxMagNativeIrisR2098||'',
+            irisTrianglesR2098:
+              Number(document.documentElement.dataset.fxMagNativeIrisTrianglesR2098||0),
             originalCanvasCount:
               document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
             originalStageCount:
@@ -145,7 +149,9 @@ const OUTPUT='artifacts/r2072-intro-proof';
           &&native.visibility==='visible'&&native.introCount===0
           &&native.originalCTA
           &&native.physicalOpticR2097==='real-metal-bezel-convex-glass-one-native-webgl-draw'
-          &&native.physicalTrianglesR2097>=600,
+          &&native.physicalTrianglesR2097>=600
+          &&native.physicalIrisR2098==='eight-physical-curved-shutter-blades'
+          &&native.irisTrianglesR2098===16,
           'Intro ended but the original permanent 3D MAG is not visible: '+
             JSON.stringify(native));
         assert.deepEqual(errors,[],'Real intro JS exceptions: '+JSON.stringify(errors));
