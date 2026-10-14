@@ -1,9 +1,9 @@
 FormatX production revision
-token=20261014-r2103-android-intro-fourpoint
-release_line=R2103-mobile-intro-hotfix
-purpose=Replace the documented oversized cropped oval Android intro fallback with a single screen-contained four-point brushed-metal-and-sapphire MAG; eight visible iris blades, accurate 390px/360px frame containment, 44px legible SKIP and no redundant CSS egg.
-scope=Surgical master-based mobile intro correction only. Preserve the existing main-site R326 MAG, real Three.js scene, CTA, bilingual contracts, cinematic archive and checkout.
-validation=R2103 screenshot browser job 38599811069 passed; cinematic archive cross-viewport rerun 38599811067 passed; production Worker validation 38599811092 passed; public site integrity 38599811094 passed; mobile visual proof 38599811214 passed.
-performance=Strict full-site Lighthouse job 38599810928 did not reach 95 (desktop 0.77/0.86/0.80; mobile 0.68/0.69/0.69). This release specifically fixes the user-reported mobile intro visual defect, without asserting whole-site Lighthouse compliance.
-production_verification=Require the exact revision token and R649/R533 content on formatxsuite.com and www.formatxsuite.com after deployment.
-limits=Mobile fallback is a vector-rendered reduced-power approximation, not physically identical to high-end Three.js film; broader visual ambitions and repeatable >=95 Lighthouse remain future work.
+token=20261014-r2104-cinematic-metal-glass-intro
+release_line=R2104-live-fallback-film-refinement
+purpose=Advance the live R2103 screen-contained four-point mobile intro with cinematic moving studio reflections, layered smoked-chrome metal planes, physically shaded eight-blade titanium iris and deeper recessed sapphire optic. Preserve exact R533 film duration, original R326 MAG handoff, native controls and visible Skip.
+scope=Surgical enhancement of the original low-power R649 canvas visual and source checks; unchanged original Three.js intro, canonical persistent WebGL MAG, download CTA, licensing, payment flow, bilingual content, router and mobile scaling. One cache-busted script URL; no extra WebGL/DOM canvas.
+validation=R2104 real 390/360px mobile Chromium frames in GitHub Actions 38639021361 passed; existing R2103 mobile browser 38639021730 passed; full 8-source desktop/mobile cinematic archive 38639021710 passed; full R536 cinematic journey 38639021450 passed; production Worker validation 38639021762 and site integrity 38639021734 passed.
+performance=Real full-site Lighthouse CI run 38639021547 failed strict 0.95 score: desktop 0.92/0.92/0.91, mobile 0.93/0.93/0.93. No guarantee of sustained 60fps on hardware; original fast/low-DPR adaptation retained.
+production_verification=Require this exact revision token on formatxsuite.com and www.formatxsuite.com, production smoke, and both live cinematic handoff scripts after deployment.
+limits=This is a materially improved CPU Canvas fallback, not full photoreal WebGL; Igloo/Lusion/Lando equivalence, repeatable >=95 Lighthouse and full R2083/R2098 Three.js refactor remain uncompleted separate goals.
