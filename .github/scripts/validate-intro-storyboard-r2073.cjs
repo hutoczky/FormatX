@@ -9,8 +9,10 @@ const SHOTS=[
   {label:'cortical-orbit',second:4.40,expected:'cortical-orbit',mobile:false},
   {label:'organism-pullback',second:6.45,expected:'organism-pullback',mobile:false},
   {label:'identity-stabilized',second:8.50,expected:'identity-stabilized',mobile:false},
+  {label:'native-organism-handoff',second:9.98,expected:'handoff-locked',mobile:false},
   {label:'mobile-depth',second:4.40,expected:'cortical-orbit',mobile:true},
-  {label:'mobile-identity',second:8.50,expected:'identity-stabilized',mobile:true}
+  {label:'mobile-identity',second:8.50,expected:'identity-stabilized',mobile:true},
+  {label:'mobile-native-handoff',second:9.98,expected:'handoff-locked',mobile:true}
 ];
 (async()=>{
   fs.mkdirSync(OUT,{recursive:true});
@@ -75,6 +77,8 @@ const SHOTS=[
             realLitSamples:Number(root.dataset.fxMagBirthFrameLitSamplesR2073||0),
             realReadback:root.dataset.fxMagBirthFrameR1557,
             physicalGeometryR2075:root.dataset.fxMagIntroGeometryR2075,
+            morphR2080:root.dataset.fxMagIntroMorphR2080,
+            morphProgressR2080:Number(root.dataset.fxMagIntroMorphProgressR2080||'0'),
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
@@ -104,6 +108,14 @@ const SHOTS=[
           &&info.realPixelPeak>=20&&info.realLitSamples>=2,
           'Cinematic original Three framebuffer is black or MAG scene missing: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
+        if(shot.second<8.96){
+          assert.equal(info.morphR2080,'physical-metal-crest',
+            'The iconic optical four-point metal crest must remain throughout the main intro: '+JSON.stringify(info));
+        }else{
+          assert.ok(info.morphR2080==='canonical-native-organism'
+            &&info.morphProgressR2080>.999,
+            'Last filmed frame does not match the real permanent native living MAG: '+JSON.stringify(info));
+        }
         if(shot.mobile){
           assert.ok(info.mobileCameraDepth>=6.18,
             'R2079 portrait camera clips the real cortex or final MAG arms: '+JSON.stringify(info));
