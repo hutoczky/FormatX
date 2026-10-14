@@ -726,10 +726,14 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(false){
-      const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
-      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
+    /* R2105: reactivate the formerly dead physical central optics of the
+       original live R326 hero core. Constrain tessellation across all phone
+       tiers and keep the ONE existing GPU program and draw call. */
+    if(true){
+      const centreX=.025,centreY=-.012;
+      const bezelSteps=software?24:mobile?32:48;
+      const bezelTubeSteps=4,bezelZ=.632;
+      const bezelMajorX=.180,bezelMajorY=.162,bezelTube=.009;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -753,12 +757,12 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.609];
-      const lensRadiusX=.153;
-      const lensRadiusY=.041;
-      const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const lensCenter=[centreX,centreY,.643];
+      const lensRadiusX=.162;
+      const lensRadiusY=.145;
+      const lensDepth=.022;
+      const radialSteps=software?4:mobile?5:6;
+      const angularSteps=software?24:mobile?32:48;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -798,6 +802,27 @@
         }
         previous=current;
       }
+      /* R2105: eight actual raised, facing metal shutter plates over the
+         convex sapphire. The lens remains visible through their aperture.
+         Sixteen triangles only, no distinct WebGL pass or offscreen texture. */
+      const bladesFirst=facets.length;
+      for(let blade=0;blade<8;blade++){
+        const angle=blade*Math.PI/4;
+        const vertex=(radius,delta)=>{
+          const v=lensVertex(radius,angle+delta);
+          v.crystal[2]+=.006;
+          return v;
+        };
+        const p0=vertex(.36,-.12);
+        const p1=vertex(.93,-.30);
+        const p2=vertex(.91,.16);
+        const p3=vertex(.49,.25);
+        triangle([p0,p1,p2],6.18);
+        triangle([p0,p2,p3],6.18);
+      }
+      root.dataset.fxNativeMagIrisR2105='8-raised-curved-titanium-blades';
+      root.dataset.fxNativeMagIrisTrianglesR2105=
+        String(facets.length-bladesFirst);
     }
 
     return {
@@ -1518,6 +1543,26 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
+        /* R2105: actual front-facing depth-tested metal, glass and iris
+           geometry have distinct reflectance instead of inheriting the
+           flat cyan base material painted on the four-point mineral. */
+        float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
+        float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
+        float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
+        vec3 machinedTitanium=vec3(.022,.040,.048)+
+          vec3(.43,.49,.46)*(softboxA*.56+softboxB*.31+key*.13)+
+          vec3(.065,.13,.15)*fresnel*.36;
+        vec3 shutterTitanium=vec3(.011,.028,.037)+
+          vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
+          vec3(.08,.14,.15)*fresnel*.28;
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),12.0);
+        vec3 sapphireGlass=vec3(.005,.019,.034)+
+          vec3(.045,.13,.16)*(.25+.75*key)+
+          vec3(.19,.24,.22)*sapphireSpec*.48+
+          vec3(.025,.12,.16)*fresnel*.21;
+        c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,shutterTitanium,physicalIris);
+        c=mix(c,sapphireGlass,physicalLens);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
