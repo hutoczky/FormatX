@@ -1,0 +1,36 @@
+name: R2099 deterministic critical CSS parity
+
+on:
+  push:
+    branches:
+      - feature/r2083-studio-cinema-reactive-mag
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-reference-production-r244.css'
+      - 'docs/scifi-ui/styles/formatx-reference-production-r244.min-r2099.css'
+      - 'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.css'
+      - 'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.min-r2099.css'
+      - '.github/scripts/verify-critical-css-r2099.cjs'
+      - '.github/workflows/verify-r2099-critical-css.yml'
+  pull_request:
+    branches:
+      - mag-r2059-native-focus-continuity-20261013
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-compact-css:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate deterministic render-critical CSS and desktop media ownership
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/verify-critical-css-r2099.cjs
+          node .github/scripts/verify-critical-css-r2099.cjs
