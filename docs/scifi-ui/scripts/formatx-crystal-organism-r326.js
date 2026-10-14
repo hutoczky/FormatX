@@ -807,6 +807,28 @@
         }
         previous=current;
       }
+      /* R2098: eight actual machined shutter blades ABOVE the convex sapphire.
+         Sixteen native triangles, one existing WebGL buffer and draw call.
+         Each blade follows the lens curvature, avoiding z-fighting while the
+         four-point outside silhouette and mobile geometry budget stay intact. */
+      const physicalIrisStart=facets.length/3;
+      for(let blade=0;blade<8;blade++){
+        const theta=blade*Math.PI/4;
+        const shutterVertex=(radial,angle)=>{
+          const vertex=lensVertex(radial,angle);
+          vertex.crystal[2]+=.006;
+          return vertex;
+        };
+        const insideLeft=shutterVertex(.70,theta-.27);
+        const outsideLeft=shutterVertex(.96,theta-.32);
+        const outsideRight=shutterVertex(.96,theta+.20);
+        const insideRight=shutterVertex(.70,theta+.15);
+        triangle([insideLeft,outsideLeft,outsideRight],6.18);
+        triangle([insideLeft,outsideRight,insideRight],6.18);
+      }
+      root.dataset.fxMagNativeIrisTrianglesR2098=
+        String(Math.round(facets.length/3-physicalIrisStart));
+      root.dataset.fxMagNativeIrisR2098='eight-physical-curved-shutter-blades';
       root.dataset.fxMagNativeOpticTrianglesR2097=
         String(Math.round(facets.length/3-opticalTrianglesBefore));
       root.dataset.fxMagNativeOpticR2097=
@@ -1684,6 +1706,16 @@
           vec3(.09,.29,.32)*sweep*.22;
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,physicalGlass,physicalLens);
+        /* R2098 physical eight-blade shutter. Its curved titanium blades are
+           drawn by the existing depth-tested triangle geometry, not a flat
+           overlay, texture, SVG or another WebGL pass. Pointer light remains
+           reactive through the canonical native uPointer uniform. */
+        float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
+        vec3 shutterMetal=vec3(.016,.035,.042)+
+          vec3(.24,.33,.35)*(softboxA*.51+softboxB*.34+key*.18)+
+          vec3(.06,.13,.15)*reactiveSpec*(.32+.24*uEnergy)+
+          vec3(.14,.22,.22)*sweep*.19;
+        c=mix(c,shutterMetal,physicalIris*.97);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
