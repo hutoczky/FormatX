@@ -1,7 +1,9 @@
 FormatX production revision
-token=20261013-r2058-curvature-correct-mag-lighting
-base_master=6da61cf2752ac8b77c0773e1c628c26b2f1aff5d
-purpose=Physically correct flexible archive papyrus shading: analytic bend derivatives rotate surface normals with the actual sheet geometry; Fresnel/GGX response follows bending and flattening. Add slight distance-dependent aerial attenuation to permanent deep metal racks without fogging the native HTML papyrus or physical energy filaments. Remove redundant immutable telemetry DOM writes on the render hot path. Preserve one canonical MAG/WebGL2 pass, 8 functional HTML content handoffs, mobile layout, intro and zero-WebGL/reduced-motion fallback.
-validation=Real desktop and mobile eight-source WebGL2 browser checks and 320-1920 no-information-occlusion passed on R2058 code; native controls, bilingual, design system, security and production candidate passed. Exact revision on formatxsuite.com and www.formatxsuite.com must be verified after deploy.
-measured=R2058 Lighthouse desktop 0.91-0.93, mobile 0.93. Prior R2057 desktop 0.93-0.94, mobile approximately 0.93; variation may reflect run noise. No claim of 95 score or improved real device FPS.
-limits=Real-hardware sustained 60fps, film-grade full photorealism, objective Igloo.inc superiority and >=95 Lighthouse remain open goals.
+token=20261014-r2103-android-intro-fourpoint
+release_line=R2103-mobile-intro-hotfix
+purpose=Replace the documented oversized cropped oval Android intro fallback with a single screen-contained four-point brushed-metal-and-sapphire MAG; eight visible iris blades, accurate 390px/360px frame containment, 44px legible SKIP and no redundant CSS egg.
+scope=Surgical master-based mobile intro correction only. Preserve the existing main-site R326 MAG, real Three.js scene, CTA, bilingual contracts, cinematic archive and checkout.
+validation=R2103 screenshot browser job 38599811069 passed; cinematic archive cross-viewport rerun 38599811067 passed; production Worker validation 38599811092 passed; public site integrity 38599811094 passed; mobile visual proof 38599811214 passed.
+performance=Strict full-site Lighthouse job 38599810928 did not reach 95 (desktop 0.77/0.86/0.80; mobile 0.68/0.69/0.69). This release specifically fixes the user-reported mobile intro visual defect, without asserting whole-site Lighthouse compliance.
+production_verification=Require the exact revision token and R649/R533 content on formatxsuite.com and www.formatxsuite.com after deployment.
+limits=Mobile fallback is a vector-rendered reduced-power approximation, not physically identical to high-end Three.js film; broader visual ambitions and repeatable >=95 Lighthouse remain future work.
