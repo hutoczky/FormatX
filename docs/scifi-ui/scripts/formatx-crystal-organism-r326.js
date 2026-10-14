@@ -822,7 +822,7 @@
       }
       root.dataset.fxNativeMagIrisR2105='8-raised-curved-titanium-blades';
       root.dataset.fxNativeMagIrisTrianglesR2105=
-        String(facets.length-bladesFirst);
+        String((facets.length-bladesFirst)/3);
     }
 
     return {
