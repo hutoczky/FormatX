@@ -1359,7 +1359,23 @@
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
+        /* R2087: macro-polished four-point bioglass planes.  The material
+           normal is bent across the actual camera-rotated solid rather than
+           drawing fake streaks or high-frequency bands.  Lighting remains
+           consistent when the user rotates the ONE original WebGL object. */
         vec3 n=normalize(vNormal);
+        float rFac=length(vLocal.xy);
+        float armFac=abs(cos(atan(vLocal.y,vLocal.x)*2.0));
+        float outerFac=smoothstep(.16,.42,rFac)*
+          (1.0-smoothstep(.72,.96,rFac));
+        float faceFac=outerFac*pow(armFac,1.8)*
+          smoothstep(.01,.36,vLocal.z);
+        vec3 cutNormal=normalize(vec3(
+          n.x*.72+sign(vLocal.x+.0001)*.39,
+          n.y*.72+sign(vLocal.y+.0001)*.29,
+          max(.25,n.z)*1.08
+        ));
+        n=normalize(mix(n,cutNormal,faceFac*.56));
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
@@ -1522,7 +1538,7 @@
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
+        c=mix(c,vec3(.004,.012,.018)+c*.23,cavity*.38);
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
         float rim=exp(-pow((od-.74)/.060,2.0))*front;
@@ -1531,7 +1547,7 @@
         float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
+        c=mix(c,opticBase+c*.34,lens*.39);
         /* R2075 compact physical iris: two machined annuli plus eight
            aperture facets, shaded by the original real single WebGL body. */
         float collarOuter=exp(-pow((od-1.08)/.065,2.0))*front;
@@ -1539,13 +1555,13 @@
         float bladeAngle=atan(oq.y,oq.x);
         float apertureBlades=pow(abs(cos(bladeAngle*4.0+.12)),15.0)
           *smoothstep(.28,.45,od)*(1.0-smoothstep(.75,.91,od))*front;
-        c+=vec3(.85,.98,.96)*collarOuter*${mobile?'.16':'.21'};
-        c+=vec3(.50,.78,.80)*collarInner*${mobile?'.095':'.13'};
-        c+=vec3(.52,.80,.83)*apertureBlades*${mobile?'.085':'.13'};
+        c+=vec3(.88,.95,.91)*collarOuter*${mobile?'.30':'.42'};
+        c+=vec3(.64,.80,.79)*collarInner*${mobile?'.20':'.26'};
+        c+=vec3(.60,.79,.80)*apertureBlades*${mobile?'.17':'.21'};
         c+=vec3(.78,.88,.84)*rim*${mobile?'.190':'.250'};
         c+=vec3(.020,.24,.27)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
+        c+=vec3(.31,.83,.85)*core*(${mobile?'.52':'.58'}+${mobile?'.17':'.18'}*uEnergy);
+        c+=vec3(.98,.99,.96)*hot*(${mobile?'.75':'.84'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
