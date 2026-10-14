@@ -29,7 +29,7 @@
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
-  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 4;
+  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 2;
   const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
   const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
