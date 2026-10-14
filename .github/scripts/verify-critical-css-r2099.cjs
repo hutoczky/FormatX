@@ -8,7 +8,8 @@ const root = path.resolve(__dirname, '../..');
 const pairs = [
   {
     source: 'docs/scifi-ui/styles/formatx-reference-production-r244.css',
-    compact: 'docs/scifi-ui/styles/formatx-reference-production-r244.min-r2099.css',
+    compact: 'docs/scifi-ui/styles/formatx-reference-production-r244.desktop-r2100.css',
+    desktopProjection: true,
     selector: 'data-fx-reference-production-r244="true"',
     media: 'media="(min-width: 901px)"'
   },
@@ -73,13 +74,67 @@ function compactCss(source) {
   return out.trim() + '\n';
 }
 
+/* R2100: the same compiled CSS, minus *only* top-level groups that cannot
+   match a 901px+ screen. Mixed pointer/coarse queries remain untouched. */
+function projectDesktopCss(source) {
+  const pieces = [];
+  let last = 0;
+  let depth = 0;
+  let quote = '';
+  let escaped = false;
+  let open = 0;
+  let removed = 0;
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === quote) quote = '';
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === '{') {
+      if (depth === 0) open = i;
+      depth++;
+      continue;
+    }
+    if (char === '}') {
+      depth--;
+      assert.ok(depth >= 0, 'Unbalanced CSS braces');
+      if (depth === 0) {
+        const previous = source.lastIndexOf('}', open - 1) + 1;
+        const prelude = source.slice(previous, open).trim();
+        const cannotMatchDesktop = prelude.startsWith('@media')
+          && /\(\s*max-width\s*:\s*(?:374|900)px\s*\)/.test(prelude)
+          && !prelude.includes(',');
+        if (cannotMatchDesktop) {
+          pieces.push(source.slice(last, previous));
+          last = i + 1;
+          removed++;
+        }
+      }
+    }
+  }
+  assert.equal(depth, 0, 'Unbalanced CSS group');
+  assert.equal(removed, 4,
+    'Mobile-only media query count changed: review desktop projection before shipping');
+  pieces.push(source.slice(last));
+  return pieces.join('').trim() + '\n';
+}
+
 const html = fs.readFileSync(path.join(root, 'docs/scifi-ui/index.html'), 'utf8');
 
 for (const entry of pairs) {
   const original = fs.readFileSync(path.join(root, entry.source), 'utf8');
   const compact = fs.readFileSync(path.join(root, entry.compact), 'utf8');
-  assert.equal(compact, compactCss(original),
-    'Compact stylesheet no longer matches the authoritative source: ' + entry.compact);
+  const expected = entry.desktopProjection
+    ? projectDesktopCss(compactCss(original))
+    : compactCss(original);
+  assert.equal(compact, expected,
+    'Optimized stylesheet no longer matches the authoritative source: ' + entry.compact);
   assert.ok(compact.length <= original.length * 0.92,
     'Critical CSS is not meaningfully smaller: ' + entry.compact);
   const basename = path.basename(entry.compact);
