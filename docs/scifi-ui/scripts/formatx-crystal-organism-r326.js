@@ -1393,7 +1393,7 @@
         }
 
         /* Smoked blue-silver glass volume. */
-        float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
+        float lift=sat(.13+.34*key+.24*side+.15*fill+.08*top);
         float macroAngle=atan(vLocal.y,vLocal.x);
         float macroRadius=length(vLocal.xy);
         float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
@@ -1404,7 +1404,7 @@
           : '.955+.070*macroFacet'}; 
         /* R2075 one-pass native body matches the readable smoked silver
            bioceramic optical material of the real 3D birth film. */
-        vec3 c=mix(vec3(.006,.012,.016),vec3(.158,.215,.224),lift)*facetTone;
+        vec3 c=mix(vec3(.006,.009,.013),vec3(.097,.125,.132),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1418,9 +1418,9 @@
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.032;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.56,.70,.69)*softboxB*${mobile?'.185':'.155'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        c+=vec3(.86,.91,.88)*softboxC*${mobile?'.215':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
@@ -1443,9 +1443,13 @@
         c+=vec3(.120,.270,.278)*axisRidge*(.155+.055*prismSweep);
         /* R2075 real native 3D radial engraved optical mineral: UV-free
            in volume coordinates, with mobile-safe lower frequency. */
-        float machinedGroove=pow(abs(sin(radialXY*${mobile?'55.0':'92.0'})),11.0)
-          *axisRidge*frontDepth;
-        c+=vec3(.65,.82,.81)*machinedGroove*${mobile?'.063':'.082'};
+        /* R2085: subpixel radial sine bands produced visible moire,
+           the dense cyan concentric rings in genuine browser screenshots.
+           Replace periodic rings with angular machined facets. */
+        float engravedAngle=abs(cos(polar*4.0+vLocal.z*.43));
+        float machinedGroove=pow(engravedAngle,14.0)*axisRidge*
+          frontDepth*(1.0-smoothstep(.67,.88,radialXY));
+        c+=vec3(.70,.79,.76)*machinedGroove*${mobile?'.075':'.105'};
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
         c*=1.0-.090*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
@@ -1480,10 +1484,20 @@
         c*=1.0-${mobile?'.027':'.037'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
+        /* A broad, physically coherent studio bevel adds sculptural
+           silver depth instead of raising the entire teal base. */
+        float metalShoulder=pow(
+          max(dot(n,normalize(vec3(-.29,.66,.69))),0.0),3.5
+        )*frontDepth;
+        float coolFacet=pow(
+          max(dot(n,normalize(vec3(.68,.12,.71))),0.0),5.0
+        )*frontDepth;
+        c+=vec3(.70,.75,.71)*metalShoulder*.105;
+        c+=vec3(.25,.41,.43)*coolFacet*.085;
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.034,.095,.115)*fresnel*.27;
+        c+=vec3(.055,.145,.165)*deepEdge*.19;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1518,7 +1532,7 @@
         c+=vec3(.50,.78,.80)*collarInner*${mobile?'.095':'.13'};
         c+=vec3(.52,.80,.83)*apertureBlades*${mobile?'.085':'.13'};
         c+=vec3(.78,.88,.84)*rim*${mobile?'.190':'.250'};
-        c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
+        c+=vec3(.020,.24,.27)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
