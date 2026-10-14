@@ -124,6 +124,14 @@
       const studioEdge=new T.DirectionalLight(0xcaf6f6,.88);
       studioEdge.position.set(2.5,3.6,4.8);
       this.scene.add(studioEdge);
+      /* R2083: three actual Three.js studio-light sources travel around
+         the same model and camera. No CSS glow, fake overlay or new renderer. */
+      this.studioKey=key;
+      this.studioFill=fill;
+      this.studioEdge=studioEdge;
+      this.studioBack=new T.DirectionalLight(0x7bafb6,.50);
+      this.studioBack.position.set(-2.4,-3.1,-3.8);
+      this.scene.add(this.studioBack);
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
@@ -1783,8 +1791,13 @@
       this.mechInnerRing.rotation.z=time*.00012;
       // Physical optic stabilizes on the same cinematic timeline; no second
       // composited CGI element appears after the handoff.
-      if(this.r2075Iris)this.r2075Iris.rotation.z=
-        .065*Math.sin(time*.00022)*grow*(1-finale*.82);
+      if(this.r2075Iris){
+        const reactiveAperture=this.cameraInput.impulse*
+          (1-smooth((t-8.65)/1.0));
+        this.r2075Iris.rotation.z=
+          .065*Math.sin(time*.00022)*grow*(1-finale*.82)+
+          reactiveAperture*.115*grow;
+      }
       if(this.r2075Engraving)this.r2075Engraving.material.opacity=
         (this.mobileRender?.11:.18)*grow*(.70+.30*finale);
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
@@ -1813,6 +1826,63 @@
       if(this.tentacleNodeMaterial)this.tentacleNodeMaterial.opacity=0;
       if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
       if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
+    }
+
+    /* R2083: authored travelling-light design. Real metal, bioglass and
+       cortex reflect differently throughout the existing cinematic shots.
+       Directional sources are moved, not replaced with procedural 2D flares. */
+    updateCinemaLighting(t,time){
+      const cortical=smooth((t-2.72)/1.12)*
+        (1-smooth((t-5.65)/1.38));
+      const optical=smooth((t-6.28)/1.24);
+      const native=smooth((t-8.96)/.88);
+      const progress=smooth((t-1.00)/7.05);
+      const scan=progress*(1-progress);
+      this.studioKey.position.set(
+        mix(-3.8,-2.55,cortical)+.45*optical,
+        mix(5.4,3.85,cortical),
+        6.4
+      );
+      this.studioFill.position.set(
+        mix(4.4,3.25,optical),1.8+scan*.65,5.2
+      );
+      this.studioEdge.position.set(
+        mix(2.5,-1.8,progress),
+        3.6+Math.sin(time*.00037)*.15,
+        4.8
+      );
+      this.studioBack.position.set(
+        mix(-2.4,2.0,progress),-3.1,-3.8
+      );
+      this.studioKey.intensity=1.90+.38*cortical+.21*optical-.10*native;
+      this.studioFill.intensity=.56+.17*cortical+.14*optical;
+      this.studioEdge.intensity=.88+.32*optical+.14*scan;
+      this.studioBack.intensity=.50+.24*cortical+.10*optical;
+      const press=this.cameraInput.impulse*
+        (1-smooth((t-8.65)/1.0));
+      /* Optical iris responds with genuine 3D material energy and mechanics.
+         Its angle and light return to the canonical native pose at handoff. */
+      if(this.r2075OpticMaterial){
+        this.r2075OpticMaterial.emissiveIntensity=
+          .13+.065*optical+.16*press;
+        this.r2075OpticMaterial.roughness=
+          .12-.015*optical;
+      }
+      if(this.r2075OpticInnerMaterial){
+        this.r2075OpticInnerMaterial.emissiveIntensity=
+          .16+.08*optical+.12*press;
+      }
+      if(this.proofReadbackR2073){
+        document.documentElement.dataset.fxMagIntroStudioR2083=
+          JSON.stringify({
+            key:Number(this.studioKey.intensity.toFixed(3)),
+            fill:Number(this.studioFill.intensity.toFixed(3)),
+            rim:Number(this.studioEdge.intensity.toFixed(3)),
+            back:Number(this.studioBack.intensity.toFixed(3)),
+            optic:Number((this.r2075OpticMaterial?.emissiveIntensity||0).toFixed(3)),
+            iris:Number((this.r2075Iris?.rotation.z||0).toFixed(4))
+          });
+      }
     }
 
     /* R2073 — three reference disciplines in one continuous 10s film:
@@ -1857,22 +1927,22 @@
       // 2.7–3.3s: decisive close-in reveal of the living embryo.
       const close=glide(2.70,3.30,t);
       z=lerp(z,3.86,close);
-      x=lerp(x,.40,close);
-      y=lerp(y,.11,close);
+      x=lerp(x,.49,close);
+      y=lerp(y,.125,close);
       focusX=lerp(focusX,-.055,close);
       bank=lerp(bank,.020,close);
       // 3.3–5.55s: restrained orbital reveal of physical cortical depth.
       const orbit=glide(3.30,5.55,t);
-      x=lerp(x,-.46,orbit);
-      y=lerp(y,-.105,orbit);
+      x=lerp(x,-.55,orbit);
+      y=lerp(y,-.135,orbit);
       focusX=lerp(focusX,.055,orbit);
       bank=lerp(bank,-.018,orbit);
       // 5.55–7.25s: pull back to see a single organism, not disconnected
       // CSS scenes. A parallax reversal gives the shell readable depth.
       const reveal=glide(5.55,7.25,t);
       z=lerp(z,4.28,reveal);
-      x=lerp(x,.22,reveal);
-      y=lerp(y,.046,reveal);
+      x=lerp(x,.275,reveal);
+      y=lerp(y,.063,reveal);
       focusX=lerp(focusX,0,reveal);
       bank=lerp(bank,.013,reveal);
       // 7.25–8.05s: the nervous system settles into its iconic axis.
@@ -1922,6 +1992,7 @@
       if(this.disposed)return;
       const t=clamp(r)*10;
       this.updateCamera(t,time);
+      this.updateCinemaLighting(t,time);
       this.updateDNA(t,time);
       this.updateCore(t,time);
       this.updateOrganic(t,time);
@@ -1952,7 +2023,12 @@
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
          not the whole frame, and lands on the permanent smoked-silver grade. */
       const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
+      /* R2083: cinematic film-grade midtone lift. The reveal is controlled
+         to protect silver/ice highlights and stays at native grade on exit. */
+      const corticalWindow=smooth((t-2.70)/.60)*(1-smooth((t-5.6)/1.20));
+      this.renderer.toneMappingExposure=
+        1.075+.095*corticalWindow+.065*smooth((t-6.25)/1.35)*
+        (1-smooth((t-8.95)/.85))+flash*.006+after*.002;
       this.coreLight.intensity+=flash*.42+after*.12;
       // R2073: touch / pointer impulses affect the ACTUAL physical lighting
       // inside the existing Three world, not a fake 2D glow overlay. The
@@ -2058,7 +2134,7 @@
         interact:input=>engine.interact(input),
         destroy:()=>engine.destroy(),
         engine,
-        revision:'r1240-organic-gyri-lock'
+        revision:'r2083-travelling-studio-optics'
       };
     }catch(error){
       console.error('FormatX R1280 genesis renderer failed:',error);
@@ -2082,7 +2158,7 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1941-signature-four-point-bioglass-central-optic-studio'
+    revision:'r2083-studio-physical-reactive-optics'
   };
   /* R1940 — the user-selected reference visual is the R1280 armored living
      pod. Keep the existing R1360 loader contract intact by exposing R1280 as
