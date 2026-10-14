@@ -197,7 +197,7 @@
     drawOrb(ctx,t,time,cx,cy);
     drawFlash(ctx,t,cx,cy);
   }
-  function drawLiteScene(ctx,r,time,target){
+  function drawLiteScene(ctx,r,time,target,radiusCap){
     const t=r*10,cx=640+(target?.x!=null?(target.x-640)*smooth((t-9.72)/.28):0),cy=360+(target?.y!=null?(target.y-360)*smooth((t-9.72)/.28):0);
     if(!MOBILE){ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);}
     const chamber=ctx.createRadialGradient(cx,cy,12,cx,cy,560);
@@ -228,89 +228,165 @@
       ctx.restore();
     }
 
+
     const grow=smooth((t-2.42)/.70);
     if(grow>.002){
-      /* R1723: one biological body from seed through final handoff. */
-      const R=(42+grow*196)*(1+.017*Math.sin(time*.0022));
-      ctx.save();ctx.translate(cx,cy);
-      {
-        const body=ctx.createRadialGradient(-R*.20,-R*.24,4,0,0,R*1.02);
-        body.addColorStop(0,'rgba(214,226,221,.54)');
-        body.addColorStop(.18,'rgba(137,160,157,.78)');
-        body.addColorStop(.42,'rgba(65,91,91,.95)');
-        body.addColorStop(.70,'rgba(22,39,42,.995)');
-        body.addColorStop(1,'rgba(3,8,10,1)');
-        ctx.fillStyle=body;
-        /* R1724: FormatX Living Crystal Organism fallback silhouette.
-           Angular living anatomy replaces the old egg/blob body. */
-        const breathe=1+.008*Math.sin(time*.0024);
-        ctx.scale(breathe,breathe);
+      /* R2103: the real low-power/non-WebGL fallback now uses the same
+         four-arm MAG identity as the single native R326/Three renderer.
+         The old oval biological ball was larger than the entire phone.
+         radiusCap is the CSS viewport-derived budget, BEFORE virtual-720p
+         letterbox/cover scaling. This remains centered at all phone ratios. */
+      const R=Math.min(
+        (28+grow*164)*(1+.008*Math.sin(time*.0022)),
+        Number.isFinite(radiusCap)?radiusCap:192
+      );
+      const S=R;
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(.012*Math.sin(time*.00033));
+      ctx.lineJoin='round';
+      ctx.lineCap='round';
+
+      const outer=()=>{
         ctx.beginPath();
-        ctx.moveTo(-R*.42,-R*.96);
-        ctx.bezierCurveTo(-R*.18,-R*1.05,R*.15,-R*.98,R*.43,-R*.78);
-        ctx.lineTo(R*.68,-R*.49);
-        ctx.bezierCurveTo(R*.84,-R*.23,R*.86,R*.10,R*.73,R*.38);
-        ctx.lineTo(R*.51,R*.67);
-        ctx.bezierCurveTo(R*.32,R*.89,R*.08,R*1.02,-R*.17,R*.96);
-        ctx.lineTo(-R*.43,R*.80);
-        ctx.bezierCurveTo(-R*.66,R*.61,-R*.79,R*.33,-R*.80,R*.04);
-        ctx.bezierCurveTo(-R*.81,-R*.26,-R*.70,-R*.60,-R*.42,-R*.96);
+        ctx.moveTo(0,-S*1.23);
+        ctx.bezierCurveTo(S*.18,-S*.91,S*.28,-S*.59,S*.41,-S*.45);
+        ctx.bezierCurveTo(S*.56,-S*.31,S*.88,-S*.18,S*1.13,0);
+        ctx.bezierCurveTo(S*.87,S*.18,S*.55,S*.31,S*.41,S*.47);
+        ctx.bezierCurveTo(S*.27,S*.63,S*.16,S*.96,0,S*1.22);
+        ctx.bezierCurveTo(-S*.16,S*.95,-S*.29,S*.62,-S*.43,S*.47);
+        ctx.bezierCurveTo(-S*.58,S*.29,-S*.90,S*.17,-S*1.14,0);
+        ctx.bezierCurveTo(-S*.88,-S*.18,-S*.57,-S*.30,-S*.42,-S*.46);
+        ctx.bezierCurveTo(-S*.27,-S*.63,-S*.18,-S*.94,0,-S*1.23);
         ctx.closePath();
-        ctx.fill();
+      };
 
-        /* R1830: broad studio reflections only. No polygon scribbles, veins or
-           faux HUD lines on the software fallback. */
-        ctx.save();
-        ctx.globalCompositeOperation='screen';
-        ctx.lineCap='round';
-        ctx.strokeStyle='rgba(225,237,232,.105)';
-        ctx.lineWidth=R*.115;
-        ctx.beginPath();
-        ctx.moveTo(-R*.46,-R*.66);
-        ctx.bezierCurveTo(-R*.31,-R*.44,-R*.27,-R*.08,-R*.12,R*.26);
-        ctx.stroke();
-        ctx.strokeStyle='rgba(87,154,158,.055)';
-        ctx.lineWidth=R*.072;
-        ctx.beginPath();
-        ctx.moveTo(R*.39,-R*.50);
-        ctx.bezierCurveTo(R*.51,-R*.18,R*.45,R*.18,R*.30,R*.46);
-        ctx.stroke();
-        ctx.restore();
-      }
-      const lensR=Math.max(27,R*.235);
-      const lensRx=lensR*.84,lensRy=lensR*.66;
-      const lensOX=R*.135,lensOY=-R*.070;
-      const lens=ctx.createRadialGradient(lensOX-lensR*.22,lensOY-lensR*.25,1,lensOX,lensOY,lensR);
-      lens.addColorStop(0,'rgba(232,236,232,.70)');
-      lens.addColorStop(.12,'rgba(156,178,176,.80)');
-      lens.addColorStop(.30,'rgba(73,112,116,.90)');
-      lens.addColorStop(.54,'rgba(27,65,70,.985)');
-      lens.addColorStop(.80,'rgba(8,28,32,1)');
-      lens.addColorStop(1,'rgba(2,8,10,1)');
-      ctx.fillStyle=lens;ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx,lensRy,-.11,0,TAU);ctx.fill();
-      ctx.strokeStyle='rgba(145,188,190,.24)';ctx.lineWidth=1.8;ctx.stroke();
-      ctx.save();ctx.globalCompositeOperation='screen';ctx.shadowColor='rgba(76,158,169,.18)';ctx.shadowBlur=7;
-      ctx.fillStyle='rgba(61,117,123,.060)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.34,lensRy*.34,-.11,0,TAU);ctx.fill();ctx.restore();
-      ctx.fillStyle='rgba(7,30,35,.34)';ctx.beginPath();ctx.ellipse(lensOX,lensOY,lensRx*.48,lensRy*.50,-.11,0,TAU);ctx.fill();
-      ctx.save();ctx.globalCompositeOperation='screen';
-      ctx.fillStyle='rgba(198,244,242,.42)';
-      ctx.beginPath();ctx.ellipse(lensOX-lensRx*.28,lensOY-lensRy*.30,lensRx*.12,lensRy*.09,-.28,0,TAU);ctx.fill();
-      ctx.restore();
+      // Real vector geometry: polished stepped four-point crystal silhouette.
+      const skin=ctx.createLinearGradient(-S,-S*.92,S,S*.95);
+      skin.addColorStop(0,'#596b70');
+      skin.addColorStop(.16,'#35464e');
+      skin.addColorStop(.43,'#172930');
+      skin.addColorStop(.64,'#0b1a23');
+      skin.addColorStop(.86,'#304b52');
+      skin.addColorStop(1,'#07121a');
+      ctx.save();
+      ctx.shadowColor='rgba(79,175,190,.33)';
+      ctx.shadowBlur=MOBILE?7:14;
+      outer();
+      ctx.fillStyle=skin;
+      ctx.fill();
       ctx.restore();
 
-      if(!MOBILE && t>6.10){
-        const tg=smooth((t-6.10)/1.10);
-        ctx.save();ctx.strokeStyle='rgba(100,163,171,'+(.34*tg)+')';ctx.lineWidth=3.0;ctx.shadowColor='rgba(56,132,143,.14)';ctx.shadowBlur=2;
-        for(let i=0;i<4;i++){
-          const a=i/4*TAU+.24;
-          const sway=Math.sin(time*.0016+i*.91)*.08;
-          ctx.beginPath();
-          ctx.moveTo(cx+Math.cos(a)*R*.66,cy+Math.sin(a)*R*.62);
-          ctx.bezierCurveTo(cx+Math.cos(a+.18+sway)*R*1.12,cy+Math.sin(a+.18+sway)*R*1.08,cx+Math.cos(a-.14-sway)*R*1.62,cy+Math.sin(a-.14-sway)*R*1.50,cx+Math.cos(a+sway*.45)*R*2.02,cy+Math.sin(a+sway*.45)*R*1.84);
-          ctx.stroke();
+      outer();
+      ctx.strokeStyle='rgba(202,226,224,.58)';
+      ctx.lineWidth=Math.max(1.35,S*.014);
+      ctx.stroke();
+
+      ctx.save();
+      outer();ctx.clip();
+      // Four bevelled radial facets with individual photographic reflections.
+      for(let arm=0;arm<4;arm++){
+        ctx.save();ctx.rotate(arm*Math.PI*.5);
+        const face=ctx.createLinearGradient(-S*.42,-S*.68,S*.45,0);
+        if(arm%2===0){
+          face.addColorStop(0,'rgba(235,246,241,.42)');
+          face.addColorStop(.40,'rgba(125,167,167,.28)');
+          face.addColorStop(1,'rgba(5,22,31,.015)');
+        }else{
+          face.addColorStop(0,'rgba(170,210,204,.27)');
+          face.addColorStop(.52,'rgba(63,107,117,.25)');
+          face.addColorStop(1,'rgba(4,18,25,.03)');
         }
+        ctx.beginPath();
+        ctx.moveTo(0,-S*1.14);
+        ctx.lineTo(-S*.34,-S*.47);
+        ctx.lineTo(-S*.16,-S*.24);
+        ctx.lineTo(S*.18,-S*.24);
+        ctx.lineTo(S*.34,-S*.46);
+        ctx.closePath();
+        ctx.fillStyle=face;ctx.fill();
+        ctx.strokeStyle=arm%2===0?'rgba(229,240,233,.44)':'rgba(132,174,177,.35)';
+        ctx.lineWidth=Math.max(1.0,S*.010);
+        ctx.beginPath();
+        ctx.moveTo(-S*.33,-S*.45);
+        ctx.lineTo(0,-S*1.12);
+        ctx.lineTo(S*.33,-S*.45);
+        ctx.stroke();
+        // Routed inset physical machining, restrained on small displays.
+        ctx.strokeStyle='rgba(118,165,170,.43)';
+        ctx.lineWidth=Math.max(.8,S*.009);
+        ctx.beginPath();
+        ctx.moveTo(-S*.17,-S*.35);
+        ctx.lineTo(-S*.075,-S*.74);
+        ctx.stroke();
         ctx.restore();
       }
+      const inset=ctx.createRadialGradient(-S*.12,-S*.18,S*.03,0,0,S*.66);
+      inset.addColorStop(0,'rgba(64,106,113,.20)');
+      inset.addColorStop(.40,'rgba(13,40,51,.42)');
+      inset.addColorStop(.75,'rgba(2,13,21,.62)');
+      inset.addColorStop(1,'rgba(1,9,15,.05)');
+      ctx.fillStyle=inset;
+      ctx.beginPath();
+      ctx.moveTo(0,-S*.47);
+      ctx.lineTo(S*.43,0);
+      ctx.lineTo(0,S*.46);
+      ctx.lineTo(-S*.44,0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      const breathing=.98+.02*Math.sin(time*.0026);
+      const rx=S*.355*breathing,ry=S*.340*breathing;
+      // Actual recessed bezel, concentric depths, eight machined shutters.
+      const titanium=ctx.createLinearGradient(-rx,-ry,rx,ry);
+      titanium.addColorStop(0,'#b7cbcb');
+      titanium.addColorStop(.21,'#647f86');
+      titanium.addColorStop(.50,'#203b45');
+      titanium.addColorStop(.76,'#89aaae');
+      titanium.addColorStop(1,'#172c35');
+      ctx.beginPath();ctx.ellipse(0,0,rx*1.17,ry*1.17,0,0,TAU);
+      ctx.fillStyle=titanium;ctx.fill();
+      ctx.strokeStyle='rgba(222,240,235,.86)';
+      ctx.lineWidth=Math.max(1.5,S*.014);ctx.stroke();
+      ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);
+      const sapphire=ctx.createRadialGradient(-rx*.22,-ry*.28,2,0,0,rx*1.10);
+      sapphire.addColorStop(0,'#446e77');
+      sapphire.addColorStop(.29,'#224854');
+      sapphire.addColorStop(.63,'#0d2634');
+      sapphire.addColorStop(.86,'#06141f');
+      sapphire.addColorStop(1,'#01060c');
+      ctx.fillStyle=sapphire;ctx.fill();
+      ctx.strokeStyle='rgba(15,30,40,.93)';
+      ctx.lineWidth=Math.max(1.8,S*.022);ctx.stroke();
+
+      for(let blade=0;blade<8;blade++){
+        const angle=blade*TAU/8+.025*Math.sin(time*.00022);
+        ctx.save();ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(rx*.36,-ry*.18);
+        ctx.lineTo(rx*.86,-ry*.36);
+        ctx.lineTo(rx*.91,ry*.01);
+        ctx.lineTo(rx*.52,ry*.22);
+        ctx.closePath();
+        ctx.fillStyle=blade%2===0?'rgba(102,138,145,.77)':'rgba(43,81,92,.87)';
+        ctx.fill();
+        ctx.strokeStyle='rgba(185,215,211,.45)';
+        ctx.lineWidth=Math.max(.9,S*.008);ctx.stroke();
+        ctx.restore();
+      }
+      const pupil=ctx.createRadialGradient(-rx*.12,-ry*.19,1,0,0,rx*.50);
+      pupil.addColorStop(0,'#75a5aa');
+      pupil.addColorStop(.14,'#35626d');
+      pupil.addColorStop(.60,'#0c2938');
+      pupil.addColorStop(1,'#030f1b');
+      ctx.beginPath();ctx.arc(0,0,rx*.42,0,TAU);
+      ctx.fillStyle=pupil;ctx.fill();
+      ctx.strokeStyle='rgba(172,222,219,.48)';
+      ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
+      ctx.beginPath();ctx.ellipse(-rx*.19,-ry*.23,rx*.14,ry*.085,-.42,0,TAU);
+      ctx.fillStyle='rgba(245,252,243,.62)';ctx.fill();
+      ctx.restore();
     }
   }
 
@@ -347,7 +423,14 @@
       let target=null;
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
       const started=performance.now();
-      drawLiteScene(ctx,r,time,target);
+      const radiusCap=MOBILE
+        ? Math.max(38,Math.min(sw*.36,sh*.35)/Math.max(.001,scale))
+        : 192;
+      document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
+        'four-point-bevelled-metal-glass-iris';
+      document.documentElement.dataset.fxMagFallbackDiameterR2103=
+        String(Math.round(radiusCap*2*scale));
+      drawLiteScene(ctx,r,time,target,radiusCap);
       ctx.restore();
 
       const cost=performance.now()-started;
@@ -399,13 +482,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'hidpi-studio-monolithic-bioglass-fallback-r1830'
+      quality:'r2103-four-point-machined-crystal-low-power'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r1919-igloo-smoked-ice-three-mass-offset-oval-aperture'
+    visualRevision:'r2103-four-point-recessed-iris-mobile-contained'
   };
 })();
