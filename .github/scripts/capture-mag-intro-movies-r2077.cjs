@@ -65,6 +65,8 @@ const OUT='artifacts/r2077-real-mag-movie';
         summary=await page.evaluate(()=>({
           renderer:document.documentElement.dataset.fxMagBirthRendererR1360,
           geometry:document.documentElement.dataset.fxMagIntroGeometryR2075,
+          nativeMorphR2080:document.documentElement.dataset.fxMagIntroMorphR2080,
+          nativeMorphProgressR2080:Number(document.documentElement.dataset.fxMagIntroMorphProgressR2080||0),
           identityCount:document.querySelectorAll('.fx-ai-core-ident-r1951').length,
           overlayCount:document.querySelectorAll('.fx-mag-birth-r533').length,
           nativeCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
@@ -87,6 +89,8 @@ const OUT='artifacts/r2077-real-mag-movie';
       assert.ok(bytes>12000,'Chromium recording produced an empty video: '+bytes);
       const accepted=!recordingError&&!!summary?.renderedInTimedFilm
         &&summary.geometry?.includes('8-physical-inset-rails-3-coaxial-metal-rings')
+        &&summary.nativeMorphR2080==='canonical-native-organism'
+        &&summary.nativeMorphProgressR2080>.999
         &&summary.identityCount===0&&summary.overlayCount===0
         &&summary.nativeCTA&&summary.scrollY===0
         &&summary.errors.length===0;
