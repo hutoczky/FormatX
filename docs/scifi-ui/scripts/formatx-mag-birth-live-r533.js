@@ -523,7 +523,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261014-r2112-full-fourpoint-mobile-cinema';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261014-r2113-physical-three-iris-mobile-frame';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
