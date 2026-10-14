@@ -359,7 +359,7 @@
     // Central aperture has REAL visual depth: shadowed recess, two metal
     // collars, a gasket, blades and a layered sapphire rather than a ball.
     const rx=S*.405,ry=S*.399;
-    const rot=.012*Math.sin(time*.00022);
+    const rot=.14*(1-smooth((t-6.15)/1.70))+.016*Math.sin(time*.00022);
     ctx.save();
     ctx.shadowColor='rgba(1,3,9,.90)';ctx.shadowBlur=S*.090;
     ctx.beginPath();ctx.ellipse(0,S*.016,rx*1.25,ry*1.25,0,0,TAU);
@@ -507,9 +507,19 @@
         (28+grow*164)*(1+.005*Math.sin(time*.0022)),
         Number.isFinite(radiusCap)?radiusCap:192
       );
+      /* R2107 cinematic focal choreography: tangible optical approach from
+         the formation scene, then an easing retreat to the canonical static
+         MAG before the real R326 WebGL handoff. Independent of pixel density. */
+      const macroDolly=smooth((t-3.20)/1.00)*
+        (1-smooth((t-5.70)/1.65));
+      const cameraScale=1+.115*macroDolly;
       ctx.save();ctx.translate(cx,cy);
+      ctx.scale(cameraScale,cameraScale);
+      ctx.rotate(-.042*macroDolly);
       drawMagStudio(ctx,R,time,t);
       ctx.restore();
+      document.documentElement.dataset.fxMagFallbackCinemaScaleR2107=
+        cameraScale.toFixed(3);
       document.documentElement.dataset.fxMagFallbackSilhouetteR2107=
         'sculpted-fourpoint-3d-illusion-machined-optic';
       document.documentElement.dataset.fxMagFallbackOpticR2107=
