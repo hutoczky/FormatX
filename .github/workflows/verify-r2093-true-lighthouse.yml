@@ -9,6 +9,14 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/verify-r2093-true-lighthouse.yml'
+  pull_request:
+    branches:
+      - mag-r2059-native-focus-continuity-20261013
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'lighthouserc.json'
+      - 'lighthouserc.mobile.json'
+      - '.github/workflows/verify-r2093-true-lighthouse.yml'
   workflow_dispatch:
 
 permissions:
