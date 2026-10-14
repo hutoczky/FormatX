@@ -1427,21 +1427,21 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(.105,.128,.131),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
+        c+=vec3(.30,.33,.31)*facetSilver*${mobile?'.095':'.120'};
+        c+=vec3(.020,.060,.070)*facetCool*${mobile?'.048':'.058'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.48,.59,.58)*softboxB*${mobile?'.250':'.235'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
@@ -1463,9 +1463,9 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.24,.34,.33)*axisRidge*(.17+.050*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-.24*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1493,14 +1493,14 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.38,.47,.43)*foldRidge*${mobile?'.110':'.140'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
+        c*=1.0-${mobile?'.095':'.125'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
+        c+=vec3(.030,.105,.123)*fresnel*.23;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
