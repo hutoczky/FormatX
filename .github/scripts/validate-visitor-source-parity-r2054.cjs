@@ -63,3 +63,10 @@ assert.ok(html.includes(hash), 'Authored CSP must permit the current inline boot
 assert.ok(read('billing-worker/src/production-content-entry.js').includes(hash), 'Production CSP must permit the same bootstrap');
 console.log(JSON.stringify({ sourceFiles: names.length + 1, prepaintIdentityComparisons: cases, cspHash: hash, result: 'pass' }));
 require('./validate-intro-rescue-lifecycle-r2060.cjs');
+const criticalControls=read('docs/scifi-ui/styles/formatx-menu-owner-r1956.css');
+const downloadHitArea=criticalControls.match(/html body\.living-architecture a#hero-download\{([^}]+)\}/)?.[1];
+assert.ok(downloadHitArea,'The original download anchor needs an unconditional critical hit area after archive relocation');
+assert.match(downloadHitArea,/display:inline-flex!important/);
+assert.match(downloadHitArea,/min-height:48px!important/);
+assert.match(downloadHitArea,/min-width:48px!important/);
+assert.equal((html.match(/formatx-menu-owner-r1956\.css\?v=20261014-r2062-persistent-download-hit-area/g)||[]).length,2,'Preload and synchronous stylesheet must use the same current control CSS');

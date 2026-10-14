@@ -165,3 +165,14 @@ html[data-fx-proof-singleton="present"] .fx-loop-reference-proof {
  visibility:hidden!important;pointer-events:none!important;
 }
 /* production-r2056-singleton-first-frame-no-blocking-remote-css */
+
+/* R2062 — the same real download anchor moves from the hero into the final
+   archive folio. Its hit area must not depend on deferred archive activation. */
+html body.living-architecture a#hero-download{
+ display:inline-flex!important;
+ box-sizing:border-box!important;
+ min-height:48px!important;
+ min-width:48px!important;
+ align-items:center!important;
+ justify-content:center!important;
+}
