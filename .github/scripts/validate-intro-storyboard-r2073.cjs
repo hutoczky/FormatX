@@ -68,6 +68,7 @@ const SHOTS=[
           return {
             phase:overlay?.dataset.phase,progress:root.dataset.fxMagBirthVisualFrameSeconds,
             camera:root.dataset.fxMagIntroCameraR2073,
+            mobileCameraDepth:Number(root.dataset.fxMagIntroMobileCameraDepthR2079||0),
             renderer:root.dataset.fxMagBirthRendererR1360,
             birthState:root.dataset.fxMagBirthLiveR533,
             realPixelPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
@@ -103,6 +104,10 @@ const SHOTS=[
           &&info.realPixelPeak>=20&&info.realLitSamples>=2,
           'Cinematic original Three framebuffer is black or MAG scene missing: '+JSON.stringify(info));
         assert.ok(info.duplicateIdentity<=1,'No duplicate MAG boot identifiers');
+        if(shot.mobile){
+          assert.ok(info.mobileCameraDepth>=6.18,
+            'R2079 portrait camera clips the real cortex or final MAG arms: '+JSON.stringify(info));
+        }
         assert.ok(/closed-beveled-3d-rim-8-physical-inset-rails-3-coaxial-metal-rings-and-8-iris-blades/.test(
           info.physicalGeometryR2075||''),
           'The living MAG must have the actual new machined 3D shell/optic assemblies: '+
