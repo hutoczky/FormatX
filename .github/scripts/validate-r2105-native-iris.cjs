@@ -65,6 +65,8 @@ const views=[
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
             rails:root.dataset.fxNativeMagRailsR2107||'',
+            railSections:Number(root.dataset.fxNativeMagRailSectionsR2108||0),
+            railDetail:root.dataset.fxNativeMagRailDetailR2108||'',
             railTriangles:Number(root.dataset.fxNativeMagRailTrianglesR2107||0),
             count:canvases.length,
             webgl:root.dataset.fxCoreReal3d,
@@ -90,8 +92,18 @@ const views=[
         assert.equal(info.blades,'8-raised-curved-titanium-blades');
         assert.equal(info.triangles,16);
         assert.equal(info.rails,'8-sculpted-front-surface-channels');
-        assert.ok(info.railTriangles===(view.mobile?160:224),
-          'Actual conforming titanium rail segments are absent: '+
+        /* Eight real superellipsoid-following titanium rails have two
+           triangles PER section. Software GL's seven-section LOD is a
+           documented performance budget; do not mistake its 112 triangles
+           for missing geometry. Never accept absent rails or zero detail. */
+        assert.ok([7,10,14].includes(info.railSections),
+          'Native real-mesh subdivision not reported: '+JSON.stringify(info));
+        assert.equal(info.railDetail,
+          info.railSections===7?'software-7':
+          info.railSections===10?'mobile-10':'desktop-14',
+          'Native renderer LOD metadata mismatches the real geometry');
+        assert.equal(info.railTriangles,8*info.railSections*2,
+          'Exactly eight full-length machined front rails are required: '+
             JSON.stringify(info));
         assert.ok(info.visible&&info.width>50&&info.height>50,
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
