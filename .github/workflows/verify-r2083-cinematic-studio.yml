@@ -7,6 +7,9 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - 'billing-worker/src/production-content-entry.js'
       - '.github/scripts/validate-intro-storyboard-r2073.cjs'
       - '.github/scripts/validate-intro-identity-r2072.cjs'
@@ -38,6 +41,9 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js
           node --check .github/scripts/validate-intro-storyboard-r2073.cjs
           node --check .github/scripts/validate-intro-identity-r2072.cjs
           node --check .github/scripts/capture-mag-intro-movies-r2077.cjs
