@@ -140,7 +140,9 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=640;
+      // R2078: atmosphere is volumetric scale reference, not visual confetti.
+      // Phone screens need a quieter, finer field that preserves core detail.
+      const count=this.mobileRender?248:440;
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -155,7 +157,7 @@
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.BufferAttribute(pos,3));
       const m=new T.PointsMaterial({
-        color:0x9bc8ce,size:.034,transparent:true,opacity:.34,
+        color:0x9bc8ce,size:this.mobileRender?.020:.026,transparent:true,opacity:.25,
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
       this.particles=new T.Points(g,m);
@@ -164,16 +166,18 @@
 
     makeDebris(){
       const T=this.THREE,r=this.rand;
-      const geo=new T.IcosahedronGeometry(.050,0);
+      const geo=new T.IcosahedronGeometry(this.mobileRender?.028:.040,0);
       const mat=new T.MeshStandardMaterial({
         color:0x73728f,roughness:.72,metalness:.03,
         emissive:0x142b3b,emissiveIntensity:.28,
         transparent:true,opacity:.40,depthWrite:false
       });
-      const mesh=new T.InstancedMesh(geo,mat,72);
+      const debrisCount=this.mobileRender?26:46;
+      const mesh=new T.InstancedMesh(geo,mat,debrisCount);
       const dummy=new T.Object3D();
-      for(let i=0;i<72;i++){
-        const a=r()*Math.PI*2, rr=1.55+r()*3.8, sc=.42+r()*1.8;
+      for(let i=0;i<debrisCount;i++){
+        const a=r()*Math.PI*2, rr=1.85+r()*3.5,
+          sc=(this.mobileRender?.32:.40)+r()*(this.mobileRender?.85:1.15);
         dummy.position.set(Math.cos(a)*rr,(r()-.5)*4.3,-1.15+(r()-.5)*3.2);
         dummy.rotation.set(r()*3,r()*3,r()*3);
         dummy.scale.set(sc*(.55+r()*.7),sc,sc*(.45+r()*.7));
@@ -1875,7 +1879,9 @@
       x+=input.x*movement;
       y+=input.y*movement*.72;
       z-=input.impulse*.035*responsiveness;
-      if(this.width<this.height)z+=.90;
+      // R2078: retain quiet breathing room around every four-point arm
+      // on tall phone viewports, without flattening or clipping 3D geometry.
+      if(this.width<this.height)z+=1.22;
       this.camera.position.set(x,y,z);
       this.camera.up.set(Math.sin(bank),Math.cos(bank),0);
       this.camera.lookAt(focusX,focusY,0);
@@ -1902,8 +1908,8 @@
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
       const finaleClean=smooth((t-6.45)/1.70);
-      this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
-      if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
+      this.particles.material.opacity=(.20+.032*Math.sin(time*.00045))*(1-finaleClean*.84);
+      if(this.debris?.material)this.debris.material.opacity=(this.mobileRender?.19:.25)*(1-finaleClean*.96);
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
