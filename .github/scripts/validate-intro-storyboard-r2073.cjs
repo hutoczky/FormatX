@@ -79,6 +79,7 @@ const SHOTS=[
             physicalGeometryR2075:root.dataset.fxMagIntroGeometryR2075,
             morphR2080:root.dataset.fxMagIntroMorphR2080,
             morphProgressR2080:Number(root.dataset.fxMagIntroMorphProgressR2080||'0'),
+            opticEnergyR2082:Number(root.dataset.fxMagIntroOpticEnergyR2082||'0'),
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
             insideFilm:badge?.dataset.fxAiCoreShot==='inside-the-original-10s-film',
             identityAlpha:Number(badgeCss?.opacity||0),
@@ -113,7 +114,8 @@ const SHOTS=[
             'The iconic optical four-point metal crest must remain throughout the main intro: '+JSON.stringify(info));
         }else{
           assert.ok(info.morphR2080==='canonical-native-organism'
-            &&info.morphProgressR2080>.999,
+            &&info.morphProgressR2080>.999
+            &&info.opticEnergyR2082>1.65,
             'Last filmed frame does not match the real permanent native living MAG: '+JSON.stringify(info));
         }
         if(shot.mobile){
