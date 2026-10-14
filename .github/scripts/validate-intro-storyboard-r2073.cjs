@@ -36,7 +36,7 @@ const SHOTS=[
           {waitUntil:'domcontentloaded',timeout:60000});
         await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
           null,{timeout:45000});
-        if(shot.second>=8.05){
+        if(shot.second>=8.05 && shot.second<9.5){
           await page.waitForFunction(()=>{
             const label=document.querySelector('.fx-ai-core-ident-r1951.is-visible');
             return !!label&&Number(getComputedStyle(label).opacity)>.90;
@@ -124,13 +124,17 @@ const SHOTS=[
           info.physicalGeometryR2075||''),
           'The living MAG must have the actual new machined 3D shell/optic assemblies: '+
             JSON.stringify(info));
-        if(shot.second>=8.05){
+        if(shot.second>=8.05 && shot.second<9.5){
           assert.equal(info.identity,'MAG // AI CORE');
           assert.ok(info.insideFilm&&info.identityAlpha>.90
             &&Math.abs(info.identityX-info.innerWidth*.5)<12,
             'MAG identity must settle sharply on its real 3D optical axis: '+JSON.stringify(info));
         }else{
           assert.ok(!info.identity,'AI telemetry should not precede stabilization');
+        }
+        if(shot.second>=9.5){
+          assert.ok(!info.identity,
+            'Native organism frame must not show expired detached MAG boot title: '+JSON.stringify(info));
         }
         assert.deepEqual(issues,[],'Intro runtime exceptions: '+JSON.stringify(issues));
         await page.screenshot({
