@@ -104,8 +104,47 @@ const OUTPUT='artifacts/r2072-intro-proof';
           &&after.originalCTA&&after.scrollY===0
           &&after.filmHandoff==='cleared-exactly-at-film-handoff',
           'Film-to-original-MAG hero handoff failed: '+JSON.stringify(after));
+        /* R2084: prove the actual permanent native R326 MAG appears after
+           the 10-second film. A vanished overlay or retained CTA alone does
+           NOT certify that a living 3D MAG exists on the original website. */
+        await page.waitForFunction(()=>{
+          const root=document.documentElement;
+          return root.dataset.fxCrystalOrganismR326==='ready'
+            &&document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length===1;
+        },null,{timeout:20000});
+        await page.waitForTimeout(300);
+        const native=await page.evaluate(()=>{
+          const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+          const rect=canvas?.getBoundingClientRect();
+          const style=canvas?getComputedStyle(canvas):null;
+          return {
+            ready:document.documentElement.dataset.fxCrystalOrganismR326,
+            originalCanvasCount:
+              document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
+            originalStageCount:
+              document.querySelectorAll('#hero .fx-crystal-organism-r326-stage').length,
+            backingWidth:canvas?.width||0,backingHeight:canvas?.height||0,
+            width:rect?.width||0,height:rect?.height||0,
+            opacity:Number(style?.opacity||0),display:style?.display||'none',
+            visibility:style?.visibility||'hidden',
+            introCount:document.querySelectorAll('.fx-mag-birth-r533').length,
+            originalCTA:!!document.querySelector('#hero .hero-actions #hero-download')
+          };
+        });
+        await page.screenshot({
+          path:OUTPUT+'/'+vp.name+'-real-native-mag-after-handoff.png',
+          animations:'allow'
+        });
+        assert.ok(native.ready==='ready'&&native.originalCanvasCount===1
+          &&native.originalStageCount===1&&native.backingWidth>=100
+          &&native.backingHeight>=100&&native.width>=60&&native.height>=60
+          &&native.opacity>.05&&native.display!=='none'
+          &&native.visibility==='visible'&&native.introCount===0
+          &&native.originalCTA,
+          'Intro ended but the original permanent 3D MAG is not visible: '+
+            JSON.stringify(native));
         assert.deepEqual(errors,[],'Real intro JS exceptions: '+JSON.stringify(errors));
-        reports.push({viewport:vp.name,proof,after});
+        reports.push({viewport:vp.name,proof,after,native});
         console.log('R2072_INTRO_INSIDE_ONE_MAG_FILM_PASS',JSON.stringify({
           viewport:vp.name,progress:proof.percentage,
           top:Math.round(proof.rect.top),alpha:proof.opacity,
