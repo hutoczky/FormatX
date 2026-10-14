@@ -19,7 +19,7 @@
     clearTimeout(timeout);
     removeEventListener('scroll',checkViewport);
     removeEventListener('hashchange',checkHash);
-    removeEventListener('formatx:magbirthcomplete',onFilmDone);
+    document.removeEventListener('formatx:magbirthcomplete',onFilmDone);
     removeEventListener('pageshow',onPageshow);
   };
   const start=reason=>{
@@ -61,7 +61,7 @@
     const filmActive=root.dataset.fxMagBirthOwnerR533==='active'
       ||root.dataset.fxIntroPrepaintR1611==='show';
     if(filmActive){
-      addEventListener('formatx:magbirthcomplete',onFilmDone,{once:true});
+      document.addEventListener('formatx:magbirthcomplete',onFilmDone,{once:true});
       timeout=setTimeout(()=>start('film-watchdog'),14500);
       return;
     }
