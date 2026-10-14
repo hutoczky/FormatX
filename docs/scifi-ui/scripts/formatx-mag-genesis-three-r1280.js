@@ -1311,6 +1311,113 @@
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
 
+      /* R2080: true native-geometry optical anatomy in the single original
+         Three scene. All detail stays INSIDE the four-point silhouette.
+         The mobile tier reduces engraving density without changing identity. */
+      this.magOptics=new T.Group();
+      this.magOptics.position.z=.002;
+      this.mechanicalGroup.add(this.magOptics);
+      this.magOpticMaterials=[];
+      const bezelProfiles=[
+        [.161,.012,.525,0x9ebfbd],
+        [.223,.008,.517,0x547c82],
+        [.283,.005,.508,0x355b64]
+      ];
+      this.magLensCollars=[];
+      for(const [radius,tube,z,color] of bezelProfiles){
+        const material=new T.MeshPhysicalMaterial({
+          color,metalness:.78,roughness:.18,clearcoat:.90,
+          clearcoatRoughness:.10,transparent:true,opacity:0,
+          depthWrite:false
+        });
+        const collar=new T.Mesh(new T.TorusGeometry(radius,tube,10,96),material);
+        collar.position.z=z;
+        this.magOptics.add(collar);
+        this.magLensCollars.push(collar);
+        this.magOpticMaterials.push(material);
+      }
+      const opticRailMaterial=new T.MeshPhysicalMaterial({
+        color:0x92b8b9,metalness:.72,roughness:.23,
+        emissive:0x0c292d,emissiveIntensity:.08,
+        clearcoat:.82,transparent:true,opacity:0,depthWrite:false
+      });
+      this.magOpticMaterials.push(opticRailMaterial);
+      this.magInsetRails=[];
+      for(let arm=0;arm<4;arm++){
+        const angle=arm*Math.PI/2;
+        for(const side of [-1,1]){
+          const points=[];
+          for(let j=0;j<=12;j++){
+            const u=j/12;
+            const radius=.32+u*.48;
+            const offset=side*(.066*(1-u)+.015);
+            const c=Math.cos(angle),s=Math.sin(angle);
+            points.push(new T.Vector3(
+              radius*c-offset*s,radius*s+offset*c,
+              .370-u*.025
+            ));
+          }
+          const curve=new T.CatmullRomCurve3(points);
+          const rail=new T.Mesh(new T.TubeGeometry(curve,32,.006,6,false),opticRailMaterial);
+          this.magOptics.add(rail);
+          this.magInsetRails.push(rail);
+        }
+      }
+      const markPositions=[];
+      const markCount=this.mobileRender?24:44;
+      for(let i=0;i<markCount;i++){
+        const arm=i%4;
+        const local=Math.floor(i/4);
+        const perArm=Math.ceil(markCount/4);
+        const u=(local+.5)/perArm;
+        const direction=arm*Math.PI/2;
+        const d=.33+u*.54;
+        const offset=(i%2===0?-1:1)*(.035+u*.006);
+        const radial=new T.Vector2(Math.cos(direction),Math.sin(direction));
+        const tangent=new T.Vector2(-radial.y,radial.x);
+        const half=.014+(i%3)*.003;
+        const px=radial.x*d+tangent.x*offset;
+        const py=radial.y*d+tangent.y*offset;
+        const z=.386-u*.020;
+        markPositions.push(
+          px-radial.x*half,py-radial.y*half,z,
+          px+radial.x*half,py+radial.y*half,z
+        );
+      }
+      const etchGeometry=new T.BufferGeometry();
+      etchGeometry.setAttribute('position',new T.Float32BufferAttribute(markPositions,3));
+      this.magEtchingMaterial=new T.LineBasicMaterial({
+        color:0xa5c9c8,transparent:true,opacity:0,depthWrite:false
+      });
+      this.magOpticMaterials.push(this.magEtchingMaterial);
+      this.magEtching=new T.LineSegments(etchGeometry,this.magEtchingMaterial);
+      this.magOptics.add(this.magEtching);
+
+      this.magIris=new T.Group();
+      this.magIris.position.z=.538;
+      this.magOptics.add(this.magIris);
+      const irisBladeMaterial=new T.MeshPhysicalMaterial({
+        color:0x24434b,metalness:.54,roughness:.27,
+        clearcoat:.70,clearcoatRoughness:.12,
+        side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
+      });
+      this.magOpticMaterials.push(irisBladeMaterial);
+      const bladeShape=new T.Shape();
+      bladeShape.moveTo(.082,-.018);
+      bladeShape.lineTo(.163,-.068);
+      bladeShape.lineTo(.177,.022);
+      bladeShape.lineTo(.106,.056);
+      bladeShape.closePath();
+      const bladeGeometry=new T.ShapeGeometry(bladeShape,1);
+      for(let i=0;i<8;i++){
+        const blade=new T.Mesh(bladeGeometry,irisBladeMaterial);
+        blade.rotation.z=i*Math.PI/4;
+        this.magIris.add(blade);
+      }
+      this.magIrisLight=new T.PointLight(0x5aa6ab,0,1.45,2);
+      this.magIrisLight.position.set(0,.008,.60);
+      this.magOptics.add(this.magIrisLight);
+
       this.mechanicalGroup.scale.setScalar(.001);
     }
 
@@ -1614,6 +1721,21 @@
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
+      /* R2080: physical material reveal, etched facet readability and
+         restrained eight-blade iris stabilization before native handoff. */
+      if(this.magOptics){
+        const opticsReveal=smooth((t-6.62)/.90)*grow;
+        for(let i=0;i<this.magLensCollars.length;i++){
+          this.magLensCollars[i].material.opacity=opticsReveal*(i===0?.85:i===1?.58:.42);
+        }
+        this.magInsetRails.forEach(rail=>{rail.material.opacity=.57*opticsReveal;});
+        this.magEtchingMaterial.opacity=.35*opticsReveal;
+        this.magIris.children.forEach(blade=>{
+          blade.material.opacity=.79*opticsReveal;
+        });
+        this.magIris.rotation.z=mix(-.19,0,smooth((t-7.12)/1.55));
+        this.magIrisLight.intensity=.46*opticsReveal*(.96+.04*Math.sin(time*.0021));
+      }
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
@@ -1826,7 +1948,7 @@
         interact:input=>engine.interact(input),
         destroy:()=>engine.destroy(),
         engine,
-        revision:'r1240-organic-gyri-lock'
+        revision:'r2080-physical-optic-engraved-iris'
       };
     }catch(error){
       console.error('FormatX R1280 genesis renderer failed:',error);
@@ -1850,7 +1972,7 @@
 
   window.FormatXMagGenesisThreeR1280={
     attach,
-    revision:'r1941-signature-four-point-bioglass-central-optic-studio'
+    revision:'r2080-native-physical-optic-studio'
   };
   /* R1940 — the user-selected reference visual is the R1280 armored living
      pod. Keep the existing R1360 loader contract intact by exposing R1280 as
