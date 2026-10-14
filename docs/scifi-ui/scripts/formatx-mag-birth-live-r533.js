@@ -974,6 +974,23 @@
     }
     phaseTimers.clear();
 
+    // R2081: a slow final GPU frame cannot leave the optical metal crest
+    // frozen at ~47% of its 900ms transition when the real intro ends.
+    // Render the canonical living-organism handoff ONCE before the overlay
+    // fades. This is real physical Three geometry, never a fake CSS picture.
+    if(filmRenderer && ROOT.dataset.fxMagBirthRendererR1360==='threejs-active'
+      && (source==='complete'||source.startsWith('bounded-failsafe'))){
+      try{
+        const progress=Number(ROOT.dataset.fxMagIntroMorphProgressR2080||0);
+        if(progress<.999)filmRenderer.draw?.(1,performance.now());
+        ROOT.dataset.fxMagIntroFinalFrameR2081=
+          ROOT.dataset.fxMagIntroMorphR2080==='canonical-native-organism'
+          ? 'real-three-living-handoff-rendered':'physical-handoff-unconfirmed';
+      }catch(error){
+        ROOT.dataset.fxMagIntroFinalFrameR2081='physical-handoff-render-error';
+        console.warn('FormatX R2081 final Three handoff render:',error);
+      }
+    }
     try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
       coreApi?.setMorph?.(0,'r611-final-living-handoff');
@@ -1064,11 +1081,14 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
+    // R2081: only the reference 2D fallback is phase-driven. An
+    // explicitly requested *real* Three.js full film must receive every
+    // available compositor frame, including 8.96–9.84s physical morph.
     const phaseDrivenFallback=Boolean(filmRenderer)
       && softwareFallbackActive
-      && !HAS_VISUAL_FRAME;
+      && !HAS_VISUAL_FRAME && !PROOF_FULL_FILM;
     const particleCadence=filmRenderer
-      ? (softwareFallbackActive?125:16.67)
+      ? (softwareFallbackActive&&!PROOF_FULL_FILM?125:16.67)
       : 16.67;
     const shouldDraw=phaseDrivenFallback
       ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
@@ -1082,7 +1102,8 @@
     if(r<1 || visiblePhase<4){
       /* Software fallback keeps the 10 s semantic timeline, but the expensive
          raster only changes at the five cinematic phase boundaries. */
-      const cadence=softwareFallbackActive?125:((AUTOMATION&&FORCE)?72:0);
+      const cadence=softwareFallbackActive&&!PROOF_FULL_FILM?125:
+        ((AUTOMATION&&FORCE&&!PROOF_FULL_FILM)?72:0);
       queueRender(cadence);
       return;
     }
