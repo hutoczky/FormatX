@@ -180,7 +180,7 @@
         emissive:0x142b3b,emissiveIntensity:.28,
         transparent:true,opacity:.40,depthWrite:false
       });
-      const debrisCount=this.mobileRender?26:46;
+      const debrisCount=this.mobileRender?16:26;
       const mesh=new T.InstancedMesh(geo,mat,debrisCount);
       const dummy=new T.Object3D();
       for(let i=0;i<debrisCount;i++){
@@ -1619,8 +1619,8 @@
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,.34,smooth((t-2.52)/.76));
-      else if(t<5.58) sc=.36+Math.sin((t-3.28)*1.02)*.002;
-      else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
+      else if(t<5.58) sc=.53+Math.sin((t-3.28)*1.02)*.004;
+      else if(t<7.15) sc=mix(.53,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
       const endMove=smooth((t-9.78)/.20);
@@ -1652,10 +1652,14 @@
       const preFlash=1-smooth((t-6.55)/.72);
       const pulse=.988+.012*Math.sin(time*.0046);
 
-      this.coreShell.material.opacity=.96*stage1+.16*reveal*preFlash;
-      this.coreGlass.material.opacity=.08*stage1+.015*reveal*preFlash;
-      this.coreEdges.material.opacity=.16*stage1+.012*reveal*preFlash;
-      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.72*stage1+.065*reveal*preFlash;
+      /* R2083: MAG stays foreground readable through cortical close orbit.
+         No fake alpha overlay or abrupt object swap. */
+      const physicalReveal=reveal*preFlash;
+      this.coreShell.material.opacity=.96*stage1+.53*physicalReveal;
+      this.coreGlass.material.opacity=.08*stage1+.075*physicalReveal;
+      this.coreEdges.material.opacity=.18*stage1+.16*physicalReveal;
+      if(this.corePetalMaterial)
+        this.corePetalMaterial.opacity=.72*stage1+.22*physicalReveal;
 
       this.irisGroup.scale.setScalar((.018+eyeHold*.72)*pulse);
       this.irisRays.rotation.z=time*.000050;
@@ -1681,15 +1685,21 @@
       const handoffOrganic=smooth((t-8.96)/.88);
       const visible=Math.max(grow*fade,handoffOrganic);
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+visible*.82;
+      /* Supporting cortical cradle, not an overpowering ball of coils.
+         Smoothly restore canonical native scale before the final handoff. */
+      const corticalClose=smooth((t-2.76)/.72)*
+        (1-smooth((t-6.72)/1.06));
+      const bodyScale=(.001+visible*.82)*(1-.255*corticalClose);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
       const finalMaterialGlow=smooth((t-8.96)/.88);
-      this.organicShellMaterial.opacity=(.54+.08*finalMaterialGlow)*visible;
-      this.organicLobeMaterial.opacity=(.46+.045*finalMaterialGlow)*visible;
+      this.organicShellMaterial.opacity=
+        (.54+.08*finalMaterialGlow)*visible*(1-.19*corticalClose);
+      this.organicLobeMaterial.opacity=
+        (.46+.045*finalMaterialGlow)*visible*(1-.17*corticalClose);
       this.organicWireMaterial.opacity=.0003*visible;
       this.organicVeinMaterial.opacity=.16*visible;
-      this.organicHoodMaterial.opacity=.36*visible;
+      this.organicHoodMaterial.opacity=.36*visible*(1-.16*corticalClose);
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.32*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
@@ -1732,7 +1742,9 @@
       const handoffCellular=smooth((t-9.04)/.84);
       const visible=Math.max(grow*fade,handoffCellular);
       this.cellGroup.visible=visible>.002;
-      const cellScale=.001+visible*.99;
+      const cortexClose=smooth((t-2.76)/.72)*
+        (1-smooth((t-6.72)/1.06));
+      const cellScale=(.001+visible*.99)*(1-.255*cortexClose);
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
       this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
