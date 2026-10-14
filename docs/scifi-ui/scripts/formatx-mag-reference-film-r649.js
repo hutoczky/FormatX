@@ -388,7 +388,6 @@
       ctx.fillStyle='rgba(245,252,243,.62)';ctx.fill();
       ctx.restore();
     }
-    }
   }
 
   function attach(canvas,getTarget){
