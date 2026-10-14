@@ -106,6 +106,51 @@ const CASES=[
         records.push({shot,info});
       }finally{await context.close()}
     }
+    /* R2103 high-core 4GB Android routing: unlike the old <=4GB gate,
+       the user agent must attempt the actual Three cinema first.
+       Browser GPU compilation is tested separately by the full Three film
+       gate; this case checks the precise capability decision before fallback. */
+    const capable=await browser.newContext({
+      viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+      deviceScaleFactor:2,locale:'hu-HU',reducedMotion:'no-preference',
+      userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) '+
+        'AppleWebKit/537.36 (KHTML, like Gecko) '+
+        'Chrome/133.0.0.0 Mobile Safari/537.36'
+    });
+    try{
+      await capable.addInitScript(()=>{
+        Object.defineProperty(navigator,'hardwareConcurrency',
+          {configurable:true,get:()=>8});
+        Object.defineProperty(navigator,'deviceMemory',
+          {configurable:true,get:()=>4});
+        Object.defineProperty(navigator,'webdriver',
+          {configurable:true,get:()=>undefined});
+      });
+      const page=await capable.newPage();
+      await page.goto(HOME+'?intro=1&r2103-device-classification=1',
+        {waitUntil:'domcontentloaded',timeout:60000});
+      await page.waitForFunction(()=>{
+        const root=document.documentElement;
+        const loader=root.dataset.fxMagBirthThreeLoaderR1608||'';
+        return loader.startsWith('lazy-owner')||loader==='existing-owner-wait'
+          ||root.dataset.fxMagBirthRendererR1360==='threejs-active';
+      },null,{timeout:18000});
+      const info=await page.evaluate(()=>({
+        cores:navigator.hardwareConcurrency,memory:navigator.deviceMemory,
+        loader:document.documentElement.dataset.fxMagBirthThreeLoaderR1608||'',
+        renderer:document.documentElement.dataset.fxMagBirthRendererR1360||'',
+        constraint:document.documentElement.dataset.fxMagBirthRendererR1729||'',
+        owner:document.documentElement.dataset.fxMagBirthOwnerR533||''
+      }));
+      assert.equal(info.cores,8);
+      assert.equal(info.memory,4);
+      assert.ok(!info.constraint.includes('constrained'),
+        '8-core, 4GB-reported high-end phone was incorrectly forced into the obsolete 2D movie: '+JSON.stringify(info));
+      assert.ok(info.owner==='active',
+        'Normal Android visit was incorrectly skipped: '+JSON.stringify(info));
+      records.push({shot:{name:'high-core-phone-uses-real-three-first'},info});
+      console.log('PASS R2103_HIGH_CORE_ANDROID',JSON.stringify(info));
+    }finally{await capable.close()}
   }finally{await browser.close()}
   fs.writeFileSync(OUT+'/summary.json',JSON.stringify(records,null,2)+'\n');
 })().catch(error=>{
