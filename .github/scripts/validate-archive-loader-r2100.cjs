@@ -106,6 +106,41 @@ async function run(){
       assert.ok(result.state.includes('explicit-cinematic-request'));
       report.push({viewport:'forced-archive',result});
     }finally{await eager.close();}
+    /* Native first visit: the 73KB archive must wait for the actual ten-second
+       MAG film's document event, not the 14.5s watchdog. The same permanent
+       WebGL and real download CTA must survive this handoff. */
+    const firstVisit=await browser.newContext({
+      viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+      reducedMotion:'no-preference'
+    });
+    try{
+      const page=await firstVisit.newPage(),errors=[];
+      page.on('pageerror',error=>errors.push(error.message));
+      await page.goto(BASE+'?intro=1',{waitUntil:'domcontentloaded',timeout:60000});
+      await page.waitForFunction(()=>
+        document.documentElement.dataset.fxArchiveLoaderR2100==='armed',
+        null,{timeout:12000});
+      await page.waitForTimeout(1100);
+      assert.equal(await page.evaluate(()=>
+        document.querySelectorAll('script[data-fx-archive-module-r2100]').length),0,
+        'Archive module may not steal GPU/CPU resources during the native MAG film');
+      await page.waitForFunction(()=>
+        document.documentElement.dataset.fxArchiveLoaderR2100==='loaded-native-mag-handoff' &&
+        !document.querySelector('.fx-mag-birth-r533'),
+        null,{timeout:25000});
+      const result=await page.evaluate(()=>({
+        loader:document.documentElement.dataset.fxArchiveLoaderR2100,
+        moduleCount:document.querySelectorAll('script[data-fx-archive-module-r2100]').length,
+        liveCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
+        filmCount:document.querySelectorAll('.fx-mag-birth-r533').length,
+        archive:typeof window.FormatXArchiveExperience
+      }));
+      assert.equal(result.moduleCount,1);
+      assert.equal(result.archive,'object');
+      assert.ok(result.liveCTA&&result.filmCount===0);
+      assert.deepEqual(errors,[]);
+      report.push({viewport:'first-real-mobile-intro-handoff',result});
+    }finally{await firstVisit.close();}
   }finally{await browser.close();}
   fs.writeFileSync(path.join(dir,'results.json'),JSON.stringify(report,null,2)+'\n');
   console.log('R2100_LAZY_ARCHIVE_CINEMATIC_PARITY_PASS',JSON.stringify(report));
