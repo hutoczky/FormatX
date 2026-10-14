@@ -1425,7 +1425,7 @@
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.004;
+        c+=vec3(.68,.79,.74)*glassBlade*.065;
 
         /* R1942 — internal prism architecture.
            Four broad refractive planes run toward the signature tips. They are
@@ -1440,7 +1440,7 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.155+.055*prismSweep);
+        c+=vec3(.35,.43,.42)*axisRidge*(.29+.075*prismSweep);
         /* R2075 real native 3D radial engraved optical mineral: UV-free
            in volume coordinates, with mobile-safe lower frequency. */
         /* R2085: subpixel radial sine bands produced visible moire,
@@ -1451,7 +1451,7 @@
           frontDepth*(1.0-smoothstep(.67,.88,radialXY));
         c+=vec3(.70,.79,.76)*machinedGroove*${mobile?'.075':'.105'};
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-.29*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1479,9 +1479,20 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.49,.57,.53)*foldRidge*${mobile?'.16':'.21'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
+        c*=1.0-${mobile?'.14':'.18'}*foldValley;
+        /* R2086: variable-depth corner facets across the actual 3D
+           surface, no high-frequency scanlines or flat decal layers. */
+        float broadSilverPlane=pow(sat(dot(
+          normalize(vec3(vLocal.x*.46-.34,vLocal.y*.62+.46,vLocal.z*.82+.73)),
+          normalize(vec3(-.50,.61,.62))
+        )),3.0)*frontDepth;
+        float silverLamina=exp(-pow(
+          (abs(vLocal.x)*.68+abs(vLocal.y)*.43-.48)/.17,2.0
+        ))*frontDepth;
+        c+=vec3(.50,.58,.56)*broadSilverPlane*.17;
+        c+=vec3(.62,.70,.66)*silverLamina*.11;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
         /* A broad, physically coherent studio bevel adds sculptural
@@ -1492,8 +1503,8 @@
         float coolFacet=pow(
           max(dot(n,normalize(vec3(.68,.12,.71))),0.0),5.0
         )*frontDepth;
-        c+=vec3(.70,.75,.71)*metalShoulder*.105;
-        c+=vec3(.25,.41,.43)*coolFacet*.085;
+        c+=vec3(.72,.76,.72)*metalShoulder*.23;
+        c+=vec3(.29,.45,.47)*coolFacet*.16;
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.034,.095,.115)*fresnel*.27;
