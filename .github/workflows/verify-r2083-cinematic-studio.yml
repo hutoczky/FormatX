@@ -38,6 +38,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/validate-intro-storyboard-r2073.cjs
+          node --check .github/scripts/validate-intro-identity-r2072.cjs
           node --check .github/scripts/capture-mag-intro-movies-r2077.cjs
       - name: Install real Chrome-equivalent Chromium and browser driver
         shell: bash
@@ -62,6 +63,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/r2083/node_modules
         run: node .github/scripts/validate-intro-storyboard-r2073.cjs
+      - name: Verify real first-visit 10s intro teardown and original hero CTA
+        env:
+          NODE_PATH: ${{ runner.temp }}/r2083/node_modules
+        run: node .github/scripts/validate-intro-identity-r2072.cjs
       - name: Record live ten-second 3D camera motion on desktop and phone
         env:
           NODE_PATH: ${{ runner.temp }}/r2083/node_modules
@@ -71,7 +76,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: formatx-r2083-native-three-studio-storyboard
-          path: artifacts/r2073-intro-storyboard/
+          path: |
+            artifacts/r2073-intro-storyboard/
+            artifacts/r2072-intro-proof/
           retention-days: 21
           if-no-files-found: warn
       - name: Preserve real 10s desktop and mobile source WebGL movies
