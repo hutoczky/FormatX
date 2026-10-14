@@ -726,10 +726,19 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(false){
-      const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
-      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
+    /* R2097: restore the ACTUAL original physical optical assembly. The
+       previous if(false) disabled both its circular metal housing and convex
+       living-glass lens, leaving only a flat shader dot after the intro.
+       Keep the native single-buffer WebGL ownership, budget geometry per tier,
+       and retain the same physical optical assembly under reduced motion. */
+    {
+      const opticalTrianglesBefore=facets.length/3;
+      const centreX=.075,centreY=.018;
+      const bezelSteps=auditMode?40:(software?48:mobile?56:72);
+      const bezelTubeSteps=mobile||auditMode?6:8;
+      const bezelZ=mobile?.729:.613;
+      const bezelMajorX=.198,bezelMajorY=.137,bezelTube=.008;
+
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -753,12 +762,12 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.609];
-      const lensRadiusX=.153;
-      const lensRadiusY=.041;
-      const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const lensCenter=[centreX,centreY,bezelZ+.008];
+      const lensRadiusX=.185;
+      const lensRadiusY=.125;
+      const lensDepth=.033;
+      const radialSteps=auditMode?8:(software?9:mobile?10:12);
+      const angularSteps=auditMode?40:(software?48:mobile?56:72);
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -798,6 +807,10 @@
         }
         previous=current;
       }
+      root.dataset.fxMagNativeOpticTrianglesR2097=
+        String(Math.round(facets.length/3-opticalTrianglesBefore));
+      root.dataset.fxMagNativeOpticR2097=
+        'real-metal-bezel-convex-glass-one-native-webgl-draw';
     }
 
     /* R2091: eight genuine precision inset metal rails that trace the exact
@@ -1648,6 +1661,29 @@
           vec3(.05,.12,.13)*fresnel*.18+
           vec3(.18,.31,.33)*sweep*.40;
         c=mix(c,railMetal,railMask*.96);
+        /* R2097: convex sapphire eye and machined titanium ring are physically
+           tessellated geometry inside the original SINGLE MAG vertex buffer.
+           vFacet distinguishes their actual surfaces from the shell. */
+        float physicalBezel=step(5.69,vFacet)*(1.0-step(5.80,vFacet));
+        float physicalLens=step(6.30,vFacet)*(1.0-step(6.54,vFacet));
+        float glassRadial=length((vUv-vec2(.5))*2.0);
+        vec3 machinedTitanium=vec3(.07,.095,.106)+
+          vec3(.43,.52,.53)*(softboxA*.54+softboxB*.36+key*.22)+
+          vec3(.14,.19,.20)*fresnel*.24;
+        float irisVein=exp(-pow((glassRadial-.53)/.075,2.0));
+        float lensCore=exp(-glassRadial*glassRadial*8.2);
+        float opticRing=exp(-pow((glassRadial-.77)/.038,2.0));
+        float reactiveSpec=pow(max(dot(n,normalize(vec3(
+          -.33+uPointer.x*.14,.62+uPointer.y*.14,.81))),0.0),15.0);
+        vec3 physicalGlass=vec3(.005,.023,.032)+
+          vec3(.028,.12,.15)*(1.0-glassRadial*.48)+
+          vec3(.17,.26,.28)*reactiveSpec*.33+
+          vec3(.20,.60,.68)*irisVein*(.22+.08*uEnergy)+
+          vec3(.32,.88,.95)*lensCore*(.24+.16*uEnergy)+
+          vec3(.35,.46,.48)*opticRing*.30+
+          vec3(.09,.29,.32)*sweep*.22;
+        c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,physicalGlass,physicalLens);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
