@@ -825,6 +825,48 @@
         String((facets.length-bladesFirst)/3);
     }
 
+    /* R2107 physical arm architecture: eight narrow titanium rail facets
+       conform to the actual front superellipsoid, submitting in the existing
+       single native WebGL buffer/draw.  The lens remains the central focus.
+       Two triangles per rail segment; no new WebGL canvas, textures or pass. */
+    const railStart=facets.length;
+    const frontZ=(x,y)=>{
+      const e=mobile?.78:.61;
+      const ax=x>=0?(mobile?.88:1.02):(mobile?.86:.98);
+      const ay=y>=0?(mobile?1.09:1.18):(mobile?.97:1.06);
+      const az=mobile?.64:.49;
+      const remain=1-Math.pow(Math.abs(x)/ax,e)
+        -Math.pow(Math.abs(y)/ay,e);
+      return az*Math.pow(Math.max(.0005,remain),1/e);
+    };
+    const sections=software?7:mobile?10:14;
+    for(let arm=0;arm<4;arm++){
+      const angle=arm*Math.PI/2;
+      const dx=Math.cos(angle),dy=Math.sin(angle);
+      const tx=-dy,ty=dx;
+      for(const side of [-1,1]){
+        let lastLeft=null,lastRight=null;
+        for(let k=0;k<=sections;k++){
+          const u=k/sections;
+          const reach=.29+(mobile?.43:.50)*u;
+          const offset=side*(.058*(1-u)+.018);
+          const mx=dx*reach+tx*offset,my=dy*reach+ty*offset;
+          const half=.005*(1-.22*u);
+          const x1=mx+tx*half,y1=my+ty*half;
+          const x2=mx-tx*half,y2=my-ty*half;
+          const left=[x1,y1,frontZ(x1,y1)+.018];
+          const right=[x2,y2,frontZ(x2,y2)+.018];
+          if(lastLeft && lastRight){
+            armorQuad(lastLeft,lastRight,right,left,5.86);
+          }
+          lastLeft=left;lastRight=right;
+        }
+      }
+    }
+    root.dataset.fxNativeMagRailsR2107='8-sculpted-front-surface-channels';
+    root.dataset.fxNativeMagRailTrianglesR2107=
+      String((facets.length-railStart)/3);
+
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
@@ -1546,6 +1588,10 @@
         /* R2105: actual front-facing depth-tested metal, glass and iris
            geometry have distinct reflectance instead of inheriting the
            flat cyan base material painted on the four-point mineral. */
+        float physicalRail=step(5.81,vFacet)*(1.0-step(5.91,vFacet));
+        vec3 channelTitanium=vec3(.042,.072,.077)+
+          vec3(.48,.58,.53)*(softboxA*.62+softboxB*.28+key*.12);
+        c=mix(c,channelTitanium,physicalRail*.92);
         float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
         float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
         float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
