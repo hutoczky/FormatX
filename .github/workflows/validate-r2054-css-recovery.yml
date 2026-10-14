@@ -5,6 +5,13 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js'
+      - 'docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css'
+      - '.github/scripts/validate-intro-identity-r2072.cjs'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
+      - '.github/scripts/validate-intro-storyboard-r2073.cjs'
+      - '.github/scripts/capture-mag-intro-movies-r2077.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
@@ -14,6 +21,13 @@ on:
     paths:
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js'
+      - 'docs/scifi-ui/styles/formatx-ai-core-ident-r1951.css'
+      - '.github/scripts/validate-intro-identity-r2072.cjs'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
+      - '.github/scripts/validate-intro-storyboard-r2073.cjs'
+      - '.github/scripts/capture-mag-intro-movies-r2077.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
@@ -37,6 +51,12 @@ jobs:
           node --check .github/scripts/validate-live-mag-functional.cjs
           node --check .github/scripts/validate-r2054-css-recovery.cjs
           node --check .github/scripts/validate-r2054-default-entry.cjs
+          node --check .github/scripts/validate-intro-identity-r2072.cjs
+          node --check .github/scripts/validate-intro-storyboard-r2073.cjs
+          node --check .github/scripts/capture-mag-intro-movies-r2077.cjs
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-ai-core-ident-r1951.js
       - name: Install browser
         run: |
           npm install --prefix "$RUNNER_TEMP/mag-r2054" --no-audit --no-fund playwright@1.62.0
@@ -60,3 +80,37 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
         run: node .github/scripts/validate-r2054-default-entry.cjs
+
+      - name: Prove R2072 one-shot MAG boot identity on real desktop and mobile first visit
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/validate-intro-identity-r2072.cjs
+      - name: Prove R2073 six original Three.js camera and input storyboard shots
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/validate-intro-storyboard-r2073.cjs
+      - name: Record the actual 10-second R2077 Three.js cinema in desktop and mobile video
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/capture-mag-intro-movies-r2077.cjs
+      - name: Preserve actual R2077 cinematic playback files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2077-real-webgl-intro-videos
+          path: artifacts/r2077-real-mag-movie/FormatX_MAG_R2077_*.webm
+          if-no-files-found: warn
+      - name: Save R2073 3D storyboard images
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2073-real-three-storyboard
+          path: artifacts/r2073-intro-storyboard/
+          if-no-files-found: warn
+      - name: Preserve R2072 cinematic visual frames and timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2072-mag-genesis-intro-proof
+          path: artifacts/r2072-intro-proof/
+          if-no-files-found: warn

@@ -20,6 +20,10 @@
   const VISUAL_FRAME = Number.parseFloat(PARAMS.get('introframe') || '');
   const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
   const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
+  // Explicit full-length creative review requests the real Three scene even
+  // on software Chromium. Ordinary low-power visitors retain the safe film.
+  // This never applies to Lighthouse or default first-visit paths.
+  const PROOF_FULL_FILM = VISUAL_PROOF && PARAMS.get('fullfilm') === '1';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
@@ -514,7 +518,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261008-r1984-continuous-microfibril-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261014-r2082-illuminated-native-core-handoff';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -537,6 +541,7 @@
   let lastTelemetryUpdate = 0;
   let warmupDispatched = false;
   let ignitionDone = false;
+  let identityAnnouncedR2072 = false;
   let visiblePhase = 0;
   let phaseChangedAt = 0;
   const PHASE_HOLD_MS = MOBILE ? [360, 620, 500, 340, 0] : [620, 1180, 920, 680, 0];
@@ -721,6 +726,28 @@
     }
   }
 
+  /* R2072 — identity is part of the ONE 10s physical genesis shot,
+     not a second post-intro splash. Dispatch once when the living MAG has
+     stabilized, with the actual hero-stage optical center. The existing
+     R1951 identification node owns the typography and its exit. */
+  function announceCoreIdentityR2072(r) {
+    if (identityAnnouncedR2072 || r < .805 || finished || (HAS_VISUAL_FRAME && r >= .95)) return;
+    identityAnnouncedR2072 = true;
+    syncTarget(true);
+    ROOT.dataset.fxMagBirthIdentityR2072 = 'mag-stabilized-within-film';
+    ROOT.dataset.fxMagBirthIdentityProgressR2072 = r.toFixed(3);
+    document.dispatchEvent(new CustomEvent('formatx:magbirthstabilized', {
+      detail: {
+        source:'single-genesis-shot-r2072',progress:r,
+        // The intro Three organism remains centered on its own camera
+        // until the final 0.22s position handoff. Do not anchor its boot
+        // telemetry to the distant HOME-stage location yet.
+        x:Math.round(innerWidth*.5),y:Math.round(innerHeight*.50),
+        timelineMs:Math.round(r*DURATION)
+      }
+    }));
+  }
+
   function seedParticles(w,h) {
     const count=MOBILE?Math.max(8,Math.min(12,Math.round((w*h)/36000))):Math.max(48,Math.min(132,Math.round((w*h)/13500)));
     particles=Array.from({length:count},(_,i)=>{
@@ -802,7 +829,7 @@
        constrained CPU/GPU path. The existing R649 cinematic keeps the same
        10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
        proof frames remain on the Three owner so design evidence stays exact. */
-    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
+    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME && !PROOF_FULL_FILM){
       ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
       overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
       startR649Fallback();
@@ -947,6 +974,23 @@
     }
     phaseTimers.clear();
 
+    // R2081: a slow final GPU frame cannot leave the optical metal crest
+    // frozen at ~47% of its 900ms transition when the real intro ends.
+    // Render the canonical living-organism handoff ONCE before the overlay
+    // fades. This is real physical Three geometry, never a fake CSS picture.
+    if(filmRenderer && ROOT.dataset.fxMagBirthRendererR1360==='threejs-active'
+      && (source==='complete'||source.startsWith('bounded-failsafe'))){
+      try{
+        const progress=Number(ROOT.dataset.fxMagIntroMorphProgressR2080||0);
+        if(progress<.999)filmRenderer.draw?.(1,performance.now());
+        ROOT.dataset.fxMagIntroFinalFrameR2081=
+          ROOT.dataset.fxMagIntroMorphR2080==='canonical-native-organism'
+          ? 'real-three-living-handoff-rendered':'physical-handoff-unconfirmed';
+      }catch(error){
+        ROOT.dataset.fxMagIntroFinalFrameR2081='physical-handoff-render-error';
+        console.warn('FormatX R2081 final Three handoff render:',error);
+      }
+    }
     try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
       coreApi?.setMorph?.(0,'r611-final-living-handoff');
@@ -1020,6 +1064,7 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
+    announceCoreIdentityR2072(r);
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
@@ -1036,11 +1081,14 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
+    // R2081: only the reference 2D fallback is phase-driven. An
+    // explicitly requested *real* Three.js full film must receive every
+    // available compositor frame, including 8.96–9.84s physical morph.
     const phaseDrivenFallback=Boolean(filmRenderer)
       && softwareFallbackActive
-      && !HAS_VISUAL_FRAME;
+      && !HAS_VISUAL_FRAME && !PROOF_FULL_FILM;
     const particleCadence=filmRenderer
-      ? (softwareFallbackActive?125:16.67)
+      ? (softwareFallbackActive&&!PROOF_FULL_FILM?125:16.67)
       : 16.67;
     const shouldDraw=phaseDrivenFallback
       ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
@@ -1054,7 +1102,8 @@
     if(r<1 || visiblePhase<4){
       /* Software fallback keeps the 10 s semantic timeline, but the expensive
          raster only changes at the five cinematic phase boundaries. */
-      const cadence=softwareFallbackActive?125:((AUTOMATION&&FORCE)?72:0);
+      const cadence=softwareFallbackActive&&!PROOF_FULL_FILM?125:
+        ((AUTOMATION&&FORCE&&!PROOF_FULL_FILM)?72:0);
       queueRender(cadence);
       return;
     }
@@ -1151,6 +1200,7 @@
       const renderFixedFrame=()=>{
         if(finished||!overlay.isConnected)return;
         try{applyPhase(phaseTargetFor(fixedR),'visual-frame-r659');}catch(_){}
+        try{announceCoreIdentityR2072(fixedR);}catch(_){}
         try{
           const value=Math.min(100,Math.round(easeOutCubic(fixedR)*100));
           percent.value=String(value).padStart(3,'0');

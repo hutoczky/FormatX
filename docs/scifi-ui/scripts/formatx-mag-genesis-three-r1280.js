@@ -48,6 +48,15 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      // Only the explicit fixed-frame visual proof reads the actual WebGL
+      // framebuffer; the normal 10s user film has zero readback stalls.
+      const proofParams=new URLSearchParams(location.search);
+      this.proofReadbackR2073=proofParams.get('visualintro')==='1'
+        &&Number.isFinite(Number.parseFloat(proofParams.get('introframe')||''));
+      this.proofPixelR2073=new Uint8Array(4);
+      // R2073: organic, inertial camera input remains inside this original
+      // Three.js renderer. No overlay renderer and no CSS parallax substitute.
+      this.cameraInput={targetX:0,targetY:0,x:0,y:0,impulse:0,lastTime:0};
 
       this.mobileRender=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
@@ -92,6 +101,12 @@
       this.makeCellularLayer();
       this.makeMechanicalLayer();
       this.makeTentacles();
+      // R2075: objective structural contract for the real source Three mesh.
+      // A flat title-only frame or legacy un-detailed star cannot pass this.
+      document.documentElement.dataset.fxMagIntroGeometryR2075=
+        'closed-beveled-3d-rim-'+this.r2075ArmRails.length+
+        '-physical-inset-rails-'+this.r2075LensPieces.length+
+        '-coaxial-metal-rings-and-8-iris-blades';
       this.resize();
     }
 
@@ -99,13 +114,16 @@
       const T=this.THREE;
       /* R1950 — studio lighting, not game-VFX lighting.
          Neutral soft key + restrained cyan transmission + very faint cool rim. */
-      this.scene.add(new T.HemisphereLight(0x8fb8bd,0x05080b,0.54));
-      const key=new T.DirectionalLight(0xe7f2ef,1.62);
+      this.scene.add(new T.HemisphereLight(0xaac6cb,0x090c13,0.68));
+      const key=new T.DirectionalLight(0xe7f2ef,1.90);
       key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
-      const fill=new T.DirectionalLight(0x9fb9b8,.42);
+      const fill=new T.DirectionalLight(0xafc8c7,.56);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
+      const studioEdge=new T.DirectionalLight(0xcaf6f6,.88);
+      studioEdge.position.set(2.5,3.6,4.8);
+      this.scene.add(studioEdge);
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
@@ -122,7 +140,9 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=640;
+      // R2078: atmosphere is volumetric scale reference, not visual confetti.
+      // Phone screens need a quieter, finer field that preserves core detail.
+      const count=this.mobileRender?248:440;
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -137,7 +157,7 @@
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.BufferAttribute(pos,3));
       const m=new T.PointsMaterial({
-        color:0x9bc8ce,size:.034,transparent:true,opacity:.34,
+        color:0x9bc8ce,size:this.mobileRender?.020:.026,transparent:true,opacity:.25,
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
       this.particles=new T.Points(g,m);
@@ -146,16 +166,18 @@
 
     makeDebris(){
       const T=this.THREE,r=this.rand;
-      const geo=new T.IcosahedronGeometry(.050,0);
+      const geo=new T.IcosahedronGeometry(this.mobileRender?.028:.040,0);
       const mat=new T.MeshStandardMaterial({
         color:0x73728f,roughness:.72,metalness:.03,
         emissive:0x142b3b,emissiveIntensity:.28,
         transparent:true,opacity:.40,depthWrite:false
       });
-      const mesh=new T.InstancedMesh(geo,mat,72);
+      const debrisCount=this.mobileRender?26:46;
+      const mesh=new T.InstancedMesh(geo,mat,debrisCount);
       const dummy=new T.Object3D();
-      for(let i=0;i<72;i++){
-        const a=r()*Math.PI*2, rr=1.55+r()*3.8, sc=.42+r()*1.8;
+      for(let i=0;i<debrisCount;i++){
+        const a=r()*Math.PI*2, rr=1.85+r()*3.5,
+          sc=(this.mobileRender?.32:.40)+r()*(this.mobileRender?.85:1.15);
         dummy.position.set(Math.cos(a)*rr,(r()-.5)*4.3,-1.15+(r()-.5)*3.2);
         dummy.rotation.set(r()*3,r()*3,r()*3);
         dummy.scale.set(sc*(.55+r()*.7),sc,sc*(.45+r()*.7));
@@ -219,12 +241,12 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.046,8,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.046,8,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.078,7,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.078,7,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.031,10,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.031,10,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.052,8,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.052,8,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.027,.027,1,8,1,false);
+      const rungGeo=new T.CylinderGeometry(.018,.018,1,10,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -657,16 +679,16 @@
       const microFiberTexture=this.makeMicroFiberTexture();
 
       this.organicShellMaterial=new T.MeshPhysicalMaterial({
-        color:0x160d20,roughness:.66,metalness:.010,
-        clearcoat:.11,clearcoatRoughness:.54,
+        color:0x292332,roughness:.60,metalness:.010,
+        clearcoat:.18,clearcoatRoughness:.48,
         bumpMap:microFiberTexture,bumpScale:.036,
         transparent:true,opacity:0,
         emissive:0x1c0b29,emissiveIntensity:.18,
         depthWrite:true
       });
       this.organicLobeMaterial=new T.MeshPhysicalMaterial({
-        color:0x25162e,roughness:.70,metalness:.006,
-        clearcoat:.08,clearcoatRoughness:.62,
+        color:0x403448,roughness:.62,metalness:.006,
+        clearcoat:.14,clearcoatRoughness:.52,
         bumpMap:microFiberTexture,bumpScale:.031,
         transparent:true,opacity:0,
         emissive:0x170a22,emissiveIntensity:.10,
@@ -709,7 +731,7 @@
       }
 
       this.organicFoldMaterial=new T.MeshPhysicalMaterial({
-        color:0x36283d,roughness:.68,metalness:.004,
+        color:0x53465c,roughness:.60,metalness:.004,
         emissive:0x140b1b,emissiveIntensity:.038,
         bumpMap:microFiberTexture,bumpScale:.019,
         transparent:true,opacity:0,depthWrite:true
@@ -854,8 +876,8 @@
       }
 
       this.organicHoodMaterial=new T.MeshPhysicalMaterial({
-        color:0x241829,
-        roughness:.68,
+        color:0x383040,
+        roughness:.60,
         metalness:.035,
         clearcoat:.12,
         clearcoatRoughness:.52,
@@ -1078,6 +1100,83 @@
       this.mechBody.position.z=-.03;
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
+
+      /* R2075 — the four-point MAG is now an optically machined *3D artifact*.
+         Real beveled metallic perimeter, paired inset arm-rails and micro-scale
+         radial signatures give photographs clear material stratification.
+         These are meshes within the SAME scene, not an HTML/SVG overlay.
+         The outline derives from the same canonical signature shape. */
+      this.r2075RimMaterial=new T.MeshPhysicalMaterial({
+        color:0x9bced0,metalness:.73,roughness:.19,
+        clearcoat:.85,clearcoatRoughness:.12,
+        emissive:0x0b292e,emissiveIntensity:.12,
+        transparent:true,opacity:.76,depthWrite:false
+      });
+      this.r2075RailMaterial=new T.MeshPhysicalMaterial({
+        color:0x729fa8,metalness:.66,roughness:.24,
+        clearcoat:.70,clearcoatRoughness:.15,
+        emissive:0x082027,emissiveIntensity:.10,
+        transparent:true,opacity:.56,depthWrite:false
+      });
+      this.r2075MicroMaterial=new T.LineBasicMaterial({
+        color:0xb6e8e5,transparent:true,opacity:.18,depthWrite:false
+      });
+      const rimPts=baseShape.getSpacedPoints(this.mobileRender?128:256);
+      const rimCurve=new T.CatmullRomCurve3(
+        rimPts.slice(0,-1).map(p=>new T.Vector3(p.x*1.035,p.y*1.035,.270)),
+        true,'centripetal'
+      );
+      const rim=new T.Mesh(
+        new T.TubeGeometry(rimCurve,this.mobileRender?128:256,.0080,6,true),
+        this.r2075RimMaterial
+      );
+      rim.renderOrder=7;
+      this.mechanicalGroup.add(rim);
+      this.r2075SignatureRim=rim;
+      this.r2075ArmRails=[];
+      const micro=[];
+      const railGeoLength=this.mobileRender?22:36;
+      for(let q=0;q<4;q++){
+        const angle=q*Math.PI*.5;
+        const vx=Math.cos(angle),vy=Math.sin(angle);
+        const nx=-vy,ny=vx;
+        for(const side of [-1,1]){
+          const pts=[];
+          for(let i=0;i<=9;i++){
+            const u=i/9;
+            const reach=.18+.66*u;
+            const offset=side*(.080*(1-u)+.009);
+            pts.push(new T.Vector3(
+              vx*reach+nx*offset,vy*reach+ny*offset,
+              .315-.055*u+.020*Math.sin(Math.PI*u)
+            ));
+          }
+          const curve=new T.CatmullRomCurve3(pts,false,'centripetal');
+          const rail=new T.Mesh(
+            new T.TubeGeometry(curve,railGeoLength,.0065,5,false),
+            this.r2075RailMaterial
+          );
+          rail.renderOrder=7;
+          this.mechanicalGroup.add(rail);
+          this.r2075ArmRails.push(rail);
+        }
+        // Fine engraved contour rhythm: 11 short transverse strokes per arm.
+        // All geometry is batched into one BufferGeometry/LineSegments draw call.
+        const ribs=this.mobileRender?7:11;
+        for(let k=0;k<ribs;k++){
+          const u=(k+.65)/(ribs+.8),r=.21+u*.60;
+          const w=.062*(1-u)+.012,z=.321-u*.05;
+          micro.push(
+            vx*r+nx*(-w),vy*r+ny*(-w),z,
+            vx*r+nx*w,vy*r+ny*w,z
+          );
+        }
+      }
+      const microGeo=new T.BufferGeometry();
+      microGeo.setAttribute('position',new T.Float32BufferAttribute(micro,3));
+      this.r2075Engraving=new T.LineSegments(microGeo,this.r2075MicroMaterial);
+      this.r2075Engraving.renderOrder=8;
+      this.mechanicalGroup.add(this.r2075Engraving);
 
       /* R1984 — final-stage edge fibrils.
          Sample the actual four-point signature outline and grow one-pixel fibers
@@ -1304,6 +1403,57 @@
       this.mechInnerRing.position.set(0,.01,.49);
       this.mechanicalGroup.add(this.mechInnerRing);
 
+      /* R2075: dual-depth optical collar with an actual cut-glass iris.
+         The small central cyan point becomes a meaningful macro lens: two
+         separately machined annuli, eight precision-cut inward facets, and
+         one physically illuminated sapphire pupil. These are 3D geometry. */
+      this.r2075OpticMaterial=new T.MeshPhysicalMaterial({
+        color:0xc1e4e0,metalness:.72,roughness:.12,
+        clearcoat:1,clearcoatRoughness:.07,
+        emissive:0x0a2d34,emissiveIntensity:.13,
+        transparent:true,opacity:.90,depthWrite:false
+      });
+      this.r2075OpticInnerMaterial=new T.MeshPhysicalMaterial({
+        color:0x296675,metalness:.38,roughness:.16,
+        transmission:.20,thickness:.17,ior:1.46,
+        clearcoat:1,clearcoatRoughness:.09,
+        emissive:0x07333e,emissiveIntensity:.16,
+        transparent:true,opacity:.85,depthWrite:false,
+        side:T.DoubleSide
+      });
+      this.r2075LensPieces=[];
+      for(const [radius,tube,z] of [
+        [.191,.010,.540],[.263,.0055,.495],[.113,.0038,.572]
+      ]){
+        const ring=new T.Mesh(
+          new T.TorusGeometry(radius,tube,10,96),
+          this.r2075OpticMaterial
+        );
+        ring.position.set(0,.01,z);
+        this.mechanicalGroup.add(ring);
+        this.r2075LensPieces.push(ring);
+      }
+      const bladeGeo=new T.BufferGeometry();
+      const blades=[],indices=[];
+      for(let i=0;i<8;i++){
+        const a=i*Math.PI/4;
+        const b=a+Math.PI/4;
+        const mid=a+Math.PI/8;
+        const start=blades.length/3;
+        blades.push(
+          Math.cos(a)*.128,Math.sin(a)*.128,.563,
+          Math.cos(b)*.130,Math.sin(b)*.130,.560,
+          Math.cos(mid)*.199,Math.sin(mid)*.199,.546
+        );
+        indices.push(start,start+1,start+2);
+      }
+      bladeGeo.setAttribute('position',new T.Float32BufferAttribute(blades,3));
+      bladeGeo.setIndex(indices);
+      bladeGeo.computeVertexNormals();
+      this.r2075Iris=new T.Mesh(bladeGeo,this.r2075OpticInnerMaterial);
+      this.r2075Iris.position.y=.01;
+      this.mechanicalGroup.add(this.r2075Iris);
+
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
@@ -1469,7 +1619,11 @@
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
-      const surfaceZ=cellular*1.10;
+      // R2082: the physical cyan optic resurfaces above the organic cortex
+      // as the mechanical armor retracts, retaining a readable center in
+      // the native MAG on desktop AND 390px portrait screens.
+      const nativeEye=smooth((t-8.96)/.88);
+      const surfaceZ=cellular*1.10+nativeEye*.96;
 
       this.coreGroup.position.set(tx,ty,surfaceZ);
       this.organicGroup.position.set(tx,ty,0);
@@ -1483,7 +1637,10 @@
 
       const stage1=1-smooth((t-2.60)/.42);
       const reveal=smooth((t-2.68)/.46);
-      const eyeHold=reveal*(1-smooth((t-6.35)/.78));
+      const eyeHold=Math.max(
+        reveal*(1-smooth((t-6.35)/.78)),
+        nativeEye*.84
+      );
       const preFlash=1-smooth((t-6.55)/.72);
       const pulse=.988+.012*Math.sin(time*.0046);
 
@@ -1499,6 +1656,9 @@
       this.glowSprite.scale.setScalar(.80+eyeHold*.05);
       this.coreInner.material.opacity=.0015+eyeHold*.018;
       this.coreLight.intensity=eyeHold*(2.4+Math.sin(time*.0046)*.10);
+      if(t>=9.50)
+        document.documentElement.dataset.fxMagIntroOpticEnergyR2082=
+          this.coreLight.intensity.toFixed(3);
 
       if(this.coreLabel)this.coreLabel.material.opacity=.52*stage1+.028*reveal*(1-smooth((t-3.08)/.32));
     }
@@ -1506,17 +1666,23 @@
     updateOrganic(t,time){
       const grow=smooth((t-2.48)/.72);
       const fade=1-smooth((t-6.20)/1.15)*.96;
-      const visible=grow*fade;
+      // R2080: the birth film and the permanent native MAG use the SAME
+      // organic identity at handoff. The sculpted metal 4-point crest at
+      // t=8.5 is a transient living exoskeleton, not an abrupt replacement.
+      // Re-emerge through it in the final ~900ms, with C1-smooth optics.
+      const handoffOrganic=smooth((t-8.96)/.88);
+      const visible=Math.max(grow*fade,handoffOrganic);
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.82;
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
-      this.organicShellMaterial.opacity=.27*visible;
-      this.organicLobeMaterial.opacity=.24*visible;
+      const finalMaterialGlow=smooth((t-8.96)/.88);
+      this.organicShellMaterial.opacity=(.54+.08*finalMaterialGlow)*visible;
+      this.organicLobeMaterial.opacity=(.46+.045*finalMaterialGlow)*visible;
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.105*visible;
-      this.organicHoodMaterial.opacity=.18*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
+      this.organicVeinMaterial.opacity=.16*visible;
+      this.organicHoodMaterial.opacity=.36*visible;
+      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.32*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
       if(this.organicFibers){
@@ -1554,7 +1720,9 @@
     updateCells(t,time){
       const grow=smooth((t-2.60)/.70);
       const fade=1-smooth((t-6.25)/1.10)*.96;
-      const visible=grow*fade;
+      // Preserve the same cellular outer mantle as the native R326 organism.
+      const handoffCellular=smooth((t-9.04)/.84);
+      const visible=Math.max(grow*fade,handoffCellular);
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.99;
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
@@ -1573,7 +1741,9 @@
     }
 
     updateMechanical(t,time){
-      const grow=smooth((t-6.25)/.90);
+      const bodyGain=smooth((t-6.25)/.90);
+      const handoffRelease=1-smooth((t-9.00)/.88);
+      const grow=bodyGain*handoffRelease;
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
@@ -1582,9 +1752,9 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
-        mix(.106,.132,finale)
+        mix(.048,.098,finale),
+        mix(.105,.172,finale),
+        mix(.120,.205,finale)
       );
       this.mechMidMaterial.color.setRGB(
         mix(.039,.066,finale),
@@ -1611,6 +1781,12 @@
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
+      // Physical optic stabilizes on the same cinematic timeline; no second
+      // composited CGI element appears after the handoff.
+      if(this.r2075Iris)this.r2075Iris.rotation.z=
+        .065*Math.sin(time*.00022)*grow*(1-finale*.82);
+      if(this.r2075Engraving)this.r2075Engraving.material.opacity=
+        (this.mobileRender?.11:.18)*grow*(.70+.30*finale);
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
@@ -1639,35 +1815,107 @@
       if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
     }
 
-    updateCamera(t,time){
-      let z=5.18,y=.012,x=0;
-      if(t<2.70){
-        const k=smooth(t/2.70);
-        z=mix(5.42,5.12,k);
-        x=Math.sin(time*.00027)*.024*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.009;
-      }else if(t<3.30){
-        const k=smooth((t-2.70)/.60);
-        z=mix(5.12,3.86,k);
-        x=mix(.018,0,k);y=mix(.012,0,k);
-      }else if(t<5.55){
-        z=3.86+Math.sin(time*.00020)*.0035;
-        x=Math.sin(time*.00015)*.0018;
-        y=Math.cos(time*.00018)*.0018;
-      }else if(t<7.25){
-        const k=smooth((t-5.55)/1.70);
-        z=mix(3.86,4.28,k);
-        y=mix(0,.003,k);
-      }else if(t<9.10){
-        z=4.28+Math.sin(time*.00018)*.006;
-        y=.003;
-      }else{
-        z=mix(4.28,4.40,smooth((t-9.10)/.60));
-        y=.003;
+    /* R2073 — three reference disciplines in one continuous 10s film:
+       - Igloo: spatial depth and physically continuous object lighting
+       - Lando: purposeful approach / orbit / settle camera arcs
+       - Lusion: spring-smoothed physical pointer, touch and pulse response.
+       Every curve uses C1-smooth ease and converges to exactly one canonical
+       final front-camera frame before the existing R326 native MAG handoff. */
+    interact(input={}){
+      if(this.disposed)return;
+      const v=this.cameraInput;
+      const kind=String(input.kind||'');
+      const x=Number(input.x),y=Number(input.y);
+      if(Number.isFinite(x)&&Number.isFinite(y)){
+        v.targetX=clamp(x,-1,1);
+        v.targetY=clamp(y,-1,1);
       }
-      if(this.width<this.height)z+=.90;
+      if(/press|click|pulse|release|wheel|scroll|key|touch/.test(kind)){
+        const strength=Number(input.strength);
+        v.impulse=Math.min(1.35,v.impulse+
+          clamp(Number.isFinite(strength)?strength:.30,0,1.2)*.36);
+      }
+      // Keep the evidence of genuine physical touch/pulse latched through
+      // subsequent synthetic move, focus or scroll events on touch devices.
+      const root=document.documentElement;
+      if(/press|click|touch|release/.test(kind))
+        root.dataset.fxMagIntroInteractionR2073='physical-core-pulse';
+      else if(root.dataset.fxMagIntroInteractionR2073!=='physical-core-pulse')
+        root.dataset.fxMagIntroInteractionR2073='inertial-camera-parallax';
+    }
+    updateCamera(t,time){
+      const glide=(a,b,v)=>smooth((v-a)/(b-a));
+      const lerp=(a,b,v)=>mix(a,b,clamp(v));
+      let z=5.42,x=0,y=0,focusX=0,focusY=0,bank=0;
+      // 0–2.7s: DNA field emerges as the lens pushes toward it.
+      const establish=glide(0,2.70,t);
+      z=lerp(6.04,5.12,establish);
+      x=lerp(-.25,.12,establish);
+      y=lerp(.16,.050,establish);
+      focusX=lerp(-.055,0,establish);
+      bank=lerp(-.021,.014,establish);
+      // 2.7–3.3s: decisive close-in reveal of the living embryo.
+      const close=glide(2.70,3.30,t);
+      z=lerp(z,3.86,close);
+      x=lerp(x,.40,close);
+      y=lerp(y,.11,close);
+      focusX=lerp(focusX,-.055,close);
+      bank=lerp(bank,.020,close);
+      // 3.3–5.55s: restrained orbital reveal of physical cortical depth.
+      const orbit=glide(3.30,5.55,t);
+      x=lerp(x,-.46,orbit);
+      y=lerp(y,-.105,orbit);
+      focusX=lerp(focusX,.055,orbit);
+      bank=lerp(bank,-.018,orbit);
+      // 5.55–7.25s: pull back to see a single organism, not disconnected
+      // CSS scenes. A parallax reversal gives the shell readable depth.
+      const reveal=glide(5.55,7.25,t);
+      z=lerp(z,4.28,reveal);
+      x=lerp(x,.22,reveal);
+      y=lerp(y,.046,reveal);
+      focusX=lerp(focusX,0,reveal);
+      bank=lerp(bank,.013,reveal);
+      // 7.25–8.05s: the nervous system settles into its iconic axis.
+      const stabilize=glide(7.25,8.05,t);
+      x=lerp(x,0,stabilize);
+      y=lerp(y,.003,stabilize);
+      focusX=lerp(focusX,0,stabilize);
+      focusY=lerp(focusY,0,stabilize);
+      bank=lerp(bank,0,stabilize);
+      // 9.1–9.7s: tiny clean handoff push; last 300ms are stable.
+      z=lerp(z,4.40,glide(9.10,9.70,t));
+      const input=this.cameraInput;
+      const dt=input.lastTime?
+        Math.max(0,Math.min(48,time-input.lastTime)):16.667;
+      input.lastTime=time;
+      const spring=1-Math.exp(-dt/110);
+      input.x+=(input.targetX-input.x)*spring;
+      input.y+=(input.targetY-input.y)*spring;
+      input.impulse*=Math.exp(-dt/290);
+      // Physical input is a bounded inspection, not a new camera controller.
+      // The last 1.2s deliberately converge to the original native view.
+      const responsiveness=1-glide(8.65,9.65,t);
+      const movement=.075*responsiveness;
+      x+=input.x*movement;
+      y+=input.y*movement*.72;
+      z-=input.impulse*.035*responsiveness;
+      // R2079: real portrait framing is scene-dependent, not one fixed
+      // number. The organic cortex is far larger than the final four-point
+      // signature, so pull the camera farther back for 3.3–5.6s. All curves
+      // are C1-smooth and settle to a generously framed final MAG by 7.2s.
+      // No geometry scale changes and no independent mobile renderer.
+      if(this.width<this.height){
+        const cellReveal=glide(3.15,3.80,t)*(1-glide(5.55,7.20,t));
+        z+=2.02+.88*cellReveal;
+        document.documentElement.dataset.fxMagIntroMobileCameraDepthR2079=
+          z.toFixed(3);
+      }
       this.camera.position.set(x,y,z);
-      this.camera.lookAt(0,0,0);
+      this.camera.up.set(Math.sin(bank),Math.cos(bank),0);
+      this.camera.lookAt(focusX,focusY,0);
+      document.documentElement.dataset.fxMagIntroCameraR2073=
+        t<3.30?'dna-approach':t<5.55?'cortical-orbit':
+        t<8.05?'organism-pullback':t<9.65?'identity-stabilized':'handoff-locked';
     }
 
     render(r,time){
@@ -1680,6 +1928,15 @@
       this.updateCells(t,time);
       this.updateMechanical(t,time);
       this.updateTentacles(t,time);
+      // Expose the real scene ownership and crossfade progress to the
+      // authentic WebGL screenshot and handoff contract.
+      const handoff=smooth((t-8.96)/.88);
+      document.documentElement.dataset.fxMagIntroMorphR2080=
+        handoff<.001?'physical-metal-crest':
+        handoff>.999?'canonical-native-organism':
+        'metal-to-living-organism';
+      document.documentElement.dataset.fxMagIntroMorphProgressR2080=
+        handoff.toFixed(3);
 
       this.particles.rotation.z=time*.000018;
       this.particles.rotation.y=time*.000012;
@@ -1688,8 +1945,8 @@
         this.debris.rotation.z=Math.sin(time*.00011)*.022;
       }
       const finaleClean=smooth((t-6.45)/1.70);
-      this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
-      if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
+      this.particles.material.opacity=(.20+.032*Math.sin(time*.00045))*(1-finaleClean*.84);
+      if(this.debris?.material)this.debris.material.opacity=(this.mobileRender?.19:.25)*(1-finaleClean*.96);
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
@@ -1697,6 +1954,13 @@
       const after=smooth((t-9.44)/.38);
       this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
       this.coreLight.intensity+=flash*.42+after*.12;
+      // R2073: touch / pointer impulses affect the ACTUAL physical lighting
+      // inside the existing Three world, not a fake 2D glow overlay. The
+      // response decays fast, is capped, and locks before the native handoff.
+      const reactiveLight=this.cameraInput.impulse*
+        (1-smooth((t-8.65)/1.0));
+      this.coreLight.intensity+=reactiveLight*.36;
+      if(this.mechLight)this.mechLight.intensity+=reactiveLight*.18;
       if(this.glowSprite){
         const g=1+flash*.10;
         this.glowSprite.scale.multiplyScalar(g);
@@ -1719,6 +1983,34 @@
       if(this.mechLight)this.mechLight.intensity+=flash*.34;
 
       this.renderer.render(this.scene,this.camera);
+      if(this.proofReadbackR2073){
+        // R2073: inspect the REAL pixels of the original Three framebuffer.
+        // A black frame with a DOM label is not acceptable visual proof.
+        // Sample the broad object volume, not just the exact optical center.
+        try{
+          const gl=this.renderer.getContext();
+          const w=gl.drawingBufferWidth,h=gl.drawingBufferHeight;
+          let peak=0,lit=0;
+          for(let yi=1;yi<=7;yi++){
+            for(let xi=1;xi<=11;xi++){
+              const px=Math.min(w-1,Math.round(w*xi/12));
+              const py=Math.min(h-1,Math.round(h*yi/8));
+              gl.readPixels(px,py,1,1,gl.RGBA,gl.UNSIGNED_BYTE,
+                this.proofPixelR2073);
+              const value=Math.max(this.proofPixelR2073[0],
+                this.proofPixelR2073[1],this.proofPixelR2073[2]);
+              peak=Math.max(peak,value);
+              if(value>=25)lit+=1;
+            }
+          }
+          document.documentElement.dataset.fxMagBirthFramePeakR1557=String(peak);
+          document.documentElement.dataset.fxMagBirthFrameR1557=
+            lit>=2?'r2073-physical-webgl-pixels-visible':'r2073-unlit-physical-film';
+          document.documentElement.dataset.fxMagBirthFrameLitSamplesR2073=String(lit);
+        }catch(_){
+          document.documentElement.dataset.fxMagBirthFrameR1557='r2073-readback-unavailable';
+        }
+      }
     }
 
     destroy(){
@@ -1763,6 +2055,7 @@
       return {
         resize:()=>engine.resize(),
         draw:(r,time)=>engine.render(r,time),
+        interact:input=>engine.interact(input),
         destroy:()=>engine.destroy(),
         engine,
         revision:'r1240-organic-gyri-lock'

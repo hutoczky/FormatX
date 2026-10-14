@@ -1291,7 +1291,7 @@
         vec2 lensVector=vUv-vec2(.5);
         float lensRadial=length(lensVector);
         float lensInner=1.0-smoothstep(.205,.475,lensRadial);
-        float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
+        float lensRimMesh=exp(-pow((lensRadial-.430)/.030,2.0));
         float lensEdge=smoothstep(.410,.490,lensRadial);
         float sensorHalo=exp(-pow(lensVector.x/.320,2.0)-pow(lensVector.y/.150,2.0));
         float sensorCore=exp(-pow(lensVector.x/.250,2.0)-pow(lensVector.y/.060,2.0));
@@ -1305,7 +1305,7 @@
         physicalLens+=vec3(.50,.58,.58)*sideSpec*.10;
         physicalLens+=vec3(.055,.14,.17)*fresnel*.12;
         physicalLens+=vec3(.008,.065,.080)*lensInner*(.09+.08*uEnergy);
-        physicalLens+=vec3(.64,.70,.68)*lensRim*.050;
+        physicalLens+=vec3(.64,.70,.68)*lensRimMesh*.050;
         physicalLens+=vec3(.018,.18,.22)*sensorHalo*(.08+.06*uEnergy);
         physicalLens+=vec3(.30,.78,.84)*sensorArc*(.10+.07*uEnergy);
         physicalLens+=vec3(.70,.96,.96)*sensorCore*(.12+.06*uEnergy);
@@ -1402,7 +1402,9 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        /* R2075 one-pass native body matches the readable smoked silver
+           bioceramic optical material of the real 3D birth film. */
+        vec3 c=mix(vec3(.006,.012,.016),vec3(.158,.215,.224),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1415,7 +1417,7 @@
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
+        c+=vec3(.98,1.00,.97)*softboxA*.032;
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
@@ -1438,7 +1440,12 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.120,.270,.278)*axisRidge*(.155+.055*prismSweep);
+        /* R2075 real native 3D radial engraved optical mineral: UV-free
+           in volume coordinates, with mobile-safe lower frequency. */
+        float machinedGroove=pow(abs(sin(radialXY*${mobile?'55.0':'92.0'})),11.0)
+          *axisRidge*frontDepth;
+        c+=vec3(.65,.82,.81)*machinedGroove*${mobile?'.063':'.082'};
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
         c*=1.0-.090*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
@@ -1500,7 +1507,17 @@
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
+        /* R2075 compact physical iris: two machined annuli plus eight
+           aperture facets, shaded by the original real single WebGL body. */
+        float collarOuter=exp(-pow((od-1.08)/.065,2.0))*front;
+        float collarInner=exp(-pow((od-.50)/.055,2.0))*front;
+        float bladeAngle=atan(oq.y,oq.x);
+        float apertureBlades=pow(abs(cos(bladeAngle*4.0+.12)),15.0)
+          *smoothstep(.28,.45,od)*(1.0-smoothstep(.75,.91,od))*front;
+        c+=vec3(.85,.98,.96)*collarOuter*${mobile?'.16':'.21'};
+        c+=vec3(.50,.78,.80)*collarInner*${mobile?'.095':'.13'};
+        c+=vec3(.52,.80,.83)*apertureBlades*${mobile?'.085':'.13'};
+        c+=vec3(.78,.88,.84)*rim*${mobile?'.190':'.250'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);

@@ -82,10 +82,40 @@ async function evaluate(viewport,isMobile,browser){
     'Repeated MAG readiness must retain the exact native renderer: '+JSON.stringify(rendererProbe));
   
   assert.equal(init.shared,true,JSON.stringify(init));
+  // Native focus must be delivered to the next real document when scrolling
+  // away from a focused module. The old folio becomes inert and inaccessible.
   assert.ok(init.sceneCount>=6,'Expected at least six real source sections');
   assert.equal(init.contextCount,'1','Original MAG owns the sole WebGL context');
   const prepared=await page.evaluate(()=>document.documentElement.dataset.fxArchiveCinemaPrepared);
   assert.ok(Number(prepared)>=6,'Cinematic archival DOM panels were not constructed: '+prepared);
+  // R2064 genuine late-WebGL first-visit regression. A renderer becoming
+  // ready at scrollY=0 must not erase the original hero or download CTA.
+  // Tested on the real 3D path, never a special audit-only CSS mode.
+  await page.waitForTimeout(420);
+  const home=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const hero=document.querySelector('#hero .hero-copy');
+    const title=document.querySelector('#hero-title');
+    const cta=document.querySelector('#hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'
+      &&node.getClientRects().length>0;
+    return {scrollY,mode:root.dataset.fxArchiveCinema,
+      continuity:root.dataset.fxArchiveHomeContinuity,hero:visible(hero),
+      title:visible(title),download:visible(cta),
+      ctaOnOriginalHero:!!document.querySelector('#hero .hero-actions')?.contains(cta),
+      focusable:!cta?.closest('[inert]'),renderer:root.dataset.fxArchiveExperience};
+  });
+  assert.ok(home.scrollY<8&&home.mode!=='active'
+    &&home.hero&&home.title&&home.download&&home.focusable&&home.ctaOnOriginalHero,
+    'R2064: delayed real WebGL must never blank the original hero: '+JSON.stringify(home));
+  console.log('ARCHIVE_LATE_HOME_HERO_REMAINS_VISIBLE_PASS',JSON.stringify(home));
+  await page.evaluate(()=>{
+    const scene=window.FormatXArchiveExperience?.scenes?.[0];
+    const node=scene&&document.querySelector('[data-fx-archive-scene="'+scene.key+'"]');
+    const host=node?.closest('main#main-content > section');
+    (host||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
   await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:12000});
   const first=await page.evaluate(()=>{
     const root=document.documentElement;
@@ -186,6 +216,7 @@ async function evaluate(viewport,isMobile,browser){
 
   let passed=0;
   const coverage=[];
+  let precedingNativeFocus=false;
   for(const scene of scenes){
     const selector=/^[#.]/.test(scene.id)?scene.id:'#'+scene.id;
     await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
@@ -202,6 +233,31 @@ async function evaluate(viewport,isMobile,browser){
       const state=window.FormatXArchiveExperience?.state;
       return state?.active&&state?.scene===key;
     },scene.key,{timeout:8000}).catch(()=>{});
+    // A camera's selected scene and the real semantic panel are committed in
+    // separate animation-frame phases. Require both to agree before measuring
+    // the physical 3D folio; a genuinely stuck handoff still fails on timeout.
+    await page.waitForFunction(source=>{
+      const active=document.querySelector(
+        'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+      );
+      return active?.dataset.fxCinemaSource===source;
+    },scene.source,{timeout:4000});
+    const focusAfterScroll=await page.evaluate(()=>{
+      const focused=document.activeElement;
+      const folio=focused?.closest?.('.fx-archive-cinema-folio-r2030');
+      return {insideInertFolio:!!folio&&folio.inert,
+        focusedTag:focused?.tagName||'none',cinema:document.documentElement.dataset.fxArchiveCinema};
+    });
+    assert.ok(!focusAfterScroll.insideInertFolio,
+      'Scroll archived a document while keyboard focus remained trapped in inert HTML: '+JSON.stringify(focusAfterScroll));
+    const transitionFocus=await page.evaluate(()=>{
+      const current=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+      const focus=document.activeElement;
+      const active=focus?.closest?.('.fx-archive-cinema-folio-r2030');
+      return {stranded:!!active&&active.inert,active:current?.dataset.fxCinemaPanelActive,
+        focused:focus?.tagName||'none'};
+    });
+    assert.ok(!transitionFocus.stranded,'Focused native control stranded after chapter change: '+JSON.stringify(transitionFocus));
     const state=await page.evaluate(()=>window.FormatXArchiveExperience.state);
     let postRefresh=null;
     if(state.scene!==scene.key){
@@ -218,6 +274,21 @@ async function evaluate(viewport,isMobile,browser){
     },selector);
     console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
+      // The previous native control was intentionally focused. Scrolling to
+      // the next real document must move focus to that document (or navigation),
+      // not merely blur the outgoing control when its folio becomes inert.
+      if(precedingNativeFocus){
+        const focusHop=await page.evaluate(()=>{
+          const active=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+          const element=document.activeElement;
+          return {onNativeFolio:!!active&&active.contains(element),
+            onNavigation:!!element?.closest?.('.topbar'),
+            focused:element?.tagName||'none',
+            status:document.documentElement.dataset.fxArchiveKeyboardFocus||null};
+        });
+        assert.ok(focusHop.onNativeFolio||focusHop.onNavigation,
+          'Keyboard focus lost during original HTML chapter handoff: '+JSON.stringify({scene:scene.key,focusHop}));
+      }
 
       // R2026: a status label alone cannot satisfy the requested cinematic
       // archival handoff. The active folio must use actual section copy, and
@@ -374,6 +445,22 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
         &&chapterHandoff.marker.includes('/ 08'),
         'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
+      // Retain keyboard focus in the actual original control until the next
+      // source takes over; runtime must never leave it stranded in inert HTML.
+      const focusProbe=await page.evaluate(()=>{
+        const paper=document.querySelector('.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        const control=[...(paper?.querySelectorAll('a[href]:not([tabindex="-1"]),button:not([disabled]),input:not([disabled])')||[])]
+          .find(el=>el instanceof HTMLElement
+            && !el.closest('[inert],[hidden],[aria-hidden="true"]')
+            && el.getClientRects().length>0);
+        if(!(control instanceof HTMLElement))return {found:false};
+        control.focus({preventScroll:true});
+        return {found:true,focused:document.activeElement===control,
+          inert:paper.inert,tag:control.tagName};
+      });
+      if(focusProbe.found)assert.ok(focusProbe.focused&&!focusProbe.inert,
+        'Original live MAG control cannot take keyboard focus: '+JSON.stringify(focusProbe));
+      precedingNativeFocus=focusProbe.found&&focusProbe.focused&&!focusProbe.inert;
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
@@ -574,11 +661,22 @@ async function verifyMobileLivingPulse(browser){
   const page=await context.newPage();
   await page.goto(URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>{
+    return document.documentElement.dataset.fxArchiveExperience==='ready'
+      && window.FormatXArchiveExperience?.scenes?.length===8;
+  },null,{timeout:65000});
+  // The reader's scroll, not idle GPU activation, initiates cinematic archive.
+  await page.evaluate(()=>{
+    const first=window.FormatXArchiveExperience.scenes[0];
+    const node=document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+    (node?.closest('main#main-content > section')||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
+  await page.waitForFunction(()=>{
     const root=document.documentElement;
     const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-    return root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
+    return root.dataset.fxArchiveCinema==='active'
+      && root.dataset.fxCoreRenderer==='single-webgl-crystal-organism-r326'
       && !!canvas&&getComputedStyle(canvas).animationName.includes('fx-primary-mag');
-  },null,{timeout:65000});
+  },null,{timeout:25000});
   const samples=[];
   for(let i=0;i<5;i++){
     samples.push(await page.evaluate(()=>{
@@ -615,10 +713,25 @@ async function verifyNormalEntry(browser,isMobile){
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>{
-    const root=document.documentElement;
-    return root.dataset.fxArchiveExperience==='ready'
-      && root.dataset.fxArchiveCinema==='active';
+    return document.documentElement.dataset.fxArchiveExperience==='ready'
+      && document.documentElement.dataset.fxArchiveCinema==='home';
   },null,{timeout:65000});
+  const home=await page.evaluate(()=>{
+    const hero=document.querySelector('#hero .hero-copy');
+    const cta=document.getElementById('hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'&&node.getClientRects().length>0;
+    return {scrollY,hero:visible(hero),cta:visible(cta),mode:document.documentElement.dataset.fxArchiveCinema};
+  });
+  assert.ok(home.scrollY<8&&home.hero&&home.cta,
+    'Real normal-entry browser hid the original home content: '+JSON.stringify(home));
+  await page.evaluate(()=>{
+    const first=window.FormatXArchiveExperience.scenes[0];
+    const node=document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+    (node?.closest('main#main-content > section')||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+    null,{timeout:12000});
   const result=await page.evaluate(()=>{
     const root=document.documentElement;
     const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
@@ -675,9 +788,9 @@ async function verifyNormalEntry(browser,isMobile){
   await context.close();
 }
 async function verifyFirstVisitIntroHandoff(browser){
-  // The normal-entry suite above uses a returning visitor. Production must
-  // ALSO deliver a real paper on the FIRST visit after the full 10s genesis.
-  // Guard against a late intro teardown blanking the actual interactive UI.
+  // First visit: the 10s MAG genesis must return to a readable hero.
+  // The first actual shelf entry then delivers the native interactive paper.
+  // A late intro teardown must never blank the home viewport.
   const u=new (require('node:url').URL)(URL);
   for(const k of ['r486-optics-energy-check','lighthouse','visualintro','mobileproof'])u.searchParams.delete(k);
   u.searchParams.set('archive','1');
@@ -694,11 +807,28 @@ async function verifyFirstVisitIntroHandoff(browser){
   },null,{timeout:30000});
   await page.waitForFunction(()=>{
     const root=document.documentElement;
-    return root.dataset.fxArchiveCinema==='active'
-      && root.dataset.fxArchiveExperience==='ready'
+    return root.dataset.fxArchiveExperience==='ready'
+      && root.dataset.fxArchiveCinema==='home'
       && !document.querySelector('.fx-mag-birth-r533:not([hidden])');
   },null,{timeout:45000});
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(350);
+  const home=await page.evaluate(()=>{
+    const hero=document.querySelector('#hero .hero-copy');
+    const cta=document.getElementById('hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'&&node.getClientRects().length>0;
+    return {scrollY,hero:visible(hero),cta:visible(cta)};
+  });
+  assert.ok(home.scrollY<8&&home.hero&&home.cta,
+    'R2064 first-visit MAG birth erased original home content: '+JSON.stringify(home));
+  await page.evaluate(()=>{
+    const first=window.FormatXArchiveExperience.scenes[0];
+    const node=document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+    (node?.closest('main#main-content > section')||node)?.scrollIntoView({block:'center',behavior:'instant'});
+  });
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+    null,{timeout:12000});
+  await page.waitForTimeout(350);
   const state=await page.evaluate(()=>{
     const root=document.documentElement;
     const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');

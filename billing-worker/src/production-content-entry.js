@@ -9,9 +9,9 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261007-r1950c-studio-intro-edge-aa';
+const STARTUP_REVISION = '20261014-r2082-illuminated-canonical-physical-eye';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
-const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-7/jS2E6UlYvVATDKUiKoEophIpSvKdB8qLIrqHOjLh0='";
+const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-r5hdcGr+jm0wSdpRXwZVcZZBpFzqZh36f/562gqhUIs='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
 const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
@@ -19,9 +19,9 @@ const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
 const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-reference-mode-boot-r504="true" src="/scifi-ui/scripts/formatx-reference-mode-boot-r334.js?v=20260903-r504-prepaint-reference-mode"></script>';
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260923-r1666-source-production-parity">';
-const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
-const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
-const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">';
+const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261013-r2061-menu-critical-fused">';
+const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261013-r2061-menu-critical-fused">';
+const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261013-r2061-menu-critical-fused">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261007-r1950-desktop-edge-aa';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261013-r2054-verified-css-recovery"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
@@ -172,8 +172,8 @@ const R502_ASSET_REWRITES = new Map([
     rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261007-r1950-desktop-edge-aa']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
-    marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261008-r1984-continuous-microfibril-handoff']],
+    marker: 'intro-to-genesis-r2073-spatial-cinematography',
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261014-r2082-illuminated-native-core-handoff']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
@@ -241,6 +241,7 @@ function injectCriticalFirstPaint(html) {
     if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
     return tag;
   });
+  // R2061: canonical menu CSS is fused; keep the original r283 first-frame geometry as a separate stylesheet.
   const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n  ${P0_MOBILE_OPTICAL_LINK}\n`;
   return source.replace('</head>', `${critical}</head>`);
 }

@@ -253,22 +253,25 @@ async function assertHeroDisclosure(page) {
   }
 
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  // R2040: the former R536 'core' is no longer the terminal reverse-scroll
-  // state when the user-selected MAG-only cinematic archive owns the page.
-  // Still REQUIRE an actual reversible chapter with exactly one working
-  // original HTML folio; never silently accept a stuck or empty scene.
+  // R2064: reverse-scroll must restore the ORIGINAL interactive hero,
+  // rather than leave an offscreen first papyrus and a black mobile viewport.
+  // The real native WebGL renderer stays ready, and the single folio resumes
+  // only when a shelf re-enters the reading viewport.
   await page.waitForFunction(() => {
     const root=document.documentElement;
     if(root.dataset.fxArchiveExperience!=='ready')
       return root.dataset.fxCinematicSceneR536==='core';
-    const first=window.FormatXArchiveExperience?.scenes?.[0]?.key;
-    const visible=[...document.querySelectorAll('main#main-content > [data-fx-cinema-host-active="true"]')];
-    const paper=visible[0]?.querySelector(':scope > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
-    return root.dataset.fxArchiveCinema==='active'
-      && !!first&&root.dataset.fxArchiveCurrent===first
-      && visible.length===1&&!!paper
-      && getComputedStyle(paper).visibility==='visible'
-      && (paper.textContent||'').trim().length>70;
+    const hero=document.querySelector('#hero .hero-copy');
+    const cta=document.querySelector('#hero-download');
+    const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+      &&getComputedStyle(node).visibility==='visible'
+      &&node.getClientRects().length>0;
+    return scrollY<8&&root.dataset.fxArchiveCinema==='home'
+      &&root.dataset.fxArchiveHomeContinuity==='original-hero-readable'
+      &&visible(hero)&&visible(cta)
+      &&!!document.querySelector('#hero .hero-actions')?.contains(cta)
+      &&root.dataset.fxArchiveCtaLane==='original-home'
+      &&!cta.closest('[inert]');
   }, null, { timeout: 9000 });
   await page.waitForTimeout(250);
 }
