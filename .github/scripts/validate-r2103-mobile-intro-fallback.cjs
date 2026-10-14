@@ -60,7 +60,10 @@ const CASES=[
             renderer:root.dataset.fxMagBirthRendererR1360,
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
+            premium:root.dataset.fxMagFallbackSilhouetteR2104,
+            optic:root.dataset.fxMagFallbackOpticR2104,
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
+            filmStyle:getComputedStyle(overlay?.querySelector('.fxb-genome-field')||overlay).display,
             width:innerWidth,height:innerHeight,
             canvasRect:{width:size?.width||0,height:size?.height||0},
             buffer:{width:canvas?.width||0,height:canvas?.height||0},
@@ -85,12 +88,16 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
+        assert.equal(info.premium,'sculpted-fourpoint-3d-illusion-machined-optic');
+        assert.equal(info.optic,'eight-deep-shutter-blades-sapphire-glass');
+        assert.equal(info.filmStyle,'none',
+          'Legacy DNA strands still intrude into the final MAG composition');
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
         );
-        assert.ok(info.diameter>=shot.width*.45&&
-          info.diameter<=shot.width*.75,
+        assert.ok(info.diameter>=shot.width*.48&&
+          info.diameter<=shot.width*.67,
           'Giant phone-clipping orb regression: '+JSON.stringify(info));
         assert.ok(info.buffer.width>100&&info.buffer.height>100,
           'Canvas has no real backing surface');
@@ -101,7 +108,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2103-four-point-mobile-fallback'),
+        assert.ok(info.loader.includes('r2104-sculpted-machined-sapphire'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
