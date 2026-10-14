@@ -74,8 +74,12 @@ has(birth,[
 ],'R1724 Three.js living crystal birth');
 has(fallback,[
   "revision:'r1724-formatx-living-crystal-organism-birth'",
-  'FormatX Living Crystal Organism fallback silhouette'
-],'R1724 2D living crystal fallback');
+  'function drawLiteScene(ctx,r,time,target,radiusCap)',
+  'fxMagFallbackSilhouetteR2103',
+  'four-point-bevelled-metal-glass-iris',
+  'ctx.ellipse(0,0,rx*1.17,ry*1.17,0,0,TAU)',
+  'for(let blade=0;blade<8;blade++)'
+],'R2103 constrained-phone 2D fallback must contain full four-point crystal and eight physical iris plates');
 has(habitat,[
   "fxLivingHabitatCrystalWorldR1724='cyan-biocrystal-arches-spires-warm-studio-rim'",
   'formatx:organismphysiology'
