@@ -1080,6 +1080,52 @@
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
+      /* R2114: actual beveled metallic plates conform to the FOUR physical
+         crystal arms. Each side has a different outward-facing normal,
+         low-key studio response and deliberate offset from the rear shell.
+         Unlike painted 2D streaks, the four-arm relief follows the actual
+         original Three.js camera throughout the live film. */
+      this.mechMachinedPanels=new T.Group();
+      this.mechMachinedPanels.position.z=.02;
+      this.mechanicalGroup.add(this.mechMachinedPanels);
+      this.mechPanelMaterials=[
+        new T.MeshPhysicalMaterial({
+          color:0x799293,metalness:.62,roughness:.24,
+          clearcoat:.80,clearcoatRoughness:.13,side:T.DoubleSide,
+          transparent:true,opacity:0,depthWrite:false
+        }),
+        new T.MeshPhysicalMaterial({
+          color:0x304b57,metalness:.53,roughness:.28,
+          clearcoat:.72,clearcoatRoughness:.15,side:T.DoubleSide,
+          transparent:true,opacity:0,depthWrite:false
+        })
+      ];
+      const makeFace=(points,material)=>{
+        const positions=new Float32Array(points.flat());
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.BufferAttribute(positions,3));
+        geometry.setIndex([0,1,2,0,2,3]);
+        geometry.computeVertexNormals();
+        const face=new T.Mesh(geometry,material);
+        face.frustumCulled=false;
+        return face;
+      };
+      for(let arm=0;arm<4;arm++){
+        const rotating=new T.Group();
+        rotating.rotation.z=arm*Math.PI/2;
+        const lit=makeFace([
+          [0,-.97,.250],[-.225,-.50,.245],
+          [-.092,-.27,.382],[.006,-.36,.375]
+        ],this.mechPanelMaterials[0]);
+        const shade=makeFace([
+          [0,-.97,.250],[.226,-.51,.242],
+          [.094,-.27,.382],[-.006,-.36,.375]
+        ],this.mechPanelMaterials[1]);
+        rotating.add(lit,shade);
+        this.mechMachinedPanels.add(rotating);
+      }
+      document.documentElement.dataset.fxMagThreeFacetsR2114='eight-truly-slanted-machined-3d-surfaces';
+
       /* R1984 — final-stage edge fibrils.
          Sample the actual four-point signature outline and grow one-pixel fibers
          out of its silhouette. This keeps microscopic detail visible through the
@@ -1652,9 +1698,9 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
-        mix(.106,.132,finale)
+        mix(.031,this.mobileRender?.17:.072,finale),
+        mix(.090,this.mobileRender?.23:.124,finale),
+        mix(.106,this.mobileRender?.245:.132,finale)
       );
       this.mechMidMaterial.color.setRGB(
         mix(.039,.066,finale),
@@ -1666,8 +1712,12 @@
         mix(.575,.540,finale),
         mix(.565,.530,finale)
       );
-      this.mechMaterial.transmission=mix(.34,.44,finale);
-      this.mechMidMaterial.transmission=mix(.40,.49,finale);
+      this.mechMaterial.transmission=this.mobileRender
+        ? mix(.18,.16,finale):mix(.34,.44,finale);
+      this.mechMidMaterial.transmission=this.mobileRender
+        ? mix(.24,.21,finale):mix(.40,.49,finale);
+      this.mechMaterial.metalness=this.mobileRender?.34:.10;
+      this.mechMidMaterial.metalness=this.mobileRender?.28:.08;
       this.mechMaterial.roughness=mix(.110,.098,finale);
       this.mechMidMaterial.roughness=mix(.102,.090,finale);
       this.silverMaterial.roughness=mix(.085,.100,finale);
@@ -1675,6 +1725,13 @@
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
       this.mechMidMaterial.opacity=
         ((this.mobileRender?.61:.46)+.035*finale)*grow;
+      if(this.mechPanelMaterials){
+        const metalReveal=smooth((t-6.28)/.86)*grow;
+        this.mechPanelMaterials[0].opacity=
+          metalReveal*(this.mobileRender?.68:.49);
+        this.mechPanelMaterials[1].opacity=
+          metalReveal*(this.mobileRender?.46:.32);
+      }
       this.silverMaterial.opacity=
         ((this.mobileRender?.54:.36)+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
