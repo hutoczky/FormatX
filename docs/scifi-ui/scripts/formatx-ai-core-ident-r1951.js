@@ -96,16 +96,18 @@
   }, { once:true, passive:true });
 
   document.addEventListener('formatx:magbirthcomplete', event => {
-    const source = event.detail?.source || 'magbirthcomplete';
-    if(source === 'user-skip'||source === 'pagehide'||source === 'reduced-motion'){
-      clearTimers();
-      removeExisting();
-      ROOT.dataset.fxAiCoreIdentityR2072='skipped-without-second-splash';
-      return;
-    }
-    // Bounded fallback if a very slow device missed the stabilized-frame
-    // event. Once the real in-film label has played, never replay it.
-    if(source === 'complete'&&!shown)showIdentity('fallback-after-genesis');
+    // R2079: the film is the SOLE owner of this identity. A slow GPU may
+    // start the optical label after 8.05 s and its local timeout would
+    // otherwise outlive the real 10 s film. The genuine native MAG must
+    // never inherit a leftover or newly created boot title.
+    clearTimers();
+    removeExisting();
+    const source=event.detail?.source||'magbirthcomplete';
+    ROOT.dataset.fxAiCoreIdentityR2072=
+      /skip|pagehide|reduced-motion/.test(source)
+      ?'skipped-without-second-splash':'cleared-exactly-at-film-handoff';
+    ROOT.dataset.fxAiCoreIdentityR1951=
+      MOBILE?'complete-mobile':'complete-desktop';
   }, { once:true, passive:true });
 
   addEventListener('pagehide', () => {
