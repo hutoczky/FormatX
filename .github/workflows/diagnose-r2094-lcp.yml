@@ -1,0 +1,56 @@
+name: R2094 real-browser LCP timeline diagnostic
+
+on:
+  push:
+    branches:
+      - feature/r2083-studio-cinema-reactive-mag
+    paths:
+      - '.github/scripts/diagnose-r2094-lcp.cjs'
+      - '.github/workflows/diagnose-r2094-lcp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2094-timeline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-first-paint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium browser and driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/paintprobe" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/paintprobe/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Start exact repository static site
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >/tmp/formatx-r2094-site.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat /tmp/formatx-r2094-site.log
+          exit 1
+      - name: Capture real early desktop/mobile LCP style timeline
+        env:
+          NODE_PATH: ${{ runner.temp }}/paintprobe/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/diagnose-r2094-lcp.cjs
+      - name: Preserve probe JSON for exact intervention
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2094-real-lcp-timeline
+          path: artifacts/r2094-lcp-timeline/
+          retention-days: 21
+          if-no-files-found: warn
