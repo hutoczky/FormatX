@@ -1879,9 +1879,17 @@
       x+=input.x*movement;
       y+=input.y*movement*.72;
       z-=input.impulse*.035*responsiveness;
-      // R2078: retain quiet breathing room around every four-point arm
-      // on tall phone viewports, without flattening or clipping 3D geometry.
-      if(this.width<this.height)z+=1.22;
+      // R2079: real portrait framing is scene-dependent, not one fixed
+      // number. The organic cortex is far larger than the final four-point
+      // signature, so pull the camera farther back for 3.3–5.6s. All curves
+      // are C1-smooth and settle to a generously framed final MAG by 7.2s.
+      // No geometry scale changes and no independent mobile renderer.
+      if(this.width<this.height){
+        const cellReveal=glide(3.15,3.80,t)*(1-glide(5.55,7.20,t));
+        z+=2.02+.88*cellReveal;
+        document.documentElement.dataset.fxMagIntroMobileCameraDepthR2079=
+          z.toFixed(3);
+      }
       this.camera.position.set(x,y,z);
       this.camera.up.set(Math.sin(bank),Math.cos(bank),0);
       this.camera.lookAt(focusX,focusY,0);
