@@ -2300,3 +2300,47 @@ html:root .fx-mag-birth-r533 .fxb-skip:focus-visible{
   outline-offset:3px!important;
 }
 /* end-r2103-mobile-compact-four-point-intro */
+
+
+/* R2104 - a coherent dark physical stage replaces legacy DNA silhouettes
+   only while the constrained R649 film is visible. Actual Three cinema is
+   unaffected. Both CSS layers and the original no-JS reduced-motion owner
+   retain their independent paths. */
+.fx-mag-birth-r533:is(
+  [data-fx-renderer="fallback"],
+  [data-fx-renderer="fallback-constrained"],
+  [data-fx-renderer="fallback-software"]
+) :is(
+  .fxb-genome-field,
+  .fxb-dna-stage,
+  .fxb-dna-helix,
+  .fxb-dna,
+  .fxb-embryo,
+  .fxb-tentacle-field,
+  .fxb-shell-lobes
+){
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+.fx-mag-birth-r533:is(
+  [data-fx-renderer="fallback"],
+  [data-fx-renderer="fallback-constrained"],
+  [data-fx-renderer="fallback-software"]
+) .fxb-veil{
+  background:radial-gradient(
+    ellipse 58% 43% at 50% 48%,
+    rgba(17,49,60,.28) 0%,
+    rgba(4,16,25,.21) 36%,
+    rgba(0,5,10,.10) 68%,
+    rgba(0,3,8,.02) 100%
+  )!important;
+}
+.fx-mag-birth-r533:is(
+  [data-fx-renderer="fallback"],
+  [data-fx-renderer="fallback-constrained"],
+  [data-fx-renderer="fallback-software"]
+) .fxb-stars{
+  opacity:.34!important;
+}
+/* end-r2104-premium-mag-stage */
