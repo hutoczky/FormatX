@@ -71,6 +71,7 @@ const frames=[
             irisBlades:Number(root.dataset.fxMagThreeIrisBladesR2113||0),
             collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
             optics:root.dataset.fxMagThreeOpticsR2113||'',
+            facets:root.dataset.fxMagThreeFacetsR2114||'',
             threeSource:[...document.scripts]
               .find(el=>el.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             skip:{width:box?.width||0,height:box?.height||0,
@@ -91,7 +92,7 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2113-physical-three-iris-mobile-frame'),
+        assert.ok(info.threeSource.includes('r2114-physical-eight-facet-three-metal'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
           assert.ok(info.mobileThreeDistance>=7.7&&
@@ -108,6 +109,8 @@ const frames=[
           'All three precision optical collars must exist in the ACTUAL Three scene');
         assert.equal(info.optics,'three-metal-collars-eight-physical-iris-blades',
           'Optic provenance must be the real new 3D mesh, not a 2D illustration');
+        assert.equal(info.facets,'eight-truly-slanted-machined-3d-surfaces',
+          'The cinematic shell must have eight genuine beveled arm panels, not a flat logo');
         assert.deepEqual(errors,[],'Three film runtime errors');
         results.push({frame,info});
         console.log('R2110_REAL_THREE_FILM_PASS',
