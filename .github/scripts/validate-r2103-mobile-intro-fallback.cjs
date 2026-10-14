@@ -60,6 +60,7 @@ const CASES=[
             renderer:root.dataset.fxMagBirthRendererR1360,
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
+            material:root.dataset.fxMagFallbackMaterialR2104||'',
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             width:innerWidth,height:innerHeight,
             canvasRect:{width:size?.width||0,height:size?.height||0},
@@ -85,6 +86,8 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
+        assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
+          'R2104 cinema material did not render in original phone canvas');
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
@@ -101,7 +104,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2103-four-point-mobile-fallback'),
+        assert.ok(info.loader.includes('r2104-photographic-moving-softbox'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
