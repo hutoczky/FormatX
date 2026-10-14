@@ -105,7 +105,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20261006-r1949-award-final-seal';
+      script.src = './scripts/igloo-parity.js?v=20261014-r2067-native-genesis-gpu-owner';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);

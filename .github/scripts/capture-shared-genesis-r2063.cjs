@@ -38,7 +38,12 @@ const report={sha:process.env.AUDITED_SHA,url,cases:[]};
           const stage=window.FormatXLivingCore?.stage,style=stage&&getComputedStyle(stage);
           return {at:performance.now(),overlayVisible:Boolean(document.querySelector('.fx-mag-birth-r533[data-fx-renderer="canonical"]')),
             stageOpacity:style?.opacity,stageVisibility:style?.visibility,transform:style?.transform,
-            bounds:stage?.getBoundingClientRect().toJSON(),originalParent:Boolean(stage?.closest('#hero'))};
+            position:style?.position,left:style?.left,top:style?.top,width:style?.width,height:style?.height,
+            inline:stage?.getAttribute('style'),bounds:stage?.getBoundingClientRect().toJSON(),originalParent:Boolean(stage?.closest('#hero')),
+            ancestors:stage?[stage.parentElement,stage.closest('.hero-grid'),stage.closest('#hero'),document.getElementById('main-content')].filter(Boolean).map(node=>{
+              const css=getComputedStyle(node);return {className:node.className,id:node.id,transform:css.transform,translate:css.translate,
+                scale:css.scale,perspective:css.perspective,filter:css.filter,contain:css.contain,willChange:css.willChange,zoom:css.zoom};
+            }):[]};
         });
         const box=item.intro.bounds;
         assert.ok(box&&box.width>100&&box.height>100&&box.right>0&&box.left<(mobile?390:1440)

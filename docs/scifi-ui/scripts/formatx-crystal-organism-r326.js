@@ -851,9 +851,9 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     /* R1959: physically neutral compositor tone. The previous inline
        !important saturation overrode the canonical material CSS. */
-    const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
-      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
+    // The physical studio shader already performs display transfer and tone
+    // mapping. Preserve its color and avoid a second canvas filter pipeline.
+    const compositorFilter='none';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');

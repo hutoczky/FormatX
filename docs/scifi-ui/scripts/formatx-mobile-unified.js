@@ -5,7 +5,7 @@
   if (root.dataset.fxMobileUnified === 'ready-v3') return;
   root.dataset.fxMobileUnified = 'loading-v3';
 
-  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20260925-r1734-mobile-null-frame-latch';
+  const SEAMLESS_BOOTSTRAP = './scripts/formatx-infinite-scroll.js?v=20261014-r2067-native-genesis-gpu-owner';
 
   function appendStyle(marker, href, readyKey) {
     if (document.querySelector('link[' + marker + ']')) return;
@@ -38,7 +38,7 @@
   function ensureReturnStateRecovery() {
     if (document.querySelector('script[data-fx-return-state-recovery]')) return;
     const script = document.createElement('script');
-    script.src = './scripts/formatx-return-state-recovery.js?v=20260820-reference-loop-r246';
+    script.src = './scripts/formatx-return-state-recovery.js?v=20261014-r2067-native-genesis-gpu-owner';
     script.async = false;
     script.dataset.fxReturnStateRecovery = 'true';
     script.addEventListener('load', () => {

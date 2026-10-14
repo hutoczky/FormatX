@@ -60,18 +60,18 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2045 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261014-r2066-viewport-owned-genesis-handoff'),
+  assert.ok(loader.includes('20261014-r2067-native-genesis-gpu-owner'),
     'R2059 normal visitor runtime renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2066-viewport-owned-genesis-handoff'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2067-native-genesis-gpu-owner'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2066-viewport-owned-genesis-handoff'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2067-native-genesis-gpu-owner'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2066-viewport-owned-genesis-handoff'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2067-native-genesis-gpu-owner'),
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2066-viewport-owned-genesis-handoff']){
+ 'formatx-mag-birth-live-r533.css?v=20261014-r2067-native-genesis-gpu-owner']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({

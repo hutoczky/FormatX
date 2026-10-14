@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2066-after-genesis-shared-context';
+  const VERSION='cinematic-archive-r2067-native-genesis-gpu-owner';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');

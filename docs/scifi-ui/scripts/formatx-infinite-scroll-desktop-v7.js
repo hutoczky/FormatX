@@ -280,10 +280,14 @@
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (!main || !footer) return false;
 
-    if (footer.closest('.fx-organism-panel') || footer.parentElement !== document.body) {
+    // The resource console owns the original footer after Organism mounts it.
+    // A scrolling repair may refresh its links, but must never steal the node
+    // from the same live console or change document height on every repair.
+    const resourceOwner=Boolean(panel?.contains(footer));
+    if (!resourceOwner && footer.parentElement !== document.body) {
       main.insertAdjacentElement('afterend', footer);
     }
-    footer.dataset.fxFooterFlow = 'document';
+    footer.dataset.fxFooterFlow = resourceOwner?'resources-console':'document';
     repairFooterCopy(footer);
 
     if (panel) {
@@ -468,7 +472,7 @@
 
     geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
     const main = document.getElementById('main-content');
-    const footer = document.querySelector('body > .site-footer');
+    const footer = document.querySelector('.site-footer');
     if (document.body) geometryObserver.observe(document.body);
     if (main) geometryObserver.observe(main);
     if (footer) geometryObserver.observe(footer);
@@ -508,7 +512,7 @@
 
   function buildBridge() {
     if (!repairReleasePanel()) return false;
-    const footer = document.querySelector('body > .site-footer');
+    const footer = document.querySelector('.site-footer');
     sourceHero = document.querySelector('#main-content > #hero');
     if (!footer || !sourceHero) return false;
 
@@ -522,7 +526,8 @@
     bridge.setAttribute('aria-hidden', 'true');
     bridge.setAttribute('inert', '');
     bridge.appendChild(mirror);
-    footer.insertAdjacentElement('afterend', bridge);
+    const bridgeAnchor=footer.parentElement===document.body?footer:document.getElementById('main-content');
+    bridgeAnchor.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
     captureCanonicalLandingOrigin();
 

@@ -801,13 +801,17 @@
   }
 
   function startR649Fallback(){
-    if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
-    filmRendererFallbackStarted=true;
+    if(filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
+    const confirmedUnavailable=['context-unavailable','shader-failed','first-frame-error'].includes(ROOT.dataset.fxCrystalOrganismR326);
     if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
     ROOT.dataset.fxMagBirthFallbackPolicyR1730=softwareFallbackActive
       ? 'phase-driven-reference-film'
       : 'adaptive-reference-film';
-    if(window.FormatXMagReferenceFilmR649?.attach){
+    // Pending real WebGL uses the inexpensive particle surface. The legacy
+    // shadow-heavy reference film is a confirmed-failure fallback, never a
+    // competing GPU workload during the permanent MAG's first frame.
+    if(confirmedUnavailable&&!filmRendererFallbackStarted&&window.FormatXMagReferenceFilmR649?.attach){
+      filmRendererFallbackStarted=true;
       overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
       if(filmRenderer)ROOT.dataset.fxMagBirthRendererR2063='native-canvas-reference-film';
@@ -815,6 +819,8 @@
       ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
     }
+    ROOT.dataset.fxMagBirthRendererR1360=confirmedUnavailable?'fallback-particles':'waiting-for-canonical-webgl';
+    ROOT.dataset.fxMagBirthRendererR2063=confirmedUnavailable?'native-canvas-fallback-particles':'native-canvas-waiting-particles';
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
@@ -865,6 +871,7 @@
 
   function drawParticles(r,time) {
     if(canonicalIntroActive)return;
+    if(!filmRenderer&&!filmRendererFallbackStarted&&['context-unavailable','shader-failed','first-frame-error'].includes(ROOT.dataset.fxCrystalOrganismR326))startR649Fallback();
     if(filmRenderer){ filmRenderer.draw?.(r,time); return; }
     if(filmRendererPromise)return;
     if(!ctx)return;

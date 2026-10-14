@@ -2279,6 +2279,11 @@ html[data-fx-native-genesis-r2064] body #hero .hero-space{
   filter:none!important;
   backdrop-filter:none!important;
   transform:none!important;
+  perspective:none!important;
+  will-change:auto!important;
+  translate:none!important;
+  rotate:none!important;
+  scale:none!important;
 }
 html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
   transform:translate(-50%,-50%)!important;
