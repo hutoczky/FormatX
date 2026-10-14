@@ -634,8 +634,18 @@
     locateStage();
     if(finished||overlayTornDown||!overlay.isConnected||canonicalIntroActive||!(stage instanceof HTMLElement)
       ||ROOT.dataset.fxCrystalOrganismR326!=='ready'||typeof coreApi?.genesis!=='function')return false;
-    canonicalStageHome={parent:stage.parentNode,next:stage.nextSibling,style:stage.getAttribute('style')};
-    overlay.appendChild(stage);
+    const rect=stage.getBoundingClientRect();
+    const names=['--fxb-genesis-x','--fxb-genesis-y','--fxb-genesis-scale','opacity','transition','transform','transform-origin'];
+    canonicalStageHome={hadStyle:stage.hasAttribute('style'),
+      style:names.map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)])};
+    stage.style.setProperty('--fxb-genesis-x',(innerWidth*.5-rect.left-rect.width*.5).toFixed(2)+'px');
+    stage.style.setProperty('--fxb-genesis-y',(innerHeight*.47-rect.top-rect.height*.5).toFixed(2)+'px');
+    stage.style.setProperty('--fxb-genesis-scale',String(Math.min(1.65,Math.max(1,Math.min(innerWidth,innerHeight)*.82/Math.max(rect.width,rect.height)))));
+    stage.style.setProperty('transform','translate(var(--fxb-genesis-x,0px),var(--fxb-genesis-y,0px)) scale(var(--fxb-genesis-scale,1))','important');
+    stage.style.setProperty('transform-origin','center','important');
+    stage.style.setProperty('opacity','1','important');
+    stage.style.setProperty('transition','transform 180ms ease','important');
+    ROOT.dataset.fxNativeGenesisR2064='active';
     canonicalIntroActive=true;
     overlay.dataset.fxRenderer='canonical';
     ROOT.dataset.fxMagBirthRendererR1360='canonical-webgl-organism';
@@ -679,6 +689,7 @@
   function setStageOpacity(value) {
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
+    if(canonicalIntroActive)return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
     stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
   }
@@ -689,10 +700,12 @@
       const home=canonicalStageHome;
       canonicalStageHome=null;
       canonicalIntroActive=false;
-      if(home.next?.parentNode===home.parent)home.parent.insertBefore(stage,home.next);
-      else home.parent?.appendChild(stage);
-      if(home.style===null)stage.removeAttribute('style');
-      else stage.setAttribute('style',home.style);
+      ROOT.removeAttribute('data-fx-native-genesis-r2064');
+      for(const [name,value,priority] of home.style){
+        if(value)stage.style.setProperty(name,value,priority);
+        else stage.style.removeProperty(name);
+      }
+      if(!home.hadStyle&&!stage.style.length)stage.removeAttribute('style');
       coreApi?.genesis?.(null);
       coreApi?.requestRender?.(1);
       return;
@@ -912,6 +925,13 @@
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
+    if(canonicalIntroActive){
+      ROOT.dataset.fxNativeGenesisR2064='leaving';
+      stage.style.setProperty('--fxb-genesis-x','0px');
+      stage.style.setProperty('--fxb-genesis-y','0px');
+      stage.style.setProperty('--fxb-genesis-scale','1');
+      coreApi?.genesis?.(1);
+    }
 
     exitTimer=window.setTimeout(
       ()=>safeTeardownOverlay(source),

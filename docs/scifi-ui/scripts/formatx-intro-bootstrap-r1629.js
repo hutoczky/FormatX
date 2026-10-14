@@ -21,7 +21,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261014-r2063-shared-genesis-dielectric';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261014-r2064-transform-genesis-csp';
 let retryCount=0,retryTimer=0;
 let introCompleted=false;
 document.addEventListener('formatx:magbirthcomplete',()=>{

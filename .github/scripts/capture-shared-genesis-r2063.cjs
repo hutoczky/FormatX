@@ -32,7 +32,12 @@ const report={sha:process.env.AUDITED_SHA,url,cases:[]};
       try{
         await page.goto(url,{waitUntil:'domcontentloaded'});
         await page.waitForSelector('.fx-mag-birth-r533[data-fx-renderer="canonical"]',{state:'visible',timeout:5000});
-        await page.screenshot({path:path.join(output,profile+'-intro.png')});
+        item.intro=await page.evaluate(()=>{
+          const stage=window.FormatXLivingCore?.stage,style=stage&&getComputedStyle(stage);
+          return {at:performance.now(),overlayVisible:Boolean(document.querySelector('.fx-mag-birth-r533[data-fx-renderer="canonical"]')),
+            stageOpacity:style?.opacity,stageVisibility:style?.visibility,transform:style?.transform,
+            bounds:stage?.getBoundingClientRect().toJSON(),originalParent:Boolean(stage?.closest('#hero'))};
+        });
         await page.waitForFunction(()=>window.__fxGenesisCapture.complete.length>0,null,{timeout:5000});
         await page.waitForFunction(()=>document.documentElement.dataset.fxCoreFirstFrameR1913==='painted',null,{timeout:5000});
         await page.screenshot({path:path.join(output,profile+'-mag.png')});

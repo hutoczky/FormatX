@@ -2261,23 +2261,22 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
     radial-gradient(ellipse 44% 62% at 52% 46%,rgba(57,90,111,.18),transparent 74%),
     linear-gradient(160deg,#010405,#061017 60%,#010407)!important;
 }
-.fx-mag-birth-r533[data-fx-renderer="canonical"]>.fx-crystal-organism-r326-stage{
-  position:absolute!important;
-  inset:auto!important;
-  left:50%!important;
-  top:47%!important;
-  width:min(86vw,86vh)!important;
-  height:min(86vw,86vh)!important;
-  min-width:0!important;
-  min-height:0!important;
-  max-width:none!important;
-  max-height:none!important;
-  transform:translate(-50%,-50%)!important;
+html[data-fx-native-genesis-r2064] body>#main-content{
+  position:relative!important;
+  z-index:2147483001!important;
+  pointer-events:none!important;
+}
+html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
+  transform:translate(var(--fxb-genesis-x,0px),var(--fxb-genesis-y,0px)) scale(var(--fxb-genesis-scale,1))!important;
+  transform-origin:center!important;
+  transition:transform 180ms ease!important;
   visibility:visible!important;
   opacity:1!important;
   z-index:30!important;
-  contain:layout paint size!important;
   pointer-events:auto!important;
+}
+html:root:root:root[data-fx-native-genesis-r2064="leaving"] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
+  transform:translate(0px,0px) scale(1)!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="canonical"]>.fxb-particles{
   display:none!important;
@@ -2309,6 +2308,7 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 }
 @media (prefers-reduced-motion:reduce){
   .fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{transition:none!important;}
+  html[data-fx-native-genesis-r2064] #hero .fx-crystal-organism-r326-stage{transform:none!important;transition:none!important;}
 }
 /* production-r1903-gallery-studio-bioglass-depth */
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
