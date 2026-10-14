@@ -51,13 +51,23 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  /* R2102: precompile monetary locales once rather than instantiating an
+     ICU formatter for every offscreen plan and QR label on first entry. */
+  const moneyFormatters = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale = language() === 'hu' ? 'hu-HU' : 'en-GB';
+    const key = locale + ':' + selectedCurrency;
+    let formatter = moneyFormatters.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: selectedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      moneyFormatters.set(key, formatter);
+    }
+    return formatter.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {
@@ -328,9 +338,32 @@
     scheduleThreeExperience();
     revealQrDock();
     syncScene();
-    updateCommerce();
     prepareQrDock();
     bind();
+
+    /* R2102: prices and QR codes live well BELOW the first viewport. Avoid
+       evaluating all card markup and Intl formatters while the first
+       FORMATX heading frame is still being painted. Scrolling within 700px
+       invokes prepareQrDock's IntersectionObserver and hydrates instantly;
+       an earlier language or currency interaction also calls updateCommerce
+       synchronously. This changes scheduling, not price content or features. */
+    let pricesReady = false;
+    const hydrateOffscreenCommerce = () => {
+      if (pricesReady || qrDockActivated) return;
+      pricesReady = true;
+      updateCommerce();
+      ROOT.dataset.fxCommerceHydrationR2102 = 'idle-complete';
+    };
+    const scheduleOffscreenCommerce = () => {
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(hydrateOffscreenCommerce, { timeout: 1800 });
+      } else {
+        setTimeout(hydrateOffscreenCommerce, 0);
+      }
+    };
+    setTimeout(scheduleOffscreenCommerce, 650);
+    ROOT.dataset.fxCommerceHydrationR2102 = 'post-hero-scheduled';
+
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }
