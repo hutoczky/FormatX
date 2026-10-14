@@ -9,9 +9,16 @@ const pairs = [
   {
     source: 'docs/scifi-ui/styles/formatx-reference-production-r244.css',
     compact: 'docs/scifi-ui/styles/formatx-reference-production-r244.desktop-r2100.css',
-    desktopProjection: true,
+    desktopProjection: 4,
     selector: 'data-fx-reference-production-r244="true"',
     media: 'media="(min-width: 901px)"'
+  },
+  {
+    source: 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css',
+    compact: 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.desktop-r2101.css',
+    desktopProjection: 6,
+    selector: 'data-fx-p0-first-paint-r503="true"',
+    media: 'media="(min-width:901px)"'
   },
   {
     source: 'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.css',
@@ -76,7 +83,7 @@ function compactCss(source) {
 
 /* R2100: the same compiled CSS, minus *only* top-level groups that cannot
    match a 901px+ screen. Mixed pointer/coarse queries remain untouched. */
-function projectDesktopCss(source) {
+function projectDesktopCss(source, expectedRemoved) {
   const pieces = [];
   let last = 0;
   let depth = 0;
@@ -119,7 +126,7 @@ function projectDesktopCss(source) {
     }
   }
   assert.equal(depth, 0, 'Unbalanced CSS group');
-  assert.equal(removed, 4,
+  assert.equal(removed, expectedRemoved,
     'Mobile-only media query count changed: review desktop projection before shipping');
   pieces.push(source.slice(last));
   return pieces.join('').trim() + '\n';
@@ -131,7 +138,7 @@ for (const entry of pairs) {
   const original = fs.readFileSync(path.join(root, entry.source), 'utf8');
   const compact = fs.readFileSync(path.join(root, entry.compact), 'utf8');
   const expected = entry.desktopProjection
-    ? projectDesktopCss(compactCss(original))
+    ? projectDesktopCss(compactCss(original), entry.desktopProjection)
     : compactCss(original);
   assert.equal(compact, expected,
     'Optimized stylesheet no longer matches the authoritative source: ' + entry.compact);
