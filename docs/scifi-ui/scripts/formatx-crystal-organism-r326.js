@@ -1629,11 +1629,15 @@
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
-          float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          /* R2092: track across the broad 3D shell at both .38 and .68
+             phase. The old .68 crest traveled onto the narrow upper point
+             and disappeared visually on 390px phone hardware. */
+          float head=-.13+1.12*sat(uSurfacePulse);
+          sweep=exp(-pow((coordinate-head)/.088,2.0))*
+            (.34+.66*fresnel);
         }
-        c+=vec3(.08,.30,.34)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
+        c+=vec3(.11,.33,.37)*sweep*${mobile?'.36':'.29'};
+        c+=vec3(.70,.78,.74)*sweep*softboxA*${mobile?'.12':'.09'};
 
         /* R2091: true thin, surface-conforming precision metal strips are
            geometry tagged 5.86. A brushed silver response comes from their
@@ -1641,7 +1645,8 @@
         float railMask=step(5.80,vFacet)*(1.0-step(6.0,vFacet));
         vec3 railMetal=vec3(.078,.102,.110)+
           vec3(.50,.58,.55)*(softboxA*.46+softboxB*.28+key*.19)+
-          vec3(.05,.12,.13)*fresnel*.18;
+          vec3(.05,.12,.13)*fresnel*.18+
+          vec3(.18,.31,.33)*sweep*.40;
         c=mix(c,railMetal,railMask*.96);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
