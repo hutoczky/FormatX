@@ -166,6 +166,50 @@ const CASES=[
       records.push({shot:{name:'high-core-phone-uses-real-three-first'},info});
       console.log('PASS R2103_HIGH_CORE_ANDROID',JSON.stringify(info));
     }finally{await capable.close()}
+    /* R2110 privacy-limited Android capability tests. The usual 4 reported
+       logical threads on modern devices must not automatically mean low-end.
+       Genuine two-core/two-GB phones must keep the screen-contained fallback. */
+    for(const phone of [
+      {name:'privacy-capped-four-core-four-gb',cores:4,memory:4,
+        expected:'attempt-full-three-first'},
+      {name:'genuine-low-memory-two-core',cores:2,memory:2,
+        expected:'bounded-reference-fallback'}
+    ]){
+      const context=await browser.newContext({
+        viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+        deviceScaleFactor:2,locale:'hu-HU',
+        userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) '+
+          'AppleWebKit/537.36 (KHTML, like Gecko) '+
+          'Chrome/133.0.0.0 Mobile Safari/537.36'
+      });
+      try{
+        await context.addInitScript(({cores,memory})=>{
+          Object.defineProperty(navigator,'hardwareConcurrency',
+            {configurable:true,get:()=>cores});
+          Object.defineProperty(navigator,'deviceMemory',
+            {configurable:true,get:()=>memory});
+          Object.defineProperty(navigator,'webdriver',
+            {configurable:true,get:()=>undefined});
+        },{cores:phone.cores,memory:phone.memory});
+        const page=await context.newPage();
+        await page.goto(HOME+'?intro=1&r2110-capability='+phone.name,
+          {waitUntil:'domcontentloaded',timeout:60000});
+        await page.waitForFunction(()=>
+          !!document.documentElement.dataset.fxMagIntroCapabilityR2110,
+          null,{timeout:18000});
+        const info=await page.evaluate(()=>({
+          cores:navigator.hardwareConcurrency,memory:navigator.deviceMemory,
+          policy:document.documentElement.dataset.fxMagIntroCapabilityR2110,
+          actual:document.documentElement.dataset.fxMagBirthRendererR1360||''
+        }));
+        assert.equal(info.cores,phone.cores);
+        assert.equal(info.memory,phone.memory);
+        assert.equal(info.policy,phone.expected,
+          'Android capability policy may not hide premium Three behind an arbitrary four-core cap');
+        records.push({shot:{name:phone.name},info});
+        console.log('PASS R2110_ANDROID_CAPABILITY',JSON.stringify({name:phone.name,...info}));
+      }finally{await context.close()}
+    }
   }finally{await browser.close()}
   fs.writeFileSync(OUT+'/summary.json',JSON.stringify(records,null,2)+'\n');
 })().catch(error=>{
