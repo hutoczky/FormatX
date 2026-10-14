@@ -9,6 +9,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'billing-worker/src/production-content-entry.js'
       - '.github/scripts/validate-intro-storyboard-r2073.cjs'
+      - '.github/scripts/validate-intro-identity-r2072.cjs'
       - '.github/scripts/capture-mag-intro-movies-r2077.cjs'
       - '.github/workflows/verify-r2083-cinematic-studio.yml'
   pull_request:
