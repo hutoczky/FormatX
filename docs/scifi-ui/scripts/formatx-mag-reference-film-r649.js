@@ -262,13 +262,19 @@
       };
 
       // Real vector geometry: polished stepped four-point crystal silhouette.
+      /* R2104: a coherent smoked-chrome material instead of a flat grey
+         badge. High-order reflections sweep across the SAME clipped
+         four-point shape; no extra canvas, DOM image or WebGL context. */
+      const studioTravel=.5+.5*Math.sin(time*.00053);
       const skin=ctx.createLinearGradient(-S,-S*.92,S,S*.95);
-      skin.addColorStop(0,'#596b70');
-      skin.addColorStop(.16,'#35464e');
-      skin.addColorStop(.43,'#172930');
-      skin.addColorStop(.64,'#0b1a23');
-      skin.addColorStop(.86,'#304b52');
-      skin.addColorStop(1,'#07121a');
+      skin.addColorStop(0,'#829698');
+      skin.addColorStop(.12,'#394951');
+      skin.addColorStop(.29,'#1c323c');
+      skin.addColorStop(.50,'#081820');
+      skin.addColorStop(.68,'#0a1922');
+      skin.addColorStop(.82,'#3e5860');
+      skin.addColorStop(.93,'#1b313a');
+      skin.addColorStop(1,'#020a12');
       ctx.save();
       ctx.shadowColor='rgba(79,175,190,.33)';
       ctx.shadowBlur=MOBILE?7:14;
@@ -278,24 +284,43 @@
       ctx.restore();
 
       outer();
-      ctx.strokeStyle='rgba(202,226,224,.58)';
-      ctx.lineWidth=Math.max(1.35,S*.014);
+      ctx.strokeStyle='rgba(196,230,224,.64)';
+      ctx.lineWidth=Math.max(1.35,S*.013);
       ctx.stroke();
+      // A second, recessed silhouette makes the crystal visibly thick.
+      ctx.save();
+      outer();
+      ctx.clip();
+      const bevelFalloff=ctx.createLinearGradient(-S*.8,-S*.9,S*.9,S*.8);
+      bevelFalloff.addColorStop(0,'rgba(211,229,219,.28)');
+      bevelFalloff.addColorStop(.34,'rgba(92,142,151,.035)');
+      bevelFalloff.addColorStop(.71,'rgba(4,13,20,.12)');
+      bevelFalloff.addColorStop(1,'rgba(131,187,186,.29)');
+      ctx.strokeStyle=bevelFalloff;
+      ctx.lineWidth=Math.max(2.5,S*.045);
+      ctx.stroke();
+      ctx.restore();
 
       ctx.save();
       outer();ctx.clip();
       // Four bevelled radial facets with individual photographic reflections.
       for(let arm=0;arm<4;arm++){
         ctx.save();ctx.rotate(arm*Math.PI*.5);
-        const face=ctx.createLinearGradient(-S*.42,-S*.68,S*.45,0);
+        const face=ctx.createLinearGradient(
+          -S*.42,-S*(.66+.08*studioTravel),S*.45,0
+        );
         if(arm%2===0){
-          face.addColorStop(0,'rgba(235,246,241,.42)');
-          face.addColorStop(.40,'rgba(125,167,167,.28)');
-          face.addColorStop(1,'rgba(5,22,31,.015)');
+          face.addColorStop(0,'rgba(236,250,243,.68)');
+          face.addColorStop(.15,'rgba(133,184,184,.44)');
+          face.addColorStop(.39,'rgba(58,100,111,.23)');
+          face.addColorStop(.71,'rgba(11,29,41,.06)');
+          face.addColorStop(1,'rgba(1,10,19,.02)');
         }else{
-          face.addColorStop(0,'rgba(170,210,204,.27)');
-          face.addColorStop(.52,'rgba(63,107,117,.25)');
-          face.addColorStop(1,'rgba(4,18,25,.03)');
+          face.addColorStop(0,'rgba(180,224,222,.48)');
+          face.addColorStop(.18,'rgba(104,152,157,.39)');
+          face.addColorStop(.49,'rgba(40,75,88,.22)');
+          face.addColorStop(.81,'rgba(8,23,32,.03)');
+          face.addColorStop(1,'rgba(4,17,24,.015)');
         }
         ctx.beginPath();
         ctx.moveTo(0,-S*1.14);
@@ -305,7 +330,23 @@
         ctx.lineTo(S*.34,-S*.46);
         ctx.closePath();
         ctx.fillStyle=face;ctx.fill();
-        ctx.strokeStyle=arm%2===0?'rgba(229,240,233,.44)':'rgba(132,174,177,.35)';
+        // The travelling reflected softbox is restricted to this facet,
+        // preserving its darkness rather than flattening the whole body.
+        ctx.save();ctx.clip();
+        const beam=ctx.createLinearGradient(
+          -S*(.24+.12*studioTravel),-S*.80,
+          S*(.12+.28*studioTravel),-S*.17
+        );
+        beam.addColorStop(0,'rgba(240,255,251,0)');
+        beam.addColorStop(.44,'rgba(220,246,236,0)');
+        beam.addColorStop(.52,'rgba(220,248,245,'+
+          (.10+.13*studioTravel).toFixed(3)+')');
+        beam.addColorStop(.64,'rgba(130,193,194,.055)');
+        beam.addColorStop(1,'rgba(12,39,51,0)');
+        ctx.fillStyle=beam;
+        ctx.fillRect(-S*.50,-S*1.22,S, S*1.12);
+        ctx.restore();
+        ctx.strokeStyle=arm%2===0?'rgba(230,248,239,.62)':'rgba(150,196,197,.50)';
         ctx.lineWidth=Math.max(1.0,S*.010);
         ctx.beginPath();
         ctx.moveTo(-S*.33,-S*.45);
@@ -339,23 +380,32 @@
       const breathing=.98+.02*Math.sin(time*.0026);
       const rx=S*.355*breathing,ry=S*.340*breathing;
       // Actual recessed bezel, concentric depths, eight machined shutters.
-      const titanium=ctx.createLinearGradient(-rx,-ry,rx,ry);
-      titanium.addColorStop(0,'#b7cbcb');
-      titanium.addColorStop(.21,'#647f86');
-      titanium.addColorStop(.50,'#203b45');
-      titanium.addColorStop(.76,'#89aaae');
-      titanium.addColorStop(1,'#172c35');
+      const titanium=ctx.createLinearGradient(
+        -rx*(1+studioTravel*.24),-ry,rx,ry
+      );
+      titanium.addColorStop(0,'#f1fff9');
+      titanium.addColorStop(.10,'#9fc2c1');
+      titanium.addColorStop(.20,'#3c6472');
+      titanium.addColorStop(.38,'#091c2a');
+      titanium.addColorStop(.59,'#17343f');
+      titanium.addColorStop(.74,'#9dbdb9');
+      titanium.addColorStop(.87,'#4b747d');
+      titanium.addColorStop(1,'#081e29');
       ctx.beginPath();ctx.ellipse(0,0,rx*1.17,ry*1.17,0,0,TAU);
       ctx.fillStyle=titanium;ctx.fill();
       ctx.strokeStyle='rgba(222,240,235,.86)';
       ctx.lineWidth=Math.max(1.5,S*.014);ctx.stroke();
       ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);
-      const sapphire=ctx.createRadialGradient(-rx*.22,-ry*.28,2,0,0,rx*1.10);
-      sapphire.addColorStop(0,'#446e77');
-      sapphire.addColorStop(.29,'#224854');
-      sapphire.addColorStop(.63,'#0d2634');
-      sapphire.addColorStop(.86,'#06141f');
-      sapphire.addColorStop(1,'#01060c');
+      const sapphire=ctx.createRadialGradient(
+        -rx*(.27+.08*studioTravel),-ry*.32,2,
+        rx*.04,ry*.02,rx*1.10
+      );
+      sapphire.addColorStop(0,'#779ba2');
+      sapphire.addColorStop(.14,'#3c6b76');
+      sapphire.addColorStop(.37,'#193c4a');
+      sapphire.addColorStop(.65,'#0b2434');
+      sapphire.addColorStop(.83,'#04111f');
+      sapphire.addColorStop(1,'#01060d');
       ctx.fillStyle=sapphire;ctx.fill();
       ctx.strokeStyle='rgba(15,30,40,.93)';
       ctx.lineWidth=Math.max(1.8,S*.022);ctx.stroke();
@@ -369,9 +419,16 @@
         ctx.lineTo(rx*.91,ry*.01);
         ctx.lineTo(rx*.52,ry*.22);
         ctx.closePath();
-        ctx.fillStyle=blade%2===0?'rgba(102,138,145,.77)':'rgba(43,81,92,.87)';
+        const shutter=ctx.createLinearGradient(
+          rx*.28,-ry*.40,rx*.97,ry*.21
+        );
+        shutter.addColorStop(0,blade%2===0?'#96b5b7':'#597d89');
+        shutter.addColorStop(.28,blade%2===0?'#4d7481':'#264b5a');
+        shutter.addColorStop(.66,'#142f3f');
+        shutter.addColorStop(1,'#071c2a');
+        ctx.fillStyle=shutter;
         ctx.fill();
-        ctx.strokeStyle='rgba(185,215,211,.45)';
+        ctx.strokeStyle='rgba(204,239,234,.51)';
         ctx.lineWidth=Math.max(.9,S*.008);ctx.stroke();
         ctx.restore();
       }
@@ -382,10 +439,24 @@
       pupil.addColorStop(1,'#030f1b');
       ctx.beginPath();ctx.arc(0,0,rx*.42,0,TAU);
       ctx.fillStyle=pupil;ctx.fill();
-      ctx.strokeStyle='rgba(172,222,219,.48)';
+      ctx.strokeStyle='rgba(198,240,235,.62)';
       ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
       ctx.beginPath();ctx.ellipse(-rx*.19,-ry*.23,rx*.14,ry*.085,-.42,0,TAU);
-      ctx.fillStyle='rgba(245,252,243,.62)';ctx.fill();
+      ctx.fillStyle='rgba(245,252,243,.68)';ctx.fill();
+      // R2104 photographic side-light trace on the recessed blue glass:
+      // one arc, two highlights and the original iris geometry.
+      ctx.beginPath();
+      ctx.ellipse(0,0,rx*.925,ry*.925,0,-2.68,-.84,false);
+      ctx.strokeStyle='rgba(224,253,245,'+
+        (.30+.18*studioTravel).toFixed(3)+')';
+      ctx.lineWidth=Math.max(.8,S*.009);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(rx*.26,ry*.27,rx*.095,ry*.045,-.45,0,TAU);
+      ctx.fillStyle='rgba(91,172,185,.16)';
+      ctx.fill();
+      document.documentElement.dataset.fxMagFallbackMaterialR2104=
+        'moving-softbox-smoked-chrome-sapphire-facets';
       ctx.restore();
     }
   }
@@ -396,7 +467,7 @@
     const proofFrame=new URLSearchParams(location.search).has('introframe');
     const constrained=!proofFrame&&(
       Number(navigator.hardwareConcurrency||8)<=4 ||
-      Number(navigator.deviceMemory||8)<=4
+      Number(navigator.deviceMemory||8)<=2
     );
     let runtimeConstrained=constrained;
     let qualityScale=proofFrame
@@ -482,13 +553,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'r2103-four-point-machined-crystal-low-power'
+      quality:'r2104-softbox-smoked-chrome-sapphire-low-power'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2103-four-point-recessed-iris-mobile-contained'
+    visualRevision:'r2104-moving-studio-softbox-metal-glass'
   };
 })();
