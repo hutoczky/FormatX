@@ -1631,7 +1631,11 @@
       // as the mechanical armor retracts, retaining a readable center in
       // the native MAG on desktop AND 390px portrait screens.
       const nativeEye=smooth((t-8.96)/.88);
-      const surfaceZ=cellular*1.10+nativeEye*.96;
+      /* R2084: retain the REAL four-point living optic as the native film
+         finale. The organic cortex becomes internal tissue rather than
+         replacing the MAG with a giant featureless spherical hairball. */
+      sc=mix(sc,1.05,nativeEye);
+      const surfaceZ=cellular*1.10+nativeEye*.38;
 
       this.coreGroup.position.set(tx,ty,surfaceZ);
       this.organicGroup.position.set(tx,ty,0);
@@ -1655,11 +1659,11 @@
       /* R2083: MAG stays foreground readable through cortical close orbit.
          No fake alpha overlay or abrupt object swap. */
       const physicalReveal=reveal*preFlash;
-      this.coreShell.material.opacity=.96*stage1+.53*physicalReveal;
-      this.coreGlass.material.opacity=.08*stage1+.075*physicalReveal;
-      this.coreEdges.material.opacity=.18*stage1+.16*physicalReveal;
+      this.coreShell.material.opacity=.96*stage1+.53*physicalReveal+.86*nativeEye;
+      this.coreGlass.material.opacity=.08*stage1+.075*physicalReveal+.08*nativeEye;
+      this.coreEdges.material.opacity=.18*stage1+.16*physicalReveal+.28*nativeEye;
       if(this.corePetalMaterial)
-        this.corePetalMaterial.opacity=.72*stage1+.22*physicalReveal;
+        this.corePetalMaterial.opacity=.72*stage1+.22*physicalReveal+.46*nativeEye;
 
       this.irisGroup.scale.setScalar((.018+eyeHold*.72)*pulse);
       this.irisRays.rotation.z=time*.000050;
@@ -1685,21 +1689,25 @@
       const handoffOrganic=smooth((t-8.96)/.88);
       const visible=Math.max(grow*fade,handoffOrganic);
       this.organicGroup.visible=visible>.002;
-      /* Supporting cortical cradle, not an overpowering ball of coils.
-         Smoothly restore canonical native scale before the final handoff. */
+      /* True organic anatomy survives as INTERNAL structure of the 3D MAG,
+         not a spherical replacement at 9.98s. All transitions are C1-smooth. */
       const corticalClose=smooth((t-2.76)/.72)*
         (1-smooth((t-6.72)/1.06));
-      const bodyScale=(.001+visible*.82)*(1-.255*corticalClose);
+      const bodyScale=(.001+visible*.82)*
+        (1-.255*corticalClose-.55*handoffOrganic);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
       const finalMaterialGlow=smooth((t-8.96)/.88);
       this.organicShellMaterial.opacity=
-        (.54+.08*finalMaterialGlow)*visible*(1-.19*corticalClose);
+        (.54+.08*finalMaterialGlow)*visible*
+        (1-.19*corticalClose-.34*handoffOrganic);
       this.organicLobeMaterial.opacity=
-        (.46+.045*finalMaterialGlow)*visible*(1-.17*corticalClose);
+        (.46+.045*finalMaterialGlow)*visible*
+        (1-.17*corticalClose-.32*handoffOrganic);
       this.organicWireMaterial.opacity=.0003*visible;
       this.organicVeinMaterial.opacity=.16*visible;
-      this.organicHoodMaterial.opacity=.36*visible*(1-.16*corticalClose);
+      this.organicHoodMaterial.opacity=.36*visible*
+        (1-.16*corticalClose-.30*handoffOrganic);
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.32*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
@@ -1744,7 +1752,8 @@
       this.cellGroup.visible=visible>.002;
       const cortexClose=smooth((t-2.76)/.72)*
         (1-smooth((t-6.72)/1.06));
-      const cellScale=(.001+visible*.99)*(1-.255*cortexClose);
+      const cellScale=(.001+visible*.99)*
+        (1-.255*cortexClose-.55*handoffCellular);
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
       this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
@@ -2072,6 +2081,15 @@
 
       this.renderer.render(this.scene,this.camera);
       if(this.proofReadbackR2073){
+        const shell=this.coreShell?.material;
+        document.documentElement.dataset.fxMagIntroFinalSignatureR2084=
+          JSON.stringify({
+            coreScale:Number(this.coreGroup.scale.x.toFixed(3)),
+            shellOpacity:Number((shell?.opacity||0).toFixed(3)),
+            organicScale:Number(this.organicGroup.scale.x.toFixed(3)),
+            cellScale:Number(this.cellGroup.scale.x.toFixed(3)),
+            mechanicalVisible:this.mechanicalGroup.visible
+          });
         // R2073: inspect the REAL pixels of the original Three framebuffer.
         // A black frame with a DOM label is not acceptable visual proof.
         // Sample the broad object volume, not just the exact optical center.
