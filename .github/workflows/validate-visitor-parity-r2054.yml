@@ -67,23 +67,3 @@ jobs:
           path: artifacts/r2054-visitor-parity/
           if-no-files-found: error
           retention-days: 30
-      - name: Export official tested Chromium runtime
-        if: always()
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import tarfile
-          root=Path.home()/'.cache/ms-playwright'
-          targets=sorted(root.glob('chromium_headless_shell-*'))
-          assert len(targets)==1, 'Exactly one installed official Chromium verifier is required'
-          with tarfile.open('tested-chromium-runtime.tar.gz','w:gz') as bundle:
-              bundle.add(targets[0],arcname=targets[0].name)
-          PY
-      - name: Upload verifier runtime for local graphics investigation
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tested-chromium-runtime-${{ env.AUDITED_SHA }}
-          path: tested-chromium-runtime.tar.gz
-          if-no-files-found: error
-          retention-days: 2

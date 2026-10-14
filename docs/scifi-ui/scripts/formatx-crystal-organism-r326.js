@@ -1368,6 +1368,7 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float value){return clamp(value,0.,1.);}
       float gaussian(float value,float width){float q=value/width;return exp(-q*q);}
+      float gaussian2(vec2 value,vec2 width){vec2 q=value/width;return exp(-dot(q,q));}
       vec3 displayColor(vec3 color){
         color=max(color,vec3(0.0));
         color=clamp((color*(2.51*color+.03))/(color*(2.43*color+.59)+.14),0.0,1.0);
@@ -1377,11 +1378,13 @@
         vec3 d=normalize(direction);
         float front=smoothstep(-.25,.65,d.z);
         float softness=.025+roughness*.14;
-        float key=gaussian(d.x+.32,.055+softness)*gaussian(d.y-.08,.66)*front;
-        float fill=gaussian(d.x-.46,.105+softness)*gaussian(d.y+.10,.72)*front;
-        float crown=gaussian(d.x+.08,.46)*gaussian(d.y-.73,.13+softness)*front;
-        float floorLight=gaussian(d.x-.10,.64)*gaussian(d.y+.65,.18+softness)*front;
-        float rear=gaussian(d.x+.10,.55)*gaussian(d.y-.32,.60)*smoothstep(.0,.75,-d.z);
+        // exp(-x*x)*exp(-y*y) equals exp(-(x*x+y*y)): keep the same
+        // physical panel while evaluating one exponential per light sample.
+        float key=gaussian2(vec2(d.x+.32,d.y-.08),vec2(.055+softness,.66))*front;
+        float fill=gaussian2(vec2(d.x-.46,d.y+.10),vec2(.105+softness,.72))*front;
+        float crown=gaussian2(vec2(d.x+.08,d.y-.73),vec2(.46,.13+softness))*front;
+        float floorLight=gaussian2(vec2(d.x-.10,d.y+.65),vec2(.64,.18+softness))*front;
+        float rear=gaussian2(vec2(d.x+.10,d.y-.32),vec2(.55,.60))*smoothstep(.0,.75,-d.z);
         return vec3(.006,.009,.015)
           +vec3(5.7,6.2,6.6)*key
           +vec3(.70,1.65,2.18)*fill
@@ -2687,6 +2690,14 @@
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       requestRender:schedule,
+      captureFrame:()=>{
+        // A loop preview may need one real still while the source is outside
+        // the viewport. The original owner draws it without starting an idle
+        // RAF loop or reviving a hidden/lost/disposed rendering lifecycle.
+        if(disposed||contextLost||document.hidden||paused||!resize())return null;
+        render(performance.now());
+        return gl.getError()===gl.NO_ERROR?canvas:null;
+      },
       genesis:(value)=>{
         genesisProgress=value===null?-1:clamp(Number(value)||0,0,1);
         schedule(1);

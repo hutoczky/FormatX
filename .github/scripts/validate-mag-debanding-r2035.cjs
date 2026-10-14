@@ -24,7 +24,7 @@ assert.ok(body.includes('vec3 absorption=exp(-vec3(')&&body.includes('float thic
   'MAG optical density must be continuous, not repeated scanlines');
 assert.ok(!body.includes('sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4)'),
   'Legacy procedural MAG scanlines are present');
-assert.ok(body.includes('gaussian(d.x-.46,.105+softness)'),
+assert.ok(body.includes('gaussian2(vec2(d.x-.46,d.y+.10),vec2(.105+softness,.72))'),
   'PC and phone cannot reintroduce the thin high-intensity studio stripe');
 assert.ok(body.includes('float fold=gaussian(abs(inside.x)*.92+abs(inside.y)*.75-.27,.037)'),
   'Thin fourfold faceting streaks must be optically widened');
@@ -60,18 +60,18 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2045 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261014-r2067-native-genesis-gpu-owner'),
+  assert.ok(loader.includes('20261014-r2068-measured-studio-genesis'),
     'R2059 normal visitor runtime renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2067-native-genesis-gpu-owner'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2068-measured-studio-genesis'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2067-native-genesis-gpu-owner'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2068-measured-studio-genesis'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2067-native-genesis-gpu-owner'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2068-measured-studio-genesis'),
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2067-native-genesis-gpu-owner']){
+ 'formatx-mag-birth-live-r533.css?v=20261014-r2068-measured-studio-genesis']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({

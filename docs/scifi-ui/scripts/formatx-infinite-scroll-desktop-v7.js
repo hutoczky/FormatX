@@ -13,6 +13,8 @@
   let mirrorImage = null;
   let mirrorCaptureFrame = 0;
   let mirrorCaptureTimer = 0;
+  let mirrorVisibilityObserver = null;
+  let mirrorNearViewport = false;
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
@@ -331,7 +333,8 @@
   function captureReferenceMirror() {
     mirrorCaptureFrame = 0;
     if (!mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
-    const liveCanvas = activeCoreCanvas();
+    const api = window.FormatXLivingCore || window.FormatXCoreMobileV69;
+    const liveCanvas = typeof api?.captureFrame==='function'?api.captureFrame():activeCoreCanvas();
     if (!(liveCanvas instanceof HTMLCanvasElement)) {
       mirror.dataset.fxLoopCapture = 'fallback-r534';
       root.dataset.fxLoopMirrorFrame = 'live-canvas-unavailable';
@@ -369,6 +372,16 @@
     clearTimeout(mirrorCaptureTimer);
     mirrorCaptureTimer = window.setTimeout(function attemptMirrorCapture() {
       mirrorCaptureTimer=0;
+      if(isMobileFlow()||!mirrorNearViewport){
+        root.dataset.fxLoopMirrorCaptureR2068='deferred-until-desktop-bridge-approach';
+        return;
+      }
+      if(document.querySelector('.fx-mag-birth-r533')
+        || root.getAttribute('data-fx-mag-birth-live')==='active'
+        || root.dataset.fxCoreFirstFrameR1913!=='painted'){
+        root.dataset.fxLoopMirrorCaptureR2068='waiting-for-real-native-handoff';
+        return;
+      }
       const activeScroll = root.dataset.fxScrollBudgetR1660 === 'fast'
         || root.dataset.fxScrollActivity === 'scrolling'
         || root.classList.contains('fx-page-scrolling');
@@ -529,6 +542,18 @@
     const bridgeAnchor=footer.parentElement===document.body?footer:document.getElementById('main-content');
     bridgeAnchor.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
+    mirrorVisibilityObserver?.disconnect();
+    mirrorNearViewport=false;
+    if(typeof IntersectionObserver==='function'){
+      mirrorVisibilityObserver=new IntersectionObserver(entries=>{
+        const entry=entries.find(item=>item.target===bridge);
+        if(!entry)return;
+        const entering=entry.isIntersecting&&!mirrorNearViewport;
+        mirrorNearViewport=entry.isIntersecting;
+        if(entering)scheduleMirrorCapture(0);
+      },{rootMargin:'200% 0px'});
+      mirrorVisibilityObserver.observe(bridge);
+    }
     captureCanonicalLandingOrigin();
 
     // Geometry is deliberately sampled outside the scroll hot path. This avoids
@@ -928,6 +953,11 @@
   }
 
   function onScroll() {
+    if(!mirrorVisibilityObserver&&loopGeometry.ready){
+      const near=!isMobileFlow()&&loopGeometry.bridgeTop<=scrollY+innerHeight*3;
+      if(near&&!mirrorNearViewport)scheduleMirrorCapture(0);
+      mirrorNearViewport=near;
+    }
 
     /* R1729 — capture the geometry the user actually saw before any lazy tail
        materialisation is allowed to change document height or bridge.offsetTop. */
@@ -1121,8 +1151,8 @@
     if (document.fonts?.ready) {
       document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
     }
-    // One late snapshot is enough. 4.6 s stays outside the startup/scroll hot path.
-    scheduleMirrorCapture(4600);
+    // The bridge observer requests its real native still before it becomes
+    // visible. Startup and unrelated interface actions must never encode it.
     root.dataset.fxLoopMirrorSchedulerR1679='single-post-startup-scroll-safe-capture';
     root.dataset.fxLoopRuntimeR1715='idle-fresh-geometry-guard-retry-two-cycle-safe';
   }
@@ -1171,6 +1201,7 @@
   });
   addEventListener('formatx:coredetailready', () => scheduleMirrorCapture(80));
   addEventListener('formatx:real3dready', () => scheduleMirrorCapture(220));
+  document.addEventListener('formatx:magbirthcomplete', () => scheduleMirrorCapture(0));
   document.addEventListener('touchstart', onTouchStart, { passive: true });
   document.addEventListener('touchend', onTouchEnd, { passive: true });
   document.addEventListener('touchcancel', onTouchEnd, { passive: true });
@@ -1189,5 +1220,6 @@
     clearTimeout(repairTimer);
     clearTimeout(mirrorCaptureTimer);
     geometryObserver?.disconnect();
+    mirrorVisibilityObserver?.disconnect();
   }, { once: true });
 }());

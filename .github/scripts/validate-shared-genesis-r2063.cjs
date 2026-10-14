@@ -28,6 +28,8 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   const stage=new Element(),sibling=new Element();
   if(initialStyle!==null){
     stage.style.setProperty('opacity','.7');stage.style.setProperty('transform','rotate(2deg)');
+    stage.style.setProperty('translate','-50% 0','important');
+    stage.style.setProperty('scale','1.02');stage.style.setProperty('rotate','3deg');
   }
   const movements=[],progress=[];
   const parent={appendChild(node){movements.push('append-home');node.parentNode=this;},
@@ -47,6 +49,10 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   assert.equal(stage.style.getPropertyValue('position'),'fixed','Deferred page geometry must not displace the actual native intro subject');
   assert.equal(stage.style.getPropertyValue('width'),'500.00px','Intro dimensions must come from the actual native stage');
   assert.equal(stage.style.getPropertyValue('height'),'500.00px');
+  assert.equal(stage.style.getPropertyValue('translate'),'none','Mobile layout must not shift the native intro a second time');
+  assert.equal(stage.style.getPropertyValue('rotate'),'none');
+  assert.equal(stage.style.getPropertyValue('scale'),'none');
+  assert.equal(stage.style.getPropertyValue('transition'),'none','Centering must settle immediately; the shader owns camera motion');
   assert.equal(stage.parentNode,parent,'The original stage must stay in its existing reserved layout');
   assert.equal(context.adoptCanonicalStage(),false,'Repeated native readiness must not adopt twice');
   stage.style.setProperty('--another-owner','preserved');
@@ -54,6 +60,10 @@ for(const initialStyle of [null,'opacity:.7;transform:rotate(2deg)']){
   assert.equal(stage.parentNode,parent,'Teardown must return the existing stage, never a clone');
   assert.equal(stage.style.getPropertyValue('opacity'),initialStyle===null?'':'.7');
   assert.equal(stage.style.getPropertyValue('transform'),initialStyle===null?'':'rotate(2deg)');
+  assert.equal(stage.style.getPropertyValue('translate'),initialStyle===null?'':'-50% 0');
+  assert.equal(stage.style.getPropertyPriority('translate'),initialStyle===null?'':'important');
+  assert.equal(stage.style.getPropertyValue('scale'),initialStyle===null?'':'1.02');
+  assert.equal(stage.style.getPropertyValue('rotate'),initialStyle===null?'':'3deg');
   assert.equal(stage.style.getPropertyValue('--another-owner'),'preserved','Unrelated runtime style changes must survive intro teardown');
   assert.equal(stage.style.getPropertyValue('--fxb-genesis-x'),'');
   assert.equal(stage.style.getPropertyValue('position'),'','Viewport docking must be fully released after the real intro');

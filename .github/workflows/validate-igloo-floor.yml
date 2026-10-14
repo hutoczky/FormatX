@@ -1,5 +1,5 @@
 name: Validate FormatX Igloo floor
-run-name: Igloo-floor gate for ${{ github.sha }}
+run-name: Igloo-floor gate for ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -41,6 +41,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Validate native procedural GPU and platform-specific scroll ownership
         run: |
@@ -57,7 +59,7 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ github.sha }}
+          SHA: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
           JOB_STATUS: ${{ job.status }}
           TARGET_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         shell: bash

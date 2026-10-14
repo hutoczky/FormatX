@@ -29,6 +29,8 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
@@ -81,7 +83,8 @@ jobs:
             state='failure'
             description='Information occlusion, clipping or pure-3D MAG validation failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX no-information-occlusion' \
             -f description="$description" \

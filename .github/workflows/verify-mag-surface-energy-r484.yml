@@ -1,5 +1,5 @@
 name: Verify canonical MAG runtime
-run-name: Canonical MAG runtime for ${{ github.event.workflow_run.head_sha || github.sha }}
+run-name: Canonical MAG runtime for ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
 on:
   push:
@@ -26,7 +26,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: canonical-mag-runtime-${{ github.event_name }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  group: canonical-mag-runtime-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
       FORMATX_VERIFY_LIVE: ${{ github.event_name == 'workflow_run' || contains(github.event.head_commit.message, '[verify-live-mag]') }}
     steps:
       - uses: actions/checkout@v5

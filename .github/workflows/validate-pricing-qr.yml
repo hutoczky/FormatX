@@ -34,6 +34,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/igloo-parity.js

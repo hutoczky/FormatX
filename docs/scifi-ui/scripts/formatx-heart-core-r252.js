@@ -215,7 +215,7 @@
   function mobileLoopBoundary() {
     if (!MOBILE_QUERY.matches) return null;
     pruneMobileReferenceMirror();
-    const footer = document.querySelector('body > .site-footer');
+    const footer = document.querySelector('.site-footer');
     const bridge = document.querySelector('.fx-loop-bridge');
     const hero = document.querySelector('#main-content > #hero');
     if (!(footer instanceof HTMLElement) || !(bridge instanceof HTMLElement) || !(hero instanceof HTMLElement)) return null;

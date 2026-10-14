@@ -637,7 +637,8 @@
       ||ROOT.dataset.fxCrystalOrganismR326!=='ready'||typeof coreApi?.genesis!=='function')return false;
     const rect=stage.getBoundingClientRect();
     const names=['--fxb-genesis-x','--fxb-genesis-y','--fxb-genesis-scale','opacity','transition','transform','transform-origin',
-      'position','inset','left','top','right','bottom','width','height','max-width','max-height','margin','filter'];
+      'position','inset','left','top','right','bottom','width','height','max-width','max-height','margin','filter',
+      'translate','rotate','scale'];
     canonicalStageHome={hadStyle:stage.hasAttribute('style'),
       style:names.map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)])};
     // The measured native surface retains its dimensions and original DOM
@@ -645,14 +646,17 @@
     // the cinematic subject while the same WebGL camera moves through it.
     for(const [name,value] of [['position','fixed'],['inset','auto'],['left','50vw'],['top','47dvh'],
       ['right','auto'],['bottom','auto'],['width',rect.width.toFixed(2)+'px'],['height',rect.height.toFixed(2)+'px'],
-      ['max-width','none'],['max-height','none'],['margin','0'],['filter','none']])stage.style.setProperty(name,value,'important');
+      ['max-width','none'],['max-height','none'],['margin','0'],['filter','none'],
+      ['translate','none'],['rotate','none'],['scale','none']])stage.style.setProperty(name,value,'important');
     stage.style.setProperty('--fxb-genesis-x','-50%');
     stage.style.setProperty('--fxb-genesis-y','-50%');
     stage.style.setProperty('--fxb-genesis-scale','1');
     stage.style.setProperty('transform','translate(-50%,-50%)','important');
     stage.style.setProperty('transform-origin','center','important');
     stage.style.setProperty('opacity','1','important');
-    stage.style.setProperty('transition','transform 180ms ease','important');
+    // The shader owns camera motion. Snap the measured stage to its reserved
+    // viewport position so a late-loaded layout cannot animate its centering.
+    stage.style.setProperty('transition','none','important');
     ROOT.dataset.fxNativeGenesisR2064='active';
     canonicalIntroActive=true;
     overlay.dataset.fxRenderer='canonical';
@@ -807,9 +811,15 @@
     ROOT.dataset.fxMagBirthFallbackPolicyR1730=softwareFallbackActive
       ? 'phase-driven-reference-film'
       : 'adaptive-reference-film';
-    // Pending real WebGL uses the inexpensive particle surface. The legacy
-    // shadow-heavy reference film is a confirmed-failure fallback, never a
-    // competing GPU workload during the permanent MAG's first frame.
+    // Pending native WebGL retains the authored studio shell and copy. Allocate
+    // Canvas2D only after a confirmed failure: creating and later hiding its
+    // desynchronized compositor layer can block the same GPU needed by MAG.
+    if(!confirmedUnavailable){
+      overlay.dataset.fxRenderer='waiting';
+      ROOT.dataset.fxMagBirthRendererR1360='waiting-for-canonical-webgl';
+      ROOT.dataset.fxMagBirthRendererR2063='waiting-for-canonical-webgl';
+      return;
+    }
     if(confirmedUnavailable&&!filmRendererFallbackStarted&&window.FormatXMagReferenceFilmR649?.attach){
       filmRendererFallbackStarted=true;
       overlay.dataset.fxRenderer='fallback';
@@ -819,6 +829,7 @@
       ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
     }
+    overlay.dataset.fxRenderer='fallback';
     ROOT.dataset.fxMagBirthRendererR1360=confirmedUnavailable?'fallback-particles':'waiting-for-canonical-webgl';
     ROOT.dataset.fxMagBirthRendererR2063=confirmedUnavailable?'native-canvas-fallback-particles':'native-canvas-waiting-particles';
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);

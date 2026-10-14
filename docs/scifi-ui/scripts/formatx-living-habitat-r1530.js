@@ -35,12 +35,9 @@
   canvas.className = 'fx-living-habitat-r1530';
   canvas.setAttribute('aria-hidden','true');
   canvas.dataset.renderer = 'canvas2d-event-driven-atmospheric-habitat';
-  const ctx = canvas.getContext('2d',{alpha:true,desynchronized:true});
-  if (!ctx) {
-    canvas.remove();
-    ROOT.dataset.fxLivingHabitatR1530='canvas-unavailable';
-    return;
-  }
+  // Even an unattached desynchronized Canvas2D context owns a compositor
+  // surface. Allocate it only when this habitat actually begins painting.
+  let ctx = null;
 
   let width=1,height=1,dpr=1,raf=0,scrollSettleTimer=0,scrollStartTimer=0,pointerSettleTimer=0,lastDrawAt=0;
   let started=false;
@@ -499,7 +496,20 @@
 
   function startHabitat(source='intent'){
     if(started)return;
+    // The native genesis owns the viewport until its real completion event.
+    // Keep physiology/input state, then paint the habitat after that handoff.
+    if(ROOT.classList.contains('fx-intro-running')
+      || document.querySelector('.fx-mag-birth-r533')
+      || document.getElementById('fx-mag-birth-prepaint-r1606')){
+      ROOT.dataset.fxLivingHabitatStartR1737='waiting-for-genesis-handoff';
+      return;
+    }
     clearTimeout(scrollStartTimer);scrollStartTimer=0;
+    if(!ctx)ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
+    if(!ctx){
+      ROOT.dataset.fxLivingHabitatR1530='canvas-unavailable';
+      return;
+    }
     started=true;
     ROOT.dataset.fxLivingHabitatStartR1737=source;
     ROOT.dataset.fxLivingHabitatFirstPaintR1737='post-intent-no-initial-layout-work';

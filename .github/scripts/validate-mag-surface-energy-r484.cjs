@@ -9,30 +9,11 @@ const { PNG } = require('pngjs');
 const origin = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4173/scifi-ui/';
 const output = process.env.FORMATX_CAPTURE_DIR || 'artifacts/r484-surface-energy';
 fs.mkdirSync(output, { recursive: true });
-const MOBILE_OPTICS_SOURCE = fs.readFileSync(
-  path.join(__dirname, '../../docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'),
-  'utf8',
-);
-function sourceFilterToken(name, unit = '') {
-  const match = MOBILE_OPTICS_SOURCE.match(
-    new RegExp(`${name}\\(([-\\d.]+)${unit}\\)`)
-  );
-  assert.ok(match, `missing canonical mobile optics token ${name}`);
-  return `${name}(${Number(match[1])}${unit})`;
-}
-const EXPECTED_MOBILE_FILTER = [
-  sourceFilterToken('brightness'),
-  sourceFilterToken('contrast'),
-  sourceFilterToken('saturate'),
-  sourceFilterToken('hue-rotate', 'deg'),
-  sourceFilterToken('blur', 'px'),
-];
-
 // Timing instrumentation must not synchronously read back the GPU: doing that
 // inside RAF stalls SwiftShader and changes the very timing being measured.
 // Separate, deterministic single-frame screenshots below test visible motion.
 function instrumentNativeFrames() {
-  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [], idleWindows: [], longTasks:[] };
+  const audit = window.__magEnergyAudit = { frames: 0, maximumPhase: -1, phases: [], events: [], recent: [], idleWindows: [], longTasks:[], shaders:[] };
   try{
     const observer=new PerformanceObserver(list=>{
       for(const x of list.getEntries())audit.longTasks.push({at:Math.round(x.startTime),duration:Math.round(x.duration)});
@@ -60,6 +41,11 @@ function instrumentNativeFrames() {
   for (const Type of [window.WebGLRenderingContext, window.WebGL2RenderingContext]) {
     if (!Type) continue;
     const proto = Type.prototype;
+    const shaderSource = proto.shaderSource;
+    proto.shaderSource = function(shader, source) {
+      if (this.canvas?.matches('#hero .fx-crystal-organism-r326-canvas')) audit.shaders.push(source);
+      return shaderSource.call(this, shader, source);
+    };
     const getUniformLocation = proto.getUniformLocation;
     const uniform1f = proto.uniform1f;
     const depthMask = proto.depthMask;
@@ -149,7 +135,9 @@ async function captureSurface(page, name, label, phase) {
     const index = (py * png.width + px) * 4;
     grid.push(.2126 * png.data[index] + .7152 * png.data[index + 1] + .0722 * png.data[index + 2]);
   }
-  return { phase, grid, mean: grid.reduce((sum, value) => sum + value, 0) / grid.length,
+  const ordered=[...grid].sort((a,b)=>a-b);
+  return { phase, grid, contrast:(ordered[Math.floor(ordered.length*.95)]+1)/(ordered[Math.floor(ordered.length*.10)]+1),
+    mean: grid.reduce((sum, value) => sum + value, 0) / grid.length,
     maximum: Math.max(...grid), coverage: grid.filter(value => value > 20).length / grid.length };
 }
 
@@ -264,6 +252,8 @@ async function verify(browser, name, viewport, mobile) {
         legacyCount: document.querySelectorAll('#hero .fx-three-frame, #hero .fx-core-mobile-v55-stage:not(.fx-crystal-organism-r326-stage)').length,
         overflow: Math.max(0, root.scrollWidth - innerWidth),
         filter: style.filter, opacity: Number(style.opacity),
+        shaderDisplayTransfer: __magEnergyAudit.shaders.some(source => source.includes('vec3 displayColor')
+          && source.includes('2.51*color') && source.includes('return pow(color,vec3(.454545))')),
         glError: gl.getError(), budget: root.dataset.fxMobileSurfaceBudgetR484,
         policy: root.dataset.fxCoreMobileIdlePolicyR426,
         shape: root.dataset.fxCoreShapeR337,
@@ -279,18 +269,12 @@ async function verify(browser, name, viewport, mobile) {
     assert.ok(report.dom.overflow <= 1, `${name}: horizontal overflow`);
     if (mobile) {
       const filter = String(report.dom.filter || '');
-      const numberOf = token => {
-        const match = filter.match(new RegExp(token + '\\(([-\\d.]+)'));
-        return match ? Number(match[1]) : NaN;
-      };
-      assert.ok(!/blur\((?!0(?:px)?\))/i.test(filter),
-        `${name}: final mobile compositor reintroduced blur; computed=${filter}`);
-      assert.ok(numberOf('brightness') >= .95,
-        `${name}: final mobile crystal is too dim; computed=${filter}`);
-      assert.ok(numberOf('contrast') >= 1.05,
-        `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
-      assert.ok(numberOf('saturate') >= .94 && numberOf('saturate') <= 1.02,
-        `${name}: final R1795 smoky-bioglass saturation drift; computed=${filter}`);
+      // Brightness/contrast now come from the physical shader. A second CSS
+      // filter would transform its display-mapped pixels and add a GPU pass.
+      // Actual luminance and contrast are asserted from readback below.
+      assert.equal(filter,'none',`${name}: native display color must remain unfiltered`);
+      assert.equal(report.dom.shaderDisplayTransfer,true,`${name}: actual compiled material lacks the display transfer`);
+      assert.ok(report.dom.opacity >= .95,`${name}: final mobile compositor dims the native crystal`);
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
@@ -305,6 +289,7 @@ async function verify(browser, name, viewport, mobile) {
     await page.evaluate(() => { delete window.__magCapturePhase; });
     await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.play()));
     assert.ok(report.captures.idle.maximum > 60 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
+    assert.ok(report.captures.idle.contrast >= 1.05, `${name}: actual rendered crystal lacks facet contrast`);
     report.earlyChange = surfaceChange(report.captures.idle, report.captures.early);
     report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
     assert.ok(report.earlyChange.changed >= 8 && report.lateChange.changed >= 8, `${name}: surface energy is not visibly distinct`);

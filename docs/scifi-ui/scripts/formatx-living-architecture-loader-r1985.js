@@ -6,7 +6,7 @@
 
   root.dataset.fxLivingArchitectureLoaderR1985 = 'loading-normal-runtime';
   const script = document.createElement('script');
-  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261014-r2067-native-genesis-gpu-owner';
+  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261014-r2068-measured-studio-genesis';
   script.async = false;
   script.dataset.fxLivingArchitectureRuntimeR1985 = 'true';
   script.addEventListener('load', () => {
