@@ -122,7 +122,7 @@
 
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=640;
+      const count=this.mobileRender?260:640;
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -152,9 +152,10 @@
         emissive:0x142b3b,emissiveIntensity:.28,
         transparent:true,opacity:.40,depthWrite:false
       });
-      const mesh=new T.InstancedMesh(geo,mat,72);
+      const debrisCount=this.mobileRender?24:72;
+      const mesh=new T.InstancedMesh(geo,mat,debrisCount);
       const dummy=new T.Object3D();
-      for(let i=0;i<72;i++){
+      for(let i=0;i<debrisCount;i++){
         const a=r()*Math.PI*2, rr=1.55+r()*3.8, sc=.42+r()*1.8;
         dummy.position.set(Math.cos(a)*rr,(r()-.5)*4.3,-1.15+(r()-.5)*3.2);
         dummy.rotation.set(r()*3,r()*3,r()*3);
@@ -1509,7 +1510,12 @@
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.82;
-      this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
+      const mobileCorticalCradle=this.mobileRender?.74:1;
+      this.organicGroup.scale.set(
+        bodyScale*1.02*mobileCorticalCradle,
+        bodyScale*.98*mobileCorticalCradle,
+        bodyScale*.94*mobileCorticalCradle
+      );
 
       this.organicShellMaterial.opacity=.27*visible;
       this.organicLobeMaterial.opacity=.24*visible;
@@ -1518,7 +1524,7 @@
       this.organicHoodMaterial.opacity=.18*visible;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
-      if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
+      if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.10:.34)*visible*(.94+.06*Math.sin(time*.0011));
       if(this.organicFibers){
         this.organicFibers.rotation.y=Math.sin(time*.00013)*.010;
         this.organicFibers.rotation.x=Math.sin(time*.00011)*.006;
@@ -1556,7 +1562,7 @@
       const fade=1-smooth((t-6.25)/1.10)*.96;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
-      const cellScale=.001+visible*.99;
+      const cellScale=.001+visible*(this.mobileRender?.75:.99);
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
       this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
@@ -1603,8 +1609,10 @@
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
+      this.mechMidMaterial.opacity=
+        ((this.mobileRender?.61:.46)+.035*finale)*grow;
+      this.silverMaterial.opacity=
+        ((this.mobileRender?.54:.36)+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
@@ -1665,8 +1673,21 @@
         z=mix(4.28,4.40,smooth((t-9.10)/.60));
         y=.003;
       }
-      if(this.width<this.height)z+=.90;
+      /* R2112: the 2026 Android real-Three film was cutting OFF the two
+         horizontal crystal tips at 8.5s and hiding the 4.4s optical core
+         inside enormous organic strands. In portrait, smoothly dolly back
+         by the geometry-required distance, preserving original 10s timing.
+         The full four-point object now fits the NARROWER horizontal FOV.
+         Early DNA/formation keeps its original camera distance. */
+      if(this.width<this.height){
+        const fit=smooth((t-2.22)/1.25);
+        z+=mix(.90,6.20,fit);
+      }
       this.camera.position.set(x,y,z);
+      if(this.mobileRender && this.width<this.height){
+        document.documentElement.dataset.fxMagThreeMobileDistanceR2112=
+          z.toFixed(3);
+      }
       this.camera.lookAt(0,0,0);
     }
 
@@ -1695,7 +1716,8 @@
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
          not the whole frame, and lands on the permanent smoked-silver grade. */
       const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
+      this.renderer.toneMappingExposure=
+        (this.mobileRender?1.16:1.075)+flash*.006+after*.002;
       this.coreLight.intensity+=flash*.42+after*.12;
       if(this.glowSprite){
         const g=1+flash*.10;
