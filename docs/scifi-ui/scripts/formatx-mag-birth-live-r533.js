@@ -518,6 +518,7 @@
   let schedulerTick = 0;
   let startedAt = 0;
   let finished = false;
+  let overlayTornDown = false;
   let exitTimer = 0;
   let hardFinishTimer = 0;
   let frameTimer = 0;
@@ -905,6 +906,8 @@
   }
 
   function safeTeardownOverlay(source) {
+    if(overlayTornDown)return;
+    overlayTornDown=true;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
@@ -1186,17 +1189,10 @@
         coreApi?.setShape?.('organism','r653-absolute-dom-watchdog');
         coreApi?.requestRender?.(1);
       }catch(_){}
-      ROOT.removeAttribute('data-fx-mag-birth-live');
-      ROOT.removeAttribute('data-fx-mag-birth-phase');
       ROOT.dataset.fxMagBirthLiveR533='absolute-dom-watchdog-r653';
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
-      overlay.remove();
-      try{
-        document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
-          detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
-        }));
-      }catch(_){}
+      safeTeardownOverlay('absolute-dom-watchdog-r653');
     },DURATION+550);
 
     // R2059: the fail-open stays close to the real platform endpoint so a

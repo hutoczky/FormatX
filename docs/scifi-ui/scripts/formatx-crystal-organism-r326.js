@@ -2147,12 +2147,9 @@
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
-      // R588: the first autonomous sweep is a post-interactive warm-up.
-      // The CSS heartbeat and direct interaction remain immediate, while the
-      // expensive native sweep no longer competes with first-load interactivity.
-      const delay=surfacePulseCount===0
-        ? 13000
-        : mobile
+      // R2061: a ready visible core uses the same genuine autonomous cadence
+      // from its first sweep onward; no initial thirteen-second dormant gap.
+      const delay=mobile
           ? 5400+(surfacePulseCount%3)*520
           : 4100+(surfacePulseCount%3)*360;
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
