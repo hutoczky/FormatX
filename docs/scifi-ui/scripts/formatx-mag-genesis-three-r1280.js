@@ -1309,6 +1309,64 @@
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
 
+      /* R2113: native Three physical optics. The earlier scene had a
+         miniature dark marble and one hairline ring but no physical
+         titanium shutter/optic architecture. These THREE meshes sit in
+         the SAME scene and renderer, and all fit within the four points. */
+      this.mechOptics=new T.Group();
+      this.mechanicalGroup.add(this.mechOptics);
+      this.mechOpticMaterials=[];
+      this.mechOpticCollars=[];
+      for(const [radius,tube,z,color] of [
+        [.158,.011,.517,0xa9c6c2],
+        [.197,.008,.520,0x617f85],
+        [.239,.0045,.507,0x36515c]
+      ]){
+        const material=new T.MeshPhysicalMaterial({
+          color,metalness:.73,roughness:.19,clearcoat:.92,
+          clearcoatRoughness:.12,transparent:true,opacity:0,
+          depthWrite:false
+        });
+        const mesh=new T.Mesh(new T.TorusGeometry(radius,tube,9,
+          this.mobileRender?54:86),material);
+        mesh.position.z=z;
+        this.mechOptics.add(mesh);
+        this.mechOpticMaterials.push(material);
+        this.mechOpticCollars.push(mesh);
+      }
+      this.mechIris=new T.Group();
+      this.mechIris.position.z=.535;
+      this.mechOptics.add(this.mechIris);
+      this.mechIrisMaterial=new T.MeshPhysicalMaterial({
+        color:0x3f636c,metalness:.68,roughness:.22,
+        emissive:0x0e2934,emissiveIntensity:.12,
+        clearcoat:.89,clearcoatRoughness:.09,
+        side:T.DoubleSide,transparent:true,opacity:0,
+        depthWrite:false
+      });
+      this.mechOpticMaterials.push(this.mechIrisMaterial);
+      const irisShape=new T.Shape();
+      irisShape.moveTo(.104,-.017);
+      irisShape.lineTo(.185,-.059);
+      irisShape.quadraticCurveTo(.217,-.026,.188,.037);
+      irisShape.lineTo(.119,.062);
+      irisShape.quadraticCurveTo(.102,.028,.104,-.017);
+      const bladeGeometry=new T.ShapeGeometry(irisShape,5);
+      for(let blade=0;blade<8;blade++){
+        const part=new T.Mesh(bladeGeometry,this.mechIrisMaterial);
+        part.rotation.z=blade*Math.PI/4;
+        this.mechIris.add(part);
+      }
+      this.mechOpticalLight=new T.PointLight(0x8bc7cb,0,1.7,2);
+      this.mechOpticalLight.position.set(0,0,.65);
+      this.mechOptics.add(this.mechOpticalLight);
+      document.documentElement.dataset.fxMagThreeOpticsR2113=
+        'three-metal-collars-eight-physical-iris-blades';
+      document.documentElement.dataset.fxMagThreeIrisBladesR2113=
+        String(this.mechIris.children.filter(child=>child.isMesh).length);
+      document.documentElement.dataset.fxMagThreeCollarsR2113=
+        String(this.mechOpticCollars.length);
+
       this.mechanicalGroup.scale.setScalar(.001);
     }
 
@@ -1462,8 +1520,8 @@
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,.34,smooth((t-2.52)/.76));
-      else if(t<5.58) sc=.36+Math.sin((t-3.28)*1.02)*.002;
-      else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
+      else if(t<5.58) sc=.56+Math.sin((t-3.28)*1.02)*.003;
+      else if(t<7.15) sc=mix(.56,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
       const endMove=smooth((t-9.78)/.20);
@@ -1488,10 +1546,16 @@
       const preFlash=1-smooth((t-6.55)/.72);
       const pulse=.988+.012*Math.sin(time*.0046);
 
-      this.coreShell.material.opacity=.96*stage1+.16*reveal*preFlash;
-      this.coreGlass.material.opacity=.08*stage1+.015*reveal*preFlash;
-      this.coreEdges.material.opacity=.16*stage1+.012*reveal*preFlash;
-      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.72*stage1+.065*reveal*preFlash;
+      /* R2113: actual four-point crystal is visible throughout the cortex
+         close-up instead of fading into a featureless organic sphere. */
+      this.coreShell.material.opacity=.96*stage1+
+        (this.mobileRender?.58:.16)*reveal*preFlash;
+      this.coreGlass.material.opacity=.08*stage1+
+        (this.mobileRender?.095:.015)*reveal*preFlash;
+      this.coreEdges.material.opacity=.16*stage1+
+        (this.mobileRender?.22:.012)*reveal*preFlash;
+      if(this.corePetalMaterial)this.corePetalMaterial.opacity=
+        .72*stage1+(this.mobileRender?.28:.065)*reveal*preFlash;
 
       this.irisGroup.scale.setScalar((.018+eyeHold*.72)*pulse);
       this.irisRays.rotation.z=time*.000050;
@@ -1619,6 +1683,16 @@
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
+      if(this.mechOptics){
+        const machined=smooth((t-6.42)/.93)*grow;
+        this.mechOpticCollars.forEach((collar,index)=>{
+          collar.material.opacity=machined*([.91,.74,.49][index]);
+        });
+        this.mechIrisMaterial.opacity=machined*.84;
+        this.mechIris.rotation.z=.17*(1-smooth((t-7.28)/1.41))+
+          .014*Math.sin(time*.00015);
+        this.mechOpticalLight.intensity=.48*machined;
+      }
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
@@ -1681,7 +1755,7 @@
          Early DNA/formation keeps its original camera distance. */
       if(this.width<this.height){
         const fit=smooth((t-2.22)/1.25);
-        z+=mix(.90,6.20,fit);
+        z+=mix(.90,4.40,fit);
       }
       this.camera.position.set(x,y,z);
       if(this.mobileRender && this.width<this.height){
