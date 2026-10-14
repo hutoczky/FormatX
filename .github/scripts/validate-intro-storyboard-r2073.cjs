@@ -81,6 +81,8 @@ const SHOTS=[
             morphProgressR2080:Number(root.dataset.fxMagIntroMorphProgressR2080||'0'),
             opticEnergyR2082:Number(root.dataset.fxMagIntroOpticEnergyR2082||'0'),
             studioR2083:JSON.parse(root.dataset.fxMagIntroStudioR2083||'null'),
+            finalSignatureR2084:
+              JSON.parse(root.dataset.fxMagIntroFinalSignatureR2084||'null'),
             genesisVersion:[...document.scripts]
               .find(x=>x.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             identity:badge?.querySelector('.fx-ai-core-ident-r1951__title')?.textContent,
@@ -138,6 +140,23 @@ const SHOTS=[
           assert.ok(studio.rim>1.15&&studio.optic>.18,
             'Identity phase must visibly illuminate the machined optic: '+
               JSON.stringify(studio));
+        }
+        const signature=info.finalSignatureR2084;
+        assert.ok(signature&&Number.isFinite(signature.coreScale)
+          &&Number.isFinite(signature.shellOpacity)
+          &&Number.isFinite(signature.organicScale),
+          'Real source Three MAG geometry signature was not measured: '+JSON.stringify(info));
+        if(shot.second===4.40){
+          assert.ok(signature.coreScale>.49&&signature.organicScale<.70,
+            'The four-point MAG must dominate the cortical orbit, not an oversized ball: '+
+              JSON.stringify(signature));
+        }
+        if(shot.second>=9.98){
+          assert.ok(signature.coreScale>.78&&signature.shellOpacity>.75
+            &&signature.organicScale<.44&&signature.cellScale<.48
+            &&signature.mechanicalVisible===false,
+            'Final MAG must remain a readable original four-point living crystal: '+
+              JSON.stringify(signature));
         }
         if(shot.second<8.96){
           assert.equal(info.morphR2080,'physical-metal-crest',
