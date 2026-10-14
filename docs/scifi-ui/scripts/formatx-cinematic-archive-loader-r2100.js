@@ -48,7 +48,7 @@
   function checkViewport(){
     if(!target)return;
     const rect=target.getBoundingClientRect();
-    if(rect.top<innerHeight+1200&&rect.bottom>-1200)
+    if(rect.top<innerHeight+80&&rect.bottom>-80)
       start('near-archive-viewport');
   }
   function onFilmDone(){start('native-mag-handoff');}
@@ -73,7 +73,7 @@
       observer=new IntersectionObserver(entries=>{
         if(entries.some(entry=>entry.isIntersecting))
           start('near-archive-viewport');
-      },{rootMargin:'1200px 0px',threshold:0});
+      },{rootMargin:'80px 0px',threshold:0});
       observer.observe(target);
     }
     addEventListener('scroll',checkViewport,{passive:true});
