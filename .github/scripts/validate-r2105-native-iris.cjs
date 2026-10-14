@@ -64,6 +64,8 @@ const views=[
             renderer:root.dataset.fxCrystalOrganismR326,
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
+            rails:root.dataset.fxNativeMagRailsR2107||'',
+            railTriangles:Number(root.dataset.fxNativeMagRailTrianglesR2107||0),
             count:canvases.length,
             webgl:root.dataset.fxCoreReal3d,
             width:rect?.width||0,height:rect?.height||0,
@@ -87,6 +89,10 @@ const views=[
         assert.equal(info.count,1,'No duplicate native MAG canvas');
         assert.equal(info.blades,'8-raised-curved-titanium-blades');
         assert.equal(info.triangles,16);
+        assert.equal(info.rails,'8-sculpted-front-surface-channels');
+        assert.ok(info.railTriangles===(view.mobile?160:224),
+          'Actual conforming titanium rail segments are absent: '+
+            JSON.stringify(info));
         assert.ok(info.visible&&info.width>50&&info.height>50,
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
         assert.ok(info.pixelWidth>100&&info.pixelHeight>100,
