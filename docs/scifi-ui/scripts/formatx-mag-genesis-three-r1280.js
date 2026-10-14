@@ -1656,6 +1656,9 @@
       this.glowSprite.scale.setScalar(.80+eyeHold*.05);
       this.coreInner.material.opacity=.0015+eyeHold*.018;
       this.coreLight.intensity=eyeHold*(2.4+Math.sin(time*.0046)*.10);
+      if(t>=9.50)
+        document.documentElement.dataset.fxMagIntroOpticEnergyR2082=
+          this.coreLight.intensity.toFixed(3);
 
       if(this.coreLabel)this.coreLabel.material.opacity=.52*stage1+.028*reveal*(1-smooth((t-3.08)/.32));
     }
