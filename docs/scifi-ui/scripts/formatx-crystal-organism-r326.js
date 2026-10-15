@@ -733,7 +733,7 @@
       const centreX=.025,centreY=-.012;
       const bezelSteps=software?24:mobile?32:48;
       const bezelTubeSteps=4,bezelZ=.632;
-      const bezelMajorX=.180,bezelMajorY=.162,bezelTube=.009;
+      const bezelMajorX=.232,bezelMajorY=.210,bezelTube=.011;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -758,9 +758,14 @@
       }
 
       const lensCenter=[centreX,centreY,.643];
-      const lensRadiusX=.162;
-      const lensRadiusY=.145;
-      const lensDepth=.022;
+      const lensRadiusX=.209;
+      const lensRadiusY=.185;
+      const lensDepth=.031;
+      /* R2108: the real machined optics were too small inside the hero
+         four-point body. Enlarge the SAME geometry and strengthen actual
+         convex lens curvature; retain the original tessellation/draw call. */
+      root.dataset.fxNativeMagOpticScaleR2108='1.29x-real-geometry';
+      root.dataset.fxNativeMagLensXRadiusR2108=String(lensRadiusX);
       const radialSteps=software?4:mobile?5:6;
       const angularSteps=software?24:mobile?32:48;
       function lensVertex(radial,angle){
