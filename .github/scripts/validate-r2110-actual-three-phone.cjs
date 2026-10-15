@@ -86,6 +86,7 @@ const frames=[
             irisPhysicalDepth:Number(root.dataset.fxMagThreeBladeDepthR2124||0),
             irisPhysicalBevel:root.dataset.fxMagThreeBladeBevelR2124||'',
             irisPhysicalTriangles:Number(root.dataset.fxMagThreeBladeTrianglesR2124||0),
+            irisHandoffAngle:Number(root.dataset.fxMagThreeIrisAngleR2125||0),
             collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
             optics:root.dataset.fxMagThreeOpticsR2113||'',
             facets:root.dataset.fxMagThreeFacetsR2114||'',
@@ -178,6 +179,9 @@ const frames=[
             'Studio lamps must return to their original pose before the permanent R326 MAG handoff');
           assert.ok(info.cortexBounce<.01,
             'R2121 real physical lights must settle before original R326 handoff');
+          assert.ok(Math.abs(info.irisHandoffAngle)<.0001,
+            'R2125 mechanical aperture must stop rotating before native R326 handoff: '+
+              JSON.stringify(info));
         }
         assert.deepEqual(errors,[],'Three film runtime errors');
         results.push({frame,info});
