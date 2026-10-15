@@ -1028,6 +1028,11 @@
 
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
+    /* R2121: a visible progress bar uses easeOutCubic and is NOT the film
+       clock. Expose the actual running animation second only for explicit
+       visual proof; keep normal visitor rendering free of extra writes. */
+    if(VISUAL_PROOF)overlay.dataset.fxActualFilmSecondsR2121=
+      (r*DURATION/1000).toFixed(3);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
