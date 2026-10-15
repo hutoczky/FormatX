@@ -51,7 +51,7 @@ const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry&r2105=physical-sapphire-iris&r2116=smoked-silver-deep-sapphire';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry&r2105=physical-sapphire-iris&r2116=smoked-silver-deep-sapphire&r2117=physical-four-arm-facet-lights';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
