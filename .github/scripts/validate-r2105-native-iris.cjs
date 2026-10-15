@@ -100,6 +100,7 @@ const views=[
             raisedPupil:root.dataset.fxNativeMagPupilR2128||'',
             pupilTriangles:Number(root.dataset.fxNativeMagPupilTrianglesR2128||0),
             pupilElevation:Number(root.dataset.fxNativeMagPupilElevationR2128||0),
+            pupilShader:root.dataset.fxNativeMagPupilShaderR2129||'',
             rails:root.dataset.fxNativeMagRailsR2107||'',
             railSections:Number(root.dataset.fxNativeMagRailSectionsR2108||0),
             railDetail:root.dataset.fxNativeMagRailDetailR2108||'',
@@ -147,6 +148,9 @@ const views=[
             JSON.stringify(info));
         assert.ok(info.pupilElevation>=.063&&info.pupilElevation<=.065,
           'The raised glass should project physically above the shutter backs');
+        assert.equal(info.pupilShader,
+          'broad-physical-normal-silver-softbox-on-convex-sapphire',
+          'R2129 must shade the physical pupil from actual curved normals');
         assert.equal(info.rails,'8-sculpted-front-surface-channels');
         /* Eight real superellipsoid-following titanium rails have two
            triangles PER section. Software GL's seven-section LOD is a
