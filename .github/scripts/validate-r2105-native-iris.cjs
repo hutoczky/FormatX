@@ -93,6 +93,10 @@ const views=[
             renderer:root.dataset.fxCrystalOrganismR326,
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
+            sideTriangles:Number(root.dataset.fxNativeMagIrisSideTrianglesR2127||0),
+            backTriangles:Number(root.dataset.fxNativeMagIrisBackTrianglesR2127||0),
+            irisThickness:Number(root.dataset.fxNativeMagIrisThicknessR2127||0),
+            allIrisTriangles:Number(root.dataset.fxNativeMagIrisTotalTrianglesR2127||0),
             rails:root.dataset.fxNativeMagRailsR2107||'',
             railSections:Number(root.dataset.fxNativeMagRailSectionsR2108||0),
             railDetail:root.dataset.fxNativeMagRailDetailR2108||'',
@@ -120,6 +124,18 @@ const views=[
         assert.equal(info.count,1,'No duplicate native MAG canvas');
         assert.equal(info.blades,'8-raised-curved-titanium-blades');
         assert.equal(info.triangles,16);
+        /* R2127: actual original R326 now matches the movie's closed
+           extruded shutter shape. Confirm all depth-bearing faces are
+           present on mobile and desktop and still use ONE GPU draw. */
+        assert.equal(info.sideTriangles,64,
+          'Eight original MAG shutters are missing depth-lit side faces');
+        assert.equal(info.backTriangles,16,
+          'Eight original MAG shutters must have physical rear faces');
+        assert.ok(info.irisThickness>=.009&&info.irisThickness<=.012,
+          'Original R326 lens shutter has no real machined depth: '+
+            JSON.stringify(info));
+        assert.equal(info.allIrisTriangles,96,
+          'Original eight native closed shutter solids must total 96 triangles');
         assert.equal(info.rails,'8-sculpted-front-surface-channels');
         /* Eight real superellipsoid-following titanium rails have two
            triangles PER section. Software GL's seven-section LOD is a
