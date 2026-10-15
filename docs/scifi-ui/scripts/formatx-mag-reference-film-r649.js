@@ -504,7 +504,9 @@
     ctx.fillStyle=chamber;ctx.fillRect(0,0,W,H);
     if(!MOBILE)drawLivingWorld(ctx,time,.86);
 
-    const dnaFade=1-smooth((t-2.65)/1.45);
+    /* R2115: DNA is only a short GENESIS prelude; once the machined MAG
+       appears it cannot share the frame with flat screen-space zigzags. */
+    const dnaFade=1-smooth((t-2.02)/.80);
     if(dnaFade>.002){
       ctx.save();ctx.globalAlpha=.58*dnaFade;ctx.lineWidth=2;
       for(let h=0;h<3;h++){
@@ -579,12 +581,17 @@
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
       const started=performance.now();
       const radiusCap=MOBILE
-        ? Math.max(34,Math.min(sw*.255,sh*.275)/Math.max(.001,scale))
+        ? Math.max(32,Math.min(sw*.208,sh*.245)/Math.max(.001,scale))
         : 192;
       document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
         'four-point-bevelled-metal-glass-iris';
       document.documentElement.dataset.fxMagFallbackDiameterR2103=
         String(Math.round(radiusCap*2.42*scale));
+      /* R2115 actual frame cap, including all four physical points. */
+      document.documentElement.dataset.fxMagMobileViewportRatioR2115=
+        MOBILE?(radiusCap*2.42*scale/Math.max(1,sw)).toFixed(3):'desktop';
+      document.documentElement.dataset.fxMagGenomeFadeR2115=
+        'fully-off-by-2.82-seconds';
       drawLiteScene(ctx,r,time,target,radiusCap);
       ctx.restore();
 
