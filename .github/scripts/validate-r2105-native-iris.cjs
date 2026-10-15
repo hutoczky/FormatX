@@ -97,6 +97,9 @@ const views=[
             backTriangles:Number(root.dataset.fxNativeMagIrisBackTrianglesR2127||0),
             irisThickness:Number(root.dataset.fxNativeMagIrisThicknessR2127||0),
             allIrisTriangles:Number(root.dataset.fxNativeMagIrisTotalTrianglesR2127||0),
+            raisedPupil:root.dataset.fxNativeMagPupilR2128||'',
+            pupilTriangles:Number(root.dataset.fxNativeMagPupilTrianglesR2128||0),
+            pupilElevation:Number(root.dataset.fxNativeMagPupilElevationR2128||0),
             rails:root.dataset.fxNativeMagRailsR2107||'',
             railSections:Number(root.dataset.fxNativeMagRailSectionsR2108||0),
             railDetail:root.dataset.fxNativeMagRailDetailR2108||'',
@@ -136,6 +139,14 @@ const views=[
             JSON.stringify(info));
         assert.equal(info.allIrisTriangles,96,
           'Original eight native closed shutter solids must total 96 triangles');
+        assert.equal(info.raisedPupil,
+          'convex-raised-sapphire-hemisphere-over-physical-iris',
+          'R2128 central pupil must be a genuine original WebGL surface');
+        assert.ok([60,120,224].includes(info.pupilTriangles),
+          'Missing capability-scaled convex sapphire hemisphere triangles: '+
+            JSON.stringify(info));
+        assert.ok(info.pupilElevation>=.063&&info.pupilElevation<=.065,
+          'The raised glass should project physically above the shutter backs');
         assert.equal(info.rails,'8-sculpted-front-surface-channels');
         /* Eight real superellipsoid-following titanium rails have two
            triangles PER section. Software GL's seven-section LOD is a
