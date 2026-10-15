@@ -72,6 +72,8 @@ const frames=[
             collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
             optics:root.dataset.fxMagThreeOpticsR2113||'',
             facets:root.dataset.fxMagThreeFacetsR2114||'',
+            railIdentity:root.dataset.fxMagThreeRailsR2118||'',
+            railTriangles:Number(root.dataset.fxMagThreeRailTrianglesR2118||0),
             studio:root.dataset.fxMagThreeStudioR2115||'',
             sapphire:root.dataset.fxMagThreeSapphireR2115||'',
             sapphireScale:Number(root.dataset.fxMagThreeOpticScaleR2115||0),
@@ -96,7 +98,7 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2115-studio-sweep-deep-sapphire'),
+        assert.ok(info.threeSource.includes('r2118-real-machined-channels'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
           assert.ok(info.mobileThreeDistance>=7.7&&
@@ -115,6 +117,10 @@ const frames=[
           'Optic provenance must be the real new 3D mesh, not a 2D illustration');
         assert.equal(info.facets,'eight-truly-slanted-machined-3d-surfaces',
           'The cinematic shell must have eight genuine beveled arm panels, not a flat logo');
+        assert.equal(info.railIdentity,'eight-real-elevated-two-segment-metal-channels',
+          'The true Three intro must contain actual raised titanium machining, not painted 2D lines');
+        assert.equal(info.railTriangles,32,
+          'Four physical MAG arms require eight entire machined rails in one indexed Three mesh');
         assert.equal(info.studio,'one-webgl-physical-softboxes-rear-air-volume',
           'The entire first-visit film must retain the physical light stage in its original WebGL scene');
         assert.equal(info.sapphire,'real-convex-optical-mesh-with-eight-iris-blades',
