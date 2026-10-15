@@ -340,17 +340,26 @@
     <div class="fxb-scan" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-top" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-bottom" aria-hidden="true"></div>
-    <header class="fxb-copy">
-      <p class="fxb-kicker"></p>
-      <p class="fxb-title"></p>
-      <p class="fxb-subtitle"></p>
-    </header>
     <div class="fxb-telemetry" aria-live="polite">
       <output class="fxb-percent">000</output>
       <progress class="fxb-progress" max="100" value="0">0%</progress>
       <span class="fxb-status"></span>
     </div>
   `);
+
+  // Retain the parser-painted title as the same node throughout genesis.
+  // A dynamically mounted shell still receives the complete localized copy.
+  if (!(overlay.querySelector('.fxb-copy') instanceof HTMLElement)) {
+    const liveCopy=document.createElement('header');
+    liveCopy.className='fxb-copy';
+    for(const name of ['kicker','title','subtitle']){
+      const line=document.createElement('p');
+      line.className='fxb-'+name;
+      line.textContent=copy[name];
+      liveCopy.appendChild(line);
+    }
+    overlay.appendChild(liveCopy);
+  }
 
   let liveSkip=overlay.querySelector('.fxb-skip');
   if (!(liveSkip instanceof HTMLButtonElement)) {
@@ -493,9 +502,9 @@
 
   buildDna();
 
-  kicker.textContent = copy.kicker;
-  title.textContent = copy.title;
-  subtitle.textContent = copy.subtitle;
+  if(kicker.textContent!==copy.kicker)kicker.textContent=copy.kicker;
+  if(title.textContent!==copy.title)title.textContent=copy.title;
+  if(subtitle.textContent!==copy.subtitle)subtitle.textContent=copy.subtitle;
   skip.textContent = copy.skip;
   skip.setAttribute('aria-label', copy.skipAria);
   status.textContent = copy.statuses[0][1];

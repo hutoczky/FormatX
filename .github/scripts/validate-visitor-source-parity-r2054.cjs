@@ -61,6 +61,15 @@ for (const source of [bootstrap, read('docs/scifi-ui/scripts/formatx-intro-boots
 const hash = 'sha256-' + crypto.createHash('sha256').update(bootstrap).digest('base64');
 assert.ok(html.includes(hash), 'Authored CSP must permit the current inline bootstrap');
 assert.ok(read('billing-worker/src/production-content-entry.js').includes(hash), 'Production CSP must permit the same bootstrap');
+const parserStyle=html.match(/<style data-fx-intro-parser-guard-r1756="true">([\s\S]*?)<\/style>/)?.[1];
+assert.ok(parserStyle,'Parser-owned intro geometry is missing');
+const parserStyleHash='sha256-'+crypto.createHash('sha256').update(parserStyle).digest('base64');
+for(const source of [html,read('billing-worker/src/production-content-entry.js')]){
+  assert.ok(source.includes(parserStyleHash),'Authored and production CSP must permit the actual first-byte intro style');
+}
+const prepaintMarkup=html.match(/<section id="fx-mag-birth-prepaint-r1606"[^>]*>([\s\S]*?)<\/section>/)?.[1];
+assert.equal((prepaintMarkup?.match(/class="fxb-copy"/g)||[]).length,1,'The first-byte intro needs one authored copy block');
+assert.match(prepaintMarkup,/<p class="fxb-title">A MAG SZÜLETÉSE<\/p>/,'The true intro title must already exist before runtime execution');
 console.log(JSON.stringify({ sourceFiles: names.length + 1, prepaintIdentityComparisons: cases, cspHash: hash, result: 'pass' }));
 require('./validate-intro-rescue-lifecycle-r2060.cjs');
 require('./validate-shared-genesis-r2063.cjs');

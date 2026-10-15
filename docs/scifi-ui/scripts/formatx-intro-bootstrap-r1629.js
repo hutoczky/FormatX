@@ -21,7 +21,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261015-r2106-late-scroll-input-ownership';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261015-r2107-parser-owned-intro-copy';
 let retryCount=0,retryTimer=0;
 let introCompleted=false;
 document.addEventListener('formatx:magbirthcomplete',()=>{
