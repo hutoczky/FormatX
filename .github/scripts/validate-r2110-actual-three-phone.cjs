@@ -87,6 +87,8 @@ const frames=[
             irisPhysicalBevel:root.dataset.fxMagThreeBladeBevelR2124||'',
             irisPhysicalTriangles:Number(root.dataset.fxMagThreeBladeTrianglesR2124||0),
             irisHandoffAngle:Number(root.dataset.fxMagThreeIrisAngleR2125||0),
+            opticParallax:Number(root.dataset.fxMagThreeOpticParallaxR2126||0),
+            cameraXOffset:Number(root.dataset.fxMagThreeCameraXOffsetR2126||0),
             collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
             optics:root.dataset.fxMagThreeOpticsR2113||'',
             facets:root.dataset.fxMagThreeFacetsR2114||'',
@@ -169,6 +171,9 @@ const frames=[
             'At 8.5s the real original Four Point optical chamber must have the closer 3D camera view');
           assert.ok(info.studioSweep>.95,
             'Actual Three.js metallic facet light choreography is missing from the optical hero frame');
+          assert.ok(info.opticParallax>.96&&info.cameraXOffset>(mobile?.30:.20),
+            'R2126 must show real physically cambered optic from traveling camera at 8.5s: '+
+              JSON.stringify(info));
           assert.ok(info.cortexBounce<.01,
             'Cortical fill light must not overexpose the final 3D sapphire identity');
         }
@@ -181,6 +186,9 @@ const frames=[
             'R2121 real physical lights must settle before original R326 handoff');
           assert.ok(Math.abs(info.irisHandoffAngle)<.0001,
             'R2125 mechanical aperture must stop rotating before native R326 handoff: '+
+              JSON.stringify(info));
+          assert.ok(info.opticParallax<.01&&Math.abs(info.cameraXOffset)<.01,
+            'R2126 real 3D camera must settle exactly to the original 9.98s pose: '+
               JSON.stringify(info));
         }
         assert.deepEqual(errors,[],'Three film runtime errors');
