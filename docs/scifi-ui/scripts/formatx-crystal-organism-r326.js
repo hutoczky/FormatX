@@ -1483,13 +1483,24 @@
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.30,.33,.31)*facetSilver*${mobile?'.095':'.120'};
-        c+=vec3(.020,.060,.070)*facetCool*${mobile?'.048':'.058'};
+        /* R2117: physically coherent four-arm metal shoulders have a
+           significantly wider photometric gradient than the old 2D icon.
+           The feature follows actual normal and signed face orientation;
+           no high-frequency grille, repeated scanline or painted outline. */
+        float cutShoulder=pow(sat(dot(n,normalize(vec3(-.38,.62,.69)))),3.0)
+          *frontDepth*(.35+.65*smoothstep(.15,.49,macroRadius));
+        float coldBackFace=pow(sat(dot(n,normalize(vec3(.60,-.18,.78)))),4.0)
+          *frontDepth;
+        c+=vec3(.38,.42,.39)*facetSilver*${mobile?'.165':'.188'};
+        c*=1.0-${mobile?'.095':'.115'}*facetCool;
+        c+=vec3(.027,.065,.075)*facetCool*${mobile?'.053':'.061'};
+        c+=vec3(.64,.69,.63)*cutShoulder*${mobile?'.19':'.22'};
+        c+=vec3(.22,.33,.35)*coldBackFace*.115;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
+        c+=vec3(.87,.91,.85)*softboxA*${mobile?'.082':'.072'};
         c+=vec3(.48,.59,.58)*softboxB*${mobile?'.250':'.235'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
@@ -1542,7 +1553,7 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.38,.47,.43)*foldRidge*${mobile?'.110':'.140'};
+        c+=vec3(.46,.51,.46)*foldRidge*${mobile?'.185':'.220'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
         c*=1.0-${mobile?'.095':'.125'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
@@ -1550,7 +1561,7 @@
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.105,.123)*fresnel*.23;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.050,.185,.210)*deepEdge*.185;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
