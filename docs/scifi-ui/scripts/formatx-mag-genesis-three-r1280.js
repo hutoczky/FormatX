@@ -1163,6 +1163,61 @@
       }
       document.documentElement.dataset.fxMagThreeFacetsR2114='eight-truly-slanted-machined-3d-surfaces';
 
+      /* R2118: actual 3D brushed titanium routes along each original
+         convex facet. Unlike the R2103 fallback's vector machining strokes,
+         this is ONE indexed native mesh (32 triangles, not 8 draw passes),
+         with true sloping Z normals for direct cinematic light response.
+         Each of four arms gets exactly two rails, running from tip to optic. */
+      const railPositions=[];
+      const railIndices=[];
+      const quad=(a,b,c,d)=>{
+        const start=railPositions.length/3;
+        railPositions.push(...a,...b,...c,...d);
+        railIndices.push(start,start+1,start+2,start,start+2,start+3);
+      };
+      for(let arm=0;arm<4;arm++){
+        const angle=arm*Math.PI/2;
+        const cs=Math.cos(angle),sn=Math.sin(angle);
+        const rotated=(x,y,z)=>[x*cs-y*sn,x*sn+y*cs,z];
+        for(const side of [-1,1]){
+          const path=[
+            [side*.065,-.84,.286],
+            [side*.114,-.54,.335],
+            [side*.062,-.345,.403]
+          ];
+          for(let index=0;index<2;index++){
+            const before=path[index],after=path[index+1];
+            const dx=after[0]-before[0],dy=after[1]-before[1];
+            const length=Math.hypot(dx,dy)||1;
+            const normalX=-dy/length,normalY=dx/length;
+            const width=.0128;
+            quad(
+              rotated(before[0]+normalX*width,before[1]+normalY*width,before[2]),
+              rotated(before[0]-normalX*width,before[1]-normalY*width,before[2]-.006),
+              rotated(after[0]-normalX*width,after[1]-normalY*width,after[2]-.006),
+              rotated(after[0]+normalX*width,after[1]+normalY*width,after[2])
+            );
+          }
+        }
+      }
+      const railGeometry=new T.BufferGeometry();
+      railGeometry.setAttribute('position',new T.Float32BufferAttribute(railPositions,3));
+      railGeometry.setIndex(railIndices);
+      railGeometry.computeVertexNormals();
+      this.mechRailMaterialR2118=new T.MeshPhysicalMaterial({
+        color:0x8ea6a1,metalness:.47,roughness:.24,
+        clearcoat:.64,clearcoatRoughness:.12,
+        emissive:0x08191e,emissiveIntensity:.035,
+        side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
+      });
+      this.mechMachinedRailsR2118=new T.Mesh(railGeometry,this.mechRailMaterialR2118);
+      this.mechMachinedRailsR2118.frustumCulled=false;
+      this.mechanicalGroup.add(this.mechMachinedRailsR2118);
+      document.documentElement.dataset.fxMagThreeRailsR2118=
+        'eight-real-elevated-two-segment-metal-channels';
+      document.documentElement.dataset.fxMagThreeRailTrianglesR2118=
+        String(railIndices.length/3);
+
       /* R1984 — final-stage edge fibrils.
          Sample the actual four-point signature outline and grow one-pixel fibers
          out of its silhouette. This keeps microscopic detail visible through the
@@ -1791,6 +1846,8 @@
           metalReveal*(this.mobileRender?.68:.49);
         this.mechPanelMaterials[1].opacity=
           metalReveal*(this.mobileRender?.46:.32);
+        if(this.mechRailMaterialR2118)
+          this.mechRailMaterialR2118.opacity=metalReveal*(this.mobileRender?.84:.69);
       }
       this.silverMaterial.opacity=
         ((this.mobileRender?.54:.36)+.055*finale)*grow;
