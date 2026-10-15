@@ -68,6 +68,33 @@ const CASES=[
             canvasRect:{width:size?.width||0,height:size?.height||0},
             buffer:{width:canvas?.width||0,height:canvas?.height||0},
             pixel:[...(sampled||[])],
+            // Optical richness is evaluated from *actual rendered pixels*
+            // around the center, rather than from source flags alone.
+            opticalSamples:(()=>{
+              if(!img||!canvas)return {distinct:0,lumaSpread:0,opaque:0};
+              const radius=Math.max(16,Math.floor(
+                Number(root.dataset.fxMagFallbackDiameterR2103||0)*
+                (canvas.width/Math.max(1,innerWidth))*.26));
+              const x=Math.max(0,Math.floor(canvas.width/2-radius));
+              const y=Math.max(0,Math.floor(canvas.height/2-radius));
+              const w=Math.min(canvas.width-x,2*radius);
+              const h=Math.min(canvas.height-y,2*radius);
+              if(w<10||h<10)return {distinct:0,lumaSpread:0,opaque:0};
+              const data=img.getImageData(x,y,w,h).data;
+              const bins=new Set();
+              let min=255,max=0,opaque=0;
+              for(let py=0;py<h;py+=Math.max(1,Math.floor(h/35))){
+                for(let px=0;px<w;px+=Math.max(1,Math.floor(w/35))){
+                  const j=(py*w+px)*4;
+                  if(data[j+3]<30)continue;
+                  opaque++;
+                  const lum=.2126*data[j]+.7152*data[j+1]+.0722*data[j+2];
+                  min=Math.min(min,lum);max=Math.max(max,lum);
+                  bins.add([data[j]>>3,data[j+1]>>3,data[j+2]>>3].join('-'));
+                }
+              }
+              return {distinct:bins.size,lumaSpread:Math.round(max-min),opaque};
+            })(),
             skip:skip?.textContent?.trim()||'',
             skipOpacity:Number(css?.opacity||0),
             skipColor:css?.color,
@@ -103,6 +130,11 @@ const CASES=[
           'Canvas has no real backing surface');
         assert.ok(info.pixel.length===4&&info.pixel[3]>12,
           'No actual fallback center optic framebuffer pixel');
+        assert.ok(info.opticalSamples.distinct>=40&&
+          info.opticalSamples.lumaSpread>=36&&
+          info.opticalSamples.opaque>=100,
+          'Flat, dark or detail-free fallback is not acceptable: '+
+            JSON.stringify(info.opticalSamples));
         assert.ok(info.skipOpacity>.95&&info.skipBox.width>=90
           &&info.skipBox.height>=44,
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
