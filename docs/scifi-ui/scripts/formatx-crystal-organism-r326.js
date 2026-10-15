@@ -1495,6 +1495,23 @@
         c*=1.0-${mobile?'.095':'.115'}*facetCool;
         c+=vec3(.027,.065,.075)*facetCool*${mobile?'.053':'.061'};
         c+=vec3(.64,.69,.63)*cutShoulder*${mobile?'.19':'.22'};
+        /* R2118: the true FOUR solid arms get an asymmetric raised silver
+           backbone and dark near-side bevel. The photometric response is
+           multiplied by the original 3D vertex normal and broad arm face,
+           never by 2D distance-to-screen or high-frequency stripes.
+           This materially separates sculpted planes that still appeared
+           too uniform on the last real permanent MAG captures. */
+        float forgedArmSpan=smoothstep(.23,.46,macroRadius)*
+          (1.0-smoothstep(.76,.96,macroRadius))*frontDepth;
+        float raisedFace=.5+.5*cos(macroAngle*4.0);
+        float axisShoulder=pow(sat(dot(n,normalize(vec3(-.62,.50,.60)))),3.0);
+        float innerSteel=pow(sat(dot(n,normalize(vec3(.44,-.56,.68)))),3.0);
+        float machinedFace=forgedArmSpan*smoothstep(.35,.76,raisedFace);
+        float insetShadow=forgedArmSpan*(1.0-smoothstep(.24,.70,raisedFace));
+        c*=1.0-insetShadow*${mobile?'.18':'.22'};
+        c+=vec3(.73,.77,.71)*machinedFace*axisShoulder*
+          ${mobile?'.42':'.46'};
+        c+=vec3(.22,.37,.38)*machinedFace*innerSteel*.15;
         c+=vec3(.22,.33,.35)*coldBackFace*.115;
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
