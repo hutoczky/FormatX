@@ -3,6 +3,22 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {chromium}=require('playwright');
+
+/* R2116 GPU proof: the capability check cannot retain an auxiliary
+   WebGL context on constrained Android hardware. Ensure the real visitor
+   loader uses this exact patched Three owner rather than stale cache. */
+const threeOwner=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
+const filmOwner=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
+const pageSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+assert.ok(
+  threeOwner.includes("gl?.getExtension('WEBGL_lose_context')?.loseContext()") &&
+  threeOwner.includes('fxMagGpuProbeR2116') &&
+  filmOwner.includes('formatx-mag-genesis-three-r1280.js?v=20261015-r2116-release-capability-webgl-context') &&
+  pageSource.includes('formatx-mag-birth-live-r533.js?v=20261015-r2116-three-first-gpu-probe'),
+  'R2116 native Three route must release the probe GPU and use exact up-to-date loader URLs'
+);
 const HOME=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT='artifacts/r2103-real-mobile-fallback';
