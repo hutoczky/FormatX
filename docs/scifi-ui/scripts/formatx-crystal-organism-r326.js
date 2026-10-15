@@ -733,7 +733,7 @@
       const centreX=.025,centreY=-.012;
       const bezelSteps=software?24:mobile?32:48;
       const bezelTubeSteps=4,bezelZ=.632;
-      const bezelMajorX=.232,bezelMajorY=.210,bezelTube=.011;
+      const bezelMajorX=.232,bezelMajorY=.210,bezelTube=.016;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -760,7 +760,7 @@
       const lensCenter=[centreX,centreY,.643];
       const lensRadiusX=.209;
       const lensRadiusY=.185;
-      const lensDepth=.031;
+      const lensDepth=.055;
       /* R2108: the real machined optics were too small inside the hero
          four-point body. Enlarge the SAME geometry and strengthen actual
          convex lens curvature; retain the original tessellation/draw call. */
@@ -1504,6 +1504,20 @@
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
+        /* R2123: macro-scale machined silver facets on the actual four-point
+           3D body. Broad projected four-arm normals/readable valleys, not
+           pixel lines or extra geometry. The strong inert teal planes of the
+           previous original hero made the MAG look like a plastic toy. */
+        float machineEnvelope=smoothstep(.20,.36,radialXY)*
+          (1.0-smoothstep(.73,.94,radialXY))*frontDepth;
+        float silverCrest=pow(abs(cos(polar*2.0)),3.1)*machineEnvelope;
+        float darkChannel=pow(abs(sin(polar*2.0)),3.0)*machineEnvelope;
+        vec3 machinedLight=vec3(.48,.53,.49)*
+          (.17+.24*key+.24*softboxB+.17*fill);
+        c+=machinedLight*silverCrest;
+        c*=1.0-.23*darkChannel;
+        c+=vec3(.035,.047,.049)*softboxA*machineEnvelope*.32;
+
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.105,.123)*fresnel*.23;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
@@ -1554,17 +1568,21 @@
         float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
         float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
         float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
-        vec3 machinedTitanium=vec3(.022,.040,.048)+
-          vec3(.43,.49,.46)*(softboxA*.56+softboxB*.31+key*.13)+
-          vec3(.065,.13,.15)*fresnel*.36;
-        vec3 shutterTitanium=vec3(.011,.028,.037)+
-          vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
-          vec3(.08,.14,.15)*fresnel*.28;
-        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),12.0);
-        vec3 sapphireGlass=vec3(.005,.019,.034)+
-          vec3(.045,.13,.16)*(.25+.75*key)+
-          vec3(.19,.24,.22)*sapphireSpec*.48+
-          vec3(.025,.12,.16)*fresnel*.21;
+        /* R2123: brighter silver collar and multiple metal shutter planes;
+           a truly curved, optically separate blue-black sapphire center. */
+        vec3 machinedTitanium=vec3(.064,.078,.078)+
+          vec3(.53,.57,.53)*(softboxA*.43+softboxB*.37+key*.18)+
+          vec3(.09,.12,.11)*fresnel*.29;
+        vec3 shutterTitanium=vec3(.034,.053,.057)+
+          vec3(.30,.38,.39)*(softboxA*.37+softboxB*.30+fill*.22)+
+          vec3(.09,.13,.15)*fresnel*.25;
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),8.0);
+        float sapphireFill=pow(sat(dot(n,normalize(vec3(.62,-.22,.77)))),5.0);
+        vec3 sapphireGlass=vec3(.008,.026,.044)+
+          vec3(.065,.15,.18)*(.24+.76*key)+
+          vec3(.37,.42,.39)*sapphireSpec*.70+
+          vec3(.17,.25,.25)*sapphireFill*.20+
+          vec3(.029,.13,.16)*fresnel*.25;
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
