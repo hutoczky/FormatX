@@ -153,6 +153,10 @@ const viewports=[
           .filter(entry=>entry.sources.some(source=>
             source.selector.includes('fx-crystal-organism-r326-stage')))
           .reduce((n,e)=>n+e.score,0);
+        report.originalMagCanvasCLS=report.evidence.shifts
+          .filter(entry=>entry.sources.some(source=>
+            source.selector.includes('fx-crystal-organism-r326-canvas')))
+          .reduce((n,e)=>n+e.score,0);
         report.handoff=await page.evaluate(()=>{
           const stage=document.querySelector(
             '#hero .fx-crystal-organism-r326-stage');
@@ -180,6 +184,7 @@ const viewports=[
         console.log('R2120_REAL_LAYOUT_SHIFTS',JSON.stringify({
           viewport:profile.name,totalCLS:report.totalCLS,
           magStageCLS:report.originalMagStageCLS,
+          magCanvasCLS:report.originalMagCanvasCLS,
           handoff:report.handoff,
           largest:[...report.evidence.shifts]
             .sort((a,b)=>b.score-a.score).slice(0,8),
@@ -197,6 +202,14 @@ const viewports=[
               nativeShift:report.originalMagStageCLS,
               largest:report.evidence.shifts.slice(0,7),
               handoff:report.handoff}));
+        assert.ok(report.originalMagCanvasCLS<.008,
+          'R2126 actual WebGL framebuffer still resizes visibly after docking: '+
+            JSON.stringify({viewport:profile.name,
+              canvasShift:report.originalMagCanvasCLS,
+              handoff:report.handoff,
+              sources:report.evidence.shifts.filter(item=>
+                item.sources.some(source=>
+                  source.selector.includes('fx-crystal-organism-r326-canvas')))}));
         assert.ok(report.handoff.ownerCount===1 &&
           !report.handoff.quiet &&
           report.handoff.visibility==='visible',
@@ -213,6 +226,7 @@ const viewports=[
     JSON.stringify(reports.map(r=>({
       profile:r.profile.name,cls:r.totalCLS,
       originalMagStageCLS:r.originalMagStageCLS,
+      originalMagCanvasCLS:r.originalMagCanvasCLS,
       handoff:r.handoff,
       shifts:r.evidence.shifts.length,
       lateStyleCount:r.lateStyles.length
