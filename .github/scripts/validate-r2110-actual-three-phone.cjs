@@ -78,6 +78,7 @@ const frames=[
             sapphire:root.dataset.fxMagThreeSapphireR2115||'',
             sapphireScale:Number(root.dataset.fxMagThreeOpticScaleR2115||0),
             studioSweep:Number(root.dataset.fxMagThreeSoftboxSweepR2115||0),
+            cortexBounce:Number(root.dataset.fxMagThreeCortexBounceR2121||0),
             threeSource:[...document.scripts]
               .find(el=>el.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             skip:{width:box?.width||0,height:box?.height||0,
@@ -98,7 +99,7 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2119-smoked-titanium-optic'),
+        assert.ok(info.threeSource.includes('r2121-cortex-studio-bounce'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
           assert.ok(info.mobileThreeDistance>=7.7&&
@@ -127,13 +128,22 @@ const frames=[
           'A painted central cyan marble cannot substitute the real convex sapphire');
         assert.ok(info.sapphireScale>=1.15&&info.sapphireScale<=1.20,
           'The optical hardware must be optically legible relative to the four arms');
+        if(frame.second===4.40){
+          assert.ok(info.cortexBounce>.98,
+            'Previously black organic film needs real extra photographic key/fill at 4.4s: '+
+              JSON.stringify(info));
+        }
         if(frame.second===8.50){
           assert.ok(info.studioSweep>.95,
             'Actual Three.js metallic facet light choreography is missing from the optical hero frame');
+          assert.ok(info.cortexBounce<.01,
+            'Cortical fill light must not overexpose the final 3D sapphire identity');
         }
         if(frame.second===9.98){
           assert.ok(info.studioSweep<.01,
             'Studio lamps must return to their original pose before the permanent R326 MAG handoff');
+          assert.ok(info.cortexBounce<.01,
+            'R2121 real physical lights must settle before original R326 handoff');
         }
         assert.deepEqual(errors,[],'Three film runtime errors');
         results.push({frame,info});
