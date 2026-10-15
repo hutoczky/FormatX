@@ -72,6 +72,13 @@ const views=[
               &&Number(cs.opacity)>0,
             heroCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
             globalCTA:!!document.getElementById('hero-download'),
+            CTAcount:document.querySelectorAll('#hero-download').length,
+            CTAhref:document.getElementById('hero-download')?.getAttribute('href')||'',
+            CTAholder:!!document.querySelector(
+              '.fx-archive-final-cta-r2032 #hero-download'
+            ),
+            archiveCinema:root.dataset.fxArchiveCinema||'',
+            archiveScene:root.dataset.fxArchiveCinemaChapter||'',
             heroElement:!!document.getElementById('hero'),
             heroCopy:!!document.querySelector('#hero .hero-copy'),
             heroChildren:document.getElementById('hero')?.children.length||0,
@@ -144,11 +151,58 @@ const views=[
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
         assert.ok(info.pixelWidth>100&&info.pixelHeight>100,
           'Original 3D canvas has no usable WebGL backing buffer');
-        assert.ok(info.heroCTA,'The original hero download action is missing: '+JSON.stringify(info));
+        // The R1987 cinema moves the SINGLE original CTA (not a clone) to
+        // the real final paper folio. While its immersive archive is active,
+        // deliberately hiding .hero-copy is correct and expected.
+        assert.ok(info.globalCTA&&info.CTAcount===1&&
+          info.CTAhref==='/download/multiplatform',
+          'Original canonical CTA is missing, duplicated or changed: '+
+            JSON.stringify(info));
+        if(info.archiveCinema==='active'){
+          assert.ok(info.CTAholder&&!info.heroCTA&&
+            info.heroCopyStyle?.display==='none',
+            'Archive did not preserve exclusive scene/CTA final ownership: '+
+              JSON.stringify(info));
+        }else{
+          assert.ok(info.CTAholder||info.heroCTA,
+            'CTA must remain attached to its original location or actual final folio: '+
+              JSON.stringify(info));
+        }
         assert.ok(info.loader.includes('r2105=physical-sapphire-iris'),
           'Cached obsolete R326 shader was loaded: '+JSON.stringify(info));
+        // Accessibility transition actually DISPOSES of the exclusive
+        // archive and must restore the exact original CTA/hero display.
+        // This catches a genuine user-facing blank landing page.
+        await page.emulateMedia({reducedMotion:'reduce'});
+        await page.waitForFunction(()=>{
+          const root=document.documentElement;
+          const cta=document.querySelector('#hero .hero-actions #hero-download');
+          const copy=document.querySelector('#hero .hero-copy');
+          return root.dataset.fxArchiveCinema==='home'&&!!cta&&
+            copy&&getComputedStyle(copy).display!=='none'&&
+            getComputedStyle(copy).visibility!=='hidden';
+        },null,{timeout:15000});
+        const restored=await page.evaluate(()=>({
+          stage:document.documentElement.dataset.fxArchiveCinema,
+          CTAcount:document.querySelectorAll('#hero-download').length,
+          CTAhref:document.getElementById('hero-download')?.getAttribute('href')||'',
+          heroTextVisible:(()=>{
+            const copy=document.querySelector('#hero .hero-copy');
+            if(!copy)return false;
+            const cs=getComputedStyle(copy),r=copy.getBoundingClientRect();
+            return cs.display!=='none'&&cs.visibility==='visible'&&
+              Number(cs.opacity)>0&&r.width>30;
+          })()
+        }));
+        assert.equal(restored.CTAcount,1,'Original CTA became duplicated after archive handoff');
+        assert.equal(restored.CTAhref,'/download/multiplatform');
+        assert.ok(restored.heroTextVisible,'Original semantic hero never returned after archive disposal');
+        await page.screenshot({
+          path:OUT+'/'+view.name+'-semantic-hero-restored.png',
+          animations:'allow'
+        });
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
-        reports.push({view,info});
+        reports.push({view,info,restored});
         console.log('R2105_NATIVE_PHYSICAL_OPTICS_PASS',
           JSON.stringify({view:view.name,...info}));
       }finally{await context.close()}
