@@ -101,6 +101,8 @@ const views=[
             pupilTriangles:Number(root.dataset.fxNativeMagPupilTrianglesR2128||0),
             pupilElevation:Number(root.dataset.fxNativeMagPupilElevationR2128||0),
             pupilShader:root.dataset.fxNativeMagPupilShaderR2129||'',
+            sculptedPanels:root.dataset.fxNativeMagPanelsR2130||'',
+            sculptedTriangles:Number(root.dataset.fxNativeMagPanelTrianglesR2130||0),
             rails:root.dataset.fxNativeMagRailsR2107||'',
             railSections:Number(root.dataset.fxNativeMagRailSectionsR2108||0),
             railDetail:root.dataset.fxNativeMagRailDetailR2108||'',
@@ -151,6 +153,11 @@ const views=[
         assert.equal(info.pupilShader,
           'broad-physical-normal-silver-softbox-on-convex-sapphire',
           'R2129 must shade the physical pupil from actual curved normals');
+        assert.equal(info.sculptedPanels,
+          '8-physically-angled-metal-arm-faces',
+          'R2130 must sculpt eight genuine 3D metallic four-arm face normals');
+        assert.equal(info.sculptedTriangles,16,
+          'Each arm must have two true geometric metal panel faces');
         assert.equal(info.rails,'8-sculpted-front-surface-channels');
         /* Eight real superellipsoid-following titanium rails have two
            triangles PER section. Software GL's seven-section LOD is a
