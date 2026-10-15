@@ -2107,10 +2107,26 @@
          centimetres in scene-space and material parameters change only within
          subtle photographic ranges. This costs no extra draw calls. */
       const physicalImpulse=Math.min(1,this.interactionImpulse+this.interactionPress*.18+this.interactionSemantic*.12);
+      /* R2119: the genuine 3.5–5.5 second cortical subject used to read
+         as a dark mass, despite geometric detail. Rebalance EXISTING physical
+         front fill and key (no second stage, no fake CSS glow, no extra draw
+         pass). The broad C1-smoothed studio bounce is exactly zero at 8.5s
+         and the final 9.98s handoff, retaining the photographed identity. */
+      const photoSecond=clamp(r)*10;
+      const organicFill=smooth((photoSecond-3.00)/.60)*
+        (1-smooth((photoSecond-5.55)/1.12));
+      if(this.frontFillLight){
+        this.frontFillLight.intensity=
+          (this.mobileProfile?1.46:1.82)+
+          organicFill*(this.mobileProfile?.91:.54);
+      }
+      document.documentElement.dataset.fxMagThreeOrganicLightR2119=
+        organicFill.toFixed(3);
       if(this.keyLight){
         this.keyLight.position.x=-3.4+this.interactionX*.22;
         this.keyLight.position.y=4.9-this.interactionY*.14;
-        this.keyLight.intensity=2.86+physicalImpulse*.12;
+        this.keyLight.intensity=2.86+physicalImpulse*.12+
+          organicFill*(this.mobileProfile?.28:.21);
       }
       if(this.rimLight){
         this.rimLight.position.x=3.4-this.interactionX*.16;
