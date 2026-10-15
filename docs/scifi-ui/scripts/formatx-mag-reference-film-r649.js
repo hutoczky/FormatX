@@ -269,7 +269,8 @@
       ctx.save();ctx.rotate(arm*Math.PI*.5);
       const even=(arm%2===0);
       magArmPath(ctx,S);
-      const slab=ctx.createLinearGradient(-S*.37,-S*.72,S*.38,-S*.30);
+      const slab=ctx.createLinearGradient(-S*.37+S*.082*lightSweep,-S*.72,
+        S*.38+S*.082*lightSweep,-S*.30);
       slab.addColorStop(0,even?'#91a7a7':'#4d666b');
       slab.addColorStop(.17,even?'#425e65':'#294450');
       slab.addColorStop(.49,'#132833');
@@ -284,7 +285,8 @@
       ctx.lineTo(-S*.040,-S*.33);
       ctx.lineTo(-S*.16,-S*.25);
       ctx.closePath();
-      const bevel=ctx.createLinearGradient(-S*.27,-S*.61,S*.01,-S*.61);
+      const bevel=ctx.createLinearGradient(-S*.27+S*.035*lightSweep,-S*.61,
+        S*.01+S*.035*lightSweep,-S*.61);
       bevel.addColorStop(0,'rgba(204,224,221,.38)');
       bevel.addColorStop(.60,'rgba(70,115,123,.18)');
       bevel.addColorStop(1,'rgba(8,21,31,.13)');
@@ -440,7 +442,8 @@
 
     // Deep obsidian aperture, offset refraction and asymmetrical photometric
     // reflection; the center should read as multi-element OPTICS, not a sphere.
-    const pupil=ctx.createRadialGradient(-rx*.17,-ry*.22,S*.006,0,0,rx*.66);
+    const pupil=ctx.createRadialGradient(-rx*(.17+.015*lightSweep),
+      -ry*.22,S*.006,0,0,rx*.66);
     pupil.addColorStop(0,'#658c91');
     pupil.addColorStop(.12,'#355c66');
     pupil.addColorStop(.36,'#163e4d');
@@ -460,14 +463,28 @@
     ctx.fillStyle=refracted;ctx.fill();
 
     ctx.save();
-    ctx.translate(-rx*.20,-ry*.31);
-    ctx.rotate(-.35);
+    ctx.translate(-rx*(.20+.045*lightSweep),-ry*(.31+.017*lightSweep));
+    ctx.rotate(-.35+.08*lightSweep);
     ctx.beginPath();ctx.ellipse(0,0,rx*.19,ry*.075,0,0,TAU);
     ctx.fillStyle='rgba(237,250,238,.59)';ctx.fill();
     ctx.restore();
     ctx.beginPath();ctx.arc(rx*.22,ry*.24,rx*.13,Math.PI*.08,Math.PI*.64);
     ctx.strokeStyle='rgba(115,184,193,'+(.13+pulse*.08)+')';
     ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
+
+    // R2111: bounded photographic lens softbox moves with the original
+    // animated material light, not a separate overlay or canvas.
+    ctx.save();
+    ctx.translate(rx*(.19+.13*lightSweep),-ry*(.19-.06*lightSweep));
+    ctx.rotate(.48);
+    const movingLensSoftbox=ctx.createLinearGradient(-rx*.19,0,rx*.19,0);
+    movingLensSoftbox.addColorStop(0,'rgba(170,217,216,0)');
+    movingLensSoftbox.addColorStop(.38,'rgba(202,230,224,.08)');
+    movingLensSoftbox.addColorStop(.58,'rgba(236,246,233,.14)');
+    movingLensSoftbox.addColorStop(1,'rgba(145,204,207,0)');
+    ctx.beginPath();ctx.ellipse(0,0,rx*.17,ry*.037,0,0,TAU);
+    ctx.fillStyle=movingLensSoftbox;ctx.fill();
+    ctx.restore();
 
     // One low-energy optical heartbeat, limited to the lens center.
     ctx.beginPath();ctx.arc(0,0,rx*.26,0,TAU);
