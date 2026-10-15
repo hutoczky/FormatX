@@ -71,6 +71,25 @@ const views=[
             visible:cs?.visibility==='visible'&&cs?.display!=='none'
               &&Number(cs.opacity)>0,
             heroCTA:!!document.querySelector('#hero .hero-actions #hero-download'),
+            globalCTA:!!document.getElementById('hero-download'),
+            heroElement:!!document.getElementById('hero'),
+            heroCopy:!!document.querySelector('#hero .hero-copy'),
+            heroChildren:document.getElementById('hero')?.children.length||0,
+            heading:document.querySelector('#hero-title')?.textContent?.trim().slice(0,80)||'',
+            heroClass:document.getElementById('hero')?.className||'',
+            heroOpacity:getComputedStyle(document.getElementById('hero')||document.body).opacity,
+            heroCopyStyle:(()=>{
+              const el=document.querySelector('#hero .hero-copy');
+              if(!el)return null;
+              const style=getComputedStyle(el),rect=el.getBoundingClientRect();
+              return {display:style.display,visibility:style.visibility,
+                opacity:style.opacity,transform:style.transform,
+                width:Math.round(rect.width),height:Math.round(rect.height)};
+            })(),
+            rootIntroDataset:Object.fromEntries(
+              Object.entries(root.dataset).filter(([key])=>
+                /intro|birth|hero|preloader|handoff/i.test(key)
+              ).slice(0,35)),
             loader:document.querySelector('script[src*="formatx-crystal-organism-r326.js"]')
               ?.src||''
           };
@@ -89,7 +108,7 @@ const views=[
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
         assert.ok(info.pixelWidth>100&&info.pixelHeight>100,
           'Original 3D canvas has no usable WebGL backing buffer');
-        assert.ok(info.heroCTA,'The original hero download action is missing');
+        assert.ok(info.heroCTA,'The original hero download action is missing: '+JSON.stringify(info));
         assert.ok(info.loader.includes('r2105=physical-sapphire-iris'),
           'Cached obsolete R326 shader was loaded: '+JSON.stringify(info));
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
