@@ -72,6 +72,10 @@ const frames=[
             collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
             optics:root.dataset.fxMagThreeOpticsR2113||'',
             facets:root.dataset.fxMagThreeFacetsR2114||'',
+            studio:root.dataset.fxMagThreeStudioR2115||'',
+            sapphire:root.dataset.fxMagThreeSapphireR2115||'',
+            sapphireScale:Number(root.dataset.fxMagThreeOpticScaleR2115||0),
+            studioSweep:Number(root.dataset.fxMagThreeSoftboxSweepR2115||0),
             threeSource:[...document.scripts]
               .find(el=>el.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             skip:{width:box?.width||0,height:box?.height||0,
@@ -92,7 +96,7 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2114-physical-eight-facet-three-metal'),
+        assert.ok(info.threeSource.includes('r2115-studio-sweep-deep-sapphire'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
           assert.ok(info.mobileThreeDistance>=7.7&&
@@ -111,6 +115,20 @@ const frames=[
           'Optic provenance must be the real new 3D mesh, not a 2D illustration');
         assert.equal(info.facets,'eight-truly-slanted-machined-3d-surfaces',
           'The cinematic shell must have eight genuine beveled arm panels, not a flat logo');
+        assert.equal(info.studio,'one-webgl-physical-softboxes-rear-air-volume',
+          'The entire first-visit film must retain the physical light stage in its original WebGL scene');
+        assert.equal(info.sapphire,'real-convex-optical-mesh-with-eight-iris-blades',
+          'A painted central cyan marble cannot substitute the real convex sapphire');
+        assert.ok(info.sapphireScale>=1.15&&info.sapphireScale<=1.20,
+          'The optical hardware must be optically legible relative to the four arms');
+        if(frame.second===8.50){
+          assert.ok(info.studioSweep>.95,
+            'Actual Three.js metallic facet light choreography is missing from the optical hero frame');
+        }
+        if(frame.second===9.98){
+          assert.ok(info.studioSweep<.01,
+            'Studio lamps must return to their original pose before the permanent R326 MAG handoff');
+        }
         assert.deepEqual(errors,[],'Three film runtime errors');
         results.push({frame,info});
         console.log('R2110_REAL_THREE_FILM_PASS',
