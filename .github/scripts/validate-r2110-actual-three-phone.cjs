@@ -22,6 +22,7 @@ assert.ok(
 const frames=[
   {name:'phone-390-cortex',width:390,height:844,second:4.40},
   {name:'phone-390-optic',width:390,height:844,second:8.50},
+  {name:'phone-360-optic',width:360,height:780,second:8.50},
   {name:'phone-390-handoff',width:390,height:844,second:9.98},
   {name:'desktop-1440-optic',width:1440,height:900,second:8.50}
 ];
@@ -90,6 +91,7 @@ const frames=[
             sapphireScale:Number(root.dataset.fxMagThreeOpticScaleR2115||0),
             studioSweep:Number(root.dataset.fxMagThreeSoftboxSweepR2115||0),
             cortexBounce:Number(root.dataset.fxMagThreeCortexBounceR2121||0),
+            cameraDolly:Number(root.dataset.fxMagThreeDollyR2123||0),
             threeSource:[...document.scripts]
               .find(el=>el.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
             skip:{width:box?.width||0,height:box?.height||0,
@@ -110,7 +112,7 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2122-silver-titanium-studio-cortex'),
+        assert.ok(info.threeSource.includes('r2123-physical-camera-silver-studio'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
           assert.ok(info.mobileThreeDistance>=7.7&&
@@ -140,17 +142,23 @@ const frames=[
         assert.ok(info.sapphireScale>=1.15&&info.sapphireScale<=1.20,
           'The optical hardware must be optically legible relative to the four arms');
         if(frame.second===4.40){
+          assert.ok(info.cameraDolly>.98,
+            'The 4.4s original Three mobile MAG must show its physically camera-fitted enlarged machining');
           assert.ok(info.cortexBounce>.98,
             'Previously black organic film needs real extra photographic key/fill at 4.4s: '+
               JSON.stringify(info));
         }
         if(frame.second===8.50){
+          if(mobile)assert.ok(info.cameraDolly>.98,
+            'At 8.5s the real original Four Point optical chamber must have the closer 3D camera view');
           assert.ok(info.studioSweep>.95,
             'Actual Three.js metallic facet light choreography is missing from the optical hero frame');
           assert.ok(info.cortexBounce<.01,
             'Cortical fill light must not overexpose the final 3D sapphire identity');
         }
         if(frame.second===9.98){
+          assert.ok(info.cameraDolly<.01,
+            'Before 9.98s camera must return smoothly to original permanent R326 MAG handoff');
           assert.ok(info.studioSweep<.01,
             'Studio lamps must return to their original pose before the permanent R326 MAG handoff');
           assert.ok(info.cortexBounce<.01,
