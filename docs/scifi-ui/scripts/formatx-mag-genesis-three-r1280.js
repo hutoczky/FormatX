@@ -1893,8 +1893,16 @@
         });
         this.mechIrisMaterial.opacity=machined*.84;
         this.mechSapphireMaterialR2115.opacity=.84*machined;
+        /* R2125: the final real Eight-Shutter assembly must become
+           mechanically still BEFORE the R326 handoff. The previous
+           perpetual .014*sin() rotation jumped to a different stationary
+           iris orientation exactly as the movie mask disappeared. Smoothly
+           damp the same authored movement; no extra mechanical meshes. */
+        const shutterSettle=1-smooth((t-8.88)/.78);
         this.mechIris.rotation.z=.17*(1-smooth((t-7.28)/1.41))+
-          .014*Math.sin(time*.00015);
+          .014*Math.sin(time*.00015)*shutterSettle;
+        document.documentElement.dataset.fxMagThreeIrisAngleR2125=
+          this.mechIris.rotation.z.toFixed(5);
         this.mechOpticalLight.intensity=.32*machined;
       }
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
