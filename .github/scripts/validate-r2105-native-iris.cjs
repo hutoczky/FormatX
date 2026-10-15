@@ -185,7 +185,8 @@ const views=[
           .includes('id="hero-download"'),
           'Production source has lost the original multiplatform CTA');
         assert.ok(info.loader.includes('r2105=physical-sapphire-iris') &&
-          info.loader.includes('r2117=physical-four-arm-facet-lights'),
+          info.loader.includes('r2117=physical-four-arm-facet-lights') &&
+          info.loader.includes('r2130=extruded-optical-iris-silver-panels'),
           'Cached obsolete R326 shader was loaded instead of the actual R2117 material: '+
             JSON.stringify(info));
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
