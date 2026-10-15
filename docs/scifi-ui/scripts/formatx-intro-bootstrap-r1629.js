@@ -21,7 +21,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261014-r2068-measured-studio-genesis';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261014-r2069-visible-native-genesis';
 let retryCount=0,retryTimer=0;
 let introCompleted=false;
 document.addEventListener('formatx:magbirthcomplete',()=>{

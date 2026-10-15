@@ -2270,14 +2270,28 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 html[data-fx-mag-birth-live="active"] body>#main-content{
   visibility:hidden!important;
 }
-html[data-fx-native-genesis-r2064] body>#main-content{
+/* The native canvas is still inside main. The retired intro's opacity:0
+   suppresses every descendant, including a successfully drawn WebGL frame.
+   Keep other content hidden, but let the native subject own its visible layer. */
+html:root:root:root[data-fx-native-genesis-r2064] body>#main-content{
   position:relative!important;
   z-index:2147483001!important;
   pointer-events:none!important;
   visibility:hidden!important;
+  opacity:1!important;
   transform:none!important;
   contain:none!important;
   filter:none!important;
+}
+/* Keep the original page boxes in place while the shared canvas is above the
+   studio shell. Hiding only main's visibility lets legacy explicitly visible
+   cards and hero controls paint over the cinematic subject. */
+html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #main-content>:not(#hero),
+html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-grid>:not(.hero-space),
+html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-space>:not(.fx-crystal-organism-r326-stage){
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
 }
 html[data-fx-native-genesis-r2064] body #hero,
 html[data-fx-native-genesis-r2064] body #hero .hero-grid,
@@ -2318,6 +2332,7 @@ html[data-fx-native-genesis-r2064] body #hero .fx-crystal-organism-r326-stage ca
 }
 .fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) .fxb-copy{
   display:block!important;
+  visibility:visible!important;
   position:absolute!important;
   inset:auto!important;
   left:5vw!important;
@@ -2330,11 +2345,15 @@ html[data-fx-native-genesis-r2064] body #hero .fx-crystal-organism-r326-stage ca
   z-index:40!important;
 }
 .fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) .fxb-title{
+  display:block!important;
+  visibility:visible!important;
   color:#d8e8f0!important;
   font:500 clamp(24px,4.2vw,64px)/1 system-ui,sans-serif!important;
   letter-spacing:-.055em!important;
 }
 .fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) .fxb-subtitle{
+  display:block!important;
+  visibility:visible!important;
   color:#8ca6b8!important;
 }
 .fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{

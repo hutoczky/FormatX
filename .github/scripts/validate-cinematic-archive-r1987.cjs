@@ -783,7 +783,8 @@ async function fallback(browser){
   await ctx.close();
 }
 (async()=>{
-  const browser=await chromium.launch({headless:true,args:[
+  const executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH||process.env.CHROME_BIN;
+  const browser=await chromium.launch({headless:true,...(executablePath?{executablePath}:{}),args:[
     '--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
     '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
   ]});

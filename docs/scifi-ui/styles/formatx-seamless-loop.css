@@ -5,6 +5,7 @@
    browser cannot pull a valid landing back to a chapter boundary. */
 html[data-fx-infinite-controller='seamless-v7'],
 html[data-fx-infinite-controller='seamless-v7'] body {
+  scroll-behavior: auto !important;
   scroll-snap-type: none !important;
   overflow-anchor: none !important;
 }

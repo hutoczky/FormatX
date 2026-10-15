@@ -23,7 +23,7 @@ const LANGUAGE_PAGE_PATHS = new Set([
 ]);
 const CONTINUOUS_SCROLL_ASSET = [
   '  <link rel="stylesheet" data-fx-continuous-scroll-style="true" href="/scifi-ui/styles/formatx-continuous-scroll.css?v=20260808-native-continuous-2">',
-  '  <link rel="stylesheet" data-fx-seamless-loop-style="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" media="print" href="/scifi-ui/styles/formatx-seamless-loop.css?v=20261013-r2051-post-fcp-delivery">',
+  '  <link rel="stylesheet" data-fx-seamless-loop-style="true" data-fx-r487-deferred-style="true" data-fx-r487-media="all" media="print" href="/scifi-ui/styles/formatx-seamless-loop.css?v=20261014-r2069-visible-native-genesis">',
   '  <script defer data-fx-seamless-scroll-runtime="true" src="/scifi-ui/scripts/formatx-infinite-scroll.js?v=20260925-r1744-heart-window-capture"></script>',
 ].join('\n') + '\n';
 const MOBILE_APEX_COMPOSITION_ASSET = '  <link rel="stylesheet" data-fx-mobile-apex-composition="true" href="/scifi-ui/styles/formatx-mobile-apex-composition.css?v=20260808-mobile-apex-live-2">\n';

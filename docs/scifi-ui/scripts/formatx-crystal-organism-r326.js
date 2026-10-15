@@ -858,19 +858,18 @@
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R2045: the original canvas is also subject to older !important opacity
-       overrides. They outrank CSS and WAAPI animations, leaving MAG visually
-       frozen even while its registered --fx-mag-life-opacity animates.
-       Bind the SAME original canvas's inline important opacity to that
-       compositor-only numeric custom property. Do this once at creation,
-       never in a JS RAF; preserve system reduced-motion changes. */
+    /* R2069: retain the existing compositor heartbeat without the historical
+       mobile dimming. The registered timeline ranges from .94 to 1; its native
+       canvas coverage therefore stays between .985 and 1. Reduced motion uses
+       full coverage. The same canvas, timeline and pause governor remain the
+       owners; this binding is updated only when the motion preference changes. */
     const mobileBreathPreference=mobile?matchMedia('(prefers-reduced-motion: reduce)'):null;
     const syncMobileBreathOpacity=()=>{
       if(!mobileBreathPreference)return;
       if(mobileBreathPreference.matches){
-        canvas.style.removeProperty('opacity');
+        canvas.style.setProperty('opacity','1','important');
       }else{
-        canvas.style.setProperty('opacity','var(--fx-mag-life-opacity,.965)','important');
+        canvas.style.setProperty('opacity','calc(.75 + var(--fx-mag-life-opacity,1) * .25)','important');
       }
     };
     syncMobileBreathOpacity();

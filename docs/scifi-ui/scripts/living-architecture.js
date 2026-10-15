@@ -105,7 +105,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20261014-r2068-measured-studio-genesis';
+      script.src = './scripts/igloo-parity.js?v=20261014-r2069-visible-native-genesis';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);

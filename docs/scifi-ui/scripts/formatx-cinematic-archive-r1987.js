@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2068-measured-studio-genesis';
+  const VERSION='cinematic-archive-r2069-visible-native-genesis';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
