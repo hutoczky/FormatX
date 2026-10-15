@@ -7,6 +7,12 @@ on:
     paths:
       - '.github/scripts/diagnose-layout-shift-r2120.cjs'
       - '.github/workflows/diagnose-layout-shift-r2120.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/scripts/diagnose-layout-shift-r2120.cjs'
+      - '.github/workflows/diagnose-layout-shift-r2120.yml'
   workflow_dispatch:
 
 permissions:
