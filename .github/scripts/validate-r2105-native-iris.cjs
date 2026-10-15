@@ -23,8 +23,20 @@ assert.ok(shader.includes('float physicalRail=step(5.81,vFacet)*(1.0-step(5.91,v
 assert.ok(shader.includes('R2117: physically coherent four-arm metal shoulders') &&
   shader.includes('float cutShoulder=pow(sat(dot(n,normalize(vec3(-.38,.62,.69)))),3.0)') &&
   shader.includes('c+=vec3(.64,.69,.63)*cutShoulder*') &&
-  shader.includes('R2116: the real depth-tested rails'),
+  shader.includes('R2116: the real depth-tested rails') &&
+  shader.includes('R2118: the true FOUR solid arms') &&
+  shader.includes('float machinedFace=forgedArmSpan*smoothstep(.35,.76,raisedFace);') &&
+  shader.includes('c+=vec3(.73,.77,.71)*machinedFace*axisShoulder*'),
   'The latest permanent 3D MAG must use broad physically lit arms and separate titanium/sapphire, not old flat cyan shading');
+for(const loaderPath of [
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+]){
+  const loader=fs.readFileSync(loaderPath,'utf8');
+  assert.ok(loader.includes('&r2118=forged-silver-arm-relief'),
+    'Permanent MAG loader still uses the old flat four-point material: '+loaderPath);
+}
 const views=[
   {name:'desktop-1440',width:1440,height:900,mobile:false,scale:1},
   {name:'phone-390',width:390,height:844,mobile:true,scale:2},
