@@ -173,7 +173,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2115-premium-contained-no-dna-overlap'),
+        assert.ok(info.loader.includes('r2122-articulated-titanium-iris'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
