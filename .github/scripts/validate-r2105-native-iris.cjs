@@ -230,6 +230,46 @@ const views=[
           path:OUT+'/'+view.name+'-semantic-hero-restored.png',
           animations:'allow'
         });
+        /* R2115: R326 "ready" and canvas DOM dimensions do not prove it
+           paints a visible MAG! Capture the actual WebGL canvas pixels on
+           the returned semantic hero after the original film and archive.
+           Do not substitute an image, CSS decoration or second renderer. */
+        const realCanvas=page.locator(
+          '#hero .fx-crystal-organism-r326-canvas');
+        await realCanvas.scrollIntoViewIfNeeded({timeout:12000});
+        await page.waitForTimeout(500);
+        const nativeCanvasPixels=await realCanvas.screenshot({
+          path:OUT+'/'+view.name+'-R2115-original-native-webgl-canvas.png',
+          animations:'allow',timeout:15000
+        });
+        const nativeGeometry=await page.evaluate(()=>{
+          const canvas=document.querySelector(
+            '#hero .fx-crystal-organism-r326-canvas');
+          const stage=canvas?.parentElement;
+          const r=canvas?.getBoundingClientRect();
+          const s=canvas?getComputedStyle(canvas):null;
+          const parent=stage?getComputedStyle(stage):null;
+          return {
+            canvas:{x:r?.x,y:r?.y,width:r?.width,height:r?.height,
+              display:s?.display,opacity:s?.opacity,visibility:s?.visibility,
+              filter:s?.filter,transform:s?.transform,zIndex:s?.zIndex},
+            stage:{display:parent?.display,opacity:parent?.opacity,
+              visibility:parent?.visibility,zIndex:parent?.zIndex},
+            window:{scrollY,innerWidth,innerHeight},
+            viewportCanvasVisible:!!r&&r.bottom>0&&r.top<innerHeight,
+            archive:document.documentElement.dataset.fxArchiveCinema||'',
+            nativePaint:document.documentElement.dataset.fxCoreReal3d||'',
+            screenshotBytes:0
+          };
+        });
+        nativeGeometry.screenshotBytes=nativeCanvasPixels.length;
+        fs.writeFileSync(OUT+'/'+view.name+'-R2115-canvas-geometry.json',
+          JSON.stringify(nativeGeometry,null,2)+'\n');
+        console.log('R2115_REAL_NATIVE_CANVAS_VISUAL',
+          JSON.stringify({view:view.name,...nativeGeometry}));
+        assert.ok(nativeCanvasPixels.length>4000&&
+          nativeGeometry.viewportCanvasVisible,
+          'Native 3D MAG viewport canvas was empty or off-screen');
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
         reports.push({view,info,restored});
         console.log('R2105_NATIVE_PHYSICAL_OPTICS_PASS',
