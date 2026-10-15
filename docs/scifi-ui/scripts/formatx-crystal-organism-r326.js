@@ -942,6 +942,34 @@
         }
       }
     }
+    /* R2130: the full four-point mineral previously looked like one
+       smooth blue-green stretched balloon in the REAL 390px framebuffer,
+       even though its iris was genuinely three-dimensional. Eight actual
+       directional metal facets (two per arm) now overlay the analytic
+       curved mineral, but remain UNDER the existing narrow raised rails.
+       The left and right halves have different actual tilted face normals.
+       All 16 triangles live in the original ONE native GPU draw call. */
+    const panelFirst=facets.length;
+    for(let arm=0;arm<4;arm++){
+      const a=arm*Math.PI/2;
+      const dx=Math.cos(a),dy=Math.sin(a);
+      const tx=-dy,ty=dx;
+      const panelPoint=(reach,offset)=>{
+        const x=dx*reach+tx*offset;
+        const y=dy*reach+ty*offset;
+        return [x,y,frontZ(x,y)+.011];
+      };
+      for(const side of [-1,1]){
+        const tip=panelPoint(.765,side*.011);
+        const shoulder=panelPoint(.525,side*.171);
+        const base=panelPoint(.305,side*.116);
+        const inner=panelPoint(.430,side*.014);
+        armorQuad(tip,shoulder,base,inner,side<0?5.94:5.98);
+      }
+    }
+    root.dataset.fxNativeMagPanelsR2130='8-physically-angled-metal-arm-faces';
+    root.dataset.fxNativeMagPanelTrianglesR2130=
+      String((facets.length-panelFirst)/3);
     root.dataset.fxNativeMagRailsR2107='8-sculpted-front-surface-channels';
     /* R2108: report the actual adaptive real-mesh tessellation level.
        SwiftShader/software WebGL intentionally uses seven rail sections,
@@ -1744,6 +1772,21 @@
           vec3(.012,.042,.065)*(.5+.5*sin(uTime*.0019))*.08;
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,channelTitanium,physicalRail*.96);
+        /* R2130: true 3D physical arm panels shade as cut silver on one
+           side and forged recessed titanium on the other, not a uniform
+           procedural diffuse gradient across the stretched mineral. */
+        float litPanel=step(5.92,vFacet)*(1.0-step(5.96,vFacet));
+        float darkPanel=step(5.96,vFacet)*(1.0-step(6.00,vFacet));
+        float panelSoftbox=pow(sat(dot(n,
+          normalize(vec3(-.44,.66,.61)))),4.0);
+        vec3 cutSilver=vec3(.037,.054,.057)+
+          vec3(.36,.41,.36)*(.16+.40*key+.29*softboxA)+
+          vec3(.37,.43,.40)*panelSoftbox*.23;
+        vec3 shadowTitanium=vec3(.012,.027,.034)+
+          vec3(.15,.19,.19)*(.19+.45*fill+.18*softboxB)+
+          vec3(.035,.076,.085)*fresnel*.12;
+        c=mix(c,cutSilver,litPanel*.94);
+        c=mix(c,shadowTitanium,darkPanel*.95);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
         /* R2129: the REAL raised pupil (facet 6.47) has a separate
