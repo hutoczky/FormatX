@@ -1953,14 +1953,26 @@
          handoff; the 3D geometry and 10s timing stay intact. */
       const sweep=smooth((t-2.9)/3.25)*
         (1-smooth((t-9.18)/.52));
+      /* R2121: physical bounce light on the actual 3.5–5.5 second
+         cortical/forged-core reveal. Real phone screenshots previously
+         rendered the organ as an unlit dark blob despite rich native
+         geometry. Add no lights, canvases or draw passes: modulate the
+         EXISTING traveling key and fill with a bounded C1 film envelope.
+         The bounce vanishes well before the 8.5s optical identity and the
+         9.98s native permanent-MAG handoff. */
+      const cortexBounce=smooth((t-3.0)/.60)*
+        (1-smooth((t-5.48)/1.15));
+      document.documentElement.dataset.fxMagThreeCortexBounceR2121=
+        cortexBounce.toFixed(3);
       if(this.studioKeyR2115){
         this.studioKeyR2115.position.x=-3.8+1.15*sweep;
         this.studioKeyR2115.position.y=5.4-.55*sweep;
-        this.studioKeyR2115.intensity=1.62+.46*sweep;
+        this.studioKeyR2115.intensity=1.62+.46*sweep+.23*cortexBounce;
       }
       if(this.studioFillR2115){
         this.studioFillR2115.position.x=4.4-1.05*sweep;
-        this.studioFillR2115.intensity=.42+.21*sweep;
+        this.studioFillR2115.intensity=.42+.21*sweep+
+          (this.mobileRender?.68:.48)*cortexBounce;
       }
       if(this.studioRimR2115){
         this.studioRimR2115.position.y=-1.9+.80*sweep;
