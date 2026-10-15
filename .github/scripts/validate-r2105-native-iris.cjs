@@ -8,6 +8,13 @@ const BASE=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT='artifacts/r2105-native-physical-optics';
 fs.mkdirSync(OUT,{recursive:true});
+/* The unchanged original download CTA may be resolved to the current signed
+   release artifact by the ordinary download owner at runtime. Validate the
+   exact first-party release repository rather than falsely requiring the
+   initial /download/multiplatform path after hydration. */
+const validDownloadHref=href=>
+  href==='/download/multiplatform' ||
+  /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/v[0-9]+\/FormatX-Suite-Pro-V[0-9]+\.zip$/.test(href);
 const views=[
   {name:'desktop-1440',width:1440,height:900,mobile:false,scale:1},
   {name:'phone-390',width:390,height:844,mobile:true,scale:2},
@@ -155,7 +162,7 @@ const views=[
         // the real final paper folio. While its immersive archive is active,
         // deliberately hiding .hero-copy is correct and expected.
         assert.ok(info.globalCTA&&info.CTAcount===1&&
-          info.CTAhref==='/download/multiplatform',
+          validDownloadHref(info.CTAhref),
           'Original canonical CTA is missing, duplicated or changed: '+
             JSON.stringify(info));
         if(info.archiveCinema==='active'){
@@ -195,7 +202,7 @@ const views=[
           })()
         }));
         assert.equal(restored.CTAcount,1,'Original CTA became duplicated after archive handoff');
-        assert.equal(restored.CTAhref,'/download/multiplatform');
+        assert.ok(validDownloadHref(restored.CTAhref), 'Restored CTA no longer links to official FormatX releases: '+JSON.stringify(restored));
         assert.ok(restored.heroTextVisible,'Original semantic hero never returned after archive disposal');
         await page.screenshot({
           path:OUT+'/'+view.name+'-semantic-hero-restored.png',
