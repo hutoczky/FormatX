@@ -84,6 +84,7 @@
       this.world.add(this.dnaGroup,this.organicGroup,this.cellGroup,this.tentacleGroup,this.mechanicalGroup,this.coreGroup);
 
       this.makeLights();
+      this.makeStudioAtmosphereR2115();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
@@ -103,12 +104,15 @@
       const key=new T.DirectionalLight(0xe7f2ef,1.62);
       key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
+      this.studioKeyR2115=key;
       const fill=new T.DirectionalLight(0x9fb9b8,.42);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
+      this.studioFillR2115=fill;
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
+      this.studioRimR2115=rim;
       const bioticFill=new T.PointLight(0x385866,5.8,11,2);
       bioticFill.position.set(-2.8,-.4,3.4);
       this.scene.add(bioticFill);
@@ -118,6 +122,39 @@
       this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
       this.mechLight.position.set(-2.6,3.0,4.4);
       this.scene.add(this.mechLight);
+    }
+
+    /* R2115 photographic depth without a second visible canvas or raster
+       replacement for the 3D MAG. One 128px offscreen texture creates only
+       atmospheric scatter on the REAR plane. All physical object facets,
+       sapphire optics and moving key/fill/rim are actual Three.js meshes and
+       lights in the original scene/WebGL pass. */
+    makeStudioAtmosphereR2115(){
+      const T=this.THREE;
+      const canvas=document.createElement('canvas');
+      canvas.width=128;canvas.height=128;
+      const ctx=canvas.getContext('2d');
+      const glow=ctx.createRadialGradient(59,55,2,65,65,64);
+      glow.addColorStop(0,'rgba(60,104,112,.37)');
+      glow.addColorStop(.28,'rgba(26,65,80,.24)');
+      glow.addColorStop(.64,'rgba(10,36,50,.12)');
+      glow.addColorStop(1,'rgba(2,7,11,0)');
+      ctx.fillStyle=glow;
+      ctx.fillRect(0,0,128,128);
+      this.studioAtmosphereTextureR2115=new T.CanvasTexture(canvas);
+      this.studioAtmosphereTextureR2115.colorSpace=T.SRGBColorSpace;
+      const material=new T.MeshBasicMaterial({
+        map:this.studioAtmosphereTextureR2115,
+        transparent:true,opacity:.58,depthWrite:false,depthTest:true,
+        blending:T.NormalBlending,fog:false,toneMapped:false
+      });
+      this.studioAtmosphereR2115=new T.Mesh(
+        new T.PlaneGeometry(6.6,6.0),material
+      );
+      this.studioAtmosphereR2115.position.set(0,0,-2.8);
+      this.scene.add(this.studioAtmosphereR2115);
+      document.documentElement.dataset.fxMagThreeStudioR2115=
+        'one-webgl-physical-softboxes-rear-air-volume';
     }
 
     makeParticles(){
@@ -1360,6 +1397,7 @@
          titanium shutter/optic architecture. These THREE meshes sit in
          the SAME scene and renderer, and all fit within the four points. */
       this.mechOptics=new T.Group();
+      this.mechOptics.scale.setScalar(1.17);
       this.mechanicalGroup.add(this.mechOptics);
       this.mechOpticMaterials=[];
       this.mechOpticCollars=[];
@@ -1380,6 +1418,24 @@
         this.mechOpticMaterials.push(material);
         this.mechOpticCollars.push(mesh);
       }
+      /* A shallow physical convex sapphire element lies behind the blades
+         while its center rises optically above them, never as a painted
+         marble overlay. Low-segment geometry keeps mobile GPU cost bounded. */
+      this.mechSapphireMaterialR2115=new T.MeshPhysicalMaterial({
+        color:0x234b58,metalness:.08,roughness:.10,
+        clearcoat:1,clearcoatRoughness:.05,ior:1.48,
+        transmission:.16,thickness:.14,
+        emissive:0x061b25,emissiveIntensity:.08,
+        envMapIntensity:1.35,transparent:true,opacity:0,
+        depthWrite:false
+      });
+      this.mechSapphireR2115=new T.Mesh(
+        new T.SphereGeometry(.112,this.mobileRender?18:26,12),
+        this.mechSapphireMaterialR2115
+      );
+      this.mechSapphireR2115.scale.z=.24;
+      this.mechSapphireR2115.position.set(0,0,.529);
+      this.mechOptics.add(this.mechSapphireR2115);
       this.mechIris=new T.Group();
       this.mechIris.position.z=.535;
       this.mechOptics.add(this.mechIris);
@@ -1412,6 +1468,10 @@
         String(this.mechIris.children.filter(child=>child.isMesh).length);
       document.documentElement.dataset.fxMagThreeCollarsR2113=
         String(this.mechOpticCollars.length);
+      document.documentElement.dataset.fxMagThreeSapphireR2115=
+        'real-convex-optical-mesh-with-eight-iris-blades';
+      document.documentElement.dataset.fxMagThreeOpticScaleR2115=
+        this.mechOptics.scale.x.toFixed(2);
 
       this.mechanicalGroup.scale.setScalar(.001);
     }
@@ -1746,6 +1806,7 @@
           collar.material.opacity=machined*([.91,.74,.49][index]);
         });
         this.mechIrisMaterial.opacity=machined*.84;
+        this.mechSapphireMaterialR2115.opacity=.84*machined;
         this.mechIris.rotation.z=.17*(1-smooth((t-7.28)/1.41))+
           .014*Math.sin(time*.00015);
         this.mechOpticalLight.intensity=.48*machined;
@@ -1825,6 +1886,30 @@
     render(r,time){
       if(this.disposed)return;
       const t=clamp(r)*10;
+      /* R2115 one-take photographic light choreography: move the existing
+         real lights across the physical facets, not HTML glow. The C1
+         envelope returns to its original pose before the permanent MAG
+         handoff; the 3D geometry and 10s timing stay intact. */
+      const sweep=smooth((t-2.9)/3.25)*
+        (1-smooth((t-9.18)/.52));
+      if(this.studioKeyR2115){
+        this.studioKeyR2115.position.x=-3.8+1.15*sweep;
+        this.studioKeyR2115.position.y=5.4-.55*sweep;
+        this.studioKeyR2115.intensity=1.62+.46*sweep;
+      }
+      if(this.studioFillR2115){
+        this.studioFillR2115.position.x=4.4-1.05*sweep;
+        this.studioFillR2115.intensity=.42+.21*sweep;
+      }
+      if(this.studioRimR2115){
+        this.studioRimR2115.position.y=-1.9+.80*sweep;
+        this.studioRimR2115.intensity=10.5+1.25*sweep;
+      }
+      if(this.studioAtmosphereR2115){
+        this.studioAtmosphereR2115.material.opacity=.54+.08*sweep;
+      }
+      document.documentElement.dataset.fxMagThreeSoftboxSweepR2115=
+        sweep.toFixed(3);
       this.updateCamera(t,time);
       this.updateDNA(t,time);
       this.updateCore(t,time);
@@ -1884,6 +1969,7 @@
         else m?.dispose?.();
       });
       this.microFiberTexture?.dispose?.();
+      this.studioAtmosphereTextureR2115?.dispose?.();
       this.renderer.dispose();
     }
   }
