@@ -1532,9 +1532,17 @@
         part.rotation.z=blade*Math.PI/4;
         this.mechIris.add(part);
       }
-      document.documentElement.dataset.fxMagThreeBladeDepthR2124='.011';
+      /* Report the genuine live geometry rather than a hardcoded promise.
+         The browser acceptance test verifies actual Three.js mesh topology. */
+      const bladeSpecs=bladeGeometry.parameters.options;
+      document.documentElement.dataset.fxMagThreeBladeDepthR2124=
+        String(bladeSpecs.depth);
       document.documentElement.dataset.fxMagThreeBladeBevelR2124=
-        'eight-shared-extruded-chamfered-optical-shutters';
+        bladeSpecs.bevelEnabled
+          ? 'eight-shared-extruded-chamfered-optical-shutters'
+          : 'missing-real-sidewall-bevel';
+      document.documentElement.dataset.fxMagThreeBladeTrianglesR2124=
+        String(Math.round(bladeGeometry.getAttribute('position').count/3));
       this.mechOpticalLight=new T.PointLight(0x8bc7cb,0,1.7,2);
       this.mechOpticalLight.position.set(0,0,.65);
       this.mechOptics.add(this.mechOpticalLight);
