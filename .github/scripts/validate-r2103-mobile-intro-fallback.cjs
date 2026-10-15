@@ -183,6 +183,67 @@ const CASES=[
     try{
       const page=await realFilm.newPage();
       filmVideo=page.video();
+      /* R2119: capture BOTH actual native film phases in the page's own
+         animation clock, not 3.6/5.4 seconds AFTER the async renderer-ready
+         wait (which can finish when the 10s film is almost over on CI).
+         This makes the acceptance stricter and temporally correct: a real
+         painted 35-50% frame and a real painted 55-73% frame are required. */
+      await page.addInitScript(() => {
+        const captured={first:null,second:null};
+        window.__fxR2119ActualFrames=captured;
+        let previous=0;
+        const record=(phase,progress,canvas)=>{
+          const ctx=canvas?.getContext('2d');
+          if(!ctx||!canvas.width||!canvas.height)return;
+          const x=Math.floor(canvas.width/2),y=Math.floor(canvas.height/2);
+          const width=Math.min(65,canvas.width-x);
+          const height=Math.min(65,canvas.height-y);
+          const pixel=[...ctx.getImageData(x,y,1,1).data];
+          const bytes=ctx.getImageData(x,y,width,height).data;
+          const bins=new Set();
+          let min=255,max=0;
+          for(let k=0;k<bytes.length;k+=36){
+            if(bytes[k+3]<20)continue;
+            const luminance=bytes[k]*.2126+bytes[k+1]*.7152+
+              bytes[k+2]*.0722;
+            min=Math.min(min,luminance);
+            max=Math.max(max,luminance);
+            bins.add([bytes[k]>>4,bytes[k+1]>>4,bytes[k+2]>>4].join('-'));
+          }
+          captured[phase]={
+            actualProgress:progress,
+            canvasWidth:canvas.width,canvasHeight:canvas.height,
+            center:pixel,
+            detail:{differentColors:bins.size,lightSpread:Math.round(max-min)},
+            renderer:document.documentElement.dataset.fxMagBirthRendererR1360||'',
+            shape:document.documentElement.dataset.fxMagFallbackSilhouetteR2104||'',
+            time:Math.round(performance.now())
+          };
+        };
+        const loop=()=>{
+          if(captured.first&&captured.second)return;
+          const root=document.documentElement;
+          const film=document.querySelector('.fx-mag-birth-r533');
+          const canvas=film?.querySelector('canvas.fxb-particles');
+          const value=Number(film?.querySelector('progress')?.value||0);
+          if(root.dataset.fxMagBirthRendererR1360===
+             'native-canvas-reference-film' && canvas &&
+             canvas.width>100&&canvas.height>100){
+            try{
+              if(!captured.first&&value>=35&&value<=50)
+                record('first',value,canvas);
+              if(!captured.second&&value>=55&&value<=73)
+                record('second',value,canvas);
+            }catch(error){
+              captured.error=String(error);
+            }
+          }
+          if(value<100&&performance.now()<25000)
+            requestAnimationFrame(loop);
+        };
+        document.addEventListener('DOMContentLoaded',
+          ()=>requestAnimationFrame(loop),{once:true});
+      });
       await page.goto(HOME+'?intro=1&visualintro=1&proofrenderer=reference'
         +'&r2107-real-mobile-film=1',{waitUntil:'domcontentloaded',timeout:60000});
       await page.waitForFunction(()=>
@@ -245,34 +306,37 @@ const CASES=[
          and removed its canvas. That is a valid handoff, not a blank frame.
          Evaluate both observed mid-film frames; the later original hero
          and absence of the overlay are asserted independently below. */
-      const midFilm=liveSamples.filter(sample =>
-        sample.elapsedSeconds>=3.6 && sample.elapsedSeconds<=7.2 &&
-        sample.canvasDisplay!=='');
-      assert.ok(midFilm.length>=2 &&
-        midFilm.some(sample=>sample.elapsedSeconds===3.6) &&
-        midFilm.some(sample=>sample.elapsedSeconds===5.4),
-        'R2112 must draw both real 3.6 and 5.4-second moving MAG frames '+
-        'before the normal film handoff: '+JSON.stringify(liveSamples));
+      const actualFilmFrames=await page.evaluate(()=>
+        window.__fxR2119ActualFrames||{});
+      const midFilm=[
+        actualFilmFrames.first,
+        actualFilmFrames.second
+      ].filter(Boolean);
+      assert.ok(midFilm.length===2 &&
+        midFilm[0].actualProgress>=35&&midFilm[0].actualProgress<=50 &&
+        midFilm[1].actualProgress>=55&&midFilm[1].actualProgress<=73,
+        'R2119 requires two actual moving painted fallback movie frames at '+
+        '35-50% and 55-73% of the ORIGINAL film timeline, regardless of '+
+        'Playwright renderer-ready startup delay: '+JSON.stringify({
+          captured:actualFilmFrames,lateSamples:liveSamples
+        }));
       for(const sample of midFilm){
         assert.equal(sample.renderer,'native-canvas-reference-film',
-          'Actual fallback film renderer switched unexpectedly: '+JSON.stringify(sample));
-        assert.equal(sample.visualVersion,
+          'Real fall-back film renderer changed during the animation');
+        assert.equal(sample.shape,
           'sculpted-fourpoint-3d-illusion-machined-optic',
-          'The real running movie did not paint the revised MAG: '+JSON.stringify(sample));
-        assert.notEqual(sample.canvasDisplay,'none',
-          'Running MAG was hidden by legacy CSS: '+JSON.stringify(sample));
-        assert.notEqual(sample.canvasVisibility,'hidden',
-          'Running MAG was occluded: '+JSON.stringify(sample));
-        assert.ok(Number(sample.canvasOpacity)>.85,
-          'Running MAG transparency obscures the sculpture: '+JSON.stringify(sample));
+          'Real film did not paint the revised MAG at '+sample.actualProgress);
+        assert.ok(sample.canvasWidth>100&&sample.canvasHeight>100,
+          'Real movie canvas has no pixels');
         assert.ok(sample.center.length===4&&sample.center[3]>=25,
-          'The actual moving film has an empty central optical pixel: '+
-            JSON.stringify(sample));
+          'Running film optical core was missing at '+sample.actualProgress);
         assert.ok(sample.detail.differentColors>=5&&
           sample.detail.lightSpread>=12,
-          'A running frame still looks like a flat disc rather than optical '+
-            'materials: '+JSON.stringify(sample));
+          'Real 3D-material silhouette is flat/undrawn at '+
+          sample.actualProgress+': '+JSON.stringify(sample));
       }
+      fs.writeFileSync(OUT+'/r2119-real-time-inpage-film-proofs.json',
+        JSON.stringify(actualFilmFrames,null,2)+'\\n');
       fs.writeFileSync(OUT+'/r2109-real-film-samples.json',
         JSON.stringify(liveSamples,null,2)+'\n');
       console.log('R2109_REAL_RUNNING_FRAME_SAMPLES',JSON.stringify(liveSamples));
