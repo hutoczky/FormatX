@@ -855,6 +855,51 @@
         bladeThickness.toFixed(3);
       root.dataset.fxNativeMagIrisTotalTrianglesR2127=
         String((facets.length-bladesFirst)/3);
+
+      /* R2128: the screenshot of the original canonical R326 revealed an
+         eight-spoked DARK disc, with the only actual sapphire hidden under
+         its metal shutter rim. Forge a NEW convex optical glass cap into the
+         SAME native interleaved buffers. Its outer rim overlaps the inner
+         4% of the eight raised R2127 leaves, while its center projects
+         forward as a true curved refractive surface. No circle decal,
+         extra WebGL draw, offscreen pass or second shader. */
+      const sapphireStart=facets.length;
+      const sapphireRings=software?2:mobile?3:4;
+      const sapphireSectors=software?20:mobile?24:32;
+      const sapphireVertex=(unitRadius,angle)=>{
+        const radial=unitRadius*.414;
+        const v=lensVertex(radial,angle);
+        const hemisphere=Math.sqrt(Math.max(0,1-unitRadius*unitRadius));
+        v.crystal[2]=lensCenter[2]+.042+.022*hemisphere;
+        v.crystalNormal=normalize([
+          unitRadius*Math.cos(angle)*.56,
+          unitRadius*Math.sin(angle)*.56,
+          .68+hemisphere*.78
+        ]);
+        return v;
+      };
+      const sapphireTip=sapphireVertex(0,0);
+      let lastRing=null;
+      for(let ring=1;ring<=sapphireRings;ring++){
+        const radius=ring/sapphireRings;
+        const current=Array.from({length:sapphireSectors},(_,index)=>
+          sapphireVertex(radius,index/sapphireSectors*Math.PI*2));
+        for(let index=0;index<sapphireSectors;index++){
+          const next=(index+1)%sapphireSectors;
+          if(!lastRing){
+            triangle([sapphireTip,current[next],current[index]],6.47);
+          }else{
+            triangle([lastRing[index],lastRing[next],current[index]],6.47);
+            triangle([lastRing[next],current[next],current[index]],6.47);
+          }
+        }
+        lastRing=current;
+      }
+      root.dataset.fxNativeMagPupilR2128=
+        'convex-raised-sapphire-hemisphere-over-physical-iris';
+      root.dataset.fxNativeMagPupilTrianglesR2128=
+        String((facets.length-sapphireStart)/3);
+      root.dataset.fxNativeMagPupilElevationR2128='0.064';
     }
 
     /* R2107 physical arm architecture: eight narrow titanium rail facets
