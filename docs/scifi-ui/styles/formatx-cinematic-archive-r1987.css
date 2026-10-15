@@ -672,6 +672,33 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
     max-width:100%!important;
     min-width:0!important;
   }
+  /* The original page's 420px diagram and 350px minimum text track cannot
+     share the narrower native folio. Keep both original modules readable
+     in its scroll flow, without clipping or shrinking their text. */
+  html:root:root:root[data-fx-archive-cinema="active"]
+  #experience .fx-archive-cinema-folio-r2030 .flow{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  #experience .fx-archive-cinema-folio-r2030 .flow-chapters article{
+    grid-template-columns:64px minmax(0,1fr)!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  #experience .fx-archive-cinema-folio-r2030 .flow-chapters article > div{
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  /* At 1024px the original release tracks require 592px inside a 468px
+     reading area. Preserve the whole release card below its introduction. */
+  html:root:root:root[data-fx-archive-cinema="active"]
+  #resources .fx-archive-cinema-folio-r2030 .release-layout{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  html:root:root:root[data-fx-archive-cinema="active"]
+  #resources .fx-archive-cinema-folio-r2030 .release-layout > div{
+    min-width:0!important;
+    max-width:100%!important;
+  }
   /* Compact chapter source label stays in MAG lane: no duplicate hero card. */
   html:root:root:root:root[data-fx-archive-cinema="active"]
   .fx-archive-physical-paper-r2026[data-active="true"]{
@@ -840,8 +867,8 @@ main#main-content > .fx-mag-ai-scroll-station-r2030{
 
 @media (prefers-reduced-motion:no-preference){
  html[data-fx-archive-cinema="active"] .fx-archive-final-cta-r2032{
-   position:sticky;
-   bottom:0;
+   position:relative;
+   bottom:auto;
    z-index:12;
    display:flex;
    justify-content:center;
