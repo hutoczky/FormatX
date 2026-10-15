@@ -84,7 +84,43 @@ const views=[
               const style=getComputedStyle(el),rect=el.getBoundingClientRect();
               return {display:style.display,visibility:style.visibility,
                 opacity:style.opacity,transform:style.transform,
-                width:Math.round(rect.width),height:Math.round(rect.height)};
+                width:Math.round(rect.width),height:Math.round(rect.height),
+                inlineStyle:el.getAttribute('style')||'',
+                hidden:el.hasAttribute('hidden'),
+                parent:el.parentElement?.className||'',
+                parentStyle:(()=>{
+                  const parent=el.parentElement;
+                  const cs=parent?getComputedStyle(parent):null;
+                  return cs?{display:cs.display,visibility:cs.visibility,
+                    opacity:cs.opacity,inlineStyle:parent.getAttribute('style')||''}:null;
+                })()};
+            })(),
+            hidingRules:(()=>{
+              const el=document.querySelector('#hero .hero-copy');
+              if(!el)return [];
+              const results=[];
+              const visit=(sheet)=>{
+                let rules;
+                try{rules=sheet.cssRules}catch(e){return}
+                if(!rules)return;
+                for(const rule of rules){
+                  if(rule.cssRules){visit(rule);continue}
+                  const selector=rule.selectorText,css=rule.style;
+                  if(!selector||!css)continue;
+                  if(!css.display&&!css.visibility&&!css.opacity)continue;
+                  try{
+                    if(el.matches(selector)){
+                      results.push({selector,display:css.display||'',
+                        visibility:css.visibility||'',opacity:css.opacity||'',
+                        priority:css.getPropertyPriority('display')||
+                          css.getPropertyPriority('visibility')||
+                          css.getPropertyPriority('opacity')});
+                    }
+                  }catch(e){}
+                }
+              };
+              for(const sheet of document.styleSheets)visit(sheet);
+              return results.slice(-25);
             })(),
             rootIntroDataset:Object.fromEntries(
               Object.entries(root.dataset).filter(([key])=>
