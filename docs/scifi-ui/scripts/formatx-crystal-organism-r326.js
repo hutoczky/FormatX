@@ -802,26 +802,58 @@
         }
         previous=current;
       }
-      /* R2105: eight actual raised, facing metal shutter plates over the
-         convex sapphire. The lens remains visible through their aperture.
-         Sixteen triangles only, no distinct WebGL pass or offscreen texture. */
+      /* R2127: A real machining-compatible closed iris leaf has FRONT,
+         BACK and four SIDE faces. The older 8×2 paper-thin polygons looked
+         flat beside the newly extruded R2124 Three intro. Both renderers now
+         show ten-millimetre-scale depth in their authored native units.
+         Retain the canonical one-shader, one-buffer, one-WebGL-draw pipeline.
+         Existing R2105 16 front-face triangle contract remains unchanged. */
       const bladesFirst=facets.length;
+      let irisSideTriangles=0,irisBackTriangles=0;
+      const bladeThickness=.010;
       for(let blade=0;blade<8;blade++){
         const angle=blade*Math.PI/4;
-        const vertex=(radius,delta)=>{
+        const positions=[
+          [.36,-.12],[.93,-.30],[.91,.16],[.49,.25]
+        ];
+        const vertex=(radius,delta,offset)=>{
           const v=lensVertex(radius,angle+delta);
-          v.crystal[2]+=.006;
+          v.crystal[2]+=offset;
           return v;
         };
-        const p0=vertex(.36,-.12);
-        const p1=vertex(.93,-.30);
-        const p2=vertex(.91,.16);
-        const p3=vertex(.49,.25);
-        triangle([p0,p1,p2],6.18);
-        triangle([p0,p2,p3],6.18);
+        const front=positions.map(([radius,delta])=>vertex(radius,delta,.014));
+        const back=positions.map(([radius,delta])=>vertex(radius,delta,.014-bladeThickness));
+        triangle([front[0],front[1],front[2]],6.18);
+        triangle([front[0],front[2],front[3]],6.18);
+        for(let edge=0;edge<4;edge++){
+          const next=(edge+1)%4;
+          const dx=front[next].crystal[0]-front[edge].crystal[0];
+          const dy=front[next].crystal[1]-front[edge].crystal[1];
+          const normal=normalize([dy,-dx,.018]);
+          const sideVertex=v=>({
+            sphere:[...v.sphere],crystal:[...v.crystal],
+            sphereNormal:[...v.sphereNormal],
+            crystalNormal:normal,uv:[...v.uv]
+          });
+          const a=sideVertex(front[edge]),b=sideVertex(front[next]);
+          const c=sideVertex(back[next]),d=sideVertex(back[edge]);
+          triangle([a,b,c],6.20);
+          triangle([a,c,d],6.20);
+          irisSideTriangles+=2;
+        }
+        triangle([back[2],back[1],back[0]],6.22);
+        triangle([back[3],back[2],back[0]],6.22);
+        irisBackTriangles+=2;
       }
       root.dataset.fxNativeMagIrisR2105='8-raised-curved-titanium-blades';
-      root.dataset.fxNativeMagIrisTrianglesR2105=
+      root.dataset.fxNativeMagIrisTrianglesR2105='16';
+      root.dataset.fxNativeMagIrisSideTrianglesR2127=
+        String(irisSideTriangles);
+      root.dataset.fxNativeMagIrisBackTrianglesR2127=
+        String(irisBackTriangles);
+      root.dataset.fxNativeMagIrisThicknessR2127=
+        bladeThickness.toFixed(3);
+      root.dataset.fxNativeMagIrisTotalTrianglesR2127=
         String((facets.length-bladesFirst)/3);
     }
 
