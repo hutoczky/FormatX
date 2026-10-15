@@ -70,4 +70,4 @@ assert.ok(downloadHitArea,'The original download anchor needs an unconditional c
 assert.match(downloadHitArea,/display:inline-flex!important/);
 assert.match(downloadHitArea,/min-height:48px!important/);
 assert.match(downloadHitArea,/min-width:48px!important/);
-assert.equal((html.match(/formatx-menu-owner-r1956\.css\?v=20261014-r2062-persistent-download-hit-area/g)||[]).length,2,'Preload and synchronous stylesheet must use the same current control CSS');
+assert.equal((html.match(/formatx-menu-owner-r1956\.css\?v=20261015-r2106-late-scroll-input-ownership/g)||[]).length,2,'Preload and synchronous stylesheet must use the same current control CSS');

@@ -1,6 +1,14 @@
 /* FormatX R1956 — deterministic menu render contract for phone + PC.
    This stylesheet is intentionally synchronous and small: the navigation must
    remain operable even while cinematic/deferred style layers are still loading. */
+
+/* Decorative cinematic layers never own input, including the interval before
+   their deferred appearance stylesheet arrives. Geometry stays with that file. */
+.fx-c536-stage,
+.fx-c536-stage > *{
+  pointer-events:none!important;
+}
+
 html body.living-architecture #menu-toggle.fx-reference-menu-button{
   touch-action:manipulation!important;
   -webkit-tap-highlight-color:transparent;

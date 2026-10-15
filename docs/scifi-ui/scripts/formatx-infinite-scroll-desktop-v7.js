@@ -106,7 +106,7 @@
     }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20261015-r2105-integrated-visible-native-genesis';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20261015-r2106-late-scroll-input-ownership';
     link.dataset.fxSeamlessLoopStyle = 'true';
     link.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
     document.head.appendChild(link);
@@ -146,6 +146,13 @@
     sourceHero = document.querySelector('#main-content > #hero');
     if (!sourceHero) return false;
     const top = heroTop();
+    // This controller can arrive after the visitor has already scrolled.
+    // The initial call and both queued frames must honor the same ownership
+    // boundary as the existing intro-complete guard.
+    if (!shouldGuaranteeHeroStart() || Math.abs(scrollY - top) > 96) {
+      root.dataset.fxInitialHeroGuard = 'user-scroll-preserved';
+      return false;
+    }
     window.scrollTo({ top, left: 0, behavior: 'auto' });
     root.dataset.fxInitialHeroGuard = source;
     root.dataset.fxInitialHeroTop = String(Math.round(top));

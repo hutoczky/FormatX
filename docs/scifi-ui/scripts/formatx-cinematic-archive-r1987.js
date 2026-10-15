@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2105-integrated-visible-native-genesis';
+  const VERSION='cinematic-archive-r2106-late-scroll-input-ownership';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');

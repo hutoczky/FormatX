@@ -6,7 +6,7 @@
 
   root.dataset.fxLivingArchitectureLoaderR1985 = 'loading-normal-runtime';
   const script = document.createElement('script');
-  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261015-r2105-integrated-visible-native-genesis';
+  script.src = '/scifi-ui/scripts/living-architecture.js?v=20261015-r2106-late-scroll-input-ownership';
   script.async = false;
   script.dataset.fxLivingArchitectureRuntimeR1985 = 'true';
   script.addEventListener('load', () => {
