@@ -16,7 +16,9 @@ assert.ok(
   source.includes('color:0x9baaa5,metalness:.69,roughness:.205')&&
   source.includes('color:0x29363d,metalness:.61,roughness:.295')&&
   source.includes('color:0x4c5555,metalness:.48,roughness:.28')&&
-  source.includes('fxMagThreeCortexBounceR2121'),
+  source.includes('fxMagThreeCortexBounceR2121')&&
+  source.includes('new T.ExtrudeGeometry(irisShape,{')&&
+  source.includes('fxMagThreeBladeTrianglesR2124'),
   'Latest actual Three cinematic must use neutral sculpted silver, smoked titanium and C1 midfilm fill'
 );
 const frames=[
@@ -81,6 +83,9 @@ const frames=[
             oneCanvas:owner?.querySelectorAll('canvas.fxb-particles').length===1,
             mobileThreeDistance:Number(root.dataset.fxMagThreeMobileDistanceR2112||0),
             irisBlades:Number(root.dataset.fxMagThreeIrisBladesR2113||0),
+            irisPhysicalDepth:Number(root.dataset.fxMagThreeBladeDepthR2124||0),
+            irisPhysicalBevel:root.dataset.fxMagThreeBladeBevelR2124||'',
+            irisPhysicalTriangles:Number(root.dataset.fxMagThreeBladeTrianglesR2124||0),
             collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
             optics:root.dataset.fxMagThreeOpticsR2113||'',
             facets:root.dataset.fxMagThreeFacetsR2114||'',
@@ -125,6 +130,16 @@ const frames=[
           'Real Three intro must retain an accessible Skip control');
         assert.equal(info.irisBlades,8,
           'Every authored titanium iris blade must exist in the ACTUAL Three scene');
+        /* R2124: 8 flat ShapeGeometry decals are not an acceptable physical
+           iris. The actual geometry must own front, back, and beveled sides. */
+        assert.ok(info.irisPhysicalDepth>=.010&&info.irisPhysicalDepth<=.013,
+          'Central iris still has zero 3D thickness: '+JSON.stringify(info));
+        assert.equal(info.irisPhysicalBevel,
+          'eight-shared-extruded-chamfered-optical-shutters',
+          'Eight iris leaves must share actual chamfered 3D solid geometry');
+        assert.ok(info.irisPhysicalTriangles>=20,
+          'Real Three.js iris leaf is still a flat pair of triangles: '+
+            JSON.stringify(info));
         assert.equal(info.collars,3,
           'All three precision optical collars must exist in the ACTUAL Three scene');
         assert.equal(info.optics,'three-metal-collars-eight-physical-iris-blades',
