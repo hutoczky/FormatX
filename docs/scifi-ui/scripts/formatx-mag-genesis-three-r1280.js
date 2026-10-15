@@ -1735,16 +1735,35 @@
     }
   }
 
+  /* R2116: WebGL capability classification MUST NOT permanently consume a
+     separate GPU context immediately before the actual 3D film attaches.
+     A standalone probe can compete with the active WebGL owner on Android.
+     Release its context deterministically and record only a coarse result. */
   function isSoftwareWebGL(){
+    let gl=null;
     try{
       const probe=document.createElement('canvas');
-      const gl=probe.getContext('webgl2',{powerPreference:'high-performance'})||probe.getContext('webgl',{powerPreference:'high-performance'});
-      if(!gl)return true;
+      probe.width=1;
+      probe.height=1;
+      gl=probe.getContext('webgl2',{powerPreference:'high-performance'})||
+        probe.getContext('webgl',{powerPreference:'high-performance'});
+      if(!gl){
+        document.documentElement.dataset.fxMagGpuProbeR2116='no-webgl-context';
+        return true;
+      }
       const ext=gl.getExtension('WEBGL_debug_renderer_info');
-      const renderer=String(ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
-      return /swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(renderer);
+      const renderer=String(ext
+        ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)
+        : gl.getParameter(gl.RENDERER)||'').toLowerCase();
+      const software=/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(renderer);
+      document.documentElement.dataset.fxMagGpuProbeR2116=
+        software?'software-fallback':'gpu-three-preferred';
+      return software;
     }catch(_){
+      document.documentElement.dataset.fxMagGpuProbeR2116='probe-exception-fallback';
       return true;
+    }finally{
+      try{gl?.getExtension('WEBGL_lose_context')?.loseContext();}catch(_){}
     }
   }
 
