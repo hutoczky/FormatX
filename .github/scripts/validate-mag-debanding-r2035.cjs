@@ -74,7 +74,7 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2104-sculpted-machined-sapphire'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2115-premium-contained-no-dna-overlap'),
   'Missing actual cache-busted four-point R2103 Android replacement');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
