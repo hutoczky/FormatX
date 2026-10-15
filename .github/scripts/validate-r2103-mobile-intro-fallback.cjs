@@ -192,7 +192,7 @@ const CASES=[
         const captured={first:null,second:null};
         window.__fxR2119ActualFrames=captured;
         let previous=0;
-        const record=(phase,progress,canvas)=>{
+        const record=(phase,seconds,progress,canvas)=>{
           const ctx=canvas?.getContext('2d');
           if(!ctx||!canvas.width||!canvas.height)return;
           const x=Math.floor(canvas.width/2),y=Math.floor(canvas.height/2);
@@ -211,7 +211,8 @@ const CASES=[
             bins.add([bytes[k]>>4,bytes[k+1]>>4,bytes[k+2]>>4].join('-'));
           }
           captured[phase]={
-            actualProgress:progress,
+            actualSeconds:seconds,
+            easedProgress:progress,
             canvasWidth:canvas.width,canvasHeight:canvas.height,
             center:pixel,
             detail:{differentColors:bins.size,lightSpread:Math.round(max-min)},
@@ -226,6 +227,7 @@ const CASES=[
           const film=document.querySelector('.fx-mag-birth-r533');
           const canvas=film?.querySelector('canvas.fxb-particles');
           const value=Number(film?.querySelector('progress')?.value||0);
+          const seconds=Number(film?.dataset.fxActualFilmSecondsR2121||0);
           /* R2120: the original progress meter can lead the first actual
              fallback paint by one or more animation ticks. Never mark the
              WebGL/canvas frame as a rendered MAG merely because progress
@@ -244,10 +246,10 @@ const CASES=[
              Number(style?.opacity||0)>.85 &&
              canvas.width>100&&canvas.height>100){
             try{
-              if(!captured.first&&value>=35&&value<=50)
-                record('first',value,canvas);
-              if(!captured.second&&value>=55&&value<=73)
-                record('second',value,canvas);
+              if(!captured.first&&seconds>=3.40&&seconds<=4.90)
+                record('first',seconds,value,canvas);
+              if(!captured.second&&seconds>=5.40&&seconds<=7.30)
+                record('second',seconds,value,canvas);
             }catch(error){
               captured.error=String(error);
             }
@@ -327,11 +329,12 @@ const CASES=[
         actualFilmFrames.second
       ].filter(Boolean);
       assert.ok(midFilm.length===2 &&
-        midFilm[0].actualProgress>=35&&midFilm[0].actualProgress<=50 &&
-        midFilm[1].actualProgress>=55&&midFilm[1].actualProgress<=73,
-        'R2119 requires two actual moving painted fallback movie frames at '+
-        '35-50% and 55-73% of the ORIGINAL film timeline, regardless of '+
-        'Playwright renderer-ready startup delay: '+JSON.stringify({
+        midFilm[0].actualSeconds>=3.40&&midFilm[0].actualSeconds<=4.90 &&
+        midFilm[1].actualSeconds>=5.40&&midFilm[1].actualSeconds<=7.30,
+        'R2121 requires two separate ACTUAL painted four-point MAG frames at '+
+        '3.4-4.9 and 5.4-7.3 seconds of the genuine 10-second film. '+
+        'The visible progress uses cubic easing and is NOT elapsed time: '+
+        JSON.stringify({
           captured:actualFilmFrames,lateSamples:liveSamples
         }));
       for(const sample of midFilm){
@@ -339,15 +342,15 @@ const CASES=[
           'Real fall-back film renderer changed during the animation');
         assert.equal(sample.shape,
           'sculpted-fourpoint-3d-illusion-machined-optic',
-          'Real film did not paint the revised MAG at '+sample.actualProgress);
+          'Real film did not paint the revised MAG at '+sample.actualSeconds);
         assert.ok(sample.canvasWidth>100&&sample.canvasHeight>100,
           'Real movie canvas has no pixels');
         assert.ok(sample.center.length===4&&sample.center[3]>=25,
-          'Running film optical core was missing at '+sample.actualProgress);
+          'Running film optical core was missing at '+sample.actualSeconds);
         assert.ok(sample.detail.differentColors>=5&&
           sample.detail.lightSpread>=12,
           'Real 3D-material silhouette is flat/undrawn at '+
-          sample.actualProgress+': '+JSON.stringify(sample));
+          sample.actualSeconds+': '+JSON.stringify(sample));
       }
       fs.writeFileSync(OUT+'/r2119-real-time-inpage-film-proofs.json',
         JSON.stringify(actualFilmFrames,null,2)+'\\n');
