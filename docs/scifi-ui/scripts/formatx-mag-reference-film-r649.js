@@ -336,11 +336,17 @@
     }
 
     // Anisotropic specular shoulder follows the actual light orientation.
-    const shine=ctx.createLinearGradient(-S,-S*.82,S,S*.85);
-    shine.addColorStop(0,'rgba(231,240,221,.17)');
+    /* R2107: the silver environmental reflection traverses the original
+       faceted body in place. A changing physical-looking highlight, not a
+       second image, CSS overlay or flashing neon outline. */
+    const shine=ctx.createLinearGradient(
+      -S*(.97-lightSweep*.17),-S*.82,
+      S*(1.03+lightSweep*.19),S*.85
+    );
+    shine.addColorStop(0,'rgba(231,240,221,'+(.16+.045*lightSweep)+')');
     shine.addColorStop(.29,'rgba(129,161,157,.07)');
     shine.addColorStop(.57,'rgba(0,0,0,0)');
-    shine.addColorStop(.85,'rgba(162,198,192,.09)');
+    shine.addColorStop(.85,'rgba(162,198,192,'+(.080+.018*lightSweep)+')');
     shine.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=shine;ctx.fillRect(-S*1.3,-S*1.3,S*2.6,S*2.6);
     ctx.restore();
