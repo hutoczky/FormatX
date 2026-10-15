@@ -556,6 +556,10 @@
         ? (innerWidth<900?.58:.56)
         : (innerWidth<900?.92:.78);
     let renderAverage=0,lastQualityAdjust=0,panicSamples=0;
+    /* R2112: resizing a canvas AFTER drawing clears its completed frame.
+       Defer adaptive reallocation until the NEXT draw, so the existing MAG
+       remains visible while the browser schedules a fresh complete frame. */
+    let pendingQualityResize=false;
     function resize(){
       sw=innerWidth;sh=innerHeight;
       const baseDpr=proofFrame
@@ -569,7 +573,7 @@
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
     }
     function draw(r,time){
-      if(!ctx)resize();
+      if(!ctx||pendingQualityResize){resize();pendingQualityResize=false;}
       ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,sw,sh);ctx.translate(ox,oy);ctx.scale(scale,scale);
       let target=null;
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
@@ -600,7 +604,7 @@
           qualityScale=Math.min(qualityScale,sw<900?.46:.42);
           if(Math.abs(previous-qualityScale)>.001 || cost>42){
             lastQualityAdjust=time;
-            resize();
+            pendingQualityResize=true;
           }
         }
       }else if(cost<9){
@@ -620,7 +624,7 @@
         else if(renderAverage<6.5)qualityScale=Math.min(ceiling,qualityScale+.010);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=time;
-          resize();
+          pendingQualityResize=true;
         }
       }
       document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
