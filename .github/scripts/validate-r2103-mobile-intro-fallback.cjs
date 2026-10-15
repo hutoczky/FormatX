@@ -11,6 +11,14 @@ const threeOwner=fs.readFileSync(
   'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
 const filmOwner=fs.readFileSync(
   'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
+const fallbackSource=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js','utf8');
+assert.ok(
+  fallbackSource.includes('const irisTravel=.058*engage*(1-.52*seat);') &&
+  fallbackSource.includes('ctx.translate(rx*irisTravel,0);') &&
+  fallbackSource.includes('const rot=.29*engage-.14*seat'),
+  'R2122 requires actual moving metal shutters, not static decorative iris art'
+);
 const pageSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 assert.ok(
   threeOwner.includes("gl?.getExtension('WEBGL_lose_context')?.loseContext()") &&
@@ -24,6 +32,7 @@ const HOME=process.env.FORMATX_TEST_URL||
 const OUT='artifacts/r2103-real-mobile-fallback';
 const CASES=[
   {name:'phone-390-midfilm',width:390,height:844,second:4.40},
+  {name:'phone-390-iris-engaged',width:390,height:844,second:6.35},
   {name:'phone-390-identity',width:390,height:844,second:8.50},
   {name:'phone-360-midfilm',width:360,height:780,second:4.40}
 ];
