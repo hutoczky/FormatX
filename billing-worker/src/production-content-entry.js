@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261015-r2108-motion-lifecycle-and-intro-controls';
+const STARTUP_REVISION = '20261015-r2109-native-cache-delegates-and-visual-ci';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-diXOSbY1jJ/ogRVKDbC977wnwBs23yPgHQHrxnbhTk8='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
