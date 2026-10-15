@@ -164,7 +164,57 @@ const CASES=[
       await page.waitForFunction(()=>
         document.documentElement.dataset.fxMagBirthRendererR1360
         ==='native-canvas-reference-film',null,{timeout:35000});
-      await page.waitForTimeout(11500);
+      /* R2109: sample ACTUAL moving film, not just isolated proof frames. */
+      const liveSamples=[];
+      for(const [i,ms] of [1800,1800,1800,1800,1800].entries()){
+        await page.waitForTimeout(ms);
+        const sample=await page.evaluate(()=>{
+          const root=document.documentElement;
+          const film=document.querySelector('.fx-mag-birth-r533');
+          const canvas=film?.querySelector('canvas.fxb-particles');
+          const cs=canvas?getComputedStyle(canvas):null;
+          let center=[],detail={differentColors:0,lightSpread:0};
+          try{
+            const ctx=canvas?.getContext('2d');
+            if(ctx&&canvas?.width>0&&canvas?.height>0){
+              const x=Math.floor(canvas.width*.5),y=Math.floor(canvas.height*.5);
+              center=[...ctx.getImageData(x,y,1,1).data];
+              const w=Math.min(65,canvas.width-x),h=Math.min(65,canvas.height-y);
+              const pixels=ctx.getImageData(x,y,w,h).data;
+              const bins=new Set();let min=255,max=0;
+              for(let j=0;j<pixels.length;j+=4*9){
+                if(pixels[j+3]<20)continue;
+                const lum=pixels[j]*.2126+pixels[j+1]*.7152+pixels[j+2]*.0722;
+                min=Math.min(min,lum);max=Math.max(max,lum);
+                bins.add([pixels[j]>>4,pixels[j+1]>>4,pixels[j+2]>>4].join('-'));
+              }
+              detail={differentColors:bins.size,lightSpread:Math.round(max-min)};
+            }
+          }catch(error){detail.error=String(error)}
+          return{
+            phase:root.dataset.fxMagBirthPhase||'',
+            filmPhase:film?.dataset.phase||'',
+            renderer:root.dataset.fxMagBirthRendererR1360||'',
+            visualVersion:root.dataset.fxMagFallbackSilhouetteR2104||'',
+            canvasDisplay:cs?.display||'',canvasOpacity:cs?.opacity||'',
+            canvasVisibility:cs?.visibility||'',canvasZ:cs?.zIndex||'',
+            canvasStyle:canvas?.getAttribute('style')||'',
+            performance:film?.dataset.performance||'',
+            introR649:film?.dataset.fxIntroR649||'',
+            progress:film?.querySelector('progress')?.value??null,
+            center,detail
+          };
+        });
+        liveSamples.push({elapsedSeconds:(i+1)*1.8,...sample});
+        await page.screenshot({
+          path:OUT+'/r2109-real-running-'+(i+1)+'-frame.png',
+          animations:'allow'
+        });
+      }
+      fs.writeFileSync(OUT+'/r2109-real-film-samples.json',
+        JSON.stringify(liveSamples,null,2)+'\n');
+      console.log('R2109_REAL_RUNNING_FRAME_SAMPLES',JSON.stringify(liveSamples));
+      await page.waitForTimeout(2500);
       filmStatus=await page.evaluate(()=>{
         const intro=document.querySelector('.fx-mag-birth-r533');
         const css=intro?getComputedStyle(intro):null;
