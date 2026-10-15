@@ -1938,6 +1938,16 @@
       if(this.width<this.height){
         const fit=smooth((t-2.22)/1.25);
         z+=mix(.90,4.40,fit);
+        /* R2123: the actual photographed Android Four Point occupied only
+           about half of the portrait width. A C1-smooth TRUE CAMERA dolly
+           brings the optical machining nearer during 4.4–8.5s while keeping
+           all four tips inside the 390/360px view, and fully returns before
+           the original 9.98s R326 handoff (no image CSS scaling). */
+        const cinemaDolly=smooth((t-3.05)/.78)*
+          (1-smooth((t-8.78)/1.17));
+        z-=.47*cinemaDolly;
+        document.documentElement.dataset.fxMagThreeDollyR2123=
+          cinemaDolly.toFixed(3);
       }
       this.camera.position.set(x,y,z);
       if(this.mobileRender && this.width<this.height){
