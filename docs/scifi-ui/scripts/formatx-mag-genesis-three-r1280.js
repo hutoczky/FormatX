@@ -1979,6 +1979,20 @@
         document.documentElement.dataset.fxMagThreeDollyR2123=
           cinemaDolly.toFixed(3);
       }
+      /* R2126: actual camera parallax across the eight bevelled metal
+         shutters during their reveal. Real Three.js perspective now shows
+         the front/side normals and finite leaf thickness instead of
+         a dead-on emblem. Symmetrical C1 envelope returns EXACTLY to
+         the original centered pose before final MAG handoff. Portrait
+         movement is bounded to 3 degrees at the existing phone depth. */
+      const opticOrbit=smooth((t-5.73)/1.18)*
+        (1-smooth((t-8.85)/.82));
+      x+=(this.width<this.height?.35:.23)*opticOrbit;
+      y+=(this.width<this.height?.10:.065)*opticOrbit;
+      document.documentElement.dataset.fxMagThreeOpticParallaxR2126=
+        opticOrbit.toFixed(3);
+      document.documentElement.dataset.fxMagThreeCameraXOffsetR2126=
+        x.toFixed(3);
       this.camera.position.set(x,y,z);
       if(this.mobileRender && this.width<this.height){
         document.documentElement.dataset.fxMagThreeMobileDistanceR2112=
