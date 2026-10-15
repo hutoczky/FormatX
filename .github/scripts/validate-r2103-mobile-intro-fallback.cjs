@@ -211,6 +211,34 @@ const CASES=[
           animations:'allow'
         });
       }
+      /* R2110 acceptance: inspect motion-driven *rendered* film samples,
+         not screenshots of isolated forced clock frames. During the two
+         central close-up scenes the real canvas must be visible and its
+         native painted iris must contain tonal and chromatic detail. */
+      const midFilm=liveSamples.filter(sample =>
+        sample.elapsedSeconds>=3.6 && sample.elapsedSeconds<=7.2);
+      assert.equal(midFilm.length,3,
+        'The physical MAG must be checked at 3.6, 5.4 and 7.2 seconds');
+      for(const sample of midFilm){
+        assert.equal(sample.renderer,'native-canvas-reference-film',
+          'Actual fallback film renderer switched unexpectedly: '+JSON.stringify(sample));
+        assert.equal(sample.visualVersion,
+          'sculpted-fourpoint-3d-illusion-machined-optic',
+          'The real running movie did not paint the revised MAG: '+JSON.stringify(sample));
+        assert.notEqual(sample.canvasDisplay,'none',
+          'Running MAG was hidden by legacy CSS: '+JSON.stringify(sample));
+        assert.notEqual(sample.canvasVisibility,'hidden',
+          'Running MAG was occluded: '+JSON.stringify(sample));
+        assert.ok(Number(sample.canvasOpacity)>.85,
+          'Running MAG transparency obscures the sculpture: '+JSON.stringify(sample));
+        assert.ok(sample.center.length===4&&sample.center[3]>=25,
+          'The actual moving film has an empty central optical pixel: '+
+            JSON.stringify(sample));
+        assert.ok(sample.detail.differentColors>=5&&
+          sample.detail.lightSpread>=12,
+          'A running frame still looks like a flat disc rather than optical '+
+            'materials: '+JSON.stringify(sample));
+      }
       fs.writeFileSync(OUT+'/r2109-real-film-samples.json',
         JSON.stringify(liveSamples,null,2)+'\n');
       console.log('R2109_REAL_RUNNING_FRAME_SAMPLES',JSON.stringify(liveSamples));
