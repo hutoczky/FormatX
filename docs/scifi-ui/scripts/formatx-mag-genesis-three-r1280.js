@@ -1502,9 +1502,9 @@
       this.mechIris.position.z=.535;
       this.mechOptics.add(this.mechIris);
       this.mechIrisMaterial=new T.MeshPhysicalMaterial({
-        color:0x3f636c,metalness:.68,roughness:.22,
-        emissive:0x0a1c28,emissiveIntensity:.070,
-        clearcoat:.89,clearcoatRoughness:.09,
+        color:0x677e7e,metalness:.73,roughness:.245,
+        emissive:0x07131a,emissiveIntensity:.032,
+        clearcoat:.83,clearcoatRoughness:.12,
         side:T.DoubleSide,transparent:true,opacity:0,
         depthWrite:false
       });
@@ -1515,12 +1515,26 @@
       irisShape.quadraticCurveTo(.217,-.026,.188,.037);
       irisShape.lineTo(.119,.062);
       irisShape.quadraticCurveTo(.102,.028,.104,-.017);
-      const bladeGeometry=new T.ShapeGeometry(irisShape,5);
+      /* R2124: these were flat, zero-thickness ShapeGeometry polygons.
+         A single shared, shallow chamfered real titanium mesh now gives
+         every shutter a front face, recessed back, and physically lit side
+         normals. Eight blades still share ONE geometry/material, no second
+         canvas, light, texture, or geometry allocation per blade. */
+      const bladeGeometry=new T.ExtrudeGeometry(irisShape,{
+        depth:.011,steps:1,
+        bevelEnabled:true,bevelSegments:2,
+        bevelThickness:.0018,bevelSize:.0022,
+        curveSegments:5
+      });
+      bladeGeometry.computeVertexNormals();
       for(let blade=0;blade<8;blade++){
         const part=new T.Mesh(bladeGeometry,this.mechIrisMaterial);
         part.rotation.z=blade*Math.PI/4;
         this.mechIris.add(part);
       }
+      document.documentElement.dataset.fxMagThreeBladeDepthR2124='.011';
+      document.documentElement.dataset.fxMagThreeBladeBevelR2124=
+        'eight-shared-extruded-chamfered-optical-shutters';
       this.mechOpticalLight=new T.PointLight(0x8bc7cb,0,1.7,2);
       this.mechOpticalLight.position.set(0,0,.65);
       this.mechOptics.add(this.mechOpticalLight);
