@@ -632,10 +632,24 @@
         root.dataset.fxArchiveHandoffR2125='visible-single-r326';
         window.FormatXLivingCore?.requestRender?.(1);
       };
-      requestAnimationFrame(()=>requestAnimationFrame(reveal));
-      // Background tabs can defer RAF indefinitely; never leave the MAG
-      // permanently hidden if the page is suspended mid-transition.
-      window.setTimeout(reveal,180);
+      /* The real WebGL canvas backs onto the same element but resizes 60–90
+         milliseconds AFTER the outer stage's CSS box settles. Two frames
+         were insufficient: real R2125 mobile proof left 0.112 canvas-only
+         CLS despite zero stage shift. Keep both invisible across the entire
+         late inner-canvas resize, then reveal in a paint frame, never
+         changing the authoritative DOM or native context. */
+      const quietUntil=performance.now()+230;
+      const checkReady=()=>{
+        if(Number(stage.dataset.fxArchiveHandoffEpochR2125)!==epoch)return;
+        if(performance.now()<quietUntil){
+          requestAnimationFrame(checkReady);
+          return;
+        }
+        requestAnimationFrame(reveal);
+      };
+      requestAnimationFrame(checkReady);
+      // Background tab RAF may be suspended; bound even GPU-loss paths.
+      window.setTimeout(reveal,650);
     }
     static dock(){
       if(!stage||archiveActive)return;
