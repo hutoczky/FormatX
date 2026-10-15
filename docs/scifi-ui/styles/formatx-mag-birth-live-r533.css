@@ -2368,3 +2368,46 @@ html[data-fx-native-genesis-r2064] body #hero .fx-crystal-organism-r326-stage ca
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
 /* production-r1950-studio-intro-controlled-bloom */
+
+/* R2103 — keep the low-power R649 CANVAS as the sole visible fallback visual.
+   Legacy DNA bubble, decorative egg, and flat HUD rings may not cover the
+   actual four-point metal MAG produced by the R649 screen-space renderer. */
+.fx-mag-birth-r533:is(
+  [data-fx-renderer="fallback"],
+  [data-fx-renderer="fallback-constrained"],
+  [data-fx-renderer="fallback-software"]
+) :is(
+  .fxb-embryo,
+  .fxb-genome-field,
+  .fxb-dna-stage,
+  .fxb-biotic-field,
+  .fxb-ring,
+  .fxb-orbit,
+  .fxb-heart-ring,
+  .fxb-phase-ring
+){
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+/* R2103 accessibility — the screenshot proved the previously forced
+   .22/.34 skip opacity was unreadable against the old software movie.
+   The actual button is ALWAYS visible and focusable in either renderer. */
+html:root .fx-mag-birth-r533 .fxb-skip{
+  opacity:1!important;
+  color:#f2fcff!important;
+  background:rgba(4,17,26,.90)!important;
+  border:1px solid rgba(176,228,234,.64)!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  letter-spacing:.07em!important;
+  min-height:44px!important;
+  min-width:96px!important;
+  backdrop-filter:none!important;
+}
+html:root .fx-mag-birth-r533 .fxb-skip:focus-visible{
+  outline:3px solid #a4edff!important;
+  outline-offset:3px!important;
+}
+/* end-r2103-mobile-compact-four-point-intro */

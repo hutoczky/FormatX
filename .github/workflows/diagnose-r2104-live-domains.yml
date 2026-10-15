@@ -1,0 +1,52 @@
+name: R2104 exact dual-domain content diagnostics
+
+on:
+  push:
+    branches:
+      - master
+      - hotfix/r2104-prod-revision-exact-byte-parity
+    paths:
+      - 'docs/production-revision.txt'
+      - '.github/workflows/diagnose-r2104-live-domains.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v5
+      - name: Compare public response bytes, HTTP status and Cloudflare headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="docs/production-revision.txt"
+          cat "$expected"
+          for host in formatxsuite.com www.formatxsuite.com; do
+            response="$RUNNER_TEMP/${host}.txt"
+            headers="$RUNNER_TEMP/${host}.headers"
+            code="$(curl --location --silent --show-error --max-time 25 \
+              --retry 2 --retry-delay 2 --retry-connrefused \
+              --header 'Cache-Control: no-cache' \
+              --dump-header "$headers" --output "$response" \
+              --write-out '%{http_code}' \
+              "https://${host}/production-revision.txt?ci=${GITHUB_RUN_ID}" || true)"
+            echo "::group::${host} HTTP ${code}"
+            grep -Ei '^(HTTP/|content-type:|cf-cache-status:|server:|location:)' "$headers" || true
+            echo "received_bytes=$(wc -c < "$response" 2>/dev/null || echo 0)"
+            echo "expected_bytes=$(wc -c < "$expected")"
+            if [[ -s "$response" ]]; then
+              if cmp -s "$expected" "$response"; then
+                echo "EXACT_REVISION_MATCH=yes"
+              else
+                echo "EXACT_REVISION_MATCH=no"
+                diff -u "$expected" "$response" || true
+              fi
+            else
+              echo 'EXACT_REVISION_MATCH=no-empty-response'
+            fi
+            echo "::endgroup::"
+          done

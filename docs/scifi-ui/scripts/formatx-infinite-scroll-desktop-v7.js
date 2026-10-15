@@ -106,7 +106,7 @@
     }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20261014-r2069-visible-native-genesis';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20261015-r2105-integrated-visible-native-genesis';
     link.dataset.fxSeamlessLoopStyle = 'true';
     link.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
     document.head.appendChild(link);

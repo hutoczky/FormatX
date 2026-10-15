@@ -170,6 +170,45 @@ async function validateDesktop() {
   }
 }
 
+async function validateLateConsoleNavigation() {
+  const browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'hu-HU', colorScheme: 'dark' });
+    const page = await context.newPage();
+    let intercepted = false;
+    await page.route('**/organism-console-state.js*', async route => {
+      intercepted = true;
+      await gate;
+      await route.continue();
+    });
+    await enterSite(page, 'desktop-late-console');
+    await page.locator('#menu-toggle').click();
+    await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
+    await page.locator('#main-nav a[href="#pricing"]').click();
+    await page.waitForFunction(() => location.hash === '#pricing'
+      && !document.getElementById('main-nav')?.classList.contains('open'));
+    assert(intercepted, 'Late console import was not delayed by the regression case');
+    release();
+    await page.waitForFunction(() => document.documentElement.dataset.fxOrganismConsoleState === 'ready'
+      && document.documentElement.dataset.fxOrganismCoreController === 'ready');
+    const navigation = await page.evaluate(() => ({
+      hash: location.hash,
+      navOpen: document.getElementById('main-nav')?.classList.contains('open') || false,
+      consoleHidden: document.getElementById('fx-organism-console')?.hidden,
+      landing: document.documentElement.dataset.fxSectionNavigationR581
+    }));
+    assert(navigation.hash === '#pricing' && !navigation.navOpen && navigation.consoleHidden,
+      'Late console cleanup overwrote the real menu navigation: ' + JSON.stringify(navigation));
+    mark('desktop-late-console: navigation-preserved', navigation);
+    await context.close();
+  } finally {
+    release();
+    await browser.close();
+  }
+}
+
 async function validateMobile() {
   const browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
   let page = null;
@@ -216,6 +255,7 @@ async function validateMobile() {
 
 (async () => {
   await validateDesktop();
+  await validateLateConsoleNavigation();
   await validateMobile();
   mark('validation: passed');
   writeReport();

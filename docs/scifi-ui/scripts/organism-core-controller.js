@@ -108,6 +108,13 @@
     }
   }
 
+  function canonicalSectionOwnsHash() {
+    const hash = location.hash;
+    if (!Object.hasOwn(PANEL_SCENES, hash.slice(1))) return false;
+    return String(ROOT.dataset.fxSectionNavigationR581 || '').startsWith(hash + '@')
+      || ROOT.dataset.fxSectionNavigationSettledR581 === hash;
+  }
+
   function activateCore(options) {
     const settings = Object.assign(
       { scroll: false, replaceHistory: true, closePanel: true },
@@ -203,7 +210,7 @@
     if (pendingPanel) openPanel(pendingPanel, 'deferred-navigation');
     else if (!panelIsOpen()) {
       if (menuIsOpen()) updateNavigation(0);
-      else activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+      else activateCore({ scroll: false, replaceHistory: !canonicalSectionOwnsHash(), closePanel: false });
     }
   }
 
@@ -222,24 +229,24 @@
   });
   document.addEventListener('formatx:introcomplete', () => {
     if (!panelIsOpen()) {
-      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+      activateCore({ scroll: false, replaceHistory: !canonicalSectionOwnsHash(), closePanel: false });
     }
   });
   addEventListener('formatx:languagechange', () => {
     const scene = Number(ROOT.dataset.fxScene || 0);
     if (scene === 0 && !panelIsOpen()) {
-      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+      activateCore({ scroll: false, replaceHistory: !canonicalSectionOwnsHash(), closePanel: false });
     } else {
       updateNavigation(scene);
     }
   });
   addEventListener('pageshow', () => {
-    activateCore({ scroll: false, replaceHistory: true, closePanel: true });
+    activateCore({ scroll: false, replaceHistory: !canonicalSectionOwnsHash(), closePanel: true });
   });
 
   const sceneGuard = new MutationObserver(() => {
     if (!panelIsOpen() && ROOT.dataset.fxScene !== '0') {
-      activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+      activateCore({ scroll: false, replaceHistory: !canonicalSectionOwnsHash(), closePanel: false });
     }
   });
   sceneGuard.observe(ROOT, {
@@ -250,5 +257,5 @@
   ROOT.dataset.fxOrganismCoreController = 'ready';
   if (interfaceReady) interfaceBecameReady();
   else if (menuIsOpen()) updateNavigation(0);
-  else activateCore({ scroll: false, replaceHistory: true, closePanel: false });
+  else activateCore({ scroll: false, replaceHistory: !canonicalSectionOwnsHash(), closePanel: false });
 }());

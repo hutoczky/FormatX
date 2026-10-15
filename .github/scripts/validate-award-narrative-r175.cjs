@@ -10,7 +10,7 @@ const js=read('docs/scifi-ui/scripts/formatx-award-narrative-r175.js');
 const energy=read('docs/scifi-ui/scripts/formatx-living-energy-r168.js');
 
 assert.ok(index.includes('formatx-critical-narrative-r227.css?v=20260819-r227'),'missing r227 critical narrative bundle');
-assert.ok(index.includes('formatx-award-narrative-r175.js?v=20261014-r2069-visible-native-genesis'),'missing current r175 narrative JS asset');
+assert.ok(index.includes('formatx-award-narrative-r175.js?v=20261015-r2105-integrated-visible-native-genesis'),'missing current r175 narrative JS asset');
 assert.equal((index.match(/formatx-critical-narrative-r227\.css/g)||[]).length,1,'critical narrative bundle must load once');
 assert.ok(criticalNarrative.includes('BEGIN formatx-award-narrative-r175.css'),'critical narrative bundle must identify its canonical r175 source');
 assert.ok(criticalNarrative.includes(css),'critical narrative bundle must contain the complete canonical r175 CSS');

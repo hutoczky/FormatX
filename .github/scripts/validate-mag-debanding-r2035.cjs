@@ -60,20 +60,35 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2045 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261014-r2069-visible-native-genesis'),
+  assert.ok(loader.includes('20261015-r2105-integrated-visible-native-genesis'),
     'R2059 normal visitor runtime renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261014-r2069-visible-native-genesis'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261015-r2105-integrated-visible-native-genesis'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261014-r2069-visible-native-genesis'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261015-r2105-integrated-visible-native-genesis'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261014-r2069-visible-native-genesis'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261015-r2105-integrated-visible-native-genesis'),
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2069-visible-native-genesis']){
+ 'formatx-mag-birth-live-r533.css?v=20261015-r2105-integrated-visible-native-genesis']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
+/* R2103 additionally forbids the exact unreadable low-power source that
+   was photographed on Android, while retaining R2035 anti-banding checks. */
+const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
+assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
+  fallback.includes('for(let blade=0;blade<8;blade++)')&&
+  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2104-photographic-moving-softbox'),
+  'Missing actual cache-busted four-point R2103 Android replacement');
+assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
+  fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
+  fallback.includes('const studioTravel=.5+.5*Math.sin(time*.00053)'),
+  'R2104 movie must use a real animated optical studio-light material');
+assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
+  intro.includes('opacity:1!important;')&&
+  intro.includes('min-height:44px!important;'),
+  'Skip button contrast and low-power fallback CSS must stay visible');
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
  correctedRearDepth:depth(-1.15),retrievedSheetDepth:depth(2.30),
