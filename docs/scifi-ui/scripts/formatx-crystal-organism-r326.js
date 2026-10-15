@@ -900,6 +900,8 @@
       root.dataset.fxNativeMagPupilTrianglesR2128=
         String((facets.length-sapphireStart)/3);
       root.dataset.fxNativeMagPupilElevationR2128='0.064';
+      root.dataset.fxNativeMagPupilShaderR2129=
+        'broad-physical-normal-silver-softbox-on-convex-sapphire';
     }
 
     /* R2107 physical arm architecture: eight narrow titanium rail facets
@@ -1744,6 +1746,22 @@
         c=mix(c,channelTitanium,physicalRail*.96);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
+        /* R2129: the REAL raised pupil (facet 6.47) has a separate
+           curved glass specular response from its surrounding titanium.
+           Broad moving studio highlight follows the original interpolated
+           WebGL NORMALS, never a pasted white circle, bloom layer or
+           independent canvas. Dark obsidian remains visible in the shadows. */
+        float convexPupil=step(6.44,vFacet)*(1.0-step(6.50,vFacet));
+        float pupilSoftbox=pow(sat(dot(n,
+          normalize(vec3(-.33,.43,.84)))),5.0);
+        float pupilRim=pow(sat(dot(n,
+          normalize(vec3(.47,-.23,.85)))),6.0);
+        vec3 physicalPupil=vec3(.009,.031,.047)+
+          vec3(.067,.138,.166)*(.34+.66*key)+
+          vec3(.68,.77,.73)*pupilSoftbox*.82+
+          vec3(.13,.26,.29)*pupilRim*.30+
+          vec3(.024,.071,.093)*fresnel*.13;
+        c=mix(c,physicalPupil,convexPupil);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
