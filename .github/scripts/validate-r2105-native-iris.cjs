@@ -242,6 +242,65 @@ const views=[
           path:OUT+'/'+view.name+'-R2115-original-native-webgl-canvas.png',
           animations:'allow',timeout:15000
         });
+        /* R2116 genuine screenshot pixel probe: the old 4KB PNG test
+           could pass a large, almost black canvas with no visible MAG.
+           Decode actual Chromium canvas screenshot and inspect luminance,
+           tonal separation, and painted coverage inside the real image.
+           No generated artwork, no extra app canvas or render context. */
+        const nativeImageProof=await page.evaluate(async base64=>{
+          const img=new Image();
+          img.src='data:image/png;base64,'+base64;
+          await img.decode();
+          const probe=document.createElement('canvas');
+          probe.width=Math.min(img.naturalWidth,420);
+          probe.height=Math.max(1,Math.round(
+            probe.width*img.naturalHeight/Math.max(1,img.naturalWidth)
+          ));
+          const ctx=probe.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(img,0,0,probe.width,probe.height);
+          const pixels=ctx.getImageData(0,0,probe.width,probe.height).data;
+          const count=probe.width*probe.height;
+          let solid=0,lit=0,maxLight=0,minLight=255,sum=0,sum2=0;
+          const toneBins=new Set(),regionBins=new Set();
+          let centerLit=0,centerSamples=0;
+          for(let i=0;i<count;i++){
+            const k=i*4;
+            const red=pixels[k],green=pixels[k+1],blue=pixels[k+2];
+            const alpha=pixels[k+3];
+            const light=.2126*red+.7152*green+.0722*blue;
+            const x=i%probe.width,y=Math.floor(i/probe.width);
+            const central=Math.abs(x/probe.width-.5)<.34&&
+              Math.abs(y/probe.height-.5)<.34;
+            if(central)centerSamples++;
+            if(alpha>16 && light>19){
+              lit++;
+              if(central)centerLit++;
+            }
+            if(alpha>16){
+              solid++;
+              minLight=Math.min(minLight,light);
+              maxLight=Math.max(maxLight,light);
+              sum+=light;sum2+=light*light;
+              toneBins.add(Math.floor(light/8));
+              if(central)regionBins.add([
+                Math.floor(red/32),Math.floor(green/32),
+                Math.floor(blue/32)
+              ].join(':'));
+            }
+          }
+          const mean=sum/Math.max(solid,1);
+          return {
+            source:'real-WebGL-canvas-Chromium-PNG',
+            width:img.naturalWidth,height:img.naturalHeight,
+            samples:count,litRatio:lit/count,
+            centralLitRatio:centerLit/Math.max(centerSamples,1),
+            coverage:solid/count,
+            luminanceRange:maxLight-minLight,
+            luminanceStdDev:Math.sqrt(Math.max(0,sum2/Math.max(solid,1)-mean*mean)),
+            distinctLuminanceBands:toneBins.size,
+            distinctCenterColorBuckets:regionBins.size
+          };
+        },nativeCanvasPixels.toString('base64'));
         const nativeGeometry=await page.evaluate(()=>{
           const canvas=document.querySelector(
             '#hero .fx-crystal-organism-r326-canvas');
@@ -263,13 +322,22 @@ const views=[
           };
         });
         nativeGeometry.screenshotBytes=nativeCanvasPixels.length;
+        nativeGeometry.pixelProof=nativeImageProof;
         fs.writeFileSync(OUT+'/'+view.name+'-R2115-canvas-geometry.json',
           JSON.stringify(nativeGeometry,null,2)+'\n');
-        console.log('R2115_REAL_NATIVE_CANVAS_VISUAL',
+        console.log('R2116_REAL_NATIVE_WEBGL_PIXEL_PROOF',
           JSON.stringify({view:view.name,...nativeGeometry}));
         assert.ok(nativeCanvasPixels.length>4000&&
           nativeGeometry.viewportCanvasVisible,
           'Native 3D MAG viewport canvas was empty or off-screen');
+        assert.ok(nativeImageProof.samples>=10000&&
+          nativeImageProof.luminanceRange>=18&&
+          nativeImageProof.luminanceStdDev>=3.0&&
+          nativeImageProof.distinctLuminanceBands>=5&&
+          nativeImageProof.distinctCenterColorBuckets>=5&&
+          nativeImageProof.centralLitRatio>=.008,
+          'Original post-intro MAG has no differentiated visible metal/glass pixels: '+
+            JSON.stringify(nativeImageProof));
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
         reports.push({view,info,restored});
         console.log('R2105_NATIVE_PHYSICAL_OPTICS_PASS',
