@@ -368,7 +368,14 @@
     // Central aperture has REAL visual depth: shadowed recess, two metal
     // collars, a gasket, blades and a layered sapphire rather than a ball.
     const rx=S*.405,ry=S*.399;
-    const rot=.012*Math.sin(time*.00022);
+    /* R2122: authored mechanical focus choreography. The original eight
+       shaded titanium shutters now visibly rotate and draw apart during the
+       MAG reveal (not just a sub-degree decorative sine wobble). The second
+       phase re-seats the iris before the canonical native hero handoff. */
+    const engage=smooth((t-3.10)/2.20);
+    const seat=smooth((t-6.45)/2.15);
+    const rot=.29*engage-.14*seat+.012*Math.sin(time*.00022);
+    const irisTravel=.058*engage*(1-.52*seat);
     ctx.save();
     ctx.shadowColor='rgba(1,3,9,.90)';ctx.shadowBlur=S*.090;
     ctx.beginPath();ctx.ellipse(0,S*.016,rx*1.25,ry*1.25,0,0,TAU);
@@ -415,6 +422,7 @@
     for(let blade=0;blade<8;blade++){
       const a=blade*TAU/8+rot;
       ctx.save();ctx.rotate(a);
+      ctx.translate(rx*irisTravel,0);
       ctx.beginPath();
       ctx.moveTo(rx*.22,-ry*.065);
       ctx.lineTo(rx*.81,-ry*.32);
