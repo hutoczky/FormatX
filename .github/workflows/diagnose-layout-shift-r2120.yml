@@ -1,0 +1,57 @@
+name: R2120 find real production layout-shift DOM owners
+
+on:
+  push:
+    branches:
+      - feature/r2107-master-sculpted-mag-optics
+    paths:
+      - '.github/scripts/diagnose-layout-shift-r2120.cjs'
+      - '.github/workflows/diagnose-layout-shift-r2120.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2120-real-cls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inspect-real-browser-cls:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium and diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/diagnose-layout-shift-r2120.cjs
+          npm install --prefix "$RUNNER_TEMP/shift" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/shift/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Serve real repository without Lighthouse-specific shortcuts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >/tmp/r2120-http.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat /tmp/r2120-http.log
+          exit 1
+      - name: Measure exact source nodes of real 8-second desktop/mobile shifts
+        env:
+          NODE_PATH: ${{ runner.temp }}/shift/node_modules
+        run: node .github/scripts/diagnose-layout-shift-r2120.cjs
+      - name: Preserve real DOM shift provenance and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2120-real-dom-layout-shift-owners
+          path: artifacts/r2120-real-cls-source/
+          retention-days: 21
+          if-no-files-found: warn
