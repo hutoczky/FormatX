@@ -30,7 +30,7 @@ const viewports=[
       });
       try{
         await context.addInitScript(()=>{
-          window.__fxR2120={shifts:[],changes:[],errors:[]};
+          window.__fxR2120={shifts:[],changes:[],errors:[],paint:[],introEvents:[]};
           const nameOf=(node)=>{
             if(!node)return '';
             const id=node.id?'#'+node.id:'';
@@ -54,6 +54,33 @@ const viewports=[
               }
             }).observe({type:'layout-shift',buffered:true});
           }catch(e){window.__fxR2120.errors.push(String(e))}
+          /* R2124: associate the real high-CLS shifts with first visible
+             content and intro state changes. These observers never change
+             application behavior or disable the user's normal animation. */
+          try{
+            new PerformanceObserver(list=>{
+              for(const e of list.getEntries()){
+                window.__fxR2120.paint.push({
+                  kind:e.entryType,time:Math.round(e.startTime),
+                  name:e.name||'',
+                  size:e.size||0,
+                  element:e.element?.tagName+'#'+(e.element?.id||'')
+                });
+              }
+            }).observe({type:'largest-contentful-paint',buffered:true});
+          }catch(e){window.__fxR2120.errors.push(String(e))}
+          ['formatx:introfinish','formatx:preloadercomplete',
+            'formatx:magbirthcomplete','formatx:immersiveactivate',
+            'formatx:hero-ready'].forEach(name=>{
+              document.addEventListener(name,()=>{
+                window.__fxR2120.introEvents.push({
+                  name,time:Math.round(performance.now()),
+                  classes:document.documentElement.className,
+                  birth:document.documentElement.dataset.fxMagBirthLive||'',
+                  cinema:document.documentElement.dataset.fxArchiveCinema||''
+                });
+              },{passive:true});
+            });
           document.addEventListener('DOMContentLoaded',()=>{
             const nodes=[
               document.documentElement,document.body,
@@ -133,7 +160,9 @@ const viewports=[
           lastRects:report.nodes.map(n=>({
             selector:n.selector,rect:n.finalRect
           })),
-          errors
+          errors,
+          paint:report.evidence.paint.slice(-12),
+          introEvents:report.evidence.introEvents
         }));
         assert.deepEqual(errors,[],'Production site throws JS exception');
       }finally{
