@@ -8,6 +8,17 @@ const ORIGIN=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const DIR='artifacts/r2110-actual-three-phone';
 fs.mkdirSync(DIR,{recursive:true});
+/* R2122: actual visible Three material must not regress into the user's
+   photographed flat cyan emblem. Verify every one of the four physical
+   sculpted arm panels and their separate titanium rail material source. */
+const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
+assert.ok(
+  source.includes('color:0x9baaa5,metalness:.69,roughness:.205')&&
+  source.includes('color:0x29363d,metalness:.61,roughness:.295')&&
+  source.includes('color:0x4c5555,metalness:.48,roughness:.28')&&
+  source.includes('fxMagThreeCortexBounceR2121'),
+  'Latest actual Three cinematic must use neutral sculpted silver, smoked titanium and C1 midfilm fill'
+);
 const frames=[
   {name:'phone-390-cortex',width:390,height:844,second:4.40},
   {name:'phone-390-optic',width:390,height:844,second:8.50},
@@ -99,7 +110,7 @@ const frames=[
           'The visible film must really be the native Three scene, not the 2D fallback');
         assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
           'No usable original WebGL framebuffer: '+JSON.stringify(info));
-        assert.ok(info.threeSource.includes('r2121-cortex-studio-bounce'),
+        assert.ok(info.threeSource.includes('r2122-silver-titanium-studio-cortex'),
           'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
         if(mobile){
           assert.ok(info.mobileThreeDistance>=7.7&&
