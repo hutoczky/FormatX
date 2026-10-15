@@ -63,6 +63,8 @@ const CASES=[
             premium:root.dataset.fxMagFallbackSilhouetteR2104,
             optic:root.dataset.fxMagFallbackOpticR2104,
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
+            viewportRatio:Number(root.dataset.fxMagMobileViewportRatioR2115||0),
+            genomeTimeline:root.dataset.fxMagGenomeFadeR2115||'',
             filmStyle:getComputedStyle(overlay?.querySelector('.fxb-genome-field')||overlay).display,
             width:innerWidth,height:innerHeight,
             canvasRect:{width:size?.width||0,height:size?.height||0},
@@ -124,8 +126,14 @@ const CASES=[
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
         );
         assert.ok(info.diameter>=shot.width*.48&&
-          info.diameter<=shot.width*.67,
-          'Giant phone-clipping orb regression: '+JSON.stringify(info));
+          info.diameter<=shot.width*.53,
+          'R2115 mobile MAG must be a full, centered 48-53% wide solid object: '+
+            JSON.stringify(info));
+        assert.ok(info.viewportRatio>=.48&&info.viewportRatio<=.53,
+          'Physical camera/framing deviates from measured phone width: '+
+            JSON.stringify(info));
+        assert.equal(info.genomeTimeline,'fully-off-by-2.82-seconds',
+          'Legacy DNA waves must disappear before premium MAG hero scene');
         assert.ok(info.buffer.width>100&&info.buffer.height>100,
           'Canvas has no real backing surface');
         assert.ok(info.pixel.length===4&&info.pixel[3]>12,
