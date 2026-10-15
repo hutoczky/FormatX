@@ -1564,7 +1564,7 @@
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
+        c=mix(c,vec3(.004,.013,.020)+c*.30,cavity*.31);
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
         float rim=exp(-pow((od-.74)/.060,2.0))*front;
@@ -1573,7 +1573,7 @@
         float hot=exp(-od*od*74.0)*front;
         float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
+        c=mix(c,opticBase+c*.28,lens*.39);
         c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
         c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
@@ -1610,23 +1610,31 @@
            bezel and eight 3D shutter blades remain in the SAME draw call. */
         float collarKey=pow(sat(dot(n,normalize(vec3(-.43,.61,.66)))),4.0);
         float collarFill=pow(sat(dot(n,normalize(vec3(.63,-.10,.77)))),4.0);
-        vec3 channelTitanium=vec3(.034,.058,.065)+
-          vec3(.39,.45,.42)*(.18+.49*key+.18*fill)+
-          vec3(.30,.42,.44)*collarKey*.22;
-        vec3 machinedTitanium=vec3(.030,.048,.055)+
-          vec3(.52,.59,.55)*(.14+.38*key+.24*softboxB)+
-          vec3(.36,.44,.43)*collarKey*.24+
-          vec3(.08,.15,.17)*fresnel*.29;
-        vec3 shutterTitanium=vec3(.020,.034,.043)+
-          vec3(.28,.40,.42)*(.14+.36*key+.25*fill)+
-          vec3(.18,.24,.24)*collarFill*.23+
-          vec3(.06,.13,.14)*fresnel*.19;
-        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),9.0);
-        vec3 sapphireGlass=vec3(.007,.024,.039)+
-          vec3(.050,.15,.18)*(.27+.73*key)+
-          vec3(.31,.42,.41)*sapphireSpec*.49+
-          vec3(.040,.12,.15)*fresnel*.22+
-          vec3(.015,.065,.080)*(.5+.5*sin(uTime*.0019))*.12;
+        /* R2116: the real depth-tested rails are brushed-smoked silver,
+           not black channels lost under a broad cyan shader. The response
+           follows the actual 3D surface normals under both studio keys. */
+        vec3 channelTitanium=vec3(.042,.063,.068)+
+          vec3(.48,.53,.48)*(.19+.52*key+.21*fill)+
+          vec3(.34,.43,.41)*collarKey*.26;
+        vec3 machinedTitanium=vec3(.028,.043,.050)+
+          vec3(.56,.61,.57)*(.19+.42*key+.24*softboxB)+
+          vec3(.36,.45,.43)*collarKey*.29+
+          vec3(.07,.13,.16)*fresnel*.21;
+        vec3 shutterTitanium=vec3(.017,.031,.041)+
+          vec3(.39,.49,.49)*(.19+.40*key+.26*fill)+
+          vec3(.24,.30,.30)*collarFill*.29+
+          vec3(.04,.10,.12)*fresnel*.17;
+        /* R2116: broad glass specular crescent and absorptive obsidian
+           depth from the REAL convex lens normal, without periodic stripes
+           or a bright painted circle on top of the original MAG. */
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),6.0);
+        float sapphireShoulder=pow(sat(dot(n,normalize(vec3(.42,-.18,.89)))),4.0);
+        vec3 sapphireGlass=vec3(.004,.016,.029)+
+          vec3(.054,.145,.176)*(.30+.70*key)+
+          vec3(.36,.46,.43)*sapphireSpec*.62+
+          vec3(.12,.24,.27)*sapphireShoulder*.25+
+          vec3(.045,.11,.14)*fresnel*.21+
+          vec3(.012,.042,.065)*(.5+.5*sin(uTime*.0019))*.08;
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,channelTitanium,physicalRail*.96);
         c=mix(c,shutterTitanium,physicalIris);
