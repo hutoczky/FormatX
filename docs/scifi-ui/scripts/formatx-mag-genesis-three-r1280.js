@@ -1127,12 +1127,14 @@
       this.mechanicalGroup.add(this.mechMachinedPanels);
       this.mechPanelMaterials=[
         new T.MeshPhysicalMaterial({
-          color:0x799293,metalness:.62,roughness:.24,
+          /* R2122 real photograph-based neutral warm silver face. */
+          color:0x9baaa5,metalness:.69,roughness:.205,
           clearcoat:.80,clearcoatRoughness:.13,side:T.DoubleSide,
           transparent:true,opacity:0,depthWrite:false
         }),
         new T.MeshPhysicalMaterial({
-          color:0x304b57,metalness:.53,roughness:.28,
+          /* R2122 cut-away shadowed titanium, not a flat cyan face. */
+          color:0x29363d,metalness:.61,roughness:.295,
           clearcoat:.72,clearcoatRoughness:.15,side:T.DoubleSide,
           transparent:true,opacity:0,depthWrite:false
         })
@@ -1209,7 +1211,8 @@
          Retain the same 32 real triangles but make their sides smoked
          titanium, with specular separation supplied by geometry normals. */
       this.mechRailMaterialR2118=new T.MeshPhysicalMaterial({
-        color:0x37535b,metalness:.36,roughness:.35,
+        /* R2122 recessed smoke-metal rails read as actual machining. */
+        color:0x4c5555,metalness:.48,roughness:.28,
         clearcoat:.42,clearcoatRoughness:.24,
         emissive:0x02090e,emissiveIntensity:.010,
         side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
