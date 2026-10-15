@@ -878,8 +878,18 @@
 
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
+    let livingTimeline=null;
+    function syncCompositorBreath(){
+      if(reduced.matches){
+        livingTimeline?.pause();
+        return;
+      }
+      if(livingTimeline){
+        if(livingTimeline.playState==='paused')livingTimeline.play();
+        return;
+      }
+      if(typeof canvas.animate!=='function')return;
+      livingTimeline=canvas.animate(
         [
           {opacity:.985,transform:'scale(.996)',offset:0},
           {opacity:1,transform:'scale(1.004)',offset:.48},
@@ -897,6 +907,7 @@
       root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
       root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
     }
+    syncCompositorBreath();
 
     const options = {
       alpha:true,
@@ -915,6 +926,7 @@
     const webgl2 = Boolean(gl);
     if (!gl) gl = canvas.getContext('webgl', options);
     if (!gl) {
+      livingTimeline?.cancel();
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
       root.dataset.fxCoreReal3d = 'context-unavailable';
@@ -1757,6 +1769,7 @@
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
+      livingTimeline?.cancel();
       stage.remove();
       root.dataset.fxCrystalOrganismR326='shader-failed';
       root.dataset.fxCoreReal3d='shader-failed';
@@ -1767,6 +1780,7 @@
     let shaderPollCount = 0;
     function failShader(error) {
       console.warn('FormatX crystal organism unavailable:',error);
+      livingTimeline?.cancel();
       if(stage.isConnected)stage.remove();
       root.dataset.fxCoreShaderCompileR600='failed';
       root.dataset.fxCrystalOrganismR326='shader-failed';
@@ -1884,6 +1898,8 @@
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
+    let motionReduced=reduced.matches;
+    syncCompositorBreath();
     let genesisProgress=-1;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
@@ -1930,8 +1946,9 @@
       },delay);
     }
     function schedule(frames=1){
+      syncMotionPreference();
       if(blocked())return;
-      const frameCap=mobile?4:24;
+      const frameCap=motionReduced?1:mobile?4:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
@@ -2299,7 +2316,7 @@
     }
 
     function frame(now){
-      raf=0;if(blocked())return;
+      raf=0;syncMotionPreference();if(blocked())return;
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
@@ -2388,15 +2405,27 @@
       }else schedule(1);
       scheduleSurfacePulse();
     }
-    function onReducedMotionChange(){
+    function syncMotionPreference(){
+      // A preference can change while an earlier scroll frame is queued.
+      // Reconcile at native input/render boundaries as well as the media
+      // event, so the old autonomous timer cannot survive that queued frame.
+      const next=reduced.matches;
+      if(next===motionReduced)return;
+      motionReduced=next;
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       surfacePulseStart=-Infinity;
+      burstFrames=0;
       root.dataset.fxCoreSurfacePulseR454='idle';
+      syncCompositorBreath();
       scheduleSurfacePulse();
+    }
+    function onReducedMotionChange(){
+      syncMotionPreference();
       schedule(1);
     }
     let previousScrollY=scrollY;
     function onScroll(){
+      syncMotionPreference();
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
@@ -2639,6 +2668,7 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
+      livingTimeline?.cancel();
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);

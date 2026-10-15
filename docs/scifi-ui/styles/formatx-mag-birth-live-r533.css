@@ -2293,6 +2293,13 @@ html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture 
   visibility:hidden!important;
   pointer-events:none!important;
 }
+/* The controls' own owner writes inline visibility and opacity. Suppress
+   their rendered subtree during the genuine intro without changing its
+   reserved box or the controls' stored styles. Handoff restores it by
+   removing the native-genesis attribute. */
+html[data-fx-native-genesis-r2064] #hero .fx-reference-controls-r204{
+  content-visibility:hidden!important;
+}
 html[data-fx-native-genesis-r2064] body #hero,
 html[data-fx-native-genesis-r2064] body #hero .hero-grid,
 html[data-fx-native-genesis-r2064] body #hero .hero-space{

@@ -7,6 +7,7 @@ on:
     paths:
       - 'docs/scifi-ui/**'
       - '.github/scripts/validate-mag-surface-energy-r484.cjs'
+      - '.github/scripts/validate-mag-reduced-lifecycle-r2108.cjs'
       - '.github/scripts/validate-mag-pause-owner-r485.cjs'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/workflows/verify-mag-surface-energy-r484.yml'
@@ -15,6 +16,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - '.github/scripts/validate-mag-surface-energy-r484.cjs'
+      - '.github/scripts/validate-mag-reduced-lifecycle-r2108.cjs'
       - '.github/workflows/verify-mag-surface-energy-r484.yml'
   workflow_run:
     workflows: ['Prepare or deploy FormatX production']
@@ -83,6 +85,7 @@ jobs:
           python3 -m http.server 4173 --directory docs > "$RUNNER_TEMP/mag-server.log" 2>&1 &
           SERVER_PID=$!
           trap 'kill "$SERVER_PID"' EXIT
+          xvfb-run -a node .github/scripts/validate-mag-reduced-lifecycle-r2108.cjs
           xvfb-run -a node .github/scripts/validate-mag-surface-energy-r484.cjs
       - name: Verify canonical deployed MAG behavior
         if: env.FORMATX_VERIFY_LIVE == 'true'
