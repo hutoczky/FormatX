@@ -226,8 +226,22 @@ const CASES=[
           const film=document.querySelector('.fx-mag-birth-r533');
           const canvas=film?.querySelector('canvas.fxb-particles');
           const value=Number(film?.querySelector('progress')?.value||0);
+          /* R2120: the original progress meter can lead the first actual
+             fallback paint by one or more animation ticks. Never mark the
+             WebGL/canvas frame as a rendered MAG merely because progress
+             reached 35%. Require the exact post-draw material identity
+             published by drawMagStudio(), plus a visible owning canvas. */
+          const style=canvas?getComputedStyle(canvas):null;
+          const painted=(
+            root.dataset.fxMagFallbackSilhouetteR2104===
+              'sculpted-fourpoint-3d-illusion-machined-optic' &&
+            root.dataset.fxMagFallbackOpticR2104===
+              'eight-deep-shutter-blades-sapphire-glass'
+          );
           if(root.dataset.fxMagBirthRendererR1360===
-             'native-canvas-reference-film' && canvas &&
+             'native-canvas-reference-film' && painted && canvas &&
+             style?.display!=='none' && style?.visibility!=='hidden' &&
+             Number(style?.opacity||0)>.85 &&
              canvas.width>100&&canvas.height>100){
             try{
               if(!captured.first&&value>=35&&value<=50)
