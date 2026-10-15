@@ -4,6 +4,20 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {chromium}=require('playwright');
 
+/* R2114: the original permanent WebGL MAG must still take ownership after
+   the repaired R2112 live fallback. A frame-perfect R2105 screenshot alone
+   would not catch an accidental reversion to the blank phase-only film. */
+const originalFilmOwner=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
+const originalFallback=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js','utf8');
+assert.ok(
+  originalFilmOwner.includes('repainting-every-125ms-and-at-phase-changes') &&
+  originalFilmOwner.includes('lastSoftwareFallbackPhase=visiblePhase;') &&
+  originalFallback.includes('pendingQualityResize=true;'),
+  'R2114 real R2112 nonblank film/graphics-canvas handoff has regressed'
+);
+
 const BASE=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT='artifacts/r2105-native-physical-optics';
