@@ -1,6 +1,7 @@
 'use strict';
 
 const { chromium } = require('playwright');
+const { finishIntroThroughControls } = require('./finish-intro-through-controls-r2110.cjs');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const CHROMIUM_ARGS = ['--enable-unsafe-swiftshader'];
@@ -138,6 +139,7 @@ async function verify(viewport, mobile) {
     // accessible HTML mode. The canonical new MAG-only experience is
     // independently tested with real eight-scene browser and native ASK suites.
     await page.goto(TEST_URL + '?lang=hu&thought-genome-test=1&archive=off', { waitUntil: 'domcontentloaded' });
+    await finishIntroThroughControls(page);
     await activateRuntime(page);
 
     const initial = await page.evaluate(() => {

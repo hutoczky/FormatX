@@ -1,37 +1,12 @@
 'use strict';
 
 const { chromium } = require('playwright');
+const { finishIntroThroughControls } = require('./finish-intro-through-controls-r2110.cjs');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 
 function assert(value, message) {
   if (!value) throw new Error(message);
-}
-
-async function clearIntro(page) {
-  const skip = page.locator('.fx-intro-skip');
-  if (await skip.count()) await skip.evaluate(node => node.click()).catch(() => {});
-
-  const completed = await page.waitForFunction(() => {
-    const root = document.documentElement;
-    const overlay = document.getElementById('formatx-event-horizon');
-    return root.classList.contains('fx-intro-complete')
-      && !root.classList.contains('fx-intro-running')
-      && (!overlay || overlay.hidden);
-  }, null, { timeout: 5000 }).then(() => true).catch(() => false);
-
-  if (completed) return;
-  await page.evaluate(() => {
-    const root = document.documentElement;
-    const overlay = document.getElementById('formatx-event-horizon');
-    root.classList.remove('fx-intro-running', 'fx-intro-pending');
-    root.classList.add('fx-intro-complete');
-    if (overlay) {
-      overlay.hidden = true;
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-    }
-  });
 }
 
 async function activateImmersiveRuntime(page, source) {
@@ -165,7 +140,7 @@ async function runCase(browser, name, contextOptions) {
   });
 
   await page.goto(TEST_URL + '?lang=hu&audio-test=1&score=v6', { waitUntil: 'domcontentloaded' });
-  await clearIntro(page);
+  await finishIntroThroughControls(page);
   await activateImmersiveRuntime(page, 'audio-validation');
   await page.waitForFunction(() => document.documentElement.dataset.fxAudioOwner === 'professional-v6', null, { timeout: 45000 });
   await page.waitForFunction(() => ['passed', 'unsupported'].includes(document.documentElement.dataset.fxAudioSelfTest || ''), null, { timeout: 20000 });

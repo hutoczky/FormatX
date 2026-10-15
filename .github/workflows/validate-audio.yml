@@ -18,6 +18,7 @@ on:
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
+      - '.github/scripts/finish-intro-through-controls-r2110.cjs'
       - '.github/workflows/validate-audio.yml'
   push:
     branches: [master]
@@ -34,6 +35,7 @@ on:
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
+      - '.github/scripts/finish-intro-through-controls-r2110.cjs'
       - '.github/workflows/validate-audio.yml'
 
 permissions:
@@ -72,6 +74,7 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check billing-worker/src/production-with-license.js
           node --check .github/scripts/validate-audio.cjs
+          node --check .github/scripts/finish-intro-through-controls-r2110.cjs
           grep -Fq "professional-v6" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "premium-cinematic-music" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "sixteen-bar-evolving-score" docs/scifi-ui/scripts/formatx-audio-repair.js

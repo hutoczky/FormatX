@@ -18,6 +18,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -36,6 +37,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
@@ -65,6 +67,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+          node --check .github/scripts/validate-archive-atomic-chapter-r2110.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -80,6 +83,10 @@ jobs:
           done
           cat "$RUNNER_TEMP/archive-server.log"
           exit 1
+      - name: Test atomic native chapter handoff on desktop and phone
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-archive-atomic-chapter-r2110.cjs
       - name: Test desktop, phone, reversibility, accessibility fallback
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
