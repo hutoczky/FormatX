@@ -36,7 +36,9 @@ const viewports=[
             const id=node.id?'#'+node.id:'';
             const cls=String(node.className||'').trim().split(/\s+/)
               .slice(0,3).filter(Boolean).map(s=>'.'+s).join('');
-            return node.tagName.toLowerCase()+id+cls;
+            return (typeof node.tagName==='string'
+              ?node.tagName.toLowerCase()
+              :'non-element-node')+id+cls;
           };
           try{
             new PerformanceObserver(list=>{
