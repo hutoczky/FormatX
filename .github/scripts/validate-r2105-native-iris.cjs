@@ -71,6 +71,8 @@ const views=[
             renderer:root.dataset.fxCrystalOrganismR326,
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
+            opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
+            sapphireRadius:Number(root.dataset.fxNativeMagLensXRadiusR2108||0),
             count:canvases.length,
             webgl:root.dataset.fxCoreReal3d,
             width:rect?.width||0,height:rect?.height||0,
@@ -154,6 +156,10 @@ const views=[
         assert.equal(info.count,1,'No duplicate native MAG canvas');
         assert.equal(info.blades,'8-raised-curved-titanium-blades');
         assert.equal(info.triangles,16);
+        assert.equal(info.opticScale,'1.29x-real-geometry',
+          'R2108 did not enlarge actual native WebGL metal/glass geometry');
+        assert.ok(info.sapphireRadius>=.205&&info.sapphireRadius<=.220,
+          'The actual sapphire surface radius is still too small');
         assert.ok(info.visible&&info.width>50&&info.height>50,
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
         assert.ok(info.pixelWidth>100&&info.pixelHeight>100,
@@ -175,6 +181,8 @@ const views=[
             'CTA must remain attached to its original location or actual final folio: '+
               JSON.stringify(info));
         }
+        assert.ok(info.loader.includes('r2108=larger-convex-sapphire'),
+          'Original renderer script stayed cached and cannot contain the bigger optic');
         assert.ok(info.loader.includes('r2105=physical-sapphire-iris'),
           'Cached obsolete R326 shader was loaded: '+JSON.stringify(info));
         // Accessibility transition actually DISPOSES of the exclusive
