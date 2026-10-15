@@ -20,6 +20,11 @@ assert.ok(shader.includes('float physicalRail=step(5.81,vFacet)*(1.0-step(5.91,v
   shader.includes('c=mix(c,channelTitanium,physicalRail*.96);')&&
   shader.includes('c=mix(c,sapphireGlass,physicalLens);'),
   'The physically distinct titanium channels, bezel and sapphire must survive shader edits');
+assert.ok(shader.includes('R2117: physically coherent four-arm metal shoulders') &&
+  shader.includes('float cutShoulder=pow(sat(dot(n,normalize(vec3(-.38,.62,.69)))),3.0)') &&
+  shader.includes('c+=vec3(.64,.69,.63)*cutShoulder*') &&
+  shader.includes('R2116: the real depth-tested rails'),
+  'The latest permanent 3D MAG must use broad physically lit arms and separate titanium/sapphire, not old flat cyan shading');
 const views=[
   {name:'desktop-1440',width:1440,height:900,mobile:false,scale:1},
   {name:'phone-390',width:390,height:844,mobile:true,scale:2},
@@ -129,8 +134,10 @@ const views=[
         assert.ok(fs.readFileSync('docs/scifi-ui/index.html','utf8')
           .includes('id="hero-download"'),
           'Production source has lost the original multiplatform CTA');
-        assert.ok(info.loader.includes('r2105=physical-sapphire-iris'),
-          'Cached obsolete R326 shader was loaded: '+JSON.stringify(info));
+        assert.ok(info.loader.includes('r2105=physical-sapphire-iris') &&
+          info.loader.includes('r2117=physical-four-arm-facet-lights'),
+          'Cached obsolete R326 shader was loaded instead of the actual R2117 material: '+
+            JSON.stringify(info));
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
         reports.push({view,info});
         console.log('R2105_NATIVE_PHYSICAL_OPTICS_PASS',
