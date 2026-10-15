@@ -726,10 +726,14 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(false){
-      const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
-      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
+    /* R2105: reactivate the formerly dead physical central optics of the
+       original live R326 hero core. Constrain tessellation across all phone
+       tiers and keep the ONE existing GPU program and draw call. */
+    if(true){
+      const centreX=.025,centreY=-.012;
+      const bezelSteps=software?24:mobile?32:48;
+      const bezelTubeSteps=4,bezelZ=.632;
+      const bezelMajorX=.232,bezelMajorY=.210,bezelTube=.011;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -753,12 +757,17 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.609];
-      const lensRadiusX=.153;
-      const lensRadiusY=.041;
-      const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const lensCenter=[centreX,centreY,.643];
+      const lensRadiusX=.209;
+      const lensRadiusY=.185;
+      const lensDepth=.031;
+      /* R2108: the real machined optics were too small inside the hero
+         four-point body. Enlarge the SAME geometry and strengthen actual
+         convex lens curvature; retain the original tessellation/draw call. */
+      root.dataset.fxNativeMagOpticScaleR2108='1.29x-real-geometry';
+      root.dataset.fxNativeMagLensXRadiusR2108=String(lensRadiusX);
+      const radialSteps=software?4:mobile?5:6;
+      const angularSteps=software?24:mobile?32:48;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -798,6 +807,27 @@
         }
         previous=current;
       }
+      /* R2105: eight actual raised, facing metal shutter plates over the
+         convex sapphire. The lens remains visible through their aperture.
+         Sixteen triangles only, no distinct WebGL pass or offscreen texture. */
+      const bladesFirst=facets.length;
+      for(let blade=0;blade<8;blade++){
+        const angle=blade*Math.PI/4;
+        const vertex=(radius,delta)=>{
+          const v=lensVertex(radius,angle+delta);
+          v.crystal[2]+=.006;
+          return v;
+        };
+        const p0=vertex(.36,-.12);
+        const p1=vertex(.93,-.30);
+        const p2=vertex(.91,.16);
+        const p3=vertex(.49,.25);
+        triangle([p0,p1,p2],6.18);
+        triangle([p0,p2,p3],6.18);
+      }
+      root.dataset.fxNativeMagIrisR2105='8-raised-curved-titanium-blades';
+      root.dataset.fxNativeMagIrisTrianglesR2105=
+        String((facets.length-bladesFirst)/3);
     }
 
     return {
@@ -1402,21 +1432,21 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(.105,.128,.131),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
+        c+=vec3(.30,.33,.31)*facetSilver*${mobile?'.095':'.120'};
+        c+=vec3(.020,.060,.070)*facetCool*${mobile?'.048':'.058'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.48,.59,.58)*softboxB*${mobile?'.250':'.235'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
@@ -1438,9 +1468,9 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.24,.34,.33)*axisRidge*(.17+.050*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-.24*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1468,14 +1498,14 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.38,.47,.43)*foldRidge*${mobile?'.110':'.140'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
+        c*=1.0-${mobile?'.095':'.125'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
+        c+=vec3(.030,.105,.123)*fresnel*.23;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
@@ -1518,6 +1548,26 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
+        /* R2105: actual front-facing depth-tested metal, glass and iris
+           geometry have distinct reflectance instead of inheriting the
+           flat cyan base material painted on the four-point mineral. */
+        float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
+        float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
+        float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
+        vec3 machinedTitanium=vec3(.022,.040,.048)+
+          vec3(.43,.49,.46)*(softboxA*.56+softboxB*.31+key*.13)+
+          vec3(.065,.13,.15)*fresnel*.36;
+        vec3 shutterTitanium=vec3(.011,.028,.037)+
+          vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
+          vec3(.08,.14,.15)*fresnel*.28;
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),12.0);
+        vec3 sapphireGlass=vec3(.005,.019,.034)+
+          vec3(.045,.13,.16)*(.25+.75*key)+
+          vec3(.19,.24,.22)*sapphireSpec*.48+
+          vec3(.025,.12,.16)*fresnel*.21;
+        c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,shutterTitanium,physicalIris);
+        c=mix(c,sapphireGlass,physicalLens);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
