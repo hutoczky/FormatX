@@ -39,9 +39,19 @@ const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi
               removeEventListener('scroll', snapshot);
               const panel = document.querySelector('[data-fx-cinema-panel-active="true"]');
               const panels = [...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
+              let opacity = 1, painted = Boolean(panel);
+              for (let node = panel; node; node = node.parentElement) {
+                const style = getComputedStyle(node);
+                opacity *= Number(style.opacity);
+                if (style.display === 'none' || style.contentVisibility === 'hidden') painted = false;
+              }
+              const rect = panel?.getBoundingClientRect();
+              const visiblePaper = painted && opacity > .1 && rect?.width > 8 && rect?.height > 8
+                && rect.right > 0 && rect.bottom > 0 && rect.left < innerWidth && rect.top < innerHeight;
               resolve({ key, expectedSource: scene.source, scene: window.FormatXArchiveExperience.state.scene,
                 source: panel?.dataset.fxCinemaSource, activeCount: panels.filter(panel => panel.dataset.fxCinemaPanelActive === 'true').length,
                 focusSafe: panels.every(panel => panel.inert === (panel.dataset.fxCinemaPanelActive !== 'true')),
+                visiblePaper, opacity,
                 sameCanvas: window.FormatXLivingCore.canvas === window.__r2110OriginalCanvas,
                 canvasCount: document.querySelectorAll('.fx-crystal-organism-r326-canvas').length });
             };
@@ -52,6 +62,7 @@ const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi
           }), key);
           assert.equal(state.scene, key, 'The native scroll selected another chapter');
           assert.equal(state.source, state.expectedSource, 'The original folio source must commit in the same native scroll event as its chapter');
+          assert.equal(state.visiblePaper, true, 'The original native paper must be visible through every ancestor, not only report visibility on itself');
           assert.equal(state.activeCount, 1, 'Chapter handoff must show one original native paper');
           assert.equal(state.focusSafe, true, 'Inactive original papers must remain inert during chapter handoff');
           assert.equal(state.sameCanvas, true, 'Chapter handoff replaced the original MAG canvas');

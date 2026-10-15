@@ -296,6 +296,11 @@ async function evaluate(viewport,isMobile,browser){
         return {count:panels.length,active:active.length,
           activeInert:active.some(p=>p.inert),hiddenFocus:inactive.filter(p=>!p.inert).length,
           activeContentVisibility:active.map(p=>getComputedStyle(p).contentVisibility),
+          activeEffectiveOpacity:active.map(panel=>{
+            let opacity=1;
+            for(let node=panel;node;node=node.parentElement)opacity*=Number(getComputedStyle(node).opacity);
+            return opacity;
+          }),
           archivedContentVisibility:inactive.map(p=>getComputedStyle(p).contentVisibility),
           remainingNativeNodes:inactive.every(p=>p.querySelectorAll('*').length>1)};
       });
@@ -305,6 +310,8 @@ async function evaluate(viewport,isMobile,browser){
           &&tabSafety.archivedContentVisibility.every(v=>v==='hidden')
           &&tabSafety.remainingNativeNodes,
         'Inactive archived native HTML must skip expensive offscreen layout without deleting original content: '+JSON.stringify(tabSafety));
+      assert.ok(tabSafety.activeEffectiveOpacity.every(value=>value>.1),
+        'The real original paper is transparent through an ancestor: '+JSON.stringify(tabSafety));
       console.log('ARCHIVE_SINGLE_LIVE_LAYOUT_PASS',JSON.stringify({scene:scene.key,active:tabSafety.activeContentVisibility,archived:tabSafety.archivedContentVisibility.length}));
             assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
       assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');

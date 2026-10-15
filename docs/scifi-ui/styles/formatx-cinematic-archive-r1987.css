@@ -495,7 +495,7 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
   /* Keep the full original page in layout as navigable scroll anchors,
      but NEVER display the old layout behind the incoming 3D folio. */
   html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
-  main#main-content > :is(section.scene,section.fx-category-deck--standalone):not(#hero){
+  main#main-content > :is(section.scene,section.fx-category-deck--standalone):not(#hero):not([data-fx-cinema-host-active="true"]){
     opacity:0!important;
     visibility:hidden!important;
     pointer-events:none!important;
