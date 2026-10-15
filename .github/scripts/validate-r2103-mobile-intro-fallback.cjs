@@ -145,6 +145,62 @@ const CASES=[
         records.push({shot,info});
       }finally{await context.close()}
     }
+    /* R2107: record the actual 10-second animated R649 film instead of
+       accepting three frozen reference-frame screenshots as complete proof.
+       Capture includes the original late overlay teardown, not an artistic
+       mock-up. The entire mobile film is an Actions artifact. */
+    const realFilm=await browser.newContext({
+      viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+      deviceScaleFactor:2,locale:'hu-HU',reducedMotion:'no-preference',
+      recordVideo:{dir:OUT,size:{width:390,height:844}}
+    });
+    let filmVideo=null;
+    let filmStatus=null;
+    try{
+      const page=await realFilm.newPage();
+      filmVideo=page.video();
+      await page.goto(HOME+'?intro=1&visualintro=1&proofrenderer=reference'
+        +'&r2107-real-mobile-film=1',{waitUntil:'domcontentloaded',timeout:60000});
+      await page.waitForFunction(()=>
+        document.documentElement.dataset.fxMagBirthRendererR1360
+        ==='native-canvas-reference-film',null,{timeout:35000});
+      await page.waitForTimeout(11500);
+      filmStatus=await page.evaluate(()=>{
+        const intro=document.querySelector('.fx-mag-birth-r533');
+        const css=intro?getComputedStyle(intro):null;
+        return {
+          renderer:document.documentElement.dataset.fxMagBirthRendererR1360||'',
+          expectedPhysicalOptic:
+            document.documentElement.dataset.fxMagFallbackOpticR2104||'',
+          overlayVisible:!!intro&&css?.visibility!=='hidden'&&
+            Number(css?.opacity||0)>.02,
+          originalCanvas:document.querySelectorAll(
+            '#hero .fx-crystal-organism-r326-canvas').length,
+          originalDownloadCount:document.querySelectorAll('#hero-download').length
+        };
+      });
+      await page.screenshot({
+        path:OUT+'/r2107-ten-second-completed-mobile.png'
+      });
+    }finally{await realFilm.close()}
+    if(filmVideo){
+      const oldPath=await filmVideo.path();
+      fs.renameSync(oldPath,OUT+'/r2107-390px-genuine-ten-second-mobile.webm');
+    }
+    fs.writeFileSync(OUT+'/r2107-film-handoff.json',
+      JSON.stringify(filmStatus,null,2)+'\n');
+    assert.equal(filmStatus?.expectedPhysicalOptic,
+      'eight-deep-shutter-blades-sapphire-glass',
+      'Genuine mobile film did not use the real R2104 optic');
+    assert.ok(filmStatus&&!filmStatus.overlayVisible,
+      'Original ten-second movie did not relinquish the screen: '+
+        JSON.stringify(filmStatus));
+    assert.equal(filmStatus.originalCanvas,1,
+      'Film handoff created no original WebGL MAG or duplicated the canvas');
+    assert.equal(filmStatus.originalDownloadCount,1,
+      'Original checkout CTA disappeared or was duplicated during the movie');
+    console.log('PASS R2107_REAL_TEN_SECOND_FILM',JSON.stringify(filmStatus));
+
     /* R2103 high-core 4GB Android routing: unlike the old <=4GB gate,
        the user agent must attempt the actual Three cinema first.
        Browser GPU compilation is tested separately by the full Three film
