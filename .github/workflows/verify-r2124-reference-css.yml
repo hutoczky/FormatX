@@ -1,0 +1,44 @@
+name: R2124 reference CSS parity and desktop first paint
+
+on:
+  push:
+    branches:
+      - feature/r2117-premium-mag-master-sync
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/styles/formatx-reference-production-r244.css'
+      - 'docs/scifi-ui/styles/formatx-reference-production-r244.desktop-r2100.css'
+      - '.github/scripts/verify-r2124-reference-css.cjs'
+      - '.github/workflows/verify-r2124-reference-css.yml'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2124-css-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  css-source-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify desktop media-group projection and exact source parity
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/verify-r2124-reference-css.cjs
+          node .github/scripts/verify-r2124-reference-css.cjs
+      - name: Verify authoritative mobile rules were not edited
+        run: |
+          set -euo pipefail
+          test -s docs/scifi-ui/styles/formatx-reference-production-r244.css
+          test -s docs/scifi-ui/styles/formatx-reference-production-r244.desktop-r2100.css
+          grep -Fq 'media="(min-width: 901px)"' docs/scifi-ui/index.html
