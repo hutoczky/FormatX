@@ -10,7 +10,7 @@
   root.dataset.fxCoreCrystalRevision = 'r615-armored-biomechanical-genesis-mag';
   root.dataset.fxCoreMobileOpticsRevision = 'r454-visible-electric-native-webgl';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry&r2105=physical-sapphire-iris&r2116=smoked-silver-deep-sapphire';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry&r2105=physical-sapphire-iris&r2116=smoked-silver-deep-sapphire&r2117=physical-four-arm-facet-lights';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   const LANGUAGE_OWNER_SCRIPT = '/scifi-ui/scripts/formatx-mobile-language-owner-r423.js?v=20260829-r423-direct-topbar-language';
