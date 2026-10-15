@@ -1204,10 +1204,14 @@
       railGeometry.setAttribute('position',new T.Float32BufferAttribute(railPositions,3));
       railGeometry.setIndex(railIndices);
       railGeometry.computeVertexNormals();
+      /* R2119 actual screenshot correction: unlit channels should NOT
+         become bright white V-shaped decals under the studio key.
+         Retain the same 32 real triangles but make their sides smoked
+         titanium, with specular separation supplied by geometry normals. */
       this.mechRailMaterialR2118=new T.MeshPhysicalMaterial({
-        color:0x8ea6a1,metalness:.47,roughness:.24,
-        clearcoat:.64,clearcoatRoughness:.12,
-        emissive:0x08191e,emissiveIntensity:.035,
+        color:0x37535b,metalness:.36,roughness:.35,
+        clearcoat:.42,clearcoatRoughness:.24,
+        emissive:0x02090e,emissiveIntensity:.010,
         side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
       });
       this.mechMachinedRailsR2118=new T.Mesh(railGeometry,this.mechRailMaterialR2118);
@@ -1477,10 +1481,10 @@
          while its center rises optically above them, never as a painted
          marble overlay. Low-segment geometry keeps mobile GPU cost bounded. */
       this.mechSapphireMaterialR2115=new T.MeshPhysicalMaterial({
-        color:0x234b58,metalness:.08,roughness:.10,
+        color:0x1b3a48,metalness:.08,roughness:.13,
         clearcoat:1,clearcoatRoughness:.05,ior:1.48,
         transmission:.16,thickness:.14,
-        emissive:0x061b25,emissiveIntensity:.08,
+        emissive:0x061722,emissiveIntensity:.045,
         envMapIntensity:1.35,transparent:true,opacity:0,
         depthWrite:false
       });
@@ -1496,7 +1500,7 @@
       this.mechOptics.add(this.mechIris);
       this.mechIrisMaterial=new T.MeshPhysicalMaterial({
         color:0x3f636c,metalness:.68,roughness:.22,
-        emissive:0x0e2934,emissiveIntensity:.12,
+        emissive:0x0a1c28,emissiveIntensity:.070,
         clearcoat:.89,clearcoatRoughness:.09,
         side:T.DoubleSide,transparent:true,opacity:0,
         depthWrite:false
@@ -1847,7 +1851,7 @@
         this.mechPanelMaterials[1].opacity=
           metalReveal*(this.mobileRender?.46:.32);
         if(this.mechRailMaterialR2118)
-          this.mechRailMaterialR2118.opacity=metalReveal*(this.mobileRender?.84:.69);
+          this.mechRailMaterialR2118.opacity=metalReveal*(this.mobileRender?.43:.38);
       }
       this.silverMaterial.opacity=
         ((this.mobileRender?.54:.36)+.055*finale)*grow;
@@ -1866,7 +1870,7 @@
         this.mechSapphireMaterialR2115.opacity=.84*machined;
         this.mechIris.rotation.z=.17*(1-smooth((t-7.28)/1.41))+
           .014*Math.sin(time*.00015);
-        this.mechOpticalLight.intensity=.48*machined;
+        this.mechOpticalLight.intensity=.32*machined;
       }
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
