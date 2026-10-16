@@ -9,6 +9,11 @@
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
+  // Read the current preference at existing input/render boundaries even
+  // while a retained media-query object's change event is still queued.
+  function reducedMotionRequested(){
+    return matchMedia('(prefers-reduced-motion:reduce)').matches;
+  }
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -880,7 +885,7 @@
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
     let livingTimeline=null;
     function syncCompositorBreath(){
-      if(reduced.matches){
+      if(reducedMotionRequested()){
         livingTimeline?.pause();
         return;
       }
@@ -1900,7 +1905,7 @@
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
-    let motionReduced=reduced.matches;
+    let motionReduced=reducedMotionRequested();
     syncCompositorBreath();
     let genesisProgress=-1;
     let activeOrgan='hero',shapeLockUntil=0;
@@ -1957,7 +1962,7 @@
     function boost(value=.84,frames=8){
       targetEnergy=Math.max(targetEnergy,value);
       targetBreath=Math.max(targetBreath,.38+value*.48);
-      schedule(reduced.matches?1:frames);
+      schedule(reducedMotionRequested()?1:frames);
     }
     function shapeName(){return 'organism';}
     function publishShape(source='renderer'){
@@ -2024,7 +2029,7 @@
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
       const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
-      if(disposed||contextLost||reduced.matches||document.hidden||paused
+      if(disposed||contextLost||reducedMotionRequested()||document.hidden||paused
         ||(!visible&&!explicitInteraction)
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
         ||(!explicitInteraction&&now-lastSurfacePulseAt<2200))return false;
@@ -2099,7 +2104,7 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+      if(disposed||contextLost||reducedMotionRequested()||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
@@ -2129,7 +2134,7 @@
       const dt=Math.min(48,Math.max(1,now-last));last=now;
       if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
       else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
-      if(!reduced.matches)simulationTime+=dt*.001;
+      if(!reducedMotionRequested())simulationTime+=dt*.001;
       const pointerEase=1-Math.exp(-dt*.018);
       const rotationEase=1-Math.exp(-dt*.011);
       px+=(tx-px)*pointerEase;py+=(ty-py)*pointerEase;
@@ -2144,7 +2149,7 @@
       breath+=(targetBreath-breath)*(1-Math.exp(-dt*.032));
       targetEnergy+=(IDLE_ENERGY-targetEnergy)*(1-Math.exp(-dt*.006));
       targetBreath+=(.12-targetBreath)*(1-Math.exp(-dt*.007));
-      morph+=(targetMorph-morph)*(reduced.matches?1:1-Math.exp(-dt*.0078));
+      morph+=(targetMorph-morph)*(reducedMotionRequested()?1:1-Math.exp(-dt*.0078));
       if(Math.abs(morph-targetMorph)<.0008)morph=targetMorph;
       siteProgress+=(targetSiteProgress-siteProgress)*(1-Math.exp(-dt*.005));
       cinematic.energy=energy;
@@ -2411,7 +2416,7 @@
       // A preference can change while an earlier scroll frame is queued.
       // Reconcile at native input/render boundaries as well as the media
       // event, so the old autonomous timer cannot survive that queued frame.
-      const next=reduced.matches;
+      const next=reducedMotionRequested();
       if(next===motionReduced)return;
       motionReduced=next;
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;

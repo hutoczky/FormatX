@@ -65,13 +65,19 @@ for(const sources of [['complete','absolute-dom-watchdog-r653'],['absolute-dom-w
 const renderer=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 const schedule=renderer.slice(renderer.indexOf('    function scheduleSurfacePulse(){'),renderer.indexOf('    function scheduleAutonomousMorph(){'));
 assert.ok(schedule.includes('function scheduleSurfacePulse'), 'Real autonomous scheduler must be present');
-for(const mobile of [false,true])for(const surfacePulseCount of [0,1,2])for(const visible of [false,true])for(const motionReduced of [false,true]){
+const preferenceStart=renderer.indexOf('  function reducedMotionRequested(){');
+assert.ok(preferenceStart>=0,'Current native preference reader must be present');
+const preference=renderer.slice(preferenceStart,renderer.indexOf('\n  }',preferenceStart)+4);
+assert.ok(preference.includes("matchMedia('(prefers-reduced-motion:reduce)').matches"));
+for(const mobile of [false,true])for(const surfacePulseCount of [0,1,2])for(const visible of [false,true])for(const motionReduced of [false,true])for(const retainedReduced of [false,true]){
   const delays=[];
   const context={mobile,surfacePulseCount,visible,surfacePulseTimer:0,disposed:false,contextLost:false,
-    reduced:{matches:motionReduced},paused:false,root:{dataset:{}},performance:{now:()=>0},
+    reduced:{matches:retainedReduced},
+    matchMedia(query){assert.equal(query,'(prefers-reduced-motion:reduce)');return{matches:motionReduced};},
+    paused:false,root:{dataset:{}},performance:{now:()=>0},
     document:{hidden:false,querySelector:()=>null},clearTimeout(){},setTimeout(callback,delay){delays.push(delay);return 1;}
   };
-  vm.createContext(context);vm.runInContext(schedule,context);context.scheduleSurfacePulse();
+  vm.createContext(context);vm.runInContext(preference+schedule,context);context.scheduleSurfacePulse();
   if(visible&&!motionReduced){assert.equal(delays.length,1);assert.ok(delays[0]>=4100&&delays[0]<=6440,'First visible sweep must use the real recurring cadence');}
   else{
     assert.equal(delays.length,0,'Offscreen or reduced-motion MAG must remain suspended');

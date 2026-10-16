@@ -77,7 +77,8 @@
 }
 @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
   .fx-ai-core-ident-r1951{
-    bottom:4%;
+    /* Reserve the complete 14px entry translation even on short phones. */
+    bottom:max(4%,16px);
     left:5%;
     right:5%;
     gap:7px;

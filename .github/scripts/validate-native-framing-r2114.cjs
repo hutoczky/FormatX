@@ -27,7 +27,7 @@ const reports=[];
    try{
     const page=await context.newPage();
     await page.addInitScript(()=>{
-     const audit=window.__nativeFramingR2114={frames:[],identity:[],complete:[],errors:[]};
+     const audit=window.__nativeFramingR2114={frames:[],identity:[],identityMotion:[],complete:[],errors:[]};
      addEventListener('error',event=>audit.errors.push(event.message));
      document.addEventListener('formatx:magbirthcomplete',()=>audit.complete.push(performance.now()));
      // Pixel readback is confined to this separate framing check. The visitor
@@ -72,18 +72,20 @@ const reports=[];
      }
      let frames=0;
      function observeIdentity(){
-      const badge=document.querySelector('.fx-ai-core-ident-r1951.is-visible');
-      if(badge&&Number(getComputedStyle(badge).opacity)>.05&&audit.identity.length===0){
+      const badge=document.querySelector('.fx-ai-core-ident-r1951');
+      if(badge&&Number(getComputedStyle(badge).opacity)>.05){
        const stage=window.FormatXLivingCore?.stage;
        const paper=document.querySelector('[data-fx-cinema-panel-active="true"]');
        const b=badge.getBoundingClientRect(),s=stage?.getBoundingClientRect(),p=paper?.getBoundingClientRect();
-       audit.identity.push({nativeReady:document.documentElement.dataset.fxCrystalOrganismR326==='ready',
+       const identity={nativeReady:document.documentElement.dataset.fxCrystalOrganismR326==='ready',
         originalStage:badge.parentElement===stage,text:badge.textContent,
         badgeRect:b.toJSON(),stageRect:s?.toJSON(),
         badgeStyle:{position:getComputedStyle(badge).position,left:getComputedStyle(badge).left,top:getComputedStyle(badge).top,
          width:getComputedStyle(badge).width,transform:getComputedStyle(badge).transform,offsetParent:badge.offsetParent?.className},
         insideStage:!!s&&b.left>=s.left-1&&b.right<=s.right+1&&b.top>=s.top-1&&b.bottom<=s.bottom+1,
-        coversPaper:!!p&&Math.min(b.right,p.right)>Math.max(b.left,p.left)&&Math.min(b.bottom,p.bottom)>Math.max(b.top,p.top)});
+        coversPaper:!!p&&Math.min(b.right,p.right)>Math.max(b.left,p.left)&&Math.min(b.bottom,p.bottom)>Math.max(b.top,p.top)};
+       if(audit.identity.length===0)audit.identity.push(identity);
+       audit.identityMotion.push(identity);
       }
       if(++frames<900&&!audit.stopped)requestAnimationFrame(observeIdentity);
      }requestAnimationFrame(observeIdentity);
@@ -92,6 +94,8 @@ const reports=[];
     await page.waitForFunction(()=>window.__nativeFramingR2114.complete.length>0
      &&document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:20000});
     await page.waitForTimeout(600);
+    await page.waitForFunction(()=>window.__nativeFramingR2114.identityMotion.length>0
+     &&!document.querySelector('.fx-ai-core-ident-r1951'),null,{timeout:6000});
     const report=await page.evaluate(()=>{
      const audit=window.__nativeFramingR2114;audit.stopped=true;
      const canvas=window.FormatXLivingCore?.canvas;
@@ -113,6 +117,9 @@ const reports=[];
     assert.equal(report.identity[0].originalStage,true,`${profile.name}: identity left its native MAG stage`);
     assert.equal(report.identity[0].insideStage,true,`${profile.name}: identity overflowed its native MAG stage`);
     assert.equal(report.identity[0].coversPaper,false,`${profile.name}: identity covered the original reading surface`);
+    assert.ok(report.identityMotion.length>0,`${profile.name}: complete native identity motion was not observed`);
+    assert.ok(report.identityMotion.every(sample=>sample.nativeReady&&sample.originalStage&&sample.insideStage&&!sample.coversPaper),
+     `${profile.name}: native identity left its lane during entry, hold or exit`);
     assert.deepEqual(report.errors,[],`${profile.name}: browser errors`);
     console.log('NATIVE_FRAMING_R2114_PASS '+JSON.stringify({profile:profile.name,frames:report.frames,identity:report.identity}));
    }finally{await context.close();}
