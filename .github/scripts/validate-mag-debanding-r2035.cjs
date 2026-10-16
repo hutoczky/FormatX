@@ -74,8 +74,10 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2122-articulated-titanium-iris'),
-  'Missing actual cache-busted four-point R2103 Android replacement');
+  fallback.includes("fxMagFramingR2126")&&
+  fallback.includes('Math.min(sw*.255,sh*.275)')&&
+  html.includes('formatx-mag-reference-film-r649.js?v=20261016-r2126-larger-cinematic-portrait'),
+  'Missing actual R2126 cache-busted, 62%-width four-point Android MAG');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
   intro.includes('min-height:44px!important;'),
