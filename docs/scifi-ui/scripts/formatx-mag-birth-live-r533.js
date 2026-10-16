@@ -644,29 +644,31 @@
     locateStage();
     if(finished||overlayTornDown||!overlay.isConnected||canonicalIntroActive||!(stage instanceof HTMLElement)
       ||ROOT.dataset.fxCrystalOrganismR326!=='ready'||typeof coreApi?.genesis!=='function')return false;
-    const rect=stage.getBoundingClientRect();
     const names=['--fxb-genesis-x','--fxb-genesis-y','--fxb-genesis-scale','opacity','transition','transform','transform-origin',
       'position','inset','left','top','right','bottom','width','height','max-width','max-height','margin','filter',
       'translate','rotate','scale'];
     canonicalStageHome={hadStyle:stage.hasAttribute('style'),
       style:names.map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)])};
-    // The measured native surface retains its dimensions and original DOM
-    // owner. Viewport positioning prevents later hero styles from displacing
-    // the cinematic subject while the same WebGL camera moves through it.
-    for(const [name,value] of [['position','fixed'],['inset','auto'],['left','50vw'],['top','47dvh'],
+    // Establish the native viewport containing block before measuring it.
+    // A transformed mobile hero would otherwise add its 70px offset here.
+    ROOT.dataset.fxNativeGenesisR2064='active';
+    const rect=stage.getBoundingClientRect();
+    // Retain the measured gallery box from the first native frame through
+    // handoff. Center the intro with a compositor transform so its layout
+    // position, dimensions, DOM owner and backing-store aspect stay stable.
+    for(const [name,value] of [['position','fixed'],['inset','auto'],['left',rect.left.toFixed(2)+'px'],['top',rect.top.toFixed(2)+'px'],
       ['right','auto'],['bottom','auto'],['width',rect.width.toFixed(2)+'px'],['height',rect.height.toFixed(2)+'px'],
       ['max-width','none'],['max-height','none'],['margin','0'],['filter','none'],
       ['translate','none'],['rotate','none'],['scale','none']])stage.style.setProperty(name,value,'important');
     stage.style.setProperty('--fxb-genesis-x','-50%');
     stage.style.setProperty('--fxb-genesis-y','-50%');
     stage.style.setProperty('--fxb-genesis-scale','1');
-    stage.style.setProperty('transform','translate(-50%,-50%)','important');
+    stage.style.setProperty('transform','translate3d('+((innerWidth-rect.width)*.5-rect.left).toFixed(2)+'px,'+(innerHeight*.47-rect.height*.5-rect.top).toFixed(2)+'px,0)','important');
     stage.style.setProperty('transform-origin','center','important');
     stage.style.setProperty('opacity','1','important');
-    // The shader owns camera motion. Snap the measured stage to its reserved
-    // viewport position so a late-loaded layout cannot animate its centering.
+    // The shader owns camera motion; layout does not animate or resize while
+    // this same native surface is centered above the introductory studio.
     stage.style.setProperty('transition','none','important');
-    ROOT.dataset.fxNativeGenesisR2064='active';
     canonicalIntroActive=true;
     overlay.dataset.fxRenderer='canonical';
     ROOT.dataset.fxMagBirthRendererR1360='canonical-webgl-organism';

@@ -2300,6 +2300,15 @@ html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture 
 html[data-fx-native-genesis-r2064] #hero .fx-reference-controls-r204{
   content-visibility:hidden!important;
 }
+/* The portrait owner can relocate and explicitly reveal the original copy.
+   Keep that complete subtree out of the introductory canvas layer, wherever
+   its native parent is, until the real genesis owner releases the viewport. */
+html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture
+main#main-content > section#hero .hero-copy{
+  content-visibility:hidden!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
 html[data-fx-native-genesis-r2064] body #hero,
 html[data-fx-native-genesis-r2064] body #hero .hero-grid,
 html[data-fx-native-genesis-r2064] body #hero .hero-space{
@@ -2418,3 +2427,44 @@ html:root .fx-mag-birth-r533 .fxb-skip:focus-visible{
   outline-offset:3px!important;
 }
 /* end-r2103-mobile-compact-four-point-intro */
+
+/* R2113 — reserve the measured gallery surface before the first native frame.
+   Intro centering uses only a compositor transform. The archive's existing
+   desktop and portrait boxes take over synchronously at the genuine handoff. */
+@media(prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-mag-birth-live="active"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    position:fixed!important;
+    inset:12dvh auto auto 2.5vw!important;
+    top:12dvh!important;
+    left:2.5vw!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:38vw!important;
+    min-width:38vw!important;
+    max-width:38vw!important;
+    height:74dvh!important;
+    min-height:74dvh!important;
+    max-height:74dvh!important;
+    margin:0!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:none!important;
+    transition:none!important;
+  }
+  @media(max-width:900px){
+    html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-mag-birth-live="active"]
+    body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+      inset:2dvh auto auto 0!important;
+      top:2dvh!important;
+      left:0!important;
+      width:100vw!important;
+      min-width:100vw!important;
+      max-width:100vw!important;
+      height:43dvh!important;
+      min-height:43dvh!important;
+      max-height:43dvh!important;
+    }
+  }
+}
