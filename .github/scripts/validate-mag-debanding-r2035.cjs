@@ -66,7 +66,7 @@ assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2050-su
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2103-contrast-fourpoint-fallback']){
+ 'formatx-mag-birth-live-r533.css?v=20261014-r2107-quiet-atmospheric-stage']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 /* R2103 additionally forbids the exact unreadable low-power source that
@@ -74,16 +74,25 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2104-photographic-moving-softbox'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2107-machined-sapphire-depth'),
   'Missing actual cache-busted four-point R2103 Android replacement');
-assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
-  fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
-  fallback.includes('const studioTravel=.5+.5*Math.sin(time*.00053)'),
-  'R2104 movie must use a real animated optical studio-light material');
+assert.ok(fallback.includes('const lightSweep=Math.sin(time*.00038)')&&
+  fallback.includes('S*.09*lightSweep')&&
+  fallback.includes("hull.addColorStop(.14,'#3b555e')")&&
+  fallback.includes('for(let arm=0;arm<4;arm++)'),
+  'R2107 moving studio light and distinct metallic facet gradients must remain active');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
   intro.includes('min-height:44px!important;'),
   'Skip button contrast and low-power fallback CSS must stay visible');
+assert.ok(fallback.includes('function drawMagStudio(ctx,S,time,t)')&&
+  fallback.includes('function magDiamond(ctx,S)')&&
+  fallback.includes('fxMagFallbackOpticR2107')&&
+  fallback.includes('for(let blade=0;blade<8;blade++)'),
+  'R2107 must paint sculpted four-point metal and actual multi-layer aperture in original fallback');
+assert.ok(intro.includes('end-r2107-premium-mag-stage')&&
+  intro.includes('.fxb-genome-field'),
+  'Legacy DNA overlays must not cover premium MAG on the mobile fallback');
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
  correctedRearDepth:depth(-1.15),retrievedSheetDepth:depth(2.30),

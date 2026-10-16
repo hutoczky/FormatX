@@ -29,7 +29,16 @@
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
-  const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 2;
+  /* R2110: mobile browsers can privacy-cap hardwareConcurrency at four
+     even on a 2026 high-performance phone. Do not send a 4-core/4GB-or-better
+     handset straight to the two-dimensional reference film. An actual
+     WebGL/probe failure still selects R649, preserving compatibility. */
+  const CONSTRAINED = DEVICE_MEMORY <= 2 ||
+    HARDWARE_CONCURRENCY <= 2 ||
+    (HARDWARE_CONCURRENCY <= 4 && DEVICE_MEMORY <= 3);
+  ROOT.dataset.fxMagIntroCapabilityR2110 = CONSTRAINED
+    ? 'bounded-reference-fallback'
+    : 'attempt-full-three-first';
   const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
   const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
@@ -514,7 +523,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261008-r1984-continuous-microfibril-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261015-r2123-physical-camera-silver-studio';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -923,6 +932,26 @@
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    /* R2134: a 390px real browser first frame was occasionally EMPTY although
+       R326's WebGL context, stage and CSS opacity were all healthy. The
+       renderer was last invalidated while the fullscreen film was still
+       composited on top. Request a BOUNDED final native paint only AFTER the
+       overlay leaves and the browser recomputes the actual home viewport.
+       This uses the original single R326 renderer; no second canvas/loop. */
+    try {
+      const repaint=()=>{
+        const api=window.FormatXLivingCore;
+        if(api?.renderer==='single-webgl-crystal-organism-r326'){
+          api.requestRender?.(2);
+          ROOT.dataset.fxMagHandoffPaintR2134='requested-after-film-removal';
+        }
+      };
+      requestAnimationFrame(()=>{
+        repaint();
+        requestAnimationFrame(repaint);
+      });
+      setTimeout(repaint,160);
+    } catch (_) {}
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}

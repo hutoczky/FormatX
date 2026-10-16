@@ -60,7 +60,10 @@ const CASES=[
             renderer:root.dataset.fxMagBirthRendererR1360,
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
-            material:root.dataset.fxMagFallbackMaterialR2104||'',
+            premium:root.dataset.fxMagFallbackSilhouetteR2107||'',
+            optic:root.dataset.fxMagFallbackOpticR2107||'',
+            cameraScale:Number(root.dataset.fxMagFallbackCinemaScaleR2107||0),
+            filmStyle:getComputedStyle(overlay?.querySelector('.fxb-genome-field')||overlay).display,
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             width:innerWidth,height:innerHeight,
             canvasRect:{width:size?.width||0,height:size?.height||0},
@@ -86,14 +89,23 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
-        assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
-          'R2104 cinema material did not render in original phone canvas');
+        assert.equal(info.premium,'sculpted-fourpoint-3d-illusion-machined-optic');
+        assert.equal(info.optic,'eight-deep-shutter-blades-sapphire-glass');
+        assert.equal(info.filmStyle,'none',
+          'Old overlaid DNA waveform is still covering the premium MAG');
+        if(shot.second===4.40){
+          assert.ok(info.cameraScale>1.10&&info.cameraScale<1.13,
+            'Midfilm must approach the physical MAG using real camera transform');
+        }else if(shot.second===8.50){
+          assert.ok(info.cameraScale>=.999&&info.cameraScale<1.005,
+            'Handoff must return to stable identity rather than clipping the MAG');
+        }
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
         );
-        assert.ok(info.diameter>=shot.width*.45&&
-          info.diameter<=shot.width*.75,
+        assert.ok(info.diameter>=shot.width*.48&&
+          info.diameter<=shot.width*.67,
           'Giant phone-clipping orb regression: '+JSON.stringify(info));
         assert.ok(info.buffer.width>100&&info.buffer.height>100,
           'Canvas has no real backing surface');
@@ -104,7 +116,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2104-photographic-moving-softbox'),
+        assert.ok(info.loader.includes('r2107-machined-sapphire-depth'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
@@ -154,6 +166,50 @@ const CASES=[
       records.push({shot:{name:'high-core-phone-uses-real-three-first'},info});
       console.log('PASS R2103_HIGH_CORE_ANDROID',JSON.stringify(info));
     }finally{await capable.close()}
+    /* R2110 privacy-limited Android capability tests. The usual 4 reported
+       logical threads on modern devices must not automatically mean low-end.
+       Genuine two-core/two-GB phones must keep the screen-contained fallback. */
+    for(const phone of [
+      {name:'privacy-capped-four-core-four-gb',cores:4,memory:4,
+        expected:'attempt-full-three-first'},
+      {name:'genuine-low-memory-two-core',cores:2,memory:2,
+        expected:'bounded-reference-fallback'}
+    ]){
+      const context=await browser.newContext({
+        viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+        deviceScaleFactor:2,locale:'hu-HU',
+        userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) '+
+          'AppleWebKit/537.36 (KHTML, like Gecko) '+
+          'Chrome/133.0.0.0 Mobile Safari/537.36'
+      });
+      try{
+        await context.addInitScript(({cores,memory})=>{
+          Object.defineProperty(navigator,'hardwareConcurrency',
+            {configurable:true,get:()=>cores});
+          Object.defineProperty(navigator,'deviceMemory',
+            {configurable:true,get:()=>memory});
+          Object.defineProperty(navigator,'webdriver',
+            {configurable:true,get:()=>undefined});
+        },{cores:phone.cores,memory:phone.memory});
+        const page=await context.newPage();
+        await page.goto(HOME+'?intro=1&r2110-capability='+phone.name,
+          {waitUntil:'domcontentloaded',timeout:60000});
+        await page.waitForFunction(()=>
+          !!document.documentElement.dataset.fxMagIntroCapabilityR2110,
+          null,{timeout:18000});
+        const info=await page.evaluate(()=>({
+          cores:navigator.hardwareConcurrency,memory:navigator.deviceMemory,
+          policy:document.documentElement.dataset.fxMagIntroCapabilityR2110,
+          actual:document.documentElement.dataset.fxMagBirthRendererR1360||''
+        }));
+        assert.equal(info.cores,phone.cores);
+        assert.equal(info.memory,phone.memory);
+        assert.equal(info.policy,phone.expected,
+          'Android capability policy may not hide premium Three behind an arbitrary four-core cap');
+        records.push({shot:{name:phone.name},info});
+        console.log('PASS R2110_ANDROID_CAPABILITY',JSON.stringify({name:phone.name,...info}));
+      }finally{await context.close()}
+    }
   }finally{await browser.close()}
   fs.writeFileSync(OUT+'/summary.json',JSON.stringify(records,null,2)+'\n');
 })().catch(error=>{

@@ -1395,3 +1395,16 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* production-r2049-inactive-original-folio-layout-isolation */
+
+
+/* R2125 genuine shift-free archive MAG geometry handoff.
+   The live R326 stage changes position/size only while temporarily hidden.
+   Its original WebGL canvas, draw state and DOM node are NOT replaced.
+   Strong selector beats earlier cinematic/mobile visibility overrides.
+   The existing archive owner removes this class after two paint frames. */
+html:root:root:root:root:root:root:root body.living-architecture
+#hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-handoff-quiet-r2125{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+/* end-r2125-geometry-quiet-single-webgl */

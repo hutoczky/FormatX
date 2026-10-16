@@ -84,6 +84,7 @@
       this.world.add(this.dnaGroup,this.organicGroup,this.cellGroup,this.tentacleGroup,this.mechanicalGroup,this.coreGroup);
 
       this.makeLights();
+      this.makeStudioAtmosphereR2115();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
@@ -103,12 +104,15 @@
       const key=new T.DirectionalLight(0xe7f2ef,1.62);
       key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
+      this.studioKeyR2115=key;
       const fill=new T.DirectionalLight(0x9fb9b8,.42);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
+      this.studioFillR2115=fill;
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
+      this.studioRimR2115=rim;
       const bioticFill=new T.PointLight(0x385866,5.8,11,2);
       bioticFill.position.set(-2.8,-.4,3.4);
       this.scene.add(bioticFill);
@@ -120,9 +124,42 @@
       this.scene.add(this.mechLight);
     }
 
+    /* R2115 photographic depth without a second visible canvas or raster
+       replacement for the 3D MAG. One 128px offscreen texture creates only
+       atmospheric scatter on the REAR plane. All physical object facets,
+       sapphire optics and moving key/fill/rim are actual Three.js meshes and
+       lights in the original scene/WebGL pass. */
+    makeStudioAtmosphereR2115(){
+      const T=this.THREE;
+      const canvas=document.createElement('canvas');
+      canvas.width=128;canvas.height=128;
+      const ctx=canvas.getContext('2d');
+      const glow=ctx.createRadialGradient(59,55,2,65,65,64);
+      glow.addColorStop(0,'rgba(60,104,112,.37)');
+      glow.addColorStop(.28,'rgba(26,65,80,.24)');
+      glow.addColorStop(.64,'rgba(10,36,50,.12)');
+      glow.addColorStop(1,'rgba(2,7,11,0)');
+      ctx.fillStyle=glow;
+      ctx.fillRect(0,0,128,128);
+      this.studioAtmosphereTextureR2115=new T.CanvasTexture(canvas);
+      this.studioAtmosphereTextureR2115.colorSpace=T.SRGBColorSpace;
+      const material=new T.MeshBasicMaterial({
+        map:this.studioAtmosphereTextureR2115,
+        transparent:true,opacity:.58,depthWrite:false,depthTest:true,
+        blending:T.NormalBlending,fog:false,toneMapped:false
+      });
+      this.studioAtmosphereR2115=new T.Mesh(
+        new T.PlaneGeometry(6.6,6.0),material
+      );
+      this.studioAtmosphereR2115.position.set(0,0,-2.8);
+      this.scene.add(this.studioAtmosphereR2115);
+      document.documentElement.dataset.fxMagThreeStudioR2115=
+        'one-webgl-physical-softboxes-rear-air-volume';
+    }
+
     makeParticles(){
       const T=this.THREE,r=this.rand;
-      const count=640;
+      const count=this.mobileRender?260:640;
       const pos=new Float32Array(count*3);
       const size=new Float32Array(count);
       for(let i=0;i<count;i++){
@@ -152,9 +189,10 @@
         emissive:0x142b3b,emissiveIntensity:.28,
         transparent:true,opacity:.40,depthWrite:false
       });
-      const mesh=new T.InstancedMesh(geo,mat,72);
+      const debrisCount=this.mobileRender?24:72;
+      const mesh=new T.InstancedMesh(geo,mat,debrisCount);
       const dummy=new T.Object3D();
-      for(let i=0;i<72;i++){
+      for(let i=0;i<debrisCount;i++){
         const a=r()*Math.PI*2, rr=1.55+r()*3.8, sc=.42+r()*1.8;
         dummy.position.set(Math.cos(a)*rr,(r()-.5)*4.3,-1.15+(r()-.5)*3.2);
         dummy.rotation.set(r()*3,r()*3,r()*3);
@@ -1079,6 +1117,114 @@
       this.mechanicalGroup.add(this.mechBody);
       this.mechBodyParts.push(this.mechBody);
 
+      /* R2114: actual beveled metallic plates conform to the FOUR physical
+         crystal arms. Each side has a different outward-facing normal,
+         low-key studio response and deliberate offset from the rear shell.
+         Unlike painted 2D streaks, the four-arm relief follows the actual
+         original Three.js camera throughout the live film. */
+      this.mechMachinedPanels=new T.Group();
+      this.mechMachinedPanels.position.z=.02;
+      this.mechanicalGroup.add(this.mechMachinedPanels);
+      this.mechPanelMaterials=[
+        new T.MeshPhysicalMaterial({
+          /* R2122 real photograph-based neutral warm silver face. */
+          color:0x9baaa5,metalness:.69,roughness:.205,
+          clearcoat:.80,clearcoatRoughness:.13,side:T.DoubleSide,
+          transparent:true,opacity:0,depthWrite:false
+        }),
+        new T.MeshPhysicalMaterial({
+          /* R2122 cut-away shadowed titanium, not a flat cyan face. */
+          color:0x29363d,metalness:.61,roughness:.295,
+          clearcoat:.72,clearcoatRoughness:.15,side:T.DoubleSide,
+          transparent:true,opacity:0,depthWrite:false
+        })
+      ];
+      const makeFace=(points,material)=>{
+        const positions=new Float32Array(points.flat());
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.BufferAttribute(positions,3));
+        geometry.setIndex([0,1,2,0,2,3]);
+        geometry.computeVertexNormals();
+        const face=new T.Mesh(geometry,material);
+        face.frustumCulled=false;
+        return face;
+      };
+      for(let arm=0;arm<4;arm++){
+        const rotating=new T.Group();
+        rotating.rotation.z=arm*Math.PI/2;
+        const lit=makeFace([
+          [0,-.97,.250],[-.225,-.50,.245],
+          [-.092,-.27,.382],[.006,-.36,.375]
+        ],this.mechPanelMaterials[0]);
+        const shade=makeFace([
+          [0,-.97,.250],[.226,-.51,.242],
+          [.094,-.27,.382],[-.006,-.36,.375]
+        ],this.mechPanelMaterials[1]);
+        rotating.add(lit,shade);
+        this.mechMachinedPanels.add(rotating);
+      }
+      document.documentElement.dataset.fxMagThreeFacetsR2114='eight-truly-slanted-machined-3d-surfaces';
+
+      /* R2118: actual 3D brushed titanium routes along each original
+         convex facet. Unlike the R2103 fallback's vector machining strokes,
+         this is ONE indexed native mesh (32 triangles, not 8 draw passes),
+         with true sloping Z normals for direct cinematic light response.
+         Each of four arms gets exactly two rails, running from tip to optic. */
+      const railPositions=[];
+      const railIndices=[];
+      const quad=(a,b,c,d)=>{
+        const start=railPositions.length/3;
+        railPositions.push(...a,...b,...c,...d);
+        railIndices.push(start,start+1,start+2,start,start+2,start+3);
+      };
+      for(let arm=0;arm<4;arm++){
+        const angle=arm*Math.PI/2;
+        const cs=Math.cos(angle),sn=Math.sin(angle);
+        const rotated=(x,y,z)=>[x*cs-y*sn,x*sn+y*cs,z];
+        for(const side of [-1,1]){
+          const path=[
+            [side*.065,-.84,.286],
+            [side*.114,-.54,.335],
+            [side*.062,-.345,.403]
+          ];
+          for(let index=0;index<2;index++){
+            const before=path[index],after=path[index+1];
+            const dx=after[0]-before[0],dy=after[1]-before[1];
+            const length=Math.hypot(dx,dy)||1;
+            const normalX=-dy/length,normalY=dx/length;
+            const width=.0128;
+            quad(
+              rotated(before[0]+normalX*width,before[1]+normalY*width,before[2]),
+              rotated(before[0]-normalX*width,before[1]-normalY*width,before[2]-.006),
+              rotated(after[0]-normalX*width,after[1]-normalY*width,after[2]-.006),
+              rotated(after[0]+normalX*width,after[1]+normalY*width,after[2])
+            );
+          }
+        }
+      }
+      const railGeometry=new T.BufferGeometry();
+      railGeometry.setAttribute('position',new T.Float32BufferAttribute(railPositions,3));
+      railGeometry.setIndex(railIndices);
+      railGeometry.computeVertexNormals();
+      /* R2119 actual screenshot correction: unlit channels should NOT
+         become bright white V-shaped decals under the studio key.
+         Retain the same 32 real triangles but make their sides smoked
+         titanium, with specular separation supplied by geometry normals. */
+      this.mechRailMaterialR2118=new T.MeshPhysicalMaterial({
+        /* R2122 recessed smoke-metal rails read as actual machining. */
+        color:0x4c5555,metalness:.48,roughness:.28,
+        clearcoat:.42,clearcoatRoughness:.24,
+        emissive:0x02090e,emissiveIntensity:.010,
+        side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
+      });
+      this.mechMachinedRailsR2118=new T.Mesh(railGeometry,this.mechRailMaterialR2118);
+      this.mechMachinedRailsR2118.frustumCulled=false;
+      this.mechanicalGroup.add(this.mechMachinedRailsR2118);
+      document.documentElement.dataset.fxMagThreeRailsR2118=
+        'eight-real-elevated-two-segment-metal-channels';
+      document.documentElement.dataset.fxMagThreeRailTrianglesR2118=
+        String(railIndices.length/3);
+
       /* R1984 — final-stage edge fibrils.
          Sample the actual four-point signature outline and grow one-pixel fibers
          out of its silhouette. This keeps microscopic detail visible through the
@@ -1308,6 +1454,109 @@
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
 
+      /* R2113: native Three physical optics. The earlier scene had a
+         miniature dark marble and one hairline ring but no physical
+         titanium shutter/optic architecture. These THREE meshes sit in
+         the SAME scene and renderer, and all fit within the four points. */
+      this.mechOptics=new T.Group();
+      this.mechOptics.scale.setScalar(1.17);
+      this.mechanicalGroup.add(this.mechOptics);
+      this.mechOpticMaterials=[];
+      this.mechOpticCollars=[];
+      for(const [radius,tube,z,color] of [
+        [.158,.011,.517,0xa9c6c2],
+        [.197,.008,.520,0x617f85],
+        [.239,.0045,.507,0x36515c]
+      ]){
+        const material=new T.MeshPhysicalMaterial({
+          color,metalness:.73,roughness:.19,clearcoat:.92,
+          clearcoatRoughness:.12,transparent:true,opacity:0,
+          depthWrite:false
+        });
+        const mesh=new T.Mesh(new T.TorusGeometry(radius,tube,9,
+          this.mobileRender?54:86),material);
+        mesh.position.z=z;
+        this.mechOptics.add(mesh);
+        this.mechOpticMaterials.push(material);
+        this.mechOpticCollars.push(mesh);
+      }
+      /* A shallow physical convex sapphire element lies behind the blades
+         while its center rises optically above them, never as a painted
+         marble overlay. Low-segment geometry keeps mobile GPU cost bounded. */
+      this.mechSapphireMaterialR2115=new T.MeshPhysicalMaterial({
+        color:0x1b3a48,metalness:.08,roughness:.13,
+        clearcoat:1,clearcoatRoughness:.05,ior:1.48,
+        transmission:.16,thickness:.14,
+        emissive:0x061722,emissiveIntensity:.045,
+        envMapIntensity:1.35,transparent:true,opacity:0,
+        depthWrite:false
+      });
+      this.mechSapphireR2115=new T.Mesh(
+        new T.SphereGeometry(.112,this.mobileRender?18:26,12),
+        this.mechSapphireMaterialR2115
+      );
+      this.mechSapphireR2115.scale.z=.24;
+      this.mechSapphireR2115.position.set(0,0,.529);
+      this.mechOptics.add(this.mechSapphireR2115);
+      this.mechIris=new T.Group();
+      this.mechIris.position.z=.535;
+      this.mechOptics.add(this.mechIris);
+      this.mechIrisMaterial=new T.MeshPhysicalMaterial({
+        color:0x677e7e,metalness:.73,roughness:.245,
+        emissive:0x07131a,emissiveIntensity:.032,
+        clearcoat:.83,clearcoatRoughness:.12,
+        side:T.DoubleSide,transparent:true,opacity:0,
+        depthWrite:false
+      });
+      this.mechOpticMaterials.push(this.mechIrisMaterial);
+      const irisShape=new T.Shape();
+      irisShape.moveTo(.104,-.017);
+      irisShape.lineTo(.185,-.059);
+      irisShape.quadraticCurveTo(.217,-.026,.188,.037);
+      irisShape.lineTo(.119,.062);
+      irisShape.quadraticCurveTo(.102,.028,.104,-.017);
+      /* R2124: these were flat, zero-thickness ShapeGeometry polygons.
+         A single shared, shallow chamfered real titanium mesh now gives
+         every shutter a front face, recessed back, and physically lit side
+         normals. Eight blades still share ONE geometry/material, no second
+         canvas, light, texture, or geometry allocation per blade. */
+      const bladeGeometry=new T.ExtrudeGeometry(irisShape,{
+        depth:.011,steps:1,
+        bevelEnabled:true,bevelSegments:2,
+        bevelThickness:.0018,bevelSize:.0022,
+        curveSegments:5
+      });
+      bladeGeometry.computeVertexNormals();
+      for(let blade=0;blade<8;blade++){
+        const part=new T.Mesh(bladeGeometry,this.mechIrisMaterial);
+        part.rotation.z=blade*Math.PI/4;
+        this.mechIris.add(part);
+      }
+      /* Report the genuine live geometry rather than a hardcoded promise.
+         The browser acceptance test verifies actual Three.js mesh topology. */
+      const bladeSpecs=bladeGeometry.parameters.options;
+      document.documentElement.dataset.fxMagThreeBladeDepthR2124=
+        String(bladeSpecs.depth);
+      document.documentElement.dataset.fxMagThreeBladeBevelR2124=
+        bladeSpecs.bevelEnabled
+          ? 'eight-shared-extruded-chamfered-optical-shutters'
+          : 'missing-real-sidewall-bevel';
+      document.documentElement.dataset.fxMagThreeBladeTrianglesR2124=
+        String(Math.round(bladeGeometry.getAttribute('position').count/3));
+      this.mechOpticalLight=new T.PointLight(0x8bc7cb,0,1.7,2);
+      this.mechOpticalLight.position.set(0,0,.65);
+      this.mechOptics.add(this.mechOpticalLight);
+      document.documentElement.dataset.fxMagThreeOpticsR2113=
+        'three-metal-collars-eight-physical-iris-blades';
+      document.documentElement.dataset.fxMagThreeIrisBladesR2113=
+        String(this.mechIris.children.filter(child=>child.isMesh).length);
+      document.documentElement.dataset.fxMagThreeCollarsR2113=
+        String(this.mechOpticCollars.length);
+      document.documentElement.dataset.fxMagThreeSapphireR2115=
+        'real-convex-optical-mesh-with-eight-iris-blades';
+      document.documentElement.dataset.fxMagThreeOpticScaleR2115=
+        this.mechOptics.scale.x.toFixed(2);
+
       this.mechanicalGroup.scale.setScalar(.001);
     }
 
@@ -1461,8 +1710,8 @@
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,.34,smooth((t-2.52)/.76));
-      else if(t<5.58) sc=.36+Math.sin((t-3.28)*1.02)*.002;
-      else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
+      else if(t<5.58) sc=.56+Math.sin((t-3.28)*1.02)*.003;
+      else if(t<7.15) sc=mix(.56,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
       const endMove=smooth((t-9.78)/.20);
@@ -1487,10 +1736,16 @@
       const preFlash=1-smooth((t-6.55)/.72);
       const pulse=.988+.012*Math.sin(time*.0046);
 
-      this.coreShell.material.opacity=.96*stage1+.16*reveal*preFlash;
-      this.coreGlass.material.opacity=.08*stage1+.015*reveal*preFlash;
-      this.coreEdges.material.opacity=.16*stage1+.012*reveal*preFlash;
-      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.72*stage1+.065*reveal*preFlash;
+      /* R2113: actual four-point crystal is visible throughout the cortex
+         close-up instead of fading into a featureless organic sphere. */
+      this.coreShell.material.opacity=.96*stage1+
+        (this.mobileRender?.58:.16)*reveal*preFlash;
+      this.coreGlass.material.opacity=.08*stage1+
+        (this.mobileRender?.095:.015)*reveal*preFlash;
+      this.coreEdges.material.opacity=.16*stage1+
+        (this.mobileRender?.22:.012)*reveal*preFlash;
+      if(this.corePetalMaterial)this.corePetalMaterial.opacity=
+        .72*stage1+(this.mobileRender?.28:.065)*reveal*preFlash;
 
       this.irisGroup.scale.setScalar((.018+eyeHold*.72)*pulse);
       this.irisRays.rotation.z=time*.000050;
@@ -1509,7 +1764,12 @@
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.82;
-      this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
+      const mobileCorticalCradle=this.mobileRender?.74:1;
+      this.organicGroup.scale.set(
+        bodyScale*1.02*mobileCorticalCradle,
+        bodyScale*.98*mobileCorticalCradle,
+        bodyScale*.94*mobileCorticalCradle
+      );
 
       this.organicShellMaterial.opacity=.27*visible;
       this.organicLobeMaterial.opacity=.24*visible;
@@ -1518,7 +1778,7 @@
       this.organicHoodMaterial.opacity=.18*visible;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
-      if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
+      if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.10:.34)*visible*(.94+.06*Math.sin(time*.0011));
       if(this.organicFibers){
         this.organicFibers.rotation.y=Math.sin(time*.00013)*.010;
         this.organicFibers.rotation.x=Math.sin(time*.00011)*.006;
@@ -1556,7 +1816,7 @@
       const fade=1-smooth((t-6.25)/1.10)*.96;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
-      const cellScale=.001+visible*.99;
+      const cellScale=.001+visible*(this.mobileRender?.75:.99);
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
       this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
@@ -1582,9 +1842,9 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
-        mix(.106,.132,finale)
+        mix(.031,this.mobileRender?.17:.072,finale),
+        mix(.090,this.mobileRender?.23:.124,finale),
+        mix(.106,this.mobileRender?.245:.132,finale)
       );
       this.mechMidMaterial.color.setRGB(
         mix(.039,.066,finale),
@@ -1596,21 +1856,55 @@
         mix(.575,.540,finale),
         mix(.565,.530,finale)
       );
-      this.mechMaterial.transmission=mix(.34,.44,finale);
-      this.mechMidMaterial.transmission=mix(.40,.49,finale);
+      this.mechMaterial.transmission=this.mobileRender
+        ? mix(.18,.16,finale):mix(.34,.44,finale);
+      this.mechMidMaterial.transmission=this.mobileRender
+        ? mix(.24,.21,finale):mix(.40,.49,finale);
+      this.mechMaterial.metalness=this.mobileRender?.34:.10;
+      this.mechMidMaterial.metalness=this.mobileRender?.28:.08;
       this.mechMaterial.roughness=mix(.110,.098,finale);
       this.mechMidMaterial.roughness=mix(.102,.090,finale);
       this.silverMaterial.roughness=mix(.085,.100,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
+      this.mechMidMaterial.opacity=
+        ((this.mobileRender?.61:.46)+.035*finale)*grow;
+      if(this.mechPanelMaterials){
+        const metalReveal=smooth((t-6.28)/.86)*grow;
+        this.mechPanelMaterials[0].opacity=
+          metalReveal*(this.mobileRender?.68:.49);
+        this.mechPanelMaterials[1].opacity=
+          metalReveal*(this.mobileRender?.46:.32);
+        if(this.mechRailMaterialR2118)
+          this.mechRailMaterialR2118.opacity=metalReveal*(this.mobileRender?.43:.38);
+      }
+      this.silverMaterial.opacity=
+        ((this.mobileRender?.54:.36)+.055*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
       this.mechInnerRing.rotation.z=time*.00012;
+      if(this.mechOptics){
+        const machined=smooth((t-6.42)/.93)*grow;
+        this.mechOpticCollars.forEach((collar,index)=>{
+          collar.material.opacity=machined*([.91,.74,.49][index]);
+        });
+        this.mechIrisMaterial.opacity=machined*.84;
+        this.mechSapphireMaterialR2115.opacity=.84*machined;
+        /* R2125: the final real Eight-Shutter assembly must become
+           mechanically still BEFORE the R326 handoff. The previous
+           perpetual .014*sin() rotation jumped to a different stationary
+           iris orientation exactly as the movie mask disappeared. Smoothly
+           damp the same authored movement; no extra mechanical meshes. */
+        const shutterSettle=1-smooth((t-8.88)/.78);
+        this.mechIris.rotation.z=.17*(1-smooth((t-7.28)/1.41))+
+          .014*Math.sin(time*.00015)*shutterSettle;
+        document.documentElement.dataset.fxMagThreeIrisAngleR2125=
+          this.mechIris.rotation.z.toFixed(5);
+        this.mechOpticalLight.intensity=.32*machined;
+      }
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
 
       if(this.mechBody){
@@ -1665,14 +1959,87 @@
         z=mix(4.28,4.40,smooth((t-9.10)/.60));
         y=.003;
       }
-      if(this.width<this.height)z+=.90;
+      /* R2112: the 2026 Android real-Three film was cutting OFF the two
+         horizontal crystal tips at 8.5s and hiding the 4.4s optical core
+         inside enormous organic strands. In portrait, smoothly dolly back
+         by the geometry-required distance, preserving original 10s timing.
+         The full four-point object now fits the NARROWER horizontal FOV.
+         Early DNA/formation keeps its original camera distance. */
+      if(this.width<this.height){
+        const fit=smooth((t-2.22)/1.25);
+        z+=mix(.90,4.40,fit);
+        /* R2123: the actual photographed Android Four Point occupied only
+           about half of the portrait width. A C1-smooth TRUE CAMERA dolly
+           brings the optical machining nearer during 4.4–8.5s while keeping
+           all four tips inside the 390/360px view, and fully returns before
+           the original 9.98s R326 handoff (no image CSS scaling). */
+        const cinemaDolly=smooth((t-3.05)/.78)*
+          (1-smooth((t-8.78)/1.17));
+        z-=.47*cinemaDolly;
+        document.documentElement.dataset.fxMagThreeDollyR2123=
+          cinemaDolly.toFixed(3);
+      }
+      /* R2126: actual camera parallax across the eight bevelled metal
+         shutters during their reveal. Real Three.js perspective now shows
+         the front/side normals and finite leaf thickness instead of
+         a dead-on emblem. Symmetrical C1 envelope returns EXACTLY to
+         the original centered pose before final MAG handoff. Portrait
+         movement is bounded to 3 degrees at the existing phone depth. */
+      const opticOrbit=smooth((t-5.73)/1.18)*
+        (1-smooth((t-8.85)/.82));
+      x+=(this.width<this.height?.35:.23)*opticOrbit;
+      y+=(this.width<this.height?.10:.065)*opticOrbit;
+      document.documentElement.dataset.fxMagThreeOpticParallaxR2126=
+        opticOrbit.toFixed(3);
+      document.documentElement.dataset.fxMagThreeCameraXOffsetR2126=
+        x.toFixed(3);
       this.camera.position.set(x,y,z);
+      if(this.mobileRender && this.width<this.height){
+        document.documentElement.dataset.fxMagThreeMobileDistanceR2112=
+          z.toFixed(3);
+      }
       this.camera.lookAt(0,0,0);
     }
 
     render(r,time){
       if(this.disposed)return;
       const t=clamp(r)*10;
+      /* R2115 one-take photographic light choreography: move the existing
+         real lights across the physical facets, not HTML glow. The C1
+         envelope returns to its original pose before the permanent MAG
+         handoff; the 3D geometry and 10s timing stay intact. */
+      const sweep=smooth((t-2.9)/3.25)*
+        (1-smooth((t-9.18)/.52));
+      /* R2121: physical bounce light on the actual 3.5–5.5 second
+         cortical/forged-core reveal. Real phone screenshots previously
+         rendered the organ as an unlit dark blob despite rich native
+         geometry. Add no lights, canvases or draw passes: modulate the
+         EXISTING traveling key and fill with a bounded C1 film envelope.
+         The bounce vanishes well before the 8.5s optical identity and the
+         9.98s native permanent-MAG handoff. */
+      const cortexBounce=smooth((t-3.0)/.60)*
+        (1-smooth((t-5.48)/1.15));
+      document.documentElement.dataset.fxMagThreeCortexBounceR2121=
+        cortexBounce.toFixed(3);
+      if(this.studioKeyR2115){
+        this.studioKeyR2115.position.x=-3.8+1.15*sweep;
+        this.studioKeyR2115.position.y=5.4-.55*sweep;
+        this.studioKeyR2115.intensity=1.62+.46*sweep+.23*cortexBounce;
+      }
+      if(this.studioFillR2115){
+        this.studioFillR2115.position.x=4.4-1.05*sweep;
+        this.studioFillR2115.intensity=.42+.21*sweep+
+          (this.mobileRender?.68:.48)*cortexBounce;
+      }
+      if(this.studioRimR2115){
+        this.studioRimR2115.position.y=-1.9+.80*sweep;
+        this.studioRimR2115.intensity=10.5+1.25*sweep;
+      }
+      if(this.studioAtmosphereR2115){
+        this.studioAtmosphereR2115.material.opacity=.54+.08*sweep;
+      }
+      document.documentElement.dataset.fxMagThreeSoftboxSweepR2115=
+        sweep.toFixed(3);
       this.updateCamera(t,time);
       this.updateDNA(t,time);
       this.updateCore(t,time);
@@ -1695,7 +2062,8 @@
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
          not the whole frame, and lands on the permanent smoked-silver grade. */
       const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
+      this.renderer.toneMappingExposure=
+        (this.mobileRender?1.16:1.075)+flash*.006+after*.002;
       this.coreLight.intensity+=flash*.42+after*.12;
       if(this.glowSprite){
         const g=1+flash*.10;
@@ -1731,6 +2099,7 @@
         else m?.dispose?.();
       });
       this.microFiberTexture?.dispose?.();
+      this.studioAtmosphereTextureR2115?.dispose?.();
       this.renderer.dispose();
     }
   }

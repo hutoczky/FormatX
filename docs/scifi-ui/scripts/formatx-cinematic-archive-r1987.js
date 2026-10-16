@@ -608,24 +608,57 @@
     }
   }
   class ResponsiveExperience {
+    /* R2125 real CLS fix. Changing the one native R326 stage from fullscreen
+       to 38vw cinematic optical framing previously caused 0.074 desktop and
+       0.254 mobile layout shift. Quiet only the two geometry-changing frames,
+       then reveal the SAME original WebGL canvas, preserving its context,
+       DOM owner and original cinematic/hero positions. This does not affect
+       any application controls, intro duration or renderer quality. */
+    static changeDock(activate){
+      if(!stage)return;
+      const epoch=(Number(stage.dataset.fxArchiveHandoffEpochR2125)||0)+1;
+      stage.dataset.fxArchiveHandoffEpochR2125=String(epoch);
+      stage.classList.add('fx-archive-handoff-quiet-r2125');
+      stage.classList.toggle('fx-archive-native-docked',activate);
+      root.dataset.fxArchiveDock=activate?'active':'home';
+      root.dataset.fxArchiveHandoffR2125='geometry-stabilizing';
+      archiveActive=activate;
+      let released=false;
+      const reveal=()=>{
+        if(released)return;
+        if(Number(stage.dataset.fxArchiveHandoffEpochR2125)!==epoch)return;
+        released=true;
+        stage.classList.remove('fx-archive-handoff-quiet-r2125');
+        root.dataset.fxArchiveHandoffR2125='visible-single-r326';
+        window.FormatXLivingCore?.requestRender?.(1);
+      };
+      /* The real WebGL canvas backs onto the same element but resizes 60–90
+         milliseconds AFTER the outer stage's CSS box settles. Two frames
+         were insufficient: real R2125 mobile proof left 0.112 canvas-only
+         CLS despite zero stage shift. Keep both invisible across the entire
+         late inner-canvas resize, then reveal in a paint frame, never
+         changing the authoritative DOM or native context. */
+      const quietUntil=performance.now()+230;
+      const checkReady=()=>{
+        if(Number(stage.dataset.fxArchiveHandoffEpochR2125)!==epoch)return;
+        if(performance.now()<quietUntil){
+          requestAnimationFrame(checkReady);
+          return;
+        }
+        requestAnimationFrame(reveal);
+      };
+      requestAnimationFrame(checkReady);
+      // Background tab RAF may be suspended; bound even GPU-loss paths.
+      window.setTimeout(reveal,650);
+    }
     static dock(){
       if(!stage||archiveActive)return;
       if(!heroHost||!heroHost.isConnected)return;
-      // Keep the canonical canvas inside #hero. Moving it would break the
-      // original MAG DOM contract and WebGL identity checks. The external
-      // archive stylesheet owns docking geometry so strict style-src remains
-      // intact and renderer-authored canvas state is never overwritten.
-      stage.classList.add('fx-archive-native-docked');
-      root.dataset.fxArchiveDock='active';
-      archiveActive=true;
-      window.FormatXLivingCore?.requestRender?.(1);
+      this.changeDock(true);
     }
     static restore(){
       if(!archiveActive||!stage)return;
-      stage.classList.remove('fx-archive-native-docked');
-      root.dataset.fxArchiveDock='home';
-      archiveActive=false;
-      window.FormatXLivingCore?.requestRender?.(1);
+      this.changeDock(false);
     }
   }
   class CameraDirector {

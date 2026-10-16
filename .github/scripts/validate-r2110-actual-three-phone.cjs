@@ -1,0 +1,205 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const {chromium}=require('playwright');
+
+const ORIGIN=process.env.FORMATX_TEST_URL||
+  'http://127.0.0.1:4178/scifi-ui/index.html';
+const DIR='artifacts/r2110-actual-three-phone';
+fs.mkdirSync(DIR,{recursive:true});
+/* R2122: actual visible Three material must not regress into the user's
+   photographed flat cyan emblem. Verify every one of the four physical
+   sculpted arm panels and their separate titanium rail material source. */
+const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
+assert.ok(
+  source.includes('color:0x9baaa5,metalness:.69,roughness:.205')&&
+  source.includes('color:0x29363d,metalness:.61,roughness:.295')&&
+  source.includes('color:0x4c5555,metalness:.48,roughness:.28')&&
+  source.includes('fxMagThreeCortexBounceR2121')&&
+  source.includes('new T.ExtrudeGeometry(irisShape,{')&&
+  source.includes('fxMagThreeBladeTrianglesR2124'),
+  'Latest actual Three cinematic must use neutral sculpted silver, smoked titanium and C1 midfilm fill'
+);
+const frames=[
+  {name:'phone-390-cortex',width:390,height:844,second:4.40},
+  {name:'phone-390-optic',width:390,height:844,second:8.50},
+  {name:'phone-360-optic',width:360,height:780,second:8.50},
+  {name:'phone-390-handoff',width:390,height:844,second:9.98},
+  {name:'desktop-1440-optic',width:1440,height:900,second:8.50}
+];
+
+(async()=>{
+  const browser=await chromium.launch({headless:true,args:[
+    '--no-sandbox','--disable-dev-shm-usage',
+    '--enable-webgl','--use-angle=swiftshader',
+    '--enable-unsafe-swiftshader'
+  ]});
+  const results=[];
+  try{
+    for(const frame of frames){
+      const mobile=frame.width<900;
+      const context=await browser.newContext({
+        viewport:{width:frame.width,height:frame.height},
+        deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,
+        locale:'hu-HU',colorScheme:'dark',
+        userAgent:mobile
+          ?'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 '+
+            '(KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36'
+          :'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '+
+            '(KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+      });
+      try{
+        await context.addInitScript(()=>{
+          Object.defineProperty(navigator,'webdriver',
+            {configurable:true,get:()=>undefined});
+          Object.defineProperty(navigator,'hardwareConcurrency',
+            {configurable:true,get:()=>4});
+          Object.defineProperty(navigator,'deviceMemory',
+            {configurable:true,get:()=>4});
+        });
+        const page=await context.newPage(),errors=[];
+        page.on('pageerror',error=>errors.push(error.message));
+        const query='?intro=1&visualintro=1&introframe='+frame.second+
+          '&r2110=real-three-'+frame.name;
+        await page.goto(ORIGIN+query,
+          {waitUntil:'domcontentloaded',timeout:60000});
+        await page.waitForFunction(()=>{
+          const root=document.documentElement;
+          return root.dataset.fxMagBirthVisualFrameR659==='ready';
+        },null,{timeout:60000});
+        const info=await page.evaluate(()=>{
+          const root=document.documentElement;
+          const owner=document.querySelector('.fx-mag-birth-r533');
+          const canvas=owner?.querySelector('canvas.fxb-particles');
+          const skip=owner?.querySelector('.fxb-skip');
+          const box=skip?.getBoundingClientRect();
+          return {
+            capability:root.dataset.fxMagIntroCapabilityR2110||'',
+            renderer:root.dataset.fxMagBirthRendererR1360||'',
+            loader:root.dataset.fxMagBirthThreeLoaderR1608||'',
+            peak:root.dataset.fxMagBirthFramePeakR1557||'',
+            buffer:[canvas?.width||0,canvas?.height||0],
+            oneCanvas:owner?.querySelectorAll('canvas.fxb-particles').length===1,
+            mobileThreeDistance:Number(root.dataset.fxMagThreeMobileDistanceR2112||0),
+            irisBlades:Number(root.dataset.fxMagThreeIrisBladesR2113||0),
+            irisPhysicalDepth:Number(root.dataset.fxMagThreeBladeDepthR2124||0),
+            irisPhysicalBevel:root.dataset.fxMagThreeBladeBevelR2124||'',
+            irisPhysicalTriangles:Number(root.dataset.fxMagThreeBladeTrianglesR2124||0),
+            irisHandoffAngle:Number(root.dataset.fxMagThreeIrisAngleR2125||0),
+            opticParallax:Number(root.dataset.fxMagThreeOpticParallaxR2126||0),
+            cameraXOffset:Number(root.dataset.fxMagThreeCameraXOffsetR2126||0),
+            collars:Number(root.dataset.fxMagThreeCollarsR2113||0),
+            optics:root.dataset.fxMagThreeOpticsR2113||'',
+            facets:root.dataset.fxMagThreeFacetsR2114||'',
+            railIdentity:root.dataset.fxMagThreeRailsR2118||'',
+            railTriangles:Number(root.dataset.fxMagThreeRailTrianglesR2118||0),
+            studio:root.dataset.fxMagThreeStudioR2115||'',
+            sapphire:root.dataset.fxMagThreeSapphireR2115||'',
+            sapphireScale:Number(root.dataset.fxMagThreeOpticScaleR2115||0),
+            studioSweep:Number(root.dataset.fxMagThreeSoftboxSweepR2115||0),
+            cortexBounce:Number(root.dataset.fxMagThreeCortexBounceR2121||0),
+            cameraDolly:Number(root.dataset.fxMagThreeDollyR2123||0),
+            threeSource:[...document.scripts]
+              .find(el=>el.src.includes('formatx-mag-genesis-three-r1280.js'))?.src||'',
+            skip:{width:box?.width||0,height:box?.height||0,
+              opacity:Number(skip?getComputedStyle(skip).opacity:0)},
+            scene:root.dataset.fxMagBirthCameraR2073||'',
+            fallback:root.dataset.fxMagFallbackSilhouetteR2107||''
+          };
+        });
+        await page.screenshot({
+          path:DIR+'/'+frame.name+'.png',
+          animations:'allow'
+        });
+        fs.writeFileSync(DIR+'/'+frame.name+'.json',
+          JSON.stringify({frame,info,errors},null,2)+'\n');
+        assert.equal(info.capability,'attempt-full-three-first',
+          'Privacy-capped mobile hardware must get true 3D first');
+        assert.equal(info.renderer,'threejs-active',
+          'The visible film must really be the native Three scene, not the 2D fallback');
+        assert.ok(info.oneCanvas&&info.buffer[0]>100&&info.buffer[1]>100,
+          'No usable original WebGL framebuffer: '+JSON.stringify(info));
+        assert.ok(info.threeSource.includes('r2123-physical-camera-silver-studio'),
+          'Stale pre-R2112 cropped Three.js source is still loaded: '+JSON.stringify(info));
+        if(mobile){
+          assert.ok(info.mobileThreeDistance>=7.7&&
+            info.mobileThreeDistance<=10.3,
+            'The premium mobile camera is still too close for the four-point width: '+
+              JSON.stringify(info));
+        }
+        assert.ok(info.skip.width>=90&&info.skip.height>=44&&
+          info.skip.opacity>.95,
+          'Real Three intro must retain an accessible Skip control');
+        assert.equal(info.irisBlades,8,
+          'Every authored titanium iris blade must exist in the ACTUAL Three scene');
+        /* R2124: 8 flat ShapeGeometry decals are not an acceptable physical
+           iris. The actual geometry must own front, back, and beveled sides. */
+        assert.ok(info.irisPhysicalDepth>=.010&&info.irisPhysicalDepth<=.013,
+          'Central iris still has zero 3D thickness: '+JSON.stringify(info));
+        assert.equal(info.irisPhysicalBevel,
+          'eight-shared-extruded-chamfered-optical-shutters',
+          'Eight iris leaves must share actual chamfered 3D solid geometry');
+        assert.ok(info.irisPhysicalTriangles>=20,
+          'Real Three.js iris leaf is still a flat pair of triangles: '+
+            JSON.stringify(info));
+        assert.equal(info.collars,3,
+          'All three precision optical collars must exist in the ACTUAL Three scene');
+        assert.equal(info.optics,'three-metal-collars-eight-physical-iris-blades',
+          'Optic provenance must be the real new 3D mesh, not a 2D illustration');
+        assert.equal(info.facets,'eight-truly-slanted-machined-3d-surfaces',
+          'The cinematic shell must have eight genuine beveled arm panels, not a flat logo');
+        assert.equal(info.railIdentity,'eight-real-elevated-two-segment-metal-channels',
+          'The true Three intro must contain actual raised titanium machining, not painted 2D lines');
+        assert.equal(info.railTriangles,32,
+          'Four physical MAG arms require eight entire machined rails in one indexed Three mesh');
+        assert.equal(info.studio,'one-webgl-physical-softboxes-rear-air-volume',
+          'The entire first-visit film must retain the physical light stage in its original WebGL scene');
+        assert.equal(info.sapphire,'real-convex-optical-mesh-with-eight-iris-blades',
+          'A painted central cyan marble cannot substitute the real convex sapphire');
+        assert.ok(info.sapphireScale>=1.15&&info.sapphireScale<=1.20,
+          'The optical hardware must be optically legible relative to the four arms');
+        if(frame.second===4.40){
+          assert.ok(info.cameraDolly>.98,
+            'The 4.4s original Three mobile MAG must show its physically camera-fitted enlarged machining');
+          assert.ok(info.cortexBounce>.98,
+            'Previously black organic film needs real extra photographic key/fill at 4.4s: '+
+              JSON.stringify(info));
+        }
+        if(frame.second===8.50){
+          if(mobile)assert.ok(info.cameraDolly>.98,
+            'At 8.5s the real original Four Point optical chamber must have the closer 3D camera view');
+          assert.ok(info.studioSweep>.95,
+            'Actual Three.js metallic facet light choreography is missing from the optical hero frame');
+          assert.ok(info.opticParallax>.96&&info.cameraXOffset>(mobile?.30:.20),
+            'R2126 must show real physically cambered optic from traveling camera at 8.5s: '+
+              JSON.stringify(info));
+          assert.ok(info.cortexBounce<.01,
+            'Cortical fill light must not overexpose the final 3D sapphire identity');
+        }
+        if(frame.second===9.98){
+          assert.ok(info.cameraDolly<.01,
+            'Before 9.98s camera must return smoothly to original permanent R326 MAG handoff');
+          assert.ok(info.studioSweep<.01,
+            'Studio lamps must return to their original pose before the permanent R326 MAG handoff');
+          assert.ok(info.cortexBounce<.01,
+            'R2121 real physical lights must settle before original R326 handoff');
+          assert.ok(Math.abs(info.irisHandoffAngle)<.0001,
+            'R2125 mechanical aperture must stop rotating before native R326 handoff: '+
+              JSON.stringify(info));
+          assert.ok(info.opticParallax<.01&&Math.abs(info.cameraXOffset)<.01,
+            'R2126 real 3D camera must settle exactly to the original 9.98s pose: '+
+              JSON.stringify(info));
+        }
+        assert.deepEqual(errors,[],'Three film runtime errors');
+        results.push({frame,info});
+        console.log('R2110_REAL_THREE_FILM_PASS',
+          JSON.stringify({name:frame.name,...info}));
+      }finally{await context.close();}
+    }
+  }finally{await browser.close();}
+  fs.writeFileSync(DIR+'/report.json',JSON.stringify(results,null,2)+'\n');
+})().catch(error=>{
+  console.error(error.stack||String(error));
+  process.exitCode=1;
+});
