@@ -1,8 +1,39 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
 const { chromium } = require('playwright');
 const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
+
+const archiveSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+const layoutStart=archiveSource.indexOf('  const folioLayoutStates=new WeakMap();');
+assert.ok(layoutStart>=0,'The original chapter owner must retain native folio layout state');
+const layoutSource=archiveSource.slice(layoutStart,archiveSource.indexOf('  function syncCinema(){',layoutStart));
+for(const initial of [[],[['content-visibility','auto',''],['contain-intrinsic-size','auto 700px','important']]]){
+  const properties=new Map(initial.map(([name,value,priority])=>[name,{value,priority}]));
+  properties.set('opacity',{value:'.7',priority:'important'});
+  const original=JSON.stringify([...properties]);let writes=0;
+  const panel={style:{getPropertyValue:name=>properties.get(name)?.value||'',
+    getPropertyPriority:name=>properties.get(name)?.priority||'',
+    setProperty(name,value,priority){writes++;properties.set(name,{value,priority});},
+    removeProperty(name){writes++;properties.delete(name);}}};
+  const context={WeakMap};vm.createContext(context);vm.runInContext(layoutSource,context);
+  context.setFolioLayout(panel,false,true);
+  assert.equal(panel.style.getPropertyValue('content-visibility'),'hidden');
+  assert.equal(panel.style.getPropertyPriority('content-visibility'),'important');
+  const hiddenWrites=writes;context.setFolioLayout(panel,false,true);
+  assert.equal(writes,hiddenWrites,'An unchanged hidden folio must not receive repeated style writes');
+  context.setFolioLayout(panel,true,true);
+  assert.equal(panel.style.getPropertyValue('content-visibility'),'visible');
+  const visibleWrites=writes;context.setFolioLayout(panel,true,true);
+  assert.equal(writes,visibleWrites,'An unchanged active folio must not receive repeated style writes');
+  context.setFolioLayout(panel,false,false);
+  assert.equal(JSON.stringify([...properties]),original,'Fallback must restore exact prior inline values and priorities');
+  const restoredWrites=writes;context.setFolioLayout(panel,false,false);
+  assert.equal(writes,restoredWrites,'Repeated fallback restoration must be idempotent');
+}
+console.log('ARCHIVE_FOLIO_LAYOUT_RESTORE_R2116_PASS');
 
 (async () => {
   const browser = await chromium.launch({ headless: true, args: [
@@ -18,6 +49,14 @@ const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi
       });
       try {
         const page = await context.newPage();
+        await page.route('**/formatx-cinematic-archive-r1987.css*', route => {
+          if (!new URL(route.request().url()).searchParams.has('fx-folio-layout-regression'))
+            return route.continue();
+          const css = fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css', 'utf8');
+          return route.fulfill({ contentType: 'text/css', body: css + '\n'
+            + 'html:root:root:root[data-fx-archive-cinema="active"] body.living-architecture main#main-content '
+            + '.fx-archive-cinema-folio-r2030{content-visibility:visible!important;contain-intrinsic-size:900px!important}' });
+        });
         const errors = [];
         page.on('pageerror', error => errors.push(String(error)));
         await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -78,6 +117,51 @@ const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi
           assert.equal(state.canvasCount, 1, 'Chapter handoff created another MAG canvas');
           console.log('ARCHIVE_ATOMIC_CHAPTER_R2110_PASS ' + JSON.stringify({ profile: mobile ? 'mobile' : 'desktop', ...state }));
         }
+        // Preserve the original six normal native handoffs above. Reload the
+        // actual external stylesheet through CSP with a late legacy override;
+        // the chapter owner must still keep seven original folios suspended.
+        await page.evaluate(() => new Promise((resolve, reject) => {
+          const link = [...document.querySelectorAll('link')]
+            .find(node => node.href.includes('formatx-cinematic-archive-r1987.css'));
+          if (!link) { reject(new Error('Actual archive stylesheet is missing')); return; }
+          const deadline = setTimeout(() => reject(new Error('External archive stylesheet reload did not complete')), 5000);
+          link.addEventListener('load', () => { clearTimeout(deadline); resolve(); }, { once: true });
+          link.addEventListener('error', () => { clearTimeout(deadline); reject(new Error('External archive stylesheet reload failed')); }, { once: true });
+          const target = new URL(link.href);
+          target.searchParams.set('fx-folio-layout-regression', 'r2116');
+          link.href = target.href;
+        }));
+        await page.locator('#experience').evaluate(node => node.scrollIntoView({ block: 'center', behavior: 'instant' }));
+        await page.waitForFunction(() => window.FormatXArchiveExperience.state.scene === 'ecosystem', null, { timeout: 8000 });
+        const layout = await page.evaluate(() => {
+          const panels = [...document.querySelectorAll('.fx-archive-cinema-folio-r2030')];
+          window.__r2116LayoutPanels = panels;
+          window.__r2116OriginalHeadings = panels.map(panel => panel.querySelector('h2,h3'));
+          return { scene: window.FormatXArchiveExperience.state.scene,
+            sameCanvas: window.FormatXLivingCore.canvas === window.__r2110OriginalCanvas,
+            panels: panels.map(panel => ({ active: panel.dataset.fxCinemaPanelActive === 'true',
+              inert: panel.inert, visibility: getComputedStyle(panel).contentVisibility })) };
+        });
+        assert.equal(layout.panels.length, 8, 'Late CSS must retain all eight original folios');
+        assert.equal(layout.panels.filter(panel => panel.active).length, 1, 'Late CSS must retain one active original folio');
+        assert.ok(layout.panels.every(panel => panel.visibility === (panel.active ? 'visible' : 'hidden') && panel.inert !== panel.active),
+          'Late CSS materialized an inactive original folio: ' + JSON.stringify(layout));
+        assert.equal(layout.sameCanvas, true, 'Layout isolation replaced the original MAG canvas');
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.waitForFunction(() => window.FormatXArchiveExperience.state.disposed, null, { timeout: 5000 });
+        const restored = await page.evaluate(() => ({
+          originalLayout: __r2116LayoutPanels.every(panel => !panel.isConnected
+            && panel.style.getPropertyValue('content-visibility') === ''
+            && panel.style.getPropertyValue('contain-intrinsic-size') === ''),
+          originalHeadings: __r2116OriginalHeadings.every(node => node?.isConnected && !node.closest('.fx-archive-cinema-folio-r2030')),
+          sameCanvas: window.FormatXLivingCore.canvas === window.__r2110OriginalCanvas,
+          canvasCount: document.querySelectorAll('.fx-crystal-organism-r326-canvas').length
+        }));
+        assert.equal(restored.originalLayout, true, 'Fallback must restore the original inline layout properties');
+        assert.equal(restored.originalHeadings, true, 'Fallback must restore the same original semantic headings');
+        assert.equal(restored.sameCanvas, true, 'Fallback replaced the original MAG canvas');
+        assert.equal(restored.canvasCount, 1, 'Fallback created another MAG canvas');
+        console.log('ARCHIVE_FOLIO_LAYOUT_R2116_PASS ' + JSON.stringify({ profile: mobile ? 'mobile' : 'desktop', layout, restored }));
         assert.deepEqual(errors, [], 'Browser errors during native chapter handoff');
       } finally {
         await context.close();

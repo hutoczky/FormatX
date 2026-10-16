@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2114-native-framing';
+  const VERSION='cinematic-archive-r2116-owned-folio-layout';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -365,6 +365,33 @@
     if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
   }
 
+  // Commit native layout isolation with the same chapter and inert state.
+  // Late stylesheet activation must never materialize seven inactive papers.
+  // Cache the original inline values and write only on actual state changes.
+  const folioLayoutStates=new WeakMap();
+  function setFolioLayout(panel,active,enabled){
+    let state=folioLayoutStates.get(panel);
+    if(!enabled){
+      if(!state)return;
+      for(const [name,value,priority] of state.original){
+        if(value)panel.style.setProperty(name,value,priority);
+        else panel.style.removeProperty(name);
+      }
+      folioLayoutStates.delete(panel);
+      return;
+    }
+    if(!state){
+      state={active:null,original:['content-visibility','contain-intrinsic-size'].map(name=>[
+        name,panel.style.getPropertyValue(name),panel.style.getPropertyPriority(name)
+      ])};
+      folioLayoutStates.set(panel,state);
+    }
+    if(state.active===active)return;
+    panel.style.setProperty('content-visibility',active?'visible':'hidden','important');
+    panel.style.setProperty('contain-intrinsic-size',active?'auto':'1px 1px','important');
+    state.active=active;
+  }
+
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -389,6 +416,7 @@
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
+        setFolioLayout(panel,active,enabled);
         if(panel.inert===active)panel.inert=!active;
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
@@ -1252,6 +1280,7 @@ void main(){
       if(panel){
         // Synthetic source telemetry is not part of the original product UI:
         // remove it BEFORE restoring exactly the native source DOM children.
+        setFolioLayout(panel,false,false);
         panel.querySelector(':scope > .fx-mag-folio-origin-r2041')?.remove();
         panel.inert=false;
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
