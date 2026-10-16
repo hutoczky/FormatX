@@ -932,6 +932,26 @@
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    /* R2134: a 390px real browser first frame was occasionally EMPTY although
+       R326's WebGL context, stage and CSS opacity were all healthy. The
+       renderer was last invalidated while the fullscreen film was still
+       composited on top. Request a BOUNDED final native paint only AFTER the
+       overlay leaves and the browser recomputes the actual home viewport.
+       This uses the original single R326 renderer; no second canvas/loop. */
+    try {
+      const repaint=()=>{
+        const api=window.FormatXLivingCore;
+        if(api?.renderer==='single-webgl-crystal-organism-r326'){
+          api.requestRender?.(2);
+          ROOT.dataset.fxMagHandoffPaintR2134='requested-after-film-removal';
+        }
+      };
+      requestAnimationFrame(()=>{
+        repaint();
+        requestAnimationFrame(repaint);
+      });
+      setTimeout(repaint,160);
+    } catch (_) {}
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
