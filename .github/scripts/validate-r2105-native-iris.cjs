@@ -3,6 +3,27 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {chromium}=require('playwright');
+const {PNG}=require('pngjs');
+
+/* R2134 regression: one successful DOM/WebGL initialization does not prove
+   pixels were composited. A real R2132 390px capture was entirely blank. */
+function visibleMagPixels(buffer,width,height){
+  const png=PNG.sync.read(buffer);
+  const x0=Math.floor(png.width*.18),x1=Math.floor(png.width*.82);
+  const y0=Math.floor(png.height*.17),y1=Math.floor(png.height*.62);
+  let bright=0,tonal=0;
+  for(let y=y0;y<y1;y+=2){
+    for(let x=x0;x<x1;x+=2){
+      const n=(png.width*y+x)*4;
+      const r=png.data[n],g=png.data[n+1],b=png.data[n+2];
+      const lum=(r+g+b)/3;
+      if(lum>80)bright++;
+      if(lum>65 && Math.max(r,g,b)-Math.min(r,g,b)>15)tonal++;
+    }
+  }
+  return {bright,tonal,pixelWidth:png.width,pixelHeight:png.height};
+}
+
 
 const BASE=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
@@ -122,6 +143,13 @@ const views=[
               x:rect.x,y:rect.y,right:rect.right,bottom:rect.bottom,
               width:rect.width,height:rect.height
             }:null,
+            archiveState:{
+              dock:root.dataset.fxArchiveDock||'',
+              current:root.dataset.fxArchiveCurrent||'',
+              experience:root.dataset.fxArchiveExperience||'',
+              cinema:root.dataset.fxArchiveCinema||'',
+              pageScrollY:scrollY
+            },
             stageRect:(()=>{
               const r=canvas?.parentElement?.getBoundingClientRect();
               return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null;
@@ -155,10 +183,19 @@ const views=[
               ?.src||''
           };
         });
-        await page.screenshot({
+        const firstPNG=await page.screenshot({
           path:OUT+'/'+view.name+'-final-original-mag.png',
           animations:'allow'
         });
+        const firstPixels=visibleMagPixels(firstPNG,view.width,view.height);
+        info.initialPixelProofR2134=firstPixels;
+        /* The off-center 390px blank bug previously PASSED every old DOM
+           test. This image-backed assertion will fail an actual blank movie
+           even if the canvas element and GPU context are fully initialized. */
+        assert.ok(firstPixels.bright> (view.mobile?450:1500)
+          &&firstPixels.tonal> (view.mobile?350:1100),
+          'R2134 WebGL initialized but no visible MAG in real first mobile frame: '+
+          JSON.stringify({view,firstPixels,stage:info.stageRect,chain:info.visualChain}));
         /* R2133: capture the actual composited WebGL canvas separately.
            The 390px full-page snapshot was fully empty despite DOM-ready
            and correctly sized canvas; crop proves actual pixels vs a cover. */
