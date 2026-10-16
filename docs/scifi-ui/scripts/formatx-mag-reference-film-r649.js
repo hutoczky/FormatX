@@ -240,6 +240,23 @@
     ctx.fillStyle=atmosphere;
     ctx.fillRect(-S*1.95,-S*1.95,S*3.90,S*3.90);
 
+    /* R2126: sparse lens-lit suspended particulate around the one real
+       four-arm metal body; never a circular HUD, patterned backdrop or
+       separate composited surface. Twelve subpixel dust motes follow the
+       10-second camera's physical center and are cheap on weak devices. */
+    for(let mote=0;mote<12;mote++){
+      const angle=mote*2.39996323;
+      const reach=S*(1.33+(mote%4)*.18);
+      const drift=Math.sin(time*.00035+mote*1.7)*S*.018;
+      const px=Math.cos(angle)*(reach+drift);
+      const py=Math.sin(angle)*(reach+drift)*.78;
+      const intensity=.12+.10*(.5+.5*Math.sin(time*.0011+mote));
+      ctx.fillStyle='rgba(155,207,211,'+intensity.toFixed(3)+')';
+      ctx.beginPath();
+      ctx.arc(px,py,Math.max(.52,S*.0045),0,TAU);
+      ctx.fill();
+    }
+
     // Extruded silhouette: physically separates the object from the void.
     ctx.save();
     ctx.shadowColor='rgba(3,8,14,.96)';ctx.shadowBlur=S*.28;
@@ -589,12 +606,18 @@
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
       const started=performance.now();
       const radiusCap=MOBILE
-        ? Math.max(32,Math.min(sw*.208,sh*.245)/Math.max(.001,scale))
+        ? Math.max(34,Math.min(sw*.255,sh*.275)/Math.max(.001,scale))
         : 192;
       document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
         'four-point-bevelled-metal-glass-iris';
       document.documentElement.dataset.fxMagFallbackDiameterR2103=
         String(Math.round(radiusCap*2.42*scale));
+      /* R2126: mobile's genuine R2125 live screenshots showed a ~50% width
+         MAG surrounded by dead space. The 62% silhouette remains safely
+         below the 390px/360px screen edges and outside the Skip zone.
+         We enlarge REAL metal/optic pixel coverage, not an overlay. */
+      document.documentElement.dataset.fxMagFramingR2126=
+        MOBILE?'cinematic-0.62-viewport-wide':'desktop-original';
       /* R2115 actual frame cap, including all four physical points. */
       document.documentElement.dataset.fxMagMobileViewportRatioR2115=
         MOBILE?(radiusCap*2.42*scale/Math.max(1,sw)).toFixed(3):'desktop';
