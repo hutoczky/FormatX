@@ -151,7 +151,7 @@ const views=[
         assert.ok(info.pupilElevation>=.063&&info.pupilElevation<=.065,
           'The raised glass should project physically above the shutter backs');
         assert.equal(info.pupilShader,
-          'broad-physical-normal-silver-softbox-on-convex-sapphire',
+          'r2132-narrow-physical-normal-obsidian-sapphire-glint',
           'R2129 must shade the physical pupil from actual curved normals');
         assert.equal(info.sculptedPanels,
           '8-physically-angled-metal-arm-faces',
@@ -186,7 +186,8 @@ const views=[
           'Production source has lost the original multiplatform CTA');
         assert.ok(info.loader.includes('r2105=physical-sapphire-iris') &&
           info.loader.includes('r2117=physical-four-arm-facet-lights') &&
-          info.loader.includes('r2130=extruded-optical-iris-silver-panels'),
+          info.loader.includes('r2130=extruded-optical-iris-silver-panels') &&
+          info.loader.includes('r2132=obsidian-glass-narrow-studio-reflection'),
           'Cached obsolete R326 shader was loaded instead of the actual R2117 material: '+
             JSON.stringify(info));
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
