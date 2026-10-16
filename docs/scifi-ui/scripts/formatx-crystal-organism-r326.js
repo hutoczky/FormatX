@@ -733,7 +733,14 @@
       const centreX=.025,centreY=-.012;
       const bezelSteps=software?24:mobile?32:48;
       const bezelTubeSteps=4,bezelZ=.632;
-      const bezelMajorX=.232,bezelMajorY=.210,bezelTube=.016;
+      /* R2129: the original permanent MAG optical assembly was still
+         undersized in the real 390px WebGL screenshot. Increase the radius
+         of its ACTUAL curved meshes, not a screen-space/DOM graphic. The
+         tessellation and single original WebGL draw call stay unchanged. */
+      const opticScaleR2129=mobile?1.17:1.07;
+      const bezelMajorX=.232*opticScaleR2129;
+      const bezelMajorY=.210*opticScaleR2129;
+      const bezelTube=.017;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -758,9 +765,13 @@
       }
 
       const lensCenter=[centreX,centreY,.643];
-      const lensRadiusX=.209;
-      const lensRadiusY=.185;
-      const lensDepth=.055;
+      const lensRadiusX=.209*opticScaleR2129;
+      const lensRadiusY=.185*opticScaleR2129;
+      const lensDepth=.055*(mobile?1.10:1.05);
+      root.dataset.fxNativeMagOpticScaleR2129=
+        (opticScaleR2129*1.29).toFixed(2)+'x-optical-geometry';
+      root.dataset.fxNativeMagOpticRadiusR2129=
+        lensRadiusX.toFixed(4);
       /* R2108: the real machined optics were too small inside the hero
          four-point body. Enlarge the SAME geometry and strengthen actual
          convex lens curvature; retain the original tessellation/draw call. */
@@ -1512,11 +1523,21 @@
           (1.0-smoothstep(.73,.94,radialXY))*frontDepth;
         float silverCrest=pow(abs(cos(polar*2.0)),3.1)*machineEnvelope;
         float darkChannel=pow(abs(sin(polar*2.0)),3.0)*machineEnvelope;
-        vec3 machinedLight=vec3(.48,.53,.49)*
-          (.17+.24*key+.24*softboxB+.17*fill);
-        c+=machinedLight*silverCrest;
-        c*=1.0-.23*darkChannel;
-        c+=vec3(.035,.047,.049)*softboxA*machineEnvelope*.32;
+        /* R2129: broad normal-following metal shoulder and deeper machined
+           quadrants. Neutral-silver key/reflected light replaces the flat
+           cyan star seen on real Android WebGL film-handoff screenshots.
+           Fourfold angular facets have NO subpixel repeating ring pattern. */
+        float polishedShoulder=pow(sat(dot(n,normalize(vec3(-.51,.64,.57)))),4.0)*
+          machineEnvelope;
+        float cutMetal=pow(abs(cos(polar*2.0)),5.2)*machineEnvelope;
+        float cutRecess=pow(abs(sin(polar*2.0)),4.4)*machineEnvelope;
+        vec3 machinedLight=vec3(.58,.63,.59)*
+          (.19+.35*key+.27*softboxB+.18*fill);
+        c+=machinedLight*silverCrest*1.28;
+        c+=vec3(.38,.43,.40)*cutMetal*(.12+.33*polishedShoulder);
+        c+=vec3(.54,.59,.54)*polishedShoulder*.13;
+        c*=1.0-.38*cutRecess;
+        c+=vec3(.035,.047,.049)*softboxA*machineEnvelope*.36;
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.105,.123)*fresnel*.23;
