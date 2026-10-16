@@ -76,7 +76,7 @@ assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
   fallback.includes("fxMagFramingR2126")&&
   fallback.includes('Math.min(sw*.255,sh*.275)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261016-r2126-larger-cinematic-portrait'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261016-r2128-oblique-metal-sapphire-lamina'),
   'Missing actual R2126 cache-busted, 62%-width four-point Android MAG');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
