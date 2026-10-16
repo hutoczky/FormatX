@@ -113,6 +113,41 @@ const views=[
             pixelWidth:canvas?.width||0,pixelHeight:canvas?.height||0,
             visible:cs?.visibility==='visible'&&cs?.display!=='none'
               &&Number(cs.opacity)>0,
+            /* R2133: DOM readiness is NOT visual evidence. The genuine
+               390px Android screenshot was blank while this previously
+               passed; 360px pinned the MAG below the sticky navigation.
+               Record every real compositor ancestor to identify the owner. */
+            viewport:{width:innerWidth,height:innerHeight},
+            canvasRect:rect?{
+              x:rect.x,y:rect.y,right:rect.right,bottom:rect.bottom,
+              width:rect.width,height:rect.height
+            }:null,
+            stageRect:(()=>{
+              const r=canvas?.parentElement?.getBoundingClientRect();
+              return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null;
+            })(),
+            heroSpaceRect:(()=>{
+              const r=document.querySelector('#hero .hero-space')
+                ?.getBoundingClientRect();
+              return r?{x:r.x,y:r.y,width:r.width,height:r.height}:null;
+            })(),
+            visualChain:(()=>{
+              const result=[];
+              for(let el=canvas,depth=0;el&&depth<9;
+                  el=el.parentElement,depth++){
+                const r=el.getBoundingClientRect(),style=getComputedStyle(el);
+                result.push({
+                  tag:el.tagName,className:String(el.className).slice(0,105),
+                  x:Math.round(r.x),y:Math.round(r.y),
+                  width:Math.round(r.width),height:Math.round(r.height),
+                  opacity:style.opacity,display:style.display,
+                  visibility:style.visibility,position:style.position,
+                  zIndex:style.zIndex,transform:style.transform,
+                  overflow:style.overflow,clipPath:style.clipPath
+                });
+              }
+              return result;
+            })(),
             heroCTA:!!document.querySelector('#hero-download,[data-release-download="multiplatform"]'),
             heroLinks:document.querySelectorAll('a[href="/download/multiplatform"]').length,
             heroState:document.querySelector('#hero')?.getAttribute('class')||'',
