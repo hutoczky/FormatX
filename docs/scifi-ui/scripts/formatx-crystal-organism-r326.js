@@ -978,8 +978,11 @@
     root.dataset.fxNativeMagRailSectionsR2108=String(sections);
     root.dataset.fxNativeMagRailDetailR2108=
       software?'software-7':mobile?'mobile-10':'desktop-14';
+    /* R2131: rail count ends BEFORE the eight R2130 metal arm panels.
+       A single vertex buffer contains both elements, but rail telemetry
+       must never include the sixteen panel triangles. */
     root.dataset.fxNativeMagRailTrianglesR2107=
-      String((facets.length-railStart)/3);
+      String((panelFirst-railStart)/3);
 
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
