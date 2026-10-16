@@ -90,6 +90,8 @@ const CASES=[
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             viewportRatio:Number(root.dataset.fxMagMobileViewportRatioR2115||0),
             framingR2126:root.dataset.fxMagFramingR2126||'',
+            poseR2128:Number(root.dataset.fxMagFallbackPoseR2128||0),
+            yawR2128:Number(root.dataset.fxMagFallbackYawR2128||0),
             genomeTimeline:root.dataset.fxMagGenomeFadeR2115||'',
             filmStyle:getComputedStyle(overlay?.querySelector('.fxb-genome-field')||overlay).display,
             width:innerWidth,height:innerHeight,
@@ -143,6 +145,18 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
+        /* R2128 must show a real staged optically oblique physical body,
+           yet remain within the intact four-point 390px mobile envelope.
+           These values come from the actual painted film renderer. */
+        const expectedPose=shot.second>=6.0&&shot.second<=7.2?
+          .90:.08;
+        assert.ok(info.poseR2128>=expectedPose,
+          'R2128 viewport cinematic perspective is inert: '+
+            JSON.stringify({shot,info}));
+        assert.ok(Number.isFinite(info.yawR2128),
+          'R2128 real optical yaw must be finite and bounded');
+        assert.ok(Math.abs(info.yawR2128)<=.19,
+          'R2128 camera yaw must not clip the four-point silhouette');
         assert.equal(info.premium,'sculpted-fourpoint-3d-illusion-machined-optic');
         assert.equal(info.optic,'eight-deep-shutter-blades-sapphire-glass');
         assert.equal(info.filmStyle,'none',
@@ -176,7 +190,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2126-larger-cinematic-portrait'),
+        assert.ok(info.loader.includes('r2128-oblique-metal-sapphire-lamina'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
