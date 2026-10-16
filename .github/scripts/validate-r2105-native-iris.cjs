@@ -87,6 +87,8 @@ const views=[
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
             opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
             sapphireRadius:Number(root.dataset.fxNativeMagLensXRadiusR2108||0),
+            opticalBoostR2129:root.dataset.fxNativeMagOpticScaleR2129||'',
+            opticalRadiusR2129:Number(root.dataset.fxNativeMagOpticRadiusR2129||0),
             count:canvases.length,
             webgl:root.dataset.fxCoreReal3d,
             width:rect?.width||0,height:rect?.height||0,
@@ -172,8 +174,15 @@ const views=[
         assert.equal(info.triangles,16);
         assert.equal(info.opticScale,'1.29x-real-geometry',
           'R2108 did not enlarge actual native WebGL metal/glass geometry');
-        assert.ok(info.sapphireRadius>=.205&&info.sapphireRadius<=.220,
-          'The actual sapphire surface radius is still too small');
+        const intendedRadius=view.mobile?.209*1.17:.209*1.07;
+        const intendedBoost=view.mobile?'1.51x-optical-geometry':
+          '1.38x-optical-geometry';
+        assert.equal(info.opticalBoostR2129,intendedBoost,
+          'The actual single-WebGL optical geometry was not enlarged in the correct viewport');
+        assert.ok(Math.abs(info.sapphireRadius-intendedRadius)<.004
+          &&Math.abs(info.opticalRadiusR2129-intendedRadius)<.004,
+          'R2129 physical sapphire mesh radius is too small or inconsistent: '+
+            JSON.stringify(info));
         assert.ok(info.visible&&info.width>50&&info.height>50,
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
         assert.ok(info.pixelWidth>100&&info.pixelHeight>100,
