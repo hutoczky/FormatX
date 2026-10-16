@@ -996,13 +996,20 @@
            compatible but never replaces the body. Constant organic smoothing plus
            physiological deformation keeps the asymmetric silhouette alive. */
         float morph=0.0;
-        float organicBlend=.010;
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.10));
+        /* R2118: the physical titanium bezel, shutter blades and actual
+           curved glass surface are rigid machined components, not living
+           cortex. Their original surface normals must NOT be smoothed with
+           the organic sphere, which flattened the specular depth. */
+        float rigidOptics=step(5.65,aFacet);
+        float organicBlend=.010*(1.0-rigidOptics);
+        vec3 crystalShadingNormal=normalize(mix(
+          aCrystalNormal,aSphereNormal,.10*(1.0-rigidOptics)));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
+        float living=(cell*.011+membrane*.0065)*
+          (.42+.58*uEnergy)*(1.0-rigidOptics);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
