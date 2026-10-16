@@ -227,9 +227,32 @@
   function drawMagStudio(ctx,S,time,t){
     const lightSweep=Math.sin(time*.00038);
     const pulse=.50+.50*Math.sin(time*.0024);
+    /* R2128: a bounded optical-camera move gives the actual fallback
+       machined body changing perspective. This is a single canvas
+       transformation, not an image layer; it fades out to identity before
+       the exact original R326 WebGL handoff. */
+    const cinematicPose=smooth((t-3.15)/1.45)*
+      (1-smooth((t-8.12)/1.30));
+    const orbitYaw=.18*cinematicPose*
+      Math.sin((t-3.15)*.52);
+    const orbitPitch=.10*cinematicPose*
+      Math.cos((t-3.15)*.47);
     ctx.save();
     ctx.lineJoin='round';ctx.lineCap='round';
     ctx.rotate(-.018+.025*Math.sin(time*.00030));
+    ctx.transform(
+      1-.033*cinematicPose,
+      orbitPitch*.27,
+      orbitYaw*.43,
+      1-.058*cinematicPose,
+      0,0
+    );
+    if(MOBILE){
+      document.documentElement.dataset.fxMagFallbackPoseR2128=
+        cinematicPose.toFixed(3);
+      document.documentElement.dataset.fxMagFallbackYawR2128=
+        orbitYaw.toFixed(3);
+    }
 
     // Wide soft atmospheric scatter: present, but never a flat cyan halo.
     const atmosphere=ctx.createRadialGradient(-S*.10,-S*.18,0,0,0,S*1.86);
@@ -263,10 +286,14 @@
     ctx.translate(S*.070,S*.092);
     magDiamond(ctx,S);ctx.fillStyle='#01080f';ctx.fill();
     ctx.restore();
-    for(let layer=5;layer>=1;layer--){
-      ctx.save();ctx.translate(S*.007*layer,S*.010*layer);
+    for(let layer=9;layer>=1;layer--){
+      ctx.save();
+      ctx.translate(S*(.0065+.002*cinematicPose)*layer,
+        S*(.010+.002*cinematicPose)*layer);
       magDiamond(ctx,S);
-      ctx.fillStyle=layer>3?'#07141d':'#142731';ctx.fill();
+      const metalShade=layer>6?'#06111a':
+        layer>3?'#0b1d28':'#203842';
+      ctx.fillStyle=metalShade;ctx.fill();
       ctx.restore();
     }
     magDiamond(ctx,S);
@@ -511,6 +538,37 @@
     ctx.fillStyle=movingLensSoftbox;ctx.fill();
     ctx.restore();
 
+    /* R2128: oblique inner glass lamina and depth-separated sapphire
+       caustic. Everything is clipped to the existing REAL drawn lens.
+       The highlights move with the pose and respect the original viewport
+       pixel budget; no new canvas, CSS overlay or WebGL context. */
+    ctx.save();
+    ctx.beginPath();ctx.arc(0,0,rx*.465,0,TAU);
+    ctx.clip();
+    const opticalLamina=ctx.createLinearGradient(
+      -rx*.52+orbitYaw*rx*.27,-ry*.42,
+      rx*.46+orbitYaw*rx*.27,ry*.43
+    );
+    opticalLamina.addColorStop(0,'rgba(212,238,230,.18)');
+    opticalLamina.addColorStop(.20,'rgba(111,171,176,.10)');
+    opticalLamina.addColorStop(.42,'rgba(18,60,81,.025)');
+    opticalLamina.addColorStop(.67,'rgba(1,15,28,.03)');
+    opticalLamina.addColorStop(1,'rgba(3,23,38,.19)');
+    ctx.fillStyle=opticalLamina;
+    ctx.fillRect(-rx*.51,-ry*.51,rx*1.02,ry*1.02);
+    ctx.beginPath();
+    ctx.ellipse(rx*(.065+.09*orbitYaw),ry*.05,
+      rx*.365,ry*.365,-.20,Math.PI*.12,Math.PI*1.68);
+    ctx.strokeStyle='rgba(142,207,210,'+
+      (.19+.09*cinematicPose).toFixed(3)+')';
+    ctx.lineWidth=Math.max(.65,S*.008);ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(-rx*.08,-ry*.05,
+      rx*.287,ry*.287,.11,Math.PI*.94,Math.PI*1.67);
+    ctx.strokeStyle='rgba(3,11,23,.77)';
+    ctx.lineWidth=Math.max(.8,S*.010);ctx.stroke();
+    ctx.restore();
+
     // One low-energy optical heartbeat, limited to the lens center.
     ctx.beginPath();ctx.arc(0,0,rx*.26,0,TAU);
     ctx.strokeStyle='rgba(84,176,191,'+(.11+pulse*.13)+')';
@@ -682,6 +740,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2104-sculpted-fourpoint-realistic-machined-optics'
+    visualRevision:'r2128-perspective-thick-metal-sapphire-lamina'
   };
 })();
