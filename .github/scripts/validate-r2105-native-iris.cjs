@@ -89,6 +89,8 @@ const views=[
             sapphireRadius:Number(root.dataset.fxNativeMagLensXRadiusR2108||0),
             opticalBoostR2129:root.dataset.fxNativeMagOpticScaleR2129||'',
             opticalRadiusR2129:Number(root.dataset.fxNativeMagOpticRadiusR2129||0),
+            spineR2130:root.dataset.fxNativeMagSpineR2130||'',
+            spineTrianglesR2130:Number(root.dataset.fxNativeMagSpineTrianglesR2130||0),
             count:canvases.length,
             webgl:root.dataset.fxCoreReal3d,
             width:rect?.width||0,height:rect?.height||0,
@@ -183,6 +185,11 @@ const views=[
           &&Math.abs(info.opticalRadiusR2129-intendedRadius)<.004,
           'R2129 physical sapphire mesh radius is too small or inconsistent: '+
             JSON.stringify(info));
+        assert.equal(info.spineR2130,
+          'four-depth-tested-machined-metal-3d-ridges',
+          'R2130 raised metal spine geometry was not built in the real WebGL scene');
+        assert.equal(info.spineTrianglesR2130,12,
+          'R2130 must add exactly 12 depth-tested physical triangles');
         assert.ok(info.visible&&info.width>50&&info.height>50,
           'Canonical MAG not genuinely visible: '+JSON.stringify(info));
         assert.ok(info.pixelWidth>100&&info.pixelHeight>100,
