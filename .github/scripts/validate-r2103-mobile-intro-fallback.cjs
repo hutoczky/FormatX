@@ -384,9 +384,26 @@ const CASES=[
           originalDownloadCount:document.querySelectorAll('#hero-download').length
         };
       });
-      await page.screenshot({
-        path:OUT+'/r2107-ten-second-completed-mobile.png'
-      });
+      /* R2127: the WebGL original hero is already live after the film.
+         Capturing that busy SwiftShader compositor can block 30+ seconds
+         despite the transition itself being complete. Film video and real
+         running screenshots are mandatory above; this additional post-film
+         still is supplemental. Keep the original DOM/WebGL/handoff and CTA
+         assertions below as hard release gates, never as screenshot heuristics. */
+      try{
+        await page.screenshot({
+          path:OUT+'/r2107-ten-second-completed-mobile.png',
+          animations:'disabled',
+          timeout:9000
+        });
+      }catch(error){
+        console.warn('R2127_OPTIONAL_POSTFILM_PNG_TIMEOUT',
+          String(error&&error.message||error));
+        fs.writeFileSync(OUT+'/r2127-postfilm-screenshot-status.json',
+          JSON.stringify({optionalScreenshot:'timed-out',
+            reason:String(error&&error.message||error),
+            handoffState:filmStatus},null,2)+'\n');
+      }
     }finally{await realFilm.close()}
     if(filmVideo){
       const oldPath=await filmVideo.path();
