@@ -12,15 +12,26 @@ const loaders=[
   'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
   'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
 ];
-const TOKEN='&r2117=high-core-android-normal-mesh';
+const TOKENS=[
+  '&r2117=high-core-android-normal-mesh',
+  '&r2118=rigid-sapphire-optic-normals'
+];
 assert.ok(core.includes('hardwareConcurrency <= 4 || deviceMemory <= 2'),
   'The permanent MAG must match the intro capability policy on privacy-rounded 4GB Android');
 assert.ok(core.includes("root.dataset.fxCoreCapabilityPolicyR2117="),
   'The current live WebGL tier is not externally auditable');
+assert.ok(
+  core.includes('float rigidOptics=step(5.65,aFacet);') &&
+  core.includes('organicBlend=.010*(1.0-rigidOptics)') &&
+  core.includes('(.42+.58*uEnergy)*(1.0-rigidOptics)'),
+  'R2118 original physically curved sapphire and titanium surfaces must not inherit living cortex warp'
+);
 for(const file of loaders){
   const code=fs.readFileSync(path.join(ROOT,file),'utf8');
-  assert.ok(code.includes(TOKEN),
-    'A stale alternate MAG loader would keep the old mobile geometry: '+file);
+  for(const token of TOKENS){
+    assert.ok(code.includes(token),
+      'A stale alternate MAG loader would lose optical quality: '+file+' '+token);
+  }
 }
 
 const url=process.env.FORMATX_TEST_URL||
@@ -110,7 +121,8 @@ const cases=[
         assert.equal(report.selected,fixture.selected,
           'Live measured geometry governor was unexpectedly bypassed');
         assert.ok(report.policy==='high-core-four-gb-phone-normal-mesh-adaptive-fps'&&
-          report.loader.includes('r2117=high-core-android-normal-mesh'),
+          report.loader.includes('r2117=high-core-android-normal-mesh')&&
+          report.loader.includes('r2118=rigid-sapphire-optic-normals'),
           'A stale original MAG file or old capability policy was used');
         assert.ok(report.canvasCount===1&&report.backingWidth>=100&&
           report.backingHeight>=100,
