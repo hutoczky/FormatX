@@ -89,6 +89,7 @@ const CASES=[
             optic:root.dataset.fxMagFallbackOpticR2104,
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             viewportRatio:Number(root.dataset.fxMagMobileViewportRatioR2115||0),
+            framingR2126:root.dataset.fxMagFramingR2126||'',
             genomeTimeline:root.dataset.fxMagGenomeFadeR2115||'',
             filmStyle:getComputedStyle(overlay?.querySelector('.fxb-genome-field')||overlay).display,
             width:innerWidth,height:innerHeight,
@@ -150,13 +151,15 @@ const CASES=[
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
         );
-        assert.ok(info.diameter>=shot.width*.48&&
-          info.diameter<=shot.width*.53,
-          'R2115 mobile MAG must be a full, centered 48-53% wide solid object: '+
+        assert.ok(info.diameter>=shot.width*.60&&
+          info.diameter<=shot.width*.64,
+          'R2126 mobile MAG must occupy 60-64% of phone width without clipping: '+
             JSON.stringify(info));
-        assert.ok(info.viewportRatio>=.48&&info.viewportRatio<=.53,
+        assert.ok(info.viewportRatio>=.60&&info.viewportRatio<=.64,
           'Physical camera/framing deviates from measured phone width: '+
             JSON.stringify(info));
+        assert.equal(info.framingR2126,'cinematic-0.62-viewport-wide',
+          'R2126 enlarged mobile object must be in the actual canvas renderer');
         assert.equal(info.genomeTimeline,'fully-off-by-2.82-seconds',
           'Legacy DNA waves must disappear before premium MAG hero scene');
         assert.ok(info.buffer.width>100&&info.buffer.height>100,
