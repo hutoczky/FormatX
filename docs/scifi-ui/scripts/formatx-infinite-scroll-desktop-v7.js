@@ -8,23 +8,13 @@
   const MOBILE_SETTLE_MS = 220;
   const MOBILE_FLOW_QUERY = matchMedia('(max-width: 900px), (pointer: coarse)');
   const HERO_START_HASHES = new Set(['', '#top', '#hero']);
-  const PARAMS = new URLSearchParams(location.search);
-  const AUDIT = /Chrome-Lighthouse/i.test(navigator.userAgent||'') || PARAMS.get('lighthouse') === '1';
-  const AUTOMATION = navigator.webdriver === true;
-  if (AUDIT) {
-    root.dataset.fxInfiniteScroll='audit-static-r1735';
-    root.dataset.fxInfiniteController='audit-static-r1735';
-    root.dataset.fxInfiniteInput='native';
-    root.dataset.fxAutomaticLoop='audit-disabled';
-    root.dataset.fxLoopBridge='audit-skip';
-    root.style.scrollSnapType='none';
-    return;
-  }
   let bridge = null;
   let mirror = null;
   let mirrorImage = null;
   let mirrorCaptureFrame = 0;
   let mirrorCaptureTimer = 0;
+  let mirrorVisibilityObserver = null;
+  let mirrorNearViewport = false;
   let sourceHero = null;
   let transferLockedUntil = 0;
   let scrollFrame = 0;
@@ -116,7 +106,7 @@
     }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20260924-r1715-idle-geometry-refresh';
+    link.href = '/scifi-ui/styles/formatx-seamless-loop.css?v=20261015-r2106-late-scroll-input-ownership';
     link.dataset.fxSeamlessLoopStyle = 'true';
     link.addEventListener('load',scheduleGeometryRefresh,{once:true,passive:true});
     document.head.appendChild(link);
@@ -156,6 +146,13 @@
     sourceHero = document.querySelector('#main-content > #hero');
     if (!sourceHero) return false;
     const top = heroTop();
+    // This controller can arrive after the visitor has already scrolled.
+    // The initial call and both queued frames must honor the same ownership
+    // boundary as the existing intro-complete guard.
+    if (!shouldGuaranteeHeroStart() || Math.abs(scrollY - top) > 96) {
+      root.dataset.fxInitialHeroGuard = 'user-scroll-preserved';
+      return false;
+    }
     window.scrollTo({ top, left: 0, behavior: 'auto' });
     root.dataset.fxInitialHeroGuard = source;
     root.dataset.fxInitialHeroTop = String(Math.round(top));
@@ -292,10 +289,14 @@
     const panel = document.querySelector('[data-organism-panel="resources"]');
     if (!main || !footer) return false;
 
-    if (footer.closest('.fx-organism-panel') || footer.parentElement !== document.body) {
+    // The resource console owns the original footer after Organism mounts it.
+    // A scrolling repair may refresh its links, but must never steal the node
+    // from the same live console or change document height on every repair.
+    const resourceOwner=Boolean(panel?.contains(footer));
+    if (!resourceOwner && footer.parentElement !== document.body) {
       main.insertAdjacentElement('afterend', footer);
     }
-    footer.dataset.fxFooterFlow = 'document';
+    footer.dataset.fxFooterFlow = resourceOwner?'resources-console':'document';
     repairFooterCopy(footer);
 
     if (panel) {
@@ -339,7 +340,8 @@
   function captureReferenceMirror() {
     mirrorCaptureFrame = 0;
     if (!mirrorImage || !mirror?.isConnected || !sourceHero?.isConnected) return false;
-    const liveCanvas = activeCoreCanvas();
+    const api = window.FormatXLivingCore || window.FormatXCoreMobileV69;
+    const liveCanvas = typeof api?.captureFrame==='function'?api.captureFrame():activeCoreCanvas();
     if (!(liveCanvas instanceof HTMLCanvasElement)) {
       mirror.dataset.fxLoopCapture = 'fallback-r534';
       root.dataset.fxLoopMirrorFrame = 'live-canvas-unavailable';
@@ -377,6 +379,16 @@
     clearTimeout(mirrorCaptureTimer);
     mirrorCaptureTimer = window.setTimeout(function attemptMirrorCapture() {
       mirrorCaptureTimer=0;
+      if(isMobileFlow()||!mirrorNearViewport){
+        root.dataset.fxLoopMirrorCaptureR2068='deferred-until-desktop-bridge-approach';
+        return;
+      }
+      if(document.querySelector('.fx-mag-birth-r533')
+        || root.getAttribute('data-fx-mag-birth-live')==='active'
+        || root.dataset.fxCoreFirstFrameR1913!=='painted'){
+        root.dataset.fxLoopMirrorCaptureR2068='waiting-for-real-native-handoff';
+        return;
+      }
       const activeScroll = root.dataset.fxScrollBudgetR1660 === 'fast'
         || root.dataset.fxScrollActivity === 'scrolling'
         || root.classList.contains('fx-page-scrolling');
@@ -480,7 +492,7 @@
 
     geometryObserver = new ResizeObserver(() => scheduleGeometryRefresh());
     const main = document.getElementById('main-content');
-    const footer = document.querySelector('body > .site-footer');
+    const footer = document.querySelector('.site-footer');
     if (document.body) geometryObserver.observe(document.body);
     if (main) geometryObserver.observe(main);
     if (footer) geometryObserver.observe(footer);
@@ -520,7 +532,7 @@
 
   function buildBridge() {
     if (!repairReleasePanel()) return false;
-    const footer = document.querySelector('body > .site-footer');
+    const footer = document.querySelector('.site-footer');
     sourceHero = document.querySelector('#main-content > #hero');
     if (!footer || !sourceHero) return false;
 
@@ -534,8 +546,21 @@
     bridge.setAttribute('aria-hidden', 'true');
     bridge.setAttribute('inert', '');
     bridge.appendChild(mirror);
-    footer.insertAdjacentElement('afterend', bridge);
+    const bridgeAnchor=footer.parentElement===document.body?footer:document.getElementById('main-content');
+    bridgeAnchor.insertAdjacentElement('afterend', bridge);
     root.dataset.fxLoopBridge = 'ready-v3';
+    mirrorVisibilityObserver?.disconnect();
+    mirrorNearViewport=false;
+    if(typeof IntersectionObserver==='function'){
+      mirrorVisibilityObserver=new IntersectionObserver(entries=>{
+        const entry=entries.find(item=>item.target===bridge);
+        if(!entry)return;
+        const entering=entry.isIntersecting&&!mirrorNearViewport;
+        mirrorNearViewport=entry.isIntersecting;
+        if(entering)scheduleMirrorCapture(0);
+      },{rootMargin:'200% 0px'});
+      mirrorVisibilityObserver.observe(bridge);
+    }
     captureCanonicalLandingOrigin();
 
     // Geometry is deliberately sampled outside the scroll hot path. This avoids
@@ -935,29 +960,10 @@
   }
 
   function onScroll() {
-    /* R1742 — WebDriver validation scrolls directly to the live bridge offset.
-       Capture that visible coordinate before lazy tail materialisation can move
-       the bridge. This branch is automation-only and never changes real input. */
-    if(AUTOMATION&&!isMobileFlow()
-      && !root.classList.contains('fx-seamless-loop-transfer')
-      && !root.classList.contains('fx-section-navigation-active')
-      && bridge?.isConnected){
-      const liveRect=bridge.getBoundingClientRect();
-      const liveBridgeTop=scrollY+liveRect.top;
-      const liveRelative=scrollY-liveBridgeTop;
-      const liveEnd=Math.max(0,document.documentElement.scrollHeight-innerHeight);
-      if(liveRelative>=-2||scrollY>=liveEnd-4){
-        const sourceHeight=Math.max(0,sourceHero?.offsetHeight||loopGeometry.sourceHeight||stableDesktopSourceHeight||0);
-        pendingDesktopRelative=Math.max(0,Math.min(liveRelative>=-2?liveRelative:0,Math.max(0,sourceHeight-2)));
-        desktopGestureAnchorY=scrollY;
-        desktopGestureAnchorRelative=liveRelative;
-        desktopGestureBoundaryLatched=true;
-        root.dataset.fxLoopAutomationBoundaryR1742='live-pre-materialisation-latched';
-        root.dataset.fxLoopAutomationRelativeR1742=String(Math.round(liveRelative));
-        clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
-        root.dataset.fxLoopAutomationSettleR1742='pre-materialisation-idle-armed';
-      }
+    if(!mirrorVisibilityObserver&&loopGeometry.ready){
+      const near=!isMobileFlow()&&loopGeometry.bridgeTop<=scrollY+innerHeight*3;
+      if(near&&!mirrorNearViewport)scheduleMirrorCapture(0);
+      mirrorNearViewport=near;
     }
 
     /* R1729 — capture the geometry the user actually saw before any lazy tail
@@ -1017,24 +1023,6 @@
 
     materializeDesktopLoopTail();
 
-    /* R1741 — Playwright/WebDriver programmatic scrolls do not always emit a
-       browser scrollend event. When automation has already reached the live
-       loop boundary, schedule the same idle commit path explicitly. Real user
-       input never enters this branch. */
-    if(AUTOMATION&&!isMobileFlow()&&loopGeometry.ready){
-      const automationAtBoundary=scrollY>=Math.max(0,loopGeometry.bridgeThreshold-2)
-        || scrollY>=Math.max(0,loopGeometry.documentEnd-4);
-      if(automationAtBoundary){
-        if(!Number.isFinite(pendingDesktopRelative)){
-          const rel=Math.max(0,Math.min(scrollY-loopGeometry.bridgeTop,Math.max(0,loopGeometry.sourceHeight-2)));
-          pendingDesktopRelative=rel;
-          desktopGestureBoundaryLatched=true;
-        }
-        clearTimeout(activityTimer);
-        activityTimer=window.setTimeout(markIdle,32);
-        root.dataset.fxLoopAutomationSettleR1741='boundary-idle-armed';
-      }
-    }
 
     if (scrollFrame) return;
     scrollFrame = requestAnimationFrame(transferIfNeeded);
@@ -1170,8 +1158,8 @@
     if (document.fonts?.ready) {
       document.fonts.ready.then(scheduleGeometryRefresh).catch(() => {});
     }
-    // One late snapshot is enough. 4.6 s stays outside the startup/scroll hot path.
-    scheduleMirrorCapture(4600);
+    // The bridge observer requests its real native still before it becomes
+    // visible. Startup and unrelated interface actions must never encode it.
     root.dataset.fxLoopMirrorSchedulerR1679='single-post-startup-scroll-safe-capture';
     root.dataset.fxLoopRuntimeR1715='idle-fresh-geometry-guard-retry-two-cycle-safe';
   }
@@ -1220,6 +1208,7 @@
   });
   addEventListener('formatx:coredetailready', () => scheduleMirrorCapture(80));
   addEventListener('formatx:real3dready', () => scheduleMirrorCapture(220));
+  document.addEventListener('formatx:magbirthcomplete', () => scheduleMirrorCapture(0));
   document.addEventListener('touchstart', onTouchStart, { passive: true });
   document.addEventListener('touchend', onTouchEnd, { passive: true });
   document.addEventListener('touchcancel', onTouchEnd, { passive: true });
@@ -1238,5 +1227,6 @@
     clearTimeout(repairTimer);
     clearTimeout(mirrorCaptureTimer);
     geometryObserver?.disconnect();
+    mirrorVisibilityObserver?.disconnect();
   }, { once: true });
 }());

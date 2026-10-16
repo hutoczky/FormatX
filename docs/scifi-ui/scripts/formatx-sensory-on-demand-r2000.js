@@ -6,15 +6,7 @@
  'use strict';
  const root=document.documentElement;
  if(root.dataset.fxSensoryLoaderR2000)return;
- const params=new URLSearchParams(location.search);
- const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')
-   ||params.get('lighthouse')==='1'
-   ||root.dataset.fxP0AuditModeR1728==='static-first-paint-no-late-webgl';
- root.dataset.fxSensoryLoaderR2000=audit?'audit-no-activation':'armed';
- if(audit){
-   root.dataset.fxSiteSensoryR1755='audit-static-r2000';
-   return;
- }
+ root.dataset.fxSensoryLoaderR2000='armed';
  const events=['pointermove','pointerdown','touchstart','wheel','keydown','focusin','click','scroll'];
  let loading=false;
  const listenOptions={capture:false,passive:true};
@@ -27,7 +19,7 @@
    cleanup();
    root.dataset.fxSensoryLoaderR2000='loading';
    const script=document.createElement('script');
-   script.src='/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20261008-r2000-lazy-sensory';
+   script.src='/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20261013-r2054-visitor-runtime-parity';
    script.async=true;
    script.dataset.fxSiteSensoryR1755='true';
    script.addEventListener('load',()=>{

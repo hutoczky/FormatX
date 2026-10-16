@@ -7,6 +7,7 @@ on:
       - 'docs/scifi-ui/index.html'
       - '.github/scripts/validate-live-mag-functional.cjs'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
+      - '.github/scripts/validate-pending-css-r2118.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
   push:
@@ -15,6 +16,7 @@ on:
       - 'docs/scifi-ui/scripts/formatx-deferred-css-r487.js'
       - 'docs/scifi-ui/index.html'
       - '.github/scripts/validate-r2054-css-recovery.cjs'
+      - '.github/scripts/validate-pending-css-r2118.cjs'
       - '.github/scripts/validate-r2054-default-entry.cjs'
       - '.github/workflows/validate-r2054-css-recovery.yml'
   workflow_dispatch:
@@ -28,6 +30,8 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -36,6 +40,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
           node --check .github/scripts/validate-live-mag-functional.cjs
           node --check .github/scripts/validate-r2054-css-recovery.cjs
+          node --check .github/scripts/validate-pending-css-r2118.cjs
           node --check .github/scripts/validate-r2054-default-entry.cjs
       - name: Install browser
         run: |
@@ -56,6 +61,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
         run: node .github/scripts/validate-r2054-css-recovery.cjs
+      - name: Preserve unfinished CSS requests in ordinary and reduced mobile + desktop
+        env:
+          NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules
+        run: node .github/scripts/validate-pending-css-r2118.cjs
       - name: Require visible original HTML papyrus on ordinary MAG entry
         env:
           NODE_PATH: ${{ runner.temp }}/mag-r2054/node_modules

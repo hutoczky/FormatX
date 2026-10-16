@@ -18,6 +18,10 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
+      - '.github/scripts/validate-native-stage-reservation-r2113.cjs'
+      - '.github/scripts/validate-hero-footprint-r2117.cjs'
+      - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -36,6 +40,10 @@ on:
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
       - '.github/scripts/validate-mag-debanding-r2035.cjs'
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
+      - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
+      - '.github/scripts/validate-native-stage-reservation-r2113.cjs'
+      - '.github/scripts/validate-hero-footprint-r2117.cjs'
+      - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
@@ -52,6 +60,8 @@ jobs:
     timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -63,6 +73,10 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
+          node --check .github/scripts/validate-archive-atomic-chapter-r2110.cjs
+          node --check .github/scripts/validate-native-stage-reservation-r2113.cjs
+          node --check .github/scripts/validate-hero-footprint-r2117.cjs
+          node --check .github/scripts/validate-native-framing-r2114.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -78,14 +92,32 @@ jobs:
           done
           cat "$RUNNER_TEMP/archive-server.log"
           exit 1
+      - name: Test atomic native chapter handoff on desktop and phone
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-archive-atomic-chapter-r2110.cjs
       - name: Test desktop, phone, reversibility, accessibility fallback
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-cinematic-archive-r1987.cjs
+      - name: Test real first-visit native stage stability and layout shifts
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-native-stage-reservation-r2113.cjs
+      - name: Test cold mobile hero footprint, responsive growth and exact restoration
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-hero-footprint-r2117.cjs
+      - name: Test real native intro framing and MAG identity placement
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-native-framing-r2114.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: formatx-archive-visual-proof
-          path: .archive-artifacts/
+          path: |
+            .archive-artifacts/
+            artifacts/r2117-hero-footprint/
           if-no-files-found: ignore

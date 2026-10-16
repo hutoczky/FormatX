@@ -525,7 +525,7 @@ html[data-fx-mag-birth-live="active"] {
   letter-spacing: .38em;
   color: rgba(171,240,255,.60);
 }
-.fxb-copy h1 {
+.fxb-copy .fxb-title {
   margin: 0;
   font-size: clamp(32px,5.4vw,78px);
   line-height: .95;
@@ -760,7 +760,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   .fx-mag-birth-r533[data-phase="3"] .fxb-dna-stage { left:50%; top:24%; width:112px; height:154px; transform:translate(-50%,-50%) perspective(1400px) rotateY(var(--fxb-dna-turn)) rotateZ(-12deg) scale(.30); }
   .fx-mag-birth-r533[data-phase="4"] .fxb-dna-stage { left:50%; top:18%; transform:translate(-50%,-50%) perspective(1600px) rotateY(var(--fxb-dna-turn)) rotateZ(-15deg) scale(.12); }
   .fxb-copy { top: max(5%,calc(env(safe-area-inset-top) + 12px)); }
-  .fxb-copy h1 { font-size: clamp(28px,10vw,46px); }
+  .fxb-copy .fxb-title { font-size: clamp(28px,10vw,46px); }
   .fxb-subtitle { font-size: 10px; letter-spacing: .12em; }
   .fxb-telemetry { bottom: max(9%,calc(env(safe-area-inset-bottom) + 22px)); grid-template-columns: auto minmax(100px,1fr); }
   .fxb-halo-outer { width: min(110vw,620px); }
@@ -961,7 +961,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   .fx-mag-birth-r533[data-performance="constrained"][data-phase="3"] .fxb-dna-stage{
     opacity:.30;
   }
-  .fx-mag-birth-r533[data-performance="constrained"] .fxb-copy h1{
+  .fx-mag-birth-r533[data-performance="constrained"] .fxb-copy .fxb-title{
     text-shadow:none;
   }
   .fx-mag-birth-r533[data-performance="constrained"] .fxb-telemetry output{
@@ -1247,7 +1247,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   top:max(6%,calc(env(safe-area-inset-top) + 16px));
   transition:opacity .65s ease,transform .8s cubic-bezier(.18,.78,.2,1);
 }
-.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy h1{
+.fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy .fxb-title{
   font-size:clamp(27px,4.2vw,58px);
   letter-spacing:-.025em;
   text-shadow:0 0 26px rgba(104,229,255,.055);
@@ -1306,7 +1306,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-embryo{
     width:min(62vw,260px);
   }
-  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy h1{
+  .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-copy .fxb-title{
     font-size:clamp(24px,8vw,38px);
   }
   .fx-mag-birth-r533[data-fx-intro-r645="biotic-genesis"] .fxb-subtitle{
@@ -1642,7 +1642,7 @@ html:root:root[data-fx-mag-birth-live="active"] body.living-architecture #hero .
   text-align:left;
   opacity:.66;
 }
-.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-copy h1,
+.fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-copy .fxb-title,
 .fx-mag-birth-r533[data-fx-intro-r646="reference-biotic-film"] .fxb-subtitle{
   display:none;
 }
@@ -2253,6 +2253,133 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 /* production-r1862-deep-photographic-studio-chamber */
 
 /* production-r1871-silver-ice-studio-horizon */
+
+/* R2063 — the permanent MAG is the cinematic subject. Its canvas and context
+   survive the cut from the macro camera to the actual page. */
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]){
+  filter:none!important;
+  -webkit-filter:none!important;
+  background:
+    radial-gradient(ellipse 44% 62% at 52% 46%,rgba(57,90,111,.18),transparent 74%),
+    linear-gradient(160deg,#010405,#061017 60%,#010407)!important;
+}
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"])>
+  :not(.fxb-particles):not(.fxb-copy):not(.fxb-skip){
+  display:none!important;
+}
+html[data-fx-mag-birth-live="active"] body>#main-content{
+  visibility:hidden!important;
+}
+/* The native canvas is still inside main. The retired intro's opacity:0
+   suppresses every descendant, including a successfully drawn WebGL frame.
+   Keep other content hidden, but let the native subject own its visible layer. */
+html:root:root:root[data-fx-native-genesis-r2064] body>#main-content{
+  position:relative!important;
+  z-index:2147483001!important;
+  pointer-events:none!important;
+  visibility:hidden!important;
+  opacity:1!important;
+  transform:none!important;
+  contain:none!important;
+  filter:none!important;
+}
+/* Keep the original page boxes in place while the shared canvas is above the
+   studio shell. Hiding only main's visibility lets legacy explicitly visible
+   cards and hero controls paint over the cinematic subject. */
+html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #main-content>:not(#hero),
+html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-grid>:not(.hero-space),
+html:root:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-space>:not(.fx-crystal-organism-r326-stage){
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+/* The controls' own owner writes inline visibility and opacity. Suppress
+   their rendered subtree during the genuine intro without changing its
+   reserved box or the controls' stored styles. Handoff restores it by
+   removing the native-genesis attribute. */
+html[data-fx-native-genesis-r2064] #hero .fx-reference-controls-r204{
+  content-visibility:hidden!important;
+}
+/* The portrait owner can relocate and explicitly reveal the original copy.
+   Keep that complete subtree out of the introductory canvas layer, wherever
+   its native parent is, until the real genesis owner releases the viewport. */
+html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture
+main#main-content > section#hero .hero-copy{
+  content-visibility:hidden!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+html[data-fx-native-genesis-r2064] body #hero,
+html[data-fx-native-genesis-r2064] body #hero .hero-grid,
+html[data-fx-native-genesis-r2064] body #hero .hero-space{
+  overflow:visible!important;
+  clip-path:none!important;
+  contain:none!important;
+  filter:none!important;
+  backdrop-filter:none!important;
+  transform:none!important;
+  perspective:none!important;
+  will-change:auto!important;
+  translate:none!important;
+  rotate:none!important;
+  scale:none!important;
+}
+html:root:root:root[data-fx-native-genesis-r2064] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center!important;
+  transition:transform 180ms ease!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:30!important;
+  pointer-events:auto!important;
+}
+html:root:root:root[data-fx-native-genesis-r2064="leaving"] body.living-architecture #hero .hero-space >.fx-crystal-organism-r326-stage{
+  transform:translate(-50%,-50%)!important;
+}
+html[data-fx-native-genesis-r2064] body #hero .fx-crystal-organism-r326-stage canvas{
+  visibility:visible!important;
+}
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) :is(.fxb-deep,.fxb-veil,.fxb-stars,.fxb-biotic-field,.fxb-genome-field,
+  .fxb-dna-stage,.fxb-embryo,.fxb-grid,.fxb-halo,.fxb-axis,.fxb-lens,.fxb-flash,.fxb-scan,.fxb-letterbox,.fxb-telemetry){
+  display:none!important;
+}
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"])>.fxb-particles{
+  display:none!important;
+}
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) .fxb-copy{
+  display:block!important;
+  visibility:visible!important;
+  position:absolute!important;
+  inset:auto!important;
+  left:5vw!important;
+  bottom:max(5vh,28px)!important;
+  width:90vw!important;
+  max-width:none!important;
+  text-align:left!important;
+  transform:none!important;
+  opacity:1!important;
+  z-index:40!important;
+}
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) .fxb-title{
+  display:block!important;
+  visibility:visible!important;
+  color:#d8e8f0!important;
+  font:500 clamp(24px,4.2vw,64px)/1 system-ui,sans-serif!important;
+  letter-spacing:-.055em!important;
+}
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]) .fxb-subtitle{
+  display:block!important;
+  visibility:visible!important;
+  color:#8ca6b8!important;
+}
+.fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{
+  opacity:0!important;
+  transition:opacity 180ms ease!important;
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533[data-fx-renderer="canonical"].is-leaving{transition:none!important;}
+  html[data-fx-native-genesis-r2064] #hero .fx-crystal-organism-r326-stage{transition:none!important;}
+}
 /* production-r1903-gallery-studio-bioglass-depth */
 /* production-r1914-visible-igloo-studio-volume-flush-sensor */
 
@@ -2300,3 +2427,44 @@ html:root .fx-mag-birth-r533 .fxb-skip:focus-visible{
   outline-offset:3px!important;
 }
 /* end-r2103-mobile-compact-four-point-intro */
+
+/* R2113 — reserve the measured gallery surface before the first native frame.
+   Intro centering uses only a compositor transform. The archive's existing
+   desktop and portrait boxes take over synchronously at the genuine handoff. */
+@media(prefers-reduced-motion:no-preference){
+  html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-mag-birth-live="active"]
+  body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+    position:fixed!important;
+    inset:12dvh auto auto 2.5vw!important;
+    top:12dvh!important;
+    left:2.5vw!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:38vw!important;
+    min-width:38vw!important;
+    max-width:38vw!important;
+    height:74dvh!important;
+    min-height:74dvh!important;
+    max-height:74dvh!important;
+    margin:0!important;
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:none!important;
+    transition:none!important;
+  }
+  @media(max-width:900px){
+    html:root:root:root:root:root:root:root:root:root:root:root:root[data-fx-mag-birth-live="active"]
+    body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage{
+      inset:2dvh auto auto 0!important;
+      top:2dvh!important;
+      left:0!important;
+      width:100vw!important;
+      min-width:100vw!important;
+      max-width:100vw!important;
+      height:43dvh!important;
+      min-height:43dvh!important;
+      max-height:43dvh!important;
+    }
+  }
+}

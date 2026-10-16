@@ -1,5 +1,5 @@
 name: Validate FormatX verified audio
-run-name: Validate FormatX professional score from ${{ github.sha }}
+run-name: Validate FormatX professional score from ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_dispatch:
@@ -18,6 +18,7 @@ on:
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
+      - '.github/scripts/finish-intro-through-controls-r2110.cjs'
       - '.github/workflows/validate-audio.yml'
   push:
     branches: [master]
@@ -34,6 +35,7 @@ on:
       - 'billing-worker/src/production-with-license.js'
       - 'billing-worker/test/production-routing.spec.js'
       - '.github/scripts/validate-audio.cjs'
+      - '.github/scripts/finish-intro-through-controls-r2110.cjs'
       - '.github/workflows/validate-audio.yml'
 
 permissions:
@@ -51,6 +53,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -70,6 +74,7 @@ jobs:
           node --check docs/scifi-ui/scripts/living-architecture.js
           node --check billing-worker/src/production-with-license.js
           node --check .github/scripts/validate-audio.cjs
+          node --check .github/scripts/finish-intro-through-controls-r2110.cjs
           grep -Fq "professional-v6" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "premium-cinematic-music" docs/scifi-ui/scripts/formatx-audio-repair.js
           grep -Fq "sixteen-bar-evolving-score" docs/scifi-ui/scripts/formatx-audio-repair.js
@@ -149,7 +154,8 @@ jobs:
             state='failure'
             description='FormatX professional score validation failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX verified audio' \
             -f description="$description" \

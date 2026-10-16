@@ -9,10 +9,11 @@
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
-  const auditParams = new URLSearchParams(location.search);
-  const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
-  const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  // Read the current preference at existing input/render boundaries even
+  // while a retained media-query object's change event is still queued.
+  function reducedMotionRequested(){
+    return matchMedia('(prefers-reduced-motion:reduce)').matches;
+  }
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -170,7 +171,7 @@
   root.dataset.fxNativeMagMobileR1787='transparent-stage-no-black-box-higher-facet-density-smooth-normals';
   root.dataset.fxNativeMagVisualR1788='mobile-blunt-cut-black-bioglass-irregular-crystal-smooth-optic';
   root.dataset.fxNativeMagMaterialR1788='controlled-softbox-highlight-deep-charcoal-glass-cyan-optical-depth';
-  root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
+  root.dataset.fxNativeMagProofR1782='normal-visitor-path-with-lens-and-msaa';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
   root.dataset.fxNativeMagVisualR1789='mobile-smoky-bioglass-refined-facets-blunt-crown';
@@ -200,7 +201,7 @@
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
-  root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
+  root.dataset.fxNativeMagVisitorParityR2054='capability-and-input-owned';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -293,11 +294,7 @@
       return value - Math.floor(value);
     }
 
-    function vertex(latitudeIndex, longitudeIndex) {
-      const latitude=latitudeIndex/latitudeSegments;
-      const longitude=longitudeIndex/longitudeSegments;
-      const phi=latitude*Math.PI;
-      const theta=longitude*Math.PI*2;
+    function shellPosition(phi,theta) {
       const sinPhi=Math.sin(phi);
       const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
@@ -334,18 +331,35 @@
 
       const crystalPosition=direction.map(value=>value*radial*organic);
 
-      /* Keep the original crystalline outline, but smooth the studio response.
-         This prevents the four quadrants from reading as flat cardboard planes. */
-      const crystalNormal=normalize([
-        direction[0]/axisX,
-        direction[1]/axisY,
-        direction[2]/axisZ
-      ]);
+      return {spherePosition,crystalPosition,direction};
+    }
 
+    function vertex(latitudeIndex, longitudeIndex) {
+      const latitude=latitudeIndex/latitudeSegments;
+      const longitude=longitudeIndex/longitudeSegments;
+      const phi=latitude*Math.PI;
+      const theta=longitude*Math.PI*2;
+      const point=shellPosition(phi,theta);
+      /* R2063 — reflections follow the actual concave glass surface. The old
+         ellipsoid normals erased the shoulders and made the sculpt look flat.
+         Central surface derivatives retain the authored positions/topology. */
+      const epsilon=.0007;
+      const tangentPhi=subtract(
+        shellPosition(Math.min(Math.PI,phi+epsilon),theta).crystalPosition,
+        shellPosition(Math.max(0,phi-epsilon),theta).crystalPosition
+      );
+      const tangentTheta=subtract(
+        shellPosition(phi,theta+epsilon).crystalPosition,
+        shellPosition(phi,theta-epsilon).crystalPosition
+      );
+      let crystalNormal=cross(tangentPhi,tangentTheta);
+      if(Math.hypot(...crystalNormal)<1e-10)crystalNormal=point.direction;
+      else crystalNormal=normalize(crystalNormal);
+      if(dot(crystalNormal,point.crystalPosition)<0)crystalNormal=crystalNormal.map(value=>-value);
       return{
-        sphere:spherePosition,
-        crystal:crystalPosition,
-        sphereNormal:direction,
+        sphere:point.spherePosition,
+        crystal:point.crystalPosition,
+        sphereNormal:point.direction,
         crystalNormal,
         uv:[longitude,latitude]
       };
@@ -728,7 +742,7 @@
 
     if(false){
       const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
+      const bezelSteps=software?112:mobile?144:160,bezelTubeSteps=software?10:mobile?14:16,bezelZ=.602;
       const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -757,8 +771,8 @@
       const lensRadiusX=.153;
       const lensRadiusY=.041;
       const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const radialSteps=software?16:mobile?20:22;
+      const angularSteps=software?112:mobile?128:144;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -842,26 +856,25 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     /* R1959: physically neutral compositor tone. The previous inline
        !important saturation overrode the canonical material CSS. */
-    const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
-      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
+    // The physical studio shader already performs display transfer and tone
+    // mapping. Preserve its color and avoid a second canvas filter pipeline.
+    const compositorFilter='none';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R2045: the original canvas is also subject to older !important opacity
-       overrides. They outrank CSS and WAAPI animations, leaving MAG visually
-       frozen even while its registered --fx-mag-life-opacity animates.
-       Bind the SAME original canvas's inline important opacity to that
-       compositor-only numeric custom property. Do this once at creation,
-       never in a JS RAF; preserve system reduced-motion changes. */
+    /* R2069: retain the existing compositor heartbeat without the historical
+       mobile dimming. The registered timeline ranges from .94 to 1; its native
+       canvas coverage therefore stays between .985 and 1. Reduced motion uses
+       full coverage. The same canvas, timeline and pause governor remain the
+       owners; this binding is updated only when the motion preference changes. */
     const mobileBreathPreference=mobile?matchMedia('(prefers-reduced-motion: reduce)'):null;
     const syncMobileBreathOpacity=()=>{
       if(!mobileBreathPreference)return;
       if(mobileBreathPreference.matches){
-        canvas.style.removeProperty('opacity');
+        canvas.style.setProperty('opacity','1','important');
       }else{
-        canvas.style.setProperty('opacity','var(--fx-mag-life-opacity,.965)','important');
+        canvas.style.setProperty('opacity','calc(.75 + var(--fx-mag-life-opacity,1) * .25)','important');
       }
     };
     syncMobileBreathOpacity();
@@ -870,8 +883,18 @@
 
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
+    let livingTimeline=null;
+    function syncCompositorBreath(){
+      if(reducedMotionRequested()){
+        livingTimeline?.pause();
+        return;
+      }
+      if(livingTimeline){
+        if(livingTimeline.playState==='paused')livingTimeline.play();
+        return;
+      }
+      if(typeof canvas.animate!=='function')return;
+      livingTimeline=canvas.animate(
         [
           {opacity:.985,transform:'scale(.996)',offset:0},
           {opacity:1,transform:'scale(1.004)',offset:.48},
@@ -889,6 +912,7 @@
       root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
       root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
     }
+    syncCompositorBreath();
 
     const options = {
       alpha:true,
@@ -900,13 +924,14 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
+      preserveDrawingBuffer:false,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
     if (!gl) gl = canvas.getContext('webgl', options);
     if (!gl) {
+      livingTimeline?.cancel();
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
       root.dataset.fxCoreReal3d = 'context-unavailable';
@@ -943,7 +968,7 @@
       ${vertexIn} vec2 aUv;
       ${vertexIn} vec3 aBary;
       ${vertexIn} float aFacet;
-      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uAspect,uSiteProgress;
+      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uAspect,uSiteProgress,uGenesis;
       uniform vec2 uPointer;
       uniform vec3 uRotation;
       ${vertexOut} vec3 vNormal;
@@ -965,14 +990,14 @@
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
-        float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
+        float membrane=sin(uTime*1.17+aUv.x*12.5663706144-aUv.y*9.2+sin(aUv.y*6.28318530718)*1.4);
         float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
-        float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
-        float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
+        float cortexA=sin(aUv.x*37.6991118431+sin(aUv.y*18.8495559215)*1.55+aUv.y*5.3);
+        float cortexB=sin(aUv.x*18.8495559215-aUv.y*25.133+sin(aUv.x*12.5663706144)*1.20);
         float cortex=(cortexA*.62+cortexB*.38)*.0026*cortexEnvelope;
-        float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*cortexEnvelope;
+        float microFold=sin(aUv.x*18.8495559215+aUv.y*15.4)*.00028*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
         /* R1923 — the smooth cubic body is now authoritative. The legacy
@@ -989,9 +1014,11 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
-        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
+        float genesis=uGenesis<0.0?1.0:smoothstep(.04,.92,uGenesis);
+        float approach=1.0-genesis;
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007+approach*.74;
+        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19)-approach*.19;
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23)-approach*.13;
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
@@ -1004,7 +1031,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.790'};
+        /* Keep the complete signature inside its actual native frustum. The
+           approach retains perspective and rotation without cropping its tips. */
+        projected*= ${mobile?'.585':'.790'}*min(1.0,max(.56,uAspect)/.88)*(1.0+approach*${mobile?'.32':'.12'});
         projected.x+=${mobile?'.002':'.018'};
         projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
@@ -1342,10 +1371,9 @@
        language with fewer highlights; software/mobile proof must not fall back
        to a gray translucent surrogate. */
 
-    /* R1941d — canonical cross-tier studio bioglass shader.
-       One clean material, no procedural dirt/speckles, no black button optic.
-       The four-point silhouette carries the identity; the shader only gives it
-       physical depth, broad softbox reflections and restrained living energy. */
+    /* R2063 — one studio dielectric across every capability tier. Reflected
+       panels and refracted light share the real surface normal; absorption
+       supplies glass depth and actual energy/scroll/pulse uniforms drive life. */
     const constrainedFragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
@@ -1356,169 +1384,92 @@
       ${fragmentIn} float vFacet;
       ${fragmentIn} float vMorph;
       ${webgl2 ? "out vec4 outColor;" : ""}
-      float sat(float v){return clamp(v,0.,1.);}
-      vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      float sat(float value){return clamp(value,0.,1.);}
+      float gaussian(float value,float width){float q=value/width;return exp(-q*q);}
+      float gaussian2(vec2 value,vec2 width){vec2 q=value/width;return exp(-dot(q,q));}
+      vec3 displayColor(vec3 color){
+        color=max(color,vec3(0.0));
+        color=clamp((color*(2.51*color+.03))/(color*(2.43*color+.59)+.14),0.0,1.0);
+        return pow(color,vec3(.454545));
+      }
+      vec3 studio(vec3 direction,float roughness){
+        vec3 d=normalize(direction);
+        float front=smoothstep(-.25,.65,d.z);
+        float softness=.025+roughness*.14;
+        // exp(-x*x)*exp(-y*y) equals exp(-(x*x+y*y)): keep the same
+        // physical panel while evaluating one exponential per light sample.
+        float key=gaussian2(vec2(d.x+.32,d.y-.08),vec2(.055+softness,.66))*front;
+        float fill=gaussian2(vec2(d.x-.46,d.y+.10),vec2(.105+softness,.72))*front;
+        float crown=gaussian2(vec2(d.x+.08,d.y-.73),vec2(.46,.13+softness))*front;
+        float floorLight=gaussian2(vec2(d.x-.10,d.y+.65),vec2(.64,.18+softness))*front;
+        float rear=gaussian2(vec2(d.x+.10,d.y-.32),vec2(.55,.60))*smoothstep(.0,.75,-d.z);
+        return vec3(.006,.009,.015)
+          +vec3(5.7,6.2,6.6)*key
+          +vec3(.70,1.65,2.18)*fill
+          +vec3(1.9,1.8,1.6)*crown
+          +vec3(.13,.21,.31)*floorLight
+          +vec3(.032,.045,.055)*rear;
+      }
       void main(){
-        vec3 n=normalize(vNormal);
+        vec3 normal=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
-        float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,1.72);
+        if(dot(normal,view)<0.0)normal=-normal;
+        float facing=sat(dot(normal,view));
+        float fresnel=.037+.963*pow(1.0-facing,5.0);
+        float roughness=.10+.055*(.5+.5*normal.y);
+        vec3 reflection=reflect(-view,normal);
+        vec3 refracted=refract(-view,normal,1.0/1.46);
+        float thickness=.08+.68*pow(facing,1.4)+.10*(.5+.5*vLocal.z);
+        vec3 absorption=exp(-vec3(1.85,1.55,1.38)*thickness);
+        vec3 transmitted=studio(refracted,roughness+.12)*absorption;
+        vec3 reflected=studio(reflection,roughness);
+        vec3 color=transmitted*(1.0-fresnel)+reflected*fresnel*1.18;
 
-        vec3 keyDir=normalize(vec3(-.50,.78,.38));
-        vec3 sideDir=normalize(vec3(.72,.08,.69));
-        vec3 fillDir=normalize(vec3(-.38,-.24,.89));
-        float key=sat(dot(n,keyDir));
-        float side=sat(dot(n,sideDir));
-        float fill=sat(dot(n,fillDir));
-        float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
+        /* The closed membrane has a cool, deep body and a neutral silver rim.
+           Normal derivatives keep every highlight attached during rotation. */
+        float key=sat(dot(normal,normalize(vec3(-.45,.65,.62))));
+        float fill=sat(dot(normal,normalize(vec3(.65,-.08,.76))));
+        float shell=.065+.060*key+.035*fill;
+        color+=vec3(.022,.073,.095)*shell;
+        float rim=pow(1.0-facing,2.25);
+        color+=vec3(.13,.26,.33)*rim*.34;
+        float dispersion=gaussian(reflection.x-.46,.028+roughness*.16)
+          *gaussian(reflection.y+.10,.73)*smoothstep(-.2,.6,reflection.z);
+        color+=vec3(.15,.08,.25)*dispersion*fresnel*.26;
 
-        vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
-        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.13)/.29,2.0)-pow((refl.y-.10)/.82,2.0))*smoothstep(-.10,.72,refl.z);
-        float ribbonB=exp(-pow((refl.x-.31)/.25,2.0)-pow((refl.y+.10)/.70,2.0))*smoothstep(-.10,.70,refl.z);
+        /* Light is evaluated inside the body, offset by the refracted ray.
+           This makes the organ shift in depth with the actual camera/input. */
+        vec3 organ=vec3(.008+uPointer.x*.016,.012-uPointer.y*.013,.15);
+        float organDepth=max(0.0,dot(organ-vLocal,refracted));
+        vec3 inside=vLocal+refracted*organDepth;
+        vec3 delta=inside-organ;
+        float organDistance=length(delta*vec3(1.0,1.03,.66));
+        float organCore=gaussian(organDistance,.055);
+        float organHalo=gaussian(organDistance,.17);
+        float organBoundary=gaussian(organDistance-.102,.012);
+        float activity=.34+.48*sat(uEnergy)+.18*sat(uBreath);
+        float transmissionWindow=smoothstep(-.05,.36,vLocal.z)*(1.0-.40*fresnel);
+        color+=vec3(.18,.87,1.18)*organHalo*.075*activity*transmissionWindow;
+        color+=vec3(.25,.76,.92)*organBoundary*.13*transmissionWindow;
+        color+=vec3(.78,1.14,1.27)*organCore*(.45+.75*activity)*transmissionWindow;
 
-        float frontDepth=smoothstep(-.46,.58,vLocal.z);
-        float backDepth=1.0-frontDepth;
-        float edge=pow(1.0-facing,2.20);
-        float deepEdge=pow(1.0-facing,3.20);
-        float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
-        /* Broadband depth density replaces periodic high-contrast scanlines. */
-        float strata=smoothstep(-.68,.72,vLocal.y*.82+vLocal.x*.16-vLocal.z*.19);
-        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        /* Four broad internal folds catch refracted illumination. The field is
+           continuous and anchored in 3D, without per-triangle random color. */
+        float fold=gaussian(abs(inside.x)*.92+abs(inside.y)*.75-.27,.037);
+        float outerFold=gaussian(abs(inside.x)*.87+abs(inside.y)*.72-.47,.055);
+        float depthMask=smoothstep(-.10,.32,vLocal.z);
+        color+=vec3(.075,.19,.24)*fold*depthMask*(.13+.16*fill);
+        color+=vec3(.07,.12,.17)*outerFold*depthMask*.12;
 
-        if(uLayer>.5){
-          ${outputName}=vec4(0.0,0.0,0.0,0.0);
-          return;
-        }
-
-        /* Smoked blue-silver glass volume. */
-        float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        float macroAngle=atan(vLocal.y,vLocal.x);
-        float macroRadius=length(vLocal.xy);
-        float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
-        float macroFacetB=.5+.5*cos(macroAngle*2.0-macroRadius*4.1+vLocal.z*1.4);
-        float macroFacet=mix(macroFacetA,macroFacetB,.34);
-        float facetTone=${mobile
-          ? '.962+.050*macroFacet'
-          : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
-        /* R1945j — one continuous macro-facet field across all tiers.
-           Per-triangle random tone created tiny dark mosaic cells that read as
-           black pin-speckles in proof captures. Geometry stays untouched. */
-        float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
-        float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
-        c+=vec3(.020,.043,.048)*backDepth*.11;
-
-        /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
-        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
-        c+=vec3(.92,.98,.96)*ribbonA*.012;
-        c+=vec3(.18,.47,.50)*ribbonB*.052;
-        float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
-          *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.004;
-
-        /* R1942 — internal prism architecture.
-           Four broad refractive planes run toward the signature tips. They are
-           volumetric tonal events, not drawn borders, so the object keeps a
-           single continuous glass skin. */
-        float polar=macroAngle;
-        float radialXY=macroRadius;
-        float prismEnvelope=
-          smoothstep(.075,.22,radialXY)*
-          (1.0-smoothstep(.44,.72,radialXY))*
-          frontDepth;
-        float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
-        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
-        float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
-        c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
-        c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
-
-        /* A second, deeper pane creates parallax-like density behind the skin. */
-        float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
-          *smoothstep(.04,.52,frontDepth);
-        c+=vec3(.082,.190,.198)*innerPane*.044;
-
-        /* R1942c — nested internal prism shells.
-           These echo the layered crystalline anatomy from the selected historic
-           MAG without adding geometry or a second render pass. */
-        float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.125,2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/.16,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.048':'.060'}+${mobile?'.017':'.023'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.035':'.043'}+${mobile?'.014':'.019'}*fresnel);
-        c*=1.0-.020*prismShellB;
-
-        /* R1942d — four authored fold ridges from optic to signature tips.
-           This is the structural cue that made the historic MAG read as a
-           layered crystal instead of a smooth diamond. */
-        float foldEnvelope=
-          smoothstep(.075,.19,radialXY)*
-          (1.0-smoothstep(.55,.76,radialXY))*
-          frontDepth;
-        float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
-        float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
-        c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
-        c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
-
-        /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
-        float spectralSide=.5+.5*n.x;
-        c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
-        c+=vec3(.015,.050,.060)*frontDepth*.10;
-
-        /* R1942 — recessed optical organ.
-           A soft smoked cavity precedes the lens, giving the centre actual depth
-           instead of a luminous disc painted onto the shell. */
-        float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
-        float od=length(oq);
-        float cavity=(1.0-smoothstep(.92,1.34,od))*front;
-        float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
-        c+=vec3(.020,.080,.092)*cavityCore*.055;
-        float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.060,2.0))*front;
-        float iris=exp(-od*od*4.8)*front;
-        float core=exp(-od*od*18.5)*front;
-        float hot=exp(-od*od*74.0)*front;
-        float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
-        vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
-        c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
-        c+=vec3(1.00,1.00,.98)*glint*.24;
-        float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
-        c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
-
-        /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=gaussian(coordinate-head,.065)*(.28+.72*rim);
         }
-        c+=vec3(.08,.30,.34)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
-
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        color+=vec3(.055,.33,.48)*sweep*.43;
+        color+=reflected*sweep*.045;
+        ${outputName}=vec4(displayColor(color),1.0);
       }`;
 
     const softwareFragmentSource = `${versionLine}precision highp float;
@@ -1682,7 +1633,7 @@
        Software rendering keeps the ultra-lite material/mesh, but real mobile
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
-    const mobilePhysical = mobile || constrainedMobile || auditMode;
+    const mobilePhysical = mobile || constrainedMobile;
     /* R1930 visual parity: one authored studio shader on desktop, mobile and
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
@@ -1825,6 +1776,7 @@
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
+      livingTimeline?.cancel();
       stage.remove();
       root.dataset.fxCrystalOrganismR326='shader-failed';
       root.dataset.fxCoreReal3d='shader-failed';
@@ -1835,6 +1787,7 @@
     let shaderPollCount = 0;
     function failShader(error) {
       console.warn('FormatX crystal organism unavailable:',error);
+      livingTimeline?.cancel();
       if(stage.isConnected)stage.remove();
       root.dataset.fxCoreShaderCompileR600='failed';
       root.dataset.fxCrystalOrganismR326='shader-failed';
@@ -1871,12 +1824,13 @@
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
     const uniforms={};
-    ['uTime','uEnergy','uBreath','uLayer','uMorph','uPointer','uAspect','uSiteProgress','uSurfacePulse','uRotation']
+    ['uTime','uEnergy','uBreath','uLayer','uMorph','uPointer','uAspect','uSiteProgress','uSurfacePulse','uRotation','uGenesis']
       .forEach(name=>{uniforms[name]=gl.getUniformLocation(program,name);});
 
     function upload(buffer,data,index,size){
       gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
       gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+      if(index<0)return;
       gl.enableVertexAttribArray(index);
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
@@ -1922,10 +1876,8 @@
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    /* R1694 — renderer capability outranks audit mode. A software GPU must never
-       be forced to full-resolution merely because a verifier is attached; that
-       creates artificial 200ms+ frames and is the opposite of the production
-       60 Hz policy. Hardware keeps the photographic path, software keeps the
+    /* Renderer capability owns the budget for every visitor. Hardware keeps
+       the photographic path, software keeps the
        same visual identity through the lite shader at a smaller backing store. */
     /* R1703 — mobile starts sharp enough to read as a photographed object.
        The strict R1701 frame governor is still allowed to shed resolution on
@@ -1942,10 +1894,10 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (constrained ? .84 : 1.00));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(constrained?.96:1.08));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
       : (mobile?.80:(constrained?.62:.74));
@@ -1953,6 +1905,9 @@
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
+    let motionReduced=reducedMotionRequested();
+    syncCompositorBreath();
+    let genesisProgress=-1;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
@@ -1963,12 +1918,12 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
@@ -1998,15 +1953,16 @@
       },delay);
     }
     function schedule(frames=1){
+      syncMotionPreference();
       if(blocked())return;
-      const frameCap=auditMode?1:(mobile?4:24);
+      const frameCap=motionReduced?1:mobile?4:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
     function boost(value=.84,frames=8){
       targetEnergy=Math.max(targetEnergy,value);
       targetBreath=Math.max(targetBreath,.38+value*.48);
-      schedule(reduced.matches?1:frames);
+      schedule(reducedMotionRequested()?1:frames);
     }
     function shapeName(){return 'organism';}
     function publishShape(source='renderer'){
@@ -2073,7 +2029,7 @@
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
       const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
-      if(disposed||contextLost||reduced.matches||document.hidden||paused
+      if(disposed||contextLost||reducedMotionRequested()||document.hidden||paused
         ||(!visible&&!explicitInteraction)
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
         ||(!explicitInteraction&&now-lastSurfacePulseAt<2200))return false;
@@ -2148,21 +2104,14 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
-      if(auditMode){
-        root.dataset.fxCoreSurfaceSchedulerR484='lighthouse-audit-disabled';
-        return;
-      }
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+      if(disposed||contextLost||reducedMotionRequested()||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
-      // R588: the first autonomous sweep is a post-interactive warm-up.
-      // The CSS heartbeat and direct interaction remain immediate, while the
-      // expensive native sweep no longer competes with first-load interactivity.
-      const delay=surfacePulseCount===0
-        ? 13000
-        : mobile
+      // R2061: a ready visible core uses the same genuine autonomous cadence
+      // from its first sweep onward; no initial thirteen-second dormant gap.
+      const delay=mobile
           ? 5400+(surfacePulseCount%3)*520
           : 4100+(surfacePulseCount%3)*360;
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
@@ -2185,7 +2134,7 @@
       const dt=Math.min(48,Math.max(1,now-last));last=now;
       if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
       else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
-      if(!reduced.matches)simulationTime+=dt*.001;
+      if(!reducedMotionRequested())simulationTime+=dt*.001;
       const pointerEase=1-Math.exp(-dt*.018);
       const rotationEase=1-Math.exp(-dt*.011);
       px+=(tx-px)*pointerEase;py+=(ty-py)*pointerEase;
@@ -2200,7 +2149,7 @@
       breath+=(targetBreath-breath)*(1-Math.exp(-dt*.032));
       targetEnergy+=(IDLE_ENERGY-targetEnergy)*(1-Math.exp(-dt*.006));
       targetBreath+=(.12-targetBreath)*(1-Math.exp(-dt*.007));
-      morph+=(targetMorph-morph)*(reduced.matches?1:1-Math.exp(-dt*.0078));
+      morph+=(targetMorph-morph)*(reducedMotionRequested()?1:1-Math.exp(-dt*.0078));
       if(Math.abs(morph-targetMorph)<.0008)morph=targetMorph;
       siteProgress+=(targetSiteProgress-siteProgress)*(1-Math.exp(-dt*.005));
       cinematic.energy=energy;
@@ -2221,6 +2170,7 @@
       gl.uniform1f(uniforms.uEnergy,energy);
       gl.uniform1f(uniforms.uBreath,breath);
       gl.uniform1f(uniforms.uMorph,morph);
+      gl.uniform1f(uniforms.uGenesis,genesisProgress);
       gl.uniform2f(uniforms.uPointer,px,py);
       gl.uniform3f(uniforms.uRotation,rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ);
       gl.uniform1f(uniforms.uAspect,aspect);
@@ -2247,8 +2197,15 @@
         catch(error){scenePasses.delete(pass);console.warn('FormatX scene pass disabled:',error);}
       }
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
+        const error=gl.getError();
+        if(error!==gl.NO_ERROR){
+          root.dataset.fxCrystalOrganismR326='first-frame-error';
+          root.dataset.fxCoreFirstFrameR1913='error-'+error;
+          return;
+        }
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
+        publishFirstFrameReady();
       }
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
@@ -2266,7 +2223,7 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode){
+      {
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
@@ -2366,12 +2323,12 @@
     }
 
     function frame(now){
-      raf=0;if(blocked())return;
+      raf=0;syncMotionPreference();if(blocked())return;
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
          This avoids the 144 Hz / 48 FPS failure mode of a fixed 16.67 ms gate. */
-      if(!auditMode){
+      {
         if(schedulerLastFrame>0){
           const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
           schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
@@ -2391,19 +2348,13 @@
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
-        const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
-        queueFrame(burstDelay);
+        root.dataset.fxCoreBurstCadenceR1600='native-60hz-target';
+        queueFrame(0);
       }else if(surfacePulseActive){
-        const sweepDelay=auditMode
-          ? (mobile
-              ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
-              : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
-          : 0;
-        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
+        root.dataset.fxCoreAdaptiveSurfaceCadenceR588='native-raf';
         root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
-        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
-        queueFrame(sweepDelay);
+        root.dataset.fxCoreAnimationCadenceR1600='native-60hz-target-all-visitors';
+        queueFrame(0);
       }else settleAfterBurst();
     }
 
@@ -2461,15 +2412,27 @@
       }else schedule(1);
       scheduleSurfacePulse();
     }
-    function onReducedMotionChange(){
+    function syncMotionPreference(){
+      // A preference can change while an earlier scroll frame is queued.
+      // Reconcile at native input/render boundaries as well as the media
+      // event, so the old autonomous timer cannot survive that queued frame.
+      const next=reducedMotionRequested();
+      if(next===motionReduced)return;
+      motionReduced=next;
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       surfacePulseStart=-Infinity;
+      burstFrames=0;
       root.dataset.fxCoreSurfacePulseR454='idle';
+      syncCompositorBreath();
       scheduleSurfacePulse();
+    }
+    function onReducedMotionChange(){
+      syncMotionPreference();
       schedule(1);
     }
     let previousScrollY=scrollY;
     function onScroll(){
+      syncMotionPreference();
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
@@ -2712,6 +2675,7 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
+      livingTimeline?.cancel();
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
@@ -2762,6 +2726,18 @@
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       requestRender:schedule,
+      captureFrame:()=>{
+        // A loop preview may need one real still while the source is outside
+        // the viewport. The original owner draws it without starting an idle
+        // RAF loop or reviving a hidden/lost/disposed rendering lifecycle.
+        if(disposed||contextLost||document.hidden||paused||!resize())return null;
+        render(performance.now());
+        return gl.getError()===gl.NO_ERROR?canvas:null;
+      },
+      genesis:(value)=>{
+        genesisProgress=value===null?-1:clamp(Number(value)||0,0,1);
+        schedule(1);
+      },
       registerScenePass:(pass)=>{
         if(!webgl2||typeof pass!=='function'||disposed)return()=>{};
         scenePasses.add(pass);schedule(1);
@@ -2781,14 +2757,6 @@
     window.FormatXCoreMobileV69=publicApi;
     window.FormatXLivingCore=publicApi;
 
-    root.dataset.fxCrystalOrganismR326='ready';
-    root.dataset.fxLivingOrganicCoreR413='ready';
-    root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
-    root.dataset.fxCoreMobileR99=READY;
-    root.dataset.fxCoreMobileV69=READY;
-    root.dataset.fxCoreMobileV55='ready-v55';
-    root.dataset.fxCoreReferenceLock=READY;
-    root.dataset.fxCoreReal3d=READY;
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
@@ -2955,7 +2923,7 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreFirstFrameR1913='pending';
     root.dataset.fxCoreRenderMs='0';
-    root.dataset.fxCoreReal3dFps='60';
+    root.dataset.fxCoreReal3dFps='pending';
     root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';
 
     publishShape('initial');
@@ -2963,10 +2931,21 @@
     scheduleHeartbeat();
     scheduleSurfacePulse();
     scheduleAutonomousMorph();
-    dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
-      version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
-      geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false
-    }}));
+    function publishFirstFrameReady(){
+      root.dataset.fxCrystalOrganismR326='ready';
+      root.dataset.fxLivingOrganicCoreR413='ready';
+      root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
+      root.dataset.fxCoreMobileR99=READY;
+      root.dataset.fxCoreMobileV69=READY;
+      root.dataset.fxCoreMobileV55='ready-v55';
+      root.dataset.fxCoreReferenceLock=READY;
+      root.dataset.fxCoreReal3d=READY;
+      dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
+        version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
+        geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false,
+        firstFrameAt:performance.now()
+      }}));
+    }
     listen(window,'pagehide',destroy,{once:true});
     }
   }

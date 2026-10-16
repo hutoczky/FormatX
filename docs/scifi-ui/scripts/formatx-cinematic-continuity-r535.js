@@ -6,13 +6,10 @@
   root.dataset.fxCinematicContinuityIdentityR1723='one-organism-anatomy-chapters';
   if (root.dataset.fxCinematicContinuityR535 === 'ready') return;
 
-  const params = new URLSearchParams(location.search);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const FORCE = params.get('cinema') === '1';
-  const audit = params.get('lighthouse') === '1' || (navigator.webdriver === true && !FORCE);
 
-  if (reduced.matches || audit) {
-    root.dataset.fxCinematicContinuityR535 = reduced.matches ? 'reduced-skip' : 'automation-skip';
+  if (reduced.matches) {
+    root.dataset.fxCinematicContinuityR535 = 'reduced-skip';
     return;
   }
 

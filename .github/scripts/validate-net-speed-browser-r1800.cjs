@@ -1,4 +1,6 @@
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {chromium}=require('playwright');
 
 const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
@@ -15,6 +17,27 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
 
   page.on('pageerror',error=>errors.push(String(error)));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+  page.on('response',response=>{
+    if(response.status()>=400)console.error(JSON.stringify({resourceFailure:{status:response.status(),url:response.url(),type:response.request().resourceType()}}));
+  });
+
+  // This static NET harness already supplies its backend endpoints explicitly.
+  // Checkout QR delivery is an independent Worker API, not a static HTML path.
+  // Supply the real bundled QR assets without ignoring any browser errors.
+  const qrRequests=[];
+  await page.route('**/api/checkout-qr?*',async route=>{
+    const request=route.request(),url=new URL(request.url());
+    const plan=url.searchParams.get('plan'),currency=url.searchParams.get('currency');
+    assert.equal(request.method(),'GET');
+    assert.ok(['business_lite','business_pro','technician_team'].includes(plan),'Unexpected QR plan');
+    assert.ok(['HUF','EUR'].includes(currency),'Unexpected QR currency');
+    assert.equal(url.searchParams.get('cycle'),'monthly');
+    const file=path.join(__dirname,'../../docs/scifi-ui/assets/qr',plan+'-'+currency.toLowerCase()+'.svg');
+    const body=fs.readFileSync(file);
+    assert.match(body.toString(),/<svg/,'The real bundled checkout QR asset must exist');
+    qrRequests.push({plan,currency});
+    await route.fulfill({status:200,contentType:'image/svg+xml',body});
+  });
 
   await page.route('**/api/net/**',async route=>{
     apiRequests+=1;
@@ -50,7 +73,7 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
     await route.fulfill({status:404,contentType:'application/json',body:'{"ok":false}'});
   });
 
-  await page.goto(TEST_URL+'?lighthouse=1&net-test=r1800',{waitUntil:'domcontentloaded',timeout:60000});
+  await page.goto(TEST_URL,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForSelector('[data-fx-net-speed-r1800="true"]',{state:'attached',timeout:15000});
 
   assert.equal(apiRequests,0,'NET test must not generate traffic before explicit user action');
@@ -79,5 +102,5 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
 
   await context.close();
   await browser.close();
-  console.log(JSON.stringify({ok:true,apiRequests,quality}));
+  console.log(JSON.stringify({ok:true,apiRequests,quality,qrFixtureRequests:qrRequests}));
 })().catch(error=>{console.error(error);process.exit(1);});

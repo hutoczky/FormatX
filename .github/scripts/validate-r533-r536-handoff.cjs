@@ -82,10 +82,25 @@ function assertStable(state,label){
 }
 
 async function installTimelineProbe(page){
-  await page.evaluate(({CANVAS,STAGE,OVERLAY})=>{
-    const root=document.documentElement;
-    const timeline={phases:[],coreReadyPhase:null,coreSamples:[]};
+  await page.addInitScript(({CANVAS,STAGE,OVERLAY,PREPAINT})=>{
+    const timeline={phases:[],coreReadyPhase:null,coreSamples:[],visibleFrames:[],nativeVisibleFrames:[],firstVisibleAt:null};
+    window.__fxR548Timeline=timeline;
+    let stopped=false;
+    let observedOverlay=null;
+    const visible=element=>{
+      if(!(element instanceof Element))return false;
+      const rect=element.getBoundingClientRect();
+      if(rect.width<=0||rect.height<=0||rect.right<=0||rect.bottom<=0||rect.left>=innerWidth||rect.top>=innerHeight)return false;
+      if(getComputedStyle(element).visibility==='hidden')return false;
+      for(let node=element;node instanceof Element;node=node.parentElement){
+        const style=getComputedStyle(node);
+        if(style.display==='none'||Number(style.opacity||1)<=.02)return false;
+      }
+      return true;
+    };
     const sample=()=>{
+      const root=document.documentElement;
+      if(!root)return;
       const overlay=document.querySelector(OVERLAY);
       const phase=String(root.dataset.fxMagBirthPhase||overlay?.dataset.phase||'');
       if(phase && timeline.phases[timeline.phases.length-1]!==phase)timeline.phases.push(phase);
@@ -99,26 +114,56 @@ async function installTimelineProbe(page){
         if(canvas && !canvas.dataset.fxR548Identity)canvas.dataset.fxR548Identity='native-canvas-r548';
       }
     };
-    window.__fxR548Timeline=timeline;
     const observer=new MutationObserver(sample);
-    observer.observe(root,{attributes:true,attributeFilter:['data-fx-mag-birth-phase','data-fx-crystal-organism-r326']});
-    const overlay=document.querySelector(OVERLAY);
-    if(overlay)observer.observe(overlay,{attributes:true,attributeFilter:['data-phase']});
-    window.__fxR548TimelineObserver=observer;
-    sample();
-  },{CANVAS,STAGE,OVERLAY});
+    const connect=()=>{
+      const root=document.documentElement;
+      if(root)observer.observe(root,{attributes:true,attributeFilter:['data-fx-mag-birth-phase','data-fx-crystal-organism-r326']});
+      const overlay=document.querySelector(OVERLAY)||document.querySelector(PREPAINT);
+      if(overlay&&overlay!==observedOverlay){
+        observedOverlay=overlay;
+        observer.observe(overlay,{attributes:true,attributeFilter:['data-phase']});
+      }
+      sample();
+    };
+    const frame=()=>{
+      const overlay=document.querySelector(OVERLAY);
+      const prepaint=document.querySelector(PREPAINT);
+      if(timeline.firstVisibleAt===null&&visible(overlay||prepaint))timeline.firstVisibleAt=performance.now();
+      if(visible(overlay)){
+        const root=document.documentElement;
+        if(timeline.visibleFrames.length<8)timeline.visibleFrames.push({
+          at:performance.now(),scrollLock:root.getAttribute('data-fx-mag-birth-live')||'',
+          legacyPreloaderCount:document.querySelectorAll('#formatx-event-horizon').length,
+          genome:root.dataset.fxMagBirthGenomeR611||'',
+          helixCount:document.querySelectorAll('[data-fx-dna-3d-r611="true"]').length,
+          embryoCount:document.querySelectorAll('.fxb-embryo').length,
+          nativeCanvasCount:document.querySelectorAll(CANVAS).length
+        });
+        if(root.dataset.fxCrystalOrganismR326==='ready'&&visible(document.querySelector(CANVAS))
+          &&timeline.nativeVisibleFrames.length<8)timeline.nativeVisibleFrames.push(performance.now());
+      }
+      if(!stopped&&(timeline.visibleFrames.length<8||timeline.nativeVisibleFrames.length<8))requestAnimationFrame(frame);
+    };
+    document.addEventListener('formatx:magbirthstart',connect);
+    document.addEventListener('formatx:magbirthcomplete',()=>{sample();stopped=true;});
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',connect,{once:true});
+    else connect();
+    requestAnimationFrame(frame);
+  },{CANVAS,STAGE,OVERLAY,PREPAINT});
 }
 
 async function readTimeline(page){
   return page.evaluate(()=>({
     phases:[...(window.__fxR548Timeline?.phases||[])],
     coreReadyPhase:window.__fxR548Timeline?.coreReadyPhase??null,
-    coreSamples:[...(window.__fxR548Timeline?.coreSamples||[])]
+    coreSamples:[...(window.__fxR548Timeline?.coreSamples||[])],
+    visibleFrames:[...(window.__fxR548Timeline?.visibleFrames||[])],
+    nativeVisibleFrames:[...(window.__fxR548Timeline?.nativeVisibleFrames||[])]
   }));
 }
 
-// R1405 live handoff tolerance: the film remains 10.0s; this wider CI wait only
-// tolerates slow remote script/bootstrap scheduling and does not alter product timing.
+// Observe before navigation so the real bounded intro cannot finish between
+// separate automation commands. No product clock or wait allowance is changed.
 async function verifyFullBirth(browser){
   const context=await browser.newContext({
     viewport:{width:1440,height:900},colorScheme:'dark',reducedMotion:'no-preference',locale:'hu-HU'
@@ -128,14 +173,15 @@ async function verifyFullBirth(browser){
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed/i.test(m.text()))errors.push(m.text());});
   try{
-    await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     await installTimelineProbe(page);
+    await page.goto(url({intro:1,cinema:1,r548:'desktop-full'}),{waitUntil:'commit',timeout:30000});
     // R1796: the first-byte shell is the immediate visual contract. The R533
     // runtime may attach later on a cold remote edge, but users must never wait
     // on a black viewport while that script is fetched/parsed.
-    await page.locator(`${PREPAINT}, ${OVERLAY}`).first().waitFor({state:'visible',timeout:5000});
+    await page.waitForFunction(()=>window.__fxR548Timeline?.firstVisibleAt!==null&&window.__fxR548Timeline?.firstVisibleAt!==undefined,null,{timeout:5000});
+    assert.ok(await page.evaluate(()=>window.__fxR548Timeline.firstVisibleAt<=5000),'desktop-full: no visible first-byte shell within 5000ms of navigation');
     try{
-      await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
+      await page.waitForFunction(()=>window.__fxR548Timeline?.visibleFrames.length>0,null,{timeout:20000});
     }catch(error){
       const debug=await page.evaluate(({PREPAINT,OVERLAY})=>{
         const root=document.documentElement;
@@ -182,19 +228,13 @@ async function verifyFullBirth(browser){
       writeJson('desktop-overlay-timeout.json',{debug,errors,error:String(error?.stack||error)});
       throw error;
     }
-    const active=await snapshot(page);
-    const dnaGenesis=await page.evaluate(()=>({
-      genome:document.documentElement.dataset.fxMagBirthGenomeR611||'',
-      helixCount:document.querySelectorAll('[data-fx-dna-3d-r611="true"]').length,
-      embryoCount:document.querySelectorAll('.fxb-embryo').length,
-      nativeCanvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length
-    }));
+    const dnaGenesis=await page.evaluate(()=>window.__fxR548Timeline.visibleFrames[0]);
     assert.equal(dnaGenesis.genome,'realistic-css-3d-double-helix-embryo-one-native-r326','desktop-full: realistic R611 DNA genesis marker missing');
     assert.equal(dnaGenesis.helixCount,1,'desktop-full: CSS 3D DNA helix must be unique');
     assert.equal(dnaGenesis.embryoCount,1,'desktop-full: living embryo stage must be unique');
     assert.ok(dnaGenesis.nativeCanvasCount<=1,'desktop-full: DNA intro created a duplicate native canvas');
-    assert.equal(active.scrollLock,'active','desktop-full: R533 did not own the temporary scroll lock');
-    assert.equal(active.legacyPreloaderCount,0,'desktop-full: second/legacy preloader remained');
+    assert.equal(dnaGenesis.scrollLock,'active','desktop-full: R533 did not own the temporary scroll lock');
+    assert.equal(dnaGenesis.legacyPreloaderCount,0,'desktop-full: second/legacy preloader remained');
     await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:18000});
     const timeline=await readTimeline(page);
     const phases=new Set(timeline.phases);
@@ -202,6 +242,7 @@ async function verifyFullBirth(browser){
     assert.notEqual(timeline.coreReadyPhase,null,'desktop-full: native R326 never became ready during birth/handoff');
     assert.ok(timeline.coreSamples.length>0,'desktop-full: no native R326 ownership samples captured');
     assert.ok(timeline.coreSamples.every(x=>x.stageCount===1&&x.canvasCount===1),'desktop-full: native R326 ownership changed during birth/handoff');
+    assert.ok(timeline.nativeVisibleFrames.length>0,'desktop-full: no visible frame of the ready native canvas was observed inside the live intro');
 
     const final=await snapshot(page);
     assertStable(final,'desktop-full');
@@ -223,7 +264,8 @@ async function verifyFullBirth(browser){
     const reloadReady=await snapshot(page);
     assertStable(reloadReady,'session-reload');
     assert.equal(errors.length,0,`desktop-full: browser errors: ${errors.join(' | ')}`);
-    return{phases:[...phases],coreReadyPhase:timeline.coreReadyPhase,coreSamples:timeline.coreSamples.length,final,reload:reloadReady};
+    return{phases:[...phases],coreReadyPhase:timeline.coreReadyPhase,coreSamples:timeline.coreSamples.length,
+      visibleFrames:timeline.visibleFrames,nativeVisibleFrames:timeline.nativeVisibleFrames,final,reload:reloadReady};
   }finally{await context.close();}
 }
 
@@ -237,10 +279,10 @@ async function verifySkip(browser){
   page.on('pageerror',e=>errors.push(String(e)));
   page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|WebGPU|GPU|Permissions policy violation: accelerometer is not allowed/i.test(m.text()))errors.push(m.text());});
   try{
+    await installTimelineProbe(page);
     await page.goto(url({intro:1,cinema:1,r548:'mobile-skip'}),{waitUntil:'commit',timeout:30000});
     const skip=page.locator(OVERLAY+' .fxb-skip');
     await skip.waitFor({state:'visible',timeout:20000});
-    await installTimelineProbe(page);
     const box=await skip.boundingBox();
     assert.ok(box&&box.width>=44&&box.height>=44,`mobile-skip: skip hit target invalid ${JSON.stringify(box)}`);
     const aria=await skip.getAttribute('aria-label');

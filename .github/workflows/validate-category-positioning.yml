@@ -54,6 +54,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -154,7 +156,8 @@ jobs:
             state='failure'
             description='FormatX category, checkout or Operational Twin validation failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX category positioning validation' \
             -f description="$description" \

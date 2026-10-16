@@ -1,6 +1,14 @@
 /* FormatX R1956 — deterministic menu render contract for phone + PC.
    This stylesheet is intentionally synchronous and small: the navigation must
    remain operable even while cinematic/deferred style layers are still loading. */
+
+/* Decorative cinematic layers never own input, including the interval before
+   their deferred appearance stylesheet arrives. Geometry stays with that file. */
+.fx-c536-stage,
+.fx-c536-stage > *{
+  pointer-events:none!important;
+}
+
 html body.living-architecture #menu-toggle.fx-reference-menu-button{
   touch-action:manipulation!important;
   -webkit-tap-highlight-color:transparent;
@@ -165,3 +173,14 @@ html[data-fx-proof-singleton="present"] .fx-loop-reference-proof {
  visibility:hidden!important;pointer-events:none!important;
 }
 /* production-r2056-singleton-first-frame-no-blocking-remote-css */
+
+/* R2062 — the same real download anchor moves from the hero into the final
+   archive folio. Its hit area must not depend on deferred archive activation. */
+html body.living-architecture a#hero-download{
+ display:inline-flex!important;
+ box-sizing:border-box!important;
+ min-height:48px!important;
+ min-width:48px!important;
+ align-items:center!important;
+ justify-content:center!important;
+}

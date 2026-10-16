@@ -1,5 +1,5 @@
 name: Prepare or deploy FormatX production
-run-name: FormatX production from ${{ github.sha }}
+run-name: FormatX production from ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_dispatch:
@@ -46,6 +46,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -154,6 +156,8 @@ jobs:
     steps:
       - name: Check out validated commit
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -357,7 +361,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: production-cinematic-handoff-${{ github.sha }}
+          name: production-cinematic-handoff-${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
           path: |
             artifacts/live-r533-r536-canonical/
             artifacts/live-r533-r536-www/

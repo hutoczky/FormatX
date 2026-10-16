@@ -8,6 +8,7 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
+      - '.github/scripts/assert-p0-lighthouse-r2054.cjs'
       - '.github/scripts/report-lighthouse-metrics.cjs'
   push:
     branches: [master]
@@ -16,6 +17,7 @@ on:
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
+      - '.github/scripts/assert-p0-lighthouse-r2054.cjs'
       - '.github/scripts/report-lighthouse-metrics.cjs'
   workflow_dispatch:
 
@@ -34,6 +36,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -57,6 +61,7 @@ jobs:
           mkdir -p lighthouse-results/desktop
           cp -a .lighthouseci/. lighthouse-results/desktop/
           PROFILE=desktop node .github/scripts/report-lighthouse-metrics.cjs lighthouse-results/desktop | tee -a lighthouse-desktop-output.txt
+          node .github/scripts/assert-p0-lighthouse-r2054.cjs lighthouse-results/desktop
           exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
@@ -76,6 +81,7 @@ jobs:
           mkdir -p lighthouse-results/mobile
           cp -a .lighthouseci/. lighthouse-results/mobile/
           PROFILE=mobile node .github/scripts/report-lighthouse-metrics.cjs lighthouse-results/mobile | tee -a lighthouse-mobile-output.txt
+          node .github/scripts/assert-p0-lighthouse-r2054.cjs lighthouse-results/mobile
           exit "$lhci_status"
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
@@ -102,15 +108,15 @@ jobs:
             echo "Validated surfaces: desktop + mobile, normal visitor experience"
             echo
             echo "### Strict truthful thresholds"
-            echo "- Performance ≥ 0.95; 1.00 remains the optimisation target"
+            echo "- Performance = 1.00 in every individual run"
             echo "- Accessibility = 1.00"
             echo "- Best practices = 1.00"
             echo "- SEO = 1.00"
             echo "- FCP ≤ 1.8s"
-            echo "- LCP ≤ 2.5s"
-            echo "- TBT ≤ 200ms"
-            echo "- CLS ≤ 0.10"
-            echo "- TTFB ≤ 600ms"
+            echo "- LCP < 2s"
+            echo "- TBT ≤ 150ms"
+            echo "- CLS < 0.05"
+            echo "- TTFB ≤ 500ms"
             echo "- 3 runs per viewport profile"
             echo "- No audit-only query parameter"
             echo "- No forced reduced-motion mode"
@@ -133,7 +139,8 @@ jobs:
             state='failure'
             description='Real-experience desktop or mobile Lighthouse gate failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX Lighthouse quality gate' \
             -f description="$description" \

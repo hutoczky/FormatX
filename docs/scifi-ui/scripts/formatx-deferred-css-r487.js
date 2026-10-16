@@ -2,7 +2,6 @@
   'use strict';
 
   const root = document.documentElement;
-  const audit = /Chrome-Lighthouse/i.test(navigator.userAgent || '') || new URLSearchParams(location.search).get('lighthouse') === '1';
   if (root.dataset.fxDeferredCssR487) return;
   root.dataset.fxDeferredCssR487 = 'queued-fcp';
 
@@ -11,6 +10,8 @@
   let fallback = 0;
   let observer = null;
   const observedStyles = new WeakSet();
+  // R2118: track the completed URL, not just a link that may later be reused.
+  const completedStyleUrls = new WeakMap();
   function recoverStyle(link, reason) {
     if (!(link instanceof HTMLLinkElement) || link.dataset.fxCssRetryR2054) return;
     // Never loop indefinitely on an unavailable asset or replace the content
@@ -28,8 +29,12 @@
     for (const link of document.querySelectorAll('link[data-fx-r487-deferred-style]')) {
       if (!(link instanceof HTMLLinkElement) || observedStyles.has(link)) continue;
       observedStyles.add(link);
+      const entries = typeof performance.getEntriesByName === 'function'
+        ? performance.getEntriesByName(link.href, 'resource') : [];
+      if (link.sheet || entries.some(entry => entry.responseEnd > 0)) completedStyleUrls.set(link, link.href);
       link.addEventListener('error', () => recoverStyle(link, 'stylesheet-load-error'));
       link.addEventListener('load', () => {
+        completedStyleUrls.set(link, link.href);
         if (link.dataset.fxCssRetryR2054 === 'attempted')
           link.dataset.fxCssRetryR2054 = 'loaded';
       });
@@ -47,15 +52,8 @@
     observeStyleLinks();
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
     let activatedCount = 0;
-    let auditSkippedCount = 0;
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
-      if (audit && link.hasAttribute('data-fx-critical-core-r227')) {
-        link.media = 'print';
-        link.dataset.fxR1970AuditDeferred = 'critical-core-skipped';
-        auditSkippedCount += 1;
-        continue;
-      }
       const targetMedia = link.dataset.fxR487Media || 'all';
       if (link.media !== targetMedia) link.media = targetMedia;
       link.removeAttribute('fetchpriority');
@@ -63,18 +61,19 @@
     }
 
     // A CSS link can fail before its deferred media is activated. Validate
-    // materialized browser styles after paint, then retry once if unavailable.
+    // materialized browser styles after paint, then retry a settled failure.
+    // An unfinished download is not a missing stylesheet: keep its request
+    // alive instead of canceling it and downloading the same CSS again.
     // This covers transient CDN/cache failures without hiding permanent faults.
     setTimeout(() => {
       for (const link of links) {
         if (link.media !== 'print' && link.media !== 'not all'
-            && !link.sheet && !link.dataset.fxCssRetryR2054)
+            && !link.sheet && completedStyleUrls.get(link) === link.href && !link.dataset.fxCssRetryR2054)
           recoverStyle(link, 'missing-active-stylesheet');
       }
     }, 1600);
     root.dataset.fxDeferredCssR487 = 'ready-fcp';
     root.dataset.fxDeferredCssCountR487 = String(activatedCount);
-    root.dataset.fxDeferredCssAuditSkippedR1970 = String(auditSkippedCount);
     root.dataset.fxDeferredCssReasonR526 = reason;
     dispatchEvent(new CustomEvent('formatx:deferredcssready', {
       detail: { count: links.length, scheduler: 'post-first-contentful-paint-r526', reason }

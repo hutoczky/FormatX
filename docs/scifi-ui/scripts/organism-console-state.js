@@ -32,6 +32,13 @@
 
   function replaceWithHeroHash() {
     if (location.hash === '#hero') return;
+    // A late console import may follow a completed native menu action. Its
+    // startup cleanup owns stale modal hashes, not the current section route.
+    const hash = location.hash;
+    const landing = root.dataset.fxSectionNavigationR581 || '';
+    const settled = root.dataset.fxSectionNavigationSettledR581 || '';
+    if (PANEL_IDS.has(hash.slice(1))
+      && (landing.startsWith(hash + '@') || settled === hash)) return;
     history.replaceState({}, '', location.pathname + location.search + '#hero');
   }
 

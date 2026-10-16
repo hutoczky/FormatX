@@ -85,6 +85,7 @@ jobs:
           lhci collect --config="$LH_CONFIG" 2>&1 | tee "lighthouse-live-$profile-output.txt"
           mkdir -p "lighthouse-live-results/$profile"
           cp -a .lighthouseci/. "lighthouse-live-results/$profile/"
+          node .github/scripts/assert-p0-lighthouse-r2054.cjs "lighthouse-live-results/$profile"
           lhci assert --config="$LH_CONFIG" 2>&1 | tee -a "lighthouse-live-$profile-output.txt"
           PROFILE="$profile" node .github/scripts/summarize-p0-lighthouse.cjs "lighthouse-live-results/$profile" | tee -a "lighthouse-live-$profile-output.txt"
 

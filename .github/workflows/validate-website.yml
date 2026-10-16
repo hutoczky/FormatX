@@ -19,6 +19,7 @@ on:
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-thought-genome.cjs'
+      - '.github/scripts/finish-intro-through-controls-r2110.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -42,6 +43,7 @@ on:
       - '.github/scripts/validate-content-visuals.cjs'
       - '.github/scripts/validate-public-pages-browser.cjs'
       - '.github/scripts/validate-thought-genome.cjs'
+      - '.github/scripts/finish-intro-through-controls-r2110.cjs'
       - '.github/scripts/validate-thought-disclosure-browser.cjs'
       - '.github/scripts/validate-real3d-core-v20.cjs'
       - '.github/scripts/validate-real3d-mobile-startup-v22.cjs'
@@ -64,6 +66,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -110,6 +114,7 @@ jobs:
           node --check .github/scripts/validate-content-visuals.cjs
           node --check .github/scripts/validate-public-pages-browser.cjs
           node --check .github/scripts/validate-thought-genome.cjs
+          node --check .github/scripts/finish-intro-through-controls-r2110.cjs
           node --check .github/scripts/validate-thought-disclosure-browser.cjs
           node --check .github/scripts/validate-real3d-core-v20.cjs
           node --check .github/scripts/validate-real3d-mobile-startup-v22.cjs
@@ -213,7 +218,8 @@ jobs:
             state='failure'
             description='Full website browser validation failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX full website browser validation' \
             -f description="$description" \
