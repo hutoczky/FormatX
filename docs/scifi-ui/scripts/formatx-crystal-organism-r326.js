@@ -841,6 +841,45 @@
         String((facets.length-bladesFirst)/3);
     }
 
+    /* R2130: real raised four-arm machined-spine geometry. Unlike an
+       emissive highlight painted into the shader, these facet planes have
+       genuinely different face normals and depth testing. They are inserted
+       in the ORIGINAL native crystal mesh, same draw call / original WebGL
+       context, with only twelve additional triangles total. */
+    const metalSpineFirst=facets.length;
+    const nativeSpineSurfaceZ=(x,y)=>{
+      const xAxis=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
+      const yAxis=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
+      const zAxis=mobile?.64:.49;
+      const exponent=mobile?.78:.61;
+      const space=1-
+        Math.pow(Math.abs(x)/xAxis,exponent)-
+        Math.pow(Math.abs(y)/yAxis,exponent);
+      return zAxis*Math.pow(Math.max(.004,space),1/exponent);
+    };
+    for(let arm=0;arm<4;arm++){
+      const angle=arm*Math.PI*.5;
+      const axisX=Math.cos(angle),axisY=Math.sin(angle);
+      const tangentX=-axisY,tangentY=axisX;
+      const point=(reach,across,lift)=>{
+        const x=axisX*reach+tangentX*across;
+        const y=axisY*reach+tangentY*across;
+        const z=nativeSpineSurfaceZ(x,y)+lift;
+        return [x,y,z];
+      };
+      const left=point(.305,-.088,.026);
+      const right=point(.305,.088,.026);
+      const raisedMid=point(.465,0,.080);
+      const tip=point(.665,0,.029);
+      armorTri(left,raisedMid,right,5.46);
+      armorTri(left,tip,raisedMid,5.46);
+      armorTri(raisedMid,tip,right,5.46);
+    }
+    root.dataset.fxNativeMagSpineTrianglesR2130=
+      String((facets.length-metalSpineFirst)/3);
+    root.dataset.fxNativeMagSpineR2130=
+      'four-depth-tested-machined-metal-3d-ridges';
+
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
@@ -1604,6 +1643,16 @@
           vec3(.37,.42,.39)*sapphireSpec*.70+
           vec3(.17,.25,.25)*sapphireFill*.20+
           vec3(.029,.13,.16)*fresnel*.25;
+        /* R2130: depth-tested actual four-arm metal spine geometry. The
+           front-facing cut planes shade by their own raised triangle normals
+           rather than borrowing the smooth teal body normal. */
+        float structuralRail=step(5.40,vFacet)*(1.0-step(5.55,vFacet));
+        vec3 cutSilver=vec3(.055,.075,.079)+
+          vec3(.50,.58,.55)*(softboxA*.42+softboxB*.34+key*.26)+
+          vec3(.21,.28,.28)*pow(sat(dot(n,
+            normalize(vec3(-.38,.62,.69)))),4.0)*.48+
+          vec3(.065,.08,.08)*fresnel*.14;
+        c=mix(c,cutSilver,structuralRail*.95);
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
