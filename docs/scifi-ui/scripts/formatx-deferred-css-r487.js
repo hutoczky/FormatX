@@ -10,6 +10,8 @@
   let fallback = 0;
   let observer = null;
   const observedStyles = new WeakSet();
+  // R2118: track the completed URL, not just a link that may later be reused.
+  const completedStyleUrls = new WeakMap();
   function recoverStyle(link, reason) {
     if (!(link instanceof HTMLLinkElement) || link.dataset.fxCssRetryR2054) return;
     // Never loop indefinitely on an unavailable asset or replace the content
@@ -27,8 +29,12 @@
     for (const link of document.querySelectorAll('link[data-fx-r487-deferred-style]')) {
       if (!(link instanceof HTMLLinkElement) || observedStyles.has(link)) continue;
       observedStyles.add(link);
+      const entries = typeof performance.getEntriesByName === 'function'
+        ? performance.getEntriesByName(link.href, 'resource') : [];
+      if (link.sheet || entries.some(entry => entry.responseEnd > 0)) completedStyleUrls.set(link, link.href);
       link.addEventListener('error', () => recoverStyle(link, 'stylesheet-load-error'));
       link.addEventListener('load', () => {
+        completedStyleUrls.set(link, link.href);
         if (link.dataset.fxCssRetryR2054 === 'attempted')
           link.dataset.fxCssRetryR2054 = 'loaded';
       });
@@ -55,12 +61,14 @@
     }
 
     // A CSS link can fail before its deferred media is activated. Validate
-    // materialized browser styles after paint, then retry once if unavailable.
+    // materialized browser styles after paint, then retry a settled failure.
+    // An unfinished download is not a missing stylesheet: keep its request
+    // alive instead of canceling it and downloading the same CSS again.
     // This covers transient CDN/cache failures without hiding permanent faults.
     setTimeout(() => {
       for (const link of links) {
         if (link.media !== 'print' && link.media !== 'not all'
-            && !link.sheet && !link.dataset.fxCssRetryR2054)
+            && !link.sheet && completedStyleUrls.get(link) === link.href && !link.dataset.fxCssRetryR2054)
           recoverStyle(link, 'missing-active-stylesheet');
       }
     }, 1600);
