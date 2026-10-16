@@ -159,6 +159,14 @@ const views=[
           path:OUT+'/'+view.name+'-final-original-mag.png',
           animations:'allow'
         });
+        /* R2133: capture the actual composited WebGL canvas separately.
+           The 390px full-page snapshot was fully empty despite DOM-ready
+           and correctly sized canvas; crop proves actual pixels vs a cover. */
+        await page.locator('#hero .fx-crystal-organism-r326-canvas')
+          .screenshot({
+            path:OUT+'/'+view.name+'-actual-canvas-only.png',
+            animations:'allow'
+          });
         fs.writeFileSync(OUT+'/'+view.name+'.json',
           JSON.stringify({view,info,errors},null,2)+'\n');
         assert.equal(info.renderer,'ready');
