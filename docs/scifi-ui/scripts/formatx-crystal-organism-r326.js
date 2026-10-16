@@ -15,7 +15,13 @@
   const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
-  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
+  /* R2117: synchronize the REAL permanent MAG tier with the R2103
+     eight-core Android intro routing. Android's deviceMemory is a privacy-
+     rounded browser hint (often 4 GB even on high-end phones), not proof
+     that the GPU cannot render the normal 3D core. Reserve low geometry for
+     <=4 logical cores or <=2 GB. The existing measured 16.67ms frame
+     governor still reduces live rendering resolution under actual pressure. */
+  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 2;
   const constrainedMobile = mobile && constrained;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
@@ -2842,6 +2848,10 @@
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
+    root.dataset.fxCoreCapabilityPolicyR2117=
+      'high-core-four-gb-phone-normal-mesh-adaptive-fps';
+    root.dataset.fxCoreCapabilitySelectedR2117=constrained?
+      'measured-adaptive-low-geometry':'normal-four-point-optics-with-measured-adaptive-governor';
     root.dataset.fxCoreCapabilityR620=`${hardwareConcurrency}c-${deviceMemory}gb`;
     root.dataset.fxCoreMaterial='cortical-bioceramic-living-tissue-r1723';
     root.dataset.fxCoreGeometry='cortical-cellular-organism-with-native-tendrils-r1723';
