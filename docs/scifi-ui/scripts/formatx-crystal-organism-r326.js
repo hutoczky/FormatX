@@ -901,7 +901,7 @@
         String((facets.length-sapphireStart)/3);
       root.dataset.fxNativeMagPupilElevationR2128='0.064';
       root.dataset.fxNativeMagPupilShaderR2129=
-        'broad-physical-normal-silver-softbox-on-convex-sapphire';
+        'r2132-narrow-physical-normal-obsidian-sapphire-glint';
     }
 
     /* R2107 physical arm architecture: eight narrow titanium rail facets
@@ -1792,21 +1792,25 @@
         c=mix(c,shadowTitanium,darkPanel*.95);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
-        /* R2129: the REAL raised pupil (facet 6.47) has a separate
-           curved glass specular response from its surrounding titanium.
-           Broad moving studio highlight follows the original interpolated
-           WebGL NORMALS, never a pasted white circle, bloom layer or
-           independent canvas. Dark obsidian remains visible in the shadows. */
+        /* R2132: the actual R2128 convex sapphire was a matte grey coin
+           in the real 1440px framebuffer. Separate internal obsidian
+           absorption from narrow environment reflections on the REAL
+           interpolated glass normals. The specular lobes stay bounded;
+           pointer input moves their source, without adding bloom, a second
+           mesh, canvas, texture or compositing pass. */
         float convexPupil=step(6.44,vFacet)*(1.0-step(6.50,vFacet));
-        float pupilSoftbox=pow(sat(dot(n,
-          normalize(vec3(-.33,.43,.84)))),5.0);
-        float pupilRim=pow(sat(dot(n,
-          normalize(vec3(.47,-.23,.85)))),6.0);
-        vec3 physicalPupil=vec3(.009,.031,.047)+
-          vec3(.067,.138,.166)*(.34+.66*key)+
-          vec3(.68,.77,.73)*pupilSoftbox*.82+
-          vec3(.13,.26,.29)*pupilRim*.30+
-          vec3(.024,.071,.093)*fresnel*.13;
+        vec3 opticalKey=normalize(vec3(
+          -.30+.075*uPointer.x,.41+.06*uPointer.y,.86));
+        vec3 opticalRim=normalize(vec3(.43,-.26,.85));
+        float pupilSoftbox=pow(sat(dot(n,opticalKey)),23.0);
+        float pupilRim=pow(sat(dot(n,opticalRim)),19.0);
+        float pupilFresnel=pow(1.0-sat(dot(n,view)),3.0);
+        float opticalDepth=sat(dot(n,vec3(.0,.0,1.0)));
+        vec3 physicalPupil=vec3(.003,.013,.025)+
+          vec3(.014,.046,.066)*opticalDepth+
+          vec3(.71,.82,.77)*pupilSoftbox*.63+
+          vec3(.16,.26,.27)*pupilRim*.30+
+          vec3(.09,.23,.27)*pupilFresnel*.48;
         c=mix(c,physicalPupil,convexPupil);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
