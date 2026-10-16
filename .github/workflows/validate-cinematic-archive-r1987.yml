@@ -20,6 +20,7 @@ on:
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
       - '.github/scripts/validate-native-stage-reservation-r2113.cjs'
+      - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
     branches: [master]
@@ -40,6 +41,7 @@ on:
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
       - '.github/scripts/validate-native-stage-reservation-r2113.cjs'
+      - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
 
@@ -71,6 +73,7 @@ jobs:
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
           node --check .github/scripts/validate-archive-atomic-chapter-r2110.cjs
           node --check .github/scripts/validate-native-stage-reservation-r2113.cjs
+          node --check .github/scripts/validate-native-framing-r2114.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -98,6 +101,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-native-stage-reservation-r2113.cjs
+      - name: Test real native intro framing and MAG identity placement
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-native-framing-r2114.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4

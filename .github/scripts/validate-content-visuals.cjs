@@ -93,7 +93,10 @@ async function waitForProductShell(page) {
       const style = getComputedStyle(element), rect = element.getBoundingClientRect();
       return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
     };
-    return root.dataset.fxControlOwnerR268 === 'ready' && visible(ask) && visible(core) && visible(lead);
+    const introActive = root.hasAttribute('data-fx-native-genesis-r2064')
+      || document.querySelector('.fx-mag-birth-r533,#fx-mag-birth-prepaint-r1606');
+    return !introActive && root.dataset.fxControlOwnerR268 === 'ready'
+      && visible(ask) && visible(core) && visible(lead);
   }, null, { timeout: 20000 });
   await page.waitForTimeout(250);
 }

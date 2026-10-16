@@ -8,6 +8,8 @@
   const MOBILE = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let shown = false;
+  let introFinished = false;
+  let departed = false;
   let exitTimer = 0;
   let removeTimer = 0;
 
@@ -23,7 +25,10 @@
   }
 
   function showIdentity(source = 'magbirthcomplete') {
-    if (shown || document.hidden) return;
+    if (shown || departed || !introFinished || document.hidden) return;
+    const stage = window.FormatXLivingCore?.stage;
+    if (ROOT.dataset.fxCrystalOrganismR326 !== 'ready'
+      || !(stage instanceof HTMLElement) || !stage.isConnected) return;
     shown = true;
     clearTimers();
     removeExisting();
@@ -42,7 +47,7 @@
     sub.textContent = 'ONLINE · LOCAL INTELLIGENCE';
 
     badge.append(title, sub);
-    document.body.appendChild(badge);
+    stage.appendChild(badge);
 
     ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'shown-mobile' : 'shown-desktop';
 
@@ -63,10 +68,15 @@
   }
 
   document.addEventListener('formatx:magbirthcomplete', event => {
+    introFinished = true;
     showIdentity(event.detail?.source || 'magbirthcomplete');
   }, { once: true, passive: true });
+  addEventListener('formatx:real3dready', () => {
+    showIdentity('native-ready-after-intro');
+  }, { passive: true });
 
   addEventListener('pagehide', () => {
+    departed = true;
     clearTimers();
     removeExisting();
   }, { once: true, passive: true });

@@ -46,11 +46,17 @@ const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi
                 if (style.display === 'none' || style.contentVisibility === 'hidden') painted = false;
               }
               const rect = panel?.getBoundingClientRect();
+              const currentHost = document.querySelector('[data-fx-archive-scene="' + key + '"]');
+              const originalHeading = currentHost?.querySelector('h2,h3');
+              const handoff = document.querySelector('.fx-archive-physical-paper-r2026');
               const visiblePaper = painted && opacity > .1 && rect?.width > 8 && rect?.height > 8
                 && rect.right > 0 && rect.bottom > 0 && rect.left < innerWidth && rect.top < innerHeight;
               resolve({ key, expectedSource: scene.source, scene: window.FormatXArchiveExperience.state.scene,
                 source: panel?.dataset.fxCinemaSource, activeCount: panels.filter(panel => panel.dataset.fxCinemaPanelActive === 'true').length,
                 focusSafe: panels.every(panel => panel.inert === (panel.dataset.fxCinemaPanelActive !== 'true')),
+                originalTitle: originalHeading?.textContent.trim().slice(0, 140),
+                handoffTitle: handoff?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent.trim(),
+                handoffChapter: handoff?.dataset.scene,
                 visiblePaper, opacity,
                 sameCanvas: window.FormatXLivingCore.canvas === window.__r2110OriginalCanvas,
                 canvasCount: document.querySelectorAll('.fx-crystal-organism-r326-canvas').length });
@@ -62,6 +68,9 @@ const url = process.env.FORMATX_ARCHIVE_TEST_URL || 'http://127.0.0.1:4178/scifi
           }), key);
           assert.equal(state.scene, key, 'The native scroll selected another chapter');
           assert.equal(state.source, state.expectedSource, 'The original folio source must commit in the same native scroll event as its chapter');
+          assert.equal(state.handoffChapter, key, 'The MAG handoff must identify the same chapter in the native scroll event');
+          assert.ok(state.originalTitle?.length > 5, 'The active original chapter heading must be present');
+          assert.equal(state.handoffTitle, state.originalTitle, 'The MAG handoff must retain the actual original chapter title without a deferred-frame mismatch');
           assert.equal(state.visiblePaper, true, 'The original native paper must be visible through every ancestor, not only report visibility on itself');
           assert.equal(state.activeCount, 1, 'Chapter handoff must show one original native paper');
           assert.equal(state.focusSafe, true, 'Inactive original papers must remain inert during chapter handoff');

@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2110-atomic-native-chapter';
+  const VERSION='cinematic-archive-r2114-native-framing';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -1150,7 +1150,12 @@ void main(){
         // Commit the original paper, source and inert state in the same
         // native event as chapter selection. Only a chapter boundary needs
         // this immediate composition; continuous progress stays coalesced.
-        if((current?.s.key||'')!==lastCinemaKey)syncCinema();
+        if((current?.s.key||'')!==lastCinemaKey){
+          syncCinema();
+          // Source and original title belong to the same native chapter
+          // transaction as its visible paper, even before the next GPU frame.
+          updateHandoff();
+        }
         setPanelState();
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint

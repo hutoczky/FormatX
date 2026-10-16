@@ -1026,7 +1026,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.790'}*(1.0+approach*1.48);
+        /* Keep the complete signature inside its actual native frustum. The
+           approach retains perspective and rotation without cropping its tips. */
+        projected*= ${mobile?'.585':'.790'}*min(1.0,max(.56,uAspect)/.88)*(1.0+approach*${mobile?'.32':'.12'});
         projected.x+=${mobile?'.002':'.018'};
         projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
