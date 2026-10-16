@@ -167,6 +167,13 @@ const views=[
             path:OUT+'/'+view.name+'-actual-canvas-only.png',
             animations:'allow'
           });
+        /* Distinguish a cold post-handoff paint from real scene occlusion:
+           record the full-page compositor AGAIN after the isolated canvas
+           screenshot has scrolled/painted its own WebGL layer. */
+        await page.screenshot({
+          path:OUT+'/'+view.name+'-after-canvas-capture.png',
+          animations:'allow'
+        });
         fs.writeFileSync(OUT+'/'+view.name+'.json',
           JSON.stringify({view,info,errors},null,2)+'\n');
         assert.equal(info.renderer,'ready');
