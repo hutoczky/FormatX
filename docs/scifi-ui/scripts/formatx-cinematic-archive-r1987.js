@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2116-owned-folio-layout';
+  const VERSION='cinematic-archive-r2117-native-hero-reservation';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -33,6 +33,7 @@
 
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
+  let legacyHeroReservation=null;
   let heroVisualState=null;
   function setHeroCanvasLaneFront(active){
     const hero=document.getElementById('hero');
@@ -56,6 +57,24 @@
       heroVisualState=null;
     }
   }
+  function setLegacyHeroReservation(hero,active){
+    if(active){
+      if(legacyHeroReservation||!(hero instanceof HTMLElement))return;
+      const height=hero.getBoundingClientRect().height;
+      if(!Number.isFinite(height)||height<=0)return;
+      legacyHeroReservation={hero,value:hero.style.getPropertyValue('min-height'),
+        priority:hero.style.getPropertyPriority('min-height')};
+      // Keep the real pre-handoff footprint when the old copy leaves flow.
+      // Otherwise the first original scroll anchor jumps into the viewport.
+      // A minimum preserves this measured floor while responsive CSS can grow.
+      hero.style.setProperty('min-height',height.toFixed(3)+'px','important');
+    }else if(legacyHeroReservation){
+      const {hero:original,value,priority}=legacyHeroReservation;
+      if(value)original.style.setProperty('min-height',value,priority);
+      else original.style.removeProperty('min-height');
+      legacyHeroReservation=null;
+    }
+  }
   function setLegacyHeroHidden(hide){
     if(hide){
       // Older hero styles contain high-specificity !important declarations.
@@ -65,6 +84,7 @@
       if(legacyHeroDisplay.size)return;
       const hero=document.getElementById('hero');
       if(!hero)return;
+      setLegacyHeroReservation(hero,true);
       const furniture=[
         ...hero.querySelectorAll(':scope .hero-grid > :not(.hero-space)'),
         ...hero.querySelectorAll(':scope .scroll-cue')
@@ -77,12 +97,13 @@
         node.style.setProperty('display','none','important');
       }
       root.dataset.fxArchiveLegacyHero='suppressed';
-    }else if(legacyHeroDisplay.size){
+    }else if(legacyHeroDisplay.size||legacyHeroReservation){
       for(const [node,old] of legacyHeroDisplay){
         if(old.value)node.style.setProperty('display',old.value,old.priority);
         else node.style.removeProperty('display');
       }
       legacyHeroDisplay.clear();
+      setLegacyHeroReservation(null,false);
       root.dataset.fxArchiveLegacyHero='restored';
     }
   }
@@ -965,13 +986,17 @@ void main(){
       root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
         pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
-      if(alpha>.001){
-        plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
+      if(alpha>.001)plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
+      // The live connection persists while its original paper is stored.
+      // Retrieval energizes the same path; return reconnects it to its bay.
+      const filamentAlpha=.18+.82*alpha;
+      {
         // Every hardware tier keeps an actual 3D energy filament attached
         // to the SAME MAG. Low-end phones use 2 Bezier segments, not zero
         // filament geometry; higher tiers get subpixel-stable refinement.
         {
-          const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
+          const from=[-.16,.02,.56],to=[mix(x,sourceX,release)-.13,
+            mix(y,sy+phase,release)+.02,mix(z,.18,release)-.06];
           const segments=quality==='high'?(mobile()?4:6):(mobile()?2:3);
           const strands=quality==='high'&&!mobile()?3:1;
           const bezier=(a,b,d,e,t)=>{
@@ -996,7 +1021,7 @@ void main(){
                 const thickness=.010+strand*.001;
                 // The box's long Z axis follows the filament path in XZ.
                 box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
-                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)),true,tilt);
+                  Math.max(dist,.012),hue,Math.atan2(dx,dz),filamentAlpha*(.18+.19*Math.sin(Math.PI*t)),true,tilt);
                 filamentCount++;
               }
               prev=point;

@@ -20,6 +20,7 @@ on:
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
       - '.github/scripts/validate-native-stage-reservation-r2113.cjs'
+      - '.github/scripts/validate-hero-footprint-r2117.cjs'
       - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
@@ -41,6 +42,7 @@ on:
       - '.github/scripts/validate-cinematic-archive-r1987.cjs'
       - '.github/scripts/validate-archive-atomic-chapter-r2110.cjs'
       - '.github/scripts/validate-native-stage-reservation-r2113.cjs'
+      - '.github/scripts/validate-hero-footprint-r2117.cjs'
       - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
@@ -73,6 +75,7 @@ jobs:
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
           node --check .github/scripts/validate-archive-atomic-chapter-r2110.cjs
           node --check .github/scripts/validate-native-stage-reservation-r2113.cjs
+          node --check .github/scripts/validate-hero-footprint-r2117.cjs
           node --check .github/scripts/validate-native-framing-r2114.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
@@ -101,6 +104,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-native-stage-reservation-r2113.cjs
+      - name: Test cold mobile hero footprint, responsive growth and exact restoration
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-hero-footprint-r2117.cjs
       - name: Test real native intro framing and MAG identity placement
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
@@ -110,5 +117,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: formatx-archive-visual-proof
-          path: .archive-artifacts/
+          path: |
+            .archive-artifacts/
+            artifacts/r2117-hero-footprint/
           if-no-files-found: ignore

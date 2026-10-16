@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261016-r2116-owned-folio-layout';
+const STARTUP_REVISION = '20261016-r2117-native-hero-reservation';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-tlDg+XYO5YPVZqKtaMP7lrq2l1fkO3Q42wIwxLIOcXs='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -25,7 +25,7 @@ const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(ma
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261016-r2115-current-motion';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261015-r2106-late-scroll-input-ownership"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-OstN9j8JgCrlyhCX6UGTa9Lw8ycrzF05ga90xQZNW9M=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
+const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VHEXAyVj5+cwyv5sIDOl/i78D1z8ikVHqe46xneHVqw=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -33,7 +33,7 @@ const HEADER_CSP = [
   "frame-ancestors 'none'",
   "form-action 'self'",
   `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} https://static.cloudflareinsights.com`,
-  "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-OstN9j8JgCrlyhCX6UGTa9Lw8ycrzF05ga90xQZNW9M='",
+  "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VHEXAyVj5+cwyv5sIDOl/i78D1z8ikVHqe46xneHVqw='",
   "img-src 'self' data: https://quickchart.io",
   "font-src 'self'",
   "connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com",
