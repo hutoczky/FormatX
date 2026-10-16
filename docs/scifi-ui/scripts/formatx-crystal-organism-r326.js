@@ -1927,6 +1927,9 @@
 
     function finishBoot(program) {
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreSoftwareOpticsR2125=softwareRenderer
+      ? 'same-physical-mag-surface-geometry-near-css-pixel-budget'
+      : 'hardware-resolution-unchanged';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -2008,14 +2011,19 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    /* R2125: the real SwiftShader/llvmpipe renderer was blocking the first
+       mobile surface-energy sweep for up to 3.6 seconds at 1.5x backing DPR.
+       Start SOFTWARE rendering near native mobile CSS pixel density, while
+       retaining the exact same lens, titanium meshes, uniforms and shader.
+       Hardware GPUs retain their full-resolution original path. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.84:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
+      ? (mobile?.96:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.76:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
@@ -2030,12 +2038,12 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
+        ? (mobile?1.21:1.28)
         : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
+        ? (mobile?440000:560000)
         : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
