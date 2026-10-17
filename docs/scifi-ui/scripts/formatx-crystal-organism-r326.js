@@ -1090,9 +1090,17 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.790'};
+        /* R2138: camera-space portrait composition. Genuine 390px Chrome
+           evidence showed the original permanent MAG occupied only 43%
+           of width at the very top of its scene, while the 10s R649 intro
+           was 62% wide. Enlarge the real SAME WebGL sculpture by 15% and
+           lower it within the original 370x381 CSS viewport, retaining safe
+           clearance to the header/ASK zone and native CTA. No CSS zoom or
+           extra canvas pixels: the same framebuffer budget and governor
+           still own rendering cost. */
+        projected*= ${mobile?'.675':'.790'};
         projected.x+=${mobile?'.002':'.018'};
-        projected.y+=${mobile?'.010':'-.006'};
+        projected.y+=${mobile?'-.095':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
