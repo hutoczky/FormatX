@@ -1164,6 +1164,19 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
+        /* R2122: when a real scroll changes the PHYSICAL shelf, the only
+           visible native HTML folio and its source identity must change in
+           that same input turn. Previously, fxArchiveCurrent changed now
+           while fxCinemaSource stayed on the preceding chapter until RAF;
+           the real eight-scene browser test caught vertical-crystal on the
+           sealed-vault shelf. Only chapter transitions use this synchronous
+           materialization; intra-chapter continuous 3D progress still
+           batches in requestAnimationFrame for performance. */
+        const nextChapter=current?.s.key||'home';
+        if(cinemaPrepared&&root.dataset.fxArchiveCinemaChapter!==nextChapter){
+          syncCinema();
+          root.dataset.fxArchiveSynchronousShelfR2122=nextChapter;
+        }
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
         // animation frame, so wheel/touch bursts cannot repeatedly recompute
