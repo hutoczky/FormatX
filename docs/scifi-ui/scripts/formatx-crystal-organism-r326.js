@@ -1578,6 +1578,31 @@
         c*=1.0-.38*cutRecess;
         c+=vec3(.035,.047,.049)*softboxA*machineEnvelope*.36;
 
+        /* R2134 genuine single-volume 3D sculptural studio relighting.
+           The model-space top-left key strikes an independent set of
+           broad real normal-facing silver shoulders; opposite arm
+           quadrants reflect a darker side studio. This solves the
+           flat pale-teal star in real native desktop/phone screenshots.
+           Entirely within the ORIGINAL depth-tested 3D fragment. */
+        float studioEnvelope=smoothstep(.18,.38,radialXY)*
+          (1.0-smoothstep(.75,.99,radialXY))*frontDepth;
+        float upperStudio=smoothstep(-.25,.64,vLocal.y);
+        float leftStudio=1.0-smoothstep(-.66,.16,vLocal.x);
+        float silverKey=pow(sat(dot(n,
+          normalize(vec3(-.62,.63,.48)))),3.0);
+        float silverFill=pow(sat(dot(n,
+          normalize(vec3(.59,-.31,.70)))),4.6);
+        float coolRecess=pow(sat(dot(n,
+          normalize(vec3(.70,-.48,-.25)))),3.2);
+        float materialShoulder=studioEnvelope*
+          (.30+.40*upperStudio+.30*leftStudio);
+        vec3 satinMetal=vec3(.40,.44,.41)*silverKey*.39+
+          vec3(.18,.28,.29)*silverFill*.21;
+        c+=satinMetal*materialShoulder;
+        c*=1.0-.23*coolRecess*studioEnvelope;
+        c+=vec3(.070,.081,.074)*
+          studioEnvelope*upperStudio*leftStudio*.38;
+
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.105,.123)*fresnel*.23;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
@@ -1640,11 +1665,14 @@
           vec3(.09,.13,.15)*fresnel*.25;
         float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),8.0);
         float sapphireFill=pow(sat(dot(n,normalize(vec3(.62,-.22,.77)))),5.0);
-        vec3 sapphireGlass=vec3(.008,.026,.044)+
-          vec3(.065,.15,.18)*(.24+.76*key)+
-          vec3(.37,.42,.39)*sapphireSpec*.70+
-          vec3(.17,.25,.25)*sapphireFill*.20+
-          vec3(.029,.13,.16)*fresnel*.25;
+        /* R2134 sapphire is an optically deep separately curved material,
+           not a cyan sphere. Strong but wide physical softbox highlights
+           preserve contours at the actual reduced Android DPR. */
+        vec3 sapphireGlass=vec3(.005,.017,.031)+
+          vec3(.050,.13,.17)*(.18+.82*key)+
+          vec3(.57,.63,.56)*sapphireSpec*.85+
+          vec3(.22,.31,.32)*sapphireFill*.27+
+          vec3(.024,.12,.16)*fresnel*.25;
         /* R2130: depth-tested actual four-arm metal spine geometry. The
            front-facing cut planes shade by their own raised triangle normals
            rather than borrowing the smooth teal body normal. */
