@@ -19,7 +19,9 @@ assert.ok(
   fallbackSource.includes('const rot=.29*engage-.14*seat') &&
   fallbackSource.includes('R2132: directional satin-metal grain') &&
   fallbackSource.includes('R2132 real material-occlusion hierarchy') &&
-  fallbackSource.includes('R2132 nested multi-element optics'),
+  fallbackSource.includes('R2132 nested multi-element optics') &&
+  fallbackSource.includes('R2133: four different light-facing metal normals') &&
+  fallbackSource.includes('const rx=S*.438,ry=S*.428'),
   'R2122 requires actual moving metal shutters, not static decorative iris art'
 );
 const pageSource=fs.readFileSync('docs/scifi-ui/index.html','utf8');
@@ -193,7 +195,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2132-brushed-silver-optical-depth'),
+        assert.ok(info.loader.includes('r2133-four-plane-silver-optical-core'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
