@@ -28,7 +28,16 @@ const rows=files.map((file,index)=>{
 const paintDetails=files.map((file,index)=>{
   const lhr=JSON.parse(fs.readFileSync(`${dir}/${file}`,'utf8'));
   const audits=lhr.audits||{};
-  const node=audits['largest-contentful-paint-element']?.details?.items?.[0]?.node;
+  // Lighthouse v13 nests the LCP node in a table at details.items[0].items.
+  // The previous direct .node lookup silently wrote null for every run.
+  // Legacy and updated shapes are both supported without changing scoring.
+  const legacyItems=audits['largest-contentful-paint-element']?.details?.items||[];
+  const lcpRows=legacyItems.flatMap(item=>Array.isArray(item?.items)?item.items:[item]);
+  const node=lcpRows.find(item=>item?.node)?.node||null;
+  const phases=lcpRows.filter(item=>typeof item?.phase==='string').map(item=>({
+    phase:item.phase,timing:item.timing,percent:item.percent
+  }));
+  const delay=phases.find(item=>item.phase==='Render Delay')?.timing??null;
   const opportunities=Object.values(audits).filter(a=>a?.details?.type==='opportunity')
     .map(a=>({id:a.id,title:a.title,ms:a.details?.overallSavingsMs||0,
       bytes:a.details?.overallSavingsBytes||0}))
@@ -40,7 +49,8 @@ const paintDetails=files.map((file,index)=>{
     .sort((a,b)=>(b.savingsMs-a.savingsMs)||(a.score-b.score)).slice(0,13);
   const result={profile,run:index+1,
     lcpElement:node?.snippet||null,lcpSelector:node?.selector||null,
-    lcpBreakdown:audits['lcp-breakdown-insight']?.details?.items?.slice(0,3)||[],
+    lcpRenderDelayMs:delay,
+    lcpBreakdown:audits['lcp-breakdown-insight']?.details?.items?.slice(0,3)||phases,
     lcpDiscovery:audits['lcp-discovery-insight']?.details?.items?.slice(0,2)||[],
     mainThread:audits['mainthread-work-breakdown']?.details?.items?.slice(0,8)||[],
     blockers:audits['render-blocking-resources']?.details?.items?.slice(0,12)
@@ -51,6 +61,11 @@ const paintDetails=files.map((file,index)=>{
       .map(x=>({score:x.score,selector:x.node?.selector}))||[],
     opportunities,failing
   };
+  console.log('LIGHTHOUSE_LCP_DETAIL '+JSON.stringify({
+    profile,run:index+1,selector:result.lcpSelector,
+    nodeLabel:node?.nodeLabel||null,renderDelayMs:result.lcpRenderDelayMs,
+    phases
+  }));
   console.log('LIGHTHOUSE_DIAG '+JSON.stringify(result));
   return result;
 });

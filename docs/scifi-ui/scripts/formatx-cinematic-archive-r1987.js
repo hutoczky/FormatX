@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
+  const VERSION='cinematic-archive-r2059-keyboard-focus-continuity';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -224,9 +224,11 @@
       scenes.forEach(s=>sceneObserver.observe(s.node));
     }
     root.dataset.fxArchiveSceneCount=String(scenes.length);
-    if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'){
+    if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'
+      &&root.dataset.fxArchiveNativePrimeR2071==='requested'){
       prepareRealContentSheets();
       prepareCinemaHosts();
+      root.dataset.fxArchiveNativePrimeR2071='prepared';
     }else if(cinemaPrepared){
       // Rebind existing ONLY; no new WebGL context, no second paper or clone.
       for(const scene of scenes){
@@ -287,7 +289,9 @@
     if(cinemaHosts.length){
       cinemaPrepared=true;
       root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
-      attachExistingFinalCta();
+      // R2070: the only real download CTA belongs to the first-visit hero
+      // until the visitor actually reaches the eighth (final) chapter.
+      // Do not remove it from the living home before any cinematic scroll.
       attachExistingProofBlock();
     }
   }
@@ -379,8 +383,16 @@
     setLegacyHeroHidden(enabled);
     setHeroCanvasLaneFront(enabled);
     const selected=enabled?current.s:null;
+    // R2070: physically hand the SAME original CTA to the final native folio
+    // only while that real chapter is being presented. The home stays usable
+    // after WebGL loads and restores the button on any reverse-scroll.
+    if(selected?.key==='final')attachExistingFinalCta();
+    else restoreExistingFinalCta();
+    root.dataset.fxArchiveCtaLane=selected?.key==='final'
+      ?'final-native-folio':'original-home';
     const key=selected?.key||'home';
     if(root.dataset.fxArchiveCinemaChapter!==key)root.dataset.fxArchiveCinemaChapter=key;
+    let transferKeyboardFocus=false;
     for(const host of cinemaHosts){
       const active=Boolean(selected&&selected.cinemaHost===host);
       const hostState=active?'true':'false';
@@ -392,7 +404,12 @@
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
-        if(panel.inert===active)panel.inert=!active;
+        if(!active&&panel.contains(document.activeElement))transferKeyboardFocus=true;
+        // Before the first real shelf enters the viewport, the original site
+        // must remain fully interactive; an unpresented archive must not
+        // silently mark the existing semantic sections inert.
+        const shouldBeInert=enabled&&!active;
+        if(panel.inert!==shouldBeInert)panel.inert=shouldBeInert;
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
         if(active){
@@ -444,6 +461,44 @@
           positionCinemaFolio(panel);
         }
       }
+    }
+    // Activate the target folio BEFORE moving focus. During forward scroll
+    // the new source is usually later in DOM order and was still inert when
+    // the outgoing panel was processed.
+    if(transferKeyboardFocus){
+      const targetPanel=selected?.cinemaPanel;
+      // A hidden/collapsed control may match a[href] but cannot receive focus.
+      // Prefer visible native controls, then the already active semantic folio.
+      const focusables=targetPanel&&!targetPanel.inert
+        ?targetPanel.querySelectorAll(
+          'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        ): [];
+      const candidate=Array.from(focusables).find(node=>
+        node instanceof HTMLElement
+        && !node.closest('[inert],[hidden],[aria-hidden="true"]')
+        && getComputedStyle(node).visibility!=='hidden'
+        && getComputedStyle(node).display!=='none'
+        && node.getClientRects().length>0
+      );
+      const preparePanel=()=>{
+        if(!(targetPanel instanceof HTMLElement)||targetPanel.inert)return null;
+        if(!targetPanel.hasAttribute('tabindex')){
+          targetPanel.setAttribute('tabindex','-1');
+          targetPanel.dataset.fxArchiveTemporaryFocus='true';
+        }
+        return targetPanel;
+      };
+      const navigation=document.querySelector('.topbar a[href],.topbar button');
+      const candidates=[candidate,preparePanel(),navigation];
+      let focused=null;
+      for(const target of candidates){
+        if(!(target instanceof HTMLElement))continue;
+        target.focus({preventScroll:true});
+        if(document.activeElement===target){focused=target;break;}
+      }
+      root.dataset.fxArchiveKeyboardFocus=focused
+        ?(targetPanel?.contains(focused)?'retargeted-native-content':'retargeted-navigation')
+        :'focus-target-unavailable';
     }
     if(enabled&&key!==lastCinemaKey){
       const panel=selected.cinemaPanel;
@@ -685,7 +740,7 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile;
-out vec3 vNormal;out vec2 vUv;out float vViewDistance;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;out vec3 vViewRay;
 void main(){
  vec3 p=aPosition*uScale;
  float bendX=2.0*aUv.x-1.0;
@@ -711,6 +766,9 @@ void main(){
  if(uMobile>.5){p.x*=.34;p.y=p.y*.63-.18;}
  float d=max(2.4,6.2-p.z);
  vViewDistance=d;
+ // A camera-space eye ray gives the glass a genuine viewing-angle response
+ // as the persistent archive camera travels between its eight physical bays.
+ vViewRay=normalize(vec3(-p.x,-p.y,max(.25,1.0-p.z)));
  // R2035: canonical MAG uses NDC depth close to zero. The old background
  // projection produced negative NDC z for far rack rails, incorrectly placing
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
@@ -724,12 +782,14 @@ void main(){
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;in float vViewDistance;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;in vec3 vViewRay;
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
  vec3 N=normalize(vNormal+vec3(.0001));
- vec3 V=normalize(vec3(.10,-.07,1.0));
+ // Preserve studio key-light composition while adding geometrically correct
+ // grazing-angle Fresnel to the moving original camera; no second renderer.
+ vec3 V=normalize(mix(vec3(.10,-.07,1.0),normalize(vViewRay),uPanel>.5?.40:.22));
  vec3 L=normalize(vec3(-.38,.68,1.0));
  vec3 H=normalize(L+V);
  float ndl=max(.06,dot(N,L));
@@ -1108,10 +1168,19 @@ void main(){
   function selectLiveChapter(){
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
-    // From the moment the intro ends, the MAG owns the page. Do not leave the
-    // old landing page visible for a whole first viewport of scrolling.
-    // The same native scrolling and eight source anchors remain intact.
-    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
+    // R2064: keep the REAL first-visit hero, CTAs and MAG readable at scroll=0.
+    // Previously simply registering WebGL2 made the nearest (far offscreen)
+    // shelf "active", hiding the complete hero around 12s after load.
+    // Handoff starts only when the FIRST real source approaches the reading
+    // viewport. The single original renderer and all eight shelf documents
+    // remain prepared and take over naturally as the visitor scrolls.
+    const first=scenes[0]?.scrollAnchor||scenes[0]?.node;
+    const firstTop=first?.getBoundingClientRect().top??Infinity;
+    const atFirstRealShelf=firstTop<=innerHeight*.86;
+    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'
+      &&next&&atFirstRealShelf);
+    root.dataset.fxArchiveHomeContinuity=atFirstRealShelf
+      ?'real-native-shelf-approaching':'original-hero-readable';
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
@@ -1144,6 +1213,16 @@ void main(){
   function invalidate(){
     if(!disposed&&!document.hidden&&!reduced.matches){
       try{
+        // R2071: the first real viewport does not need eight distant HTML
+        // chapters moved into heavy fixed paper wrappers. Compose native folios
+        // only after real scroll motion (or an explicit forced archive route).
+        // All eight original sources and the shared WebGL context stay intact.
+        if(!cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'
+          &&(scrollY>56||force)){
+          root.dataset.fxArchiveNativePrimeR2071='requested';
+          ensureAIScrollStation();
+          discover();
+        }
         // R2022: synchronize the visible archive layer and chapter identity
         // with the native scroll event, not a deferred GPU RAF. A slow WebGL
         // frame must never strand a previous panel/HUD over the next chapter.
@@ -1208,12 +1287,15 @@ void main(){
       registeredCanvas=api.canvas;
       registeredApi=api;
       root.dataset.fxArchiveExperience='ready';
+      root.dataset.fxArchiveCinema='home';
+      root.dataset.fxArchiveCtaLane='original-home';
+      root.dataset.fxArchiveNativePrimeR2071=force?'requested':'awaiting-user-scroll';
       root.dataset.fxArchiveQuality=quality;
       root.dataset.fxArchiveTargetFrameMs=String(PerformanceManager.frameInterval());
       // Only after one real shared WebGL2 renderer exists may the original
       // website be replaced by the one-chapter cinematic archive. A blocked
       // WebGL context must retain the usable original HTML experience.
-      ensureAIScrollStation();
+      if(force)ensureAIScrollStation();
       discover();
       invalidate();
     }catch(error){
@@ -1250,6 +1332,10 @@ void main(){
         panel.remove();
       }
       host.removeAttribute('data-fx-cinema-host-active');
+      host.querySelectorAll('[data-fx-archive-temporary-focus="true"]').forEach(node=>{
+        node.removeAttribute('tabindex');
+        delete node.dataset.fxArchiveTemporaryFocus;
+      });
       host.removeAttribute('data-fx-cinema-anchor-height');
       for(const [name,value,priority] of host._fxArchiveOriginalHeights||[]){
         if(value)host.style.setProperty(name,value,priority);

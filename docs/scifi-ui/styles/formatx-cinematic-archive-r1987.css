@@ -1395,3 +1395,20 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* production-r2049-inactive-original-folio-layout-isolation */
+
+/* R2060 — Optical/typographic discipline in the SAME semantic 3D paper.
+   No duplicate HTML overlay, full-screen filter or additional compositing pass.
+   Focus remains unmistakable after native keyboard chapter handoff. */
+@media (prefers-reduced-motion:no-preference) {
+  html[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]:focus-visible {
+    outline:2px solid rgba(190,243,255,.94)!important;
+    outline-offset:4px!important;
+  }
+  html[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+  .fx-archive-cinema-folio-r2030 > .fx-mag-folio-origin-r2041 {
+    font-variant-numeric:tabular-nums!important;
+    font-kerning:normal!important;
+    -webkit-font-smoothing:antialiased;
+  }
+}

@@ -24,14 +24,39 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
     const page=await context.newPage();
     const faults=[];
     page.on('pageerror',e=>faults.push(String(e)));
-    // The real normal site: no forced archive, no artificial scroll, no
-    // Lighthouse bypass. Returning visitors must see the first original
-    // native HTML chapter as soon as the living core finishes loading.
+    // The real normal site: no forced archive and no Lighthouse bypass.
+    // Late WebGL must NOT make the original hero disappear while at scroll=0.
+    // Scrolling to the actual first shelf must then deliver a native folio.
     await page.goto(ROOT+'?r2054-normal-entry='+c.label,{
       waitUntil:'domcontentloaded',timeout:60000
     });
-    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='ready',
       null,{timeout:48000});
+    await page.waitForTimeout(450);
+    const entry=await page.evaluate(()=>{
+      const hero=document.querySelector('#hero .hero-copy');
+      const cta=document.getElementById('hero-download');
+      const visible=node=>!!node&&getComputedStyle(node).display!=='none'
+        &&getComputedStyle(node).visibility==='visible'&&node.getClientRects().length>0;
+      return {scrollY,cinema:document.documentElement.dataset.fxArchiveCinema,
+        heroVisible:visible(hero),ctaVisible:visible(cta),focusable:!cta?.closest('[inert]'),
+        ctaOnOriginalHero:!!document.querySelector('#hero .hero-actions')?.contains(cta),
+        ctaOwner:document.documentElement.dataset.fxArchiveCtaLane,
+        continuity:document.documentElement.dataset.fxArchiveHomeContinuity};
+    });
+    assert.ok(entry.scrollY<8&&entry.cinema!=='active'&&entry.heroVisible
+      &&entry.ctaVisible&&entry.focusable&&entry.ctaOnOriginalHero,
+      'R2064 normal first-visit hero disappeared during delayed MAG readiness: '+JSON.stringify(entry));
+    console.log('R2064_NORMAL_HOME_CONTINUITY_PASS',JSON.stringify({viewport:c.label,...entry}));
+    await page.evaluate(()=>{
+      const first=window.FormatXArchiveExperience?.scenes?.[0];
+      const node=first&&document.querySelector('[data-fx-archive-scene="'+first.key+'"]');
+      (node?.closest('main#main-content > section')||node)?.scrollIntoView({
+        block:'center',behavior:'instant'
+      });
+    });
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+      null,{timeout:12000});
     await page.waitForTimeout(500);
     const sample=await page.evaluate(()=>{
       const root=document.documentElement;
