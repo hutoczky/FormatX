@@ -368,6 +368,42 @@
       ctx.lineWidth=Math.max(1,S*.011);
       ctx.stroke();
 
+      /* R2132: directional satin-metal grain lives INSIDE each actual
+         machined arm face. The old material was smooth synthetic vector fill.
+         Fine broken anisotropic micro-etching follows the real arm's long
+         axis, with edge falloff and a soft traveling studio highlight. */
+      ctx.save();
+      magArmPath(ctx,S);
+      ctx.clip();
+      for(let grain=0;grain<16;grain++){
+        const stagger=Math.sin(grain*19.43+arm*7.19)*.028;
+        const gy=.25+grain*.049;
+        const lateral=Math.sin(grain*12.26+arm*4.17)*(.125-.045*gy);
+        const startX=S*(lateral+stagger);
+        const startY=-S*gy;
+        const length=S*(.033+.064*(.5+.5*Math.sin(grain*3.79)));
+        const roughness=.055+.058*(.5+.5*Math.sin(grain*7.61+arm));
+        ctx.beginPath();
+        ctx.moveTo(startX,startY);
+        ctx.lineTo(startX+S*.006,startY-length);
+        ctx.strokeStyle='rgba(210,231,220,'+roughness.toFixed(3)+')';
+        ctx.lineWidth=Math.max(.32,S*.0032);
+        ctx.stroke();
+      }
+      const streakPosition=(-.35+.70*(.5+.5*Math.sin(time*.00054+arm*.75)));
+      const brushedGlint=ctx.createLinearGradient(
+        S*(streakPosition-.19),-S*.78,
+        S*(streakPosition+.21),-S*.38
+      );
+      brushedGlint.addColorStop(0,'rgba(198,224,218,0)');
+      brushedGlint.addColorStop(.42,'rgba(201,221,210,.025)');
+      brushedGlint.addColorStop(.52,'rgba(228,241,222,.17)');
+      brushedGlint.addColorStop(.62,'rgba(165,209,204,.027)');
+      brushedGlint.addColorStop(1,'rgba(151,208,211,0)');
+      ctx.fillStyle=brushedGlint;
+      ctx.fillRect(-S*.44,-S*1.18,S*.88,S*.99);
+      ctx.restore();
+
       // Recessed panel seams—different distances to avoid repeated vector art.
       for(let j=0;j<3;j++){
         const dy=.49+j*.13;
@@ -407,6 +443,28 @@
     ctx.bezierCurveTo(-S*.27,-S*.63,-S*.16,-S*.92,0,-S*1.20);
     ctx.strokeStyle='rgba(204,222,214,.32)';
     ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
+    ctx.restore();
+
+    /* R2132 real material-occlusion hierarchy: the heavy optical ring
+       rests ABOVE a deeply machined socket. Four bevel pockets cast contact
+       shadows onto the silver arms before the sapphire assembly is drawn. */
+    ctx.save();
+    for(let socket=0;socket<4;socket++){
+      ctx.save();ctx.rotate(socket*Math.PI*.5);
+      const shadow=ctx.createLinearGradient(0,-S*.56,0,-S*.26);
+      shadow.addColorStop(0,'rgba(1,8,13,0)');
+      shadow.addColorStop(.34,'rgba(1,8,13,.22)');
+      shadow.addColorStop(.77,'rgba(0,4,10,.65)');
+      shadow.addColorStop(1,'rgba(0,4,10,.92)');
+      ctx.beginPath();
+      ctx.moveTo(-S*.24,-S*.52);
+      ctx.quadraticCurveTo(0,-S*.59,S*.24,-S*.52);
+      ctx.lineTo(S*.37,-S*.21);
+      ctx.lineTo(-S*.37,-S*.21);
+      ctx.closePath();
+      ctx.fillStyle=shadow;ctx.fill();
+      ctx.restore();
+    }
     ctx.restore();
 
     // Central aperture has REAL visual depth: shadowed recess, two metal
@@ -567,6 +625,39 @@
       rx*.287,ry*.287,.11,Math.PI*.94,Math.PI*1.67);
     ctx.strokeStyle='rgba(3,11,23,.77)';
     ctx.lineWidth=Math.max(.8,S*.010);ctx.stroke();
+    ctx.restore();
+
+    /* R2132 nested multi-element optics. Fine crescent glass reflections,
+       a curved secondary anti-reflective coating, and internal aperture
+       vignetting replace the central spherical-logo impression without
+       introducing bright HUD rings or unsupported WebGL dependencies. */
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0,0,rx*.46,0,TAU);
+    ctx.clip();
+    const glassCoating=ctx.createLinearGradient(
+      -rx*.40+orbitYaw*rx*.11,-ry*.40,
+      rx*.39+orbitYaw*rx*.11,ry*.45
+    );
+    glassCoating.addColorStop(0,'rgba(207,239,226,.12)');
+    glassCoating.addColorStop(.22,'rgba(109,163,169,.06)');
+    glassCoating.addColorStop(.51,'rgba(3,18,31,.015)');
+    glassCoating.addColorStop(.78,'rgba(2,11,22,.11)');
+    glassCoating.addColorStop(1,'rgba(2,7,17,.25)');
+    ctx.fillStyle=glassCoating;
+    ctx.fillRect(-rx*.48,-ry*.48,rx*.96,ry*.96);
+    ctx.beginPath();
+    ctx.ellipse(-rx*.11,-ry*.055,rx*.37,ry*.34,-.28,
+      Math.PI*.92,Math.PI*1.83);
+    ctx.strokeStyle='rgba(196,227,217,.16)';
+    ctx.lineWidth=Math.max(.7,S*.005);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(rx*.045,ry*.08,rx*.32,ry*.32,.07,
+      -Math.PI*.16,Math.PI*.58);
+    ctx.strokeStyle='rgba(2,10,22,.52)';
+    ctx.lineWidth=Math.max(.8,S*.012);
+    ctx.stroke();
     ctx.restore();
 
     // One low-energy optical heartbeat, limited to the lens center.
