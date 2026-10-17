@@ -143,6 +143,36 @@ const samples=[200,400,700,1000,1500,2000,3000,4200];
         assert.ok(lateShift<.025,
           'Unexpected late idle layout shifts on the first untouched viewport: '+
           JSON.stringify({profile:p.name,lateShift,shifts:observed.shifts}));
+        /* R2121: verify that an ordinary visitor (without ?archive=1) can
+           STILL enter all original spatial chapters on genuine scroll,
+           then returns to the exact original hero MAG at scroll position 0.
+           A tiny CLS score must not come from disabling the archive. */
+        await page.waitForFunction(()=>{
+          const state=document.documentElement.dataset.fxArchiveExperience;
+          return state==='ready';
+        },null,{timeout:30000});
+        await page.evaluate(()=>{
+          window.scrollTo({top:Math.max(180,innerHeight*.35),behavior:'instant'});
+          window.dispatchEvent(new Event('scroll'));
+        });
+        await page.waitForFunction(()=>
+          document.documentElement.dataset.fxArchiveScrollEntryR2121===
+            'real-scroll-or-explicit-archive'&&
+          !!document.querySelector(
+            '#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked'
+          ),null,{timeout:15000});
+        await page.evaluate(()=>{
+          window.scrollTo({top:0,behavior:'instant'});
+          window.dispatchEvent(new Event('scroll'));
+        });
+        await page.waitForFunction(()=>
+          document.documentElement.dataset.fxArchiveScrollEntryR2121===
+            'landing-hero-undisturbed'&&
+          !document.querySelector(
+            '#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked'
+          ),null,{timeout:15000});
+        console.log('PASS R2121_REAL_SCROLL_ACTIVATION_AND_HERO_RESTORATION',
+          JSON.stringify({viewport:p.name,realArchive:true,restoredOriginal:true}));
       }finally{await context.close();}
     }
   }finally{await browser.close();}
