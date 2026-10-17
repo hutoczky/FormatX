@@ -1673,6 +1673,25 @@
           vec3(.57,.63,.56)*sapphireSpec*.85+
           vec3(.22,.31,.32)*sapphireFill*.27+
           vec3(.024,.12,.16)*fresnel*.25;
+        /* R2136: real UV coordinates are independently authored on each
+           depth-tested convex lens vertex. Their radius creates a deep
+           obsidian annulus, a broad inner optical meniscus and a precise
+           asymmetric coated-glass studio reflection WITHOUT a textured
+           disc or new draw pass. Physical iris/blade facets keep their
+           separately shaded titanium material. */
+        vec2 sapphireUv=(vUv-.5)*2.0;
+        float sapphireRadius=length(sapphireUv);
+        float glassDarkAnnulus=smoothstep(.61,.97,sapphireRadius);
+        float innerMeniscus=1.0-smoothstep(.23,.76,sapphireRadius);
+        float coatingSweep=exp(-pow((sapphireUv.x+.26+
+          sapphireUv.y*.45)/.36,2.0))*
+          smoothstep(-.68,.12,sapphireUv.y);
+        float curvedSpec=pow(sat(dot(n,normalize(vec3(-.31,.69,.65)))),6.2);
+        sapphireGlass*=1.0-.47*glassDarkAnnulus;
+        sapphireGlass+=vec3(.018,.072,.094)*innerMeniscus*.45;
+        sapphireGlass+=vec3(.42,.50,.46)*coatingSweep*curvedSpec*.36;
+        sapphireGlass+=vec3(.16,.20,.18)*
+          exp(-pow((sapphireRadius-.83)/.10,2.0))*side*.13;
         /* R2130: depth-tested actual four-arm metal spine geometry. The
            front-facing cut planes shade by their own raised triangle normals
            rather than borrowing the smooth teal body normal. */
@@ -1711,8 +1730,23 @@
         studioSilver+=vec3(.22,.28,.27)*softboxB*
           (.18+.45*materialLight);
         c=mix(c,studioSilver, shellExposure*.72);
+        /* R2136: actual smoothly varying FOUR ARM normals reflect a
+           large left-top area key and a shorter cool fill. The raised
+           broad bevel runs in model space and therefore stays correctly
+           attached when native MAG rotates; no brittle micro-stripes. */
+        float armAzimuth=abs(cos(macroAngle*2.0));
+        float shoulderEnvelope=smoothstep(.20,.33,radialXY)*
+          (1.0-smoothstep(.73,.94,radialXY))*shellExposure;
+        float bevelKey=pow(sat(dot(n,
+          normalize(vec3(-.43,.74,.51)))),3.2);
+        float bevelFill=pow(sat(dot(n,
+          normalize(vec3(.78,-.13,.61)))),4.5);
+        c+=vec3(.54,.60,.55)*pow(armAzimuth,5.0)*
+          shoulderEnvelope*(.12+.27*bevelKey);
+        c+=vec3(.18,.29,.31)*bevelFill*
+          shoulderEnvelope*.18;
         float fourfoldValley=pow(abs(sin(macroAngle*2.0)),3.4);
-        c*=1.0-.18*fourfoldValley*shellExposure;
+        c*=1.0-.24*fourfoldValley*shellExposure;
 
         /* R2131: actual travelling studio caustic across the ONE native
            three-dimensional metal/facet surface. A wider softbox band is
