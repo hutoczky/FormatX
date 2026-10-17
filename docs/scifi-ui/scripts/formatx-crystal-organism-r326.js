@@ -15,7 +15,13 @@
   const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
-  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
+  /* R2137: memory 4 GB is frequently rounded by Chrome's deviceMemory
+     privacy bucketing on powerful eight-core Android handsets. The normal
+     live Three film already treats only <=2 GB or <=4 cores as constrained.
+     Match that decision for the permanent hero rather than silently loading
+     lower tessellation and DPR after the otherwise premium cinema. Actual
+     software renderer/frame-time pressure still retains its own governor. */
+  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 2;
   const constrainedMobile = mobile && constrained;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
