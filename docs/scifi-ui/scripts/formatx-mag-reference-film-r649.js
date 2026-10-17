@@ -315,11 +315,22 @@
       magArmPath(ctx,S);
       const slab=ctx.createLinearGradient(-S*.37+S*.082*lightSweep,-S*.72,
         S*.38+S*.082*lightSweep,-S*.30);
-      slab.addColorStop(0,even?'#91a7a7':'#4d666b');
-      slab.addColorStop(.17,even?'#425e65':'#294450');
-      slab.addColorStop(.49,'#132833');
-      slab.addColorStop(.66,even?'#263e48':'#0b1f2b');
-      slab.addColorStop(1,'#04111a');
+      /* R2133: four different light-facing metal normals. The former
+         alternating two-color pattern made a symmetric flat SVG icon.
+         Top/left receive warm studio silver, bottom and right retain
+         cooler shadowed brushed-titanium planes. */
+      const metalFaces=[
+        ['#d0d9d0','#83989a','#304d5a','#486471','#081925'],
+        ['#708d92','#436875','#203b49','#183441','#061723'],
+        ['#899e9b','#526a74','#1c3947','#344f5a','#081823'],
+        ['#b0c0b8','#69888b','#294b58','#42616c','#091a25']
+      ];
+      const face=metalFaces[arm];
+      slab.addColorStop(0,face[0]);
+      slab.addColorStop(.17,face[1]);
+      slab.addColorStop(.49,face[2]);
+      slab.addColorStop(.66,face[3]);
+      slab.addColorStop(1,face[4]);
       ctx.fillStyle=slab;ctx.fill();
 
       // Face break-line creates true directional visual relief.
@@ -331,9 +342,12 @@
       ctx.closePath();
       const bevel=ctx.createLinearGradient(-S*.27+S*.035*lightSweep,-S*.61,
         S*.01+S*.035*lightSweep,-S*.61);
-      bevel.addColorStop(0,'rgba(204,224,221,.38)');
-      bevel.addColorStop(.60,'rgba(70,115,123,.18)');
-      bevel.addColorStop(1,'rgba(8,21,31,.13)');
+      bevel.addColorStop(0,
+        arm===0?'rgba(232,242,228,.78)':
+        arm===3?'rgba(210,235,225,.67)':
+        'rgba(174,213,209,.45)');
+      bevel.addColorStop(.60,'rgba(84,141,148,.26)');
+      bevel.addColorStop(1,'rgba(5,19,29,.19)');
       ctx.fillStyle=bevel;ctx.fill();
 
       ctx.beginPath();
@@ -342,7 +356,7 @@
       ctx.lineTo(S*.045,-S*.33);
       ctx.lineTo(S*.18,-S*.25);
       ctx.closePath();
-      ctx.fillStyle='rgba(1,12,22,.32)';ctx.fill();
+      ctx.fillStyle='rgba(1,10,20,.49)';ctx.fill();
 
       // Machined arm insert: two actual offset channels with small bevels.
       ctx.beginPath();
@@ -364,7 +378,10 @@
       ctx.moveTo(-S*.32,-S*.44);
       ctx.lineTo(-S*.005,-S*1.10);
       ctx.lineTo(S*.085,-S*.91);
-      ctx.strokeStyle=even?'rgba(217,235,223,.42)':'rgba(129,180,181,.29)';
+      ctx.strokeStyle=arm===0?'rgba(229,242,229,.63)':
+        arm===3?'rgba(204,230,219,.52)':
+        arm===2?'rgba(165,204,201,.35)':
+        'rgba(109,165,172,.25)';
       ctx.lineWidth=Math.max(1,S*.011);
       ctx.stroke();
 
@@ -425,8 +442,8 @@
       -S*(.97-lightSweep*.17),-S*.82,
       S*(1.03+lightSweep*.19),S*.85
     );
-    shine.addColorStop(0,'rgba(231,240,221,'+(.16+.045*lightSweep)+')');
-    shine.addColorStop(.29,'rgba(129,161,157,.07)');
+    shine.addColorStop(0,'rgba(238,244,226,'+(.25+.090*lightSweep)+')');
+    shine.addColorStop(.29,'rgba(154,189,180,.12)');
     shine.addColorStop(.57,'rgba(0,0,0,0)');
     shine.addColorStop(.85,'rgba(162,198,192,'+(.080+.018*lightSweep)+')');
     shine.addColorStop(1,'rgba(0,0,0,0)');
@@ -469,7 +486,9 @@
 
     // Central aperture has REAL visual depth: shadowed recess, two metal
     // collars, a gasket, blades and a layered sapphire rather than a ball.
-    const rx=S*.405,ry=S*.399;
+    /* R2133: a larger multi-element camera optic communicates actual
+       optical depth instead of a small sphere embedded in an icon. */
+    const rx=S*.438,ry=S*.428;
     /* R2122: authored mechanical focus choreography. The original eight
        shaded titanium shutters now visibly rotate and draw apart during the
        MAG reveal (not just a sub-degree decorative sine wobble). The second
@@ -554,13 +573,13 @@
     // reflection; the center should read as multi-element OPTICS, not a sphere.
     const pupil=ctx.createRadialGradient(-rx*(.17+.015*lightSweep),
       -ry*.22,S*.006,0,0,rx*.66);
-    pupil.addColorStop(0,'#658c91');
-    pupil.addColorStop(.12,'#355c66');
-    pupil.addColorStop(.36,'#163e4d');
-    pupil.addColorStop(.66,'#071b2a');
+    pupil.addColorStop(0,'#9fbabb');
+    pupil.addColorStop(.12,'#547f88');
+    pupil.addColorStop(.36,'#1b5062');
+    pupil.addColorStop(.66,'#061a2d');
     pupil.addColorStop(.86,'#010c18');
     pupil.addColorStop(1,'#00040c');
-    ctx.beginPath();ctx.arc(0,0,rx*.59,0,TAU);
+    ctx.beginPath();ctx.arc(0,0,rx*.68,0,TAU);
     ctx.fillStyle=pupil;ctx.fill();
     ctx.lineWidth=Math.max(1,S*.013);
     ctx.strokeStyle='rgba(4,13,21,.93)';ctx.stroke();
@@ -569,14 +588,14 @@
     refracted.addColorStop(.29,'rgba(77,136,146,.22)');
     refracted.addColorStop(.62,'rgba(11,47,65,.17)');
     refracted.addColorStop(1,'rgba(2,15,24,.02)');
-    ctx.beginPath();ctx.arc(0,0,rx*.49,0,TAU);
+    ctx.beginPath();ctx.arc(0,0,rx*.55,0,TAU);
     ctx.fillStyle=refracted;ctx.fill();
 
     ctx.save();
     ctx.translate(-rx*(.20+.045*lightSweep),-ry*(.31+.017*lightSweep));
     ctx.rotate(-.35+.08*lightSweep);
     ctx.beginPath();ctx.ellipse(0,0,rx*.19,ry*.075,0,0,TAU);
-    ctx.fillStyle='rgba(237,250,238,.59)';ctx.fill();
+    ctx.fillStyle='rgba(242,252,237,.71)';ctx.fill();
     ctx.restore();
     ctx.beginPath();ctx.arc(rx*.22,ry*.24,rx*.13,Math.PI*.08,Math.PI*.64);
     ctx.strokeStyle='rgba(115,184,193,'+(.13+pulse*.08)+')';
