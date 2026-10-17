@@ -15,7 +15,13 @@
   const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
-  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
+  /* R2137: memory 4 GB is frequently rounded by Chrome's deviceMemory
+     privacy bucketing on powerful eight-core Android handsets. The normal
+     live Three film already treats only <=2 GB or <=4 cores as constrained.
+     Match that decision for the permanent hero rather than silently loading
+     lower tessellation and DPR after the otherwise premium cinema. Actual
+     software renderer/frame-time pressure still retains its own governor. */
+  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 2;
   const constrainedMobile = mobile && constrained;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
@@ -726,10 +732,21 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(false){
-      const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
-      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
+    /* R2105: reactivate the formerly dead physical central optics of the
+       original live R326 hero core. Constrain tessellation across all phone
+       tiers and keep the ONE existing GPU program and draw call. */
+    if(true){
+      const centreX=.025,centreY=-.012;
+      const bezelSteps=software?24:mobile?32:48;
+      const bezelTubeSteps=4,bezelZ=.632;
+      /* R2129: the original permanent MAG optical assembly was still
+         undersized in the real 390px WebGL screenshot. Increase the radius
+         of its ACTUAL curved meshes, not a screen-space/DOM graphic. The
+         tessellation and single original WebGL draw call stay unchanged. */
+      const opticScaleR2129=mobile?1.17:1.07;
+      const bezelMajorX=.232*opticScaleR2129;
+      const bezelMajorY=.210*opticScaleR2129;
+      const bezelTube=.017;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -753,12 +770,21 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.609];
-      const lensRadiusX=.153;
-      const lensRadiusY=.041;
-      const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const lensCenter=[centreX,centreY,.643];
+      const lensRadiusX=.209*opticScaleR2129;
+      const lensRadiusY=.185*opticScaleR2129;
+      const lensDepth=.055*(mobile?1.10:1.05);
+      root.dataset.fxNativeMagOpticScaleR2129=
+        (opticScaleR2129*1.29).toFixed(2)+'x-optical-geometry';
+      root.dataset.fxNativeMagOpticRadiusR2129=
+        lensRadiusX.toFixed(4);
+      /* R2108: the real machined optics were too small inside the hero
+         four-point body. Enlarge the SAME geometry and strengthen actual
+         convex lens curvature; retain the original tessellation/draw call. */
+      root.dataset.fxNativeMagOpticScaleR2108='1.29x-real-geometry';
+      root.dataset.fxNativeMagLensXRadiusR2108=String(lensRadiusX);
+      const radialSteps=software?4:mobile?5:6;
+      const angularSteps=software?24:mobile?32:48;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -798,7 +824,67 @@
         }
         previous=current;
       }
+      /* R2105: eight actual raised, facing metal shutter plates over the
+         convex sapphire. The lens remains visible through their aperture.
+         Sixteen triangles only, no distinct WebGL pass or offscreen texture. */
+      const bladesFirst=facets.length;
+      for(let blade=0;blade<8;blade++){
+        const angle=blade*Math.PI/4;
+        const vertex=(radius,delta)=>{
+          const v=lensVertex(radius,angle+delta);
+          v.crystal[2]+=.006;
+          return v;
+        };
+        const p0=vertex(.36,-.12);
+        const p1=vertex(.93,-.30);
+        const p2=vertex(.91,.16);
+        const p3=vertex(.49,.25);
+        triangle([p0,p1,p2],6.18);
+        triangle([p0,p2,p3],6.18);
+      }
+      root.dataset.fxNativeMagIrisR2105='8-raised-curved-titanium-blades';
+      root.dataset.fxNativeMagIrisTrianglesR2105=
+        String((facets.length-bladesFirst)/3);
     }
+
+    /* R2130: real raised four-arm machined-spine geometry. Unlike an
+       emissive highlight painted into the shader, these facet planes have
+       genuinely different face normals and depth testing. They are inserted
+       in the ORIGINAL native crystal mesh, same draw call / original WebGL
+       context, with only twelve additional triangles total. */
+    const metalSpineFirst=facets.length;
+    const nativeSpineSurfaceZ=(x,y)=>{
+      const xAxis=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
+      const yAxis=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
+      const zAxis=mobile?.64:.49;
+      const exponent=mobile?.78:.61;
+      const space=1-
+        Math.pow(Math.abs(x)/xAxis,exponent)-
+        Math.pow(Math.abs(y)/yAxis,exponent);
+      return zAxis*Math.pow(Math.max(.004,space),1/exponent);
+    };
+    for(let arm=0;arm<4;arm++){
+      const angle=arm*Math.PI*.5;
+      const axisX=Math.cos(angle),axisY=Math.sin(angle);
+      const tangentX=-axisY,tangentY=axisX;
+      const point=(reach,across,lift)=>{
+        const x=axisX*reach+tangentX*across;
+        const y=axisY*reach+tangentY*across;
+        const z=nativeSpineSurfaceZ(x,y)+lift;
+        return [x,y,z];
+      };
+      const left=point(.305,-.088,.026);
+      const right=point(.305,.088,.026);
+      const raisedMid=point(.465,0,.080);
+      const tip=point(.665,0,.029);
+      armorTri(left,raisedMid,right,5.46);
+      armorTri(left,tip,raisedMid,5.46);
+      armorTri(raisedMid,tip,right,5.46);
+    }
+    root.dataset.fxNativeMagSpineTrianglesR2130=
+      String((facets.length-metalSpineFirst)/3);
+    root.dataset.fxNativeMagSpineR2130=
+      'four-depth-tested-machined-metal-3d-ridges';
 
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
@@ -1004,9 +1090,17 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.790'};
+        /* R2138: camera-space portrait composition. Genuine 390px Chrome
+           evidence showed the original permanent MAG occupied only 43%
+           of width at the very top of its scene, while the 10s R649 intro
+           was 62% wide. Enlarge the real SAME WebGL sculpture by 15% and
+           lower it within the original 370x381 CSS viewport, retaining safe
+           clearance to the header/ASK zone and native CTA. No CSS zoom or
+           extra canvas pixels: the same framebuffer budget and governor
+           still own rendering cost. */
+        projected*= ${mobile?'.675':'.790'};
         projected.x+=${mobile?'.002':'.018'};
-        projected.y+=${mobile?'.010':'-.006'};
+        projected.y+=${mobile?'-.095':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
         gl_Position=vec4(projected,-world.z*.13,1.0);
@@ -1402,21 +1496,21 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(.105,.128,.131),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
+        c+=vec3(.30,.33,.31)*facetSilver*${mobile?'.095':'.120'};
+        c+=vec3(.020,.060,.070)*facetCool*${mobile?'.048':'.058'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.48,.59,.58)*softboxB*${mobile?'.250':'.235'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
@@ -1438,9 +1532,9 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.24,.34,.33)*axisRidge*(.17+.050*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-.24*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1468,14 +1562,63 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.38,.47,.43)*foldRidge*${mobile?'.110':'.140'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
+        c*=1.0-${mobile?'.095':'.125'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
+        /* R2123: macro-scale machined silver facets on the actual four-point
+           3D body. Broad projected four-arm normals/readable valleys, not
+           pixel lines or extra geometry. The strong inert teal planes of the
+           previous original hero made the MAG look like a plastic toy. */
+        float machineEnvelope=smoothstep(.20,.36,radialXY)*
+          (1.0-smoothstep(.73,.94,radialXY))*frontDepth;
+        float silverCrest=pow(abs(cos(polar*2.0)),3.1)*machineEnvelope;
+        float darkChannel=pow(abs(sin(polar*2.0)),3.0)*machineEnvelope;
+        /* R2129: broad normal-following metal shoulder and deeper machined
+           quadrants. Neutral-silver key/reflected light replaces the flat
+           cyan star seen on real Android WebGL film-handoff screenshots.
+           Fourfold angular facets have NO subpixel repeating ring pattern. */
+        float polishedShoulder=pow(sat(dot(n,normalize(vec3(-.51,.64,.57)))),4.0)*
+          machineEnvelope;
+        float cutMetal=pow(abs(cos(polar*2.0)),5.2)*machineEnvelope;
+        float cutRecess=pow(abs(sin(polar*2.0)),4.4)*machineEnvelope;
+        vec3 machinedLight=vec3(.58,.63,.59)*
+          (.19+.35*key+.27*softboxB+.18*fill);
+        c+=machinedLight*silverCrest*1.28;
+        c+=vec3(.38,.43,.40)*cutMetal*(.12+.33*polishedShoulder);
+        c+=vec3(.54,.59,.54)*polishedShoulder*.13;
+        c*=1.0-.38*cutRecess;
+        c+=vec3(.035,.047,.049)*softboxA*machineEnvelope*.36;
+
+        /* R2134 genuine single-volume 3D sculptural studio relighting.
+           The model-space top-left key strikes an independent set of
+           broad real normal-facing silver shoulders; opposite arm
+           quadrants reflect a darker side studio. This solves the
+           flat pale-teal star in real native desktop/phone screenshots.
+           Entirely within the ORIGINAL depth-tested 3D fragment. */
+        float studioEnvelope=smoothstep(.18,.38,radialXY)*
+          (1.0-smoothstep(.75,.99,radialXY))*frontDepth;
+        float upperStudio=smoothstep(-.25,.64,vLocal.y);
+        float leftStudio=1.0-smoothstep(-.66,.16,vLocal.x);
+        float silverKey=pow(sat(dot(n,
+          normalize(vec3(-.62,.63,.48)))),3.0);
+        float silverFill=pow(sat(dot(n,
+          normalize(vec3(.59,-.31,.70)))),4.6);
+        float coolRecess=pow(sat(dot(n,
+          normalize(vec3(.70,-.48,-.25)))),3.2);
+        float materialShoulder=studioEnvelope*
+          (.30+.40*upperStudio+.30*leftStudio);
+        vec3 satinMetal=vec3(.40,.44,.41)*silverKey*.39+
+          vec3(.18,.28,.29)*silverFill*.21;
+        c+=satinMetal*materialShoulder;
+        c*=1.0-.23*coolRecess*studioEnvelope;
+        c+=vec3(.070,.081,.074)*
+          studioEnvelope*upperStudio*leftStudio*.38;
+
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
+        c+=vec3(.030,.105,.123)*fresnel*.23;
         c+=vec3(.055,.300,.335)*deepEdge*.235;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
@@ -1513,11 +1656,121 @@
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=exp(-pow((coordinate-head)/.107,2.0))*(.48+.52*fresnel);
         }
-        c+=vec3(.08,.30,.34)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
+        /* The moving silver energy arrives AFTER the metal/glass material
+           overrides. R2130's independent metal spine otherwise replaced
+           the sweep along the four arms, leaving almost no visible signal
+           on a 390px mobile compositor. */
 
+        /* R2105: actual front-facing depth-tested metal, glass and iris
+           geometry have distinct reflectance instead of inheriting the
+           flat cyan base material painted on the four-point mineral. */
+        float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
+        float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
+        float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
+        /* R2123: brighter silver collar and multiple metal shutter planes;
+           a truly curved, optically separate blue-black sapphire center. */
+        vec3 machinedTitanium=vec3(.064,.078,.078)+
+          vec3(.53,.57,.53)*(softboxA*.43+softboxB*.37+key*.18)+
+          vec3(.09,.12,.11)*fresnel*.29;
+        vec3 shutterTitanium=vec3(.034,.053,.057)+
+          vec3(.30,.38,.39)*(softboxA*.37+softboxB*.30+fill*.22)+
+          vec3(.09,.13,.15)*fresnel*.25;
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),8.0);
+        float sapphireFill=pow(sat(dot(n,normalize(vec3(.62,-.22,.77)))),5.0);
+        /* R2134 sapphire is an optically deep separately curved material,
+           not a cyan sphere. Strong but wide physical softbox highlights
+           preserve contours at the actual reduced Android DPR. */
+        vec3 sapphireGlass=vec3(.005,.017,.031)+
+          vec3(.050,.13,.17)*(.18+.82*key)+
+          vec3(.57,.63,.56)*sapphireSpec*.85+
+          vec3(.22,.31,.32)*sapphireFill*.27+
+          vec3(.024,.12,.16)*fresnel*.25;
+        /* R2136: real UV coordinates are independently authored on each
+           depth-tested convex lens vertex. Their radius creates a deep
+           obsidian annulus, a broad inner optical meniscus and a precise
+           asymmetric coated-glass studio reflection WITHOUT a textured
+           disc or new draw pass. Physical iris/blade facets keep their
+           separately shaded titanium material. */
+        vec2 sapphireUv=(vUv-.5)*2.0;
+        float sapphireRadius=length(sapphireUv);
+        float glassDarkAnnulus=smoothstep(.61,.97,sapphireRadius);
+        float innerMeniscus=1.0-smoothstep(.23,.76,sapphireRadius);
+        float coatingSweep=exp(-pow((sapphireUv.x+.26+
+          sapphireUv.y*.45)/.36,2.0))*
+          smoothstep(-.68,.12,sapphireUv.y);
+        float curvedSpec=pow(sat(dot(n,normalize(vec3(-.31,.69,.65)))),6.2);
+        sapphireGlass*=1.0-.47*glassDarkAnnulus;
+        sapphireGlass+=vec3(.018,.072,.094)*innerMeniscus*.45;
+        sapphireGlass+=vec3(.42,.50,.46)*coatingSweep*curvedSpec*.36;
+        sapphireGlass+=vec3(.16,.20,.18)*
+          exp(-pow((sapphireRadius-.83)/.10,2.0))*side*.13;
+        /* R2130: depth-tested actual four-arm metal spine geometry. The
+           front-facing cut planes shade by their own raised triangle normals
+           rather than borrowing the smooth teal body normal. */
+        float structuralRail=step(5.40,vFacet)*(1.0-step(5.55,vFacet));
+        vec3 cutSilver=vec3(.055,.075,.079)+
+          vec3(.50,.58,.55)*(softboxA*.42+softboxB*.34+key*.26)+
+          vec3(.21,.28,.28)*pow(sat(dot(n,
+            normalize(vec3(-.38,.62,.69)))),4.0)*.48+
+          vec3(.065,.08,.08)*fresnel*.14;
+        c=mix(c,cutSilver,structuralRail*.95);
+        c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,shutterTitanium,physicalIris);
+        c=mix(c,sapphireGlass,physicalLens);
+
+        /* R2135: substantial real 3D body material upgrade. Unlike the
+           microscopic R2134 accent this affects the entire lit front shell,
+           while the already depth-tested physical bezel, shutters, raised
+           silver rails and sapphire remain untouched. One model-space
+           upper-left studio source creates a contrasting silver top/left
+           shoulder and physically darker right/bottom facets.
+           No screen-space logo layer, no second canvas or draw call. */
+        float originalShell=(1.0-step(5.35,vFacet));
+        float silverFacing=smoothstep(-.16,.34,vLocal.z);
+        float shellOptic=(1.0-smoothstep(.11,.27,radialXY));
+        float shellExposure=originalShell*silverFacing*(1.0-shellOptic*.35);
+        float upFace=smoothstep(-.65,.67,vLocal.y);
+        float leftFace=1.0-smoothstep(-.68,.58,vLocal.x);
+        float keyLight=sat(dot(n,normalize(vec3(-.58,.73,.47))));
+        float materialLight=sat((.21+.45*upFace+.34*leftFace)*
+          (.43+.57*pow(keyLight,.72)));
+        vec3 studioSilver=mix(
+          vec3(.023,.044,.053),
+          vec3(.63,.70,.66),
+          materialLight
+        );
+        studioSilver+=vec3(.22,.28,.27)*softboxB*
+          (.18+.45*materialLight);
+        c=mix(c,studioSilver, shellExposure*.72);
+        /* R2136: actual smoothly varying FOUR ARM normals reflect a
+           large left-top area key and a shorter cool fill. The raised
+           broad bevel runs in model space and therefore stays correctly
+           attached when native MAG rotates; no brittle micro-stripes. */
+        float armAzimuth=abs(cos(macroAngle*2.0));
+        float shoulderEnvelope=smoothstep(.20,.33,radialXY)*
+          (1.0-smoothstep(.73,.94,radialXY))*shellExposure;
+        float bevelKey=pow(sat(dot(n,
+          normalize(vec3(-.43,.74,.51)))),3.2);
+        float bevelFill=pow(sat(dot(n,
+          normalize(vec3(.78,-.13,.61)))),4.5);
+        c+=vec3(.54,.60,.55)*pow(armAzimuth,5.0)*
+          shoulderEnvelope*(.12+.27*bevelKey);
+        c+=vec3(.18,.29,.31)*bevelFill*
+          shoulderEnvelope*.18;
+        float fourfoldValley=pow(abs(sin(macroAngle*2.0)),3.4);
+        c*=1.0-.24*fourfoldValley*shellExposure;
+
+        /* R2131: actual travelling studio caustic across the ONE native
+           three-dimensional metal/facet surface. A wider softbox band is
+           stable under mobile pixel density, retaining physical front/back
+           occlusion. No new canvas, geometry, CSS glow or idle render loop. */
+        float pulseFront=smoothstep(-.35,.52,vLocal.z);
+        float pulseMaterial=1.0-physicalLens*.91-physicalIris*.52;
+        float pulseLuminance=sweep*pulseFront*pulseMaterial*
+          (.83+.28*key);
+        c+=vec3(.64,.76,.72)*pulseLuminance*.86;
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
@@ -1859,6 +2112,9 @@
 
     function finishBoot(program) {
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreSoftwareOpticsR2125=softwareRenderer
+      ? 'same-physical-mag-surface-geometry-near-css-pixel-budget'
+      : 'hardware-resolution-unchanged';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -1940,14 +2196,19 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    /* R2125: the real SwiftShader/llvmpipe renderer was blocking the first
+       mobile surface-energy sweep for up to 3.6 seconds at 1.5x backing DPR.
+       Start SOFTWARE rendering near native mobile CSS pixel density, while
+       retaining the exact same lens, titanium meshes, uniforms and shader.
+       Hardware GPUs retain their full-resolution original path. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.84:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
+      ? (mobile?.96:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.76:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
@@ -1962,12 +2223,12 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
+        ? (mobile?1.21:1.28)
         : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
+        ? (mobile?440000:560000)
         : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));

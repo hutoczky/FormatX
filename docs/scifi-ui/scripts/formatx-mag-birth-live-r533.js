@@ -514,7 +514,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261008-r1984-continuous-microfibril-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261015-r2116-release-capability-webgl-context';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -744,6 +744,16 @@
     if(window.FormatXMagReferenceFilmR649?.attach){
       overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
+      /* R2112: reset fallback ownership exactly when the real 2D canvas
+         attaches. A late switch from pending Three or a quality resize may
+         otherwise retain the last software phase and never repaint the
+         visible foreground, leaving only the stray DNA background. */
+      if(filmRenderer){
+        lastSoftwareFallbackPhase=-1;
+        lastParticleDraw=0;
+        overlay.dataset.fxFallbackPaintR2112='real-running-resumable';
+        ROOT.dataset.fxMagBirthCanvasHandoffR2112='fallback-ready-new-frame';
+      }
       ROOT.dataset.fxMagBirthRendererR1360=filmRenderer?'native-canvas-reference-film':'fallback-particles';
       ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
@@ -1018,6 +1028,11 @@
 
     if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
+    /* R2121: a visible progress bar uses easeOutCubic and is NOT the film
+       clock. Expose the actual running animation second only for explicit
+       visual proof; keep normal visitor rendering free of extra writes. */
+    if(VISUAL_PROOF)overlay.dataset.fxActualFilmSecondsR2121=
+      (r*DURATION/1000).toFixed(3);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
@@ -1036,19 +1051,25 @@
       const nextStatus=statusFor(r);
       if(status.textContent!==nextStatus)status.textContent=nextStatus;
     }
-    const phaseDrivenFallback=Boolean(filmRenderer)
-      && softwareFallbackActive
-      && !HAS_VISUAL_FRAME;
+    /* R2112: an active R649 canvas MUST be repainted, not merely at five
+       phase changes. Canvas backing clears on an adaptive resolution resize,
+       so the old phase-only scheduler allowed multi-second blank MAG frames.
+       Keep the existing software-safe 125ms budget; genuine fast devices
+       retain 16.67ms target cadence and do not duplicate a canvas. */
     const particleCadence=filmRenderer
       ? (softwareFallbackActive?125:16.67)
       : 16.67;
-    const shouldDraw=phaseDrivenFallback
-      ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
-      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || r>=1);
+    const shouldDraw=!lastParticleDraw
+      ||now-lastParticleDraw>=particleCadence
+      ||lastSoftwareFallbackPhase!==visiblePhase
+      ||r>=1;
     if(shouldDraw){
       lastParticleDraw=now;
-      if(phaseDrivenFallback)lastSoftwareFallbackPhase=visiblePhase;
+      lastSoftwareFallbackPhase=visiblePhase;
       drawParticles(r,now);
+      if(filmRenderer&&softwareFallbackActive)
+        ROOT.dataset.fxMagBirthContinuousFallbackR2112=
+          'repainting-every-125ms-and-at-phase-changes';
     }
 
     if(r<1 || visiblePhase<4){

@@ -197,6 +197,495 @@
     drawOrb(ctx,t,time,cx,cy);
     drawFlash(ctx,t,cx,cy);
   }
+
+  /* R2104: photographic light-stage for the low-power film. This is the
+     REAL fallback that appeared in the user's Android screenshot; improving
+     Three.js alone cannot correct it. All surfaces are drawn into the
+     existing one canvas, at its existing adaptive pixel budget. */
+  function magDiamond(ctx,S){
+    ctx.beginPath();
+    ctx.moveTo(0,-S*1.21);
+    ctx.bezierCurveTo(S*.16,-S*.90,S*.28,-S*.60,S*.43,-S*.45);
+    ctx.bezierCurveTo(S*.60,-S*.29,S*.88,-S*.15,S*1.14,0);
+    ctx.bezierCurveTo(S*.88,S*.17,S*.60,S*.29,S*.43,S*.47);
+    ctx.bezierCurveTo(S*.28,S*.64,S*.16,S*.95,0,S*1.21);
+    ctx.bezierCurveTo(-S*.16,S*.95,-S*.28,S*.64,-S*.43,S*.47);
+    ctx.bezierCurveTo(-S*.60,S*.29,-S*.88,S*.17,-S*1.14,0);
+    ctx.bezierCurveTo(-S*.88,-S*.15,-S*.60,-S*.29,-S*.43,-S*.45);
+    ctx.bezierCurveTo(-S*.28,-S*.60,-S*.16,-S*.90,0,-S*1.21);
+    ctx.closePath();
+  }
+  function magArmPath(ctx,S){
+    ctx.beginPath();
+    ctx.moveTo(0,-S*1.13);
+    ctx.lineTo(-S*.35,-S*.43);
+    ctx.lineTo(-S*.18,-S*.24);
+    ctx.lineTo(S*.18,-S*.24);
+    ctx.lineTo(S*.35,-S*.43);
+    ctx.closePath();
+  }
+  function drawMagStudio(ctx,S,time,t){
+    const lightSweep=Math.sin(time*.00038);
+    const pulse=.50+.50*Math.sin(time*.0024);
+    /* R2128: a bounded optical-camera move gives the actual fallback
+       machined body changing perspective. This is a single canvas
+       transformation, not an image layer; it fades out to identity before
+       the exact original R326 WebGL handoff. */
+    const cinematicPose=smooth((t-3.15)/1.45)*
+      (1-smooth((t-8.12)/1.30));
+    const orbitYaw=.18*cinematicPose*
+      Math.sin((t-3.15)*.52);
+    const orbitPitch=.10*cinematicPose*
+      Math.cos((t-3.15)*.47);
+    ctx.save();
+    ctx.lineJoin='round';ctx.lineCap='round';
+    ctx.rotate(-.018+.025*Math.sin(time*.00030));
+    ctx.transform(
+      1-.033*cinematicPose,
+      orbitPitch*.27,
+      orbitYaw*.43,
+      1-.058*cinematicPose,
+      0,0
+    );
+    if(MOBILE){
+      document.documentElement.dataset.fxMagFallbackPoseR2128=
+        cinematicPose.toFixed(3);
+      document.documentElement.dataset.fxMagFallbackYawR2128=
+        orbitYaw.toFixed(3);
+    }
+
+    // Wide soft atmospheric scatter: present, but never a flat cyan halo.
+    const atmosphere=ctx.createRadialGradient(-S*.10,-S*.18,0,0,0,S*1.86);
+    atmosphere.addColorStop(0,'rgba(92,153,162,.13)');
+    atmosphere.addColorStop(.35,'rgba(46,103,116,.075)');
+    atmosphere.addColorStop(.78,'rgba(10,34,48,.045)');
+    atmosphere.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=atmosphere;
+    ctx.fillRect(-S*1.95,-S*1.95,S*3.90,S*3.90);
+
+    /* R2126: sparse lens-lit suspended particulate around the one real
+       four-arm metal body; never a circular HUD, patterned backdrop or
+       separate composited surface. Twelve subpixel dust motes follow the
+       10-second camera's physical center and are cheap on weak devices. */
+    for(let mote=0;mote<12;mote++){
+      const angle=mote*2.39996323;
+      const reach=S*(1.33+(mote%4)*.18);
+      const drift=Math.sin(time*.00035+mote*1.7)*S*.018;
+      const px=Math.cos(angle)*(reach+drift);
+      const py=Math.sin(angle)*(reach+drift)*.78;
+      const intensity=.12+.10*(.5+.5*Math.sin(time*.0011+mote));
+      ctx.fillStyle='rgba(155,207,211,'+intensity.toFixed(3)+')';
+      ctx.beginPath();
+      ctx.arc(px,py,Math.max(.52,S*.0045),0,TAU);
+      ctx.fill();
+    }
+
+    // Extruded silhouette: physically separates the object from the void.
+    ctx.save();
+    ctx.shadowColor='rgba(3,8,14,.96)';ctx.shadowBlur=S*.28;
+    ctx.translate(S*.070,S*.092);
+    magDiamond(ctx,S);ctx.fillStyle='#01080f';ctx.fill();
+    ctx.restore();
+    for(let layer=9;layer>=1;layer--){
+      ctx.save();
+      ctx.translate(S*(.0065+.002*cinematicPose)*layer,
+        S*(.010+.002*cinematicPose)*layer);
+      magDiamond(ctx,S);
+      const metalShade=layer>6?'#06111a':
+        layer>3?'#0b1d28':'#203842';
+      ctx.fillStyle=metalShade;ctx.fill();
+      ctx.restore();
+    }
+    magDiamond(ctx,S);
+    const hull=ctx.createLinearGradient(-S*.90,-S*1.05,S*.94,S*1.03);
+    hull.addColorStop(0,'#819498');
+    hull.addColorStop(.14,'#3b555e');
+    hull.addColorStop(.37,'#182c36');
+    hull.addColorStop(.57,'#07141c');
+    hull.addColorStop(.80,'#324953');
+    hull.addColorStop(1,'#0b1823');
+    ctx.fillStyle=hull;ctx.fill();
+    ctx.save();magDiamond(ctx,S);ctx.clip();
+
+    // Four radial sculpted arms. The opposing faces have different normals,
+    // highlights, inset mechanical recesses and actual cross-facet shadows.
+    for(let arm=0;arm<4;arm++){
+      ctx.save();ctx.rotate(arm*Math.PI*.5);
+      const even=(arm%2===0);
+      magArmPath(ctx,S);
+      const slab=ctx.createLinearGradient(-S*.37+S*.082*lightSweep,-S*.72,
+        S*.38+S*.082*lightSweep,-S*.30);
+      /* R2133: four different light-facing metal normals. The former
+         alternating two-color pattern made a symmetric flat SVG icon.
+         Top/left receive warm studio silver, bottom and right retain
+         cooler shadowed brushed-titanium planes. */
+      const metalFaces=[
+        ['#d0d9d0','#83989a','#304d5a','#486471','#081925'],
+        ['#708d92','#436875','#203b49','#183441','#061723'],
+        ['#899e9b','#526a74','#1c3947','#344f5a','#081823'],
+        ['#b0c0b8','#69888b','#294b58','#42616c','#091a25']
+      ];
+      const face=metalFaces[arm];
+      slab.addColorStop(0,face[0]);
+      slab.addColorStop(.17,face[1]);
+      slab.addColorStop(.49,face[2]);
+      slab.addColorStop(.66,face[3]);
+      slab.addColorStop(1,face[4]);
+      ctx.fillStyle=slab;ctx.fill();
+
+      // Face break-line creates true directional visual relief.
+      ctx.beginPath();
+      ctx.moveTo(-S*.34,-S*.43);
+      ctx.lineTo(0,-S*1.10);
+      ctx.lineTo(-S*.040,-S*.33);
+      ctx.lineTo(-S*.16,-S*.25);
+      ctx.closePath();
+      const bevel=ctx.createLinearGradient(-S*.27+S*.035*lightSweep,-S*.61,
+        S*.01+S*.035*lightSweep,-S*.61);
+      bevel.addColorStop(0,
+        arm===0?'rgba(232,242,228,.78)':
+        arm===3?'rgba(210,235,225,.67)':
+        'rgba(174,213,209,.45)');
+      bevel.addColorStop(.60,'rgba(84,141,148,.26)');
+      bevel.addColorStop(1,'rgba(5,19,29,.19)');
+      ctx.fillStyle=bevel;ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(S*.35,-S*.43);
+      ctx.lineTo(0,-S*1.10);
+      ctx.lineTo(S*.045,-S*.33);
+      ctx.lineTo(S*.18,-S*.25);
+      ctx.closePath();
+      ctx.fillStyle='rgba(1,10,20,.49)';ctx.fill();
+
+      // Machined arm insert: two actual offset channels with small bevels.
+      ctx.beginPath();
+      ctx.moveTo(-S*.153,-S*.48);
+      ctx.lineTo(-S*.046,-S*.88);
+      ctx.quadraticCurveTo(-S*.025,-S*.90,-S*.015,-S*.87);
+      ctx.lineTo(-S*.074,-S*.45);
+      ctx.strokeStyle='rgba(3,14,23,.72)';
+      ctx.lineWidth=Math.max(1.4,S*.032);ctx.stroke();
+      ctx.strokeStyle='rgba(147,181,180,.49)';
+      ctx.lineWidth=Math.max(.85,S*.009);ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(S*.145,-S*.47);ctx.lineTo(S*.060,-S*.76);
+      ctx.strokeStyle='rgba(140,173,173,.24)';
+      ctx.lineWidth=Math.max(1,S*.008);ctx.stroke();
+
+      // Long polished crest, intentionally NOT a continuous white stroke.
+      ctx.beginPath();
+      ctx.moveTo(-S*.32,-S*.44);
+      ctx.lineTo(-S*.005,-S*1.10);
+      ctx.lineTo(S*.085,-S*.91);
+      ctx.strokeStyle=arm===0?'rgba(229,242,229,.63)':
+        arm===3?'rgba(204,230,219,.52)':
+        arm===2?'rgba(165,204,201,.35)':
+        'rgba(109,165,172,.25)';
+      ctx.lineWidth=Math.max(1,S*.011);
+      ctx.stroke();
+
+      /* R2132: directional satin-metal grain lives INSIDE each actual
+         machined arm face. The old material was smooth synthetic vector fill.
+         Fine broken anisotropic micro-etching follows the real arm's long
+         axis, with edge falloff and a soft traveling studio highlight. */
+      ctx.save();
+      magArmPath(ctx,S);
+      ctx.clip();
+      for(let grain=0;grain<16;grain++){
+        const stagger=Math.sin(grain*19.43+arm*7.19)*.028;
+        const gy=.25+grain*.049;
+        const lateral=Math.sin(grain*12.26+arm*4.17)*(.125-.045*gy);
+        const startX=S*(lateral+stagger);
+        const startY=-S*gy;
+        const length=S*(.033+.064*(.5+.5*Math.sin(grain*3.79)));
+        const roughness=.055+.058*(.5+.5*Math.sin(grain*7.61+arm));
+        ctx.beginPath();
+        ctx.moveTo(startX,startY);
+        ctx.lineTo(startX+S*.006,startY-length);
+        ctx.strokeStyle='rgba(210,231,220,'+roughness.toFixed(3)+')';
+        ctx.lineWidth=Math.max(.32,S*.0032);
+        ctx.stroke();
+      }
+      const streakPosition=(-.35+.70*(.5+.5*Math.sin(time*.00054+arm*.75)));
+      const brushedGlint=ctx.createLinearGradient(
+        S*(streakPosition-.19),-S*.78,
+        S*(streakPosition+.21),-S*.38
+      );
+      brushedGlint.addColorStop(0,'rgba(198,224,218,0)');
+      brushedGlint.addColorStop(.42,'rgba(201,221,210,.025)');
+      brushedGlint.addColorStop(.52,'rgba(228,241,222,.17)');
+      brushedGlint.addColorStop(.62,'rgba(165,209,204,.027)');
+      brushedGlint.addColorStop(1,'rgba(151,208,211,0)');
+      ctx.fillStyle=brushedGlint;
+      ctx.fillRect(-S*.44,-S*1.18,S*.88,S*.99);
+      ctx.restore();
+
+      // Recessed panel seams—different distances to avoid repeated vector art.
+      for(let j=0;j<3;j++){
+        const dy=.49+j*.13;
+        ctx.beginPath();
+        ctx.moveTo(-S*(.115-j*.022),-S*dy);
+        ctx.lineTo(-S*(.081-j*.013),-S*(dy+.040));
+        ctx.strokeStyle=j===0?'rgba(5,14,22,.48)':'rgba(158,199,196,.21)';
+        ctx.lineWidth=Math.max(.65,S*.004);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Anisotropic specular shoulder follows the actual light orientation.
+    /* R2107: the silver environmental reflection traverses the original
+       faceted body in place. A changing physical-looking highlight, not a
+       second image, CSS overlay or flashing neon outline. */
+    const shine=ctx.createLinearGradient(
+      -S*(.97-lightSweep*.17),-S*.82,
+      S*(1.03+lightSweep*.19),S*.85
+    );
+    shine.addColorStop(0,'rgba(238,244,226,'+(.25+.090*lightSweep)+')');
+    shine.addColorStop(.29,'rgba(154,189,180,.12)');
+    shine.addColorStop(.57,'rgba(0,0,0,0)');
+    shine.addColorStop(.85,'rgba(162,198,192,'+(.080+.018*lightSweep)+')');
+    shine.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=shine;ctx.fillRect(-S*1.3,-S*1.3,S*2.6,S*2.6);
+    ctx.restore();
+
+    // Segmented perimeter edge: restrained pewter, not a bright white logo.
+    magDiamond(ctx,S);
+    ctx.strokeStyle='rgba(109,157,163,.43)';
+    ctx.lineWidth=Math.max(.9,S*.009);ctx.stroke();
+    ctx.save();ctx.beginPath();
+    ctx.moveTo(-S*1.12,0);
+    ctx.bezierCurveTo(-S*.82,-S*.19,-S*.55,-S*.28,-S*.41,-S*.46);
+    ctx.bezierCurveTo(-S*.27,-S*.63,-S*.16,-S*.92,0,-S*1.20);
+    ctx.strokeStyle='rgba(204,222,214,.32)';
+    ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
+    ctx.restore();
+
+    /* R2132 real material-occlusion hierarchy: the heavy optical ring
+       rests ABOVE a deeply machined socket. Four bevel pockets cast contact
+       shadows onto the silver arms before the sapphire assembly is drawn. */
+    ctx.save();
+    for(let socket=0;socket<4;socket++){
+      ctx.save();ctx.rotate(socket*Math.PI*.5);
+      const shadow=ctx.createLinearGradient(0,-S*.56,0,-S*.26);
+      shadow.addColorStop(0,'rgba(1,8,13,0)');
+      shadow.addColorStop(.34,'rgba(1,8,13,.22)');
+      shadow.addColorStop(.77,'rgba(0,4,10,.65)');
+      shadow.addColorStop(1,'rgba(0,4,10,.92)');
+      ctx.beginPath();
+      ctx.moveTo(-S*.24,-S*.52);
+      ctx.quadraticCurveTo(0,-S*.59,S*.24,-S*.52);
+      ctx.lineTo(S*.37,-S*.21);
+      ctx.lineTo(-S*.37,-S*.21);
+      ctx.closePath();
+      ctx.fillStyle=shadow;ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // Central aperture has REAL visual depth: shadowed recess, two metal
+    // collars, a gasket, blades and a layered sapphire rather than a ball.
+    /* R2133: a larger multi-element camera optic communicates actual
+       optical depth instead of a small sphere embedded in an icon. */
+    const rx=S*.438,ry=S*.428;
+    /* R2122: authored mechanical focus choreography. The original eight
+       shaded titanium shutters now visibly rotate and draw apart during the
+       MAG reveal (not just a sub-degree decorative sine wobble). The second
+       phase re-seats the iris before the canonical native hero handoff. */
+    const engage=smooth((t-3.10)/2.20);
+    const seat=smooth((t-6.45)/2.15);
+    const rot=.29*engage-.14*seat+.012*Math.sin(time*.00022);
+    const irisTravel=.058*engage*(1-.52*seat);
+    ctx.save();
+    ctx.shadowColor='rgba(1,3,9,.90)';ctx.shadowBlur=S*.090;
+    ctx.beginPath();ctx.ellipse(0,S*.016,rx*1.25,ry*1.25,0,0,TAU);
+    ctx.fillStyle='#020b14';ctx.fill();
+    ctx.restore();
+
+    const outerRing=ctx.createLinearGradient(-rx,-ry,rx,ry);
+    outerRing.addColorStop(0,'#d4ded4');
+    outerRing.addColorStop(.16,'#657f83');
+    outerRing.addColorStop(.38,'#243d48');
+    outerRing.addColorStop(.62,'#0b1b27');
+    outerRing.addColorStop(.86,'#809da0');
+    outerRing.addColorStop(1,'#122530');
+    ctx.beginPath();ctx.ellipse(0,0,rx*1.17,ry*1.17,0,0,TAU);
+    ctx.fillStyle=outerRing;ctx.fill();
+    ctx.strokeStyle='rgba(177,203,197,.53)';
+    ctx.lineWidth=Math.max(1,S*.009);ctx.stroke();
+
+    // Mechanical fastener seats anchor optic to the four reinforced arms.
+    for(let bolt=0;bolt<8;bolt++){
+      const angle=(bolt+.5)*TAU/8;
+      const bx=Math.cos(angle)*rx*1.08,by=Math.sin(angle)*ry*1.08;
+      ctx.beginPath();ctx.arc(bx,by,S*.014,0,TAU);
+      ctx.fillStyle='#0b2029';ctx.fill();
+      ctx.beginPath();ctx.arc(bx-S*.003,by-S*.004,S*.006,0,TAU);
+      ctx.fillStyle='rgba(208,226,216,.57)';ctx.fill();
+    }
+
+    ctx.beginPath();ctx.ellipse(0,0,rx*1.027,ry*1.027,0,0,TAU);
+    ctx.fillStyle='#020a13';ctx.fill();
+    ctx.strokeStyle='rgba(4,11,18,.96)';
+    ctx.lineWidth=Math.max(1,S*.020);ctx.stroke();
+    const innerMetal=ctx.createRadialGradient(-rx*.22,-ry*.26,0,0,0,rx*1.03);
+    innerMetal.addColorStop(0,'#365d65');
+    innerMetal.addColorStop(.38,'#132e3d');
+    innerMetal.addColorStop(.79,'#091a27');
+    innerMetal.addColorStop(.94,'#030c17');
+    innerMetal.addColorStop(1,'#01060c');
+    ctx.beginPath();ctx.ellipse(0,0,rx*.94,ry*.94,0,0,TAU);
+    ctx.fillStyle=innerMetal;ctx.fill();
+
+    // Eight interlocking, foreshortened titanium shutter plates. Each is
+    // individually lit and edged, casting onto the dark central chamber.
+    for(let blade=0;blade<8;blade++){
+      const a=blade*TAU/8+rot;
+      ctx.save();ctx.rotate(a);
+      ctx.translate(rx*irisTravel,0);
+      ctx.beginPath();
+      ctx.moveTo(rx*.22,-ry*.065);
+      ctx.lineTo(rx*.81,-ry*.32);
+      ctx.quadraticCurveTo(rx*.90,-ry*.23,rx*.90,-ry*.12);
+      ctx.lineTo(rx*.54,ry*.23);
+      ctx.closePath();
+      const steel=ctx.createLinearGradient(rx*.20,-ry*.34,rx*.86,ry*.25);
+      steel.addColorStop(0,blade%2===0?'#80999a':'#5e7c80');
+      steel.addColorStop(.30,blade%2===0?'#3d6168':'#30505a');
+      steel.addColorStop(.72,'#102e3a');
+      steel.addColorStop(1,'#061925');
+      ctx.shadowColor='rgba(0,5,13,.72)';
+      ctx.shadowBlur=S*.014;ctx.shadowOffsetY=S*.008;
+      ctx.fillStyle=steel;ctx.fill();
+      ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+      ctx.strokeStyle='rgba(136,185,184,.54)';
+      ctx.lineWidth=Math.max(.80,S*.008);ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rx*.33,-ry*.097);
+      ctx.lineTo(rx*.73,-ry*.26);
+      ctx.strokeStyle='rgba(227,241,228,.22)';
+      ctx.lineWidth=Math.max(.7,S*.006);ctx.stroke();
+      ctx.restore();
+    }
+
+    // Deep obsidian aperture, offset refraction and asymmetrical photometric
+    // reflection; the center should read as multi-element OPTICS, not a sphere.
+    const pupil=ctx.createRadialGradient(-rx*(.17+.015*lightSweep),
+      -ry*.22,S*.006,0,0,rx*.66);
+    pupil.addColorStop(0,'#9fbabb');
+    pupil.addColorStop(.12,'#547f88');
+    pupil.addColorStop(.36,'#1b5062');
+    pupil.addColorStop(.66,'#061a2d');
+    pupil.addColorStop(.86,'#010c18');
+    pupil.addColorStop(1,'#00040c');
+    ctx.beginPath();ctx.arc(0,0,rx*.68,0,TAU);
+    ctx.fillStyle=pupil;ctx.fill();
+    ctx.lineWidth=Math.max(1,S*.013);
+    ctx.strokeStyle='rgba(4,13,21,.93)';ctx.stroke();
+    const refracted=ctx.createRadialGradient(-rx*.18,-ry*.27,0,-rx*.07,-ry*.07,rx*.52);
+    refracted.addColorStop(0,'rgba(178,213,211,.32)');
+    refracted.addColorStop(.29,'rgba(77,136,146,.22)');
+    refracted.addColorStop(.62,'rgba(11,47,65,.17)');
+    refracted.addColorStop(1,'rgba(2,15,24,.02)');
+    ctx.beginPath();ctx.arc(0,0,rx*.55,0,TAU);
+    ctx.fillStyle=refracted;ctx.fill();
+
+    ctx.save();
+    ctx.translate(-rx*(.20+.045*lightSweep),-ry*(.31+.017*lightSweep));
+    ctx.rotate(-.35+.08*lightSweep);
+    ctx.beginPath();ctx.ellipse(0,0,rx*.19,ry*.075,0,0,TAU);
+    ctx.fillStyle='rgba(242,252,237,.71)';ctx.fill();
+    ctx.restore();
+    ctx.beginPath();ctx.arc(rx*.22,ry*.24,rx*.13,Math.PI*.08,Math.PI*.64);
+    ctx.strokeStyle='rgba(115,184,193,'+(.13+pulse*.08)+')';
+    ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
+
+    // R2111: bounded photographic lens softbox moves with the original
+    // animated material light, not a separate overlay or canvas.
+    ctx.save();
+    ctx.translate(rx*(.19+.13*lightSweep),-ry*(.19-.06*lightSweep));
+    ctx.rotate(.48);
+    const movingLensSoftbox=ctx.createLinearGradient(-rx*.19,0,rx*.19,0);
+    movingLensSoftbox.addColorStop(0,'rgba(170,217,216,0)');
+    movingLensSoftbox.addColorStop(.38,'rgba(202,230,224,.08)');
+    movingLensSoftbox.addColorStop(.58,'rgba(236,246,233,.14)');
+    movingLensSoftbox.addColorStop(1,'rgba(145,204,207,0)');
+    ctx.beginPath();ctx.ellipse(0,0,rx*.17,ry*.037,0,0,TAU);
+    ctx.fillStyle=movingLensSoftbox;ctx.fill();
+    ctx.restore();
+
+    /* R2128: oblique inner glass lamina and depth-separated sapphire
+       caustic. Everything is clipped to the existing REAL drawn lens.
+       The highlights move with the pose and respect the original viewport
+       pixel budget; no new canvas, CSS overlay or WebGL context. */
+    ctx.save();
+    ctx.beginPath();ctx.arc(0,0,rx*.465,0,TAU);
+    ctx.clip();
+    const opticalLamina=ctx.createLinearGradient(
+      -rx*.52+orbitYaw*rx*.27,-ry*.42,
+      rx*.46+orbitYaw*rx*.27,ry*.43
+    );
+    opticalLamina.addColorStop(0,'rgba(212,238,230,.18)');
+    opticalLamina.addColorStop(.20,'rgba(111,171,176,.10)');
+    opticalLamina.addColorStop(.42,'rgba(18,60,81,.025)');
+    opticalLamina.addColorStop(.67,'rgba(1,15,28,.03)');
+    opticalLamina.addColorStop(1,'rgba(3,23,38,.19)');
+    ctx.fillStyle=opticalLamina;
+    ctx.fillRect(-rx*.51,-ry*.51,rx*1.02,ry*1.02);
+    ctx.beginPath();
+    ctx.ellipse(rx*(.065+.09*orbitYaw),ry*.05,
+      rx*.365,ry*.365,-.20,Math.PI*.12,Math.PI*1.68);
+    ctx.strokeStyle='rgba(142,207,210,'+
+      (.19+.09*cinematicPose).toFixed(3)+')';
+    ctx.lineWidth=Math.max(.65,S*.008);ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(-rx*.08,-ry*.05,
+      rx*.287,ry*.287,.11,Math.PI*.94,Math.PI*1.67);
+    ctx.strokeStyle='rgba(3,11,23,.77)';
+    ctx.lineWidth=Math.max(.8,S*.010);ctx.stroke();
+    ctx.restore();
+
+    /* R2132 nested multi-element optics. Fine crescent glass reflections,
+       a curved secondary anti-reflective coating, and internal aperture
+       vignetting replace the central spherical-logo impression without
+       introducing bright HUD rings or unsupported WebGL dependencies. */
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0,0,rx*.46,0,TAU);
+    ctx.clip();
+    const glassCoating=ctx.createLinearGradient(
+      -rx*.40+orbitYaw*rx*.11,-ry*.40,
+      rx*.39+orbitYaw*rx*.11,ry*.45
+    );
+    glassCoating.addColorStop(0,'rgba(207,239,226,.12)');
+    glassCoating.addColorStop(.22,'rgba(109,163,169,.06)');
+    glassCoating.addColorStop(.51,'rgba(3,18,31,.015)');
+    glassCoating.addColorStop(.78,'rgba(2,11,22,.11)');
+    glassCoating.addColorStop(1,'rgba(2,7,17,.25)');
+    ctx.fillStyle=glassCoating;
+    ctx.fillRect(-rx*.48,-ry*.48,rx*.96,ry*.96);
+    ctx.beginPath();
+    ctx.ellipse(-rx*.11,-ry*.055,rx*.37,ry*.34,-.28,
+      Math.PI*.92,Math.PI*1.83);
+    ctx.strokeStyle='rgba(196,227,217,.16)';
+    ctx.lineWidth=Math.max(.7,S*.005);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(rx*.045,ry*.08,rx*.32,ry*.32,.07,
+      -Math.PI*.16,Math.PI*.58);
+    ctx.strokeStyle='rgba(2,10,22,.52)';
+    ctx.lineWidth=Math.max(.8,S*.012);
+    ctx.stroke();
+    ctx.restore();
+
+    // One low-energy optical heartbeat, limited to the lens center.
+    ctx.beginPath();ctx.arc(0,0,rx*.26,0,TAU);
+    ctx.strokeStyle='rgba(84,176,191,'+(.11+pulse*.13)+')';
+    ctx.lineWidth=Math.max(.8,S*.006);ctx.stroke();
+    ctx.restore();
+  }
+
   function drawLiteScene(ctx,r,time,target,radiusCap){
     const t=r*10,cx=640+(target?.x!=null?(target.x-640)*smooth((t-9.72)/.28):0),cy=360+(target?.y!=null?(target.y-360)*smooth((t-9.72)/.28):0);
     if(!MOBILE){ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);}
@@ -208,7 +697,9 @@
     ctx.fillStyle=chamber;ctx.fillRect(0,0,W,H);
     if(!MOBILE)drawLivingWorld(ctx,time,.86);
 
-    const dnaFade=1-smooth((t-2.65)/1.45);
+    /* R2115: DNA is only a short GENESIS prelude; once the machined MAG
+       appears it cannot share the frame with flat screen-space zigzags. */
+    const dnaFade=1-smooth((t-2.02)/.80);
     if(dnaFade>.002){
       ctx.save();ctx.globalAlpha=.58*dnaFade;ctx.lineWidth=2;
       for(let h=0;h<3;h++){
@@ -231,233 +722,17 @@
 
     const grow=smooth((t-2.42)/.70);
     if(grow>.002){
-      /* R2103: the real low-power/non-WebGL fallback now uses the same
-         four-arm MAG identity as the single native R326/Three renderer.
-         The old oval biological ball was larger than the entire phone.
-         radiusCap is the CSS viewport-derived budget, BEFORE virtual-720p
-         letterbox/cover scaling. This remains centered at all phone ratios. */
       const R=Math.min(
-        (28+grow*164)*(1+.008*Math.sin(time*.0022)),
+        (28+grow*164)*(1+.005*Math.sin(time*.0022)),
         Number.isFinite(radiusCap)?radiusCap:192
       );
-      const S=R;
-      ctx.save();
-      ctx.translate(cx,cy);
-      ctx.rotate(.012*Math.sin(time*.00033));
-      ctx.lineJoin='round';
-      ctx.lineCap='round';
-
-      const outer=()=>{
-        ctx.beginPath();
-        ctx.moveTo(0,-S*1.23);
-        ctx.bezierCurveTo(S*.18,-S*.91,S*.28,-S*.59,S*.41,-S*.45);
-        ctx.bezierCurveTo(S*.56,-S*.31,S*.88,-S*.18,S*1.13,0);
-        ctx.bezierCurveTo(S*.87,S*.18,S*.55,S*.31,S*.41,S*.47);
-        ctx.bezierCurveTo(S*.27,S*.63,S*.16,S*.96,0,S*1.22);
-        ctx.bezierCurveTo(-S*.16,S*.95,-S*.29,S*.62,-S*.43,S*.47);
-        ctx.bezierCurveTo(-S*.58,S*.29,-S*.90,S*.17,-S*1.14,0);
-        ctx.bezierCurveTo(-S*.88,-S*.18,-S*.57,-S*.30,-S*.42,-S*.46);
-        ctx.bezierCurveTo(-S*.27,-S*.63,-S*.18,-S*.94,0,-S*1.23);
-        ctx.closePath();
-      };
-
-      // Real vector geometry: polished stepped four-point crystal silhouette.
-      /* R2104: a coherent smoked-chrome material instead of a flat grey
-         badge. High-order reflections sweep across the SAME clipped
-         four-point shape; no extra canvas, DOM image or WebGL context. */
-      const studioTravel=.5+.5*Math.sin(time*.00053);
-      const skin=ctx.createLinearGradient(-S,-S*.92,S,S*.95);
-      skin.addColorStop(0,'#829698');
-      skin.addColorStop(.12,'#394951');
-      skin.addColorStop(.29,'#1c323c');
-      skin.addColorStop(.50,'#081820');
-      skin.addColorStop(.68,'#0a1922');
-      skin.addColorStop(.82,'#3e5860');
-      skin.addColorStop(.93,'#1b313a');
-      skin.addColorStop(1,'#020a12');
-      ctx.save();
-      ctx.shadowColor='rgba(79,175,190,.33)';
-      ctx.shadowBlur=MOBILE?7:14;
-      outer();
-      ctx.fillStyle=skin;
-      ctx.fill();
+      ctx.save();ctx.translate(cx,cy);
+      drawMagStudio(ctx,R,time,t);
       ctx.restore();
-
-      outer();
-      ctx.strokeStyle='rgba(196,230,224,.64)';
-      ctx.lineWidth=Math.max(1.35,S*.013);
-      ctx.stroke();
-      // A second, recessed silhouette makes the crystal visibly thick.
-      ctx.save();
-      outer();
-      ctx.clip();
-      const bevelFalloff=ctx.createLinearGradient(-S*.8,-S*.9,S*.9,S*.8);
-      bevelFalloff.addColorStop(0,'rgba(211,229,219,.28)');
-      bevelFalloff.addColorStop(.34,'rgba(92,142,151,.035)');
-      bevelFalloff.addColorStop(.71,'rgba(4,13,20,.12)');
-      bevelFalloff.addColorStop(1,'rgba(131,187,186,.29)');
-      ctx.strokeStyle=bevelFalloff;
-      ctx.lineWidth=Math.max(2.5,S*.045);
-      ctx.stroke();
-      ctx.restore();
-
-      ctx.save();
-      outer();ctx.clip();
-      // Four bevelled radial facets with individual photographic reflections.
-      for(let arm=0;arm<4;arm++){
-        ctx.save();ctx.rotate(arm*Math.PI*.5);
-        const face=ctx.createLinearGradient(
-          -S*.42,-S*(.66+.08*studioTravel),S*.45,0
-        );
-        if(arm%2===0){
-          face.addColorStop(0,'rgba(236,250,243,.68)');
-          face.addColorStop(.15,'rgba(133,184,184,.44)');
-          face.addColorStop(.39,'rgba(58,100,111,.23)');
-          face.addColorStop(.71,'rgba(11,29,41,.06)');
-          face.addColorStop(1,'rgba(1,10,19,.02)');
-        }else{
-          face.addColorStop(0,'rgba(180,224,222,.48)');
-          face.addColorStop(.18,'rgba(104,152,157,.39)');
-          face.addColorStop(.49,'rgba(40,75,88,.22)');
-          face.addColorStop(.81,'rgba(8,23,32,.03)');
-          face.addColorStop(1,'rgba(4,17,24,.015)');
-        }
-        ctx.beginPath();
-        ctx.moveTo(0,-S*1.14);
-        ctx.lineTo(-S*.34,-S*.47);
-        ctx.lineTo(-S*.16,-S*.24);
-        ctx.lineTo(S*.18,-S*.24);
-        ctx.lineTo(S*.34,-S*.46);
-        ctx.closePath();
-        ctx.fillStyle=face;ctx.fill();
-        // The travelling reflected softbox is restricted to this facet,
-        // preserving its darkness rather than flattening the whole body.
-        ctx.save();ctx.clip();
-        const beam=ctx.createLinearGradient(
-          -S*(.24+.12*studioTravel),-S*.80,
-          S*(.12+.28*studioTravel),-S*.17
-        );
-        beam.addColorStop(0,'rgba(240,255,251,0)');
-        beam.addColorStop(.44,'rgba(220,246,236,0)');
-        beam.addColorStop(.52,'rgba(220,248,245,'+
-          (.10+.13*studioTravel).toFixed(3)+')');
-        beam.addColorStop(.64,'rgba(130,193,194,.055)');
-        beam.addColorStop(1,'rgba(12,39,51,0)');
-        ctx.fillStyle=beam;
-        ctx.fillRect(-S*.50,-S*1.22,S, S*1.12);
-        ctx.restore();
-        ctx.strokeStyle=arm%2===0?'rgba(230,248,239,.62)':'rgba(150,196,197,.50)';
-        ctx.lineWidth=Math.max(1.0,S*.010);
-        ctx.beginPath();
-        ctx.moveTo(-S*.33,-S*.45);
-        ctx.lineTo(0,-S*1.12);
-        ctx.lineTo(S*.33,-S*.45);
-        ctx.stroke();
-        // Routed inset physical machining, restrained on small displays.
-        ctx.strokeStyle='rgba(118,165,170,.43)';
-        ctx.lineWidth=Math.max(.8,S*.009);
-        ctx.beginPath();
-        ctx.moveTo(-S*.17,-S*.35);
-        ctx.lineTo(-S*.075,-S*.74);
-        ctx.stroke();
-        ctx.restore();
-      }
-      const inset=ctx.createRadialGradient(-S*.12,-S*.18,S*.03,0,0,S*.66);
-      inset.addColorStop(0,'rgba(64,106,113,.20)');
-      inset.addColorStop(.40,'rgba(13,40,51,.42)');
-      inset.addColorStop(.75,'rgba(2,13,21,.62)');
-      inset.addColorStop(1,'rgba(1,9,15,.05)');
-      ctx.fillStyle=inset;
-      ctx.beginPath();
-      ctx.moveTo(0,-S*.47);
-      ctx.lineTo(S*.43,0);
-      ctx.lineTo(0,S*.46);
-      ctx.lineTo(-S*.44,0);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-
-      const breathing=.98+.02*Math.sin(time*.0026);
-      const rx=S*.355*breathing,ry=S*.340*breathing;
-      // Actual recessed bezel, concentric depths, eight machined shutters.
-      const titanium=ctx.createLinearGradient(
-        -rx*(1+studioTravel*.24),-ry,rx,ry
-      );
-      titanium.addColorStop(0,'#f1fff9');
-      titanium.addColorStop(.10,'#9fc2c1');
-      titanium.addColorStop(.20,'#3c6472');
-      titanium.addColorStop(.38,'#091c2a');
-      titanium.addColorStop(.59,'#17343f');
-      titanium.addColorStop(.74,'#9dbdb9');
-      titanium.addColorStop(.87,'#4b747d');
-      titanium.addColorStop(1,'#081e29');
-      ctx.beginPath();ctx.ellipse(0,0,rx*1.17,ry*1.17,0,0,TAU);
-      ctx.fillStyle=titanium;ctx.fill();
-      ctx.strokeStyle='rgba(222,240,235,.86)';
-      ctx.lineWidth=Math.max(1.5,S*.014);ctx.stroke();
-      ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,TAU);
-      const sapphire=ctx.createRadialGradient(
-        -rx*(.27+.08*studioTravel),-ry*.32,2,
-        rx*.04,ry*.02,rx*1.10
-      );
-      sapphire.addColorStop(0,'#779ba2');
-      sapphire.addColorStop(.14,'#3c6b76');
-      sapphire.addColorStop(.37,'#193c4a');
-      sapphire.addColorStop(.65,'#0b2434');
-      sapphire.addColorStop(.83,'#04111f');
-      sapphire.addColorStop(1,'#01060d');
-      ctx.fillStyle=sapphire;ctx.fill();
-      ctx.strokeStyle='rgba(15,30,40,.93)';
-      ctx.lineWidth=Math.max(1.8,S*.022);ctx.stroke();
-
-      for(let blade=0;blade<8;blade++){
-        const angle=blade*TAU/8+.025*Math.sin(time*.00022);
-        ctx.save();ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.moveTo(rx*.36,-ry*.18);
-        ctx.lineTo(rx*.86,-ry*.36);
-        ctx.lineTo(rx*.91,ry*.01);
-        ctx.lineTo(rx*.52,ry*.22);
-        ctx.closePath();
-        const shutter=ctx.createLinearGradient(
-          rx*.28,-ry*.40,rx*.97,ry*.21
-        );
-        shutter.addColorStop(0,blade%2===0?'#96b5b7':'#597d89');
-        shutter.addColorStop(.28,blade%2===0?'#4d7481':'#264b5a');
-        shutter.addColorStop(.66,'#142f3f');
-        shutter.addColorStop(1,'#071c2a');
-        ctx.fillStyle=shutter;
-        ctx.fill();
-        ctx.strokeStyle='rgba(204,239,234,.51)';
-        ctx.lineWidth=Math.max(.9,S*.008);ctx.stroke();
-        ctx.restore();
-      }
-      const pupil=ctx.createRadialGradient(-rx*.12,-ry*.19,1,0,0,rx*.50);
-      pupil.addColorStop(0,'#75a5aa');
-      pupil.addColorStop(.14,'#35626d');
-      pupil.addColorStop(.60,'#0c2938');
-      pupil.addColorStop(1,'#030f1b');
-      ctx.beginPath();ctx.arc(0,0,rx*.42,0,TAU);
-      ctx.fillStyle=pupil;ctx.fill();
-      ctx.strokeStyle='rgba(198,240,235,.62)';
-      ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
-      ctx.beginPath();ctx.ellipse(-rx*.19,-ry*.23,rx*.14,ry*.085,-.42,0,TAU);
-      ctx.fillStyle='rgba(245,252,243,.68)';ctx.fill();
-      // R2104 photographic side-light trace on the recessed blue glass:
-      // one arc, two highlights and the original iris geometry.
-      ctx.beginPath();
-      ctx.ellipse(0,0,rx*.925,ry*.925,0,-2.68,-.84,false);
-      ctx.strokeStyle='rgba(224,253,245,'+
-        (.30+.18*studioTravel).toFixed(3)+')';
-      ctx.lineWidth=Math.max(.8,S*.009);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.ellipse(rx*.26,ry*.27,rx*.095,ry*.045,-.45,0,TAU);
-      ctx.fillStyle='rgba(91,172,185,.16)';
-      ctx.fill();
-      document.documentElement.dataset.fxMagFallbackMaterialR2104=
-        'moving-softbox-smoked-chrome-sapphire-facets';
-      ctx.restore();
+      document.documentElement.dataset.fxMagFallbackSilhouetteR2104=
+        'sculpted-fourpoint-3d-illusion-machined-optic';
+      document.documentElement.dataset.fxMagFallbackOpticR2104=
+        'eight-deep-shutter-blades-sapphire-glass';
     }
   }
 
@@ -467,7 +742,7 @@
     const proofFrame=new URLSearchParams(location.search).has('introframe');
     const constrained=!proofFrame&&(
       Number(navigator.hardwareConcurrency||8)<=4 ||
-      Number(navigator.deviceMemory||8)<=2
+      Number(navigator.deviceMemory||8)<=4
     );
     let runtimeConstrained=constrained;
     let qualityScale=proofFrame
@@ -476,6 +751,10 @@
         ? (innerWidth<900?.58:.56)
         : (innerWidth<900?.92:.78);
     let renderAverage=0,lastQualityAdjust=0,panicSamples=0;
+    /* R2112: resizing a canvas AFTER drawing clears its completed frame.
+       Defer adaptive reallocation until the NEXT draw, so the existing MAG
+       remains visible while the browser schedules a fresh complete frame. */
+    let pendingQualityResize=false;
     function resize(){
       sw=innerWidth;sh=innerHeight;
       const baseDpr=proofFrame
@@ -489,18 +768,29 @@
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
     }
     function draw(r,time){
-      if(!ctx)resize();
+      if(!ctx||pendingQualityResize){resize();pendingQualityResize=false;}
       ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,sw,sh);ctx.translate(ox,oy);ctx.scale(scale,scale);
       let target=null;
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
       const started=performance.now();
       const radiusCap=MOBILE
-        ? Math.max(38,Math.min(sw*.36,sh*.35)/Math.max(.001,scale))
+        ? Math.max(34,Math.min(sw*.255,sh*.275)/Math.max(.001,scale))
         : 192;
       document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
         'four-point-bevelled-metal-glass-iris';
       document.documentElement.dataset.fxMagFallbackDiameterR2103=
-        String(Math.round(radiusCap*2*scale));
+        String(Math.round(radiusCap*2.42*scale));
+      /* R2126: mobile's genuine R2125 live screenshots showed a ~50% width
+         MAG surrounded by dead space. The 62% silhouette remains safely
+         below the 390px/360px screen edges and outside the Skip zone.
+         We enlarge REAL metal/optic pixel coverage, not an overlay. */
+      document.documentElement.dataset.fxMagFramingR2126=
+        MOBILE?'cinematic-0.62-viewport-wide':'desktop-original';
+      /* R2115 actual frame cap, including all four physical points. */
+      document.documentElement.dataset.fxMagMobileViewportRatioR2115=
+        MOBILE?(radiusCap*2.42*scale/Math.max(1,sw)).toFixed(3):'desktop';
+      document.documentElement.dataset.fxMagGenomeFadeR2115=
+        'fully-off-by-2.82-seconds';
       drawLiteScene(ctx,r,time,target,radiusCap);
       ctx.restore();
 
@@ -520,7 +810,7 @@
           qualityScale=Math.min(qualityScale,sw<900?.46:.42);
           if(Math.abs(previous-qualityScale)>.001 || cost>42){
             lastQualityAdjust=time;
-            resize();
+            pendingQualityResize=true;
           }
         }
       }else if(cost<9){
@@ -540,7 +830,7 @@
         else if(renderAverage<6.5)qualityScale=Math.min(ceiling,qualityScale+.010);
         if(Math.abs(previous-qualityScale)>.001){
           lastQualityAdjust=time;
-          resize();
+          pendingQualityResize=true;
         }
       }
       document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
@@ -553,13 +843,13 @@
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
-      quality:'r2104-softbox-smoked-chrome-sapphire-low-power'
+      quality:'r2104-sculpted-glass-mechanical-optic-low-power'
     };
   }
   window.FormatXMagReferenceFilmR649={
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2104-moving-studio-softbox-metal-glass'
+    visualRevision:'r2128-perspective-thick-metal-sapphire-lamina'
   };
 })();

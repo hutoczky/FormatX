@@ -1,0 +1,33 @@
+name: R2118 strict CSP and original intro bootstrap parity
+
+on:
+  push:
+    branches:
+      - feature/r2117-premium-mag-master-sync
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/validate-inline-csp-r2118.cjs'
+      - '.github/workflows/verify-r2118-strict-inline-csp.yml'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  strict-inline-hashes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate exact production intro bootstrap CSP authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-inline-csp-r2118.cjs
+          node .github/scripts/validate-inline-csp-r2118.cjs
