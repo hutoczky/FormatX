@@ -42,13 +42,14 @@
       searchTitle: 'Találatok',
       open: 'Megnyitás',
       diagnosticsDone: 'A helyi böngésződiagnosztika elkészült. Ezek a jelenlegi munkamenet valós adatai.',
+      webglInactive: 'Nincs aktív WebGL-kontextus',
       threeIdle: 'A 3D rendszerkép csak kérésre töltődik be.',
       threeLoading: 'A 3D motor betöltése folyamatban…',
       threeReady: 'A funkcionális 3D térkép aktív. Kattints a meghajtókra vagy indíts ellenőrzést.',
       threeError: 'A WebGL 3D nézet ezen az eszközön nem indítható. A diagnosztika és a parancsréteg továbbra is működik.',
       reviewPending: 'Független értékelés: még nincs publikálva — nem helyettesítjük kitalált idézettel.',
       proofItems: [
-        ['LIGHTHOUSE KAPU', 'Automatikus minimum: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 90.'],
+        ['LIGHTHOUSE KAPU', 'Követelmény: Performance, Accessibility, Best Practices és SEO egyenként 100. Az aktuális eredmény a GitHub Actionsban ellenőrizhető.'],
         ['MOBIL ÉS MOZGÁS', 'Külön mobil-, csökkentett mozgás- és adaptív teljesítményellenőrzések futnak.'],
         ['KIADÁSI INTEGRITÁS', 'A publikus kiadási lánc és a letöltési hivatkozások automatizált szerződésekkel ellenőrzöttek.'],
         ['VALÓDI TERMÉKKÉPEK', 'A bemutató a működő Linux / Bazzite kiadás képernyőit használja, nem koncepciórenderelést.']
@@ -102,13 +103,14 @@
       searchTitle: 'Results',
       open: 'Open',
       diagnosticsDone: 'Local browser diagnostics completed. These are real values from the current session.',
+      webglInactive: 'No active WebGL context',
       threeIdle: 'The 3D system map loads only on demand.',
       threeLoading: 'Loading the 3D engine…',
       threeReady: 'The functional 3D map is active. Select a drive or start verification.',
       threeError: 'The WebGL view cannot start on this device. Diagnostics and commands remain available.',
       reviewPending: 'Independent review: not published yet — no fabricated quote is used as a substitute.',
       proofItems: [
-        ['LIGHTHOUSE GATE', 'Automated minimums: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95 and SEO ≥ 90.'],
+        ['LIGHTHOUSE GATE', 'Required: Performance, Accessibility, Best Practices and SEO each 100. Check GitHub Actions for the actual current result.'],
         ['MOBILE AND MOTION', 'Dedicated mobile, reduced-motion and adaptive performance checks run in CI.'],
         ['RELEASE INTEGRITY', 'The public release chain and download references are validated by automated contracts.'],
         ['REAL PRODUCT SCREENS', 'The showcase uses the working Linux / Bazzite edition, not concept renders.']
@@ -251,9 +253,11 @@
   }
 
   function webglInfo() {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl2', { powerPreference: 'high-performance' });
-    if (!gl) return { label: 'WebGL 1 / fallback', detail: '' };
+    // Read the real session renderer instead of allocating an unowned,
+    // detached GPU context for every diagnostics request.
+    const canvas = window.FormatXLivingCore?.canvas;
+    const gl = canvas?.getContext('webgl2');
+    if (!gl || gl.isContextLost()) return { label: copy().webglInactive, detail: '' };
     const extension = gl.getExtension('WEBGL_debug_renderer_info');
     const renderer = extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : 'WebGL 2';
     return { label: 'WebGL 2', detail: String(renderer).slice(0, 72) };

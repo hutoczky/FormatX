@@ -3,8 +3,24 @@ const { chromium } = require('playwright');
 
 const baseUrl = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4182/scifi-ui/index.html';
 const report = { sha: process.env.AUDITED_SHA || '', baseUrl, desktop: {}, mobile: {}, fallback: {}, errors: [] };
+let activePage = null;
 
 async function exercise(page, label, entry = 'keyboard') {
+  activePage = page;
+  report.currentCase = { label, entry, phase: 'loading' };
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    const seen = new WeakSet();
+    window.__liveOsWebGLContexts = [];
+    HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+      const context = original.call(this, type, ...args);
+      if (context && /^(?:webgl2?|experimental-webgl)$/.test(String(type)) && !seen.has(context)) {
+        seen.add(context);
+        __liveOsWebGLContexts.push({ type, connected: this.isConnected, canvas: this.outerHTML.slice(0, 300) });
+      }
+      return context;
+    };
+  });
   const errors = [];
   page.on('pageerror', error => {
     const text = String(error);
@@ -33,16 +49,22 @@ async function exercise(page, label, entry = 'keyboard') {
   const live = page.locator('#live-operating-system');
   await live.waitFor({ state: 'visible', timeout: 30000 });
 
+  report.currentCase.phase = 'diagnostics';
   const input = live.locator('#fx-live-command');
   await input.fill(label === 'desktop' ? 'diagnosztika' : 'diagnostics');
   await input.press('Enter');
   await page.waitForFunction(() => document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length === 8);
+  const diagnosticsContexts = await page.evaluate(() => __liveOsWebGLContexts);
+  const expectedContexts = entry === 'keyboard' ? 1 : 0;
+  if (diagnosticsContexts.length !== expectedContexts) throw new Error(`${label}: diagnostics allocated an unowned WebGL context: ${JSON.stringify(diagnosticsContexts)}`);
 
+  report.currentCase.phase = 'proof';
   await input.fill(label === 'desktop' ? 'tesztek' : 'tests');
   await input.press('Enter');
   await live.locator('[data-fx-proof-panel]').waitFor({ state: 'visible' });
 
   const threeButton = live.locator('[data-fx-three]');
+  report.currentCase.phase = 'topology';
   await threeButton.click();
   await page.waitForFunction(() => {
     const stage = document.querySelector('#live-operating-system [data-fx-stage]');
@@ -77,6 +99,7 @@ async function exercise(page, label, entry = 'keyboard') {
       sameMagContext: !window.__liveOsOriginalContext || window.__liveOsOriginalContext === window.FormatXLivingCore?.canvas?.getContext('webgl2')
     };
   });
+  result.diagnosticsContexts = diagnosticsContexts;
 
   if (result.metrics !== 8) throw new Error(`${label}: expected 8 diagnostics metrics`);
   if (result.proofCards !== 4) throw new Error(`${label}: expected 4 evidence cards`);
@@ -88,6 +111,7 @@ async function exercise(page, label, entry = 'keyboard') {
   if (!result.sameMagCanvas || !result.sameMagContext) throw new Error(`${label}: command navigation replaced the native MAG`);
   if (errors.length) throw new Error(`${label}: browser errors: ${errors.join(' | ')}`);
 
+  report.currentCase.phase = 'complete';
   return result;
 }
 
@@ -134,6 +158,16 @@ async function exercise(page, label, entry = 'keyboard') {
     console.log(JSON.stringify(report, null, 2));
   } catch (error) {
     report.errors.push(String(error.stack || error));
+    report.failureState = await activePage?.evaluate(() => ({
+      url: location.href,
+      visibility: document.visibilityState,
+      activeElement: document.activeElement?.id || '',
+      command: document.querySelector('#fx-live-command')?.value || '',
+      metrics: document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length,
+      busy: document.querySelector('#live-operating-system [data-fx-metrics]')?.getAttribute('aria-busy'),
+      contexts: window.__liveOsWebGLContexts || [],
+      root: { ...document.documentElement.dataset }
+    })).catch(() => null);
     fs.writeFileSync('live-os-browser-report.json', JSON.stringify(report, null, 2));
     throw error;
   } finally {

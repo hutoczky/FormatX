@@ -28,9 +28,13 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.AUDITED_SHA }}
       - name: Validate JavaScript syntax
         run: |
           node --check docs/scifi-ui/scripts/formatx-product-showcase.js
