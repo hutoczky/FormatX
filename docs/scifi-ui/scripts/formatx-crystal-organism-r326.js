@@ -1687,6 +1687,33 @@
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
 
+        /* R2135: substantial real 3D body material upgrade. Unlike the
+           microscopic R2134 accent this affects the entire lit front shell,
+           while the already depth-tested physical bezel, shutters, raised
+           silver rails and sapphire remain untouched. One model-space
+           upper-left studio source creates a contrasting silver top/left
+           shoulder and physically darker right/bottom facets.
+           No screen-space logo layer, no second canvas or draw call. */
+        float originalShell=(1.0-step(5.35,vFacet));
+        float silverFacing=smoothstep(-.16,.34,vLocal.z);
+        float shellOptic=(1.0-smoothstep(.11,.27,radialXY));
+        float shellExposure=originalShell*silverFacing*(1.0-shellOptic*.35);
+        float upFace=smoothstep(-.65,.67,vLocal.y);
+        float leftFace=1.0-smoothstep(-.68,.58,vLocal.x);
+        float keyLight=sat(dot(n,normalize(vec3(-.58,.73,.47))));
+        float materialLight=sat((.21+.45*upFace+.34*leftFace)*
+          (.43+.57*pow(keyLight,.72)));
+        vec3 studioSilver=mix(
+          vec3(.023,.044,.053),
+          vec3(.63,.70,.66),
+          materialLight
+        );
+        studioSilver+=vec3(.22,.28,.27)*softboxB*
+          (.18+.45*materialLight);
+        c=mix(c,studioSilver, shellExposure*.72);
+        float fourfoldValley=pow(abs(sin(macroAngle*2.0)),3.4);
+        c*=1.0-.18*fourfoldValley*shellExposure;
+
         /* R2131: actual travelling studio caustic across the ONE native
            three-dimensional metal/facet surface. A wider softbox band is
            stable under mobile pixel density, retaining physical front/back
