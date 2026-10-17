@@ -14,7 +14,8 @@ const loaders=[
 ];
 const TOKENS=[
   '&r2117=high-core-android-normal-mesh',
-  '&r2118=rigid-sapphire-optic-normals'
+  '&r2118=rigid-sapphire-optic-normals',
+  '&r2119=curved-sapphire-cavity-reflection'
 ];
 assert.ok(core.includes('hardwareConcurrency <= 4 || deviceMemory <= 2'),
   'The permanent MAG must match the intro capability policy on privacy-rounded 4GB Android');
@@ -25,6 +26,14 @@ assert.ok(
   core.includes('organicBlend=.010*(1.0-rigidOptics)') &&
   core.includes('(.42+.58*uEnergy)*(1.0-rigidOptics)'),
   'R2118 original physically curved sapphire and titanium surfaces must not inherit living cortex warp'
+);
+assert.ok(
+  core.includes('vec2 lensUv=vec2((vLocal.x-.025)/.209,(vLocal.y+.012)/.185);')&&
+  core.includes('float apertureDepth=1.0-smoothstep(.14,.80,lensRadius);')&&
+  core.includes('float glassRim=smoothstep(.71,.92,lensRadius);')&&
+  core.includes('sapphireGlass=mix(')&&
+  core.includes('c=mix(c,sapphireGlass,physicalLens);'),
+  'R2119 sapphire shading must use the real 3D surface with recessed optical depth'
 );
 for(const file of loaders){
   const code=fs.readFileSync(path.join(ROOT,file),'utf8');
@@ -122,7 +131,8 @@ const cases=[
           'Live measured geometry governor was unexpectedly bypassed');
         assert.ok(report.policy==='high-core-four-gb-phone-normal-mesh-adaptive-fps'&&
           report.loader.includes('r2117=high-core-android-normal-mesh')&&
-          report.loader.includes('r2118=rigid-sapphire-optic-normals'),
+          report.loader.includes('r2118=rigid-sapphire-optic-normals')&&
+          report.loader.includes('r2119=curved-sapphire-cavity-reflection'),
           'A stale original MAG file or old capability policy was used');
         assert.ok(report.canvasCount===1&&report.backingWidth>=100&&
           report.backingHeight>=100,
