@@ -33,11 +33,15 @@ assert.ok(nativeSource.includes('R2134 genuine single-volume 3D sculptural studi
   nativeSource.includes('float silverKey=pow(sat(dot(n,') &&
   nativeSource.includes('vec3 sapphireGlass=vec3(.005,.017,.031)') &&
   nativeSource.includes('R2135: substantial real 3D body material upgrade') &&
-  nativeSource.includes('c=mix(c,studioSilver, shellExposure*.72)'),
+  nativeSource.includes('c=mix(c,studioSilver, shellExposure*.72)') &&
+  nativeSource.includes('R2136: real UV coordinates are independently authored') &&
+  nativeSource.includes('float glassDarkAnnulus=smoothstep(.61,.97,sapphireRadius)') &&
+  nativeSource.includes('float shoulderEnvelope=smoothstep(.20,.33,radialXY)'),
   'R2134 3D optical/material shader missing from original native MAG');
 for(const loader of nativeLoaders){
   const source=fs.readFileSync(loader,'utf8');
-  assert.ok(source.includes('&r2135=entire-native-brushed-silver-shell'),
+  assert.ok(source.includes('&r2135=entire-native-brushed-silver-shell') &&
+    source.includes('&r2136=coated-sapphire-and-sculpted-silver-bevels'),
     'Original permanent MAG owner still serves stale pre-R2134 shader: '+loader);
 }
 
