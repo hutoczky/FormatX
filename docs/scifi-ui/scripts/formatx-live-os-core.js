@@ -171,8 +171,10 @@
   }
 
   function targetCapabilities() {
-    return document.getElementById('product-showcase')
-      || document.querySelector('section#capabilities, section[data-organ="organs"]');
+    // The showcase can live inside an inactive, inert archive folio. Keep
+    // the working command section beside the canonical source section.
+    return document.querySelector('section#capabilities, section[data-organ="organs"]')
+      || document.getElementById('product-showcase')?.closest('main > section');
   }
 
   function makeSection() {
@@ -200,7 +202,7 @@
       '  <article class="fx-live-os__panel fx-live-os__topology"><div class="fx-live-os__panel-head"><div><h3 data-fx-topology-title></h3><p data-fx-topology-lead></p></div><button type="button" data-fx-three></button></div><div class="fx-live-os__stage" data-fx-stage><canvas data-fx-three-canvas aria-label="FormatX functional 3D storage map"></canvas><div class="fx-live-os__stage-idle" data-fx-three-state></div></div><div class="fx-live-os__object" data-fx-object></div></article>',
       '  <article class="fx-live-os__panel fx-live-os__response"><div class="fx-live-os__panel-head"><h3 data-fx-results-title></h3><button type="button" data-fx-demo></button></div><div class="fx-live-os__output" data-fx-output aria-live="polite"></div><div class="fx-live-os__demo" data-fx-demo-panel hidden><img data-fx-demo-image width="800" height="418" alt=""><div><small data-fx-demo-step></small><strong data-fx-demo-title></strong><p data-fx-demo-copy></p><span data-fx-demo-progress></span></div></div></article>',
       '</div>',
-      '<aside class="fx-live-os__proof" data-fx-proof-panel hidden><div class="fx-live-os__panel-head"><h3 data-fx-proof-title></h3><a href="https://github.com/hutoczky/FormatX/actions" target="_blank" rel="noopener">GitHub Actions ↗</a></div><div data-fx-proof-grid></div><p data-fx-review-state></p></aside>'
+      '<aside class="fx-live-os__proof" data-fx-proof-panel hidden><div class="fx-live-os__panel-head"><h3 data-fx-live-os-proof-title></h3><a href="https://github.com/hutoczky/FormatX/actions" target="_blank" rel="noopener">GitHub Actions ↗</a></div><div data-fx-proof-grid></div><p data-fx-review-state></p></aside>'
     ].join('');
 
     anchor.insertAdjacentElement('afterend', section);
@@ -397,7 +399,7 @@
     const section = state.section;
     if (!section) return;
     const c = copy();
-    section.querySelector('[data-fx-proof-title]').textContent = c.proof;
+    section.querySelector('[data-fx-live-os-proof-title]').textContent = c.proof;
     section.querySelector('[data-fx-review-state]').textContent = c.reviewPending;
     const grid = section.querySelector('[data-fx-proof-grid]');
     grid.replaceChildren(...c.proofItems.map((item, index) => {
@@ -771,6 +773,9 @@
   }
 
   function openFromLauncher() {
+    // A command opens the original interactive HTML. Release the archive's
+    // fixed paper before focusing its input, retaining the same native MAG.
+    window.FormatXArchiveExperience?.showHTML?.('live-os-command');
     const section = makeSection();
     if (!section) return;
     section.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });

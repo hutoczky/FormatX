@@ -49,6 +49,9 @@
   }
 
   function onIntent(event) {
+    // A modifier is only the first half of a shortcut. Do not disarm this
+    // owner on Control/Meta before the following K can retain its open request.
+    if (event?.type === 'keydown' && ['Control', 'Meta', 'Alt', 'Shift'].includes(event.key)) return;
     if (reservedInteraction(event)) return;
     if (event?.type === 'keydown' && (event.ctrlKey || event.metaKey) && String(event.key || '').toLowerCase() === 'k') {
       event.preventDefault();

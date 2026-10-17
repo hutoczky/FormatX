@@ -263,13 +263,23 @@
      Every original section remains in the document as a scroll anchor.
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
+    // Read the real source heights together before wrapping any original
+    // document or changing its anchor height. Keep the same nodes and one
+    // physical folio per host without eight forced full-page layouts.
+    const originalHeights=new Map();
+    for(const scene of scenes){
+      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      if(!(host instanceof HTMLElement)||originalHeights.has(host)
+          ||host.querySelector(':scope > .fx-archive-cinema-folio-r2030'))continue;
+      originalHeights.set(host,Math.max(520,host.getBoundingClientRect().height||host.offsetHeight));
+    }
     for(const scene of scenes){
       const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
       if(!(host instanceof HTMLElement))continue;
       scene.cinemaHost=host;
       let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(!panel){
-        const oldHeight=Math.max(520,host.getBoundingClientRect().height||host.offsetHeight);
+        const oldHeight=originalHeights.get(host);
         panel=document.createElement('div');
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
@@ -1375,7 +1385,11 @@ void main(){
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples,domComposes};},
-    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
+    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value),
+    showHTML:(source='user-request')=>{
+      stop();
+      root.dataset.fxArchiveHtmlFallback=String(source);
+    }
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

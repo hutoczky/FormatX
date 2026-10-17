@@ -15,7 +15,7 @@
         return;
       }
       const script = document.createElement('script');
-      script.src = src + version;
+      script.src = src + (marker === 'core' ? '?v=20261017-r2120-proof-title-owner' : version);
       script.async = false;
       script.dataset.fxLiveOsPart = marker;
       script.addEventListener('load', resolve, { once: true });
