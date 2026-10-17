@@ -76,11 +76,13 @@ assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
   fallback.includes("fxMagFramingR2126")&&
   fallback.includes('Math.min(sw*.255,sh*.275)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261017-r2132-brushed-silver-optical-depth'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261017-r2133-four-plane-silver-optical-core'),
   'Missing actual R2126 cache-busted, 62%-width four-point Android MAG');
 assert.ok(fallback.includes('R2132: directional satin-metal grain') &&
   fallback.includes('R2132 real material-occlusion hierarchy') &&
   fallback.includes('R2132 nested multi-element optics'),
+  fallback.includes('R2133: four different light-facing metal normals') &&
+  fallback.includes('const rx=S*.438,ry=S*.428'),
   'R2132 must actually create localized arm grain, socket contact shadows and multi-layer physical lens');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
