@@ -6,6 +6,36 @@ const URL=process.env.FORMATX_ARCHIVE_TEST_URL||'http://127.0.0.1:4178/scifi-ui/
 const out='.archive-artifacts';
 fs.mkdirSync(out,{recursive:true});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function captureNativeArchiveViewport(page,label){
+  // WebGL SwiftShader can hang Playwright's animation-disabled screenshot.
+  // Capture a genuine compositor frame through Chromium CDP instead; never
+  // synthesize a PNG or mock the MAG. It includes the live original HTML paper.
+  let cdp,timeout;
+  try{
+    cdp=await page.context().newCDPSession(page);
+    const result=await Promise.race([
+      cdp.send('Page.captureScreenshot',{
+        format:'png',fromSurface:true,captureBeyondViewport:false
+      }),
+      new Promise((_,reject)=>{
+        timeout=setTimeout(()=>reject(new Error('CDP capture exceeded 20000 ms')),20000);
+      })
+    ]);
+    const bytes=Buffer.from(result.data,'base64');
+    assert.ok(bytes.length>10000,'Blank or truncated Chromium screenshot');
+    const path=`${out}/mag-archive-real-${label}.png`;
+    fs.writeFileSync(path,bytes);
+    console.log('ARCHIVE_REAL_CDP_VISUAL_PASS',JSON.stringify({label,bytes:bytes.length,path}));
+    return true;
+  }catch(error){
+    console.warn('ARCHIVE_REAL_CDP_VISUAL_UNAVAILABLE',JSON.stringify({label,error:String(error).slice(0,350)}));
+    return false;
+  }finally{
+    if(timeout)clearTimeout(timeout);
+    if(cdp)cdp.detach().catch(()=>{});
+  }
+}
+
 const jsSource=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 // R2058: film lighting follows the actual flexible membrane geometry,
  // rather than shading a curled display with a permanently flat surface
@@ -644,6 +674,9 @@ async function verifyNormalEntry(browser,isMobile){
     'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
+  // Actual normal-entry capture, never the isolated MAG/legacy hero mock-up.
+  if(!isMobile)await captureNativeArchiveViewport(page,'desktop-first-original-folio');
+
   if(isMobile){
     // Lighthouse's authentic filmstrip found that the first native folio
     // could DISAPPEAR after ~14s despite passing immediate-entry assertions.
@@ -671,6 +704,8 @@ async function verifyNormalEntry(browser,isMobile){
       &&late.box.y>=0&&late.withinPaper,
       'Mobile MAG native paper disappeared after 14s (Lighthouse filmstrip regression): '+JSON.stringify(late));
     console.log('ARCHIVE_MOBILE_LATE_15S_VISIBLE_PASS',JSON.stringify(late));
+    await captureNativeArchiveViewport(page,'mobile-original-folio-after-15s');
+
   }
   await context.close();
 }
