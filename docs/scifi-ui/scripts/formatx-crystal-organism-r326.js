@@ -1617,10 +1617,12 @@
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=exp(-pow((coordinate-head)/.107,2.0))*(.48+.52*fresnel);
         }
-        c+=vec3(.08,.30,.34)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
+        /* The moving silver energy arrives AFTER the metal/glass material
+           overrides. R2130's independent metal spine otherwise replaced
+           the sweep along the four arms, leaving almost no visible signal
+           on a 390px mobile compositor. */
 
         /* R2105: actual front-facing depth-tested metal, glass and iris
            geometry have distinct reflectance instead of inheriting the
@@ -1656,6 +1658,16 @@
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
+
+        /* R2131: actual travelling studio caustic across the ONE native
+           three-dimensional metal/facet surface. A wider softbox band is
+           stable under mobile pixel density, retaining physical front/back
+           occlusion. No new canvas, geometry, CSS glow or idle render loop. */
+        float pulseFront=smoothstep(-.35,.52,vLocal.z);
+        float pulseMaterial=1.0-physicalLens*.91-physicalIris*.52;
+        float pulseLuminance=sweep*pulseFront*pulseMaterial*
+          (.83+.28*key);
+        c+=vec3(.64,.76,.72)*pulseLuminance*.86;
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
