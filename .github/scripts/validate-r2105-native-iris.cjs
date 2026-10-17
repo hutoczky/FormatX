@@ -36,7 +36,8 @@ assert.ok(nativeSource.includes('R2134 genuine single-volume 3D sculptural studi
   nativeSource.includes('c=mix(c,studioSilver, shellExposure*.72)') &&
   nativeSource.includes('R2136: real UV coordinates are independently authored') &&
   nativeSource.includes('float glassDarkAnnulus=smoothstep(.61,.97,sapphireRadius)') &&
-  nativeSource.includes('float shoulderEnvelope=smoothstep(.20,.33,radialXY)'),
+  nativeSource.includes('float shoulderEnvelope=smoothstep(.20,.33,radialXY)') &&
+  nativeSource.includes('const constrained = hardwareConcurrency <= 4 || deviceMemory <= 2;'),
   'R2134 3D optical/material shader missing from original native MAG');
 for(const loader of nativeLoaders){
   const source=fs.readFileSync(loader,'utf8');
@@ -77,11 +78,25 @@ const views=[
         colorScheme:'dark'
       });
       try{
-        await context.addInitScript(()=>{
+        /* R2137: Chrome reports 4GB for many genuinely high-core Android
+           phones. Verify the full-tier WebGL MAG, not only a source string.
+           The 360px case is a separate actual constrained-device fixture. */
+        const capabilityFixture=view.name==='phone-390'
+          ? {cores:8,memory:4}
+          : view.name==='phone-360'
+            ? {cores:4,memory:4}
+            : {cores:8,memory:8};
+        await context.addInitScript(({cores,memory})=>{
           Object.defineProperty(navigator,'webdriver',{
             configurable:true,get:()=>undefined
           });
-        });
+          Object.defineProperty(navigator,'hardwareConcurrency',{
+            configurable:true,get:()=>cores
+          });
+          Object.defineProperty(navigator,'deviceMemory',{
+            configurable:true,get:()=>memory
+          });
+        },capabilityFixture);
         const page=await context.newPage(),errors=[];
         page.on('pageerror',e=>errors.push(e.message));
         await page.goto(BASE+'?intro=1&r2105-native-optical-evidence='+view.name,
@@ -110,6 +125,8 @@ const views=[
           const cs=canvas?getComputedStyle(canvas):null;
           return {
             renderer:root.dataset.fxCrystalOrganismR326,
+            capabilityTier:root.dataset.fxCoreCapabilityTierR620||'',
+            capabilityHint:root.dataset.fxCoreCapabilityR620||'',
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
             opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
@@ -381,6 +398,15 @@ const views=[
           nativeImageProof.centralLitRatio>=.008,
           'Original post-intro MAG has no differentiated visible metal/glass pixels: '+
             JSON.stringify(nativeImageProof));
+        const expectedTier=view.name==='phone-390'
+          ? 'mobile-full-two-pass'
+          : view.name==='phone-360'
+            ? 'mobile-constrained-one-pass'
+            : 'desktop-full-three-pass';
+        assert.equal(info.capabilityTier,expectedTier,
+          'R2137 actual Android CPU/memory classification must match the '+
+          'native 3D WebGL tessellation and DPR contract: '+
+          JSON.stringify({view:view.name,info}));
         assert.deepEqual(errors,[],'Runtime errors in original 3D MAG');
         reports.push({view,info,restored});
         console.log('R2105_NATIVE_PHYSICAL_OPTICS_PASS',
