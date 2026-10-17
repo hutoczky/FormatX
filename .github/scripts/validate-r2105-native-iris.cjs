@@ -18,6 +18,27 @@ assert.ok(
   'R2114 real R2112 nonblank film/graphics-canvas handoff has regressed'
 );
 
+/* R2134 original hero must use the revised physical GLSL—not merely a
+   new fallback Canvas. The browser tests below compile and render this same
+   source on desktop and both Android-sized viewports. */
+const nativeSource=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
+const nativeLoaders=[
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+];
+assert.ok(nativeSource.includes('R2134 genuine single-volume 3D sculptural studio relighting') &&
+  nativeSource.includes('R2134 sapphire is an optically deep separately curved material') &&
+  nativeSource.includes('float silverKey=pow(sat(dot(n,') &&
+  nativeSource.includes('vec3 sapphireGlass=vec3(.005,.017,.031)'),
+  'R2134 3D optical/material shader missing from original native MAG');
+for(const loader of nativeLoaders){
+  const source=fs.readFileSync(loader,'utf8');
+  assert.ok(source.includes('&r2134=actual-silver-shoulders-layered-sapphire'),
+    'Original permanent MAG owner still serves stale pre-R2134 shader: '+loader);
+}
+
 const BASE=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT='artifacts/r2105-native-physical-optics';
