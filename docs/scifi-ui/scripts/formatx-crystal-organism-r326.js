@@ -1573,11 +1573,31 @@
         vec3 shutterTitanium=vec3(.011,.028,.037)+
           vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
           vec3(.08,.14,.15)*fresnel*.28;
-        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),12.0);
-        vec3 sapphireGlass=vec3(.005,.019,.034)+
-          vec3(.045,.13,.16)*(.25+.75*key)+
-          vec3(.19,.24,.22)*sapphireSpec*.48+
-          vec3(.025,.12,.16)*fresnel*.21;
+        /* R2119: the sapphire's actual curved R2108 surface now refracts
+           against a recessed black optical cavity. The restrained coating
+           sheen depends on the REAL interpolated convex vertex normal and
+           the ring position in the same 3D lens geometry; no 2D overlay,
+           second canvas, temporal scanlines or new fragment sampling. */
+        vec2 lensUv=vec2((vLocal.x-.025)/.209,(vLocal.y+.012)/.185);
+        float lensRadius=length(lensUv);
+        float apertureDepth=1.0-smoothstep(.14,.80,lensRadius);
+        float innerGlass=1.0-smoothstep(.48,.78,lensRadius);
+        float glassRim=smoothstep(.71,.92,lensRadius);
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),17.0);
+        float secondarySpec=pow(sat(dot(n,normalize(vec3(.58,-.28,.76)))),27.0);
+        vec3 sapphireGlass=vec3(.004,.014,.027)+
+          vec3(.041,.092,.118)*(.24+.76*key)+
+          vec3(.21,.29,.26)*sapphireSpec*.52+
+          vec3(.10,.19,.22)*secondarySpec*.23+
+          vec3(.030,.11,.16)*fresnel*.31;
+        sapphireGlass=mix(
+          sapphireGlass,
+          vec3(.002,.009,.018)+sapphireGlass*.35,
+          apertureDepth*.52
+        );
+        sapphireGlass+=vec3(.016,.046,.057)*innerGlass*.34;
+        sapphireGlass+=vec3(.18,.23,.22)*glassRim*
+          (.22+.32*softboxA+.22*softboxB);
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
