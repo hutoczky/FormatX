@@ -111,7 +111,17 @@ const samples=[200,400,700,1000,1500,2000,3000,4200];
         }
         const observed=await page.evaluate(()=>window.__r2120);
         const total=observed.shifts.reduce((sum,x)=>sum+x.value,0);
-        const report={profile:p.name,snapshots,observed,total,errors};
+        const lateShift=observed.shifts
+          .filter(x=>x.ms>=1000).reduce((sum,x)=>sum+x.value,0);
+        const dock=await page.evaluate(()=>({
+          scrollY:Math.round(scrollY),
+          stageDocked:!!document.querySelector(
+            '#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked'
+          ),
+          gestureGate:document.documentElement.dataset.fxArchiveScrollEntryR2121||'',
+          cinematic:document.documentElement.dataset.fxArchiveCinema||''
+        }));
+        const report={profile:p.name,snapshots,observed,total,lateShift,dock,errors};
         fs.writeFileSync(path.join(OUT,p.name+'.json'),
           JSON.stringify(report,null,2)+'\n');
         console.log('R2120_LAYOUT_SHIFT_PROFILE',JSON.stringify({
@@ -127,6 +137,12 @@ const samples=[200,400,700,1000,1500,2000,3000,4200];
         }));
         assert.deepEqual(errors,[],
           'JS errors during first paint; inspect preserved diagnostics');
+        assert.ok(dock.scrollY===0 && !dock.stageDocked,
+          'R2121 must not move original live MAG before the visitor scrolls: '+
+          JSON.stringify({profile:p.name,dock,observed:observed.shifts}));
+        assert.ok(lateShift<.025,
+          'Unexpected late idle layout shifts on the first untouched viewport: '+
+          JSON.stringify({profile:p.name,lateShift,shifts:observed.shifts}));
       }finally{await context.close();}
     }
   }finally{await browser.close();}
