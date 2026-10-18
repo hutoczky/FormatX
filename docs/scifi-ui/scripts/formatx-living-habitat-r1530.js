@@ -505,6 +505,15 @@
       return;
     }
     clearTimeout(scrollStartTimer);scrollStartTimer=0;
+    // R2126 — keep the authored CSS presentation policy authoritative. An unbacked
+    // canvas can resolve its real display/visibility before allocating a
+    // compositor surface or forcing document-height layout for a hidden world.
+    if(!canvas.isConnected)BODY.prepend(canvas);
+    const presentation=getComputedStyle(canvas);
+    if(presentation.display==='none'||presentation.visibility!=='visible'||Number(presentation.opacity)===0){
+      ROOT.dataset.fxLivingHabitatStartR1737='css-hidden-no-canvas-allocation';
+      return;
+    }
     if(!ctx)ctx=canvas.getContext('2d',{alpha:true,desynchronized:true});
     if(!ctx){
       ROOT.dataset.fxLivingHabitatR1530='canvas-unavailable';
@@ -513,13 +522,24 @@
     started=true;
     ROOT.dataset.fxLivingHabitatStartR1737=source;
     ROOT.dataset.fxLivingHabitatFirstPaintR1737='post-intent-no-initial-layout-work';
-    if(!canvas.isConnected)BODY.prepend(canvas);
     resize();
     updateScroll();
     draw(performance.now());
   }
 
-  addEventListener('resize',resize,{passive:true});
+  function refreshPresentation(source){
+    // A deferred stylesheet/media change can reveal the same retained canvas.
+    // Start from its real CSS state without waiting for another user gesture.
+    if(!canvas.isConnected)return;
+    if(!started)startHabitat(source);
+    else resize();
+  }
+  addEventListener('resize',()=>refreshPresentation('viewport-resize'),{passive:true});
+  document.addEventListener('load',event=>{
+    if(event.target instanceof HTMLLinkElement&&event.target.matches('link[data-fx-living-habitat-r1530]')){
+      refreshPresentation('stylesheet-ready');
+    }
+  },true);
   addEventListener('scroll',()=>{
     /* R1755 — never allocate or repaint the full-viewport habitat on the hot
        scroll path. MAG + compositor sensory field react immediately; the deep
@@ -592,7 +612,7 @@
   addEventListener('orientationchange',()=>{resize();pulse('orientation',.48);},{passive:true});
   document.addEventListener('formatx:magbirthcomplete',()=>{if(!started)startHabitat('mag-birth-handoff');pulse('intro-handoff',1);},{passive:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)schedule();});
-  MOBILE.addEventListener?.('change',resize);
+  MOBILE.addEventListener?.('change',()=>refreshPresentation('viewport-media-change'));
 
   ROOT.dataset.fxLivingHabitatR1530='deferred-first-paint-r1737';
   ROOT.dataset.fxLivingHabitatFirstPaintR1737='zero-canvas-layout-before-intent';
