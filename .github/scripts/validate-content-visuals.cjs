@@ -252,23 +252,32 @@ async function assertHeroDisclosure(page) {
       `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify({ heroState, journeyState })}`);
   }
 
-  await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  // R2040: the former R536 'core' is no longer the terminal reverse-scroll
-  // state when the user-selected MAG-only cinematic archive owns the page.
-  // Still REQUIRE an actual reversible chapter with exactly one working
-  // original HTML folio; never silently accept a stuck or empty scene.
+  /* R2133: the actual R2121 product only docks the permanent MAG archive
+     on user scroll, then returns to the readable original hero on scroll 0.
+     Preserve both physical native-paper delivery and the no-CLS reversibility.
+     Never bypass real browser input or silently skip the original document. */
   await page.waitForFunction(() => {
     const root=document.documentElement;
-    if(root.dataset.fxArchiveExperience!=='ready')
-      return root.dataset.fxCinematicSceneR536==='core';
-    const first=window.FormatXArchiveExperience?.scenes?.[0]?.key;
-    const visible=[...document.querySelectorAll('main#main-content > [data-fx-cinema-host-active="true"]')];
-    const paper=visible[0]?.querySelector(':scope > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
-    return root.dataset.fxArchiveCinema==='active'
-      && !!first&&root.dataset.fxArchiveCurrent===first
-      && visible.length===1&&!!paper
-      && getComputedStyle(paper).visibility==='visible'
-      && (paper.textContent||'').trim().length>70;
+    const panels=[...document.querySelectorAll(
+      'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+    )];
+    return root.dataset.fxArchiveExperience==='ready'&&
+      root.dataset.fxArchiveCinema==='active'&&
+      root.dataset.fxArchiveScrollEntryR2121==='real-scroll-or-explicit-archive'&&
+      panels.length===1&&
+      getComputedStyle(panels[0]).visibility==='visible'&&
+      (panels[0].textContent||'').trim().length>70;
+  }, null, { timeout: 9000 });
+  await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+  await page.waitForFunction(() => {
+    const root=document.documentElement;
+    const original=document.querySelector('#hero .hero-copy');
+    return root.dataset.fxCinematicSceneR536==='core'&&
+      root.dataset.fxArchiveCinema!=='active'&&
+      root.dataset.fxArchiveScrollEntryR2121==='landing-hero-undisturbed'&&
+      !!original&&getComputedStyle(original).display!=='none'&&
+      original.getBoundingClientRect().width>90&&
+      document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length===0;
   }, null, { timeout: 9000 });
   await page.waitForTimeout(250);
 }
