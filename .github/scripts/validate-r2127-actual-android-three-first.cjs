@@ -21,6 +21,12 @@ assert.ok(source.includes('three-owner-timeout-fallback')&&
   source.includes("ROOT.dataset.fxMagBirthRendererR1360='threejs-active';"),
   'Runtime must expose actual THREE success or a real error state');
 
+/* Chromium on GitHub uses SwiftShader; production deliberately avoids
+   spending users' CPU on full Three.js under software rendering. The fast
+   fixture therefore opts into the existing ?visualintro=1 WebGL proof path,
+   where REAL Three shaders compile on SwiftShader. The low-power fixture
+   exercises normal production routing without this override. This tests
+   execution and fallback separately; it is not an actual S24 hardware GPU. */
 const fixtures=[
   {name:'phone-390-fast',width:390,height:844,cores:8,ram:4,expectThree:true},
   {name:'phone-360-low-core',width:360,height:780,cores:4,ram:4,expectThree:false}
@@ -56,7 +62,9 @@ const fixtures=[
         const page=await context.newPage();
         const errors=[],statuses=[];
         page.on('pageerror',err=>errors.push(err.message));
-        await page.goto(base+'?intro=1&r2127-active3d='+fixture.name,
+        await page.goto(base+'?intro=1'+
+          (fixture.expectThree?'&visualintro=1':'')+
+          '&r2127-active3d='+fixture.name,
           {waitUntil:'domcontentloaded',timeout:60000});
         const start=Date.now();
         for(let step=0;step<7;step++){
