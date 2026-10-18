@@ -229,7 +229,18 @@
     const pulse=.50+.50*Math.sin(time*.0024);
     ctx.save();
     ctx.lineJoin='round';ctx.lineCap='round';
-    ctx.rotate(-.018+.025*Math.sin(time*.00030));
+    /* R2125: one continuous film, not a 7-second motionless badge.
+       Camera closes in on the lens and slides back into the original final
+       alignment before the R326 handoff. Every function is time-continuous
+       with bounded 12% magnification; reduced-end hardware stays on 2D. */
+    const cameraPush=smooth((t-4.55)/1.30)*
+      (1-smooth((t-6.85)/1.60));
+    const authoredRoll=-.032+.055*cameraPush+
+      .014*Math.sin(time*.00030);
+    ctx.rotate(authoredRoll);
+    ctx.scale(1+cameraPush*.115,1+cameraPush*.115);
+    document.documentElement.dataset.fxMagFallbackCameraR2125=
+      cameraPush.toFixed(3);
 
     // Wide soft atmospheric scatter: present, but never a flat cyan halo.
     const atmosphere=ctx.createRadialGradient(-S*.10,-S*.18,0,0,0,S*1.86);
@@ -267,6 +278,7 @@
     // highlights, inset mechanical recesses and actual cross-facet shadows.
     for(let arm=0;arm<4;arm++){
       ctx.save();ctx.rotate(arm*Math.PI*.5);
+      ctx.globalAlpha=.56+.44*smooth((t-4.05)/1.75);
       const even=(arm%2===0);
       magArmPath(ctx,S);
       const slab=ctx.createLinearGradient(-S*.37+S*.082*lightSweep,-S*.72,
@@ -367,6 +379,8 @@
 
     // Central aperture has REAL visual depth: shadowed recess, two metal
     // collars, a gasket, blades and a layered sapphire rather than a ball.
+    ctx.save();
+    ctx.globalAlpha=.19+.81*smooth((t-3.85)/2.10);
     const rx=S*.405,ry=S*.399;
     const rot=.012*Math.sin(time*.00022);
     ctx.save();
@@ -491,6 +505,7 @@
     ctx.strokeStyle='rgba(84,176,191,'+(.11+pulse*.13)+')';
     ctx.lineWidth=Math.max(.8,S*.006);ctx.stroke();
     ctx.restore();
+    ctx.restore();
   }
 
   function drawLiteScene(ctx,r,time,target,radiusCap){
@@ -529,6 +544,22 @@
 
     const grow=smooth((t-2.42)/.70);
     if(grow>.002){
+      /* Sparse defocused dust moves behind the lens; no old bright DNA wave. */
+      const dust=smooth((t-3.3)/1.0);
+      if(dust>.002){
+        ctx.save();
+        for(let k=0;k<16;k++){
+          const angle=k*2.399963+time*.000032*(k%2?1:-1);
+          const dist=125+(k%5)*51+14*Math.sin(time*.00035+k);
+          const x=cx+Math.cos(angle)*dist;
+          const y=cy+Math.sin(angle)*dist*.73;
+          const radius=.65+(k%3)*.35;
+          ctx.globalAlpha=(.045+.030*Math.sin(time*.0008+k))*dust;
+          ctx.fillStyle=k%4===0?'#b2dbd9':'#528da0';
+          ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.fill();
+        }
+        ctx.restore();
+      }
       const R=Math.min(
         (28+grow*164)*(1+.005*Math.sin(time*.0022)),
         Number.isFinite(radiusCap)?radiusCap:192
@@ -536,6 +567,27 @@
       ctx.save();ctx.translate(cx,cy);
       drawMagStudio(ctx,R,time,t);
       ctx.restore();
+
+      /* A filmic title belongs inside the FILM's original canvas before
+         handoff, unlike the old fixed badge that covered semantic HTML. */
+      const titleOpacity=smooth((t-7.63)/.52)*
+        (1-smooth((t-9.57)/.38));
+      if(titleOpacity>.005){
+        ctx.save();
+        ctx.globalAlpha=titleOpacity*.90;
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillStyle='#d2e8e7';
+        ctx.font='700 16px Inter, system-ui, sans-serif';
+        ctx.fillText('MAG // AI CORE',cx,cy+R*1.72);
+        ctx.globalAlpha*=.66;
+        ctx.fillStyle='#88b8bd';
+        ctx.font='500 9px Inter, system-ui, sans-serif';
+        ctx.fillText('ONLINE · LOCAL INTELLIGENCE',cx,cy+R*1.96);
+        ctx.restore();
+      }
+      document.documentElement.dataset.fxMagFallbackPhaseR2125=
+        t<5.6?'crystal-assembly':t<8.0?'macro-lens-reveal':'settled-handoff';
       document.documentElement.dataset.fxMagFallbackSilhouetteR2104=
         'sculpted-fourpoint-3d-illusion-machined-optic';
       document.documentElement.dataset.fxMagFallbackOpticR2104=
