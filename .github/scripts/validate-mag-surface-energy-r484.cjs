@@ -336,7 +336,20 @@ async function verify(browser, name, viewport, mobile) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await page.waitForTimeout(500);
-    assert.equal(await page.evaluate(() => document.documentElement.dataset.fxCoreSurfaceSchedulerR484), 'suspended');
+    report.reducedMotionAtAssertion = await page.evaluate(() => {
+      const root = document.documentElement;
+      // Capture the same original scheduler read before the additional
+      // diagnostics. Keep the original 500ms boundary and assertion intact.
+      const at = performance.now();
+      const scheduler = root.dataset.fxCoreSurfaceSchedulerR484;
+      return { at, scheduler, requested: matchMedia('(prefers-reduced-motion:reduce)').matches,
+        visibility: document.visibilityState, scrollX, scrollY,
+        nativeGenesis: root.dataset.fxNativeGenesisR2064 || '',
+        archive: root.dataset.fxArchiveCinema || '',
+        paused: root.dataset.fxReferenceMotionPaused || '',
+        pulse: root.dataset.fxCoreSurfacePulseR454 || '' };
+    });
+    assert.equal(report.reducedMotionAtAssertion.scheduler, 'suspended');
     const reducedCount = await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length);
     await page.waitForTimeout(6800);
     assert.equal(await page.evaluate(() => __magEnergyAudit.events.filter(e => e.phase === 'start').length), reducedCount, `${name}: reduced-motion sweep still running`);

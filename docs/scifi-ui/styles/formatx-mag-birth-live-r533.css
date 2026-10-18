@@ -2259,9 +2259,17 @@ html[data-fx-mag-birth-renderer-r1360="threejs-active"] .fx-mag-birth-r533 .fxb-
 .fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"]){
   filter:none!important;
   -webkit-filter:none!important;
+  /* R2127 — a filter transition overrides even the final none value while
+     interpolating from legacy brightness(1). Only the real fade may animate. */
+  transition-property:opacity!important;
   background:
     radial-gradient(ellipse 44% 62% at 52% 46%,rgba(57,90,111,.18),transparent 74%),
     linear-gradient(160deg,#010405,#061017 60%,#010407)!important;
+}
+/* R2127 — keep the existing radial studio field continuous. The later legacy
+   7px background-size otherwise projects a visible reticle over native genesis. */
+.fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"])::after{
+  background-size:auto!important;
 }
 .fx-mag-birth-r533:is([data-fx-renderer="waiting"],[data-fx-renderer="canonical"])>
   :not(.fxb-particles):not(.fxb-copy):not(.fxb-skip){

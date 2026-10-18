@@ -74,7 +74,7 @@ assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261016-r2115-cu
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261015-r2113-stable-native-stage']){
+ 'formatx-mag-birth-live-r533.css?v=20261018-r2127-continuous-studio']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 /* R2103 additionally forbids the exact unreadable low-power source that

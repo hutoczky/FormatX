@@ -23,6 +23,7 @@ on:
       - '.github/scripts/validate-hero-footprint-r2117.cjs'
       - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/scripts/validate-habitat-presentation-r2126.cjs'
+      - '.github/scripts/validate-native-intro-field-r2127.cjs'
       - 'docs/scifi-ui/scripts/formatx-living-habitat-r1530.js'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   push:
@@ -47,6 +48,7 @@ on:
       - '.github/scripts/validate-hero-footprint-r2117.cjs'
       - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/scripts/validate-habitat-presentation-r2126.cjs'
+      - '.github/scripts/validate-native-intro-field-r2127.cjs'
       - 'docs/scifi-ui/scripts/formatx-living-habitat-r1530.js'
       - '.github/workflows/validate-cinematic-archive-r1987.yml'
   workflow_dispatch:
@@ -82,6 +84,7 @@ jobs:
           node --check .github/scripts/validate-hero-footprint-r2117.cjs
           node --check .github/scripts/validate-native-framing-r2114.cjs
           node --check .github/scripts/validate-habitat-presentation-r2126.cjs
+          node --check .github/scripts/validate-native-intro-field-r2127.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -122,6 +125,11 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-habitat-presentation-r2126.cjs
+      - name: Test actual first native intro filter and continuous studio field
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-native-intro-field-r2127.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
