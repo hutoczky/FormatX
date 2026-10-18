@@ -836,6 +836,12 @@
         String((facets.length-bladesFirst)/3);
     }
 
+    /* R2128: actual browser screenshot showed dark broken seam marks along
+       the permanent MAG arms. The original rail height (.012/.023) could
+       intersect the slightly irregular 3D body, while its nearly black
+       shader acted like a painted dotted line. Raise the existing machined
+       vertices above the crystal envelope and use slate-metal instead of
+       near-black. No extra object, canvas, draw or shader pass. */
     /* R2123: eight true front-facing, curved, dual-depth precision ribs.
        This was missing from the permanent R326 MAG, leaving its silhouette
        a single liquid-looking turquoise sheet after the much richer intro.
@@ -864,8 +870,8 @@
             const t=step/railSections;
             const along=.235+.425*t;
             const offset=side*(.069-.028*t);
-            const width=(layer===0?.011:.0048)*(1-.17*t);
-            const lift=layer===0?.012:.023;
+            const width=(layer===0?.009:.0048)*(1-.17*t);
+            const lift=layer===0?.041:.056;
             const point=(edge)=>{
               const x=dx*along+px*(offset+edge*width);
               const y=dy*along+py*(offset+edge*width);
@@ -884,6 +890,7 @@
       }
     }
     root.dataset.fxNativeMagRailsR2123='eight-dual-depth-real-geometry';
+    root.dataset.fxNativeMagRailVisibilityR2128='raised-continuous-satin-silver-no-dashed-black';
     root.dataset.fxNativeMagRailTrianglesR2123=
       String((facets.length-railFirst)/3);
 
@@ -1657,8 +1664,8 @@
         vec3 crestSilver=vec3(.085,.12,.13)+
           vec3(.54,.59,.54)*(softboxA*.55+softboxB*.27+key*.20);
         c=mix(c,machinedTitanium,physicalBezel);
-        c=mix(c,vec3(.012,.024,.030)+machinedTitanium*.23,railShadow*.96);
-        c=mix(c,crestSilver,railCrest*.96);
+        c=mix(c,vec3(.043,.067,.073)+machinedTitanium*.48,railShadow*.67);
+        c=mix(c,crestSilver,railCrest*.99);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
