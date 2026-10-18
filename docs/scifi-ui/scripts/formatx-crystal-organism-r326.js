@@ -836,6 +836,11 @@
         String((facets.length-bladesFirst)/3);
     }
 
+    /* R2129: the 390px REAL WebGL screenshot still showed stair-stepped
+       discontinuities because 11 rail segments tessellated the strongly
+       curved superellipsoid too coarsely. 26/30 segments plus greater physical
+       clearance keep the dual-depth machined ribs contiguous at screen DPR 2.
+       The darker underlay now reflects slate titanium rather than black. */
     /* R2128: actual browser screenshot showed dark broken seam marks along
        the permanent MAG arms. The original rail height (.012/.023) could
        intersect the slightly irregular 3D body, while its nearly black
@@ -848,7 +853,7 @@
        The ribs follow the same superellipsoid implicit surface, occupy the
        ORIGINAL buffers and cost fewer than 400 triangles on a normal phone. */
     const railFirst=facets.length;
-    const railSections=software?6:mobile?11:15;
+    const railSections=software?12:mobile?26:30;
     function frontCrystalZ(x,y){
       const power=mobile?.78:.61;
       const ax=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
@@ -871,7 +876,7 @@
             const along=.235+.425*t;
             const offset=side*(.069-.028*t);
             const width=(layer===0?.009:.0048)*(1-.17*t);
-            const lift=layer===0?.041:.056;
+            const lift=layer===0?.050:.069;
             const point=(edge)=>{
               const x=dx*along+px*(offset+edge*width);
               const y=dy*along+py*(offset+edge*width);
@@ -891,6 +896,7 @@
     }
     root.dataset.fxNativeMagRailsR2123='eight-dual-depth-real-geometry';
     root.dataset.fxNativeMagRailVisibilityR2128='raised-continuous-satin-silver-no-dashed-black';
+    root.dataset.fxNativeMagTessellationR2129='26-mobile-30-desktop-clearance-geometry';
     root.dataset.fxNativeMagRailTrianglesR2123=
       String((facets.length-railFirst)/3);
 
@@ -1664,7 +1670,7 @@
         vec3 crestSilver=vec3(.085,.12,.13)+
           vec3(.54,.59,.54)*(softboxA*.55+softboxB*.27+key*.20);
         c=mix(c,machinedTitanium,physicalBezel);
-        c=mix(c,vec3(.043,.067,.073)+machinedTitanium*.48,railShadow*.67);
+        c=mix(c,vec3(.077,.105,.112)+machinedTitanium*.74,railShadow*.58);
         c=mix(c,crestSilver,railCrest*.99);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
