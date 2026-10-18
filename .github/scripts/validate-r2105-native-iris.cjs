@@ -64,7 +64,9 @@ const views=[
           return root.dataset.fxCrystalOrganismR326==='ready'&&
             root.dataset.fxNativeMagIrisR2105===
               '8-raised-curved-titanium-blades'&&
-            root.dataset.fxNativeMagIrisTrianglesR2105==='16';
+            root.dataset.fxNativeMagIrisTrianglesR2105==='16'&&
+            root.dataset.fxNativeMagRailsR2123==='eight-dual-depth-real-geometry'&&
+            Number(root.dataset.fxNativeMagRailTrianglesR2123||0)>=192;
         },null,{timeout:60000});
         // The intro must relinquish the stage before sampling the permanent
         // original hero scene. A healthy screenshot alone isn't enough.
@@ -85,6 +87,8 @@ const views=[
             renderer:root.dataset.fxCrystalOrganismR326,
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
+            railGeometry:root.dataset.fxNativeMagRailsR2123,
+            railTriangles:Number(root.dataset.fxNativeMagRailTrianglesR2123||0),
             opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
             sapphireRadius:Number(root.dataset.fxNativeMagLensXRadiusR2108||0),
             count:canvases.length,
