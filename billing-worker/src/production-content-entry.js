@@ -13,7 +13,7 @@ const STARTUP_REVISION = '20261007-r1950c-studio-intro-edge-aa';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-7/jS2E6UlYvVATDKUiKoEophIpSvKdB8qLIrqHOjLh0='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
-const INLINE_CANONICAL_BOOT_HASH = "'sha256-c4rdyn8er9Z4FppBdilWwTcc3JceOzJ62q7aajWYKW4='";
+const INLINE_CANONICAL_BOOT_HASH = "'sha256-tMfttyOeayGKQTmV/cMt2B4XnHdjzB8jKqi6dic0l+I='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
