@@ -26,6 +26,16 @@ fs.mkdirSync(OUT,{recursive:true});
    release artifact by the ordinary download owner at runtime. Validate the
    exact first-party release repository rather than falsely requiring the
    initial /download/multiplatform path after hydration. */
+/* R2128 source lock: the real screenshots exposed broken black stripes from
+   almost coplanar dark rails. Enforce actual raised geometry, lighter recessed
+   metal and a cache-busted shader instead of just checking rail existence. */
+const nativeCore=fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
+assert.ok(
+  nativeCore.includes('const lift=layer===0?.041:.056;') &&
+  nativeCore.includes('railShadow*.67') &&
+  nativeCore.includes('fxNativeMagRailVisibilityR2128'),
+  'R2128 satin continuous rails must not revert to dotted black near-coplanar geometry');
 const validDownloadHref=href=>
   href==='/download/multiplatform' ||
   /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/v[0-9]+\/FormatX-Suite-Pro-V[0-9]+\.zip$/.test(href);
@@ -66,6 +76,8 @@ const views=[
               '8-raised-curved-titanium-blades'&&
             root.dataset.fxNativeMagIrisTrianglesR2105==='16'&&
             root.dataset.fxNativeMagRailsR2123==='eight-dual-depth-real-geometry'&&
+            root.dataset.fxNativeMagRailVisibilityR2128===
+              'raised-continuous-satin-silver-no-dashed-black'&&
             Number(root.dataset.fxNativeMagRailTrianglesR2123||0)>=192;
         },null,{timeout:60000});
         // The intro must relinquish the stage before sampling the permanent
@@ -88,6 +100,7 @@ const views=[
             blades:root.dataset.fxNativeMagIrisR2105,
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
             railGeometry:root.dataset.fxNativeMagRailsR2123,
+            railFinish:root.dataset.fxNativeMagRailVisibilityR2128||'',
             railTriangles:Number(root.dataset.fxNativeMagRailTrianglesR2123||0),
             opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
             sapphireRadius:Number(root.dataset.fxNativeMagLensXRadiusR2108||0),
