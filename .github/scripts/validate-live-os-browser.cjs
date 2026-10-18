@@ -12,6 +12,7 @@ async function readDiagnostics(page, label, diagnosticMode) {
     metricValues: [...document.querySelectorAll('#live-operating-system [data-fx-metrics] article strong')].map(node => node.textContent),
     faultRequests: window.__liveOsFaultRequests || []
   }));
+  report.lastDiagnostics = { label, diagnosticMode, ...result };
   if (diagnosticMode !== 'normal' && !result.faultRequests.length) throw new Error(`${label}: diagnostic cadence fault was not exercised`);
   if (!result.measurements.length) throw new Error(`${label}: no actual diagnostics observation completed`);
   for (const measured of result.measurements) {
@@ -221,9 +222,13 @@ async function exercise(page, label, entry = 'keyboard', diagnosticMode = 'norma
       }
     }
 
+    // Keep all original four routes, then run each added cadence fault in
+    // a fresh browser so their native scheduling observations are isolated.
+    await browser.close();
     report.cadence = {};
     for (const mode of ['sparse', 'stalled']) {
-      const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+      const cadenceBrowser = await chromium.launch({ headless: true, args: ['--use-angle=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+      const context = await cadenceBrowser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
       await context.addInitScript(({ delay }) => {
         const request = window.requestAnimationFrame, cancel = window.cancelAnimationFrame;
         const pending = new Map(); let nextHandle = -1;
@@ -246,7 +251,7 @@ async function exercise(page, label, entry = 'keyboard', diagnosticMode = 'norma
         };
       }, { delay: mode === 'sparse' ? 1000 : 10000 });
       try { report.cadence[mode] = await exercise(await context.newPage(), `desktop-${mode}`, 'keyboard', mode); }
-      finally { await context.close(); }
+      finally { await context.close(); await cadenceBrowser.close(); }
     }
 
     fs.writeFileSync('live-os-browser-report.json', JSON.stringify(report, null, 2));

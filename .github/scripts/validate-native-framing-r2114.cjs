@@ -20,7 +20,8 @@ const reports=[];
    {name:'desktop-1920',width:1920,height:1080,mobile:false},
    {name:'mobile-320',width:320,height:568,mobile:true},
    {name:'mobile-390',width:390,height:844,mobile:true},
-   {name:'desktop-delayed-identity',width:1920,height:1080,mobile:false,identityEntryDelay:2400}
+   {name:'desktop-delayed-identity',width:1920,height:1080,mobile:false,identityEntryDelay:2400},
+   {name:'desktop-stalled-identity',width:1920,height:1080,mobile:false,identityEntryDelay:10000}
   ]){
    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},
     isMobile:profile.mobile,hasTouch:profile.mobile,deviceScaleFactor:profile.mobile?2:1,

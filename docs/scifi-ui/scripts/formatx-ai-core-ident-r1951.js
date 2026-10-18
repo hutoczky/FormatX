@@ -11,16 +11,19 @@
   let introFinished = false;
   let departed = false;
   let entryFrame = 0;
+  let entryTimer = 0;
   let exitTimer = 0;
   let removeTimer = 0;
 
   function clearTimers() {
     if (entryFrame) cancelAnimationFrame(entryFrame);
+    if (entryTimer) clearTimeout(entryTimer);
     if (exitTimer) clearTimeout(exitTimer);
     if (removeTimer) clearTimeout(removeTimer);
     exitTimer = 0;
     removeTimer = 0;
     entryFrame = 0;
+    entryTimer = 0;
   }
 
   function removeExisting() {
@@ -54,26 +57,35 @@
 
     ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'shown-mobile' : 'shown-desktop';
 
-    entryFrame = requestAnimationFrame(() => {
-      entryFrame = requestAnimationFrame(() => {
-        entryFrame = 0;
-        if (departed || !badge.isConnected) return;
-        badge.classList.add('is-visible');
+    let entered = false;
+    function enterIdentity() {
+      if (entered || departed || !badge.isConnected || document.hidden) return;
+      entered = true;
+      if (entryFrame) cancelAnimationFrame(entryFrame);
+      if (entryTimer) clearTimeout(entryTimer);
+      entryFrame = entryTimer = 0;
+      // Resolve the authored entry style before applying its destination.
+      // This also starts the real CSS transition when display callbacks stall.
+      void getComputedStyle(badge).opacity;
+      badge.classList.add('is-visible');
 
-        // The hold belongs to the visible entry, not node creation. A busy
-        // compositor must not consume the complete label lifetime before its
-        // two presentation callbacks have had a chance to run.
-        const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
-        exitTimer = window.setTimeout(() => {
-          badge.classList.remove('is-visible');
-          badge.classList.add('is-exiting');
-          ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'exiting-mobile' : 'exiting-desktop';
-          removeTimer = window.setTimeout(() => {
-            badge.remove();
-            ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'complete-mobile' : 'complete-desktop';
-          }, REDUCED ? 120 : 680);
-        }, hold);
-      });
+      // Hold starts only after entry is applied, for either presentation route.
+      const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
+      exitTimer = window.setTimeout(() => {
+        badge.classList.remove('is-visible');
+        badge.classList.add('is-exiting');
+        ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'exiting-mobile' : 'exiting-desktop';
+        removeTimer = window.setTimeout(() => {
+          badge.remove();
+          ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'complete-mobile' : 'complete-desktop';
+        }, REDUCED ? 120 : 680);
+      }, hold);
+    }
+    // Prefer the existing two presentation callbacks, with a real task-based
+    // entry route so delayed display callbacks cannot strand an invisible node.
+    entryTimer = window.setTimeout(enterIdentity, 120);
+    entryFrame = requestAnimationFrame(() => {
+      entryFrame = requestAnimationFrame(enterIdentity);
     });
   }
 
