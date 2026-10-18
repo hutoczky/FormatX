@@ -32,12 +32,14 @@ fs.mkdirSync(OUT,{recursive:true});
 const nativeCore=fs.readFileSync(
   'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 assert.ok(
-  nativeCore.includes('const lift=layer===0?.050:.069;') &&
-  nativeCore.includes('const railSections=software?12:mobile?26:30;') &&
+  nativeCore.includes('const lift=layer===0?.085:.108;') &&
+  nativeCore.includes('const railSections=software?18:mobile?36:40;') &&
   nativeCore.includes("fxNativeMagTessellationR2129='26-mobile-30-desktop-clearance-geometry'") &&
-  nativeCore.includes('railShadow*.58') &&
-  nativeCore.includes('vec3(.077,.105,.112)+machinedTitanium*.74') &&
-  nativeCore.includes('fxNativeMagRailVisibilityR2128'),
+  nativeCore.includes('railShadow*.68') &&
+  nativeCore.includes('vec3(.12,.16,.17)+machinedTitanium*.74') &&
+  nativeCore.includes('fxNativeMagRailVisibilityR2128') &&
+  nativeCore.includes('fxNativeMagRailVisibilityR2131') &&
+  nativeCore.includes('fxNativeMagLensContrastR2131'),
   'R2128 satin continuous rails must not revert to dotted black near-coplanar geometry');
 const validDownloadHref=href=>
   href==='/download/multiplatform' ||
@@ -81,6 +83,10 @@ const views=[
             root.dataset.fxNativeMagRailsR2123==='eight-dual-depth-real-geometry'&&
             root.dataset.fxNativeMagRailVisibilityR2128===
               'raised-continuous-satin-silver-no-dashed-black'&&
+            root.dataset.fxNativeMagRailVisibilityR2131===
+              'wider-anti-aliased-raised-satin-double-ribs'&&
+            root.dataset.fxNativeMagLensContrastR2131===
+              'visible-depth-graded-sapphire-optic'&&
             Number(root.dataset.fxNativeMagRailTrianglesR2123||0)>=192;
         },null,{timeout:60000});
         // The intro must relinquish the stage before sampling the permanent
@@ -104,6 +110,8 @@ const views=[
             triangles:Number(root.dataset.fxNativeMagIrisTrianglesR2105),
             railGeometry:root.dataset.fxNativeMagRailsR2123,
             railFinish:root.dataset.fxNativeMagRailVisibilityR2128||'',
+            railFinishR2131:root.dataset.fxNativeMagRailVisibilityR2131||'',
+            sapphireR2131:root.dataset.fxNativeMagLensContrastR2131||'',
             railTriangles:Number(root.dataset.fxNativeMagRailTrianglesR2123||0),
             opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
             sapphireRadius:Number(root.dataset.fxNativeMagLensXRadiusR2108||0),
