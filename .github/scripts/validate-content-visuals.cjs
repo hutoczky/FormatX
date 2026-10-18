@@ -269,16 +269,41 @@ async function assertHeroDisclosure(page) {
       (panels[0].textContent||'').trim().length>70;
   }, null, { timeout: 9000 });
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  await page.waitForFunction(() => {
-    const root=document.documentElement;
-    const original=document.querySelector('#hero .hero-copy');
-    return root.dataset.fxCinematicSceneR536==='core'&&
-      root.dataset.fxArchiveCinema!=='active'&&
-      root.dataset.fxArchiveScrollEntryR2121==='landing-hero-undisturbed'&&
-      !!original&&getComputedStyle(original).display!=='none'&&
-      original.getBoundingClientRect().width>90&&
-      document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length===0;
-  }, null, { timeout: 9000 });
+  try {
+    await page.waitForFunction(() => {
+      const root=document.documentElement;
+      const original=document.querySelector('#hero .hero-copy');
+      return root.dataset.fxCinematicSceneR536==='core'&&
+        root.dataset.fxArchiveCinema!=='active'&&
+        root.dataset.fxArchiveScrollEntryR2121==='landing-hero-undisturbed'&&
+        !!original&&getComputedStyle(original).display!=='none'&&
+        original.getBoundingClientRect().width>90&&
+        document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length===0;
+    }, null, { timeout: 9000 });
+  } catch (error) {
+    const diagnostics=await page.evaluate(()=>{
+      const root=document.documentElement,hero=document.querySelector('#hero .hero-copy');
+      const cs=hero?getComputedStyle(hero):null,rect=hero?.getBoundingClientRect();
+      return {
+        scrollY,visual:root.dataset.fxCinematicSceneR536,
+        archive:root.dataset.fxArchiveCinema,entry:root.dataset.fxArchiveScrollEntryR2121,
+        mode:root.dataset.fxArchiveExperience,
+        nativeCanvas:root.dataset.fxCrystalOrganismR326,
+        prepared:root.dataset.fxArchiveCinemaPrepared,
+        chapter:root.dataset.fxArchiveCinemaChapter,
+        updateScroll:root.dataset.fxArchiveUpdateScroll,
+        restore:root.dataset.fxArchiveDock,
+        heroDisplay:cs?.display,heroVisibility:cs?.visibility,
+        heroWidth:rect?.width,heroHeight:rect?.height,
+        activePanels:document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length,
+        activeHosts:document.querySelectorAll('[data-fx-cinema-host-active="true"]').length,
+        sceneCount:root.dataset.fxArchiveSceneCount,
+        originalCTA:!!document.getElementById('hero-download')
+      };
+    });
+    console.error('R2133_ACTUAL_REVERSE_SCROLL_STATE',JSON.stringify(diagnostics));
+    throw error;
+  }
   await page.waitForTimeout(250);
 }
 
