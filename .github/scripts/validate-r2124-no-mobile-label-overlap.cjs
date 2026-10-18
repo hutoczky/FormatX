@@ -50,6 +50,12 @@ function overlapping(a,b){
         await page.waitForSelector('.fx-ai-core-ident-r1951.is-visible',{
           timeout:45000
         });
+        /* The class is set two RAFs BEFORE the .48s CSS fade completes.
+           Capture actual readable opacity, not the first zero-alpha frame. */
+        await page.waitForFunction(()=>{
+          const badge=document.querySelector('.fx-ai-core-ident-r1951.is-visible');
+          return !!badge&&Number(getComputedStyle(badge).opacity)>.65;
+        },null,{timeout:2400});
         const measured=await page.evaluate(()=>{
           const rect=(e)=>{
             if(!e)return null;
