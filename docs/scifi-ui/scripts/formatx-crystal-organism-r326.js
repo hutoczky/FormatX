@@ -1496,28 +1496,28 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.105,.128,.131),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(.133,.144,.140),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.30,.33,.31)*facetSilver*${mobile?'.095':'.120'};
+        c+=vec3(.37,.39,.34)*facetSilver*${mobile?'.185':'.215'};
         c+=vec3(.020,.060,.070)*facetCool*${mobile?'.048':'.058'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.48,.59,.58)*softboxB*${mobile?'.250':'.235'};
+        c+=vec3(.86,.90,.84)*softboxA*.105;
+        c+=vec3(.46,.55,.53)*softboxB*${mobile?'.185':'.165'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.004;
+        c+=vec3(.70,.78,.74)*glassBlade*.029;
 
         /* R1942 — internal prism architecture.
            Four broad refractive planes run toward the signature tips. They are
@@ -1532,9 +1532,9 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.24,.34,.33)*axisRidge*(.17+.050*prismSweep);
+        c+=vec3(.30,.38,.35)*axisRidge*(.31+.095*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.24*diagonalValley;
+        c*=1.0-.32*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1570,7 +1570,7 @@
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
         c+=vec3(.030,.105,.123)*fresnel*.23;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.067,.19,.20)*deepEdge*.20;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1649,7 +1649,16 @@
         sapphireGlass+=vec3(.016,.046,.057)*innerGlass*.34;
         sapphireGlass+=vec3(.18,.23,.22)*glassRim*
           (.22+.32*softboxA+.22*softboxB);
+        /* R2123 physically raised machined rails; shadow seam and the
+           raised polished crest differ from the broad titanium bezel.
+           All three are original depth-tested vertices in one WebGL draw. */
+        float railShadow=step(5.880,vFacet)*(1.0-step(5.892,vFacet));
+        float railCrest=step(5.850,vFacet)*(1.0-step(5.870,vFacet));
+        vec3 crestSilver=vec3(.085,.12,.13)+
+          vec3(.54,.59,.54)*(softboxA*.55+softboxB*.27+key*.20);
         c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,vec3(.012,.024,.030)+machinedTitanium*.23,railShadow*.96);
+        c=mix(c,crestSilver,railCrest*.96);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
