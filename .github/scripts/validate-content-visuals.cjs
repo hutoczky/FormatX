@@ -256,18 +256,46 @@ async function assertHeroDisclosure(page) {
      on user scroll, then returns to the readable original hero on scroll 0.
      Preserve both physical native-paper delivery and the no-CLS reversibility.
      Never bypass real browser input or silently skip the original document. */
-  await page.waitForFunction(() => {
-    const root=document.documentElement;
-    const panels=[...document.querySelectorAll(
-      'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
-    )];
-    return root.dataset.fxArchiveExperience==='ready'&&
-      root.dataset.fxArchiveCinema==='active'&&
-      root.dataset.fxArchiveScrollEntryR2121==='real-scroll-or-explicit-archive'&&
-      panels.length===1&&
-      getComputedStyle(panels[0]).visibility==='visible'&&
-      (panels[0].textContent||'').trim().length>70;
-  }, null, { timeout: 9000 });
+  try {
+    await page.waitForFunction(() => {
+      const root=document.documentElement;
+      const panels=[...document.querySelectorAll(
+        'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+      )];
+      return root.dataset.fxArchiveExperience==='ready'&&
+        root.dataset.fxArchiveCinema==='active'&&
+        root.dataset.fxArchiveScrollEntryR2121==='real-scroll-or-explicit-archive'&&
+        panels.length===1&&
+        getComputedStyle(panels[0]).visibility==='visible'&&
+        (panels[0].textContent||'').trim().length>70;
+    }, null, { timeout: 9000 });
+  } catch (error) {
+    const state=await page.evaluate(()=>{
+      const root=document.documentElement;
+      const panels=[...document.querySelectorAll(
+        'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+      )];
+      const panel=panels[0],cs=panel&&getComputedStyle(panel);
+      const hero=document.querySelector('#hero .hero-copy');
+      return {scrollY,viewport:innerHeight,url:location.search,
+        intro:root.dataset.fxMagBirthOwnerR533||'',introDone:root.dataset.fxIntro||'',
+        archive:root.dataset.fxArchiveCinema||'',
+        entry:root.dataset.fxArchiveScrollEntryR2121||'',
+        archiveExperience:root.dataset.fxArchiveExperience||'',
+        chapter:root.dataset.fxArchiveCinemaChapter||'',
+        current:root.dataset.fxArchiveCurrent||'',
+        progress:root.dataset.fxArchivePhase||'',
+        panels:panels.length,panelVisible:cs?.visibility||'',
+        panelLength:panel?.textContent?.length||0,
+        worldScene:root.dataset.fxCinematicSceneR536||'',
+        originalHeroVisible:!!hero&&getComputedStyle(hero).display!=='none',
+        scriptReady:!!window.FormatXArchiveExperience,
+        errors:root.dataset.fxArchiveError||''
+      };
+    });
+    console.error('R2133_ARCHIVE_ENTER_BLOCKER',JSON.stringify(state));
+    throw error;
+  }
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
   try {
     await page.waitForFunction(() => {
