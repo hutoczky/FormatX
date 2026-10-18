@@ -853,7 +853,7 @@
        The ribs follow the same superellipsoid implicit surface, occupy the
        ORIGINAL buffers and cost fewer than 400 triangles on a normal phone. */
     const railFirst=facets.length;
-    const railSections=software?12:mobile?26:30;
+    const railSections=software?18:mobile?36:40;
     function frontCrystalZ(x,y){
       const power=mobile?.78:.61;
       const ax=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
@@ -875,8 +875,8 @@
             const t=step/railSections;
             const along=.235+.425*t;
             const offset=side*(.069-.028*t);
-            const width=(layer===0?.009:.0048)*(1-.17*t);
-            const lift=layer===0?.050:.069;
+            const width=(layer===0?.015:.009)*(1-.12*t);
+            const lift=layer===0?.085:.108;
             const point=(edge)=>{
               const x=dx*along+px*(offset+edge*width);
               const y=dy*along+py*(offset+edge*width);
@@ -897,6 +897,9 @@
     root.dataset.fxNativeMagRailsR2123='eight-dual-depth-real-geometry';
     root.dataset.fxNativeMagRailVisibilityR2128='raised-continuous-satin-silver-no-dashed-black';
     root.dataset.fxNativeMagTessellationR2129='26-mobile-30-desktop-clearance-geometry';
+    root.dataset.fxNativeMagRailVisibilityR2131='wider-anti-aliased-raised-satin-double-ribs';
+    root.dataset.fxNativeMagTessellationR2131='36-mobile-40-desktop-clearance-geometry';
+    root.dataset.fxNativeMagLensContrastR2131='visible-depth-graded-sapphire-optic';
     root.dataset.fxNativeMagRailTrianglesR2123=
       String((facets.length-railFirst)/3);
 
@@ -1649,28 +1652,31 @@
         float glassRim=smoothstep(.71,.92,lensRadius);
         float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),17.0);
         float secondarySpec=pow(sat(dot(n,normalize(vec3(.58,-.28,.76)))),27.0);
-        vec3 sapphireGlass=vec3(.004,.014,.027)+
-          vec3(.041,.092,.118)*(.24+.76*key)+
-          vec3(.21,.29,.26)*sapphireSpec*.52+
-          vec3(.10,.19,.22)*secondarySpec*.23+
-          vec3(.030,.11,.16)*fresnel*.31;
+        /* R2131: realistic but legible sapphire coating on genuine
+           curved physical glass. The previous pupil was almost black at
+           390 px, obscuring the raised eight-blade optic entirely. */
+        vec3 sapphireGlass=vec3(.010,.028,.045)+
+          vec3(.075,.146,.176)*(.28+.72*key)+
+          vec3(.27,.36,.32)*sapphireSpec*.72+
+          vec3(.14,.25,.29)*secondarySpec*.38+
+          vec3(.045,.14,.19)*fresnel*.35;
         sapphireGlass=mix(
           sapphireGlass,
           vec3(.002,.009,.018)+sapphireGlass*.35,
-          apertureDepth*.52
+          apertureDepth*.37
         );
-        sapphireGlass+=vec3(.016,.046,.057)*innerGlass*.34;
-        sapphireGlass+=vec3(.18,.23,.22)*glassRim*
-          (.22+.32*softboxA+.22*softboxB);
+        sapphireGlass+=vec3(.030,.075,.090)*innerGlass*.50;
+        sapphireGlass+=vec3(.24,.30,.28)*glassRim*
+          (.29+.36*softboxA+.22*softboxB);
         /* R2123 physically raised machined rails; shadow seam and the
            raised polished crest differ from the broad titanium bezel.
            All three are original depth-tested vertices in one WebGL draw. */
         float railShadow=step(5.880,vFacet)*(1.0-step(5.892,vFacet));
         float railCrest=step(5.850,vFacet)*(1.0-step(5.870,vFacet));
-        vec3 crestSilver=vec3(.085,.12,.13)+
-          vec3(.54,.59,.54)*(softboxA*.55+softboxB*.27+key*.20);
+        vec3 crestSilver=vec3(.17,.225,.23)+
+          vec3(.54,.61,.55)*(softboxA*.55+softboxB*.27+key*.20);
         c=mix(c,machinedTitanium,physicalBezel);
-        c=mix(c,vec3(.077,.105,.112)+machinedTitanium*.74,railShadow*.58);
+        c=mix(c,vec3(.12,.16,.17)+machinedTitanium*.74,railShadow*.68);
         c=mix(c,crestSilver,railCrest*.99);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
