@@ -32,8 +32,11 @@ fs.mkdirSync(OUT,{recursive:true});
 const nativeCore=fs.readFileSync(
   'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 assert.ok(
-  nativeCore.includes('const lift=layer===0?.041:.056;') &&
-  nativeCore.includes('railShadow*.67') &&
+  nativeCore.includes('const lift=layer===0?.050:.069;') &&
+  nativeCore.includes('const railSections=software?12:mobile?26:30;') &&
+  nativeCore.includes("fxNativeMagTessellationR2129='26-mobile-30-desktop-clearance-geometry'") &&
+  nativeCore.includes('railShadow*.58') &&
+  nativeCore.includes('vec3(.077,.105,.112)+machinedTitanium*.74') &&
   nativeCore.includes('fxNativeMagRailVisibilityR2128'),
   'R2128 satin continuous rails must not revert to dotted black near-coplanar geometry');
 const validDownloadHref=href=>
