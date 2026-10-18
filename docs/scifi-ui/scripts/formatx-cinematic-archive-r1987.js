@@ -1175,7 +1175,13 @@ void main(){
         const nextChapter=current?.s.key||'home';
         if(cinemaPrepared&&root.dataset.fxArchiveCinemaChapter!==nextChapter){
           syncCinema();
+          /* R2130: update the chapter's REAL live heading in the physical
+             film handoff during the same scroll event as the original HTML
+             panel. The visual test caught stale previous-chapter titles
+             even though the true native paper had already moved. */
+          updateHandoff();
           root.dataset.fxArchiveSynchronousShelfR2122=nextChapter;
+          root.dataset.fxArchiveSynchronousHeadingR2130=nextChapter;
         }
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
