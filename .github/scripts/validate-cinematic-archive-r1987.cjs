@@ -614,11 +614,30 @@ async function verifyNormalEntry(browser,isMobile){
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  /* R2132 R2121 real scroll contract: do not auto-dock the permanent
+     MAG on first paint. Preserve the original hero, then a genuine user
+     wheel event should deliver the archived original HTML paper. */
   await page.waitForFunction(()=>{
     const root=document.documentElement;
     return root.dataset.fxArchiveExperience==='ready'
-      && root.dataset.fxArchiveCinema==='active';
+      && root.dataset.fxCrystalOrganismR326==='ready';
   },null,{timeout:65000});
+  const untouched=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.fxArchiveCinema||'home',
+    entry:document.documentElement.dataset.fxArchiveScrollEntryR2121,
+    scroll:scrollY,
+    hero:!!document.querySelector('#hero .hero-copy')
+  }));
+  assert.equal(untouched.entry,'landing-hero-undisturbed',
+    'Normal site jumped from MAG hero to archive without human input: '+
+    JSON.stringify(untouched));
+  await page.mouse.wheel(0,Math.round((isMobile?844:900)*1.25));
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxArchiveExperience==='ready'
+      && root.dataset.fxArchiveCinema==='active'
+      && root.dataset.fxArchiveScrollEntryR2121==='real-scroll-or-explicit-archive';
+  },null,{timeout:30000});
   const result=await page.evaluate(()=>{
     const root=document.documentElement;
     const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
