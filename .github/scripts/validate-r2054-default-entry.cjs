@@ -30,8 +30,35 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
     await page.goto(ROOT+'?r2054-normal-entry='+c.label,{
       waitUntil:'domcontentloaded',timeout:60000
     });
-    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
-      null,{timeout:48000});
+    try {
+      await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
+        null,{timeout:48000});
+    } catch (error) {
+      const diagnostics=await page.evaluate(()=>{
+        const root=document.documentElement;
+        const stage=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+        const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+        const scripts=[...document.scripts].filter(node=>
+          /archive|mag|motion|core/.test(node.src)).map(node=>
+          ({src:node.src.split('/').pop(),loaded:node.dataset.loaded||''}));
+        return {
+          root:Object.fromEntries(Object.entries(root.dataset).filter(([key])=>
+            /archive|core|mag|webgl|gpu|intro|cinema/i.test(key))),
+          stage:!!stage,webglReady:!!stage?.getContext('webgl2'),
+          alive:root.dataset.fxCrystalOrganismR326,
+          panel:!!panel,
+          archiveApi:!!window.FormatXArchiveExperience,
+          sharedCore:!!window.FormatXLivingCore?.sharedWebGL2,
+          registered:typeof window.FormatXLivingCore?.registerScenePass,
+          activeIntro:!!document.querySelector('.fx-mag-birth-r533:not([hidden])'),
+          current:location.href,
+          scripts
+        };
+      });
+      console.error('R2130_NORMAL_ENTRY_BLOCKER',
+        JSON.stringify({viewport:c.label,diagnostics,faults}));
+      throw error;
+    }
     await page.waitForTimeout(500);
     const sample=await page.evaluate(()=>{
       const root=document.documentElement;
