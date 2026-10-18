@@ -10,14 +10,17 @@
   let shown = false;
   let introFinished = false;
   let departed = false;
+  let entryFrame = 0;
   let exitTimer = 0;
   let removeTimer = 0;
 
   function clearTimers() {
+    if (entryFrame) cancelAnimationFrame(entryFrame);
     if (exitTimer) clearTimeout(exitTimer);
     if (removeTimer) clearTimeout(removeTimer);
     exitTimer = 0;
     removeTimer = 0;
+    entryFrame = 0;
   }
 
   function removeExisting() {
@@ -51,20 +54,27 @@
 
     ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'shown-mobile' : 'shown-desktop';
 
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => badge.classList.add('is-visible'));
-    });
+    entryFrame = requestAnimationFrame(() => {
+      entryFrame = requestAnimationFrame(() => {
+        entryFrame = 0;
+        if (departed || !badge.isConnected) return;
+        badge.classList.add('is-visible');
 
-    const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
-    exitTimer = window.setTimeout(() => {
-      badge.classList.remove('is-visible');
-      badge.classList.add('is-exiting');
-      ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'exiting-mobile' : 'exiting-desktop';
-      removeTimer = window.setTimeout(() => {
-        badge.remove();
-        ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'complete-mobile' : 'complete-desktop';
-      }, REDUCED ? 120 : 680);
-    }, hold);
+        // The hold belongs to the visible entry, not node creation. A busy
+        // compositor must not consume the complete label lifetime before its
+        // two presentation callbacks have had a chance to run.
+        const hold = REDUCED ? 800 : (MOBILE ? 1250 : 1500);
+        exitTimer = window.setTimeout(() => {
+          badge.classList.remove('is-visible');
+          badge.classList.add('is-exiting');
+          ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'exiting-mobile' : 'exiting-desktop';
+          removeTimer = window.setTimeout(() => {
+            badge.remove();
+            ROOT.dataset.fxAiCoreIdentityR1951 = MOBILE ? 'complete-mobile' : 'complete-desktop';
+          }, REDUCED ? 120 : 680);
+        }, hold);
+      });
+    });
   }
 
   document.addEventListener('formatx:magbirthcomplete', event => {

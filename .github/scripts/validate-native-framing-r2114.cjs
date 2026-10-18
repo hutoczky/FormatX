@@ -19,13 +19,26 @@ const reports=[];
    {name:'desktop-1440',width:1440,height:900,mobile:false},
    {name:'desktop-1920',width:1920,height:1080,mobile:false},
    {name:'mobile-320',width:320,height:568,mobile:true},
-   {name:'mobile-390',width:390,height:844,mobile:true}
+   {name:'mobile-390',width:390,height:844,mobile:true},
+   {name:'desktop-delayed-identity',width:1920,height:1080,mobile:false,identityEntryDelay:2400}
   ]){
    const context=await browser.newContext({viewport:{width:profile.width,height:profile.height},
     isMobile:profile.mobile,hasTouch:profile.mobile,deviceScaleFactor:profile.mobile?2:1,
     locale:'hu-HU',colorScheme:'dark',reducedMotion:'no-preference'});
    try{
     const page=await context.newPage();
+    if(profile.identityEntryDelay){
+     await page.route('**/formatx-ai-core-ident-r1951.js?*',async route=>{
+      const response=await route.fetch();
+      const source=await response.text();
+      // Delay only this label's first presentation callback. Keep the actual
+      // native renderer, intro clock, readiness and original framing checks.
+      const scheduling=`const nativeFrame=window.requestAnimationFrame.bind(window);let firstIdentityFrame=true;
+       const requestAnimationFrame=callback=>{if(firstIdentityFrame){firstIdentityFrame=false;
+        return setTimeout(()=>nativeFrame(callback),${profile.identityEntryDelay});}return nativeFrame(callback);};`;
+      await route.fulfill({response,body:source.replace("'use strict';","'use strict';"+scheduling)});
+     });
+    }
     await page.addInitScript(()=>{
      const audit=window.__nativeFramingR2114={frames:[],identity:[],identityMotion:[],complete:[],errors:[]};
      addEventListener('error',event=>audit.errors.push(event.message));
@@ -95,7 +108,22 @@ const reports=[];
      &&document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:20000});
     await page.waitForTimeout(600);
     await page.waitForFunction(()=>window.__nativeFramingR2114.identityMotion.length>0
-     &&!document.querySelector('.fx-ai-core-ident-r1951'),null,{timeout:6000});
+     &&!document.querySelector('.fx-ai-core-ident-r1951'),null,{timeout:6000}).catch(async error=>{
+      const failure=await page.evaluate(()=>({
+       audit:window.__nativeFramingR2114,
+       identity:document.documentElement.dataset.fxAiCoreIdentityR1951,
+       ready:document.documentElement.dataset.fxCrystalOrganismR326,
+       visibility:document.visibilityState,
+       badge:document.querySelector('.fx-ai-core-ident-r1951')?.outerHTML||null,
+       styles:[...document.querySelectorAll('link[data-fx-ai-core-ident-r1951]')].map(link=>({href:link.href,media:link.media,loaded:!!link.sheet}))
+      }));
+      reports.push({profile:profile.name,failure});fs.mkdirSync(path.dirname(out),{recursive:true});
+      fs.writeFileSync(out,JSON.stringify(reports,null,2));
+      console.error('NATIVE_FRAMING_FAILURE '+JSON.stringify({profile:profile.name,identity:failure.identity,
+       ready:failure.ready,visibility:failure.visibility,badge:failure.badge,styles:failure.styles,
+       frameCount:failure.audit.frames.length,identitySamples:failure.audit.identityMotion.length,errors:failure.audit.errors}));
+      throw error;
+     });
     const report=await page.evaluate(()=>{
      const audit=window.__nativeFramingR2114;audit.stopped=true;
      const canvas=window.FormatXLivingCore?.canvas;

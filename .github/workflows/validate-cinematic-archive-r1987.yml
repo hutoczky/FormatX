@@ -121,3 +121,4 @@ jobs:
             .archive-artifacts/
             artifacts/r2117-hero-footprint/
           if-no-files-found: ignore
+          include-hidden-files: true

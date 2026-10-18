@@ -12,6 +12,19 @@ async function exercise(page, label, entry = 'keyboard') {
     const original = HTMLCanvasElement.prototype.getContext;
     const seen = new WeakSet();
     window.__liveOsWebGLContexts = [];
+    window.__liveOsFrameRequests = [];
+    const requestFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = function(callback) {
+      // Observe the real diagnostics callbacks without changing their count,
+      // timestamps or scheduling. Generic async errors are retained below too.
+      if (!String(new Error().stack).includes('/formatx-live-os-core.js')) return requestFrame.call(this, callback);
+      const item = { name: callback.name, requestedAt: performance.now(), returnedAt: null };
+      if (__liveOsFrameRequests.length < 200) __liveOsFrameRequests.push(item);
+      return requestFrame.call(this, function(now) {
+        item.returnedAt = performance.now();
+        return callback.call(this, now);
+      });
+    };
     HTMLCanvasElement.prototype.getContext = function(type, ...args) {
       const context = original.call(this, type, ...args);
       if (context && /^(?:webgl2?|experimental-webgl)$/.test(String(type)) && !seen.has(context)) {
@@ -22,9 +35,9 @@ async function exercise(page, label, entry = 'keyboard') {
     };
   });
   const errors = [];
+  (report.caseErrors ||= {})[`${label}-${entry}`] = errors;
   page.on('pageerror', error => {
-    const text = String(error);
-    if (/formatx-live-os|Live OS/i.test(text)) errors.push(text);
+    errors.push(String(error.stack || error));
   });
   page.on('console', message => {
     const text = message.text();
@@ -100,6 +113,7 @@ async function exercise(page, label, entry = 'keyboard') {
     };
   });
   result.diagnosticsContexts = diagnosticsContexts;
+  result.frameRequests = await page.evaluate(() => __liveOsFrameRequests);
 
   if (result.metrics !== 8) throw new Error(`${label}: expected 8 diagnostics metrics`);
   if (result.proofCards !== 4) throw new Error(`${label}: expected 4 evidence cards`);
@@ -166,6 +180,7 @@ async function exercise(page, label, entry = 'keyboard') {
       metrics: document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length,
       busy: document.querySelector('#live-operating-system [data-fx-metrics]')?.getAttribute('aria-busy'),
       contexts: window.__liveOsWebGLContexts || [],
+      frameRequests: window.__liveOsFrameRequests || [],
       root: { ...document.documentElement.dataset }
     })).catch(() => null);
     fs.writeFileSync('live-os-browser-report.json', JSON.stringify(report, null, 2));

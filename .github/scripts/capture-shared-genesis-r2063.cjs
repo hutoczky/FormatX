@@ -67,6 +67,9 @@ const report={sha:process.env.AUDITED_SHA,url,cases:[]};
       let encoded='';
       for(;;){const part=await trace.send('IO.read',{handle:stream});encoded+=part.data;if(part.eof)break;}
       await trace.send('IO.close',{handle:stream});
+      // Retain the complete measured call tree as well as the short summary;
+      // a longest-task list cannot identify work nested inside a blocked frame.
+      fs.writeFileSync(path.join(output,profile+'-trace.json'),encoded);
       const events=JSON.parse(encoded).traceEvents;
       const names=new Map(events.filter(event=>event.name==='thread_name').map(event=>[event.pid+':'+event.tid,event.args?.name]));
       item.trace={longest:events.filter(event=>event.ph==='X'&&event.dur>=50000)
