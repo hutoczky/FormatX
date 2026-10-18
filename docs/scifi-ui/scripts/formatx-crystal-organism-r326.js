@@ -836,6 +836,57 @@
         String((facets.length-bladesFirst)/3);
     }
 
+    /* R2123: eight true front-facing, curved, dual-depth precision ribs.
+       This was missing from the permanent R326 MAG, leaving its silhouette
+       a single liquid-looking turquoise sheet after the much richer intro.
+       The ribs follow the same superellipsoid implicit surface, occupy the
+       ORIGINAL buffers and cost fewer than 400 triangles on a normal phone. */
+    const railFirst=facets.length;
+    const railSections=software?6:mobile?11:15;
+    function frontCrystalZ(x,y){
+      const power=mobile?.78:.61;
+      const ax=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
+      const ay=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
+      const az=mobile?.64:.49;
+      const remaining=1.0-
+        Math.pow(Math.abs(x)/ax,power)-
+        Math.pow(Math.abs(y)/ay,power);
+      return az*Math.pow(Math.max(.0005,remaining),1/power);
+    }
+    for(let arm=0;arm<4;arm++){
+      const a=arm*Math.PI*.5;
+      const dx=Math.cos(a),dy=Math.sin(a);
+      const px=-dy,py=dx;
+      for(const side of [-1,1]){
+        for(const layer of [0,1]){
+          let left=null,right=null;
+          for(let step=0;step<=railSections;step++){
+            const t=step/railSections;
+            const along=.235+.425*t;
+            const offset=side*(.069-.028*t);
+            const width=(layer===0?.011:.0048)*(1-.17*t);
+            const lift=layer===0?.012:.023;
+            const point=(edge)=>{
+              const x=dx*along+px*(offset+edge*width);
+              const y=dy*along+py*(offset+edge*width);
+              return [x,y,frontCrystalZ(x,y)+lift];
+            };
+            const nextLeft=point(-1);
+            const nextRight=point(1);
+            if(left&&right){
+              armorQuad(left,right,nextRight,nextLeft,
+                layer===0?5.885:5.855);
+            }
+            left=nextLeft;
+            right=nextRight;
+          }
+        }
+      }
+    }
+    root.dataset.fxNativeMagRailsR2123='eight-dual-depth-real-geometry';
+    root.dataset.fxNativeMagRailTrianglesR2123=
+      String((facets.length-railFirst)/3);
+
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
