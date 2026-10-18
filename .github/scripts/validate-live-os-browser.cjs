@@ -5,7 +5,44 @@ const baseUrl = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4182/scifi-ui/
 const report = { sha: process.env.AUDITED_SHA || '', baseUrl, desktop: {}, mobile: {}, fallback: {}, errors: [] };
 let activePage = null;
 
-async function exercise(page, label, entry = 'keyboard') {
+async function readDiagnostics(page, label, diagnosticMode) {
+  const result = await page.evaluate(() => ({
+    frameRequests: window.__liveOsFrameRequests,
+    measurements: window.__liveOsMeasurements,
+    metricValues: [...document.querySelectorAll('#live-operating-system [data-fx-metrics] article strong')].map(node => node.textContent),
+    faultRequests: window.__liveOsFaultRequests || []
+  }));
+  if (diagnosticMode !== 'normal' && !result.faultRequests.length) throw new Error(`${label}: diagnostic cadence fault was not exercised`);
+  if (!result.measurements.length) throw new Error(`${label}: no actual diagnostics observation completed`);
+  for (const measured of result.measurements) {
+    const observed = result.frameRequests.filter(item => item.name === 'frame' && item.returnedAt !== null
+      && item.requestedAt >= measured.startedAt && item.returnedAt <= measured.startedAt + measured.elapsedMs + 1);
+    const intervals = observed.map((item, index) => item.frameTime - (index ? observed[index - 1].frameTime : measured.startedAt))
+      .filter(value => Number.isFinite(value) && value > 0);
+    if (intervals.length !== measured.samples || measured.intervals.length !== intervals.length
+      || intervals.some((value, index) => Math.abs(value - measured.intervals[index]) > 0.25)) {
+      throw new Error(`${label}: reported cadence does not match independent native frame timestamps: ${JSON.stringify({measured,observed})}`);
+    }
+    if (diagnosticMode === 'stalled') {
+      if (measured.samples !== 0 || measured.fps !== null || measured.median !== null || measured.p95 !== null) {
+        throw new Error(`${label}: a stalled observer invented a frame value`);
+      }
+    } else if (!measured.samples || !Number.isFinite(measured.median) || !Number.isFinite(measured.p95)
+      || !Number.isFinite(measured.fps) || measured.median <= 0) {
+      throw new Error(`${label}: real cadence samples are missing`);
+    }
+    if (diagnosticMode === 'sparse' && (measured.samples > 4 || measured.fps > 1.5 || measured.median < 900)) {
+      throw new Error(`${label}: sparse actual frames were reported as a fast display`);
+    }
+  }
+  if (diagnosticMode === 'stalled' && !['nem érhető el', 'unavailable'].includes(result.metricValues[0])) {
+    throw new Error(`${label}: unavailable cadence was not shown truthfully`);
+  }
+
+  return result;
+}
+
+async function exercise(page, label, entry = 'keyboard', diagnosticMode = 'normal') {
   activePage = page;
   report.currentCase = { label, entry, phase: 'loading' };
   await page.addInitScript(() => {
@@ -13,15 +50,19 @@ async function exercise(page, label, entry = 'keyboard') {
     const seen = new WeakSet();
     window.__liveOsWebGLContexts = [];
     window.__liveOsFrameRequests = [];
+    window.__liveOsMeasurements = [];
+    document.addEventListener('formatx:liveosdiagnostics', event => __liveOsMeasurements.push(event.detail));
     const requestFrame = window.requestAnimationFrame;
     window.requestAnimationFrame = function(callback) {
       // Observe the real diagnostics callbacks without changing their count,
       // timestamps or scheduling. Generic async errors are retained below too.
-      if (!String(new Error().stack).includes('/formatx-live-os-core.js')) return requestFrame.call(this, callback);
+      const owner = String(new Error().stack).match(/https?:\/\/[^\s)]+\/(formatx-[^/\s():]+\.js)/)?.[1];
+      if (owner !== 'formatx-live-os-core.js') return requestFrame.call(this, callback);
       const item = { name: callback.name, requestedAt: performance.now(), returnedAt: null };
       if (__liveOsFrameRequests.length < 200) __liveOsFrameRequests.push(item);
       return requestFrame.call(this, function(now) {
         item.returnedAt = performance.now();
+        item.frameTime = now;
         return callback.call(this, now);
       });
     };
@@ -66,10 +107,22 @@ async function exercise(page, label, entry = 'keyboard') {
   const input = live.locator('#fx-live-command');
   await input.fill(label === 'desktop' ? 'diagnosztika' : 'diagnostics');
   await input.press('Enter');
-  await page.waitForFunction(() => document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length === 8);
+  await page.waitForFunction(() => {
+    const metrics = document.querySelector('#live-operating-system [data-fx-metrics]');
+    return metrics?.querySelectorAll('article').length === 8 && metrics.getAttribute('aria-busy') !== 'true';
+  });
   const diagnosticsContexts = await page.evaluate(() => __liveOsWebGLContexts);
   const expectedContexts = entry === 'keyboard' ? 1 : 0;
   if (diagnosticsContexts.length !== expectedContexts) throw new Error(`${label}: diagnostics allocated an unowned WebGL context: ${JSON.stringify(diagnosticsContexts)}`);
+  const diagnostics = await readDiagnostics(page, label, diagnosticMode);
+  if (diagnosticMode !== 'normal') {
+    const sameOwner = await page.evaluate(() => window.__liveOsOriginalMag === window.FormatXLivingCore?.canvas
+      && window.__liveOsOriginalContext === window.FormatXLivingCore?.canvas?.getContext('webgl2'));
+    if (!sameOwner || errors.length) throw new Error(`${label}: diagnostic fault changed the native owner or caused browser errors`);
+    report.currentCase.phase = 'complete';
+    return { ...diagnostics, diagnosticsContexts, metrics: diagnostics.metricValues.length, sameOwner };
+  }
+
 
   report.currentCase.phase = 'proof';
   await input.fill(label === 'desktop' ? 'tesztek' : 'tests');
@@ -113,7 +166,7 @@ async function exercise(page, label, entry = 'keyboard') {
     };
   });
   result.diagnosticsContexts = diagnosticsContexts;
-  result.frameRequests = await page.evaluate(() => __liveOsFrameRequests);
+  Object.assign(result, diagnostics);
 
   if (result.metrics !== 8) throw new Error(`${label}: expected 8 diagnostics metrics`);
   if (result.proofCards !== 4) throw new Error(`${label}: expected 4 evidence cards`);
@@ -168,6 +221,34 @@ async function exercise(page, label, entry = 'keyboard') {
       }
     }
 
+    report.cadence = {};
+    for (const mode of ['sparse', 'stalled']) {
+      const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+      await context.addInitScript(({ delay }) => {
+        const request = window.requestAnimationFrame, cancel = window.cancelAnimationFrame;
+        const pending = new Map(); let nextHandle = -1;
+        window.__liveOsFaultRequests = [];
+        window.requestAnimationFrame = function(callback) {
+          const stack = String(new Error().stack);
+          const owner = stack.match(/https?:\/\/[^\s)]+\/(formatx-[^/\s():]+\.js)/)?.[1];
+          if (owner !== 'formatx-live-os-core.js' || !/\bat (?:async )?(?:frame|measureFrames)\b/.test(stack)) return request.call(this, callback);
+          __liveOsFaultRequests.push({ requestedAt: performance.now(), delay });
+          const handle = nextHandle--, item = { timer: 0, frame: 0 };
+          item.timer = setTimeout(() => {
+            item.frame = request.call(window, now => { pending.delete(handle); callback(now); });
+          }, delay);
+          pending.set(handle, item); return handle;
+        };
+        window.cancelAnimationFrame = function(handle) {
+          const item = pending.get(handle);
+          if (!item) return cancel.call(this, handle);
+          clearTimeout(item.timer); if (item.frame) cancel.call(this, item.frame); pending.delete(handle);
+        };
+      }, { delay: mode === 'sparse' ? 1000 : 10000 });
+      try { report.cadence[mode] = await exercise(await context.newPage(), `desktop-${mode}`, 'keyboard', mode); }
+      finally { await context.close(); }
+    }
+
     fs.writeFileSync('live-os-browser-report.json', JSON.stringify(report, null, 2));
     console.log(JSON.stringify(report, null, 2));
   } catch (error) {
@@ -181,6 +262,8 @@ async function exercise(page, label, entry = 'keyboard') {
       busy: document.querySelector('#live-operating-system [data-fx-metrics]')?.getAttribute('aria-busy'),
       contexts: window.__liveOsWebGLContexts || [],
       frameRequests: window.__liveOsFrameRequests || [],
+      measurements: window.__liveOsMeasurements || [],
+      faultRequests: window.__liveOsFaultRequests || [],
       root: { ...document.documentElement.dataset }
     })).catch(() => null);
     fs.writeFileSync('live-os-browser-report.json', JSON.stringify(report, null, 2));

@@ -300,7 +300,7 @@
     document.head.appendChild(stylesheet);
 
     const script = document.createElement('script');
-    script.src = './scripts/formatx-live-os.js?v=20261017-r2121-shared-diagnostics-owner';
+    script.src = './scripts/formatx-live-os.js?v=20261018-r2123-bounded-real-diagnostics';
     script.async = true;
     script.dataset.fxLiveOsScript = 'true';
     script.addEventListener('load', () => {

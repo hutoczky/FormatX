@@ -40,7 +40,15 @@ const reports=[];
      });
     }
     await page.addInitScript(()=>{
-     const audit=window.__nativeFramingR2114={frames:[],identity:[],identityMotion:[],complete:[],errors:[]};
+     const audit=window.__nativeFramingR2114={frames:[],identity:[],identityMotion:[],identityEvents:[],complete:[],errors:[]};
+     let lastIdentity=null,lastIdentityClass='';
+     new MutationObserver(()=>{
+      const badge=document.querySelector('.fx-ai-core-ident-r1951');
+      if(badge!==lastIdentity||badge?.className!==lastIdentityClass){
+       audit.identityEvents.push({at:performance.now(),state:badge?.className||'absent'});
+       lastIdentity=badge;lastIdentityClass=badge?.className;
+      }
+     }).observe(document,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
      addEventListener('error',event=>audit.errors.push(event.message));
      document.addEventListener('formatx:magbirthcomplete',()=>audit.complete.push(performance.now()));
      // Pixel readback is confined to this separate framing check. The visitor
@@ -90,7 +98,7 @@ const reports=[];
        const stage=window.FormatXLivingCore?.stage;
        const paper=document.querySelector('[data-fx-cinema-panel-active="true"]');
        const b=badge.getBoundingClientRect(),s=stage?.getBoundingClientRect(),p=paper?.getBoundingClientRect();
-       const identity={nativeReady:document.documentElement.dataset.fxCrystalOrganismR326==='ready',
+       const identity={at:performance.now(),nativeReady:document.documentElement.dataset.fxCrystalOrganismR326==='ready',
         originalStage:badge.parentElement===stage,text:badge.textContent,
         badgeRect:b.toJSON(),stageRect:s?.toJSON(),
         badgeStyle:{position:getComputedStyle(badge).position,left:getComputedStyle(badge).left,top:getComputedStyle(badge).top,
@@ -107,8 +115,11 @@ const reports=[];
     await page.waitForFunction(()=>window.__nativeFramingR2114.complete.length>0
      &&document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:20000});
     await page.waitForTimeout(600);
-    await page.waitForFunction(()=>window.__nativeFramingR2114.identityMotion.length>0
-     &&!document.querySelector('.fx-ai-core-ident-r1951'),null,{timeout:6000}).catch(async error=>{
+    await page.waitForFunction(()=>{
+     const audit=window.__nativeFramingR2114;
+     audit.waitStartedAt??=performance.now();
+     return audit.identityMotion.length>0&&!document.querySelector('.fx-ai-core-ident-r1951');
+    },null,{timeout:6000}).catch(async error=>{
       const failure=await page.evaluate(()=>({
        audit:window.__nativeFramingR2114,
        identity:document.documentElement.dataset.fxAiCoreIdentityR1951,
@@ -121,7 +132,8 @@ const reports=[];
       fs.writeFileSync(out,JSON.stringify(reports,null,2));
       console.error('NATIVE_FRAMING_FAILURE '+JSON.stringify({profile:profile.name,identity:failure.identity,
        ready:failure.ready,visibility:failure.visibility,badge:failure.badge,styles:failure.styles,
-       frameCount:failure.audit.frames.length,identitySamples:failure.audit.identityMotion.length,errors:failure.audit.errors}));
+       frameCount:failure.audit.frames.length,identitySamples:failure.audit.identityMotion.length,
+       waitStartedAt:failure.audit.waitStartedAt,identityEvents:failure.audit.identityEvents,errors:failure.audit.errors}));
       throw error;
      });
     const report=await page.evaluate(()=>{

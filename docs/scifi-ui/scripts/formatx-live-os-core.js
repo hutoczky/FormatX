@@ -16,6 +16,7 @@
     demoTimer: 0,
     scanTimer: 0,
     inputLatency: null,
+    frameMeasurement: null,
     lastPointerAt: 0
   };
 
@@ -42,6 +43,7 @@
       searchTitle: 'Találatok',
       open: 'Megnyitás',
       diagnosticsDone: 'A helyi böngésződiagnosztika elkészült. Ezek a jelenlegi munkamenet valós adatai.',
+      diagnosticsPartial: 'A böngésző nem adott képkockamintát. A többi munkamenetadat elérhető; képkockaértéket nem becsültünk.',
       webglInactive: 'Nincs aktív WebGL-kontextus',
       threeIdle: 'A 3D rendszerkép csak kérésre töltődik be.',
       threeLoading: 'A 3D motor betöltése folyamatban…',
@@ -103,6 +105,7 @@
       searchTitle: 'Results',
       open: 'Open',
       diagnosticsDone: 'Local browser diagnostics completed. These are real values from the current session.',
+      diagnosticsPartial: 'The browser supplied no frame sample. Other session data is available; no frame value was estimated.',
       webglInactive: 'No active WebGL context',
       threeIdle: 'The 3D system map loads only on demand.',
       threeLoading: 'Loading the 3D engine…',
@@ -230,26 +233,52 @@
   }
 
   async function measureFrames(sampleCount = 48) {
-    return new Promise(resolve => {
+    // Concurrent commands share one real observation. A fixed sample target
+    // must not strand all hardware diagnostics on a sparse display cadence.
+    if (state.frameMeasurement) return state.frameMeasurement;
+    state.frameMeasurement = new Promise(resolve => {
       const times = [];
-      let previous = performance.now();
+      const startedAt = performance.now();
+      const windowMs = 2400;
+      let previous = startedAt;
+      let frameHandle = 0;
+      let settled = false;
+      function finish(reason) {
+        if (settled) return;
+        settled = true;
+        if (frameHandle) cancelAnimationFrame(frameHandle);
+        clearTimeout(deadline);
+        const valid = times.filter(value => Number.isFinite(value) && value > 0);
+        const usable = valid.slice(valid.length > 4 ? 4 : 0).sort((a, b) => a - b);
+        const median = usable.length ? usable[Math.floor(usable.length / 2)] : null;
+        const p95 = usable.length ? usable[Math.floor(usable.length * 0.95)] : null;
+        const result = {
+          fps: median === null ? null : Number((1000 / median).toFixed(1)),
+          median,
+          p95,
+          samples: valid.length,
+          intervals: valid,
+          startedAt,
+          elapsedMs: performance.now() - startedAt,
+          reason
+        };
+        state.frameMeasurement = null;
+        document.dispatchEvent(new CustomEvent('formatx:liveosdiagnostics', { detail: result }));
+        resolve(result);
+      }
       function frame(now) {
+        if (settled) return;
+        frameHandle = 0;
         times.push(now - previous);
         previous = now;
-        if (times.length < sampleCount) requestAnimationFrame(frame);
-        else {
-          const usable = times.slice(4).sort((a, b) => a - b);
-          const median = usable[Math.floor(usable.length / 2)] || 16.7;
-          const p95 = usable[Math.floor(usable.length * 0.95)] || median;
-          resolve({
-            fps: Math.max(1, Math.round(1000 / median)),
-            median,
-            p95
-          });
-        }
+        if (times.length >= sampleCount) finish('sample-target');
+        else if (performance.now() - startedAt >= windowMs) finish('observation-window');
+        else frameHandle = requestAnimationFrame(frame);
       }
-      requestAnimationFrame(frame);
+      const deadline = setTimeout(() => finish('observation-window'), windowMs);
+      frameHandle = requestAnimationFrame(frame);
     });
+    return state.frameMeasurement;
   }
 
   function webglInfo() {
@@ -269,6 +298,7 @@
     const metrics = section.querySelector('[data-fx-metrics]');
     metrics.setAttribute('aria-busy', 'true');
     const frames = await measureFrames();
+    if (!section.isConnected) return;
     const gl = webglInfo();
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     const memory = navigator.deviceMemory ? navigator.deviceMemory + ' GB+' : copy().unknown;
@@ -279,8 +309,10 @@
     const viewport = innerWidth + '×' + innerHeight + ' @' + Math.min(devicePixelRatio || 1, 4).toFixed(2) + 'x';
 
     metrics.replaceChildren(
-      metricCard('fps', frames.fps + ' Hz', 'median ' + frames.median.toFixed(1) + ' ms'),
-      metricCard('frame', frames.p95.toFixed(1) + ' ms', 'p95'),
+      metricCard('fps', frames.fps === null ? copy().unknown : frames.fps + ' Hz',
+        frames.median === null ? '' : 'median ' + frames.median.toFixed(1) + ' ms · n=' + frames.samples),
+      metricCard('frame', frames.p95 === null ? copy().unknown : frames.p95.toFixed(1) + ' ms',
+        'p95 · ' + Math.round(frames.elapsedMs) + ' ms'),
       metricCard('latency', latency, 'current session'),
       metricCard('webgl', gl.label, gl.detail),
       metricCard('cores', String(navigator.hardwareConcurrency || copy().unknown), 'navigator.hardwareConcurrency'),
@@ -289,7 +321,7 @@
       metricCard('viewport', viewport, screen.width + '×' + screen.height)
     );
     metrics.removeAttribute('aria-busy');
-    if (announce) output(copy().diagnosticsDone, 'success');
+    if (announce) output(frames.samples ? copy().diagnosticsDone : copy().diagnosticsPartial, frames.samples ? 'success' : 'warning');
   }
 
   function buildSearchIndex() {
