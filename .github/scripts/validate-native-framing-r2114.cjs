@@ -116,11 +116,13 @@ const reports=[];
     await page.waitForFunction(()=>window.__nativeFramingR2114.complete.length>0
      &&document.documentElement.dataset.fxArchiveCinema==='active',null,{timeout:20000});
     await page.waitForTimeout(600);
+    // Observe the same actual DOM condition on timer tasks: a delayed display
+    // callback must not hide a removal already proven within the original6s.
     await page.waitForFunction(()=>{
      const audit=window.__nativeFramingR2114;
      audit.waitStartedAt??=performance.now();
      return audit.identityMotion.length>0&&!document.querySelector('.fx-ai-core-ident-r1951');
-    },null,{timeout:6000}).catch(async error=>{
+    },null,{timeout:6000,polling:100}).catch(async error=>{
       const failure=await page.evaluate(()=>({
        audit:window.__nativeFramingR2114,
        identity:document.documentElement.dataset.fxAiCoreIdentityR1951,
@@ -161,6 +163,13 @@ const reports=[];
     assert.ok(report.identityMotion.length>0,`${profile.name}: complete native identity motion was not observed`);
     assert.ok(report.identityMotion.every(sample=>sample.nativeReady&&sample.originalStage&&sample.insideStage&&!sample.coversPaper),
      `${profile.name}: native identity left its lane during entry, hold or exit`);
+    const entry=report.identityEvents.find(event=>event.state.includes('is-visible'));
+    const removal=report.identityEvents.find(event=>event.state==='absent'&&entry&&event.at>entry.at);
+    assert.ok(entry&&removal,`${profile.name}: actual visible entry and removal events were not observed`);
+    assert.ok(Number.isFinite(report.waitStartedAt)&&removal.at<=report.waitStartedAt+6000,
+     `${profile.name}: the actual identity removal missed the original6000ms deadline`);
+    assert.ok(report.identityMotion.some(sample=>sample.at<=report.waitStartedAt+6000),
+     `${profile.name}: no actual visible identity sample preceded the original deadline`);
     assert.deepEqual(report.errors,[],`${profile.name}: browser errors`);
     console.log('NATIVE_FRAMING_R2114_PASS '+JSON.stringify({profile:profile.name,frames:report.frames,identity:report.identity}));
    }finally{await context.close();}

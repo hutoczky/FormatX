@@ -5,6 +5,36 @@ const baseUrl = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4182/scifi-ui/
 const report = { sha: process.env.AUDITED_SHA || '', baseUrl, desktop: {}, mobile: {}, fallback: {}, errors: [] };
 let activePage = null;
 
+async function retainFailureState(page) {
+  if (report.failureState || !page || page.isClosed()) return;
+  report.failureState = await page.evaluate(() => ({
+      url: location.href,
+      visibility: document.visibilityState,
+      activeElement: document.activeElement?.id || '',
+      command: document.querySelector('#fx-live-command')?.value || '',
+      metrics: document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length,
+      busy: document.querySelector('#live-operating-system [data-fx-metrics]')?.getAttribute('aria-busy'),
+      contexts: window.__liveOsWebGLContexts || [],
+      frameRequests: window.__liveOsFrameRequests || [],
+      measurements: window.__liveOsMeasurements || [],
+      faultRequests: window.__liveOsFaultRequests || [],
+      root: { ...document.documentElement.dataset },
+      geometry: (() => {
+        const button=document.querySelector('#live-operating-system [data-fx-three]');
+        const ancestors=[];
+        for(let node=button;node;node=node.parentElement){
+          const style=getComputedStyle(node);
+          ancestors.push({tag:node.tagName,id:node.id,className:node.className,
+            bounds:node.getBoundingClientRect().toJSON(),contentVisibility:style.contentVisibility,
+            containIntrinsicSize:style.containIntrinsicSize,transform:style.transform,
+            translate:style.translate,position:style.position,overflow:style.overflow});
+        }
+        return {scrollY,scrollHeight:document.documentElement.scrollHeight,
+          viewport:{width:innerWidth,height:innerHeight},ancestors};
+      })()
+    })).catch(() => null);
+}
+
 async function readDiagnostics(page, label, diagnosticMode) {
   const result = await page.evaluate(() => ({
     frameRequests: window.__liveOsFrameRequests,
@@ -217,6 +247,9 @@ async function exercise(page, label, entry = 'keyboard', diagnosticMode = 'norma
       });
       try {
         report.fallback[label] = await exercise(await context.newPage(), label, 'launcher');
+      } catch (error) {
+        await retainFailureState(activePage);
+        throw error;
       } finally {
         await context.close();
       }
@@ -251,6 +284,7 @@ async function exercise(page, label, entry = 'keyboard', diagnosticMode = 'norma
         };
       }, { delay: mode === 'sparse' ? 1000 : 10000 });
       try { report.cadence[mode] = await exercise(await context.newPage(), `desktop-${mode}`, 'keyboard', mode); }
+      catch (error) { await retainFailureState(activePage); throw error; }
       finally { await context.close(); await cadenceBrowser.close(); }
     }
 
@@ -258,19 +292,7 @@ async function exercise(page, label, entry = 'keyboard', diagnosticMode = 'norma
     console.log(JSON.stringify(report, null, 2));
   } catch (error) {
     report.errors.push(String(error.stack || error));
-    report.failureState = await activePage?.evaluate(() => ({
-      url: location.href,
-      visibility: document.visibilityState,
-      activeElement: document.activeElement?.id || '',
-      command: document.querySelector('#fx-live-command')?.value || '',
-      metrics: document.querySelectorAll('#live-operating-system [data-fx-metrics] article').length,
-      busy: document.querySelector('#live-operating-system [data-fx-metrics]')?.getAttribute('aria-busy'),
-      contexts: window.__liveOsWebGLContexts || [],
-      frameRequests: window.__liveOsFrameRequests || [],
-      measurements: window.__liveOsMeasurements || [],
-      faultRequests: window.__liveOsFaultRequests || [],
-      root: { ...document.documentElement.dataset }
-    })).catch(() => null);
+    await retainFailureState(activePage);
     fs.writeFileSync('live-os-browser-report.json', JSON.stringify(report, null, 2));
     throw error;
   } finally {
