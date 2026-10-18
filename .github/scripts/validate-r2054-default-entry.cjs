@@ -24,15 +24,40 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
     const page=await context.newPage();
     const faults=[];
     page.on('pageerror',e=>faults.push(String(e)));
-    // The real normal site: no forced archive, no artificial scroll, no
-    // Lighthouse bypass. Returning visitors must see the first original
-    // native HTML chapter as soon as the living core finishes loading.
+    // R2132: the live R2121 product deliberately preserves the ORIGINAL
+    // hero (without .254 mobile CLS) until a real viewer scrolls. Test the
+    // resting hero AND the actual user-initiated 3D paper handoff, never
+    // force ?archive=1 or fake application telemetry.
     await page.goto(ROOT+'?r2054-normal-entry='+c.label,{
       waitUntil:'domcontentloaded',timeout:60000
     });
+    await page.waitForFunction(()=>
+      document.documentElement.dataset.fxArchiveExperience==='ready' &&
+      document.documentElement.dataset.fxCrystalOrganismR326==='ready',
+      null,{timeout:48000});
+    const landing=await page.evaluate(()=>{
+      const root=document.documentElement;
+      const hero=document.querySelector('#hero .hero-copy');
+      return {
+        archive:root.dataset.fxArchiveCinema||'home',
+        entry:root.dataset.fxArchiveScrollEntryR2121,
+        originalHeroVisible:!!hero&&hero.getClientRects().length>0,
+        scroll:window.scrollY
+      };
+    });
+    assert.equal(landing.entry,'landing-hero-undisturbed',
+      'Normal user must see stable MAG hero before intentional scroll: '+
+      JSON.stringify(landing));
+    assert.ok(landing.originalHeroVisible&&landing.scroll===0,
+      'The original hero was replaced before visitor interaction: '+
+      JSON.stringify(landing));
+    await page.mouse.wheel(0,Math.round(c.h*1.20));
     try {
-      await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
-        null,{timeout:48000});
+      await page.waitForFunction(()=>
+        document.documentElement.dataset.fxArchiveCinema==='active' &&
+        document.documentElement.dataset.fxArchiveScrollEntryR2121===
+          'real-scroll-or-explicit-archive',
+        null,{timeout:20000});
     } catch (error) {
       const diagnostics=await page.evaluate(()=>{
         const root=document.documentElement;
