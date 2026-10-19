@@ -617,6 +617,8 @@
       Number(navigator.hardwareConcurrency||8)<=4 ||
       Number(navigator.deviceMemory||8)<=2
     );
+    document.documentElement.dataset.fxMagFallbackInitialCapabilityR2140=
+      constrained?'true-low-power':'high-core-optical';
     let runtimeConstrained=constrained;
     let qualityScale=proofFrame
       ? 1
