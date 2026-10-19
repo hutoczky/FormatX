@@ -45,6 +45,26 @@ assert.ok(
   nativeCore.includes('const finalSmoothWeight=continuousRail?1.0:smoothWeight;') &&
   nativeCore.includes("fxNativeMagRailContinuityR2134='shared-guide-corner-normals-no-per-triangle-flicker'"),
   'R2128 satin continuous rails must not revert to dotted black near-coplanar geometry');
+/* R2145: visual changes belong to the actual native WebGL fragment,
+   not only to the fallback source or a separately composited image.
+   All original canonical loaders must fetch the same cache-busted material. */
+assert.ok(
+  nativeCore.includes('R2145: broaden the genuine native four-point') &&
+  nativeCore.includes('R2145: genuine convex sapphire adds deep coated') &&
+  nativeCore.includes('float bevelLift=bodyArm*') &&
+  nativeCore.includes('float crownCoating=exp('),
+  'R2145 actual studio metal and depth-coated sapphire material missing'
+);
+for (const loaderPath of [
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+]) {
+  const loader=fs.readFileSync(loaderPath,'utf8');
+  assert.ok(loader.includes('&r2145=sculpted-silver-deep-sapphire'),
+    'R2145 requires the SAME new physical WebGL shader on every phone/PC route: '+
+    loaderPath);
+}
 const validDownloadHref=href=>
   href==='/download/multiplatform' ||
   /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/v[0-9]+\/FormatX-Suite-Pro-V[0-9]+\.zip$/.test(href);
