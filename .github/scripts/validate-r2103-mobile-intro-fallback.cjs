@@ -26,6 +26,7 @@ const CASES=[
   {name:'phone-390-midfilm',width:390,height:844,second:4.40},
   {name:'phone-390-iris-opening',width:390,height:844,second:6.20},
   {name:'phone-390-identity',width:390,height:844,second:8.50},
+  {name:'phone-390-handoff',width:390,height:844,second:9.30},
   {name:'phone-360-midfilm',width:360,height:780,second:4.40}
 ];
 (async()=>{
@@ -80,6 +81,7 @@ const CASES=[
             premium:root.dataset.fxMagFallbackSilhouetteR2104,
             optic:root.dataset.fxMagFallbackOpticR2104,
             irisActuation:Number(root.dataset.fxMagFallbackIrisActuationR2139||0),
+            depthParallax:Number(root.dataset.fxMagFallbackDepthR2143||0),
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             viewportRatio:Number(root.dataset.fxMagMobileViewportRatioR2115||0),
             genomeTimeline:root.dataset.fxMagGenomeFadeR2115||'',
@@ -146,18 +148,28 @@ const CASES=[
             'Iris must hold its original calibrated shape outside its actual '+
               'cinematic movement window: '+JSON.stringify(info));
         }
+        if(shot.second>=5.95&&shot.second<=6.50){
+          assert.ok(info.depthParallax>.70,
+            'R2143 sidewall must exhibit genuine composed 3D depth reveal: '+
+            JSON.stringify(info));
+        }
+        if(shot.second>=9.15){
+          assert.ok(Math.abs(info.depthParallax)<.01,
+            'R2143 camera depth must settle before the real R326 handoff: '+
+            JSON.stringify(info));
+        }
         assert.equal(info.filmStyle,'none',
           'Legacy DNA strands still intrude into the final MAG composition');
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
         );
-        assert.ok(info.diameter>=shot.width*.48&&
-          info.diameter<=shot.width*.53,
-          'R2115 mobile MAG must be a full, centered 48-53% wide solid object: '+
+        assert.ok(info.diameter>=shot.width*.55&&
+          info.diameter<=shot.width*.60,
+          'R2143 mobile MAG must have a legible, centered 55-60% width: '+
             JSON.stringify(info));
-        assert.ok(info.viewportRatio>=.48&&info.viewportRatio<=.53,
-          'Physical camera/framing deviates from measured phone width: '+
+        assert.ok(info.viewportRatio>=.55&&info.viewportRatio<=.60,
+          'R2143 physical silhouette deviates from measured phone width: '+
             JSON.stringify(info));
         assert.equal(info.genomeTimeline,'fully-off-by-2.82-seconds',
           'Legacy DNA waves must disappear before premium MAG hero scene');
@@ -175,7 +187,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2141-depth-glass-mechanical-iris'),
+        assert.ok(info.loader.includes('r2143-sidewall-parallax-silver-body'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
