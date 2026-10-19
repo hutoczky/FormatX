@@ -26,6 +26,11 @@ on:
       - '.github/scripts/validate-native-intro-field-r2127.cjs'
       - '.github/scripts/validate-mag-buffer-resize-r2128.cjs'
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
+      - '.github/scripts/validate-native-reduced-input-r2130.cjs'
+      - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
+      - 'docs/scifi-ui/styles/formatx-category-positioning.css'
+      - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
+      - 'docs/scifi-ui/styles/formatx-critical-reduced-full-r298.css'
       - 'docs/scifi-ui/scripts/formatx-menu-owner-r1956.js'
       - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
       - 'docs/scifi-ui/styles/formatx-menu-owner-r1956.css'
@@ -57,6 +62,11 @@ on:
       - '.github/scripts/validate-native-intro-field-r2127.cjs'
       - '.github/scripts/validate-mag-buffer-resize-r2128.cjs'
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
+      - '.github/scripts/validate-native-reduced-input-r2130.cjs'
+      - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
+      - 'docs/scifi-ui/styles/formatx-category-positioning.css'
+      - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
+      - 'docs/scifi-ui/styles/formatx-critical-reduced-full-r298.css'
       - 'docs/scifi-ui/scripts/formatx-menu-owner-r1956.js'
       - 'docs/scifi-ui/scripts/formatx-control-owner-r268.js'
       - 'docs/scifi-ui/styles/formatx-menu-owner-r1956.css'
@@ -99,6 +109,7 @@ jobs:
           node --check .github/scripts/validate-native-intro-field-r2127.cjs
           node --check .github/scripts/validate-mag-buffer-resize-r2128.cjs
           node --check .github/scripts/validate-native-intro-state-r2129.cjs
+          node --check .github/scripts/validate-native-reduced-input-r2130.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -154,6 +165,11 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-native-intro-state-r2129.cjs
+      - name: Test real keyboard and MAG input after the original reduced stylesheet loads
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-native-reduced-input-r2130.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4

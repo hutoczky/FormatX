@@ -12,7 +12,7 @@ const names = [
   'formatx-cinematic-archive-r1987.js', 'formatx-cinematic-continuity-r535.js',
   'formatx-cinematic-journey-r536.js', 'formatx-crystal-organism-r326.js',
   'formatx-current-mag-loader-r422.js', 'formatx-core-mobile-v55.js',
-  'formatx-deferred-css-r487.js', 'formatx-infinite-scroll-desktop-v7.js',
+  'formatx-deferred-css-r487.js', 'formatx-deferred-reduced-style-r232.js', 'formatx-infinite-scroll-desktop-v7.js',
   'formatx-infinite-scroll.js', 'formatx-return-state-recovery.js',
   'formatx-intro-bootstrap-r1629.js', 'formatx-intro-prepaint-owner-r1611.js',
   'formatx-living-architecture-loader-r1985.js', 'formatx-living-habitat-r1530.js',

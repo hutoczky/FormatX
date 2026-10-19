@@ -116,7 +116,7 @@ has(quality,[
 
 has(worker,[
   "EVENT_HORIZON_URL = 'formatx-event-horizon.js?v=20260905-r531-preloader-effects-v2'",
-  "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20260905-r531-preloader-owner'",
+  "DEFERRED_REDUCED_URL = 'formatx-deferred-reduced-style-r232.js?v=20261019-r2130-native-reduced-input'",
   "X-FormatX-Preloader', 'r531-extended-effects-navigation-owned'",
   "X-FormatX-Preloader-Cache', 'r531-effects-v2-fresh-assets'"
 ],'R531 preloader cache/delivery contract');
