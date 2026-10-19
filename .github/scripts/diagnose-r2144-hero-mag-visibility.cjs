@@ -56,9 +56,14 @@ async function inspectPage(page,tag){
     return{
       documentSize:[innerWidth,innerHeight],scrollY,hash:location.hash,
       canvas:r,canvasPixels:canvas&&[canvas.width,canvas.height],
-      htmlFlags:Object.fromEntries(Object.entries(root.dataset).filter(
-        ([k])=>/^(fxCrystal|fxCore|fxMagBirth|fxArchive)/.test(k)
-      ).slice(0,75)),
+      htmlFlags:{
+        ...Object.fromEntries(Object.entries(root.dataset).filter(
+          ([k])=>/^(fxCrystal|fxCore|fxMagBirth|fxArchive)/.test(k)
+        ).slice(0,75)),
+        fxNativeMagCompositorR2146:root.dataset.fxNativeMagCompositorR2146||'',
+        fxCinematicMobileHandoffR2146:
+          root.dataset.fxCinematicMobileHandoffR2146||''
+      },
       hero:hero&&info(hero),ancestry,viewport,overlays
     };
   });
