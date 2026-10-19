@@ -854,6 +854,32 @@
        ORIGINAL buffers and cost fewer than 400 triangles on a normal phone. */
     const railFirst=facets.length;
     const railSections=software?18:mobile?36:40;
+    /* R2134: make the long polished ribs a single continuous specular
+       surface. Previously armorQuad generated a fresh flat face normal for
+       EACH small triangle: tiny longitudinal changes flashed as alternating
+       dots on high-DPI mobile displays. Explicit shared corner normals now
+       follow the rail's actual guide direction, while the two cross-section
+       edges keep a small machined bevel. Exactly the same native vertices,
+       original buffer layout and draw call are used. */
+    function railVertex(position,dx,dy,px,py,edge,layer){
+      const edgeNormal=layer===0?.11:.075;
+      const alongNormal=layer===0?.065:.045;
+      const normal=normalize([
+        px*edge*edgeNormal+dx*alongNormal,
+        py*edge*edgeNormal+dy*alongNormal,
+        1
+      ]);
+      return surfaceVertex(position,normal,[.5+.5*edge,.5],.91);
+    }
+    function railQuad(left,right,nextRight,nextLeft,dx,dy,px,py,layer){
+      const facet=layer===0?5.885:5.855;
+      const l0=railVertex(left,dx,dy,px,py,-1,layer);
+      const r0=railVertex(right,dx,dy,px,py,1,layer);
+      const r1=railVertex(nextRight,dx,dy,px,py,1,layer);
+      const l1=railVertex(nextLeft,dx,dy,px,py,-1,layer);
+      triangle([l0,r0,r1],facet);
+      triangle([l0,r1,l1],facet);
+    }
     function frontCrystalZ(x,y){
       const power=mobile?.78:.61;
       const ax=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
@@ -885,8 +911,8 @@
             const nextLeft=point(-1);
             const nextRight=point(1);
             if(left&&right){
-              armorQuad(left,right,nextRight,nextLeft,
-                layer===0?5.885:5.855);
+              railQuad(left,right,nextRight,nextLeft,
+                dx,dy,px,py,layer);
             }
             left=nextLeft;
             right=nextRight;
@@ -898,6 +924,7 @@
     root.dataset.fxNativeMagRailVisibilityR2128='raised-continuous-satin-silver-no-dashed-black';
     root.dataset.fxNativeMagTessellationR2129='26-mobile-30-desktop-clearance-geometry';
     root.dataset.fxNativeMagRailVisibilityR2131='wider-anti-aliased-raised-satin-double-ribs';
+    root.dataset.fxNativeMagRailContinuityR2134='shared-guide-corner-normals-no-per-triangle-flicker';
     root.dataset.fxNativeMagTessellationR2131='36-mobile-40-desktop-clearance-geometry';
     root.dataset.fxNativeMagLensContrastR2131='visible-depth-graded-sapphire-optic';
     root.dataset.fxNativeMagRailTrianglesR2123=
