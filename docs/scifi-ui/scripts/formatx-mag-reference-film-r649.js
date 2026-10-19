@@ -608,9 +608,14 @@
     if(!(canvas instanceof HTMLCanvasElement))return null;
     let ctx=null,dpr=1,sw=0,sh=0,scale=1,ox=0,oy=0;
     const proofFrame=new URLSearchParams(location.search).has('introframe');
+    /* R2140: mirror the actual R533 Three owner capability policy.
+       A flagship phone reporting a coarse 4GB deviceMemory bucket must
+       not lose the fallback's optical resolution on its first frame.
+       True low-core (<=4) or <=2GB devices stay constrained; the measured
+       >24ms panic governor below still lowers quality when necessary. */
     const constrained=!proofFrame&&(
       Number(navigator.hardwareConcurrency||8)<=4 ||
-      Number(navigator.deviceMemory||8)<=4
+      Number(navigator.deviceMemory||8)<=2
     );
     let runtimeConstrained=constrained;
     let qualityScale=proofFrame
