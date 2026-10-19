@@ -382,7 +382,15 @@
     ctx.save();
     ctx.globalAlpha=.19+.81*smooth((t-3.85)/2.10);
     const rx=S*.405,ry=S*.399;
+    /* R2139: authored mechanical iris action in the actual low-power film.
+       The shutter opens during the cinematic lens reveal, then returns to
+       its original calibration BEFORE the 10s one-scene R326 handoff.
+       This is geometry motion, not a CSS decoration or second canvas. */
+    const irisActuation=smooth((t-4.72)/1.18)*
+      (1-smooth((t-7.08)/1.30));
     const rot=.012*Math.sin(time*.00022);
+    document.documentElement.dataset.fxMagFallbackIrisActuationR2139=
+      irisActuation.toFixed(3);
     ctx.save();
     ctx.shadowColor='rgba(1,3,9,.90)';ctx.shadowBlur=S*.090;
     ctx.beginPath();ctx.ellipse(0,S*.016,rx*1.25,ry*1.25,0,0,TAU);
@@ -428,7 +436,8 @@
     // individually lit and edged, casting onto the dark central chamber.
     for(let blade=0;blade<8;blade++){
       const a=blade*TAU/8+rot;
-      ctx.save();ctx.rotate(a);
+      ctx.save();ctx.rotate(a+irisActuation*.155);
+      ctx.translate(rx*.060*irisActuation,-ry*.018*irisActuation);
       ctx.beginPath();
       ctx.moveTo(rx*.22,-ry*.065);
       ctx.lineTo(rx*.81,-ry*.32);
@@ -457,7 +466,7 @@
     // Deep obsidian aperture, offset refraction and asymmetrical photometric
     // reflection; the center should read as multi-element OPTICS, not a sphere.
     const pupil=ctx.createRadialGradient(-rx*(.17+.015*lightSweep),
-      -ry*.22,S*.006,0,0,rx*.66);
+      -ry*.22,S*.006,0,0,rx*(.66+.035*irisActuation));
     pupil.addColorStop(0,'#658c91');
     pupil.addColorStop(.12,'#355c66');
     pupil.addColorStop(.36,'#163e4d');
