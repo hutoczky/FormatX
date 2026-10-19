@@ -235,12 +235,21 @@
        with bounded 12% magnification; reduced-end hardware stays on 2D. */
     const cameraPush=smooth((t-4.55)/1.30)*
       (1-smooth((t-6.85)/1.60));
+    /* R2143 measured sculptural yaw: the deeper rear alloy wall shifts
+       relative to the front body and central glass; the optical iris itself
+       stays seated, avoiding fake rubber-sheet warping. All yaw settles by
+       the handoff and remains available on constrained Canvas2D devices. */
+    const cameraYaw=smooth((t-3.60)/1.20)*
+      (1-smooth((t-7.70)/1.40))*
+      Math.sin((t-3.40)*.72);
     const authoredRoll=-.032+.055*cameraPush+
       .014*Math.sin(time*.00030);
     ctx.rotate(authoredRoll);
     ctx.scale(1+cameraPush*.115,1+cameraPush*.115);
     document.documentElement.dataset.fxMagFallbackCameraR2125=
       cameraPush.toFixed(3);
+    document.documentElement.dataset.fxMagFallbackDepthR2143=
+      cameraYaw.toFixed(3);
 
     // Wide soft atmospheric scatter: present, but never a flat cyan halo.
     const atmosphere=ctx.createRadialGradient(-S*.10,-S*.18,0,0,0,S*1.86);
@@ -254,13 +263,23 @@
     // Extruded silhouette: physically separates the object from the void.
     ctx.save();
     ctx.shadowColor='rgba(3,8,14,.96)';ctx.shadowBlur=S*.28;
-    ctx.translate(S*.070,S*.092);
+    ctx.translate(S*(.075+.070*cameraYaw),S*.092);
     magDiamond(ctx,S);ctx.fillStyle='#01080f';ctx.fill();
     ctx.restore();
-    for(let layer=5;layer>=1;layer--){
-      ctx.save();ctx.translate(S*.007*layer,S*.010*layer);
+    for(let layer=7;layer>=1;layer--){
+      ctx.save();
+      ctx.translate(
+        S*(.011*layer+.010*layer*cameraYaw),
+        S*.0116*layer
+      );
       magDiamond(ctx,S);
-      ctx.fillStyle=layer>3?'#07141d':'#142731';ctx.fill();
+      ctx.fillStyle=layer>=5?'#091b25':layer>=3?'#162f3b':'#233a44';
+      ctx.fill();
+      if(layer===6||layer===3){
+        ctx.strokeStyle=layer===6?'rgba(89,126,133,.17)':'rgba(124,159,161,.19)';
+        ctx.lineWidth=Math.max(.55,S*.005);
+        ctx.stroke();
+      }
       ctx.restore();
     }
     magDiamond(ctx,S);
@@ -283,11 +302,11 @@
       magArmPath(ctx,S);
       const slab=ctx.createLinearGradient(-S*.37+S*.082*lightSweep,-S*.72,
         S*.38+S*.082*lightSweep,-S*.30);
-      slab.addColorStop(0,even?'#91a7a7':'#4d666b');
-      slab.addColorStop(.17,even?'#425e65':'#294450');
-      slab.addColorStop(.49,'#132833');
-      slab.addColorStop(.66,even?'#263e48':'#0b1f2b');
-      slab.addColorStop(1,'#04111a');
+      slab.addColorStop(0,even?'#b5c9c4':'#779399');
+      slab.addColorStop(.17,even?'#5c7b80':'#3b5b65');
+      slab.addColorStop(.49,'#19343f');
+      slab.addColorStop(.66,even?'#314f59':'#132e3a');
+      slab.addColorStop(1,'#081923');
       ctx.fillStyle=slab;ctx.fill();
 
       // Face break-line creates true directional visual relief.
@@ -299,8 +318,8 @@
       ctx.closePath();
       const bevel=ctx.createLinearGradient(-S*.27+S*.035*lightSweep,-S*.61,
         S*.01+S*.035*lightSweep,-S*.61);
-      bevel.addColorStop(0,'rgba(204,224,221,.38)');
-      bevel.addColorStop(.60,'rgba(70,115,123,.18)');
+      bevel.addColorStop(0,'rgba(210,231,225,.48)');
+      bevel.addColorStop(.60,'rgba(94,141,148,.23)');
       bevel.addColorStop(1,'rgba(8,21,31,.13)');
       ctx.fillStyle=bevel;ctx.fill();
 
@@ -336,16 +355,18 @@
       ctx.lineWidth=Math.max(1,S*.011);
       ctx.stroke();
 
-      // Recessed panel seams—different distances to avoid repeated vector art.
-      for(let j=0;j<3;j++){
-        const dy=.49+j*.13;
-        ctx.beginPath();
-        ctx.moveTo(-S*(.115-j*.022),-S*dy);
-        ctx.lineTo(-S*(.081-j*.013),-S*(dy+.040));
-        ctx.strokeStyle=j===0?'rgba(5,14,22,.48)':'rgba(158,199,196,.21)';
-        ctx.lineWidth=Math.max(.65,S*.004);
-        ctx.stroke();
-      }
+      /* R2143: remove three tight, repetitive scratch-like microstrokes.
+         One readable broad machined inset survives downsampling to mobile. */
+      ctx.beginPath();
+      ctx.moveTo(-S*.112,-S*.52);
+      ctx.lineTo(-S*.068,-S*.57);
+      ctx.lineTo(-S*.052,-S*.73);
+      ctx.strokeStyle='rgba(5,18,29,.69)';
+      ctx.lineWidth=Math.max(1.15,S*.018);
+      ctx.stroke();
+      ctx.strokeStyle='rgba(147,187,185,.29)';
+      ctx.lineWidth=Math.max(.80,S*.006);
+      ctx.stroke();
       ctx.restore();
     }
 
@@ -677,7 +698,7 @@
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
       const started=performance.now();
       const radiusCap=MOBILE
-        ? Math.max(32,Math.min(sw*.208,sh*.245)/Math.max(.001,scale))
+        ? Math.max(34,Math.min(sw*.236,sh*.255)/Math.max(.001,scale))
         : 192;
       document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
         'four-point-bevelled-metal-glass-iris';
@@ -747,6 +768,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2104-sculpted-fourpoint-realistic-machined-optics'
+    visualRevision:'r2143-macro-contrast-sidewall-parallax-optic'
   };
 })();
