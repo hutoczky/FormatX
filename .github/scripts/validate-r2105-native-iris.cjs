@@ -87,6 +87,8 @@ const views=[
               'wider-anti-aliased-raised-satin-double-ribs'&&
             root.dataset.fxNativeMagLensContrastR2131===
               'visible-depth-graded-sapphire-optic'&&
+            root.dataset.fxNativeMagRailContinuityR2134===
+              'shared-guide-corner-normals-no-per-triangle-flicker'&&
             Number(root.dataset.fxNativeMagRailTrianglesR2123||0)>=192;
         },null,{timeout:60000});
         // The intro must relinquish the stage before sampling the permanent
@@ -111,6 +113,7 @@ const views=[
             railGeometry:root.dataset.fxNativeMagRailsR2123,
             railFinish:root.dataset.fxNativeMagRailVisibilityR2128||'',
             railFinishR2131:root.dataset.fxNativeMagRailVisibilityR2131||'',
+            railContinuityR2134:root.dataset.fxNativeMagRailContinuityR2134||'',
             sapphireR2131:root.dataset.fxNativeMagLensContrastR2131||'',
             railTriangles:Number(root.dataset.fxNativeMagRailTrianglesR2123||0),
             opticScale:root.dataset.fxNativeMagOpticScaleR2108||'',
@@ -355,6 +358,9 @@ const views=[
           JSON.stringify(nativeGeometry,null,2)+'\n');
         console.log('R2116_REAL_NATIVE_WEBGL_PIXEL_PROOF',
           JSON.stringify({view:view.name,...nativeGeometry}));
+        assert.equal(info.railContinuityR2134,
+          'shared-guide-corner-normals-no-per-triangle-flicker',
+          'The original post-intro MAG is still rendering per-triangle specular dotting');
         assert.ok(nativeCanvasPixels.length>4000&&
           nativeGeometry.viewportCanvasVisible,
           'Native 3D MAG viewport canvas was empty or off-screen');
