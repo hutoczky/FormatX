@@ -62,8 +62,7 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/fallback/node_modules
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
         run: node .github/scripts/validate-r2103-mobile-intro-fallback.cjs
-      - name: Capture real post-intro full viewport and native canvas occlusion
-        continue-on-error: true
+      - name: Prove actual post-intro MAG pixels on desktop and phone, without scrolling
         env:
           NODE_PATH: ${{ runner.temp }}/fallback/node_modules
         run: node .github/scripts/diagnose-r2144-hero-mag-visibility.cjs
