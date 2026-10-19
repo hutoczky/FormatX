@@ -74,10 +74,14 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261019-r2141-depth-glass-mechanical-iris')&&
+  html.includes('formatx-mag-reference-film-r649.js?v=20261019-r2143-sidewall-parallax-silver-body')&&
   fallback.includes('fxMagFallbackIrisActuationR2139')&&
   fallback.includes('fxMagFallbackInitialCapabilityR2140')&&
   fallback.includes('R2141: refracting optic'),
+  fallback.includes('fxMagFallbackDepthR2143')&&
+  fallback.includes('Math.min(sw*.236,sh*.255)')&&
+  fallback.includes('const cameraYaw=smooth((t-3.60)/1.20)')&&
+  fallback.includes("visualRevision:'r2143-macro-contrast-sidewall-parallax-optic'"),
   'Missing actual cache-busted R2141 curved meniscus, R2139 mechanical iris or R2140 hardware-tier fallback');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
