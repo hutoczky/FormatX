@@ -485,6 +485,34 @@
     ctx.beginPath();ctx.arc(0,0,rx*.49,0,TAU);
     ctx.fillStyle=refracted;ctx.fill();
 
+    /* R2141: refracting optic, NOT a polished cyan ball. The aperture
+       resolves into a submerged obsidian chamber with an independently
+       shaded meniscus, asymmetric coating edge and two constrained
+       reflection crescents. All are clipped visually within the existing
+       curved sapphire lens; no texture fetch or second canvas. */
+    const meniscus=ctx.createRadialGradient(
+      -rx*.12,-ry*.17,rx*.016,rx*.035,ry*.038,rx*.39);
+    meniscus.addColorStop(0,'#102f3c');
+    meniscus.addColorStop(.34,'#061e2a');
+    meniscus.addColorStop(.68,'#020e1b');
+    meniscus.addColorStop(.89,'#071f2a');
+    meniscus.addColorStop(1,'#284650');
+    ctx.beginPath();ctx.ellipse(0,0,rx*.355,ry*.347,
+      .015*Math.sin(time*.0003),0,TAU);
+    ctx.fillStyle=meniscus;ctx.fill();
+    ctx.strokeStyle='rgba(123,179,177,.28)';
+    ctx.lineWidth=Math.max(.80,S*.007);ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(-rx*.025,-ry*.018,rx*.30,ry*.29,
+      -.16,Math.PI*.90,Math.PI*1.83);
+    ctx.strokeStyle='rgba(205,229,218,.15)';
+    ctx.lineWidth=Math.max(.8,S*.007);ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(rx*.038,ry*.045,rx*.285,ry*.265,
+      -.13,Math.PI*.09,Math.PI*.67);
+    ctx.strokeStyle='rgba(53,111,130,.30)';
+    ctx.lineWidth=Math.max(1,S*.009);ctx.stroke();
+
     ctx.save();
     ctx.translate(-rx*(.20+.045*lightSweep),-ry*(.31+.017*lightSweep));
     ctx.rotate(-.35+.08*lightSweep);
