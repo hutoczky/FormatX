@@ -114,9 +114,14 @@ const cases=[
             owner:root.dataset.fxPrimaryMagOwnerR460||''
           };
         });
+        /* R2142: first-time software Chromium WebGL + browser font load
+           on parallel CI sometimes needs >30s for an otherwise correct,
+           ready native canvas. Preserve the REAL pixel screenshot and
+           strict assertions rather than skip capture on a slow runner. */
         await page.screenshot({
           path:OUT+'/'+fixture.name+'.png',
-          animations:'allow'
+          animations:'allow',
+          timeout:90000
         });
         const record={fixture,report,errors};
         fs.writeFileSync(OUT+'/'+fixture.name+'.json',
