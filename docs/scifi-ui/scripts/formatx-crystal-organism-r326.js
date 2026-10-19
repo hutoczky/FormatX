@@ -403,11 +403,17 @@
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
         const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
-        const faceWeight=1-smoothWeight;
+        /* R2134: only the new long machined rail facets are continuously
+           interpolated. All other body/iris normals keep their established
+           authored material response. Any per-face admixture, even 2.2%,
+           created a pixel-scale sparkle at each of 36 small rail sections. */
+        const continuousRail=facet>5.84&&facet<5.89;
+        const finalSmoothWeight=continuousRail?1.0:smoothWeight;
+        const faceWeight=1-finalSmoothWeight;
         const hybridNormal=normalize([
-          smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
-          smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
-          smoothNormal[2]*smoothWeight+crystalNormal[2]*faceWeight
+          smoothNormal[0]*finalSmoothWeight+crystalNormal[0]*faceWeight,
+          smoothNormal[1]*finalSmoothWeight+crystalNormal[1]*faceWeight,
+          smoothNormal[2]*finalSmoothWeight+crystalNormal[2]*faceWeight
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
