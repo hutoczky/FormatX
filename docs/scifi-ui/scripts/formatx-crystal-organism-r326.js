@@ -2937,6 +2937,19 @@
           ? 'resubmitted-visible-native-webgl-after-film'
           : 'offscreen-preserve-idle';
         if(!onscreen)return;
+        /* R2146: Android sometimes keeps the prior full-screen film's
+           compositing surface even after the Three/WebGL buffer is drawn.
+           Promote the EXISTING original hero layer once at real film exit.
+           This is an identity transform (no scroll, displacement, new canvas,
+           animation, continuous frame loop, or request for another renderer).
+           The regular visibility governor stays responsible thereafter. */
+        if(mobile){
+          stage.style.transform='translate3d(0,0,0)';
+          canvas.style.transform='translate3d(0,0,0)';
+          stage.getBoundingClientRect();
+          root.dataset.fxNativeMagCompositorR2146=
+            'original-webgl-canvas-promoted-after-film';
+        }
         visible=true;
         resize();
         schedule(mobile?3:4);
