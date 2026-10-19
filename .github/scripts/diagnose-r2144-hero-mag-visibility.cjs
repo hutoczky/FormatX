@@ -62,12 +62,51 @@ async function inspectPage(page,tag){
       hero:hero&&info(hero),ancestry,viewport,overlays
     };
   });
-  await page.screenshot({path:out+'/'+tag+'-full.png',animations:'allow'});
+  const capture=await page.screenshot({
+    path:out+'/'+tag+'-full.png',animations:'allow'
+  });
+  /* Measure the real COMPOSITED page, not just pixels inside the WebGL canvas.
+     R2142 had a beautifully painted native framebuffer but a black viewport
+     until the user scrolled 1 pixel. A DOM-ready/canvas-ready test missed it. */
+  result.visiblePixelProof=await page.evaluate(async input=>{
+    const image=new Image();
+    image.src='data:image/png;base64,'+input.png;
+    await image.decode();
+    const probe=document.createElement('canvas');
+    probe.width=image.naturalWidth;probe.height=image.naturalHeight;
+    const ctx=probe.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(image,0,0);
+    const rx=image.naturalWidth/innerWidth;
+    const ry=image.naturalHeight/innerHeight;
+    const box=input.rect;
+    const x0=Math.max(0,Math.round((box.x+box.width*.19)*rx));
+    const x1=Math.min(probe.width,Math.round((box.x+box.width*.81)*rx));
+    const y0=Math.max(0,Math.round((box.y+box.height*.13)*ry));
+    const y1=Math.min(probe.height,Math.round((box.y+box.height*.77)*ry));
+    const width=x1-x0,height=y1-y0;
+    if(width<10||height<10)return {visible:false,reason:'invalid-region'};
+    const rgba=ctx.getImageData(x0,y0,width,height).data;
+    let bright=0,total=0,mean=0,mean2=0;
+    const stride=Math.max(1,Math.floor(Math.max(width,height)/240));
+    for(let y=0;y<height;y+=stride){
+      for(let x=0;x<width;x+=stride){
+        const idx=(y*width+x)*4;
+        const l=rgba[idx]*.2126+rgba[idx+1]*.7152+rgba[idx+2]*.0722;
+        if(l>50)bright++;
+        mean+=l;mean2+=l*l;total++;
+      }
+    }
+    mean/=Math.max(1,total);
+    const dev=Math.sqrt(Math.max(0,mean2/Math.max(1,total)-mean*mean));
+    return {brightRatio:bright/Math.max(1,total),
+      luminanceStdDev:dev,region:[x0,y0,x1,y1],
+      samples:total,composited:bright/Math.max(1,total)>.07&&dev>16};
+  },{png:capture.toString('base64'),rect:result.canvas});
   const native=page.locator('#hero .fx-crystal-organism-r326-canvas');
   await native.screenshot({path:out+'/'+tag+'-canvas.png',animations:'allow'});
   fs.writeFileSync(out+'/'+tag+'.json',JSON.stringify(result,null,2)+'\n');
   console.log('R2144_REAL_HERO_OCCLUSION',JSON.stringify({
-    phase:tag,canvas:result.canvas,
+    phase:tag,canvas:result.canvas,pixelProof:result.visiblePixelProof,
     ancestors:result.ancestry.map(v=>({
       classes:v.classes,opacity:v.opacity,visibility:v.visibility,
       display:v.display,clipPath:v.clipPath,maskImage:v.maskImage,zIndex:v.zIndex
@@ -121,6 +160,15 @@ async function inspectPage(page,tag){
         await page.waitForTimeout(600);
         const scrolled=await inspectPage(page,view.name+'-after-1px-scroll');
         assert.ok(original.canvas&&original.canvas.width>50&&original.canvas.height>50);
+        assert.ok(original.visiblePixelProof.composited,
+          'The original MAG is WebGL-ready but absent from the real '+
+          'viewport BEFORE scrolling: '+JSON.stringify({
+            viewport:view.name,proof:original.visiblePixelProof,
+            stage:original.ancestry.slice(0,3)
+          }));
+        assert.ok(scrolled.visiblePixelProof.composited,
+          'The native MAG disappeared after a harmless 1px scroll: '+
+          JSON.stringify(scrolled.visiblePixelProof));
         assert.deepEqual(errors,[],'Uncaught runtime errors');
         fs.writeFileSync(out+'/'+view.name+'-summary.json',
           JSON.stringify({view,original,scrolled,errors},null,2)+'\n');
