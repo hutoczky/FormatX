@@ -2892,6 +2892,36 @@
       scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
+    /* R2144: the original WebGL buffer sometimes contains the complete MAG
+       while mobile Chromium has NOT composited that layer back into the
+       semantic hero after R533 removes its full-screen film. An actual 1px
+       scroll fixed the published visual defect, but scrolling must never be
+       required, fabricated or stolen from the user. Recover visibility and
+       submit a bounded native paint on the authentic film completion event.
+       The same original WebGL canvas stays mounted: no second renderer. */
+    listen(document,'formatx:magbirthcomplete',()=>{
+      requestAnimationFrame(()=>{
+        if(disposed||contextLost||document.hidden)return;
+        const r=stage.getBoundingClientRect();
+        const onscreen=r.width>40&&r.height>40&&
+          r.right>0&&r.bottom>0&&r.left<innerWidth&&r.top<innerHeight;
+        root.dataset.fxNativeMagHandoffPaintR2144=onscreen
+          ? 'resubmitted-visible-native-webgl-after-film'
+          : 'offscreen-preserve-idle';
+        if(!onscreen)return;
+        visible=true;
+        resize();
+        schedule(mobile?3:4);
+        io.unobserve(stage);
+        io.observe(stage);
+        requestAnimationFrame(()=>{
+          if(!disposed&&!contextLost&&!document.hidden){
+            visible=true;
+            schedule(1);
+          }
+        });
+      });
+    });
     const sectionPhysiology={
       hero:'homeostasis',experience:'attention',capabilities:'activation',
       pricing:'heartbeat',system:'stability',resources:'curiosity'
