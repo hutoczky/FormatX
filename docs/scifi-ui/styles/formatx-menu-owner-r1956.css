@@ -89,7 +89,29 @@ html.fx-organism-menu-open body.living-architecture #main-nav.fx-organism-system
 }
 
 @media (prefers-reduced-motion:reduce){
+  /* R2129: the legacy reduced shell hides .menu-toggle even though this
+     owner now keeps its navigation closed. Motion preference must not remove
+     the real control; retain the existing header geometry and input owner. */
+  html body.living-architecture #menu-toggle.fx-reference-menu-button{display:grid!important}
   html body.living-architecture #main-nav.fx-organism-system-menu{transition:none!important}
+  /* The static hero keeps the same native stage and identity band. Its legacy
+     bottom-centered SOUND/ASK row overlaps that band on desktop and phones.
+     Anchor the existing controls in the free upper-left corner of hero-space. */
+  html body.living-architecture #main-content #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+    position:absolute!important;
+    top:18px!important;
+    right:auto!important;
+    bottom:auto!important;
+    left:18px!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  @media (max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+    html body.living-architecture #main-content #hero .hero-space > .fx-reference-controls-r204.fx-reference-controls-r264{
+      top:6px!important;
+      left:10px!important;
+    }
+  }
 }
 
 

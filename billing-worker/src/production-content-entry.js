@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261018-r2128-desktop-buffer-pair';
+const STARTUP_REVISION = '20261018-r2129-genuine-intro-state';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-tlDg+XYO5YPVZqKtaMP7lrq2l1fkO3Q42wIwxLIOcXs='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -272,6 +272,11 @@ function scheduleMotionRuntime(html) {
 }
 function cacheBustR502Runtime(html) {
   return String(html || '')
+    .replace(/formatx-menu-owner-r1956\.js\?v=[^"']+/g, 'formatx-menu-owner-r1956.js?v=20261018-r2129-genuine-intro-state')
+    .replace(/formatx-menu-owner-r1956\.css\?v=[^"']+/g, 'formatx-menu-owner-r1956.css?v=20261018-r2129-genuine-intro-state')
+    .replace(/formatx-control-owner-r268\.js\?v=[^"']+/g, 'formatx-control-owner-r268.js?v=20261018-r2129-genuine-intro-state')
+    .replace(/formatx-ai-core-ident-r1951\.css\?v=[^"']+/g, 'formatx-ai-core-ident-r1951.css?v=20261018-r2129-genuine-intro-state')
+    .replace(/formatx-cinematic-archive-r1987\.js\?v=[^"']+/g, 'formatx-cinematic-archive-r1987.js?v=20261018-r2129-genuine-intro-state')
     .replace(/formatx-event-horizon\.js\?v=[^"']+/g, 'formatx-event-horizon.js?v=20260925-r1730-retired-r533-owner')
     .replace(/formatx-content-runtime-loader-r241\.js\?v=[^"']+/g, 'formatx-content-runtime-loader-r241.js?v=20261017-r2120-persistent-command-intent')
     .replace(/formatx-mag-shape-sync-r476\.js\?v=[^"']+/g, 'formatx-mag-shape-sync-r476.js?v=20260924-r1723-canonical-organism')

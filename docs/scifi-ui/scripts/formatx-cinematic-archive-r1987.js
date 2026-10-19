@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2121-native-document-owners';
+  const VERSION='cinematic-archive-r2129-viewport-folio';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -366,21 +366,17 @@
     // (-394px) and the genuine native paper overlapped the MAG stage.
     // Never apply legacy transform-ancestor compensation on a phone.
     if(phone){
-      // CSS fixed positioned descendants can still be captured by transformed
-      // chapter ancestors. Correct their ACTUAL screen box, once per scrub.
-      // Use a bounded, absolute-in-screen translation, not an accumulating
-      // transform offset from a previous scroll chapter.
-      const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
-      const magBottom=stage?.getBoundingClientRect().bottom||h*.45;
-      const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
+      // The docked stage ends at 45dvh (top2 + height43); its bounded
+      // gap stays below the existing 51% folio lane. Keep that measured lane
+      // in viewport units so rotation updates it even before resize delivery.
       // No per-scroll cumulative coordinates: this is genuinely viewport-
       // fixed once the source chapter no longer creates a containing block.
       panel.style.removeProperty('translate');
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
-      const screenTop=viewportTop.toFixed(2);
+      const screenTop='51dvh';
       if(panel.dataset.fxMobileScreenTop!==screenTop){
-        panel.style.setProperty('top',screenTop+'px','important');
+        panel.style.setProperty('top',screenTop,'important');
         panel.dataset.fxMobileScreenTop=screenTop;
       }
       return;

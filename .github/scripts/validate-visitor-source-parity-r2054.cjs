@@ -7,6 +7,7 @@ const crypto = require('node:crypto');
 
 const names = [
   'formatx-ai-core-ident-r1951.js', 'formatx-apex.js',
+  'formatx-menu-owner-r1956.js', 'formatx-control-owner-r268.js',
   'formatx-award-narrative-r175.js', 'formatx-award-runtime-r206.js',
   'formatx-cinematic-archive-r1987.js', 'formatx-cinematic-continuity-r535.js',
   'formatx-cinematic-journey-r536.js', 'formatx-crystal-organism-r326.js',
@@ -79,4 +80,4 @@ assert.ok(downloadHitArea,'The original download anchor needs an unconditional c
 assert.match(downloadHitArea,/display:inline-flex!important/);
 assert.match(downloadHitArea,/min-height:48px!important/);
 assert.match(downloadHitArea,/min-width:48px!important/);
-assert.equal((html.match(/formatx-menu-owner-r1956\.css\?v=20261015-r2106-late-scroll-input-ownership/g)||[]).length,2,'Preload and synchronous stylesheet must use the same current control CSS');
+assert.equal((html.match(/formatx-menu-owner-r1956\.css\?v=20261018-r2129-genuine-intro-state/g)||[]).length,2,'Preload and synchronous stylesheet must use the same current control CSS');
