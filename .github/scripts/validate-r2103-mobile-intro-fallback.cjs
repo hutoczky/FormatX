@@ -24,6 +24,7 @@ const HOME=process.env.FORMATX_TEST_URL||
 const OUT='artifacts/r2103-real-mobile-fallback';
 const CASES=[
   {name:'phone-390-midfilm',width:390,height:844,second:4.40},
+  {name:'phone-390-iris-opening',width:390,height:844,second:6.20},
   {name:'phone-390-identity',width:390,height:844,second:8.50},
   {name:'phone-360-midfilm',width:360,height:780,second:4.40}
 ];
@@ -78,6 +79,7 @@ const CASES=[
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
             premium:root.dataset.fxMagFallbackSilhouetteR2104,
             optic:root.dataset.fxMagFallbackOpticR2104,
+            irisActuation:Number(root.dataset.fxMagFallbackIrisActuationR2139||0),
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             viewportRatio:Number(root.dataset.fxMagMobileViewportRatioR2115||0),
             genomeTimeline:root.dataset.fxMagGenomeFadeR2115||'',
@@ -135,6 +137,15 @@ const CASES=[
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
         assert.equal(info.premium,'sculpted-fourpoint-3d-illusion-machined-optic');
         assert.equal(info.optic,'eight-deep-shutter-blades-sapphire-glass');
+        if(shot.second>=5.95&&shot.second<=6.50){
+          assert.ok(info.irisActuation>=.95,
+            'Real iris must open mechanically during macro-lens camera reveal: '+
+              JSON.stringify(info));
+        }else{
+          assert.ok(info.irisActuation<.05,
+            'Iris must hold its original calibrated shape outside its actual '+
+              'cinematic movement window: '+JSON.stringify(info));
+        }
         assert.equal(info.filmStyle,'none',
           'Legacy DNA strands still intrude into the final MAG composition');
         assert.ok(
@@ -164,7 +175,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2115-premium-contained-no-dna-overlap'),
+        assert.ok(info.loader.includes('r2139-shutter-actuation-and-sapphire'),
           'Stale browser cache is loading old giant-oval renderer');
         records.push({shot,info});
       }finally{await context.close()}
