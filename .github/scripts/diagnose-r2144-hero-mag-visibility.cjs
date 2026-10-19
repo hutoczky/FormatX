@@ -126,6 +126,11 @@ async function inspectPage(page,tag){
   try{
     for(const view of [
       {name:'phone-390',width:390,height:844,mobile:true},
+      /* R2146: R2144 intermittently passed once and failed the very next
+         real Chromium attempt. Reboot a second INDEPENDENT mobile browser
+         context and repeat the whole ten-second intro plus fully composited
+         no-scroll MAG screenshot. Do not silently accept a flaky first pass. */
+      {name:'phone-390-repeat',width:390,height:844,mobile:true},
       {name:'desktop-1440',width:1440,height:900,mobile:false}
     ]){
       const context=await browser.newContext({
@@ -160,6 +165,14 @@ async function inspectPage(page,tag){
         await page.waitForTimeout(600);
         const scrolled=await inspectPage(page,view.name+'-after-1px-scroll');
         assert.ok(original.canvas&&original.canvas.width>50&&original.canvas.height>50);
+        if(view.mobile){
+          assert.ok(original.htmlFlags?.fxNativeMagCompositorR2146===
+            'original-webgl-canvas-promoted-after-film',
+            'R2146 browser must composite the SAME original WebGL canvas after the film');
+          assert.equal(original.htmlFlags?.fxCinematicMobileHandoffR2146,
+            'direct-native-mag-no-secondary-cover',
+            'Redundant second cinematic cut is still hiding the native MAG');
+        }
         assert.ok(original.visiblePixelProof.composited,
           'The original MAG is WebGL-ready but absent from the real '+
           'viewport BEFORE scrolling: '+JSON.stringify({
