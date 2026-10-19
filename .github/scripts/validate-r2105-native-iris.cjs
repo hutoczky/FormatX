@@ -39,7 +39,11 @@ assert.ok(
   nativeCore.includes('vec3(.12,.16,.17)+machinedTitanium*.74') &&
   nativeCore.includes('fxNativeMagRailVisibilityR2128') &&
   nativeCore.includes('fxNativeMagRailVisibilityR2131') &&
-  nativeCore.includes('fxNativeMagLensContrastR2131'),
+  nativeCore.includes('fxNativeMagLensContrastR2131') &&
+  nativeCore.includes('function railVertex(position,dx,dy,px,py,edge,layer)') &&
+  nativeCore.includes('function railQuad(left,right,nextRight,nextLeft,dx,dy,px,py,layer)') &&
+  nativeCore.includes('const finalSmoothWeight=continuousRail?1.0:smoothWeight;') &&
+  nativeCore.includes("fxNativeMagRailContinuityR2134='shared-guide-corner-normals-no-per-triangle-flicker'"),
   'R2128 satin continuous rails must not revert to dotted black near-coplanar geometry');
 const validDownloadHref=href=>
   href==='/download/multiplatform' ||
