@@ -65,6 +65,12 @@
   let pointerTargetNY = 0;
   let pointerTailFrames = 0;
   const finePointer = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  /* R2146: the mobile WebGL MAG must be visible immediately after the film.
+     The extra full-screen cut at this instant can strand the Android
+     compositor's existing native canvas until the first real scroll. */
+  const mobileIntroHandoff = matchMedia(
+    '(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)'
+  ).matches;
   let lastCoreKey = '';
   let scrollBudgetState='';
   let scrollBudgetTimer=0;
@@ -297,7 +303,8 @@
     sceneCommitTimer=0;
     pendingSceneIndex=-1;
     commitScene(index,previous,reason);
-    if(reason!=='scroll'||Math.abs(velocity)<=.36)cut();
+    if((reason!=='scroll'||Math.abs(velocity)<=.36) &&
+      !(reason==='intro-handoff'&&mobileIntroHandoff))cut();
   }
 
   function pickActive(y=scrollY){
@@ -517,9 +524,16 @@
 
   function introHandoff() {
     activate(0,'intro-handoff');
-    root.classList.add('fx-c536-cut');
     clearTimeout(cutTimer);
-    cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
+    if(mobileIntroHandoff){
+      if(cutRaf){cancelAnimationFrame(cutRaf);cutRaf=0;}
+      root.classList.remove('fx-c536-cut');
+      root.dataset.fxCinematicMobileHandoffR2146=
+        'direct-native-mag-no-secondary-cover';
+    }else{
+      root.classList.add('fx-c536-cut');
+      cutTimer=setTimeout(()=>root.classList.remove('fx-c536-cut'),820);
+    }
     signalCore(scenes[0],'intro-handoff');
   }
 
