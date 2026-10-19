@@ -1562,6 +1562,21 @@
         c+=vec3(.46,.55,.53)*softboxB*${mobile?'.185':'.165'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        /* R2145: broaden the genuine native four-point object's studio
+           response rather than painting uniform flat teal over the arms.
+           Analytic front normals continue rotating with the ONE R326 mesh;
+           no extra canvas, paper texture, or high-frequency banding. */
+        float silverKey=pow(sat(dot(n,
+          normalize(vec3(-.62,.72,.45)))),3.1)*frontDepth;
+        float sculptedShadow=pow(sat(dot(n,
+          normalize(vec3(.58,-.44,.68)))),2.4)*frontDepth;
+        float bodyArm=smoothstep(.18,.35,macroRadius)*
+          (1.0-smoothstep(.70,.92,macroRadius))*frontDepth;
+        float fourfoldPlane=.5+.5*cos(macroAngle*4.0);
+        float bevelLift=bodyArm*(.42+.58*fourfoldPlane)*silverKey;
+        c+=vec3(.45,.49,.44)*bevelLift*.30;
+        c*=1.0-.23*bodyArm*(1.0-fourfoldPlane)*sculptedShadow;
+        c+=vec3(.045,.085,.096)*bodyArm*softboxB*.13;
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
@@ -1701,13 +1716,26 @@
         sapphireGlass+=vec3(.030,.075,.090)*innerGlass*.50;
         sapphireGlass+=vec3(.24,.30,.28)*glassRim*
           (.29+.36*softboxA+.22*softboxB);
+        /* R2145: genuine convex sapphire adds deep coated reflections
+           across its existing curved physical mesh. The optic must read as
+           layered glass in the actual 390px screenshot, not eight bare fins. */
+        float deepCaustic=exp(-pow((lensUv.x+.26)/.32,2.0)
+          -pow((lensUv.y-.24)/.47,2.0))*innerGlass;
+        float crownCoating=exp(-pow((lensUv.x-.08)/.66,2.0)
+          -pow((lensUv.y+.51)/.18,2.0))*glassRim;
+        sapphireGlass+=vec3(.12,.26,.32)*deepCaustic*.30;
+        sapphireGlass+=vec3(.48,.60,.58)*crownCoating*
+          (.16+.22*softboxA+.15*key);
+        sapphireGlass+=vec3(.025,.080,.105)*innerGlass*
+          (.32+.34*softboxB);
         /* R2123 physically raised machined rails; shadow seam and the
            raised polished crest differ from the broad titanium bezel.
            All three are original depth-tested vertices in one WebGL draw. */
         float railShadow=step(5.880,vFacet)*(1.0-step(5.892,vFacet));
         float railCrest=step(5.850,vFacet)*(1.0-step(5.870,vFacet));
-        vec3 crestSilver=vec3(.17,.225,.23)+
-          vec3(.54,.61,.55)*(softboxA*.55+softboxB*.27+key*.20);
+        vec3 crestSilver=vec3(.12,.17,.18)+
+          vec3(.60,.65,.57)*(softboxA*.62+softboxB*.29+key*.24);
+        crestSilver+=vec3(.11,.14,.13)*silverKey*.22;
         c=mix(c,machinedTitanium,physicalBezel);
         c=mix(c,vec3(.12,.16,.17)+machinedTitanium*.74,railShadow*.68);
         c=mix(c,crestSilver,railCrest*.99);
