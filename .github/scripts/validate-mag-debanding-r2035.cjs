@@ -77,7 +77,7 @@ assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   html.includes('formatx-mag-reference-film-r649.js?v=20261019-r2143-sidewall-parallax-silver-body')&&
   fallback.includes('fxMagFallbackIrisActuationR2139')&&
   fallback.includes('fxMagFallbackInitialCapabilityR2140')&&
-  fallback.includes('R2141: refracting optic'),
+  fallback.includes('R2141: refracting optic')&&
   fallback.includes('fxMagFallbackDepthR2143')&&
   fallback.includes('Math.min(sw*.236,sh*.255)')&&
   fallback.includes('const cameraYaw=smooth((t-3.60)/1.20)')&&
