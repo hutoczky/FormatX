@@ -368,6 +368,33 @@ const CASES=[
         'Normal Android visit was incorrectly skipped: '+JSON.stringify(info));
       records.push({shot:{name:'high-core-phone-uses-real-three-first'},info});
       console.log('PASS R2103_HIGH_CORE_ANDROID',JSON.stringify(info));
+
+      /* R2140: even if this same high-core Android requires the real 2D
+         emergency fallback, the rough 4GB deviceMemory hint must not
+         preemptively strip its metallic/sapphire rendering precision.
+         Real measured frame panic is allowed to adapt quality later. */
+      await page.goto(HOME+
+        '?intro=1&visualintro=1&proofrenderer=reference&r2140-flagship-fallback=1',
+        {waitUntil:'domcontentloaded',timeout:60000});
+      await page.waitForFunction(()=>{
+        const root=document.documentElement;
+        return !!root.dataset.fxMagFallbackInitialCapabilityR2140
+          &&root.dataset.fxMagBirthRendererR1360===
+             'native-canvas-reference-film';
+      },null,{timeout:18000});
+      const tier=await page.evaluate(()=>({
+        cores:navigator.hardwareConcurrency,
+        memory:navigator.deviceMemory,
+        capability:document.documentElement.dataset
+          .fxMagFallbackInitialCapabilityR2140,
+        actualRenderer:document.documentElement.dataset.fxMagBirthRendererR1360
+      }));
+      assert.equal(tier.capability,'high-core-optical',
+        '8-core flagship phone wrongly starts in blurry emergency framebuffer: '+
+          JSON.stringify(tier));
+      assert.equal(tier.actualRenderer,'native-canvas-reference-film');
+      records.push({shot:{name:'r2140-high-core-fallback-resolution'},info:tier});
+      console.log('PASS R2140_HIGH_CORE_FALLBACK',JSON.stringify(tier));
     }finally{await capable.close()}
   }finally{await browser.close()}
   fs.writeFileSync(OUT+'/summary.json',JSON.stringify(records,null,2)+'\n');
