@@ -2994,7 +2994,15 @@
        required, fabricated or stolen from the user. Recover visibility and
        submit a bounded native paint on the authentic film completion event.
        The same original WebGL canvas stays mounted: no second renderer. */
-    listen(document,'formatx:magbirthcomplete',()=>{
+    /* R2153: the film event can fire before the deferred R326 loader has
+       finished compiling WebGL on a real phone. Keep its normal recovery
+       path, but also inspect the ALREADY-COMPLETED film at mount. This
+       restores the identical original canvas without synthetic scrolling
+       or any second renderer. Idempotent while the same stage is mounted. */
+    let handoffPromotionQueued=false;
+    const promoteNativeAtFilmExit=()=>{
+      if(handoffPromotionQueued)return;
+      handoffPromotionQueued=true;
       requestAnimationFrame(()=>{
         if(disposed||contextLost||document.hidden)return;
         const r=stage.getBoundingClientRect();
@@ -3045,7 +3053,18 @@
           }
         });
       });
-    });
+    };
+    listen(document,'formatx:magbirthcomplete',promoteNativeAtFilmExit);
+    const filmAlreadyCompleted=
+      !root.hasAttribute('data-fx-mag-birth-live') &&
+      !document.querySelector('.fx-mag-birth-r533') &&
+      Boolean(root.dataset.fxMagBirthLiveR533) &&
+      root.dataset.fxMagBirthLiveR533!=='active';
+    if(filmAlreadyCompleted){
+      root.dataset.fxNativeMagLateHandoffR2153=
+        'film-completed-before-original-webgl-ready';
+      queueMicrotask(promoteNativeAtFilmExit);
+    }
     const sectionPhysiology={
       hero:'homeostasis',experience:'attention',capabilities:'activation',
       pricing:'heartbeat',system:'stability',resources:'curiosity'
