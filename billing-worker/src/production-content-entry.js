@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261019-r2130-native-reduced-input';
+const STARTUP_REVISION = '20261020-r2131-header-wordmark-clearance';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-tlDg+XYO5YPVZqKtaMP7lrq2l1fkO3Q42wIwxLIOcXs='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -21,7 +21,7 @@ const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-referen
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260923-r1666-source-production-parity">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
 const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
-const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">';
+const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261020-r2131-header-wordmark-clearance">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261018-r2128-desktop-buffer-pair';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261016-r2118-pending-css-downloads"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
@@ -272,6 +272,7 @@ function scheduleMotionRuntime(html) {
 }
 function cacheBustR502Runtime(html) {
   return String(html || '')
+    .replace(/formatx-mobile-first-paint-r358\.css\?v=[^"']+/g, 'formatx-mobile-first-paint-r358.css?v=20261020-r2131-header-wordmark-clearance')
     .replace(/formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g, 'formatx-deferred-reduced-style-r232.js?v=20261019-r2130-native-reduced-input')
     .replace(/formatx-critical-core-r227\.css\?v=[^"']+/g, 'formatx-critical-core-r227.css?v=20261019-r2130-native-reduced-input')
     .replace(/formatx-menu-owner-r1956\.js\?v=[^"']+/g, 'formatx-menu-owner-r1956.js?v=20261018-r2129-genuine-intro-state')

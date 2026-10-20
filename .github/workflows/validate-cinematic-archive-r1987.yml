@@ -27,6 +27,8 @@ on:
       - '.github/scripts/validate-mag-buffer-resize-r2128.cjs'
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
       - '.github/scripts/validate-native-reduced-input-r2130.cjs'
+      - '.github/scripts/validate-native-header-clearance-r2131.cjs'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
@@ -63,6 +65,8 @@ on:
       - '.github/scripts/validate-mag-buffer-resize-r2128.cjs'
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
       - '.github/scripts/validate-native-reduced-input-r2130.cjs'
+      - '.github/scripts/validate-native-header-clearance-r2131.cjs'
+      - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
       - 'docs/scifi-ui/styles/formatx-critical-core-r227.css'
@@ -110,6 +114,7 @@ jobs:
           node --check .github/scripts/validate-mag-buffer-resize-r2128.cjs
           node --check .github/scripts/validate-native-intro-state-r2129.cjs
           node --check .github/scripts/validate-native-reduced-input-r2130.cjs
+          node --check .github/scripts/validate-native-header-clearance-r2131.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -170,6 +175,11 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-native-reduced-input-r2130.cjs
+      - name: Test actual wordmark clearance and genuine bilingual header input
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-native-header-clearance-r2131.cjs
       - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v4
