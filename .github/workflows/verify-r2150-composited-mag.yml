@@ -44,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           npm install --prefix "$RUNNER_TEMP/compositor" --no-audit --no-fund playwright@1.62.0
-          "$RUNNER_TEMP/compositor/node_modules/.bin/playwright" install --with-deps chromium
+          "$RUNNER_TEMP/compositor/node_modules/.bin/playwright" install chromium
       - name: Start canonical repository website
         shell: bash
         run: |
