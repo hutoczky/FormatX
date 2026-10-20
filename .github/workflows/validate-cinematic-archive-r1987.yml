@@ -29,6 +29,7 @@ on:
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
       - '.github/scripts/validate-native-reduced-input-r2130.cjs'
       - '.github/scripts/validate-native-header-clearance-r2131.cjs'
+      - '.github/scripts/validate-native-shader-payload-r2133.cjs'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
@@ -68,6 +69,7 @@ on:
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
       - '.github/scripts/validate-native-reduced-input-r2130.cjs'
       - '.github/scripts/validate-native-header-clearance-r2131.cjs'
+      - '.github/scripts/validate-native-shader-payload-r2133.cjs'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
@@ -118,6 +120,7 @@ jobs:
           node --check .github/scripts/validate-native-intro-state-r2129.cjs
           node --check .github/scripts/validate-native-reduced-input-r2130.cjs
           node --check .github/scripts/validate-native-header-clearance-r2131.cjs
+          node --check .github/scripts/validate-native-shader-payload-r2133.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -133,6 +136,10 @@ jobs:
           done
           cat "$RUNNER_TEMP/archive-server.log"
           exit 1
+      - name: Test actual native shader payload and preserved live program
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-native-shader-payload-r2133.cjs
       - name: Test atomic native chapter handoff on desktop and phone
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules

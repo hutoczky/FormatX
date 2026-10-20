@@ -44,7 +44,7 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261018-r2128-desktop-buffer-pair';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261020-r2133-active-shader-only';
 const AUTO_DELAY_MS=5500;
 let started=false;
 let idleId=0;
