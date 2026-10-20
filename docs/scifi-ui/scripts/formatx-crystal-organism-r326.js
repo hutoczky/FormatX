@@ -3011,11 +3011,27 @@
            animation, continuous frame loop, or request for another renderer).
            The regular visibility governor stays responsible thereafter. */
         if(mobile){
-          stage.style.transform='translate3d(0,0,0)';
-          canvas.style.transform='translate3d(0,0,0)';
+          /* R2151: the canonical r422 stylesheet explicitly declares
+             transform:none!important on this stage. The former R2146
+             ordinary inline translate3d was therefore INEFFECTIVE:
+             real 390px Chromium repeated runs occasionally kept the
+             WebGL-ready MAG entirely black until a 1px scroll.
+             Override only the existing layer with an important IDENTITY
+             transform. No geometry shift, fake scroll, second canvas,
+             stale fixed overlay or continuous repainting. */
+          stage.style.setProperty(
+            'transform','translate3d(0,0,0)','important');
+          canvas.style.setProperty(
+            'transform','translate3d(0,0,0)','important');
+          stage.style.setProperty(
+            'backface-visibility','hidden','important');
+          canvas.style.setProperty(
+            'backface-visibility','hidden','important');
           stage.getBoundingClientRect();
           root.dataset.fxNativeMagCompositorR2146=
             'original-webgl-canvas-promoted-after-film';
+          root.dataset.fxNativeMagCompositorR2151=
+            'important-identity-transform-beats-r422-none-important';
         }
         visible=true;
         resize();
