@@ -65,6 +65,28 @@ for (const loaderPath of [
     'R2145 requires the SAME new physical WebGL shader on every phone/PC route: '+
     loaderPath);
 }
+/* R2147 native silver-and-sapphire contrast is exercised in the real
+   physical fragment, and both desktop/phone asset owners load that exact
+   edition. Do not certify a screenshot-only approximation of the original
+   WebGL core or allow an old cached renderer into production. */
+assert.ok(
+  nativeCore.includes('R2147: four broad machined shoulder planes') &&
+  nativeCore.includes('float armShoulder=pow(sat(dot(n,') &&
+  nativeCore.includes('float armRecess=pow(abs(sin(macroAngle*2.0)),4.0)') &&
+  nativeCore.includes('R2147: contact-darkened physical mechanical chamber') &&
+  nativeCore.includes('c=mix(c,deepObsidian+sapphireGlass*.54,') &&
+  nativeCore.includes('vec3 irisCutLight=vec3(.35,.43,.42)'),
+  'R2147 must shade physical raised silver facets and sapphire instead of applying a 2D glow'
+);
+for(const loaderPath of [
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+]){
+  const originalOwner=fs.readFileSync(loaderPath,'utf8');
+  assert.ok(originalOwner.includes('&r2147=sculpted-facet-optical-relief'),
+    'R2147 three canonical native MAG loaders must refer to identical physically lit WebGL material: '+loaderPath);
+}
 const validDownloadHref=href=>
   href==='/download/multiplatform' ||
   /^https:\/\/github\.com\/hutoczky\/FormatX-Updates\/releases\/download\/v[0-9]+\/FormatX-Suite-Pro-V[0-9]+\.zip$/.test(href);
