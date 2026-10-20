@@ -1736,9 +1736,16 @@
         vec3 machinedTitanium=vec3(.022,.040,.048)+
           vec3(.43,.49,.46)*(softboxA*.56+softboxB*.31+key*.13)+
           vec3(.065,.13,.15)*fresnel*.36;
-        vec3 shutterTitanium=vec3(.011,.028,.037)+
-          vec3(.22,.35,.39)*(softboxA*.42+softboxB*.34+fill*.20)+
-          vec3(.08,.14,.15)*fresnel*.28;
+        /* R2154: dark-machined, physically separated shutter blades.
+           Real existing normal changes each facet's broad studio response.
+           The cinema requires distinct metallic blades, not 8 flat
+           turquoise fan icons and no unstable procedural line patterns. */
+        float bladeShoulder=pow(sat(dot(
+          n,normalize(vec3(-.42,.53,.76)))),6.0);
+        vec3 shutterTitanium=vec3(.006,.018,.028)+
+          vec3(.18,.27,.29)*(softboxA*.37+softboxB*.31+fill*.16)+
+          vec3(.11,.16,.17)*fresnel*.20+
+          vec3(.39,.45,.42)*bladeShoulder*.20;
         /* R2119: the sapphire's actual curved R2108 surface now refracts
            against a recessed black optical cavity. The restrained coating
            sheen depends on the REAL interpolated convex vertex normal and
@@ -1779,6 +1786,20 @@
           (.16+.22*softboxA+.15*key);
         sapphireGlass+=vec3(.025,.080,.105)*innerGlass*
           (.32+.34*softboxB);
+        /* R2154: optically dense obsidian pupil behind the convex sapphire.
+           Deep physical cavity is bounded to the CENTER of the existing
+           curved lens geometry; two asymmetric softboxes remain reflected
+           from its real normals, avoiding the previous flat fan appearance. */
+        float glassWell=1.0-smoothstep(.17,.65,lensRadius);
+        sapphireGlass=mix(
+          sapphireGlass,
+          vec3(.001,.007,.017)+sapphireGlass*.28,
+          glassWell*.52
+        );
+        float lensReflector=exp(-pow((lensUv.x+.32)/.27,2.0)
+          -pow((lensUv.y-.29)/.17,2.0));
+        sapphireGlass+=vec3(.57,.71,.69)*lensReflector*
+          (.10+.14*softboxA);
         /* R2123 physically raised machined rails; shadow seam and the
            raised polished crest differ from the broad titanium bezel.
            All three are original depth-tested vertices in one WebGL draw. */
