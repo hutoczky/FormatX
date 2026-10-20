@@ -45,6 +45,34 @@ assert.ok(
   nativeCore.includes('const finalSmoothWeight=continuousRail?1.0:smoothWeight;') &&
   nativeCore.includes("fxNativeMagRailContinuityR2134='shared-guide-corner-normals-no-per-triangle-flicker'"),
   'R2128 satin continuous rails must not revert to dotted black near-coplanar geometry');
+/* R2153: ensure the R326 three-dimensional scene is still composited
+   even if a slow mobile GPU finishes shader compilation AFTER the film has
+   already dispatched its completion event. Keep the complete first-paint
+   scheduler -> motion runtime -> canonical renderer cache chain up to date. */
+assert.ok(
+  nativeCore.includes('const promoteNativeAtFilmExit=()=>{') &&
+  nativeCore.includes('queueMicrotask(promoteNativeAtFilmExit);') &&
+  nativeCore.includes('fxNativeMagLateHandoffR2153') &&
+  nativeCore.includes("'translate3d(0,0,0)','important'"),
+  'Original 3D MAG lost R2153 late-film visibility/compositor recovery'
+);
+for(const loaderPath of [
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+]){
+  assert.ok(fs.readFileSync(loaderPath,'utf8')
+    .includes('&r2153=late-film-handoff-race'),
+    'Stale R326 cached shader would bypass R2153 on mobile: '+loaderPath);
+}
+assert.ok(fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','utf8')
+  .includes('&r2153=late-film-native-compositor-recovery'),
+  'First paint scheduler would keep cached pre-R2153 runtime');
+assert.ok(fs.readFileSync('docs/scifi-ui/index.html','utf8')
+  .includes('&r2153=late-film-native-mag-handoff'),
+  'Public page would keep stale pre-R2153 animation scheduler');
+
 /* R2145: visual changes belong to the actual native WebGL fragment,
    not only to the fallback source or a separately composited image.
    All original canonical loaders must fetch the same cache-busted material. */
