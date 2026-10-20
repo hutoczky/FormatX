@@ -259,10 +259,16 @@ const CASES=[
           };
         });
         liveSamples.push({elapsedSeconds:Number(((i+1)*actualCadenceMs/1000).toFixed(2)),...sample});
-        await page.screenshot({
-          path:OUT+'/r2109-real-running-'+(i+1)+'-frame.png',
-          animations:'allow'
-        });
+        /* R2150: the WebM already records every frame. Six browser
+           screenshots at fixed positions retain real material evidence
+           without freezing software-GPU Chromium by screenshotting every
+           700ms while a WebGL context is initializing in the background. */
+        if(i%2===0){
+          await page.screenshot({
+            path:OUT+'/r2150-real-running-'+(i+1)+'-frame.png',
+            animations:'allow',timeout:90000
+          });
+        }
       }
       /* R2110 acceptance: inspect motion-driven *rendered* film samples,
          not screenshots of isolated forced clock frames. During the two
