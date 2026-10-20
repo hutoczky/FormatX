@@ -1577,6 +1577,26 @@
         c+=vec3(.45,.49,.44)*bevelLift*.30;
         c*=1.0-.23*bodyArm*(1.0-fourfoldPlane)*sculptedShadow;
         c+=vec3(.045,.085,.096)*bodyArm*softboxB*.13;
+        /* R2147: four broad machined shoulder planes now have real separated
+           brushed silver and smoked-obsidian responses. The reflections
+           are evaluated against the ORIGINAL physically rotating interpolated
+           normal, and fades across the existing solid. No texture, overlay,
+           per-pixel stochastic noise or extra draw call. */
+        float armShoulder=pow(sat(dot(n,
+          normalize(vec3(-.47,.63,.63)))),3.1)*bodyArm;
+        float armCounterlight=pow(sat(dot(n,
+          normalize(vec3(.70,.13,.70)))),4.4)*bodyArm;
+        float armRecess=pow(abs(sin(macroAngle*2.0)),4.0)*bodyArm;
+        float armCrest=pow(abs(cos(macroAngle*2.0)),9.0)*bodyArm;
+        float armFaceTone=smoothstep(.25,.82,
+          .5+.5*cos(macroAngle*4.0+vLocal.z*.45));
+        c*=1.0-.32*armRecess*(.58+.42*sculptedShadow);
+        c*=1.0-.13*(1.0-armFaceTone)*bodyArm;
+        c+=vec3(.60,.65,.59)*armShoulder*(.16+.30*armCrest);
+        c+=vec3(.20,.33,.35)*armCounterlight*.18;
+        /* Bounded broad metallic kicker gives each tip dimensionality
+           without reopening the old narrow scanline/moiré defects. */
+        c+=vec3(.32,.39,.37)*armCrest*(.05+.17*softboxA);
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
@@ -1741,6 +1761,22 @@
         c=mix(c,crestSilver,railCrest*.99);
         c=mix(c,shutterTitanium,physicalIris);
         c=mix(c,sapphireGlass,physicalLens);
+        /* R2147: contact-darkened physical mechanical chamber, plus two
+           broad directional metallic highlights. The real facet-coded lens,
+           shutters and collar receive distinct BRDF-like reflectance. */
+        float opticShadow=exp(-pow(lensRadius/.70,2.0));
+        vec3 deepObsidian=vec3(.002,.009,.016)+
+          vec3(.014,.047,.064)*(.24+.76*fill);
+        c=mix(c,deepObsidian+sapphireGlass*.54,
+          physicalLens*opticShadow*.22);
+        vec3 irisCutLight=vec3(.35,.43,.42)*
+          (pow(sat(dot(n,normalize(vec3(-.64,.58,.52)))),6.0)*.31+
+           pow(sat(dot(n,normalize(vec3(.54,-.28,.79)))),9.0)*.17);
+        c+=irisCutLight*(physicalBezel*.80+physicalIris*.65);
+        /* Dark body remains dark; optical crown catches two softbox sources.
+           Everything is clamped by the same original tone mapper. */
+        c+=vec3(.18,.28,.30)*physicalLens*
+          (softboxA*.15+softboxB*.11)*glassRim;
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
