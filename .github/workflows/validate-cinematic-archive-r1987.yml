@@ -23,6 +23,7 @@ on:
       - '.github/scripts/validate-hero-footprint-r2117.cjs'
       - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/scripts/validate-habitat-presentation-r2126.cjs'
+      - '.github/scripts/validate-habitat-frame-owner-r2132.cjs'
       - '.github/scripts/validate-native-intro-field-r2127.cjs'
       - '.github/scripts/validate-mag-buffer-resize-r2128.cjs'
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
@@ -61,6 +62,7 @@ on:
       - '.github/scripts/validate-hero-footprint-r2117.cjs'
       - '.github/scripts/validate-native-framing-r2114.cjs'
       - '.github/scripts/validate-habitat-presentation-r2126.cjs'
+      - '.github/scripts/validate-habitat-frame-owner-r2132.cjs'
       - '.github/scripts/validate-native-intro-field-r2127.cjs'
       - '.github/scripts/validate-mag-buffer-resize-r2128.cjs'
       - '.github/scripts/validate-native-intro-state-r2129.cjs'
@@ -110,6 +112,7 @@ jobs:
           node --check .github/scripts/validate-hero-footprint-r2117.cjs
           node --check .github/scripts/validate-native-framing-r2114.cjs
           node --check .github/scripts/validate-habitat-presentation-r2126.cjs
+          node --check .github/scripts/validate-habitat-frame-owner-r2132.cjs
           node --check .github/scripts/validate-native-intro-field-r2127.cjs
           node --check .github/scripts/validate-mag-buffer-resize-r2128.cjs
           node --check .github/scripts/validate-native-intro-state-r2129.cjs
@@ -150,6 +153,11 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
         run: node .github/scripts/validate-native-framing-r2114.cjs
+      - name: Test actual single-frame habitat startup without an orphan paint
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-habitat-frame-owner-r2132.cjs
       - name: Test CSS-hidden habitat allocation and actual late stylesheet recovery
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules

@@ -524,7 +524,9 @@
     ROOT.dataset.fxLivingHabitatFirstPaintR1737='post-intent-no-initial-layout-work';
     resize();
     updateScroll();
-    draw(performance.now());
+    // R2132 — resize() already owns the scheduled first frame. A synchronous
+    // draw here cleared its handle while the real callback was still queued,
+    // leaving an untracked full-viewport paint behind the first presentation.
   }
 
   function refreshPresentation(source){

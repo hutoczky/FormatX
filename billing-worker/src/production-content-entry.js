@@ -9,7 +9,7 @@ import productionBase from './production-content-entry-r369-base.js';
    product contract has no user-facing manual PAUSE control. */
 
 // production-r1776-immediate-visible-intro-edge-wire
-const STARTUP_REVISION = '20261020-r2131-header-wordmark-clearance';
+const STARTUP_REVISION = '20261020-r2132-habitat-frame-owner';
 // R1898 — keep Worker response CSP aligned with the current parser-owned intro bootstrap.
 const INLINE_INTRO_BOOTSTRAP_HASH = "'sha256-tlDg+XYO5YPVZqKtaMP7lrq2l1fkO3Q42wIwxLIOcXs='";
 const INLINE_LANGUAGE_PREPAINT_HASH = "'sha256-HFqOjvuK3a5gouo7WGpbechN8b6H+1lF5fTomw2yhQ4='";
@@ -272,6 +272,7 @@ function scheduleMotionRuntime(html) {
 }
 function cacheBustR502Runtime(html) {
   return String(html || '')
+    .replace(/formatx-living-habitat-r1530\.js\?v=[^"']+/g, 'formatx-living-habitat-r1530.js?v=20261020-r2132-habitat-frame-owner')
     .replace(/formatx-mobile-first-paint-r358\.css\?v=[^"']+/g, 'formatx-mobile-first-paint-r358.css?v=20261020-r2131-header-wordmark-clearance')
     .replace(/formatx-deferred-reduced-style-r232\.js\?v=[^"']+/g, 'formatx-deferred-reduced-style-r232.js?v=20261019-r2130-native-reduced-input')
     .replace(/formatx-critical-core-r227\.css\?v=[^"']+/g, 'formatx-critical-core-r227.css?v=20261019-r2130-native-reduced-input')
