@@ -213,7 +213,13 @@ const CASES=[
         ==='native-canvas-reference-film',null,{timeout:35000});
       /* R2109: sample ACTUAL moving film, not just isolated proof frames. */
       const liveSamples=[];
-      for(const [i,ms] of [1800,1800,1800,1800,1800].entries()){
+      /* R2148: the normal ten-second film clock starts before Chromium
+         finishes waiting for the async fallback. Sample several consecutive
+         *real running frames* at 700ms cadence, not an arbitrary 5.4 seconds
+         AFTER renderer-ready. Otherwise a correct 10s completed handoff was
+         falsely reported as a missing midfilm canvas. */
+      const actualCadenceMs=700;
+      for(const [i,ms] of Array(11).fill(actualCadenceMs).entries()){
         await page.waitForTimeout(ms);
         const sample=await page.evaluate(()=>{
           const root=document.documentElement;
@@ -252,7 +258,7 @@ const CASES=[
             center,detail
           };
         });
-        liveSamples.push({elapsedSeconds:(i+1)*1.8,...sample});
+        liveSamples.push({elapsedSeconds:Number(((i+1)*actualCadenceMs/1000).toFixed(2)),...sample});
         await page.screenshot({
           path:OUT+'/r2109-real-running-'+(i+1)+'-frame.png',
           animations:'allow'
@@ -268,14 +274,22 @@ const CASES=[
          and removed its canvas. That is a valid handoff, not a blank frame.
          Evaluate both observed mid-film frames; the later original hero
          and absence of the overlay are asserted independently below. */
-      const midFilm=liveSamples.filter(sample =>
-        sample.elapsedSeconds>=3.6 && sample.elapsedSeconds<=7.2 &&
-        sample.canvasDisplay!=='');
-      assert.ok(midFilm.length>=2 &&
-        midFilm.some(sample=>sample.elapsedSeconds===3.6) &&
-        midFilm.some(sample=>sample.elapsedSeconds===5.4),
-        'R2112 must draw both real 3.6 and 5.4-second moving MAG frames '+
-        'before the normal film handoff: '+JSON.stringify(liveSamples));
+      const midFilm=liveSamples.filter(sample=>
+        sample.canvasDisplay!==''&&sample.canvasDisplay!=='none'&&
+        sample.canvasVisibility!=='hidden'&&
+        Number(sample.canvasOpacity)>.85&&
+        sample.renderer==='native-canvas-reference-film'&&
+        sample.visualVersion==='sculpted-fourpoint-3d-illusion-machined-optic'
+      );
+      const progressSeen=new Set(midFilm
+        .map(sample=>sample.progress).filter(value=>Number.isFinite(value)));
+      /* At least two DIFFERENT painted timestamps, followed by the original
+         disappearing overlay and restored permanent R326 MAG. This is stricter
+         than accepting one forced-frame screenshot, but independent of how
+         much of the 10s movie elapsed during the real async loader. */
+      assert.ok(midFilm.length>=2 && progressSeen.size>=2,
+        'R2148 real running MAG must paint >=2 progressing visible frames '+
+        'before the NORMAL ten-second film handoff: '+JSON.stringify(liveSamples));
       for(const sample of midFilm){
         assert.equal(sample.renderer,'native-canvas-reference-film',
           'Actual fallback film renderer switched unexpectedly: '+JSON.stringify(sample));
