@@ -1503,6 +1503,26 @@
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
+        /* R2149: the four-point body was technically volumetric but the
+           smooth interpolated hemisphere normals made it READ AS A FLAT
+           grey blob in a real 390px browser capture. Bend normals into
+           four broad contiguous *machined* planes only for the mineral
+           body. Rigid sapphire, rail and iris vertex normals are untouched.
+           Smooth directional transitions keep the former moiré out. */
+        float macroPlaneR=length(vLocal.xy);
+        float macroPlaneMask=(1.0-step(5.70,vFacet))*
+          smoothstep(.18,.33,macroPlaneR)*
+          (1.0-smoothstep(.76,.96,macroPlaneR))*
+          smoothstep(-.09,.30,vLocal.z);
+        vec2 fourPointNormal=vec2(
+          vLocal.x/(abs(vLocal.x)+.085),
+          vLocal.y/(abs(vLocal.y)+.085));
+        vec3 cutMineralNormal=normalize(vec3(
+          n.xy*.40+fourPointNormal*.58,
+          max(.28,n.z)*1.17
+        ));
+        n=normalize(mix(n,cutMineralNormal,
+          macroPlaneMask*.53));
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
@@ -1577,6 +1597,17 @@
         c+=vec3(.45,.49,.44)*bevelLift*.30;
         c*=1.0-.23*bodyArm*(1.0-fourfoldPlane)*sculptedShadow;
         c+=vec3(.045,.085,.096)*bodyArm*softboxB*.13;
+        /* R2149 genuine four-point carved light: contiguous specular planes
+           respond to the revised *physical* mineral normals; no texture,
+           artificial decal, second surface or narrow periodic scanlines. */
+        float carvedRidge=pow(abs(cos(macroAngle*2.0)),5.0)*macroPlaneMask;
+        float carvedValley=pow(abs(sin(macroAngle*2.0)),3.1)*macroPlaneMask;
+        float directionalSilver=pow(sat(dot(n,
+          normalize(vec3(-.49,.75,.44)))),2.35)*macroPlaneMask;
+        c*=1.0-.40*carvedValley;
+        c*=1.0-.24*macroPlaneMask*(1.0-directionalSilver);
+        c+=vec3(.76,.81,.75)*directionalSilver*(.16+.34*carvedRidge);
+        c+=vec3(.32,.43,.45)*carvedRidge*softboxB*.16;
         /* R2147: four broad machined shoulder planes now have real separated
            brushed silver and smoked-obsidian responses. The reflections
            are evaluated against the ORIGINAL physically rotating interpolated
