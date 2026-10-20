@@ -65,6 +65,27 @@ for (const loaderPath of [
     'R2145 requires the SAME new physical WebGL shader on every phone/PC route: '+
     loaderPath);
 }
+/* R2149's visible carved four-point facets must be implemented inside
+   the actual original WebGL material and NEVER mutate the lens/iris
+   facet-coded rigid normals. All real-device loaders share the same URL. */
+assert.ok(
+  nativeCore.includes('R2149: the four-point body was technically volumetric') &&
+  nativeCore.includes('float macroPlaneMask=(1.0-step(5.70,vFacet))*') &&
+  nativeCore.includes('vec3 cutMineralNormal=normalize(vec3(') &&
+  nativeCore.includes('n=normalize(mix(n,cutMineralNormal,') &&
+  nativeCore.includes('float carvedValley=pow(abs(sin(macroAngle*2.0)),3.1)') &&
+  nativeCore.includes('c+=vec3(.76,.81,.75)*directionalSilver*'),
+  'R2149 requires true body-only facet normal relief and visible metal shadow planes'
+);
+for(const loaderPath of [
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+]){
+  assert.ok(fs.readFileSync(loaderPath,'utf8')
+    .includes('&r2149=machined-fourpoint-facet-normal'),
+    'R2149 normal-map WebGL core must be loaded consistently on desktop and phone: '+loaderPath);
+}
 /* R2147 native silver-and-sapphire contrast is exercised in the real
    physical fragment, and both desktop/phone asset owners load that exact
    edition. Do not certify a screenshot-only approximation of the original
