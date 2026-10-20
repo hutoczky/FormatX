@@ -64,7 +64,9 @@ async function inspectPage(page,tag){
         fxCinematicMobileHandoffR2146:
           root.dataset.fxCinematicMobileHandoffR2146||'',
         fxNativeMagCompositorR2151:
-          root.dataset.fxNativeMagCompositorR2151||''
+          root.dataset.fxNativeMagCompositorR2151||'',
+        fxNativeMagLateHandoffR2153:
+          root.dataset.fxNativeMagLateHandoffR2153||''
       },
       hero:hero&&info(hero),ancestry,viewport,overlays
     };
@@ -138,6 +140,10 @@ async function inspectPage(page,tag){
          context and repeat the whole ten-second intro plus fully composited
          no-scroll MAG screenshot. Do not silently accept a flaky first pass. */
       {name:'phone-390-repeat',width:390,height:844,mobile:true},
+      /* R2153: delayed real shader loading must not strand the hero after
+         the genuine 10-second intro has already dispatched its event. */
+      {name:'phone-390-late-webgl',width:390,height:844,mobile:true,
+        lateWebgl:true},
       {name:'desktop-1440',width:1440,height:900,mobile:false}
     ]){
       const context=await browser.newContext({
@@ -153,6 +159,13 @@ async function inspectPage(page,tag){
           });
         });
         const page=await context.newPage(),errors=[];
+        if(view.lateWebgl){
+          await page.route('**/formatx-crystal-organism-r326.js?*',
+            async route=>{
+              await new Promise(resolve=>setTimeout(resolve,13250));
+              await route.continue();
+            });
+        }
         page.on('pageerror',e=>errors.push(e.message));
         await page.goto(url+'?intro=1&r2144-hero-occlusion='+view.name,
           {waitUntil:'domcontentloaded',timeout:60000});
@@ -172,6 +185,14 @@ async function inspectPage(page,tag){
         await page.waitForTimeout(600);
         const scrolled=await inspectPage(page,view.name+'-after-1px-scroll');
         assert.ok(original.canvas&&original.canvas.width>50&&original.canvas.height>50);
+        if(view.lateWebgl){
+          assert.equal(
+            original.htmlFlags?.fxNativeMagLateHandoffR2153,
+            'film-completed-before-original-webgl-ready',
+            'The deferred original WebGL engine missed its 10s movie event '+
+              'without the R2153 late-film recovery: '+
+              JSON.stringify(original.htmlFlags));
+        }
         if(view.mobile){
           /* The R326 compositor promotion is a recovery fallback only: on
              an already-visible original WebGL canvas, the film may finish
