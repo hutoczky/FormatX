@@ -60,17 +60,17 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2045 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261020-r2133-active-shader-only'),
+  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261020-r2134-body-space-optics'),
     'Native renderer delegates must request the current motion lifecycle owner');
 }
 assert.ok(read('docs/scifi-ui/scripts/formatx-core-real3d-v20.js').includes(
-  'formatx-core-mobile-v55.js?v=20261020-r2133-active-shader-only'),
+  'formatx-core-mobile-v55.js?v=20261020-r2134-body-space-optics'),
   'The retained mobile delegate needs a fresh caller URL after its renderer dependency changes');
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261020-r2133-active-shader-only'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261020-r2134-body-space-optics'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261020-r2133-active-shader-only'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261020-r2134-body-space-optics'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261020-r2133-active-shader-only'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261020-r2134-body-space-optics'),
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',

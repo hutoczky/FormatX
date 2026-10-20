@@ -6,10 +6,11 @@ const output=path.resolve('.archive-artifacts/native-shader-payload-r2133.json')
 const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
 const report={sha:process.env.AUDITED_SHA||'',cases:[]};
 const write=()=>{fs.mkdirSync(path.dirname(output),{recursive:true});fs.writeFileSync(output,JSON.stringify(report,null,2));};
-// These are the actual R2132 WebGL2 program sources, captured on both native
-// viewport paths. The payload correction must not replace the live material.
-const fragment='f03ea76b4136220f6628ddff8f8b2f613733b7bcb695f86740aa82ee90b83739';
-const vertices={desktop:'1ab17f04f8a3c0373e771369886f9b54ca61574fc9a899842b89313e9159c786',mobile:'535bc610349321b2c6e2bb56485f32f4f588620cf7586bc9ecf7817bc278bbc0'};
+// R2134 intentionally attaches internal optics to the retained native body.
+// Pin those actual programs; the original payload ceiling, one-owner, real
+// draw/completion and error assertions remain unchanged.
+const fragment='f61a6fa2c682aeb36b29c1613615ed5f8be0fddccf537f5081f01464db35420c';
+const vertices={desktop:'4df951d53bf20e9968c823993af312968a391f841ae3b820d8823adf85a34568',mobile:'ec7eea99e6c145efa91b0fe30c4dd0f21aeb169f118cbfb1b6cb2924ef29f91a'};
 function observe(){
  const data=window.__nativePayload={shaders:[],contexts:0,draws:0,birth:[],contextLosses:0,csp:[]};
  document.addEventListener('securitypolicyviolation',event=>data.csp.push({directive:event.violatedDirective,blocked:event.blockedURI}));
@@ -49,7 +50,7 @@ function observe(){
   finally{write();await context.close();}
  }}finally{await browser.close();write();}
  assert.equal(report.cases.filter(item=>item.pass).length,2,'The actual desktop/mobile native payload contract failed');
- const rev='20261020-r2133-active-shader-only';
+ const rev='20261020-r2134-body-space-optics';
  for(const file of ['docs/scifi-ui/index.html','docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js','docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js','docs/scifi-ui/scripts/formatx-core-mobile-v55.js','docs/scifi-ui/scripts/formatx-core-real3d-v20.js','billing-worker/src/production-content-entry.js'])assert.ok(fs.readFileSync(file,'utf8').includes(rev),'The current native cache chain is stale: '+file);
  console.log('NATIVE_SHADER_PAYLOAD_R2133_PASS',JSON.stringify(report));
 })().catch(error=>{write();console.error(error);process.exitCode=1;});

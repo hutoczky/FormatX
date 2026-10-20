@@ -973,6 +973,9 @@
       uniform vec3 uRotation;
       ${vertexOut} vec3 vNormal;
       ${vertexOut} vec3 vLocal;
+      ${vertexOut} vec3 vBodyX;
+      ${vertexOut} vec3 vBodyY;
+      ${vertexOut} vec3 vBodyZ;
       ${vertexOut} vec2 vUv;
       ${vertexOut} vec3 vBary;
       ${vertexOut} float vFacet;
@@ -1023,6 +1026,9 @@
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
         vLocal=world;
+        vBodyX=rotation[0];
+        vBodyY=rotation[1];
+        vBodyZ=rotation[2];
         vUv=aUv;
         vBary=aBary;
         vFacet=aFacet;
@@ -1058,6 +1064,9 @@
       uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
       ${fragmentIn} vec3 vLocal;
+      ${fragmentIn} vec3 vBodyX;
+      ${fragmentIn} vec3 vBodyY;
+      ${fragmentIn} vec3 vBodyZ;
       ${fragmentIn} vec2 vUv;
       ${fragmentIn} vec3 vBary;
       ${fragmentIn} float vFacet;
@@ -1116,18 +1125,21 @@
           *gaussian(reflection.y+.10,.73)*smoothstep(-.2,.6,reflection.z);
         color+=vec3(.15,.08,.25)*dispersion*fresnel*.26;
 
-        /* Light is evaluated inside the body, offset by the refracted ray.
-           This makes the organ shift in depth with the actual camera/input. */
+        /* Internal anatomy follows the same real rotation as the body.
+           Environment reflections stay in world space. The orthonormal
+           basis transforms the refracted ray back into body coordinates. */
+        vec3 bodyPosition=vec3(dot(vLocal,vBodyX),dot(vLocal,vBodyY),dot(vLocal,vBodyZ));
+        vec3 bodyRay=vec3(dot(refracted,vBodyX),dot(refracted,vBodyY),dot(refracted,vBodyZ));
         vec3 organ=vec3(.008+uPointer.x*.016,.012-uPointer.y*.013,.15);
-        float organDepth=max(0.0,dot(organ-vLocal,refracted));
-        vec3 inside=vLocal+refracted*organDepth;
+        float organDepth=max(0.0,dot(organ-bodyPosition,bodyRay));
+        vec3 inside=bodyPosition+bodyRay*organDepth;
         vec3 delta=inside-organ;
         float organDistance=length(delta*vec3(1.0,1.03,.66));
         float organCore=gaussian(organDistance,.055);
         float organHalo=gaussian(organDistance,.17);
         float organBoundary=gaussian(organDistance-.102,.012);
         float activity=.34+.48*sat(uEnergy)+.18*sat(uBreath);
-        float transmissionWindow=smoothstep(-.05,.36,vLocal.z)*(1.0-.40*fresnel);
+        float transmissionWindow=smoothstep(-.05,.36,bodyPosition.z)*(1.0-.40*fresnel);
         color+=vec3(.18,.87,1.18)*organHalo*.075*activity*transmissionWindow;
         color+=vec3(.25,.76,.92)*organBoundary*.13*transmissionWindow;
         color+=vec3(.78,1.14,1.27)*organCore*(.45+.75*activity)*transmissionWindow;
@@ -1136,13 +1148,13 @@
            continuous and anchored in 3D, without per-triangle random color. */
         float fold=gaussian(abs(inside.x)*.92+abs(inside.y)*.75-.27,.037);
         float outerFold=gaussian(abs(inside.x)*.87+abs(inside.y)*.72-.47,.055);
-        float depthMask=smoothstep(-.10,.32,vLocal.z);
+        float depthMask=smoothstep(-.10,.32,bodyPosition.z);
         color+=vec3(.075,.19,.24)*fold*depthMask*(.13+.16*fill);
         color+=vec3(.07,.12,.17)*outerFold*depthMask*.12;
 
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
-          float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
+          float coordinate=.5+(bodyPosition.y*.61+bodyPosition.x*.14+bodyPosition.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
           sweep=gaussian(coordinate-head,.065)*(.28+.72*rim);
         }

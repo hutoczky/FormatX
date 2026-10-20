@@ -30,6 +30,7 @@ on:
       - '.github/scripts/validate-native-reduced-input-r2130.cjs'
       - '.github/scripts/validate-native-header-clearance-r2131.cjs'
       - '.github/scripts/validate-native-shader-payload-r2133.cjs'
+      - '.github/scripts/validate-native-optical-parallax-r2134.cjs'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
@@ -70,6 +71,7 @@ on:
       - '.github/scripts/validate-native-reduced-input-r2130.cjs'
       - '.github/scripts/validate-native-header-clearance-r2131.cjs'
       - '.github/scripts/validate-native-shader-payload-r2133.cjs'
+      - '.github/scripts/validate-native-optical-parallax-r2134.cjs'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
@@ -121,6 +123,7 @@ jobs:
           node --check .github/scripts/validate-native-reduced-input-r2130.cjs
           node --check .github/scripts/validate-native-header-clearance-r2131.cjs
           node --check .github/scripts/validate-native-shader-payload-r2133.cjs
+          node --check .github/scripts/validate-native-optical-parallax-r2134.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -139,7 +142,19 @@ jobs:
       - name: Test actual native shader payload and preserved live program
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
         run: node .github/scripts/validate-native-shader-payload-r2133.cjs
+      - name: Test body-attached native optical parallax with genuine keyboard turns
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
+        run: node .github/scripts/validate-native-optical-parallax-r2134.cjs
+      - name: Test actual WebGL1 optical parallax when WebGL2 is unavailable
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
+          FORMATX_OPTICAL_WEBGL1: '1'
+        run: node .github/scripts/validate-native-optical-parallax-r2134.cjs
       - name: Test atomic native chapter handoff on desktop and phone
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules

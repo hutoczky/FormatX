@@ -3,7 +3,7 @@
 
   const root = document.documentElement;
   const BOOTSTRAP = 'native-mechanical-orb-r250-no-2d-mag-layers';
-  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20261020-r2133-active-shader-only';
+  const MOBILE_SCRIPT = '/scifi-ui/scripts/formatx-core-mobile-v55.js?v=20261020-r2134-body-space-optics';
   const MOBILE_STYLE = '/scifi-ui/styles/formatx-core-mobile-v55.css?v=20260821-r285-pure-webgl3d';
   const PURE_STYLE = '/scifi-ui/styles/formatx-pure-3d-r285.css?v=20260828-r382-balanced-soft-optics';
   const AWARD_STYLE = '/scifi-ui/styles/formatx-award-reference-r80.css?v=20260814-pixel-aspect-r80';
