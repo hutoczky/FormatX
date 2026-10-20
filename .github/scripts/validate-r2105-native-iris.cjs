@@ -73,6 +73,33 @@ assert.ok(fs.readFileSync('docs/scifi-ui/index.html','utf8')
   .includes('&r2153=late-film-native-mag-handoff'),
   'Public page would keep stale pre-R2153 animation scheduler');
 
+/* R2154: the user's actual 390px browser capture showed a shallow,
+   turbine-like sapphire. Require dark curved-center lens depth and truly
+   separate normal-lit titanium plates in the ORIGINAL native shader. */
+assert.ok(
+  nativeCore.includes('float bladeShoulder=pow(sat(dot(') &&
+  nativeCore.includes('float glassWell=1.0-smoothstep(.17,.65,lensRadius);') &&
+  nativeCore.includes('float lensReflector=exp(-pow(') &&
+  nativeCore.includes('vec3(.001,.007,.017)+sapphireGlass*.28'),
+  'R2154 physical sapphire material still renders as flat eight-fin UI logo'
+);
+for(const loaderPath of [
+  'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js',
+  'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js',
+  'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+]){
+  assert.ok(fs.readFileSync(loaderPath,'utf8')
+    .includes('&r2154=obsidian-sapphire-iris-facets'),
+    'R2154 shader missing on canonical native route: '+loaderPath);
+}
+assert.ok(fs.readFileSync(
+  'docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','utf8')
+  .includes('&r2154=deep-sapphire-iris-facets'),
+  'R2154 deep optic stale in first-paint motion scheduler');
+assert.ok(fs.readFileSync('docs/scifi-ui/index.html','utf8')
+  .includes('&r2154=deep-sapphire-iris-facets'),
+  'R2154 deep optic stale in first entry HTML');
+
 /* R2145: visual changes belong to the actual native WebGL fragment,
    not only to the fallback source or a separately composited image.
    All original canonical loaders must fetch the same cache-busted material. */
