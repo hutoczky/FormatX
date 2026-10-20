@@ -10,6 +10,8 @@ on:
       - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js'
+      - 'docs/scifi-ui/index.html'
       - '.github/scripts/diagnose-r2144-hero-mag-visibility.cjs'
       - '.github/workflows/verify-r2150-composited-mag.yml'
   pull_request:
