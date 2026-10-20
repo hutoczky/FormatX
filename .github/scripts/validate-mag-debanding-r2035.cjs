@@ -66,7 +66,7 @@ assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2050-su
   'Canonical HTML must load the R2045 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2103-contrast-fourpoint-fallback']){
+ 'formatx-mag-birth-live-r533.css?v=20261014-r2104-premium-dark-stage']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 /* R2103 additionally forbids the exact unreadable low-power source that
@@ -74,16 +74,27 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2104-photographic-moving-softbox'),
-  'Missing actual cache-busted four-point R2103 Android replacement');
-assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
-  fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
-  fallback.includes('const studioTravel=.5+.5*Math.sin(time*.00053)'),
-  'R2104 movie must use a real animated optical studio-light material');
+  html.includes('formatx-mag-reference-film-r649.js?v=20261019-r2143-sidewall-parallax-silver-body')&&
+  fallback.includes('fxMagFallbackIrisActuationR2139')&&
+  fallback.includes('fxMagFallbackInitialCapabilityR2140')&&
+  fallback.includes('R2141: refracting optic')&&
+  fallback.includes('fxMagFallbackDepthR2143')&&
+  fallback.includes('Math.min(sw*.236,sh*.255)')&&
+  fallback.includes('const cameraYaw=smooth((t-3.60)/1.20)')&&
+  fallback.includes("visualRevision:'r2143-macro-contrast-sidewall-parallax-optic'"),
+  'Missing actual cache-busted R2141 curved meniscus, R2139 mechanical iris or R2140 hardware-tier fallback');
 assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
   intro.includes('opacity:1!important;')&&
   intro.includes('min-height:44px!important;'),
   'Skip button contrast and low-power fallback CSS must stay visible');
+assert.ok(fallback.includes('function drawMagStudio(ctx,S,time,t)')&&
+  fallback.includes('function magDiamond(ctx,S)')&&
+  fallback.includes('fxMagFallbackOpticR2104')&&
+  fallback.includes('for(let blade=0;blade<8;blade++)'),
+  'Premium real mobile film renderer must actually draw deeper machined geometry');
+assert.ok(intro.includes('end-r2104-premium-mag-stage')&&
+  intro.includes('.fxb-genome-field'),
+  'Old DNA overlay may not obscure the new MAG');
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
  correctedRearDepth:depth(-1.15),retrievedSheetDepth:depth(2.30),

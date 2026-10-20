@@ -1,0 +1,73 @@
+name: R2150 real mobile MAG compositor no-scroll regression
+
+on:
+  push:
+    branches:
+      - feature/r2104-cinematic-machined-mag-intro
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js'
+      - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
+      - 'docs/scifi-ui/scripts/formatx-core-mobile-v55.js'
+      - 'docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/diagnose-r2144-hero-mag-visibility.cjs'
+      - '.github/workflows/verify-r2150-composited-mag.yml'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2150-real-mobile-compositor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  three-real-compositor-proofs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate real R326 and proof syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check .github/scripts/diagnose-r2144-hero-mag-visibility.cjs
+      - name: Install actual Chromium/software GPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/compositor" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/compositor/node_modules/.bin/playwright" install chromium
+      - name: Start canonical repository website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs >/tmp/r2150-site.log 2>&1 &
+          for attempt in $(seq 1 80); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat /tmp/r2150-site.log
+          exit 1
+      - name: Require visible ORIGINAL R326 in two real Android contexts before any scroll
+        env:
+          NODE_PATH: ${{ runner.temp }}/compositor/node_modules
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/diagnose-r2144-hero-mag-visibility.cjs
+      - name: Preserve screenshot evidence including failed compositor frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2150-independent-mobile-compositor-evidence
+          path: artifacts/r2144-hero-mag-visibility/
+          retention-days: 21
+          if-no-files-found: warn

@@ -96,6 +96,20 @@
     letter-spacing:.16em;
   }
 }
+/* R2124: real 390px native WebGL screenshot proves the fixed 57vh
+   post-intro badge collides with the semantic hero kicker and feature title.
+   Put the temporary film identity into the clean space BELOW the 70px
+   navigation, ABOVE the physical MAG tip, not over any product content. */
+@media (max-width:900px),(max-aspect-ratio:27/25){
+  .fx-ai-core-ident-r1951{
+    top:clamp(84px,10.7svh,104px);
+    gap:5px;
+    padding:5px 12px 6px;
+    max-width:86vw;
+  }
+}
+/* end-r2124-mobile-postintro-identity-no-overlap */
+
 @media (prefers-reduced-motion:reduce){
   .fx-ai-core-ident-r1951{
     filter:none;

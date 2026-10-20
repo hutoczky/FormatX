@@ -44,7 +44,7 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry&r2153=late-film-native-compositor-recovery&r2154=deep-sapphire-iris-facets';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';

@@ -1108,10 +1108,23 @@ void main(){
   function selectLiveChapter(){
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
-    // From the moment the intro ends, the MAG owns the page. Do not leave the
-    // old landing page visible for a whole first viewport of scrolling.
-    // The same native scrolling and eight source anchors remain intact.
-    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
+    /* R2121: the 3D archive remains scroll-authored, never TIME-authored.
+       Previously, merely completing the 10s intro docked the canonical MAG,
+       collapsed the original hero and moved all controls without any visitor
+       action. Actual browser LayoutShiftObserver measured a .254 mobile
+       displacement of the WebGL stage (and another .074 on desktop).
+       Defer the spatial paper takeover until the visitor actually begins to
+       explore the real source sections. Explicit ?archive=1 immersive preview
+       still activates the exact scene immediately. Reduced-motion and
+       history-restored scroll positions retain their existing behavior. */
+    const scrollThreshold=Math.max(30,Math.min(88,innerHeight*.05));
+    const engaged=force||scrollY>=scrollThreshold;
+    root.dataset.fxArchiveScrollEntryR2121=engaged
+      ? 'real-scroll-or-explicit-archive'
+      : 'landing-hero-undisturbed';
+    const inArchive=Boolean(introDone&&
+      root.dataset.fxArchiveExperience==='ready'&&
+      engaged&&next);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
@@ -1151,6 +1164,25 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
+        /* R2122: when a real scroll changes the PHYSICAL shelf, the only
+           visible native HTML folio and its source identity must change in
+           that same input turn. Previously, fxArchiveCurrent changed now
+           while fxCinemaSource stayed on the preceding chapter until RAF;
+           the real eight-scene browser test caught vertical-crystal on the
+           sealed-vault shelf. Only chapter transitions use this synchronous
+           materialization; intra-chapter continuous 3D progress still
+           batches in requestAnimationFrame for performance. */
+        const nextChapter=current?.s.key||'home';
+        if(cinemaPrepared&&root.dataset.fxArchiveCinemaChapter!==nextChapter){
+          syncCinema();
+          /* R2130: update the chapter's REAL live heading in the physical
+             film handoff during the same scroll event as the original HTML
+             panel. The visual test caught stale previous-chapter titles
+             even though the true native paper had already moved. */
+          updateHandoff();
+          root.dataset.fxArchiveSynchronousShelfR2122=nextChapter;
+          root.dataset.fxArchiveSynchronousHeadingR2130=nextChapter;
+        }
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
         // animation frame, so wheel/touch bursts cannot repeatedly recompute

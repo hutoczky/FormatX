@@ -51,13 +51,24 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  /* R2155: reuse locale-specific currency formatters, protecting the
+     first visible MAG/heading paint from repeated ICU constructor work.
+     HUF/EUR figures, checkout URLs and HU/EN semantics are unchanged. */
+  const moneyFormatters = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale = language() === 'hu' ? 'hu-HU' : 'en-GB';
+    const key = locale + ':' + selectedCurrency;
+    let formatter = moneyFormatters.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: selectedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      moneyFormatters.set(key, formatter);
+    }
+    return formatter.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {
@@ -328,9 +339,29 @@
     scheduleThreeExperience();
     revealQrDock();
     syncScene();
-    updateCommerce();
     prepareQrDock();
     bind();
+
+    /* R2155: pricing, currency and QR cards are well BELOW the first MAG
+       viewport. Move the initial DOM/Intl work outside the critical
+       hero-paint frame. Actual currency/lang clicks still call updateCommerce
+       synchronously; an active near-viewport QR observer remains unchanged. */
+    let initialCommerceHydrated = false;
+    const hydrateInitialCommerce = () => {
+      if (initialCommerceHydrated || qrDockActivated) return;
+      initialCommerceHydrated = true;
+      updateCommerce();
+      ROOT.dataset.fxCommerceHydrationR2155 = 'idle-complete';
+    };
+    const scheduleCommerceIdle = () => {
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(hydrateInitialCommerce, { timeout: 1800 });
+      } else {
+        setTimeout(hydrateInitialCommerce, 0);
+      }
+    };
+    setTimeout(scheduleCommerceIdle, 650);
+    ROOT.dataset.fxCommerceHydrationR2155 = 'post-hero-scheduled';
     ROOT.dataset.fxLivingArchitecture = 'ready-performance-v3';
     dispatchEvent(new CustomEvent('formatx:livingready'));
   }

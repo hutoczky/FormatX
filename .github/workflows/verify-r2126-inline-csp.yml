@@ -1,0 +1,32 @@
+name: R2126 exact inline bootstrap CSP safety
+
+on:
+  push:
+    branches:
+      - feature/r2104-cinematic-machined-mag-intro
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/validate-r2126-inline-csp.cjs'
+      - '.github/workflows/verify-r2126-inline-csp.yml'
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-csp-boot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reject unapproved inline bootstrap changes
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/validate-r2126-inline-csp.cjs
+          node .github/scripts/validate-r2126-inline-csp.cjs

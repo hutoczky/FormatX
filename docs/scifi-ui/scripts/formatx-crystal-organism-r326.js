@@ -15,7 +15,13 @@
   const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
-  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
+  /* R2117: synchronize the REAL permanent MAG tier with the R2103
+     eight-core Android intro routing. Android's deviceMemory is a privacy-
+     rounded browser hint (often 4 GB even on high-end phones), not proof
+     that the GPU cannot render the normal 3D core. Reserve low geometry for
+     <=4 logical cores or <=2 GB. The existing measured 16.67ms frame
+     governor still reduces live rendering resolution under actual pressure. */
+  const constrained = hardwareConcurrency <= 4 || deviceMemory <= 2;
   const constrainedMobile = mobile && constrained;
   const IDLE_ENERGY = mobile ? .50 : .43;
   const SURFACE_PULSE_MS = 1160;
@@ -397,11 +403,17 @@
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
         const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
-        const faceWeight=1-smoothWeight;
+        /* R2134: only the new long machined rail facets are continuously
+           interpolated. All other body/iris normals keep their established
+           authored material response. Any per-face admixture, even 2.2%,
+           created a pixel-scale sparkle at each of 36 small rail sections. */
+        const continuousRail=facet>5.84&&facet<5.89;
+        const finalSmoothWeight=continuousRail?1.0:smoothWeight;
+        const faceWeight=1-finalSmoothWeight;
         const hybridNormal=normalize([
-          smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
-          smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
-          smoothNormal[2]*smoothWeight+crystalNormal[2]*faceWeight
+          smoothNormal[0]*finalSmoothWeight+crystalNormal[0]*faceWeight,
+          smoothNormal[1]*finalSmoothWeight+crystalNormal[1]*faceWeight,
+          smoothNormal[2]*finalSmoothWeight+crystalNormal[2]*faceWeight
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
@@ -726,10 +738,14 @@
       appendMembraneTri([ .46,.13,-.07],[ .70,.25,-.11],[ .51,-.06,.03],4.48);
     }
 
-    if(false){
-      const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
-      const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
+    /* R2105: reactivate the formerly dead physical central optics of the
+       original live R326 hero core. Constrain tessellation across all phone
+       tiers and keep the ONE existing GPU program and draw call. */
+    if(true){
+      const centreX=.025,centreY=-.012;
+      const bezelSteps=software?24:mobile?32:48;
+      const bezelTubeSteps=4,bezelZ=.632;
+      const bezelMajorX=.232,bezelMajorY=.210,bezelTube=.011;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
         const radial=[ca,sa,0];
@@ -753,12 +769,17 @@
         }
       }
 
-      const lensCenter=[centreX,centreY,.609];
-      const lensRadiusX=.153;
-      const lensRadiusY=.041;
-      const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const lensCenter=[centreX,centreY,.643];
+      const lensRadiusX=.209;
+      const lensRadiusY=.185;
+      const lensDepth=.031;
+      /* R2108: the real machined optics were too small inside the hero
+         four-point body. Enlarge the SAME geometry and strengthen actual
+         convex lens curvature; retain the original tessellation/draw call. */
+      root.dataset.fxNativeMagOpticScaleR2108='1.29x-real-geometry';
+      root.dataset.fxNativeMagLensXRadiusR2108=String(lensRadiusX);
+      const radialSteps=software?4:mobile?5:6;
+      const angularSteps=software?24:mobile?32:48;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -798,7 +819,122 @@
         }
         previous=current;
       }
+      /* R2105: eight actual raised, facing metal shutter plates over the
+         convex sapphire. The lens remains visible through their aperture.
+         Sixteen triangles only, no distinct WebGL pass or offscreen texture. */
+      const bladesFirst=facets.length;
+      for(let blade=0;blade<8;blade++){
+        const angle=blade*Math.PI/4;
+        const vertex=(radius,delta)=>{
+          const v=lensVertex(radius,angle+delta);
+          v.crystal[2]+=.006;
+          return v;
+        };
+        const p0=vertex(.36,-.12);
+        const p1=vertex(.93,-.30);
+        const p2=vertex(.91,.16);
+        const p3=vertex(.49,.25);
+        triangle([p0,p1,p2],6.18);
+        triangle([p0,p2,p3],6.18);
+      }
+      root.dataset.fxNativeMagIrisR2105='8-raised-curved-titanium-blades';
+      root.dataset.fxNativeMagIrisTrianglesR2105=
+        String((facets.length-bladesFirst)/3);
     }
+
+    /* R2129: the 390px REAL WebGL screenshot still showed stair-stepped
+       discontinuities because 11 rail segments tessellated the strongly
+       curved superellipsoid too coarsely. 26/30 segments plus greater physical
+       clearance keep the dual-depth machined ribs contiguous at screen DPR 2.
+       The darker underlay now reflects slate titanium rather than black. */
+    /* R2128: actual browser screenshot showed dark broken seam marks along
+       the permanent MAG arms. The original rail height (.012/.023) could
+       intersect the slightly irregular 3D body, while its nearly black
+       shader acted like a painted dotted line. Raise the existing machined
+       vertices above the crystal envelope and use slate-metal instead of
+       near-black. No extra object, canvas, draw or shader pass. */
+    /* R2123: eight true front-facing, curved, dual-depth precision ribs.
+       This was missing from the permanent R326 MAG, leaving its silhouette
+       a single liquid-looking turquoise sheet after the much richer intro.
+       The ribs follow the same superellipsoid implicit surface, occupy the
+       ORIGINAL buffers and cost fewer than 400 triangles on a normal phone. */
+    const railFirst=facets.length;
+    const railSections=software?18:mobile?36:40;
+    /* R2134: make the long polished ribs a single continuous specular
+       surface. Previously armorQuad generated a fresh flat face normal for
+       EACH small triangle: tiny longitudinal changes flashed as alternating
+       dots on high-DPI mobile displays. Explicit shared corner normals now
+       follow the rail's actual guide direction, while the two cross-section
+       edges keep a small machined bevel. Exactly the same native vertices,
+       original buffer layout and draw call are used. */
+    function railVertex(position,dx,dy,px,py,edge,layer){
+      const edgeNormal=layer===0?.11:.075;
+      const alongNormal=layer===0?.065:.045;
+      const normal=normalize([
+        px*edge*edgeNormal+dx*alongNormal,
+        py*edge*edgeNormal+dy*alongNormal,
+        1
+      ]);
+      return surfaceVertex(position,normal,[.5+.5*edge,.5],.91);
+    }
+    function railQuad(left,right,nextRight,nextLeft,dx,dy,px,py,layer){
+      const facet=layer===0?5.885:5.855;
+      const l0=railVertex(left,dx,dy,px,py,-1,layer);
+      const r0=railVertex(right,dx,dy,px,py,1,layer);
+      const r1=railVertex(nextRight,dx,dy,px,py,1,layer);
+      const l1=railVertex(nextLeft,dx,dy,px,py,-1,layer);
+      triangle([l0,r0,r1],facet);
+      triangle([l0,r1,l1],facet);
+    }
+    function frontCrystalZ(x,y){
+      const power=mobile?.78:.61;
+      const ax=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
+      const ay=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
+      const az=mobile?.64:.49;
+      const remaining=1.0-
+        Math.pow(Math.abs(x)/ax,power)-
+        Math.pow(Math.abs(y)/ay,power);
+      return az*Math.pow(Math.max(.0005,remaining),1/power);
+    }
+    for(let arm=0;arm<4;arm++){
+      const a=arm*Math.PI*.5;
+      const dx=Math.cos(a),dy=Math.sin(a);
+      const px=-dy,py=dx;
+      for(const side of [-1,1]){
+        for(const layer of [0,1]){
+          let left=null,right=null;
+          for(let step=0;step<=railSections;step++){
+            const t=step/railSections;
+            const along=.235+.425*t;
+            const offset=side*(.069-.028*t);
+            const width=(layer===0?.015:.009)*(1-.12*t);
+            const lift=layer===0?.085:.108;
+            const point=(edge)=>{
+              const x=dx*along+px*(offset+edge*width);
+              const y=dy*along+py*(offset+edge*width);
+              return [x,y,frontCrystalZ(x,y)+lift];
+            };
+            const nextLeft=point(-1);
+            const nextRight=point(1);
+            if(left&&right){
+              railQuad(left,right,nextRight,nextLeft,
+                dx,dy,px,py,layer);
+            }
+            left=nextLeft;
+            right=nextRight;
+          }
+        }
+      }
+    }
+    root.dataset.fxNativeMagRailsR2123='eight-dual-depth-real-geometry';
+    root.dataset.fxNativeMagRailVisibilityR2128='raised-continuous-satin-silver-no-dashed-black';
+    root.dataset.fxNativeMagTessellationR2129='26-mobile-30-desktop-clearance-geometry';
+    root.dataset.fxNativeMagRailVisibilityR2131='wider-anti-aliased-raised-satin-double-ribs';
+    root.dataset.fxNativeMagRailContinuityR2134='shared-guide-corner-normals-no-per-triangle-flicker';
+    root.dataset.fxNativeMagTessellationR2131='36-mobile-40-desktop-clearance-geometry';
+    root.dataset.fxNativeMagLensContrastR2131='visible-depth-graded-sapphire-optic';
+    root.dataset.fxNativeMagRailTrianglesR2123=
+      String((facets.length-railFirst)/3);
 
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
@@ -960,13 +1096,20 @@
            compatible but never replaces the body. Constant organic smoothing plus
            physiological deformation keeps the asymmetric silhouette alive. */
         float morph=0.0;
-        float organicBlend=.010;
-        vec3 crystalShadingNormal=normalize(mix(aCrystalNormal,aSphereNormal,.10));
+        /* R2118: the physical titanium bezel, shutter blades and actual
+           curved glass surface are rigid machined components, not living
+           cortex. Their original surface normals must NOT be smoothed with
+           the organic sphere, which flattened the specular depth. */
+        float rigidOptics=step(5.65,aFacet);
+        float organicBlend=.010*(1.0-rigidOptics);
+        vec3 crystalShadingNormal=normalize(mix(
+          aCrystalNormal,aSphereNormal,.10*(1.0-rigidOptics)));
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
         float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
-        float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
+        float living=(cell*.011+membrane*.0065)*
+          (.42+.58*uEnergy)*(1.0-rigidOptics);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
         float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
@@ -1360,6 +1503,26 @@
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
+        /* R2149: the four-point body was technically volumetric but the
+           smooth interpolated hemisphere normals made it READ AS A FLAT
+           grey blob in a real 390px browser capture. Bend normals into
+           four broad contiguous *machined* planes only for the mineral
+           body. Rigid sapphire, rail and iris vertex normals are untouched.
+           Smooth directional transitions keep the former moiré out. */
+        float macroPlaneR=length(vLocal.xy);
+        float macroPlaneMask=(1.0-step(5.70,vFacet))*
+          smoothstep(.18,.33,macroPlaneR)*
+          (1.0-smoothstep(.76,.96,macroPlaneR))*
+          smoothstep(-.09,.30,vLocal.z);
+        vec2 fourPointNormal=vec2(
+          vLocal.x/(abs(vLocal.x)+.085),
+          vLocal.y/(abs(vLocal.y)+.085));
+        vec3 cutMineralNormal=normalize(vec3(
+          n.xy*.40+fourPointNormal*.58,
+          max(.28,n.z)*1.17
+        ));
+        n=normalize(mix(n,cutMineralNormal,
+          macroPlaneMask*.53));
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
         float fresnel=pow(1.0-facing,1.72);
@@ -1402,28 +1565,74 @@
         float facetTone=${mobile
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        vec3 c=mix(vec3(.004,.008,.010),vec3(.133,.144,.140),lift)*facetTone;
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
            black pin-speckles in proof captures. Geometry stays untouched. */
         float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
         float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
+        c+=vec3(.37,.39,.34)*facetSilver*${mobile?'.185':'.215'};
+        c+=vec3(.020,.060,.070)*facetCool*${mobile?'.048':'.058'};
         c+=vec3(.030,.060,.064)*strata*.10;
         c+=vec3(.020,.043,.048)*backDepth*.11;
 
         /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.86,.90,.84)*softboxA*.105;
+        c+=vec3(.46,.55,.53)*softboxB*${mobile?'.185':'.165'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
+        /* R2145: broaden the genuine native four-point object's studio
+           response rather than painting uniform flat teal over the arms.
+           Analytic front normals continue rotating with the ONE R326 mesh;
+           no extra canvas, paper texture, or high-frequency banding. */
+        float silverKey=pow(sat(dot(n,
+          normalize(vec3(-.62,.72,.45)))),3.1)*frontDepth;
+        float sculptedShadow=pow(sat(dot(n,
+          normalize(vec3(.58,-.44,.68)))),2.4)*frontDepth;
+        float bodyArm=smoothstep(.18,.35,macroRadius)*
+          (1.0-smoothstep(.70,.92,macroRadius))*frontDepth;
+        float fourfoldPlane=.5+.5*cos(macroAngle*4.0);
+        float bevelLift=bodyArm*(.42+.58*fourfoldPlane)*silverKey;
+        c+=vec3(.45,.49,.44)*bevelLift*.30;
+        c*=1.0-.23*bodyArm*(1.0-fourfoldPlane)*sculptedShadow;
+        c+=vec3(.045,.085,.096)*bodyArm*softboxB*.13;
+        /* R2149 genuine four-point carved light: contiguous specular planes
+           respond to the revised *physical* mineral normals; no texture,
+           artificial decal, second surface or narrow periodic scanlines. */
+        float carvedRidge=pow(abs(cos(macroAngle*2.0)),5.0)*macroPlaneMask;
+        float carvedValley=pow(abs(sin(macroAngle*2.0)),3.1)*macroPlaneMask;
+        float directionalSilver=pow(sat(dot(n,
+          normalize(vec3(-.49,.75,.44)))),2.35)*macroPlaneMask;
+        c*=1.0-.40*carvedValley;
+        c*=1.0-.24*macroPlaneMask*(1.0-directionalSilver);
+        c+=vec3(.76,.81,.75)*directionalSilver*(.16+.34*carvedRidge);
+        c+=vec3(.32,.43,.45)*carvedRidge*softboxB*.16;
+        /* R2147: four broad machined shoulder planes now have real separated
+           brushed silver and smoked-obsidian responses. The reflections
+           are evaluated against the ORIGINAL physically rotating interpolated
+           normal, and fades across the existing solid. No texture, overlay,
+           per-pixel stochastic noise or extra draw call. */
+        float armShoulder=pow(sat(dot(n,
+          normalize(vec3(-.47,.63,.63)))),3.1)*bodyArm;
+        float armCounterlight=pow(sat(dot(n,
+          normalize(vec3(.70,.13,.70)))),4.4)*bodyArm;
+        float armRecess=pow(abs(sin(macroAngle*2.0)),4.0)*bodyArm;
+        float armCrest=pow(abs(cos(macroAngle*2.0)),9.0)*bodyArm;
+        float armFaceTone=smoothstep(.25,.82,
+          .5+.5*cos(macroAngle*4.0+vLocal.z*.45));
+        c*=1.0-.32*armRecess*(.58+.42*sculptedShadow);
+        c*=1.0-.13*(1.0-armFaceTone)*bodyArm;
+        c+=vec3(.60,.65,.59)*armShoulder*(.16+.30*armCrest);
+        c+=vec3(.20,.33,.35)*armCounterlight*.18;
+        /* Bounded broad metallic kicker gives each tip dimensionality
+           without reopening the old narrow scanline/moiré defects. */
+        c+=vec3(.32,.39,.37)*armCrest*(.05+.17*softboxA);
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
         float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.004;
+        c+=vec3(.70,.78,.74)*glassBlade*.029;
 
         /* R1942 — internal prism architecture.
            Four broad refractive planes run toward the signature tips. They are
@@ -1438,9 +1647,9 @@
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
         float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
+        c+=vec3(.30,.38,.35)*axisRidge*(.31+.095*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
+        c*=1.0-.32*diagonalValley;
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
@@ -1468,15 +1677,15 @@
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
         float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
+        c+=vec3(.38,.47,.43)*foldRidge*${mobile?'.110':'.140'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
+        c*=1.0-${mobile?'.095':'.125'}*foldValley;
         c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
         c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
 
         /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
+        c+=vec3(.030,.105,.123)*fresnel*.23;
+        c+=vec3(.067,.19,.20)*deepEdge*.20;
         float spectralSide=.5+.5*n.x;
         c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
         c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
@@ -1518,6 +1727,108 @@
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
 
+        /* R2105: actual front-facing depth-tested metal, glass and iris
+           geometry have distinct reflectance instead of inheriting the
+           flat cyan base material painted on the four-point mineral. */
+        float physicalBezel=step(5.70,vFacet)*(1.0-step(5.90,vFacet));
+        float physicalIris=step(6.10,vFacet)*(1.0-step(6.24,vFacet));
+        float physicalLens=step(6.35,vFacet)*(1.0-step(6.52,vFacet));
+        vec3 machinedTitanium=vec3(.022,.040,.048)+
+          vec3(.43,.49,.46)*(softboxA*.56+softboxB*.31+key*.13)+
+          vec3(.065,.13,.15)*fresnel*.36;
+        /* R2154: dark-machined, physically separated shutter blades.
+           Real existing normal changes each facet's broad studio response.
+           The cinema requires distinct metallic blades, not 8 flat
+           turquoise fan icons and no unstable procedural line patterns. */
+        float bladeShoulder=pow(sat(dot(
+          n,normalize(vec3(-.42,.53,.76)))),6.0);
+        vec3 shutterTitanium=vec3(.006,.018,.028)+
+          vec3(.18,.27,.29)*(softboxA*.37+softboxB*.31+fill*.16)+
+          vec3(.11,.16,.17)*fresnel*.20+
+          vec3(.39,.45,.42)*bladeShoulder*.20;
+        /* R2119: the sapphire's actual curved R2108 surface now refracts
+           against a recessed black optical cavity. The restrained coating
+           sheen depends on the REAL interpolated convex vertex normal and
+           the ring position in the same 3D lens geometry; no 2D overlay,
+           second canvas, temporal scanlines or new fragment sampling. */
+        vec2 lensUv=vec2((vLocal.x-.025)/.209,(vLocal.y+.012)/.185);
+        float lensRadius=length(lensUv);
+        float apertureDepth=1.0-smoothstep(.14,.80,lensRadius);
+        float innerGlass=1.0-smoothstep(.48,.78,lensRadius);
+        float glassRim=smoothstep(.71,.92,lensRadius);
+        float sapphireSpec=pow(sat(dot(n,normalize(vec3(-.36,.54,.76)))),17.0);
+        float secondarySpec=pow(sat(dot(n,normalize(vec3(.58,-.28,.76)))),27.0);
+        /* R2131: realistic but legible sapphire coating on genuine
+           curved physical glass. The previous pupil was almost black at
+           390 px, obscuring the raised eight-blade optic entirely. */
+        vec3 sapphireGlass=vec3(.010,.028,.045)+
+          vec3(.075,.146,.176)*(.28+.72*key)+
+          vec3(.27,.36,.32)*sapphireSpec*.72+
+          vec3(.14,.25,.29)*secondarySpec*.38+
+          vec3(.045,.14,.19)*fresnel*.35;
+        sapphireGlass=mix(
+          sapphireGlass,
+          vec3(.002,.009,.018)+sapphireGlass*.35,
+          apertureDepth*.37
+        );
+        sapphireGlass+=vec3(.030,.075,.090)*innerGlass*.50;
+        sapphireGlass+=vec3(.24,.30,.28)*glassRim*
+          (.29+.36*softboxA+.22*softboxB);
+        /* R2145: genuine convex sapphire adds deep coated reflections
+           across its existing curved physical mesh. The optic must read as
+           layered glass in the actual 390px screenshot, not eight bare fins. */
+        float deepCaustic=exp(-pow((lensUv.x+.26)/.32,2.0)
+          -pow((lensUv.y-.24)/.47,2.0))*innerGlass;
+        float crownCoating=exp(-pow((lensUv.x-.08)/.66,2.0)
+          -pow((lensUv.y+.51)/.18,2.0))*glassRim;
+        sapphireGlass+=vec3(.12,.26,.32)*deepCaustic*.30;
+        sapphireGlass+=vec3(.48,.60,.58)*crownCoating*
+          (.16+.22*softboxA+.15*key);
+        sapphireGlass+=vec3(.025,.080,.105)*innerGlass*
+          (.32+.34*softboxB);
+        /* R2154: optically dense obsidian pupil behind the convex sapphire.
+           Deep physical cavity is bounded to the CENTER of the existing
+           curved lens geometry; two asymmetric softboxes remain reflected
+           from its real normals, avoiding the previous flat fan appearance. */
+        float glassWell=1.0-smoothstep(.17,.65,lensRadius);
+        sapphireGlass=mix(
+          sapphireGlass,
+          vec3(.001,.007,.017)+sapphireGlass*.28,
+          glassWell*.52
+        );
+        float lensReflector=exp(-pow((lensUv.x+.32)/.27,2.0)
+          -pow((lensUv.y-.29)/.17,2.0));
+        sapphireGlass+=vec3(.57,.71,.69)*lensReflector*
+          (.10+.14*softboxA);
+        /* R2123 physically raised machined rails; shadow seam and the
+           raised polished crest differ from the broad titanium bezel.
+           All three are original depth-tested vertices in one WebGL draw. */
+        float railShadow=step(5.880,vFacet)*(1.0-step(5.892,vFacet));
+        float railCrest=step(5.850,vFacet)*(1.0-step(5.870,vFacet));
+        vec3 crestSilver=vec3(.12,.17,.18)+
+          vec3(.60,.65,.57)*(softboxA*.62+softboxB*.29+key*.24);
+        crestSilver+=vec3(.11,.14,.13)*silverKey*.22;
+        c=mix(c,machinedTitanium,physicalBezel);
+        c=mix(c,vec3(.12,.16,.17)+machinedTitanium*.74,railShadow*.68);
+        c=mix(c,crestSilver,railCrest*.99);
+        c=mix(c,shutterTitanium,physicalIris);
+        c=mix(c,sapphireGlass,physicalLens);
+        /* R2147: contact-darkened physical mechanical chamber, plus two
+           broad directional metallic highlights. The real facet-coded lens,
+           shutters and collar receive distinct BRDF-like reflectance. */
+        float opticShadow=exp(-pow(lensRadius/.70,2.0));
+        vec3 deepObsidian=vec3(.002,.009,.016)+
+          vec3(.014,.047,.064)*(.24+.76*fill);
+        c=mix(c,deepObsidian+sapphireGlass*.54,
+          physicalLens*opticShadow*.22);
+        vec3 irisCutLight=vec3(.35,.43,.42)*
+          (pow(sat(dot(n,normalize(vec3(-.64,.58,.52)))),6.0)*.31+
+           pow(sat(dot(n,normalize(vec3(.54,-.28,.79)))),9.0)*.17);
+        c+=irisCutLight*(physicalBezel*.80+physicalIris*.65);
+        /* Dark body remains dark; optical crown catches two softbox sources.
+           Everything is clamped by the same original tone mapper. */
+        c+=vec3(.18,.28,.30)*physicalLens*
+          (softboxA*.15+softboxB*.11)*glassRim;
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
 
@@ -2697,6 +3008,87 @@
       scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
+    /* R2144: the original WebGL buffer sometimes contains the complete MAG
+       while mobile Chromium has NOT composited that layer back into the
+       semantic hero after R533 removes its full-screen film. An actual 1px
+       scroll fixed the published visual defect, but scrolling must never be
+       required, fabricated or stolen from the user. Recover visibility and
+       submit a bounded native paint on the authentic film completion event.
+       The same original WebGL canvas stays mounted: no second renderer. */
+    /* R2153: the film event can fire before the deferred R326 loader has
+       finished compiling WebGL on a real phone. Keep its normal recovery
+       path, but also inspect the ALREADY-COMPLETED film at mount. This
+       restores the identical original canvas without synthetic scrolling
+       or any second renderer. Idempotent while the same stage is mounted. */
+    let handoffPromotionQueued=false;
+    const promoteNativeAtFilmExit=()=>{
+      if(handoffPromotionQueued)return;
+      handoffPromotionQueued=true;
+      requestAnimationFrame(()=>{
+        if(disposed||contextLost||document.hidden)return;
+        const r=stage.getBoundingClientRect();
+        const onscreen=r.width>40&&r.height>40&&
+          r.right>0&&r.bottom>0&&r.left<innerWidth&&r.top<innerHeight;
+        root.dataset.fxNativeMagHandoffPaintR2144=onscreen
+          ? 'resubmitted-visible-native-webgl-after-film'
+          : 'offscreen-preserve-idle';
+        if(!onscreen){
+          handoffPromotionQueued=false;
+          return;
+        }
+        /* R2146: Android sometimes keeps the prior full-screen film's
+           compositing surface even after the Three/WebGL buffer is drawn.
+           Promote the EXISTING original hero layer once at real film exit.
+           This is an identity transform (no scroll, displacement, new canvas,
+           animation, continuous frame loop, or request for another renderer).
+           The regular visibility governor stays responsible thereafter. */
+        if(mobile){
+          /* R2151: the canonical r422 stylesheet explicitly declares
+             transform:none!important on this stage. The former R2146
+             ordinary inline translate3d was therefore INEFFECTIVE:
+             real 390px Chromium repeated runs occasionally kept the
+             WebGL-ready MAG entirely black until a 1px scroll.
+             Override only the existing layer with an important IDENTITY
+             transform. No geometry shift, fake scroll, second canvas,
+             stale fixed overlay or continuous repainting. */
+          stage.style.setProperty(
+            'transform','translate3d(0,0,0)','important');
+          canvas.style.setProperty(
+            'transform','translate3d(0,0,0)','important');
+          stage.style.setProperty(
+            'backface-visibility','hidden','important');
+          canvas.style.setProperty(
+            'backface-visibility','hidden','important');
+          stage.getBoundingClientRect();
+          root.dataset.fxNativeMagCompositorR2146=
+            'original-webgl-canvas-promoted-after-film';
+          root.dataset.fxNativeMagCompositorR2151=
+            'important-identity-transform-beats-r422-none-important';
+        }
+        visible=true;
+        resize();
+        schedule(mobile?3:4);
+        io.unobserve(stage);
+        io.observe(stage);
+        requestAnimationFrame(()=>{
+          if(!disposed&&!contextLost&&!document.hidden){
+            visible=true;
+            schedule(1);
+          }
+        });
+      });
+    };
+    listen(document,'formatx:magbirthcomplete',promoteNativeAtFilmExit);
+    const filmAlreadyCompleted=
+      !root.hasAttribute('data-fx-mag-birth-live') &&
+      !document.querySelector('.fx-mag-birth-r533') &&
+      Boolean(root.dataset.fxMagBirthLiveR533) &&
+      root.dataset.fxMagBirthLiveR533!=='active';
+    if(filmAlreadyCompleted){
+      root.dataset.fxNativeMagLateHandoffR2153=
+        'film-completed-before-original-webgl-ready';
+      queueMicrotask(promoteNativeAtFilmExit);
+    }
     const sectionPhysiology={
       hero:'homeostasis',experience:'attention',capabilities:'activation',
       pricing:'heartbeat',system:'stability',resources:'curiosity'
@@ -2792,6 +3184,10 @@
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
+    root.dataset.fxCoreCapabilityPolicyR2117=
+      'high-core-four-gb-phone-normal-mesh-adaptive-fps';
+    root.dataset.fxCoreCapabilitySelectedR2117=constrained?
+      'measured-adaptive-low-geometry':'normal-four-point-optics-with-measured-adaptive-governor';
     root.dataset.fxCoreCapabilityR620=`${hardwareConcurrency}c-${deviceMemory}gb`;
     root.dataset.fxCoreMaterial='cortical-bioceramic-living-tissue-r1723';
     root.dataset.fxCoreGeometry='cortical-cellular-organism-with-native-tendrils-r1723';

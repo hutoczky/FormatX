@@ -51,7 +51,7 @@ const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
 const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry&r2105=physical-sapphire-iris&r2108=larger-convex-sapphire&r2117=high-core-android-normal-mesh&r2118=rigid-sapphire-optic-normals&r2119=curved-sapphire-cavity-reflection&r2128=continuous-satin-raised-rails&r2129=smooth-curved-ribs&r2123=raised-silver-rails&r2131=wider-satin-rails-visible-sapphire&r2134=continuous-rail-corner-normals&r2144=post-intro-native-mag-visibility&r2145=sculpted-silver-deep-sapphire&r2146=mobile-compositor-promoted&r2147=sculpted-facet-optical-relief&r2149=machined-fourpoint-facet-normal&r2151=important-mobile-compositor-layer&r2153=late-film-handoff-race&r2154=obsidian-sapphire-iris-facets';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';

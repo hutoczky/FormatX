@@ -252,24 +252,86 @@ async function assertHeroDisclosure(page) {
       `R1948 hud did not progressively open after hero when mounted: ${JSON.stringify({ heroState, journeyState })}`);
   }
 
+  /* R2133: the actual R2121 product only docks the permanent MAG archive
+     on user scroll, then returns to the readable original hero on scroll 0.
+     Preserve both physical native-paper delivery and the no-CLS reversibility.
+     Never bypass real browser input or silently skip the original document. */
+  try {
+    await page.waitForFunction(() => {
+      const root=document.documentElement;
+      const panels=[...document.querySelectorAll(
+        'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+      )];
+      return root.dataset.fxArchiveExperience==='ready'&&
+        root.dataset.fxArchiveCinema==='active'&&
+        root.dataset.fxArchiveScrollEntryR2121==='real-scroll-or-explicit-archive'&&
+        panels.length===1&&
+        getComputedStyle(panels[0]).visibility==='visible'&&
+        (panels[0].textContent||'').trim().length>70;
+    }, null, { timeout: 9000 });
+  } catch (error) {
+    const state=await page.evaluate(()=>{
+      const root=document.documentElement;
+      const panels=[...document.querySelectorAll(
+        'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+      )];
+      const panel=panels[0],cs=panel&&getComputedStyle(panel);
+      const hero=document.querySelector('#hero .hero-copy');
+      return {scrollY,viewport:innerHeight,url:location.search,
+        intro:root.dataset.fxMagBirthOwnerR533||'',introDone:root.dataset.fxIntro||'',
+        archive:root.dataset.fxArchiveCinema||'',
+        entry:root.dataset.fxArchiveScrollEntryR2121||'',
+        archiveExperience:root.dataset.fxArchiveExperience||'',
+        chapter:root.dataset.fxArchiveCinemaChapter||'',
+        current:root.dataset.fxArchiveCurrent||'',
+        progress:root.dataset.fxArchivePhase||'',
+        panels:panels.length,panelVisible:cs?.visibility||'',
+        panelLength:panel?.textContent?.length||0,
+        worldScene:root.dataset.fxCinematicSceneR536||'',
+        originalHeroVisible:!!hero&&getComputedStyle(hero).display!=='none',
+        scriptReady:!!window.FormatXArchiveExperience,
+        errors:root.dataset.fxArchiveError||''
+      };
+    });
+    console.error('R2133_ARCHIVE_ENTER_BLOCKER',JSON.stringify(state));
+    throw error;
+  }
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  // R2040: the former R536 'core' is no longer the terminal reverse-scroll
-  // state when the user-selected MAG-only cinematic archive owns the page.
-  // Still REQUIRE an actual reversible chapter with exactly one working
-  // original HTML folio; never silently accept a stuck or empty scene.
-  await page.waitForFunction(() => {
-    const root=document.documentElement;
-    if(root.dataset.fxArchiveExperience!=='ready')
-      return root.dataset.fxCinematicSceneR536==='core';
-    const first=window.FormatXArchiveExperience?.scenes?.[0]?.key;
-    const visible=[...document.querySelectorAll('main#main-content > [data-fx-cinema-host-active="true"]')];
-    const paper=visible[0]?.querySelector(':scope > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
-    return root.dataset.fxArchiveCinema==='active'
-      && !!first&&root.dataset.fxArchiveCurrent===first
-      && visible.length===1&&!!paper
-      && getComputedStyle(paper).visibility==='visible'
-      && (paper.textContent||'').trim().length>70;
-  }, null, { timeout: 9000 });
+  try {
+    await page.waitForFunction(() => {
+      const root=document.documentElement;
+      const original=document.querySelector('#hero .hero-copy');
+      return root.dataset.fxCinematicSceneR536==='core'&&
+        root.dataset.fxArchiveCinema!=='active'&&
+        root.dataset.fxArchiveScrollEntryR2121==='landing-hero-undisturbed'&&
+        !!original&&getComputedStyle(original).display!=='none'&&
+        original.getBoundingClientRect().width>90&&
+        document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length===0;
+    }, null, { timeout: 9000 });
+  } catch (error) {
+    const diagnostics=await page.evaluate(()=>{
+      const root=document.documentElement,hero=document.querySelector('#hero .hero-copy');
+      const cs=hero?getComputedStyle(hero):null,rect=hero?.getBoundingClientRect();
+      return {
+        scrollY,visual:root.dataset.fxCinematicSceneR536,
+        archive:root.dataset.fxArchiveCinema,entry:root.dataset.fxArchiveScrollEntryR2121,
+        mode:root.dataset.fxArchiveExperience,
+        nativeCanvas:root.dataset.fxCrystalOrganismR326,
+        prepared:root.dataset.fxArchiveCinemaPrepared,
+        chapter:root.dataset.fxArchiveCinemaChapter,
+        updateScroll:root.dataset.fxArchiveUpdateScroll,
+        restore:root.dataset.fxArchiveDock,
+        heroDisplay:cs?.display,heroVisibility:cs?.visibility,
+        heroWidth:rect?.width,heroHeight:rect?.height,
+        activePanels:document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length,
+        activeHosts:document.querySelectorAll('[data-fx-cinema-host-active="true"]').length,
+        sceneCount:root.dataset.fxArchiveSceneCount,
+        originalCTA:!!document.getElementById('hero-download')
+      };
+    });
+    console.error('R2133_ACTUAL_REVERSE_SCROLL_STATE',JSON.stringify(diagnostics));
+    throw error;
+  }
   await page.waitForTimeout(250);
 }
 
