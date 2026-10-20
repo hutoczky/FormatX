@@ -3011,7 +3011,10 @@
         root.dataset.fxNativeMagHandoffPaintR2144=onscreen
           ? 'resubmitted-visible-native-webgl-after-film'
           : 'offscreen-preserve-idle';
-        if(!onscreen)return;
+        if(!onscreen){
+          handoffPromotionQueued=false;
+          return;
+        }
         /* R2146: Android sometimes keeps the prior full-screen film's
            compositing surface even after the Three/WebGL buffer is drawn.
            Promote the EXISTING original hero layer once at real film exit.
