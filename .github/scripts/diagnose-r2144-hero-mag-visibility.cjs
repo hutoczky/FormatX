@@ -62,7 +62,9 @@ async function inspectPage(page,tag){
         ).slice(0,75)),
         fxNativeMagCompositorR2146:root.dataset.fxNativeMagCompositorR2146||'',
         fxCinematicMobileHandoffR2146:
-          root.dataset.fxCinematicMobileHandoffR2146||''
+          root.dataset.fxCinematicMobileHandoffR2146||'',
+        fxNativeMagCompositorR2151:
+          root.dataset.fxNativeMagCompositorR2151||''
       },
       hero:hero&&info(hero),ancestry,viewport,overlays
     };
@@ -180,6 +182,17 @@ async function inspectPage(page,tag){
           assert.equal(original.htmlFlags?.fxCinematicMobileHandoffR2146,
             'direct-native-mag-no-secondary-cover',
             'Redundant second cinematic cut is still hiding the native MAG');
+          /* R2151: before the fix the CSS !important rule returned 'none'
+             even though the JS had assigned an ordinary inline translate3d.
+             Do not certify mere WebGL readiness or a dummy status flag:
+             actual COMPUTED transforms must contain the promoted matrix. */
+          assert.equal(original.htmlFlags?.fxNativeMagCompositorR2151,
+            'important-identity-transform-beats-r422-none-important',
+            'Post-intro original mobile MAG compositor ownership was never promoted');
+          assert.ok(original.ancestry[0]?.transform!=='none'&&
+            original.ancestry[1]?.transform!=='none',
+            'Canonical CSS still suppressed the real MAG compositor promotion: '+
+              JSON.stringify(original.ancestry.slice(0,2)));
         }
         assert.ok(original.visiblePixelProof.composited,
           'The original MAG is WebGL-ready but absent from the real '+
