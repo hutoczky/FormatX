@@ -983,6 +983,9 @@
 
   function queueRender(delay=0) {
     if(finished||raf||frameTimer)return;
+    // Background tabs cannot present cinematic frames. Preserve the timeline
+    // without waking the main thread for an invisible 60 Hz render loop.
+    if(document.hidden && !HAS_VISUAL_FRAME)delay=Math.max(delay,250);
     if(delay>0){
       frameTimer=setTimeout(()=>{
         frameTimer=0;
@@ -992,6 +995,11 @@
     }
     raf=requestAnimationFrame(render);
   }
+
+  let lastRefreshTelemetryAt=0;
+  let lastCoreCostSampleAt=0;
+  let cachedCoreRenderCost=0;
+  let finalParticleFrameDrawn=false;
 
   function render(now) {
     raf=0;
@@ -1008,8 +1016,15 @@
       const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
       const divisor=Math.max(1,Math.floor(estimatedHz/60));
       schedulerTick=(schedulerTick+1)%divisor;
-      ROOT.dataset.fxMagBirthRefreshHzR1622=estimatedHz.toFixed(1);
-      ROOT.dataset.fxMagBirthRenderDivisorR1622=String(divisor);
+      // DOM dataset mutations can invalidate style and layout. Publish diagnostic
+      // refresh telemetry at most four times a second, not on every animation frame.
+      if(!lastRefreshTelemetryAt || now-lastRefreshTelemetryAt>=250){
+        lastRefreshTelemetryAt=now;
+        const hzText=estimatedHz.toFixed(1);
+        const divisorText=String(divisor);
+        if(ROOT.dataset.fxMagBirthRefreshHzR1622!==hzText)ROOT.dataset.fxMagBirthRefreshHzR1622=hzText;
+        if(ROOT.dataset.fxMagBirthRenderDivisorR1622!==divisorText)ROOT.dataset.fxMagBirthRenderDivisorR1622=divisorText;
+      }
       if(divisor>1 && schedulerTick!==0){
         raf=requestAnimationFrame(render);
         return;
@@ -1020,7 +1035,13 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
-    const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
+    // Read the core's render-cost hint at the same cadence as native synchronization.
+    // Avoid an attribute lookup and numeric parse on every cinematic frame.
+    if(!lastCoreCostSampleAt || now-lastCoreCostSampleAt>=200){
+      lastCoreCostSampleAt=now;
+      cachedCoreRenderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
+    }
+    const renderCost=cachedCoreRenderCost;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
       lastNativeSync=now;
@@ -1042,10 +1063,12 @@
     const particleCadence=filmRenderer
       ? (softwareFallbackActive?125:16.67)
       : 16.67;
+    const finalFrameDue=r>=1 && !finalParticleFrameDrawn;
     const shouldDraw=phaseDrivenFallback
-      ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
-      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || r>=1);
+      ? (lastSoftwareFallbackPhase!==visiblePhase || finalFrameDue)
+      : (!lastParticleDraw || (r<1 && now-lastParticleDraw>=particleCadence) || finalFrameDue);
     if(shouldDraw){
+      if(r>=1)finalParticleFrameDrawn=true;
       lastParticleDraw=now;
       if(phaseDrivenFallback)lastSoftwareFallbackPhase=visiblePhase;
       drawParticles(r,now);
@@ -1058,6 +1081,8 @@
       queueRender(cadence);
       return;
     }
+    // Only inspect the native stage when the cinematic timeline is complete.
+    // Earlier frames should not query the DOM for a handoff they cannot perform.
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
     if(MOBILE && FORCE && !nativeReady && now-startedAt<10500){
       requestCoreWarmup('forced-mobile-handoff-wait');
@@ -1083,7 +1108,8 @@
   }
 
   function start() {
-    try { sessionStorage.setItem(KEY,'1'); } catch (_) {}
+    // Mark the session only after a real intro begins; retain deterministic proof mode.
+    try { if (!HAS_VISUAL_FRAME) sessionStorage.setItem(KEY,'1'); } catch (_) {}
     ROOT.dataset.fxMagBirthLiveR533='active';
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';

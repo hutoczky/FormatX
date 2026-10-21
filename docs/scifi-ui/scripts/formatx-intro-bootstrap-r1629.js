@@ -5,6 +5,8 @@ r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
 const f=p.get('intro')==='1'||p.get('visualintro')==='1';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+r.dataset.fxIntroMotionR2105=reduced?'reduced':'full';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
 const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
 if(l){
@@ -33,6 +35,7 @@ function activateStyles(){
 
 const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261007-r1950c-studio-intro';
 let retryCount=0,retryTimer=0;
+const RETRY_LIMIT=3;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){
   if(runtimeReady()){
@@ -52,18 +55,26 @@ function requestRuntime(reason='rescue'){
   }else{
     r.dataset.fxIntroBootstrapRescueR1755='owner-present-observed';
   }
+  let verified=false;
   const verify=()=>{
+    if(verified)return;
+    verified=true;
     clearTimeout(retryTimer);
     if(runtimeReady()){
       r.dataset.fxIntroBootstrapRescueR1755='loaded-and-running';
       return;
     }
-    if(retryCount>=3){
+    // A loaded script may have acquired the owner latch while its overlay is still mounting.
+    // Never detach or re-request it in that state: duplicate runtime instances are worse than a late intro.
+    if(window.__formatxMagBirthR533Owner===true){
+      r.dataset.fxIntroBootstrapRescueR1755='owner-already-active';
+      return;
+    }
+    if(retryCount>=RETRY_LIMIT){
       r.dataset.fxIntroBootstrapRescueR1755='retry-exhausted';
       return;
     }
-    e.remove();
-    if(window.__formatxMagBirthR533Owner===true&&!runtimeReady())window.__formatxMagBirthR533Owner=false;
+    if(e.isConnected)e.remove();
     r.dataset.fxIntroBootstrapRescueR1755='retry-'+reason;
     requestRuntime('verification');
   };
