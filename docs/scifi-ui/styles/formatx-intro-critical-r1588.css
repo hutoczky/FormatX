@@ -299,3 +299,31 @@ html[data-fx-intro-prepaint-r1611="skip"] #fx-mag-birth-prepaint-r1606{
    Keep the full cinematic stylesheet focused on the real intro only. */
 /* production-r1757-mag-proxy-owned-by-p0 */
 
+
+/* R2105 — accessible, tactile cinematic Skip control, without extra DOM or GPU loops. */
+.fx-mag-birth-r533 > .fxb-skip,
+#fx-mag-birth-prepaint-r1606 > .fxb-skip{
+  backdrop-filter:blur(14px) saturate(1.25);
+  -webkit-backdrop-filter:blur(14px) saturate(1.25);
+  box-shadow:inset 0 1px 0 rgba(220,247,251,.12),0 8px 32px rgba(0,0,0,.38);
+  transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease;
+}
+.fx-mag-birth-r533 > .fxb-skip:hover,
+#fx-mag-birth-prepaint-r1606 > .fxb-skip:hover{
+  border-color:rgba(170,244,250,.72)!important;
+  background:rgba(9,29,35,.88)!important;
+  box-shadow:inset 0 1px 0 rgba(220,247,251,.22),0 0 26px rgba(80,210,228,.15);
+}
+.fx-mag-birth-r533 > .fxb-skip:focus-visible,
+#fx-mag-birth-prepaint-r1606 > .fxb-skip:focus-visible{
+  outline:3px solid #9ceefa!important;
+  outline-offset:4px!important;
+}
+@media (prefers-reduced-motion:reduce){
+  .fx-mag-birth-r533 > .fxb-skip,
+  #fx-mag-birth-prepaint-r1606 > .fxb-skip{transition:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+}
+@media (prefers-contrast:more){
+  .fx-mag-birth-r533 > .fxb-skip,
+  #fx-mag-birth-prepaint-r1606 > .fxb-skip{border-color:#fff!important;color:#fff!important;background:#071317!important;}
+}
