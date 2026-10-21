@@ -106,6 +106,15 @@
       const fill=new T.DirectionalLight(0x9fb9b8,.42);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
+      // R2114: restrained opposing studio strip, only on desktop-class
+      // hardware. This illuminates actual 3D geometry and specular normals,
+      // unlike a CSS overlay or a 2D fallback highlight.
+      if(!this.mobileProfile&&!this.lowPowerProfile){
+        const studioStrip=new T.SpotLight(0xc5e4e5,1.10,13,Math.PI*.32,.94,1.8);
+        studioStrip.position.set(4.3,3.6,5.8);
+        studioStrip.target.position.set(-.18,.10,0);
+        this.scene.add(studioStrip,studioStrip.target);
+      }
       const rim=new T.PointLight(0x6b9da9,10.5,13,2);
       rim.position.set(3.1,-1.9,3.9);
       this.scene.add(rim);
@@ -376,7 +385,8 @@
       const shellMat=new T.MeshPhysicalMaterial({
         color:0x5d6d78,metalness:.82,roughness:.20,
         emissive:0x0d222d,emissiveIntensity:.12,
-        clearcoat:.86,clearcoatRoughness:.10,
+        clearcoat:.92,clearcoatRoughness:.075,
+        specularIntensity:1.0,specularColor:new T.Color(0xe2f4f4),
         transparent:true,opacity:.96
       });
       const shellGlass=new T.MeshPhysicalMaterial({
