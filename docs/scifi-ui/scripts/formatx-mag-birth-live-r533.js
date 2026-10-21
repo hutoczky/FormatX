@@ -1078,6 +1078,8 @@
       queueRender(cadence);
       return;
     }
+    // Only inspect the native stage when the cinematic timeline is complete.
+    // Earlier frames should not query the DOM for a handoff they cannot perform.
     const nativeReady=ROOT.dataset.fxCrystalOrganismR326==='ready' && locateStage() instanceof HTMLElement;
     if(MOBILE && FORCE && !nativeReady && now-startedAt<10500){
       requestCoreWarmup('forced-mobile-handoff-wait');
