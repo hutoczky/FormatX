@@ -380,6 +380,28 @@
         ctx.moveTo(-S*.17,-S*.35);
         ctx.lineTo(-S*.075,-S*.74);
         ctx.stroke();
+        // R2108: sub-facet machining and a tiny inset optical witness line.
+        // Geometry scales with the existing four-arm silhouette and adds no
+        // textures, DOM nodes, shaders, or separate rendering passes.
+        if(S>42){
+          ctx.strokeStyle='rgba(200,239,233,.19)';
+          ctx.lineWidth=Math.max(.55,S*.004);
+          ctx.beginPath();
+          ctx.moveTo(S*.075,-S*.83);
+          ctx.lineTo(S*.19,-S*.56);
+          ctx.lineTo(S*.13,-S*.39);
+          ctx.stroke();
+          ctx.strokeStyle='rgba(4,13,20,.58)';
+          ctx.lineWidth=Math.max(.7,S*.007);
+          ctx.beginPath();
+          ctx.moveTo(S*.11,-S*.81);
+          ctx.lineTo(S*.225,-S*.56);
+          ctx.stroke();
+          ctx.fillStyle='rgba(181,236,231,.33)';
+          ctx.beginPath();
+          ctx.arc(-S*.12,-S*.47,Math.max(.65,S*.008),0,TAU);
+          ctx.fill();
+        }
         ctx.restore();
       }
       const inset=ctx.createRadialGradient(-S*.12,-S*.18,S*.03,0,0,S*.66);
@@ -580,6 +602,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2107-multilayer-metal-glass-specular-surface'
+    visualRevision:'r2108-machined-crystal-microfacets'
   };
 })();
