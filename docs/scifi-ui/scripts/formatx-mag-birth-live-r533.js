@@ -999,6 +999,7 @@
   let lastRefreshTelemetryAt=0;
   let lastCoreCostSampleAt=0;
   let cachedCoreRenderCost=0;
+  let finalParticleFrameDrawn=false;
 
   function render(now) {
     raf=0;
@@ -1062,10 +1063,12 @@
     const particleCadence=filmRenderer
       ? (softwareFallbackActive?125:16.67)
       : 16.67;
+    const finalFrameDue=r>=1 && !finalParticleFrameDrawn;
     const shouldDraw=phaseDrivenFallback
-      ? (lastSoftwareFallbackPhase!==visiblePhase || (r>=1 && lastParticleDraw<startedAt+DURATION))
-      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || (r>=1 && lastParticleDraw<startedAt+DURATION));
+      ? (lastSoftwareFallbackPhase!==visiblePhase || finalFrameDue)
+      : (!lastParticleDraw || (r<1 && now-lastParticleDraw>=particleCadence) || finalFrameDue);
     if(shouldDraw){
+      if(r>=1)finalParticleFrameDrawn=true;
       lastParticleDraw=now;
       if(phaseDrivenFallback)lastSoftwareFallbackPhase=visiblePhase;
       drawParticles(r,now);
