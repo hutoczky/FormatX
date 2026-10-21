@@ -483,6 +483,25 @@
       ctx.fillStyle=pupil;ctx.fill();
       ctx.strokeStyle='rgba(198,240,235,.62)';
       ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
+      // R2109: sapphire lens with a recessed concentric aperture and
+      // directional catchlights. Detail is restricted to adequately sized
+      // projections to avoid aliasing and overdraw on low-power phones.
+      if(S>52){
+        ctx.beginPath();ctx.arc(0,0,rx*.295,0,TAU);
+        ctx.strokeStyle='rgba(7,20,29,.86)';
+        ctx.lineWidth=Math.max(1.1,S*.014);ctx.stroke();
+        ctx.beginPath();ctx.arc(0,0,rx*.245,0,TAU);
+        ctx.strokeStyle='rgba(118,197,205,.28)';
+        ctx.lineWidth=Math.max(.7,S*.005);ctx.stroke();
+        for(let notch=0;notch<8;notch++){
+          const a=notch*TAU/8;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a)*rx*.31,Math.sin(a)*ry*.31);
+          ctx.lineTo(Math.cos(a)*rx*.355,Math.sin(a)*ry*.355);
+          ctx.strokeStyle='rgba(194,232,229,.24)';
+          ctx.lineWidth=Math.max(.6,S*.004);ctx.stroke();
+        }
+      }
       ctx.beginPath();ctx.ellipse(-rx*.19,-ry*.23,rx*.14,ry*.085,-.42,0,TAU);
       ctx.fillStyle='rgba(245,252,243,.68)';ctx.fill();
       // R2104 photographic side-light trace on the recessed blue glass:
@@ -602,6 +621,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2108-machined-crystal-microfacets'
+    visualRevision:'r2109-sapphire-aperture-optics'
   };
 })();
