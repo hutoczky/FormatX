@@ -570,13 +570,25 @@
         : runtimeConstrained
           ? (sw<900?1.18:1.05)
           : (sw<900?1.78:1.34);
-      dpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
-      canvas.width=Math.max(1,Math.round(sw*dpr));canvas.height=Math.max(1,Math.round(sh*dpr));canvas.style.width=sw+'px';canvas.style.height=sh+'px';
-      ctx=canvas.getContext('2d',{alpha:MOBILE,desynchronized:true});ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.setTransform(dpr,0,0,dpr,0,0);
+      // R2112: hard cap the backing-store area on high-resolution phones and
+      // ultrawide displays. A DPR cap alone does not bound pixel allocation.
+      const pixelBudget=runtimeConstrained?1600000:proofFrame?4800000:3200000;
+      const requestedDpr=Math.min(devicePixelRatio||1,baseDpr*qualityScale);
+      dpr=Math.min(requestedDpr,Math.sqrt(pixelBudget/Math.max(1,sw*sh)));
+      const pixelWidth=Math.max(1,Math.round(sw*dpr));
+      const pixelHeight=Math.max(1,Math.round(sh*dpr));
+      if(canvas.width!==pixelWidth)canvas.width=pixelWidth;
+      if(canvas.height!==pixelHeight)canvas.height=pixelHeight;
+      canvas.style.width=sw+'px';canvas.style.height=sh+'px';
+      ctx=canvas.getContext('2d',{alpha:MOBILE,desynchronized:true});
+      if(!ctx)return;
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
       scale=Math.max(sw/W,sh/H);ox=(sw-W*scale)*.5;oy=(sh-H*scale)*.5;
     }
     function draw(r,time){
       if(!ctx)resize();
+      if(!ctx)return;
       ctx.save();ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,sw,sh);ctx.translate(ox,oy);ctx.scale(scale,scale);
       let target=null;
       try{const p=getTarget?.();if(p)target={x:(p.x-ox)/scale,y:(p.y-oy)/scale}}catch(_){}
@@ -647,6 +659,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2111-consistent-mobile-studio-stage'
+    visualRevision:'r2112-bounded-high-dpi-studio-canvas'
   };
 })();
