@@ -64,17 +64,17 @@ function requestRuntime(reason='rescue'){
       r.dataset.fxIntroBootstrapRescueR1755='loaded-and-running';
       return;
     }
-    if(retryCount>=RETRY_LIMIT){
-      r.dataset.fxIntroBootstrapRescueR1755='retry-exhausted';
-      return;
-    }
-    // Do not reset the canonical runtime owner: a slow script may still be executing.
-    // Removing its ownership latch could create a second overlay or render loop.
-    if(e.isConnected)e.remove();
+    // A loaded script may have acquired the owner latch while its overlay is still mounting.
+    // Never detach or re-request it in that state: duplicate runtime instances are worse than a late intro.
     if(window.__formatxMagBirthR533Owner===true){
       r.dataset.fxIntroBootstrapRescueR1755='owner-already-active';
       return;
     }
+    if(retryCount>=RETRY_LIMIT){
+      r.dataset.fxIntroBootstrapRescueR1755='retry-exhausted';
+      return;
+    }
+    if(e.isConnected)e.remove();
     r.dataset.fxIntroBootstrapRescueR1755='retry-'+reason;
     requestRuntime('verification');
   };
