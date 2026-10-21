@@ -201,6 +201,21 @@
     ctx.fillStyle='#010405';ctx.fillRect(0,0,W,H);
     let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(7,13,15,.97)');g.addColorStop(.55,'rgba(4,10,12,.97)');g.addColorStop(1,'rgba(2,5,7,.99)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     const rg=makeGradient(ctx,W*.50,H*.49,0,W*.50,H*.49,W*.68,[[0,'rgba(74,103,105,.11)'],[.36,'rgba(38,58,61,.075)'],[.72,'rgba(54,43,51,.055)'],[1,'rgba(0,0,0,0)']]);ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+    // R2110: cinematic three-point lighting, painted behind the subject.
+    // Static gradients are deliberately subtle so they preserve the dark
+    // smoked-chrome contrast and do not introduce an extra animation loop.
+    const key=makeGradient(ctx,W*.29,H*.24,0,W*.29,H*.24,W*.52,[
+      [0,'rgba(115,206,222,.095)'],[.38,'rgba(55,119,139,.052)'],[1,'rgba(0,0,0,0)']
+    ]);
+    ctx.fillStyle=key;ctx.fillRect(0,0,W,H);
+    const rim=makeGradient(ctx,W*.77,H*.38,0,W*.77,H*.38,W*.39,[
+      [0,'rgba(134,177,215,.065)'],[.46,'rgba(57,102,151,.031)'],[1,'rgba(0,0,0,0)']
+    ]);
+    ctx.fillStyle=rim;ctx.fillRect(0,0,W,H);
+    const bounce=makeGradient(ctx,W*.50,H*.95,0,W*.50,H*.95,W*.45,[
+      [0,'rgba(43,112,127,.085)'],[.50,'rgba(21,58,72,.031)'],[1,'rgba(0,0,0,0)']
+    ]);
+    ctx.fillStyle=bounce;ctx.fillRect(0,0,W,H);
     drawLivingWorld(ctx,time,.92);
     for(const s of stars){const tw=.68+.32*Math.sin(time*.001*s.d+s.x);ctx.fillStyle='rgba(182,224,236,'+(s.a*tw)+')';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,TAU);ctx.fill()}
     for(const d of debris){const yy=(d.y+time*.006*(.5+d.s*.1))%H;ctx.save();ctx.translate(d.x,yy);ctx.rotate(d.p+time*.00015);ctx.globalAlpha=d.a;ctx.strokeStyle='rgba(149,206,221,.65)';ctx.strokeRect(-d.s,-d.s*.45,d.s*2,d.s*.9);ctx.restore()}
@@ -621,6 +636,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2109-sapphire-aperture-optics'
+    visualRevision:'r2110-three-point-cinematic-studio-lighting'
   };
 })();
