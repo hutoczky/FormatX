@@ -1054,8 +1054,9 @@
         color:0xb8c8c6,metalness:.12,roughness:.085,
         transmission:.28,thickness:.22,ior:1.42,
         emissive:0x0a252b,emissiveIntensity:.070,
-        clearcoat:1.0,clearcoatRoughness:.050,
-        bumpMap:this.microFiberTexture,bumpScale:.006,
+        clearcoat:1.0,clearcoatRoughness:.042,
+        specularIntensity:1.0,specularColor:new T.Color(0xe8f6f4),
+        bumpMap:this.microFiberTexture,bumpScale:.004,
         transparent:true,opacity:0
       });
       this.mechEdgeMaterial=new T.LineBasicMaterial({
