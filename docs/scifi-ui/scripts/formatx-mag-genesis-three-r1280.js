@@ -109,7 +109,7 @@
       // R2114: restrained opposing studio strip, only on desktop-class
       // hardware. This illuminates actual 3D geometry and specular normals,
       // unlike a CSS overlay or a 2D fallback highlight.
-      if(!this.mobileProfile&&!this.lowPowerProfile){
+      if(!this.mobileRender && Number(navigator.hardwareConcurrency||8)>4){
         const studioStrip=new T.SpotLight(0xc5e4e5,1.10,13,Math.PI*.32,.94,1.8);
         studioStrip.position.set(4.3,3.6,5.8);
         studioStrip.target.position.set(-.18,.10,0);
