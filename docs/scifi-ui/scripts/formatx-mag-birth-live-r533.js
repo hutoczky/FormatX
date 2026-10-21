@@ -1040,7 +1040,9 @@
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
-    if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
+    // The canonical mobile camera follows this existing display callback;
+    // the legacy 200ms sampler made its actual 3D movement visibly step.
+    if((MOBILE&&canonicalIntroActive)||!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
       lastNativeSync=now;
       syncNativeCore(r,now);
     }

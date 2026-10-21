@@ -31,6 +31,9 @@ on:
       - '.github/scripts/validate-native-header-clearance-r2131.cjs'
       - '.github/scripts/validate-native-shader-payload-r2133.cjs'
       - '.github/scripts/validate-native-optical-parallax-r2134.cjs'
+      - '.github/scripts/validate-native-intro-camera-r2135.cjs'
+      - 'docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
@@ -72,6 +75,9 @@ on:
       - '.github/scripts/validate-native-header-clearance-r2131.cjs'
       - '.github/scripts/validate-native-shader-payload-r2133.cjs'
       - '.github/scripts/validate-native-optical-parallax-r2134.cjs'
+      - '.github/scripts/validate-native-intro-camera-r2135.cjs'
+      - 'docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css'
       - 'docs/scifi-ui/scripts/formatx-deferred-reduced-style-r232.js'
       - 'docs/scifi-ui/styles/formatx-category-positioning.css'
@@ -124,6 +130,9 @@ jobs:
           node --check .github/scripts/validate-native-header-clearance-r2131.cjs
           node --check .github/scripts/validate-native-shader-payload-r2133.cjs
           node --check .github/scripts/validate-native-optical-parallax-r2134.cjs
+          node --check .github/scripts/validate-native-intro-camera-r2135.cjs
+          node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
       - name: Install Chromium
@@ -139,6 +148,11 @@ jobs:
           done
           cat "$RUNNER_TEMP/archive-server.log"
           exit 1
+      - name: Test actual native intro camera and original reduced shortcut
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
+        run: node .github/scripts/validate-native-intro-camera-r2135.cjs
       - name: Test actual native shader payload and preserved live program
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules

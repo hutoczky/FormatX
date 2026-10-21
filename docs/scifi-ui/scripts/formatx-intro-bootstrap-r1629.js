@@ -21,7 +21,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261015-r2113-stable-native-stage';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261021-r2135-native-mobile-camera';
 let retryCount=0,retryTimer=0;
 let introCompleted=false;
 document.addEventListener('formatx:magbirthcomplete',()=>{
