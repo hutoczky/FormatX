@@ -983,6 +983,9 @@
 
   function queueRender(delay=0) {
     if(finished||raf||frameTimer)return;
+    // Background tabs cannot present cinematic frames. Preserve the timeline
+    // without waking the main thread for an invisible 60 Hz render loop.
+    if(document.hidden && !HAS_VISUAL_FRAME)delay=Math.max(delay,250);
     if(delay>0){
       frameTimer=setTimeout(()=>{
         frameTimer=0;
