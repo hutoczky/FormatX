@@ -3,6 +3,7 @@
 const { chromium } = require('playwright');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const {spawnSync} = require('node:child_process');
 
 const base = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
 const origin = new URL(base).origin;
@@ -92,7 +93,10 @@ async function waitForProductShell(page) {
       const style = getComputedStyle(element), rect = element.getBoundingClientRect();
       return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
     };
-    return root.dataset.fxControlOwnerR268 === 'ready' && visible(ask) && visible(core) && visible(lead);
+    const introActive = root.hasAttribute('data-fx-native-genesis-r2064')
+      || document.querySelector('.fx-mag-birth-r533,#fx-mag-birth-prepaint-r1606');
+    return !introActive && root.dataset.fxControlOwnerR268 === 'ready'
+      && visible(ask) && visible(core) && visible(lead);
   }, null, { timeout: 20000 });
   await page.waitForTimeout(250);
 }
@@ -294,6 +298,7 @@ async function capture(browser, name, viewport, options = {}) {
   let failure;
   try {
     await page.goto(urlWith({
+      archive: 'off',
       visual: `${name}-${Date.now()}`,
       ...(options.lang ? { lang: options.lang } : {}),
       ...(options.disclosure ? { cinema: 1 } : {})
@@ -368,10 +373,18 @@ async function publicPage(browser, name, pathname, selector) {
     await publicPage(browser, 'known-issues', '/scifi-ui/known-issues.html', 'main');
     await publicPage(browser, 'security', '/scifi-ui/security.html', 'main');
     await publicPage(browser, 'support', '/scifi-ui/support.html', 'main');
-    console.log('PASS: R1948 current hero visual contract — clean hero disclosure, progressive journey telemetry, stable controls, responsive geometry, reduced-motion, i18n and public pages.');
+    console.log('PASS: existing HTML fallback visual contracts — clean hero disclosure, progressive journey telemetry, stable controls, responsive geometry, reduced-motion, i18n and public pages.');
   } finally {
     await browser.close();
   }
+  // Preserve every classic HTML assertion above and require the complete
+  // default eight-source cinematic suite on the unmodified visitor URL too.
+  // Product code selects HTML only through its existing user-facing fallback.
+  const cinematic=spawnSync(process.execPath,['.github/scripts/validate-cinematic-archive-r1987.cjs'],{
+    stdio:'inherit',env:{...process.env,FORMATX_ARCHIVE_TEST_URL:base}
+  });
+  await fs.cp('.archive-artifacts',path.join(out,'default-cinematic'),{recursive:true});
+  assert(cinematic.status===0,'The default visitor cinematic visual contract must also pass');
 })().catch(error => {
   console.error(error?.stack || error);
   process.exit(1);

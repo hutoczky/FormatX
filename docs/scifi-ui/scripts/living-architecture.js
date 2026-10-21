@@ -2,23 +2,6 @@
   'use strict';
 
   const ROOT = document.documentElement;
-  const PARAMS = new URLSearchParams(location.search);
-  const AUDIT_MODE =
-    /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || PARAMS.get('lighthouse') === '1'
-    || ROOT.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
-  const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
-  if (AUDIT_MODE) {
-    const canvas = document.getElementById('fx-apex-canvas');
-    if (canvas) canvas.hidden = true;
-    ROOT.classList.add('fx-audit-mode');
-    ROOT.dataset.fxThree = 'audit-skip';
-    ROOT.dataset.fxLighthouse = 'ready';
-    ROOT.dataset.fxLivingArchitecture = 'audit-skip';
-    dispatchEvent(new CustomEvent('formatx:livingready'));
-    return;
-  }
-
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
   const PLANS = {
     business_lite: { name: 'Business Lite', HUF: 7900, EUR: 22 },
@@ -122,7 +105,7 @@
     }
     if (!document.querySelector('script[data-fx-cryosphere-script]')) {
       const script = document.createElement('script');
-      script.src = './scripts/igloo-parity.js?v=20261006-r1949-award-final-seal';
+      script.src = './scripts/igloo-parity.js?v=20261015-r2106-late-scroll-input-ownership';
       script.defer = true;
       script.dataset.fxCryosphereScript = 'true';
       document.head.appendChild(script);
@@ -146,9 +129,8 @@
   }
 
   function scheduleThreeExperience() {
-    if (ORGANISM_VALIDATION || ROOT.dataset.fxImmersive === 'active') {
+    if (ROOT.dataset.fxImmersive === 'active') {
       loadThreeExperience();
-      if(ORGANISM_VALIDATION)ROOT.dataset.fxOrganismValidationR1723='eager-interface-for-ci-contract';
       return;
     }
     ROOT.dataset.fxThreeLoader = 'deferred-user-activation';

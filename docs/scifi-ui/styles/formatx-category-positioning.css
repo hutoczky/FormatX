@@ -240,7 +240,9 @@
     overflow: visible !important;
   }
 
-  html[data-fx-design-system="2"] body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-space {
+  /* R2130: only the retired visual may collapse. The native organism owns
+     this same container in reduced motion, including after real user input. */
+  html[data-fx-design-system="2"]:not([data-fx-core-shape-mode-r413="single-living-organism-fixed-anatomy-r1723"]) body.living-architecture main#main-content section#hero#hero.scene.hero > .hero-grid > .hero-space {
     order: 0 !important;
     display: none !important;
     visibility: hidden !important;

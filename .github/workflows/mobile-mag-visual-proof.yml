@@ -31,7 +31,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: formatx-mobile-mag-visual-proof
+  group: formatx-mobile-mag-visual-proof-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 permissions:
@@ -44,6 +44,8 @@ jobs:
     timeout-minutes: 4
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -106,7 +108,8 @@ jobs:
             state=success
             description='R1450 mobile coherent crystal proof passed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX R1450 mobile MAG visual proof' \
             -f description="$description" \

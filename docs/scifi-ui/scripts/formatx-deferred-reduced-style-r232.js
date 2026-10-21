@@ -4,7 +4,7 @@
 const root=document.documentElement;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
-const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
+const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20261019-r2130-native-reduced-input';
 const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260830-r455-csp-safe-geometry-seed';
 
 function seedMobileGeometry(){

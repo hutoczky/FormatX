@@ -9,10 +9,11 @@
   const READY = 'ready-v69';
   const mobile = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const reduced = matchMedia('(prefers-reduced-motion:reduce)');
-  const auditParams = new URLSearchParams(location.search);
-  const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
-  const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  // Read the current preference at existing input/render boundaries even
+  // while a retained media-query object's change event is still queued.
+  function reducedMotionRequested(){
+    return matchMedia('(prefers-reduced-motion:reduce)').matches;
+  }
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
@@ -170,7 +171,7 @@
   root.dataset.fxNativeMagMobileR1787='transparent-stage-no-black-box-higher-facet-density-smooth-normals';
   root.dataset.fxNativeMagVisualR1788='mobile-blunt-cut-black-bioglass-irregular-crystal-smooth-optic';
   root.dataset.fxNativeMagMaterialR1788='controlled-softbox-highlight-deep-charcoal-glass-cyan-optical-depth';
-  root.dataset.fxNativeMagProofR1782=mobileVisualProof?'normal-mobile-visual-path-with-lens-and-msaa':'not-mobile-proof';
+  root.dataset.fxNativeMagProofR1782='normal-visitor-path-with-lens-and-msaa';
   root.dataset.fxNativeMagVisualR1780='mobile-opaque-obsidian-three-quarter-broad-facet-proof';
   root.dataset.fxNativeMagSurfaceR1780='no-blend-no-cull-closed-opaque-mineral';
   root.dataset.fxNativeMagVisualR1789='mobile-smoky-bioglass-refined-facets-blunt-crown';
@@ -200,7 +201,7 @@
   root.dataset.fxNativeMagInteractionR1711 = 'all-input-physiology-no-shape-switching';
   root.dataset.fxNativeMagVisualR1703 = 'sharp-mobile-smoky-obsidian-dark-photographic-planes-readable-smoked-lens';
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
-  root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
+  root.dataset.fxNativeMagVisitorParityR2054='capability-and-input-owned';
 
   function beginProgram(gl, vertexSource, fragmentSource) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
@@ -293,11 +294,7 @@
       return value - Math.floor(value);
     }
 
-    function vertex(latitudeIndex, longitudeIndex) {
-      const latitude=latitudeIndex/latitudeSegments;
-      const longitude=longitudeIndex/longitudeSegments;
-      const phi=latitude*Math.PI;
-      const theta=longitude*Math.PI*2;
+    function shellPosition(phi,theta) {
       const sinPhi=Math.sin(phi);
       const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
       const spherePosition=direction.map(value=>value*.91);
@@ -334,18 +331,35 @@
 
       const crystalPosition=direction.map(value=>value*radial*organic);
 
-      /* Keep the original crystalline outline, but smooth the studio response.
-         This prevents the four quadrants from reading as flat cardboard planes. */
-      const crystalNormal=normalize([
-        direction[0]/axisX,
-        direction[1]/axisY,
-        direction[2]/axisZ
-      ]);
+      return {spherePosition,crystalPosition,direction};
+    }
 
+    function vertex(latitudeIndex, longitudeIndex) {
+      const latitude=latitudeIndex/latitudeSegments;
+      const longitude=longitudeIndex/longitudeSegments;
+      const phi=latitude*Math.PI;
+      const theta=longitude*Math.PI*2;
+      const point=shellPosition(phi,theta);
+      /* R2063 — reflections follow the actual concave glass surface. The old
+         ellipsoid normals erased the shoulders and made the sculpt look flat.
+         Central surface derivatives retain the authored positions/topology. */
+      const epsilon=.0007;
+      const tangentPhi=subtract(
+        shellPosition(Math.min(Math.PI,phi+epsilon),theta).crystalPosition,
+        shellPosition(Math.max(0,phi-epsilon),theta).crystalPosition
+      );
+      const tangentTheta=subtract(
+        shellPosition(phi,theta+epsilon).crystalPosition,
+        shellPosition(phi,theta-epsilon).crystalPosition
+      );
+      let crystalNormal=cross(tangentPhi,tangentTheta);
+      if(Math.hypot(...crystalNormal)<1e-10)crystalNormal=point.direction;
+      else crystalNormal=normalize(crystalNormal);
+      if(dot(crystalNormal,point.crystalPosition)<0)crystalNormal=crystalNormal.map(value=>-value);
       return{
-        sphere:spherePosition,
-        crystal:crystalPosition,
-        sphereNormal:direction,
+        sphere:point.spherePosition,
+        crystal:point.crystalPosition,
+        sphereNormal:point.direction,
         crystalNormal,
         uv:[longitude,latitude]
       };
@@ -728,7 +742,7 @@
 
     if(false){
       const centreX=.105,centreY=.025;
-      const bezelSteps=auditMode?96:(software?112:mobile?144:160),bezelTubeSteps=auditMode?10:(software?10:mobile?14:16),bezelZ=.602;
+      const bezelSteps=software?112:mobile?144:160,bezelTubeSteps=software?10:mobile?14:16,bezelZ=.602;
       const bezelMajorX=.168,bezelMajorY=.052,bezelTube=.0022;
       const bezelVertex=(angle,tubeAngle)=>{
         const ca=Math.cos(angle),sa=Math.sin(angle),ct=Math.cos(tubeAngle),st=Math.sin(tubeAngle);
@@ -757,8 +771,8 @@
       const lensRadiusX=.153;
       const lensRadiusY=.041;
       const lensDepth=.020;
-      const radialSteps=auditMode?14:(software?16:mobile?20:22);
-      const angularSteps=auditMode?96:(software?112:mobile?128:144);
+      const radialSteps=software?16:mobile?20:22;
+      const angularSteps=software?112:mobile?128:144;
       function lensVertex(radial,angle){
         const edgeWarp=1+.018*Math.sin(angle*3.0+.42)+.010*Math.cos(angle*5.0-.31);
         const nx=radial*Math.cos(angle);
@@ -842,26 +856,25 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     /* R1959: physically neutral compositor tone. The previous inline
        !important saturation overrode the canonical material CSS. */
-    const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
-      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
+    // The physical studio shader already performs display transfer and tone
+    // mapping. Preserve its color and avoid a second canvas filter pipeline.
+    const compositorFilter='none';
     canvas.style.setProperty('filter',compositorFilter,'important');
     canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
     canvas.style.setProperty('box-shadow','none','important');
 
-    /* R2045: the original canvas is also subject to older !important opacity
-       overrides. They outrank CSS and WAAPI animations, leaving MAG visually
-       frozen even while its registered --fx-mag-life-opacity animates.
-       Bind the SAME original canvas's inline important opacity to that
-       compositor-only numeric custom property. Do this once at creation,
-       never in a JS RAF; preserve system reduced-motion changes. */
+    /* R2069: retain the existing compositor heartbeat without the historical
+       mobile dimming. The registered timeline ranges from .94 to 1; its native
+       canvas coverage therefore stays between .985 and 1. Reduced motion uses
+       full coverage. The same canvas, timeline and pause governor remain the
+       owners; this binding is updated only when the motion preference changes. */
     const mobileBreathPreference=mobile?matchMedia('(prefers-reduced-motion: reduce)'):null;
     const syncMobileBreathOpacity=()=>{
       if(!mobileBreathPreference)return;
       if(mobileBreathPreference.matches){
-        canvas.style.removeProperty('opacity');
+        canvas.style.setProperty('opacity','1','important');
       }else{
-        canvas.style.setProperty('opacity','var(--fx-mag-life-opacity,.965)','important');
+        canvas.style.setProperty('opacity','calc(.75 + var(--fx-mag-life-opacity,1) * .25)','important');
       }
     };
     syncMobileBreathOpacity();
@@ -870,8 +883,18 @@
 
     /* R1930 — one slow compositor breath on every capable screen.
        No idle JS RAF is introduced; reduced-motion remains fully respected. */
-    if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
+    let livingTimeline=null;
+    function syncCompositorBreath(){
+      if(reducedMotionRequested()){
+        livingTimeline?.pause();
+        return;
+      }
+      if(livingTimeline){
+        if(livingTimeline.playState==='paused')livingTimeline.play();
+        return;
+      }
+      if(typeof canvas.animate!=='function')return;
+      livingTimeline=canvas.animate(
         [
           {opacity:.985,transform:'scale(.996)',offset:0},
           {opacity:1,transform:'scale(1.004)',offset:.48},
@@ -889,6 +912,7 @@
       root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
       root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
     }
+    syncCompositorBreath();
 
     const options = {
       alpha:true,
@@ -900,13 +924,14 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
+      preserveDrawingBuffer:false,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
     if (!gl) gl = canvas.getContext('webgl', options);
     if (!gl) {
+      livingTimeline?.cancel();
       stage.remove();
       root.dataset.fxCrystalOrganismR326 = 'context-unavailable';
       root.dataset.fxCoreReal3d = 'context-unavailable';
@@ -943,11 +968,14 @@
       ${vertexIn} vec2 aUv;
       ${vertexIn} vec3 aBary;
       ${vertexIn} float aFacet;
-      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uAspect,uSiteProgress;
+      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uAspect,uSiteProgress,uGenesis;
       uniform vec2 uPointer;
       uniform vec3 uRotation;
       ${vertexOut} vec3 vNormal;
       ${vertexOut} vec3 vLocal;
+      ${vertexOut} vec3 vBodyX;
+      ${vertexOut} vec3 vBodyY;
+      ${vertexOut} vec3 vBodyZ;
       ${vertexOut} vec2 vUv;
       ${vertexOut} vec3 vBary;
       ${vertexOut} float vFacet;
@@ -965,14 +993,14 @@
         vec3 normal=normalize(mix(crystalShadingNormal,aSphereNormal,organicBlend));
         vec3 base=mix(aCrystal,aSphere,organicBlend);
         float cell=sin(uTime*.71+dot(aSphereNormal,vec3(5.7,4.1,6.3))+uSiteProgress*6.28318);
-        float membrane=sin(uTime*1.17+aUv.x*12.566-aUv.y*9.2+sin(aUv.y*6.283)*1.4);
+        float membrane=sin(uTime*1.17+aUv.x*12.5663706144-aUv.y*9.2+sin(aUv.y*6.28318530718)*1.4);
         float living=(cell*.011+membrane*.0065)*(.42+.58*uEnergy);
         float bodyVertexMask=1.0-step(2.0,aFacet);
         float cortexEnvelope=pow(max(0.0,sin(aUv.y*3.14159265)),1.35)*bodyVertexMask;
-        float cortexA=sin(aUv.x*37.699+sin(aUv.y*18.849)*1.55+aUv.y*5.3);
-        float cortexB=sin(aUv.x*18.849-aUv.y*25.133+sin(aUv.x*12.566)*1.20);
+        float cortexA=sin(aUv.x*37.6991118431+sin(aUv.y*18.8495559215)*1.55+aUv.y*5.3);
+        float cortexB=sin(aUv.x*18.8495559215-aUv.y*25.133+sin(aUv.x*12.5663706144)*1.20);
         float cortex=(cortexA*.62+cortexB*.38)*.0026*cortexEnvelope;
-        float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*cortexEnvelope;
+        float microFold=sin(aUv.x*18.8495559215+aUv.y*15.4)*.00028*cortexEnvelope;
         /* R1917 — two broad sculptural valleys bend the reflection field without
            drawing decorative lines. Geometry stays one continuous living volume. */
         /* R1923 — the smooth cubic body is now authoritative. The legacy
@@ -989,13 +1017,18 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
-        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
-        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
+        float genesis=uGenesis<0.0?1.0:smoothstep(.04,.92,uGenesis);
+        float approach=1.0-genesis;
+        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007+approach*.74;
+        float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19)-approach*.19;
+        float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23)-approach*.13;
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
         vLocal=world;
+        vBodyX=rotation[0];
+        vBodyY=rotation[1];
+        vBodyZ=rotation[2];
         vUv=aUv;
         vBary=aBary;
         vFacet=aFacet;
@@ -1004,7 +1037,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.790'};
+        /* Keep the complete signature inside its actual native frustum. The
+           approach retains perspective and rotation without cropping its tips. */
+        projected*= ${mobile?'.585':'.790'}*min(1.0,max(.56,uAspect)/.88)*(1.0+approach*${mobile?'.32':'.12'});
         projected.x+=${mobile?'.002':'.018'};
         projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
@@ -1012,327 +1047,6 @@
         gl_Position=vec4(projected,-world.z*.13,1.0);
       }`;
 
-    const fullFragmentSource = `${versionLine}precision highp float;
-      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
-      uniform vec2 uPointer;
-      ${fragmentIn} vec3 vNormal;
-      ${fragmentIn} vec3 vLocal;
-      ${fragmentIn} vec2 vUv;
-      ${fragmentIn} vec3 vBary;
-      ${fragmentIn} float vFacet;
-      ${fragmentIn} float vMorph;
-      ${webgl2 ? 'out vec4 outColor;' : ''}
-      float sat(float v){return clamp(v,0.,1.);}
-      vec3 filmic(vec3 c){return 1.0-exp(-max(c,vec3(0.)));}
-      vec3 fresnelSchlick(float cosTheta,vec3 F0){
-        return F0+(1.0-F0)*pow(1.0-clamp(cosTheta,0.0,1.0),5.0);
-      }
-      float distributionGGX(float NoH,float roughness){
-        float a=roughness*roughness;
-        float a2=a*a;
-        float d=(NoH*NoH)*(a2-1.0)+1.0;
-        return a2/max(3.14159265*d*d,.0002);
-      }
-      float geometrySchlickGGX(float NoV,float roughness){
-        float r=roughness+1.0;
-        float k=(r*r)/8.0;
-        return NoV/max(NoV*(1.0-k)+k,.0002);
-      }
-      void main(){
-        vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
-        vec3 key=normalize(vec3(-.53,.79,.31));
-        vec3 side=normalize(vec3(.77,.06,.64));
-        vec3 fill=normalize(vec3(-.61,-.31,.73));
-        float ndl=max(dot(n,key),0.0);
-        float sideLight=max(dot(n,side),0.0);
-        float fillLight=max(dot(n,fill),0.0);
-        float floorBounce=max(0.0,-n.y);
-        float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,2.05);
-        vec3 halfKey=normalize(key+view);
-        float NoV=max(dot(n,view),.001);
-        float NoH=max(dot(n,halfKey),0.0);
-        float keySpec=pow(NoH,88.0);
-        float keySoft=pow(NoH,5.6);
-        float sideSpec=pow(max(dot(n,normalize(side+view)),0.0),42.0);
-        vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.25)/.235,2.0)-pow((refl.y-.30)/.46,2.0))*smoothstep(-.24,.50,refl.z);
-        float softboxB=exp(-pow((refl.x-.40)/.245,2.0)-pow((refl.y-.01)/.50,2.0))*smoothstep(-.28,.54,refl.z);
-        float ceilingBand=exp(-pow((refl.y-.72)/.30,4.0))*smoothstep(.02,.68,refl.z);
-        float horizonBand=exp(-pow((refl.y+.05)/.19,2.0))*smoothstep(.08,.90,facing);
-        float studioRibbonA=exp(-pow((refl.x+.18)/.070,2.0)-pow((refl.y-.18)/.64,2.0))*smoothstep(-.18,.66,refl.z);
-        float studioRibbonB=exp(-pow((refl.x-.30)/.098,2.0)-pow((refl.y+.06)/.56,2.0))*smoothstep(-.14,.68,refl.z);
-        float studioRibbonC=exp(-pow((refl.x+.010+refl.y*.09)/.040,2.0)-pow((refl.y-.04)/.72,2.0))*smoothstep(-.08,.74,refl.z);
-
-        float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
-        float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
-        float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
-        float isLensMesh=step(6.0,vFacet);
-        float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
-        float tendrilMask=isTendril*(1.0-vMorph);
-        float glassFinMask=isGlassFin*(1.0-vMorph);
-        float armorMask=isArmor*(1.0-vMorph);
-        float lensMeshMask=isLensMesh*(1.0-vMorph);
-        float facetRand=fract(sin(fract(vFacet)*91.73+13.17)*43758.5453);
-        float microRoughness=mix(.20,.27,facetRand);
-        float microD=distributionGGX(NoH,microRoughness);
-        float microG=geometrySchlickGGX(NoV,microRoughness)*geometrySchlickGGX(max(ndl,.001),microRoughness);
-        vec3 microF=fresnelSchlick(max(dot(halfKey,view),0.0),vec3(.039,.041,.043));
-        vec3 microSpec=min(vec3(1.8),(microD*microG*microF)/max(4.0*NoV*max(ndl,.001),.001));
-        float lift=sat(.205+ndl*.330+sideLight*.245+fillLight*.145);
-        float facetTone=mix(.999,1.0015,facetRand);
-        float smokyDepth=.5+.5*sin(vLocal.x*4.1+vLocal.y*2.7-vLocal.z*3.6);
-        float mineralGrain=.5+.5*sin(vLocal.x*37.0+vLocal.y*29.0+vLocal.z*41.0);
-        float mineralGrainB=.5+.5*sin(vLocal.x*71.0-vLocal.y*53.0+vLocal.z*47.0);
-        float mineralGrainC=.5+.5*sin(vLocal.x*113.0+vLocal.y*97.0-vLocal.z*83.0);
-        float strata=.5+.5*sin(vLocal.y*17.0+vLocal.x*4.7-vLocal.z*3.1+sin(vLocal.x*8.0)*.35);
-        float fractureHair=pow(.5+.5*sin(vLocal.x*46.0-vLocal.y*29.0+vLocal.z*37.0+sin(vLocal.y*13.0)*1.3),18.0);
-
-        /* R1982 — sub-millimetre fibril field.
-           Two non-parallel strand families, a phase-shifted root shadow and an
-           elongated anisotropic glint make individual fibers readable without
-           turning the organism into a noisy texture. Frequencies are lowered on
-           phone profiles to remain temporally stable at the adaptive DPR. */
-        float fiberPhaseA=vUv.x*${mobile?'118.0':'224.0'}+vUv.y*${mobile?'21.0':'37.0'}+sin(vUv.y*17.0)*2.15+vLocal.z*9.0;
-        float fiberPhaseB=vUv.y*${mobile?'136.0':'252.0'}-vUv.x*${mobile?'31.0':'47.0'}+sin(vUv.x*14.0)*1.82-vLocal.z*7.0;
-        float microFiberA=pow(max(0.0,1.0-abs(sin(fiberPhaseA))),${mobile?'16.0':'26.0'});
-        float microFiberB=pow(max(0.0,1.0-abs(sin(fiberPhaseB))),${mobile?'18.0':'30.0'});
-        float microFiberSurface=max(microFiberA,microFiberB*.62)*bodyMask;
-        float microFiberShadow=pow(max(0.0,1.0-abs(sin(fiberPhaseA+.19))),${mobile?'18.0':'30.0'})*bodyMask;
-        vec3 fiberGuide=abs(n.y)<.90?vec3(0.0,1.0,0.0):vec3(1.0,0.0,0.0);
-        vec3 fiberAxis=normalize(cross(fiberGuide,n));
-        float fiberAniso=pow(max(0.0,1.0-abs(dot(halfKey,fiberAxis))),${mobile?'10.0':'19.0'})*microFiberSurface;
-        float fiberGeometryMask=smoothstep(1.55,1.68,vFacet)*(1.0-step(2.0,vFacet));
-        float inclusion=smoothstep(.72,.96,.5+.5*sin(vLocal.x*12.0-vLocal.y*7.0+vLocal.z*9.0))*smoothstep(.18,.78,smokyDepth);
-        vec3 mineral=mix(vec3(.005,.010,.013),vec3(.118,.160,.165),lift)*facetTone;
-        mineral*=.942+.045*smokyDepth+.010*mineralGrain+.006*mineralGrainB+.004*mineralGrainC;
-        mineral+=vec3(.052,.057,.056)*fractureHair*(.016+.034*fresnel);
-        mineral-=vec3(.008,.010,.010)*microFiberShadow*(.22+.28*(1.0-facing));
-        mineral+=vec3(.105,.126,.122)*microFiberSurface*(.020+.032*ndl+.044*fresnel);
-        mineral+=vec3(.52,.61,.58)*fiberAniso*(.020+.030*softboxA+.018*sideSpec);
-        mineral+=vec3(.20,.235,.225)*fiberGeometryMask*(.030+.055*ndl+.075*fresnel+.052*softboxA);
-        mineral+=vec3(.011,.014,.015)*strata*(.18+.32*lift);
-        mineral-=vec3(.0035,.0048,.0052)*inclusion;
-        mineral+=vec3(.96,.98,.94)*keySpec*.110;
-        mineral+=microSpec*ndl*.22;
-        mineral+=vec3(.27,.28,.27)*keySoft*.045;
-        mineral+=vec3(.58,.72,.74)*sideSpec*.135;
-        mineral+=vec3(1.00,1.00,.99)*softboxA*.012;
-        mineral+=vec3(.57,.72,.71)*softboxB*.250;
-        float softboxC2=exp(-pow((refl.x-.16)/.34,2.0)-pow((refl.y-.56)/.31,2.0))*smoothstep(-.18,.68,refl.z);
-        mineral+=vec3(.79,.90,.86)*softboxC2*.215;
-        mineral+=vec3(.94,1.00,.98)*studioRibbonA*.060;
-        mineral+=vec3(.46,.30,.19)*studioRibbonB*.030;
-        mineral+=vec3(.68,.97,1.00)*studioRibbonC*.105;
-        mineral+=vec3(.13,.14,.13)*ceilingBand*.075;
-        mineral+=vec3(.080,.096,.095)*horizonBand*.170;
-        mineral+=vec3(.055,.175,.195)*fresnel*.190;
-        mineral+=vec3(.034,.022,.016)*floorBounce*.055;
-        float planeKey=max(0.0,dot(n,normalize(vec3(-.30,.42,.86))));
-        float planeFill=max(0.0,dot(n,normalize(vec3(.68,-.18,.71))));
-        mineral+=vec3(.012,.015,.016)*(.14+.22*fillLight+.08*floorBounce);
-        mineral+=vec3(.090,.098,.096)*pow(planeKey,.72)*.27;
-        mineral+=vec3(.052,.045,.039)*pow(planeFill,.82)*.14;
-        mineral+=vec3(.003,.011,.013)*smokyDepth*(.30+.70*(1.0-facing));
-        vec3 mineralAbsorption=exp(-vec3(.38,.28,.22)*(0.22+0.52*smokyDepth)*(1.0-facing));
-        mineral*=mix(vec3(1.0),mineralAbsorption,.30);
-        float internalCaustic=pow(1.0-facing,2.35)*(.35+.65*smokyDepth)*(1.0-.55*ndl);
-        mineral+=vec3(.040,.072,.073)*internalCaustic*.46;
-        float edgeTransmission=pow(1.0-facing,3.0)*(1.0-sat(ndl*.58));
-        mineral+=vec3(.055,.185,.200)*edgeTransmission*.76;
-        float iceVolume=exp(-pow((vLocal.x+.10)/.46,2.0)-pow((vLocal.y-.08)/.58,2.0))
-          *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        float sculptValleyA=exp(-pow((vLocal.x+.035)/.105,2.0)-pow((vLocal.y-.22)/.42,2.0))*bodyMask;
-        float sculptValleyB=exp(-pow((vLocal.x-.19)/.095,2.0)-pow((vLocal.y+.30)/.25,2.0))*bodyMask;
-        float sculptShoulder=exp(-pow((vLocal.x+.34)/.21,2.0)-pow((vLocal.y-.38)/.25,2.0))*bodyMask;
-        mineral*=1.0-.13*sculptValleyA-.09*sculptValleyB;
-        mineral+=vec3(.052,.104,.110)*sculptShoulder*.034;
-        float iceCloud=.5+.5*sin(vLocal.x*6.2-vLocal.y*4.7+vLocal.z*5.4+sin(vLocal.y*3.2));
-        mineral+=vec3(.068,.088,.088)*iceVolume*(.012+.016*(1.0-facing))*(.86+.14*iceCloud);
-        float chromaSide=.5+.5*n.x;
-        mineral+=mix(vec3(.018,.120,.145),vec3(.105,.032,.128),chromaSide)*fresnel*bodyMask*.105;
-        float backScatter=pow(max(0.0,dot(-n,normalize(vec3(.16,.42,-.89)))),2.2)*(1.0-facing);
-        float subsurface=pow(max(0.0,dot(-n,key)),1.65)*(1.0-facing);
-        mineral+=vec3(.025,.052,.058)*backScatter*.36;
-        mineral+=vec3(.066,.050,.074)*subsurface*(.038+.042*uEnergy);
-        mineral+=vec3(.018,.060,.072)*subsurface*fresnel*.14;
-        float vesselA=pow(.5+.5*sin(vLocal.y*18.0+sin(vLocal.x*9.0)*2.2+vLocal.z*6.0),16.0);
-        float vesselB=pow(.5+.5*sin(vLocal.x*21.0-vLocal.y*7.0+sin(vLocal.z*8.0)*1.7),20.0);
-        float vesselC=pow(.5+.5*sin(vLocal.x*13.0+vLocal.y*23.0-vLocal.z*11.0+sin(vLocal.y*8.0)*2.0),24.0);
-        float vascular=max(max(vesselA,vesselB),vesselC)*bodyMask;
-        mineral+=vec3(.022,.066,.073)*vascular*(.016+.030*uEnergy);
-        mineral+=vec3(.038,.016,.023)*vascular*subsurface*(.010+.020*uEnergy);
-        float cortexWave=.5+.5*sin(vUv.x*37.699+sin(vUv.y*18.849)*1.65+vUv.y*5.2);
-        float cortexCross=.5+.5*sin(vUv.x*18.849-vUv.y*25.133+sin(vUv.x*12.566)*1.25);
-        float cortexValley=pow(1.0-max(cortexWave*.72,cortexCross*.56),3.4)*bodyMask;
-        float cortexRidge=pow(max(cortexWave,cortexCross),4.2)*bodyMask;
-        mineral=mix(mineral,vec3(.014,.025,.031),cortexValley*.050);
-        mineral+=vec3(.066,.082,.090)*cortexRidge*.035;
-        mineral+=vec3(.020,.082,.096)*cortexRidge*vascular*.12;
-
-        /* R1724 FormatX living-crystal material — pearlescent cortical bioceramic
-           plates ride above dark cortical tissue. The plate field is broad,
-           irregular and organic; it is not a metallic armour texture. */
-        float plateField=.5+.5*sin(vUv.x*15.7+sin(vUv.y*10.8)*1.42+sin(vLocal.y*4.1)*.38);
-        float plateCross=.5+.5*sin(vUv.y*13.9-vUv.x*6.1+sin(vUv.x*8.2)*1.08);
-        float plateMask=smoothstep(.60,.84,max(plateField,plateCross*.82))*bodyMask;
-        plateMask*=.52+.34*smoothstep(-.45,.82,n.z);
-        float livingSeam=pow(1.0-max(plateField*.84,plateCross*.78),3.8)*bodyMask;
-        float plateFacetTone=.996+.004*fract(vFacet*7.13+.19);
-        vec3 ivory=vec3(.115,.132,.130)
-          +vec3(.27,.29,.27)*(.18*ndl+.13*sideLight+.20*softboxA)
-          +vec3(.12,.20,.22)*fresnel*.16;
-        ivory+=vec3(.42,.27,.17)*studioRibbonB*.036;
-        mineral*=mix(1.0,plateFacetTone,bodyMask*.06);
-        mineral=mix(mineral,ivory,plateMask*.065);
-        mineral=mix(mineral,vec3(.006,.018,.023),livingSeam*.115);
-        mineral+=vec3(.032,.190,.218)*vascular*(.080+.135*uEnergy);
-        mineral+=vec3(.48,.31,.20)*vascular*studioRibbonB*.050;
-
-        vec2 q=vLocal.xy;
-        float front=smoothstep(.19,.53,vLocal.z)*(1.0-vMorph)*bodyMask;
-
-        /* R1942 — desktop/internal prism parity with the mobile studio shader. */
-        float polar=atan(q.y,q.x);
-        float radialXY=length(q);
-        float prismEnvelope=
-          smoothstep(.070,.22,radialXY)*
-          (1.0-smoothstep(.44,.72,radialXY))*
-          front;
-        float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
-        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
-        float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        mineral+=vec3(.115,.255,.262)*axisRidge*(.062+.025*prismSweep);
-        mineral+=vec3(.40,.47,.44)*axisRidge*softboxB*.048;
-        mineral*=1.0-.082*diagonalValley;
-        mineral+=vec3(.018,.072,.084)*diagonalValley*fresnel*.052;
-        float innerPane=exp(-pow((abs(q.x)-(.16+.16*abs(q.y)))/.085,2.0))
-          *smoothstep(.04,.52,front);
-        mineral+=vec3(.078,.180,.188)*innerPane*.040;
-        float l1Prism=abs(q.x)*.90+abs(q.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.050,2.0))*front;
-        float prismShellB=exp(-pow((l1Prism-.475)/.072,2.0))*front;
-        mineral+=vec3(.40,.54,.51)*prismShellA*(.088+.032*softboxB);
-        mineral+=vec3(.048,.178,.192)*prismShellB*(.064+.028*fresnel);
-        mineral*=1.0-.018*prismShellB;
-        float foldEnvelope=
-          smoothstep(.075,.19,radialXY)*
-          (1.0-smoothstep(.55,.76,radialXY))*
-          front;
-        float foldRidge=pow(abs(cos(polar*2.0)),9.0)*foldEnvelope;
-        float foldValley=pow(abs(sin(polar*2.0)),8.0)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),14.0)*foldEnvelope;
-        mineral+=vec3(.28,.43,.42)*foldRidge*.105;
-        mineral+=vec3(.050,.188,.202)*foldSecondary*.054;
-        mineral*=1.0-.078*foldValley;
-        float crackX=q.x+.010*sin(q.y*19.0+vLocal.z*8.0)+.004*sin(q.y*43.0);
-        float fissureEnvelope=exp(-pow(q.y/.31,4.0))*front;
-        float fissureHalo=exp(-pow(crackX/.025,2.0))*fissureEnvelope;
-        float fissure=exp(-pow(crackX/.0058,2.0))*fissureEnvelope;
-        mineral=mix(mineral,vec3(.006,.017,.021),fissureHalo*.035);
-        mineral+=vec3(.18,.30,.31)*fissure*.072;
-        mineral+=vec3(.66,.67,.62)*fissure*.030;
-
-        /* R1942 — central optical organ with a true recessed cavity. */
-        vec2 lq=q;
-        float lensD=length(lq);
-        float cavity=(1.0-smoothstep(.130,.188,lensD))*front;
-        float cavityCore=exp(-pow(lensD/.105,2.0))*front;
-        mineral=mix(mineral,vec3(.004,.016,.021)+mineral*.44,cavity*.10);
-        mineral+=vec3(.018,.070,.082)*cavityCore*.050;
-        float lensOuter=(1.0-smoothstep(.112,.146,lensD))*front;
-        float lensGlass=(1.0-smoothstep(.064,.108,lensD))*front;
-        float lensCore=(1.0-smoothstep(.022,.052,lensD))*front;
-        float lensPupil=(1.0-smoothstep(.004,.016,lensD))*front;
-        float lensRim=max(0.0,lensOuter-lensGlass);
-        float lensInnerRing=exp(-pow((lensD-.066)/.008,2.0))*front;
-        float lensHighlight=exp(-pow((lq.x+.040)/.030,2.0)-pow((lq.y-.046)/.034,2.0))*lensGlass;
-        float lensLower=exp(-pow((lq.x-.030)/.060,2.0)-pow((lq.y+.052)/.040,2.0))*lensGlass;
-        float lensDepth=sat(1.0-lensD/.105);
-        float opticBreath=.94+.06*(.5+.5*sin(uTime*.72));
-
-        mineral=mix(mineral,vec3(.012,.036,.041)+mineral*.42,lensOuter*.055);
-        mineral+=vec3(.84,.93,.89)*lensRim*(.090+.125*sideLight+.074*fresnel);
-        mineral+=vec3(.020,.105,.120)*lensGlass*(.095+.080*softboxA+.065*sideSpec);
-        mineral+=vec3(.030,.38,.42)*lensInnerRing*(.17+.12*uEnergy);
-        mineral+=vec3(.30,.91,.93)*lensCore*(.25+.14*uEnergy)*opticBreath;
-        mineral+=vec3(.98,1.00,.99)*lensPupil*(.28+.10*uEnergy);
-        mineral+=vec3(.82,.94,.91)*lensHighlight*.18;
-        mineral+=vec3(.10,.15,.15)*lensLower*.032;
-        mineral=mix(mineral,vec3(.002,.010,.013),lensDepth*.050*lensGlass);
-
-        float pulse=0.0;
-        if(uSurfacePulse>=0.0){
-          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
-          float head=mix(-.18,1.18,sat(uSurfacePulse));
-          pulse=exp(-pow((coordinate-head)/.060,2.0))*(.25+.75*fresnel);
-        }
-        mineral+=vec3(.18,.42,.47)*pulse*.55;
-        mineral+=vec3(.58,.64,.62)*pulse*(.10+.24*softboxA);
-
-        vec3 livingMembrane=vec3(.008,.022,.030);
-        livingMembrane+=vec3(.085,.175,.205)*(.12*ndl+.22*sideLight+.58*fresnel);
-        livingMembrane+=vec3(.66,.87,.88)*softboxA*.24;
-        livingMembrane+=vec3(.32,.52,.57)*softboxB*.18;
-        livingMembrane+=vec3(.12,.34,.38)*edgeTransmission*.48;
-        livingMembrane+=vec3(.22,.075,.30)*subsurface*.34;
-        mineral=mix(mineral,livingMembrane,glassFinMask*.965);
-
-        vec3 cartilage=vec3(.070,.078,.076);
-        cartilage+=vec3(.140,.155,.150)*(.16*ndl+.20*sideLight);
-        cartilage+=vec3(.98,1.00,.97)*softboxA*.245;
-        cartilage+=vec3(.54,.66,.64)*sideSpec*.175;
-        cartilage+=vec3(.060,.19,.20)*fresnel*.125;
-        cartilage+=vec3(.030,.018,.038)*subsurface*.038;
-        cartilage+=vec3(.012,.055,.064)*vascular*.045;
-        mineral=mix(mineral,cartilage,armorMask*.985);
-
-        vec2 lensVector=vUv-vec2(.5);
-        float lensRadial=length(lensVector);
-        float lensInner=1.0-smoothstep(.205,.475,lensRadial);
-        float lensRim=exp(-pow((lensRadial-.430)/.030,2.0));
-        float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorHalo=exp(-pow(lensVector.x/.320,2.0)-pow(lensVector.y/.150,2.0));
-        float sensorCore=exp(-pow(lensVector.x/.250,2.0)-pow(lensVector.y/.060,2.0));
-        float sensorArc=0.0;
-        float lensHot=exp(-pow(lensVector.x/.290,2.0)-pow(lensVector.y/.085,2.0));
-        float lensGlint=exp(-pow((vUv.x-.29)/.085,2.0)-pow((vUv.y-.33)/.095,2.0));
-        float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
-        vec3 physicalLens=vec3(.0012,.005,.007);
-        physicalLens+=vec3(.010,.040,.047)*(.16+.17*uEnergy);
-        physicalLens+=vec3(.94,.98,.95)*softboxA*.22;
-        physicalLens+=vec3(.50,.58,.58)*sideSpec*.10;
-        physicalLens+=vec3(.055,.14,.17)*fresnel*.12;
-        physicalLens+=vec3(.008,.065,.080)*lensInner*(.09+.08*uEnergy);
-        physicalLens+=vec3(.64,.70,.68)*lensRim*.050;
-        physicalLens+=vec3(.018,.18,.22)*sensorHalo*(.08+.06*uEnergy);
-        physicalLens+=vec3(.30,.78,.84)*sensorArc*(.10+.07*uEnergy);
-        physicalLens+=vec3(.70,.96,.96)*sensorCore*(.12+.06*uEnergy);
-        physicalLens+=vec3(.62,.82,.82)*lensHot*.055;
-        physicalLens+=vec3(.96,1.00,1.00)*lensGlint*.38;
-        physicalLens+=vec3(.44,.57,.57)*lensEdge*(.07+.08*softboxA+.05*sideSpec);
-        physicalLens=mix(physicalLens,vec3(.003,.014,.018),lensDepthShade*.09);
-        physicalLens+=vec3(.58,.82,.86)*lensGlint*.10;
-        mineral=mix(mineral,physicalLens,lensMeshMask*.997);
-
-        float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
-        vec3 tendon=vec3(.005,.016,.021)+vec3(.055,.125,.145)*(.14*sideLight+.08*ndl+.42*fresnel);
-        tendon+=vec3(.020,.22,.29)*cableSegment*(.055+.055*uEnergy);
-        tendon+=vec3(.64,.75,.74)*sideSpec*.15;
-        tendon+=vec3(.46,.64,.65)*softboxA*.12;
-        tendon+=vec3(.15,.36,.40)*edgeTransmission*.34;
-        tendon+=vec3(.78,.38,.15)*studioRibbonB*(.065+.045*cableSegment);
-        mineral=mix(mineral,tendon,tendrilMask*.995);
-
-        if(uLayer>.5){
-          ${outputName}=vec4(vec3(.004,.009,.011),.16);
-          return;
-        }
-        float outAlpha=1.0-tendrilMask*.38-glassFinMask*.70;
-        outAlpha=mix(outAlpha,.90,lensMeshMask);
-        ${outputName}=vec4(filmic(mineral*2.58),clamp(outAlpha,.92,1.0));
-      }`;
 
     /* R1557 source-contract compatibility: dnaHelix and dnaBridge remain the
        semantic genome lineage names even though the final mineral no longer
@@ -1342,347 +1056,119 @@
        language with fewer highlights; software/mobile proof must not fall back
        to a gray translucent surrogate. */
 
-    /* R1941d — canonical cross-tier studio bioglass shader.
-       One clean material, no procedural dirt/speckles, no black button optic.
-       The four-point silhouette carries the identity; the shader only gives it
-       physical depth, broad softbox reflections and restrained living energy. */
+    /* R2063 — one studio dielectric across every capability tier. Reflected
+       panels and refracted light share the real surface normal; absorption
+       supplies glass depth and actual energy/scroll/pulse uniforms drive life. */
     const constrainedFragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
       ${fragmentIn} vec3 vLocal;
+      ${fragmentIn} vec3 vBodyX;
+      ${fragmentIn} vec3 vBodyY;
+      ${fragmentIn} vec3 vBodyZ;
       ${fragmentIn} vec2 vUv;
       ${fragmentIn} vec3 vBary;
       ${fragmentIn} float vFacet;
       ${fragmentIn} float vMorph;
       ${webgl2 ? "out vec4 outColor;" : ""}
-      float sat(float v){return clamp(v,0.,1.);}
-      vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      float sat(float value){return clamp(value,0.,1.);}
+      float gaussian(float value,float width){float q=value/width;return exp(-q*q);}
+      float gaussian2(vec2 value,vec2 width){vec2 q=value/width;return exp(-dot(q,q));}
+      vec3 displayColor(vec3 color){
+        color=max(color,vec3(0.0));
+        color=clamp((color*(2.51*color+.03))/(color*(2.43*color+.59)+.14),0.0,1.0);
+        return pow(color,vec3(.454545));
+      }
+      vec3 studio(vec3 direction,float roughness){
+        vec3 d=normalize(direction);
+        float front=smoothstep(-.25,.65,d.z);
+        float softness=.025+roughness*.14;
+        // exp(-x*x)*exp(-y*y) equals exp(-(x*x+y*y)): keep the same
+        // physical panel while evaluating one exponential per light sample.
+        float key=gaussian2(vec2(d.x+.32,d.y-.08),vec2(.055+softness,.66))*front;
+        float fill=gaussian2(vec2(d.x-.46,d.y+.10),vec2(.105+softness,.72))*front;
+        float crown=gaussian2(vec2(d.x+.08,d.y-.73),vec2(.46,.13+softness))*front;
+        float floorLight=gaussian2(vec2(d.x-.10,d.y+.65),vec2(.64,.18+softness))*front;
+        float rear=gaussian2(vec2(d.x+.10,d.y-.32),vec2(.55,.60))*smoothstep(.0,.75,-d.z);
+        return vec3(.006,.009,.015)
+          +vec3(5.7,6.2,6.6)*key
+          +vec3(.70,1.65,2.18)*fill
+          +vec3(1.9,1.8,1.6)*crown
+          +vec3(.13,.21,.31)*floorLight
+          +vec3(.032,.045,.055)*rear;
+      }
       void main(){
-        vec3 n=normalize(vNormal);
+        vec3 normal=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
-        float facing=sat(abs(dot(n,view)));
-        float fresnel=pow(1.0-facing,1.72);
+        if(dot(normal,view)<0.0)normal=-normal;
+        float facing=sat(dot(normal,view));
+        float fresnel=.037+.963*pow(1.0-facing,5.0);
+        float roughness=.10+.055*(.5+.5*normal.y);
+        vec3 reflection=reflect(-view,normal);
+        vec3 refracted=refract(-view,normal,1.0/1.46);
+        float thickness=.08+.68*pow(facing,1.4)+.10*(.5+.5*vLocal.z);
+        vec3 absorption=exp(-vec3(1.85,1.55,1.38)*thickness);
+        vec3 transmitted=studio(refracted,roughness+.12)*absorption;
+        vec3 reflected=studio(reflection,roughness);
+        vec3 color=transmitted*(1.0-fresnel)+reflected*fresnel*1.18;
 
-        vec3 keyDir=normalize(vec3(-.50,.78,.38));
-        vec3 sideDir=normalize(vec3(.72,.08,.69));
-        vec3 fillDir=normalize(vec3(-.38,-.24,.89));
-        float key=sat(dot(n,keyDir));
-        float side=sat(dot(n,sideDir));
-        float fill=sat(dot(n,fillDir));
-        float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
+        /* The closed membrane has a cool, deep body and a neutral silver rim.
+           Normal derivatives keep every highlight attached during rotation. */
+        float key=sat(dot(normal,normalize(vec3(-.45,.65,.62))));
+        float fill=sat(dot(normal,normalize(vec3(.65,-.08,.76))));
+        float shell=.065+.060*key+.035*fill;
+        color+=vec3(.022,.073,.095)*shell;
+        float rim=pow(1.0-facing,2.25);
+        color+=vec3(.13,.26,.33)*rim*.34;
+        float dispersion=gaussian(reflection.x-.46,.028+roughness*.16)
+          *gaussian(reflection.y+.10,.73)*smoothstep(-.2,.6,reflection.z);
+        color+=vec3(.15,.08,.25)*dispersion*fresnel*.26;
 
-        vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
-        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.13)/.29,2.0)-pow((refl.y-.10)/.82,2.0))*smoothstep(-.10,.72,refl.z);
-        float ribbonB=exp(-pow((refl.x-.31)/.25,2.0)-pow((refl.y+.10)/.70,2.0))*smoothstep(-.10,.70,refl.z);
+        /* Internal anatomy follows the same real rotation as the body.
+           Environment reflections stay in world space. The orthonormal
+           basis transforms the refracted ray back into body coordinates. */
+        vec3 bodyPosition=vec3(dot(vLocal,vBodyX),dot(vLocal,vBodyY),dot(vLocal,vBodyZ));
+        vec3 bodyRay=vec3(dot(refracted,vBodyX),dot(refracted,vBodyY),dot(refracted,vBodyZ));
+        vec3 organ=vec3(.008+uPointer.x*.016,.012-uPointer.y*.013,.15);
+        float organDepth=max(0.0,dot(organ-bodyPosition,bodyRay));
+        vec3 inside=bodyPosition+bodyRay*organDepth;
+        vec3 delta=inside-organ;
+        float organDistance=length(delta*vec3(1.0,1.03,.66));
+        float organCore=gaussian(organDistance,.055);
+        float organHalo=gaussian(organDistance,.17);
+        float organBoundary=gaussian(organDistance-.102,.012);
+        float activity=.34+.48*sat(uEnergy)+.18*sat(uBreath);
+        float transmissionWindow=smoothstep(-.05,.36,bodyPosition.z)*(1.0-.40*fresnel);
+        color+=vec3(.18,.87,1.18)*organHalo*.075*activity*transmissionWindow;
+        color+=vec3(.25,.76,.92)*organBoundary*.13*transmissionWindow;
+        color+=vec3(.78,1.14,1.27)*organCore*(.45+.75*activity)*transmissionWindow;
 
-        float frontDepth=smoothstep(-.46,.58,vLocal.z);
-        float backDepth=1.0-frontDepth;
-        float edge=pow(1.0-facing,2.20);
-        float deepEdge=pow(1.0-facing,3.20);
-        float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
-        /* Broadband depth density replaces periodic high-contrast scanlines. */
-        float strata=smoothstep(-.68,.72,vLocal.y*.82+vLocal.x*.16-vLocal.z*.19);
-        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        /* Four broad internal folds catch refracted illumination. The field is
+           continuous and anchored in 3D, without per-triangle random color. */
+        float fold=gaussian(abs(inside.x)*.92+abs(inside.y)*.75-.27,.037);
+        float outerFold=gaussian(abs(inside.x)*.87+abs(inside.y)*.72-.47,.055);
+        float depthMask=smoothstep(-.10,.32,bodyPosition.z);
+        color+=vec3(.075,.19,.24)*fold*depthMask*(.13+.16*fill);
+        color+=vec3(.07,.12,.17)*outerFold*depthMask*.12;
 
-        if(uLayer>.5){
-          ${outputName}=vec4(0.0,0.0,0.0,0.0);
-          return;
-        }
-
-        /* Smoked blue-silver glass volume. */
-        float lift=sat(.18+.36*key+.24*side+.15*fill+.08*top);
-        float macroAngle=atan(vLocal.y,vLocal.x);
-        float macroRadius=length(vLocal.xy);
-        float macroFacetA=.5+.5*cos(macroAngle*4.0+macroRadius*2.6-vLocal.z*.9);
-        float macroFacetB=.5+.5*cos(macroAngle*2.0-macroRadius*4.1+vLocal.z*1.4);
-        float macroFacet=mix(macroFacetA,macroFacetB,.34);
-        float facetTone=${mobile
-          ? '.962+.050*macroFacet'
-          : '.955+.070*macroFacet'}; 
-        vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
-        c*=.93+.07*volume;
-        /* R1945j — one continuous macro-facet field across all tiers.
-           Per-triangle random tone created tiny dark mosaic cells that read as
-           black pin-speckles in proof captures. Geometry stays untouched. */
-        float facetSilver=smoothstep(${mobile?'.60':'.56'},.94,macroFacet)*frontDepth;
-        float facetCool=smoothstep(.10,${mobile?'.44':'.48'},1.0-macroFacet)*frontDepth;
-        c+=vec3(.120,.136,.130)*facetSilver*${mobile?'.044':'.072'};
-        c+=vec3(.010,.065,.076)*facetCool*${mobile?'.030':'.046'};
-        c+=vec3(.030,.060,.064)*strata*.10;
-        c+=vec3(.020,.043,.048)*backDepth*.11;
-
-        /* Large photographic light sources. */
-        c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
-        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
-        c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
-        c+=vec3(.92,.98,.96)*ribbonA*.012;
-        c+=vec3(.18,.47,.50)*ribbonB*.052;
-        float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
-          *smoothstep(-.72,.72,vLocal.y);
-        c+=vec3(.76,.88,.86)*glassBlade*.004;
-
-        /* R1942 — internal prism architecture.
-           Four broad refractive planes run toward the signature tips. They are
-           volumetric tonal events, not drawn borders, so the object keeps a
-           single continuous glass skin. */
-        float polar=macroAngle;
-        float radialXY=macroRadius;
-        float prismEnvelope=
-          smoothstep(.075,.22,radialXY)*
-          (1.0-smoothstep(.44,.72,radialXY))*
-          frontDepth;
-        float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
-        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
-        float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
-        c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
-        c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
-        c*=1.0-.090*diagonalValley;
-        c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
-
-        /* A second, deeper pane creates parallax-like density behind the skin. */
-        float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
-          *smoothstep(.04,.52,frontDepth);
-        c+=vec3(.082,.190,.198)*innerPane*.044;
-
-        /* R1942c — nested internal prism shells.
-           These echo the layered crystalline anatomy from the selected historic
-           MAG without adding geometry or a second render pass. */
-        float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.125,2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/.16,2.0))*frontDepth;
-        c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.048':'.060'}+${mobile?'.017':'.023'}*softboxB);
-        c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.035':'.043'}+${mobile?'.014':'.019'}*fresnel);
-        c*=1.0-.020*prismShellB;
-
-        /* R1942d — four authored fold ridges from optic to signature tips.
-           This is the structural cue that made the historic MAG read as a
-           layered crystal instead of a smooth diamond. */
-        float foldEnvelope=
-          smoothstep(.075,.19,radialXY)*
-          (1.0-smoothstep(.55,.76,radialXY))*
-          frontDepth;
-        float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
-        float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
-        c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
-        c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
-        c*=1.0-${mobile?'.027':'.037'}*foldValley;
-        c+=vec3(.22,.40,.42)*pow(key,2.8)*${mobile?'.12':'.15'};
-        c+=vec3(.15,.32,.35)*pow(side,3.2)*${mobile?'.11':'.14'};
-
-        /* Optical transmission at the silhouette and restrained inner cyan. */
-        c+=vec3(.030,.180,.205)*fresnel*.34;
-        c+=vec3(.055,.300,.335)*deepEdge*.235;
-        float spectralSide=.5+.5*n.x;
-        c+=mix(vec3(.018,.120,.150),vec3(.105,.038,.125),spectralSide)*fresnel*.070;
-        c+=vec3(.025,.110,.128)*centreHaze*(${mobile?'.08':'.045'}+${mobile?'.07':'.050'}*uEnergy);
-        c+=vec3(.015,.050,.060)*frontDepth*.10;
-
-        /* R1942 — recessed optical organ.
-           A soft smoked cavity precedes the lens, giving the centre actual depth
-           instead of a luminous disc painted onto the shell. */
-        float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
-        float od=length(oq);
-        float cavity=(1.0-smoothstep(.92,1.34,od))*front;
-        float cavityCore=exp(-od*od*2.3)*front;
-        c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
-        c+=vec3(.020,.080,.092)*cavityCore*.055;
-        float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.060,2.0))*front;
-        float iris=exp(-od*od*4.8)*front;
-        float core=exp(-od*od*18.5)*front;
-        float hot=exp(-od*od*74.0)*front;
-        float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
-        vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
-        c=mix(c,opticBase+c*.42,lens*.22);
-        c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
-        c+=vec3(.028,.28,.33)*iris*(${mobile?'.115':'.135'}+${mobile?'.085':'.095'}*uEnergy);
-        c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
-        c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
-        c+=vec3(1.00,1.00,.98)*glint*.24;
-        float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
-        c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
-
-        /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
         if(uSurfacePulse>=0.0){
-          float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
+          float coordinate=.5+(bodyPosition.y*.61+bodyPosition.x*.14+bodyPosition.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=gaussian(coordinate-head,.065)*(.28+.72*rim);
         }
-        c+=vec3(.08,.30,.34)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
-
-        ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
+        color+=vec3(.055,.33,.48)*sweep*.43;
+        color+=reflected*sweep*.045;
+        ${outputName}=vec4(displayColor(color),1.0);
       }`;
 
-    const softwareFragmentSource = `${versionLine}precision highp float;
-      uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
-      uniform vec2 uPointer;
-      ${fragmentIn} vec3 vNormal;
-      ${fragmentIn} vec3 vLocal;
-      ${fragmentIn} vec2 vUv;
-      ${fragmentIn} vec3 vBary;
-      ${fragmentIn} float vFacet;
-      ${fragmentIn} float vMorph;
-      ${webgl2 ? 'out vec4 outColor;' : ''}
-      float sat(float v){return clamp(v,0.,1.);}
-      vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
-      void main(){
-        vec3 n=normalize(vNormal);
-        vec3 view=normalize(vec3(-vLocal.xy,2.92-vLocal.z));
-        vec3 key=normalize(vec3(-.53,.79,.31));
-        vec3 side=normalize(vec3(.77,.06,.64));
-        float ndl=max(dot(n,key),0.0);
-        float sideLight=max(dot(n,side),0.0);
-        float facing=sat(abs(dot(n,view)));
-        float fresnel=(1.0-facing);fresnel*=fresnel;
-        float keySpec=max(dot(n,normalize(key+view)),0.0);
-        keySpec*=keySpec;keySpec*=keySpec;keySpec*=keySpec;
-        float sideSpec=max(dot(n,normalize(side+view)),0.0);
-        sideSpec*=sideSpec;sideSpec*=sideSpec;sideSpec*=sideSpec;
-        keySpec*=keySpec;
-        sideSpec*=sideSpec;
-
-        float isTendril=step(2.0,vFacet)*(1.0-step(4.0,vFacet));
-        float isGlassFin=step(4.0,vFacet)*(1.0-step(5.0,vFacet));
-        float isArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
-        float isLensMesh=step(6.0,vFacet);
-        float bodyMask=max(0.0,1.0-isTendril-isGlassFin-isArmor-isLensMesh);
-        float tendrilMask=isTendril*(1.0-vMorph);
-        float armorMask=isArmor*(1.0-vMorph);
-        float lensMeshMask=isLensMesh*(1.0-vMorph);
-
-        float lift=sat(.088+ndl*.185+sideLight*.135);
-        float facetTone=.996+.008*fract(vFacet*5.73+.23);
-        float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
-        float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
-        float capShade=1.0-.050*smoothstep(.46,.96,vLocal.y);
-        float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
-        float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
-        float absorption=.84+.16*facing;
-        vec3 col=mix(vec3(.003,.007,.010),vec3(.066,.086,.090),lift)*facetTone*capShade*absorption;
-        col*=.994+.012*grain;
-        col+=vec3(1.00,1.00,.99)*keySpec*.135;
-        col+=vec3(.26,.54,.59)*sideSpec*.105;
-        col+=vec3(.020,.125,.150)*fresnel*.185;
-        col+=vec3(.135,.070,.034)*warmPlane*.050;
-        col+=vec3(.032,.066,.072)*coolPlane*.055;
-        col+=vec3(.022,.030,.030)*ndl*.026;
-        col+=vec3(.060,.078,.076)*fissure*.018;
-        col+=vec3(.018,.036,.039)*(1.0-facing)*.070;
-        col+=vec3(.005,.008,.010)*max(0.0,-n.y)*.10;
-
-        float broadKey=max(0.0,dot(n,normalize(vec3(-.34,.68,.64))));
-        float broadSide=max(0.0,dot(n,normalize(vec3(.74,.10,.66))));
-        float broadWarm=max(0.0,dot(n,normalize(vec3(.30,-.48,.82))));
-        float studioStripeA=exp(-pow((vLocal.x+.245)/.052,2.0))*smoothstep(-.82,.74,vLocal.y)*bodyMask;
-        float studioStripeB=exp(-pow((vLocal.x-.315)/.066,2.0))*smoothstep(-.68,.80,vLocal.y)*bodyMask;
-        float studioStripeC=exp(-pow((vLocal.x+.005+vLocal.y*.08)/.070,2.0))*smoothstep(-.78,.78,vLocal.y)*bodyMask;
-        float studioFaceA=pow(max(dot(n,normalize(vec3(-.28,.34,.90))),0.0),5.0)*bodyMask;
-        float studioFaceB=pow(max(dot(n,normalize(vec3(.50,-.04,.86))),0.0),7.0)*bodyMask;
-        col+=vec3(.30,.38,.38)*pow(broadKey,2.65)*.026*bodyMask;
-        col+=vec3(.11,.28,.31)*pow(broadSide,2.45)*.044*bodyMask;
-        col+=vec3(.08,.042,.055)*pow(broadWarm,2.70)*.014*bodyMask;
-        col+=vec3(.98,1.00,.99)*studioFaceA*.074;
-        col+=vec3(.30,.72,.78)*studioFaceB*.052;
-        col+=vec3(1.00,1.00,.99)*studioStripeA*.145;
-        col+=vec3(.25,.62,.69)*studioStripeB*.052;
-        col+=vec3(.58,.90,.93)*studioStripeC*.058;
-        col+=vec3(.018,.048,.052)*fresnel*.112*bodyMask;
-        float internalDepth=smoothstep(-.30,.60,vLocal.z)*(1.0-.38*fresnel)*bodyMask;
-        float glassEdge=pow(1.0-facing,2.05)*bodyMask;
-        float glassHalo=pow(1.0-facing,1.35)*bodyMask;
-        float frontDepth=smoothstep(-.18,.62,vLocal.z)*bodyMask;
-        float iceVolume=exp(-pow((vLocal.x+.10)/.50,2.0)-pow((vLocal.y-.08)/.62,2.0))
-          *smoothstep(-.42,.72,vLocal.z)*bodyMask;
-        float sculptValleyA=exp(-pow((vLocal.x+.035)/.112,2.0)-pow((vLocal.y-.22)/.44,2.0))*bodyMask;
-        float sculptValleyB=exp(-pow((vLocal.x-.19)/.102,2.0)-pow((vLocal.y+.30)/.27,2.0))*bodyMask;
-        float sculptShoulder=exp(-pow((vLocal.x+.34)/.23,2.0)-pow((vLocal.y-.38)/.27,2.0))*bodyMask;
-        col*=1.0-.075*sculptValleyA-.045*sculptValleyB;
-        col+=vec3(.040,.096,.106)*sculptShoulder*.026;
-        col+=vec3(.018,.034,.036)*internalDepth*(.18+.26*lift);
-        col+=vec3(.024,.090,.100)*glassEdge*.245;
-        col+=vec3(.014,.050,.057)*glassHalo*.082;
-        col+=vec3(.010,.024,.026)*frontDepth*.040;
-        float innerVeil=exp(-pow((vLocal.x+.02+vLocal.y*.10)/.20,2.0)-pow((vLocal.y-.03)/.60,2.0))*bodyMask;
-        col+=vec3(.076,.092,.090)*iceVolume*(.010+.010*(1.0-facing));
-        col+=vec3(.070,.085,.083)*innerVeil*(.004+.006*facing);
-        col+=vec3(.013,.030,.035)*bodyMask*(.34+.40*facing);
-        col+=vec3(.022,.052,.058)*grain*iceVolume*.006;
-        vec2 socketQ=vec2((vLocal.x-.115)/.165,(vLocal.y-.040)/.145);
-        float socketD=length(socketQ);
-        float socketShade=exp(-pow((socketD-1.0)/.20,2.0))*smoothstep(.14,.54,vLocal.z)*bodyMask;
-        float opticCaustic=exp(-dot(socketQ,socketQ)*.70)*smoothstep(.04,.58,vLocal.z)*bodyMask;
-        col*=1.0-.070*socketShade;
-        col+=vec3(.022,.090,.110)*opticCaustic*(.042+.055*uEnergy);
-        float chromaSide=.5+.5*n.x;
-        vec3 spectralEdge=mix(vec3(.015,.140,.168),vec3(.120,.032,.148),chromaSide);
-        col+=spectralEdge*fresnel*bodyMask*.135;
-        float refractRibbon=exp(-pow((vLocal.x+.11-vLocal.y*.16)/.115,2.0))*smoothstep(-.62,.66,vLocal.y)*frontDepth;
-        col+=vec3(.055,.185,.205)*refractRibbon*(.045+.055*(1.0-facing));
-
-        vec3 bezel=vec3(.080,.090,.087)
-          +vec3(.095,.112,.108)*(.11*ndl+.12*sideLight)
-          +vec3(1.00,1.00,.98)*keySpec*.230
-          +vec3(.060,.175,.184)*fresnel*.100
-          +vec3(.040,.052,.050)*(.10+.08*facing);
-        col=mix(col,bezel,armorMask*.985);
-
-        float pulse=0.0;
-        if(uSurfacePulse>=0.0){
-          float coordinate=.5+(vLocal.y*.62+vLocal.x*.14+vLocal.z*.20)*.5;
-          float head=mix(-.18,1.18,sat(uSurfacePulse));
-          pulse=1.0-smoothstep(.045,.115,abs(coordinate-head));
-          pulse*=.30+.70*fresnel;
-        }
-        col+=vec3(.11,.28,.33)*pulse*.64;
-        col+=vec3(.34,.40,.39)*pulse*keySpec*.16;
-
-
-
-        vec2 lensVector=vUv-vec2(.5);
-        float lensRadial=length(lensVector);
-        float lensInner=1.0-smoothstep(.20,.47,lensRadial);
-        float lensRim=exp(-pow((lensRadial-.430)/.032,2.0));
-        float lensEdge=smoothstep(.410,.490,lensRadial);
-        float sensorLine=exp(-pow((lensVector.y+lensVector.x*.050)/.052,2.0))
-          *smoothstep(.06,.20,vUv.x)*(1.0-smoothstep(.80,.94,vUv.x));
-        float sensorCore=exp(-pow((lensVector.y+lensVector.x*.050)/.023,2.0))
-          *smoothstep(.18,.32,vUv.x)*(1.0-smoothstep(.68,.82,vUv.x));
-        float lensHot=exp(-pow(lensVector.x/.205,2.0)-pow(lensVector.y/.115,2.0));
-        float lensDepthShade=exp(-pow(lensRadial/.225,2.0));
-        float lensGlint=exp(-pow((vUv.x-.31)/.065,2.0)-pow((vUv.y-.27)/.052,2.0));
-        vec3 optical=vec3(.006,.022,.028)
-          +vec3(.008,.050,.060)*lensInner
-          +vec3(.94,.99,.97)*keySpec*.070
-          +vec3(.014,.070,.084)*fresnel*.060
-          +vec3(.58,.66,.64)*lensRim*.040
-          +vec3(.018,.34,.39)*sensorLine*.090
-          +vec3(.62,.92,.94)*sensorCore*.120
-          +vec3(.68,.86,.84)*lensHot*.042
-          +vec3(1.00,1.00,1.00)*lensGlint*.30
-          +vec3(.32,.44,.44)*lensEdge*(.032+.032*keySpec+.016*sideSpec);
-        optical=mix(optical,vec3(.003,.014,.018),lensDepthShade*.075);
-        optical+=vec3(.72,.92,.94)*lensGlint*.080;
-        col=mix(col,optical,lensMeshMask*.997);
-
-        if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
-        float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
-        alpha=mix(alpha,.97,isLensMesh);
-        ${outputName}=vec4(tone(col*2.10),clamp(alpha,.99,1.0));
-      }`;
 
     /* R1716 — preserve photographic mobile geometry.
        Software rendering keeps the ultra-lite material/mesh, but real mobile
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
-    const mobilePhysical = mobile || constrainedMobile || auditMode;
+    const mobilePhysical = mobile || constrainedMobile;
     /* R1930 visual parity: one authored studio shader on desktop, mobile and
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
@@ -1825,6 +1311,7 @@
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
+      livingTimeline?.cancel();
       stage.remove();
       root.dataset.fxCrystalOrganismR326='shader-failed';
       root.dataset.fxCoreReal3d='shader-failed';
@@ -1835,6 +1322,7 @@
     let shaderPollCount = 0;
     function failShader(error) {
       console.warn('FormatX crystal organism unavailable:',error);
+      livingTimeline?.cancel();
       if(stage.isConnected)stage.remove();
       root.dataset.fxCoreShaderCompileR600='failed';
       root.dataset.fxCrystalOrganismR326='shader-failed';
@@ -1871,12 +1359,13 @@
     const attributeNames=['aSphere','aCrystal','aSphereNormal','aCrystalNormal','aUv','aBary','aFacet'];
     const attributes=attributeNames.map(name=>gl.getAttribLocation(program,name));
     const uniforms={};
-    ['uTime','uEnergy','uBreath','uLayer','uMorph','uPointer','uAspect','uSiteProgress','uSurfacePulse','uRotation']
+    ['uTime','uEnergy','uBreath','uLayer','uMorph','uPointer','uAspect','uSiteProgress','uSurfacePulse','uRotation','uGenesis']
       .forEach(name=>{uniforms[name]=gl.getUniformLocation(program,name);});
 
     function upload(buffer,data,index,size){
       gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
       gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);
+      if(index<0)return;
       gl.enableVertexAttribArray(index);
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
@@ -1922,10 +1411,8 @@
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
-    /* R1694 — renderer capability outranks audit mode. A software GPU must never
-       be forced to full-resolution merely because a verifier is attached; that
-       creates artificial 200ms+ frames and is the opposite of the production
-       60 Hz policy. Hardware keeps the photographic path, software keeps the
+    /* Renderer capability owns the budget for every visitor. Hardware keeps
+       the photographic path, software keeps the
        same visual identity through the lite shader at a smaller backing store. */
     /* R1703 — mobile starts sharp enough to read as a photographed object.
        The strict R1701 frame governor is still allowed to shed resolution on
@@ -1942,17 +1429,24 @@
        after measured frame pressure. Mobile keeps its existing contract. */
     let qualityScale=softwareRenderer
       ? (mobile?.94:.72)
-      : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
+      : (mobile ? 1.00 : (constrained ? .84 : 1.00));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
-      : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
+      : (mobile?1.08:(constrained?.96:1.08));
     const qualityFloor=softwareRenderer
       ? (mobile?.80:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
+    const qualityGpuTimer=webgl2?gl.getExtension('EXT_disjoint_timer_query_webgl2'):null;
+    let qualityGpuQuery=null,qualityGpuQueryWidth=0,qualityGpuQueryHeight=0,lastGpuSampleAt=-Infinity;
+    let gpuStartupRecorded=false,gpuBudgetSamples=0,gpuAverage=0,gpuPeak=0,gpuLastMs=null;
+    let budgetCpuSamples=0,budgetCpuAverage=0,budgetCpuPeak=0,gpuStableSamples=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
+    let motionReduced=reducedMotionRequested();
+    syncCompositorBreath();
+    let genesisProgress=-1;
     let activeOrgan='hero',shapeLockUntil=0;
     const cinematic=window.FormatXCoreCinematic=window.FormatXCoreCinematic||{};
     cinematic.version=REVISION;
@@ -1963,17 +1457,31 @@
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
-        : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
+        : (constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
+        : (constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
-      if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+      if(width!==w||height!==h){
+        // A cost measured for the old backing store must not keep shedding
+        // the new, smaller one before any work at its actual size completes.
+        budgetCpuSamples=0;budgetCpuAverage=0;budgetCpuPeak=0;
+        gpuBudgetSamples=0;gpuAverage=0;gpuPeak=0;gpuStableSamples=0;
+        delete root.dataset.fxCoreGpuAverageMsR2136;delete root.dataset.fxCoreGpuPeakMsR2136;
+      }
+      // R2128: when BOTH desktop axes change, release the old width before
+      // assigning the pair. This avoids a costly intermediate full-area
+      // drawing buffer at the new width and old height. All assignments are
+      // synchronous; the next draw uses the same final dimensions and context.
+      // Mobile retains its original allocation sequence and quality policy.
+      if(!mobile&&canvas.width!==w&&canvas.height!==h){
+        canvas.width=0;canvas.height=h;canvas.width=w;
+      }else if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
       width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
@@ -1998,15 +1506,16 @@
       },delay);
     }
     function schedule(frames=1){
+      syncMotionPreference();
       if(blocked())return;
-      const frameCap=auditMode?1:(mobile?4:24);
+      const frameCap=motionReduced?1:mobile?4:24;
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
     function boost(value=.84,frames=8){
       targetEnergy=Math.max(targetEnergy,value);
       targetBreath=Math.max(targetBreath,.38+value*.48);
-      schedule(reduced.matches?1:frames);
+      schedule(reducedMotionRequested()?1:frames);
     }
     function shapeName(){return 'organism';}
     function publishShape(source='renderer'){
@@ -2073,7 +1582,7 @@
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
       const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
-      if(disposed||contextLost||reduced.matches||document.hidden||paused
+      if(disposed||contextLost||reducedMotionRequested()||document.hidden||paused
         ||(!visible&&!explicitInteraction)
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'
         ||(!explicitInteraction&&now-lastSurfacePulseAt<2200))return false;
@@ -2148,21 +1657,14 @@
     }
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
-      if(auditMode){
-        root.dataset.fxCoreSurfaceSchedulerR484='lighthouse-audit-disabled';
-        return;
-      }
-      if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
+      if(disposed||contextLost||reducedMotionRequested()||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
-      // R588: the first autonomous sweep is a post-interactive warm-up.
-      // The CSS heartbeat and direct interaction remain immediate, while the
-      // expensive native sweep no longer competes with first-load interactivity.
-      const delay=surfacePulseCount===0
-        ? 13000
-        : mobile
+      // R2061: a ready visible core uses the same genuine autonomous cadence
+      // from its first sweep onward; no initial thirteen-second dormant gap.
+      const delay=mobile
           ? 5400+(surfacePulseCount%3)*520
           : 4100+(surfacePulseCount%3)*360;
       root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
@@ -2182,10 +1684,44 @@
 
     function render(now){
       const begin=performance.now();
+      let freshGpuSample=false;
+      if(qualityGpuQuery){
+        const disjoint=gl.getParameter(qualityGpuTimer.GPU_DISJOINT_EXT);
+        const available=gl.getQueryParameter(qualityGpuQuery,gl.QUERY_RESULT_AVAILABLE);
+        if(disjoint||available){
+          if(available&&!disjoint){
+            gpuLastMs=gl.getQueryParameter(qualityGpuQuery,gl.QUERY_RESULT)/1e6;
+            root.dataset.fxCoreGpuLastMsR2136=gpuLastMs.toFixed(3);
+            root.dataset.fxCoreGpuSampleResolutionR2136=qualityGpuQueryWidth+'x'+qualityGpuQueryHeight;
+            if(!gpuStartupRecorded){
+              gpuStartupRecorded=true;
+              root.dataset.fxCoreGpuStartupMsR2136=gpuLastMs.toFixed(3);
+            }else if(qualityGpuQueryWidth===width&&qualityGpuQueryHeight===height){
+              gpuAverage=gpuBudgetSamples?gpuAverage*.72+gpuLastMs*.28:gpuLastMs;
+              gpuPeak=Math.max(gpuLastMs,gpuPeak*.82);
+              gpuBudgetSamples++;
+              freshGpuSample=true;
+            }
+          }else{
+            gpuBudgetSamples=0;gpuAverage=0;gpuPeak=0;gpuStableSamples=0;
+            delete root.dataset.fxCoreGpuAverageMsR2136;delete root.dataset.fxCoreGpuPeakMsR2136;
+          }
+          gl.deleteQuery(qualityGpuQuery);qualityGpuQuery=null;
+        }
+      }
+      let gpuQueryStarted=false;
+      if(qualityGpuTimer&&!qualityGpuQuery&&now-lastGpuSampleAt>=120&&!gl.getQuery(qualityGpuTimer.TIME_ELAPSED_EXT,gl.CURRENT_QUERY)){
+        qualityGpuQuery=gl.createQuery();
+        if(qualityGpuQuery){
+          qualityGpuQueryWidth=width;qualityGpuQueryHeight=height;lastGpuSampleAt=now;
+          gl.beginQuery(qualityGpuTimer.TIME_ELAPSED_EXT,qualityGpuQuery);
+          gpuQueryStarted=true;
+        }
+      }
       const dt=Math.min(48,Math.max(1,now-last));last=now;
       if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
       else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
-      if(!reduced.matches)simulationTime+=dt*.001;
+      if(!reducedMotionRequested())simulationTime+=dt*.001;
       const pointerEase=1-Math.exp(-dt*.018);
       const rotationEase=1-Math.exp(-dt*.011);
       px+=(tx-px)*pointerEase;py+=(ty-py)*pointerEase;
@@ -2200,7 +1736,7 @@
       breath+=(targetBreath-breath)*(1-Math.exp(-dt*.032));
       targetEnergy+=(IDLE_ENERGY-targetEnergy)*(1-Math.exp(-dt*.006));
       targetBreath+=(.12-targetBreath)*(1-Math.exp(-dt*.007));
-      morph+=(targetMorph-morph)*(reduced.matches?1:1-Math.exp(-dt*.0078));
+      morph+=(targetMorph-morph)*(reducedMotionRequested()?1:1-Math.exp(-dt*.0078));
       if(Math.abs(morph-targetMorph)<.0008)morph=targetMorph;
       siteProgress+=(targetSiteProgress-siteProgress)*(1-Math.exp(-dt*.005));
       cinematic.energy=energy;
@@ -2221,6 +1757,7 @@
       gl.uniform1f(uniforms.uEnergy,energy);
       gl.uniform1f(uniforms.uBreath,breath);
       gl.uniform1f(uniforms.uMorph,morph);
+      gl.uniform1f(uniforms.uGenesis,genesisProgress);
       gl.uniform2f(uniforms.uPointer,px,py);
       gl.uniform3f(uniforms.uRotation,rotationX+pointerTiltX,rotationY+pointerTiltY,rotationZ);
       gl.uniform1f(uniforms.uAspect,aspect);
@@ -2246,9 +1783,17 @@
         try{pass({gl,canvas,stage,width,height,aspect,now,siteProgress});}
         catch(error){scenePasses.delete(pass);console.warn('FormatX scene pass disabled:',error);}
       }
+      if(gpuQueryStarted)gl.endQuery(qualityGpuTimer.TIME_ELAPSED_EXT);
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
+        const error=gl.getError();
+        if(error!==gl.NO_ERROR){
+          root.dataset.fxCrystalOrganismR326='first-frame-error';
+          root.dataset.fxCoreFirstFrameR1913='error-'+error;
+          return;
+        }
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
+        publishFirstFrameReady();
       }
       root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
@@ -2256,6 +1801,11 @@
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
       renderPeak=Math.max(ms,renderPeak*.86);
       framePeak=Math.max(dt,framePeak*.90);
+      const startupCpuSample=budgetCpuSamples++===0;
+      if(!startupCpuSample){
+        budgetCpuAverage=budgetCpuAverage?budgetCpuAverage*.82+ms*.18:ms;
+        budgetCpuPeak=Math.max(ms,budgetCpuPeak*.86);
+      }
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
@@ -2266,7 +1816,40 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      if(!auditMode){
+      if(qualityGpuTimer){
+        // The first real draw includes allocation and shader warm-up. Keep it
+        // in honest telemetry, then use completed GPU work for later LOD
+        // decisions. Page/idle scheduling gaps are not GPU execution time.
+        const cpuPressure=!startupCpuSample&&(budgetCpuAverage>4.4||budgetCpuPeak>5.8);
+        const cpuPanic=!startupCpuSample&&ms>6.4;
+        const gpuPressure=freshGpuSample&&(gpuAverage>13.4||gpuPeak>16.67);
+        const gpuPanic=freshGpuSample&&(gpuAverage>16.67||gpuPeak>22);
+        if((cpuPanic||gpuPressure||cpuPressure)&&now-lastQualityAdjust>120){
+          const previous=qualityScale;
+          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(cpuPanic||gpuPanic?.06:.035):(cpuPanic||gpuPanic?.12:.09)));
+          gpuStableSamples=0;
+          if(Math.abs(previous-qualityScale)>.001){
+            lastQualityAdjust=now;
+            root.dataset.fxCoreGovernorR1660='gpu-timed-budget-shed-r2136';
+            if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+            qualityResizeTimer=later(()=>{qualityResizeTimer=0;if(!disposed&&!contextLost&&resize())schedule(1);},0);
+          }
+        }else if(freshGpuSample){
+          if(gpuAverage<10&&gpuPeak<12&&budgetCpuAverage<3.4&&budgetCpuPeak<4.8)gpuStableSamples++;
+          else gpuStableSamples=0;
+          if(gpuStableSamples>=12&&now-lastQualityAdjust>120){
+            const previous=qualityScale;
+            qualityScale=Math.min(qualityCeiling,qualityScale+.015);
+            gpuStableSamples=0;
+            if(Math.abs(previous-qualityScale)>.001){
+              lastQualityAdjust=now;
+              root.dataset.fxCoreGovernorR1660='gpu-timed-headroom-recovery-r2136';
+              if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+              qualityResizeTimer=later(()=>{qualityResizeTimer=0;if(!disposed&&!contextLost&&resize())schedule(1);},0);
+            }
+          }
+        }
+      }else{
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
@@ -2342,6 +1925,9 @@
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
+      root.dataset.fxCoreGpuBudgetR2136=qualityGpuTimer?'native-completed-query':'original-submission-fallback';
+      root.dataset.fxCoreGpuSamplesR2136=String(gpuBudgetSamples);
+      if(gpuBudgetSamples){root.dataset.fxCoreGpuAverageMsR2136=gpuAverage.toFixed(3);root.dataset.fxCoreGpuPeakMsR2136=gpuPeak.toFixed(3);}
       }
     }
 
@@ -2366,12 +1952,12 @@
     }
 
     function frame(now){
-      raf=0;if(blocked())return;
+      raf=0;syncMotionPreference();if(blocked())return;
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
          This avoids the 144 Hz / 48 FPS failure mode of a fixed 16.67 ms gate. */
-      if(!auditMode){
+      {
         if(schedulerLastFrame>0){
           const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
           schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
@@ -2391,19 +1977,13 @@
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
-        const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
-        queueFrame(burstDelay);
+        root.dataset.fxCoreBurstCadenceR1600='native-60hz-target';
+        queueFrame(0);
       }else if(surfacePulseActive){
-        const sweepDelay=auditMode
-          ? (mobile
-              ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
-              : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
-          : 0;
-        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
+        root.dataset.fxCoreAdaptiveSurfaceCadenceR588='native-raf';
         root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
-        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
-        queueFrame(sweepDelay);
+        root.dataset.fxCoreAnimationCadenceR1600='native-60hz-target-all-visitors';
+        queueFrame(0);
       }else settleAfterBurst();
     }
 
@@ -2461,15 +2041,27 @@
       }else schedule(1);
       scheduleSurfacePulse();
     }
-    function onReducedMotionChange(){
+    function syncMotionPreference(){
+      // A preference can change while an earlier scroll frame is queued.
+      // Reconcile at native input/render boundaries as well as the media
+      // event, so the old autonomous timer cannot survive that queued frame.
+      const next=reducedMotionRequested();
+      if(next===motionReduced)return;
+      motionReduced=next;
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       surfacePulseStart=-Infinity;
+      burstFrames=0;
       root.dataset.fxCoreSurfacePulseR454='idle';
+      syncCompositorBreath();
       scheduleSurfacePulse();
+    }
+    function onReducedMotionChange(){
+      syncMotionPreference();
       schedule(1);
     }
     let previousScrollY=scrollY;
     function onScroll(){
+      syncMotionPreference();
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
@@ -2712,6 +2304,9 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
+      if(qualityGpuQuery&&!contextLost)gl.deleteQuery(qualityGpuQuery);
+      qualityGpuQuery=null;
+      livingTimeline?.cancel();
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
@@ -2762,6 +2357,18 @@
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       requestRender:schedule,
+      captureFrame:()=>{
+        // A loop preview may need one real still while the source is outside
+        // the viewport. The original owner draws it without starting an idle
+        // RAF loop or reviving a hidden/lost/disposed rendering lifecycle.
+        if(disposed||contextLost||document.hidden||paused||!resize())return null;
+        render(performance.now());
+        return gl.getError()===gl.NO_ERROR?canvas:null;
+      },
+      genesis:(value)=>{
+        genesisProgress=value===null?-1:clamp(Number(value)||0,0,1);
+        schedule(1);
+      },
       registerScenePass:(pass)=>{
         if(!webgl2||typeof pass!=='function'||disposed)return()=>{};
         scenePasses.add(pass);schedule(1);
@@ -2781,14 +2388,6 @@
     window.FormatXCoreMobileV69=publicApi;
     window.FormatXLivingCore=publicApi;
 
-    root.dataset.fxCrystalOrganismR326='ready';
-    root.dataset.fxLivingOrganicCoreR413='ready';
-    root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
-    root.dataset.fxCoreMobileR99=READY;
-    root.dataset.fxCoreMobileV69=READY;
-    root.dataset.fxCoreMobileV55='ready-v55';
-    root.dataset.fxCoreReferenceLock=READY;
-    root.dataset.fxCoreReal3d=READY;
     root.dataset.fxCoreRenderer='single-webgl-crystal-organism-r326';
     root.dataset.fxCoreRendererCanonicalR1723='single-webgl-living-organism-r326';
     root.dataset.fxCoreCapabilityTierR620=constrainedMobile?'mobile-constrained-one-pass':constrained?'desktop-constrained-two-pass':mobile?'mobile-full-two-pass':'desktop-full-three-pass';
@@ -2955,7 +2554,7 @@
     root.dataset.fxCoreIdleRenderR441='zero-frame';
     root.dataset.fxCoreFirstFrameR1913='pending';
     root.dataset.fxCoreRenderMs='0';
-    root.dataset.fxCoreReal3dFps='60';
+    root.dataset.fxCoreReal3dFps='pending';
     root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';
 
     publishShape('initial');
@@ -2963,10 +2562,21 @@
     scheduleHeartbeat();
     scheduleSurfacePulse();
     scheduleAutonomousMorph();
-    dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
-      version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
-      geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false
-    }}));
+    function publishFirstFrameReady(){
+      root.dataset.fxCrystalOrganismR326='ready';
+      root.dataset.fxLivingOrganicCoreR413='ready';
+      root.dataset.fxLivingOrganicCoreR454='luminous-electric-single-webgl-ready';
+      root.dataset.fxCoreMobileR99=READY;
+      root.dataset.fxCoreMobileV69=READY;
+      root.dataset.fxCoreMobileV55='ready-v55';
+      root.dataset.fxCoreReferenceLock=READY;
+      root.dataset.fxCoreReal3d=READY;
+      dispatchEvent(new CustomEvent('formatx:real3dready',{detail:{
+        version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
+        geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false,
+        firstFrameAt:performance.now()
+      }}));
+    }
     listen(window,'pagehide',destroy,{once:true});
     }
   }

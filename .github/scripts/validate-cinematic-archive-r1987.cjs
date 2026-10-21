@@ -271,9 +271,16 @@ async function evaluate(viewport,isMobile,browser){
         const existingCTA=await page.evaluate(()=>{
           const p=document.querySelector('[data-fx-archive-scene="final"] .fx-archive-cinema-folio-r2030');
           const link=p?.querySelector('#hero-download');
-          return {exists:!!link,href:link?.getAttribute('href'),inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p};
+          const href=link?.getAttribute('href')||'';
+          let trusted=false;
+          try{
+            const url=new URL(href,location.href);
+            trusted=(url.origin===location.origin&&url.pathname==='/download/multiplatform')
+              ||(url.origin==='https://github.com'&&url.pathname.startsWith('/hutoczky/FormatX-Updates/releases/download/'));
+          }catch{}
+          return {exists:!!link,href,inPaper:link?.closest('.fx-archive-cinema-folio-r2030')===p,trusted};
         });
-        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
+        assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.trusted,
           'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
       }
       const real3D=await page.evaluate(()=>{
@@ -289,6 +296,11 @@ async function evaluate(viewport,isMobile,browser){
         return {count:panels.length,active:active.length,
           activeInert:active.some(p=>p.inert),hiddenFocus:inactive.filter(p=>!p.inert).length,
           activeContentVisibility:active.map(p=>getComputedStyle(p).contentVisibility),
+          activeEffectiveOpacity:active.map(panel=>{
+            let opacity=1;
+            for(let node=panel;node;node=node.parentElement)opacity*=Number(getComputedStyle(node).opacity);
+            return opacity;
+          }),
           archivedContentVisibility:inactive.map(p=>getComputedStyle(p).contentVisibility),
           remainingNativeNodes:inactive.every(p=>p.querySelectorAll('*').length>1)};
       });
@@ -298,6 +310,8 @@ async function evaluate(viewport,isMobile,browser){
           &&tabSafety.archivedContentVisibility.every(v=>v==='hidden')
           &&tabSafety.remainingNativeNodes,
         'Inactive archived native HTML must skip expensive offscreen layout without deleting original content: '+JSON.stringify(tabSafety));
+      assert.ok(tabSafety.activeEffectiveOpacity.every(value=>value>.1),
+        'The real original paper is transparent through an ancestor: '+JSON.stringify(tabSafety));
       console.log('ARCHIVE_SINGLE_LIVE_LAYOUT_PASS',JSON.stringify({scene:scene.key,active:tabSafety.activeContentVisibility,archived:tabSafety.archivedContentVisibility.length}));
             assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
       assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');
@@ -776,7 +790,8 @@ async function fallback(browser){
   await ctx.close();
 }
 (async()=>{
-  const browser=await chromium.launch({headless:true,args:[
+  const executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH||process.env.CHROME_BIN;
+  const browser=await chromium.launch({headless:true,...(executablePath?{executablePath}:{}),args:[
     '--no-sandbox','--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
     '--enable-unsafe-swiftshader','--disable-dev-shm-usage'
   ]});

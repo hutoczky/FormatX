@@ -1,0 +1,70 @@
+name: Validate real visitor runtime and intro parity
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/**'
+      - 'billing-worker/src/production-content-entry*.js'
+      - '.github/scripts/*r2054.cjs'
+      - '.github/workflows/validate-visitor-parity-r2054.yml'
+  push:
+    branches: [fix/r2054-visitor-runtime-parity]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-visitor-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-visitor-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.AUDITED_SHA }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Check source parity and current CSP
+        run: node .github/scripts/validate-visitor-source-parity-r2054.cjs
+      - name: Install browser verifiers
+        run: |
+          npm install --prefix "$RUNNER_TEMP/fx-parity" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/fx-parity/node_modules/.bin/playwright" install --with-deps chromium firefox
+      - name: Compare real rendering, automatic startup and first-frame readiness
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-parity/node_modules
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/fx-parity-http.log" 2>&1 &
+          FX_PARITY_SERVER_PID=$!
+          trap 'kill "$FX_PARITY_SERVER_PID"' EXIT
+          node .github/scripts/validate-parser-intro-copy-r2107.cjs
+          xvfb-run -a node .github/scripts/validate-visitor-runtime-parity-r2054.cjs
+      - name: Enforce measured original intro duration
+        if: always()
+        run: node .github/scripts/assert-actual-intro-timing-r2054.cjs
+      - name: Capture normal shared-canvas intro and MAG
+        if: always()
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-parity/node_modules
+        run: |
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/fx-genesis-http.log" 2>&1 &
+          FX_GENESIS_SERVER_PID=$!
+          trap 'kill "$FX_GENESIS_SERVER_PID"' EXIT
+          node .github/scripts/capture-shared-genesis-r2063.cjs
+      - name: Upload complete visitor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-visitor-parity-${{ env.AUDITED_SHA }}
+          path: artifacts/r2054-visitor-parity/
+          if-no-files-found: error
+          retention-days: 30

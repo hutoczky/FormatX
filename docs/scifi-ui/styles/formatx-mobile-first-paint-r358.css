@@ -990,7 +990,7 @@
     box-sizing:border-box!important;
     width:auto!important;
     min-width:122px!important;
-    max-width:132px!important;
+    max-width:140px!important;
     overflow:visible!important;
     text-overflow:clip!important;
     white-space:normal!important;
@@ -1003,6 +1003,20 @@
   }
 }
 /* production-r1647-mobile-hero-flow-brand-no-clipping */
+
+/* R2131 — reserve the real wordmark width, including the MAG's existing
+   1.04 response scale. At 320px the 44px logo and complete 13px wordmark
+   fit a compact brand lane; neither the text nor a touch target is hidden. */
+@media(max-width:340px){
+  html:root:root:root:root:root:root body.living-architecture .topbar > a.brand{
+    max-width:130px!important;
+    gap:4px!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture .topbar > a.brand strong{
+    letter-spacing:.12em!important;
+  }
+}
+/* production-r2131-measured-header-wordmark-and-mag-clearance */
 
 /* R2039 — essential brand accessibility and design tokens are render-critical.
    They must exist before deferred desktop-quality CSS loads on a phone. */

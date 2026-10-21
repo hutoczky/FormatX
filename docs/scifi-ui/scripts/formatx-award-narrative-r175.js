@@ -8,7 +8,6 @@ root.dataset.fxAwardNarrativeR175='booting';
 root.dataset.fxAwardNarrativePerfR219=PERF_VERSION;
 
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||new URLSearchParams(location.search).get('lighthouse')==='1';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const chapters=[
   {id:'hero',organ:'core',caption:'WAKE / SENSE / SIGNAL'},
@@ -38,7 +37,7 @@ function discover(){
 }
 
 function pulse(index){
-  if(reduced.matches||audit)return;
+  if(reduced.matches)return;
   clearTimeout(pulseTimer);
   root.dataset.fxStoryPulseR175='on';
   root.dataset.fxStorySignalR175=`chapter-${index+1}`;
@@ -132,7 +131,7 @@ function boot(){
     root.dataset.fxStoryPulseR175='off';
     return;
   }
-  if(reduced.matches||audit){
+  if(reduced.matches){
     setStaticState();
     return;
   }

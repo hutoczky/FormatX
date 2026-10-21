@@ -56,15 +56,23 @@ async function enterSite(page, label) {
   // the deliberately retained semantic HTML fallback, not the user-facing
   // exclusive MAG-only stage. The separate archive suite verifies original
   // clickable modules and Ask controls in the cinematic experience.
-  await page.goto(TEST_URL + '?organism-validation=1&archive=off', { waitUntil: 'domcontentloaded', timeout: 60000 });
-  const skip = page.locator('.fx-intro-skip');
+  await page.goto(TEST_URL + '?archive=off', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  const skip = page.locator('.fxb-skip');
   if (await skip.isVisible().catch(() => false)) {
     await skip.click({ force: true, timeout: 1500 }).catch(() => {});
   }
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    const birth = root.dataset.fxMagBirthLiveR533;
+    return root.classList.contains('fx-intro-complete') && birth && birth !== 'active'
+      && !document.querySelector('.fx-mag-birth-r533');
+  }, null, { timeout: 30000 });
+  const ask = page.locator('#hero .fx-reference-ask').first();
+  await ask.waitFor({ state: 'visible', timeout: 30000 });
+  await ask.click();
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => ['ready','delegated-r264'].includes(document.documentElement.dataset.fxOrganismMenu || ''), null, { timeout: 30000 });
   await page.waitForFunction(() => document.documentElement.dataset.fxControlOwnerR268 === 'ready', null, { timeout: 30000 });
-  await page.waitForFunction(() => document.documentElement.classList.contains('fx-intro-complete'), null, { timeout: 30000 });
   mark(label + ': site-ready');
 }
 
@@ -167,6 +175,84 @@ async function validateDesktop() {
   }
 }
 
+async function validateLateConsoleNavigation() {
+  const browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'hu-HU', colorScheme: 'dark' });
+    const page = await context.newPage();
+    let intercepted = false;
+    await page.route('**/organism-console-state.js*', async route => {
+      intercepted = true;
+      await gate;
+      await route.continue();
+    });
+    await enterSite(page, 'desktop-late-console');
+    await page.locator('#menu-toggle').click();
+    await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
+    await page.locator('#main-nav a[href="#pricing"]').click();
+    await page.waitForFunction(() => location.hash === '#pricing'
+      && !document.getElementById('main-nav')?.classList.contains('open'));
+    assert(intercepted, 'Late console import was not delayed by the regression case');
+    release();
+    await page.waitForFunction(() => document.documentElement.dataset.fxOrganismConsoleState === 'ready'
+      && document.documentElement.dataset.fxOrganismCoreController === 'ready');
+    const navigation = await page.evaluate(() => ({
+      hash: location.hash,
+      navOpen: document.getElementById('main-nav')?.classList.contains('open') || false,
+      consoleHidden: document.getElementById('fx-organism-console')?.hidden,
+      landing: document.documentElement.dataset.fxSectionNavigationR581
+    }));
+    assert(navigation.hash === '#pricing' && !navigation.navOpen && navigation.consoleHidden,
+      'Late console cleanup overwrote the real menu navigation: ' + JSON.stringify(navigation));
+    mark('desktop-late-console: navigation-preserved', navigation);
+    await context.close();
+  } finally {
+    release();
+    await browser.close();
+  }
+}
+
+async function validateLateLoopScroll() {
+  const browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  try {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'hu-HU', colorScheme: 'dark' });
+    const page = await context.newPage();
+    let intercepted = false;
+    await page.route('**/formatx-infinite-scroll-desktop-v7.js*', async route => {
+      intercepted = true;
+      await gate;
+      await route.continue();
+    });
+    await enterSite(page, 'desktop-late-loop');
+    const pricingTrigger = page.locator('[data-organism-open="pricing"]');
+    await pricingTrigger.scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => ({ y: scrollY, hash: location.hash }));
+    assert(intercepted && before.y > 96, 'Late loop regression did not reach an already-scrolled visitor: ' + JSON.stringify(before));
+    release();
+    await page.waitForFunction(() => document.documentElement.dataset.fxInfiniteScroll?.startsWith('ready-'));
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const after = await page.evaluate(() => {
+      const rect = document.querySelector('[data-organism-open="pricing"]')?.getBoundingClientRect();
+      return { y: scrollY, hash: location.hash, top: rect?.top, bottom: rect?.bottom,
+        viewport: innerHeight, guard: document.documentElement.dataset.fxInitialHeroGuard };
+    });
+    assert(after.y > 96 && after.hash === before.hash && after.guard === 'user-scroll-preserved',
+      'Late loop startup discarded the existing scroll/navigation owner: ' + JSON.stringify({ before, after }));
+    await pricingTrigger.click();
+    await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden
+      && !document.querySelector('[data-organism-panel="pricing"]').hidden);
+    mark('desktop-late-loop: scroll-and-pricing-action-preserved', { before, after });
+    await context.close();
+  } finally {
+    release();
+    await browser.close();
+  }
+}
+
 async function validateMobile() {
   const browser = await chromium.launch({ headless: true, args: CHROMIUM_ARGS });
   let page = null;
@@ -213,6 +299,8 @@ async function validateMobile() {
 
 (async () => {
   await validateDesktop();
+  await validateLateConsoleNavigation();
+  await validateLateLoopScroll();
   await validateMobile();
   mark('validation: passed');
   writeReport();

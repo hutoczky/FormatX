@@ -16,6 +16,7 @@
     demoTimer: 0,
     scanTimer: 0,
     inputLatency: null,
+    frameMeasurement: null,
     lastPointerAt: 0
   };
 
@@ -42,13 +43,15 @@
       searchTitle: 'Találatok',
       open: 'Megnyitás',
       diagnosticsDone: 'A helyi böngésződiagnosztika elkészült. Ezek a jelenlegi munkamenet valós adatai.',
+      diagnosticsPartial: 'A böngésző nem adott képkockamintát. A többi munkamenetadat elérhető; képkockaértéket nem becsültünk.',
+      webglInactive: 'Nincs aktív WebGL-kontextus',
       threeIdle: 'A 3D rendszerkép csak kérésre töltődik be.',
       threeLoading: 'A 3D motor betöltése folyamatban…',
       threeReady: 'A funkcionális 3D térkép aktív. Kattints a meghajtókra vagy indíts ellenőrzést.',
       threeError: 'A WebGL 3D nézet ezen az eszközön nem indítható. A diagnosztika és a parancsréteg továbbra is működik.',
       reviewPending: 'Független értékelés: még nincs publikálva — nem helyettesítjük kitalált idézettel.',
       proofItems: [
-        ['LIGHTHOUSE KAPU', 'Automatikus minimum: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 90.'],
+        ['LIGHTHOUSE KAPU', 'Követelmény: Performance, Accessibility, Best Practices és SEO egyenként 100. Az aktuális eredmény a GitHub Actionsban ellenőrizhető.'],
         ['MOBIL ÉS MOZGÁS', 'Külön mobil-, csökkentett mozgás- és adaptív teljesítményellenőrzések futnak.'],
         ['KIADÁSI INTEGRITÁS', 'A publikus kiadási lánc és a letöltési hivatkozások automatizált szerződésekkel ellenőrzöttek.'],
         ['VALÓDI TERMÉKKÉPEK', 'A bemutató a működő Linux / Bazzite kiadás képernyőit használja, nem koncepciórenderelést.']
@@ -102,13 +105,15 @@
       searchTitle: 'Results',
       open: 'Open',
       diagnosticsDone: 'Local browser diagnostics completed. These are real values from the current session.',
+      diagnosticsPartial: 'The browser supplied no frame sample. Other session data is available; no frame value was estimated.',
+      webglInactive: 'No active WebGL context',
       threeIdle: 'The 3D system map loads only on demand.',
       threeLoading: 'Loading the 3D engine…',
       threeReady: 'The functional 3D map is active. Select a drive or start verification.',
       threeError: 'The WebGL view cannot start on this device. Diagnostics and commands remain available.',
       reviewPending: 'Independent review: not published yet — no fabricated quote is used as a substitute.',
       proofItems: [
-        ['LIGHTHOUSE GATE', 'Automated minimums: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95 and SEO ≥ 90.'],
+        ['LIGHTHOUSE GATE', 'Required: Performance, Accessibility, Best Practices and SEO each 100. Check GitHub Actions for the actual current result.'],
         ['MOBILE AND MOTION', 'Dedicated mobile, reduced-motion and adaptive performance checks run in CI.'],
         ['RELEASE INTEGRITY', 'The public release chain and download references are validated by automated contracts.'],
         ['REAL PRODUCT SCREENS', 'The showcase uses the working Linux / Bazzite edition, not concept renders.']
@@ -171,8 +176,10 @@
   }
 
   function targetCapabilities() {
-    return document.getElementById('product-showcase')
-      || document.querySelector('section#capabilities, section[data-organ="organs"]');
+    // The showcase can live inside an inactive, inert archive folio. Keep
+    // the working command section beside the canonical source section.
+    return document.querySelector('section#capabilities, section[data-organ="organs"]')
+      || document.getElementById('product-showcase')?.closest('main > section');
   }
 
   function makeSection() {
@@ -200,7 +207,7 @@
       '  <article class="fx-live-os__panel fx-live-os__topology"><div class="fx-live-os__panel-head"><div><h3 data-fx-topology-title></h3><p data-fx-topology-lead></p></div><button type="button" data-fx-three></button></div><div class="fx-live-os__stage" data-fx-stage><canvas data-fx-three-canvas aria-label="FormatX functional 3D storage map"></canvas><div class="fx-live-os__stage-idle" data-fx-three-state></div></div><div class="fx-live-os__object" data-fx-object></div></article>',
       '  <article class="fx-live-os__panel fx-live-os__response"><div class="fx-live-os__panel-head"><h3 data-fx-results-title></h3><button type="button" data-fx-demo></button></div><div class="fx-live-os__output" data-fx-output aria-live="polite"></div><div class="fx-live-os__demo" data-fx-demo-panel hidden><img data-fx-demo-image width="800" height="418" alt=""><div><small data-fx-demo-step></small><strong data-fx-demo-title></strong><p data-fx-demo-copy></p><span data-fx-demo-progress></span></div></div></article>',
       '</div>',
-      '<aside class="fx-live-os__proof" data-fx-proof-panel hidden><div class="fx-live-os__panel-head"><h3 data-fx-proof-title></h3><a href="https://github.com/hutoczky/FormatX/actions" target="_blank" rel="noopener">GitHub Actions ↗</a></div><div data-fx-proof-grid></div><p data-fx-review-state></p></aside>'
+      '<aside class="fx-live-os__proof" data-fx-proof-panel hidden><div class="fx-live-os__panel-head"><h3 data-fx-live-os-proof-title></h3><a href="https://github.com/hutoczky/FormatX/actions" target="_blank" rel="noopener">GitHub Actions ↗</a></div><div data-fx-proof-grid></div><p data-fx-review-state></p></aside>'
     ].join('');
 
     anchor.insertAdjacentElement('afterend', section);
@@ -226,32 +233,60 @@
   }
 
   async function measureFrames(sampleCount = 48) {
-    return new Promise(resolve => {
+    // Concurrent commands share one real observation. A fixed sample target
+    // must not strand all hardware diagnostics on a sparse display cadence.
+    if (state.frameMeasurement) return state.frameMeasurement;
+    state.frameMeasurement = new Promise(resolve => {
       const times = [];
-      let previous = performance.now();
+      const startedAt = performance.now();
+      const windowMs = 2400;
+      let previous = startedAt;
+      let frameHandle = 0;
+      let settled = false;
+      function finish(reason) {
+        if (settled) return;
+        settled = true;
+        if (frameHandle) cancelAnimationFrame(frameHandle);
+        clearTimeout(deadline);
+        const valid = times.filter(value => Number.isFinite(value) && value > 0);
+        const usable = valid.slice(valid.length > 4 ? 4 : 0).sort((a, b) => a - b);
+        const median = usable.length ? usable[Math.floor(usable.length / 2)] : null;
+        const p95 = usable.length ? usable[Math.floor(usable.length * 0.95)] : null;
+        const result = {
+          fps: median === null ? null : Number((1000 / median).toFixed(1)),
+          median,
+          p95,
+          samples: valid.length,
+          intervals: valid,
+          startedAt,
+          elapsedMs: performance.now() - startedAt,
+          reason
+        };
+        state.frameMeasurement = null;
+        document.dispatchEvent(new CustomEvent('formatx:liveosdiagnostics', { detail: result }));
+        resolve(result);
+      }
       function frame(now) {
+        if (settled) return;
+        frameHandle = 0;
         times.push(now - previous);
         previous = now;
-        if (times.length < sampleCount) requestAnimationFrame(frame);
-        else {
-          const usable = times.slice(4).sort((a, b) => a - b);
-          const median = usable[Math.floor(usable.length / 2)] || 16.7;
-          const p95 = usable[Math.floor(usable.length * 0.95)] || median;
-          resolve({
-            fps: Math.max(1, Math.round(1000 / median)),
-            median,
-            p95
-          });
-        }
+        if (times.length >= sampleCount) finish('sample-target');
+        else if (performance.now() - startedAt >= windowMs) finish('observation-window');
+        else frameHandle = requestAnimationFrame(frame);
       }
-      requestAnimationFrame(frame);
+      const deadline = setTimeout(() => finish('observation-window'), windowMs);
+      frameHandle = requestAnimationFrame(frame);
     });
+    return state.frameMeasurement;
   }
 
   function webglInfo() {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl2', { powerPreference: 'high-performance' });
-    if (!gl) return { label: 'WebGL 1 / fallback', detail: '' };
+    // Read the real session renderer instead of allocating an unowned,
+    // detached GPU context for every diagnostics request.
+    const canvas = window.FormatXLivingCore?.canvas;
+    const gl = canvas?.getContext('webgl2');
+    if (!gl || gl.isContextLost()) return { label: copy().webglInactive, detail: '' };
     const extension = gl.getExtension('WEBGL_debug_renderer_info');
     const renderer = extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : 'WebGL 2';
     return { label: 'WebGL 2', detail: String(renderer).slice(0, 72) };
@@ -263,6 +298,7 @@
     const metrics = section.querySelector('[data-fx-metrics]');
     metrics.setAttribute('aria-busy', 'true');
     const frames = await measureFrames();
+    if (!section.isConnected) return;
     const gl = webglInfo();
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     const memory = navigator.deviceMemory ? navigator.deviceMemory + ' GB+' : copy().unknown;
@@ -273,8 +309,10 @@
     const viewport = innerWidth + '×' + innerHeight + ' @' + Math.min(devicePixelRatio || 1, 4).toFixed(2) + 'x';
 
     metrics.replaceChildren(
-      metricCard('fps', frames.fps + ' Hz', 'median ' + frames.median.toFixed(1) + ' ms'),
-      metricCard('frame', frames.p95.toFixed(1) + ' ms', 'p95'),
+      metricCard('fps', frames.fps === null ? copy().unknown : frames.fps + ' Hz',
+        frames.median === null ? '' : 'median ' + frames.median.toFixed(1) + ' ms · n=' + frames.samples),
+      metricCard('frame', frames.p95 === null ? copy().unknown : frames.p95.toFixed(1) + ' ms',
+        'p95 · ' + Math.round(frames.elapsedMs) + ' ms'),
       metricCard('latency', latency, 'current session'),
       metricCard('webgl', gl.label, gl.detail),
       metricCard('cores', String(navigator.hardwareConcurrency || copy().unknown), 'navigator.hardwareConcurrency'),
@@ -283,7 +321,7 @@
       metricCard('viewport', viewport, screen.width + '×' + screen.height)
     );
     metrics.removeAttribute('aria-busy');
-    if (announce) output(copy().diagnosticsDone, 'success');
+    if (announce) output(frames.samples ? copy().diagnosticsDone : copy().diagnosticsPartial, frames.samples ? 'success' : 'warning');
   }
 
   function buildSearchIndex() {
@@ -397,7 +435,7 @@
     const section = state.section;
     if (!section) return;
     const c = copy();
-    section.querySelector('[data-fx-proof-title]').textContent = c.proof;
+    section.querySelector('[data-fx-live-os-proof-title]').textContent = c.proof;
     section.querySelector('[data-fx-review-state]').textContent = c.reviewPending;
     const grid = section.querySelector('[data-fx-proof-grid]');
     grid.replaceChildren(...c.proofItems.map((item, index) => {
@@ -771,6 +809,9 @@
   }
 
   function openFromLauncher() {
+    // A command opens the original interactive HTML. Release the archive's
+    // fixed paper before focusing its input, retaining the same native MAG.
+    window.FormatXArchiveExperience?.showHTML?.('live-os-command');
     const section = makeSection();
     if (!section) return;
     section.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });

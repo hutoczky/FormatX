@@ -27,11 +27,19 @@ const CASES=[
         locale:'hu-HU',reducedMotion:'no-preference'
       });
       try{
+        await context.addInitScript(()=>{
+          const actualGetContext=HTMLCanvasElement.prototype.getContext;
+          HTMLCanvasElement.prototype.getContext=function(type,...args){
+            if(/^(webgl2?|experimental-webgl)$/.test(type)
+              &&this.classList.contains('fx-crystal-organism-r326-canvas'))return null;
+            return Reflect.apply(actualGetContext,this,[type,...args]);
+          };
+        });
         const page=await context.newPage();
         const errors=[];
         page.on('pageerror',e=>errors.push(e.message));
         await page.goto(
-          HOME+'?intro=1&visualintro=1&proofrenderer=reference&introframe='+
+          HOME+'?intro=1&visualintro=1&introframe='+
           shot.second+'&r2103='+shot.name,
           {waitUntil:'domcontentloaded',timeout:60000}
         );
@@ -58,6 +66,7 @@ const CASES=[
           ).data;
           return {
             renderer:root.dataset.fxMagBirthRendererR1360,
+            nativeFailure:root.dataset.fxCrystalOrganismR326,
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
             material:root.dataset.fxMagFallbackMaterialR2104||'',
@@ -85,6 +94,8 @@ const CASES=[
           JSON.stringify({shot,info,errors},null,2)+'\n');
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
+        assert.equal(info.nativeFailure,'context-unavailable',
+          'The real native context failure must trigger the fallback movie');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
         assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
           'R2104 cinema material did not render in original phone canvas');
@@ -109,10 +120,9 @@ const CASES=[
         records.push({shot,info});
       }finally{await context.close()}
     }
-    /* R2103 high-core 4GB Android routing: unlike the old <=4GB gate,
-       the user agent must attempt the actual Three cinema first.
-       Browser GPU compilation is tested separately by the full Three film
-       gate; this case checks the precise capability decision before fallback. */
+    /* R2105 preserves the R2103 high-core 4GB capability decision. The
+       integrated intro uses the same original native WebGL MAG as the site;
+       prove an actual painted native frame and one canvas on a normal visit. */
     const capable=await browser.newContext({
       viewport:{width:390,height:844},isMobile:true,hasTouch:true,
       deviceScaleFactor:2,locale:'hu-HU',reducedMotion:'no-preference',
@@ -134,16 +144,21 @@ const CASES=[
         {waitUntil:'domcontentloaded',timeout:60000});
       await page.waitForFunction(()=>{
         const root=document.documentElement;
-        const loader=root.dataset.fxMagBirthThreeLoaderR1608||'';
-        return loader.startsWith('lazy-owner')||loader==='existing-owner-wait'
-          ||root.dataset.fxMagBirthRendererR1360==='threejs-active';
+        return root.dataset.fxCoreFirstFrameR1913==='painted'
+          &&root.dataset.fxCrystalOrganismR326==='ready'
+          &&root.dataset.fxMagBirthContinuityR2063===
+            'same-canvas-context-geometry-input-and-lifecycle';
       },null,{timeout:18000});
       const info=await page.evaluate(()=>({
         cores:navigator.hardwareConcurrency,memory:navigator.deviceMemory,
         loader:document.documentElement.dataset.fxMagBirthThreeLoaderR1608||'',
         renderer:document.documentElement.dataset.fxMagBirthRendererR1360||'',
         constraint:document.documentElement.dataset.fxMagBirthRendererR1729||'',
-        owner:document.documentElement.dataset.fxMagBirthOwnerR533||''
+        owner:document.documentElement.dataset.fxMagBirthOwnerR533||'',
+        nativeRenderer:window.FormatXLivingCore?.renderer||'',
+        firstFrame:document.documentElement.dataset.fxCoreFirstFrameR1913||'',
+        canvasCount:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,
+        continuity:document.documentElement.dataset.fxMagBirthContinuityR2063||''
       }));
       assert.equal(info.cores,8);
       assert.equal(info.memory,4);
@@ -151,7 +166,11 @@ const CASES=[
         '8-core, 4GB-reported high-end phone was incorrectly forced into the obsolete 2D movie: '+JSON.stringify(info));
       assert.ok(info.owner==='active',
         'Normal Android visit was incorrectly skipped: '+JSON.stringify(info));
-      records.push({shot:{name:'high-core-phone-uses-real-three-first'},info});
+      assert.equal(info.renderer,'canonical-webgl-organism');
+      assert.equal(info.firstFrame,'painted');
+      assert.equal(info.canvasCount,1,'Native intro duplicated the permanent MAG canvas');
+      assert.equal(info.continuity,'same-canvas-context-geometry-input-and-lifecycle');
+      records.push({shot:{name:'high-core-phone-uses-real-shared-webgl'},info});
       console.log('PASS R2103_HIGH_CORE_ANDROID',JSON.stringify(info));
     }finally{await capable.close()}
   }finally{await browser.close()}

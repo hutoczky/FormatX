@@ -2,7 +2,6 @@
   'use strict';
   const root = document.documentElement;
   if (root.dataset.fxCoreMobileV55 === 'ready-v55' || root.dataset.fxCoreMobileV55 === 'booting-reference-v69') return;
-  if (new URLSearchParams(location.search).get('lighthouse') === '1') { root.dataset.fxCoreMobileV55 = 'audit-skip'; return; }
 
   root.dataset.fxCoreMobileV55 = 'booting-reference-v69';
   root.dataset.fxCoreRendererMode = 'mobile';
@@ -10,7 +9,7 @@
   root.dataset.fxCoreCrystalRevision = 'r615-armored-biomechanical-genesis-mag';
   root.dataset.fxCoreMobileOpticsRevision = 'r454-visible-electric-native-webgl';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261012-r2050-surface-sweep-endpoint&r2055=native-dom-telemetry';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261021-r2136-gpu-timed-quality';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   const LANGUAGE_OWNER_SCRIPT = '/scifi-ui/scripts/formatx-mobile-language-owner-r423.js?v=20260829-r423-direct-topbar-language';

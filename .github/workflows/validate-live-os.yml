@@ -32,9 +32,13 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.AUDITED_SHA }}
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -72,5 +76,7 @@ jobs:
             live-os-browser-report.json
             live-os-desktop.png
             live-os-mobile.png
+            live-os-desktop-fallback.png
+            live-os-mobile-fallback.png
           if-no-files-found: warn
           retention-days: 7

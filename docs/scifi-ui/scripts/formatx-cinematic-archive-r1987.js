@@ -4,14 +4,11 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
+  const VERSION='cinematic-archive-r2129-viewport-folio';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
-  const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const force=params.get('archive')==='1';
   const requestedHtmlFallback=params.get('archive')==='off';
-  const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const mix=(a,b,t)=>a+(b-a)*t;
   const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
@@ -36,6 +33,7 @@
 
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
+  let legacyHeroReservation=null;
   let heroVisualState=null;
   function setHeroCanvasLaneFront(active){
     const hero=document.getElementById('hero');
@@ -59,6 +57,24 @@
       heroVisualState=null;
     }
   }
+  function setLegacyHeroReservation(hero,active){
+    if(active){
+      if(legacyHeroReservation||!(hero instanceof HTMLElement))return;
+      const height=hero.getBoundingClientRect().height;
+      if(!Number.isFinite(height)||height<=0)return;
+      legacyHeroReservation={hero,value:hero.style.getPropertyValue('min-height'),
+        priority:hero.style.getPropertyPriority('min-height')};
+      // Keep the real pre-handoff footprint when the old copy leaves flow.
+      // Otherwise the first original scroll anchor jumps into the viewport.
+      // A minimum preserves this measured floor while responsive CSS can grow.
+      hero.style.setProperty('min-height',height.toFixed(3)+'px','important');
+    }else if(legacyHeroReservation){
+      const {hero:original,value,priority}=legacyHeroReservation;
+      if(value)original.style.setProperty('min-height',value,priority);
+      else original.style.removeProperty('min-height');
+      legacyHeroReservation=null;
+    }
+  }
   function setLegacyHeroHidden(hide){
     if(hide){
       // Older hero styles contain high-specificity !important declarations.
@@ -68,6 +84,7 @@
       if(legacyHeroDisplay.size)return;
       const hero=document.getElementById('hero');
       if(!hero)return;
+      setLegacyHeroReservation(hero,true);
       const furniture=[
         ...hero.querySelectorAll(':scope .hero-grid > :not(.hero-space)'),
         ...hero.querySelectorAll(':scope .scroll-cue')
@@ -80,12 +97,13 @@
         node.style.setProperty('display','none','important');
       }
       root.dataset.fxArchiveLegacyHero='suppressed';
-    }else if(legacyHeroDisplay.size){
+    }else if(legacyHeroDisplay.size||legacyHeroReservation){
       for(const [node,old] of legacyHeroDisplay){
         if(old.value)node.style.setProperty('display',old.value,old.priority);
         else node.style.removeProperty('display');
       }
       legacyHeroDisplay.clear();
+      setLegacyHeroReservation(null,false);
       root.dataset.fxArchiveLegacyHero='restored';
     }
   }
@@ -245,13 +263,23 @@
      Every original section remains in the document as a scroll anchor.
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
+    // Read the real source heights together before wrapping any original
+    // document or changing its anchor height. Keep the same nodes and one
+    // physical folio per host without eight forced full-page layouts.
+    const originalHeights=new Map();
+    for(const scene of scenes){
+      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      if(!(host instanceof HTMLElement)||originalHeights.has(host)
+          ||host.querySelector(':scope > .fx-archive-cinema-folio-r2030'))continue;
+      originalHeights.set(host,Math.max(520,host.getBoundingClientRect().height||host.offsetHeight));
+    }
     for(const scene of scenes){
       const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
       if(!(host instanceof HTMLElement))continue;
       scene.cinemaHost=host;
       let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(!panel){
-        const oldHeight=Math.max(520,host.getBoundingClientRect().height||host.offsetHeight);
+        const oldHeight=originalHeights.get(host);
         panel=document.createElement('div');
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
@@ -338,21 +366,17 @@
     // (-394px) and the genuine native paper overlapped the MAG stage.
     // Never apply legacy transform-ancestor compensation on a phone.
     if(phone){
-      // CSS fixed positioned descendants can still be captured by transformed
-      // chapter ancestors. Correct their ACTUAL screen box, once per scrub.
-      // Use a bounded, absolute-in-screen translation, not an accumulating
-      // transform offset from a previous scroll chapter.
-      const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
-      const magBottom=stage?.getBoundingClientRect().bottom||h*.45;
-      const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
+      // The docked stage ends at 45dvh (top2 + height43); its bounded
+      // gap stays below the existing 51% folio lane. Keep that measured lane
+      // in viewport units so rotation updates it even before resize delivery.
       // No per-scroll cumulative coordinates: this is genuinely viewport-
       // fixed once the source chapter no longer creates a containing block.
       panel.style.removeProperty('translate');
       panel.style.removeProperty('--fx-cinema-screen-x');
       panel.style.removeProperty('--fx-cinema-screen-y');
-      const screenTop=viewportTop.toFixed(2);
+      const screenTop='51dvh';
       if(panel.dataset.fxMobileScreenTop!==screenTop){
-        panel.style.setProperty('top',screenTop+'px','important');
+        panel.style.setProperty('top',screenTop,'important');
         panel.dataset.fxMobileScreenTop=screenTop;
       }
       return;
@@ -366,6 +390,33 @@
     const dx=x-r.left,dy=y-r.top;
     if(Math.abs(dx)>1)panel.style.setProperty('--fx-cinema-screen-x',(previousX+dx).toFixed(2)+'px');
     if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
+  }
+
+  // Commit native layout isolation with the same chapter and inert state.
+  // Late stylesheet activation must never materialize seven inactive papers.
+  // Cache the original inline values and write only on actual state changes.
+  const folioLayoutStates=new WeakMap();
+  function setFolioLayout(panel,active,enabled){
+    let state=folioLayoutStates.get(panel);
+    if(!enabled){
+      if(!state)return;
+      for(const [name,value,priority] of state.original){
+        if(value)panel.style.setProperty(name,value,priority);
+        else panel.style.removeProperty(name);
+      }
+      folioLayoutStates.delete(panel);
+      return;
+    }
+    if(!state){
+      state={active:null,original:['content-visibility','contain-intrinsic-size'].map(name=>[
+        name,panel.style.getPropertyValue(name),panel.style.getPropertyPriority(name)
+      ])};
+      folioLayoutStates.set(panel,state);
+    }
+    if(state.active===active)return;
+    panel.style.setProperty('content-visibility',active?'visible':'hidden','important');
+    panel.style.setProperty('contain-intrinsic-size',active?'auto':'1px 1px','important');
+    state.active=active;
   }
 
   function syncCinema(){
@@ -392,6 +443,7 @@
       if(panel){
         // Hidden chapters must never remain in tab/screen-reader order.
         // The HTML stays native and focusable again on its own turn.
+        setFolioLayout(panel,active,enabled);
         if(panel.inert===active)panel.inert=!active;
         const panelState=active?'true':'false';
         if(panel.dataset.fxCinemaPanelActive!==panelState)panel.dataset.fxCinemaPanelActive=panelState;
@@ -940,13 +992,17 @@ void main(){
       root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
         pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
-      if(alpha>.001){
-        plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
+      if(alpha>.001)plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
+      // The live connection persists while its original paper is stored.
+      // Retrieval energizes the same path; return reconnects it to its bay.
+      const filamentAlpha=.18+.82*alpha;
+      {
         // Every hardware tier keeps an actual 3D energy filament attached
         // to the SAME MAG. Low-end phones use 2 Bezier segments, not zero
         // filament geometry; higher tiers get subpixel-stable refinement.
         {
-          const from=[-.16,.02,.56],to=[x-.13,y+.02,z-.06];
+          const from=[-.16,.02,.56],to=[mix(x,sourceX,release)-.13,
+            mix(y,sy+phase,release)+.02,mix(z,.18,release)-.06];
           const segments=quality==='high'?(mobile()?4:6):(mobile()?2:3);
           const strands=quality==='high'&&!mobile()?3:1;
           const bezier=(a,b,d,e,t)=>{
@@ -971,7 +1027,7 @@ void main(){
                 const thickness=.010+strand*.001;
                 // The box's long Z axis follows the filament path in XZ.
                 box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
-                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)),true,tilt);
+                  Math.max(dist,.012),hue,Math.atan2(dx,dz),filamentAlpha*(.18+.19*Math.sin(Math.PI*t)),true,tilt);
                 filamentCount++;
               }
               prev=point;
@@ -1150,6 +1206,15 @@ void main(){
         const active=selectLiveChapter();
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
+        // Commit the original paper, source and inert state in the same
+        // native event as chapter selection. Only a chapter boundary needs
+        // this immediate composition; continuous progress stays coalesced.
+        if((current?.s.key||'')!==lastCinemaKey){
+          syncCinema();
+          // Source and original title belong to the same native chapter
+          // transaction as its visible paper, even before the next GPU frame.
+          updateHandoff();
+        }
         setPanelState();
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
@@ -1175,7 +1240,9 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    // The existing MAG owns its first-visit camera before the archive may
+    // compile its shared-context pass or reorganize the original HTML folios.
+    if(disposed||reduced.matches||requestedHtmlFallback||!introDone)return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
@@ -1244,6 +1311,7 @@ void main(){
       if(panel){
         // Synthetic source telemetry is not part of the original product UI:
         // remove it BEFORE restoring exactly the native source DOM children.
+        setFolioLayout(panel,false,false);
         panel.querySelector(':scope > .fx-mag-folio-origin-r2041')?.remove();
         panel.inert=false;
         while(panel.firstChild)host.insertBefore(panel.firstChild,panel);
@@ -1280,7 +1348,6 @@ void main(){
       root.dataset.fxArchiveHtmlFallback=requestedHtmlFallback?'user-requested':'reduced-motion';
       return;
     }
-    if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,
@@ -1298,6 +1365,7 @@ void main(){
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      connect();
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
@@ -1313,7 +1381,11 @@ void main(){
       targetFrameMs:PerformanceManager.frameInterval(),
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples,domComposes};},
-    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
+    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value),
+    showHTML:(source='user-request')=>{
+      stop();
+      root.dataset.fxArchiveHtmlFallback=String(source);
+    }
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

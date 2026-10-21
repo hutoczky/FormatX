@@ -1,5 +1,5 @@
 name: Validate FormatX platform scroll policy
-run-name: Validate platform scroll policy from ${{ github.sha }}
+run-name: Validate platform scroll policy from ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
 on:
   workflow_dispatch:
@@ -45,6 +45,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -124,7 +126,8 @@ jobs:
             state='failure'
             description='Platform scroll or living MAG interaction validation failed'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+          FX_AUDITED_SHA="$(git rev-parse HEAD)"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$FX_AUDITED_SHA" \
             -f state="$state" \
             -f context='FormatX platform scroll policy' \
             -f description="$description" \

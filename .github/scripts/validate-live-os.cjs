@@ -48,7 +48,7 @@ assert.match(styles, /prefers-reduced-motion:\s*reduce/, 'reduced-motion mode mi
 assert.match(styles, /\[data-fx-live-os-launcher\]/, 'command launcher styling missing');
 
 assert.match(loader, /formatx-live-os\.css\?v=20260806-live-os-1/, 'versioned Live OS stylesheet loader missing');
-assert.match(loader, /formatx-live-os\.js\?v=20260806-live-os-1/, 'versioned Live OS runtime loader missing');
+assert.match(loader, /formatx-live-os\.js\?v=20261018-r2123-bounded-real-diagnostics/, 'versioned Live OS runtime loader missing');
 assert.match(loader, /ctrlKey \|\| event\.metaKey/, 'keyboard command launcher missing');
 assert.match(loader, /IntersectionObserver/, 'near-viewport lazy loading missing');
 

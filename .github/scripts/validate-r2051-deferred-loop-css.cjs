@@ -15,7 +15,7 @@ assert.ok(asset,'Production must serve exactly one original seamless-loop styles
 assert.match(asset[0],/data-fx-r487-deferred-style="true"/);
 assert.match(asset[0],/data-fx-r487-media="all"/);
 assert.match(asset[0],/media="print"/);
-assert.match(asset[0],/href="\/scifi-ui\/styles\/formatx-seamless-loop\.css\?v=20261013-r2051-post-fcp-delivery"/);
+assert.match(asset[0],/href="\/scifi-ui\/styles\/formatx-seamless-loop\.css\?v=20261015-r2106-late-scroll-input-ownership"/);
 assert.equal((worker.match(/data-fx-seamless-loop-style="true"/g)||[]).length,1,
   'Do not add a second competing seamless-loop CSS link');
 assert.ok(css.length>4000&&/scroll-snap-type/i.test(css),

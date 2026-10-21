@@ -19,19 +19,13 @@
   const VISUAL_PROOF = PARAMS.get('visualintro') === '1';
   const VISUAL_FRAME = Number.parseFloat(PARAMS.get('introframe') || '');
   const HAS_VISUAL_FRAME = VISUAL_PROOF && Number.isFinite(VISUAL_FRAME);
-  const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
-  if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
-  const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 2;
-  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
-  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
+  const SOFTWARE_SAFE = CONSTRAINED;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
      The R533/critical birth styles are normally deferred for first-paint cost,
      but ?intro=1 / visualintro must own their geometry immediately so the
@@ -50,7 +44,9 @@
     ROOT.dataset.fxMagBirthForcedStyleR1753 = 'immediate';
   }
   const LOW_POWER = MOBILE && CONSTRAINED;
-  const DURATION = 10000;
+  // R2059 — every real visitor uses the same bounded cinematic clock. The
+  // graceful exit is part of the measured visible lifetime.
+  const DURATION = MOBILE ? 1200 : 1350;
   const PREPAINT_ID = 'fx-mag-birth-prepaint-r1606';
   const prepaintOverlay = document.getElementById(PREPAINT_ID);
   const EXIT_MS = 180;
@@ -64,16 +60,16 @@
      source for compatibility validators, but is removed before its deferred
      controller executes, so users never see two intros back-to-back. */
   document.getElementById('formatx-event-horizon')?.remove();
-  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : (seen && !FORCE ? 'session-skip' : 'active');
+  ROOT.dataset.fxMagBirthOwnerR533 = seen && !FORCE && !VISUAL_PROOF ? 'session-skip' : 'active';
   if (ROOT.dataset.fxMagBirthOwnerR533 === 'active') {
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthOwnershipR1673='genesis-contract-published-before-visible-live-shell';
   }
 
-  if (!FORCE && (seen || AUTOMATION)) {
+  if (!FORCE && !VISUAL_PROOF && seen) {
     prepaintOverlay?.remove();
-    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'session-skip';
+    ROOT.dataset.fxMagBirthLiveR533 = 'session-skip';
     return;
   }
 
@@ -344,17 +340,26 @@
     <div class="fxb-scan" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-top" aria-hidden="true"></div>
     <div class="fxb-letterbox fxb-letterbox-bottom" aria-hidden="true"></div>
-    <header class="fxb-copy">
-      <p class="fxb-kicker"></p>
-      <h1></h1>
-      <p class="fxb-subtitle"></p>
-    </header>
     <div class="fxb-telemetry" aria-live="polite">
       <output class="fxb-percent">000</output>
       <progress class="fxb-progress" max="100" value="0">0%</progress>
       <span class="fxb-status"></span>
     </div>
   `);
+
+  // Retain the parser-painted title as the same node throughout genesis.
+  // A dynamically mounted shell still receives the complete localized copy.
+  if (!(overlay.querySelector('.fxb-copy') instanceof HTMLElement)) {
+    const liveCopy=document.createElement('header');
+    liveCopy.className='fxb-copy';
+    for(const name of ['kicker','title','subtitle']){
+      const line=document.createElement('p');
+      line.className='fxb-'+name;
+      line.textContent=copy[name];
+      liveCopy.appendChild(line);
+    }
+    overlay.appendChild(liveCopy);
+  }
 
   let liveSkip=overlay.querySelector('.fxb-skip');
   if (!(liveSkip instanceof HTMLButtonElement)) {
@@ -382,7 +387,7 @@
   }
 
   const kicker = overlay.querySelector('.fxb-kicker');
-  const title = overlay.querySelector('h1');
+  const title = overlay.querySelector('.fxb-title');
   const subtitle = overlay.querySelector('.fxb-subtitle');
   const skip = liveSkip;
   const percent = overlay.querySelector('.fxb-percent');
@@ -497,9 +502,9 @@
 
   buildDna();
 
-  kicker.textContent = copy.kicker;
-  title.textContent = copy.title;
-  subtitle.textContent = copy.subtitle;
+  if(kicker.textContent!==copy.kicker)kicker.textContent=copy.kicker;
+  if(title.textContent!==copy.title)title.textContent=copy.title;
+  if(subtitle.textContent!==copy.subtitle)subtitle.textContent=copy.subtitle;
   skip.textContent = copy.skip;
   skip.setAttribute('aria-label', copy.skipAria);
   status.textContent = copy.statuses[0][1];
@@ -522,6 +527,7 @@
   let schedulerTick = 0;
   let startedAt = 0;
   let finished = false;
+  let overlayTornDown = false;
   let exitTimer = 0;
   let hardFinishTimer = 0;
   let frameTimer = 0;
@@ -530,6 +536,9 @@
   let targetY = innerHeight * .48;
   let stage = null;
   let coreApi = null;
+  let canonicalStageHome=null;
+  let canonicalIntroActive=false;
+  let canonicalFrameProofDetach=null;
   let lastTargetSync = 0;
   let lastMorphSync = 0;
   let lastNativeSync = 0;
@@ -565,6 +574,7 @@
       const turns=['-24deg','18deg','46deg','72deg','86deg'];
       dnaStage.style.setProperty('--fxb-dna-turn',turns[value]||'86deg');
     }
+    if(value===2)requestCoreWarmup('genesis-phase-2-r2063');
     if(MOBILE){
       const values=[8,34,62,86,100];
       const statusIndex=[0,2,4,6,7][value]||0;
@@ -572,8 +582,7 @@
       percent.value=String(progressValue).padStart(3,'0');
       progress.value=progressValue;
       status.textContent=copy.statuses[statusIndex][1];
-      if(value===2)requestCoreWarmup('mobile-css-phase-2-r631');
-      if(value===3){
+      if(value===3&&!canonicalIntroActive){
         locateStage();
         try{
           coreApi?.setMorph?.(.72,'r631-mobile-css-genome-handoff');
@@ -581,7 +590,7 @@
         }catch(_){}
         if(stage instanceof HTMLElement)setStageOpacity(.72);
       }
-      if(value===4){
+      if(value===4&&!canonicalIntroActive){
         locateStage();
         try{
           coreApi?.setMorph?.(0,'r631-mobile-css-final-handoff');
@@ -625,10 +634,63 @@
   }
 
   function locateStage() {
-    const candidate = document.querySelector('#hero .fx-crystal-organism-r326-stage');
-    if (candidate instanceof HTMLElement) stage = candidate;
     coreApi = window.FormatXLivingCore || window.FormatXCoreMobileV69 || coreApi;
+    const candidate = coreApi?.stage || document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    if (candidate instanceof HTMLElement) stage = candidate;
     return stage;
+  }
+
+  function adoptCanonicalStage(){
+    locateStage();
+    if(finished||overlayTornDown||!overlay.isConnected||canonicalIntroActive||!(stage instanceof HTMLElement)
+      ||ROOT.dataset.fxCrystalOrganismR326!=='ready'||typeof coreApi?.genesis!=='function')return false;
+    const names=['--fxb-genesis-x','--fxb-genesis-y','--fxb-genesis-scale','opacity','transition','transform','transform-origin',
+      'position','inset','left','top','right','bottom','width','height','max-width','max-height','margin','filter',
+      'translate','rotate','scale'];
+    canonicalStageHome={hadStyle:stage.hasAttribute('style'),
+      style:names.map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)])};
+    // Establish the native viewport containing block before measuring it.
+    // A transformed mobile hero would otherwise add its 70px offset here.
+    ROOT.dataset.fxNativeGenesisR2064='active';
+    const rect=stage.getBoundingClientRect();
+    // Retain the measured gallery box from the first native frame through
+    // handoff. Center the intro with a compositor transform so its layout
+    // position, dimensions, DOM owner and backing-store aspect stay stable.
+    for(const [name,value] of [['position','fixed'],['inset','auto'],['left',rect.left.toFixed(2)+'px'],['top',rect.top.toFixed(2)+'px'],
+      ['right','auto'],['bottom','auto'],['width',rect.width.toFixed(2)+'px'],['height',rect.height.toFixed(2)+'px'],
+      ['max-width','none'],['max-height','none'],['margin','0'],['filter','none'],
+      ['translate','none'],['rotate','none'],['scale','none']])stage.style.setProperty(name,value,'important');
+    stage.style.setProperty('--fxb-genesis-x','-50%');
+    stage.style.setProperty('--fxb-genesis-y','-50%');
+    stage.style.setProperty('--fxb-genesis-scale','1');
+    stage.style.setProperty('transform','translate3d('+((innerWidth-rect.width)*.5-rect.left).toFixed(2)+'px,'+(innerHeight*.47-rect.height*.5-rect.top).toFixed(2)+'px,0)','important');
+    stage.style.setProperty('transform-origin','center','important');
+    stage.style.setProperty('opacity','1','important');
+    // The shader owns camera motion; layout does not animate or resize while
+    // this same native surface is centered above the introductory studio.
+    stage.style.setProperty('transition','none','important');
+    canonicalIntroActive=true;
+    overlay.dataset.fxRenderer='canonical';
+    ROOT.dataset.fxMagBirthRendererR1360='canonical-webgl-organism';
+    ROOT.dataset.fxMagBirthRendererR2063='canonical-webgl-organism';
+    ROOT.dataset.fxMagBirthContinuityR2063='same-canvas-context-geometry-input-and-lifecycle';
+    canvas.hidden=true;
+    try{filmRenderer?.destroy?.();}catch(_){}
+    filmRenderer=null;
+    if(HAS_VISUAL_FRAME&&coreApi.sharedWebGL2){
+      canonicalFrameProofDetach=coreApi.registerScenePass(({gl,width,height})=>{
+        const sample=new Uint8Array(4);
+        let peak=0;
+        for(const x of [.2,.35,.5,.65,.8])for(const y of [.2,.35,.5,.65,.8]){
+          gl.readPixels(Math.min(width-1,Math.round(width*x)),Math.min(height-1,Math.round(height*y)),1,1,gl.RGBA,gl.UNSIGNED_BYTE,sample);
+          peak=Math.max(peak,sample[0],sample[1],sample[2]);
+        }
+        ROOT.dataset.fxMagBirthFramePeakR1557=String(peak);
+      });
+    }
+    try{interactionController.abort();}catch(_){}
+    coreApi.genesis(REDUCED?1:Math.min(1,(performance.now()-startedAt)/DURATION));
+    return true;
   }
 
   function syncTarget(force=false) {
@@ -663,12 +725,28 @@
   function setStageOpacity(value) {
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
+    if(canonicalIntroActive||typeof coreApi?.genesis==='function')return;
     stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
     stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
   }
 
   function releaseStageStyle() {
     if (!(stage instanceof HTMLElement)) return;
+    if(canonicalStageHome){
+      canonicalFrameProofDetach?.();canonicalFrameProofDetach=null;
+      const home=canonicalStageHome;
+      canonicalStageHome=null;
+      canonicalIntroActive=false;
+      ROOT.removeAttribute('data-fx-native-genesis-r2064');
+      for(const [name,value,priority] of home.style){
+        if(value)stage.style.setProperty(name,value,priority);
+        else stage.style.removeProperty(name);
+      }
+      if(!home.hadStyle&&!stage.style.length)stage.removeAttribute('style');
+      coreApi?.genesis?.(null);
+      coreApi?.requestRender?.(1);
+      return;
+    }
     stage.style.removeProperty('opacity');
     stage.style.removeProperty('transition');
   }
@@ -685,6 +763,9 @@
   function syncNativeCore(r, now) {
     locateStage();
     if (!coreApi) return;
+    adoptCanonicalStage();
+    if(canonicalIntroActive){coreApi.genesis(REDUCED?1:r);return;}
+    if(typeof coreApi.genesis==='function')return;
 
     if (r < .50) {
       setStageOpacity(Math.max(.008,r*.035));
@@ -735,19 +816,33 @@
   }
 
   function startR649Fallback(){
-    if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
-    filmRendererFallbackStarted=true;
+    if(filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
+    const confirmedUnavailable=['context-unavailable','shader-failed','first-frame-error'].includes(ROOT.dataset.fxCrystalOrganismR326);
     if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
     ROOT.dataset.fxMagBirthFallbackPolicyR1730=softwareFallbackActive
       ? 'phase-driven-reference-film'
       : 'adaptive-reference-film';
-    if(window.FormatXMagReferenceFilmR649?.attach){
+    // Pending native WebGL retains the authored studio shell and copy. Allocate
+    // Canvas2D only after a confirmed failure: creating and later hiding its
+    // desynchronized compositor layer can block the same GPU needed by MAG.
+    if(!confirmedUnavailable){
+      overlay.dataset.fxRenderer='waiting';
+      ROOT.dataset.fxMagBirthRendererR1360='waiting-for-canonical-webgl';
+      ROOT.dataset.fxMagBirthRendererR2063='waiting-for-canonical-webgl';
+      return;
+    }
+    if(confirmedUnavailable&&!filmRendererFallbackStarted&&window.FormatXMagReferenceFilmR649?.attach){
+      filmRendererFallbackStarted=true;
       overlay.dataset.fxRenderer='fallback';
       filmRenderer=window.FormatXMagReferenceFilmR649.attach(canvas,()=>({x:targetX,y:targetY}));
+      if(filmRenderer)ROOT.dataset.fxMagBirthRendererR2063='native-canvas-reference-film';
       ROOT.dataset.fxMagBirthRendererR1360=filmRenderer?'native-canvas-reference-film':'fallback-particles';
       ROOT.dataset.fxMagBirthRendererR1430=filmRenderer?'fallback-only-after-three-unavailable':'fallback-particles';
       if(filmRenderer)return;
     }
+    overlay.dataset.fxRenderer='fallback';
+    ROOT.dataset.fxMagBirthRendererR1360=confirmedUnavailable?'fallback-particles':'waiting-for-canonical-webgl';
+    ROOT.dataset.fxMagBirthRendererR2063=confirmedUnavailable?'native-canvas-fallback-particles':'native-canvas-waiting-particles';
     const dpr=Math.min(MOBILE?1:1.5,devicePixelRatio||1);
     const w=innerWidth,h=innerHeight;
     canvas.width=Math.max(1,Math.floor(w*dpr));
@@ -788,102 +883,17 @@
   function sizeCanvas() {
     if (!(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
-    if(AUTOMATION && FORCE && !VISUAL_PROOF){
-      ROOT.dataset.fxMagBirthRendererR1360='automation-handoff-lightweight';
-      canvas.hidden=true;
-      return;
-    }
-    if(PROOF_REFERENCE_RENDERER){
-      ROOT.dataset.fxMagBirthProofRendererR1407='reference-film-no-swiftshader-block';
-      startR649Fallback();
-      return;
-    }
-    /* R1727c — never force a heavyweight continuous Three intro onto a
-       constrained CPU/GPU path. The existing R649 cinematic keeps the same
-       10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
-       proof frames remain on the Three owner so design evidence stays exact. */
-    if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
-      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
-      overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
-      startR649Fallback();
-      if(filmRenderer)filmRenderer.resize?.();
-      return;
-    }
-    ensureThreeOwner();
-    if(filmRenderer){
-      filmRenderer.resize?.();
-      return;
-    }
-    if(window.FormatXMagGenesisThreeR1360?.attach){
-      if(threeWaitTimer){clearTimeout(threeWaitTimer);threeWaitTimer=0;}
-      if(!filmRendererPromise){
-        ROOT.dataset.fxMagBirthRendererR1360='loading-threejs';
-        ROOT.dataset.fxMagBirthRendererR1450='three-primary-loading';
-        overlay.dataset.fxRenderer='three-loading';
-        filmRendererPromise=Promise.resolve(
-          window.FormatXMagGenesisThreeR1360.attach(canvas,()=>({x:targetX,y:targetY}))
-        ).then(renderer=>{
-          filmRendererPromise=null;
-          if(finished){
-            renderer?.destroy?.();
-            return null;
-          }
-          if(renderer){
-            filmRenderer=renderer;
-            if(pendingRendererInteraction){
-              try{filmRenderer.interact?.(pendingRendererInteraction);}catch(_){}
-              pendingRendererInteraction=null;
-            }
-            ROOT.dataset.fxMagBirthRendererR1360='threejs-active';
-            ROOT.dataset.fxMagBirthRendererR1430='threejs-active-production-path';
-            ROOT.dataset.fxMagBirthRendererR1450='three-primary-active';
-            ROOT.dataset.fxMagBirthRendererR1460='cinematic-three-active';
-            ROOT.dataset.fxMagBirthRendererR1470='cinematic-cortical-three-active';
-            ROOT.dataset.fxMagBirthRendererR1490='realistic-cinematic-three-active';
-            overlay.dataset.fxRenderer='three';
-            renderer.resize?.();
-            return renderer;
-          }
-          ROOT.dataset.fxMagBirthRendererR1360='threejs-failed-r649-fallback';
-          ROOT.dataset.fxMagBirthRendererR1450='three-explicit-failure-fallback';
-          if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
-          startR649Fallback();
-          return null;
-        }).catch(error=>{
-          filmRendererPromise=null;
-          ROOT.dataset.fxMagBirthRendererR1360='threejs-error-r649-fallback';
-          ROOT.dataset.fxMagBirthRendererR1450='three-error-fallback';
-          console.error('FormatX R1360 intro attach failed:',error);
-          startR649Fallback();
-        });
-      }
-      return;
-    }
-
-    /* R1450 — never lock the production intro into the 2D fallback because
-       the deferred Three owner is a few milliseconds late. Wait for the real
-       renderer for a bounded window; only an actual missing/failed Three path
-       is allowed to fall back. */
-    const now=performance.now();
-    if(!threeWaitStartedAt)threeWaitStartedAt=now;
-    const waited=now-threeWaitStartedAt;
-    if(waited<4800){
-      ROOT.dataset.fxMagBirthRendererR1450='waiting-for-three-owner';
-      overlay.dataset.fxRenderer='three-loading';
-      if(!threeWaitTimer){
-        threeWaitTimer=setTimeout(()=>{
-          threeWaitTimer=0;
-          sizeCanvas();
-        },80);
-      }
-      return;
-    }
-    ROOT.dataset.fxMagBirthRendererR1450='three-owner-timeout-fallback';
-    overlay.dataset.fxRenderer='fallback';
+    /* The permanent WebGL owner also owns genesis. The canvas reference film
+       provides an honest waiting/unavailable fallback, with no second GL owner. */
+    if(adoptCanonicalStage()||canonicalIntroActive)return;
     startR649Fallback();
+    if(filmRenderer)filmRenderer.resize?.();
+    return;
   }
 
   function drawParticles(r,time) {
+    if(canonicalIntroActive)return;
+    if(!filmRenderer&&!filmRendererFallbackStarted&&['context-unavailable','shader-failed','first-frame-error'].includes(ROOT.dataset.fxCrystalOrganismR326))startR649Fallback();
     if(filmRenderer){ filmRenderer.draw?.(r,time); return; }
     if(filmRendererPromise)return;
     if(!ctx)return;
@@ -919,6 +929,8 @@
   }
 
   function safeTeardownOverlay(source) {
+    if(overlayTornDown)return;
+    overlayTornDown=true;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
@@ -949,9 +961,12 @@
 
     try { requestCoreWarmup('finish-'+String(source||'unknown')); } catch (_) {}
     try {
-      coreApi?.setMorph?.(0,'r611-final-living-handoff');
-      coreApi?.setShape?.('organism','r611-final-living-handoff');
-      coreApi?.requestRender?.(2);
+      if(typeof coreApi?.genesis==='function')coreApi.genesis(1);
+      else{
+        coreApi?.setMorph?.(0,'r611-final-living-handoff');
+        coreApi?.setShape?.('organism','r611-final-living-handoff');
+        coreApi?.requestRender?.(2);
+      }
     } catch (_) {}
     try { setStageOpacity(1); } catch (_) {}
 
@@ -966,6 +981,10 @@
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
     try { overlay.classList.add('is-leaving'); } catch (_) {}
+    if(canonicalIntroActive){
+      ROOT.dataset.fxNativeGenesisR2064='leaving';
+      coreApi?.genesis?.(1);
+    }
 
     exitTimer=window.setTimeout(
       ()=>safeTeardownOverlay(source),
@@ -999,7 +1018,7 @@
     /* R1622 — stable display divisor with a 60 FPS floor target.
        The accepted render cadence is always an integer divisor of the actual
        display refresh and never deliberately below 60 Hz on >=60 Hz panels. */
-    if(!(AUTOMATION&&FORCE)){
+    {
       if(schedulerLastFrame>0){
         const rawRefresh=Math.max(2,Math.min(40,now-schedulerLastFrame));
         schedulerRefreshMs=schedulerRefreshMs*.82+rawRefresh*.18;
@@ -1016,13 +1035,14 @@
       }
     }
 
-    if(!startedAt)startedAt=now;
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
     const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
-    if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
+    // The canonical mobile camera follows this existing display callback;
+    // the legacy 200ms sampler made its actual 3D movement visibly step.
+    if((MOBILE&&canonicalIntroActive)||!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
       lastNativeSync=now;
       syncNativeCore(r,now);
     }
@@ -1052,9 +1072,9 @@
     }
 
     if(r<1 || visiblePhase<4){
-      /* Software fallback keeps the 10 s semantic timeline, but the expensive
-         raster only changes at the five cinematic phase boundaries. */
-      const cadence=softwareFallbackActive?125:((AUTOMATION&&FORCE)?72:0);
+      /* Software fallback keeps the same bounded semantic timeline, while the
+         expensive raster only changes at the five cinematic boundaries. */
+      const cadence=canonicalIntroActive?0:softwareFallbackActive?125:0;
       queueRender(cadence);
       return;
     }
@@ -1062,19 +1082,6 @@
     if(MOBILE && FORCE && !nativeReady && now-startedAt<10500){
       requestCoreWarmup('forced-mobile-handoff-wait');
       ROOT.dataset.fxMagBirthHandoffR623='waiting-for-native-core';
-      queueRender(120);
-      return;
-    }
-    /* R1553: automated mobile skip validation must be able to focus the real
-       skip control after the native MAG becomes ready. Keep the completed film
-       mounted briefly in webdriver runs instead of racing its teardown. */
-    if(VALIDATED_SKIP_MODE && nativeReady){
-      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-validated-skip-r1557';
-      queueRender(120);
-      return;
-    }
-    if(MOBILE && FORCE && AUTOMATION && nativeReady && now-startedAt<10500){
-      ROOT.dataset.fxMagBirthHandoffR623='native-ready-awaiting-automation-handoff';
       queueRender(120);
       return;
     }
@@ -1105,7 +1112,7 @@
     ROOT.dataset.fxMagBirthSoftwareProbeR1729='delegated-to-three-owner-no-extra-webgl-context';
     ROOT.dataset.fxMagBirthPerformanceR1730=softwareFallbackActive?'five-phase-fallback-raster-125ms-control-clock':'hardware-60hz-render-path';
     ROOT.dataset.fxMagBirthCinematicR645='deep-biotic-field-genome-cloud-embryo-iris-neural-growth-energy-handoff';
-    ROOT.dataset.fxMagBirthTimelineR1290='10s-reference-film-locked-dna-cellular-tentacles-9.2s-flash-late-armor';
+    ROOT.dataset.fxMagBirthTimelineR1290='bounded-reference-film-complete-normalized-genesis-handoff';
     ROOT.dataset.fxMagBirthGenomeRendererR626='single-css3d-double-helix-no-svg-animation';
     ROOT.dataset.fxMagBirthSchedulerR621='native-raf-plus-independent-css-phase-timeline';
     visiblePhase=0;
@@ -1114,15 +1121,21 @@
     ROOT.setAttribute('data-fx-mag-birth-live','active');
     if(!HAS_VISUAL_FRAME)armPhaseTimeline();
     document.body.prepend(overlay);
+    startedAt=performance.now();
+    try {
+      document.dispatchEvent(new CustomEvent('formatx:magbirthstart',{
+        detail:{revision:'r2059-original-intro-parity'}
+      }));
+    } catch (_) {}
+    /* R2063 — the actual inserted overlay owns the clock, independently of
+       the first GPU/compositor frame. Rendering cannot restart that clock. */
+    if(!HAS_VISUAL_FRAME&&!REDUCED){
+      hardFinishTimer=window.setTimeout(()=>finish('timeline-end-r2063'),DURATION);
+    }
+    requestCoreWarmup('canonical-genesis-start-r2063');
     try { scrollTo({top:0,left:0,behavior:'instant'}); } catch (_) { scrollTo(0,0); }
     canvas.hidden=false;
     sizeCanvas();
-    if(VALIDATED_SKIP_MODE){
-      /* Publish the warmup latch immediately in the forced skip contract.
-         The runtime loader consumes the latch even if it loads after this shell. */
-      requestCoreWarmup('validated-skip-bootstrap-r1560');
-      ROOT.dataset.fxMagBirthSkipBootstrapR1560='canonical-mag-warmup-requested';
-    }
     ROOT.dataset.fxMagBirthRenderClockR631='superseded-by-r1601-adaptive-60hz';
     ROOT.dataset.fxMagBirthRenderClockR649='adaptive-60hz-target-fallback-canvas';
     ROOT.dataset.fxMagBirthPerformanceR1541='superseded-by-r1601-adaptive-60hz';
@@ -1132,14 +1145,13 @@
     ROOT.dataset.fxMagBirthPerformanceR1606='static-lcp-shell-mobile-lean-dom-handoff-first-permanent-webgl-60fps';
     ROOT.dataset.fxMagBirthPerformanceR1618='stable-canonical-underlay-no-delayed-lcp-aria-dialog';
     ROOT.dataset.fxMagBirthPerformanceR1608='lazy-three-owner-zero-parse-cost-when-intro-skipped';
-    ROOT.dataset.fxMagBirthDurationR1549='10000ms-full-studio-adaptive-60fps';
+    ROOT.dataset.fxMagBirthDurationR1549=(MOBILE?'1200ms-film-plus-180ms-exit-mobile':'1350ms-film-plus-180ms-exit-desktop')+'-complete-normalized-studio-cinematic';
     ROOT.dataset.fxMagBirthRenderClockR650='r667-threejs-armored-organic-primary-r649-fallback';
-    ROOT.dataset.fxMagBirthHandoffR652='10s-film-180ms-exit-bounded-fail-open';
+    ROOT.dataset.fxMagBirthHandoffR652='original-window-film-180ms-exit-bounded-fail-open';
     ROOT.dataset.fxMagBirthHandoffR653='absolute-dom-watchdog-r653';
-    ROOT.dataset.fxMagBirthHandoffR1553=(MOBILE&&FORCE&&AUTOMATION)?'validated-skip-kept-until-native-ready-or-10.8s':'normal-bounded-handoff';
+    ROOT.dataset.fxMagBirthHandoffR1553='normal-bounded-handoff';
     ROOT.dataset.fxMagBirthProofR1560=HAS_VISUAL_FRAME?'readback-verified-fixed-frame':'production-cinematic';
-    ROOT.dataset.fxMagBirthHandoffR1557=VALIDATED_SKIP_MODE?'webdriver-skip-remains-mounted-until-explicit-enter':'normal-product-handoff';
-    ROOT.dataset.fxMagBirthAutomationR654=(AUTOMATION&&FORCE&&!VISUAL_PROOF)?'lightweight-handoff-proof':(VISUAL_PROOF?'visual-reference-proof':'production-renderer');
+    ROOT.dataset.fxMagBirthHandoffR1557='normal-product-handoff';
     if(HAS_VISUAL_FRAME){
       for(const timer of phaseTimers){
         try{clearTimeout(timer);}catch(_){}
@@ -1190,12 +1202,10 @@
         };
         requestAnimationFrame(()=>requestAnimationFrame(settleProof));
       };
-      const rendererReady=filmRendererPromise
-        ? Promise.race([
-            Promise.resolve(filmRendererPromise),
-            new Promise(resolve=>setTimeout(resolve,6000))
-          ])
-        : Promise.resolve();
+      const rendererReady=canonicalIntroActive?Promise.resolve():Promise.race([
+        new Promise(resolve=>addEventListener('formatx:real3dready',resolve,{once:true})),
+        new Promise(resolve=>setTimeout(resolve,6000))
+      ]);
       rendererReady.then(()=>{
         requestAnimationFrame(()=>requestAnimationFrame(renderFixedFrame));
       }).catch(()=>{
@@ -1215,26 +1225,15 @@
         coreApi?.setShape?.('organism','r653-absolute-dom-watchdog');
         coreApi?.requestRender?.(1);
       }catch(_){}
-      ROOT.removeAttribute('data-fx-mag-birth-live');
-      ROOT.removeAttribute('data-fx-mag-birth-phase');
       ROOT.dataset.fxMagBirthLiveR533='absolute-dom-watchdog-r653';
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
-      overlay.remove();
-      try{
-        document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
-          detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
-        }));
-      }catch(_){}
-    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
+      safeTeardownOverlay('absolute-dom-watchdog-r653');
+    },DURATION+550);
 
-    // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
-    // deliberately close to the reference endpoint so a stalled GPU/import path
-    // can never strand the cinematic overlay beyond the finished shot.
-    hardFinishTimer=window.setTimeout(
-      ()=>finish(VALIDATED_SKIP_MODE?'validated-skip-timeout-r1557':'bounded-failsafe-r652'),
-      VALIDATED_SKIP_MODE ? 35000 : (REDUCED ? 900 : DURATION + (MOBILE ? 420 : 220))
-    );
+    // R2059: the fail-open stays close to the real platform endpoint so a
+    // stalled GPU/import path cannot strand the cinematic overlay.
+    if(REDUCED)hardFinishTimer=window.setTimeout(()=>finish('bounded-failsafe-r652'),900);
 
     if(REDUCED){
       requestCoreWarmup('reduced-motion');
@@ -1338,6 +1337,7 @@
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
     locateStage();
+    adoptCanonicalStage();
     syncTarget(true);
     coreApi=window.FormatXLivingCore||window.FormatXCoreMobileV69||coreApi;
   },{passive:true});

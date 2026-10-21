@@ -36,6 +36,11 @@ function setOpen(open,source){
   const state=normalize();
   if(!state)return false;
   const {toggle,nav}=state;
+  // R2129: boot/pageshow can reconcile an already-closed menu. Publish a
+  // state transition only when a real open/closed state changed, so native
+  // MAG genesis does not receive an invented menu-close stimulus.
+  const wasOpen=root.classList.contains('fx-organism-menu-open')
+    || nav.classList.contains('open') || toggle.getAttribute('aria-expanded')==='true';
 
   if(open){
     document.body?.classList.remove('fx-organism-panel-open');
@@ -56,9 +61,11 @@ function setOpen(open,source){
   root.classList.toggle('fx-organism-menu-open',open);
   root.dataset.fxMenuOwnerR1956=open?'open':'closed';
 
-  dispatchEvent(new CustomEvent('formatx:menustatechange',{
-    detail:{open,source:source||'menu-owner-r1956'}
-  }));
+  if(wasOpen!==open){
+    dispatchEvent(new CustomEvent('formatx:menustatechange',{
+      detail:{open,source:source||'menu-owner-r1956'}
+    }));
+  }
   return true;
 }
 

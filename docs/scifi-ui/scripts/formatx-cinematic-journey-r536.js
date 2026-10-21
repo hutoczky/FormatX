@@ -6,19 +6,9 @@
   if (root.dataset.fxCinematicJourneyR536 === 'ready') return;
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const params = new URLSearchParams(location.search);
-  const FORCE = params.get('cinema') === '1';
-  const VERIFY = params.has('verify') || params.has('scroll-test') || params.has('design-test');
-  const AUDIT = /Chrome-Lighthouse/i.test(navigator.userAgent||'') || params.get('lighthouse') === '1';
-
-  if (AUDIT && !FORCE) {
-    root.dataset.fxCinematicJourneyR536='audit-static-skip-r1735';
-    root.dataset.fxCinematicJourneyAuditR1735='zero-stage-zero-observers';
-    return;
-  }
-
-  if (reduced.matches || (VERIFY && !FORCE)) {
-    root.dataset.fxCinematicJourneyR536 = reduced.matches ? 'reduced-skip' : 'verification-skip';
+  const FORCE = new URLSearchParams(location.search).get('cinema') === '1';
+  if (reduced.matches) {
+    root.dataset.fxCinematicJourneyR536 = 'reduced-skip';
     return;
   }
 
@@ -130,19 +120,24 @@
       if (!(node instanceof HTMLElement) || seen.has(node)) continue;
       seen.add(node);
       const layer = anatomy(node,def.key);
-      node.dataset.fxC536Code = def.code;
-      node.dataset.fxC1947Side = (next.length % 2) ? 'left' : 'right';
-      if (layer instanceof HTMLElement) layer.dataset.fxC617Code = def.code;
-      const rect=node.getBoundingClientRect();
-      next.push({
-        def,node,index:next.length,
-        top:rect.top+scrollY,
-        height:Math.max(1,rect.height),
-        bottom:rect.bottom+scrollY
-      });
+      if (node.dataset.fxC536Code !== def.code) node.dataset.fxC536Code = def.code;
+      const side = (next.length % 2) ? 'left' : 'right';
+      if (node.dataset.fxC1947Side !== side) node.dataset.fxC1947Side = side;
+      if (layer instanceof HTMLElement && layer.dataset.fxC617Code !== def.code) layer.dataset.fxC617Code = def.code;
+      next.push({def,node,index:next.length});
     }
 
     if(!next.length)return false;
+    // Complete the original scene decorations before measuring any anchor.
+    // Alternating each DOM write with a rectangle read laid out the entire
+    // newly revealed page once per scene at the native intro handoff.
+    const y=scrollY;
+    for(const scene of next){
+      const rect=scene.node.getBoundingClientRect();
+      scene.top=rect.top+y;
+      scene.height=Math.max(1,rect.height);
+      scene.bottom=rect.bottom+y;
+    }
     scenes=next.sort((x,y)=>x.top-y.top).map((item,index)=>({...item,index}));
     if(active>=scenes.length)active=scenes.length-1;
     root.dataset.fxCinematicGeometryR1624='cached-document-space';

@@ -188,7 +188,37 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   controlSnapshotsR1968.push(await controlSnapshot('plus50ms'));
   await page.waitForTimeout(70);
   controlSnapshotsR1968.push(await controlSnapshot('plus120ms'));
-  await page.waitForSelector('#hero-title');
+  // Collect the actual first visible document after the automatic intro.
+  // A ready native archive retains the legacy H1 for HTML fallback, while its
+  // original category heading is the visible reading surface. Waiting for the
+  // hidden legacy title used to depend on its leaking through the intro.
+  await page.waitForFunction(() => {
+    const root = document.documentElement;
+    if (root.hasAttribute('data-fx-native-genesis-r2064')
+      || document.querySelector('.fx-mag-birth-r533,#fx-mag-birth-prepaint-r1606')) return false;
+    const nativeArchive = root.dataset.fxArchiveCinema === 'active';
+    const heading = nativeArchive
+      ? document.querySelector('[data-fx-cinema-panel-active="true"] #fx-category-title')
+      : document.getElementById('hero-title');
+    if (!(heading instanceof HTMLElement) || heading.textContent.trim().length < 8) return false;
+    const rect = heading.getBoundingClientRect(), style = getComputedStyle(heading);
+    if (style.visibility !== 'visible' || rect.width <= 0 || rect.height <= 0
+      || rect.bottom <= 0 || rect.top >= innerHeight || rect.right <= 0 || rect.left >= innerWidth) return false;
+    let opacity = 1;
+    for (let node = heading; node; node = node.parentElement) {
+      const ancestor = getComputedStyle(node);
+      opacity *= Number(ancestor.opacity || 1);
+      if (ancestor.display === 'none' || ancestor.contentVisibility === 'hidden' || opacity <= .02) return false;
+    }
+    if (nativeArchive && (root.dataset.fxCrystalOrganismR326 !== 'ready'
+      || document.querySelectorAll('.fx-crystal-organism-r326-canvas').length !== 1)) return false;
+    window.__fxPerf.visibleEntry = {
+      id: heading.id, text: heading.textContent.trim(), nativeArchive,
+      at: performance.now(), effectiveOpacity: opacity,
+      rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+    };
+    return true;
+  }, null, { timeout: 30000 });
   await page.waitForTimeout(2380);
 
   const interaction = await page.evaluate(async () => {
@@ -267,6 +297,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       layoutShifts: window.__fxPerf.shifts,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
       introComplete: window.__fxPerf.introComplete,
+      visibleEntry: window.__fxPerf.visibleEntry,
       renderer: document.documentElement.dataset.fxRenderer || null,
       mobileCoreState: document.documentElement.dataset.fxMobileCore || null,
       contentVisible: Boolean(document.querySelector('#hero-title')?.getClientRects().length),
