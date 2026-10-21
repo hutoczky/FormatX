@@ -1035,25 +1035,25 @@
       /* R1945g — intro finale material converges into the permanent Signature MAG:
          neutral smoked-silver bioglass, internal ice facets and recessed optic. */
       this.mechMaterial=new T.MeshPhysicalMaterial({
-        color:0x08171b,metalness:.10,roughness:.115,
-        transmission:.32,thickness:.42,ior:1.45,
-        emissive:0x041216,emissiveIntensity:.065,
+        color:0x17262c,metalness:.58,roughness:.23,
+        transmission:.055,thickness:.42,ior:1.45,
+        emissive:0x041216,emissiveIntensity:.018,
         clearcoat:.98,clearcoatRoughness:.065,
         bumpMap:this.microFiberTexture,bumpScale:.013,
         transparent:true,opacity:0
       });
       this.mechMidMaterial=new T.MeshPhysicalMaterial({
-        color:0x0a2025,metalness:.08,roughness:.105,
-        transmission:.38,thickness:.32,ior:1.46,
-        emissive:0x04191d,emissiveIntensity:.075,
+        color:0x233940,metalness:.48,roughness:.20,
+        transmission:.075,thickness:.32,ior:1.46,
+        emissive:0x04191d,emissiveIntensity:.020,
         clearcoat:.98,clearcoatRoughness:.060,
         bumpMap:this.microFiberTexture,bumpScale:.010,
         transparent:true,opacity:0
       });
       this.silverMaterial=new T.MeshPhysicalMaterial({
-        color:0xb8c8c6,metalness:.12,roughness:.085,
-        transmission:.28,thickness:.22,ior:1.42,
-        emissive:0x0a252b,emissiveIntensity:.070,
+        color:0xb8c8c6,metalness:.78,roughness:.16,
+        transmission:.025,thickness:.22,ior:1.42,
+        emissive:0x0a252b,emissiveIntensity:.012,
         clearcoat:1.0,clearcoatRoughness:.042,
         specularIntensity:1.0,specularColor:new T.Color(0xe8f6f4),
         bumpMap:this.microFiberTexture,bumpScale:.004,
