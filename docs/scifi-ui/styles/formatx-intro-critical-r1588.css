@@ -327,3 +327,41 @@ html[data-fx-intro-prepaint-r1611="skip"] #fx-mag-birth-prepaint-r1606{
   .fx-mag-birth-r533 > .fxb-skip,
   #fx-mag-birth-prepaint-r1606 > .fxb-skip{border-color:#fff!important;color:#fff!important;background:#071317!important;}
 }
+
+
+/* R2106 — layered studio lighting: physically suggestive rim, bounce and optical falloff.
+   CSS-only: no extra draw calls or animated filters. */
+html:root:root body>.fx-mag-birth-r533{
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse 17% 43% at 25% 46%,rgba(93,199,216,.075),transparent 88%),
+    radial-gradient(ellipse 17% 43% at 76% 44%,rgba(153,201,222,.065),transparent 88%),
+    radial-gradient(ellipse 34% 35% at 50% 47%,rgba(34,111,131,.17),transparent 77%),
+    radial-gradient(ellipse 60% 31% at 50% 102%,rgba(21,76,91,.20),transparent 80%),
+    linear-gradient(180deg,#010305 0%,#03090d 48%,#010305 100%)!important;
+}
+html:root:root body>.fx-mag-birth-r533::after{
+  background:
+    radial-gradient(ellipse 39% 52% at 50% 44%,transparent 36%,rgba(0,0,0,.28) 88%),
+    linear-gradient(110deg,transparent 20%,rgba(162,229,242,.035) 48%,transparent 73%),
+    linear-gradient(180deg,rgba(255,255,255,.025),transparent 22%,rgba(0,0,0,.32))!important;
+  opacity:.78!important;
+  pointer-events:none;
+}
+html:root:root body>.fx-mag-birth-r533 .fxb-deep{
+  background:
+    radial-gradient(ellipse 29% 48% at 50% 44%,rgba(45,141,164,.20),transparent 77%),
+    radial-gradient(ellipse 55% 22% at 50% 75%,rgba(52,109,129,.12),transparent 84%)!important;
+  opacity:.64!important;
+}
+@media (max-width:900px){
+  html:root:root body>.fx-mag-birth-r533{
+    background:
+      radial-gradient(ellipse 60% 34% at 50% 41%,rgba(35,109,127,.13),transparent 80%),
+      radial-gradient(ellipse 80% 24% at 50% 91%,rgba(33,86,102,.14),transparent 83%),
+      linear-gradient(180deg,#010406,#03090c 48%,#010305)!important;
+  }
+}
+@media (prefers-contrast:more){
+  html:root:root body>.fx-mag-birth-r533{background:#000!important;}
+}
