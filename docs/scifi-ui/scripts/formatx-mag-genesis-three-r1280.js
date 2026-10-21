@@ -1607,11 +1607,18 @@
         mix(.575,.540,finale),
         mix(.565,.530,finale)
       );
-      this.mechMaterial.transmission=mix(.34,.44,finale);
-      this.mechMidMaterial.transmission=mix(.40,.49,finale);
-      this.mechMaterial.roughness=mix(.110,.098,finale);
-      this.mechMidMaterial.roughness=mix(.102,.090,finale);
-      this.silverMaterial.roughness=mix(.085,.100,finale);
+      // R2118: previous per-frame animation silently reverted the physical
+      // metal material settings on every render. Keep cinematic progression
+      // while retaining an opaque, textured machined chassis.
+      this.mechMaterial.transmission=mix(.075,.045,finale);
+      this.mechMidMaterial.transmission=mix(.095,.065,finale);
+      this.silverMaterial.transmission=mix(.040,.020,finale);
+      this.mechMaterial.metalness=mix(.50,.64,finale);
+      this.mechMidMaterial.metalness=mix(.43,.54,finale);
+      this.silverMaterial.metalness=mix(.70,.82,finale);
+      this.mechMaterial.roughness=mix(.26,.21,finale);
+      this.mechMidMaterial.roughness=mix(.24,.19,finale);
+      this.silverMaterial.roughness=mix(.18,.14,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
       this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
