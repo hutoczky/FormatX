@@ -5,6 +5,8 @@ r.dataset.fxReferenceProductionR244=m?'ready':'desktop';
 r.dataset.fxReferenceComposition=m?'reference-frame-r244':'desktop-reference-r244';
 r.dataset.fxReferencePrepaintR1620=m?'mobile-ready-first-byte':'desktop-first-byte';
 const f=p.get('intro')==='1'||p.get('visualintro')==='1';
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+r.dataset.fxIntroMotionR2105=reduced?'reduced':'full';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
 const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
 if(l){
@@ -33,6 +35,8 @@ function activateStyles(){
 
 const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261007-r1950c-studio-intro';
 let retryCount=0,retryTimer=0;
+let pendingScript=null;
+const RETRY_LIMIT=3;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){
   if(runtimeReady()){
@@ -47,6 +51,7 @@ function requestRuntime(reason='rescue'){
     e.dataset.fxIntroRescueR1755='true';
     const retry=retryCount++;
     e.src=RUNTIME_SRC+(retry?('&retry=r1813-'+retry):'');
+    pendingScript=e;
     document.head.appendChild(e);
     r.dataset.fxIntroBootstrapRescueR1755=retry?'retry-requested':'requested';
   }else{
@@ -58,12 +63,17 @@ function requestRuntime(reason='rescue'){
       r.dataset.fxIntroBootstrapRescueR1755='loaded-and-running';
       return;
     }
-    if(retryCount>=3){
+    if(retryCount>=RETRY_LIMIT){
       r.dataset.fxIntroBootstrapRescueR1755='retry-exhausted';
       return;
     }
-    e.remove();
-    if(window.__formatxMagBirthR533Owner===true&&!runtimeReady())window.__formatxMagBirthR533Owner=false;
+    // Do not reset the canonical runtime owner: a slow script may still be executing.
+    // Removing its ownership latch could create a second overlay or render loop.
+    if(e.isConnected)e.remove();
+    if(window.__formatxMagBirthR533Owner===true){
+      r.dataset.fxIntroBootstrapRescueR1755='owner-already-active';
+      return;
+    }
     r.dataset.fxIntroBootstrapRescueR1755='retry-'+reason;
     requestRuntime('verification');
   };
