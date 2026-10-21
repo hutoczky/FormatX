@@ -993,6 +993,8 @@
     raf=requestAnimationFrame(render);
   }
 
+  let lastRefreshTelemetryAt=0;
+
   function render(now) {
     raf=0;
 
@@ -1008,8 +1010,15 @@
       const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
       const divisor=Math.max(1,Math.floor(estimatedHz/60));
       schedulerTick=(schedulerTick+1)%divisor;
-      ROOT.dataset.fxMagBirthRefreshHzR1622=estimatedHz.toFixed(1);
-      ROOT.dataset.fxMagBirthRenderDivisorR1622=String(divisor);
+      // DOM dataset mutations can invalidate style and layout. Publish diagnostic
+      // refresh telemetry at most four times a second, not on every animation frame.
+      if(!lastRefreshTelemetryAt || now-lastRefreshTelemetryAt>=250){
+        lastRefreshTelemetryAt=now;
+        const hzText=estimatedHz.toFixed(1);
+        const divisorText=String(divisor);
+        if(ROOT.dataset.fxMagBirthRefreshHzR1622!==hzText)ROOT.dataset.fxMagBirthRefreshHzR1622=hzText;
+        if(ROOT.dataset.fxMagBirthRenderDivisorR1622!==divisorText)ROOT.dataset.fxMagBirthRenderDivisorR1622=divisorText;
+      }
       if(divisor>1 && schedulerTick!==0){
         raf=requestAnimationFrame(render);
         return;
