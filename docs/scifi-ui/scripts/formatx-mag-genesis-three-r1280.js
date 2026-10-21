@@ -1661,12 +1661,15 @@
         z=mix(5.12,3.86,k);
         x=mix(.018,0,k);y=mix(.012,0,k);
       }else if(t<5.55){
-        z=3.86+Math.sin(time*.00020)*.0035;
-        x=Math.sin(time*.00015)*.0018;
-        y=Math.cos(time*.00018)*.0018;
+        // R2115: restrained camera dolly and parallax while the mechanical
+        // iris resolves; sub-centimetre movement keeps the MAG centered.
+        const k=smooth((t-3.30)/2.25);
+        z=mix(3.86,3.82,k)+Math.sin(time*.00020)*.0035;
+        x=Math.sin(k*Math.PI)*.024+Math.sin(time*.00015)*.0018;
+        y=Math.sin(k*Math.PI)*.010+Math.cos(time*.00018)*.0018;
       }else if(t<7.25){
         const k=smooth((t-5.55)/1.70);
-        z=mix(3.86,4.28,k);
+        z=mix(3.82,4.28,k);
         y=mix(0,.003,k);
       }else if(t<9.10){
         z=4.28+Math.sin(time*.00018)*.006;
