@@ -89,6 +89,26 @@
       ctx.beginPath();ctx.ellipse(0,0,R*.25*L.k,R*.39*L.q,0,0,TAU);ctx.fill();ctx.stroke();ctx.restore();
     }
     ctx.restore();
+    // R2107: polished metal-glass surface with layered softbox reflections.
+    // Reflections are clipped to the existing organism silhouette, avoiding
+    // additional canvas layers and keeping the mobile adaptive DPR intact.
+    ctx.save();
+    ctx.beginPath();ctx.arc(0,0,R*.975,0,TAU);ctx.clip();
+    const drift=Math.sin(time*.00022)*R*.045;
+    const reflection=ctx.createLinearGradient(-R*.85+drift,-R*.9,R*.75+drift,R*.8);
+    reflection.addColorStop(0,'rgba(221,251,255,0)');
+    reflection.addColorStop(.24,'rgba(221,251,255,.025)');
+    reflection.addColorStop(.39,'rgba(214,248,255,.16)');
+    reflection.addColorStop(.43,'rgba(255,255,255,.055)');
+    reflection.addColorStop(.54,'rgba(12,28,42,0)');
+    reflection.addColorStop(.72,'rgba(139,205,225,.07)');
+    reflection.addColorStop(1,'rgba(4,11,19,0)');
+    ctx.fillStyle=reflection;ctx.fillRect(-R,-R,R*2,R*2);
+    ctx.strokeStyle='rgba(198,243,250,.15)';ctx.lineWidth=Math.max(.7,R*.006);
+    ctx.beginPath();ctx.ellipse(-R*.24,-R*.32,R*.52,R*.24,-.52,Math.PI*1.12,Math.PI*1.89);ctx.stroke();
+    ctx.strokeStyle='rgba(68,164,190,.11)';ctx.lineWidth=Math.max(.6,R*.004);
+    ctx.beginPath();ctx.ellipse(R*.24,R*.27,R*.64,R*.33,-.52,0,Math.PI*.82);ctx.stroke();
+    ctx.restore();
     ctx.save();ctx.globalAlpha=.38+.18*energy;ctx.strokeStyle='rgba(116,205,222,.22)';ctx.lineWidth=1.1;ctx.shadowColor='rgba(79,198,224,.22)';ctx.shadowBlur=3;
     for(const v of veins){
       const a=v.a+Math.sin(time*.0003+v.a)*.025;
@@ -560,6 +580,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2104-moving-studio-softbox-metal-glass'
+    visualRevision:'r2107-multilayer-metal-glass-specular-surface'
   };
 })();
