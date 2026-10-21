@@ -55,7 +55,10 @@ function requestRuntime(reason='rescue'){
   }else{
     r.dataset.fxIntroBootstrapRescueR1755='owner-present-observed';
   }
+  let verified=false;
   const verify=()=>{
+    if(verified)return;
+    verified=true;
     clearTimeout(retryTimer);
     if(runtimeReady()){
       r.dataset.fxIntroBootstrapRescueR1755='loaded-and-running';
