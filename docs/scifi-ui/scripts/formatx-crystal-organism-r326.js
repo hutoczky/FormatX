@@ -1438,6 +1438,10 @@
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
+    const qualityGpuTimer=webgl2?gl.getExtension('EXT_disjoint_timer_query_webgl2'):null;
+    let qualityGpuQuery=null,qualityGpuQueryWidth=0,qualityGpuQueryHeight=0,lastGpuSampleAt=-Infinity;
+    let gpuStartupRecorded=false,gpuBudgetSamples=0,gpuAverage=0,gpuPeak=0,gpuLastMs=null;
+    let budgetCpuSamples=0,budgetCpuAverage=0,budgetCpuPeak=0,gpuStableSamples=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
     let motionReduced=reducedMotionRequested();
@@ -1463,6 +1467,13 @@
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
+      if(width!==w||height!==h){
+        // A cost measured for the old backing store must not keep shedding
+        // the new, smaller one before any work at its actual size completes.
+        budgetCpuSamples=0;budgetCpuAverage=0;budgetCpuPeak=0;
+        gpuBudgetSamples=0;gpuAverage=0;gpuPeak=0;gpuStableSamples=0;
+        delete root.dataset.fxCoreGpuAverageMsR2136;delete root.dataset.fxCoreGpuPeakMsR2136;
+      }
       // R2128: when BOTH desktop axes change, release the old width before
       // assigning the pair. This avoids a costly intermediate full-area
       // drawing buffer at the new width and old height. All assignments are
@@ -1673,6 +1684,40 @@
 
     function render(now){
       const begin=performance.now();
+      let freshGpuSample=false;
+      if(qualityGpuQuery){
+        const disjoint=gl.getParameter(qualityGpuTimer.GPU_DISJOINT_EXT);
+        const available=gl.getQueryParameter(qualityGpuQuery,gl.QUERY_RESULT_AVAILABLE);
+        if(disjoint||available){
+          if(available&&!disjoint){
+            gpuLastMs=gl.getQueryParameter(qualityGpuQuery,gl.QUERY_RESULT)/1e6;
+            root.dataset.fxCoreGpuLastMsR2136=gpuLastMs.toFixed(3);
+            root.dataset.fxCoreGpuSampleResolutionR2136=qualityGpuQueryWidth+'x'+qualityGpuQueryHeight;
+            if(!gpuStartupRecorded){
+              gpuStartupRecorded=true;
+              root.dataset.fxCoreGpuStartupMsR2136=gpuLastMs.toFixed(3);
+            }else if(qualityGpuQueryWidth===width&&qualityGpuQueryHeight===height){
+              gpuAverage=gpuBudgetSamples?gpuAverage*.72+gpuLastMs*.28:gpuLastMs;
+              gpuPeak=Math.max(gpuLastMs,gpuPeak*.82);
+              gpuBudgetSamples++;
+              freshGpuSample=true;
+            }
+          }else{
+            gpuBudgetSamples=0;gpuAverage=0;gpuPeak=0;gpuStableSamples=0;
+            delete root.dataset.fxCoreGpuAverageMsR2136;delete root.dataset.fxCoreGpuPeakMsR2136;
+          }
+          gl.deleteQuery(qualityGpuQuery);qualityGpuQuery=null;
+        }
+      }
+      let gpuQueryStarted=false;
+      if(qualityGpuTimer&&!qualityGpuQuery&&now-lastGpuSampleAt>=120&&!gl.getQuery(qualityGpuTimer.TIME_ELAPSED_EXT,gl.CURRENT_QUERY)){
+        qualityGpuQuery=gl.createQuery();
+        if(qualityGpuQuery){
+          qualityGpuQueryWidth=width;qualityGpuQueryHeight=height;lastGpuSampleAt=now;
+          gl.beginQuery(qualityGpuTimer.TIME_ELAPSED_EXT,qualityGpuQuery);
+          gpuQueryStarted=true;
+        }
+      }
       const dt=Math.min(48,Math.max(1,now-last));last=now;
       if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
       else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
@@ -1738,6 +1783,7 @@
         try{pass({gl,canvas,stage,width,height,aspect,now,siteProgress});}
         catch(error){scenePasses.delete(pass);console.warn('FormatX scene pass disabled:',error);}
       }
+      if(gpuQueryStarted)gl.endQuery(qualityGpuTimer.TIME_ELAPSED_EXT);
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
         const error=gl.getError();
         if(error!==gl.NO_ERROR){
@@ -1755,6 +1801,11 @@
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
       renderPeak=Math.max(ms,renderPeak*.86);
       framePeak=Math.max(dt,framePeak*.90);
+      const startupCpuSample=budgetCpuSamples++===0;
+      if(!startupCpuSample){
+        budgetCpuAverage=budgetCpuAverage?budgetCpuAverage*.82+ms*.18:ms;
+        budgetCpuPeak=Math.max(ms,budgetCpuPeak*.86);
+      }
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
@@ -1765,7 +1816,40 @@
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
-      {
+      if(qualityGpuTimer){
+        // The first real draw includes allocation and shader warm-up. Keep it
+        // in honest telemetry, then use completed GPU work for later LOD
+        // decisions. Page/idle scheduling gaps are not GPU execution time.
+        const cpuPressure=!startupCpuSample&&(budgetCpuAverage>4.4||budgetCpuPeak>5.8);
+        const cpuPanic=!startupCpuSample&&ms>6.4;
+        const gpuPressure=freshGpuSample&&(gpuAverage>13.4||gpuPeak>16.67);
+        const gpuPanic=freshGpuSample&&(gpuAverage>16.67||gpuPeak>22);
+        if((cpuPanic||gpuPressure||cpuPressure)&&now-lastQualityAdjust>120){
+          const previous=qualityScale;
+          qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(cpuPanic||gpuPanic?.06:.035):(cpuPanic||gpuPanic?.12:.09)));
+          gpuStableSamples=0;
+          if(Math.abs(previous-qualityScale)>.001){
+            lastQualityAdjust=now;
+            root.dataset.fxCoreGovernorR1660='gpu-timed-budget-shed-r2136';
+            if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+            qualityResizeTimer=later(()=>{qualityResizeTimer=0;if(!disposed&&!contextLost&&resize())schedule(1);},0);
+          }
+        }else if(freshGpuSample){
+          if(gpuAverage<10&&gpuPeak<12&&budgetCpuAverage<3.4&&budgetCpuPeak<4.8)gpuStableSamples++;
+          else gpuStableSamples=0;
+          if(gpuStableSamples>=12&&now-lastQualityAdjust>120){
+            const previous=qualityScale;
+            qualityScale=Math.min(qualityCeiling,qualityScale+.015);
+            gpuStableSamples=0;
+            if(Math.abs(previous-qualityScale)>.001){
+              lastQualityAdjust=now;
+              root.dataset.fxCoreGovernorR1660='gpu-timed-headroom-recovery-r2136';
+              if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
+              qualityResizeTimer=later(()=>{qualityResizeTimer=0;if(!disposed&&!contextLost&&resize())schedule(1);},0);
+            }
+          }
+        }
+      }else{
         const panicFrame=dt>16.75 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
@@ -1841,6 +1925,9 @@
       root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
+      root.dataset.fxCoreGpuBudgetR2136=qualityGpuTimer?'native-completed-query':'original-submission-fallback';
+      root.dataset.fxCoreGpuSamplesR2136=String(gpuBudgetSamples);
+      if(gpuBudgetSamples){root.dataset.fxCoreGpuAverageMsR2136=gpuAverage.toFixed(3);root.dataset.fxCoreGpuPeakMsR2136=gpuPeak.toFixed(3);}
       }
     }
 
@@ -2217,6 +2304,8 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
+      if(qualityGpuQuery&&!contextLost)gl.deleteQuery(qualityGpuQuery);
+      qualityGpuQuery=null;
       livingTimeline?.cancel();
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();

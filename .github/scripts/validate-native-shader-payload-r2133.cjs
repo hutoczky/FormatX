@@ -50,7 +50,7 @@ function observe(){
   finally{write();await context.close();}
  }}finally{await browser.close();write();}
  assert.equal(report.cases.filter(item=>item.pass).length,2,'The actual desktop/mobile native payload contract failed');
- const rev='20261020-r2134-body-space-optics';
- for(const file of ['docs/scifi-ui/index.html','docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js','docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js','docs/scifi-ui/scripts/formatx-core-mobile-v55.js','docs/scifi-ui/scripts/formatx-core-real3d-v20.js','billing-worker/src/production-content-entry.js'])assert.ok(fs.readFileSync(file,'utf8').includes(['docs/scifi-ui/index.html','docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','billing-worker/src/production-content-entry.js'].includes(file)?'20261021-r2135-native-mobile-camera':rev),'The current native cache chain is stale: '+file);
+ const rev='20261021-r2136-gpu-timed-quality';
+ for(const file of ['docs/scifi-ui/index.html','docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js','docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js','docs/scifi-ui/scripts/formatx-core-mobile-v55.js','docs/scifi-ui/scripts/formatx-core-real3d-v20.js','billing-worker/src/production-content-entry.js'])assert.ok(fs.readFileSync(file,'utf8').includes(rev),'The current native cache chain is stale: '+file);
  console.log('NATIVE_SHADER_PAYLOAD_R2133_PASS',JSON.stringify(report));
 })().catch(error=>{write();console.error(error);process.exitCode=1;});
