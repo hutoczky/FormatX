@@ -1083,7 +1083,8 @@
   }
 
   function start() {
-    try { sessionStorage.setItem(KEY,'1'); } catch (_) {}
+    // Mark the session only after a real intro begins; retain deterministic proof mode.
+    try { if (!HAS_VISUAL_FRAME) sessionStorage.setItem(KEY,'1'); } catch (_) {}
     ROOT.dataset.fxMagBirthLiveR533='active';
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
