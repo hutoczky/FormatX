@@ -445,6 +445,42 @@
       ctx.fill();
       ctx.restore();
 
+      // R2113: machined radial chassis, physically layered under the lens.
+      // The eight recessed titanium ribs follow the four-arm body instead of
+      // reading as a flat emblem. Static geometry, no shader or texture fetch.
+      if(S>45){
+        ctx.save();
+        const framePhase=Math.sin(time*.00031)*.012;
+        for(let i=0;i<8;i++){
+          const a=i*TAU/8+framePhase;
+          ctx.save();ctx.rotate(a);
+          const rib=ctx.createLinearGradient(-S*.07,-S*.62,S*.12,-S*.24);
+          rib.addColorStop(0,'rgba(209,244,238,.06)');
+          rib.addColorStop(.30,'rgba(157,216,216,.22)');
+          rib.addColorStop(.51,'rgba(8,29,39,.52)');
+          rib.addColorStop(1,'rgba(91,159,171,.13)');
+          ctx.fillStyle=rib;
+          ctx.beginPath();
+          ctx.moveTo(-S*.060,-S*.57);
+          ctx.lineTo(-S*.024,-S*.42);
+          ctx.lineTo(S*.025,-S*.42);
+          ctx.lineTo(S*.075,-S*.57);
+          ctx.closePath();ctx.fill();
+          ctx.strokeStyle='rgba(173,222,224,.22)';
+          ctx.lineWidth=Math.max(.65,S*.004);
+          ctx.beginPath();ctx.moveTo(-S*.058,-S*.56);ctx.lineTo(-S*.022,-S*.43);ctx.stroke();
+          ctx.restore();
+        }
+        // Two concentric instrument bezels with an intentionally broken
+        // highlight, suggesting depth and controlled studio reflections.
+        ctx.strokeStyle='rgba(190,232,228,.30)';
+        ctx.lineWidth=Math.max(.75,S*.007);
+        ctx.beginPath();ctx.arc(0,0,S*.432,-2.65,-.47);ctx.stroke();
+        ctx.strokeStyle='rgba(39,94,108,.43)';
+        ctx.beginPath();ctx.arc(0,0,S*.453,.26,2.70);ctx.stroke();
+        ctx.restore();
+      }
+
       const breathing=.98+.02*Math.sin(time*.0026);
       const rx=S*.355*breathing,ry=S*.340*breathing;
       // Actual recessed bezel, concentric depths, eight machined shutters.
@@ -659,6 +695,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2112-bounded-high-dpi-studio-canvas'
+    visualRevision:'r2113-layered-machined-chassis'
   };
 })();
