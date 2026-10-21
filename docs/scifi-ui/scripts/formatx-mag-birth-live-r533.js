@@ -1063,8 +1063,8 @@
       ? (softwareFallbackActive?125:16.67)
       : 16.67;
     const shouldDraw=phaseDrivenFallback
-      ? (lastSoftwareFallbackPhase!==visiblePhase || r>=1)
-      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || r>=1);
+      ? (lastSoftwareFallbackPhase!==visiblePhase || (r>=1 && lastParticleDraw<startedAt+DURATION))
+      : (!lastParticleDraw || now-lastParticleDraw>=particleCadence || (r>=1 && lastParticleDraw<startedAt+DURATION));
     if(shouldDraw){
       lastParticleDraw=now;
       if(phaseDrivenFallback)lastSoftwareFallbackPhase=visiblePhase;
