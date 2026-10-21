@@ -241,6 +241,17 @@
     chamber.addColorStop(.72,'rgba(12,20,29,.08)');
     chamber.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=chamber;ctx.fillRect(0,0,W,H);
+    // R2111: low-power studio stage shares the hero's key/rim/bounce
+    // direction without WebGL, post-processing, or a second render pass.
+    const key=ctx.createRadialGradient(W*.30,H*.24,0,W*.30,H*.24,W*.42);
+    key.addColorStop(0,'rgba(115,200,216,.075)');
+    key.addColorStop(.5,'rgba(53,111,130,.027)');
+    key.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=key;ctx.fillRect(0,0,W,H);
+    const rim=ctx.createRadialGradient(W*.75,H*.37,0,W*.75,H*.37,W*.32);
+    rim.addColorStop(0,'rgba(116,165,205,.050)');
+    rim.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=rim;ctx.fillRect(0,0,W,H);
     if(!MOBILE)drawLivingWorld(ctx,time,.86);
 
     const dnaFade=1-smooth((t-2.65)/1.45);
@@ -636,6 +647,6 @@
     attach,
     revision:'r1724-formatx-living-crystal-organism-birth',
     guardianCompatibility:{revision:'r1724-formatx-crystal-guardian-birth'},
-    visualRevision:'r2110-three-point-cinematic-studio-lighting'
+    visualRevision:'r2111-consistent-mobile-studio-stage'
   };
 })();
