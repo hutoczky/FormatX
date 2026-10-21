@@ -35,7 +35,6 @@ function activateStyles(){
 
 const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261007-r1950c-studio-intro';
 let retryCount=0,retryTimer=0;
-let pendingScript=null;
 const RETRY_LIMIT=3;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
 function requestRuntime(reason='rescue'){
@@ -51,7 +50,6 @@ function requestRuntime(reason='rescue'){
     e.dataset.fxIntroRescueR1755='true';
     const retry=retryCount++;
     e.src=RUNTIME_SRC+(retry?('&retry=r1813-'+retry):'');
-    pendingScript=e;
     document.head.appendChild(e);
     r.dataset.fxIntroBootstrapRescueR1755=retry?'retry-requested':'requested';
   }else{
