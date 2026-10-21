@@ -994,6 +994,8 @@
   }
 
   let lastRefreshTelemetryAt=0;
+  let lastCoreCostSampleAt=0;
+  let cachedCoreRenderCost=0;
 
   function render(now) {
     raf=0;
@@ -1029,7 +1031,13 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
-    const renderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
+    // Read the core's render-cost hint at the same cadence as native synchronization.
+    // Avoid an attribute lookup and numeric parse on every cinematic frame.
+    if(!lastCoreCostSampleAt || now-lastCoreCostSampleAt>=200){
+      lastCoreCostSampleAt=now;
+      cachedCoreRenderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
+    }
+    const renderCost=cachedCoreRenderCost;
     const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
       lastNativeSync=now;
