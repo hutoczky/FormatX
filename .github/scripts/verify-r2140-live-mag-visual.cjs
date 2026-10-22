@@ -53,7 +53,7 @@ function pixelEvidence(file){
       });
       await page.waitForFunction(
         ()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready',
-        {timeout:60000}
+        null,{timeout:60000}
       );
       const canvas=page.locator('#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
       await canvas.waitFor({state:'visible',timeout:10000});
