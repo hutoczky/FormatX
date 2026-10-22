@@ -222,6 +222,19 @@ async function verifyFullBirth(browser){
     await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready',{timeout:20000});
     const reloadReady=await snapshot(page);
     assertStable(reloadReady,'session-reload');
+    // R2150: session persistence is intentional, but the audience must be
+    // able to rewatch the full DNA-to-embryo-to-MAG film without clearing data.
+    const replay=page.locator('#hero .hero-space > .fx-mag-replay-r2150');
+    await replay.waitFor({state:'visible',timeout:10000});
+    assert.equal(await replay.getAttribute('href'),'/?intro=1',
+      'R2150 replay link must force the ten-second canonical cinematic');
+    const replayBox=await replay.boundingBox();
+    assert.ok(replayBox&&replayBox.width>=44&&replayBox.height>=44,
+      'R2150 replay control must meet accessible mobile hit-target dimensions');
+    await replay.click({timeout:10000});
+    await page.waitForURL(/(?:\\?|&)intro=1(?:&|$)/,{timeout:15000});
+    await page.locator(OVERLAY).waitFor({state:'visible',timeout:15000});
+    assert.equal(documentNeverUsedPlaceholder,undefined);
     assert.equal(errors.length,0,`desktop-full: browser errors: ${errors.join(' | ')}`);
     return{phases:[...phases],coreReadyPhase:timeline.coreReadyPhase,coreSamples:timeline.coreSamples.length,final,reload:reloadReady};
   }finally{await context.close();}
