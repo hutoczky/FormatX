@@ -1,9 +1,8 @@
 FormatX production revision
-token=20261022-r2139-permanent-surface-fitted-four-arm-mag
-release_line=R2139-visible-permanent-MAG-four-arm-structural-bioglass-titanium
-purpose=Make the actual persistent hero MAG visibly different, not only the ten-second DNA cinematic intro. Four structural titanium arms use eight beveled channels contoured to the canonical superellipsoid crystal body, with a larger recessed central optic.
-scope=docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; .github/scripts/validate-mag-debanding-r2035.cjs.
-delivery=Both device runtimes use R2139 cache keys; Cloudflare must not rewrite current source to old R1950/R1984 assets. Deferred native hero mount latency is lowered while respecting first paint, reduced-motion, and Lighthouse modes.
-validation=Require production source and security gates, browser archive checks, exact revision convergence on both domains, production smoke, and live R533-R536 cinematic handoff.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and the live R2139 renderer asset; no success claims before GitHub production deployment completes.
-limits=Final visual acceptance remains a human judgment; photorealism and superiority over award studios are not automatically proven.
+token=20261022-r2140-four-arm-mag-verified-production
+release_line=R2140-visible-MAG-structural-titanium-and-optical-core
+purpose=Release the permanent four-arm MAG, with eight beveled titanium panels built on the front superellipsoid surface and a larger recessed central optic.
+assets=Native single-canvas WebGL renderer; post-first-paint loading on desktop and mobile; cached script keys point to the new permanent four-arm geometry; cinematic DNA handoff preserved.
+verification=On both production domains verify exact release marker; verify real served metal geometry, titanium fragment material and native script dependency chain; run website smoke and ten-second intro browser handoff.
+quality=No duplicate hero canvases; responsive performance policy and reduced-motion behavior preserved.
+limits=Automated deployment proves availability and browser contract, not subjective photorealism or award-level visual superiority.
