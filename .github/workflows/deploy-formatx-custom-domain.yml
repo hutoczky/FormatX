@@ -199,11 +199,11 @@ jobs:
             echo "Exact revision convergence attempt $attempt/90"
             origin_ok=0
             www_ok=0
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/production-revision.txt?rev=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/origin-revision.txt" \
+            if curl -fsSL --proto-redir '=https' --max-redirs 4 --max-time 20 -H 'Cache-Control: no-cache' "$ORIGIN/production-revision.txt?rev=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/origin-revision.txt" \
               && cmp -s "$EXPECTED" "$RUNNER_TEMP/origin-revision.txt"; then
               origin_ok=1
             fi
-            if curl -fsS --max-time 20 -H 'Cache-Control: no-cache' "$WWW/production-revision.txt?rev=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/www-revision.txt" \
+            if curl -fsSL --proto-redir '=https' --max-redirs 4 --max-time 20 -H 'Cache-Control: no-cache' "$WWW/production-revision.txt?rev=${GITHUB_RUN_ID}-$attempt" -o "$RUNNER_TEMP/www-revision.txt" \
               && cmp -s "$EXPECTED" "$RUNNER_TEMP/www-revision.txt"; then
               www_ok=1
             fi
@@ -212,6 +212,12 @@ jobs:
               exit 0
             fi
             sleep 5
+          done
+          echo 'Revision HTTP diagnostics (after redirect following):' >&2
+          for HOST in "$ORIGIN" "$WWW"; do
+            curl -sSL --proto-redir '=https' --max-redirs 4 --max-time 20 -o /dev/null \
+              -w "domain=$HOST status=%{http_code} final=%{url_effective}\\n" \
+              "$HOST/production-revision.txt?rev=${GITHUB_RUN_ID}-diagnostic" >&2 || true
           done
           echo 'Connected Cloudflare build did not converge to the exact audited revision.' >&2
           echo 'Expected:' >&2
