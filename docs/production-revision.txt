@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2144-permanent-titanium-mag
-release_line=R2144-permanent-titanium-mag-and-R2143-canonical-threejs-cinematic
-purpose=Release verified R2144 bevelled 3D titanium arms and layered optical ring on the permanent native R326 MAG. Retain the R2143 root-correct Three.js cinematic importer and dual-domain handoff.
-assets=R2144 native four-arm metallic MAG body, physical raised bevel planes and 48-segment optical bezel; R2144 mobile/desktop cache graph; R2143 Three.js root import; Cloudflare Worker asset rewrites aligned with active revisions.
-validation=Production source, Worker preflight, R2144 cinematic archive Chromium desktop/mobile, reversibility and accessibility passed. R2143 canonical Three.js route regression updated. R2144 live-asset gate aligned with the current scheduler, renderer and raised optical bezel. Both-domain live handoff still required.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision token, pass production smoke and R533 to R536 cinematic browser tests.
-limits=Real GPU rendering depends on browser/WebGL capabilities; passing automated tests does not certify artistic similarity or guarantee that the user's device has refreshed the latest assets.
+token=20261022-r2146-centered-mobile-genome
+release_line=R2146-mobile-centered-true-3d-dna-and-R2145-portrait-cinematic
+purpose=Make the core's DNA genesis legible on upright Android screens, in both the genuine Three.js renderer and the low-power native Canvas2D cinematic.
+assets=R2146 native 3D center-first double helix and 3 satellites; canonical root-absolute Three.js module import; GPU-only visual readback in explicit proof mode; R2145 portrait centered DNA, living embryo, DNA-to-chassis energy strands, late polished MAG assembly; R2144 raised titanium permanent MAG and optical ring retained.
+validation=R2145 Android 412x915 reference-canvas DNA/embryo/MAG keyframe Chromium visual proof passed; JavaScript parsed. R2146 mobile Three.js source, exact Cloudflare rewrite and rendering proof added to CI; production validation and full dual-domain cinematic handoff required.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision token, pass production smoke, and complete canonical R533-to-R536 cinematic handoff. A successful deployment is not an artistic quality comparison.
+limits=Visual fidelity and performance vary across Android/GPU browsers. Real-user screenshot verification remains separate from synthetic headless Chromium evidence.
