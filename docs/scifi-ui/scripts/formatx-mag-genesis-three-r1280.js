@@ -1462,8 +1462,11 @@
         // construction lanes rather than vanishing into one central dot.
         // Reuse existing helix meshes: no additional GPU draw calls.
         const converge=1-assembly*.86;
+        // R2126: each DNA filament feeds a distinct assembly arm at a
+        // staggered phase; no uniform teleport or simultaneous collapse.
         const armAngle=(i%4)*Math.PI*.5+Math.PI*.5;
-        const armReach=.69*assembly;
+        const armProgress=smooth((t-4.72-(i%4)*.11)/2.06);
+        const armReach=.69*armProgress;
         h.position.x=b.x*(1+fly*.38)*converge+Math.cos(armAngle)*armReach;
         h.position.y=b.y*(1+fly*.34)*converge+Math.sin(armAngle)*armReach;
         h.position.z=b.z+fly*.54-assembly*.24;
