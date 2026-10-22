@@ -48,7 +48,7 @@ assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
 assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261022-r2144-permanent-mag'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
-assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2143-canonical-threejs-route'),
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2146-mobile-centered-threejs-dna'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
