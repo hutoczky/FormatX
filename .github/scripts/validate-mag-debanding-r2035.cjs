@@ -109,8 +109,26 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261021-r2113-layered-chassis'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261022-r2145-portrait-dna-genesis'),
   'Missing actual cache-busted four-point R2103 Android replacement');
+// R2145: phone cover-crop cannot discard the genome. The opening must
+// show a centered vertical helix and an embryo BEFORE the metal object.
+const dnaBorn=fallback.indexOf('const dnaFade=1-smooth((t-4.60)/1.28)');
+const embryoBorn=fallback.indexOf('const embryo=smooth((t-2.45)/.88)');
+const metalBorn=fallback.indexOf('const grow=smooth((t-5.58)/1.30)');
+assert.ok(dnaBorn>=0 && embryoBorn>dnaBorn && metalBorn>embryoBorn,
+  'R2145 temporal contract: DNA first, living embryo second, titanium MAG last');
+for(const token of [
+  'x:640,y:360,l:520,a:61,r:Math.PI/2',
+  'const transfer=smooth((t-5.15)/.52)',
+  'drawDNA(ctx,genome,time,dnaFade*.95,genomeScale)',
+  'R2145: the permanent four-point metal belongs to the FINAL act'
+])assert.ok(fallback.includes(token),'R2145 portrait-first fallback missing: '+token);
+// The 412 x 915 Android cover crop only shows the central ~324 virtual
+// horizontal units. A vertical helix centered at 640 stays fully inside it.
+const visibleW=412*720/915;
+assert.ok(61*2<visibleW && Math.abs(640-640)<visibleW*.5,
+  'R2145 central portrait DNA is clipped at a common Android aspect ratio');
 assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
   fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
   fallback.includes('const studioTravel=.5+.5*Math.sin(time*.00053)'),
