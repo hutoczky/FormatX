@@ -1975,6 +1975,14 @@
           root.dataset.fxMagBirthVisibleArmorR2147=String(
             [...this.silverParts,...this.plates].filter(part=>part.visible).length
           );
+          // R2148: test-only true GPU-scene optic state; never emit per-frame
+          // telemetry during a normal mobile visitor's ten-second intro.
+          root.dataset.fxMagBirthEyeOpacityR2148=String(
+            this.mechEyeCorona?.material?.opacity??0
+          );
+          root.dataset.fxMagBirthEyeScaleR2148=String(
+            this.mechEyeCorona?.scale?.x??0
+          );
           root.dataset.fxMagBirthThreeLitPixelsR2146=String(lit);
           root.dataset.fxMagBirthFrameR1557='r2146-canonical-three-framebuffer-readback';
         }catch(error){
