@@ -11,7 +11,10 @@ const base=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4185/scifi-ui/index.h
 const mode=process.env.FORMATX_PORTRAIT_RENDERER==='three'?'three':'reference';
 const dir=process.env.FORMATX_PORTRAIT_PROOF_DIR||'artifacts/r2145-portrait-genesis';
 fs.mkdirSync(dir,{recursive:true});
-const scenes=[['dna',1.6],['embryo',4.2],['mag',8.3]];
+// R2148: capture mechanical construction before the optical organ wakes.
+const scenes=[['dna',1.6],['embryo',4.2],
+  ...(mode==='three'?[['assembly',6.8]]:[]),
+  ['mag',8.3]];
 
 async function main(){
   const browser=await chromium.launch({
@@ -73,6 +76,8 @@ async function main(){
           peak:root.dataset.fxMagBirthFramePeakR1557,
           litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,
           armorPieces:root.dataset.fxMagBirthVisibleArmorR2147,
+          eyeOpacity:root.dataset.fxMagBirthEyeOpacityR2148,
+          eyeScale:root.dataset.fxMagBirthEyeScaleR2148,
           proof:root.dataset.fxMagBirthVisualFrameR659,
           width:cv.width,height:cv.height,
           rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
@@ -95,7 +100,15 @@ async function main(){
           assert.equal(Number(state.armorPieces),0,
             'R2147 must establish DNA before showing a single titanium panel');
         }
+        if(name==='assembly'){
+          assert.ok(Number(state.eyeOpacity)<.003,
+            'R2148 pupil must not glow before five-piece metal assembly seats: '+JSON.stringify(state));
+        }
         if(name==='mag'){
+          assert.ok(Number(state.eyeOpacity)>.07&&Number(state.eyeOpacity)<.25,
+            'R2148 central optic must ignite after assembly, with restrained emission: '+JSON.stringify(state));
+          assert.ok(Number(state.eyeScale)>.42&&Number(state.eyeScale)<.60,
+            'R2148 central eye must retain its authored physical size: '+JSON.stringify(state));
           assert.ok(Number(state.armorPieces)>=5,
             'R2147 metal finale must visibly seat the five authored titanium pieces: '+JSON.stringify(state));
         }
