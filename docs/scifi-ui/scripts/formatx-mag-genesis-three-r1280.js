@@ -1763,7 +1763,9 @@
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
       // R2123: the optical organ awakens only after the four-arm
       // chassis has assembled; a short restrained ignition, not a flash.
-      const opticWake=smooth((t-7.12)/.88);
+      // R2148: the final jaw finishes seating around 7.48s. Do not
+      // ignite the optical organ before all five metal parts are in place.
+      const opticWake=smooth((t-7.44)/.78);
       const opticPulse=1+.075*Math.sin(time*.0022);
       if(this.mechEyeCorona){
         this.mechEyeCorona.material.opacity=(.145+.018*finale)*opticWake*opticPulse;
@@ -1934,12 +1936,20 @@
         this.flashBeam.material.opacity=flash*.004;
         this.flashBeam.scale.x=1+flash*.035;
       }
+      // R2148: respect the mechanical layer's opticWake contract.
+      // The former finale pass replaced a hidden pupil with a visible
+      // 1.0-wide ring every frame, even before the eye was born.
+      const eyeWake=smooth((t-7.44)/.78);
       if(this.mechEyeCorona){
-        this.mechEyeCorona.material.opacity=Math.min(.24,.18+flash*.018);
-        const q=1.00+flash*.022;
+        const finale=smooth((t-7.20)/1.65);
+        const breathing=1+.075*Math.sin(time*.0022);
+        this.mechEyeCorona.material.opacity=Math.min(.24,
+          ((.145+.018*finale)*breathing+flash*.018)*eyeWake
+        );
+        const q=.50*(.90+.10*eyeWake)*(1+flash*.022*eyeWake);
         this.mechEyeCorona.scale.set(q,q,1);
       }
-      if(this.mechLight)this.mechLight.intensity+=flash*.34;
+      if(this.mechLight)this.mechLight.intensity+=flash*.34*eyeWake;
 
       this.renderer.render(this.scene,this.camera);
       if(this.proofReadback){
