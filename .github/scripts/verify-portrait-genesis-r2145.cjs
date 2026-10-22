@@ -8,6 +8,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {chromium}=require('playwright');
 const base=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4185/scifi-ui/index.html';
+const mode=process.env.FORMATX_PORTRAIT_RENDERER==='three'?'three':'reference';
 const dir=process.env.FORMATX_PORTRAIT_PROOF_DIR||'artifacts/r2145-portrait-genesis';
 fs.mkdirSync(dir,{recursive:true});
 const scenes=[['dna',1.6],['embryo',4.2],['mag',8.3]];
@@ -36,7 +37,7 @@ async function main(){
       u.searchParams.set('intro','1');
       u.searchParams.set('visualintro','1');
       u.searchParams.set('introframe',String(seconds));
-      u.searchParams.set('proofrenderer','reference');
+      if(mode==='reference')u.searchParams.set('proofrenderer','reference');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       await page.waitForFunction(
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
@@ -47,6 +48,7 @@ async function main(){
         if(!(cv instanceof HTMLCanvasElement))return {error:'canvas missing'};
         const rect=cv.getBoundingClientRect();
         const pixels=cv.getContext('2d')?.getImageData(0,0,cv.width,cv.height);
+        const root=document.documentElement;
         let count=0,highlight=0,cx=0,cy=0;
         if(pixels){
           const step=Math.max(1,Math.floor(Math.min(cv.width,cv.height)/230));
@@ -65,9 +67,11 @@ async function main(){
           }
         }
         return{
-          phase:document.documentElement.dataset.fxMagBirthPhase,
-          renderer:document.documentElement.dataset.fxMagBirthRendererR1360,
-          proof:document.documentElement.dataset.fxMagBirthVisualFrameR659,
+          phase:root.dataset.fxMagBirthPhase,
+          renderer:root.dataset.fxMagBirthRendererR1360,
+          loader:root.dataset.fxMagBirthThreeLoaderR1608,
+          peak:root.dataset.fxMagBirthFramePeakR1557,
+          proof:root.dataset.fxMagBirthVisualFrameR659,
           width:cv.width,height:cv.height,
           rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
           coloredSamples:count,highlightSamples:highlight,
@@ -77,14 +81,21 @@ async function main(){
       await page.screenshot({path:path.join(dir,name+'-portrait-412x915.png'),fullPage:false});
       assert.equal(errors.length,0,name+': browser page errors: '+errors.join(' | '));
       assert.equal(state.error,undefined,name+': '+state.error);
-      assert.ok(state.coloredSamples>12,name+': no visually readable blue/cyan subject in center crop: '+JSON.stringify(state));
-      assert.ok(state.highlightSamples>1,name+': insufficient bright material in center crop: '+JSON.stringify(state));
+      if(mode==='reference'){
+        assert.ok(state.coloredSamples>12,name+': no visible cyan subject in center crop: '+JSON.stringify(state));
+        assert.ok(state.highlightSamples>1,name+': insufficient highlights in center crop: '+JSON.stringify(state));
+      }else{
+        assert.equal(state.renderer,'threejs-active',
+          name+': true Three.js renderer did not activate: '+JSON.stringify(state));
+        assert.ok(Number(state.peak)>8,
+          name+': WebGL visual-readback proof is not established: '+JSON.stringify(state));
+      }
       outputs.push({name,seconds,...state});
       await context.close();
     }
     assert.ok(outputs[0].phase!==''&&outputs[1].phase!==''&&outputs[2].phase!=='','phase telemetry missing');
     fs.writeFileSync(path.join(dir,'proof.json'),JSON.stringify(outputs,null,2)+'\n');
-    console.log('R2145_PORTRAIT_GENESIS_PASS',JSON.stringify(outputs));
+    console.log('FORMATX_PORTRAIT_GENESIS_PASS_'+mode.toUpperCase(),JSON.stringify(outputs));
   }finally{
     await browser.close();
   }
