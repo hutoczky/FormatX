@@ -1,0 +1,54 @@
+name: Verify live permanent MAG visual R2140
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/verify-r2140-live-mag-visual.yml'
+      - '.github/scripts/verify-r2140-live-mag-visual.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    name: Capture real mobile and desktop MAG screens
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out tested source
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install isolated browser verification dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-mag-visual" --no-save --no-audit --no-fund playwright@1.57.0 pngjs@7.0.0
+          echo "NODE_PATH=$RUNNER_TEMP/formatx-mag-visual/node_modules" >> "$GITHUB_ENV"
+          test -x /usr/bin/google-chrome
+
+      - name: Verify JavaScript source and capture permanent MAG
+        shell: bash
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+          FORMATX_R2140_URL: https://formatxsuite.com
+          FORMATX_R2140_VISUAL_DIR: artifacts/r2140-live-mag
+        run: |
+          set -euo pipefail
+          node --check .github/scripts/verify-r2140-live-mag-visual.cjs
+          node .github/scripts/verify-r2140-live-mag-visual.cjs
+
+      - name: Upload mobile and desktop screenshots with diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-permanent-mag-r2140
+          path: artifacts/r2140-live-mag/
+          if-no-files-found: warn
+          retention-days: 30
