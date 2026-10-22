@@ -72,6 +72,7 @@ async function main(){
           loader:root.dataset.fxMagBirthThreeLoaderR1608,
           peak:root.dataset.fxMagBirthFramePeakR1557,
           litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,
+          armorPieces:root.dataset.fxMagBirthVisibleArmorR2147,
           proof:root.dataset.fxMagBirthVisualFrameR659,
           width:cv.width,height:cv.height,
           rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
@@ -90,6 +91,14 @@ async function main(){
           name+': true Three.js renderer did not activate: '+JSON.stringify(state));
         assert.ok(Number(state.peak)>35 && Number(state.litPixels)>1,
           name+': genuine bright Three.js geometry not found in GPU center crop: '+JSON.stringify(state));
+        if(name==='dna'){
+          assert.equal(Number(state.armorPieces),0,
+            'R2147 must establish DNA before showing a single titanium panel');
+        }
+        if(name==='mag'){
+          assert.ok(Number(state.armorPieces)>=5,
+            'R2147 metal finale must visibly seat the five authored titanium pieces: '+JSON.stringify(state));
+        }
       }
       outputs.push({name,seconds,...state});
       await context.close();
