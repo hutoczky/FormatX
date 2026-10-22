@@ -132,6 +132,17 @@ const CASES=[
       const page=await capable.newPage();
       await page.goto(HOME+'?intro=1&r2103-device-classification=1',
         {waitUntil:'domcontentloaded',timeout:60000});
+      // R2143: verify that the real ESM module loads from the same path
+      // from which the canonical root-domain intro imports it. A previous
+      // location.href-relative URL silently downgraded high-end phones.
+      const importedThree=await page.evaluate(async()=>{
+        const url=new URL('/scifi-ui/scripts/three-r185.module.js',location.origin);
+        const library=await import(url.href);
+        return {path:url.pathname,webglRenderer:typeof library.WebGLRenderer==='function'};
+      });
+      assert.deepEqual(importedThree,{
+        path:'/scifi-ui/scripts/three-r185.module.js',webglRenderer:true
+      },'The native Three.js module cannot be imported on the public origin');
       await page.waitForFunction(()=>{
         const root=document.documentElement;
         const loader=root.dataset.fxMagBirthThreeLoaderR1608||'';
