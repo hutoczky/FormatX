@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2147-visible-mechanical-mag
-release_line=R2147-DNA-first-five-piece-machined-MAG-and-R2146-portrait-native-genome
-purpose=Make the metal chassis visibly assemble during the true Three.js MAG intro. Previously the 2 silver crown pieces, two lateral panels and lower jaw were permanently marked invisible and did not appear despite being animated.
-assets=R2147 staged five-piece titanium crown, shoulder and lower-jaw reveal, DNA first scene free of premature central shell and proof-only GPU armor-count telemetry; R2146 portrait-correct native 3D double helix; R2145 centered low-power DNA/embryo/finale; R2144 permanent raised titanium MAG retained.
-validation=R2147 mobile portrait proof passed in both real Three.js and Canvas2D: real native GPU pixels measured and five assembled armor pieces confirmed in the MAG frame. Full production validation, revision convergence, canonical smoke and dual-domain R533-to-R536 cinematic browser handoff required.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve the exact token and pass full production smoke and canonical R533-to-R536 cinematic handoff.
-limits=Headless Chromium artifacts verify the rendered structure but artistic quality is not objectively certified. User-device visual inspection remains necessary; mobile GPUs/browsers may differ.
+token=20261022-r2148-physical-optical-iris
+release_line=R2148-DNA-embryo-five-piece-MAG-optical-ignition
+purpose=Promote the user-visible R2148 physically raised titanium optical socket, machined bezel, cyan capillary, eight separate shutter facets and larger recessed pupil after the five-piece mechanical chassis seats.
+assets=R2148 native Three.js aperture and controlled shutter/eye ignition, R2147 staged crown/shoulder/jaw assembly, R2146 portrait-centered native 3D DNA, R2145 low-power portrait DNA/embryo/finale, and R2144 permanent raised titanium hero geometry.
+validation=Android portrait visual proof passed on the R2148 optical assembly and source regression guard; require production validation, both-domain exact revision convergence, canonical smoke and dual-domain R533-to-R536 cinematic browser handoff.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact token and pass the canonical R533-to-R536 film tests; deployment status must not be marked complete until the workflow succeeds.
+limits=Headless Chromium evidence verifies the rendering stages and optical geometry; artistic photorealism and performance on all user devices require separate real-device visual assessment.
