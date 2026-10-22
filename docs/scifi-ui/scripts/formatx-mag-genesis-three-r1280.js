@@ -1731,12 +1731,18 @@
         x=Math.sin(k*Math.PI)*.024+Math.sin(time*.00015)*.0018;
         y=Math.sin(k*Math.PI)*.010+Math.cos(time*.00018)*.0018;
       }else if(t<7.25){
+        // R2128: during DNA-to-chassis birth, a slow lateral tracking
+        // move creates real parallax across the layered 3D geometry.
         const k=smooth((t-5.55)/1.70);
         z=mix(3.82,4.28,k);
-        y=mix(0,.003,k);
+        x=.105*Math.sin(k*Math.PI);
+        y=mix(-.018,.003,k)+.022*Math.sin(k*Math.PI);
       }else if(t<9.10){
+        // Settle on a symmetrical hero portrait as the pupil ignites.
+        const k=smooth((t-7.25)/1.85);
         z=4.28+Math.sin(time*.00018)*.006;
-        y=.003;
+        x=.022*Math.sin(k*Math.PI);
+        y=.003+.009*Math.sin(k*Math.PI);
       }else{
         z=mix(4.28,4.40,smooth((t-9.10)/.60));
         y=.003;
