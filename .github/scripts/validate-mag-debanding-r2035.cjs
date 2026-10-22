@@ -94,7 +94,7 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261014-r2104-photographic-moving-softbox'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261021-r2113-layered-chassis'),
   'Missing actual cache-busted four-point R2103 Android replacement');
 assert.ok(fallback.includes('fxMagFallbackMaterialR2104')&&
   fallback.includes('moving-softbox-smoked-chrome-sapphire-facets')&&
