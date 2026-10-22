@@ -2066,6 +2066,10 @@
           root.dataset.fxMagBirthEyeScaleR2148=String(
             this.mechEyeCorona?.scale?.x??0
           );
+          root.dataset.fxMagBirthEmbryoScaleR2149=String(this.coreGroup.scale.x);
+          root.dataset.fxMagBirthDnaOpacityR2149=String(
+            this.dnas[0]?.userData?.materials?.[0]?.opacity??0
+          );
           root.dataset.fxMagBirthThreeLitPixelsR2146=String(lit);
           root.dataset.fxMagBirthFrameR1557='r2146-canonical-three-framebuffer-readback';
         }catch(error){
