@@ -1621,8 +1621,10 @@
       this.silverMaterial.roughness=mix(.18,.14,finale);
 
       this.mechMaterial.opacity=(.90+.028*finale)*grow;
-      this.mechMidMaterial.opacity=(.46+.035*finale)*grow;
-      this.silverMaterial.opacity=(.36+.055*finale)*grow;
+      // R2119: reveal machined inserts as solid layers, not ghosted decals.
+      // Opacity is still animated from zero to preserve the cinematic reveal.
+      this.mechMidMaterial.opacity=(.74+.08*finale)*grow;
+      this.silverMaterial.opacity=(.76+.10*finale)*grow;
       this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
