@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2149-dna-embryo-optic-birth
-release_line=R2149-mobile-embryo-focus-and-R2148-physical-optic
-purpose=Show the authentic 3D double-helix first, hand off to a more readable living embryo, then mechanically seat five visible titanium panels and ignite the recessed eight-shutter optical eye only after assembly.
-assets=R2149 mobile Three.js embryo scale and soft DNA scaffold; R2148 real titanium optical aperture and timing correction; cache revisions propagated through both loader and Cloudflare Worker asset rewrites; R2147 five-piece metal assembly retained.
-validation=R2149 real mobile Chromium WebGL and reference fallback portrait proof passed, including measured GPU pixel brightness and DNA/embryo/assembly/MAG stages, five visible titanium panels and bounded optical ignition; preflight validation passed. Production final live smoke and dual-domain cinematic check must still pass.
-production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this exact marker and pass full R533 to R536 live cinematic handoff.
-limits=Automated visual checks prove geometry/visibility, not subjective film-studio quality on all screens. Performance/Lighthouse ratings and user-device visual inspection remain independent checks.
+token=20261023-r2150-visible-cinematic-replay
+release_line=R2150-visible-MAG-cinematic-replay-with-R2149-3d-birth
+purpose=Give returning mobile and desktop visitors a clear accessible way to replay the latest DNA-to-embryo-to-MAG cinematic, instead of silently skipping it because the session had already seen an earlier version.
+assets=docs/scifi-ui/index.html; docs/scifi-ui/styles/formatx-intro-replay-r2150.css; .github/scripts/validate-r533-r536-handoff.cjs. Preserves all deployed R2149 3D scene and native R2144 permanent metal MAG improvements.
+validation=Preflight, exact content revision, both-domain live smoke and browser R533-R536 tests must pass. Browser test verifies replay link is visible and tappable and forced intro=1 opens the animation, including the mobile after-skip state.
+production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this exact marker and pass the full cinematic and replay regression tests before publication is considered verified.
+limits=Automated deployment and browser checks do not prove subjective cinematic award quality or the identical appearance on every real phone; user-device visual inspection is distinct.
