@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2142-smooth-polished-metallic-mag
-release_line=R2142-native-MAG-smooth-armour-and-3D-perspective
-purpose=Deliver improved visible permanent four-arm MAG after real mobile and desktop screenshot audits. Raised twelve-segment titanium panels now have smooth vertex normals, eye has a forty-eight-segment metal bezel with eight iris vanes, and the resting camera reveals genuine 3D depth.
-assets=One native WebGL canvas; same responsive controller, reduced motion and interaction handling; updated browser cache keys throughout the actual mobile and desktop startup path.
-verification=Both live domains must serve the exact release marker, real R2142 render source and script dependency graph, and pass production smoke and cinematic R533-R536 handoff.
-visual=Capture real mobile and desktop Chromium screenshots to inspect final surface quality; do not infer photorealism from green code tests alone.
-limits=Artistic approval against the supplied user screenshots remains separate from software deployment success.
+token=20261022-r2143-root-native-three-intro
+release_line=R2143-native-threejs-cinematic-and-R2142-titanium-mag
+purpose=Fix the real canonical-homepage 3D cinematic importer: the Three.js bundle must load from /scifi-ui/scripts/three-r185.module.js rather than the broken /scripts/ path. Preserve R2142 smooth titanium permanent four-arm MAG and three-dimensional idle camera.
+assets=Updated canonical absolute Three.js ESM import path, R533 birth-engine query, Cloudflare asset-graph rewrite, native permanent R326 MAG, and startup caches.
+validation=Production source, Worker build and security preflight passed for R2143. Regression tests check canonical root/SCIFI module paths and importable Android Three.js. Live confirmation requires exact revision on both domains and cinematic browser handoff.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision token, pass production smoke and R533 to R536 cinematic browser tests.
+limits=Real GPU rendering depends on browser/WebGL capabilities; tests do not constitute visual artistic approval against user photos.
