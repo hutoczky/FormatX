@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2135-volumetric-helix
-release_line=R2135-volumetric-DNA-to-MAG-four-arm-birth
+token=20261022-r2136-volumetric-helix-csp-safe
+release_line=R2136-volumetric-DNA-to-MAG-four-arm-birth-CSP-safe
 purpose=Promote eight genuine 3D phase-opposed DNA strands, two per four-point MAG arm, with tapered volumetric winding and timed mechanical seating.
-scope=docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js, docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js, docs/scifi-ui/index.html. R2134 CSP hotfix preserved.
-validation=Require successful production validation, both-domain revision convergence, live smoke and cinematic browser handoff before claiming deployment complete.
+scope=R2135 volumetric DNA-to-MAG renderer and loader, R2136 exact inline CSP hash for both HTML and Cloudflare Worker, and production inline CSP drift regression guard.
+validation=R2136 production CSP hash validator and source validation passed; require successful production validation, both-domain revision convergence, live smoke and cinematic browser handoff before claiming deployment complete.
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and pass R533 to R536 cinematic handoff.
 limits=GPU-dependent cinematic quality varies by device; full photoreal quality and performance score targets are not asserted.
