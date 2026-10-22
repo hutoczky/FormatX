@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2136-volumetric-helix-csp-safe
-release_line=R2136-volumetric-DNA-to-MAG-four-arm-birth-CSP-safe
-purpose=Promote eight genuine 3D phase-opposed DNA strands, two per four-point MAG arm, with tapered volumetric winding and timed mechanical seating.
-scope=R2135 volumetric DNA-to-MAG renderer and loader, R2136 exact inline CSP hash for both HTML and Cloudflare Worker, and production inline CSP drift regression guard.
-validation=R2136 production CSP hash validator and source validation passed; require successful production validation, both-domain revision convergence, live smoke and cinematic browser handoff before claiming deployment complete.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and pass R533 to R536 cinematic handoff.
-limits=GPU-dependent cinematic quality varies by device; full photoreal quality and performance score targets are not asserted.
+token=20261022-r2137-permanent-four-arm-titanium-mag
+release_line=R2137-permanent-MAG-four-arm-titanium-optical-core
+purpose=The live persistent R326 hero, not merely the cinematic R533 intro, now has four structural metal arms composed of eight beveled raised titanium plates, a larger recessed cyan optic, and the prior volumetric DNA-to-MAG birth.
+scope=docs/scifi-ui/scripts/formatx-crystal-organism-r326.js, docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js, docs/scifi-ui/scripts/formatx-core-mobile-v55.js, docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js, docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js, docs/scifi-ui/index.html, billing-worker/src/production-content-entry.js, .github/scripts/validate-mag-debanding-r2035.cjs.
+validation=Require production integrity, browser runtime, exact revision convergence on both domains, smoke test, cinematic handoff and mobile/desktop evidence before asserting live success.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and the live JavaScript owner must expose the R2137 geometry, material and cache chain.
+limits=No verified claim of surpassing benchmark studios, photoreal rendering or universal device performance; user visual acceptance remains necessary.
