@@ -270,6 +270,25 @@
         [-1.42,.18,-1.08,-.12,.68],
         [1.48,.10,-1.02,.10,.66]
       ];
+      // R2131: four persistent, GPU-light DNA-to-arm transfer strands.
+      // Their endpoints are animated with the same chassis-axis mapping
+      // as the parent helices, visually bridging DNA and emerging metal.
+      this.birthStrands=[];
+      const T=this.THREE;
+      for(let axis=0;axis<4;axis++){
+        const positions=new Float32Array(3*40);
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.BufferAttribute(positions,3));
+        const material=new T.LineBasicMaterial({
+          color:0x79e8e3,transparent:true,opacity:0,
+          depthWrite:false,blending:T.AdditiveBlending
+        });
+        const strand=new T.Line(geometry,material);
+        strand.visible=false;
+        strand.frustumCulled=false;
+        this.dnaGroup.add(strand);
+        this.birthStrands.push(strand);
+      }
       this.dnas=[];
       for(const [x,y,z,rz,sc] of placements){
         const h=this.createHelix(4.08,.272,3.82);
@@ -1493,6 +1512,39 @@
       });
     }
 
+    updateBirthStrands(t,time){
+      // R2131: each strand bridges its DNA origin to the corresponding
+      // four-point metal arm. Reuse buffers; no frame-by-frame allocation.
+      const start=smooth((t-4.68)/.62);
+      const end=1-smooth((t-6.48)/.75);
+      const opacity=start*end;
+      this.birthStrands.forEach((line,axis)=>{
+        line.visible=opacity>.002;
+        if(!line.visible)return;
+        line.material.opacity=.24*opacity;
+        const angle=axis*Math.PI*.5;
+        const dx=Math.cos(angle),dy=Math.sin(angle);
+        const source=this.dnas.find(h=>{
+          const b=h.userData.base;
+          const a=Math.abs(b.x)>Math.abs(b.y)
+            ?(b.x>=0?0:2):(b.y>=0?1:3);
+          return a===axis;
+        });
+        if(!source)return;
+        const a=line.geometry.attributes.position;
+        for(let j=0;j<40;j++){
+          const u=j/39;
+          const eased=smooth(u);
+          const x=mix(source.position.x,dx*.86,eased);
+          const y=mix(source.position.y,dy*.86,eased);
+          const z=mix(source.position.z,.19,eased);
+          const ripple=Math.sin(u*Math.PI)*Math.sin(time*.003+axis*1.57+u*11)*.075;
+          a.setXYZ(j,x-dy*ripple,y+dx*ripple,z);
+        }
+        a.needsUpdate=true;
+      });
+    }
+
     updateCore(t,time){
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
@@ -1769,6 +1821,7 @@
       const t=clamp(r)*10;
       this.updateCamera(t,time);
       this.updateDNA(t,time);
+      this.updateBirthStrands(t,time);
       this.updateCore(t,time);
       this.updateOrganic(t,time);
       this.updateCells(t,time);
