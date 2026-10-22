@@ -316,10 +316,13 @@
             ?(b.x>=0?0:2):(b.y>=0?1:3);
           return nearest===axis;
         });
-        line.userData.source=candidates.sort((a,b)=>
+        // R2134: bind the two lanes to distinct DNA parents when
+        // possible, so the doubled bridge has genuine spatial depth.
+        candidates.sort((a,b)=>
           Math.hypot(a.userData.base.x,a.userData.base.y)-
           Math.hypot(b.userData.base.x,b.userData.base.y)
-        )[0]||null;
+        );
+        line.userData.source=candidates[line.userData.lane]||candidates[0]||null;
       });
     }
 
