@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2134-double-helix-csp-hotfix
-release_line=R2134-DNA-to-MAG-dual-strand-CSP-hotfix
-purpose=Deploy the current R2133 cinematic intro with two phase-opposed DNA transfer strands per each of the four MAG arms, staged mechanical assembly, optical wake and camera parallax.
-scope=docs/scifi-ui/index.html, docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js, docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js. No intended changes to payments, licensing or authentication.
-validation=R2133 production revision convergence and canonical smoke passed; cinematic browser validation failed on blocked inline script hash sha256-SAjaKaD+n3UzHnk5MDF832VipOXQgwI909nprqwAofY=. R2134 adds only that exact hash to CSP. Production validation and live smoke checks must run in the deploy-formatx-custom-domain workflow for this revision. No live visual or Lighthouse success claimed before those jobs pass.
-production_verification=Require this exact revision token on formatxsuite.com and www.formatxsuite.com and successful canonical cinematic browser checks.
-limits=R2133 introduces visual bridge strands, not complete geometric metamorphosis or verified photoreal quality.
+token=20261022-r2135-volumetric-helix
+release_line=R2135-volumetric-DNA-to-MAG-four-arm-birth
+purpose=Promote eight genuine 3D phase-opposed DNA strands, two per four-point MAG arm, with tapered volumetric winding and timed mechanical seating.
+scope=docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js, docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js, docs/scifi-ui/index.html. R2134 CSP hotfix preserved.
+validation=Require successful production validation, both-domain revision convergence, live smoke and cinematic browser handoff before claiming deployment complete.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and pass R533 to R536 cinematic handoff.
+limits=GPU-dependent cinematic quality varies by device; full photoreal quality and performance score targets are not asserted.
