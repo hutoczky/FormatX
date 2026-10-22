@@ -1589,7 +1589,9 @@
     }
 
     updateMechanical(t,time){
-      const grow=smooth((t-6.25)/.90);
+      // R2121: overlap the first chassis emergence with the final DNA
+      // convergence so the mechanical MAG is born from the helix on screen.
+      const grow=smooth((t-5.88)/1.18);
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
       this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
