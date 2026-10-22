@@ -52,6 +52,10 @@
       this.height=1;
       this.lastRender=0;
       this.disposed=false;
+      // R2146: inspect real GPU pixels only in deterministic visual proofs.
+      // Never stall a user's normal cinematic with gl.readPixels.
+      this.proofReadback=new URLSearchParams(location.search).has('introframe');
+      this.proofPixel=this.proofReadback?new Uint8Array(4):null;
 
       this.mobileRender=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
       this.renderer=new THREE.WebGLRenderer({
@@ -1908,6 +1912,32 @@
       if(this.mechLight)this.mechLight.intensity+=flash*.34;
 
       this.renderer.render(this.scene,this.camera);
+      if(this.proofReadback){
+        // R2146: real framebuffer evidence for the canonical R1280 Three.js
+        // owner. The former visual proof only supported the retired R1360
+        // renderer, and therefore reported a false blank GPU frame.
+        try{
+          const gl=this.renderer.getContext();
+          const w=gl.drawingBufferWidth,h=gl.drawingBufferHeight;
+          let peak=0,lit=0;
+          const px=this.proofPixel;
+          for(let yi=0;yi<15;yi++){
+            const y=Math.max(0,Math.min(h-1,Math.floor(h*(.10+yi*.057))));
+            for(let xi=0;xi<15;xi++){
+              const x=Math.max(0,Math.min(w-1,Math.floor(w*(.12+xi*.054))));
+              gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+              peak=Math.max(peak,px[0],px[1],px[2]);
+              if(px[1]>35&&px[2]>45)lit++;
+            }
+          }
+          const root=document.documentElement;
+          root.dataset.fxMagBirthFramePeakR1557=String(peak);
+          root.dataset.fxMagBirthThreeLitPixelsR2146=String(lit);
+          root.dataset.fxMagBirthFrameR1557='r2146-canonical-three-framebuffer-readback';
+        }catch(error){
+          document.documentElement.dataset.fxMagBirthFrameR1557='r2146-three-readback-unavailable';
+        }
+      }
     }
 
     destroy(){
