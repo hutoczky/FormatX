@@ -1676,8 +1676,28 @@
         this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
         this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
       }
+      // R2127: sequentially seat machined silver elements into the
+      // four-armed chassis. Capture each mesh's authored final transform
+      // once, so repeated animation frames never accumulate drift.
       this.silverParts.forEach((p,i)=>{
-        p.rotation.y=Math.sin(time*.00015+i)*.006*grow;
+        if(!p.userData.birthTransform){
+          p.userData.birthTransform={
+            position:p.position.clone(),
+            scale:p.scale.clone(),
+            rotationY:p.rotation.y
+          };
+        }
+        const base=p.userData.birthTransform;
+        const seat=smooth((t-5.91-(i%8)*.105)/1.10);
+        const direction=(i%4)*Math.PI*.5;
+        const offset=(1-seat)*.16;
+        p.position.set(
+          base.position.x+Math.cos(direction)*offset,
+          base.position.y+Math.sin(direction)*offset,
+          base.position.z+(1-seat)*.22
+        );
+        p.scale.copy(base.scale).multiplyScalar(.78+.22*seat);
+        p.rotation.y=base.rotationY+(1-seat)*.17+Math.sin(time*.00015+i)*.006*grow;
       });
     }
 
