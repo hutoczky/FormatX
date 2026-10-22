@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2146-centered-mobile-genome
-release_line=R2146-mobile-centered-true-3d-dna-and-R2145-portrait-cinematic
-purpose=Make the core's DNA genesis legible on upright Android screens, in both the genuine Three.js renderer and the low-power native Canvas2D cinematic.
-assets=R2146 native 3D center-first double helix and 3 satellites; canonical root-absolute Three.js module import; GPU-only visual readback in explicit proof mode; R2145 portrait centered DNA, living embryo, DNA-to-chassis energy strands, late polished MAG assembly; R2144 raised titanium permanent MAG and optical ring retained.
-validation=R2145 Android 412x915 reference-canvas DNA/embryo/MAG keyframe Chromium visual proof passed; JavaScript parsed. R2146 mobile Three.js source, exact Cloudflare rewrite and rendering proof added to CI; production validation and full dual-domain cinematic handoff required.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision token, pass production smoke, and complete canonical R533-to-R536 cinematic handoff. A successful deployment is not an artistic quality comparison.
-limits=Visual fidelity and performance vary across Android/GPU browsers. Real-user screenshot verification remains separate from synthetic headless Chromium evidence.
+token=20261022-r2147-visible-mechanical-mag
+release_line=R2147-DNA-first-five-piece-machined-MAG-and-R2146-portrait-native-genome
+purpose=Make the metal chassis visibly assemble during the true Three.js MAG intro. Previously the 2 silver crown pieces, two lateral panels and lower jaw were permanently marked invisible and did not appear despite being animated.
+assets=R2147 staged five-piece titanium crown, shoulder and lower-jaw reveal, DNA first scene free of premature central shell and proof-only GPU armor-count telemetry; R2146 portrait-correct native 3D double helix; R2145 centered low-power DNA/embryo/finale; R2144 permanent raised titanium MAG retained.
+validation=R2147 mobile portrait proof passed in both real Three.js and Canvas2D: real native GPU pixels measured and five assembled armor pieces confirmed in the MAG frame. Full production validation, revision convergence, canonical smoke and dual-domain R533-to-R536 cinematic browser handoff required.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve the exact token and pass full production smoke and canonical R533-to-R536 cinematic handoff.
+limits=Headless Chromium artifacts verify the rendered structure but artistic quality is not objectively certified. User-device visual inspection remains necessary; mobile GPUs/browsers may differ.
