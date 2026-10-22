@@ -514,7 +514,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261022-r2146-mobile-centered-threejs-dna';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261022-r2147-mechanical-titanium-finale';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
