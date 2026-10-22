@@ -1353,7 +1353,7 @@
       this.mechanicalGroup.add(this.mechEyeCorona);
 
       this.mechEyeCore=new T.Mesh(
-        new T.SphereGeometry(.094,48,24),
+        new T.SphereGeometry(.120,48,24),
         new T.MeshPhysicalMaterial({
           color:0x12383e,metalness:.02,roughness:.075,
           transmission:.34,thickness:.18,ior:1.47,
@@ -1365,6 +1365,69 @@
       this.mechEyeCore.scale.set(1,1,.30);
       this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
+
+      // R2148 — physically raised optical assembly: a dark machined socket,
+      // bright brushed-titanium rim, secondary cyan capillary and eight
+      // individual shutter facets. The final R326 hero uses this same
+      // approximately 0.20-unit aperture, preventing a small-eye handoff.
+      this.mechOpticSocket=new T.Mesh(
+        new T.TorusGeometry(.191,.026,12,96),
+        new T.MeshPhysicalMaterial({
+          color:0x081a20,metalness:.55,roughness:.31,
+          clearcoat:.72,clearcoatRoughness:.12,
+          transparent:true,opacity:0,depthWrite:false
+        })
+      );
+      this.mechOpticSocket.position.set(0,.01,.477);
+      this.mechanicalGroup.add(this.mechOpticSocket);
+
+      this.mechOpticRim=new T.Mesh(
+        new T.TorusGeometry(.192,.010,12,96),
+        new T.MeshPhysicalMaterial({
+          color:0xc2d7d4,metalness:.69,roughness:.15,
+          clearcoat:1,clearcoatRoughness:.043,
+          specularIntensity:1,
+          transparent:true,opacity:0,depthWrite:false
+        })
+      );
+      this.mechOpticRim.position.set(0,.01,.507);
+      this.mechanicalGroup.add(this.mechOpticRim);
+
+      this.mechOpticCapillary=new T.Mesh(
+        new T.TorusGeometry(.142,.0038,6,96),
+        new T.MeshBasicMaterial({
+          color:0x5ddddc,transparent:true,opacity:0,
+          blending:T.AdditiveBlending,depthWrite:false
+        })
+      );
+      this.mechOpticCapillary.position.set(0,.01,.514);
+      this.mechanicalGroup.add(this.mechOpticCapillary);
+
+      const shutterVertices=[];
+      for(let blade=0;blade<8;blade++){
+        const angle=blade*Math.PI/4+.12;
+        const p=(radius,offset)=>[
+          Math.cos(angle+offset)*radius,
+          .01+Math.sin(angle+offset)*radius,
+          .495
+        ];
+        shutterVertices.push(
+          ...p(.107,-.15),...p(.178,-.23),...p(.178,.35)
+        );
+      }
+      const shutterGeometry=new T.BufferGeometry();
+      shutterGeometry.setAttribute('position',
+        new T.Float32BufferAttribute(shutterVertices,3));
+      shutterGeometry.computeVertexNormals();
+      this.mechOpticShutters=new T.Mesh(
+        shutterGeometry,
+        new T.MeshPhysicalMaterial({
+          color:0x98b5b7,metalness:.67,roughness:.23,
+          clearcoat:.9,clearcoatRoughness:.08,
+          side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
+        })
+      );
+      this.mechanicalGroup.add(this.mechOpticShutters);
 
       this.mechInnerMaterial=new T.MeshBasicMaterial({
         color:0x8af6f5,transparent:true,opacity:0,
@@ -1776,7 +1839,18 @@
       // Previously its fixed .92 opacity revealed the eye prematurely.
       if(this.mechEyeCore){
         this.mechEyeCore.material.opacity=.92*opticWake;
-        this.mechEyeCore.material.emissiveIntensity=.045+opticWake*.11;
+        this.mechEyeCore.material.emissiveIntensity=.045+opticWake*.17;
+      }
+      // The iris seats only after the armour closes; no premature luminous
+      // HUD or arbitrary late flash in the DNA/embryo chapters.
+      if(this.mechOpticSocket){
+        const wake=opticWake*grow;
+        this.mechOpticSocket.material.opacity=.88*wake;
+        this.mechOpticRim.material.opacity=.94*wake;
+        this.mechOpticCapillary.material.opacity=.26*wake;
+        this.mechOpticShutters.material.opacity=.79*wake;
+        this.mechOpticShutters.rotation.z=.11*(1-opticWake)+Math.sin(time*.00023)*.007*wake;
+        this.mechOpticRim.rotation.z=Math.sin(time*.00012)*.010*wake;
       }
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*opticWake*opticPulse;
