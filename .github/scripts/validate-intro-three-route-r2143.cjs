@@ -1,5 +1,5 @@
 'use strict';
-// R2143 regression: the root-domain homepage must load the same native
+// R2148 + R2143 regression: the root-domain homepage must load the same native
 // Three.js birth engine as /scifi-ui/index.html. A page-relative import
 // once resolved to /scripts/three-r185.module.js and forced the 2D fallback.
 const assert=require('node:assert/strict');
@@ -9,7 +9,7 @@ const engine=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
 const birth=read('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js');
 const worker=read('billing-worker/src/production-content-entry.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
-const revision='formatx-mag-genesis-three-r1280.js?v=20261022-r2147-mechanical-titanium-finale';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261022-r2148-optical-ignition';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
