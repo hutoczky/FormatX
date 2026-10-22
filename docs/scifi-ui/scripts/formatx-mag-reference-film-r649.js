@@ -254,28 +254,121 @@
     ctx.fillStyle=rim;ctx.fillRect(0,0,W,H);
     if(!MOBILE)drawLivingWorld(ctx,time,.86);
 
-    const dnaFade=1-smooth((t-2.65)/1.45);
+    // R2145: the old panoramic DNA was outside the actual cropped field
+    // on portrait phones (1280x720 cover). Keep the genome in the visible
+    // center of the portrait composition, and keep it onscreen long enough
+    // to establish the first shot before the embryonic organism is born.
+    const dnaFade=1-smooth((t-4.60)/1.28);
     if(dnaFade>.002){
-      ctx.save();ctx.globalAlpha=.58*dnaFade;ctx.lineWidth=2;
-      for(let h=0;h<3;h++){
-        const ox=[180,640,1090][h],oy=[170,120,205][h],rot=[-.28,.11,.31][h];
-        ctx.save();ctx.translate(ox,oy);ctx.rotate(rot);
-        for(let strand=0;strand<2;strand++){
-          ctx.strokeStyle=strand?'rgba(132,112,220,.54)':'rgba(116,210,220,.58)';
+      if(MOBILE){
+        const genomeScale=1.02-.22*smooth((t-3.30)/2.45);
+        const genome={x:640,y:360,l:520,a:61,r:Math.PI/2,p:.35,s:.98,o:1};
+        drawDNA(ctx,genome,time,dnaFade*.95,genomeScale);
+      }else{
+        ctx.save();ctx.globalAlpha=.66*dnaFade;ctx.lineWidth=2;
+        for(let h=0;h<3;h++){
+          const ox=[180,640,1090][h],oy=[170,270,205][h],rot=[-.28,.11,.31][h];
+          ctx.save();ctx.translate(ox,oy);ctx.rotate(rot);
+          for(let strand=0;strand<2;strand++){
+            ctx.strokeStyle=strand?'rgba(132,112,220,.54)':'rgba(116,210,220,.58)';
+            ctx.beginPath();
+            for(let i=0;i<=28;i++){
+              const u=i/28,x=(u-.5)*520,y=Math.sin(u*Math.PI*6.4+strand*Math.PI+time*.00042)*42;
+              i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+            }
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+    }
+
+    // R2145: a biologically formed three-dimensional-looking embryo occupies
+    // the middle act. The smoked-glass volume has real clipped depth cues,
+    // not the premature metal emblem from the previous low-power film.
+    const embryo=smooth((t-2.45)/.88)*(1-smooth((t-5.72)/.88));
+    if(embryo>.002){
+      const R=Math.min(
+        80+smooth((t-2.45)/1.10)*57,
+        Number.isFinite(radiusCap)?radiusCap*.88:137
+      );
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.globalAlpha=embryo;
+      const body=ctx.createRadialGradient(-R*.23,-R*.30,R*.035,R*.08,R*.06,R*1.12);
+      body.addColorStop(0,'rgba(146,222,219,.88)');
+      body.addColorStop(.22,'rgba(66,128,146,.90)');
+      body.addColorStop(.47,'rgba(31,63,84,.96)');
+      body.addColorStop(.73,'rgba(18,30,49,.97)');
+      body.addColorStop(.94,'rgba(4,12,24,.99)');
+      body.addColorStop(1,'rgba(1,5,12,.16)');
+      ctx.fillStyle=body;
+      ctx.beginPath();
+      ctx.moveTo(0,-R);
+      ctx.bezierCurveTo(R*.80,-R*.80,R*1.04,-R*.13,R*.79,R*.52);
+      ctx.bezierCurveTo(R*.48,R*1.07,-R*.50,R*1.10,-R*.84,R*.44);
+      ctx.bezierCurveTo(-R*1.08,-R*.15,-R*.72,-R*.79,0,-R);
+      ctx.closePath();
+      ctx.fill();
+      ctx.save();ctx.clip();
+      const caustic=ctx.createLinearGradient(-R,-R,R,R);
+      caustic.addColorStop(0,'rgba(191,245,236,.03)');
+      caustic.addColorStop(.28,'rgba(198,253,255,.27)');
+      caustic.addColorStop(.40,'rgba(14,33,49,.02)');
+      caustic.addColorStop(.78,'rgba(75,158,178,.14)');
+      caustic.addColorStop(1,'rgba(0,8,20,.04)');
+      ctx.fillStyle=caustic;ctx.fillRect(-R,-R,R*2,R*2);
+      for(let j=0;j<9;j++){
+        const angle=j*TAU/9+time*.00013;
+        ctx.strokeStyle='rgba(126,227,222,.13)';
+        ctx.lineWidth=1.1;
+        ctx.beginPath();ctx.moveTo(Math.cos(angle)*R*.19,Math.sin(angle)*R*.19);
+        ctx.quadraticCurveTo(Math.cos(angle+.29)*R*.67,Math.sin(angle+.29)*R*.68,
+          Math.cos(angle+.10)*R*.86,Math.sin(angle+.10)*R*.84);
+        ctx.stroke();
+      }
+      ctx.restore();
+      ctx.strokeStyle='rgba(170,230,228,.30)';
+      ctx.lineWidth=1.3;
+      ctx.stroke();
+      const eye=ctx.createRadialGradient(-R*.022,-R*.025,0,0,0,R*.19);
+      eye.addColorStop(0,'rgba(213,255,248,.92)');
+      eye.addColorStop(.15,'rgba(82,225,225,.90)');
+      eye.addColorStop(.48,'rgba(16,78,96,.70)');
+      eye.addColorStop(1,'rgba(0,13,28,0)');
+      ctx.fillStyle=eye;ctx.beginPath();ctx.arc(0,0,R*.19,0,TAU);ctx.fill();
+      ctx.restore();
+    }
+
+    // R2145: eight DNA filaments feed the four future chassis axes before
+    // the metal seats. This pass is deliberately behind the metal shell.
+    const transfer=smooth((t-5.15)/.52)*(1-smooth((t-6.85)/.78));
+    if(transfer>.002){
+      const R=Math.min(170,Number.isFinite(radiusCap)?radiusCap:170);
+      ctx.save();ctx.translate(cx,cy);ctx.globalAlpha=transfer*.75;
+      for(let axis=0;axis<4;axis++){
+        const a=axis*Math.PI*.5,dx=Math.cos(a),dy=Math.sin(a);
+        for(let lane=0;lane<2;lane++){
+          ctx.strokeStyle=lane?'rgba(154,163,240,.77)':'rgba(107,232,237,.91)';
+          ctx.lineWidth=lane?1.5:2.0;
           ctx.beginPath();
-          for(let i=0;i<=20;i++){
-            const u=i/20,x=(u-.5)*520,y=Math.sin(u*Math.PI*6.4+strand*Math.PI+time*.00042)*42;
-            i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+          for(let j=0;j<=24;j++){
+            const u=j/24;
+            const extent=R*(.12+.80*u);
+            const wave=Math.sin(u*Math.PI*7+time*.003+lane*Math.PI)*R*.075*Math.sin(Math.PI*u);
+            const x=dx*extent-dy*wave,y=dy*extent+dx*wave;
+            j?ctx.lineTo(x,y):ctx.moveTo(x,y);
           }
           ctx.stroke();
         }
-        ctx.restore();
       }
       ctx.restore();
     }
 
-
-    const grow=smooth((t-2.42)/.70);
+    // R2145: the permanent four-point metal belongs to the FINAL act.
+    // Do not replace the establishing DNA or embryonic shot at 2.42 s.
+    const grow=smooth((t-5.58)/1.30);
     if(grow>.002){
       /* R2103: the real low-power/non-WebGL fallback now uses the same
          four-arm MAG identity as the single native R326/Three renderer.
