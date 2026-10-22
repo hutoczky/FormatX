@@ -1647,7 +1647,7 @@
       const opticPulse=1+.075*Math.sin(time*.0022);
       if(this.mechEyeCorona){
         this.mechEyeCorona.material.opacity=(.145+.018*finale)*opticWake*opticPulse;
-        this.mechEyeCorona.scale.setScalar(.50*(.90+.10*opticWake));
+        this.mechEyeCorona.scale.set(.50*(.90+.10*opticWake),.50*(.90+.10*opticWake),1);
       }
       this.mechInnerMaterial.opacity=(.070+.020*finale)*opticWake;
       this.mechInnerRing.rotation.z=time*.00012;
