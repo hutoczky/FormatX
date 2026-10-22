@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2141-polished-armour-optical-bezel
-release_line=R2141-polished-MAG-anti-zfighting-and-3D-iris
-purpose=Correct the actual browser-captured R2140 persistent MAG: prevent dark panel intersections, replace gray metal shading with polished studio titanium, and build a physical forty-eight-segment central optical bezel with eight iris vanes.
-assets=Single canvas, four radial chassis arms, eight surface-fitted bevelled metal channels, twelve segments per channel, increased glass-metal clearance, native 3D optic geometry, and updated desktop and mobile caches.
-verification=Both production domains must serve this exact marker and the R2141 arm and lens source; run canonical website smoke, mobile and desktop rendering, and full ten-second cinematic handoff.
-quality=Avoid duplicate canvases and reduced-motion regressions while keeping the GPU workload bounded by the existing WebGL context.
-limits=Automated passes prove functionality and basic visual presence, not final artistic approval.
+token=20261022-r2142-smooth-polished-metallic-mag
+release_line=R2142-native-MAG-smooth-armour-and-3D-perspective
+purpose=Deliver improved visible permanent four-arm MAG after real mobile and desktop screenshot audits. Raised twelve-segment titanium panels now have smooth vertex normals, eye has a forty-eight-segment metal bezel with eight iris vanes, and the resting camera reveals genuine 3D depth.
+assets=One native WebGL canvas; same responsive controller, reduced motion and interaction handling; updated browser cache keys throughout the actual mobile and desktop startup path.
+verification=Both live domains must serve the exact release marker, real R2142 render source and script dependency graph, and pass production smoke and cinematic R533-R536 handoff.
+visual=Capture real mobile and desktop Chromium screenshots to inspect final surface quality; do not infer photorealism from green code tests alone.
+limits=Artistic approval against the supplied user screenshots remains separate from software deployment success.
