@@ -5,6 +5,7 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
       - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
       - 'docs/scifi-ui/index.html'
       - '.github/scripts/verify-portrait-genesis-r2145.cjs'
