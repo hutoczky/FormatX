@@ -49,7 +49,7 @@ assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
 assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261022-r2144-permanent-mag'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
-assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2148-optical-ignition'),
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2149-embryo-focus'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
 // R2148: the user-visible native Three.js cinematic must end with a true
 // machined optical instrument rather than the small pre-R2148 glowing bead.
