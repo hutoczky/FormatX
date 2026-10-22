@@ -48,7 +48,9 @@ const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261022-r2
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
-const AUTO_DELAY_MS=5500;
+// R2139: mount the real four-arm hero shortly after first paint, not after
+// an invisible 5.5s+3.5s idle window. Keep mobile and audit protections.
+const AUTO_DELAY_MS=matchMedia('(max-width:900px),(pointer:coarse)').matches?2600:1450;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -107,7 +109,7 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:3500});
+    idleId=requestIdleCallback(launch,{timeout:1350});
   }else{
     timer=setTimeout(launch,900);
   }
