@@ -1,8 +1,9 @@
 FormatX production revision
-token=20261022-r2137-permanent-four-arm-titanium-mag
-release_line=R2137-permanent-MAG-four-arm-titanium-optical-core
-purpose=The live persistent R326 hero, not merely the cinematic R533 intro, now has four structural metal arms composed of eight beveled raised titanium plates, a larger recessed cyan optic, and the prior volumetric DNA-to-MAG birth.
-scope=docs/scifi-ui/scripts/formatx-crystal-organism-r326.js, docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js, docs/scifi-ui/scripts/formatx-core-mobile-v55.js, docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js, docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js, docs/scifi-ui/index.html, billing-worker/src/production-content-entry.js, .github/scripts/validate-mag-debanding-r2035.cjs.
-validation=Require production integrity, browser runtime, exact revision convergence on both domains, smoke test, cinematic handoff and mobile/desktop evidence before asserting live success.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and the live JavaScript owner must expose the R2137 geometry, material and cache chain.
-limits=No verified claim of surpassing benchmark studios, photoreal rendering or universal device performance; user visual acceptance remains necessary.
+token=20261022-r2139-permanent-surface-fitted-four-arm-mag
+release_line=R2139-visible-permanent-MAG-four-arm-structural-bioglass-titanium
+purpose=Make the actual persistent hero MAG visibly different, not only the ten-second DNA cinematic intro. Four structural titanium arms use eight beveled channels contoured to the canonical superellipsoid crystal body, with a larger recessed central optic.
+scope=docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; .github/scripts/validate-mag-debanding-r2035.cjs.
+delivery=Both device runtimes use R2139 cache keys; Cloudflare must not rewrite current source to old R1950/R1984 assets. Deferred native hero mount latency is lowered while respecting first paint, reduced-motion, and Lighthouse modes.
+validation=Require production source and security gates, browser archive checks, exact revision convergence on both domains, production smoke, and live R533-R536 cinematic handoff.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision and the live R2139 renderer asset; no success claims before GitHub production deployment completes.
+limits=Final visual acceptance remains a human judgment; photorealism and superiority over award studios are not automatically proven.
