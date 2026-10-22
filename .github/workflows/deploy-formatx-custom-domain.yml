@@ -234,15 +234,15 @@ jobs:
           set -euo pipefail
           for base in https://formatxsuite.com https://www.formatxsuite.com; do
             tmp="$(mktemp -d)"
-            curl -fsS --retry 4 --retry-delay 2 --max-time 35 \
+            curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-crystal-organism-r326.js?rev=${GITHUB_RUN_ID}-visible-mag" -o "$tmp/renderer.js"
             grep -Fq 'R2142: smooth vertex normals across the machined metal' "$tmp/renderer.js"
             grep -Fq 'R2144: raised 48-piece optical bezel now has a true sloped crown' "$tmp/renderer.js"
             grep -Fq 'c=mix(c,titanium,machinedArmor*.99)' "$tmp/renderer.js"
-            curl -fsS --retry 4 --retry-delay 2 --max-time 35 \
+            curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?rev=${GITHUB_RUN_ID}-mag-loader" -o "$tmp/scheduler.js"
             grep -Fq 'formatx-motion-runtime-loader-r239.js?v=20261022-r2144-permanent-mag' "$tmp/scheduler.js"
-            curl -fsS --retry 4 --retry-delay 2 --max-time 35 \
+            curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?rev=${GITHUB_RUN_ID}-mag-runtime" -o "$tmp/motion.js"
             grep -Fq 'formatx-crystal-organism-r326.js?v=20261022-r2144-smooth-polished-mag' "$tmp/motion.js"
             echo "R2144 raised titanium MAG geometry and runtime load chain verified on $base"
@@ -261,18 +261,18 @@ jobs:
             tmp="$(mktemp -d)"
             home_code="$(curl -sS -L --max-time 30 -D "$tmp/home.headers" -o "$tmp/home.html" -w '%{http_code}' "$ORIGIN/" || true)"
             www_code="$(curl -sS -L --max-time 30 -o "$tmp/www.html" -w '%{http_code}' "$WWW/" || true)"
-            bootstrap_code="$(curl -sS --max-time 30 -o "$tmp/bootstrap.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
-            seamless_code="$(curl -sS --max-time 30 -o "$tmp/seamless.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=production-smoke" || true)"
-            continuous_code="$(curl -sS --max-time 30 -o "$tmp/continuous.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-continuous-scroll.css?v=production-smoke" || true)"
-            mobile_code="$(curl -sS --max-time 30 -o "$tmp/mobile.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-production-r5.css?v=production-smoke" || true)"
-            mobile_loop_code="$(curl -sS --max-time 30 -o "$tmp/mobile-loop.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=production-smoke" || true)"
-            policy_code="$(curl -sS --max-time 30 -o "$tmp/scroll-policy.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=production-smoke" || true)"
-            release_code="$(curl -sS --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/current-release.json" || true)"
-            summary_code="$(curl -sS --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$ORIGIN/api/feedback/summary" || true)"
+            bootstrap_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/bootstrap.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll.js?v=production-smoke" || true)"
+            seamless_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/seamless.js" -w '%{http_code}' "$ORIGIN/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js?v=production-smoke" || true)"
+            continuous_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/continuous.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-continuous-scroll.css?v=production-smoke" || true)"
+            mobile_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/mobile.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-production-r5.css?v=production-smoke" || true)"
+            mobile_loop_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/mobile-loop.css" -w '%{http_code}' "$ORIGIN/scifi-ui/styles/formatx-mobile-seamless-loop.css?v=production-smoke" || true)"
+            policy_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/scroll-policy.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/scroll-policy.json?v=production-smoke" || true)"
+            release_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/release.json" -w '%{http_code}' "$ORIGIN/scifi-ui/data/current-release.json" || true)"
+            summary_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -o "$tmp/summary.json" -w '%{http_code}' "$ORIGIN/api/feedback/summary" || true)"
             downloads_code="$(curl -sS -L --max-time 30 -o "$tmp/downloads.html" -w '%{http_code}' "$ORIGIN/downloads/" || true)"
             verification_code="$(curl -sS -L --max-time 30 -o "$tmp/verification.html" -w '%{http_code}' "$ORIGIN/verification" || true)"
             account_code="$(curl -sS -L --max-time 30 -o "$tmp/account.html" -w '%{http_code}' "$ORIGIN/account/" || true)"
-            package_code="$(curl -sS --max-time 30 -D "$tmp/package.headers" -o /dev/null -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
+            package_code="$(curl -sS -L --proto-redir '=https' --max-redirs 4 --max-time 30 -D "$tmp/package.headers" -o /dev/null -w '%{http_code}' "$ORIGIN/download/multiplatform" || true)"
             if (( attempt == 1 || attempt % 10 == 0 || attempt == 30 )); then
               echo "PRODUCTION_SMOKE_HTTP attempt=$attempt home=$home_code www=$www_code scroll_bootstrap=$bootstrap_code seamless=$seamless_code continuous_css=$continuous_code mobile_css=$mobile_code mobile_loop_css=$mobile_loop_code scroll_policy=$policy_code release=$release_code feedback=$summary_code downloads=$downloads_code verification=$verification_code account=$account_code gated_package=$package_code"
             fi
