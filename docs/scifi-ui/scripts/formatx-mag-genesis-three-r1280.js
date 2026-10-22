@@ -1502,7 +1502,11 @@
       this.coreGroup.rotation.y=Math.sin(time*.00018)*.010;
       this.coreGroup.rotation.x=Math.sin(time*.00022)*.007;
 
-      const stage1=1-smooth((t-2.60)/.42);
+      // R2125: DNA must be the first readable subject. The original
+      // opaque core shell was fully visible at t=0, before the helix.
+      // Reveal the embryonic core only after the DNA establishing shot.
+      const dnaToEmbryo=smooth((t-1.92)/.64);
+      const stage1=dnaToEmbryo*(1-smooth((t-2.60)/.42));
       const reveal=smooth((t-2.68)/.46);
       const eyeHold=reveal*(1-smooth((t-6.35)/.78));
       const preFlash=1-smooth((t-6.55)/.72);
