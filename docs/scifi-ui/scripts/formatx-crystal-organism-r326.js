@@ -589,8 +589,10 @@
         for(let j=0;j<=5;j++){
           const t=j/5;
           const radius=.17+.66*t;
-          const half=.046+.067*Math.sin(Math.PI*t);
-          const centre=lane*(.027+.008*Math.sin(Math.PI*t));
+          // R2138: leave an actual recessed centre seam between the two
+          // separately machined blade panels; never overlap coplanar faces.
+          const half=.022+.039*Math.sin(Math.PI*t);
+          const centre=lane*(half+.017);
           const z=.455-.39*t+.014*Math.sin(Math.PI*t);
           const make=(offset,depth)=>{
             const x=dx*radius+px*(centre+offset);
