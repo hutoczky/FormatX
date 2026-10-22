@@ -1448,19 +1448,24 @@
     }
 
     updateDNA(t,time){
-      const fade=1-smooth((t-2.70)/.78);
+      // R2120: DNA is the visible origin of the MAG, not an unrelated
+      // opening motif. Hold the double helix through the biological
+      // construction and let it collapse into the emerging metal chassis.
+      const assembly=smooth((t-4.85)/2.25);
+      const fade=1-smooth((t-5.75)/1.35);
       const intro=ease(t/.42);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
-        h.position.x=b.x*(1+fly*.38);
-        h.position.y=b.y*(1+fly*.34);
-        h.position.z=b.z+fly*.54;
+        const converge=1-assembly*.86;
+        h.position.x=b.x*(1+fly*.38)*converge;
+        h.position.y=b.y*(1+fly*.34)*converge;
+        h.position.z=b.z+fly*.54-assembly*.24;
         h.rotation.x=Math.sin(time*.00045+b.phase)*.082;
         h.rotation.y=Math.sin(time*.00033+b.phase)*.17;
         h.rotation.z=b.rz+time*.000058*(i%2?1:-1);
-        h.scale.setScalar(b.s*(.95+.05*intro));
+        h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56));
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
           m.opacity=(bases[mi]??.5)*fade*intro*.84;
