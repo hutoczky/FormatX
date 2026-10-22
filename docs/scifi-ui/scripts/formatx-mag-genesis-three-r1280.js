@@ -262,7 +262,18 @@
     }
 
     makeDNAField(){
-      const placements=[
+      // R2146: a portrait camera only covers about 2 world units in width.
+      // The old panoramic sources at x=+/-2.3 lived offscreen on phones,
+      // so a capable Android device could still appear to open on black.
+      // Establish one large, genuine 3D double helix in the center, plus
+      // three smaller biological satellites feeding the four MAG arms.
+      // Desktop retains the original wide ten-helix cinematography.
+      const placements=this.mobileRender?[
+        [.00,.06,.60,1.57,.92],
+        [-.55,.18,.16,1.30,.48],
+        [.56,.16,.12,1.82,.48],
+        [.00,-.87,-.20,1.58,.39]
+      ]:[
         [-2.34,1.34,.60,-.48,.96],
         [2.30,1.36,.64,.46,.94],
         [-2.26,-1.32,.56,.42,.98],
