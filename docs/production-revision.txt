@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2143-root-native-three-intro
-release_line=R2143-native-threejs-cinematic-and-R2142-titanium-mag
-purpose=Fix the real canonical-homepage 3D cinematic importer: the Three.js bundle must load from /scifi-ui/scripts/three-r185.module.js rather than the broken /scripts/ path. Preserve R2142 smooth titanium permanent four-arm MAG and three-dimensional idle camera.
-assets=Updated canonical absolute Three.js ESM import path, R533 birth-engine query, Cloudflare asset-graph rewrite, native permanent R326 MAG, and startup caches.
-validation=Production source, Worker build and security preflight passed for R2143. Regression tests check canonical root/SCIFI module paths and importable Android Three.js. Live confirmation requires exact revision on both domains and cinematic browser handoff.
+token=20261022-r2144-permanent-titanium-mag
+release_line=R2144-permanent-titanium-mag-and-R2143-canonical-threejs-cinematic
+purpose=Release verified R2144 bevelled 3D titanium arms and layered optical ring on the permanent native R326 MAG. Retain the R2143 root-correct Three.js cinematic importer and dual-domain handoff.
+assets=R2144 native four-arm metallic MAG body, physical raised bevel planes and 48-segment optical bezel; R2144 mobile/desktop cache graph; R2143 Three.js root import; Cloudflare Worker asset rewrites aligned with active revisions.
+validation=Production source and Worker preflight passed; R2144 MAG cinematic archive Chromium desktop/mobile, reversibility and accessibility passed. R2143 canonical Three.js route regression updated. Final release requires both-domain live checks.
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision token, pass production smoke and R533 to R536 cinematic browser tests.
-limits=Real GPU rendering depends on browser/WebGL capabilities; tests do not constitute visual artistic approval against user photos.
+limits=Real GPU rendering depends on browser/WebGL capabilities; passing automated tests does not certify artistic similarity or guarantee that the user's device has refreshed the latest assets.
