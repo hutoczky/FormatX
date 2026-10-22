@@ -1641,9 +1641,17 @@
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
-      if(this.mechEyeCorona)this.mechEyeCorona.material.opacity=(.145+.018*finale)*grow;
+      // R2123: the optical organ awakens only after the four-arm
+      // chassis has assembled; a short restrained ignition, not a flash.
+      const opticWake=smooth((t-7.12)/.88);
+      const opticPulse=1+.075*Math.sin(time*.0022);
+      if(this.mechEyeCorona){
+        this.mechEyeCorona.material.opacity=(.145+.018*finale)*opticWake*opticPulse;
+        this.mechEyeCorona.scale.setScalar(.50*(.90+.10*opticWake));
+      }
+      this.mechInnerMaterial.opacity=(.070+.020*finale)*opticWake;
       this.mechInnerRing.rotation.z=time*.00012;
-      if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*grow;
+      if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*opticWake*opticPulse;
 
       if(this.mechBody){
         this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
