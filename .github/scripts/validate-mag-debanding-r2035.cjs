@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const read=p=>fs.readFileSync(p,'utf8');
 const core=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const introThree=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
 const archive=read('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js');
 const productionWorker=read('billing-worker/src/production-content-entry.js');
 const html=read('docs/scifi-ui/index.html');
@@ -50,6 +51,19 @@ assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=202
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2148-optical-ignition'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
+// R2148: the user-visible native Three.js cinematic must end with a true
+// machined optical instrument rather than the small pre-R2148 glowing bead.
+for(const token of [
+  'this.mechOpticSocket=new T.Mesh(',
+  'this.mechOpticRim=new T.Mesh(',
+  'this.mechOpticCapillary=new T.Mesh(',
+  'this.mechOpticShutters=new T.Mesh(',
+  'new T.SphereGeometry(.120,48,24)',
+  'this.mechOpticShutters.material.opacity=.79*wake;',
+  'this.mechOpticShutters.rotation.z=.11*(1-opticWake)'
+]){
+  assert.ok(introThree.includes(token),'R2148 physical optical assembly lost: '+token);
+}
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
