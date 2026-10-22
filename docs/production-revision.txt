@@ -1,8 +1,8 @@
 FormatX production revision
-token=20261022-r2148-physical-optical-iris
-release_line=R2148-DNA-embryo-five-piece-MAG-optical-ignition
-purpose=Promote the user-visible R2148 physically raised titanium optical socket, machined bezel, cyan capillary, eight separate shutter facets and larger recessed pupil after the five-piece mechanical chassis seats.
-assets=R2148 native Three.js aperture and controlled shutter/eye ignition, R2147 staged crown/shoulder/jaw assembly, R2146 portrait-centered native 3D DNA, R2145 low-power portrait DNA/embryo/finale, and R2144 permanent raised titanium hero geometry.
-validation=Android portrait visual proof passed on the R2148 optical assembly and source regression guard; require production validation, both-domain exact revision convergence, canonical smoke and dual-domain R533-to-R536 cinematic browser handoff.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact token and pass the canonical R533-to-R536 film tests; deployment status must not be marked complete until the workflow succeeds.
-limits=Headless Chromium evidence verifies the rendering stages and optical geometry; artistic photorealism and performance on all user devices require separate real-device visual assessment.
+token=20261022-r2149-dna-embryo-optic-birth
+release_line=R2149-mobile-embryo-focus-and-R2148-physical-optic
+purpose=Show the authentic 3D double-helix first, hand off to a more readable living embryo, then mechanically seat five visible titanium panels and ignite the recessed eight-shutter optical eye only after assembly.
+assets=R2149 mobile Three.js embryo scale and soft DNA scaffold; R2148 real titanium optical aperture and timing correction; cache revisions propagated through both loader and Cloudflare Worker asset rewrites; R2147 five-piece metal assembly retained.
+validation=R2149 real mobile Chromium WebGL and reference fallback portrait proof passed, including measured GPU pixel brightness and DNA/embryo/assembly/MAG stages, five visible titanium panels and bounded optical ignition; preflight validation passed. Production final live smoke and dual-domain cinematic check must still pass.
+production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this exact marker and pass full R533 to R536 live cinematic handoff.
+limits=Automated visual checks prove geometry/visibility, not subjective film-studio quality on all screens. Performance/Lighthouse ratings and user-device visual inspection remain independent checks.
