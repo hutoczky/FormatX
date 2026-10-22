@@ -219,7 +219,7 @@ jobs:
           cat "$RUNNER_TEMP/www-revision.txt" 2>/dev/null || true
           exit 1
 
-      - name: Verify actual R2141 polished MAG assets on both domains
+      - name: Verify actual R2142 smoothed MAG assets on both domains
         shell: bash
         run: |
           set -euo pipefail
@@ -227,15 +227,15 @@ jobs:
             tmp="$(mktemp -d)"
             curl -fsS --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-crystal-organism-r326.js?rev=${GITHUB_RUN_ID}-visible-mag" -o "$tmp/renderer.js"
-            grep -Fq 'R2141: four polished, contoured metal-arm assemblies' "$tmp/renderer.js"
+            grep -Fq 'R2142: smooth vertex normals across the machined metal' "$tmp/renderer.js"
             grep -Fq 'c=mix(c,titanium,machinedArmor*.99)' "$tmp/renderer.js"
             curl -fsS --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?rev=${GITHUB_RUN_ID}-mag-loader" -o "$tmp/scheduler.js"
-            grep -Fq 'formatx-motion-runtime-loader-r239.js?v=20261022-r2141-permanent-mag' "$tmp/scheduler.js"
+            grep -Fq 'formatx-motion-runtime-loader-r239.js?v=20261022-r2142-permanent-mag' "$tmp/scheduler.js"
             curl -fsS --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?rev=${GITHUB_RUN_ID}-mag-runtime" -o "$tmp/motion.js"
-            grep -Fq 'formatx-crystal-organism-r326.js?v=20261022-r2141-polished-anti-zfight-mag' "$tmp/motion.js"
-            echo "R2141 polished MAG geometry and runtime load chain verified on $base"
+            grep -Fq 'formatx-crystal-organism-r326.js?v=20261022-r2142-smooth-polished-mag' "$tmp/motion.js"
+            echo "R2142 smooth MAG geometry and runtime load chain verified on $base"
             rm -rf "$tmp"
           done
 
