@@ -6,6 +6,7 @@ const assert=require('node:assert/strict');
 const read=p=>fs.readFileSync(p,'utf8');
 const core=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const archive=read('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js');
+const productionWorker=read('billing-worker/src/production-content-entry.js');
 const html=read('docs/scifi-ui/index.html');
 const retro=read('docs/scifi-ui/styles/formatx-core-real3d-v20.css');
 const intro=read('docs/scifi-ui/styles/formatx-mag-birth-live-r533.css');
@@ -15,6 +16,25 @@ const motion=read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js')
 const scheduler=read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
 for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk],['mobile-loader',mobile]])
   assert.doesNotThrow(()=>new Function(s),name+' JavaScript parsing failed');
+// R2137: the permanent on-page MAG, not only the birth film, must carry
+// visible raised metal arms in the single canonical WebGL geometry.
+for(const token of [
+  'R2137 — actual, permanent R326 MAG',
+  'for(let axis=0;axis<4;axis++)',
+  'for(const lane of [-1,1])',
+  'armorQuad(a.left,a.right,b.right,b.left,facet)',
+  'float machinedArmor=step(5.0,vFacet)',
+  'c=mix(c,titanium,machinedArmor*.99)',
+  "mobile?'.178':'.235'"
+]){
+  assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
+}
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261022-r2137-visible-mag'),
+  'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261022-r2137-permanent-mag'),
+  'Cloudflare Worker must not rewrite the scheduler to R1950');
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2136-volumetric-helix'),
+  'Cloudflare Worker must not downgrade the cinematic birth renderer to R1984');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
