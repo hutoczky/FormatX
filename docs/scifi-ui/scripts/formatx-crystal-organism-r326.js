@@ -562,7 +562,11 @@
       return item;
     }
     function armorVertex(position, uv=[.5,.5]) {
-      return surfaceVertex(position,null,uv,.91);
+      // R2142: smooth vertex normals across the machined metal, instead of
+      // assigning a new flat triangle normal to every tiny armour facet.
+      // This removes the checkerboard highlights seen in actual phone proofs.
+      const normal=normalize([position[0]*1.14,position[1]*1.14,1.40]);
+      return surfaceVertex(position,normal,uv,.91);
     }
     function armorTri(a,b,c,facet=2.40) {
       triangle([
@@ -1063,7 +1067,7 @@
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
-        float yaw=${mobile?'.405':'.335'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
+        float yaw=${mobile?'.535':'.465'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
         float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
         float roll=-.045+uRotation.z+uPointer.x*uPointer.y*${mobile?'.022':'.034'}+.005*sin(uTime*.23);
         mat3 rotation=rz(roll)*ry(yaw)*rx(pitch);
