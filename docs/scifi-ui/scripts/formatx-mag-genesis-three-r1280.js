@@ -1579,6 +1579,11 @@
       const assembly=smooth((t-4.85)/2.25);
       const fade=1-smooth((t-5.75)/1.35);
       const intro=ease(t/.42);
+      // R2149: DNA is the establishing shot; once the embryo forms,
+      // helices become a transparent scaffold instead of blocking it.
+      const embryoFocus=smooth((t-2.48)/1.02);
+      const helixScaleFocus=1-embryoFocus*(this.mobileRender?.47:.16);
+      const helixOpacityFocus=1-embryoFocus*(this.mobileRender?.72:.34);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
@@ -1610,10 +1615,10 @@
         h.rotation.x=Math.sin(time*.00045+b.phase)*.082;
         h.rotation.y=Math.sin(time*.00033+b.phase)*.17;
         h.rotation.z=b.rz+time*.000058*(i%2?1:-1);
-        h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56));
+        h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56)*helixScaleFocus);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*intro*.84;
+          m.opacity=(bases[mi]??.5)*fade*intro*.84*helixOpacityFocus;
         });
       });
     }
@@ -1655,11 +1660,15 @@
     }
 
     updateCore(t,time){
+      // R2149: the phone's biological hero needs readable foreground
+      // scale, not a distant diamond trapped behind oversized helices.
+      // Preserve the established ten-second camera and end-state framing.
+      const embryoScale=this.mobileRender?.52:.36;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
-      else if(t<3.28) sc=mix(1.40,.34,smooth((t-2.52)/.76));
-      else if(t<5.58) sc=.36+Math.sin((t-3.28)*1.02)*.002;
-      else if(t<7.15) sc=mix(.36,.30,smooth((t-5.58)/1.57));
+      else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
+      else if(t<5.58) sc=embryoScale+Math.sin((t-3.28)*1.02)*.002;
+      else if(t<7.15) sc=mix(embryoScale,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
       const endMove=smooth((t-9.78)/.20);
