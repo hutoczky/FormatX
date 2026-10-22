@@ -1559,8 +1559,14 @@
           const x=mix(source.position.x,dx*.86,eased);
           const y=mix(source.position.y,dy*.86,eased);
           const z=mix(source.position.z,.19,eased);
-          const ripple=Math.sin(u*Math.PI)*Math.sin(time*.003+axis*1.57+u*11+lane*Math.PI)*.075;
-          a.setXYZ(j,x-dy*ripple,y+dx*ripple,z);
+          // R2135: a real volumetric, phase-opposed double helix twists
+          // around each forming MAG arm, rather than oscillating in a plane.
+          // Its tapered radius seats into the emerging metal at both ends.
+          const radius=.105*Math.sin(Math.PI*u)*(1-.45*smooth((t-5.15)/1.65));
+          const phase=u*Math.PI*8+time*.0028+axis*Math.PI*.5+lane*Math.PI;
+          const sideways=radius*Math.cos(phase);
+          const depth=radius*Math.sin(phase);
+          a.setXYZ(j,x-dy*sideways,y+dx*sideways,z+depth);
         }
         a.needsUpdate=true;
       });
