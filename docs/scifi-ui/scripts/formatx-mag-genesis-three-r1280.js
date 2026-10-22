@@ -1799,6 +1799,9 @@
         }
         const base=p.userData.birthTransform;
         const seat=smooth((t-5.91-(i%8)*.105)/1.10);
+        // R2147: these metal assemblies were authored but permanently hidden
+        // since R1941. Reveal them as each metal segment reaches its seat.
+        p.visible=seat>.008;
         const direction=(i%4)*Math.PI*.5;
         const offset=(1-seat)*.16;
         p.position.set(
@@ -1808,6 +1811,30 @@
         );
         p.scale.copy(base.scale).multiplyScalar(.78+.22*seat);
         p.rotation.y=base.rotationY+(1-seat)*.17+Math.sin(time*.00015+i)*.006*grow;
+      });
+      // R2147: lateral titanium shoulders and lower machined jaw follow
+      // separate staggered tracks. Transform bases are authored once; no
+      // accumulating per-frame position drift or extra WebGL draw pipeline.
+      this.plates.forEach((p,i)=>{
+        if(!p.userData.birthTransformR2147){
+          p.userData.birthTransformR2147={
+            position:p.position.clone(),
+            scale:p.scale.clone(),
+            rotationZ:p.rotation.z
+          };
+        }
+        const base=p.userData.birthTransformR2147;
+        const seat=smooth((t-5.90-i*.18)/1.22);
+        p.visible=seat>.008;
+        const swing=(1-seat)*.17;
+        const sign=i===0?-1:i===1?1:0;
+        p.position.set(
+          base.position.x+sign*swing,
+          base.position.y+(i===2?-.12:0)*(1-seat),
+          base.position.z+(1-seat)*.21
+        );
+        p.scale.copy(base.scale).multiplyScalar(.76+.24*seat);
+        p.rotation.z=base.rotationZ+(1-seat)*(i===0?-.10:i===1?.10:0);
       });
     }
 
