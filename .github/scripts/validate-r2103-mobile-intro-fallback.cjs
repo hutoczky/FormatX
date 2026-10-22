@@ -104,8 +104,8 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2104-photographic-moving-softbox'),
-          'Stale browser cache is loading old giant-oval renderer');
+        assert.ok(info.loader.includes('r2113-layered-chassis'),
+          'The Android fallback is loading an obsolete renderer instead of R2113');
         records.push({shot,info});
       }finally{await context.close()}
     }
