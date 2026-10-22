@@ -34,9 +34,11 @@ permissions:
   contents: read
   statuses: write
 
+# Release jobs must not be cancelled by subsequent validation-only pushes.
+# This matters for connected Cloudflare deployment and dual-domain browser tests.
 concurrency:
-  group: formatx-production-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+  group: formatx-production-${{ github.ref }}-${{ ((github.event_name == 'workflow_dispatch' && inputs.deploy == true) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]'))) && 'release' || 'validate' }}
+  cancel-in-progress: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, '[deploy-production]') }}
 
 jobs:
   validate:
