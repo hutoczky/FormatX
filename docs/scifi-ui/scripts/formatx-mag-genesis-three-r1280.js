@@ -275,19 +275,25 @@
       // as the parent helices, visually bridging DNA and emerging metal.
       this.birthStrands=[];
       const T=this.THREE;
+      // R2133: two phase-opposed strands per arm carry the helix's
+      // double-stranded identity all the way into the metal silhouette.
       for(let axis=0;axis<4;axis++){
-        const positions=new Float32Array(3*40);
-        const geometry=new T.BufferGeometry();
-        geometry.setAttribute('position',new T.BufferAttribute(positions,3));
-        const material=new T.LineBasicMaterial({
-          color:0x79e8e3,transparent:true,opacity:0,
-          depthWrite:false,blending:T.AdditiveBlending
-        });
-        const strand=new T.Line(geometry,material);
-        strand.visible=false;
-        strand.frustumCulled=false;
-        this.dnaGroup.add(strand);
-        this.birthStrands.push(strand);
+        for(let lane=0;lane<2;lane++){
+          const positions=new Float32Array(3*40);
+          const geometry=new T.BufferGeometry();
+          geometry.setAttribute('position',new T.BufferAttribute(positions,3));
+          const material=new T.LineBasicMaterial({
+            color:lane===0?0x79e8e3:0xb8e5f2,transparent:true,opacity:0,
+            depthWrite:false,blending:T.AdditiveBlending
+          });
+          const strand=new T.Line(geometry,material);
+          strand.userData.axis=axis;
+          strand.userData.lane=lane;
+          strand.visible=false;
+          strand.frustumCulled=false;
+          this.dnaGroup.add(strand);
+          this.birthStrands.push(strand);
+        }
       }
       this.dnas=[];
       for(const [x,y,z,rz,sc] of placements){
@@ -302,7 +308,8 @@
       }
       // R2132: bind each arm to the closest authored DNA origin once,
       // rather than searching the helix array on every animation frame.
-      this.birthStrands.forEach((line,axis)=>{
+      this.birthStrands.forEach((line)=>{
+        const axis=line.userData.axis;
         const candidates=this.dnas.filter(h=>{
           const b=h.userData.base;
           const nearest=Math.abs(b.x)>Math.abs(b.y)
@@ -1532,10 +1539,12 @@
       const start=smooth((t-4.68)/.62);
       const end=1-smooth((t-6.48)/.75);
       const opacity=start*end;
-      this.birthStrands.forEach((line,axis)=>{
+      this.birthStrands.forEach((line)=>{
+        const axis=line.userData.axis;
+        const lane=line.userData.lane;
         line.visible=opacity>.002;
         if(!line.visible)return;
-        line.material.opacity=.24*opacity;
+        line.material.opacity=(lane===0?.28:.19)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
         const source=line.userData.source;
@@ -1547,7 +1556,7 @@
           const x=mix(source.position.x,dx*.86,eased);
           const y=mix(source.position.y,dy*.86,eased);
           const z=mix(source.position.z,.19,eased);
-          const ripple=Math.sin(u*Math.PI)*Math.sin(time*.003+axis*1.57+u*11)*.075;
+          const ripple=Math.sin(u*Math.PI)*Math.sin(time*.003+axis*1.57+u*11+lane*Math.PI)*.075;
           a.setXYZ(j,x-dy*ripple,y+dx*ripple,z);
         }
         a.needsUpdate=true;
