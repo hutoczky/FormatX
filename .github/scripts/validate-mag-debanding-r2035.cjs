@@ -52,18 +52,18 @@ assert.ok(intro.includes('Continuous cinematographic atmosphere'),
   'Cinematic MAG intro still overlays 4px raster stripes');
 assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
-// R2045 must bust the R2035 browser cache while RETAINING every strict
+// R2137 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261012-r2050-surface-sweep-endpoint'),
-    'R2050 native sweep endpoint renderer loader is stale and may serve the old WebGL timing');
+  assert.ok(loader.includes('20261022-r2137'),
+    'R2137 native four-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261012-r2050-surface-sweep-endpoint'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261022-r2137'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261012-r2050-surface-sweep-endpoint'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261022-r2137'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261012-r2050-surface-sweep-endpoint'),
-  'Canonical HTML must load the R2045 scheduler');
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261022-r2137'),
+  'Canonical HTML must load the R2137 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261014-r2103-contrast-fourpoint-fallback']){
