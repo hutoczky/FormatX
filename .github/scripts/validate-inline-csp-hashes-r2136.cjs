@@ -6,15 +6,15 @@ const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 const html = fs.readFileSync('docs/scifi-ui/index.html', 'utf8');
 const worker = fs.readFileSync('billing-worker/src/production-content-entry.js', 'utf8');
-const meta = html.match(/<meta\\s+http-equiv="Content-Security-Policy"\\s+content="([^"]+)"/i);
+const meta = html.match(/<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i);
 assert(meta, 'The HTML Content-Security-Policy meta element is missing');
-const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-  .filter(match => match[2].trim() && !/\\bsrc\\s*=/.test(match[1]));
+const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+  .filter(match => match[2].trim() && !/\bsrc\s*=/.test(match[1]));
 assert(scripts.length > 0, 'No inline bootstraps found: audit a deliberate migration');
-const allowedWorkerHashes = [...worker.matchAll(/const\\s+(INLINE_[A-Z0-9_]+_HASH)\\s*=\\s*["']('sha256-[^"']+')["'];/g)];
+const allowedWorkerHashes = [...worker.matchAll(/const\s+(INLINE_[A-Z0-9_]+_HASH)\s*=\s*["']('sha256-[^"']+')["'];/g)];
 assert(allowedWorkerHashes.length, 'Worker inline hash declarations not found');
-const workerMeta = worker.match(/const META_CSP = \`([\\s\\S]*?)\`;/);
-const workerHeader = worker.match(/const HEADER_CSP = \\[([\\s\\S]*?)\\]\\.join/);
+const workerMeta = worker.match(/const META_CSP = \`([\s\S]*?)\`;/);
+const workerHeader = worker.match(/const HEADER_CSP = \[([\s\S]*?)\]\.join/);
 assert(workerMeta && workerHeader, 'Worker CSP templates have changed; inspect the production policy');
 const declared = new Map(allowedWorkerHashes.map(match => [match[2], match[1]]));
 for (const [index, match] of scripts.entries()) {
