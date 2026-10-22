@@ -593,11 +593,22 @@
           // separately machined blade panels; never overlap coplanar faces.
           const half=.022+.039*Math.sin(Math.PI*t);
           const centre=lane*(half+.017);
-          const z=.455-.39*t+.014*Math.sin(Math.PI*t);
+          // R2139: derive the chassis from the same anisotropic closed
+          // superellipsoid as the living crystal. Titanium now follows the
+          // photographed shell rather than floating 0.2 units above it.
           const make=(offset,depth)=>{
             const x=dx*radius+px*(centre+offset);
             const y=dy*radius+py*(centre+offset);
-            return [x,y,z+depth];
+            const exponent=mobile?.78:.61;
+            const axisX=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
+            const axisY=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
+            const axisZ=mobile?.64:.49;
+            const remaining=Math.max(0,1-
+              Math.pow(Math.abs(x)/axisX,exponent)-
+              Math.pow(Math.abs(y)/axisY,exponent));
+            const surfaceZ=axisZ*Math.pow(remaining,1/exponent);
+            const sculptedRelief=.008+.013*Math.sin(Math.PI*t);
+            return [x,y,surfaceZ+sculptedRelief+depth];
           };
           bands.push({
             left:make(-half,.026),right:make(half,.026),
