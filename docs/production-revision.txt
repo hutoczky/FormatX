@@ -2,7 +2,7 @@ FormatX production revision
 token=20261023-r2150-visible-cinematic-replay
 release_line=R2150-visible-MAG-cinematic-replay-with-R2149-3d-birth
 purpose=Give returning mobile and desktop visitors a clear accessible way to replay the latest DNA-to-embryo-to-MAG cinematic, instead of silently skipping it because the session had already seen an earlier version.
-assets=docs/scifi-ui/index.html; docs/scifi-ui/styles/formatx-intro-replay-r2150.css; .github/scripts/validate-r533-r536-handoff.cjs. Preserves all deployed R2149 3D scene and native R2144 permanent metal MAG improvements.
+assets=docs/scifi-ui/index.html; docs/scifi-ui/styles/formatx-intro-replay-r2150.css; R533-R536 browser handoff regression verifier. Preserves all deployed R2149 3D scene and native R2144 permanent metal MAG improvements.
 validation=Preflight, exact content revision, both-domain live smoke and browser R533-R536 tests must pass. Browser test verifies replay link is visible and tappable and forced intro=1 opens the animation, including the mobile after-skip state.
 production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this exact marker and pass the full cinematic and replay regression tests before publication is considered verified.
 limits=Automated deployment and browser checks do not prove subjective cinematic award quality or the identical appearance on every real phone; user-device visual inspection is distinct.
