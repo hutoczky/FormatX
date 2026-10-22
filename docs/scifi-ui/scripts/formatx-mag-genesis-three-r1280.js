@@ -1471,9 +1471,16 @@
           ?(b.x>=0?0:2):(b.y>=0?1:3);
         const armAngle=nearestAxis*Math.PI*.5;
         const armProgress=smooth((t-4.72-nearestAxis*.11)/2.06);
+        // R2130: blend each filament onto its actual final arm position.
+        // Interpolation preserves the source DNA silhouette at birth,
+        // while removing the old residual offsets at full convergence.
         const armReach=.69*armProgress;
-        h.position.x=b.x*(1+fly*.38)*converge+Math.cos(armAngle)*armReach;
-        h.position.y=b.y*(1+fly*.34)*converge+Math.sin(armAngle)*armReach;
+        const originX=b.x*(1+fly*.38);
+        const originY=b.y*(1+fly*.34);
+        const destinationX=Math.cos(armAngle)*armReach;
+        const destinationY=Math.sin(armAngle)*armReach;
+        h.position.x=mix(originX,destinationX,assembly);
+        h.position.y=mix(originY,destinationY,assembly);
         h.position.z=b.z+fly*.54-assembly*.24;
         h.rotation.x=Math.sin(time*.00045+b.phase)*.082;
         h.rotation.y=Math.sin(time*.00033+b.phase)*.17;
