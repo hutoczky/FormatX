@@ -61,11 +61,20 @@ jobs:
           FORMATX_PORTRAIT_PROOF_DIR: artifacts/r2145-portrait-genesis
         run: node .github/scripts/verify-portrait-genesis-r2145.cjs
 
+      - name: Capture true Three.js mobile 3D keyframes
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4185/scifi-ui/index.html
+          FORMATX_PORTRAIT_PROOF_DIR: artifacts/r2146-three-portrait-genesis
+          FORMATX_PORTRAIT_RENDERER: three
+        run: node .github/scripts/verify-portrait-genesis-r2145.cjs
+
       - name: Upload inspectable Android proof frames
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: formatx-r2145-dna-embryo-mag-portrait
-          path: artifacts/r2145-portrait-genesis/
+          path: |
+            artifacts/r2145-portrait-genesis/
+            artifacts/r2146-three-portrait-genesis/
           if-no-files-found: warn
           retention-days: 21
