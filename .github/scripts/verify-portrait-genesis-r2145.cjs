@@ -71,6 +71,7 @@ async function main(){
           renderer:root.dataset.fxMagBirthRendererR1360,
           loader:root.dataset.fxMagBirthThreeLoaderR1608,
           peak:root.dataset.fxMagBirthFramePeakR1557,
+          litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,
           proof:root.dataset.fxMagBirthVisualFrameR659,
           width:cv.width,height:cv.height,
           rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
@@ -87,8 +88,8 @@ async function main(){
       }else{
         assert.equal(state.renderer,'threejs-active',
           name+': true Three.js renderer did not activate: '+JSON.stringify(state));
-        assert.ok(Number(state.peak)>8,
-          name+': WebGL visual-readback proof is not established: '+JSON.stringify(state));
+        assert.ok(Number(state.peak)>35 && Number(state.litPixels)>1,
+          name+': genuine bright Three.js geometry not found in GPU center crop: '+JSON.stringify(state));
       }
       outputs.push({name,seconds,...state});
       await context.close();
