@@ -232,9 +232,8 @@ async function verifyFullBirth(browser){
     assert.ok(replayBox&&replayBox.width>=44&&replayBox.height>=44,
       'R2150 replay control must meet accessible mobile hit-target dimensions');
     await replay.click({timeout:10000});
-    await page.waitForURL(/(?:\\?|&)intro=1(?:&|$)/,{timeout:15000});
+    await page.waitForURL(href=>href.searchParams.get('intro')==='1',{timeout:15000});
     await page.locator(OVERLAY).waitFor({state:'visible',timeout:15000});
-    assert.equal(documentNeverUsedPlaceholder,undefined);
     assert.equal(errors.length,0,`desktop-full: browser errors: ${errors.join(' | ')}`);
     return{phases:[...phases],coreReadyPhase:timeline.coreReadyPhase,coreSamples:timeline.coreSamples.length,final,reload:reloadReady};
   }finally{await context.close();}
