@@ -1,0 +1,71 @@
+name: R2145 portrait DNA-to-MAG cinematic proof
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/verify-portrait-genesis-r2145.cjs'
+      - '.github/workflows/verify-portrait-genesis-r2145.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-r2145-portrait-proof
+  cancel-in-progress: true
+
+jobs:
+  portrait-proof:
+    name: Verify centered DNA, living embryo and MAG on Android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Verify JavaScript syntax and design sequence
+        run: |
+          set -euo pipefail
+          node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
+          node --check .github/scripts/verify-portrait-genesis-r2145.cjs
+          node .github/scripts/validate-mag-debanding-r2035.cjs
+
+      - name: Install browser proof runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0
+
+      - name: Locate browser and launch source server
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          python3 -m http.server 4185 --directory docs > "$RUNNER_TEMP/r2145-portrait-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4185/scifi-ui/index.html >/dev/null; then exit 0; fi
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/r2145-portrait-http.log"
+          exit 1
+
+      - name: Capture and verify three portrait keyframes
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4185/scifi-ui/index.html
+          FORMATX_PORTRAIT_PROOF_DIR: artifacts/r2145-portrait-genesis
+        run: node .github/scripts/verify-portrait-genesis-r2145.cjs
+
+      - name: Upload inspectable Android proof frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatx-r2145-dna-embryo-mag-portrait
+          path: artifacts/r2145-portrait-genesis/
+          if-no-files-found: warn
+          retention-days: 21
