@@ -9,12 +9,17 @@ const engine=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
 const birth=read('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js');
 const worker=read('billing-worker/src/production-content-entry.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
-const revision='formatx-mag-genesis-three-r1280.js?v=20261022-r2143-canonical-threejs-route';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261022-r2146-mobile-centered-threejs-dna';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
 assert.ok(!engine.includes("new URL('./scripts/three-r185.module.js', location.href)"),
   'Page-relative Three.js import would break canonical root homepage');
+// R2146 portrait composition must keep a real central 3D helix visible.
+assert.ok(engine.includes('const placements=this.mobileRender?[') &&
+  engine.includes('[.00,.06,.60,1.57,.92]') &&
+  engine.includes('[.00,-.87,-.20,1.58,.39]'),
+  'Portrait Three.js DNA must be centered within the mobile camera frustum');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');
 for(const home of [
