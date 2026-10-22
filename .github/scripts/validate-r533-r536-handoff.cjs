@@ -270,6 +270,12 @@ async function verifySkip(browser){
     assert.equal(final.scrollLock,'','mobile-skip: scroll lock remained after skip');
     assert.equal(final.cinemaReady,'ready','mobile-skip: R536 not ready after skip handoff');
     assert.equal(final.cinemaPointerEvents,'none','mobile-skip: cinematic visual layer intercepts input');
+    const replay=page.locator('#hero .hero-space > .fx-mag-replay-r2150');
+    await replay.waitFor({state:'visible',timeout:10000});
+    const replayBox=await replay.boundingBox();
+    assert.ok(replayBox&&replayBox.width>=44&&replayBox.height>=44,
+      'mobile-skip: R2150 cinematic replay has undersized hit target');
+    await replay.click({trial:true,timeout:10000});
     assert.equal(errors.length,0,`mobile-skip: browser errors: ${errors.join(' | ')}`);
     return{skipBox:box,skipAria:aria,final};
   }finally{await context.close();}
