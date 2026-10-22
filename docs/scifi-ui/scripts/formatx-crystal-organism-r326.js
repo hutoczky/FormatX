@@ -578,44 +578,45 @@
 
     /* R1724 — additional living anatomy is appended to the same attribute
        buffers. No second canvas, model loader or image asset is introduced. */
-    /* R2137 — actual, permanent R326 MAG: four raised, bevelled titanium
-       chassis arms. One set of buffers and one existing WebGL draw call. */
+    /* R2141: four polished, contoured metal-arm assemblies now sit safely
+       above the real crystal surface. 12 longitudinal steps avoid the curved
+       shell cutting through five-segment metal chords, the source of dark
+       pepper-speckle/z-fighting on the R2140 visual proof. All armour still
+       shares the original R326 draw call. */
+    const magSkinZ=(x,y)=>{
+      const exponent=mobile?.78:.61;
+      const axisX=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
+      const axisY=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
+      const axisZ=mobile?.64:.49;
+      const remaining=Math.max(0,1-
+        Math.pow(Math.abs(x)/axisX,exponent)-
+        Math.pow(Math.abs(y)/axisY,exponent));
+      return axisZ*Math.pow(remaining,1/exponent);
+    };
     for(let axis=0;axis<4;axis++){
       const angle=axis*Math.PI*.5;
       const dx=Math.cos(angle),dy=Math.sin(angle);
       const px=-dy,py=dx;
       for(const lane of [-1,1]){
         const bands=[];
-        for(let j=0;j<=5;j++){
-          const t=j/5;
-          const radius=.17+.66*t;
-          // R2138: leave an actual recessed centre seam between the two
-          // separately machined blade panels; never overlap coplanar faces.
-          const half=.022+.039*Math.sin(Math.PI*t);
-          const centre=lane*(half+.017);
-          // R2139: derive the chassis from the same anisotropic closed
-          // superellipsoid as the living crystal. Titanium now follows the
-          // photographed shell rather than floating 0.2 units above it.
+        const steps=12;
+        for(let j=0;j<=steps;j++){
+          const t=j/steps;
+          const radius=.19+.66*t;
+          const half=.021+.042*Math.sin(Math.PI*t);
+          const centre=lane*(half+.013);
+          const relief=.011+.009*Math.sin(Math.PI*t);
           const make=(offset,depth)=>{
             const x=dx*radius+px*(centre+offset);
             const y=dy*radius+py*(centre+offset);
-            const exponent=mobile?.78:.61;
-            const axisX=mobile?(x>=0?.88:.86):(x>=0?1.02:.98);
-            const axisY=mobile?(y>=0?1.09:.97):(y>=0?1.18:1.06);
-            const axisZ=mobile?.64:.49;
-            const remaining=Math.max(0,1-
-              Math.pow(Math.abs(x)/axisX,exponent)-
-              Math.pow(Math.abs(y)/axisY,exponent));
-            const surfaceZ=axisZ*Math.pow(remaining,1/exponent);
-            const sculptedRelief=.008+.013*Math.sin(Math.PI*t);
-            return [x,y,surfaceZ+sculptedRelief+depth];
+            return [x,y,magSkinZ(x,y)+relief+depth];
           };
           bands.push({
-            left:make(-half,.026),right:make(half,.026),
-            lowerLeft:make(-half,-.016),lowerRight:make(half,-.016)
+            left:make(-half,.071),right:make(half,.071),
+            lowerLeft:make(-half,.044),lowerRight:make(half,.044)
           });
         }
-        for(let j=0;j<5;j++){
+        for(let j=0;j<steps;j++){
           const a=bands[j],b=bands[j+1];
           const facet=5.18+axis*.014+(lane>0?.003:0);
           armorQuad(a.left,a.right,b.right,b.left,facet);
@@ -627,6 +628,28 @@
         armorQuad(first.left,first.lowerLeft,first.lowerRight,first.right,5.72);
         armorQuad(last.left,last.right,last.lowerRight,last.lowerLeft,5.72);
       }
+    }
+    /* The centre is not a painted circle. A shallow, machined 48-facet
+       silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
+    const opticPoint=(radius,angle,depth)=>[
+      radius*Math.cos(angle),radius*Math.sin(angle),
+      magSkinZ(radius*Math.cos(angle),radius*Math.sin(angle))+depth
+    ];
+    for(let j=0;j<48;j++){
+      const a=j*Math.PI/24,b=(j+1)*Math.PI/24;
+      armorQuad(
+        opticPoint(.132,a,.078),opticPoint(.173,a,.078),
+        opticPoint(.173,b,.078),opticPoint(.132,b,.078),
+        5.22
+      );
+    }
+    for(let j=0;j<8;j++){
+      const angle=j*Math.PI/4+.10;
+      armorQuad(
+        opticPoint(.084,angle,.083),opticPoint(.123,angle+.06,.083),
+        opticPoint(.125,angle+.42,.083),opticPoint(.084,angle+.32,.083),
+        5.35
+      );
     }
 
     function guardianTriangle(vertices,facet,origin=[0,0,0]){
@@ -1563,13 +1586,19 @@
         /* R2137: raised metal panels visually separate from smoked bioglass. */
         float metalKey=max(dot(n,normalize(vec3(-.46,.72,.52))),0.0);
         float metalRim=pow(1.0-facing,2.0);
-        vec3 titanium=vec3(.072,.093,.098);
-        titanium+=vec3(.23,.29,.29)*metalKey*.56;
-        titanium+=vec3(.64,.72,.70)*softboxB*.43;
-        titanium+=vec3(.89,.92,.89)*softboxC*.18;
-        titanium+=vec3(.13,.24,.26)*metalRim*.24;
+        // R2141: real polished titanium response (broad key, cool rim,
+        // narrow specular lines) rather than flat gray plastic channels.
+        float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0);
+        float metalSideSpec=pow(max(dot(n,normalize(sideDir+view)),0.0),34.0);
+        vec3 titanium=vec3(.135,.176,.185);
+        titanium+=vec3(.33,.38,.38)*metalKey*.68;
+        titanium+=vec3(.72,.83,.82)*softboxB*.48;
+        titanium+=vec3(.94,.97,.94)*softboxC*.23;
+        titanium+=vec3(.93,.97,.96)*metalSpec*.48;
+        titanium+=vec3(.38,.72,.78)*metalSideSpec*.25;
+        titanium+=vec3(.12,.29,.32)*metalRim*.28;
         titanium+=vec3(.052,.11,.13)*side*.15;
-        titanium*=1.0-.45*step(5.65,vFacet);
+        titanium*=1.0-.36*step(5.65,vFacet);
         c=mix(c,titanium,machinedArmor*.99);
 
         /* Interaction/surface sweep remains physical and brief. */
