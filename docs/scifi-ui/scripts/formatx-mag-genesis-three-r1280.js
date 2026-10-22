@@ -1618,6 +1618,9 @@
       // R2125: DNA must be the first readable subject. The original
       // opaque core shell was fully visible at t=0, before the helix.
       // Reveal the embryonic core only after the DNA establishing shot.
+      // R2147: no translucent core silhouette may occlude the founding
+      // double helix during the first 1.9 seconds of the actual 3D film.
+      this.coreGroup.visible=t>=1.92;
       const dnaToEmbryo=smooth((t-1.92)/.64);
       const stage1=dnaToEmbryo*(1-smooth((t-2.60)/.42));
       const reveal=smooth((t-2.68)/.46);
@@ -1959,6 +1962,9 @@
           }
           const root=document.documentElement;
           root.dataset.fxMagBirthFramePeakR1557=String(peak);
+          root.dataset.fxMagBirthVisibleArmorR2147=String(
+            [...this.silverParts,...this.plates].filter(part=>part.visible).length
+          );
           root.dataset.fxMagBirthThreeLitPixelsR2146=String(lit);
           root.dataset.fxMagBirthFrameR1557='r2146-canonical-three-framebuffer-readback';
         }catch(error){
