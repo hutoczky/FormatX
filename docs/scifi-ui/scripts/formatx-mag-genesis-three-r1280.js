@@ -300,6 +300,20 @@
         this.dnaGroup.add(h);
         this.dnas.push(h);
       }
+      // R2132: bind each arm to the closest authored DNA origin once,
+      // rather than searching the helix array on every animation frame.
+      this.birthStrands.forEach((line,axis)=>{
+        const candidates=this.dnas.filter(h=>{
+          const b=h.userData.base;
+          const nearest=Math.abs(b.x)>Math.abs(b.y)
+            ?(b.x>=0?0:2):(b.y>=0?1:3);
+          return nearest===axis;
+        });
+        line.userData.source=candidates.sort((a,b)=>
+          Math.hypot(a.userData.base.x,a.userData.base.y)-
+          Math.hypot(b.userData.base.x,b.userData.base.y)
+        )[0]||null;
+      });
     }
 
     makeGlowTexture(){
@@ -1524,13 +1538,8 @@
         line.material.opacity=.24*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
-        const source=this.dnas.find(h=>{
-          const b=h.userData.base;
-          const a=Math.abs(b.x)>Math.abs(b.y)
-            ?(b.x>=0?0:2):(b.y>=0?1:3);
-          return a===axis;
-        });
-        if(!source)return;
+        const source=line.userData.source;
+        if(!source){line.visible=false;return;}
         const a=line.geometry.attributes.position;
         for(let j=0;j<40;j++){
           const u=j/39;
