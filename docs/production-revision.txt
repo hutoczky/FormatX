@@ -3,6 +3,6 @@ token=20261022-r2144-permanent-titanium-mag
 release_line=R2144-permanent-titanium-mag-and-R2143-canonical-threejs-cinematic
 purpose=Release verified R2144 bevelled 3D titanium arms and layered optical ring on the permanent native R326 MAG. Retain the R2143 root-correct Three.js cinematic importer and dual-domain handoff.
 assets=R2144 native four-arm metallic MAG body, physical raised bevel planes and 48-segment optical bezel; R2144 mobile/desktop cache graph; R2143 Three.js root import; Cloudflare Worker asset rewrites aligned with active revisions.
-validation=Production source and Worker preflight passed; R2144 MAG cinematic archive Chromium desktop/mobile, reversibility and accessibility passed. R2143 canonical Three.js route regression updated. Final release requires both-domain live checks.
+validation=Production source, Worker preflight, R2144 cinematic archive Chromium desktop/mobile, reversibility and accessibility passed. R2143 canonical Three.js route regression updated. R2144 live-asset gate aligned with the current scheduler, renderer and raised optical bezel. Both-domain live handoff still required.
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision token, pass production smoke and R533 to R536 cinematic browser tests.
 limits=Real GPU rendering depends on browser/WebGL capabilities; passing automated tests does not certify artistic similarity or guarantee that the user's device has refreshed the latest assets.
