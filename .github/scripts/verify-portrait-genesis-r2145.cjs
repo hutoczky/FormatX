@@ -78,6 +78,8 @@ async function main(){
           armorPieces:root.dataset.fxMagBirthVisibleArmorR2147,
           eyeOpacity:root.dataset.fxMagBirthEyeOpacityR2148,
           eyeScale:root.dataset.fxMagBirthEyeScaleR2148,
+          embryoScale:root.dataset.fxMagBirthEmbryoScaleR2149,
+          dnaOpacity:root.dataset.fxMagBirthDnaOpacityR2149,
           proof:root.dataset.fxMagBirthVisualFrameR659,
           width:cv.width,height:cv.height,
           rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
@@ -97,8 +99,16 @@ async function main(){
         assert.ok(Number(state.peak)>35 && Number(state.litPixels)>1,
           name+': genuine bright Three.js geometry not found in GPU center crop: '+JSON.stringify(state));
         if(name==='dna'){
+          assert.ok(Number(state.dnaOpacity)>.35,
+            'R2149 must open with a full-opacity 3D DNA establishing shot: '+JSON.stringify(state));
           assert.equal(Number(state.armorPieces),0,
             'R2147 must establish DNA before showing a single titanium panel');
+        }
+        if(name==='embryo'){
+          assert.ok(Number(state.embryoScale)>.47,
+            'R2149 mobile embryo must occupy an intentional readable foreground: '+JSON.stringify(state));
+          assert.ok(Number(state.dnaOpacity)<.23,
+            'R2149 DNA must form a translucent supporting scaffold around the embryo: '+JSON.stringify(state));
         }
         if(name==='assembly'){
           assert.ok(Number(state.eyeOpacity)<.003,
