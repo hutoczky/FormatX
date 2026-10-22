@@ -578,6 +578,44 @@
 
     /* R1724 — additional living anatomy is appended to the same attribute
        buffers. No second canvas, model loader or image asset is introduced. */
+    /* R2137 — actual, permanent R326 MAG: four raised, bevelled titanium
+       chassis arms. One set of buffers and one existing WebGL draw call. */
+    for(let axis=0;axis<4;axis++){
+      const angle=axis*Math.PI*.5;
+      const dx=Math.cos(angle),dy=Math.sin(angle);
+      const px=-dy,py=dx;
+      for(const lane of [-1,1]){
+        const bands=[];
+        for(let j=0;j<=5;j++){
+          const t=j/5;
+          const radius=.17+.66*t;
+          const half=.046+.067*Math.sin(Math.PI*t);
+          const centre=lane*(.027+.008*Math.sin(Math.PI*t));
+          const z=.455-.39*t+.014*Math.sin(Math.PI*t);
+          const make=(offset,depth)=>{
+            const x=dx*radius+px*(centre+offset);
+            const y=dy*radius+py*(centre+offset);
+            return [x,y,z+depth];
+          };
+          bands.push({
+            left:make(-half,.026),right:make(half,.026),
+            lowerLeft:make(-half,-.016),lowerRight:make(half,-.016)
+          });
+        }
+        for(let j=0;j<5;j++){
+          const a=bands[j],b=bands[j+1];
+          const facet=5.18+axis*.014+(lane>0?.003:0);
+          armorQuad(a.left,a.right,b.right,b.left,facet);
+          armorQuad(a.lowerLeft,b.lowerLeft,b.lowerRight,a.lowerRight,5.82);
+          armorQuad(a.left,b.left,b.lowerLeft,a.lowerLeft,5.72);
+          armorQuad(a.right,a.lowerRight,b.lowerRight,b.right,5.72);
+        }
+        const first=bands[0],last=bands[bands.length-1];
+        armorQuad(first.left,first.lowerLeft,first.lowerRight,first.right,5.72);
+        armorQuad(last.left,last.right,last.lowerRight,last.lowerLeft,5.72);
+      }
+    }
+
     function guardianTriangle(vertices,facet,origin=[0,0,0]){
       let faceNormal=normalize(cross(
         subtract(vertices[1].crystal,vertices[0].crystal),
@@ -1403,6 +1441,7 @@
           ? '.962+.050*macroFacet'
           : '.955+.070*macroFacet'}; 
         vec3 c=mix(vec3(.004,.008,.010),vec3(.108,.138,.141),lift)*facetTone;
+        float machinedArmor=step(5.0,vFacet)*(1.0-step(6.0,vFacet));
         c*=.93+.07*volume;
         /* R1945j — one continuous macro-facet field across all tiers.
            Per-triangle random tone created tiny dark mosaic cells that read as
@@ -1486,7 +1525,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.135':'.210'},vLocal.y/${mobile?'.135':'.210'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.178':'.235'},vLocal.y/${mobile?'.178':'.235'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1507,6 +1546,18 @@
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
+
+        /* R2137: raised metal panels visually separate from smoked bioglass. */
+        float metalKey=max(dot(n,normalize(vec3(-.46,.72,.52))),0.0);
+        float metalRim=pow(1.0-facing,2.0);
+        vec3 titanium=vec3(.072,.093,.098);
+        titanium+=vec3(.23,.29,.29)*metalKey*.56;
+        titanium+=vec3(.64,.72,.70)*softboxB*.43;
+        titanium+=vec3(.89,.92,.89)*softboxC*.18;
+        titanium+=vec3(.13,.24,.26)*metalRim*.24;
+        titanium+=vec3(.052,.11,.13)*side*.15;
+        titanium*=1.0-.45*step(5.65,vFacet);
+        c=mix(c,titanium,machinedArmor*.99);
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
