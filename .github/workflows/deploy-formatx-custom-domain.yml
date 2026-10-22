@@ -61,6 +61,7 @@ jobs:
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
           python3 .github/scripts/validate-webgpu-source.py
+          node .github/scripts/validate-inline-csp-hashes-r2136.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-pricing-qr.cjs
           node .github/scripts/validate-public-site-integrity.cjs
