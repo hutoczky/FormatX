@@ -1458,9 +1458,14 @@
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
+        // R2122: the collapsing helices flow into four separate radial
+        // construction lanes rather than vanishing into one central dot.
+        // Reuse existing helix meshes: no additional GPU draw calls.
         const converge=1-assembly*.86;
-        h.position.x=b.x*(1+fly*.38)*converge;
-        h.position.y=b.y*(1+fly*.34)*converge;
+        const armAngle=(i%4)*Math.PI*.5+Math.PI*.5;
+        const armReach=.69*assembly;
+        h.position.x=b.x*(1+fly*.38)*converge+Math.cos(armAngle)*armReach;
+        h.position.y=b.y*(1+fly*.34)*converge+Math.sin(armAngle)*armReach;
         h.position.z=b.z+fly*.54-assembly*.24;
         h.rotation.x=Math.sin(time*.00045+b.phase)*.082;
         h.rotation.y=Math.sin(time*.00033+b.phase)*.17;
