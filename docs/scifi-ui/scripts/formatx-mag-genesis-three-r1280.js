@@ -1650,6 +1650,12 @@
         this.mechEyeCorona.scale.set(.50*(.90+.10*opticWake),.50*(.90+.10*opticWake),1);
       }
       this.mechInnerMaterial.opacity=(.070+.020*finale)*opticWake;
+      // R2124: the recessed glass pupil must remain dark until ignition.
+      // Previously its fixed .92 opacity revealed the eye prematurely.
+      if(this.mechEyeCore){
+        this.mechEyeCore.material.opacity=.92*opticWake;
+        this.mechEyeCore.material.emissiveIntensity=.045+opticWake*.11;
+      }
       this.mechInnerRing.rotation.z=time*.00012;
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*opticWake*opticPulse;
 
