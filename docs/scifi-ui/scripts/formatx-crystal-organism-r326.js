@@ -396,7 +396,13 @@
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
            may still retain a small face-normal contribution. */
-        const smoothWeight=facet<2.0?(mobile?.985:(software?.94:.90)):(software?.95:(mobile?.985:(constrained?.972:.978)));
+        // R2144: the machined raised armour is truly bevelled. A controlled
+        // contribution from its 3D face normal reveals the roof planes without
+        // the fully flat, per-triangle checkerboarding of earlier builds.
+        const metalFacet=facet>=5.0&&facet<6.0;
+        const smoothWeight=metalFacet?(facet>=5.65?.57:.74):
+          (facet<2.0?(mobile?.985:(software?.94:.90)):
+          (software?.95:(mobile?.985:(constrained?.972:.978))));
         const faceWeight=1-smoothWeight;
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
@@ -615,15 +621,22 @@
             const y=dy*radius+py*(centre+offset);
             return [x,y,magSkinZ(x,y)+relief+depth];
           };
+          // R2144: two intersecting bevel planes rise from the glass
+          // substrate into a machined titanium spine. The roof has real
+          // geometric normals, visible parallax and measurable thickness.
           bands.push({
-            left:make(-half,.071),right:make(half,.071),
-            lowerLeft:make(-half,.044),lowerRight:make(half,.044)
+            left:make(-half,.079),
+            crown:make(0,.164),
+            right:make(half,.079),
+            lowerLeft:make(-half,.022),
+            lowerRight:make(half,.022)
           });
         }
         for(let j=0;j<steps;j++){
           const a=bands[j],b=bands[j+1];
           const facet=5.18+axis*.014+(lane>0?.003:0);
-          armorQuad(a.left,a.right,b.right,b.left,facet);
+          armorQuad(a.left,a.crown,b.crown,b.left,facet);
+          armorQuad(a.crown,a.right,b.right,b.crown,facet+.016);
           armorQuad(a.lowerLeft,b.lowerLeft,b.lowerRight,a.lowerRight,5.82);
           armorQuad(a.left,b.left,b.lowerLeft,a.lowerLeft,5.72);
           armorQuad(a.right,a.lowerRight,b.lowerRight,b.right,5.72);
@@ -631,6 +644,9 @@
         const first=bands[0],last=bands[bands.length-1];
         armorQuad(first.left,first.lowerLeft,first.lowerRight,first.right,5.72);
         armorQuad(last.left,last.right,last.lowerRight,last.lowerLeft,5.72);
+        // Cut end caps receive the same physical ridge as the long roof.
+        armorTri(first.left,first.right,first.crown,5.31);
+        armorTri(last.left,last.crown,last.right,5.31);
       }
     }
     /* The centre is not a painted circle. A shallow, machined 48-facet
@@ -639,13 +655,17 @@
       radius*Math.cos(angle),radius*Math.sin(angle),
       magSkinZ(radius*Math.cos(angle),radius*Math.sin(angle))+depth
     ];
+    // R2144: raised 48-piece optical bezel now has a true sloped crown and
+    // inner/outer machined side walls, not just a flat painted ring.
     for(let j=0;j<48;j++){
       const a=j*Math.PI/24,b=(j+1)*Math.PI/24;
-      armorQuad(
-        opticPoint(.132,a,.078),opticPoint(.173,a,.078),
-        opticPoint(.173,b,.078),opticPoint(.132,b,.078),
-        5.22
-      );
+      const innerA=opticPoint(.143,a,.118),outerA=opticPoint(.203,a,.134);
+      const innerB=opticPoint(.143,b,.118),outerB=opticPoint(.203,b,.134);
+      armorQuad(innerA,outerA,outerB,innerB,5.22);
+      armorQuad(outerA,opticPoint(.203,a,.035),
+                opticPoint(.203,b,.035),outerB,5.72);
+      armorQuad(opticPoint(.143,a,.035),innerA,
+                innerB,opticPoint(.143,b,.035),5.72);
     }
     for(let j=0;j<8;j++){
       const angle=j*Math.PI/4+.10;
