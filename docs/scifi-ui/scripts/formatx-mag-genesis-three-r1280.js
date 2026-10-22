@@ -1,8 +1,12 @@
 (() => {
   'use strict';
 
+  // R2143: the production homepage is served at '/', even though the
+  // renderer source lives below '/scifi-ui/scripts/'. Resolving against
+  // location.href previously requested /scripts/three-r185.module.js and
+  // silently forced the phone intro to its flat 2D fallback.
   const THREE_SOURCES = [
-    new URL('./scripts/three-r185.module.js', location.href).href
+    new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href
   ];
 
   const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
