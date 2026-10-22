@@ -33,13 +33,14 @@ async function main(){
       const errors=[];
       page.on('pageerror',e=>errors.push(String(e)));
       const u=new URL(base);
+      u.searchParams.set('intro','1');
       u.searchParams.set('visualintro','1');
       u.searchParams.set('introframe',String(seconds));
       u.searchParams.set('proofrenderer','reference');
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       await page.waitForFunction(
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-        {timeout:35000}
+        null,{timeout:35000}
       );
       const state=await page.evaluate(()=>{
         const cv=document.querySelector('.fx-mag-birth-r533 canvas.fxb-particles');
