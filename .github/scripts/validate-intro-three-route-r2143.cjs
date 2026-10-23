@@ -31,9 +31,15 @@ assert.ok(engine.includes('const grow=smooth((t-5.88)/1.18)') &&
   engine.includes('this.birthRungs.forEach((bridge,axis)=>'),
   'Narrative continuity must be DNA -> paired arm transfer -> assembled MAG -> eye ignition');
 // R2164: enforce the story as real staged geometry, not metadata/CSS copy.
-assert.ok(engine.includes('[.00,.04,.85,1.57,.88]') &&
-  engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
-  'Desktop establishing shot must feature a centered, vertical double helix');
+const desktopPlacement=engine.split('const placements=this.mobileRender?[')[1]?.split(']:[')[1]
+  ?.match(/\[\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\]/);
+assert.ok(desktopPlacement,'Desktop DNA placements are missing');
+const [heroX,heroY,heroZ,heroRotation,heroScale]=desktopPlacement.slice(1).map(Number);
+assert.ok(Math.abs(heroX)<.10 && Math.abs(heroY)<.10 && heroZ>.45 &&
+  Math.abs(heroRotation-Math.PI/2)<.15 && heroScale>.70,
+  'Desktop establishing shot must show a centered, vertical 3D double helix');
+assert.ok(engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
+  'Desktop cinematic has no authoritative founding DNA');
 assert.ok(engine.includes('const satelliteReveal=smooth((t-1.12)/.86)') &&
   engine.includes('(h.userData.primary?1:satelliteReveal)'),
   'Secondary DNA must join the scene after the centered helix is recognizable');
