@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261023-r2167-dna-to-living-cell-four-arm-mag
-release_line=R2167-FILMIC-DNA-LIVING-CELL-FOUR-ARM-MAG
+token=20261023-r2168-dna-studio-mag-exact-csp
+release_line=R2168-FILMIC-DNA-LIVING-CELL-FOUR-ARM-MAG-SECURE
 purpose=Make the main homepage cinematic visibly begin with one centered 3D DNA double helix on desktop and mobile, reveal supporting nucleotides later, morph through a living organic embryo, then assemble the four-arm titanium MAG and ignite its recessed optical eye only after seating.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
@@ -23,3 +23,5 @@ release_scope=Maintain the canonical homepage DNA-first -> embryo -> four-arm ti
 release_features=R2167 main GENESIS: 9600 GPU morph DNA points on desktop, 6000 on mobile; physically larger living embryonic cell, translucent cellular envelope, inner organelle and organic curved capillaries; full mechanical four-arm titanium MAG, recessed delayed optic awakening; permanent MAG enlarges responsive silhouette and polished central eye. Isolated GENESIS Studio retains 9000 particles, GSAP, Three.js postprocessing, OrbitControls and opt-in sound.
 release_security=Isolated Studio CSP admits only pinned CDN, exact inline hashes and Cloudflare Analytics script host; no unsafe-inline.
 release_regression=R2167 revision-safe Worker cache rewrite graph; live desktop 1.6s DNA 4.2s cell 6.8s assembling metal 8.3s awakened MAG; 9600 GPU source proof and minimum embryonic subject size; both domains and standalone GENESIS source/browser smoke.
+
+release_csp_fix=R2168 exact production policy hash sha256-y+8/vQYbSebeWoOU9O4YA0EzypCmrfbhEUkbyGKJ5SY= for modified canonical parser bootstrap; isolated GENESIS Studio Cloudflare Analytics beacon script host explicitly permitted without unsafe-inline.
