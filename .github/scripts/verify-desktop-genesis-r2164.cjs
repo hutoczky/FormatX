@@ -1,0 +1,92 @@
+'use strict';
+// R2164: real desktop WebGL keyframe gate for the homepage birth film.
+// The DNA must own the establishing shot; a biological embryo follows;
+// the optical titanium MAG may be revealed only after mechanical assembly.
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const {chromium} = require('playwright');
+const base = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
+const dir = process.env.FORMATX_DESKTOP_GENESIS_DIR || 'artifacts/desktop-genesis-r2164';
+const scenes = [
+  ['dna', 1.6],
+  ['embryo', 4.2],
+  ['assembly', 6.8],
+  ['mag', 8.3]
+];
+fs.mkdirSync(dir, {recursive:true});
+async function main(){
+  const browser=await chromium.launch({
+    headless:true,
+    executablePath:process.env.CHROME_BIN || undefined,
+    args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--use-gl=angle','--use-angle=swiftshader']
+  });
+  const outputs=[];
+  try{
+    for(const [name,seconds] of scenes){
+      const context=await browser.newContext({
+        viewport:{width:1440,height:900},deviceScaleFactor:1.5,
+        isMobile:false,hasTouch:false,reducedMotion:'no-preference',
+        locale:'hu-HU',colorScheme:'dark'
+      });
+      const page=await context.newPage();
+      const errors=[];
+      page.on('pageerror',error=>errors.push(String(error)));
+      const url=new URL(base);
+      url.searchParams.set('intro','1');
+      url.searchParams.set('visualintro','1');
+      url.searchParams.set('introframe',String(seconds));
+      await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
+      await page.waitForFunction(
+        ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
+        null,{timeout:45000}
+      );
+      const state=await page.evaluate(()=>{
+        const root=document.documentElement;
+        return{
+          renderer:root.dataset.fxMagBirthRendererR1360||'',
+          phase:root.dataset.fxMagBirthPhase||'',
+          centeredDna:root.dataset.fxMagBirthCenteredDnaR2164||'',
+          dnaOpacity:Number(root.dataset.fxMagBirthDnaOpacityR2149||0),
+          embryoOpacity:Number(root.dataset.fxMagBirthEmbryoOpacityR2160||0),
+          embryoScale:Number(root.dataset.fxMagBirthEmbryoScaleR2149||0),
+          armorPieces:Number(root.dataset.fxMagBirthVisibleArmorR2147||0),
+          eyeOpacity:Number(root.dataset.fxMagBirthEyeOpacityR2148||0),
+          genomeCount:Number(root.dataset.fxMagBirthGenomeParticlesR2160||0),
+          peak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+          litPixels:Number(root.dataset.fxMagBirthThreeLitPixelsR2146||0)
+        };
+      });
+      await page.screenshot({path:path.join(dir,name+'-desktop-1440x900.png'),fullPage:false});
+      assert.deepEqual(errors,[],name+': browser JavaScript errors');
+      assert.equal(state.renderer,'threejs-active',name+': canonical Three.js missing');
+      assert.equal(state.centeredDna,'true',name+': DNA origin is off-axis');
+      assert.ok(state.peak>35 && state.litPixels>1,name+': actual GPU frame is blank');
+      assert.ok(state.genomeCount>=2000,name+': GPU genome particles absent');
+      if(name==='dna'){
+        assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
+        assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
+        assert.ok(state.embryoOpacity<.01,'Embryo appeared before DNA origin');
+      }
+      if(name==='embryo'){
+        assert.ok(state.embryoOpacity>.45,'Biological nucleus invisible');
+        assert.ok(state.embryoScale>.32,'Biological nucleus is too small');
+        assert.ok(state.dnaOpacity<.36,'DNA does not make room for the nucleus');
+        assert.equal(state.armorPieces,0,'Metal appeared before the embryo');
+      }
+      if(name==='assembly'){
+        assert.ok(state.armorPieces>=1,'Four-arm chassis did not begin assembling');
+        assert.ok(state.eyeOpacity<.003,'MAG optical organ ignited before assembly');
+      }
+      if(name==='mag'){
+        assert.ok(state.armorPieces>=5,'Permanent titanium chassis is incomplete');
+        assert.ok(state.eyeOpacity>.07 && state.eyeOpacity<.25,'MAG eye not visibly awakened');
+      }
+      outputs.push({name,seconds,...state});
+      await context.close();
+    }
+    fs.writeFileSync(path.join(dir,'timeline.json'),JSON.stringify(outputs,null,2)+'\n');
+    console.log('FORMATX_R2164_DESKTOP_GENESIS_STORYBOARD_PASS',JSON.stringify(outputs));
+  }finally{await browser.close();}
+}
+main().catch(error=>{console.error(error.stack||error);process.exitCode=1;});
