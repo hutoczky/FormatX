@@ -106,6 +106,7 @@ jobs:
           node --check docs/scifi-ui/scripts/organism-master-sync.js
           node --check docs/scifi-ui/scripts/synaptic-thought-genome.js
           node --check docs/scifi-ui/scripts/synaptic-thought-disclosure.js
+          node --check .github/scripts/verify-desktop-genesis-r2164.cjs
           node --check .github/scripts/validate-laptop-continuous-loop.cjs
           node --check .github/scripts/validate-public-site-integrity.cjs
           node --check .github/scripts/validate-living-core-r425-source.cjs
@@ -413,6 +414,15 @@ jobs:
           FORMATX_TEST_URL: https://formatxsuite.com/
         run: node .github/scripts/validate-r533-r536-handoff.cjs
 
+      # R2164: test rendered desktop GPU frames at 1.6/4.2/6.8/8.3s.
+      # A green textual handoff alone does not establish DNA-first cinematography.
+      - name: Verify desktop DNA-first to assembled MAG cinematic frames
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_DESKTOP_GENESIS_DIR: artifacts/live-desktop-genesis-r2164
+          FORMATX_TEST_URL: https://formatxsuite.com/scifi-ui/index.html
+        run: node .github/scripts/verify-desktop-genesis-r2164.cjs
+
       - name: Verify www domain resolves the same live cinematic contract
         env:
           NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
@@ -458,6 +468,7 @@ jobs:
         with:
           name: production-cinematic-handoff-${{ github.sha }}
           path: |
+            artifacts/live-desktop-genesis-r2164/
             artifacts/live-r533-r536-canonical/
             artifacts/live-r533-r536-www/
             artifacts/live-permanent-mag-r2154/
