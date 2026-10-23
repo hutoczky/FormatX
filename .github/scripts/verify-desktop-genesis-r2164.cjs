@@ -22,13 +22,16 @@ async function main(){
     args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--use-gl=angle','--use-angle=swiftshader']
   });
   const outputs=[];
+  // R2170: one browser context for all four frames reuses the browser's
+  // verified origin session/cache instead of repeatedly cold-starting
+  // thirteen production bundles. Each frame still has its own clean page.
+  const context=await browser.newContext({
+    viewport:{width:1440,height:900},deviceScaleFactor:1.5,
+    isMobile:false,hasTouch:false,reducedMotion:'no-preference',
+    locale:'hu-HU',colorScheme:'dark'
+  });
   try{
     for(const [name,seconds] of scenes){
-      const context=await browser.newContext({
-        viewport:{width:1440,height:900},deviceScaleFactor:1.5,
-        isMobile:false,hasTouch:false,reducedMotion:'no-preference',
-        locale:'hu-HU',colorScheme:'dark'
-      });
       const page=await context.newPage();
       const errors=[];
       page.on('pageerror',error=>errors.push(String(error)));
@@ -45,12 +48,21 @@ async function main(){
         canonical.pathname='/';
         await page.goto(canonical.href,{waitUntil:'domcontentloaded',timeout:30000});
       }
+      // The remote Cloudflare edge occasionally stalls a cold script fetch.
+      // Retry ONE real navigation, then demand the same GPU/phase assertions;
+      // never accept a static/CSS fallback as a successful film frame.
+      const failedRequests=[];
+      page.on('requestfailed',request=>{
+        if(/formatx-|three-r185/.test(request.url()))
+          failedRequests.push({url:request.url(),error:request.failure()?.errorText||'network failure'});
+      });
+      const awaitGpuFrame=()=>page.waitForFunction(
+        ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
+        null,{timeout:30000}
+      );
       try{
-        await page.waitForFunction(
-          ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-          null,{timeout:45000}
-        );
-      }catch(error){
+        await awaitGpuFrame();
+      }catch(firstError){
         const debug=await page.evaluate(()=>({
           href:location.href,
           intro:document.documentElement.dataset.fxMagBirthLiveR533||'',
@@ -62,8 +74,19 @@ async function main(){
           scripts:[...document.scripts].filter(script=>/formatx-mag-birth-live-r533|formatx-mag-genesis-three-r1280/.test(script.src))
             .map(script=>script.src)
         }));
-        fs.writeFileSync(path.join(dir,name+'-timeout.json'),JSON.stringify({debug,errors,message:String(error)},null,2));
-        throw error;
+        fs.writeFileSync(path.join(dir,name+'-first-attempt.json'),JSON.stringify({
+          debug,errors,failedRequests,firstError:String(firstError)
+        },null,2));
+        try{
+          await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+          await awaitGpuFrame();
+        }catch(secondError){
+          fs.writeFileSync(path.join(dir,name+'-timeout.json'),JSON.stringify({
+            debug,errors,failedRequests,firstError:String(firstError),
+            secondError:String(secondError)
+          },null,2));
+          throw secondError;
+        }
       }
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
@@ -107,10 +130,10 @@ async function main(){
         assert.ok(state.eyeOpacity>.07 && state.eyeOpacity<.25,'MAG eye not visibly awakened');
       }
       outputs.push({name,seconds,...state});
-      await context.close();
+      await page.close();
     }
     fs.writeFileSync(path.join(dir,'timeline.json'),JSON.stringify(outputs,null,2)+'\n');
     console.log('FORMATX_R2164_DESKTOP_GENESIS_STORYBOARD_PASS',JSON.stringify(outputs));
-  }finally{await browser.close();}
+  }finally{await context.close();await browser.close();}
 }
 main().catch(error=>{console.error(error.stack||error);process.exitCode=1;});
