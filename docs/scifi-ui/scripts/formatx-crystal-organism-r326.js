@@ -273,8 +273,11 @@
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
-    const latitudeSegments = software ? 24 : constrainedMobile ? 28 : mobile ? 36 : constrained ? 48 : 72;
-    const longitudeSegments = software ? 48 : constrainedMobile ? 56 : mobile ? 72 : constrained ? 96 : 144;
+    /* R2157: prevent angular stair-stepping across the four titanium arms
+       on phones. modest adaptive tessellation uplift; one draw call retained,
+       desktop full-quality and device-dependent render governor unchanged. */
+    const latitudeSegments = software ? 28 : constrainedMobile ? 30 : mobile ? 40 : constrained ? 48 : 72;
+    const longitudeSegments = software ? 56 : constrainedMobile ? 60 : mobile ? 80 : constrained ? 96 : 144;
     /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
        with the four-point body; the living response stays in material, light and motion. */
     const tendrilCount = 0;
