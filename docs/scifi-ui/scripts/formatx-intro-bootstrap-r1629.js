@@ -33,7 +33,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261007-r1950c-studio-intro';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261023-r2170-dna-first-studio-genesis';
 let retryCount=0,retryTimer=0;
 const RETRY_LIMIT=3;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
