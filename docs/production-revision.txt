@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261023-r2165-dna-first-studio-mag-birth
-release_line=R2165-MAIN-INTRO-DNA-FIRST-TO-FOUR-ARM-MAG
+token=20261023-r2166-dna-genesis-favicon-live-qa
+release_line=R2166-MAIN-INTRO-DNA-FIRST-TO-FOUR-ARM-MAG-GENESIS-QA
 purpose=Make the main homepage cinematic visibly begin with one centered 3D DNA double helix on desktop and mobile, reveal supporting nucleotides later, morph through a living organic embryo, then assemble the four-arm titanium MAG and ignite its recessed optical eye only after seating.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
@@ -16,3 +16,6 @@ release_verification=20261023-r2165-canonical-homepage-DNA-embryo-assembly-MAG-4
 
 main_storyboard=0-2.38s centered volumetric double helix; 2.38-5.64s living organic embryo; 5.88-7.48s sequential four-arm titanium seating; 7.44-10s recessed MAG optic awakening and permanent hero handoff.
 storyboard_proof_url=https://formatxsuite.com/?intro=1&visualintro=1; canonical root preserves forced playback and fixed GPU frame query.
+
+release_fix=R2166: both isolated GENESIS movie routes explicitly use the existing first-party FormatX PNG favicon to prevent missing default root favicon requests during real Chrome sessions; add URL-precise 4xx/failed request diagnostics to GENESIS desktop and mobile browser QA.
+release_scope=Maintain the canonical homepage DNA-first -> embryo -> four-arm titanium seating -> eye ignition sequence unchanged and preserve strict isolated CSP for both Genesis route variants.
