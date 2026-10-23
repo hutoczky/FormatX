@@ -65,6 +65,25 @@ const GENESIS_CSP = [
   "worker-src 'self'",
   "upgrade-insecure-requests"
 ].join('; ');
+// R2161 — isolated 9000-particle Three.js + GSAP Genesis Studio route.
+// Only this path receives the pinned CDN and the exact audited inline hashes.
+// The existing /genesis/ film and homepage CSP remain unchanged.
+const GENESIS_STUDIO_PATHS = new Set(['/scifi-ui/genesis/index.html', '/scifi-ui/genesis/']);
+const GENESIS_STUDIO_CSP = [
+  "default-src 'none'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  "script-src 'self' https://cdn.jsdelivr.net 'sha256-PJuPofc3VlYWTUNXN9BXKt1IhI2wg5qUvxVGhJE5x5k=' 'sha256-S41J1U+ajP9QIkM5ZMs/czASMxe4/Wv2c1y0ppgPp3o='",
+  "style-src 'self' 'sha256-KjJjjobWHZZERty7pHlWgA82YUXWD7FQqmLVGshBumA='",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'self' https://cdn.jsdelivr.net",
+  "media-src 'self'",
+  "worker-src 'self'",
+  "upgrade-insecure-requests"
+].join('; ');
 const ROBOTS = [
   '# FormatX canonical robots policy — served by production Worker R499',
   'User-agent: *',
@@ -368,7 +387,8 @@ async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
   const isGenesis = url.pathname === '/genesis/' || url.pathname === '/genesis/index.html';
-  headers.set('Content-Security-Policy', isGenesis ? GENESIS_CSP : HEADER_CSP);
+  const isGenesisStudio = GENESIS_STUDIO_PATHS.has(url.pathname);
+  headers.set('Content-Security-Policy', isGenesisStudio ? GENESIS_STUDIO_CSP : (isGenesis ? GENESIS_CSP : HEADER_CSP));
   headers.set('Alt-Svc', 'clear');
   headers.set('X-FormatX-Transport-Stability', 'r514-critical-core-post-first-paint');
   headers.set('X-FormatX-Edge-Stability', `r514-critical-core:${STARTUP_REVISION}`);
@@ -394,7 +414,8 @@ async function stabilizePublicResponse(request, url, response) {
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
   let html = await response.text();
-  if (!isGenesis) html = normalizeMetaCsp(html);
+  // These standalone, content-hashed films must not inherit homepage meta CSP.
+  if (!isGenesis && !isGenesisStudio) html = normalizeMetaCsp(html);
   if (HOMEPAGE_PATHS.has(url.pathname)) html = optimizeHomepage(html);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
