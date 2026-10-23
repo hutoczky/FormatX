@@ -12,6 +12,7 @@ mag_cache=20261023-r2157
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
 
-release_verification=20261023-r2165-centered-studio-genesis-live-storyboard-gate
+release_verification=20261023-r2165-canonical-homepage-DNA-embryo-assembly-MAG-4-keyframe-proof
 
 main_storyboard=0-2.38s centered volumetric double helix; 2.38-5.64s living organic embryo; 5.88-7.48s sequential four-arm titanium seating; 7.44-10s recessed MAG optic awakening and permanent hero handoff.
+storyboard_proof_url=https://formatxsuite.com/?intro=1&visualintro=1; canonical root preserves forced playback and fixed GPU frame query.
