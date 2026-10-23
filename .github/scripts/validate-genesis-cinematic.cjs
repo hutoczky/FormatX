@@ -21,6 +21,7 @@ for(const [kind,body] of [['style',styles],['importmap',imports],['module',modul
 assert(worker.includes('isGenesis ? GENESIS_CSP : HEADER_CSP'),'Original /genesis/ must keep its own CSP even with an additional Genesis Studio route');
 assert(worker.includes('if (!isGenesis && !isGenesisStudio) html = normalizeMetaCsp(html);'),'Either Genesis film must bypass production homepage meta-CSP rewriting');
 assert(home.includes('fx-genesis-entrance')&&home.includes('/genesis/index.html'),'Main site has no visible Genesis hero entrance');
+assert(html.includes('href="/scifi-ui/assets/images/formatx-icon-80.png"'), 'Genesis must declare the existing site favicon rather than requesting a missing root favicon.ico');
 for(const token of [
   'const N=9600;','new THREE.Points(','new UnrealBloomPass(','new OrbitControls(',
   'gsap.timeline(','new THREE.ShaderMaterial(','AudioContext','addEventListener',
@@ -49,8 +50,17 @@ async function live(){
       const context=await browser.newContext({viewport:profile.viewport,isMobile:profile.isMobile,deviceScaleFactor:profile.isMobile?1:1.5,reducedMotion:'no-preference'});
       const page=await context.newPage();
       const errors=[];
+      const failedResponses=[];
       page.on('pageerror',e=>errors.push('pageerror '+String(e)));
-      page.on('console',m=>{if(m.type()==='error')errors.push('console '+m.text())});
+      page.on('response',response=>{
+        if(response.status()>=400)failedResponses.push(response.status()+' '+response.url());
+      });
+      page.on('requestfailed',request=>{
+        failedResponses.push('requestfailed '+request.url()+' '+(request.failure()?.errorText||''));
+      });
+      page.on('console',m=>{
+        if(m.type()==='error')errors.push('console '+m.text()+' @ '+m.location().url);
+      });
       const url=root+'/genesis/index.html?proof='+profile.id+'&rev='+Date.now();
       const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
       assert.equal(response?.status(),200,'Genesis route is not HTTP 200: '+url);
@@ -92,8 +102,8 @@ async function live(){
       await page.locator('#cameraMode').click();
       await page.waitForTimeout(280);
       assert.ok((await page.locator('#cameraMode').textContent()).includes('FILMES KAMERA'),'Camera view control failed');
-      assert.deepEqual(errors,[],'Genesis browser errors on '+profile.id+': '+errors.join(' | '));
-      fs.writeFileSync(path.join(out,profile.id+'.json'),JSON.stringify({initial,final,errors,url},null,2));
+      assert.deepEqual(errors,[],'Genesis browser errors on '+profile.id+': '+errors.join(' | ')+'; failed requests: '+failedResponses.join(' | '));
+      fs.writeFileSync(path.join(out,profile.id+'.json'),JSON.stringify({initial,final,errors,failedResponses,url},null,2));
       await context.close();
       console.log('GENESIS_BROWSER_PASS',profile.id,JSON.stringify({count:initial.count,phase:final.phase,errors:errors.length}));
     }
