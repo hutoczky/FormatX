@@ -172,6 +172,11 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_INTRO_EVIDENCE_DIR: artifacts/r533-r536-handoff
         run: node .github/scripts/validate-r533-r536-handoff.cjs
+      - name: Verify reference-film native frame before handoff
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-reference-film-native-handoff-r2171.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -182,6 +187,7 @@ jobs:
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
             artifacts/r533-r536-handoff/
+            artifacts/reference-film-native-handoff-r2171/
             artifacts/r656-intro-keyframes/
           if-no-files-found: warn
           retention-days: 30

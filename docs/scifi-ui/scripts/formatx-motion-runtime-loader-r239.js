@@ -165,7 +165,11 @@ function activateMagRuntime(source='startup'){
 function onMagBirthWarmup(event){
   const source=String(event?.detail?.source||root.dataset.fxMagBirthCoreWarmupR618||'cinematic-warmup');
   const validationWarmup=/validated-skip|mobile-skip|automation|webdriver/i.test(source);
-  if(mobile.matches && !validationWarmup){
+  // The reference film owns a 2D canvas. Its phase-2 warmup can prepare the
+  // single native WebGL MAG under the overlay, as on desktop. Deferring that
+  // work until completion leaves an empty handoff while R326 first boots.
+  const referenceFilm=root.dataset.fxMagBirthRendererR1360==='native-canvas-reference-film';
+  if(mobile.matches && !referenceFilm && !validationWarmup){
     /* R1774: preserve the exclusive intro GPU budget, but use the existing
        phase-2 warmup event (~3.15 s on the 10 s film) to fetch the permanent
        MAG owners into HTTP cache. No script executes here, no WebGL context is
