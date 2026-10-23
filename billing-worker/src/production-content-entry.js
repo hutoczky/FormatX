@@ -57,7 +57,7 @@ const GENESIS_CSP = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   "script-src 'self' 'sha256-/2Irsdgw5a20ZICW0D+XGUGUWrvnATkcGIEfMbdY404=' 'sha256-IMJDwF1q+tyko8lfT79OANJl5tVeFC/VLpsreqWS0TE=' https://cdn.jsdelivr.net",
-  "style-src 'self' 'sha256-WMjWMJeNk87T9uXkQFBbN8MzKSj/b80vxdPe9HnHk04='",
+  "style-src 'self' 'sha256-IIQmVBsn7KFFQNxX0hQt3bvD8TN31TD5haDjJuSXuJ8='",
   "img-src 'self' data:",
   "connect-src 'self' https://cdn.jsdelivr.net",
   "font-src 'self'",
