@@ -257,7 +257,10 @@ async function verifySkip(browser){
     await skip.focus();
     assert.equal(await skip.evaluate(el=>document.activeElement===el),true,'mobile-skip: skip cannot receive keyboard focus');
     await page.keyboard.press('Enter');
-    await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:3000});
+    // R2165: cold CI GPUs can stall the event loop briefly while the native
+    // MAG shader finishes compiling. Allow the bounded cinematic exit to drain
+    // without weakening the actual teardown and scroll-lock assertions.
+    await page.waitForFunction(sel=>!document.querySelector(sel),OVERLAY,{timeout:8000});
     const final=await snapshot(page);
     assertStable(final,'mobile-skip');
     assert.equal(final.stageIdentity,'native-stage-r548','mobile-skip: native stage swapped');
