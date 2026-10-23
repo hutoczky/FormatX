@@ -388,6 +388,8 @@ jobs:
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           echo "FORMATX_LIVE_NODE_PATH=$RUNNER_TEMP/formatx-live-cinematic/node_modules" >> "$GITHUB_ENV"
 
+      # R2155: this validator now requires the *styled* hero grid, not just a
+      # first WebGL canvas frame, to avoid accepting an unstyled WWW capture.
       - name: Verify actual permanent R2154 MAG after WebGL first frame
         env:
           NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
