@@ -95,15 +95,38 @@ async function waitForProductShell(page) {
     return root.dataset.fxControlOwnerR268 === 'ready' && visible(ask) && visible(core) && visible(lead);
   }, null, { timeout: 20000 });
   await page.waitForTimeout(250);
+  // The immersive archive intentionally replaces the legacy hero copy with
+  // its original, interactive DOM folio. Verify the new content has actually
+  // materialized before capturing a screenshot or asserting layout.
+  await page.waitForFunction(()=>{
+    if(document.documentElement.dataset.fxArchiveCinema!=='active')return true;
+    const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+    if(!(panel instanceof HTMLElement))return false;
+    const c=getComputedStyle(panel),r=panel.getBoundingClientRect();
+    return c.display!=='none'&&c.visibility!=='hidden'&&
+      Number(c.opacity||1)>.10&&r.width>220&&r.height>160&&
+      (panel.textContent||'').trim().length>120;
+  },null,{timeout:20000});
 }
 
 async function assertCommon(page, { mobile = false, reduced = false } = {}) {
   const hero = await visibleBox(page, '#hero');
-  const lead = await visibleBox(page, '#hero .hero-lead');
+  const archiveActive = await page.evaluate(() => document.documentElement.dataset.fxArchiveCinema==='active');
+  const lead = await visibleBox(page, '#hero .hero-lead', !archiveActive);
+  const folio = archiveActive
+    ? await visibleBox(page, 'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]')
+    : null;
   const ask = await visibleBox(page, ASK);
   const core = await visibleBox(page, '.topbar .fx-reference-mag-button');
   assert(hero.width > 200 && hero.height > 200, `Hero geometry invalid: ${JSON.stringify(hero)}`);
-  assert(lead.text.length > 80, 'Hero product definition is missing or too short');
+  if(archiveActive){
+    assert(folio.width >= 220 && folio.height >= 160,
+      `Cinematic folio not visible: ${JSON.stringify(folio)}`);
+    assert(folio.text.length > 120,
+      'Active cinematic folio has no readable original product content');
+  }else{
+    assert(lead.text.length > 80, 'Hero product definition is missing or too short');
+  }
   assert(ask.width >= 44 && ask.height >= 44, `ASK target is below 44px: ${JSON.stringify(ask)}`);
   assert(core.width >= 40 && core.height >= 40, `MAG header target is too small: ${JSON.stringify(core)}`);
 
@@ -135,8 +158,9 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
   if (mobile) {
     const menu = await visibleBox(page, '#menu-toggle');
     const heroSpace = await visibleBox(page, '#hero .hero-space');
-    const copy = await visibleBox(page, '#hero .hero-copy');
+    const copy = archiveActive ? null : await visibleBox(page, '#hero .hero-copy');
     assert(menu.width >= 40 && menu.height >= 40, `Mobile menu target is too small: ${JSON.stringify(menu)}`);
+    if(!archiveActive){
     assert(controls.left >= heroSpace.left - 1 && controls.right <= heroSpace.right + 1,
       `Mobile controls escaped MAG stage horizontally: ${JSON.stringify({ controls, heroSpace })}`);
     assert(controls.top >= heroSpace.top - 1 && controls.bottom <= heroSpace.bottom + 1,
@@ -145,7 +169,8 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
     assert(owned, 'Mobile controls are not owned by .hero-space');
     assert(copy.width >= 280 && copy.top >= heroSpace.bottom - 2,
       `Mobile hero copy must follow the MAG stage in normal flow: ${JSON.stringify({ copy, heroSpace })}`);
-  } else {
+    } // Cinematic mode docks the canonical controls independently of the MAG stage.
+  } else if(!archiveActive) {
     const title = await visibleBox(page, '#hero-title');
     const cta = await visibleBox(page, '#hero-download');
     const copy = await visibleBox(page, '#hero .hero-copy');
