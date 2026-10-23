@@ -86,7 +86,7 @@ async function main(){
       assert.equal(state.renderer,'threejs-active',name+': canonical Three.js missing');
       assert.equal(state.centeredDna,'true',name+': DNA origin is off-axis');
       assert.ok(state.peak>35 && state.litPixels>1,name+': actual GPU frame is blank');
-      assert.ok(state.genomeCount>=2000,name+': GPU genome particles absent');
+      assert.ok(state.genomeCount>=9000,name+': 9600-point GPU genome regressed');
       if(name==='dna'){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
         assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
@@ -94,7 +94,7 @@ async function main(){
       }
       if(name==='embryo'){
         assert.ok(state.embryoOpacity>.45,'Biological nucleus invisible');
-        assert.ok(state.embryoScale>.32,'Biological nucleus is too small');
+        assert.ok(state.embryoScale>.60,'Living cell nucleus must fill the studio close-up');
         assert.ok(state.dnaOpacity<.36,'DNA does not make room for the nucleus');
         assert.equal(state.armorPieces,0,'Metal appeared before the embryo');
       }
