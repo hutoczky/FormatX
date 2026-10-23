@@ -67,6 +67,7 @@ jobs:
           node .github/scripts/validate-intro-three-route-r2143.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
+          node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-pricing-qr.cjs
           node .github/scripts/validate-public-site-integrity.cjs
@@ -435,6 +436,22 @@ jobs:
           FORMATX_TEST_URL: https://www.formatxsuite.com
         run: node .github/scripts/validate-genesis-cinematic.cjs
 
+      # Independently verify the linked 9000-point single-file cinematic
+      # on desktop and mobile with actual WebGL and CDN imports.
+      - name: Verify live GENESIS Studio 9000 particles
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_GENESIS_STUDIO_EVIDENCE_DIR: artifacts/live-genesis-studio-canonical
+          FORMATX_TEST_URL: https://formatxsuite.com
+        run: node .github/scripts/validate-genesis-studio-r2161.cjs
+
+      - name: Verify www GENESIS Studio 9000 particles
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_GENESIS_STUDIO_EVIDENCE_DIR: artifacts/live-genesis-studio-www
+          FORMATX_TEST_URL: https://www.formatxsuite.com
+        run: node .github/scripts/validate-genesis-studio-r2161.cjs
+
       - name: Upload live cinematic evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -447,6 +464,8 @@ jobs:
             artifacts/live-permanent-mag-r2154-www/
             artifacts/live-genesis-canonical/
             artifacts/live-genesis-www/
+            artifacts/live-genesis-studio-canonical/
+            artifacts/live-genesis-studio-www/
           if-no-files-found: warn
           retention-days: 30
 
