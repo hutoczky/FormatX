@@ -79,6 +79,9 @@ async function main(){
           eyeOpacity:root.dataset.fxMagBirthEyeOpacityR2148,
           eyeScale:root.dataset.fxMagBirthEyeScaleR2148,
           embryoScale:root.dataset.fxMagBirthEmbryoScaleR2149,
+          embryoOpacity:root.dataset.fxMagBirthEmbryoOpacityR2160,
+          gpuGenomeCount:root.dataset.fxMagBirthGenomeParticlesR2160,
+          earlyDiamondVisible:root.dataset.fxMagBirthEarlyDiamondVisibleR2160,
           dnaOpacity:root.dataset.fxMagBirthDnaOpacityR2149,
           proof:root.dataset.fxMagBirthVisualFrameR659,
           width:cv.width,height:cv.height,
@@ -98,6 +101,10 @@ async function main(){
           name+': true Three.js renderer did not activate: '+JSON.stringify(state));
         assert.ok(Number(state.peak)>35 && Number(state.litPixels)>1,
           name+': genuine bright Three.js geometry not found in GPU center crop: '+JSON.stringify(state));
+        assert.ok(Number(state.gpuGenomeCount)>=1000,
+          'R2160 GPU DNA particle birth must render more than 1000 real particles: '+JSON.stringify(state));
+        assert.equal(state.earlyDiamondVisible,'false',
+          'R2160 must not show the old hard-edged metal diamond before assembly');
         if(name==='dna'){
           assert.ok(Number(state.dnaOpacity)>.35,
             'R2149 must open with a full-opacity 3D DNA establishing shot: '+JSON.stringify(state));
@@ -105,6 +112,8 @@ async function main(){
             'R2147 must establish DNA before showing a single titanium panel');
         }
         if(name==='embryo'){
+          assert.ok(Number(state.embryoOpacity)>.45,
+            'R2160 organic cell nucleus must actually be visible during embryo scene: '+JSON.stringify(state));
           assert.ok(Number(state.embryoScale)>.47,
             'R2149 mobile embryo must occupy an intentional readable foreground: '+JSON.stringify(state));
           assert.ok(Number(state.dnaOpacity)<.23,
