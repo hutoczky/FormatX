@@ -77,7 +77,7 @@ const GENESIS_STUDIO_CSP = [
   "object-src 'none'",
   "frame-ancestors 'self'",
   "form-action 'self'",
-  "script-src 'self' https://cdn.jsdelivr.net 'sha256-PJuPofc3VlYWTUNXN9BXKt1IhI2wg5qUvxVGhJE5x5k=' 'sha256-S41J1U+ajP9QIkM5ZMs/czASMxe4/Wv2c1y0ppgPp3o='",
+  "script-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com 'sha256-PJuPofc3VlYWTUNXN9BXKt1IhI2wg5qUvxVGhJE5x5k=' 'sha256-S41J1U+ajP9QIkM5ZMs/czASMxe4/Wv2c1y0ppgPp3o='",
   "style-src 'self' 'sha256-3bYUAOH/hl6gWLfZnnKmxP82kvE2YuePeaeu94pbxFs='",
   "img-src 'self' data:",
   "font-src 'self'",
