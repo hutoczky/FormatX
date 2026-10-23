@@ -90,7 +90,11 @@ async function main(){
       }
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
+        const nativeStage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+        const nativeOpacity=nativeStage?Number(getComputedStyle(nativeStage).opacity):0;
         return{
+          nativeOpacity,
+          nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
           renderer:root.dataset.fxMagBirthRendererR1360||'',
           phase:root.dataset.fxMagBirthPhase||'',
           centeredDna:root.dataset.fxMagBirthCenteredDnaR2164||'',
@@ -110,6 +114,10 @@ async function main(){
       assert.equal(state.centeredDna,'true',name+': DNA origin is off-axis');
       assert.ok(state.peak>35 && state.litPixels>1,name+': actual GPU frame is blank');
       assert.ok(state.genomeCount>=9000,name+': 9600-point GPU genome regressed');
+      if(name==='dna'||name==='embryo'||name==='assembly'){
+        assert.ok(state.nativeOpacity<.025,
+          name+': permanent MAG leaked into birth film before titanium assembly: '+JSON.stringify(state));
+      }
       if(name==='dna'){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
         assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
