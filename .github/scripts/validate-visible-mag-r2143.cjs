@@ -26,6 +26,18 @@ async function capture(browser,{name,width,height,mobile}){
     url.searchParams.set('mobileproof','1');
     url.searchParams.set('magvisual','r2143');
     await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
+    // R2156: www currently performs a canonical recovery redirect and can
+    // drop the visual-proof query on that hop. Verify that it landed on the
+    // approved first-party canonical host, then repeat the proof there with
+    // the original query rather than testing a different intro mode.
+    const intended=new URL(BASE);
+    const landed=new URL(page.url());
+    if(intended.hostname==='www.formatxsuite.com' && landed.hostname==='formatxsuite.com'){
+      assert.equal(landed.protocol,'https:','www redirect must remain HTTPS');
+      const canonical=new URL(url.href);
+      canonical.hostname='formatxsuite.com';
+      await page.goto(canonical.href,{waitUntil:'domcontentloaded',timeout:30000});
+    }
     const hero=page.locator('#hero .hero-space');
     await hero.waitFor({state:'visible',timeout:20000});
     // Natural pointer movement activates the same deferred renderer that a
@@ -44,7 +56,8 @@ async function capture(browser,{name,width,height,mobile}){
     // layout/CSS has settled. The earlier www proof captured a bare stage at
     // far left with the text entirely missing even though WebGL was ready.
     // Require the actual hero composition to be laid out before evidence.
-    await page.waitForFunction(isMobile=>{
+    try{
+      await page.waitForFunction(isMobile=>{
       const hero=document.querySelector('#hero');
       const space=hero?.querySelector('.hero-space');
       const headline=hero?.querySelector('h1');
@@ -53,7 +66,24 @@ async function capture(browser,{name,width,height,mobile}){
       if(!shell||!title||title.width<100||title.height<20)return false;
       if(!isMobile && shell.x<innerWidth*.37)return false;
       return true;
-    },mobile,{timeout:25000});
+    },mobile,{timeout:35000});
+    }catch(error){
+      const diagnostic=await page.evaluate(()=>{
+        const box=(selector)=>{
+          const node=document.querySelector(selector);
+          if(!node)return null;
+          const r=node.getBoundingClientRect(),css=getComputedStyle(node);
+          return {x:r.x,y:r.y,width:r.width,height:r.height,display:css.display,visibility:css.visibility,opacity:css.opacity};
+        };
+        return {href:location.href,scrollY,viewport:[innerWidth,innerHeight],
+          rootBirth:document.documentElement.dataset.fxMagBirthLiveR533,
+          hero:box('#hero'),space:box('#hero .hero-space'),title:box('#hero h1'),
+          header:box('header'),replay:box('#hero .fx-mag-replay-r2150')};
+      });
+      state={failure:'hero-layout-not-ready',diagnostic};
+      await page.screenshot({path:path.join(OUT,name+'-layout-error.png'),fullPage:false}).catch(()=>{});
+      throw new Error(name+': styled hero layout not ready: '+JSON.stringify(diagnostic)+'; '+String(error));
+    }
     await page.evaluate(()=>document.fonts?.ready);
     await page.waitForTimeout(650);
     state=await page.evaluate(()=>{
@@ -100,6 +130,8 @@ async function capture(browser,{name,width,height,mobile}){
     assert(replayLayout.replay?.width>=130&&replayLayout.replay?.height>=44,
       name+': replay link missing or too small');
     assert(replayLayout.withinViewport,name+': replay escaped visible MAG viewport');
+    assert(replayLayout.replay.y>=0&&replayLayout.replay.y+replayLayout.replay.height<=page.viewportSize().height,
+      name+': replay is vertically cropped or outside the viewport');
     assert(!replayLayout.overlapAsk&&!replayLayout.overlapSound,
       name+': replay overlaps SOUND or ASK controls');
     await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
