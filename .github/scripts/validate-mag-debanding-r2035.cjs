@@ -47,7 +47,7 @@ for(const token of [
   'armorQuad(a.left,a.crown,b.crown,b.left,facet)',
   'float machinedArmor=step(5.0,vFacet)',
   'c=mix(c,titanium,machinedArmor*.99)',
-  "mobile?'.178':'.235'"
+  "mobile?'.195':'.252'"
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
