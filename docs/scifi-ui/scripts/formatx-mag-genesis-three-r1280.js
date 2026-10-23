@@ -273,13 +273,17 @@
       // so a capable Android device could still appear to open on black.
       // Establish one large, genuine 3D double helix in the center, plus
       // three smaller biological satellites feeding the four MAG arms.
-      // Desktop retains the original wide ten-helix cinematography.
+      // R2164: frame one must show ONE complete, central 3D DNA double
+      // helix on desktop as well as phones. The older desktop composition
+      // put all ten sources around the edges and left the hero centre empty.
+      // Supporting helices join later and flow into the four MAG arms.
       const placements=this.mobileRender?[
         [.00,.06,.60,1.57,.92],
         [-.55,.18,.16,1.30,.48],
         [.56,.16,.12,1.82,.48],
         [.00,-.87,-.20,1.58,.39]
       ]:[
+        [.00,.04,.85,1.57,.88],
         [-2.34,1.34,.60,-.48,.96],
         [2.30,1.36,.64,.46,.94],
         [-2.26,-1.32,.56,.42,.98],
@@ -341,6 +345,8 @@
         h.rotation.y=(this.rand()-.5)*.24;
         h.scale.setScalar(sc);
         h.userData.base={x,y,z,rz,s:sc,phase:this.rand()*Math.PI*2};
+        // A dominant, recognizable nucleotide chain owns the opening shot.
+        h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50;
         this.dnaGroup.add(h);
         this.dnas.push(h);
       }
@@ -1725,7 +1731,11 @@
       // construction and let it collapse into the emerging metal chassis.
       const assembly=smooth((t-4.85)/2.25);
       const fade=1-smooth((t-5.75)/1.35);
-      const intro=ease(t/.42);
+      const intro=ease(t/.30);
+      // R2164: the central DNA is alone during the establishing shot.
+      // Side genomes develop AFTER viewers have recognized its double helix.
+      // Keep the timing in the existing 10-second film (no delayed handoff).
+      const satelliteReveal=smooth((t-1.12)/.86);
       // R2149: DNA is the establishing shot; once the embryo forms,
       // helices become a transparent scaffold instead of blocking it.
       const embryoFocus=smooth((t-2.48)/1.02);
@@ -1765,7 +1775,7 @@
         h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56)*helixScaleFocus);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*intro*.84*helixOpacityFocus;
+          m.opacity=(bases[mi]??.5)*fade*intro*.94*helixOpacityFocus*(h.userData.primary?1:satelliteReveal);
         });
       });
     }
