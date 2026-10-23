@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#050712"/>
+<title>FormatX Genesis — A születés</title>
+<style>
+:root{color-scheme:dark;--ink:#eaf6ff;--muted:#91a8bd;--line:rgba(170,220,255,.19);--cyan:#68eaff;--blue:#397cff;--gold:#ffca9a}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#02040d;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+#stage{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none}
+.vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 43%,transparent 22%,rgba(0,2,12,.13) 52%,rgba(0,0,8,.8) 100%)}
+.grain{position:fixed;inset:0;pointer-events:none;opacity:.14;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E")}
+header{position:fixed;top:clamp(20px,4vw,48px);left:clamp(20px,5vw,80px);right:clamp(20px,5vw,80px);display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.brand{display:flex;align-items:center;gap:14px;font-size:13px;font-weight:750;letter-spacing:.32em}.brand-mark{width:27px;height:27px;border:1px solid #72ddff;transform:rotate(45deg);box-shadow:0 0 22px #28bfff55;position:relative}.brand-mark:after{content:"";position:absolute;inset:6px;border:1px solid #72ddff}.tag{font-size:10px;letter-spacing:.3em;color:#c3dbef8f}
+.hero{position:fixed;top:21%;left:clamp(20px,7vw,112px);pointer-events:none;max-width:420px;text-shadow:0 2px 24px #02030a;transition:opacity .3s}.eyebrow{color:#8de8ff;font-size:11px;letter-spacing:.46em;text-transform:uppercase}.hero h1{font-size:clamp(52px,7.6vw,116px);font-weight:250;letter-spacing:-.075em;line-height:.96;margin:20px 0 12px}.hero h1 strong{font-weight:680;background:linear-gradient(100deg,#fff,#8ae8ff 70%,#6797ff);-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{max-width:280px;font-size:13px;line-height:1.8;color:#b7cbdc;letter-spacing:.06em}.hero .line{width:54px;height:1px;background:linear-gradient(90deg,#76efff,transparent);margin-top:27px}
+.status{position:fixed;right:clamp(20px,5vw,80px);top:49%;transform:translateY(-50%);text-align:right;pointer-events:none}.status .num{font-size:clamp(50px,6vw,96px);font-weight:200;letter-spacing:-.08em;color:#d6faff}.status .phase{font-size:10px;letter-spacing:.32em;color:#8be9ff;text-transform:uppercase}.status .small{font-size:10px;color:#8294a7;letter-spacing:.15em;margin-top:10px}
+.panel{position:fixed;bottom:clamp(18px,4vw,48px);left:50%;transform:translateX(-50%);width:min(860px,calc(100% - 28px));padding:16px 19px 15px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(135deg,rgba(20,36,59,.76),rgba(8,13,27,.7));backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);box-shadow:0 18px 60px #0009, inset 0 1px #ffffff15;display:grid;grid-template-columns:auto 1fr auto;gap:19px;align-items:center}
+button{font:inherit;color:#e6f8ff;cursor:pointer;border:1px solid #8cdcff40;background:#10263b9c;padding:11px 14px;border-radius:10px;letter-spacing:.13em;font-size:10px;font-weight:700;transition:background .2s,border-color .2s}button:hover{background:#204a65;border-color:#81e9ff}button:focus-visible,input:focus-visible{outline:2px solid #7aeaff;outline-offset:3px}.primary{background:linear-gradient(115deg,#1d8ab2,#1a487b);border-color:#7eeaff9c;min-width:115px}.timeline{min-width:0}.timeline-label{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.18em;color:#c0d7e7;margin-bottom:9px}.timeline-label span:last-child{color:#7ddfff}input[type=range]{width:100%;appearance:none;-webkit-appearance:none;background:linear-gradient(90deg,#7feaff var(--p,0%),#48607666 var(--p,0%));height:3px;border-radius:9px;cursor:pointer;margin:7px 0 10px}input[type=range]::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:#c9f8ff;box-shadow:0 0 0 5px #5ed9ff22,0 0 15px #72e9ff}input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;background:#c9f8ff}.actions{display:flex;gap:8px}.foot{position:fixed;bottom:7px;left:50%;transform:translateX(-50%);color:#7291a4;font-size:9px;letter-spacing:.22em;pointer-events:none;white-space:nowrap}
+#fallback{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(460px,90vw);padding:22px;background:#111d30;border:1px solid #56718c;border-radius:14px;display:none;z-index:10;line-height:1.7}
+@media(max-width:740px){.tag{display:none}.hero{top:15%;left:24px}.hero h1{font-size:58px}.hero p{font-size:11px;max-width:220px}.status{top:37%;right:22px}.status .num{font-size:49px}.panel{grid-template-columns:1fr auto;gap:11px;padding:13px}.timeline{grid-column:1/-1;grid-row:1}.actions{grid-column:2;grid-row:2}.primary{grid-column:1;grid-row:2}.foot{display:none}}@media(max-height:620px){.hero{top:14%}.hero h1{font-size:45px}.hero p,.hero .line{display:none}.status{top:28%}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+<canvas id="stage" aria-label="Háromdimenziós DNS és sejtmag animáció"></canvas><div class="vignette"></div><div class="grain"></div>
+<header><div class="brand"><div class="brand-mark"></div>FORMATX <span style="font-weight:300;letter-spacing:.15em;color:#8dd8e9">SUITE</span></div><div class="tag">GENESIS / CINEMATIC EXPERIENCE</div></header>
+<section class="hero" id="hero"><div class="eyebrow">01 / The beginning</div><h1>A <strong>születés.</strong></h1><p>Egyetlen kódból élet. A kettős hélix széthullik, majd új univerzummá áll össze.</p><div class="line"></div></section>
+<div class="status"><div class="phase" id="phase">DNA / ORIGIN</div><div class="num" id="percent">00</div><div class="small" id="statusSub">GENETIC SEQUENCE</div></div>
+<div class="panel"><button class="primary" id="play" aria-label="Lejátszás vagy újrajátszás">▶ LEJÁTSZÁS</button><div class="timeline"><div class="timeline-label"><span>GENESIS SEQUENCE</span><span id="time">00:00 / 00:10</span></div><input id="scrub" type="range" min="0" max="10" value="0" step="0.001" aria-label="Animáció előre-hátra tekerése"/></div><div class="actions"><button id="view" title="Kameranézet váltása">◈ NÉZET</button><button id="sound" title="Hang be- vagy kikapcsolása">♫ HANG: KI</button></div></div><div class="foot">FORMATX GENESIS ENGINE · THREE.JS / GSAP / WEB AUDIO</div>
+<div id="fallback" role="alert">A 3D jelenet nem indítható. WebGL 2 támogatás és internetkapcsolat szükséges a CDN-könyvtárak betöltéséhez. Próbáld Chrome vagy Firefox böngészőben.</div>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const canvas=document.querySelector('#stage'),playBtn=document.querySelector('#play'),scrub=document.querySelector('#scrub'),timeEl=document.querySelector('#time'),percentEl=document.querySelector('#percent'),phaseEl=document.querySelector('#phase'),statusSub=document.querySelector('#statusSub'),viewBtn=document.querySelector('#view'),soundBtn=document.querySelector('#sound'),fallback=document.querySelector('#fallback');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'high-performance'});}catch(e){fallback.style.display='block';throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.7));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x02040d);scene.fog=new THREE.FogExp2(0x02040d,.018);
+const camera=new THREE.PerspectiveCamera(44,innerWidth/innerHeight,.08,250);camera.position.set(0.2,0.3,21);
+const controls=new OrbitControls(camera,canvas);controls.enablePan=false;controls.enableZoom=false;controls.enableDamping=true;controls.dampingFactor=.045;controls.minPolarAngle=.55;controls.maxPolarAngle=2.55;controls.target.set(0,0,0);
+const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.65,.62,.1);composer.addPass(bloom);
+const root=new THREE.Group();scene.add(root);
+const N=10000,source=new Float32Array(N*3),dest=new Float32Array(N*3),colors=new Float32Array(N*3),sizes=new Float32Array(N),seed=new Float32Array(N);
+const cA=new THREE.Color('#54dfff'),cB=new THREE.Color('#3775ff'),cC=new THREE.Color('#ffe0c3');
+const rnd=(n)=>{const x=Math.sin(n*127.1+78.233)*43758.5453;return x-Math.floor(x)};
+// Two helical strands, connecting base-pairs and surrounding molecular dust.
+for(let i=0;i<N;i++){
+ const k=i*3,u=rnd(i+13),v=rnd(i+201),w=rnd(i+631),strand=i%5;
+ const t=(i/(N-1))*Math.PI*12.5,theta=t+(strand===1?Math.PI:0);
+ let x,y,z;
+ if(strand<=1){const r=2.0+(u-.5)*.13;x=Math.cos(theta)*r;y=(i/N-.5)*11.7;z=Math.sin(theta)*r;}
+ else if(strand===2){const q=v,ang=t;x=Math.cos(ang)*2*(q*2-1);y=(i/N-.5)*11.7;z=Math.sin(ang)*2*(q*2-1);}
+ else {const ang=t+(strand===4?Math.PI:0);const r=2.02+(u-.5)*.68;x=Math.cos(ang)*r;y=(i/N-.5)*11.7+(v-.5)*.36;z=Math.sin(ang)*r;}
+ source[k]=x;source[k+1]=y;source[k+2]=z;
+ // Volume-distributed core, with 15% suspended particles in an outer matrix.
+ const a=2*Math.PI*u,zz=2*v-1,rr=Math.sqrt(1-zz*zz);const outer=i%7===0;const radius=outer?3.55+Math.pow(w,1.7)*2.35:Math.cbrt(w)*3.05;
+ const organic=1+.065*Math.sin(a*7+zz*10)+.042*Math.sin(a*13-zz*8);
+ dest[k]=Math.cos(a)*rr*radius*organic;dest[k+1]=zz*radius*(outer?1:0.93)*organic;dest[k+2]=Math.sin(a)*rr*radius*organic;
+ const col=(strand===1?cB:strand===2?cC:cA).clone();col.lerp(cC,outer?.3:Math.pow(w,6)*.35);colors[k]=col.r;colors[k+1]=col.g;colors[k+2]=col.b;
+ sizes[i]=strand===2?1.45:outer?.8:1.0+u*.75;seed[i]=rnd(i+911);
+}
+const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(source.slice(),3).setUsage(THREE.DynamicDrawUsage));geometry.setAttribute('aColor',new THREE.BufferAttribute(colors,3));geometry.setAttribute('aSize',new THREE.BufferAttribute(sizes,1));geometry.setAttribute('aSeed',new THREE.BufferAttribute(seed,1));
+const uniforms={uTime:{value:0},uPulse:{value:0},uOpacity:{value:1},uPixelRatio:{value:renderer.getPixelRatio()}};
+const particleMaterial=new THREE.ShaderMaterial({uniforms,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,vertexShader:`attribute vec3 aColor;attribute float aSize;attribute float aSeed;varying vec3 vColor;varying float vSeed;uniform float uTime;uniform float uPixelRatio;void main(){vColor=aColor;vSeed=aSeed;vec4 mv=modelViewMatrix*vec4(position,1.0);gl_Position=projectionMatrix*mv;gl_PointSize=clamp(aSize*(43.0/-mv.z)*uPixelRatio,1.1,13.0);}`,fragmentShader:`varying vec3 vColor;varying float vSeed;uniform float uTime;uniform float uPulse;uniform float uOpacity;void main(){vec2 uv=gl_PointCoord-.5;float d=length(uv);float core=exp(-d*d*105.0);float halo=exp(-d*d*14.0)*.4;float flicker=.84+.16*sin(uTime*2.2+vSeed*22.0);float alpha=(core+halo)*flicker*uOpacity;if(d>.5||alpha<.012)discard;gl_FragColor=vec4(vColor*(1.2+uPulse*.45),alpha);}`});
+const points=new THREE.Points(geometry,particleMaterial);root.add(points);
+// A nucleus membrane materializes after the particle morph.
+const coreGroup=new THREE.Group();root.add(coreGroup);
+const shellGeo=new THREE.IcosahedronGeometry(2.96,5);
+const shellMat=new THREE.ShaderMaterial({uniforms:{uTime:uniforms.uTime,uReveal:{value:0}},transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,vertexShader:`varying vec3 vNormal;varying vec3 vPos;uniform float uTime;void main(){vNormal=normalize(normalMatrix*normal);vPos=position;vec3 p=position+normal*(.055*sin(position.x*8.0+uTime*.7)*sin(position.y*7.0-uTime*.5));gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}`,fragmentShader:`varying vec3 vNormal;varying vec3 vPos;uniform float uTime;uniform float uReveal;void main(){float rim=pow(1.0-abs(dot(normalize(vNormal),vec3(0.,0.,1.))),3.0);float veins=pow(abs(sin(vPos.y*8.+sin(vPos.x*4.+uTime*.2)*3.))*abs(cos(vPos.z*9.-uTime*.25)),9.0);vec3 color=mix(vec3(.03,.25,.65),vec3(.35,.95,1.),rim);float alpha=(rim*.52+veins*.045+.018)*uReveal;gl_FragColor=vec4(color,alpha);}`});
+coreGroup.add(new THREE.Mesh(shellGeo,shellMat));
+const inner=new THREE.Mesh(new THREE.IcosahedronGeometry(1.55,3),new THREE.MeshBasicMaterial({color:0x58bfff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,wireframe:true}));coreGroup.add(inner);
+const torusMat=new THREE.MeshBasicMaterial({color:0x4cd9ff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
+for(let j=0;j<3;j++){const ring=new THREE.Mesh(new THREE.TorusGeometry(3.35+j*.28,.007,5,190),torusMat.clone());ring.rotation.set(j*.8+.2,j*1.05+.3,j*.47);ring.userData.ring=j;coreGroup.add(ring);}
+// Deep field of stars and volumetric-looking micro-dust.
+const BG=2700,bgp=new Float32Array(BG*3),bgc=new Float32Array(BG*3);for(let i=0;i<BG;i++){let a=rnd(i+2231)*Math.PI*2,b=(rnd(i+773)-.5)*Math.PI,dist=19+rnd(i+333)*60;bgp[i*3]=Math.cos(a)*Math.cos(b)*dist;bgp[i*3+1]=Math.sin(b)*dist;bgp[i*3+2]=Math.sin(a)*Math.cos(b)*dist;bgc[i*3]=.13+rnd(i+1)*.22;bgc[i*3+1]=.32+rnd(i+2)*.35;bgc[i*3+2]=.58+rnd(i+3)*.4;}
+const bgGeo=new THREE.BufferGeometry();bgGeo.setAttribute('position',new THREE.BufferAttribute(bgp,3));bgGeo.setAttribute('color',new THREE.BufferAttribute(bgc,3));const stars=new THREE.Points(bgGeo,new THREE.PointsMaterial({size:.035,vertexColors:true,transparent:true,opacity:.7,sizeAttenuation:true,depthWrite:false}));scene.add(stars);
+const clock=new THREE.Clock(),state={time:0},duration=10;let viewMode=0,isSeeking=false;
+function smooth(a,b,x){const t=THREE.MathUtils.clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)}
+function update(t){
+ const morph=smooth(3,7,t),settle=smooth(6.2,8.2,t),p=geometry.attributes.position.array;
+ const twist=Math.sin(t*2.6)*(.11*(1-settle));
+ for(let i=0;i<N;i++){
+  const k=i*3,s=seed[i],m=THREE.MathUtils.clamp(morph+(s-.5)*.21*(1-morph)*morph,0,1);
+  const chaos=Math.sin(t*4.4+s*32)*Math.sin(Math.PI*morph)*.38;
+  const px=THREE.MathUtils.lerp(source[k],dest[k],m),py=THREE.MathUtils.lerp(source[k+1],dest[k+1],m),pz=THREE.MathUtils.lerp(source[k+2],dest[k+2],m);
+  const breathe=1+settle*.015*Math.sin(t*3.3+s*3.0);
+  p[k]=(px+chaos+twist)*breathe;p[k+1]=(py+chaos*.55)*breathe;p[k+2]=(pz+chaos*.7)*breathe;
+ }
+ geometry.attributes.position.needsUpdate=true;
+ const reveal=smooth(6.4,8.1,t);shellMat.uniforms.uReveal.value=reveal;inner.material.opacity=.13*reveal;
+ coreGroup.children.slice(2).forEach((ring,j)=>{ring.material.opacity=(.1+j*.03)*reveal;ring.rotation.y+=0;});
+ uniforms.uPulse.value=reveal*(.5+.5*Math.sin(t*3.5));
+ const targetDistance=viewMode===0?THREE.MathUtils.lerp(21,11.5,smooth(0,3,t))*(1-.18*smooth(7,10,t)):viewMode===1?15:8.9;
+ camera.position.z=THREE.MathUtils.lerp(camera.position.z,targetDistance,.08);camera.fov=THREE.MathUtils.lerp(camera.fov,viewMode===2?52:44,.035);camera.updateProjectionMatrix();
+ phaseEl.textContent=t<3?'DNA / ORIGIN':t<7?'MORPHOGENESIS':'NUCLEUS / AWAKENING';statusSub.textContent=t<3?'GENETIC SEQUENCE':t<7?'CELLULAR TRANSFORMATION':'LIFE INITIALIZED';
+ percentEl.textContent=String(Math.round(morph*100)).padStart(2,'0');timeEl.textContent=`00:${String(Math.floor(t)).padStart(2,'0')} / 00:10`;scrub.value=String(t);scrub.style.setProperty('--p',`${t*10}%`);
+ document.querySelector('#hero').style.opacity=String(1-.68*smooth(4.8,8,t));
+}
+const tl=gsap.timeline({paused:true,onUpdate(){update(state.time);},onComplete(){playBtn.textContent='↻ ÚJRAJÁTSZÁS';stopAudio();}});
+tl.to(state,{time:duration,duration:duration,ease:'none'});
+playBtn.addEventListener('click',()=>{if(tl.progress()>=.999){tl.pause(0);update(0);}if(tl.paused()){tl.play();playBtn.textContent='Ⅱ SZÜNET';startAudio();}else{tl.pause();playBtn.textContent='▶ FOLYTATÁS';stopAudio();}});
+scrub.addEventListener('input',()=>{isSeeking=true;tl.pause();tl.time(Number(scrub.value));playBtn.textContent='▶ FOLYTATÁS';stopAudio();});scrub.addEventListener('change',()=>{isSeeking=false;});
+viewBtn.addEventListener('click',()=>{viewMode=(viewMode+1)%3;viewBtn.textContent=['◈ NÉZET','◇ TÁVOLI','◎ KÖZELI'][viewMode];});
+let audioCtx,master,osc1,osc2,lfo,lfoGain,filter,activeAudio=false,muted=true;
+function initAudio(){if(audioCtx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audioCtx=new AC();master=audioCtx.createGain();master.gain.value=0;master.connect(audioCtx.destination);filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=360;filter.Q.value=.65;filter.connect(master);osc1=audioCtx.createOscillator();osc1.type='sine';osc1.frequency.value=55;osc2=audioCtx.createOscillator();osc2.type='triangle';osc2.frequency.value=82.41;const gain2=audioCtx.createGain();gain2.gain.value=.24;osc1.connect(filter);osc2.connect(gain2);gain2.connect(filter);lfo=audioCtx.createOscillator();lfo.frequency.value=.31;lfoGain=audioCtx.createGain();lfoGain.gain.value=13;lfo.connect(lfoGain);lfoGain.connect(osc1.frequency);osc1.start();osc2.start();lfo.start();}
+function startAudio(){if(muted)return;initAudio();if(!audioCtx)return;audioCtx.resume();master.gain.cancelScheduledValues(audioCtx.currentTime);master.gain.setTargetAtTime(.045,audioCtx.currentTime,.8);activeAudio=true;}
+function stopAudio(){if(!audioCtx)return;master.gain.cancelScheduledValues(audioCtx.currentTime);master.gain.setTargetAtTime(0,audioCtx.currentTime,.15);activeAudio=false;}
+soundBtn.addEventListener('click',()=>{muted=!muted;soundBtn.textContent=muted?'♫ HANG: KI':'♫ HANG: BE';if(muted)stopAudio();else if(!tl.paused())startAudio();else{initAudio();audioCtx?.resume();}});
+function render(){requestAnimationFrame(render);const dt=Math.min(clock.getDelta(),.05);const t=clock.elapsedTime;uniforms.uTime.value=t;root.rotation.y+=dt*(.11+.055*(1-smooth(5,8,state.time)));root.rotation.z=Math.sin(t*.16)*.06;coreGroup.rotation.x=Math.sin(t*.21)*.09;stars.rotation.y+=dt*.002;controls.update();composer.render();}
+function resize(){const w=innerWidth,h=innerHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);composer.setSize(w,h);bloom.setSize(w,h);uniforms.uPixelRatio.value=renderer.getPixelRatio();}addEventListener('resize',resize);
+// Reduce GPU pressure on hidden tabs, preserving timeline position.
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&!tl.paused()){tl.pause();playBtn.textContent='▶ FOLYTATÁS';stopAudio();}});
+update(0);render();
+// Autoplay the cinematic visual; audio remains user-gesture gated by browser policy.
+if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){tl.play();playBtn.textContent="Ⅱ SZÜNET";}
+</script>
+</body></html>
