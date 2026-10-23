@@ -36,3 +36,4 @@ studio_film_upgrade=R2172: keep one clear main DNA double helix through 4.38 sec
 
 reveal_order_fix=R2173: never show the native permanent R326 MAG during DNA (0-2.38s), embryo (2.38-5.64s), or titanium assembly (5.88-7.48s); mount late native WebGL stage at zero opacity, then crossfade only after 7.60s through 9.40s; retain fixed 10-second film, delayed optic wake and no early mobile phase-3 reveal.
 reveal_order_gate=Source validation checks canonical R533 and late-mount R326; desktop fixed-frame GPU keyframe gate asserts native MAG stays hidden through 1.6s DNA, 4.2s embryo and 6.8s mechanical seating.
+asset_cache=R2173 canonical and recovery R533 bootstraps use v=20261023-r2173-strict-reveal-handoff; exact parser SHA256 sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps= whitelisted by both static and Worker CSP.
