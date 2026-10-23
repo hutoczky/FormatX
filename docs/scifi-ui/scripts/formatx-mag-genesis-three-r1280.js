@@ -314,6 +314,23 @@
           this.birthStrands.push(strand);
         }
       }
+      // R2157: paired cross-bridges make the arm transfer read as
+      // recognizable DNA, rather than two independent light trails.
+      // Four shared GPU line batches (one per arm), no per-frame allocations.
+      this.birthRungs=[];
+      for(let axis=0;axis<4;axis++){
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.BufferAttribute(new Float32Array(12*2*3),3));
+        const material=new T.LineBasicMaterial({
+          color:0xb8eae7,transparent:true,opacity:0,
+          depthWrite:false,blending:T.AdditiveBlending
+        });
+        const bridges=new T.LineSegments(geometry,material);
+        bridges.visible=false;
+        bridges.frustumCulled=false;
+        this.dnaGroup.add(bridges);
+        this.birthRungs.push(bridges);
+      }
       this.dnas=[];
       for(const [x,y,z,rz,sc] of placements){
         const h=this.createHelix(4.08,.272,3.82);
@@ -1634,7 +1651,7 @@
         const lane=line.userData.lane;
         line.visible=opacity>.002;
         if(!line.visible)return;
-        line.material.opacity=(lane===0?.28:.19)*opacity;
+        line.material.opacity=(lane===0?.34:.27)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
         const source=line.userData.source;
@@ -1654,6 +1671,26 @@
           const sideways=radius*Math.cos(phase);
           const depth=radius*Math.sin(phase);
           a.setXYZ(j,x-dy*sideways,y+dx*sideways,z+depth);
+        }
+        a.needsUpdate=true;
+      });
+      // R2157: reuse the already-updated opposite DNA strands as the
+      // moving endpoints of the base-pair bridges. This tracks the same
+      // four mechanical axes throughout the arm seating animation.
+      this.birthRungs.forEach((bridge,axis)=>{
+        const first=this.birthStrands[axis*2];
+        const second=this.birthStrands[axis*2+1];
+        const show=opacity>.002 && first?.visible && second?.visible;
+        bridge.visible=Boolean(show);
+        if(!show)return;
+        bridge.material.opacity=.29*opacity;
+        const a=bridge.geometry.attributes.position;
+        const p=first.geometry.attributes.position;
+        const q=second.geometry.attributes.position;
+        for(let i=0;i<12;i++){
+          const j=Math.round((i+.5)/12*39);
+          a.setXYZ(i*2,p.getX(j),p.getY(j),p.getZ(j));
+          a.setXYZ(i*2+1,q.getX(j),q.getY(j),q.getZ(j));
         }
         a.needsUpdate=true;
       });
