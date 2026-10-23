@@ -563,7 +563,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261023-r2164-centered-dna-hero-birth';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261023-r2165-centered-studio-genesis';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
