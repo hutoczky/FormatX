@@ -752,7 +752,9 @@
       // cell nucleus -> four MAG arms. One Points draw call, no CPU per-frame
       // position uploads. No secondary renderer or costly framebuffer bloom.
       const T=this.THREE,r=this.rand;
-      const count=this.mobileRender?1200:2800;
+      // R2167: film-grade DNA has 6k particles even on phones;
+      // geometry is static and GPU morphs all particles in one draw call.
+      const count=this.mobileRender?6000:9600;
       const initial=new Float32Array(count*3);
       const cell=new Float32Array(count*3);
       const arms=new Float32Array(count*3);
@@ -844,10 +846,10 @@
       }
       positions.needsUpdate=true;geometry.computeVertexNormals();
       this.embryoMaterial=new T.MeshPhysicalMaterial({
-        color:0x315d66,emissive:0x0d2b34,emissiveIntensity:.14,
-        metalness:.07,roughness:.30,clearcoat:.86,clearcoatRoughness:.13,
-        transmission:.06,thickness:.52,transparent:true,opacity:0,
-        depthWrite:true
+        color:0x2a6775,emissive:0x0a3543,emissiveIntensity:.23,
+        metalness:.04,roughness:.17,clearcoat:.96,clearcoatRoughness:.075,
+        transmission:.26,thickness:.19,ior:1.34,
+        transparent:true,opacity:0,depthWrite:false
       });
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
       this.embryoShell.scale.set(.88,1.12,.78);
@@ -859,8 +861,49 @@
       this.embryoNucleus=new T.Mesh(
         new T.SphereGeometry(.16,16,12),this.embryoNucleusMaterial
       );
-      this.embryoNucleus.position.set(-.09,.09,.77);
+      this.embryoNucleus.position.set(-.13,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
+      // R2167 — nucleus organelle and continuous curved membrane networks.
+      // These sit at genuinely different z depths inside the cell; they
+      // remain biological and are removed before metallic chassis birth.
+      this.embryoInnerMaterial=new T.MeshPhysicalMaterial({
+        color:0x376b77,emissive:0x16414b,emissiveIntensity:.17,
+        metalness:0,roughness:.23,clearcoat:.78,
+        transmission:.20,thickness:.15,
+        transparent:true,opacity:0,depthWrite:false,side:T.DoubleSide
+      });
+      this.embryoOrganelle=new T.Mesh(
+        new T.IcosahedronGeometry(.40,3),this.embryoInnerMaterial
+      );
+      this.embryoOrganelle.position.set(-.045,.032,.17);
+      this.embryoOrganelle.scale.set(1.0,.82,.67);
+      this.coreGroup.add(this.embryoOrganelle);
+      const membraneLines=[];
+      const capillaries=this.mobileRender?9:17;
+      for(let strand=0;strand<capillaries;strand++){
+        const phase=strand*Math.PI*2/capillaries;
+        const shift=(strand%3-1)*.065;
+        for(let segment=0;segment<46;segment++){
+          for(let k=0;k<2;k++){
+            const u=(segment+k)/46;
+            const a=u*Math.PI*2+phase;
+            const radial=.64+.085*Math.sin(a*3.0+phase*2.0);
+            membraneLines.push(
+              radial*Math.cos(a)*.92+shift,
+              radial*Math.sin(a)*1.07,
+              Math.sin(a*1.8+phase)*.26+.29
+            );
+          }
+        }
+      }
+      const membranes=new T.BufferGeometry();
+      membranes.setAttribute('position',new T.Float32BufferAttribute(membraneLines,3));
+      this.embryoCapillaryMaterial=new T.LineBasicMaterial({
+        color:0x86c6c5,transparent:true,opacity:0,
+        depthWrite:false,blending:T.NormalBlending
+      });
+      this.embryoCapillaries=new T.LineSegments(membranes,this.embryoCapillaryMaterial);
+      this.coreGroup.add(this.embryoCapillaries);
     }
 
     updateGenomeParticles(t,time){
@@ -1840,7 +1883,9 @@
       // R2149: the phone's biological hero needs readable foreground
       // scale, not a distant diamond trapped behind oversized helices.
       // Preserve the established ten-second camera and end-state framing.
-      const embryoScale=this.mobileRender?.52:.36;
+      // R2167: the embryonic cell must fill the lens as an actual subject,
+      // not read as a tiny smooth bead behind distracting orbiting DNA.
+      const embryoScale=this.mobileRender?.72:.66;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
@@ -1871,13 +1916,19 @@
       const dissolve=1-smooth((t-5.64)/1.16);
       const visible=appear*dissolve;
       this.coreGroup.visible=visible>.002;
-      this.embryoMaterial.opacity=.92*visible;
-      this.embryoNucleusMaterial.opacity=.22*visible;
+      this.embryoMaterial.opacity=.73*visible;
+      this.embryoNucleusMaterial.opacity=.29*visible;
       const pulse=1+.025*Math.sin(time*.0021);
       this.embryoShell.scale.set(.88*pulse,1.12*pulse,.78*pulse);
       this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
+      this.embryoInnerMaterial.opacity=.25*visible;
+      this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
+      this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
+      this.embryoCapillaryMaterial.opacity=.19*visible;
+      this.embryoCapillaries.rotation.y=time*.000043;
+      this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
       this.coreGlass.material.opacity=0;
       this.coreEdges.material.opacity=0;
