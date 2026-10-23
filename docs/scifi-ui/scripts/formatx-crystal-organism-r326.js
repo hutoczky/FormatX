@@ -649,6 +649,45 @@
         armorTri(last.left,last.crown,last.right,5.31);
       }
     }
+    /* R2151 — the permanent MAG needs an unmistakable mechanical
+       silhouette, not only metal hidden inside the old diamond. Eight
+       raised, tapered titanium winglets extend beyond the crystal at
+       the four cardinal arm tips. These share the existing R326 WebGL
+       buffer and shader: no new canvas, context or idle render loop. */
+    for(let axis=0;axis<4;axis++){
+      const theta=axis*Math.PI*.5;
+      const dx=Math.cos(theta),dy=Math.sin(theta);
+      const sx=-dy,sy=dx;
+      const tipRadius=axis===1?1.225:axis===3?1.120:1.145;
+      for(const handedness of [-1,1]){
+        const pt=(radius,lateral,elevation)=>{
+          const x=dx*radius+sx*lateral*handedness;
+          const y=dy*radius+sy*lateral*handedness;
+          return [x,y,magSkinZ(x,y)+elevation];
+        };
+        // The central ridge rises above the original blade roof. Its
+        // front and side planes have genuine three-dimensional parallax.
+        const heel=pt(.66,.102,.165);
+        const root=pt(.73,.095,.210);
+        const ridge=pt(.87,.104,.270);
+        const shoulder=pt(.85,.205,.150);
+        const tip=pt(tipRadius,.072,.182);
+        const lowerTip=pt(tipRadius,.072,.095);
+        const lowerShoulder=pt(.85,.205,.080);
+        armorTri(heel,root,shoulder,5.24);
+        armorTri(root,ridge,shoulder,5.18);
+        armorTri(ridge,tip,shoulder,5.21);
+        armorTri(shoulder,tip,lowerTip,5.72);
+        armorTri(shoulder,lowerTip,lowerShoulder,5.72);
+        armorTri(heel,shoulder,lowerShoulder,5.72);
+        // A dark engraved channel separates each machined winglet
+        // from its adjacent parent blade without a second draw pass.
+        const channelInner=pt(.82,.112,.278);
+        const channelOuter=pt(.96,.103,.230);
+        armorTri(root,channelInner,ridge,5.78);
+        armorTri(channelInner,channelOuter,ridge,5.78);
+      }
+    }
     /* The centre is not a painted circle. A shallow, machined 48-facet
        silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
     const opticPoint=(radius,angle,depth)=>[
