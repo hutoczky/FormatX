@@ -25,11 +25,11 @@ for(const token of [
   'for(const lane of [-1,1])',
   'const steps=12',
   'R2144: two intersecting bevel planes',
-  'R2151 — the permanent MAG needs an unmistakable mechanical',
-  'const tipRadius=axis===1?1.225:axis===3?1.120:1.145',
-  'const ridge=pt(.87,.104,.270)',
-  'armorTri(ridge,tip,shoulder,5.21)',
-  'armorTri(channelInner,channelOuter,ridge,5.78)',
+  'R2153 — continuous 3D titanium arms replace the eight detached',
+  'const tipRadius=axis===1?1.096:axis===3?1.045:1.075',
+  'const steps=14',
+  'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)',
+  'armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008)',
   'armorQuad(a.crown,a.right,b.right,b.crown,facet+.016)',
   'const metalFacet=facet>=5.0&&facet<6.0',
   'armorQuad(innerA,outerA,outerB,innerB,5.22)',
@@ -50,9 +50,9 @@ for(const token of [
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2151-visible-mag'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2153-unified-hero'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2151-mechanical-mag'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2153-connected-mag'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2149-embryo-focus'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
@@ -106,18 +106,18 @@ assert.ok(intro.includes('Continuous cinematographic atmosphere'),
   'Cinematic MAG intro still overlays 4px raster stripes');
 assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
-// R2151 must bust the R2035 browser cache while RETAINING every strict
+// R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261023-r2151'),
-    'R2151 raised-winglet MAG renderer loader is stale and may serve the old WebGL timing');
+  assert.ok(loader.includes('20261023-r2153'),
+    'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261023-r2151'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261023-r2153'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2151'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2153'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2151'),
-  'Canonical HTML must load the R2151 scheduler');
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2153'),
+  'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
  'formatx-mag-birth-live-r533.css?v=20261014-r2103-contrast-fourpoint-fallback']){
