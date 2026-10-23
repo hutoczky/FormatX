@@ -973,6 +973,14 @@
     stage.dataset.revision = REVISION;
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
+    // R2173: if the permanent WebGL core mounts during the 10-second birth
+    // film, it must start completely invisible. R533 owns the gradual
+    // reveal only AFTER the final titanium assembly has seated.
+    if(root.dataset.fxMagBirthLiveR533==='active'||
+       root.getAttribute('data-fx-mag-birth-live')==='active'){
+      stage.style.setProperty('opacity','0','important');
+      stage.dataset.fxBirthDeferredR2173='true';
+    }
     host.prepend(stage);
     stage.style.setProperty('background','radial-gradient(ellipse 44% 38% at 50% 47%,rgba(90,206,216,.125) 0%,rgba(40,92,98,.055) 42%,rgba(0,0,0,0) 76%),radial-gradient(ellipse 78% 66% at 50% 52%,rgba(6,18,23,.24),rgba(0,0,0,0) 82%)','important');
 
