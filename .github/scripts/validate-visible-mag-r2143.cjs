@@ -40,7 +40,22 @@ async function capture(browser,{name,width,height,mobile}){
         canvas instanceof HTMLCanvasElement &&
         canvas.width>150 && canvas.height>150;
     },null,{timeout:45000});
-    await page.waitForTimeout(400);
+    // R2155: a painted WebGL canvas does not prove that the deferred hero
+    // layout/CSS has settled. The earlier www proof captured a bare stage at
+    // far left with the text entirely missing even though WebGL was ready.
+    // Require the actual hero composition to be laid out before evidence.
+    await page.waitForFunction(isMobile=>{
+      const hero=document.querySelector('#hero');
+      const space=hero?.querySelector('.hero-space');
+      const headline=hero?.querySelector('h1');
+      const shell=space?.getBoundingClientRect();
+      const title=headline?.getBoundingClientRect();
+      if(!shell||!title||title.width<100||title.height<20)return false;
+      if(!isMobile && shell.x<innerWidth*.37)return false;
+      return true;
+    },mobile,{timeout:25000});
+    await page.evaluate(()=>document.fonts?.ready);
+    await page.waitForTimeout(650);
     state=await page.evaluate(()=>{
       const root=document.documentElement;
       const canvas=document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
