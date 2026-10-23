@@ -6,3 +6,5 @@ assets=docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scr
 validation=R2151 permanent 3D geometry and corrected cache chain passed source validation; both production domains must converge to this exact marker and pass browser cinematic, replay and smoke tests.
 production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this marker and pass the complete automated production deployment verification before publication is considered verified.
 limits=Automated checks do not establish subjective cinematic award-level quality or identical GPU rendering on all real Android devices; screenshot comparison remains necessary.
+mag_geometry=R2151
+mag_cache=20261023-r2151
