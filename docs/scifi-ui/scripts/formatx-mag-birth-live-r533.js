@@ -85,30 +85,30 @@
     skip: 'SKIP',
     skipAria: 'Skip the FormatX core birth sequence',
     statuses: [
-      [0.00, 'AWAKENING GENETIC ENERGY FIELD'],
+      [0.00, 'DNA DOUBLE HELIX · GENETIC AWAKENING'],
       [0.10, 'CAPTURING SIGNAL NUCLEOTIDES'],
-      [0.22, 'ASSEMBLING 3D DNA DOUBLE HELIX'],
-      [0.38, 'LIVING GENOME STABILIZING'],
-      [0.52, 'CAMERA PULLING BACK / EMBRYO FOCUS'],
-      [0.68, 'GENOME COLLAPSING INTO LIVING CORE'],
-      [0.82, 'FIRST LIVING IMPULSE'],
-      [0.94, 'CORE ALIVE']
+      [0.22, 'DNA CONDENSATION · PARTICLE GENOME'],
+      [0.38, 'BIOLOGICAL CELL NUCLEUS IS BORN'],
+      [0.52, 'MOLECULES FORM FOUR MECHANICAL AXES'],
+      [0.68, 'TITANIUM ARMATURE / DNA INTEGRATION'],
+      [0.82, 'MAG OPTICAL ORGAN AWAKENS'],
+      [0.94, 'MAG BORN · SYSTEM ONLINE']
     ]
   } : {
     kicker: 'FORMATX / MAG GENESIS',
-    title: 'A MAG SZÜLETÉSE',
-    subtitle: 'Az élő rendszer első impulzusa.',
+    title: 'A SZÜLETÉS',
+    subtitle: 'A DNS kettős spiráljából megszületik az élő MAG.',
     skip: 'ÁTUGRÁS',
     skipAria: 'A FormatX MAG születése animáció átugrása',
     statuses: [
-      [0.00, 'GENETIKAI ENERGIAMEZŐ ÉBRESZTÉSE'],
+      [0.00, 'DNS KETTŐS SPIRÁL · AZ ÉLET EREDETE'],
       [0.10, 'JEL-NUKLEOTIDOK BEFOGÁSA'],
-      [0.22, '3D DNS KETTŐS SPIRÁL ÖSSZEÁLLÍTÁSA'],
-      [0.38, 'ÉLŐ GENOM STABILIZÁLÁSA'],
-      [0.52, 'KAMERA KIZOOM / EMBRIÓ FÓKUSZ'],
-      [0.68, 'A GENOM ÉLŐ MAGGÁ SŰRŰSÖDIK'],
-      [0.82, 'ELSŐ ÉLŐ IMPULZUS'],
-      [0.94, 'MAG ÉL']
+      [0.22, 'MOLEKULÁRIS SŰRŰSÖDÉS · RÉSZECSKÉK'],
+      [0.38, 'MEGSZÜLETIK AZ ÉLŐ SEJTMAG'],
+      [0.52, 'A DNS NÉGY MECHANIKAI KARRÁ ALAKUL'],
+      [0.68, 'TITÁNPÁNCÉL / GENETIKAI BEÉPÜLÉS'],
+      [0.82, 'A MAG OPTIKAI SZEME FELÉBRED'],
+      [0.94, 'A MAG MEGSZÜLETETT · RENDSZER AKTÍV']
     ]
   };
 
@@ -365,6 +365,55 @@
   }
   liveSkip.removeAttribute('tabindex');
 
+  // R2160: optional soundscape is entirely opt-in; Web Audio starts only
+  // after an explicit user click. No microphone, autoplay or audio download.
+  const audioButton=document.createElement('button');
+  audioButton.type='button';
+  audioButton.className='fxb-studio-audio-r2160';
+  audioButton.textContent=ROOT.lang==='en'?'SOUND ON':'HANG BE';
+  audioButton.setAttribute('aria-label',ROOT.lang==='en'?'Enable cinematic ambience':'Filmes hang bekapcsolása');
+  audioButton.setAttribute('aria-pressed','false');
+  overlay.appendChild(audioButton);
+  let audioContext=null;
+  let audioGain=null;
+  let audioEnabled=false;
+  audioButton.addEventListener('click',async()=>{
+    if(audioEnabled){
+      audioEnabled=false;
+      if(audioGain)audioGain.gain.setTargetAtTime(0,audioContext.currentTime,.08);
+      audioButton.textContent=ROOT.lang==='en'?'SOUND ON':'HANG BE';
+      audioButton.setAttribute('aria-pressed','false');
+      return;
+    }
+    try{
+      const AudioCtor=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtor){audioButton.disabled=true;return;}
+      if(!audioContext){
+        audioContext=new AudioCtor();
+        const filter=audioContext.createBiquadFilter();
+        filter.type='lowpass';filter.frequency.value=480;
+        audioGain=audioContext.createGain();
+        audioGain.gain.value=0;
+        filter.connect(audioGain);
+        audioGain.connect(audioContext.destination);
+        for(const [freq,wave,volume] of [[55,'sine',.26],[110,'sine',.09],[164.81,'triangle',.018]]){
+          const osc=audioContext.createOscillator();
+          const gain=audioContext.createGain();
+          osc.type=wave;osc.frequency.value=freq;gain.gain.value=volume;
+          osc.connect(gain);gain.connect(filter);osc.start();
+        }
+      }
+      await audioContext.resume();
+      audioEnabled=true;
+      if(audioGain)audioGain.gain.setTargetAtTime(.105,audioContext.currentTime,.35);
+      audioButton.textContent=ROOT.lang==='en'?'SOUND OFF':'HANG KI';
+      audioButton.setAttribute('aria-pressed','true');
+    }catch(error){
+      audioButton.disabled=true;
+      ROOT.dataset.fxMagBirthAudioR2160='unavailable';
+    }
+  });
+
   if (!(prepaintCanvas instanceof HTMLCanvasElement)) {
     prepaintCanvas=document.createElement('canvas');
     prepaintCanvas.className='fxb-particles';
@@ -514,7 +563,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261023-r2157-dna-arm-bridges';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261023-r2159-studio-genesis-gpu-cell-mag';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -962,6 +1011,7 @@
     try { ROOT.dataset.fxMagBirthLiveR533=source; } catch (_) {}
     try { ROOT.dataset.fxMagBirthHandoffR655='exception-safe-overlay-teardown'; } catch (_) {}
 
+    if(audioContext){try{void audioContext.close();}catch(_){}audioContext=null;}
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
