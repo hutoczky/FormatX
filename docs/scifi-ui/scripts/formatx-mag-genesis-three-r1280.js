@@ -95,7 +95,9 @@
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
+      this.makeGenomeParticles();
       this.makeCore();
+      this.makeEmbryoFilm();
       this.makeOrganicLayer();
       this.makeCellularLayer();
       this.makeMechanicalLayer();
@@ -739,6 +741,134 @@
       if('NoColorSpace' in T)tex.colorSpace=T.NoColorSpace;
       this.microFiberTexture=tex;
       return tex;
+    }
+
+    makeGenomeParticles(){
+      // R2159: GPU-interpolated living nucleotides: DNA -> condensation ->
+      // cell nucleus -> four MAG arms. One Points draw call, no CPU per-frame
+      // position uploads. No secondary renderer or costly framebuffer bloom.
+      const T=this.THREE,r=this.rand;
+      const count=this.mobileRender?1200:2800;
+      const initial=new Float32Array(count*3);
+      const cell=new Float32Array(count*3);
+      const arms=new Float32Array(count*3);
+      const seed=new Float32Array(count);
+      for(let i=0;i<count;i++){
+        const u=i/count;
+        const strand=i%2;
+        const angle=u*Math.PI*15.5+strand*Math.PI;
+        const height=(u-.5)*3.25;
+        const jitter=(r()-.5)*.10;
+        initial.set([Math.cos(angle)*(.29+jitter),height,Math.sin(angle)*(.29+jitter)+.50],i*3);
+        const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
+        const radius=.12+Math.cbrt(r())*.82;
+        cell.set([radius*Math.sin(b)*Math.cos(a),radius*1.08*Math.cos(b),radius*.80*Math.sin(b)*Math.sin(a)+.20],i*3);
+        const axis=i%4,phi=axis*Math.PI*.5;
+        const reach=.20+.74*r();
+        const lateral=(r()-.5)*.15;
+        arms.set([Math.cos(phi)*reach-Math.sin(phi)*lateral,Math.sin(phi)*reach+Math.cos(phi)*lateral,.05+(r()-.5)*.22],i*3);
+        seed[i]=r();
+      }
+      const geometry=new T.BufferGeometry();
+      geometry.setAttribute('position',new T.BufferAttribute(initial,3));
+      geometry.setAttribute('aCell',new T.BufferAttribute(cell,3));
+      geometry.setAttribute('aArm',new T.BufferAttribute(arms,3));
+      geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
+      const material=new T.ShaderMaterial({
+        uniforms:{uTime:{value:0},uPhase:{value:0},uPixelRatio:{value:1}},
+        transparent:true,depthWrite:false,depthTest:true,
+        blending:T.AdditiveBlending,
+        vertexShader:`
+          attribute vec3 aCell;
+          attribute vec3 aArm;
+          attribute float aSeed;
+          uniform float uTime,uPhase,uPixelRatio;
+          varying float vSeed,vEnergy;
+          float curve(float a,float b,float x){
+            float t=clamp((x-a)/(b-a),0.0,1.0);
+            return t*t*(3.0-2.0*t);
+          }
+          void main(){
+            float condense=curve(2.55,4.12,uPhase);
+            float assemble=curve(5.26,7.18,uPhase);
+            vec3 p=mix(position,aCell,condense);
+            p=mix(p,aArm,assemble);
+            float coil=1.0-curve(2.55,4.12,uPhase);
+            p.x+=coil*.018*sin(uTime*.00082+aSeed*32.0);
+            p.y+=.013*sin(uTime*.0011+aSeed*20.0)*(1.0-assemble);
+            p.z+=.012*cos(uTime*.00072+aSeed*17.0);
+            vec4 mv=modelViewMatrix*vec4(p,1.0);
+            gl_Position=projectionMatrix*mv;
+            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z),1.0,5.6*uPixelRatio);
+            float first=curve(0.08,.65,uPhase);
+            float last=1.0-curve(7.16,8.05,uPhase);
+            vEnergy=first*last;
+            vSeed=aSeed;
+          }`,
+        fragmentShader:`
+          precision mediump float;
+          varying float vSeed,vEnergy;
+          void main(){
+            vec2 p=gl_PointCoord-.5;
+            float r=dot(p,p);
+            if(r>.25)discard;
+            float glow=exp(-r*15.0);
+            float center=exp(-r*53.0);
+            vec3 cool=mix(vec3(.10,.51,.70),vec3(.53,.70,.95),vSeed);
+            vec3 color=cool*glow*.70+vec3(.75,1.0,.98)*center*.32;
+            gl_FragColor=vec4(color,vEnergy*mix(.37,.64,vSeed)*smoothstep(.25,.04,r));
+          }`
+      });
+      this.genomeParticles=new T.Points(geometry,material);
+      this.genomeParticles.frustumCulled=false;
+      this.world.add(this.genomeParticles);
+      this.genomeParticleMaterial=material;
+    }
+
+    makeEmbryoFilm(){
+      // R2159: the pre-mechanical nucleus is an irregular organic cell,
+      // not the old metallic diamond with an illuminated MAG eye.
+      const T=this.THREE;
+      this.coreGroup.children.forEach(part=>{part.visible=false;});
+      const geometry=new T.SphereGeometry(.98,this.mobileRender?28:42,this.mobileRender?20:30);
+      const positions=geometry.attributes.position;
+      for(let i=0;i<positions.count;i++){
+        const x=positions.getX(i),y=positions.getY(i),z=positions.getZ(i);
+        const phi=Math.atan2(z,x);
+        const envelope=1+.045*Math.sin(phi*5.0+y*4.2)+.024*Math.cos(phi*3.0-y*7.1);
+        positions.setXYZ(i,x*envelope,y*(1+.024*Math.cos(phi*4.0))*envelope,z*envelope);
+      }
+      positions.needsUpdate=true;geometry.computeVertexNormals();
+      this.embryoMaterial=new T.MeshPhysicalMaterial({
+        color:0x315d66,emissive:0x0d2b34,emissiveIntensity:.14,
+        metalness:.07,roughness:.30,clearcoat:.86,clearcoatRoughness:.13,
+        transmission:.06,thickness:.52,transparent:true,opacity:0,
+        depthWrite:true
+      });
+      this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
+      this.embryoShell.scale.set(.88,1.12,.78);
+      this.coreGroup.add(this.embryoShell);
+      this.embryoNucleusMaterial=new T.MeshBasicMaterial({
+        color:0x70d6df,transparent:true,opacity:0,
+        depthWrite:false,blending:T.AdditiveBlending
+      });
+      this.embryoNucleus=new T.Mesh(
+        new T.SphereGeometry(.16,16,12),this.embryoNucleusMaterial
+      );
+      this.embryoNucleus.position.set(-.09,.09,.77);
+      this.coreGroup.add(this.embryoNucleus);
+    }
+
+    updateGenomeParticles(t,time){
+      if(!this.genomeParticles)return;
+      const visible=t>.08&&t<8.05;
+      this.genomeParticles.visible=visible;
+      if(!visible)return;
+      this.genomeParticleMaterial.uniforms.uTime.value=time;
+      this.genomeParticleMaterial.uniforms.uPhase.value=t;
+      this.genomeParticleMaterial.uniforms.uPixelRatio.value=Math.min(
+        this.mobileRender?1.6:2.0,this.renderer.getPixelRatio()
+      );
     }
 
     makeOrganicLayer(){
@@ -1724,33 +1854,30 @@
       this.coreGroup.rotation.y=Math.sin(time*.00018)*.010;
       this.coreGroup.rotation.x=Math.sin(time*.00022)*.007;
 
-      // R2125: DNA must be the first readable subject. The original
-      // opaque core shell was fully visible at t=0, before the helix.
-      // Reveal the embryonic core only after the DNA establishing shot.
-      // R2147: no translucent core silhouette may occlude the founding
-      // double helix during the first 1.9 seconds of the actual 3D film.
-      this.coreGroup.visible=t>=1.92;
-      const dnaToEmbryo=smooth((t-1.92)/.64);
-      const stage1=dnaToEmbryo*(1-smooth((t-2.60)/.42));
-      const reveal=smooth((t-2.68)/.46);
-      const eyeHold=reveal*(1-smooth((t-6.35)/.78));
-      const preFlash=1-smooth((t-6.55)/.72);
-      const pulse=.988+.012*Math.sin(time*.0046);
-
-      this.coreShell.material.opacity=.96*stage1+.16*reveal*preFlash;
-      this.coreGlass.material.opacity=.08*stage1+.015*reveal*preFlash;
-      this.coreEdges.material.opacity=.16*stage1+.012*reveal*preFlash;
-      if(this.corePetalMaterial)this.corePetalMaterial.opacity=.72*stage1+.065*reveal*preFlash;
-
-      this.irisGroup.scale.setScalar((.018+eyeHold*.72)*pulse);
-      this.irisRays.rotation.z=time*.000050;
-      if(this.irisCorona)this.irisCorona.material.opacity=.76*eyeHold;
-      this.glowSprite.material.opacity=(.001+eyeHold*.010)*pulse;
-      this.glowSprite.scale.setScalar(.80+eyeHold*.05);
-      this.coreInner.material.opacity=.0015+eyeHold*.018;
-      this.coreLight.intensity=eyeHold*(2.4+Math.sin(time*.0046)*.10);
-
-      if(this.coreLabel)this.coreLabel.material.opacity=.52*stage1+.028*reveal*(1-smooth((t-3.08)/.32));
+      // R2159: only a living, soft-edged biological cell is visible
+      // between the founding DNA and the mechanically assembling MAG.
+      // All the old early diamond/iris shapes stay invisible.
+      const appear=smooth((t-2.38)/.76);
+      const dissolve=1-smooth((t-5.64)/1.16);
+      const visible=appear*dissolve;
+      this.coreGroup.visible=visible>.002;
+      this.embryoMaterial.opacity=.92*visible;
+      this.embryoNucleusMaterial.opacity=.22*visible;
+      const pulse=1+.025*Math.sin(time*.0021);
+      this.embryoShell.scale.set(.88*pulse,1.12*pulse,.78*pulse);
+      this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
+      this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
+      this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
+      this.coreShell.material.opacity=0;
+      this.coreGlass.material.opacity=0;
+      this.coreEdges.material.opacity=0;
+      if(this.corePetalMaterial)this.corePetalMaterial.opacity=0;
+      this.irisGroup.visible=false;
+      if(this.irisCorona)this.irisCorona.material.opacity=0;
+      if(this.glowSprite)this.glowSprite.material.opacity=0;
+      if(this.coreInner)this.coreInner.material.opacity=0;
+      if(this.coreLabel)this.coreLabel.material.opacity=0;
+      this.coreLight.intensity=0;
     }
 
     updateOrganic(t,time){
@@ -2020,6 +2147,7 @@
       this.updateCamera(t,time);
       this.updateDNA(t,time);
       this.updateBirthStrands(t,time);
+      this.updateGenomeParticles(t,time);
       this.updateCore(t,time);
       this.updateOrganic(t,time);
       this.updateCells(t,time);
@@ -2041,12 +2169,9 @@
          not the whole frame, and lands on the permanent smoked-silver grade. */
       const after=smooth((t-9.44)/.38);
       this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
-      this.coreLight.intensity+=flash*.42+after*.12;
-      if(this.glowSprite){
-        const g=1+flash*.10;
-        this.glowSprite.scale.multiplyScalar(g);
-        this.glowSprite.material.opacity=Math.min(.12,this.glowSprite.material.opacity+flash*.035);
-      }
+      // Keep the premature embryo optic off; only the seated MAG eye may ignite.
+      this.coreLight.intensity=0;
+      if(this.glowSprite)this.glowSprite.material.opacity=0;
       if(this.flashBurst){
         this.flashBurst.material.opacity=flash*.010;
         const burstScale=2.08+flash*.10;
