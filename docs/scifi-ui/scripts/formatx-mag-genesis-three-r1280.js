@@ -1737,8 +1737,10 @@
       // R2149: DNA is the establishing shot; once the embryo forms,
       // helices become a transparent scaffold instead of blocking it.
       const embryoFocus=smooth((t-2.48)/1.02);
-      const helixScaleFocus=1-embryoFocus*(this.mobileRender?.47:.16);
-      const helixOpacityFocus=1-embryoFocus*(this.mobileRender?.72:.34);
+      // R2164: soften the desktop DNA around the new embryonic cell,
+      // as phones already do. The bright helix must not occlude the cell.
+      const helixScaleFocus=1-embryoFocus*(this.mobileRender?.47:.35);
+      const helixOpacityFocus=1-embryoFocus*(this.mobileRender?.72:.66);
       this.dnaGroup.visible=fade>.002;
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
