@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#03070e">
+  <meta name="description" content="FORMATX GENESIS — interaktív, filmszerű 3D DNS–sejtmag születés, 9600 élő részecskével.">
+  <title>GENESIS — The Birth of MAG | FormatX</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <style>
+    :root{color-scheme:dark;--ivory:#e6eeef;--muted:#93a6b1;--cyan:#87edee;--line:rgba(173,225,235,.19)}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;min-height:100%;background:#03070e;color:var(--ivory)}
+    body{font-family:Inter,"Segoe UI",Arial,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+    button,input{font:inherit}button{cursor:pointer}
+    :focus-visible{outline:2px solid #9bedf6;outline-offset:4px}
+    #viewport{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+    .grain,.vignette,.guide{pointer-events:none;position:fixed;inset:0}
+    .vignette{background:radial-gradient(ellipse 65% 66% at 52% 48%,transparent 20%,rgba(0,3,10,.28) 67%,rgba(0,2,8,.79) 100%);z-index:2}
+    .grain{opacity:.15;z-index:3;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.28' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:screen}
+    .guide{z-index:3;inset:36px 38px 36px;border:1px solid rgba(163,207,221,.085);border-radius:3px}
+    .guide:before,.guide:after{content:"";position:absolute;width:25px;height:25px;border-color:rgba(147,232,241,.42);border-style:solid}
+    .guide:before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+    .guide:after{right:-1px;bottom:-1px;border-width:0 1px 1px 0}
+    .hud{position:fixed;inset:0;z-index:4;pointer-events:none}
+    .hud button,.hud a,.hud input{pointer-events:auto}
+    .topbar{position:absolute;left:clamp(26px,5.6vw,112px);right:clamp(26px,5.6vw,112px);top:clamp(26px,5.2vh,60px);display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{text-decoration:none;display:flex;align-items:center;gap:13px;color:#f1faf9;letter-spacing:.18em;font-size:12px;font-weight:800}
+    .brand-emblem{width:34px;height:34px;border:1px solid rgba(135,237,238,.48);transform:rotate(45deg);display:grid;place-items:center;background:rgba(89,171,181,.08);box-shadow:0 0 30px rgba(83,230,244,.08)}
+    .brand-emblem span{transform:rotate(-45deg);font-size:15px;color:var(--cyan)}
+    .top-meta{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#a4b9be}
+    .back{color:var(--ivory);font-size:10px;text-decoration:none;letter-spacing:.17em;text-transform:uppercase;border:1px solid var(--line);border-radius:100px;padding:12px 16px;background:rgba(10,25,31,.38);backdrop-filter:blur(18px);transition:background .2s}
+    .back:hover{background:rgba(91,173,187,.15)}
+    .editorial{position:absolute;left:clamp(26px,7.2vw,138px);top:50%;transform:translateY(-53%);width:min(32vw,540px);min-width:250px}
+    .eyebrow{font-size:10px;color:#a8cad4;font-weight:600;letter-spacing:.38em;display:flex;gap:15px;align-items:center}
+    .eyebrow:before{content:"";display:block;width:28px;height:1px;background:#8af5f2;box-shadow:0 0 12px #77ddf1}
+    h1{font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-weight:200;letter-spacing:-.07em;font-size:clamp(66px,8.3vw,150px);line-height:.83;margin:27px 0 30px;text-shadow:0 10px 70px rgba(17,39,51,.85)}
+    h1 span{display:block;letter-spacing:-.075em}
+    h1 .outline{color:transparent;-webkit-text-stroke:1px rgba(197,231,235,.65)}
+    .editorial p{font-size:clamp(12px,1.1vw,15px);font-weight:300;color:#b0c6c9;line-height:1.85;max-width:320px;margin:0}
+    .editorial .thin-rule{width:62px;height:1px;background:linear-gradient(90deg,#8dedeb,transparent);margin:30px 0 21px}
+    .act-label{letter-spacing:.30em;text-transform:uppercase;color:#d3edee;font-size:10px;font-weight:700}
+    .caption{font-size:11px;line-height:1.6;color:#a3b8bc;max-width:330px;margin-top:8px;min-height:35px;transition:opacity .2s}
+    .vertical-index{position:absolute;right:clamp(31px,5.8vw,110px);top:40%;display:flex;flex-direction:column;align-items:flex-end;gap:13px}
+    .vertical-index .tiny{font-size:10px;letter-spacing:.25em;color:#9db5bf}
+    .vertical-index .count{font-family:Georgia,serif;font-size:clamp(38px,4vw,65px);font-weight:300;line-height:1;color:#dfeff1}
+    .vertical-index .depth{width:1px;height:85px;background:linear-gradient(#88f3f3,transparent);margin-right:7px}
+    .bottom{position:absolute;bottom:clamp(28px,5.3vh,66px);left:clamp(26px,5.6vw,112px);right:clamp(26px,5.6vw,112px);display:flex;align-items:flex-end;justify-content:space-between;gap:28px}
+    .controls{width:min(670px,65vw);border:1px solid rgba(180,221,228,.23);border-radius:18px;padding:17px 22px 19px;display:grid;grid-template-columns:auto 1fr auto;gap:14px 22px;align-items:center;background:linear-gradient(145deg,rgba(27,49,58,.57),rgba(8,16,29,.72));box-shadow:0 22px 65px rgba(0,0,0,.23),inset 0 1px 0 rgba(225,249,251,.05);backdrop-filter:blur(23px) saturate(155%)}
+    .play{min-width:119px;background:rgba(136,230,236,.12);border:1px solid rgba(147,240,240,.32);border-radius:30px;color:#e7fafd;padding:12px 16px;font-size:10px;font-weight:800;letter-spacing:.10em;transition:background .2s}
+    .play:hover{background:rgba(136,230,236,.23)}
+    .meter{display:flex;align-items:center;gap:14px;min-width:0}
+    .time{font-variant-numeric:tabular-nums;font-size:10px;letter-spacing:.12em;color:#d6edee;white-space:nowrap}
+    .scrub{flex:1;appearance:none;-webkit-appearance:none;min-width:45px;height:4px;accent-color:#91f3f3;background:linear-gradient(90deg,#92eeed var(--fill,0%),rgba(207,238,239,.19) var(--fill,0%));border-radius:15px;cursor:ew-resize}
+    .scrub::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#d9ffff;border:3px solid #6fd4de;box-shadow:0 0 18px #70d5ea}
+    .scrub::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:#d9ffff;border:3px solid #6fd4de}
+    .view{border:1px solid var(--line);border-radius:30px;background:rgba(11,22,32,.4);color:#e5f4f4;padding:12px 14px;font-size:10px;letter-spacing:.08em;white-space:nowrap}
+    .subcontrol{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#95adb4;font-size:9px;letter-spacing:.17em;text-transform:uppercase}
+    .sound{color:#b8e8e9;background:none;border:0;font-size:10px;letter-spacing:.14em;cursor:pointer;padding:2px}
+    .sound:hover{color:white}
+    .footnote{text-align:right;color:#8ca3ab;font-size:10px;letter-spacing:.17em;line-height:2;text-transform:uppercase}
+    .footnote strong{color:#d5ebeb;font-weight:500}
+    .loader{position:fixed;z-index:10;inset:0;background:#03070e;display:grid;place-items:center;color:#bbd6d9;letter-spacing:.3em;text-align:center;transition:opacity .8s,visibility .8s}
+    .loader.is-gone{opacity:0;visibility:hidden;pointer-events:none}
+    .load-ring{border:1px solid rgba(141,231,236,.20);border-top:1px solid #93eff1;border-radius:50%;width:64px;height:64px;margin:0 auto 25px;animation:spin 1.7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .error{color:#ffd5ca;font-size:14px;max-width:460px;line-height:1.6;letter-spacing:.04em;padding:20px}
+    .no-webgl{display:none;position:fixed;inset:0;z-index:11;background:rgba(1,4,9,.94);place-items:center;text-align:center;padding:30px}
+    .no-webgl.show{display:grid}
+    .no-webgl p{max-width:430px;color:#b9d1d7;line-height:1.7}
+    .skip{position:absolute;left:clamp(26px,7.2vw,138px);bottom:calc(clamp(28px,5.3vh,66px) + 143px);color:#b8dbde;border:0;border-bottom:1px solid rgba(170,230,231,.38);background:none;padding:7px 0;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+    .skip:hover{color:white}
+    @media(max-width:1000px){.top-meta{display:none}.editorial{left:7vw;width:42vw}.bottom{left:5vw;right:5vw}.footnote{display:none}.controls{width:min(680px,100%)}.vertical-index{right:6vw}}
+    @media(max-width:680px){
+      .guide{inset:14px}.topbar{top:28px;left:26px;right:26px}.brand{font-size:10px}.brand-emblem{width:28px;height:28px}
+      .back{font-size:9px;padding:10px 12px}
+      .editorial{top:110px;left:30px;transform:none;min-width:0;width:calc(100% - 60px)}
+      h1{font-size:clamp(58px,15vw,90px);margin:13px 0 14px;line-height:.83}
+      .editorial p{font-size:11px;line-height:1.55;max-width:250px}
+      .editorial .thin-rule{margin:17px 0 12px}
+      .eyebrow{font-size:8px}
+      .act-label{font-size:9px}
+      .caption{font-size:10px;max-width:235px}
+      .vertical-index{top:42%;right:29px}.vertical-index .count{font-size:34px}.vertical-index .depth{height:42px}
+      .bottom{bottom:28px;left:23px;right:23px}
+      .controls{grid-template-columns:auto 1fr;gap:11px 12px;padding:15px;border-radius:14px}
+      .play{min-width:102px;padding:12px 11px}.view{grid-column:1/-1}.subcontrol{grid-column:1/-1}
+      .skip{left:30px;bottom:205px}
+    }
+    @media(max-width:385px){.editorial p{display:none}.editorial{top:93px}h1{font-size:61px}.skip{bottom:202px}}
+    @media(prefers-reduced-motion:reduce){.load-ring{animation:none}*{scroll-behavior:auto!important}}
+  </style>
+  <script type="importmap">
+  {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+  <canvas id="viewport" aria-label="Filmminőségű interaktív 3D DNS és sejtmag átalakulás"></canvas>
+  <div class="vignette"></div><div class="grain"></div><div class="guide"></div>
+  <main class="hud" aria-label="Genesis filmszerű 3D élmény">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="FormatX Suite Pro főoldal"><span class="brand-emblem"><span>✦</span></span> FORMATX <span style="font-weight:300;color:#97b2b7">/ LABORATORY</span></a>
+      <div class="top-meta">VOL. 001 &nbsp; / &nbsp; THE ORIGIN SEQUENCE &nbsp; / &nbsp; 2026</div>
+      <a class="back" href="/">← &nbsp; Vissza a FormatX-hez</a>
+    </header>
+    <section class="editorial" aria-live="polite">
+      <div class="eyebrow">THE BIRTH OF AN INTELLIGENCE</div>
+      <h1>GEN<span class="outline">E</span>SIS<span style="font-size:.17em;vertical-align:top;display:inline-block;letter-spacing:0;margin-left:.30em;color:#79e4e8">01</span></h1>
+      <p>Minden élő rendszer egyetlen mintával kezdődik. Figyeld, ahogy a genetikai kód térbeli energiává, majd önálló sejtmaggá szerveződik.</p>
+      <div class="thin-rule"></div>
+      <div class="act-label" id="actTitle">01 / A KÓD</div>
+      <div class="caption" id="actText">A kettős DNS-spirál először önálló, élő szerkezetként jelenik meg.</div>
+    </section>
+    <aside class="vertical-index" aria-label="Jelenet állapota">
+      <div class="tiny">SEQUENCE</div>
+      <div class="count" id="sceneNumber">01</div>
+      <div class="depth"></div>
+      <div class="tiny" id="stateWord">ORIGIN</div>
+    </aside>
+    <button class="skip" id="skip" type="button">Ugrás a sejtmaghoz ↗</button>
+    <footer class="bottom">
+      <div class="controls" aria-label="Lejátszás és kamera">
+        <button class="play" type="button" id="play" aria-label="Animáció szüneteltetése">Ⅱ &nbsp; SZÜNET</button>
+        <div class="meter">
+          <span class="time" id="elapsed">00:00</span>
+          <input id="progress" class="scrub" type="range" min="0" max="10" step="0.01" value="0" aria-label="Animáció előre- és visszatekerése">
+          <span class="time">00:10</span>
+        </div>
+        <button class="view" type="button" id="cameraMode">◈ &nbsp; SZABAD KAMERA</button>
+        <div class="subcontrol"><span>9600 részecske &nbsp; · &nbsp; WebGL &nbsp; · &nbsp; 10 s film</span><button id="sound" class="sound" type="button" aria-pressed="false">♫ &nbsp; HANG BEKAPCSOLÁSA</button></div>
+      </div>
+      <div class="footnote">FORMATX GENESIS ENGINE<br><strong>DNA → NUCLEUS / CINEMATIC EXPERIENCE</strong><br>THREE.JS · GSAP · REAL-TIME PARTICLES</div>
+    </footer>
+  </main>
+  <div class="loader" id="loading"><div><div class="load-ring"></div><div id="loadingText" style="font-size:10px">GENESIS RENDERER INICIALIZÁLÁSA</div></div></div>
+  <div class="no-webgl" id="fallback" role="alert"><div><h2>A 3D motor nem indítható</h2><p>A Genesis WebGL-képes böngészőt és hálózati hozzáférést igényel a Three.js / GSAP CDN-ekhez. Ellenőrizd a grafikus gyorsítást, majd frissítsd az oldalt.</p><a class="back" href="/">Vissza a főoldalra</a></div></div>
+
+  <script id="particleVertex" type="x-shader/x-vertex">
+  precision highp float;
+  attribute vec3 aStart;
+  attribute vec3 aEnd;
+  attribute vec3 aTint;
+  attribute float aSize;
+  attribute float aSeed;
+  attribute float aKind;
+  uniform float uMorph;
+  uniform float uTime;
+  uniform float uPixelRatio;
+  uniform float uBreath;
+  varying vec3 vTint;
+  varying float vAlpha;
+  void main(){
+    float k=uMorph*uMorph*(3.0-2.0*uMorph);
+    vec3 p=mix(aStart,aEnd,k);
+    float transition=sin(k*3.14159265);
+    float swirl=aSeed*6.283185+uTime*.32;
+    p.x+=transition*sin(swirl+p.y*3.2)*(.25+.12*aKind);
+    p.z+=transition*cos(swirl*.9+p.y*2.6)*(.25+.09*aKind);
+    float breathing=1.0+uBreath*.035*sin(uTime*1.8+aSeed*12.0);
+    p*=mix(1.0,breathing,k);
+    if(aKind>1.5){
+      float phase=uTime*(.09+.045*aSeed)*k;
+      float co=cos(phase),si=sin(phase);
+      p.xz=mat2(co,-si,si,co)*p.xz;
+    }
+    vec4 mv=modelViewMatrix*vec4(p,1.0);
+    gl_Position=projectionMatrix*mv;
+    float apparent=17.5/max(1.0,-mv.z);
+    gl_PointSize=clamp(aSize*uPixelRatio*apparent,1.0,19.0);
+    vTint=aTint;
+    vAlpha=mix(1.0,.82,k)*(aKind>1.5?.77:1.0);
+  }
+  </script>
+  <script id="particleFragment" type="x-shader/x-fragment">
+  precision highp float;
+  uniform float uOpacity;
+  varying vec3 vTint;
+  varying float vAlpha;
+  void main(){
+    vec2 p=gl_PointCoord-.5;
+    float d=length(p)*2.0;
+    float core=pow(max(0.0,1.0-d),3.4);
+    float halo=exp(-d*d*4.8)*.19;
+    float alpha=(core+halo)*vAlpha*uOpacity;
+    if(alpha<.008)discard;
+    gl_FragColor=vec4(vTint*(1.4+core*.7),alpha);
+  }
+  </script>
+  <script id="membraneVertex" type="x-shader/x-vertex">
+  precision highp float;
+  uniform float uTime;
+  varying vec3 vNormal;
+  varying vec3 vWorld;
+  void main(){
+    vec3 p=position;
+    float undulation=sin(p.y*7.2+uTime*.57)*sin(p.x*8.4-uTime*.39)*.030;
+    p+=normal*undulation;
+    vNormal=normalize(normalMatrix*normal);
+    vec4 world=modelViewMatrix*vec4(p,1.0);
+    vWorld=world.xyz;
+    gl_Position=projectionMatrix*world;
+  }
+  </script>
+  <script id="membraneFragment" type="x-shader/x-fragment">
+  precision highp float;
+  uniform float uTime;
+  uniform float uFade;
+  varying vec3 vNormal;
+  varying vec3 vWorld;
+  void main(){
+    vec3 n=normalize(vNormal);
+    vec3 view=normalize(-vWorld);
+    float edge=pow(1.0-abs(dot(n,view)),2.7);
+    float fractal=.5+.5*sin(vWorld.y*16.0+sin(vWorld.x*11.0)*1.7+uTime*.65);
+    vec3 base=mix(vec3(.008,.050,.060),vec3(.12,.64,.72),edge);
+    vec3 rim=vec3(.40,.92,1.0)*pow(edge,2.2)*(.54+.46*fractal);
+    gl_FragColor=vec4(base*.31+rim,uFade*(.025+edge*.39));
+  }
+  </script>
+  <script type="module">
+  import * as THREE from 'three';
+  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+  import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  const $=id=>document.getElementById(id);
+  const N=9600;
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const gsap=window.gsap;
+  const clamp=(n,min=0,max=1)=>Math.min(max,Math.max(min,n));
+  const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
+  const lerp=(a,b,k)=>a+(b-a)*k;
+  const canvas=$('viewport');
+  const loading=$('loading');
+  let renderer,composer,bloom,scene,camera,controls,particles,membrane,innerMembrane,cradle,dust,heart,halo;
+  let timeline;
+  let freeView=false;
+  let scrubbing=false;
+  let pointerX=0,pointerY=0;
+  let visible=true;
+  let audioContext,masterGain,droneOsc,upperOsc,lfoOsc,lfoGain;
+  let audioUnlocked=false,soundOn=false;
+  const state={time:0,morph:0,breath:0,glow:0,playing:false};
+  const track={x:0,y:0,z:10.8};
+  const clock=new THREE.Clock();
+  const axis=new THREE.Vector3();
+  let actIndex=-1;
+
+  function randFactory(seed){
+    let s=seed>>>0;
+    return ()=>{s=(Math.imul(1664525,s)+1013904223)>>>0;return s/4294967296;};
+  }
+  const random=randFactory(0x65dfea21);
+
+  function fibonacciDirection(i,count){
+    const y=1-2*(i+.5)/count;
+    const r=Math.sqrt(Math.max(0,1-y*y));
+    const theta=i*2.399963229728653;
+    return [r*Math.cos(theta),y,r*Math.sin(theta)];
+  }
+
+  function makeParticles(){
+    const start=new Float32Array(N*3);
+    const end=new Float32Array(N*3);
+    const tint=new Float32Array(N*3);
+    const sizes=new Float32Array(N);
+    const seeds=new Float32Array(N);
+    const kinds=new Float32Array(N);
+    const N_STRAND=7400,N_RUNG=1100;
+    for(let i=0;i<N;i++){
+      const a=i*3,seed=random();
+      seeds[i]=seed;
+      let sx=0,sy=0,sz=0,kind=0;
+      if(i<N_STRAND){
+        const strand=i%2,step=Math.floor(i/2);
+        const u=(step+.5)/(N_STRAND/2);
+        const theta=u*10.5*Math.PI-.25*Math.PI+(strand*Math.PI);
+        const radial=1.03+(random()-.5)*.07;
+        sx=Math.cos(theta)*radial+(random()-.5)*.055;
+        sz=Math.sin(theta)*radial*.88+(random()-.5)*.065;
+        sy=(u-.5)*6.0+(random()-.5)*.032;
+        kind=strand;
+      }else if(i<N_STRAND+N_RUNG){
+        const u=Math.floor(random()*68)/67;
+        const theta=u*10.5*Math.PI-.25*Math.PI;
+        const lane=random()*2-1;
+        sx=Math.cos(theta)*lane*1.03+(random()-.5)*.032;
+        sz=Math.sin(theta)*lane*.90+(random()-.5)*.05;
+        sy=(u-.5)*6.0+(random()-.5)*.028;
+        kind=2.0;
+      }else{
+        const u=random(),theta=random()*Math.PI*2;
+        const R=1.4+random()*1.6;
+        sx=Math.cos(theta)*R;
+        sz=Math.sin(theta)*R;
+        sy=(u-.5)*6.4;
+        kind=3.0;
+      }
+      start[a]=sx;start[a+1]=sy;start[a+2]=sz;
+      const dir=fibonacciDirection(i,N);
+      const targetOuter=i%10===0||i>=8500;
+      const r=targetOuter?1.68+random()*1.18:Math.cbrt(random())*1.46;
+      const organic=1+.055*Math.sin(dir[0]*11+dir[1]*8)*Math.cos(dir[2]*12);
+      end[a]=dir[0]*r*organic;
+      end[a+1]=dir[1]*r*organic;
+      end[a+2]=dir[2]*r*organic;
+      const cyan=kind===0?new THREE.Color(0x7fe9ef):kind===1?new THREE.Color(0xe3b7dc):kind===2?new THREE.Color(0xabc8df):new THREE.Color(0x65a4bf);
+      cyan.multiplyScalar(.77+random()*.42);
+      tint[a]=cyan.r;tint[a+1]=cyan.g;tint[a+2]=cyan.b;
+      sizes[i]=i%43===0?3.2+random()*1.9:1.18+random()*1.75;
+      kinds[i]=kind;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.Float32BufferAttribute(start,3));
+    geo.setAttribute('aStart',new THREE.BufferAttribute(start,3));
+    geo.setAttribute('aEnd',new THREE.BufferAttribute(end,3));
+    geo.setAttribute('aTint',new THREE.BufferAttribute(tint,3));
+    geo.setAttribute('aSize',new THREE.BufferAttribute(sizes,1));
+    geo.setAttribute('aSeed',new THREE.BufferAttribute(seeds,1));
+    geo.setAttribute('aKind',new THREE.BufferAttribute(kinds,1));
+    const mat=new THREE.ShaderMaterial({
+      vertexShader:$('particleVertex').textContent,
+      fragmentShader:$('particleFragment').textContent,
+      uniforms:{uMorph:{value:0},uTime:{value:0},uPixelRatio:{value:1},uBreath:{value:0},uOpacity:{value:1}},
+      transparent:true,depthWrite:false,blending:THREE.AdditiveBlending
+    });
+    particles=new THREE.Points(geo,mat);
+    particles.frustumCulled=false;
+    scene.add(particles);
+  }
+
+  function glowTexture(){
+    const c=document.createElement('canvas');c.width=c.height=128;
+    const ctx=c.getContext('2d');
+    const gradient=ctx.createRadialGradient(64,64,0,64,64,64);
+    gradient.addColorStop(0,'rgba(210,255,255,1)');
+    gradient.addColorStop(.10,'rgba(124,233,248,.72)');
+    gradient.addColorStop(.34,'rgba(50,161,197,.25)');
+    gradient.addColorStop(1,'rgba(3,18,34,0)');
+    ctx.fillStyle=gradient;ctx.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
+  const flare=glowTexture();
+
+  function makeDust(){
+    const count=1450;
+    const coords=new Float32Array(count*3);
+    const colors=new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      const j=i*3;
+      coords[j]=(random()-.5)*24;
+      coords[j+1]=(random()-.5)*15;
+      coords[j+2]=(random()-.5)*16-3;
+      const v=.28+random()*.60;
+      colors[j]=v*.48;colors[j+1]=v*.86;colors[j+2]=v;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(coords,3));
+    geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+    const mat=new THREE.PointsMaterial({size:.028,map:flare,vertexColors:true,transparent:true,opacity:.48,depthWrite:false,sizeAttenuation:true,blending:THREE.AdditiveBlending});
+    dust=new THREE.Points(geo,mat);scene.add(dust);
+  }
+
+  function makeNucleus(){
+    const membraneMat=new THREE.ShaderMaterial({
+      vertexShader:$('membraneVertex').textContent,
+      fragmentShader:$('membraneFragment').textContent,
+      uniforms:{uTime:{value:0},uFade:{value:0}},
+      transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending
+    });
+    membrane=new THREE.Mesh(new THREE.SphereGeometry(1.44,80,56),membraneMat);
+    membrane.visible=false;
+    scene.add(membrane);
+    const innerMat=new THREE.MeshPhysicalMaterial({
+      color:0x072e3f,emissive:0x114455,emissiveIntensity:.12,
+      metalness:.13,roughness:.29,transmission:.48,
+      thickness:1.3,ior:1.23,clearcoat:.85,clearcoatRoughness:.16,
+      transparent:true,opacity:0,depthWrite:false
+    });
+    innerMembrane=new THREE.Mesh(new THREE.IcosahedronGeometry(1.19,4),innerMat);
+    innerMembrane.visible=false;
+    scene.add(innerMembrane);
+    const heartMat=new THREE.MeshBasicMaterial({color:0x9cecf4,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
+    heart=new THREE.Mesh(new THREE.IcosahedronGeometry(.21,3),heartMat);
+    scene.add(heart);
+    halo=new THREE.Sprite(new THREE.SpriteMaterial({map:flare,color:0x74e6f5,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));
+    halo.scale.set(4.9,4.9,1);scene.add(halo);
+
+    cradle=new THREE.Group();
+    for(const [radius,turnX,turnY,color] of [[1.69,.46,.4,0x80e7f0],[1.90,-.70,.65,0x88bad9],[2.05,.82,-.58,0xe9b8d5]]){
+      const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,.004,6,170),mat);
+      ring.rotation.set(turnX,turnY,.15);
+      cradle.add(ring);
+    }
+    scene.add(cradle);
+    const fill=new THREE.PointLight(0x75d8e8,22,7,1.8);
+    fill.position.set(-1.7,1.8,2.7);scene.add(fill);
+    const rim=new THREE.PointLight(0xd9a8d6,13,7,2);
+    rim.position.set(2.2,-1.2,-2.1);scene.add(rim);
+  }
+
+  function makeScene(){
+    renderer=new THREE.WebGLRenderer({canvas,antialias:innerWidth<1100,alpha:false,powerPreference:'high-performance'});
+    renderer.setClearColor(0x020611,1);
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.16;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,innerWidth<700?1.2:1.7));
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x020611);
+    scene.fog=new THREE.FogExp2(0x020611,.015);
+    camera=new THREE.PerspectiveCamera(41,1,.1,65);
+    camera.position.set(0,0,10.8);
+    controls=new OrbitControls(camera,canvas);
+    controls.enabled=false;
+    controls.enableDamping=true;
+    controls.dampingFactor=.055;
+    controls.enablePan=false;
+    controls.minDistance=4.1;
+    controls.maxDistance=17.0;
+    controls.target.set(0,0,0);
+    scene.add(new THREE.AmbientLight(0x6f9cb5,.36));
+    makeParticles();makeDust();makeNucleus();
+    composer=new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene,camera));
+    bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.05,.66,.15);
+    bloom.threshold=.17;bloom.radius=.72;bloom.strength=1.0;
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+    resize();
+  }
+
+  function resize(){
+    const w=Math.max(1,window.innerWidth),h=Math.max(1,window.innerHeight);
+    const ratio=Math.min(window.devicePixelRatio||1,w<700?1.2:1.7);
+    renderer.setPixelRatio(ratio);
+    renderer.setSize(w,h,false);
+    composer.setPixelRatio(ratio);
+    composer.setSize(w,h);
+    camera.aspect=w/h;
+    camera.fov=w<700?51:41;
+    camera.updateProjectionMatrix();
+    particles.material.uniforms.uPixelRatio.value=ratio;
+  }
+
+  function sceneCopy(t){
+    const stage=t<3?0:t<7?1:2;
+    if(stage!==actIndex){
+      actIndex=stage;
+      const titles=['01 / A KÓD','02 / AZ ÁTALAKULÁS','03 / A SZÜLETÉS'];
+      const copies=[
+        'A kettős DNS-spirál először önálló, élő szerkezetként jelenik meg.',
+        'A genetikai szálak több ezer fényrészecskére bomlanak és a magba áramlanak.',
+        'A sejtmag megszületett. Belső energiája pulzál, külső mátrixa él és lélegzik.'
+      ];
+      $('actTitle').textContent=titles[stage];
+      $('actText').textContent=copies[stage];
+      $('sceneNumber').textContent=String(stage+1).padStart(2,'0');
+      $('stateWord').textContent=['ORIGIN','MORPHOSIS','AWAKENING'][stage];
+    }
+  }
+
+  function syncState(){
+    const t=state.time;
+    state.morph=smooth((t-3)/4);
+    state.breath=smooth((t-6.7)/2.3);
+    state.glow=smooth((t-6.5)/2.5);
+    if(!scrubbing){
+      $('progress').value=t.toFixed(2);
+      $('progress').style.setProperty('--fill',(t*10).toFixed(2)+'%');
+    }
+    $('elapsed').textContent='00:'+String(Math.floor(t)).padStart(2,'0');
+    sceneCopy(t);
+  }
+
+  function makeTimeline(){
+    timeline=gsap.timeline({
+      paused:true,
+      onUpdate:syncState,
+      onComplete:()=>{
+        state.playing=false;
+        $('play').textContent='↻  ÚJRAJÁTSZÁS';
+        $('play').setAttribute('aria-label','Animáció újrajátszása');
+      }
+    });
+    timeline.to(state,{time:3,duration:3,ease:'none'},0);
+    timeline.to(state,{time:7,duration:4,ease:'none'},3);
+    timeline.to(state,{time:10,duration:3,ease:'none'},7);
+    timeline.to(track,{z:9.45,y:.05,duration:3,ease:'power2.inOut'},0);
+    timeline.to(track,{z:7.50,x:.33,y:.18,duration:4,ease:'power2.inOut'},3);
+    timeline.to(track,{z:6.25,x:0,y:0,duration:3,ease:'power3.out'},7);
+    syncState();
+  }
+
+  function setPlaying(on){
+    if(on&&timeline.progress()>=.999)timeline.restart();
+    else if(on)timeline.play();
+    else timeline.pause();
+    state.playing=on;
+    $('play').textContent=on?'Ⅱ  SZÜNET':'▶  LEJÁTSZÁS';
+    $('play').setAttribute('aria-label',on?'Animáció szüneteltetése':'Animáció lejátszása');
+    if(soundOn&&audioContext){
+      if(on)audioContext.resume().catch(()=>{});
+      else audioContext.suspend().catch(()=>{});
+    }
+  }
+
+  function initAudio(){
+    if(audioUnlocked)return;
+    const Audio=window.AudioContext||window.webkitAudioContext;
+    if(!Audio)return;
+    audioContext=new Audio();
+    masterGain=audioContext.createGain();masterGain.gain.value=0;
+    const filter=audioContext.createBiquadFilter();filter.type='lowpass';filter.frequency.value=490;filter.Q.value=.72;
+    filter.connect(masterGain);masterGain.connect(audioContext.destination);
+    const base=audioContext.createGain();base.gain.value=.21;base.connect(filter);
+    const shimmer=audioContext.createGain();shimmer.gain.value=.056;shimmer.connect(filter);
+    droneOsc=audioContext.createOscillator();droneOsc.type='sine';droneOsc.frequency.value=55;droneOsc.connect(base);
+    upperOsc=audioContext.createOscillator();upperOsc.type='triangle';upperOsc.frequency.value=110.15;upperOsc.connect(shimmer);
+    lfoOsc=audioContext.createOscillator();lfoOsc.type='sine';lfoOsc.frequency.value=.22;
+    lfoGain=audioContext.createGain();lfoGain.gain.value=.078;lfoOsc.connect(lfoGain);lfoGain.connect(base.gain);
+    droneOsc.start();upperOsc.start();lfoOsc.start();
+    audioUnlocked=true;
+  }
+
+  async function toggleSound(){
+    try{
+      initAudio();
+      if(!audioContext){$('sound').textContent='HANG NEM TÁMOGATOTT';return;}
+      await audioContext.resume();
+      soundOn=!soundOn;
+      masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+      masterGain.gain.setTargetAtTime(soundOn?.15:0,audioContext.currentTime,.2);
+      $('sound').textContent=soundOn?'♫  HANG BEKAPCSOLVA':'♫  HANG BEKAPCSOLÁSA';
+      $('sound').setAttribute('aria-pressed',String(soundOn));
+      if(!state.playing&&soundOn)audioContext.suspend().catch(()=>{});
+    }catch(err){$('sound').textContent='A HANG NEM INDÍTHATÓ';console.warn('Genesis audio unavailable',err);}
+  }
+
+  function bindUI(){
+    $('play').addEventListener('click',async()=>{
+      const willPlay=!state.playing;
+      // Browser security permits audio only after a user gesture.
+      if(willPlay&&soundOn&&audioContext)await audioContext.resume().catch(()=>{});
+      setPlaying(willPlay);
+    });
+    $('sound').addEventListener('click',toggleSound);
+    $('progress').addEventListener('pointerdown',()=>{scrubbing=true;timeline.pause();state.playing=false;});
+    $('progress').addEventListener('input',event=>{
+      scrubbing=true;
+      const t=Number(event.target.value);
+      timeline.time(t,false);
+      $('progress').style.setProperty('--fill',(t*10).toFixed(2)+'%');
+      syncState();
+    });
+    $('progress').addEventListener('change',()=>{
+      scrubbing=false;
+      setPlaying(false);
+    });
+    $('progress').addEventListener('pointerup',()=>{scrubbing=false;});
+    $('skip').addEventListener('click',()=>{
+      timeline.pause();timeline.time(8.5,false);setPlaying(false);syncState();
+    });
+    $('cameraMode').addEventListener('click',()=>{
+      freeView=!freeView;
+      controls.enabled=freeView;
+      if(freeView){
+        camera.position.set(2.35,1.3,8.4);
+        controls.target.set(0,0,0);
+        controls.update();
+      }else{
+        controls.enabled=false;
+        controls.target.set(0,0,0);
+      }
+      $('cameraMode').textContent=freeView?'◎  FILMES KAMERA':'◈  SZABAD KAMERA';
+    });
+    addEventListener('pointermove',event=>{
+      pointerX=event.clientX/Math.max(1,innerWidth)*2-1;
+      pointerY=event.clientY/Math.max(1,innerHeight)*2-1;
+    },{passive:true});
+    addEventListener('resize',resize,{passive:true});
+    document.addEventListener('visibilitychange',()=>{
+      visible=!document.hidden;
+      if(!visible&&audioContext&&audioContext.state==='running')audioContext.suspend().catch(()=>{});
+      else if(visible&&soundOn&&state.playing&&audioContext)audioContext.resume().catch(()=>{});
+    });
+    addEventListener('pagehide',()=>{try{audioContext?.close()}catch(_){}},{once:true});
+  }
+
+  function render(){
+    requestAnimationFrame(render);
+    if(!visible)return;
+    const elapsed=clock.getElapsedTime();
+    const t=state.time;
+    const m=state.morph;
+    particles.material.uniforms.uMorph.value=m;
+    particles.material.uniforms.uTime.value=elapsed;
+    particles.material.uniforms.uBreath.value=state.breath;
+    particles.rotation.y=elapsed*.032*(1-m)+m*Math.sin(elapsed*.075)*.15;
+    particles.rotation.z=elapsed*.012*(1-m);
+    dust.rotation.y=elapsed*.003;
+    membrane.visible=t>4;
+    innerMembrane.visible=t>4.8;
+    membrane.material.uniforms.uFade.value=smooth((t-5.2)/2.2);
+    membrane.material.uniforms.uTime.value=elapsed;
+    innerMembrane.material.opacity=.05*smooth((t-5.7)/2.0);
+    innerMembrane.rotation.y=elapsed*.038;
+    innerMembrane.rotation.x=elapsed*.018;
+    heart.material.opacity=.12*state.glow;
+    heart.scale.setScalar(.87+.13*Math.sin(elapsed*2.0));
+    halo.material.opacity=.064*state.glow;
+    halo.scale.setScalar(4.4+.18*Math.sin(elapsed*1.6));
+    cradle.children.forEach((ring,index)=>{
+      ring.material.opacity=(.19-index*.036)*state.glow;
+      ring.rotation.z=elapsed*(index%2?.035:-.026)+index*.13;
+    });
+    bloom.strength=1.1+.26*state.glow+.05*Math.sin(elapsed*.7);
+    if(!freeView){
+      camera.position.x=track.x+pointerX*.13;
+      camera.position.y=track.y-pointerY*.10;
+      camera.position.z=track.z;
+      camera.lookAt(0,0,0);
+    }else controls.update();
+    composer.render();
+  }
+
+  function start(){
+    if(!gsap)throw new Error('GSAP nem töltődött be a CDN-ről.');
+    makeScene();
+    makeTimeline();
+    bindUI();
+    render();
+    loading.classList.add('is-gone');
+    // The visual film autoplays; audio must await explicit user activation.
+    if(!reduced)setPlaying(true);
+    else{timeline.time(0,false);setPlaying(false);}
+    document.documentElement.dataset.genesisReady='true';
+    document.documentElement.dataset.genesisParticles=String(N);
+  }
+
+  try{start();}
+  catch(error){
+    console.error('GENESIS start error:',error);
+    $('fallback').classList.add('show');
+    $('loadingText').className='error';
+    $('loadingText').textContent='A Genesis 3D motor nem indult: '+(error?.message||String(error));
+    loading.classList.add('is-gone');
+  }
+  </script>
+</body>
+</html>
