@@ -1,0 +1,73 @@
+name: Verify studio DNA-to-MAG birth R2158
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'
+      - 'docs/scifi-ui/styles/formatx-mag-birth-live-r533.css'
+      - 'docs/scifi-ui/index.html'
+      - '.github/scripts/verify-portrait-genesis-r2145.cjs'
+      - '.github/workflows/verify-mag-birth-studio-r2158.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: formatx-studio-dna-mag-proof
+  cancel-in-progress: true
+jobs:
+  studio-birth:
+    name: Real Three.js and fallback DNA to MAG frame-by-frame
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate real production renderers and portrait verifier
+        run: |
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
+          node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
+          node --check .github/scripts/verify-portrait-genesis-r2145.cjs
+          node .github/scripts/validate-intro-three-route-r2143.cjs
+      - name: Install Chromium testing runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/studio-birth" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/studio-birth/node_modules/.bin/playwright" install --with-deps chromium
+          echo "NODE_PATH=$RUNNER_TEMP/studio-birth/node_modules" >> "$GITHUB_ENV"
+      - name: Start actual static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4185 --directory docs > "$RUNNER_TEMP/studio-birth-http.log" 2>&1 &
+          for i in $(seq 1 50); do
+            curl -fsS http://127.0.0.1:4185/scifi-ui/index.html > /dev/null && exit 0
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/studio-birth-http.log"
+          exit 1
+      - name: Capture real 3D genome embryo assembly and MAG
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4185/scifi-ui/index.html
+          FORMATX_PORTRAIT_RENDERER: three
+          FORMATX_PORTRAIT_PROOF_DIR: artifacts/studio-birth-r2158-three
+        run: node .github/scripts/verify-portrait-genesis-r2145.cjs
+      - name: Capture constrained-device cinematic fallback
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4185/scifi-ui/index.html
+          FORMATX_PORTRAIT_RENDERER: reference
+          FORMATX_PORTRAIT_PROOF_DIR: artifacts/studio-birth-r2158-reference
+        run: node .github/scripts/verify-portrait-genesis-r2145.cjs
+      - name: Preserve film stills and state evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-dna-to-mag-r2158-keyframes
+          path: artifacts/studio-birth-r2158-*/
+          if-no-files-found: warn
+          retention-days: 30
