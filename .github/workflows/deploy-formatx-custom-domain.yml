@@ -244,7 +244,17 @@ jobs:
               "$base/scifi-ui/scripts/formatx-crystal-organism-r326.js?rev=${GITHUB_RUN_ID}-visible-mag" -o "$tmp/renderer.js"
             grep -Fq 'R2142: smooth vertex normals across the machined metal' "$tmp/renderer.js"
             grep -Fq 'R2144: raised 48-piece optical bezel now has a true sloped crown' "$tmp/renderer.js"
-            grep -Fq "${MAG_GEOMETRY} — the permanent MAG" "$tmp/renderer.js"
+            # Do not pin the geometry comment to R2151: R2153 replaces those
+            # detached winglets with a continuous four-arm metal assembly.
+            grep -Fq "${MAG_GEOMETRY} —" "$tmp/renderer.js"
+            if [[ "$MAG_GEOMETRY" = "R2153" ]]; then
+              grep -Fq 'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)' "$tmp/renderer.js"
+              grep -Fq 'armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008)' "$tmp/renderer.js"
+              if grep -Fq 'armorTri(ridge,tip,shoulder,5.21)' "$tmp/renderer.js"; then
+                echo 'Legacy detached R2151 winglets are still served' >&2
+                exit 1
+              fi
+            fi
             grep -Fq 'c=mix(c,titanium,machinedArmor*.99)' "$tmp/renderer.js"
             curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?rev=${GITHUB_RUN_ID}-mag-loader" -o "$tmp/scheduler.js"
