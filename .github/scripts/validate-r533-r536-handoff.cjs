@@ -222,18 +222,13 @@ async function verifyFullBirth(browser){
     await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready',{timeout:20000});
     const reloadReady=await snapshot(page);
     assertStable(reloadReady,'session-reload');
-    // R2150: session persistence is intentional, but the audience must be
-    // able to rewatch the full DNA-to-embryo-to-MAG film without clearing data.
-    const replay=page.locator('#hero .hero-space > .fx-mag-replay-r2150');
-    await replay.waitFor({state:'visible',timeout:10000});
-    assert.equal(await replay.getAttribute('href'),'/?intro=1',
-      'R2150 replay link must force the ten-second canonical cinematic');
-    const replayBox=await replay.boundingBox();
-    assert.ok(replayBox&&replayBox.width>=44&&replayBox.height>=44,
-      'R2150 replay control must meet accessible mobile hit-target dimensions');
-    await replay.click({timeout:10000});
-    await page.waitForURL(href=>href.searchParams.get('intro')==='1',{timeout:15000});
-    await page.locator(OVERLAY).waitFor({state:'visible',timeout:15000});
+    // R2157: the visible replay button was removed at the user's request.
+    // A forced intro URL remains functional for regression checks, while
+    // normal session revisits do not replay the film.
+    assert.equal(await page.locator('#hero .fx-mag-replay-r2150').count(),0,
+      'desktop-full: removed replay action returned');
+    await page.goto(url({intro:1,cinema:1,r548:'forced-regression'}),{waitUntil:'commit',timeout:30000});
+    await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
     assert.equal(errors.length,0,`desktop-full: browser errors: ${errors.join(' | ')}`);
     return{phases:[...phases],coreReadyPhase:timeline.coreReadyPhase,coreSamples:timeline.coreSamples.length,final,reload:reloadReady};
   }finally{await context.close();}
@@ -270,12 +265,8 @@ async function verifySkip(browser){
     assert.equal(final.scrollLock,'','mobile-skip: scroll lock remained after skip');
     assert.equal(final.cinemaReady,'ready','mobile-skip: R536 not ready after skip handoff');
     assert.equal(final.cinemaPointerEvents,'none','mobile-skip: cinematic visual layer intercepts input');
-    const replay=page.locator('#hero .hero-space > .fx-mag-replay-r2150');
-    await replay.waitFor({state:'visible',timeout:10000});
-    const replayBox=await replay.boundingBox();
-    assert.ok(replayBox&&replayBox.width>=44&&replayBox.height>=44,
-      'mobile-skip: R2150 cinematic replay has undersized hit target');
-    await replay.click({trial:true,timeout:10000});
+    assert.equal(await page.locator('#hero .fx-mag-replay-r2150').count(),0,
+      'mobile-skip: removed replay action returned');
     assert.equal(errors.length,0,`mobile-skip: browser errors: ${errors.join(' | ')}`);
     return{skipBox:box,skipAria:aria,final};
   }finally{await context.close();}
