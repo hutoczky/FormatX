@@ -46,7 +46,9 @@ html body #hero .hero-space > .fx-mag-replay-r2150 .fx-mag-replay-icon {
 }
 @media (max-width: 900px), (pointer: coarse) {
   html body #hero .hero-space > .fx-mag-replay-r2150 {
-    top: 14px !important;
+    /* R2156: the compact stage can start slightly above the mobile viewport;
+       keep the replay button fully inside the visible scene. */
+    top: 58px !important;
     right: 14px !important;
     min-width: 168px !important;
     min-height: 48px !important;
