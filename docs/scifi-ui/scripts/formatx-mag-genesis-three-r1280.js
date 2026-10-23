@@ -816,7 +816,7 @@
             float center=exp(-r*53.0);
             vec3 cool=mix(vec3(.10,.51,.70),vec3(.53,.70,.95),vSeed);
             vec3 color=cool*glow*.70+vec3(.75,1.0,.98)*center*.32;
-            gl_FragColor=vec4(color,vEnergy*mix(.37,.64,vSeed)*smoothstep(.25,.04,r));
+            gl_FragColor=vec4(color,vEnergy*mix(.37,.64,vSeed)*(1.0-smoothstep(.04,.25,r)));
           }`
       });
       this.genomeParticles=new T.Points(geometry,material);
