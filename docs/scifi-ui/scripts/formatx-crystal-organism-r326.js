@@ -663,7 +663,8 @@
         const t=j/steps;
         const radius=.545+(tipRadius-.545)*t;
         // Two symmetric polished slopes converge to ONE metal tip per arm.
-        const halfWidth=(.145*(1-smooth(t))+.006)*(1+.045*Math.sin(Math.PI*t));
+        const eased=t*t*(3-2*t);
+        const halfWidth=(.145*(1-eased)+.006)*(1+.045*Math.sin(Math.PI*t));
         const coreZ=magSkinZ(dx*radius,dy*radius);
         const pt=(side,height)=>{
           const x=dx*radius+sx*side,y=dy*radius+sy*side;
