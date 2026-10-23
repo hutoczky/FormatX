@@ -37,10 +37,34 @@ async function main(){
       url.searchParams.set('visualintro','1');
       url.searchParams.set('introframe',String(seconds));
       await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
-      await page.waitForFunction(
-        ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-        null,{timeout:45000}
-      );
+      // Production may canonicalize /scifi-ui/index.html to / and strip
+      // query params. A proof without introframe= is NOT a film test.
+      const landed=new URL(page.url());
+      if(landed.searchParams.get('introframe')!==String(seconds)){
+        const canonical=new URL(url.href);
+        canonical.pathname='/';
+        await page.goto(canonical.href,{waitUntil:'domcontentloaded',timeout:30000});
+      }
+      try{
+        await page.waitForFunction(
+          ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
+          null,{timeout:45000}
+        );
+      }catch(error){
+        const debug=await page.evaluate(()=>({
+          href:location.href,
+          intro:document.documentElement.dataset.fxMagBirthLiveR533||'',
+          owner:document.documentElement.dataset.fxMagBirthOwnerR533||'',
+          phase:document.documentElement.dataset.fxMagBirthPhase||'',
+          renderer:document.documentElement.dataset.fxMagBirthRendererR1360||'',
+          loader:document.documentElement.dataset.fxMagBirthThreeLoaderR1608||'',
+          visualProof:document.documentElement.dataset.fxMagBirthVisualFrameR659||'',
+          scripts:[...document.scripts].filter(script=>/formatx-mag-birth-live-r533|formatx-mag-genesis-three-r1280/.test(script.src))
+            .map(script=>script.src)
+        }));
+        fs.writeFileSync(path.join(dir,name+'-timeout.json'),JSON.stringify({debug,errors,message:String(error)},null,2));
+        throw error;
+      }
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
         return{
