@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261023-r2170-dna-genesis-mag-studio-reliable
-release_line=R2170-DNA-FIRST-EMBRYO-FOUR-ARM-MAG-RELIABLE-KEYFRAMES
+token=20261023-r2171-cinematic-assembly-studio-light
+release_line=R2171-DNA-FIRST-LIVING-EMBRYO-MAG-CINEMATIC-STUDIO-ILLUMINATION
 purpose=Make the main homepage cinematic visibly begin with one centered 3D DNA double helix on desktop and mobile, reveal supporting nucleotides later, morph through a living organic embryo, then assemble the four-arm titanium MAG and ignite its recessed optical eye only after seating.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
@@ -29,3 +29,5 @@ release_csp_fix=R2168 exact production policy hash sha256-y+8/vQYbSebeWoOU9O4YA0
 release_validation=R2169: production candidate source, inline CSP fingerprints, Worker tests and JavaScript syntax passed on git revision 14ac9047e2b97dee89fcb3c80ccea1b18085f4d8; real live cinematic browser and GENESIS Studio parity required before successful release.
 
 release_reliability=R2170: preserve proven real 1.6s DNA / 4.2s cell / 6.8s titanium assembly screenshots, align canonical and rescue R533 film asset URL, cache-bust the external recovery bootstrap, share one Chromium context across the four desktop keyframe proofs, retry a single stalled Cloudflare script load once while keeping strict GPU render and cinematic order assertions.
+
+studio_assembly_upgrade=R2171: physical Three.js studio directional key and fill intensities increase only while the four titanium MAG arms are assembled; adaptive exposure follows the same constrained window; no additional meshes, draw calls or WebGL lights; keep DNA-first and embryo-before-metal staging, keep optic fully dark until 7.44 seconds, return to original final hero tone before handoff.
