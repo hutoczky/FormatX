@@ -65,6 +65,7 @@ jobs:
           python3 .github/scripts/validate-webgpu-source.py
           node .github/scripts/validate-inline-csp-hashes-r2136.cjs
           node .github/scripts/validate-intro-three-route-r2143.cjs
+          node .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-pricing-qr.cjs
           node .github/scripts/validate-public-site-integrity.cjs
@@ -387,6 +388,20 @@ jobs:
           echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
           echo "FORMATX_LIVE_NODE_PATH=$RUNNER_TEMP/formatx-live-cinematic/node_modules" >> "$GITHUB_ENV"
 
+      - name: Verify actual permanent R2154 MAG after WebGL first frame
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_VISIBLE_MAG_DIR: artifacts/live-permanent-mag-r2154
+          FORMATX_TEST_URL: https://formatxsuite.com/
+        run: node .github/scripts/validate-visible-mag-r2143.cjs
+
+      - name: Verify www permanent R2154 MAG after WebGL first frame
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_VISIBLE_MAG_DIR: artifacts/live-permanent-mag-r2154-www
+          FORMATX_TEST_URL: https://www.formatxsuite.com/
+        run: node .github/scripts/validate-visible-mag-r2143.cjs
+
       - name: Verify live R533 to R536 cinematic handoff on both domains
         env:
           NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
@@ -409,6 +424,8 @@ jobs:
           path: |
             artifacts/live-r533-r536-canonical/
             artifacts/live-r533-r536-www/
+            artifacts/live-permanent-mag-r2154/
+            artifacts/live-permanent-mag-r2154-www/
           if-no-files-found: warn
           retention-days: 30
 
