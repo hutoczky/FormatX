@@ -628,7 +628,9 @@
           coreApi?.setMorph?.(.72,'r631-mobile-css-genome-handoff');
           coreApi?.requestRender?.(1);
         }catch(_){}
-        if(stage instanceof HTMLElement)setStageOpacity(.72);
+        // R2173: the finished native MAG cannot appear mid-assembly.
+        // Only the actual DNA-fed titanium film owns this chapter.
+        if(stage instanceof HTMLElement)setStageOpacity(0);
       }
       if(value===4){
         locateStage();
@@ -732,37 +734,44 @@
   }
 
   function syncNativeCore(r, now) {
+    // R2173: the permanent R326 hero must not leak behind the film during
+    // the DNA, embryo or mechanical seating chapters. The 3D birth renderer
+    // alone owns the visible object until the eye has awakened.
     locateStage();
-    if (!coreApi) return;
+    const nativeReveal=smoothstep((r-.76)/.18);
+    setStageOpacity(nativeReveal);
+    ROOT.dataset.fxMagBirthNativeRevealR2173=nativeReveal<=.001
+      ? 'hidden-until-titanium-seated'
+      : nativeReveal>=.999?'ready-permanent-mag':'post-assembly-crossfade';
+    if(!coreApi) return;
 
-    if (r < .50) {
-      setStageOpacity(Math.max(.008,r*.035));
+    if (r < .76) {
       if (now-lastMorphSync > 420) {
         lastMorphSync=now;
-        try { coreApi.setMorph?.(.02,'r611-genome-dormant'); coreApi.requestRender?.(1); } catch (_) {}
-      }
-      return;
-    }
-
-    if (r < .82) {
-      const t=smoothstep((r-.50)/.32);
-      setStageOpacity(.025 + t*.975);
-      if (now-lastMorphSync > 170) {
-        lastMorphSync=now;
         try {
-          coreApi.setMorph?.(.05 + t*.95,'r611-genome-to-living-core');
+          coreApi.setMorph?.(.02,'r2173-native-dormant-during-DNA-embryo-and-assembly');
           coreApi.requestRender?.(1);
         } catch (_) {}
       }
       return;
     }
 
-    setStageOpacity(1);
+    if (r < .94) {
+      if (now-lastMorphSync > 170) {
+        lastMorphSync=now;
+        try {
+          coreApi.setMorph?.(.05 + nativeReveal*.95,'r2173-post-assembly-MAG-crossfade');
+          coreApi.requestRender?.(1);
+        } catch (_) {}
+      }
+      return;
+    }
+
     if (!ignitionDone) {
       ignitionDone=true;
       try {
-        coreApi.setMorph?.(0,'r611-living-core-ignition');
-        coreApi.setShape?.('organism','r611-living-core-ignition');
+        coreApi.setMorph?.(0,'r2173-finished-MAG-handoff');
+        coreApi.setShape?.('organism','r2173-finished-MAG-handoff');
         coreApi.rotateBy?.(.035,.055,'r614-genome-first-living-impulse');
         coreApi.surfacePulse?.('r614-genome-handoff');
         coreApi.requestRender?.(MOBILE?1:2);
