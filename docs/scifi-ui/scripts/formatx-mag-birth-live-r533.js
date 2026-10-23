@@ -563,7 +563,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261023-r2159-studio-genesis-gpu-cell-mag';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261023-r2160-gpu-genesis-sound';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
