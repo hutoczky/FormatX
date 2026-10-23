@@ -17,7 +17,7 @@
     #viewport{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
     .grain,.vignette,.guide{pointer-events:none;position:fixed;inset:0}
     .vignette{background:radial-gradient(ellipse 65% 66% at 52% 48%,transparent 20%,rgba(0,3,10,.28) 67%,rgba(0,2,8,.79) 100%);z-index:2}
-    .grain{opacity:.15;z-index:3;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.28' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:screen}
+    .grain{opacity:.15;z-index:3;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 150 150' xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.28' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:screen}
     .guide{z-index:3;inset:36px 38px 36px;border:1px solid rgba(163,207,221,.085);border-radius:3px}
     .guide:before,.guide:after{content:"";position:absolute;width:25px;height:25px;border-color:rgba(147,232,241,.42);border-style:solid}
     .guide:before{top:-1px;left:-1px;border-width:1px 0 0 1px}
@@ -26,6 +26,9 @@
     .hud button,.hud a,.hud input{pointer-events:auto}
     .topbar{position:absolute;left:clamp(26px,5.6vw,112px);right:clamp(26px,5.6vw,112px);top:clamp(26px,5.2vh,60px);display:flex;align-items:center;justify-content:space-between;gap:16px}
     .brand{text-decoration:none;display:flex;align-items:center;gap:13px;color:#f1faf9;letter-spacing:.18em;font-size:12px;font-weight:800}
+    .brand-sub{font-weight:300;color:#97b2b7}
+    .h1-index{font-size:.17em;vertical-align:top;display:inline-block;letter-spacing:0;margin-left:.30em;color:#79e4e8}
+    .loading-label{font-size:10px}
     .brand-emblem{width:34px;height:34px;border:1px solid rgba(135,237,238,.48);transform:rotate(45deg);display:grid;place-items:center;background:rgba(89,171,181,.08);box-shadow:0 0 30px rgba(83,230,244,.08)}
     .brand-emblem span{transform:rotate(-45deg);font-size:15px;color:var(--cyan)}
     .top-meta{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#a4b9be}
@@ -100,13 +103,13 @@
   <div class="vignette"></div><div class="grain"></div><div class="guide"></div>
   <main class="hud" aria-label="Genesis filmszerű 3D élmény">
     <header class="topbar">
-      <a class="brand" href="/" aria-label="FormatX Suite Pro főoldal"><span class="brand-emblem"><span>✦</span></span> FORMATX <span style="font-weight:300;color:#97b2b7">/ LABORATORY</span></a>
+      <a class="brand" href="/" aria-label="FormatX Suite Pro főoldal"><span class="brand-emblem"><span>✦</span></span> FORMATX <span class="brand-sub">/ LABORATORY</span></a>
       <div class="top-meta">VOL. 001 &nbsp; / &nbsp; THE ORIGIN SEQUENCE &nbsp; / &nbsp; 2026</div>
       <a class="back" href="/">← &nbsp; Vissza a FormatX-hez</a>
     </header>
     <section class="editorial" aria-live="polite">
       <div class="eyebrow">THE BIRTH OF AN INTELLIGENCE</div>
-      <h1>GEN<span class="outline">E</span>SIS<span style="font-size:.17em;vertical-align:top;display:inline-block;letter-spacing:0;margin-left:.30em;color:#79e4e8">01</span></h1>
+      <h1>GEN<span class="outline">E</span>SIS<span class="h1-index">01</span></h1>
       <p>Minden élő rendszer egyetlen mintával kezdődik. Figyeld, ahogy a genetikai kód térbeli energiává, majd önálló sejtmaggá szerveződik.</p>
       <div class="thin-rule"></div>
       <div class="act-label" id="actTitle">01 / A KÓD</div>
@@ -133,7 +136,7 @@
       <div class="footnote">FORMATX GENESIS ENGINE<br><strong>DNA → NUCLEUS / CINEMATIC EXPERIENCE</strong><br>THREE.JS · GSAP · REAL-TIME PARTICLES</div>
     </footer>
   </main>
-  <div class="loader" id="loading"><div><div class="load-ring"></div><div id="loadingText" style="font-size:10px">GENESIS RENDERER INICIALIZÁLÁSA</div></div></div>
+  <div class="loader" id="loading"><div><div class="load-ring"></div><div id="loadingText" class="loading-label">GENESIS RENDERER INICIALIZÁLÁSA</div></div></div>
   <div class="no-webgl" id="fallback" role="alert"><div><h2>A 3D motor nem indítható</h2><p>A Genesis WebGL-képes böngészőt és hálózati hozzáférést igényel a Three.js / GSAP CDN-ekhez. Ellenőrizd a grafikus gyorsítást, majd frissítsd az oldalt.</p><a class="back" href="/">Vissza a főoldalra</a></div></div>
 
   <script id="particleVertex" type="x-shader/x-vertex">
