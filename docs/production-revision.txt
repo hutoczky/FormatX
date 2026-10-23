@@ -1,10 +1,10 @@
 FormatX production revision
-token=20261023-r2154-unified-machined-mag-runtime-fix
-release_line=R2154-integrated-four-arm-titanium-mag-runtime-safe
-purpose=Deliver connected R2153 titanium MAG arms with R2154 native WebGL geometry easing fix, preserve R2149 DNA-to-embryo-to-metal cinematic intro and R2152 accessible replay, verify actual painted permanent MAG on both domains.
-assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs
-validation=Require R2154 geometry easing regression test, production security and release checks, real WebGL mobile/desktop first-painted-frame screenshots on both domains, no SOUND/ASK/replay overlap, exact revision convergence and cinematic handoff before marking R2154 live.
+token=20261023-r2156-permanent-mag-mobile-layout-proof
+release_line=R2156-integrated-four-arm-titanium-mag-mobile-layout-safe
+purpose=Maintain the native R2153 four-arm sculpt and R2154 stabilized WebGL, correct clipped mobile cinematic replay button, and verify the permanent MAG on both canonical and redirected WWW domains after a real painted WebGL frame.
+assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: .github/scripts/validate-visible-mag-r2143.cjs
+validation=Require source/security release checks, canonical and WWW real-WebGL first-frame screenshots, viewport-contained replay controls, canonical-redirect-safe hero proof, original DNA-to-MAG cinematic continuity and exact marker convergence.
 production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this marker and pass the complete automated production deployment verification before publication is considered verified.
-limits=Automated checks do not establish subjective cinematic award-level quality or identical GPU rendering on all real Android devices; screenshot comparison remains necessary.
+limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
 mag_cache=20261023-r2154
