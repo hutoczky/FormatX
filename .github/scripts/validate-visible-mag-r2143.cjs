@@ -67,6 +67,26 @@ async function capture(browser,{name,width,height,mobile}){
     assert.notEqual(state.visibility,'hidden',name+': canvas hidden');
     assert(Number(state.opacity)>.15,name+': MAG opacity too low for a visible hero');
     assert.equal(failures.length,0,name+': '+failures.join(' | '));
+    // R2152: replay belongs in the upper free-space of the actual MAG stage.
+    // Guard against the previous overlap with the two native hit targets.
+    const replayLayout=await page.evaluate(()=>{
+      const rect=selector=>document.querySelector(selector)?.getBoundingClientRect()||null;
+      const replay=rect('#hero .hero-space > .fx-mag-replay-r2150');
+      const ask=rect('#hero .fx-reference-ask');
+      const sound=rect('#hero .fx-three-sound');
+      const intersects=(a,b)=>!!(a&&b&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top);
+      return{
+        replay:replay?{x:replay.x,y:replay.y,width:replay.width,height:replay.height}:null,
+        overlapAsk:intersects(replay,ask),overlapSound:intersects(replay,sound),
+        withinViewport:!!replay&&replay.left>=0&&replay.right<=innerWidth
+      };
+    });
+    state.replayLayout=replayLayout;
+    assert(replayLayout.replay?.width>=130&&replayLayout.replay?.height>=44,
+      name+': replay link missing or too small');
+    assert(replayLayout.withinViewport,name+': replay escaped visible MAG viewport');
+    assert(!replayLayout.overlapAsk&&!replayLayout.overlapSound,
+      name+': replay overlaps SOUND or ASK controls');
     await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
   }finally{
     await fs.writeFile(path.join(OUT,name+'.json'),JSON.stringify({state,failures},null,2)+'\n');
