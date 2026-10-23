@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#03070d">
+  <meta name="description" content="FORMATX GENESIS — a DNS kettős spiráljából születő, filmszerű 3D sejtmag. Interaktív WebGL-élmény 9000 részecskével.">
+  <title>GENESIS / A MAG SZÜLETÉSE — FormatXSuite</title>
+  <style>
+    :root{color-scheme:dark;--ice:#b6f2f2;--soft:#91aeb8;--line:rgba(171,226,229,.18);--glass:rgba(8,17,27,.62);--font:Inter,"Segoe UI",system-ui,-apple-system,sans-serif}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:#03070d;overflow:hidden;font-family:var(--font);color:#edfaff}body{min-height:100dvh}
+    #experience,#webgl{position:fixed;inset:0;width:100%;height:100%}#webgl{display:block;outline:none;touch-action:none}
+    #atmosphere{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 48% 52% at 51% 47%,transparent 11%,rgba(2,6,13,.24) 70%,rgba(1,3,8,.82) 100%),linear-gradient(180deg,rgba(4,11,22,.22),transparent 21%,transparent 78%,rgba(1,5,11,.75));z-index:2}
+    #atmosphere::after{content:"";position:absolute;inset:0;opacity:.19;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.22'/%3E%3C/svg%3E");mix-blend-mode:screen}
+    .hud{position:fixed;z-index:5;pointer-events:none}.hud a,.hud button,.hud input{pointer-events:auto}
+    .topbar{top:0;left:0;right:0;display:flex;align-items:flex-start;justify-content:space-between;padding:clamp(22px,3.4vw,54px) clamp(22px,4.1vw,70px)}
+    .wordmark{text-decoration:none;color:#ecfbfd;display:flex;align-items:center;gap:13px;letter-spacing:.21em;font-weight:720;font-size:clamp(16px,1.25vw,21px)}
+    .logo-icon{display:grid;place-items:center;width:35px;height:35px;border:1px solid rgba(168,240,241,.65);transform:rotate(45deg);border-radius:6px;box-shadow:inset 0 0 17px rgba(92,235,243,.17),0 0 25px rgba(37,189,217,.16)}.logo-icon span{display:block;width:13px;height:13px;border:2px solid #91edeb;transform:rotate(0deg);border-radius:50%}
+    .wordmark small{display:block;font-size:9px;letter-spacing:.3em;color:#7f9eaa;font-weight:510;margin-top:4px}
+    .top-meta{text-align:right;font:500 10px/1.8 var(--font);color:#b1c4cf;letter-spacing:.26em;text-transform:uppercase}.top-meta b{display:block;color:#c6eef2;font-weight:600}.signal{display:inline-block;width:5px;height:5px;margin-right:8px;background:#93e6d9;border-radius:50%;box-shadow:0 0 14px #79d6da}
+    .sidecopy{left:clamp(23px,4.1vw,70px);top:49%;transform:translateY(-49%);max-width:min(330px,30vw)}.sidecopy .kicker{margin:0 0 22px;font-size:10px;letter-spacing:.38em;color:#91d1d1;font-weight:650}.sidecopy h1{margin:0;font-size:clamp(38px,5.2vw,86px);font-weight:580;letter-spacing:-.065em;line-height:.89;text-shadow:0 9px 38px rgba(0,0,0,.6)}.sidecopy h1 span{display:block;font-family:Georgia,serif;font-style:italic;font-weight:400;color:#b8e7eb;letter-spacing:-.075em}.sidecopy p.description{max-width:265px;margin:24px 0 0;color:#91a6b3;font:400 12px/1.85 var(--font);letter-spacing:.015em}
+    .sidecopy .hairline{margin-top:22px;width:88px;height:1px;background:linear-gradient(90deg,#a6e7e8,transparent)}
+    .chapter{right:clamp(23px,4.1vw,70px);top:47%;transform:translateY(-50%);width:180px;text-align:right}.chapter .ordinal{font:400 clamp(54px,7vw,116px)/1 Georgia,serif;letter-spacing:-.08em;color:rgba(173,220,224,.13)}.chapter .phase{display:block;color:#bed4dc;letter-spacing:.22em;font-size:11px;font-weight:600;text-transform:uppercase;margin:10px 0}.chapter .subphase{color:#7493a1;font-size:10px;letter-spacing:.07em;line-height:1.65}
+    .hud-bottom{position:fixed;z-index:6;bottom:clamp(16px,3vh,39px);left:50%;transform:translateX(-50%);width:min(1030px,calc(100% - 36px))}
+    .controls{display:grid;grid-template-columns:auto minmax(160px,1fr) auto auto auto;align-items:center;gap:clamp(10px,2vw,26px);padding:14px 18px;background:linear-gradient(120deg,rgba(16,34,46,.79),rgba(6,16,26,.82));border:1px solid rgba(155,208,212,.22);border-radius:17px;box-shadow:0 18px 75px rgba(0,0,0,.44),inset 0 1px rgba(209,251,251,.08);backdrop-filter:blur(25px) saturate(155%);-webkit-backdrop-filter:blur(25px) saturate(155%)}
+    .control-button{appearance:none;display:inline-flex;justify-content:center;align-items:center;gap:9px;white-space:nowrap;color:#c3dee2;border:1px solid rgba(170,221,222,.20);border-radius:9px;background:rgba(114,194,209,.065);padding:12px 13px;min-height:45px;font:600 10px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+    .control-button:hover,.control-button:focus-visible{background:rgba(118,230,226,.16);border-color:#8de4e2;color:white;outline:none}.control-button.primary{color:#06131a;background:linear-gradient(135deg,#a6eeee,#8bc8d2);border-color:rgba(219,255,255,.58);min-width:137px}.control-button.primary:hover{background:linear-gradient(135deg,#ddffff,#a6eaed)}.control-button:disabled{opacity:.5;cursor:wait}.control-button svg{width:14px;height:14px;fill:currentColor;flex:none}
+    .timeline{min-width:0;display:flex;flex-direction:column;gap:9px}.time-label{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#b3cfd2;font-size:10px;letter-spacing:.1em;font-variant-numeric:tabular-nums}.time-label strong{color:#e8f7f7;font-weight:600}.time-label em{font-style:normal;color:#7898a3}
+    input[type=range]{width:100%;height:18px;margin:0;appearance:none;-webkit-appearance:none;background:transparent;cursor:pointer;accent-color:#abf0ec;touch-action:none}input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(to right,#a2efeb var(--track,0%),rgba(139,173,182,.26) var(--track,0%));border-radius:99px}input[type=range]::-moz-range-track{height:3px;background:rgba(139,173,182,.3);border-radius:99px}input[type=range]::-moz-range-progress{height:3px;background:#9ce8e8}input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;margin-top:-5.5px;border:3px solid #b8f8f6;border-radius:50%;background:#0b2330;box-shadow:0 0 16px #65cbd4}input[type=range]::-moz-range-thumb{width:10px;height:10px;border:3px solid #b8f8f6;border-radius:50%;background:#0b2330}
+    .bottom-meta{display:flex;justify-content:space-between;gap:18px;padding:13px 10px 0;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#637e8b}.bottom-meta a{color:#789aa8;text-decoration:none}.bottom-meta a:hover{color:#d8f7f8}.status{display:inline-flex;align-items:center;gap:8px}.status::before{content:"";width:4px;height:4px;border-radius:50%;background:#79cfd3}
+    #load{position:fixed;inset:0;z-index:15;display:grid;place-items:center;background:#03070d;transition:opacity .75s ease,visibility .75s ease}#load.ready{opacity:0;visibility:hidden;pointer-events:none}.loader{text-align:center;display:grid;gap:16px;justify-items:center}.loader-ring{width:63px;height:63px;border:1px solid rgba(129,226,228,.2);border-top-color:#acf1ec;border-radius:50%;animation:spin 1.5s linear infinite;box-shadow:0 0 30px rgba(52,167,190,.1)}@keyframes spin{to{transform:rotate(360deg)}}.loader-title{letter-spacing:.42em;font-size:13px;color:#d6f9fa}.loader-sub{font-size:11px;letter-spacing:.15em;color:#7e9aa5}
+    .footnote{position:fixed;z-index:5;bottom:140px;left:clamp(23px,4.1vw,70px);pointer-events:none;font-size:9px;color:#54707b;letter-spacing:.18em;text-transform:uppercase}
+    @media(max-width:900px){.sidecopy{top:24%;transform:none;max-width:310px}.sidecopy h1{font-size:clamp(36px,7.3vw,62px)}.sidecopy .description{font-size:11px;max-width:215px}.chapter{top:31%;right:23px;width:110px}.chapter .ordinal{font-size:66px}.chapter .subphase{display:none}.footnote{display:none}}
+    @media(max-width:630px){.topbar{padding:22px}.top-meta{font-size:9px;letter-spacing:.12em}.sidecopy{top:18%;left:22px;max-width:210px}.sidecopy h1{font-size:46px}.sidecopy p.description{max-width:190px;margin-top:16px;font-size:10px;line-height:1.6}.sidecopy .kicker{font-size:9px;letter-spacing:.2em;margin-bottom:13px}.sidecopy .hairline{display:none}.chapter{top:31%;right:22px}.chapter .ordinal{font-size:55px}.chapter .phase{font-size:9px;letter-spacing:.1em}.hud-bottom{width:calc(100% - 20px);bottom:10px}.controls{grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 11px}.controls .timeline{grid-column:1 / -1;grid-row:1;margin-bottom:1px}.control-button{font-size:9px;letter-spacing:.03em;min-height:40px;padding:8px 6px}.control-button.primary{min-width:0}.bottom-meta{font-size:8px;letter-spacing:.03em;padding:9px 6px 0}.logo-icon{width:28px;height:28px}.wordmark{font-size:14px;gap:10px}}
+    @media(prefers-reduced-motion:reduce){.loader-ring{animation-duration:3.4s}.control-button{transition:none}} 
+  </style>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+  <main id="experience" aria-label="GENESIS — filmes 3D DNS–sejtmag átalakulás">
+    <canvas id="webgl" tabindex="0" aria-label="Interaktív 3D DNS kettős hélix és sejtmag; a kamera egérrel és érintéssel mozgatható"></canvas>
+    <div id="atmosphere" aria-hidden="true"></div>
+    <div class="hud topbar"><a class="wordmark" href="/" aria-label="FormatXSuite főoldal"><span class="logo-icon" aria-hidden="true"><span></span></span><span>FORMATX<small>LIVING SYSTEMS / 001</small></span></a><div class="top-meta"><b><span class="signal"></span>REAL-TIME EXPERIENCE</b>GENESIS / ORIGINAL FILM<br>RENDERED IN YOUR BROWSER</div></div>
+    <div class="hud sidecopy"><p class="kicker">01 / THE ORIGIN</p><h1>THE <span>Genesis.</span></h1><p class="description">Egyetlen kódból élet. A DNS kettős spirálja sejtmaggá alakul — minden részecske a saját útján talál haza.</p><div class="hairline" aria-hidden="true"></div></div>
+    <div class="hud chapter" aria-live="polite"><div class="ordinal" id="chapterNumber">01</div><span class="phase" id="chapterPhase">Örökség</span><span class="subphase" id="chapterDescription">A kettős hélix megszületik</span></div>
+    <div class="footnote">9000 / REAL 3D PARTICLES &nbsp;·&nbsp; THREE.JS / GSAP</div>
+    <section class="hud-bottom" aria-label="Filmvezérlés"><div class="controls">
+      <button class="control-button primary" type="button" id="play" aria-label="Lejátszás vagy újrajátszás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 4 14 8-14 8z"></path></svg><span id="playLabel">PLAY / REPLAY</span></button>
+      <label class="timeline" for="progress"><span class="time-label"><strong id="timeNow">00:00</strong><span id="currentAct">DNA / GENESIS</span><em>00:10</em></span><input type="range" id="progress" min="0" max="10" step="0.01" value="0" aria-label="A tíz másodperces film tekerése"></label>
+      <button class="control-button" type="button" id="view" aria-pressed="false" title="Kameranézet váltása"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 3a6 6 0 0 0 6 6m-6-6a6 6 0 0 1-6 6m6 6a6 6 0 0 1-6-6m6 0a6 6 0 0 1-6 6" stroke="currentColor" fill="none" stroke-width="1.5"/></svg><span id="viewLabel">ORBIT</span></button>
+      <button class="control-button" type="button" id="sound" aria-pressed="true" title="A generált ambient hang kikapcsolása vagy bekapcsolása">♫ <span id="soundLabel">HANG BE</span></button>
+      <button class="control-button" type="button" id="reset" title="Kezdőképkocka">↺</button>
+    </div><div class="bottom-meta"><span class="status" id="runtimeStatus">INITIALIZING WEBGL</span><span>ART DIRECTION: FORMATX ORIGINAL · <a href="https://igloo.inc" target="_blank" rel="noopener noreferrer">IGLOO INC</a> / <a href="https://www.awwwards.com/" target="_blank" rel="noopener noreferrer">AWWWARDS</a> — INSPIRATION</span></div></section>
+    <div id="load" role="status" aria-live="polite"><div class="loader"><div class="loader-ring" aria-hidden="true"></div><div class="loader-title">GENESIS</div><div class="loader-sub" id="loadMessage">Mikroszkopikus univerzum építése…</div></div></div>
+  </main>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+    const byId = id => document.getElementById(id);
+    const canvas = byId('webgl');
+    const loading = byId('load');
+    const gsap = window.gsap;
+    if (!gsap) throw new Error('GSAP CDN nem érhető el.');
+    const clamp = (v,a=0,b=1) => Math.min(b,Math.max(a,v));
+    const mix=(a,b,t)=>a+(b-a)*t;
+    const mobile=matchMedia('(max-width:680px), (pointer:coarse)').matches;
+    const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let randomSeed=20261023;
+    function rnd(){randomSeed=(Math.imul(randomSeed,1664525)+1013904223)>>>0;return randomSeed/4294967296;}
+
+    let renderer;
+    try { renderer=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'high-performance',stencil:false,depth:true}); }
+    catch(error){byId('loadMessage').textContent='WebGL nem elérhető: '+error.message;throw error;}
+    renderer.setClearColor(0x03070d,1);
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.12;
+    const scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x03070d);
+    scene.fog=new THREE.FogExp2(0x03070d,0.020);
+    const camera=new THREE.PerspectiveCamera(38,1,.05,100);
+    camera.position.set(.28,.1,8.8);
+    const cameraTarget=new THREE.Vector3(0,0,0);
+    const orbit = new OrbitControls(camera,canvas);
+    orbit.enabled=false;orbit.enableDamping=true;orbit.dampingFactor=.055;
+    orbit.enablePan=false;orbit.minDistance=2.8;orbit.maxDistance=12;
+    orbit.minPolarAngle=.32;orbit.maxPolarAngle=Math.PI-.32;
+
+    const ambience=new THREE.Group();scene.add(ambience);
+    const stage=new THREE.Group();scene.add(stage);
+    scene.add(new THREE.AmbientLight(0x88bac9,.38));
+    const key=new THREE.PointLight(0xb2f1f3,23,14,2);key.position.set(-3.8,3.2,4.4);scene.add(key);
+    const rim=new THREE.PointLight(0x5c73dc,13,15,2);rim.position.set(3,-1.8,-3);scene.add(rim);
+    const warm=new THREE.PointLight(0xf1b995,3.4,11,2);warm.position.set(1,-3,3.2);scene.add(warm);
+
+    const COUNT=9000;
+    const start=new Float32Array(COUNT*3),end=new Float32Array(COUNT*3);
+    const seeds=new Float32Array(COUNT*3),kind=new Float32Array(COUNT),outside=new Float32Array(COUNT);
+    const PI2=Math.PI*2;
+    const turns=4.25;
+    for(let i=0;i<COUNT;i++){
+      const j=i*3;
+      // DNA: 7200 strand samples, 1200 paired-base bridge samples and 600 free ions.
+      const lane=i<7200?Math.floor(i/3600):(i<8400?2:3);
+      const u=lane<2?((i%3600)+rnd()*.4)/3600:(i<8400?(i-7200)/1200:rnd());
+      const theta=u*PI2*turns-Math.PI*.35;
+      const jitter=.008+.022*rnd();
+      let x,y,z;
+      if(lane<2){
+        const a=theta+lane*Math.PI;
+        const r=.82+.07*Math.sin(theta*.8)+(.018*(rnd()-.5));
+        x=r*Math.cos(a)+(rnd()-.5)*jitter;
+        y=(u-.5)*5.20+(rnd()-.5)*.038;
+        z=r*Math.sin(a)+(rnd()-.5)*jitter;
+      }else if(lane===2){
+        const v=rnd(),r=mix(-.80,.80,v);
+        x=r*Math.cos(theta)+(rnd()-.5)*.025;
+        y=(u-.5)*5.20;
+        z=r*Math.sin(theta)+(rnd()-.5)*.025;
+      }else{
+        const a=theta+rnd()*PI2;
+        const r=.88+(rnd()-.5)*.5;
+        x=r*Math.cos(a);y=(u-.5)*5.65;z=r*Math.sin(a);
+      }
+      start[j]=x;start[j+1]=y;start[j+2]=z;
+      // Final state: dense living sphere with a separate suspended outer matrix.
+      const a=rnd()*PI2,v=rnd()*2-1,s=Math.sqrt(1-v*v);
+      const outer=i%7===0;
+      outside[i]=outer?1:0;
+      const radius=outer?1.39+rnd()*.62:1.12*Math.pow(rnd(),.37);
+      const asym=1+.045*Math.sin(a*5+v*7)+.035*Math.cos(a*3-v*11);
+      end[j]=radius*s*Math.cos(a)*asym;
+      end[j+1]=radius*v*(outer?.89:1.07);
+      end[j+2]=radius*s*Math.sin(a)*asym;
+      seeds[j]=rnd();seeds[j+1]=rnd();seeds[j+2]=rnd();
+      kind[i]=lane;
+    }
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.BufferAttribute(start,3));
+    geometry.setAttribute('aTarget',new THREE.BufferAttribute(end,3));
+    geometry.setAttribute('aSeed',new THREE.BufferAttribute(seeds,3));
+    geometry.setAttribute('aKind',new THREE.BufferAttribute(kind,1));
+    geometry.setAttribute('aOuter',new THREE.BufferAttribute(outside,1));
+    geometry.computeBoundingSphere();geometry.boundingSphere.radius=10;
+
+    const shaderUniforms={
+      uMorph:{value:0},uTime:{value:0},uPulse:{value:0},
+      uDpr:{value:1},uMotion:{value:1}
+    };
+    const particleMaterial=new THREE.ShaderMaterial({
+      uniforms:shaderUniforms,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+      vertexShader:`
+        precision highp float;
+        attribute vec3 aTarget;attribute vec3 aSeed;attribute float aKind;attribute float aOuter;
+        uniform float uMorph,uTime,uPulse,uDpr,uMotion;
+        varying vec3 vColor;varying float vOpacity;
+        void main(){
+          float k=smoothstep(0.0,1.0,uMorph);
+          float turbulence=4.0*k*(1.0-k);
+          vec3 dna=position;
+          dna.xz+=vec2(sin(uTime*.46+aSeed.x*9.0),cos(uTime*.41+aSeed.y*7.0))*.012*uMotion;
+          vec3 p=mix(dna,aTarget,k);
+          float spin=turbulence*(1.45+.45*aSeed.z);
+          float cs=cos(spin),sn=sin(spin);
+          p.xz=mat2(cs,-sn,sn,cs)*p.xz;
+          p+=turbulence*vec3(
+            sin(uTime*.7+aSeed.x*40.+position.y*3.),
+            cos(uTime*.56+aSeed.y*30.+position.x*4.),
+            sin(uTime*.45+aSeed.z*37.)
+          )*.29*uMotion;
+          p.x+=sin(uTime*.35+p.y*4.6+aSeed.x*6.28)*.012*k*uMotion;
+          p.y+=cos(uTime*.31+p.x*4.3+aSeed.y*6.28)*.014*k*uMotion;
+          vec4 mv=modelViewMatrix*vec4(p,1.);
+          gl_Position=projectionMatrix*mv;
+          float ion=step(2.5,aKind);
+          float base=step(1.5,aKind)*(1.-ion);
+          float outer=aOuter;
+          float size=mix(2.4,3.5,aSeed.z);
+          size=mix(size,1.7,ion);
+          size=mix(size,2.0,base);
+          size*=1.0+.24*sin(uTime*1.8+aSeed.x*6.28)*k+.14*uPulse*k;
+          gl_PointSize=clamp(size*uDpr*(7.0/max(2.,-mv.z)),1.0,8.7*uDpr);
+          vec3 cyan=vec3(.32,.96,1.0),silver=vec3(.78,.94,1.0);
+          vec3 violet=vec3(.44,.50,1.0),gold=vec3(1.,.72,.45);
+          float alternate=step(.5,aKind);
+          vColor=mix(cyan,violet,alternate*.72);
+          vColor=mix(vColor,gold,base*.56);
+          vColor=mix(vColor,silver,k*(.26+.35*aSeed.y));
+          vOpacity=mix(.76,.68,k)*(1.-ion*.63);
+          vOpacity*=mix(1.0,.44,outer*k);
+        }`,
+      fragmentShader:`
+        precision highp float;varying vec3 vColor;varying float vOpacity;
+        void main(){
+          float d=length(gl_PointCoord-vec2(.5))*2.;
+          float core=exp(-d*d*16.0);
+          float glow=exp(-d*d*3.4)*.25;
+          float alpha=(core+glow)*vOpacity*(1.0-smoothstep(0.1,1.0,d));
+          if(alpha<.005)discard;
+          gl_FragColor=vec4(vColor*(core*1.24+glow*.88),alpha);
+        }`
+    });
+    const particles=new THREE.Points(geometry,particleMaterial);
+    particles.frustumCulled=false;stage.add(particles);
+
+    // Volumetric helix guide-rails and 112 bridge rungs; visible only before morph.
+    const dnaGroup=new THREE.Group();stage.add(dnaGroup);
+    const rails=[];const railsMaterial=[
+      new THREE.MeshBasicMaterial({color:0x7ceae8,transparent:true,opacity:.34,depthWrite:false,blending:THREE.AdditiveBlending}),
+      new THREE.MeshBasicMaterial({color:0x8c9df9,transparent:true,opacity:.27,depthWrite:false,blending:THREE.AdditiveBlending})
+    ];
+    for(let lane=0;lane<2;lane++){
+      const path=[];
+      for(let i=0;i<=520;i++){
+        const u=i/520,angle=u*turns*PI2-Math.PI*.35+Math.PI*lane;
+        const r=.82+.07*Math.sin((angle-lane*Math.PI)*.8);
+        path.push(new THREE.Vector3(Math.cos(angle)*r,(u-.5)*5.2,Math.sin(angle)*r));
+      }
+      const curve=new THREE.CatmullRomCurve3(path);
+      const rail=new THREE.Mesh(new THREE.TubeGeometry(curve,480,.010,5,false),railsMaterial[lane]);
+      dnaGroup.add(rail);rails.push(rail);
+    }
+    const rungPositions=[];
+    for(let i=0;i<112;i++){
+      const u=i/111,angle=u*turns*PI2-Math.PI*.35,r=.82+.07*Math.sin(angle*.8),y=(u-.5)*5.2;
+      rungPositions.push(r*Math.cos(angle),y,r*Math.sin(angle),-r*Math.cos(angle),y,-r*Math.sin(angle));
+    }
+    const baseGeometry=new THREE.BufferGeometry();baseGeometry.setAttribute('position',new THREE.Float32BufferAttribute(rungPositions,3));
+    const baseMaterial=new THREE.LineBasicMaterial({color:0xbbd9e9,transparent:true,opacity:.23,depthWrite:false,blending:THREE.AdditiveBlending});
+    dnaGroup.add(new THREE.LineSegments(baseGeometry,baseMaterial));
+
+    // Microscopic particulate fog behind the hero. Low draw cost, deterministic.
+    const dustCount=1550,dustPos=new Float32Array(dustCount*3);
+    for(let i=0;i<dustCount;i++){
+      dustPos[i*3]=(rnd()-.5)*18;dustPos[i*3+1]=(rnd()-.5)*11;dustPos[i*3+2]=(rnd()-.5)*16-3.5;
+    }
+    const dustGeometry=new THREE.BufferGeometry();dustGeometry.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
+    const dustMaterial=new THREE.PointsMaterial({color:0x6698ab,size:.014,transparent:true,opacity:.32,depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true});
+    const dust=new THREE.Points(dustGeometry,dustMaterial);ambience.add(dust);
+
+    // Organic nucleus membrane. The outer shell only appears once the DNA is assembled.
+    const membraneUniforms={uTime:{value:0},uReveal:{value:0},uPulse:{value:0}};
+    const membrane=new THREE.Mesh(new THREE.SphereGeometry(1.18,76,52),new THREE.ShaderMaterial({
+      uniforms:membraneUniforms,side:THREE.FrontSide,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+      vertexShader:`precision highp float;uniform float uTime,uReveal,uPulse;varying vec3 vNormal;varying vec3 vPos;
+        void main(){vec3 p=position;float wave=sin(p.x*8.4+uTime*.85)*sin(p.y*7.1-uTime*.62)*cos(p.z*6.8+uTime*.46);p+=normal*(wave*.039+.023*sin(uTime*1.35+position.y*6.0)+uPulse*.025);vNormal=normalize(normalMatrix*normal);vPos=p;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+      fragmentShader:`precision highp float;uniform float uTime,uReveal;varying vec3 vNormal;varying vec3 vPos;
+        void main(){float f=pow(1.0-abs(dot(normalize(vNormal),vec3(0.,0.,1.))),2.6);float veins=pow(.5+.5*sin(vPos.x*29.+vPos.y*19.-vPos.z*13.+uTime*.5),13.);vec3 c=mix(vec3(.045,.22,.29),vec3(.28,.90,1.),f)+veins*vec3(.20,.36,.46);float a=(.045+.28*f+.09*veins)*uReveal;gl_FragColor=vec4(c,a);}`
+    }));
+    stage.add(membrane);
+    const nucleus=new THREE.Mesh(new THREE.IcosahedronGeometry(.43,5),new THREE.MeshPhysicalMaterial({color:0x1f6674,metalness:.20,roughness:.16,transmission:.25,thickness:.28,ior:1.42,transparent:true,opacity:0,emissive:0x0a9da9,emissiveIntensity:.9,clearcoat:1,clearcoatRoughness:.08}));
+    stage.add(nucleus);
+    const nucleusLight=new THREE.PointLight(0x74faff,0,5,2);stage.add(nucleusLight);
+    const haloMaterial=new THREE.MeshBasicMaterial({color:0x86dcea,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending});
+    const halo=new THREE.Mesh(new THREE.TorusGeometry(1.47,.008,7,190),haloMaterial);halo.rotation.x=.36;halo.rotation.y=.65;stage.add(halo);
+    const secondaryHalo=new THREE.Mesh(new THREE.TorusGeometry(1.74,.005,7,190),haloMaterial.clone());secondaryHalo.rotation.set(.91,.14,.33);stage.add(secondaryHalo);
+    const glowy=new THREE.Sprite(new THREE.SpriteMaterial({color:0x68efff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));glowy.scale.set(.48,.48,1);stage.add(glowy);
+
+    // Post-production: actual multi-pass cinematic bloom with stable output color.
+    const composer=new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene,camera));
+    const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),mobile?1.12:1.42,.65,.14);
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+
+    const film={morph:0,reveal:0,pulse:0};
+    const timeline=gsap.timeline({paused:true,onUpdate:syncUi,onComplete:()=>{byId('playLabel').textContent='REPLAY';}});
+    timeline.addLabel('dna',0)
+      .fromTo(camera.position,{x:.28,y:.1,z:8.8},{x:.08,y:.04,z:6.7,duration:3,ease:'sine.inOut'},0)
+      .to(stage.rotation,{y:Math.PI*.33,duration:3,ease:'sine.inOut'},0)
+      .addLabel('morph',3)
+      .to(film,{morph:1,duration:4,ease:'power2.inOut'},3)
+      .to(film,{reveal:1,duration:3.1,ease:'power2.inOut'},5.9)
+      .to(camera.position,{x:-.15,y:.08,z:5.0,duration:4,ease:'power2.inOut'},3)
+      .to(stage.rotation,{y:Math.PI*.85,duration:4,ease:'sine.inOut'},3)
+      .addLabel('nucleus',7)
+      .to(camera.position,{x:0,y:.02,z:3.7,duration:3,ease:'sine.inOut'},7)
+      .to(stage.rotation,{y:Math.PI*1.05,duration:3,ease:'sine.inOut'},7)
+      .to(film,{pulse:1,duration:1.6,ease:'sine.inOut'},7.2)
+      .to(film,{pulse:.55,duration:1.2,ease:'sine.inOut'},8.8)
+      .addLabel('end',10);
+    timeline.pause(0);
+    const duration=10;
+
+    let soundEnabled=true,audioCtx=null,audioNodes=[],soundGain=null;
+    function initAudio(){
+      if(audioCtx)return audioCtx;
+      const Ctor=window.AudioContext||window.webkitAudioContext;
+      if(!Ctor)return null;
+      audioCtx=new Ctor();
+      soundGain=audioCtx.createGain();soundGain.gain.value=0;
+      const filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=340;filter.Q.value=.65;
+      filter.connect(soundGain);soundGain.connect(audioCtx.destination);
+      for(const [type,freq,level] of [['sine',55,.25],['sine',82.4,.14],['triangle',110,.055],['sine',164.8,.025]]){
+        const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=type;osc.frequency.value=freq;gain.gain.value=level;osc.connect(gain);gain.connect(filter);osc.start();audioNodes.push(osc);
+      }
+      const lfo=audioCtx.createOscillator(),lfoGain=audioCtx.createGain();lfo.type='sine';lfo.frequency.value=.18;lfoGain.gain.value=75;lfo.connect(lfoGain);lfoGain.connect(filter.frequency);lfo.start();audioNodes.push(lfo);
+      return audioCtx;
+    }
+    async function updateSound(active){
+      if(!soundEnabled || !active || !initAudio()){
+        if(audioCtx&&soundGain)soundGain.gain.setTargetAtTime(0,audioCtx.currentTime,.22);
+        return;
+      }
+      try{await audioCtx.resume();}catch(_){}
+      soundGain.gain.setTargetAtTime(.42,audioCtx.currentTime,.45);
+    }
+    const playBtn=byId('play'),playLabel=byId('playLabel'),progress=byId('progress');
+    function syncUi(){
+      const t=timeline.time(),percent=t/duration*100;
+      progress.value=String(t);progress.style.setProperty('--track',percent+'%');
+      const sec=Math.max(0,Math.floor(t));byId('timeNow').textContent='00:'+String(sec).padStart(2,'0');
+      const chapter=t<3?0:t<7?1:2;
+      byId('chapterNumber').textContent=['01','02','03'][chapter];
+      byId('chapterPhase').textContent=['Örökség','Átalakulás','Ébredés'][chapter];
+      byId('chapterDescription').textContent=['A kettős hélix megszületik','Az információ anyaggá sűrűsödik','Az élő sejtmag pulzál'][chapter];
+      byId('currentAct').textContent=['DNA / DOUBLE HELIX','MORPH / ASSEMBLY','NUCLEUS / AWAKENING'][chapter];
+      if(timeline.paused()&&t<duration)playLabel.textContent='PLAY';
+      else if(t>=duration)playLabel.textContent='REPLAY';
+      else playLabel.textContent='PAUSE';
+    }
+    async function togglePlay(){
+      if(timeline.time()>=duration-.001)timeline.restart();
+      else timeline.paused()?timeline.play():timeline.pause();
+      // User gesture unlocks WebAudio; autoplay starts silently by policy.
+      await updateSound(!timeline.paused());
+      syncUi();
+    }
+    playBtn.addEventListener('click',togglePlay);
+    byId('reset').addEventListener('click',()=>{timeline.pause(0);updateSound(false);syncUi();});
+    progress.addEventListener('pointerdown',()=>{timeline.pause();updateSound(false);});
+    progress.addEventListener('input',()=>{timeline.pause(clamp(Number(progress.value),0,10));syncUi();});
+    byId('view').addEventListener('click',()=>{
+      orbit.enabled=!orbit.enabled;
+      byId('view').setAttribute('aria-pressed',String(orbit.enabled));
+      byId('viewLabel').textContent=orbit.enabled?'FILM':'ORBIT';
+      if(orbit.enabled){timeline.pause();updateSound(false);}
+      else {orbit.reset();timeline.time(clamp(timeline.time(),0,duration),false);}
+      syncUi();
+    });
+    byId('sound').addEventListener('click',async()=>{
+      soundEnabled=!soundEnabled;
+      byId('sound').setAttribute('aria-pressed',String(soundEnabled));
+      byId('soundLabel').textContent=soundEnabled?'HANG BE':'HANG KI';
+      await updateSound(!timeline.paused());
+    });
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){timeline.pause();updateSound(false);syncUi();}});
+    const pointer={x:0,y:0};
+    canvas.addEventListener('pointermove',e=>{
+      if(orbit.enabled)return;
+      pointer.x=clamp(e.clientX/innerWidth*2-1,-1,1);
+      pointer.y=clamp(e.clientY/innerHeight*2-1,-1,1);
+    },{passive:true});
+    let parallaxX=0,parallaxY=0;
+    const clock=new THREE.Clock();
+    let running=true;
+    function animate(){
+      if(!running)return;
+      requestAnimationFrame(animate);
+      const t=clock.getElapsedTime();
+      shaderUniforms.uTime.value=t;shaderUniforms.uMorph.value=film.morph;shaderUniforms.uPulse.value=film.pulse;
+      membraneUniforms.uTime.value=t;membraneUniforms.uReveal.value=film.reveal;membraneUniforms.uPulse.value=film.pulse;
+      const phase=t*.13;
+      nucleus.rotation.y=t*.19;nucleus.rotation.z=t*.08;
+      const scale=1+.055*Math.sin(t*1.8)*film.reveal+.07*film.pulse;
+      nucleus.scale.setScalar(scale);
+      nucleus.material.opacity=film.reveal*.68;
+      nucleus.material.emissiveIntensity=.45+.6*film.reveal+.23*film.pulse;
+      nucleusLight.intensity=film.reveal*(2.8+1.6*film.pulse+.28*Math.sin(t*1.7));
+      glowy.material.opacity=film.reveal*(.08+.10*film.pulse);
+      glowy.scale.setScalar(.52+.16*film.pulse);
+      haloMaterial.opacity=film.reveal*.18;
+      secondaryHalo.material.opacity=film.reveal*.11;
+      halo.rotation.z=t*.08;secondaryHalo.rotation.y=t*.065;
+      const dnaFade=1-THREE.MathUtils.smoothstep(film.morph,.10,.80);
+      railsMaterial[0].opacity=.34*dnaFade;railsMaterial[1].opacity=.27*dnaFade;
+      baseMaterial.opacity=.23*dnaFade;
+      dnaGroup.visible=dnaFade>.004;
+      dust.rotation.y=t*.0018;
+      dust.rotation.z=Math.sin(t*.15)*.02;
+      const px=orbit.enabled?0:pointer.x*.055,py=orbit.enabled?0:pointer.y*.034;
+      parallaxX+=(px-parallaxX)*.035;parallaxY+=(py-parallaxY)*.035;
+      if(!orbit.enabled){camera.lookAt(cameraTarget.x+parallaxX,cameraTarget.y-parallaxY,0);}
+      else orbit.update();
+      composer.render();
+    }
+    function resize(){
+      const w=Math.max(1,innerWidth),h=Math.max(1,innerHeight);
+      const dpr=Math.min(devicePixelRatio||1,mobile?1.3:1.8);
+      renderer.setPixelRatio(dpr);renderer.setSize(w,h,false);
+      camera.aspect=w/h;camera.fov=h>w?44:38;camera.updateProjectionMatrix();
+      composer.setPixelRatio(dpr);composer.setSize(w,h);
+      shaderUniforms.uDpr.value=dpr;
+    }
+    addEventListener('resize',resize,{passive:true});
+    resize();
+    // Startup favors motion for typical visitors but respects reduced-motion users.
+    loading.classList.add('ready');byId('runtimeStatus').textContent='LIVE / 9000 PARTICLES / WEBGL';
+    syncUi();animate();
+    if(!reduced)timeline.play(0);
+    window.addEventListener('pagehide',()=>{running=false;timeline.kill();composer.dispose?.();renderer.dispose();audioNodes.forEach(n=>{try{n.stop();}catch(_){}});if(audioCtx)audioCtx.close();},{once:true});
+    canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();timeline.pause();running=false;byId('loadMessage').textContent='A 3D grafikus kontextus megszakadt. Frissítsd az oldalt.';loading.classList.remove('ready');});
+    window.__formatxGenesis={revision:'r2160-singlefile-9000',getTime:()=>timeline.time(),getMorph:()=>film.morph,getParticles:()=>COUNT,seek:time=>{timeline.pause(clamp(Number(time)||0,0,10));syncUi();}};
+  </script>
+</body>
+</html>
