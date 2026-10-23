@@ -8,6 +8,20 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 const BASE=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT=process.env.FORMATX_VISIBLE_MAG_DIR||'artifacts/visible-mag-r2143';
+// R2156b: the living page may advance the scroll location while its core
+// initializes. Visual evidence must be captured at the start of the MAG hero,
+// not at whichever section was last scrolled into view.
+async function restoreHeroViewport(page){
+  await page.evaluate(()=>{
+    const scroller=document.scrollingElement||document.documentElement;
+    const previous=scroller.style.scrollBehavior;
+    scroller.style.scrollBehavior='auto';
+    window.scrollTo(0,0);
+    scroller.scrollTop=0;
+    scroller.style.scrollBehavior=previous;
+  });
+  await page.waitForTimeout(120);
+}
 async function capture(browser,{name,width,height,mobile}){
   const context=await browser.newContext({
     viewport:{width,height},deviceScaleFactor:mobile?2:1,isMobile:mobile,
@@ -52,6 +66,7 @@ async function capture(browser,{name,width,height,mobile}){
         canvas instanceof HTMLCanvasElement &&
         canvas.width>150 && canvas.height>150;
     },null,{timeout:45000});
+    await restoreHeroViewport(page);
     // R2155: a painted WebGL canvas does not prove that the deferred hero
     // layout/CSS has settled. The earlier www proof captured a bare stage at
     // far left with the text entirely missing even though WebGL was ready.
@@ -86,6 +101,7 @@ async function capture(browser,{name,width,height,mobile}){
     }
     await page.evaluate(()=>document.fonts?.ready);
     await page.waitForTimeout(650);
+    await restoreHeroViewport(page);
     state=await page.evaluate(()=>{
       const root=document.documentElement;
       const canvas=document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage > .fx-crystal-organism-r326-canvas');
@@ -101,6 +117,7 @@ async function capture(browser,{name,width,height,mobile}){
         canvasCount:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length,
         canvasWidth:canvas?.width,canvasHeight:canvas?.height,
         box:box?{x:box.x,y:box.y,width:box.width,height:box.height}:null,
+        scrollY:window.scrollY,
         opacity:style?.opacity,visibility:style?.visibility,display:style?.display
       };
     });
@@ -108,6 +125,8 @@ async function capture(browser,{name,width,height,mobile}){
     assert.equal(state.ready,'ready',name+': core not initialized');
     assert.equal(state.firstFrame,'painted',name+': screenshot predates WebGL first frame');
     assert(state.box?.width>=180&&state.box?.height>=180,name+': MAG is too small');
+    assert(state.box.y<page.viewportSize().height&&state.box.y+state.box.height>0,
+      name+': MAG stage is not inside the current viewport after scroll restoration');
     assert.notEqual(state.display,'none',name+': canvas hidden');
     assert.notEqual(state.visibility,'hidden',name+': canvas hidden');
     assert(Number(state.opacity)>.15,name+': MAG opacity too low for a visible hero');
