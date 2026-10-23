@@ -18,8 +18,8 @@ for(const [kind,body] of [['style',styles],['importmap',imports],['module',modul
   assert(worker.includes(hash),'Production Worker lacks exact Genesis '+kind+' CSP hash '+hash);
   console.log('GENESIS_CSP '+kind+' '+hash);
 }
-assert(worker.includes('isGenesis ? GENESIS_CSP : HEADER_CSP'),'Genesis must not inherit production homepage CSP');
-assert(worker.includes('if (!isGenesis) html = normalizeMetaCsp(html);'),'Global CSP injection would block the single-file cinematic film');
+assert(worker.includes('isGenesis ? GENESIS_CSP : HEADER_CSP'),'Original /genesis/ must keep its own CSP even with an additional Genesis Studio route');
+assert(worker.includes('if (!isGenesis && !isGenesisStudio) html = normalizeMetaCsp(html);'),'Either Genesis film must bypass production homepage meta-CSP rewriting');
 assert(home.includes('fx-genesis-entrance')&&home.includes('/genesis/index.html'),'Main site has no visible Genesis hero entrance');
 for(const token of [
   'const N=9600;','new THREE.Points(','new UnrealBloomPass(','new OrbitControls(',
