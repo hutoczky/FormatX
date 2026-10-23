@@ -1148,7 +1148,9 @@
         float perspective=2.76/max(1.72,camera);
         vec2 silhouetteScale=vec2(mix(1.02,1.0,morph),mix(1.03,1.0,morph));
         vec2 projected=vec2(world.x/max(.56,uAspect),world.y)*silhouetteScale*perspective;
-        projected*= ${mobile?'.585':'.790'};
+        // R2167: iconic four-arm MAG owns the mobile hero rather than
+        // shrinking to a tiny emblem beneath the navigation.
+        projected*= ${mobile?'.690':'.825'};
         projected.x+=${mobile?'.002':'.018'};
         projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
@@ -1561,7 +1563,7 @@
 
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
-        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.315':'.260'};
+        c+=vec3(.40,.66,.66)*softboxB*${mobile?'.395':'.295'};
         float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
@@ -1631,7 +1633,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.178':'.235'},vLocal.y/${mobile?'.178':'.235'});
+        vec2 oq=vec2(vLocal.x/${mobile?'.195':'.252'},vLocal.y/${mobile?'.195':'.252'});
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
