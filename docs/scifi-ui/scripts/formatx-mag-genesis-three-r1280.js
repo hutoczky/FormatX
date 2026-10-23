@@ -113,9 +113,11 @@
       const key=new T.DirectionalLight(0xe7f2ef,1.62);
       key.position.set(-3.8,5.4,6.4);
       this.scene.add(key);
+      this.studioKey=key;
       const fill=new T.DirectionalLight(0x9fb9b8,.42);
       fill.position.set(4.4,1.8,5.2);
       this.scene.add(fill);
+      this.studioFill=fill;
       // R2114: restrained opposing studio strip, only on desktop-class
       // hardware. This illuminates actual 3D geometry and specular normals,
       // unlike a CSS overlay or a 2D fallback highlight.
@@ -2229,7 +2231,13 @@
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
          not the whole frame, and lands on the permanent smoked-silver grade. */
       const after=smooth((t-9.44)/.38);
-      this.renderer.toneMappingExposure=1.075+flash*.006+after*.002;
+      // R2171: a focused studio key/fill illuminates the PHYSICAL titanium
+      // only while the DNA is becoming a chassis. The eye still remains dark
+      // until 7.44 s, and the final grade settles back to its original look.
+      const assemblyStudio=smooth((t-5.45)/.95)*(1-smooth((t-7.15)/1.45));
+      this.studioKey.intensity=1.62+assemblyStudio*.70;
+      this.studioFill.intensity=.42+assemblyStudio*.38;
+      this.renderer.toneMappingExposure=1.075+assemblyStudio*.11+flash*.006+after*.002;
       // Keep the premature embryo optic off; only the seated MAG eye may ignite.
       this.coreLight.intensity=0;
       if(this.glowSprite)this.glowSprite.material.opacity=0;
