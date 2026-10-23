@@ -9,6 +9,8 @@ const engine=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
 const birth=read('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js');
 const worker=read('billing-worker/src/production-content-entry.js');
 const permanent=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const home=read('docs/scifi-ui/index.html');
+const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
 const revision='formatx-mag-genesis-three-r1280.js?v=20261023-r2172-studio-dna-dolly';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
@@ -79,6 +81,11 @@ for(const [seconds,expected] of [[1.6,0],[4.2,0],[6.8,0],[7.6,0],[8.3,null],[9.5
     'R2173 early native MAG visibility regressed at '+seconds+'s');
   else assert(crossfade>0&&crossfade<1,'R2173 eye-open transition should crossfade the finished MAG');
 }
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261023-r2173-strict-reveal-handoff';
+assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
+  'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
+assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),
+  'Cloudflare CSP lacks the exact changed R2173 parser-bootstrap hash');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');
 for(const home of [
