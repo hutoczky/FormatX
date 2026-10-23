@@ -649,44 +649,47 @@
         armorTri(last.left,last.crown,last.right,5.31);
       }
     }
-    /* R2151 — the permanent MAG needs an unmistakable mechanical
-       silhouette, not only metal hidden inside the old diamond. Eight
-       raised, tapered titanium winglets extend beyond the crystal at
-       the four cardinal arm tips. These share the existing R326 WebGL
-       buffer and shader: no new canvas, context or idle render loop. */
+    /* R2153 — continuous 3D titanium arms replace the eight detached
+       horn-like R2151 winglets. All four arms retain one shared permanent
+       R326 WebGL geometry and draw call, including the optical socket. */
     for(let axis=0;axis<4;axis++){
-      const theta=axis*Math.PI*.5;
-      const dx=Math.cos(theta),dy=Math.sin(theta);
+      const angle=axis*Math.PI*.5;
+      const dx=Math.cos(angle),dy=Math.sin(angle);
       const sx=-dy,sy=dx;
-      const tipRadius=axis===1?1.225:axis===3?1.120:1.145;
-      for(const handedness of [-1,1]){
-        const pt=(radius,lateral,elevation)=>{
-          const x=dx*radius+sx*lateral*handedness;
-          const y=dy*radius+sy*lateral*handedness;
-          return [x,y,magSkinZ(x,y)+elevation];
+      const tipRadius=axis===1?1.096:axis===3?1.045:1.075;
+      const sections=[];
+      const steps=14;
+      for(let j=0;j<=steps;j++){
+        const t=j/steps;
+        const radius=.545+(tipRadius-.545)*t;
+        // Two symmetric polished slopes converge to ONE metal tip per arm.
+        const halfWidth=(.145*(1-smooth(t))+.006)*(1+.045*Math.sin(Math.PI*t));
+        const coreZ=magSkinZ(dx*radius,dy*radius);
+        const pt=(side,height)=>{
+          const x=dx*radius+sx*side,y=dy*radius+sy*side;
+          return [x,y,Math.max(coreZ,magSkinZ(x,y))+height];
         };
-        // The central ridge rises above the original blade roof. Its
-        // front and side planes have genuine three-dimensional parallax.
-        const heel=pt(.66,.102,.165);
-        const root=pt(.73,.095,.210);
-        const ridge=pt(.87,.104,.270);
-        const shoulder=pt(.85,.205,.150);
-        const tip=pt(tipRadius,.072,.182);
-        const lowerTip=pt(tipRadius,.072,.095);
-        const lowerShoulder=pt(.85,.205,.080);
-        armorTri(heel,root,shoulder,5.24);
-        armorTri(root,ridge,shoulder,5.18);
-        armorTri(ridge,tip,shoulder,5.21);
-        armorTri(shoulder,tip,lowerTip,5.72);
-        armorTri(shoulder,lowerTip,lowerShoulder,5.72);
-        armorTri(heel,shoulder,lowerShoulder,5.72);
-        // A dark engraved channel separates each machined winglet
-        // from its adjacent parent blade without a second draw pass.
-        const channelInner=pt(.82,.112,.278);
-        const channelOuter=pt(.96,.103,.230);
-        armorTri(root,channelInner,ridge,5.78);
-        armorTri(channelInner,channelOuter,ridge,5.78);
+        sections.push({
+          left:pt(-halfWidth,.065+.032*Math.sin(Math.PI*t)),
+          crown:pt(0,.153+.057*Math.sin(Math.PI*t)),
+          right:pt(halfWidth,.065+.032*Math.sin(Math.PI*t)),
+          underLeft:pt(-halfWidth,.019),
+          underRight:pt(halfWidth,.019)
+        });
       }
+      for(let j=0;j<steps;j++){
+        const a=sections[j],b=sections[j+1];
+        armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008);
+        armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008);
+        armorQuad(a.left,b.left,b.underLeft,a.underLeft,5.72);
+        armorQuad(a.right,a.underRight,b.underRight,b.right,5.72);
+        armorQuad(a.underLeft,b.underLeft,b.underRight,a.underRight,5.82);
+      }
+      const first=sections[0],last=sections[steps];
+      armorTri(first.left,first.right,first.crown,5.31);
+      armorQuad(first.left,first.underLeft,first.underRight,first.right,5.72);
+      armorTri(last.left,last.crown,last.right,5.31);
+      armorQuad(last.left,last.right,last.underRight,last.underLeft,5.72);
     }
     /* The centre is not a painted circle. A shallow, machined 48-facet
        silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
@@ -1653,15 +1656,17 @@
         // narrow specular lines) rather than flat gray plastic channels.
         float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0);
         float metalSideSpec=pow(max(dot(n,normalize(sideDir+view)),0.0),34.0);
-        vec3 titanium=vec3(.135,.176,.185);
-        titanium+=vec3(.33,.38,.38)*metalKey*.68;
-        titanium+=vec3(.72,.83,.82)*softboxB*.48;
-        titanium+=vec3(.94,.97,.94)*softboxC*.23;
-        titanium+=vec3(.93,.97,.96)*metalSpec*.48;
-        titanium+=vec3(.38,.72,.78)*metalSideSpec*.25;
-        titanium+=vec3(.12,.29,.32)*metalRim*.28;
-        titanium+=vec3(.052,.11,.13)*side*.15;
-        titanium*=1.0-.36*step(5.65,vFacet);
+        // R2153: deeper smoked-metal ground with narrower studio glints.
+        // The R2151 grey-white plate wash obscured sculptural metal depth.
+        vec3 titanium=vec3(.052,.072,.078);
+        titanium+=vec3(.27,.32,.32)*metalKey*.60;
+        titanium+=vec3(.62,.73,.72)*softboxB*.39;
+        titanium+=vec3(.87,.93,.90)*softboxC*.19;
+        titanium+=vec3(.86,.94,.92)*metalSpec*.40;
+        titanium+=vec3(.30,.62,.69)*metalSideSpec*.20;
+        titanium+=vec3(.11,.25,.28)*metalRim*.25;
+        titanium+=vec3(.046,.100,.118)*side*.14;
+        titanium*=1.0-.46*step(5.65,vFacet);
         c=mix(c,titanium,machinedArmor*.99);
 
         /* Interaction/surface sweep remains physical and brief. */
