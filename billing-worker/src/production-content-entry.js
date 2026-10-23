@@ -48,6 +48,23 @@ const HEADER_CSP = [
   "manifest-src 'self'",
   'upgrade-insecure-requests',
 ].join('; ');
+// Genesis is a separate authored, single-file WebGL film. Keep the production
+// app's strict CSP unchanged; grant only the exact hashes of its self-contained
+// CSS/importmap/module scripts and the pinned CDN host on this isolated route.
+const GENESIS_CSP = [
+  "default-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "script-src 'self' 'sha256-/2Irsdgw5a20ZICW0D+XGUGUWrvnATkcGIEfMbdY404=' 'sha256-IMJDwF1q+tyko8lfT79OANJl5tVeFC/VLpsreqWS0TE=' https://cdn.jsdelivr.net",
+  "style-src 'self' 'sha256-WMjWMJeNk87T9uXkQFBbN8MzKSj/b80vxdPe9HnHk04='",
+  "img-src 'self' data:",
+  "connect-src 'self' https://cdn.jsdelivr.net",
+  "font-src 'self'",
+  "media-src 'self'",
+  "worker-src 'self'",
+  "upgrade-insecure-requests"
+].join('; ');
 const ROBOTS = [
   '# FormatX canonical robots policy — served by production Worker R499',
   'User-agent: *',
@@ -350,7 +367,8 @@ async function rewriteR502DeliveryAsset(url, response, headers) {
 async function stabilizePublicResponse(request, url, response) {
   if (!isSafeMethod(request) || !isPublicRequest(url)) return response;
   const headers = new Headers(response.headers);
-  headers.set('Content-Security-Policy', HEADER_CSP);
+  const isGenesis = url.pathname === '/genesis/' || url.pathname === '/genesis/index.html';
+  headers.set('Content-Security-Policy', isGenesis ? GENESIS_CSP : HEADER_CSP);
   headers.set('Alt-Svc', 'clear');
   headers.set('X-FormatX-Transport-Stability', 'r514-critical-core-post-first-paint');
   headers.set('X-FormatX-Edge-Stability', `r514-critical-core:${STARTUP_REVISION}`);
@@ -376,7 +394,7 @@ async function stabilizePublicResponse(request, url, response) {
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
   let html = await response.text();
-  html = normalizeMetaCsp(html);
+  if (!isGenesis) html = normalizeMetaCsp(html);
   if (HOMEPAGE_PATHS.has(url.pathname)) html = optimizeHomepage(html);
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
