@@ -2247,6 +2247,14 @@
           root.dataset.fxMagBirthDnaOpacityR2149=String(
             this.dnas[0]?.userData?.materials?.[0]?.opacity??0
           );
+          // R2164 proof-only center opening check: don't emit live DOM telemetry.
+          const heroDna=this.dnas[0];
+          root.dataset.fxMagBirthCenteredDnaR2164=String(Boolean(
+            heroDna?.userData?.primary &&
+            Math.abs(heroDna.userData.base.x)<.03 &&
+            Math.abs(heroDna.userData.base.y)<.09 &&
+            heroDna.userData.base.z>.50
+          ));
           root.dataset.fxMagBirthThreeLitPixelsR2146=String(lit);
           root.dataset.fxMagBirthFrameR1557='r2146-canonical-three-framebuffer-readback';
         }catch(error){
