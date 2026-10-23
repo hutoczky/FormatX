@@ -5,9 +5,11 @@
 html body #hero .hero-space > .fx-mag-replay-r2150 {
   position: absolute !important;
   z-index: 19 !important;
-  left: 50% !important;
-  top: clamp(380px, 60vh, 570px) !important;
-  transform: translateX(-50%) !important;
+  /* R2152: top-right in MAG stage, clear of the lower SOUND/ASK cluster. */
+  left: auto !important;
+  right: clamp(14px, 2.8vw, 35px) !important;
+  top: clamp(16px, 3.5vh, 34px) !important;
+  transform: none !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -44,14 +46,15 @@ html body #hero .hero-space > .fx-mag-replay-r2150 .fx-mag-replay-icon {
 }
 @media (max-width: 900px), (pointer: coarse) {
   html body #hero .hero-space > .fx-mag-replay-r2150 {
-    top: clamp(355px, 56vh, 515px) !important;
+    top: 14px !important;
+    right: 14px !important;
     min-width: 168px !important;
     min-height: 48px !important;
   }
 }
 @media (max-height: 690px) {
   html body #hero .hero-space > .fx-mag-replay-r2150 {
-    top: clamp(300px, 62vh, 395px) !important;
+    top: 12px !important;
   }
 }
 @media (prefers-reduced-motion: reduce) {
