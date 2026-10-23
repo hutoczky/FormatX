@@ -217,7 +217,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261023-r2171-studio-titanium-assembly']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261023-r2172-studio-dna-dolly']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
