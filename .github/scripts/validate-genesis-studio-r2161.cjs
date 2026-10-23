@@ -20,7 +20,7 @@ JSON.parse(imports);
 for(const token of [
  'const COUNT=9000','new THREE.Points(','new UnrealBloomPass(','new EffectComposer(','new OrbitControls(',
  'gsap.timeline(','new THREE.ShaderMaterial(','AudioContext','uMorph','aOuter',
- 'timeline.addLabel(\'dna\',0)','timeline.addLabel(\'morph\',3)','timeline.addLabel(\'nucleus\',7)',
+ '.addLabel(\'dna\',0)','.addLabel(\'morph\',3)','.addLabel(\'nucleus\',7)',
  'id="play"','id="progress"','id="view"','id="sound"'
 ])assert(html.includes(token),'Missing Studio feature '+token);
 assert(!source.includes('gl_VertexID'),'WebGL1-compatible shader must not use gl_VertexID');
