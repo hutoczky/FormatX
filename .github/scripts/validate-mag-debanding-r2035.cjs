@@ -28,6 +28,7 @@ for(const token of [
   'R2153 — continuous 3D titanium arms replace the eight detached',
   'const tipRadius=axis===1?1.096:axis===3?1.045:1.075',
   'const steps=14',
+  'const eased=t*t*(3-2*t)',
   'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)',
   'armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008)',
   'armorQuad(a.crown,a.right,b.right,b.crown,facet+.016)',
@@ -50,9 +51,10 @@ for(const token of [
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2153-unified-hero'),
+assert.ok(!core.includes('1-smooth(t)'), 'R2154: undefined smooth() must not break permanent WebGL geometry');
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2154-unified-hero'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2153-connected-mag'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2154-connected-mag'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261022-r2149-embryo-focus'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
@@ -109,14 +111,14 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261023-r2153'),
+  assert.ok(loader.includes('20261023-r2154'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261023-r2153'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261023-r2154'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2153'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2154'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2153'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2154'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
