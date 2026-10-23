@@ -30,6 +30,19 @@ assert.ok(engine.includes('const grow=smooth((t-5.88)/1.18)') &&
   engine.includes('const opticWake=smooth((t-7.44)/.78)') &&
   engine.includes('this.birthRungs.forEach((bridge,axis)=>'),
   'Narrative continuity must be DNA -> paired arm transfer -> assembled MAG -> eye ignition');
+// R2164: enforce the story as real staged geometry, not metadata/CSS copy.
+assert.ok(engine.includes('[.00,.04,.85,1.57,.88]') &&
+  engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
+  'Desktop establishing shot must feature a centered, vertical double helix');
+assert.ok(engine.includes('const satelliteReveal=smooth((t-1.12)/.86)') &&
+  engine.includes('(h.userData.primary?1:satelliteReveal)'),
+  'Secondary DNA must join the scene after the centered helix is recognizable');
+assert.ok(engine.includes('const appear=smooth((t-2.38)/.76)') &&
+  engine.includes('const grow=smooth((t-5.88)/1.18)') &&
+  engine.includes('const opticWake=smooth((t-7.44)/.78)'),
+  'DNA / living embryo / assembled titanium MAG / optical ignition story order regressed');
+assert.ok(engine.includes('root.dataset.fxMagBirthCenteredDnaR2164'),
+  'Canonical Three.js framebuffer proof must confirm the central DNA subject');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');
 for(const home of [
