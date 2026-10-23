@@ -66,6 +66,7 @@ jobs:
           node .github/scripts/validate-inline-csp-hashes-r2136.cjs
           node .github/scripts/validate-intro-three-route-r2143.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
+          node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-pricing-qr.cjs
           node .github/scripts/validate-public-site-integrity.cjs
@@ -418,6 +419,22 @@ jobs:
           FORMATX_TEST_URL: https://www.formatxsuite.com/
         run: node .github/scripts/validate-r533-r536-handoff.cjs
 
+      # GENESIS: independently load the actual single-file Three.js / GSAP film
+      # on mobile and desktop, including CSP, morph and viewport checks.
+      - name: Verify live GENESIS DNA-to-nucleus 3D film
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_GENESIS_EVIDENCE_DIR: artifacts/live-genesis-canonical
+          FORMATX_TEST_URL: https://formatxsuite.com
+        run: node .github/scripts/validate-genesis-cinematic.cjs
+
+      - name: Verify www GENESIS cinematic playback parity
+        env:
+          NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
+          FORMATX_GENESIS_EVIDENCE_DIR: artifacts/live-genesis-www
+          FORMATX_TEST_URL: https://www.formatxsuite.com
+        run: node .github/scripts/validate-genesis-cinematic.cjs
+
       - name: Upload live cinematic evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -428,6 +445,8 @@ jobs:
             artifacts/live-r533-r536-www/
             artifacts/live-permanent-mag-r2154/
             artifacts/live-permanent-mag-r2154-www/
+            artifacts/live-genesis-canonical/
+            artifacts/live-genesis-www/
           if-no-files-found: warn
           retention-days: 30
 
