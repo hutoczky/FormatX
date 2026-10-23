@@ -2229,6 +2229,13 @@
             this.mechEyeCorona?.scale?.x??0
           );
           root.dataset.fxMagBirthEmbryoScaleR2149=String(this.coreGroup.scale.x);
+          root.dataset.fxMagBirthEmbryoOpacityR2160=String(this.embryoMaterial.opacity);
+          root.dataset.fxMagBirthGenomeParticlesR2160=String(
+            this.genomeParticles?.geometry?.attributes?.position?.count||0
+          );
+          root.dataset.fxMagBirthEarlyDiamondVisibleR2160=String(
+            this.coreShell?.visible||false
+          );
           root.dataset.fxMagBirthDnaOpacityR2149=String(
             this.dnas[0]?.userData?.materials?.[0]?.opacity??0
           );
