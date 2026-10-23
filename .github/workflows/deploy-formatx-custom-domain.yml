@@ -228,24 +228,31 @@ jobs:
           cat "$RUNNER_TEMP/www-revision.txt" 2>/dev/null || true
           exit 1
 
-      - name: Verify actual R2144 raised titanium MAG assets on both domains
+      - name: Verify exact permanent raised MAG geometry and cache chain on both domains
         shell: bash
         run: |
           set -euo pipefail
+          # R2151+: derive visible MAG source contract and cache prefix from the
+          # audited marker instead of pinning the old R2144 cache strings.
+          MAG_CACHE="$(sed -n 's/^mag_cache=//p' docs/production-revision.txt)"
+          MAG_GEOMETRY="$(sed -n 's/^mag_geometry=//p' docs/production-revision.txt)"
+          [[ "$MAG_CACHE" =~ ^[0-9]{8}-r[0-9]+$ ]]
+          [[ "$MAG_GEOMETRY" =~ ^R[0-9]+$ ]]
           for base in https://formatxsuite.com https://www.formatxsuite.com; do
             tmp="$(mktemp -d)"
             curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-crystal-organism-r326.js?rev=${GITHUB_RUN_ID}-visible-mag" -o "$tmp/renderer.js"
             grep -Fq 'R2142: smooth vertex normals across the machined metal' "$tmp/renderer.js"
             grep -Fq 'R2144: raised 48-piece optical bezel now has a true sloped crown' "$tmp/renderer.js"
+            grep -Fq "${MAG_GEOMETRY} — the permanent MAG" "$tmp/renderer.js"
             grep -Fq 'c=mix(c,titanium,machinedArmor*.99)' "$tmp/renderer.js"
             curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?rev=${GITHUB_RUN_ID}-mag-loader" -o "$tmp/scheduler.js"
-            grep -Fq 'formatx-motion-runtime-loader-r239.js?v=20261022-r2144-permanent-mag' "$tmp/scheduler.js"
+            grep -Fq "formatx-motion-runtime-loader-r239.js?v=${MAG_CACHE}-" "$tmp/scheduler.js"
             curl -fsSL --proto-redir '=https' --max-redirs 4 --retry 4 --retry-delay 2 --max-time 35 \
               "$base/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?rev=${GITHUB_RUN_ID}-mag-runtime" -o "$tmp/motion.js"
-            grep -Fq 'formatx-crystal-organism-r326.js?v=20261022-r2144-smooth-polished-mag' "$tmp/motion.js"
-            echo "R2144 raised titanium MAG geometry and runtime load chain verified on $base"
+            grep -Fq "formatx-crystal-organism-r326.js?v=${MAG_CACHE}-" "$tmp/motion.js"
+            echo "Raised ${MAG_GEOMETRY} titanium MAG geometry and ${MAG_CACHE} load chain verified on $base"
             rm -rf "$tmp"
           done
 
