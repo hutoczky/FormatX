@@ -1,10 +1,10 @@
 FormatX production revision
-token=20261023-r2153-unified-machined-mag
-release_line=R2153-integrated-four-arm-titanium-mag-accessible-replay
-purpose=Replace visually detached R2151 winglet spikes with four continuously crowned R2153 machined titanium arms in permanent R326 hero, preserve R2149 DNA-to-embryo-to-metal film and the R2152 accessible replay trigger.
+token=20261023-r2154-unified-machined-mag-runtime-fix
+release_line=R2154-integrated-four-arm-titanium-mag-runtime-safe
+purpose=Deliver connected R2153 titanium MAG arms with R2154 native WebGL geometry easing fix, preserve R2149 DNA-to-embryo-to-metal cinematic intro and R2152 accessible replay, verify actual painted permanent MAG on both domains.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs
-validation=Require production source and security checks, real WebGL mobile/desktop visual proof after first painted frame, no SOUND/ASK/replay overlap, both-domain exact revision convergence and cinematic smoke/handoff before marking R2153 live.
+validation=Require R2154 geometry easing regression test, production security and release checks, real WebGL mobile/desktop first-painted-frame screenshots on both domains, no SOUND/ASK/replay overlap, exact revision convergence and cinematic handoff before marking R2154 live.
 production_verification=Both https://formatxsuite.com/ and https://www.formatxsuite.com/ must serve this marker and pass the complete automated production deployment verification before publication is considered verified.
 limits=Automated checks do not establish subjective cinematic award-level quality or identical GPU rendering on all real Android devices; screenshot comparison remains necessary.
 mag_geometry=R2153
-mag_cache=20261023-r2153
+mag_cache=20261023-r2154
