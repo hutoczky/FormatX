@@ -420,7 +420,7 @@ jobs:
         env:
           NODE_PATH: ${{ env.FORMATX_LIVE_NODE_PATH }}
           FORMATX_DESKTOP_GENESIS_DIR: artifacts/live-desktop-genesis-r2164
-          FORMATX_TEST_URL: https://formatxsuite.com/scifi-ui/index.html
+          FORMATX_TEST_URL: https://formatxsuite.com/
         run: node .github/scripts/verify-desktop-genesis-r2164.cjs
 
       - name: Verify www domain resolves the same live cinematic contract
