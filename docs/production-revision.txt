@@ -1,10 +1,10 @@
 FormatX production revision
-token=20261023-r2163-both-genesis-films-browser-verified
-release_line=R2163-CINEMATIC-GENESIS-BOTH-STUDIO-ROUTES
-purpose=Remove the user-rejected INTRO UJRA hero action; retain automatic first-visit DNA genesis and accessible cinematic skip; animate twelve DNA base-pair bridges per MAG arm; improve mobile/SwiftShader titanium geometry tessellation and ensure fresh cached delivery.
+token=20261023-r2165-centered-dna-to-four-arm-mag
+release_line=R2165-DNA-FIRST-CINEMATIC-MAG-BIRTH
+purpose=Deliver a full-frame central double helix as the opening cinematic subject on desktop and mobile; smaller background DNA donors join later, condense into a living nucleus, transfer as paired four-arm DNA bridges, seat machined titanium MAG plates, and ignite the optical eye only after assembly. Keep one automatic first-visit film, no replay control.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
-validation=Require production source/security checks, exact HTML/Worker CSP hashes, no visible replay link, four-arm DNA base-pair source audit, both-domain revision convergence and real-browser cinematic/permanent MAG visual checks.
-production_verification=Both formatxsuite.com and www.formatxsuite.com must deliver this R2157 marker and pass the full live cinematic and permanent WebGL MAG screenshot checks; no success asserted until workflows complete.
+validation=R2165 production source/security checks and exact HTML/Cloudflare CSP hashes passed on validated branch; require both-domain revision convergence and live Chromium cinematic tests before release is considered verified.
+production_verification=Both formatxsuite.com and www.formatxsuite.com must serve the exact R2165 marker, pass real live cinematic R533-R536 handoff, permanent MAG integrity and accessible mobile skip without CSP errors.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
 mag_cache=20261023-r2157
@@ -12,4 +12,4 @@ mag_cache=20261023-r2157
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
 
-release_verification=20261023-r2163-cinematic-genesis-CSP-synchronized-live-browser-gate
+release_verification=20261023-r2165-centered-DNA-hero-four-arm-MAG-CSP-both-domain-browser-gate
