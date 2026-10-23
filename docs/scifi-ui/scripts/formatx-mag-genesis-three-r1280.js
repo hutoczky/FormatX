@@ -1778,7 +1778,10 @@
       // R2164: the central DNA is alone during the establishing shot.
       // Side genomes develop AFTER viewers have recognized its double helix.
       // Keep the timing in the existing 10-second film (no delayed handoff).
-      const satelliteReveal=smooth((t-1.12)/.86);
+      // R2172: keep the first DNA chapter uncluttered and the embryo fully
+      // readable. Donor helices illuminate ONLY when their nucleotides are
+      // being recruited into the four mechanical construction lanes.
+      const satelliteReveal=smooth((t-4.38)/.66);
       // R2149: DNA is the establishing shot; once the embryo forms,
       // helices become a transparent scaffold instead of blocking it.
       const embryoFocus=smooth((t-2.48)/1.02);
@@ -2199,6 +2202,14 @@
         z=mix(4.28,4.40,smooth((t-9.10)/.60));
         y=.003;
       }
+      // R2172: one physical camera, one uninterrupted photographic take.
+      // Gently dolly toward the moving titanium parts, then return to the
+      // exact established final hero distance before the native R326 handoff.
+      // This keeps the 10-second story and mobile crop intact.
+      const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.52)/1.12));
+      z-=birthDolly*(this.mobileRender?.27:.47);
+      x+=birthDolly*.038*Math.sin((t-5.68)*1.12);
+      y+=birthDolly*.018;
       if(this.width<this.height)z+=.90;
       this.camera.position.set(x,y,z);
       this.camera.lookAt(0,0,0);
@@ -2237,6 +2248,11 @@
       const assemblyStudio=smooth((t-5.45)/.95)*(1-smooth((t-7.15)/1.45));
       this.studioKey.intensity=1.62+assemblyStudio*.70;
       this.studioFill.intensity=.42+assemblyStudio*.38;
+      // R2172: animate the direction of REAL key/fill highlights across the
+      // approaching metal plates, not a screen-space fake white flash.
+      // Original authored light positions are restored at the film handoff.
+      this.studioKey.position.set(-3.8+assemblyStudio*1.30,5.4-assemblyStudio*.70,6.4);
+      this.studioFill.position.set(4.4-assemblyStudio*1.15,1.8+assemblyStudio*.50,5.2);
       this.renderer.toneMappingExposure=1.075+assemblyStudio*.11+flash*.006+after*.002;
       // Keep the premature embryo optic off; only the seated MAG eye may ignite.
       this.coreLight.intensity=0;
