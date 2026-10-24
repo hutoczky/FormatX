@@ -563,7 +563,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261024-r2176-coherent-genome-to-cell';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261024-r2180-beveled-titanium-birth';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
