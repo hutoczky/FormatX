@@ -66,9 +66,9 @@ for(const token of [
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2177-mobile-studio-titanium'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2178-single-titanium-hull'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2177-mobile-studio-titanium'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2178-single-titanium-hull'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261024-r2176-coherent-genome-to-cell'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
