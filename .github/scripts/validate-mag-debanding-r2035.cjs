@@ -23,6 +23,8 @@ for(const token of [
   'for(let axis=0;axis<4;axis++)',
   'R2153 — continuous 3D titanium arms replace the eight detached',
   'const tipRadius=axis===1?1.096:axis===3?1.045:1.075',
+  'const rootRadius=.255',
+  'const radius=rootRadius+(tipRadius-rootRadius)*t',
   'const steps=14',
   'const eased=t*t*(3-2*t)',
   'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)',
