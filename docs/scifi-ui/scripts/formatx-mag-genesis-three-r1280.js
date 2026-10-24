@@ -761,13 +761,32 @@
       const cell=new Float32Array(count*3);
       const arms=new Float32Array(count*3);
       const seed=new Float32Array(count);
+      // R2176: a SINGLE founding DNA shape owns the opening shot. Previously
+      // the 9,600 glowing nucleotides wound 7.75 turns while the visible
+      // 3D helix wound 3.82; two mismatched objects overlapped on screen.
+      // Sample the real parent helix, including its authored 3D transforms.
+      const founding=this.dnas.find(h=>h.userData.primary);
+      if(!founding)throw new Error('Genesis founding DNA helix is missing');
+      const origin=founding.userData.base;
+      const scale=origin.s;
+      const cosZ=Math.cos(origin.rz),sinZ=Math.sin(origin.rz);
+      const cosY=Math.cos(founding.rotation.y),sinY=Math.sin(founding.rotation.y);
       for(let i=0;i<count;i++){
-        const u=i/count;
+        const u=Math.floor(i/2)/(count/2-1);
         const strand=i%2;
-        const angle=u*Math.PI*15.5+strand*Math.PI;
-        const height=(u-.5)*3.25;
-        const jitter=(r()-.5)*.10;
-        initial.set([Math.cos(angle)*(.29+jitter),height,Math.sin(angle)*(.29+jitter)+.50],i*3);
+        const sign=strand===0?1:-1;
+        const phase=u*Math.PI*2*3.82;
+        const radius=.272+(r()-.5)*.016;
+        const localX=(u-.5)*4.08;
+        const localY=sign*Math.sin(phase)*radius;
+        const localZ=sign*Math.cos(phase)*radius;
+        const rolledX=localX*cosZ-localY*sinZ;
+        const rolledY=localX*sinZ+localY*cosZ;
+        initial.set([
+          origin.x+scale*(rolledX*cosY+localZ*sinY),
+          origin.y+scale*rolledY,
+          origin.z+scale*(-rolledX*sinY+localZ*cosY)
+        ],i*3);
         const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
         const radius=.12+Math.cbrt(r())*.82;
         cell.set([radius*Math.sin(b)*Math.cos(a),radius*1.08*Math.cos(b),radius*.80*Math.sin(b)*Math.sin(a)+.20],i*3);
@@ -775,7 +794,8 @@
         const reach=.20+.74*r();
         const lateral=(r()-.5)*.15;
         arms.set([Math.cos(phi)*reach-Math.sin(phi)*lateral,Math.sin(phi)*reach+Math.cos(phi)*lateral,.05+(r()-.5)*.22],i*3);
-        seed[i]=r();
+        // Cyan strand A, violet strand B: one identifiable double helix.
+        seed[i]=strand===0?r()*.42:.58+r()*.42;
       }
       const geometry=new T.BufferGeometry();
       geometry.setAttribute('position',new T.BufferAttribute(initial,3));
@@ -822,7 +842,7 @@
             if(r>.25)discard;
             float glow=exp(-r*15.0);
             float center=exp(-r*53.0);
-            vec3 cool=mix(vec3(.10,.51,.70),vec3(.53,.70,.95),vSeed);
+            vec3 cool=mix(vec3(.14,.68,.75),vec3(.62,.34,.90),smoothstep(.46,.54,vSeed));
             vec3 color=cool*glow*.70+vec3(.75,1.0,.98)*center*.32;
             gl_FragColor=vec4(color,vEnergy*mix(.37,.64,vSeed)*(1.0-smoothstep(.04,.25,r)));
           }`
