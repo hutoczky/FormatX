@@ -403,7 +403,8 @@
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
         const metalFacet=facet>=5.0&&facet<6.0;
-        const smoothWeight=metalFacet?(facet>=5.65?.57:.74):
+        // R2177: avoid jagged per-triangle metal shading on the phone.
+        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
           (facet<2.0?(mobile?.985:(software?.94:.90)):
           (software?.95:(mobile?.985:(constrained?.972:.978))));
         const faceWeight=1-smoothWeight;
@@ -591,7 +592,9 @@
 
     /* R1724 — additional living anatomy is appended to the same attribute
        buffers. No second canvas, model loader or image asset is introduced. */
-    /* R2141: four polished, contoured metal-arm assemblies now sit safely
+    /* R2178: the four R2153 continuous arm hulls use this shared precise
+       source-surface offset, preserving metal relief above the crystal body.
+       The older overlapping R2141 eight-winglet geometry is retired. now sit safely
        above the real crystal surface. 12 longitudinal steps avoid the curved
        shell cutting through five-segment metal chords, the source of dark
        pepper-speckle/z-fighting on the R2140 visual proof. All armour still
@@ -606,52 +609,10 @@
         Math.pow(Math.abs(y)/axisY,exponent));
       return axisZ*Math.pow(remaining,1/exponent);
     };
-    for(let axis=0;axis<4;axis++){
-      const angle=axis*Math.PI*.5;
-      const dx=Math.cos(angle),dy=Math.sin(angle);
-      const px=-dy,py=dx;
-      for(const lane of [-1,1]){
-        const bands=[];
-        const steps=12;
-        for(let j=0;j<=steps;j++){
-          const t=j/steps;
-          const radius=.19+.66*t;
-          const half=.021+.042*Math.sin(Math.PI*t);
-          const centre=lane*(half+.013);
-          const relief=.011+.009*Math.sin(Math.PI*t);
-          const make=(offset,depth)=>{
-            const x=dx*radius+px*(centre+offset);
-            const y=dy*radius+py*(centre+offset);
-            return [x,y,magSkinZ(x,y)+relief+depth];
-          };
-          // R2144: two intersecting bevel planes rise from the glass
-          // substrate into a machined titanium spine. The roof has real
-          // geometric normals, visible parallax and measurable thickness.
-          bands.push({
-            left:make(-half,.079),
-            crown:make(0,.164),
-            right:make(half,.079),
-            lowerLeft:make(-half,.022),
-            lowerRight:make(half,.022)
-          });
-        }
-        for(let j=0;j<steps;j++){
-          const a=bands[j],b=bands[j+1];
-          const facet=5.18+axis*.014+(lane>0?.003:0);
-          armorQuad(a.left,a.crown,b.crown,b.left,facet);
-          armorQuad(a.crown,a.right,b.right,b.crown,facet+.016);
-          armorQuad(a.lowerLeft,b.lowerLeft,b.lowerRight,a.lowerRight,5.82);
-          armorQuad(a.left,b.left,b.lowerLeft,a.lowerLeft,5.72);
-          armorQuad(a.right,a.lowerRight,b.lowerRight,b.right,5.72);
-        }
-        const first=bands[0],last=bands[bands.length-1];
-        armorQuad(first.left,first.lowerLeft,first.lowerRight,first.right,5.72);
-        armorQuad(last.left,last.right,last.lowerRight,last.lowerLeft,5.72);
-        // Cut end caps receive the same physical ridge as the long roof.
-        armorTri(first.left,first.right,first.crown,5.31);
-        armorTri(last.left,last.crown,last.right,5.31);
-      }
-    }
+    // R2178: the retired eight raised titanium winglets are deliberately
+    // NOT built. They overlapped the R2153 four continuous arm hulls in 3D,
+    // producing depth fighting and pepper-black facets on Android/desktop.
+    // Keep a single four-arm chassis sharing this one native WebGL draw.
     /* R2153 — continuous 3D titanium arms replace the eight detached
        horn-like R2151 winglets. All four arms retain one shared permanent
        R326 WebGL geometry and draw call, including the optical socket. */
@@ -664,10 +625,16 @@
       const steps=14;
       for(let j=0;j<=steps;j++){
         const t=j/steps;
-        const radius=.545+(tipRadius-.545)*t;
-        // Two symmetric polished slopes converge to ONE metal tip per arm.
+        // R2178: after retiring the overlapping R2141 winglets, the ONE
+        // connected metal hull must now reach the central titanium socket.
+        // Radius .255 seats just beyond the .203 optical bezel; otherwise
+        // the previous .545 start left four metal tips detached in midair.
+        const rootRadius=.255;
+        const radius=rootRadius+(tipRadius-rootRadius)*t;
+        // One continuous tapered pair of bevel slopes, no intersecting
+        // duplicate blades, and no unpainted gap near the optic housing.
         const eased=t*t*(3-2*t);
-        const halfWidth=(.145*(1-eased)+.006)*(1+.045*Math.sin(Math.PI*t));
+        const halfWidth=(.110*(1-eased)+.006)*(1+.045*Math.sin(Math.PI*t));
         const coreZ=magSkinZ(dx*radius,dy*radius);
         const pt=(side,height)=>{
           const x=dx*radius+sx*side,y=dy*radius+sy*side;
@@ -715,12 +682,20 @@
     }
     for(let j=0;j<8;j++){
       const angle=j*Math.PI/4+.10;
+      // R2179: the vanes are now seated BELOW the continuous glass lens.
       armorQuad(
-        opticPoint(.084,angle,.083),opticPoint(.123,angle+.06,.083),
-        opticPoint(.125,angle+.42,.083),opticPoint(.084,angle+.32,.083),
+        opticPoint(.084,angle,.036),opticPoint(.123,angle+.06,.036),
+        opticPoint(.125,angle+.42,.036),opticPoint(.084,angle+.32,.036),
         5.35
       );
     }
+    // R2179: true curved optical glass, modeled in the SAME geometry buffer,
+    // rather than a glossy 2D shader disc with exposed polygonal shutters.
+    // The .203 titanium bezel remains the physical lens housing.
+    // Mobile and desktop use the same recessed optical depth proportion.
+    const opticalCentreZ=magSkinZ(0,0)-.073;
+    appendEllipsoid([0,0,opticalCentreZ],[.135,.135,.055],
+      6.43,12,32);
 
     function guardianTriangle(vertices,facet,origin=[0,0,0]){
       let faceNormal=normalize(cross(
@@ -1163,7 +1138,14 @@
         projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
-        gl_Position=vec4(projected,-world.z*.13,1.0);
+        // R2177: a tiny stable depth offset avoids metal/bioglass Z-fighting
+        // without adding a second canvas, blending pass or draw call.
+        // R2179: the reduced-precision mobile depth buffer was still
+        // interleaving dark mineral fragments with the raised titanium.
+        // A stable per-material clip-depth layer replaces subpixel z-fight
+        // while retaining physical front/back ordering WITHIN each layer.
+        float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet));
+        gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.030,1.0);
       }`;
 
 

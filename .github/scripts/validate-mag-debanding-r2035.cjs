@@ -20,18 +20,18 @@ for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk]
 // R2137: the permanent on-page MAG, not only the birth film, must carry
 // visible raised metal arms in the single canonical WebGL geometry.
 for(const token of [
-  'R2141: four polished, contoured metal-arm assemblies',
   'for(let axis=0;axis<4;axis++)',
-  'for(const lane of [-1,1])',
-  'const steps=12',
-  'R2144: two intersecting bevel planes',
   'R2153 — continuous 3D titanium arms replace the eight detached',
   'const tipRadius=axis===1?1.096:axis===3?1.045:1.075',
+  'const rootRadius=.255',
+  'const opticalCentreZ=magSkinZ(0,0)-.073',
+  'appendEllipsoid([0,0,opticalCentreZ],[.135,.135,.055]',
+  'opticPoint(.084,angle,.036)',
+  'const radius=rootRadius+(tipRadius-rootRadius)*t',
   'const steps=14',
   'const eased=t*t*(3-2*t)',
   'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)',
   'armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008)',
-  'armorQuad(a.crown,a.right,b.right,b.crown,facet+.016)',
   'const metalFacet=facet>=5.0&&facet<6.0',
   'armorQuad(innerA,outerA,outerB,innerB,5.22)',
   'const normal=normalize([position[0]*1.14,position[1]*1.14,1.40])',
@@ -40,17 +40,24 @@ for(const token of [
   'for(let j=0;j<48;j++)',
   'for(let j=0;j<8;j++)',
   'float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0)',
-  'const half=.021+.042*Math.sin(Math.PI*t)',
-  'const centre=lane*(half+.013)',
   'return axisZ*Math.pow(remaining,1/exponent)',
-  'const relief=.011+.009*Math.sin(Math.PI*t)',
-  'armorQuad(a.left,a.crown,b.crown,b.left,facet)',
   'float machinedArmor=step(5.0,vFacet)',
   'c=mix(c,titanium,machinedArmor*.99)',
+  'float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet))',
+  'gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.030,1.0)',
   "mobile?'.195':'.252'"
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
+// R2178: reject the genuine root cause of visible titanium pepper-speckles:
+ // the former R2141 double-lane armour overlaid the newer R2153 one-piece
+ // arm hulls at almost identical projected depth. Exactly four arm hulls.
+assert.equal(core.split('for(let axis=0;axis<4;axis++)').length-1,1,
+  'R2178: permanent MAG must have one (and only one) four-arm geometry pass');
+assert.ok(!core.includes('for(const lane of [-1,1])'),
+  'R2178: retired duplicate titanium lane geometry has returned');
+assert.ok(core.includes('R2178: the retired eight raised titanium winglets'),
+  'R2178: missing documented single-chassis ownership');
 assert.ok(!core.includes('1-smooth(t)'), 'R2154: undefined smooth() must not break permanent WebGL geometry');
 assert.ok(!html.includes('class="fx-mag-replay-r2150"') && !html.includes('data-fx-mag-replay-r2150'),
   'R2157: removed INTRO ÚJRA must not return to the permanent MAG hero');
@@ -64,11 +71,11 @@ for(const token of [
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2167-studio-mag'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2179-optic-native-continuity'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2167-studio-mag'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2179-optic-native-continuity'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
-assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261024-r2175-mobile-msaa-film'),
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261024-r2179-dna-cell-msaa-continuity'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
 // R2148: the user-visible native Three.js cinematic must end with a true
 // machined optical instrument rather than the small pre-R2148 glowing bead.
@@ -123,14 +130,14 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261023-r2167'),
+  assert.ok(loader.includes('20261024-r2179'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261023-r2167'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261024-r2179'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2167'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2179'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2167'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2179'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',

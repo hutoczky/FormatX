@@ -12,7 +12,18 @@ const permanent=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const home=read('docs/scifi-ui/index.html');
 const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
-const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2175-mobile-msaa-film';
+// R2176: production source validation must parse the ACTUAL Three.js film;
+// the earlier gate missed a duplicate const inside its genome loop.
+assert.doesNotThrow(()=>new Function(engine),
+  'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
+const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2179-dna-cell-msaa-continuity';
+for(const token of [
+  'crownL.scale.set(.30,.90,.76)',
+  'crownR.scale.set(-.30,.90,.76)',
+  'left.scale.set(.72,.40,.74)',
+  'right.scale.set(-.72,.40,.74)',
+  'this.jaw.scale.set(.48,.88,.76)'
+])assert.ok(engine.includes(token),'R2180 intro-to-native titanium proportion regressed: '+token);
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -43,6 +54,26 @@ assert.ok(Math.abs(heroX)<.10 && Math.abs(heroY)<.10 && heroZ>.45 &&
   'Desktop establishing shot must show a centered, vertical 3D double helix');
 assert.ok(engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
   'Desktop cinematic has no authoritative founding DNA');
+// R2176: the GPU nucleotides must follow precisely the same authored
+// 3.82-turn, 4.08-unit founding DNA, instead of an overlapping 7.75-turn
+// particle ribbon. Colour both antiparallel strands consistently.
+for(const token of [
+  "const founding=this.dnas.find(h=>h.userData.primary)",
+  "const u=Math.floor(i/2)/(count/2-1)",
+  "const phase=u*Math.PI*2*3.82",
+  "const localX=(u-.5)*4.08",
+  "const localY=sign*Math.sin(phase)*helixRadius",
+  "const localZ=sign*Math.cos(phase)*helixRadius",
+  "const rolledX=localX*cosZ-localY*sinZ",
+  "origin.z+scale*(-rolledX*sinY+localZ*cosY)",
+  "seed[i]=strand===0?r()*.42:.58+r()*.42",
+  "smoothstep(.46,.54,vSeed)"
+]){
+  assert.ok(engine.includes(token),'R2176 founding double-helix particle mismatch: '+token);
+}
+assert.ok(!engine.includes('u*Math.PI*15.5+strand*Math.PI'),
+  'Do not overlay an unrelated twice-coiled DNA particle geometry');
+
 assert.ok(engine.includes('const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85))') &&
   engine.includes('h.userData.primary?fade:donorEnvelope*.27'),
   'Secondary DNA must stay dark through the biological chapter and feed later assembly');
@@ -108,10 +139,10 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261024-r2175-mobile-msaa-handoff';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261024-r2179-dna-cell-mag-handoff';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
-assert.ok(worker.includes("'sha256-ko75vmw8zOSike2Px9UTZI0FlWrjThI7blFxEndsW6s='"),
+assert.ok(worker.includes("'sha256-g04mjLntRvn8Vy6KWfrkAHbI1dGtr3getveN5iirM1c='"),
   'Cloudflare CSP lacks the exact changed R2173 parser-bootstrap hash');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');

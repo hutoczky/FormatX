@@ -29,6 +29,19 @@ for(const token of [
 ])assert(moduleSource.includes(token),'Genesis missing feature '+token);
 const result=cp.spawnSync(process.execPath,['--input-type=module','--check'],{input:moduleSource,encoding:'utf8'});
 assert.equal(result.status,0,'Genesis module syntax invalid: '+result.stderr);
+// R2179: the filmed nucleus must keep fine particle structure instead of
+// saturating into a featureless white plate; editorial typography must not
+// split the six-letter title into disconnected vertical columns.
+for(const token of [
+  'renderer.toneMappingExposure=.87;',
+  'bloom.threshold=.46;bloom.radius=.46;bloom.strength=.56;',
+  'bloom.strength=.49+.12*state.glow+.018*Math.sin(elapsed*.7);',
+  'particles.material.uniforms.uOpacity.value=.92-.32*smooth((t-3.6)/3.0);'
+])assert(moduleSource.includes(token),'R2179 cinematic nucleus grade regressed: '+token);
+assert(styles.includes('h1 span{display:inline;letter-spacing:-.075em}'),
+  'R2179 GENESIS masthead must be continuous, not stacked letters');
+assert(styles.includes('line-height:.94;white-space:nowrap;'),
+  'R2179 GENESIS masthead must fit as one studio editorial word');
 JSON.parse(imports);
 console.log('GENESIS_SOURCE_PASS',{particles:9600,embeddedCss:styles.length,moduleLength:moduleSource.length,importmap:true});
 
@@ -76,11 +89,20 @@ async function live(){
         width:document.documentElement.scrollWidth,
         innerWidth:innerWidth,
         phase:document.getElementById('actTitle')?.textContent,
-        shader:document.querySelectorAll('script[type^="x-shader"]').length
+        shader:document.querySelectorAll('script[type^="x-shader"]').length,
+        headlineWhiteSpace:getComputedStyle(document.querySelector('.editorial h1')).whiteSpace,
+        headlineBounds:(()=>{
+          const r=document.querySelector('.editorial h1').getBoundingClientRect();
+          return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+        })()
       }));
       assert.equal(initial.count,9600,'Incorrect 3D points count');
       assert.equal(initial.canvas,1,'Expected one full-screen WebGL canvas');
       assert.equal(initial.shader,4,'Missing source-embedded shaders');
+      assert.equal(initial.headlineWhiteSpace,'nowrap',
+        'R2179 live GENESIS masthead reverted to broken multi-line title');
+      assert.ok(initial.headlineBounds.left>=0&&initial.headlineBounds.right<=initial.innerWidth+2,
+        'R2179 live GENESIS editorial masthead escapes viewport on '+profile.id);
       assert.ok(initial.width<=initial.innerWidth+2,'Horizontal overflow on '+profile.id);
       await page.locator('#play').click();
       await page.locator('#progress').evaluate(input=>{

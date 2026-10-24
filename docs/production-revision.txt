@@ -1,13 +1,13 @@
 FormatX production revision
-token=20261024-r2175-cinematic-dna-cell-titanium-native-landing
-release_line=R2175-DNA-FIRST-CLEAN-EMBRYO-FOUR-ARM-MAG-SEAMLESS-LANDING
+token=20261024-r2179-genesis-photographic-nucleus
+release_line=R2179-DNA-CELL-MAG-PHOTOGRAPHIC-NATIVE-RELEASE
 purpose=An explicitly staged ten-second studio birth film: one smooth centered living DNA double helix, then genuine genome-particle condensation into a clean embryonic cell, followed by phased titanium arm assembly and delayed optical ignition. After the assembled MAG is established, it travels and scales into the permanent WebGL hero position during a continuous 1.35-second photographic landing; final native hero crossfade begins only after 9.15 seconds.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261023-r2167
+mag_cache=20261024-r2179
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -45,3 +45,16 @@ release_gates=R2174 source checks enforce all three real studio-light chapters a
 
 R2175_visual_changes=Rounded slimmer higher-segment DNA strands and base pairs; capillary and organic-haze reduction for a recognizable living cell; donor genomes deferred until post-embryo mechanical transfer; cinematic MAG world-space landing and native single-owner crossfade late in the final shot; cached birth runtime version bumped coherently in HTML, rescue bootstrap, Worker asset graph, and exact SHA-256 CSP.
 R2175_proofs=Production candidate source and CSP validation succeeded on GitHub Actions run 40083129512; Android portrait real keyframe proof passed run 40083129517; cinematic archive browser test passed run 40083129530. New release must independently pass live both-domain revision convergence and cinematic handoff before marked deployed.
+
+R2176_source=The native Three.js 9600/6000 GPU genome particles now sample the exact primary 3.82-turn authored 3D founding helix with parent Z/Y transforms, matched radius and two phase-opposed nucleotide strands; cyan/violet strand-specific particles eliminate the old 7.75-turn mismatched luminous overlay. The same GPU geometry morphs into the cell and then the four titanium construction axes.
+R2176_regression=Production source gate verifies the actual cinematic engine parses, geometry alignment and double-strand palette, without extra GPU draw calls; the R533 runtime and Cloudflare rewrite use the same cache-busted engine revision. Existing DNA-first embryo chapter, four-arm metal seating, eye ignition and R326 hero landing remain unchanged.
+R2176_required_proofs=Passing production pipeline, both-domain exact marker comparison, real desktop GPU keyframes at 1.6/4.2/6.8/8.3 seconds and Android portrait proof, with zero browser JS exceptions.
+R2176_qa=Mobile portrait real Three.js DNA-to-MAG keyframe proof passed (GitHub Actions 40102375272). Source/CSP/Worker production validation passed on commit cc6f8e9ef20349150e5a2c5c85dc115fe607c5b3 (workflow 40102792199). Production deploy still requires both-domain revision convergence, live cinematic browser and independent desktop frame verification.
+R2177_metal_finish=R326 permanent hero armor receives raised physically separated bevelled titanium panels, mobile smooth-normal blending and bias-adjusted canonical WebGL depth. All device loaders and Cloudflare R502 asset graph serve the matching cache-busted R2177 MAG shader.
+R2177_intent=Address pepper-speckle / triangle faceting in actual 390x844 permanent MAG screenshot; retain R2176 genome coil matching, biologic embryo and phased film, preserve one WebGL draw and no extra idle render.
+R2177_qa=R2177 source/CSP/Worker validation passed on GitHub Actions 40103818902. Release requires new both-domain exact revision, 390x844 permanent MAG live capture and four cinematic DNA-to-MAG keyframes before confirmation.
+R2177_cache_gate=Raised permanent MAG source and both-domain scheduler/motion/renderer cache chain must exactly match mag_cache=20261024-r2177; no stale R2167 assets allowed.
+
+release_r2178=Delete the previously overlapping R2141 eight titanium winglets entirely. Keep only the newer R2153 four continuous raised metal-arm hulls on native R326 WebGL; both groups were previously drawn into nearly the same depth, producing mobile pepper-speckles and a confused metallic silhouette. Retain centered DNA -> 9600-point biological condensation -> embryo -> mechanically assembled four-arm MAG -> delayed central optic -> permanent MAG continuity. All device loaders and Cloudflare rewrites cache-busted as 20261024-r2178-single-titanium-hull. Require full production source gates, both-domain exact revision convergence and live desktop/mobile screenshot evidence; no claim of photographic award parity.
+
+release_r2178_detail=Single four-arm titanium hull now begins at radius 0.255 to join the 0.203 optical bezel; retired second eight-winglet generator and no overlapping crown faces. Candidate passed full production source/build validation before release. GitHub Actions must independently confirm exact revision on both production hosts and live film/handoff.
