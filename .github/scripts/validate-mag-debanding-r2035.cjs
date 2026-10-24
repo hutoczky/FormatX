@@ -43,10 +43,12 @@ for(const token of [
   'const half=.021+.042*Math.sin(Math.PI*t)',
   'const centre=lane*(half+.013)',
   'return axisZ*Math.pow(remaining,1/exponent)',
-  'const relief=.011+.009*Math.sin(Math.PI*t)',
+  'const relief=.030+.010*Math.sin(Math.PI*t)',
   'armorQuad(a.left,a.crown,b.crown,b.left,facet)',
   'float machinedArmor=step(5.0,vFacet)',
   'c=mix(c,titanium,machinedArmor*.99)',
+  'float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet))',
+  'gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.0025,1.0)',
   "mobile?'.195':'.252'"
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
