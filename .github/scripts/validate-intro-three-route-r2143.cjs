@@ -12,7 +12,7 @@ const permanent=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const home=read('docs/scifi-ui/index.html');
 const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
-const revision='formatx-mag-genesis-three-r1280.js?v=20261023-r2172-studio-dna-dolly';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2174-dna-embryo-titanium-studio';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -49,8 +49,11 @@ assert.ok(engine.includes('const satelliteReveal=smooth((t-4.38)/.66)') &&
 // R2172: verified stage-specific optics, NOT an unrelated flash or model swap.
 assert.ok(engine.includes('const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.52)/1.12))') &&
   engine.includes('z-=birthDolly*(this.mobileRender?.27:.47)') &&
-  engine.includes('this.studioKey.position.set(-3.8+assemblyStudio*1.30') &&
-  engine.includes('this.studioFill.position.set(4.4-assemblyStudio*1.15'),
+  engine.includes('this.studioKey.position.set(') &&
+  engine.includes('-3.8-dnaStudio*.42+assemblyStudio*1.30') &&
+  engine.includes('4.4-dnaStudio*.32-assemblyStudio*1.15') &&
+  engine.includes('const embryoStudio=smooth((t-2.48)/.62)') &&
+  engine.includes('const dnaStudio=smooth((t-.12)/.38)'),
   'R2172 needs one tracked cinematic camera and physically moving key/fill lights');
 const smoothNumber=v=>{v=Math.min(1,Math.max(0,v));return v*v*(3-2*v)};
 const donorOpacity=t=>smoothNumber((t-4.38)/.66);
@@ -81,6 +84,16 @@ for(const [seconds,expected] of [[1.6,0],[4.2,0],[6.8,0],[7.6,0],[8.3,null],[9.5
     'R2173 early native MAG visibility regressed at '+seconds+'s');
   else assert(crossfade>0&&crossfade<1,'R2173 eye-open transition should crossfade the finished MAG');
 }
+const critical=read('docs/scifi-ui/styles/formatx-mag-birth-critical-r1572.css');
+// R2174: a newly mounted native WebGL stage must never animate opacity
+// down from 1 over the initial DNA and embryo frames.
+assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
+  birth.includes("stage.style.setProperty('transition','none','important')") &&
+  birth.includes("stage.style.setProperty('transition', alpha<=.001") &&
+  critical.includes(':not([data-fx-mag-birth-native-reveal-r2173="post-assembly-crossfade"])') &&
+  critical.includes('transition:none!important;'),
+  'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
+
 const revisedFilm='formatx-mag-birth-live-r533.js?v=20261023-r2173-strict-reveal-handoff';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
