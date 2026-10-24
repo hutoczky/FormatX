@@ -29,6 +29,19 @@ for(const token of [
 ])assert(moduleSource.includes(token),'Genesis missing feature '+token);
 const result=cp.spawnSync(process.execPath,['--input-type=module','--check'],{input:moduleSource,encoding:'utf8'});
 assert.equal(result.status,0,'Genesis module syntax invalid: '+result.stderr);
+// R2179: the filmed nucleus must keep fine particle structure instead of
+// saturating into a featureless white plate; editorial typography must not
+// split the six-letter title into disconnected vertical columns.
+for(const token of [
+  'renderer.toneMappingExposure=.87;',
+  'bloom.threshold=.46;bloom.radius=.46;bloom.strength=.56;',
+  'bloom.strength=.49+.12*state.glow+.018*Math.sin(elapsed*.7);',
+  'particles.material.uniforms.uOpacity.value=.92-.32*smooth((t-3.6)/3.0);'
+])assert(moduleSource.includes(token),'R2179 cinematic nucleus grade regressed: '+token);
+assert(styles.includes('h1 span{display:inline;letter-spacing:-.075em}'),
+  'R2179 GENESIS masthead must be continuous, not stacked letters');
+assert(styles.includes('line-height:.94;white-space:nowrap;'),
+  'R2179 GENESIS masthead must fit as one studio editorial word');
 JSON.parse(imports);
 console.log('GENESIS_SOURCE_PASS',{particles:9600,embeddedCss:styles.length,moduleLength:moduleSource.length,importmap:true});
 
