@@ -2246,14 +2246,28 @@
       // only while the DNA is becoming a chassis. The eye still remains dark
       // until 7.44 s, and the final grade settles back to its original look.
       const assemblyStudio=smooth((t-5.45)/.95)*(1-smooth((t-7.15)/1.45));
-      this.studioKey.intensity=1.62+assemblyStudio*.70;
-      this.studioFill.intensity=.42+assemblyStudio*.38;
-      // R2172: animate the direction of REAL key/fill highlights across the
-      // approaching metal plates, not a screen-space fake white flash.
-      // Original authored light positions are restored at the film handoff.
-      this.studioKey.position.set(-3.8+assemblyStudio*1.30,5.4-assemblyStudio*.70,6.4);
-      this.studioFill.position.set(4.4-assemblyStudio*1.15,1.8+assemblyStudio*.50,5.2);
-      this.renderer.toneMappingExposure=1.075+assemblyStudio*.11+flash*.006+after*.002;
+      // R2174: three physically illuminated chapters from one continuous
+      // camera take. The opening blue/violet DNA receives a narrow cool studio
+      // key, the biological cell gets a gentle subsurface fill, and only then
+      // does the titanium carry the moving broad metallic softbox. No new lights,
+      // glow overlays or GPU draw calls are allocated per frame.
+      const dnaStudio=smooth((t-.12)/.38)*(1-smooth((t-2.12)/.70));
+      const embryoStudio=smooth((t-2.48)/.62)*(1-smooth((t-5.10)/.72));
+      this.studioKey.intensity=1.62+dnaStudio*.35+embryoStudio*.20+assemblyStudio*.70;
+      this.studioFill.intensity=.42+dnaStudio*.16+embryoStudio*.34+assemblyStudio*.38;
+      // The DNA key and embryonic fill converge back to the authored
+      // neutral studio positions before the first titanium plate seats.
+      this.studioKey.position.set(
+        -3.8-dnaStudio*.42+assemblyStudio*1.30,
+        5.4+embryoStudio*.34-assemblyStudio*.70,6.4
+      );
+      this.studioFill.position.set(
+        4.4-dnaStudio*.32-assemblyStudio*1.15,
+        1.8+embryoStudio*.65+assemblyStudio*.50,5.2
+      );
+      this.renderer.toneMappingExposure=
+        1.075+dnaStudio*.035+embryoStudio*.045+assemblyStudio*.11+
+        flash*.006+after*.002;
       // Keep the premature embryo optic off; only the seated MAG eye may ignite.
       this.coreLight.intensity=0;
       if(this.glowSprite)this.glowSprite.material.opacity=0;
