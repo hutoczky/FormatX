@@ -1534,6 +1534,51 @@
       this.plates.push(this.jaw);
       this.jaw.visible=false;
 
+      // R2180: four real machined titanium inlays, not flat screen-space
+      // lines. Each plate has bevelled depth and a recessed axial engraving.
+      // The parts arrive on distinct tracks during the MAG birth sequence.
+      // The geometry is shared by all four arms to bound GPU memory.
+      this.armInlays=[];
+      this.armInlayMaterial=new T.MeshPhysicalMaterial({
+        color:0xa9bdbe,metalness:.86,roughness:.23,
+        emissive:0x071b21,emissiveIntensity:.018,
+        clearcoat:.82,clearcoatRoughness:.09,
+        bumpMap:this.microFiberTexture,bumpScale:.0025,
+        transparent:true,opacity:0,depthWrite:false
+      });
+      this.armEtchMaterial=new T.LineBasicMaterial({
+        color:0x132c34,transparent:true,opacity:0,depthWrite:false
+      });
+      const inlayProfile=new T.Shape();
+      inlayProfile.moveTo(-.066,.28);
+      inlayProfile.bezierCurveTo(-.13,.42,-.106,.60,-.025,.88);
+      inlayProfile.lineTo(.025,.88);
+      inlayProfile.bezierCurveTo(.106,.60,.13,.42,.066,.28);
+      inlayProfile.bezierCurveTo(.035,.215,-.035,.215,-.066,.28);
+      const inlayGeometry=new T.ExtrudeGeometry(inlayProfile,{
+        depth:.032,steps:1,bevelEnabled:true,bevelSegments:3,
+        bevelSize:.009,bevelThickness:.012,curveSegments:12
+      });
+      const etchGeometry=new T.BufferGeometry();
+      etchGeometry.setAttribute('position',new T.Float32BufferAttribute([
+        0,.35,.433,0,.47,.433,0,.47,.433,0,.67,.433,
+        -.018,.70,.433,0,.765,.433,0,.765,.433,.018,.70,.433
+      ],3));
+      for(let axis=0;axis<4;axis++){
+        const arm=new T.Group();
+        arm.userData.axis=axis;
+        const plate=new T.Mesh(inlayGeometry,this.armInlayMaterial);
+        plate.position.z=.378;
+        plate.renderOrder=3;
+        arm.add(plate);
+        const engraving=new T.LineSegments(etchGeometry,this.armEtchMaterial);
+        engraving.renderOrder=4;
+        arm.add(engraving);
+        arm.visible=false;
+        this.mechanicalGroup.add(arm);
+        this.armInlays.push(arm);
+      }
+
       // Minimal internal seam energy; no external robotic rails in R1941.
       this.seamMaterial=new T.MeshBasicMaterial({
         color:0x52d9ef,transparent:true,opacity:0,
@@ -1798,7 +1843,9 @@
       // arm formation, not a second helix tangled inside the living cell.
       const fade=1-smooth((t-2.72)/1.94);
       const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85));
-      const intro=ease(t/.30);
+      // R2180: DNA is readable on the FIRST rendered frame, not hidden
+      // behind a zero-opacity establishing shot while Three.js warms up.
+      const intro=.46+.54*ease(t/.30);
       // R2164: the central DNA is alone during the establishing shot.
       // Side genomes develop AFTER viewers have recognized its double helix.
       // Keep the timing in the existing 10-second film (no delayed handoff).
@@ -2162,6 +2209,20 @@
         p.scale.copy(base.scale).multiplyScalar(.78+.22*seat);
         p.rotation.y=base.rotationY+(1-seat)*.17+Math.sin(time*.00015+i)*.006*grow;
       });
+      // R2180: titanium inlays mechanically seat after the supporting DNA
+      // reaches each arm. Shared geometry, deterministic authored end pose.
+      const inlayBirth=smooth((t-5.86)/1.14);
+      this.armInlayMaterial.opacity=.93*grow;
+      this.armEtchMaterial.opacity=.55*inlayBirth;
+      this.armInlays.forEach((part,axis)=>{
+        const seat=smooth((t-5.90-axis*.13)/1.16);
+        part.visible=seat>.004;
+        const direction=axis*Math.PI*.5;
+        part.rotation.z=-direction+(1-seat)*(axis%2?-.23:.23);
+        part.position.set(Math.cos(direction)*(1-seat)*.17,
+          Math.sin(direction)*(1-seat)*.17,(1-seat)*.16);
+        part.scale.setScalar(.70+.30*seat);
+      });
       // R2147: lateral titanium shoulders and lower machined jaw follow
       // separate staggered tracks. Transform bases are authored once; no
       // accumulating per-frame position drift or extra WebGL draw pipeline.
@@ -2268,7 +2329,10 @@
       }
       const finaleClean=smooth((t-6.45)/1.70);
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
-      if(this.debris?.material)this.debris.material.opacity=.34*(1-finaleClean*.94);
+      // Film the genetic origin against a restrained neutral studio set:
+      // early drifting rubble competes with the DNA silhouette.
+      const setDressing=.28+.72*smooth((t-5.15)/1.22);
+      if(this.debris?.material)this.debris.material.opacity=.34*setDressing*(1-finaleClean*.94);
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
