@@ -357,6 +357,17 @@ for (const relative of [
   );
 }
 
+// R2175: exact production revision fingerprints must survive the public
+// Cloudflare Worker. Its upstream-platform word substitutions must never
+// rewrite the file compared byte-for-byte in the two-domain release gate.
+const publicWorkerSource=read('billing-worker/src/production-with-license.js');
+check(
+  'production-revision-unaltered-when-served',
+  publicWorkerSource.includes('response = await concealUpstreamPlatform(response, url);') &&
+    publicWorkerSource.includes("if (url?.pathname === '/production-revision.txt') return response;"),
+  'Cloudflare Worker must preserve /production-revision.txt byte-for-byte through concealUpstreamPlatform'
+);
+
 const report = {
   schema_version: 2,
   generated_at: new Date().toISOString(),
