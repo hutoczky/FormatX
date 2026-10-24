@@ -123,14 +123,14 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261023-r2167'),
+  assert.ok(loader.includes('20261024-r2177'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261023-r2167'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261024-r2177'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261023-r2167'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2177'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261023-r2167'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2177'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
