@@ -625,10 +625,16 @@
       const steps=14;
       for(let j=0;j<=steps;j++){
         const t=j/steps;
-        const radius=.545+(tipRadius-.545)*t;
-        // Two symmetric polished slopes converge to ONE metal tip per arm.
+        // R2178: after retiring the overlapping R2141 winglets, the ONE
+        // connected metal hull must now reach the central titanium socket.
+        // Radius .255 seats just beyond the .203 optical bezel; otherwise
+        // the previous .545 start left four metal tips detached in midair.
+        const rootRadius=.255;
+        const radius=rootRadius+(tipRadius-rootRadius)*t;
+        // One continuous tapered pair of bevel slopes, no intersecting
+        // duplicate blades, and no unpainted gap near the optic housing.
         const eased=t*t*(3-2*t);
-        const halfWidth=(.145*(1-eased)+.006)*(1+.045*Math.sin(Math.PI*t));
+        const halfWidth=(.110*(1-eased)+.006)*(1+.045*Math.sin(Math.PI*t));
         const coreZ=magSkinZ(dx*radius,dy*radius);
         const pt=(side,height)=>{
           const x=dx*radius+sx*side,y=dy*radius+sy*side;
