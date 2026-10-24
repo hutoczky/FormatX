@@ -26,7 +26,7 @@ for(const token of [
   'const rootRadius=.255',
   'const opticalCentreZ=magSkinZ(0,0)-.073',
   'appendEllipsoid([0,0,opticalCentreZ],[.135,.135,.055]',
-  'opticPoint(.084,angle,.036)'
+  'opticPoint(.084,angle,.036)',
   'const radius=rootRadius+(tipRadius-rootRadius)*t',
   'const steps=14',
   'const eased=t*t*(3-2*t)',
