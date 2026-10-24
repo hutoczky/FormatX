@@ -7,7 +7,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261024-r2180
+mag_cache=20261024-r2179
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -63,3 +63,4 @@ r2180_story=First frame visibly centered cyan-violet 3D double helix; 9600 GPU n
 r2180_render_files=docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js;docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js;docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js;docs/scifi-ui/index.html;billing-worker/src/production-content-entry.js
 r2180_visual_gate=Real desktop 1.6s DNA, 4.2s embryo, 6.8s assembly and 8.3s eye frame checks require inlay count 0/0/at-least-2/4; both production domains require matching revision and full cinematic handoff.
 r2180_limit=Claims of commercial film or studio-grade photoreal quality require subjective visual review on desktop and Android, not only CI test success.
+r2180_cache_scope=Only cinematic DNA-to-MAG birth engine and R533/first-byte/rescue bootstraps have new 20261024-r2180 cache identity; permanent R326 WebGL runtime still uses audited 20261024-r2179 cache until separately changed.
