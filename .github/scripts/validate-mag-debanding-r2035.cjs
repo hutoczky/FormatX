@@ -24,6 +24,9 @@ for(const token of [
   'R2153 — continuous 3D titanium arms replace the eight detached',
   'const tipRadius=axis===1?1.096:axis===3?1.045:1.075',
   'const rootRadius=.255',
+  'const opticalCentreZ=magSkinZ(0,0)-.073',
+  'appendEllipsoid([0,0,opticalCentreZ],[.135,.135,.055]',
+  'opticPoint(.084,angle,.036)'
   'const radius=rootRadius+(tipRadius-rootRadius)*t',
   'const steps=14',
   'const eased=t*t*(3-2*t)',
@@ -41,7 +44,7 @@ for(const token of [
   'float machinedArmor=step(5.0,vFacet)',
   'c=mix(c,titanium,machinedArmor*.99)',
   'float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet))',
-  'gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.0025,1.0)',
+  'gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.030,1.0)',
   "mobile?'.195':'.252'"
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
