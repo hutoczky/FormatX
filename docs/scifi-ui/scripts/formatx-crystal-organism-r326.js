@@ -682,12 +682,20 @@
     }
     for(let j=0;j<8;j++){
       const angle=j*Math.PI/4+.10;
+      // R2179: the vanes are now seated BELOW the continuous glass lens.
       armorQuad(
-        opticPoint(.084,angle,.083),opticPoint(.123,angle+.06,.083),
-        opticPoint(.125,angle+.42,.083),opticPoint(.084,angle+.32,.083),
+        opticPoint(.084,angle,.036),opticPoint(.123,angle+.06,.036),
+        opticPoint(.125,angle+.42,.036),opticPoint(.084,angle+.32,.036),
         5.35
       );
     }
+    // R2179: true curved optical glass, modeled in the SAME geometry buffer,
+    // rather than a glossy 2D shader disc with exposed polygonal shutters.
+    // The .203 titanium bezel remains the physical lens housing.
+    // Mobile and desktop use the same recessed optical depth proportion.
+    const opticalCentreZ=magSkinZ(0,0)-.073;
+    appendEllipsoid([0,0,opticalCentreZ],[.135,.135,.055],
+      6.43,12,32);
 
     function guardianTriangle(vertices,facet,origin=[0,0,0]){
       let faceNormal=normalize(cross(
@@ -1132,8 +1140,12 @@
            NDC depth grows away from camera, therefore the sign must be inverted. */
         // R2177: a tiny stable depth offset avoids metal/bioglass Z-fighting
         // without adding a second canvas, blending pass or draw call.
+        // R2179: the reduced-precision mobile depth buffer was still
+        // interleaving dark mineral fragments with the raised titanium.
+        // A stable per-material clip-depth layer replaces subpixel z-fight
+        // while retaining physical front/back ordering WITHIN each layer.
         float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet));
-        gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.0025,1.0);
+        gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.030,1.0);
       }`;
 
     const fullFragmentSource = `${versionLine}precision highp float;
