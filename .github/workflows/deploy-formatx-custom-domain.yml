@@ -64,6 +64,7 @@ jobs:
           python3 .github/scripts/validate-public-release-integration.py
           python3 .github/scripts/validate-webgpu-source.py
           node .github/scripts/validate-inline-csp-hashes-r2136.cjs
+          node .github/scripts/validate-dna-first-frame-r2181.cjs
           node .github/scripts/validate-intro-three-route-r2143.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
