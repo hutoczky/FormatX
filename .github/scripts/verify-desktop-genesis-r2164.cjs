@@ -94,6 +94,8 @@ async function main(){
         const nativeOpacity=nativeStage?Number(getComputedStyle(nativeStage).opacity):0;
         return{
           nativeOpacity,
+          nativeTransitionDuration:nativeStage?getComputedStyle(nativeStage).transitionDuration:'',
+          nativeConcealed:nativeStage?.dataset.fxBirthConcealedR2174||'not-mounted',
           nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
           renderer:root.dataset.fxMagBirthRendererR1360||'',
           phase:root.dataset.fxMagBirthPhase||'',
@@ -117,6 +119,12 @@ async function main(){
       if(name==='dna'||name==='embryo'||name==='assembly'){
         assert.ok(state.nativeOpacity<.025,
           name+': permanent MAG leaked into birth film before titanium assembly: '+JSON.stringify(state));
+        if(state.nativeConcealed!=='not-mounted'){
+          assert.equal(state.nativeTransitionDuration,'0s',
+            name+': concealing a live native MAG must not fade it from 1 to 0');
+          assert.equal(state.nativeConcealed,'true',
+            name+': native stage must remain strictly concealed before the titanium seats');
+        }
       }
       if(name==='dna'){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
