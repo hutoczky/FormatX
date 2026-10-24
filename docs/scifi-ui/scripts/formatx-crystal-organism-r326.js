@@ -592,7 +592,9 @@
 
     /* R1724 — additional living anatomy is appended to the same attribute
        buffers. No second canvas, model loader or image asset is introduced. */
-    /* R2141: four polished, contoured metal-arm assemblies now sit safely
+    /* R2178: the four R2153 continuous arm hulls use this shared precise
+       source-surface offset, preserving metal relief above the crystal body.
+       The older overlapping R2141 eight-winglet geometry is retired. now sit safely
        above the real crystal surface. 12 longitudinal steps avoid the curved
        shell cutting through five-segment metal chords, the source of dark
        pepper-speckle/z-fighting on the R2140 visual proof. All armour still
@@ -607,53 +609,10 @@
         Math.pow(Math.abs(y)/axisY,exponent));
       return axisZ*Math.pow(remaining,1/exponent);
     };
-    for(let axis=0;axis<4;axis++){
-      const angle=axis*Math.PI*.5;
-      const dx=Math.cos(angle),dy=Math.sin(angle);
-      const px=-dy,py=dx;
-      for(const lane of [-1,1]){
-        const bands=[];
-        const steps=12;
-        for(let j=0;j<=steps;j++){
-          const t=j/steps;
-          const radius=.19+.66*t;
-          const half=.021+.042*Math.sin(Math.PI*t);
-          const centre=lane*(half+.013);
-          // R2177: lift the bevel above the displaced mineral substrate.
-          const relief=.030+.010*Math.sin(Math.PI*t);
-          const make=(offset,depth)=>{
-            const x=dx*radius+px*(centre+offset);
-            const y=dy*radius+py*(centre+offset);
-            return [x,y,magSkinZ(x,y)+relief+depth];
-          };
-          // R2144: two intersecting bevel planes rise from the glass
-          // substrate into a machined titanium spine. The roof has real
-          // geometric normals, visible parallax and measurable thickness.
-          bands.push({
-            left:make(-half,.079),
-            crown:make(0,.164),
-            right:make(half,.079),
-            lowerLeft:make(-half,.036),
-            lowerRight:make(half,.036)
-          });
-        }
-        for(let j=0;j<steps;j++){
-          const a=bands[j],b=bands[j+1];
-          const facet=5.18+axis*.014+(lane>0?.003:0);
-          armorQuad(a.left,a.crown,b.crown,b.left,facet);
-          armorQuad(a.crown,a.right,b.right,b.crown,facet+.016);
-          armorQuad(a.lowerLeft,b.lowerLeft,b.lowerRight,a.lowerRight,5.82);
-          armorQuad(a.left,b.left,b.lowerLeft,a.lowerLeft,5.72);
-          armorQuad(a.right,a.lowerRight,b.lowerRight,b.right,5.72);
-        }
-        const first=bands[0],last=bands[bands.length-1];
-        armorQuad(first.left,first.lowerLeft,first.lowerRight,first.right,5.72);
-        armorQuad(last.left,last.right,last.lowerRight,last.lowerLeft,5.72);
-        // Cut end caps receive the same physical ridge as the long roof.
-        armorTri(first.left,first.right,first.crown,5.31);
-        armorTri(last.left,last.crown,last.right,5.31);
-      }
-    }
+    // R2178: the retired eight raised titanium winglets are deliberately
+    // NOT built. They overlapped the R2153 four continuous arm hulls in 3D,
+    // producing depth fighting and pepper-black facets on Android/desktop.
+    // Keep a single four-arm chassis sharing this one native WebGL draw.
     /* R2153 — continuous 3D titanium arms replace the eight detached
        horn-like R2151 winglets. All four arms retain one shared permanent
        R326 WebGL geometry and draw call, including the optical socket. */
