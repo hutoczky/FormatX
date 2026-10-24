@@ -187,6 +187,11 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-native-mag-dock-entry-r2173.cjs
+      - name: Verify real mobile cinematic antialias coverage
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-genesis-antialias-r2175.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -200,6 +205,7 @@ jobs:
             artifacts/reference-film-native-handoff-r2171/
             artifacts/intro-retired-layout-r2173/
             artifacts/native-mag-dock-entry-r2173/
+            artifacts/genesis-antialias-r2175/
             artifacts/r656-intro-keyframes/
           if-no-files-found: warn
           retention-days: 30

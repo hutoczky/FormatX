@@ -247,7 +247,7 @@ export default {
     }
 
     response = sanitiseApiServerError(response, url.pathname);
-    response = await concealUpstreamPlatform(response);
+    response = await concealUpstreamPlatform(response, url);
     return secureResponse(response, url);
   },
 };
@@ -806,7 +806,11 @@ export function concealUpstreamText(value) {
     .replace(/github/gi, 'formatx');
 }
 
-async function concealUpstreamPlatform(response) {
+async function concealUpstreamPlatform(response, url) {
+  // R2175: release revision is a byte-for-byte integrity contract. Do not
+  // rewrite platform names inside it: even one substituted character makes
+  // both-domain SHA/exact-revision deployment checks fail after a real deploy.
+  if (url?.pathname === '/production-revision.txt') return response;
   const contentType = response.headers.get('Content-Type') || '';
   if (!/(?:text\/|application\/(?:json|javascript|ld\+json)|image\/svg\+xml)/i.test(contentType)) {
     return response;

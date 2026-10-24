@@ -61,7 +61,7 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:!this.mobileRender,
+        antialias:true,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -191,7 +191,7 @@
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
-      const seg=84;
+      const seg=120;
       const aPts=[],bPts=[],rungPairs=[],beadA=[],beadB=[];
       for(let i=0;i<=seg;i++){
         const u=i/seg;
@@ -240,12 +240,12 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.046,8,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.046,8,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.078,7,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.078,7,false),gb);
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.031,10,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.031,10,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.065,8,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.065,8,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.027,.027,1,8,1,false);
+      const rungGeo=new T.CylinderGeometry(.018,.018,1,10,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -810,7 +810,11 @@
             gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z),1.0,5.6*uPixelRatio);
             float first=curve(0.08,.65,uPhase);
             float last=1.0-curve(7.16,8.05,uPhase);
-            vEnergy=first*last;
+            // Let the membrane and nucleus own the condensed-cell chapter.
+            // Keep every GPU particle and restore full transfer energy as the
+            // same points assemble into the four authored titanium arms.
+            float cellFocus=condense*(1.0-assemble);
+            vEnergy=first*last*(1.0-.66*cellFocus);
             vSeed=aSeed;
           }`,
         fragmentShader:`
@@ -881,7 +885,7 @@
       this.embryoOrganelle.scale.set(1.0,.82,.67);
       this.coreGroup.add(this.embryoOrganelle);
       const membraneLines=[];
-      const capillaries=this.mobileRender?9:17;
+      const capillaries=this.mobileRender?5:9;
       for(let strand=0;strand<capillaries;strand++){
         const phase=strand*Math.PI*2/capillaries;
         const shift=(strand%3-1)*.065;
@@ -1773,7 +1777,11 @@
       // opening motif. Hold the double helix through the biological
       // construction and let it collapse into the emerging metal chassis.
       const assembly=smooth((t-4.85)/2.25);
-      const fade=1-smooth((t-5.75)/1.35);
+      // R2175: the founding helix physically dissolves into the embryo
+      // particles by 4.6 s. Supporting DNA is a low-opacity donor during
+      // arm formation, not a second helix tangled inside the living cell.
+      const fade=1-smooth((t-2.72)/1.94);
+      const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85));
       const intro=ease(t/.30);
       // R2164: the central DNA is alone during the establishing shot.
       // Side genomes develop AFTER viewers have recognized its double helix.
@@ -1781,7 +1789,7 @@
       // R2172: keep the first DNA chapter uncluttered and the embryo fully
       // readable. Donor helices illuminate ONLY when their nucleotides are
       // being recruited into the four mechanical construction lanes.
-      const satelliteReveal=smooth((t-4.38)/.66);
+      // R2175: donor opacity is controlled by the separate transfer envelope.
       // R2149: DNA is the establishing shot; once the embryo forms,
       // helices become a transparent scaffold instead of blocking it.
       const embryoFocus=smooth((t-2.48)/1.02);
@@ -1789,7 +1797,8 @@
       // as phones already do. The bright helix must not occlude the cell.
       const helixScaleFocus=1-embryoFocus*(this.mobileRender?.47:.35);
       const helixOpacityFocus=1-embryoFocus*(this.mobileRender?.72:.66);
-      this.dnaGroup.visible=fade>.002;
+      // Keep the transfer strands/rungs alive after the opening helix fades.
+      this.dnaGroup.visible=t<7.24;
       this.dnas.forEach((h,i)=>{
         const b=h.userData.base;
         const fly=1-intro;
@@ -1823,7 +1832,8 @@
         h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56)*helixScaleFocus);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          m.opacity=(bases[mi]??.5)*fade*intro*.94*helixOpacityFocus*(h.userData.primary?1:satelliteReveal);
+          const chapterAlpha=h.userData.primary?fade:donorEnvelope*.27;
+          m.opacity=(bases[mi]??.5)*intro*.94*helixOpacityFocus*chapterAlpha;
         });
       });
     }
@@ -1898,7 +1908,10 @@
       else if(t<7.15) sc=mix(embryoScale,.30,smooth((t-5.58)/1.57));
       else sc=.30;
 
-      const endMove=smooth((t-9.78)/.20);
+      // R2175: the born MAG travels into the permanent hero position in a
+      // continuous 1.35 s photographic dolly, instead of teleporting there
+      // during the final 200 ms of the film.
+      const endMove=smooth((t-8.45)/1.35);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
@@ -1931,7 +1944,7 @@
       this.embryoInnerMaterial.opacity=.25*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoCapillaryMaterial.opacity=.19*visible;
+      this.embryoCapillaryMaterial.opacity=.105*visible;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
@@ -1951,14 +1964,14 @@
       const fade=1-smooth((t-6.20)/1.15)*.96;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+visible*.82;
+      const bodyScale=.001+visible*.63;
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
-      this.organicShellMaterial.opacity=.27*visible;
-      this.organicLobeMaterial.opacity=.24*visible;
+      this.organicShellMaterial.opacity=.18*visible;
+      this.organicLobeMaterial.opacity=.15*visible;
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.105*visible;
-      this.organicHoodMaterial.opacity=.18*visible;
+      this.organicVeinMaterial.opacity=.068*visible;
+      this.organicHoodMaterial.opacity=.13*visible;
       if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
@@ -1999,11 +2012,11 @@
       const fade=1-smooth((t-6.25)/1.10)*.96;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
-      const cellScale=.001+visible*.99;
+      const cellScale=.001+visible*.76;
       this.cellGroup.scale.set(cellScale*.94,cellScale*.92,cellScale*.90);
       this.cellMaterial.opacity=.045*visible;
       this.cellEdgeMaterial.opacity=.0005*visible;
-      this.cellVeinMaterial.opacity=.058*visible;
+      this.cellVeinMaterial.opacity=.040*visible;
       this.cells.forEach((c,i)=>{
         const q=1+Math.sin(time*.00102+c.userData.phase)*.010*visible;
         c.rotation.y+=.00010*(i%2?1:-1);
@@ -2021,7 +2034,10 @@
       const grow=smooth((t-5.88)/1.18);
       const finale=smooth((t-7.20)/1.65);
       this.mechanicalGroup.visible=grow>.002;
-      this.mechanicalGroup.scale.set(.001+grow*1.04,.001+grow*1.04,.001+grow*1.02);
+      // R2175: match the physical size of the native R326 MAG as it settles
+      // into the upper hero viewport, eliminating the final size jump.
+      const landingScale=1-.26*smooth((t-8.55)/1.30);
+      this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
 
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
@@ -2246,14 +2262,28 @@
       // only while the DNA is becoming a chassis. The eye still remains dark
       // until 7.44 s, and the final grade settles back to its original look.
       const assemblyStudio=smooth((t-5.45)/.95)*(1-smooth((t-7.15)/1.45));
-      this.studioKey.intensity=1.62+assemblyStudio*.70;
-      this.studioFill.intensity=.42+assemblyStudio*.38;
-      // R2172: animate the direction of REAL key/fill highlights across the
-      // approaching metal plates, not a screen-space fake white flash.
-      // Original authored light positions are restored at the film handoff.
-      this.studioKey.position.set(-3.8+assemblyStudio*1.30,5.4-assemblyStudio*.70,6.4);
-      this.studioFill.position.set(4.4-assemblyStudio*1.15,1.8+assemblyStudio*.50,5.2);
-      this.renderer.toneMappingExposure=1.075+assemblyStudio*.11+flash*.006+after*.002;
+      // R2174: three physically illuminated chapters from one continuous
+      // camera take. The opening blue/violet DNA receives a narrow cool studio
+      // key, the biological cell gets a gentle subsurface fill, and only then
+      // does the titanium carry the moving broad metallic softbox. No new lights,
+      // glow overlays or GPU draw calls are allocated per frame.
+      const dnaStudio=smooth((t-.12)/.38)*(1-smooth((t-2.12)/.70));
+      const embryoStudio=smooth((t-2.48)/.62)*(1-smooth((t-5.10)/.72));
+      this.studioKey.intensity=1.62+dnaStudio*.35+embryoStudio*.20+assemblyStudio*.70;
+      this.studioFill.intensity=.42+dnaStudio*.16+embryoStudio*.34+assemblyStudio*.38;
+      // The DNA key and embryonic fill converge back to the authored
+      // neutral studio positions before the first titanium plate seats.
+      this.studioKey.position.set(
+        -3.8-dnaStudio*.42+assemblyStudio*1.30,
+        5.4+embryoStudio*.34-assemblyStudio*.70,6.4
+      );
+      this.studioFill.position.set(
+        4.4-dnaStudio*.32-assemblyStudio*1.15,
+        1.8+embryoStudio*.65+assemblyStudio*.50,5.2
+      );
+      this.renderer.toneMappingExposure=
+        1.075+dnaStudio*.035+embryoStudio*.045+assemblyStudio*.11+
+        flash*.006+after*.002;
       // Keep the premature embryo optic off; only the seated MAG eye may ignite.
       this.coreLight.intensity=0;
       if(this.glowSprite)this.glowSprite.material.opacity=0;
