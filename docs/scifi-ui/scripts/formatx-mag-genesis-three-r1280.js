@@ -1777,7 +1777,7 @@
       // particles by 4.6 s. Supporting DNA is a low-opacity donor during
       // arm formation, not a second helix tangled inside the living cell.
       const fade=1-smooth((t-2.72)/1.94);
-      const donorEnvelope=smooth((t-4.18)/.55)*(1-smooth((t-5.95)/.85));
+      const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85));
       const intro=ease(t/.30);
       // R2164: the central DNA is alone during the establishing shot.
       // Side genomes develop AFTER viewers have recognized its double helix.
