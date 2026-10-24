@@ -7,7 +7,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261023-r2167
+mag_cache=20261024-r2177
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -53,3 +53,4 @@ R2176_qa=Mobile portrait real Three.js DNA-to-MAG keyframe proof passed (GitHub 
 R2177_metal_finish=R326 permanent hero armor receives raised physically separated bevelled titanium panels, mobile smooth-normal blending and bias-adjusted canonical WebGL depth. All device loaders and Cloudflare R502 asset graph serve the matching cache-busted R2177 MAG shader.
 R2177_intent=Address pepper-speckle / triangle faceting in actual 390x844 permanent MAG screenshot; retain R2176 genome coil matching, biologic embryo and phased film, preserve one WebGL draw and no extra idle render.
 R2177_qa=R2177 source/CSP/Worker validation passed on GitHub Actions 40103818902. Release requires new both-domain exact revision, 390x844 permanent MAG live capture and four cinematic DNA-to-MAG keyframes before confirmation.
+R2177_cache_gate=Raised permanent MAG source and both-domain scheduler/motion/renderer cache chain must exactly match mag_cache=20261024-r2177; no stale R2167 assets allowed.
