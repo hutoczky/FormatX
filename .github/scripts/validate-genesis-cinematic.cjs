@@ -89,11 +89,20 @@ async function live(){
         width:document.documentElement.scrollWidth,
         innerWidth:innerWidth,
         phase:document.getElementById('actTitle')?.textContent,
-        shader:document.querySelectorAll('script[type^="x-shader"]').length
+        shader:document.querySelectorAll('script[type^="x-shader"]').length,
+        headlineWhiteSpace:getComputedStyle(document.querySelector('.editorial h1')).whiteSpace,
+        headlineBounds:(()=>{
+          const r=document.querySelector('.editorial h1').getBoundingClientRect();
+          return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+        })()
       }));
       assert.equal(initial.count,9600,'Incorrect 3D points count');
       assert.equal(initial.canvas,1,'Expected one full-screen WebGL canvas');
       assert.equal(initial.shader,4,'Missing source-embedded shaders');
+      assert.equal(initial.headlineWhiteSpace,'nowrap',
+        'R2179 live GENESIS masthead reverted to broken multi-line title');
+      assert.ok(initial.headlineBounds.left>=0&&initial.headlineBounds.right<=initial.innerWidth+2,
+        'R2179 live GENESIS editorial masthead escapes viewport on '+profile.id);
       assert.ok(initial.width<=initial.innerWidth+2,'Horizontal overflow on '+profile.id);
       await page.locator('#play').click();
       await page.locator('#progress').evaluate(input=>{
