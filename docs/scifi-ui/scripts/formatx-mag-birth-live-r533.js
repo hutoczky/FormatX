@@ -640,7 +640,8 @@
           coreApi?.surfacePulse?.('r631-mobile-css-final-handoff');
           coreApi?.requestRender?.(1);
         }catch(_){}
-        if(stage instanceof HTMLElement)setStageOpacity(1);
+        // R2175: phase 4 marks the handoff chapter, but does not snap the
+        // permanent MAG to 100% opacity before the cinematic crossfade.
       }
     }
     return true;
@@ -728,9 +729,9 @@
     // R2174: 0 must be immediate. Animating opacity from the stage's default
     // 1 to 0 caused a short, visible permanent MAG flash over the DNA film.
     // The film owns the scene until the actual 7.6 s seating boundary.
-    stage.style.setProperty('transition', alpha<=.001
-      ? 'none'
-      : 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    // R2175: deterministic timeline opacity, no competing 720 ms CSS
+    // transition that lags behind and snaps when the intro is removed.
+    stage.style.setProperty('transition','none','important');
     stage.style.setProperty('opacity', String(alpha), 'important');
     stage.dataset.fxBirthConcealedR2174=alpha<=.001?'true':'post-assembly-reveal';
   }
@@ -755,14 +756,16 @@
     // the DNA, embryo or mechanical seating chapters. The 3D birth renderer
     // alone owns the visible object until the eye has awakened.
     locateStage();
-    const nativeReveal=smoothstep((r-.76)/.18);
+    // R2175: only reveal the native hero after the film MAG has travelled
+    // into its real page position and reduced to matching screen size.
+    const nativeReveal=smoothstep((r-.915)/.08);
     setStageOpacity(nativeReveal);
     ROOT.dataset.fxMagBirthNativeRevealR2173=nativeReveal<=.001
       ? 'hidden-until-titanium-seated'
       : nativeReveal>=.999?'ready-permanent-mag':'post-assembly-crossfade';
     if(!coreApi) return;
 
-    if (r < .76) {
+    if (r < .915) {
       if (now-lastMorphSync > 420) {
         lastMorphSync=now;
         try {
@@ -773,7 +776,7 @@
       return;
     }
 
-    if (r < .94) {
+    if (r < .995) {
       if (now-lastMorphSync > 170) {
         lastMorphSync=now;
         try {
@@ -1118,7 +1121,7 @@
       cachedCoreRenderCost=Number.parseFloat(ROOT.dataset.fxCoreRenderMs||'0')||0;
     }
     const renderCost=cachedCoreRenderCost;
-    const nativeCadence=renderCost>50?620:renderCost>32?380:(MOBILE?200:120);
+    const nativeCadence=r>=.90?40:(renderCost>50?620:renderCost>32?380:(MOBILE?200:120));
     if(!lastNativeSync||now-lastNativeSync>=nativeCadence||(!ignitionDone&&r>=.69)){
       lastNativeSync=now;
       syncNativeCore(r,now);
