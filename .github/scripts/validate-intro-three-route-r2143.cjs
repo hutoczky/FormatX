@@ -43,6 +43,26 @@ assert.ok(Math.abs(heroX)<.10 && Math.abs(heroY)<.10 && heroZ>.45 &&
   'Desktop establishing shot must show a centered, vertical 3D double helix');
 assert.ok(engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
   'Desktop cinematic has no authoritative founding DNA');
+// R2176: the GPU nucleotides must follow precisely the same authored
+// 3.82-turn, 4.08-unit founding DNA, instead of an overlapping 7.75-turn
+// particle ribbon. Colour both antiparallel strands consistently.
+for(const token of [
+  "const founding=this.dnas.find(h=>h.userData.primary)",
+  "const u=Math.floor(i/2)/(count/2-1)",
+  "const phase=u*Math.PI*2*3.82",
+  "const localX=(u-.5)*4.08",
+  "const localY=sign*Math.sin(phase)*radius",
+  "const localZ=sign*Math.cos(phase)*radius",
+  "const rolledX=localX*cosZ-localY*sinZ",
+  "origin.z+scale*(-rolledX*sinY+localZ*cosY)",
+  "seed[i]=strand===0?r()*.42:.58+r()*.42",
+  "smoothstep(.46,.54,vSeed)"
+]){
+  assert.ok(engine.includes(token),'R2176 founding double-helix particle mismatch: '+token);
+}
+assert.ok(!engine.includes('u*Math.PI*15.5+strand*Math.PI'),
+  'Do not overlay an unrelated twice-coiled DNA particle geometry');
+
 assert.ok(engine.includes('const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85))') &&
   engine.includes('h.userData.primary?fade:donorEnvelope*.27'),
   'Secondary DNA must stay dark through the biological chapter and feed later assembly');
