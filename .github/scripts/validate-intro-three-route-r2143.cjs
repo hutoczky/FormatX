@@ -12,7 +12,7 @@ const permanent=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const home=read('docs/scifi-ui/index.html');
 const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
-const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2175-dna-cell-mag-studio-landing';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2176-coherent-genome-to-cell';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
