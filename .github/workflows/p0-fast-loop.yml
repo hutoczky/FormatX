@@ -177,6 +177,11 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node .github/scripts/validate-reference-film-native-handoff-r2171.cjs
+      - name: Verify completed intro releases geometry listeners
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-intro-retired-layout-r2173.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -188,6 +193,7 @@ jobs:
             artifacts/content-visuals/
             artifacts/r533-r536-handoff/
             artifacts/reference-film-native-handoff-r2171/
+            artifacts/intro-retired-layout-r2173/
             artifacts/r656-intro-keyframes/
           if-no-files-found: warn
           retention-days: 30

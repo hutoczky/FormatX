@@ -8,6 +8,9 @@ const read=path=>fs.readFileSync(path,'utf8');
 const engine=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
 const birth=read('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js');
 const worker=read('billing-worker/src/production-content-entry.js');
+const permanent=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const home=read('docs/scifi-ui/index.html');
+const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
 const revision='formatx-mag-genesis-three-r1280.js?v=20261023-r2172-studio-dna-dolly';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
@@ -60,6 +63,29 @@ assert.ok(engine.includes('const appear=smooth((t-2.38)/.76)') &&
   'DNA / living embryo / assembled titanium MAG / optical ignition story order regressed');
 assert.ok(engine.includes('root.dataset.fxMagBirthCenteredDnaR2164'),
   'Canonical Three.js framebuffer proof must confirm the central DNA subject');
+// R2173: a formerly invisible cinematic contract failure allowed the
+// permanent R326 hero to leak through at t=5.0s BEFORE the titanium body
+// existed. Keep the native stage fully hidden throughout DNA and embryo,
+// and fade it in only once the film's mechanical pieces have seated.
+assert.ok(birth.includes('const nativeReveal=smoothstep((r-.76)/.18)') &&
+  birth.includes('if (r < .76) {') &&
+  birth.includes("hidden-until-titanium-seated") &&
+  birth.includes("if(stage instanceof HTMLElement)setStageOpacity(0);"),
+  'R2173: permanent MAG must remain invisible until assembly and optic ignition');
+assert.ok(permanent.includes("stage.dataset.fxBirthDeferredR2173='true'") &&
+  permanent.includes("stage.style.setProperty('opacity','0','important')"),
+  'R2173: asynchronously mounted permanent R326 must not flash through the birth film');
+for(const [seconds,expected] of [[1.6,0],[4.2,0],[6.8,0],[7.6,0],[8.3,null],[9.5,1]]){
+  const crossfade=smoothNumber((seconds/10-.76)/.18);
+  if(expected!==null)assert.equal(crossfade,expected,
+    'R2173 early native MAG visibility regressed at '+seconds+'s');
+  else assert(crossfade>0&&crossfade<1,'R2173 eye-open transition should crossfade the finished MAG');
+}
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261024-r2173-retired-intro-lifecycle';
+assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
+  'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
+assert.ok(worker.includes("'sha256-LO3HUV9j8rmHnB28vPQgG8bw2LIzXdwNTaWzMig4G90='"),
+  'Cloudflare CSP lacks the exact changed R2173 parser-bootstrap hash');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');
 for(const home of [
