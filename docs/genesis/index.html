@@ -35,11 +35,11 @@
     .top-meta{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#a4b9be}
     .back{color:var(--ivory);font-size:10px;text-decoration:none;letter-spacing:.17em;text-transform:uppercase;border:1px solid var(--line);border-radius:100px;padding:12px 16px;background:rgba(10,25,31,.38);backdrop-filter:blur(18px);transition:background .2s}
     .back:hover{background:rgba(91,173,187,.15)}
-    .editorial{position:absolute;left:clamp(26px,7.2vw,138px);top:50%;transform:translateY(-53%);width:min(32vw,540px);min-width:250px}
+    .editorial{position:absolute;left:clamp(26px,7.2vw,138px);top:50%;transform:translateY(-53%);width:min(36vw,540px);min-width:250px}
     .eyebrow{font-size:10px;color:#a8cad4;font-weight:600;letter-spacing:.38em;display:flex;gap:15px;align-items:center}
     .eyebrow:before{content:"";display:block;width:28px;height:1px;background:#8af5f2;box-shadow:0 0 12px #77ddf1}
-    h1{font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-weight:200;letter-spacing:-.07em;font-size:clamp(66px,8.3vw,150px);line-height:.83;margin:27px 0 30px;text-shadow:0 10px 70px rgba(17,39,51,.85)}
-    h1 span{display:block;letter-spacing:-.075em}
+    h1{font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;font-weight:200;letter-spacing:-.07em;font-size:clamp(66px,7.0vw,114px);line-height:.94;white-space:nowrap;margin:27px 0 30px;text-shadow:0 10px 70px rgba(17,39,51,.85)}
+    h1 span{display:inline;letter-spacing:-.075em}
     h1 .outline{color:transparent;-webkit-text-stroke:1px rgba(197,231,235,.65)}
     .editorial p{font-size:clamp(12px,1.1vw,15px);font-weight:300;color:#b0c6c9;line-height:1.85;max-width:320px;margin:0}
     .editorial .thin-rule{width:62px;height:1px;background:linear-gradient(90deg,#8dedeb,transparent);margin:30px 0 21px}
@@ -412,7 +412,7 @@
     renderer.setClearColor(0x020611,1);
     renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.toneMapping=THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure=1.16;
+    renderer.toneMappingExposure=.87;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,innerWidth<700?1.2:1.7));
     scene=new THREE.Scene();
     scene.background=new THREE.Color(0x020611);
@@ -432,7 +432,7 @@
     composer=new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene,camera));
     bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.05,.66,.15);
-    bloom.threshold=.17;bloom.radius=.72;bloom.strength=1.0;
+    bloom.threshold=.46;bloom.radius=.46;bloom.strength=.56;
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     resize();
@@ -602,6 +602,8 @@
     const t=state.time;
     const m=state.morph;
     particles.material.uniforms.uMorph.value=m;
+    // Keep the 9,600 nucleotides individually legible after condensation.
+    particles.material.uniforms.uOpacity.value=.92-.32*smooth((t-3.6)/3.0);
     particles.material.uniforms.uTime.value=elapsed;
     particles.material.uniforms.uBreath.value=state.breath;
     particles.rotation.y=elapsed*.032*(1-m)+m*Math.sin(elapsed*.075)*.15;
@@ -622,7 +624,7 @@
       ring.material.opacity=(.19-index*.036)*state.glow;
       ring.rotation.z=elapsed*(index%2?.035:-.026)+index*.13;
     });
-    bloom.strength=1.1+.26*state.glow+.05*Math.sin(elapsed*.7);
+    bloom.strength=.49+.12*state.glow+.018*Math.sin(elapsed*.7);
     if(!freeView){
       camera.position.x=track.x+pointerX*.13;
       camera.position.y=track.y-pointerY*.10;
