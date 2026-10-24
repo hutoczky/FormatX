@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261024-r2178-single-hull-zero-overlap-mag
-release_line=R2178-COHERENT-DNA-STUDIO-MAG-NATIVE-SINGLE-TITANIUM-HULL
+token=20261024-r2179-genesis-photographic-nucleus
+release_line=R2179-DNA-CELL-MAG-PHOTOGRAPHIC-NATIVE-RELEASE
 purpose=An explicitly staged ten-second studio birth film: one smooth centered living DNA double helix, then genuine genome-particle condensation into a clean embryonic cell, followed by phased titanium arm assembly and delayed optical ignition. After the assembled MAG is established, it travels and scales into the permanent WebGL hero position during a continuous 1.35-second photographic landing; final native hero crossfade begins only after 9.15 seconds.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
