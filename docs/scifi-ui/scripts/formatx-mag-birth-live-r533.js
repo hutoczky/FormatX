@@ -677,7 +677,17 @@
 
   function locateStage() {
     const candidate = document.querySelector('#hero .fx-crystal-organism-r326-stage');
-    if (candidate instanceof HTMLElement) stage = candidate;
+    if (candidate instanceof HTMLElement && candidate !== stage) {
+      stage = candidate;
+      // R2174: native WebGL is allowed to mount early for GPU warmup, but it
+      // must never flash on screen before the DNA -> embryo -> armour film.
+      // Hide a newly mounted stage synchronously, without a CSS transition.
+      if (!finished && ROOT.getAttribute('data-fx-mag-birth-live') === 'active') {
+        stage.style.setProperty('transition','none','important');
+        stage.style.setProperty('opacity','0','important');
+        stage.dataset.fxBirthConcealedR2174='true';
+      }
+    }
     coreApi = window.FormatXLivingCore || window.FormatXCoreMobileV69 || coreApi;
     return stage;
   }
@@ -714,8 +724,15 @@
   function setStageOpacity(value) {
     locateStage();
     if (!(stage instanceof HTMLElement)) return;
-    stage.style.setProperty('opacity', String(clamp(value,0,1)), 'important');
-    stage.style.setProperty('transition', 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    const alpha=clamp(value,0,1);
+    // R2174: 0 must be immediate. Animating opacity from the stage's default
+    // 1 to 0 caused a short, visible permanent MAG flash over the DNA film.
+    // The film owns the scene until the actual 7.6 s seating boundary.
+    stage.style.setProperty('transition', alpha<=.001
+      ? 'none'
+      : 'opacity .72s cubic-bezier(.2,.7,.2,1)', 'important');
+    stage.style.setProperty('opacity', String(alpha), 'important');
+    stage.dataset.fxBirthConcealedR2174=alpha<=.001?'true':'post-assembly-reveal';
   }
 
   function releaseStageStyle() {
