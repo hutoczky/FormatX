@@ -61,8 +61,8 @@ function observe({normal}){
   const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||undefined,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const report={auditedSha:process.env.AUDITED_SHA||null,browser:browser.version(),actualDockAndCinemaEvents:true,cases:[]};
   try{
-    for(const config of [{name:'desktop-1350-runtime',width:1350,height:940,normal:false},{name:'desktop-1440-normal-birth',width:1440,height:900,normal:true}]){
-      const context=await browser.newContext({viewport:{width:config.width,height:config.height},deviceScaleFactor:1,reducedMotion:'no-preference',userAgent:'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36'});
+    for(const config of [{name:'mobile-390-runtime',width:390,height:844,mobile:true,normal:false},{name:'mobile-430-normal-birth',width:430,height:932,mobile:true,normal:true},{name:'desktop-1350-runtime',width:1350,height:940,normal:false},{name:'desktop-1440-normal-birth',width:1440,height:900,normal:true}]){
+      const context=await browser.newContext({viewport:{width:config.width,height:config.height},deviceScaleFactor:config.mobile?2:1,isMobile:!!config.mobile,hasTouch:!!config.mobile,reducedMotion:'no-preference',userAgent:'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36'});
       try{
         await context.addInitScript(observe,{normal:config.normal});
         const page=await context.newPage(),errors=[],failedRequests=[];
@@ -88,7 +88,8 @@ function observe({normal}){
           assert(Math.abs(first.stage[key]-cinema.stage[key])<=1,`MAG ${key} jumps between first dock and cinema: ${first.stage[key]} -> ${cinema.stage[key]}`);
           assert(Math.abs(cinema.stage[key]-result.final[key])<=1,`MAG ${key} changes after cinema entry`);
         }
-        assert(first.stage.width<first.viewport.width*.5,'First dock exposed a full-viewport MAG stage');
+        if(!config.mobile)assert(first.stage.width<first.viewport.width*.5,'First dock exposed a full-viewport MAG stage');
+        else assert(first.stage.width<=first.viewport.width+1,'First mobile dock escaped the viewport');
         assert(first.stage.height<first.viewport.height*.8,'First dock exposed a full-height MAG stage');
         assert.deepEqual(first.canvas,cinema.canvas,'The first dock must already use the final native canvas scale and optics');
         assert.deepEqual(result.observation.shifts.filter(s=>!s.recentInput&&s.at>=first.at),[],'Native stage shifts after its first real docking');
