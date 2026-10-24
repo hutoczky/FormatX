@@ -43,7 +43,7 @@ assert.ok(Math.abs(heroX)<.10 && Math.abs(heroY)<.10 && heroZ>.45 &&
   'Desktop establishing shot must show a centered, vertical 3D double helix');
 assert.ok(engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
   'Desktop cinematic has no authoritative founding DNA');
-assert.ok(engine.includes('const donorEnvelope=smooth((t-4.18)/.55)*(1-smooth((t-5.95)/.85))') &&
+assert.ok(engine.includes('const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85))') &&
   engine.includes('h.userData.primary?fade:donorEnvelope*.27'),
   'Secondary DNA must stay dark through the biological chapter and feed later assembly');
 // R2172: verified stage-specific optics, NOT an unrelated flash or model swap.
@@ -56,7 +56,7 @@ assert.ok(engine.includes('const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.
   engine.includes('const dnaStudio=smooth((t-.12)/.38)'),
   'R2172 needs one tracked cinematic camera and physically moving key/fill lights');
 const smoothNumber=v=>{v=Math.min(1,Math.max(0,v));return v*v*(3-2*v)};
-const donorOpacity=t=>smoothNumber((t-4.18)/.55)*(1-smoothNumber((t-5.95)/.85));
+const donorOpacity=t=>smoothNumber((t-4.38)/.48)*(1-smoothNumber((t-5.95)/.85));
 for(const t of [0,1.6,2.6,4.2])assert.equal(donorOpacity(t),0,
   'Donor helices must be absent before the transition out of the embryo');
 assert(donorOpacity(5.1)>.99,'Donor helices must feed the four arms before titanium seating');
