@@ -20,18 +20,13 @@ for(const [name,s] of [['core',core],['archive',archive],['desktop-loader',desk]
 // R2137: the permanent on-page MAG, not only the birth film, must carry
 // visible raised metal arms in the single canonical WebGL geometry.
 for(const token of [
-  'R2141: four polished, contoured metal-arm assemblies',
   'for(let axis=0;axis<4;axis++)',
-  'for(const lane of [-1,1])',
-  'const steps=12',
-  'R2144: two intersecting bevel planes',
   'R2153 — continuous 3D titanium arms replace the eight detached',
   'const tipRadius=axis===1?1.096:axis===3?1.045:1.075',
   'const steps=14',
   'const eased=t*t*(3-2*t)',
   'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)',
   'armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008)',
-  'armorQuad(a.crown,a.right,b.right,b.crown,facet+.016)',
   'const metalFacet=facet>=5.0&&facet<6.0',
   'armorQuad(innerA,outerA,outerB,innerB,5.22)',
   'const normal=normalize([position[0]*1.14,position[1]*1.14,1.40])',
@@ -40,11 +35,7 @@ for(const token of [
   'for(let j=0;j<48;j++)',
   'for(let j=0;j<8;j++)',
   'float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0)',
-  'const half=.021+.042*Math.sin(Math.PI*t)',
-  'const centre=lane*(half+.013)',
   'return axisZ*Math.pow(remaining,1/exponent)',
-  'const relief=.030+.010*Math.sin(Math.PI*t)',
-  'armorQuad(a.left,a.crown,b.crown,b.left,facet)',
   'float machinedArmor=step(5.0,vFacet)',
   'c=mix(c,titanium,machinedArmor*.99)',
   'float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet))',
@@ -53,6 +44,15 @@ for(const token of [
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
+// R2178: reject the genuine root cause of visible titanium pepper-speckles:
+ // the former R2141 double-lane armour overlaid the newer R2153 one-piece
+ // arm hulls at almost identical projected depth. Exactly four arm hulls.
+assert.equal((core.match(/for\\(let axis=0;axis<4;axis\\+\\+\\)/g)||[]).length,1,
+  'R2178: permanent MAG must have one (and only one) four-arm geometry pass');
+assert.ok(!core.includes('for(const lane of [-1,1])'),
+  'R2178: retired duplicate titanium lane geometry has returned');
+assert.ok(core.includes('R2178: the retired eight raised titanium winglets'),
+  'R2178: missing documented single-chassis ownership');
 assert.ok(!core.includes('1-smooth(t)'), 'R2154: undefined smooth() must not break permanent WebGL geometry');
 assert.ok(!html.includes('class="fx-mag-replay-r2150"') && !html.includes('data-fx-mag-replay-r2150'),
   'R2157: removed INTRO ÚJRA must not return to the permanent MAG hero');
