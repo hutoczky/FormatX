@@ -776,10 +776,10 @@
         const strand=i%2;
         const sign=strand===0?1:-1;
         const phase=u*Math.PI*2*3.82;
-        const radius=.272+(r()-.5)*.016;
+        const helixRadius=.272+(r()-.5)*.016;
         const localX=(u-.5)*4.08;
-        const localY=sign*Math.sin(phase)*radius;
-        const localZ=sign*Math.cos(phase)*radius;
+        const localY=sign*Math.sin(phase)*helixRadius;
+        const localZ=sign*Math.cos(phase)*helixRadius;
         const rolledX=localX*cosZ-localY*sinZ;
         const rolledY=localX*sinZ+localY*cosZ;
         initial.set([
