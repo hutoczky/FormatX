@@ -25,7 +25,7 @@ const INLINE_R2167_BOOT_HASH = "'sha256-y+8/vQYbSebeWoOU9O4YA0EzypCmrfbhEUkbyGKJ
 // R2173: exact inline SHA256 after activating the strict MAG reveal handoff.
 const INLINE_R2173_BOOT_HASH = "'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='";
 // R2175: exact parser-owned bootstrap fingerprint for the timed MAG landing.
-const INLINE_R2175_BOOT_HASH = "'sha256-VP3CZoYSuJr5kQ6mWR/FvvAs+2eceHsU44aK1lpujRM='";
+const INLINE_R2180_BOOT_HASH = "'sha256-vFnqrxhj1TyaRwUVyY50JweGkw0ezcXtOE1df2a68/c='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -37,14 +37,14 @@ const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(ma
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261024-r2179-true-optic-stable-titanium';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261013-r2054-verified-css-recovery"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2175_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
+const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2175_BOOT_HASH} https://static.cloudflareinsights.com`,
+  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} https://static.cloudflareinsights.com`,
   "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI='",
   "img-src 'self' data: https://quickchart.io",
   "font-src 'self'",
