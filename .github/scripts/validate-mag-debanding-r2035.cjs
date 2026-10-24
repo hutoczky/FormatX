@@ -47,7 +47,7 @@ for(const token of [
 // R2178: reject the genuine root cause of visible titanium pepper-speckles:
  // the former R2141 double-lane armour overlaid the newer R2153 one-piece
  // arm hulls at almost identical projected depth. Exactly four arm hulls.
-assert.equal((core.match(/for\\(let axis=0;axis<4;axis\\+\\+\\)/g)||[]).length,1,
+assert.equal(core.split('for(let axis=0;axis<4;axis++)').length-1,1,
   'R2178: permanent MAG must have one (and only one) four-arm geometry pass');
 assert.ok(!core.includes('for(const lane of [-1,1])'),
   'R2178: retired duplicate titanium lane geometry has returned');
