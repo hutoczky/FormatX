@@ -119,6 +119,9 @@ async function readTimeline(page){
 
 // R1405 live handoff tolerance: the film remains 10.0s; this wider CI wait only
 // tolerates slow remote script/bootstrap scheduling and does not alter product timing.
+// R1815c — production intentionally disables accelerometer via Permissions-Policy.
+// Chromium surfaces that restriction as a console error. It is expected and
+// must not mask the real R533/R536 cinematic assertions below.
 async function verifyFullBirth(browser){
   const context=await browser.newContext({
     viewport:{width:1440,height:900},colorScheme:'dark',reducedMotion:'no-preference',locale:'hu-HU'
