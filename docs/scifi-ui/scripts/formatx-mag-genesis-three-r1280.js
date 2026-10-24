@@ -2415,6 +2415,13 @@
           root.dataset.fxMagBirthVisibleArmorR2147=String(
             [...this.silverParts,...this.plates].filter(part=>part.visible).length
           );
+          // R2180: real GPU scene proof, not a CSS or semantic placeholder.
+          root.dataset.fxMagBirthArmInlaysR2180=String(
+            this.armInlays.filter(part=>part.visible).length
+          );
+          root.dataset.fxMagBirthArmInlayOpacityR2180=String(
+            this.armInlayMaterial.opacity
+          );
           // R2148: test-only true GPU-scene optic state; never emit per-frame
           // telemetry during a normal mobile visitor's ten-second intro.
           root.dataset.fxMagBirthEyeOpacityR2148=String(
