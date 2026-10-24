@@ -403,7 +403,8 @@
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
         const metalFacet=facet>=5.0&&facet<6.0;
-        const smoothWeight=metalFacet?(facet>=5.65?.57:.74):
+        // R2177: avoid jagged per-triangle metal shading on the phone.
+        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
           (facet<2.0?(mobile?.985:(software?.94:.90)):
           (software?.95:(mobile?.985:(constrained?.972:.978))));
         const faceWeight=1-smoothWeight;
@@ -618,7 +619,8 @@
           const radius=.19+.66*t;
           const half=.021+.042*Math.sin(Math.PI*t);
           const centre=lane*(half+.013);
-          const relief=.011+.009*Math.sin(Math.PI*t);
+          // R2177: lift the bevel above the displaced mineral substrate.
+          const relief=.030+.010*Math.sin(Math.PI*t);
           const make=(offset,depth)=>{
             const x=dx*radius+px*(centre+offset);
             const y=dy*radius+py*(centre+offset);
@@ -631,8 +633,8 @@
             left:make(-half,.079),
             crown:make(0,.164),
             right:make(half,.079),
-            lowerLeft:make(-half,.022),
-            lowerRight:make(half,.022)
+            lowerLeft:make(-half,.036),
+            lowerRight:make(half,.036)
           });
         }
         for(let j=0;j<steps;j++){
@@ -1163,7 +1165,10 @@
         projected.y+=${mobile?'.010':'-.006'};
         /* world.z grows toward the virtual camera in the perspective term.
            NDC depth grows away from camera, therefore the sign must be inverted. */
-        gl_Position=vec4(projected,-world.z*.13,1.0);
+        // R2177: a tiny stable depth offset avoids metal/bioglass Z-fighting
+        // without adding a second canvas, blending pass or draw call.
+        float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet));
+        gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.0025,1.0);
       }`;
 
     const fullFragmentSource = `${versionLine}precision highp float;
