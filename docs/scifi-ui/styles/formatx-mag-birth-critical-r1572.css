@@ -96,3 +96,13 @@ html[data-fx-mag-birth-live="active"]{
 @media (prefers-reduced-motion:reduce){
   .fx-mag-birth-r533{transition:none}
 }
+
+/* R2174: first-paint occlusion guard. The permanent MAG may initialize its
+   WebGL shader behind the cinematic, but cannot become visible while the
+   central DNA or embryo owns the shot. Only the post-assembly handoff lifts
+   this CSS guard; inline stage opacity then owns the cinematic crossfade. */
+html:root:root[data-fx-mag-birth-live="active"]:not([data-fx-mag-birth-native-reveal-r2173="post-assembly-crossfade"]):not([data-fx-mag-birth-native-reveal-r2173="ready-permanent-mag"])
+body #hero .hero-space > .fx-crystal-organism-r326-stage {
+  opacity:0!important;
+  transition:none!important;
+}
