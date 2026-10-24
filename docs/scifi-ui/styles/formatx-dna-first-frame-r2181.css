@@ -1,0 +1,78 @@
+/* R2181 — cold-start DNA. This first-byte silhouette is real inline SVG
+   under the initial, adopted R533 intro shell. It deliberately has no
+   external image, network font, JavaScript or extra animation loop.
+   It is removed only after the cinematic renderer draws its first frame. */
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-dna-r2181 {
+  display:none;
+}
+html[data-fx-intro-prepaint-r1611="show"]
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-dna-r2181 {
+  position:absolute;
+  z-index:5;
+  display:block;
+  left:50%;
+  top:49%;
+  width:min(74vw,360px);
+  height:min(74dvh,690px);
+  max-width:none;
+  overflow:visible;
+  pointer-events:none;
+  filter:drop-shadow(0 0 13px rgba(44,191,216,.34))
+         drop-shadow(0 0 35px rgba(99,77,192,.19));
+  transform:translate(-50%,-50%) perspective(900px) rotateY(-15deg) rotateZ(-3deg);
+  transform-origin:50% 50%;
+  animation:fxb-first-frame-birth-r2181 5s ease-in-out infinite alternate;
+}
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-dna-r2181 path {
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-glow-r2181 path {
+  stroke-width:15;
+  opacity:.12;
+  filter:blur(7px);
+}
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-strands-r2181 path {
+  stroke-width:5.4;
+  opacity:.96;
+}
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-pairs-r2181 line {
+  stroke:#87cce3;
+  stroke-width:2.2;
+  opacity:.52;
+}
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-nodes-r2181 .cyan {
+  fill:#d8ffff;
+  filter:drop-shadow(0 0 3px #3cf2fa);
+}
+#fx-mag-birth-prepaint-r1606 .fxb-first-frame-nodes-r2181 .violet {
+  fill:#e2d5ff;
+  filter:drop-shadow(0 0 3px #9677ff);
+}
+@keyframes fxb-first-frame-birth-r2181 {
+  0% {
+    transform:translate(-50%,-50%) perspective(900px) rotateY(-15deg) rotateZ(-3deg);
+    opacity:.85;
+  }
+  100% {
+    transform:translate(-50%,-50%) perspective(900px) rotateY(11deg) rotateZ(2deg);
+    opacity:1;
+  }
+}
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25) {
+  html[data-fx-intro-prepaint-r1611="show"]
+  #fx-mag-birth-prepaint-r1606 .fxb-first-frame-dna-r2181 {
+    top:49%;
+    width:min(77vw,320px);
+    height:min(65dvh,560px);
+    filter:drop-shadow(0 0 12px rgba(58,198,218,.32))
+           drop-shadow(0 0 27px rgba(110,78,207,.18));
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  html[data-fx-intro-prepaint-r1611="show"]
+  #fx-mag-birth-prepaint-r1606 .fxb-first-frame-dna-r2181 {
+    animation:none;
+  }
+}

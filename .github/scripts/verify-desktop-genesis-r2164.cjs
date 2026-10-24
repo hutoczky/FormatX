@@ -104,6 +104,8 @@ async function main(){
           embryoOpacity:Number(root.dataset.fxMagBirthEmbryoOpacityR2160||0),
           embryoScale:Number(root.dataset.fxMagBirthEmbryoScaleR2149||0),
           armorPieces:Number(root.dataset.fxMagBirthVisibleArmorR2147||0),
+          inlayPieces:Number(root.dataset.fxMagBirthArmInlaysR2180||0),
+          inlayOpacity:Number(root.dataset.fxMagBirthArmInlayOpacityR2180||0),
           eyeOpacity:Number(root.dataset.fxMagBirthEyeOpacityR2148||0),
           genomeCount:Number(root.dataset.fxMagBirthGenomeParticlesR2160||0),
           peak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
@@ -129,6 +131,7 @@ async function main(){
       if(name==='dna'){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
         assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
+        assert.equal(state.inlayPieces,0,'R2180 titanium appeared during DNA opening');
         assert.ok(state.embryoOpacity<.01,'Embryo appeared before DNA origin');
       }
       if(name==='embryo'){
@@ -136,13 +139,17 @@ async function main(){
         assert.ok(state.embryoScale>.60,'Living cell nucleus must fill the studio close-up');
         assert.ok(state.dnaOpacity<.36,'DNA does not make room for the nucleus');
         assert.equal(state.armorPieces,0,'Metal appeared before the embryo');
+        assert.equal(state.inlayPieces,0,'R2180 titanium covered the living nucleus');
       }
       if(name==='assembly'){
         assert.ok(state.armorPieces>=1,'Four-arm chassis did not begin assembling');
+        assert.ok(state.inlayPieces>=2,'R2180 titanium inlays did not start seating');
         assert.ok(state.eyeOpacity<.003,'MAG optical organ ignited before assembly');
       }
       if(name==='mag'){
         assert.ok(state.armorPieces>=5,'Permanent titanium chassis is incomplete');
+        assert.equal(state.inlayPieces,4,'R2180 four machined arm inlays incomplete');
+        assert.ok(state.inlayOpacity>.70,'R2180 optical titanium material missing');
         assert.ok(state.eyeOpacity>.07 && state.eyeOpacity<.25,'MAG eye not visibly awakened');
       }
       outputs.push({name,seconds,...state});

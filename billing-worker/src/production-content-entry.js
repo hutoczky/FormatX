@@ -25,7 +25,7 @@ const INLINE_R2167_BOOT_HASH = "'sha256-y+8/vQYbSebeWoOU9O4YA0EzypCmrfbhEUkbyGKJ
 // R2173: exact inline SHA256 after activating the strict MAG reveal handoff.
 const INLINE_R2173_BOOT_HASH = "'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='";
 // R2175: exact parser-owned bootstrap fingerprint for the timed MAG landing.
-const INLINE_R2179_OWN_BOOT_HASH = "'sha256-g04mjLntRvn8Vy6KWfrkAHbI1dGtr3getveN5iirM1c='";
+const INLINE_R2179_OWN_BOOT_HASH = "'sha256-vR4G1K9xwapInZdgibgBJeypYFKbikrEkesFvuRoMn8='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -221,7 +221,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261024-r2179-dna-cell-msaa-continuity']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261025-r2181-born-mag-continuity']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',

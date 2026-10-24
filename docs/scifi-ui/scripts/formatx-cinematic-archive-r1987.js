@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
+  const VERSION='cinematic-archive-r2181-native-handoff-layout';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -245,13 +245,26 @@
      Every original section remains in the document as a scroll anchor.
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
-    for(const scene of scenes){
+    // Read every original anchor before moving any live child. Interleaving
+    // these reads with the folio transfers forced a fresh document layout for
+    // each chapter while the same native MAG was preparing its first frame.
+    const prepared=new Map();
+    const entries=scenes.map(scene=>{
       const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
-      if(!(host instanceof HTMLElement))continue;
+      if(!(host instanceof HTMLElement))return null;
+      let entry=prepared.get(host);
+      if(!entry){
+        const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+        entry={host,panel,oldHeight:panel?null:Math.max(520,host.getBoundingClientRect().height||host.offsetHeight)};
+        prepared.set(host,entry);
+      }
+      return {scene,entry};
+    }).filter(Boolean);
+    for(const {scene,entry} of entries){
+      const {host,oldHeight}=entry;
       scene.cinemaHost=host;
-      let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+      let panel=entry.panel;
       if(!panel){
-        const oldHeight=Math.max(520,host.getBoundingClientRect().height||host.offsetHeight);
         panel=document.createElement('div');
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
@@ -280,6 +293,7 @@
         host.style.setProperty('height','165dvh','important');
         host.style.setProperty('max-height','165dvh','important');
         host.dataset.fxCinemaAnchorHeight=String(Math.round(oldHeight));
+        entry.panel=panel;
       }
       if(!cinemaHosts.includes(host))cinemaHosts.push(host);
       scene.cinemaPanel=panel;

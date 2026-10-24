@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2179-dna-cell-msaa-continuity';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261025-r2181-born-mag-continuity';
 for(const token of [
   'crownL.scale.set(.30,.90,.76)',
   'crownR.scale.set(-.30,.90,.76)',
@@ -139,10 +139,10 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261024-r2179-dna-cell-mag-handoff';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261025-r2181-birth-layout-handoff';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
-assert.ok(worker.includes("'sha256-g04mjLntRvn8Vy6KWfrkAHbI1dGtr3getveN5iirM1c='"),
+assert.ok(worker.includes("'sha256-vR4G1K9xwapInZdgibgBJeypYFKbikrEkesFvuRoMn8='"),
   'Cloudflare CSP lacks the exact changed R2173 parser-bootstrap hash');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');

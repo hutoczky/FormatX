@@ -273,6 +273,17 @@
   ROOT.dataset.fxNativeMagProofR1101 = 'r1090-intro-r1100-real-armor-browser-proof';
   ROOT.dataset.fxIntroProofR911 = 'r900-intro-r910-native-clean-browser-proof';
   overlay.setAttribute('aria-label', copy.title);
+  // R2181: preserve the instant DNA fallback while Three.js/WASM/GPU warms
+  // up. Retire it ONLY after the film's first real render, or at the end
+  // of the DNA chapter on a software/2D fallback; never leave it over MAG.
+  const firstFrameDnaR2181=overlay.querySelector('.fxb-first-frame-dna-r2181');
+  let firstFrameDnaReleasedR2181=false;
+  function releaseFirstFrameDnaR2181(reason){
+    if(firstFrameDnaReleasedR2181)return;
+    firstFrameDnaReleasedR2181=true;
+    firstFrameDnaR2181?.remove();
+    ROOT.dataset.fxMagBirthDnaFirstFrameR2181=reason;
+  }
   let prepaintCanvas = overlay.querySelector('.fxb-particles');
   overlay.insertAdjacentHTML('beforeend', `
     <div class="fxb-deep" aria-hidden="true"></div>
@@ -563,7 +574,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261024-r2179-dna-cell-msaa-continuity';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261025-r2181-born-mag-continuity';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -963,7 +974,14 @@
   }
 
   function drawParticles(r,time) {
-    if(filmRenderer){ filmRenderer.draw?.(r,time); return; }
+    if(filmRenderer){
+      filmRenderer.draw?.(r,time);
+      // A successfully drawn frame replaces the cold-start SVG in the SAME
+      // animation tick, never exposing a black intermediate viewport.
+      releaseFirstFrameDnaR2181('gpu-film-first-frame');
+      return;
+    }
+    if(r>=.23)releaseFirstFrameDnaR2181('dna-chapter-fallback-handoff');
     if(filmRendererPromise)return;
     if(!ctx)return;
     const w=innerWidth,h=innerHeight;
