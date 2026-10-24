@@ -61,7 +61,7 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:!this.mobileRender,
+        antialias:true,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -810,7 +810,11 @@
             gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z),1.0,5.6*uPixelRatio);
             float first=curve(0.08,.65,uPhase);
             float last=1.0-curve(7.16,8.05,uPhase);
-            vEnergy=first*last;
+            // Let the membrane and nucleus own the condensed-cell chapter.
+            // Keep every GPU particle and restore full transfer energy as the
+            // same points assemble into the four authored titanium arms.
+            float cellFocus=condense*(1.0-assemble);
+            vEnergy=first*last*(1.0-.66*cellFocus);
             vSeed=aSeed;
           }`,
         fragmentShader:`

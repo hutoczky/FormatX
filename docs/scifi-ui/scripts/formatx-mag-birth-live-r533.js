@@ -563,7 +563,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261024-r2175-dna-cell-mag-studio-landing';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261024-r2175-mobile-msaa-film';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -694,6 +694,7 @@
   }
 
   function syncTarget(force=false) {
+    if (finished) return;
     const now = performance.now();
     if (!force && now-lastTargetSync < 180) return;
     lastTargetSync = now;
@@ -813,7 +814,7 @@
   }
 
   function startR649Fallback(){
-    if(filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
+    if(finished || filmRendererFallbackStarted || filmRenderer || !(canvas instanceof HTMLCanvasElement))return;
     filmRendererFallbackStarted=true;
     if(ROOT.dataset.fxMagBirthR1545==='software-webgl-reference-film-fallback')softwareFallbackActive=true;
     ROOT.dataset.fxMagBirthFallbackPolicyR1730=softwareFallbackActive
@@ -864,7 +865,7 @@
   }
 
   function sizeCanvas() {
-    if (!(canvas instanceof HTMLCanvasElement)) return;
+    if (finished || !(canvas instanceof HTMLCanvasElement)) return;
     syncTarget(true);
     if(AUTOMATION && FORCE && !VISUAL_PROOF){
       ROOT.dataset.fxMagBirthRendererR1360='automation-handoff-lightweight';
@@ -1445,9 +1446,9 @@
     locateStage();
     syncTarget(true);
     coreApi=window.FormatXLivingCore||window.FormatXCoreMobileV69||coreApi;
-  },{passive:true});
-  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},{passive:true});
-  addEventListener('orientationchange',()=>setTimeout(()=>syncTarget(true),120),{passive:true});
+  },interactionOptions);
+  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},interactionOptions);
+  addEventListener('orientationchange',()=>setTimeout(()=>syncTarget(true),120),interactionOptions);
   addEventListener('pagehide',()=>finish('pagehide'),{once:true});
 
   start();

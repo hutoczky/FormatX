@@ -12,7 +12,7 @@ const permanent=read('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
 const home=read('docs/scifi-ui/index.html');
 const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const modulePath='/scifi-ui/scripts/three-r185.module.js';
-const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2175-dna-cell-mag-studio-landing';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261024-r2175-mobile-msaa-film';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -108,10 +108,10 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261024-r2175-cell-to-mag-landing';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261024-r2175-mobile-msaa-handoff';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
-assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),
+assert.ok(worker.includes("'sha256-ko75vmw8zOSike2Px9UTZI0FlWrjThI7blFxEndsW6s='"),
   'Cloudflare CSP lacks the exact changed R2173 parser-bootstrap hash');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');
