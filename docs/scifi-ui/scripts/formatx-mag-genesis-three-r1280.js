@@ -2136,12 +2136,12 @@
       this.mechMidMaterial.roughness=mix(.24,.19,finale);
       this.silverMaterial.roughness=mix(.18,.14,finale);
 
-      this.mechMaterial.opacity=(.90+.028*finale)*grow;
+      this.mechMaterial.opacity=(.97+.018*finale)*grow;
       // R2119: reveal machined inserts as solid layers, not ghosted decals.
       // Opacity is still animated from zero to preserve the cinematic reveal.
-      this.mechMidMaterial.opacity=(.74+.08*finale)*grow;
-      this.silverMaterial.opacity=(.76+.10*finale)*grow;
-      this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
+      this.mechMidMaterial.opacity=(.91+.07*finale)*grow;
+      this.silverMaterial.opacity=(.92+.06*finale)*grow;
+      this.mechEdgeMaterial.opacity=(.045+.020*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
@@ -2215,7 +2215,7 @@
       // R2180: titanium inlays mechanically seat after the supporting DNA
       // reaches each arm. Shared geometry, deterministic authored end pose.
       const inlayBirth=smooth((t-5.86)/1.14);
-      this.armInlayMaterial.opacity=.93*grow;
+      this.armInlayMaterial.opacity=.985*grow;
       this.armEtchMaterial.opacity=.55*inlayBirth;
       this.armInlays.forEach((part,axis)=>{
         const seat=smooth((t-5.90-axis*.13)/1.16);
