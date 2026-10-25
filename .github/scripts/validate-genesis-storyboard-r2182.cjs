@@ -55,4 +55,23 @@ assert(embryo(4.4)>.98,'The cell fails to materialize after DNA condensation');
 assert(arm(7.2)>.99,'The titanium MAG is still missing after assembly');
 assert.equal(smooth((7.3-7.44)/.78),0,'The optical eye ignites before seating');
 assert(smooth((8.4-7.44)/.78)>.99,'The finished MAG eye never ignites');
-console.log('R2182_GENESIS_STORYBOARD_PASS DNA -> condensation -> cell -> four-arm titanium MAG -> optical ignition');
+// R2183: enforce real, independent sources for every MAG arm on desktop and
+// mobile. Previously the nearest-X/Y heuristic left the south arm unconnected.
+const assignment=gpu.match(/const armAssignments=this\.mobileRender\s*\?\s*(\[[^\]]+\])\s*:\s*(\[[^\]]+\]);/);
+assert(assignment,'Missing explicit mobile/desktop DNA donor routing');
+const routes=[JSON.parse(assignment[1]),JSON.parse(assignment[2])];
+for(const [index,arms] of routes.entries()){
+  const label=index===0?'mobile':'desktop';
+  assert.equal(arms.length,index===0?4:7,label+' DNA donor count drift');
+  for(const axis of [0,1,2,3]){
+    assert(arms.includes(axis),label+' MAG arm '+axis+' has no DNA donor');
+  }
+}
+check(gpu,[
+  'return b.armAxis===axis;',
+  'const nearestAxis=b.armAxis;',
+  'line.userData.source=candidates[0]||null;',
+  "throw new Error('Every MAG arm requires an actual DNA donor source')",
+  "throw new Error('A true double helix needs two strands from one donor')"
+],'DNA bridge must preserve paired helix source across all four titanium axes');
+console.log('R2183_GENESIS_STORYBOARD_PASS DNA -> condensation -> cell -> four-arm titanium MAG -> optical ignition');
