@@ -20,7 +20,7 @@ check(gpu,[
   'const grow=smooth((t-3.76)/.72)',
   'const grow=smooth((t-3.90)/.70)',
   'float condense=curve(2.94,4.38,uPhase)',
-  'float assemble=curve(5.36,7.18,uPhase)',
+  'float assemble=curve(5.34+armBeat,6.90+armBeat,uPhase)',
   'const grow=smooth((t-5.88)/1.18)',
   'const opticWake=smooth((t-7.44)/.78)',
   'this.updateDNA(t,time)',
@@ -55,6 +55,31 @@ assert(embryo(4.4)>.98,'The cell fails to materialize after DNA condensation');
 assert(arm(7.2)>.99,'The titanium MAG is still missing after assembly');
 assert.equal(smooth((7.3-7.44)/.78),0,'The optical eye ignites before seating');
 assert(smooth((8.4-7.44)/.78)>.99,'The finished MAG eye never ignites');
+// R2184: paired nucleotide color/arm routing and four staggered seating beats.
+// i%4 assigned alternating DNA strands to disjoint opposite arm pairs:
+// cyan ONLY north/south and violet ONLY east/west. Now the two physical
+// nucleotides at each base-pair station must travel to the same MAG arm.
+check(gpu,[
+  'const armIndex=new Float32Array(count)',
+  'const axis=Math.floor(i/2)%4',
+  'armIndex[i]=axis',
+  "geometry.setAttribute('aArmIndex',new T.BufferAttribute(armIndex,1))",
+  'attribute float aArmIndex;',
+  'float armBeat=aArmIndex*.11;',
+  'float curlEnvelope=assemble*(1.0-assemble);'
+],'Nucleotide pairing and staggered four-arm morph');
+assert(!gpu.includes('const axis=i%4,phi=axis*Math.PI*.5;'),
+  'The old strand-parity-based arm assignment has returned');
+for(let pair=0;pair<96;pair++){
+  const first=Math.floor((pair*2)/2)%4;
+  const second=Math.floor((pair*2+1)/2)%4;
+  assert.equal(first,second,'One DNA base pair was routed to different arms');
+}
+for(const axis of [0,1,2,3]){
+  const armBeat=axis*.11;
+  const endTime=6.90+armBeat;
+  assert(endTime<7.44,'A genetic arm assembled after the optic ignited');
+}
 // R2183: enforce real, independent sources for every MAG arm on desktop and
 // mobile. Previously the nearest-X/Y heuristic left the south arm unconnected.
 const assignment=gpu.match(/const armAssignments=this\.mobileRender\s*\?\s*(\[[^\]]+\])\s*:\s*(\[[^\]]+\]);/);
@@ -74,4 +99,4 @@ check(gpu,[
   "throw new Error('Every MAG arm requires an actual DNA donor source')",
   "throw new Error('A true double helix needs two strands from one donor')"
 ],'DNA bridge must preserve paired helix source across all four titanium axes');
-console.log('R2183_GENESIS_STORYBOARD_PASS DNA -> condensation -> cell -> four-arm titanium MAG -> optical ignition');
+console.log('R2184_GENESIS_STORYBOARD_PASS paired DNA -> biological nucleus -> staggered four-arm titanium MAG -> optical ignition');
