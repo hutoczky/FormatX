@@ -105,7 +105,7 @@ check(gpu,[
 check(gpu,[
   'const end=1-smooth((t-6.76)/.58)',
   'line.material.opacity=(lane===0?.70:.54)*opacity',
-  'bridge.material.opacity=.48*opacity',
+  'bridge.material.opacity=.67*opacity',
   'float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));',
   'vEnergy=first*last*(1.0+transferGlow*.16);',
   'this.assemblyWeldMaterial.uniforms.uIntensity.value=strength',
