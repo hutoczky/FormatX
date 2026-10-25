@@ -76,7 +76,7 @@ assert.ok(engine.includes('const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.
   engine.includes('this.studioKey.position.set(') &&
   engine.includes('-3.8-dnaStudio*.42+assemblyStudio*1.30') &&
   engine.includes('4.4-dnaStudio*.32-assemblyStudio*1.15') &&
-  engine.includes('const embryoStudio=smooth((t-2.48)/.62)') &&
+  engine.includes('const embryoStudio=smooth((t-3.48)/.62)') &&
   engine.includes('const dnaStudio=smooth((t-.12)/.38)'),
   'R2172 needs one tracked cinematic camera and physically moving key/fill lights');
 const smoothNumber=v=>{v=Math.min(1,Math.max(0,v));return v*v*(3-2*v)};
