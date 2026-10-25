@@ -3,8 +3,10 @@
 // asynchronous film owner is fetched, parsed or compiles its WebGL shader.
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const css=fs.readFileSync('docs/scifi-ui/styles/formatx-dna-first-frame-r2181.css','utf8');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
 const birth=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
 const gpu=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
 const prepaint=html.match(/<section id="fx-mag-birth-prepaint-r1606"[\s\S]*?<\/section>/);
@@ -15,7 +17,15 @@ assert(prepaint[0].includes('fxb-first-frame-strands-r2181'),'DNA lacks the oppo
 const pairs=(prepaint[0].match(/<line x1=/g)||[]).length;
 const nodes=(prepaint[0].match(/<circle class=/g)||[]).length;
 assert(pairs>=28&&nodes>=38,'Opening DNA geometry is too sparse');
-assert(/data-fx-dna-first-frame-r2181="true"/.test(html),'Critical preload stylesheet link missing');
+const inline=html.match(/<style data-fx-dna-first-frame-r2181="true">([\s\S]*?)<\/style>/);
+assert(inline,'Parser-inline DNA first-frame style missing');
+assert.equal(inline[1],css,'Parser-inline DNA style must remain byte-exact with its canonical asset');
+assert(!/<link[^>]+data-fx-dna-first-frame-r2181="true"/.test(html),'DNA first frame must not wait for a render-blocking stylesheet request');
+const cssHash=`'sha256-${crypto.createHash('sha256').update(css).digest('base64')}'`;
+assert(html.match(/<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i)?.[1].includes(cssHash),'HTML CSP is missing exact inline DNA style hash');
+assert(worker.includes(`const INLINE_DNA_FIRST_FRAME_STYLE_HASH = "${cssHash}"`),'Worker is missing exact inline DNA style hash declaration');
+assert(worker.match(/const META_CSP = `([\s\S]*?)`;/)?.[1].includes('${INLINE_DNA_FIRST_FRAME_STYLE_HASH}'),'Worker META_CSP does not authorize inline DNA style');
+assert(worker.match(/const HEADER_CSP = \[([\s\S]*?)\]\.join/)?.[1].includes('${INLINE_DNA_FIRST_FRAME_STYLE_HASH}'),'Worker HEADER_CSP does not authorize inline DNA style');
 assert(css.includes('data-fx-intro-prepaint-r1611="show"'),'Cold frame hidden on initial HTML');
 assert(css.includes('prefers-reduced-motion:reduce'),'Reduced motion must remain accessible');
 assert(birth.includes('const firstFrameDnaR2181=overlay.querySelector'),'R533 does not adopt DNA shell');
@@ -24,4 +34,4 @@ assert(birth.includes("releaseFirstFrameDnaR2181('dna-chapter-fallback-handoff')
 assert(gpu.includes('this.makeDNAField();')&&gpu.includes('this.makeGenomeParticles();'),'GPU genome chapter missing');
 assert(gpu.includes('this.makeEmbryoFilm();')&&gpu.includes('this.makeMechanicalLayer();'),'DNA-to-embryo-to-MAG pipeline incomplete');
 assert(/if\(t<2\.52\)/.test(gpu)&&gpu.includes('const grow=smooth((t-5.88)/1.18)'),'Genesis timeline ordering changed');
-console.log('R2181_FIRST_VISIBLE_FRAME_DNA_PASS',JSON.stringify({basePairs:pairs,nucleotides:nodes,criticalCss:true,gpuHandoff:true,fallbackHandoff:true}));
+console.log('R2181_FIRST_VISIBLE_FRAME_DNA_PASS',JSON.stringify({basePairs:pairs,nucleotides:nodes,criticalCss:'parser-inline-byte-exact',cssHash,gpuHandoff:true,fallbackHandoff:true}));
