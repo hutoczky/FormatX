@@ -74,9 +74,9 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=i%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.86*visible;',
-  'this.embryoNucleusMaterial.opacity=.47*visible;',
-  'this.embryoCapillaryMaterial.opacity=.16*visible;'
+  'this.embryoMaterial.opacity=.72*visible;',
+  'this.embryoNucleusMaterial.opacity=.76*visible;',
+  'this.embryoCapillaryMaterial.opacity=.25*visible;'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
 }
