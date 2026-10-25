@@ -2150,7 +2150,13 @@
           const eased=smooth(u);
           const x=mix(source.position.x,dx*.86,eased);
           const y=mix(source.position.y,dy*.86,eased);
-          const z=mix(source.position.z,.19,eased);
+          // R2190: the double helix must remain PHYSICALLY IN FRONT of the
+          // emerging titanium inlays during the genetic welding shot.
+          // Previously z=.19 left it behind the .38-.48 metal face: the
+          // actual 6.8s WebGL capture showed metal but almost no DNA.
+          // This 3D path rises onto the arm, then fades before eye ignition.
+          const frontSource=Math.max(.28,source.position.z+.22);
+          const z=mix(frontSource,.65,eased);
           // R2135: a real volumetric, phase-opposed double helix twists
           // around each forming MAG arm, rather than oscillating in a plane.
           // Its tapered radius seats into the emerging metal at both ends.
@@ -2164,7 +2170,7 @@
         const tube=line.userData.tube;
         if(tube){
           tube.visible=opacity>.002;
-          tube.material.opacity=(lane===0?.38:.30)*opacity;
+          tube.material.opacity=(lane===0?.64:.52)*opacity;
           const p=tube.geometry.attributes.position;
           const sides=6;
           for(let j=0;j<40;j++){
@@ -2201,7 +2207,7 @@
         const show=opacity>.002 && first?.visible && second?.visible;
         bridge.visible=Boolean(show);
         if(!show)return;
-        bridge.material.opacity=.48*opacity;
+        bridge.material.opacity=.67*opacity;
         const a=bridge.geometry.attributes.position;
         const p=first.geometry.attributes.position;
         const q=second.geometry.attributes.position;
@@ -2697,6 +2703,14 @@
           );
           root.dataset.fxMagBirthArmInlayOpacityR2180=String(
             this.armInlayMaterial.opacity
+          );
+          // R2190: verify real transfer tube opacity and physical world-space
+          // front depth on the exact browser-rendered film frame.
+          root.dataset.fxMagBirthTransferTubeOpacityR2190=String(
+            this.birthStrands[0]?.userData?.tube?.material?.opacity??0
+          );
+          root.dataset.fxMagBirthTransferTubeFrontR2190=String(
+            this.birthStrands[0]?.userData?.tube?.geometry?.attributes?.position?.getZ(39*6)??0
           );
           root.dataset.fxMagBirthAssemblyWeldR2187=String(
             this.assemblyWeld.visible &&
