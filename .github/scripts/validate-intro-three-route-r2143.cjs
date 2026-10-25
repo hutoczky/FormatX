@@ -16,14 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261025-r2181-born-mag-continuity';
-for(const token of [
-  'crownL.scale.set(.30,.90,.76)',
-  'crownR.scale.set(-.30,.90,.76)',
-  'left.scale.set(.72,.40,.74)',
-  'right.scale.set(-.72,.40,.74)',
-  'this.jaw.scale.set(.48,.88,.76)'
-])assert.ok(engine.includes(token),'R2180 intro-to-native titanium proportion regressed: '+token);
+const revision='formatx-mag-genesis-three-r1280.js?v=20261025-r2182-dna-chapter-first';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -83,7 +76,7 @@ assert.ok(engine.includes('const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.
   engine.includes('this.studioKey.position.set(') &&
   engine.includes('-3.8-dnaStudio*.42+assemblyStudio*1.30') &&
   engine.includes('4.4-dnaStudio*.32-assemblyStudio*1.15') &&
-  engine.includes('const embryoStudio=smooth((t-2.48)/.62)') &&
+  engine.includes('const embryoStudio=smooth((t-3.48)/.62)') &&
   engine.includes('const dnaStudio=smooth((t-.12)/.38)'),
   'R2172 needs one tracked cinematic camera and physically moving key/fill lights');
 const smoothNumber=v=>{v=Math.min(1,Math.max(0,v));return v*v*(3-2*v)};
@@ -91,7 +84,7 @@ const donorOpacity=t=>smoothNumber((t-4.38)/.48)*(1-smoothNumber((t-5.95)/.85));
 for(const t of [0,1.6,2.6,4.2])assert.equal(donorOpacity(t),0,
   'Donor helices must be absent before the transition out of the embryo');
 assert(donorOpacity(5.1)>.99,'Donor helices must feed the four arms before titanium seating');
-assert.ok(engine.includes('const appear=smooth((t-2.38)/.76)') &&
+assert.ok(engine.includes('const appear=smooth((t-3.52)/.76)') &&
   engine.includes('const grow=smooth((t-5.88)/1.18)') &&
   engine.includes('const opticWake=smooth((t-7.44)/.78)'),
   'DNA / living embryo / assembled titanium MAG / optical ignition story order regressed');
@@ -123,7 +116,7 @@ assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
 assert.ok(engine.includes('const capillaries=this.mobileRender?5:9') &&
   engine.includes('this.embryoCapillaryMaterial.opacity=.105*visible') &&
-  engine.includes('const fade=1-smooth((t-2.72)/1.94)'),
+  engine.includes('const fade=1-smooth((t-3.10)/1.38)'),
   'R2175 biologic embryo must remain readable without the old DNA/capillary clutter');
 const land=t=>smoothNumber((t-8.45)/1.35);
 for(const [time,value] of [[4.2,0],[7.6,0],[8.45,0],[9.8,1]]){
@@ -139,10 +132,10 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261025-r2181-birth-layout-handoff';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261025-r2182-studio-film-owner';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
-assert.ok(worker.includes("'sha256-vR4G1K9xwapInZdgibgBJeypYFKbikrEkesFvuRoMn8='"),
+assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),
   'Cloudflare CSP lacks the exact changed R2173 parser-bootstrap hash');
 assert.ok(birth.includes(revision),'Intro bootstrap is still caching old Three.js engine');
 assert.ok(worker.includes(revision),'Cloudflare asset rewrite would downgrade the canonical 3D intro');

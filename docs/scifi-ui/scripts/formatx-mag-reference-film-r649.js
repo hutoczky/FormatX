@@ -36,27 +36,104 @@
   function pathGlow(ctx,draw,width,color,blur,alpha=1){
     ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor=color;ctx.shadowBlur=blur;ctx.beginPath();draw(ctx);ctx.stroke();ctx.restore();
   }
+  // R2182 — Canvas cinematic safety path: genuine depth-sorted helix,
+  // cylindrical rim shading, 3D nucleotide bridges and perspective.
+  // The fallback must never collapse the user's DNA origin into two
+  // flat neon sine waves when the Three.js film is unavailable.
   function drawDNA(ctx,d,time,alpha,zoom){
+    if(alpha<=.002)return;
     ctx.save();
-    ctx.translate(d.x,d.y);ctx.rotate(d.r);ctx.scale(d.s*zoom,d.s*zoom);
-    const l=d.l,amp=d.a,phase=d.p+time*.00125;
-    const pts1=[],pts2=[],N=40;
-    for(let i=0;i<=N;i++){
-      const u=i/N, x=(u-.5)*l, q=u*TAU*3.28+phase;
-      const z=Math.sin(q), y=Math.cos(q)*amp;
-      pts1.push([x,y,z]);pts2.push([x,-y,-z]);
+    ctx.translate(d.x,d.y);
+    ctx.rotate(d.r);
+    ctx.scale(d.s*zoom,d.s*zoom);
+    const L=d.l,A=d.a,phase=d.p+time*.00055;
+    const yaw=-.32+.24*Math.sin(time*.00026);
+    const cy=Math.cos(yaw),sy=Math.sin(yaw);
+    const N=108;
+    const samples=[[],[]];
+    for(let lane=0;lane<2;lane++){
+      for(let k=0;k<=N;k++){
+        const u=k/N;
+        const theta=u*TAU*3.28+phase+lane*Math.PI;
+        const y=Math.cos(theta)*A,z=Math.sin(theta)*A*.98;
+        const projectedY=y*cy-z*sy;
+        const depth=y*sy+z*cy;
+        const perspective=1+depth/450;
+        samples[lane].push({
+          x:(u-.5)*L*perspective,
+          y:projectedY*perspective,
+          depth,
+          radius:perspective*(2.15+1.7*(depth/A+1)*.5)
+        });
+      }
     }
-    const strand=(pts,col)=>{
-      ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.shadowColor=col;ctx.shadowBlur=5;ctx.beginPath();
-      pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();
-    };
-    strand(pts1,'rgba(98,225,255,.92)');strand(pts2,'rgba(139,105,255,.82)');
-    for(let i=3;i<N;i+=5){
-      const p1=pts1[i],p2=pts2[i],front=(p1[2]+1)*.5;
-      ctx.save();ctx.globalAlpha=alpha*(.30+.55*front);ctx.strokeStyle='rgba(190,244,255,.78)';ctx.lineWidth=1.4;ctx.shadowColor='rgba(112,220,255,.7)';ctx.shadowBlur=2;
-      ctx.beginPath();ctx.moveTo(p1[0],p1[1]);ctx.lineTo(p2[0],p2[1]);ctx.stroke();
-      for(const p of [p1,p2]){ctx.fillStyle=front>.5?'rgba(151,238,255,.96)':'rgba(142,105,255,.84)';ctx.beginPath();ctx.arc(p[0],p[1],2.5+front*1.7,0,TAU);ctx.fill()}
+    const elements=[];
+    // Nuclear base-pair bridges are part of the same rotating 3D lattice.
+    // Render by camera depth so the strands truly pass in front/behind.
+    for(let k=3;k<N-2;k+=5){
+      const a=samples[0][k],b=samples[1][k];
+      elements.push({type:'bridge',a,b,depth:(a.depth+b.depth)*.5});
+    }
+    for(let lane=0;lane<2;lane++){
+      for(let k=1;k<=N;k++){
+        const a=samples[lane][k-1],b=samples[lane][k];
+        elements.push({type:'strand',lane,a,b,depth:(a.depth+b.depth)*.5,k});
+      }
+    }
+    elements.sort((a,b)=>a.depth-b.depth);
+    ctx.lineCap='round';
+    ctx.lineJoin='round';
+    for(const item of elements){
+      const front=clamp(.5+.5*item.depth/A);
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      ctx.beginPath();
+      ctx.moveTo(item.a.x,item.a.y);
+      ctx.lineTo(item.b.x,item.b.y);
+      if(item.type==='bridge'){
+        ctx.strokeStyle='rgba(147,198,211,'+(.26+.39*front).toFixed(3)+')';
+        ctx.lineWidth=.90+front*1.25;
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      }
+      const cool=item.lane===0;
+      // Layered edge + bright specular center, sampled directly from helix
+      // depth, creates round strands without another canvas or image.
+      ctx.strokeStyle=cool
+        ?'rgba(13,62,83,'+(.48+.32*front).toFixed(3)+')'
+        :'rgba(35,28,82,'+(.48+.32*front).toFixed(3)+')';
+      ctx.lineWidth=4.5+2.1*front;
+      ctx.stroke();
+      ctx.strokeStyle=cool
+        ?'rgba(59,184,215,'+(.45+.52*front).toFixed(3)+')'
+        :'rgba(135,97,221,'+(.40+.53*front).toFixed(3)+')';
+      ctx.lineWidth=2.30+1.60*front;
+      ctx.stroke();
+      if(front>.52){
+        ctx.strokeStyle=cool?'rgba(205,254,253,.65)':'rgba(225,205,255,.55)';
+        ctx.lineWidth=.55+.72*front;
+        ctx.shadowColor=cool?'#55dfe9':'#a894ff';
+        ctx.shadowBlur=front*7;
+        ctx.stroke();
+      }
       ctx.restore();
+    }
+    // Few physical nucleotides: soft glass beads at the camera-front turns.
+    for(let k=5;k<N;k+=8){
+      for(let lane=0;lane<2;lane++){
+        const p=samples[lane][k];
+        const front=clamp(.5+.5*p.depth/A);
+        if(front<.39)continue;
+        const radius=1.65+front*2.15;
+        const bead=ctx.createRadialGradient(p.x-radius*.25,p.y-radius*.33,.15,p.x,p.y,radius*1.55);
+        bead.addColorStop(0,'rgba(246,255,254,.98)');
+        bead.addColorStop(.32,lane===0?'rgba(106,231,241,.91)':'rgba(195,159,254,.88)');
+        bead.addColorStop(1,'rgba(11,28,49,0)');
+        ctx.globalAlpha=alpha*(.45+.55*front);
+        ctx.fillStyle=bead;
+        ctx.beginPath();ctx.arc(p.x,p.y,radius*1.55,0,TAU);ctx.fill();
+      }
     }
     ctx.restore();
   }
@@ -258,29 +335,20 @@
     // on portrait phones (1280x720 cover). Keep the genome in the visible
     // center of the portrait composition, and keep it onscreen long enough
     // to establish the first shot before the embryonic organism is born.
-    const dnaFade=1-smooth((t-4.60)/1.28);
+    // R2182: DNA condenses INTO the embryo; by 3.8 s its external
+    // double helix is gone and the organic cell owns the frame.
+    const dnaFade=1-smooth((t-2.58)/1.20);
     if(dnaFade>.002){
       if(MOBILE){
         const genomeScale=1.02-.22*smooth((t-3.30)/2.45);
         const genome={x:640,y:360,l:520,a:61,r:Math.PI/2,p:.35,s:.98,o:1};
         drawDNA(ctx,genome,time,dnaFade*.95,genomeScale);
       }else{
-        ctx.save();ctx.globalAlpha=.66*dnaFade;ctx.lineWidth=2;
-        for(let h=0;h<3;h++){
-          const ox=[180,640,1090][h],oy=[170,270,205][h],rot=[-.28,.11,.31][h];
-          ctx.save();ctx.translate(ox,oy);ctx.rotate(rot);
-          for(let strand=0;strand<2;strand++){
-            ctx.strokeStyle=strand?'rgba(132,112,220,.54)':'rgba(116,210,220,.58)';
-            ctx.beginPath();
-            for(let i=0;i<=28;i++){
-              const u=i/28,x=(u-.5)*520,y=Math.sin(u*Math.PI*6.4+strand*Math.PI+time*.00042)*42;
-              i?ctx.lineTo(x,y):ctx.moveTo(x,y);
-            }
-            ctx.stroke();
-          }
-          ctx.restore();
-        }
-        ctx.restore();
+        // Desktop also opens with ONE identifiable central DNA helix,
+        // not three off-axis decorative waveforms.
+        const genome={x:640,y:350,l:590,a:70,r:Math.PI/2,p:.45,s:1,o:1};
+        drawDNA(ctx,genome,time,dnaFade,1.06-.10*smooth(t/3));
+
       }
     }
 
@@ -332,12 +400,29 @@
       ctx.strokeStyle='rgba(170,230,228,.30)';
       ctx.lineWidth=1.3;
       ctx.stroke();
-      const eye=ctx.createRadialGradient(-R*.022,-R*.025,0,0,0,R*.19);
-      eye.addColorStop(0,'rgba(213,255,248,.92)');
-      eye.addColorStop(.15,'rgba(82,225,225,.90)');
-      eye.addColorStop(.48,'rgba(16,78,96,.70)');
-      eye.addColorStop(1,'rgba(0,13,28,0)');
-      ctx.fillStyle=eye;ctx.beginPath();ctx.arc(0,0,R*.19,0,TAU);ctx.fill();
+      // R2182 — living organelle, NOT a prematurely illuminated MAG pupil.
+      // The biological chapter has a diffuse asymmetric nucleus and
+      // capillary substructure; the engineered aperture only appears later.
+      const organelle=ctx.createRadialGradient(-R*.09,-R*.10,R*.02,R*.035,R*.025,R*.44);
+      organelle.addColorStop(0,'rgba(194,243,228,.69)');
+      organelle.addColorStop(.25,'rgba(90,191,181,.43)');
+      organelle.addColorStop(.62,'rgba(33,92,111,.31)');
+      organelle.addColorStop(1,'rgba(12,40,61,0)');
+      ctx.fillStyle=organelle;
+      ctx.beginPath();ctx.ellipse(-R*.018,-R*.02,R*.43,R*.33,-.27,0,TAU);ctx.fill();
+      ctx.strokeStyle='rgba(167,223,210,.16)';
+      ctx.lineWidth=Math.max(.65,R*.007);
+      for(let j=0;j<12;j++){
+        const phi=j*TAU/12+time*.00017;
+        const x=Math.cos(phi)*R*.21,y=Math.sin(phi)*R*.15;
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        ctx.quadraticCurveTo(
+          Math.cos(phi+.45)*R*.38,Math.sin(phi+.30)*R*.40,
+          Math.cos(phi+.16)*R*.65,Math.sin(phi+.16)*R*.63
+        );
+        ctx.stroke();
+      }
       ctx.restore();
     }
 
@@ -380,6 +465,10 @@
         Number.isFinite(radiusCap)?radiusCap:192
       );
       const S=R;
+      // R2182: the mechanical aperture is dormant until the last act.
+      // Titanium assembles first; the living MAG's optic ignites only
+      // after its four arms have fully seated.
+      const opticWake=smooth((t-7.38)/.76);
       ctx.save();
       ctx.translate(cx,cy);
       ctx.rotate(.012*Math.sin(time*.00033));
@@ -630,13 +719,13 @@
         ctx.restore();
       }
       const pupil=ctx.createRadialGradient(-rx*.12,-ry*.19,1,0,0,rx*.50);
-      pupil.addColorStop(0,'#75a5aa');
-      pupil.addColorStop(.14,'#35626d');
+      pupil.addColorStop(0,'rgba(117,165,170,'+(.14+.86*opticWake).toFixed(3)+')');
+      pupil.addColorStop(.14,opticWake>.20?'#35626d':'#0b1a24');
       pupil.addColorStop(.60,'#0c2938');
       pupil.addColorStop(1,'#030f1b');
       ctx.beginPath();ctx.arc(0,0,rx*.42,0,TAU);
       ctx.fillStyle=pupil;ctx.fill();
-      ctx.strokeStyle='rgba(198,240,235,.62)';
+      ctx.strokeStyle='rgba(198,240,235,'+(.10+.52*opticWake).toFixed(3)+')';
       ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
       // R2109: sapphire lens with a recessed concentric aperture and
       // directional catchlights. Detail is restricted to adequately sized
@@ -658,13 +747,13 @@
         }
       }
       ctx.beginPath();ctx.ellipse(-rx*.19,-ry*.23,rx*.14,ry*.085,-.42,0,TAU);
-      ctx.fillStyle='rgba(245,252,243,.68)';ctx.fill();
+      ctx.fillStyle='rgba(245,252,243,'+(.025+.655*opticWake).toFixed(3)+')';ctx.fill();
       // R2104 photographic side-light trace on the recessed blue glass:
       // one arc, two highlights and the original iris geometry.
       ctx.beginPath();
       ctx.ellipse(0,0,rx*.925,ry*.925,0,-2.68,-.84,false);
       ctx.strokeStyle='rgba(224,253,245,'+
-        (.30+.18*studioTravel).toFixed(3)+')';
+        (.035+opticWake*(.265+.18*studioTravel)).toFixed(3)+')';
       ctx.lineWidth=Math.max(.8,S*.009);
       ctx.stroke();
       ctx.beginPath();

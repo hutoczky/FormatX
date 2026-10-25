@@ -817,11 +817,11 @@
             return t*t*(3.0-2.0*t);
           }
           void main(){
-            float condense=curve(2.55,4.12,uPhase);
-            float assemble=curve(5.26,7.18,uPhase);
+            float condense=curve(2.94,4.38,uPhase);
+            float assemble=curve(5.36,7.18,uPhase);
             vec3 p=mix(position,aCell,condense);
             p=mix(p,aArm,assemble);
-            float coil=1.0-curve(2.55,4.12,uPhase);
+            float coil=1.0-curve(2.94,4.38,uPhase);
             p.x+=coil*.018*sin(uTime*.00082+aSeed*32.0);
             p.y+=.013*sin(uTime*.0011+aSeed*20.0)*(1.0-assemble);
             p.z+=.012*cos(uTime*.00072+aSeed*17.0);
@@ -1845,10 +1845,13 @@
       // opening motif. Hold the double helix through the biological
       // construction and let it collapse into the emerging metal chassis.
       const assembly=smooth((t-4.85)/2.25);
+      // R2182: do not reveal a large embryonic globe behind the founding DNA.
+      // First 3.1s establish one complete helix, then nucleotides condense;
+      // biological membranes appear after that transition is unmistakable.
       // R2175: the founding helix physically dissolves into the embryo
       // particles by 4.6 s. Supporting DNA is a low-opacity donor during
       // arm formation, not a second helix tangled inside the living cell.
-      const fade=1-smooth((t-2.72)/1.94);
+      const fade=1-smooth((t-3.10)/1.38);
       const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85));
       // R2180: DNA is readable on the FIRST rendered frame, not hidden
       // behind a zero-opacity establishing shot while Three.js warms up.
@@ -1862,7 +1865,7 @@
       // R2175: donor opacity is controlled by the separate transfer envelope.
       // R2149: DNA is the establishing shot; once the embryo forms,
       // helices become a transparent scaffold instead of blocking it.
-      const embryoFocus=smooth((t-2.48)/1.02);
+      const embryoFocus=smooth((t-3.12)/1.04);
       // R2164: soften the desktop DNA around the new embryonic cell,
       // as phones already do. The bright helix must not occlude the cell.
       const helixScaleFocus=1-embryoFocus*(this.mobileRender?.47:.35);
@@ -2000,8 +2003,8 @@
       // R2159: only a living, soft-edged biological cell is visible
       // between the founding DNA and the mechanically assembling MAG.
       // All the old early diamond/iris shapes stay invisible.
-      const appear=smooth((t-2.38)/.76);
-      const dissolve=1-smooth((t-5.64)/1.16);
+      const appear=smooth((t-3.52)/.76);
+      const dissolve=1-smooth((t-5.66)/1.12);
       const visible=appear*dissolve;
       this.coreGroup.visible=visible>.002;
       this.embryoMaterial.opacity=.73*visible;
@@ -2030,7 +2033,7 @@
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-2.48)/.72);
+      const grow=smooth((t-3.76)/.72);
       const fade=1-smooth((t-6.20)/1.15)*.96;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
@@ -2078,7 +2081,7 @@
     }
 
     updateCells(t,time){
-      const grow=smooth((t-2.60)/.70);
+      const grow=smooth((t-3.90)/.70);
       const fade=1-smooth((t-6.25)/1.10)*.96;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
@@ -2140,12 +2143,12 @@
       this.mechMidMaterial.roughness=mix(.24,.19,finale);
       this.silverMaterial.roughness=mix(.18,.14,finale);
 
-      this.mechMaterial.opacity=(.90+.028*finale)*grow;
+      this.mechMaterial.opacity=(.97+.018*finale)*grow;
       // R2119: reveal machined inserts as solid layers, not ghosted decals.
       // Opacity is still animated from zero to preserve the cinematic reveal.
-      this.mechMidMaterial.opacity=(.74+.08*finale)*grow;
-      this.silverMaterial.opacity=(.76+.10*finale)*grow;
-      this.mechEdgeMaterial.opacity=(.020+.010*finale)*grow;
+      this.mechMidMaterial.opacity=(.91+.07*finale)*grow;
+      this.silverMaterial.opacity=(.92+.06*finale)*grow;
+      this.mechEdgeMaterial.opacity=(.045+.020*finale)*grow;
       this.mechInnerMaterial.opacity=(.070+.020*finale)*grow;
       if(this.mechFiberMaterial)this.mechFiberMaterial.opacity=(this.mobileRender?.055:.115)*grow*(.82+.18*finale);
       if(this.seamMaterial)this.seamMaterial.opacity=(.06-.020*finale)*grow;
@@ -2219,7 +2222,7 @@
       // R2180: titanium inlays mechanically seat after the supporting DNA
       // reaches each arm. Shared geometry, deterministic authored end pose.
       const inlayBirth=smooth((t-5.86)/1.14);
-      this.armInlayMaterial.opacity=.93*grow;
+      this.armInlayMaterial.opacity=.985*grow;
       this.armEtchMaterial.opacity=.55*inlayBirth;
       this.armInlays.forEach((part,axis)=>{
         const seat=smooth((t-5.90-axis*.13)/1.16);
@@ -2355,7 +2358,7 @@
       // does the titanium carry the moving broad metallic softbox. No new lights,
       // glow overlays or GPU draw calls are allocated per frame.
       const dnaStudio=smooth((t-.12)/.38)*(1-smooth((t-2.12)/.70));
-      const embryoStudio=smooth((t-2.48)/.62)*(1-smooth((t-5.10)/.72));
+      const embryoStudio=smooth((t-3.48)/.62)*(1-smooth((t-5.10)/.72));
       this.studioKey.intensity=1.62+dnaStudio*.35+embryoStudio*.20+assemblyStudio*.70;
       this.studioFill.intensity=.42+dnaStudio*.16+embryoStudio*.34+assemblyStudio*.38;
       // The DNA key and embryonic fill converge back to the authored

@@ -75,7 +75,7 @@ assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
 assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2179-optic-native-continuity'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
-assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261025-r2181-born-mag-continuity'),
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261025-r2182-dna-chapter-first'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
 // R2148: the user-visible native Three.js cinematic must end with a true
 // machined optical instrument rather than the small pre-R2148 glowing bead.
@@ -141,7 +141,7 @@ assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2179'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
- 'formatx-mag-birth-live-r533.css?v=20261014-r2103-contrast-fourpoint-fallback']){
+ 'formatx-mag-birth-live-r533.css?v=20261025-r2182-dna-chapter-first']){
  assert.ok(html.includes(resource),'Public site has a stale optical resource '+resource);
 }
 /* R2103 additionally forbids the exact unreadable low-power source that
@@ -149,11 +149,11 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261022-r2145-portrait-dna-genesis'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261025-r2182-studio-depth-first-genome'),
   'Missing actual cache-busted four-point R2103 Android replacement');
 // R2145: phone cover-crop cannot discard the genome. The opening must
 // show a centered vertical helix and an embryo BEFORE the metal object.
-const dnaBorn=fallback.indexOf('const dnaFade=1-smooth((t-4.60)/1.28)');
+const dnaBorn=fallback.indexOf('const dnaFade=1-smooth((t-2.58)/1.20)');
 const embryoBorn=fallback.indexOf('const embryo=smooth((t-2.45)/.88)');
 const metalBorn=fallback.indexOf('const grow=smooth((t-5.58)/1.30)');
 assert.ok(dnaBorn>=0 && embryoBorn>dnaBorn && metalBorn>embryoBorn,
@@ -162,7 +162,12 @@ for(const token of [
   'x:640,y:360,l:520,a:61,r:Math.PI/2',
   'const transfer=smooth((t-5.15)/.52)',
   'drawDNA(ctx,genome,time,dnaFade*.95,genomeScale)',
-  'R2145: the permanent four-point metal belongs to the FINAL act'
+  'R2145: the permanent four-point metal belongs to the FINAL act',
+  'R2182 — Canvas cinematic safety path: genuine depth-sorted helix',
+  'elements.sort((a,b)=>a.depth-b.depth)',
+  'Desktop also opens with ONE identifiable central DNA helix',
+  'R2182 — living organelle, NOT a prematurely illuminated MAG pupil',
+  'const opticWake=smooth((t-7.38)/.76)'
 ])assert.ok(fallback.includes(token),'R2145 portrait-first fallback missing: '+token);
 // The 412 x 915 Android cover crop only shows the central ~324 virtual
 // horizontal units. A vertical helix centered at 640 stays fully inside it.

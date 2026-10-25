@@ -129,7 +129,7 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('formatx-mag-reference-film-r649.js?v=20261022-r2145-portrait-dna-genesis'),
+        assert.ok(info.loader.includes('formatx-mag-reference-film-r649.js?v=20261025-r2182-studio-depth-first-genome'),
           'The Android fallback is not loading the canonical DNA-to-embryo-to-MAG reference film');
         records.push({shot,info});
       }finally{await context.close()}
