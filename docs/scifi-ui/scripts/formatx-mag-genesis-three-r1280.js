@@ -360,10 +360,14 @@
           }
           tubeGeometry.setAttribute('position',new T.BufferAttribute(tubePositions,3));
           tubeGeometry.setIndex(tubeIndices);
-          const tubeMaterial=new T.MeshBasicMaterial({
-            color:lane===0?0x73eee8:0xbca2ff,
+          // R2191: physically lit mineral-biomolecule, not a white-hot
+          // additive tube. Retain cyan/violet molecular identity.
+          const tubeMaterial=new T.MeshStandardMaterial({
+            color:lane===0?0x4aaeb5:0x9a80cf,
+            emissive:lane===0?0x155e67:0x493776,
+            emissiveIntensity:.26,metalness:.28,roughness:.34,
             transparent:true,opacity:0,depthWrite:false,
-            blending:T.AdditiveBlending,side:T.DoubleSide
+            blending:T.NormalBlending,side:T.DoubleSide
           });
           const tube=new T.Mesh(tubeGeometry,tubeMaterial);
           tube.visible=false;
@@ -2139,7 +2143,7 @@
           if(line.userData.tube)line.userData.tube.visible=false;
           return;
         }
-        line.material.opacity=(lane===0?.70:.54)*opacity;
+        line.material.opacity=(lane===0?.25:.21)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
         const source=line.userData.source;
@@ -2148,8 +2152,14 @@
         for(let j=0;j<40;j++){
           const u=j/39;
           const eased=smooth(u);
-          const x=mix(source.position.x,dx*.86,eased);
-          const y=mix(source.position.y,dy*.86,eased);
+          // R2191: R2190 proved the gene-transfer was four tiny glowing
+          // stubs, because start and end had already converged. Stretch
+          // DNA from the inner chassis to each real titanium arm tip.
+          const seatAlongArm=smooth((t-5.12)/1.23);
+          const rootX=mix(source.position.x,dx*.24,seatAlongArm);
+          const rootY=mix(source.position.y,dy*.24,seatAlongArm);
+          const x=mix(rootX,dx*.89,eased);
+          const y=mix(rootY,dy*.89,eased);
           // R2190: the double helix must remain PHYSICALLY IN FRONT of the
           // emerging titanium inlays during the genetic welding shot.
           // Previously z=.19 left it behind the .38-.48 metal face: the
@@ -2170,7 +2180,7 @@
         const tube=line.userData.tube;
         if(tube){
           tube.visible=opacity>.002;
-          tube.material.opacity=(lane===0?.64:.52)*opacity;
+          tube.material.opacity=(lane===0?.74:.65)*opacity;
           const p=tube.geometry.attributes.position;
           const sides=6;
           for(let j=0;j<40;j++){
@@ -2207,7 +2217,7 @@
         const show=opacity>.002 && first?.visible && second?.visible;
         bridge.visible=Boolean(show);
         if(!show)return;
-        bridge.material.opacity=.67*opacity;
+        bridge.material.opacity=.32*opacity;
         const a=bridge.geometry.attributes.position;
         const p=first.geometry.attributes.position;
         const q=second.geometry.attributes.position;
@@ -2711,6 +2721,14 @@
           );
           root.dataset.fxMagBirthTransferTubeFrontR2190=String(
             this.birthStrands[0]?.userData?.tube?.geometry?.attributes?.position?.getZ(39*6)??0
+          );
+          // R2191: a bright dot on a metal tip is NOT a genome-to-MAG morph.
+          const transferPoints=this.birthStrands[0]?.geometry?.attributes?.position;
+          root.dataset.fxMagBirthTransferSpanR2191=String(transferPoints ?
+            Math.hypot(
+              transferPoints.getX(39)-transferPoints.getX(0),
+              transferPoints.getY(39)-transferPoints.getY(0)
+            ) : 0
           );
           root.dataset.fxMagBirthAssemblyWeldR2187=String(
             this.assemblyWeld.visible &&
