@@ -153,7 +153,7 @@ assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   'Missing actual cache-busted four-point R2103 Android replacement');
 // R2145: phone cover-crop cannot discard the genome. The opening must
 // show a centered vertical helix and an embryo BEFORE the metal object.
-const dnaBorn=fallback.indexOf('const dnaFade=1-smooth((t-4.60)/1.28)');
+const dnaBorn=fallback.indexOf('const dnaFade=1-smooth((t-2.58)/1.20)');
 const embryoBorn=fallback.indexOf('const embryo=smooth((t-2.45)/.88)');
 const metalBorn=fallback.indexOf('const grow=smooth((t-5.58)/1.30)');
 assert.ok(dnaBorn>=0 && embryoBorn>dnaBorn && metalBorn>embryoBorn,
@@ -162,7 +162,12 @@ for(const token of [
   'x:640,y:360,l:520,a:61,r:Math.PI/2',
   'const transfer=smooth((t-5.15)/.52)',
   'drawDNA(ctx,genome,time,dnaFade*.95,genomeScale)',
-  'R2145: the permanent four-point metal belongs to the FINAL act'
+  'R2145: the permanent four-point metal belongs to the FINAL act',
+  'R2182 — Canvas cinematic safety path: genuine depth-sorted helix',
+  'elements.sort((a,b)=>a.depth-b.depth)',
+  'Desktop also opens with ONE identifiable central DNA helix',
+  'R2182 — living organelle, NOT a prematurely illuminated MAG pupil',
+  'const opticWake=smooth((t-7.38)/.76)'
 ])assert.ok(fallback.includes(token),'R2145 portrait-first fallback missing: '+token);
 // The 412 x 915 Android cover crop only shows the central ~324 virtual
 // horizontal units. A vertical helix centered at 640 stays fully inside it.
