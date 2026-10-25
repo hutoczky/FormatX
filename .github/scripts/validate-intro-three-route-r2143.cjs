@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261025-r2184-paired-genetic-morph';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261025-r2185-wide-studio-dna-cell';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -64,6 +64,23 @@ for(const token of [
 ]){
   assert.ok(engine.includes(token),'R2176 founding double-helix particle mismatch: '+token);
 }
+// R2185: what the camera actually photographs must remain broad enough
+// to read as a biological double helix, not two slim glowing wires.
+for(const token of [
+  'index===0?.410:.272',
+  'const backbone=radius>.35?.043:.031;',
+  'const aureole=radius>.35?.087:.065;',
+  'const helixRadius=.410+(r()-.5)*.013;',
+  'const membrane=i%4!==0;',
+  'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
+  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoNucleusMaterial.opacity=.47*visible;',
+  'this.embryoCapillaryMaterial.opacity=.16*visible;'
+]){
+  assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
+}
+assert.ok(home.includes('formatx-dna-first-frame-r2181.css?v=20261025-r2185-wide-studio-dna'),
+  'First-byte SVG DNA must load the new wider cinematic CSS');
 assert.ok(!engine.includes('u*Math.PI*15.5+strand*Math.PI'),
   'Do not overlay an unrelated twice-coiled DNA particle geometry');
 
@@ -115,7 +132,7 @@ assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
   birth.includes('const nativeCadence=r>=.90?40:'),
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
 assert.ok(engine.includes('const capillaries=this.mobileRender?5:9') &&
-  engine.includes('this.embryoCapillaryMaterial.opacity=.105*visible') &&
+  engine.includes('this.embryoCapillaryMaterial.opacity=.16*visible') &&
   engine.includes('const fade=1-smooth((t-3.10)/1.38)'),
   'R2175 biologic embryo must remain readable without the old DNA/capillary clutter');
 const land=t=>smoothNumber((t-8.45)/1.35);
@@ -132,7 +149,7 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261025-r2184-paired-genesis';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261025-r2185-wide-studio-genesis';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
 assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),
