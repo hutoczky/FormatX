@@ -1793,6 +1793,52 @@
         this.armInlays.push(arm);
       }
 
+      // R2194 — the same eight continuous studio-polished titanium ribs
+      // as the permanent R326 MAG. One batched 3D mesh and one material;
+      // no second canvas or screen-space decorative overlay.
+      const ribPositions=[],ribIndices=[];
+      for(let axis=0;axis<4;axis++){
+        const angle=axis*Math.PI*.5;
+        const dx=Math.cos(angle),dy=Math.sin(angle);
+        const sx=-dy,sy=dx;
+        for(const side of [-1,1]){
+          const start=ribPositions.length/3;
+          for(let j=0;j<=20;j++){
+            const u=j/20;
+            const reach=.29+.59*u;
+            const lateral=side*(.053+.024*Math.sin(Math.PI*u));
+            const width=.010*(1-.43*u);
+            const z=.470-.034*u+.020*Math.sin(Math.PI*u);
+            ribPositions.push(
+              dx*reach+sx*(lateral-width),
+              dy*reach+sy*(lateral-width),z,
+              dx*reach+sx*(lateral+width),
+              dy*reach+sy*(lateral+width),z
+            );
+            if(j>0){
+              const p=start+(j-1)*2,q=start+j*2;
+              ribIndices.push(p,q,p+1,p+1,q,q+1);
+            }
+          }
+        }
+      }
+      const ribGeometry=new T.BufferGeometry();
+      ribGeometry.setAttribute('position',
+        new T.Float32BufferAttribute(ribPositions,3));
+      ribGeometry.setIndex(ribIndices);
+      ribGeometry.computeVertexNormals();
+      this.armTrimMaterial=new T.MeshPhysicalMaterial({
+        color:0xd5e6e2,metalness:.89,roughness:.16,
+        clearcoat:1,clearcoatRoughness:.042,
+        specularIntensity:1,
+        transparent:true,opacity:0,depthWrite:false,
+        side:T.DoubleSide,envMapIntensity:2.2
+      });
+      this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial);
+      this.armTrim.renderOrder=5;
+      this.armTrim.visible=false;
+      this.mechanicalGroup.add(this.armTrim);
+
       // Minimal internal seam energy; no external robotic rails in R1941.
       this.seamMaterial=new T.MeshBasicMaterial({
         color:0x52d9ef,transparent:true,opacity:0,
@@ -2564,6 +2610,11 @@
       // R2180: titanium inlays mechanically seat after the supporting DNA
       // reaches each arm. Shared geometry, deterministic authored end pose.
       const inlayBirth=smooth((t-5.86)/1.14);
+      // R2194: real metal veins only become visible after DNA molecular
+      // filaments begin seating into the four machined titanium arms.
+      const trimSeat=smooth((t-6.02)/1.18);
+      this.armTrim.visible=trimSeat>.002;
+      this.armTrimMaterial.opacity=.90*grow*trimSeat;
       this.armInlayMaterial.opacity=.985*grow;
       this.armEtchMaterial.opacity=.55*inlayBirth;
       this.armInlays.forEach((part,axis)=>{
