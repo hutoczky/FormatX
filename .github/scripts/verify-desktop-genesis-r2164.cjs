@@ -56,9 +56,14 @@ async function main(){
         if(/formatx-|three-r185/.test(request.url()))
           failedRequests.push({url:request.url(),error:request.failure()?.errorText||'network failure'});
       });
+      // R2183b: deterministic introframe= freezes its film frame and can
+      // intentionally stop requestAnimationFrame. Playwright's default
+      // rAF-based wait therefore timed out even when the GPU framebuffer
+      // and DOM visualProof marker were already READY. Poll independently
+      // of the page's cinematic frame scheduler.
       const awaitGpuFrame=()=>page.waitForFunction(
         ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-        null,{timeout:30000}
+        null,{polling:250,timeout:30000}
       );
       try{
         await awaitGpuFrame();
