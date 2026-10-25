@@ -2707,7 +2707,7 @@
           // R2190: verify real transfer tube opacity and physical world-space
           // front depth on the exact browser-rendered film frame.
           root.dataset.fxMagBirthTransferTubeOpacityR2190=String(
-            this.birthStrands[0]?.userData?.tube?.material?.opacity??0
+            this.birthStrands[0]?.userData?.tube?.visible ? this.birthStrands[0].userData.tube.material.opacity : 0
           );
           root.dataset.fxMagBirthTransferTubeFrontR2190=String(
             this.birthStrands[0]?.userData?.tube?.geometry?.attributes?.position?.getZ(39*6)??0
