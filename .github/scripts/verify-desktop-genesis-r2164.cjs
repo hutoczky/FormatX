@@ -119,6 +119,7 @@ async function main(){
           armorPieces:Number(root.dataset.fxMagBirthVisibleArmorR2147||0),
           inlayPieces:Number(root.dataset.fxMagBirthArmInlaysR2180||0),
           inlayOpacity:Number(root.dataset.fxMagBirthArmInlayOpacityR2180||0),
+          assemblyWeld:root.dataset.fxMagBirthAssemblyWeldR2187==='true',
           eyeOpacity:Number(root.dataset.fxMagBirthEyeOpacityR2148||0),
           genomeCount:Number(root.dataset.fxMagBirthGenomeParticlesR2160||0),
           donorArms:Number(root.dataset.fxMagBirthDonorArmsR2183||0),
@@ -149,6 +150,7 @@ async function main(){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
         assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
         assert.equal(state.inlayPieces,0,'R2180 titanium appeared during DNA opening');
+        assert.equal(state.assemblyWeld,false,'Welding began before the DNA introduction');
         assert.ok(state.embryoOpacity<.01,'Embryo appeared before DNA origin');
       }
       if(name==='embryo'){
@@ -161,6 +163,7 @@ async function main(){
       if(name==='assembly'){
         assert.ok(state.armorPieces>=1,'Four-arm chassis did not begin assembling');
         assert.ok(state.inlayPieces>=2,'R2180 titanium inlays did not start seating');
+        assert.ok(state.assemblyWeld,'R2187 physical genome welding light did not reach four metal arms');
         assert.ok(state.eyeOpacity<.003,'MAG optical organ ignited before assembly');
       }
       if(name==='mag'){
