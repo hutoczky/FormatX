@@ -90,6 +90,16 @@ for(const token of [
 ]){
   assert.ok(introThree.includes(token),'R2148 physical optical assembly lost: '+token);
 }
+// R2194 MUST affect both the permanent visible R326 model and the
+// cinematic assembly, without creating a second permanent canvas.
+assert.ok(core.includes('R2194 — continuous polished titanium vein inlays')&&
+  core.includes('float polishedRib=smoothstep(5.43,5.455,vFacet)'),
+  'R2194 visible four-arm polished titanium relief missing from R326');
+const realIntro=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
+assert.ok(realIntro.includes('R2194 — the same eight continuous studio-polished titanium ribs')&&
+  realIntro.includes('this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial)')&&
+  realIntro.includes('const trimSeat=smooth((t-6.02)/1.18)'),
+  'R2194 film must seat the same raised chromium filaments after DNA');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
@@ -130,14 +140,14 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261024-r2179'),
+  assert.ok(loader.includes('20261026-r2194'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261024-r2179'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261026-r2194'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2179'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2179'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
