@@ -41,9 +41,9 @@ check(css,[
 ],'No premature native-MAG reveal');
 check(html,['formatx-mag-birth-live-r533.css?v=20261025-r2182-dna-chapter-first'],
   'Static stylesheet cache bust');
-check(birth,['formatx-mag-genesis-three-r1280.js?v=20261026-r2193-photographic-softbox-dna-metal'],
+check(birth,['formatx-mag-genesis-three-r1280.js?v=20261026-r2194-cinematic-raised-titanium-ribs'],
   'Live WebGL owner cache bust');
-check(edge,['formatx-mag-genesis-three-r1280.js?v=20261026-r2193-photographic-softbox-dna-metal'],
+check(edge,['formatx-mag-genesis-three-r1280.js?v=20261026-r2194-cinematic-raised-titanium-ribs'],
   'Cloudflare rewrite must not serve an older film');
 const embryo=t=>smooth((t-3.52)/.76)*(1-smooth((t-5.66)/1.12));
 const arm=t=>smooth((t-5.88)/1.18);
