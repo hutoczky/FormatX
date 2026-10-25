@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2192-physical-genome-morph';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2193-photographic-softbox-dna-metal';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
