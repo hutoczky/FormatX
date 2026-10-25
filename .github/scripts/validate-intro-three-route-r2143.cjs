@@ -133,7 +133,7 @@ assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
   birth.includes('const nativeCadence=r>=.90?40:'),
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
 assert.ok(engine.includes('const capillaries=this.mobileRender?5:9') &&
-  engine.includes('this.embryoCapillaryMaterial.opacity=.16*visible') &&
+  engine.includes('this.embryoCapillaryMaterial.opacity=.25*visible') &&
   engine.includes('const fade=1-smooth((t-3.10)/1.38)'),
   'R2175 biologic embryo must remain readable without the old DNA/capillary clutter');
 const land=t=>smoothNumber((t-8.45)/1.35);
