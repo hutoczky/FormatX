@@ -92,6 +92,7 @@
       this.world.add(this.dnaGroup,this.organicGroup,this.cellGroup,this.tentacleGroup,this.mechanicalGroup,this.coreGroup);
 
       this.makeLights();
+      this.makeStudioEnvironment();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
@@ -140,6 +141,59 @@
       this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
       this.mechLight.position.set(-2.6,3.0,4.4);
       this.scene.add(this.mechLight);
+    }
+
+    makeStudioEnvironment(){
+      // R2193 — camera-grade specular light tent. Three real broad light cards
+      // and a cool horizon are baked once into one low-resolution HDR-like
+      // equirectangular environment. Physically based metal receives coherent
+      // broad softbox reflections, not extra CSS overlays or neon bloom.
+      const T=this.THREE;
+      const canvas=document.createElement('canvas');
+      const w=this.mobileRender?256:512;
+      canvas.width=w;canvas.height=w/2;
+      const ctx=canvas.getContext('2d',{alpha:false});
+      if(!ctx)return;
+      const h=canvas.height;
+      const fill=ctx.createLinearGradient(0,0,0,h);
+      fill.addColorStop(0,'#18252b');
+      fill.addColorStop(.35,'#091319');
+      fill.addColorStop(.61,'#101b21');
+      fill.addColorStop(1,'#03070b');
+      ctx.fillStyle=fill;ctx.fillRect(0,0,w,h);
+      // Feathered reflections from long, physically plausible studio panels.
+      const card=(x,y,rx,ry,angle,white,outer)=>{
+        ctx.save();ctx.translate(x*w,y*h);ctx.rotate(angle);
+        ctx.scale(rx*w,ry*h);
+        const g=ctx.createRadialGradient(0,0,.02,0,0,1);
+        g.addColorStop(0,white);g.addColorStop(.50,white);
+        g.addColorStop(.78,outer);g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);
+        ctx.fill();ctx.restore();
+      };
+      card(.22,.36,.063,.31,-.22,'rgba(226,244,242,.91)','rgba(94,142,145,.18)');
+      card(.68,.46,.043,.37,.14,'rgba(194,220,217,.77)','rgba(82,122,128,.14)');
+      card(.49,.19,.32,.068,0,'rgba(135,180,195,.32)','rgba(54,99,114,.05)');
+      card(.87,.58,.12,.18,.35,'rgba(71,154,175,.26)','rgba(34,83,110,.04)');
+      let texture=null,pmrem=null;
+      try{
+        texture=new T.CanvasTexture(canvas);
+        texture.mapping=T.EquirectangularReflectionMapping;
+        texture.colorSpace=T.SRGBColorSpace;
+        pmrem=new T.PMREMGenerator(this.renderer);
+        this.studioEnvTarget=pmrem.fromEquirectangular(texture);
+        this.scene.environment=this.studioEnvTarget.texture;
+        this.scene.environmentIntensity=this.mobileRender?.64:.84;
+        this.studioEnvironmentTexture=texture;
+      }catch(error){
+        this.studioEnvTarget?.dispose?.();
+        this.studioEnvTarget=null;
+        this.scene.environment=null;
+        texture?.dispose?.();
+        console.warn('FormatX neutral studio environment fallback:',error);
+      }finally{
+        pmrem?.dispose?.();
+      }
     }
 
     makeParticles(){
@@ -2160,7 +2214,7 @@
           if(line.userData.tube)line.userData.tube.visible=false;
           return;
         }
-        line.material.opacity=(lane===0?.25:.21)*opacity;
+        line.material.opacity=(lane===0?.18:.16)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
         const source=line.userData.source;
@@ -2187,7 +2241,7 @@
           // R2135: a real volumetric, phase-opposed double helix twists
           // around each forming MAG arm, rather than oscillating in a plane.
           // Its tapered radius seats into the emerging metal at both ends.
-          const radius=.105*Math.sin(Math.PI*u)*(1-.45*smooth((t-5.15)/1.65));
+          const radius=.065*Math.sin(Math.PI*u)*(1-.38*smooth((t-5.15)/1.65));
           const phase=u*Math.PI*8+time*.0028+axis*Math.PI*.5+lane*Math.PI;
           const sideways=radius*Math.cos(phase);
           const depth=radius*Math.sin(phase);
@@ -2197,7 +2251,7 @@
         const tube=line.userData.tube;
         if(tube){
           tube.visible=opacity>.002;
-          tube.material.opacity=(lane===0?.74:.65)*opacity;
+          tube.material.opacity=(lane===0?.59:.52)*opacity;
           const p=tube.geometry.attributes.position;
           const sides=6;
           for(let j=0;j<40;j++){
@@ -2234,7 +2288,7 @@
         const show=opacity>.002 && first?.visible && second?.visible;
         bridge.visible=Boolean(show);
         if(!show)return;
-        bridge.material.opacity=.32*opacity;
+        bridge.material.opacity=.29*opacity;
         const a=bridge.geometry.attributes.position;
         const p=first.geometry.attributes.position;
         const q=second.geometry.attributes.position;
@@ -2796,6 +2850,8 @@
         else m?.dispose?.();
       });
       this.microFiberTexture?.dispose?.();
+      this.studioEnvironmentTexture?.dispose?.();
+      this.studioEnvTarget?.dispose?.();
       this.renderer.dispose();
     }
   }
