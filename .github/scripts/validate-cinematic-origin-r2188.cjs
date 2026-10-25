@@ -26,6 +26,11 @@ for(const text of [
   'p.needsUpdate=true;',
   'const start=smooth((t-4.68)/.62);',
   'const opticWake=smooth((t-7.44)/.78);',
+  'const chromatinCount=this.mobileRender?10:17;',
+  'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
+  'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;',
+  'this.embryoMaterial.opacity=.72*visible;',
   "const count=this.mobileRender?6000:9600;",
   "const fade=1-smooth((t-3.10)/1.38);"
 ]){
@@ -51,5 +56,5 @@ console.log('R2188_GENESIS_STUDIO_SOURCE_PASS',JSON.stringify({
   dnaFirst:true,cellSecond:true,metalThird:true,opticLast:true,
   gpuParticles:{mobile:6000,desktop:9600},
   pairedVolumetricStreams:8,
-  nucleotideColors:4,cloudflareRevision:'r2188'
+  nucleotideColors:4,chromatin:{mobile:10,desktop:17},cloudflareRevision:'r2189'
 }));
