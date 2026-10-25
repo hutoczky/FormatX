@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261025-r2183-four-arm-dna-studio
-release_line=R2183-DNA-FIRST-FOUR-ARM-PAIRED-GENETIC-MAG-STUDIO
+token=20261025-r2183b-four-arm-dna-studio-proof
+release_line=R2183B-DNA-FIRST-FOUR-ARM-PAIRED-GENETIC-MAG-STUDIO-PROOF
 purpose=An explicitly staged ten-second studio birth film: one smooth centered living DNA double helix, then genuine genome-particle condensation into a clean embryonic cell, followed by phased titanium arm assembly and delayed optical ignition. After the assembled MAG is established, it travels and scales into the permanent WebGL hero position during a continuous 1.35-second photographic landing; final native hero crossfade begins only after 9.15 seconds.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
@@ -82,3 +82,7 @@ R2183_webgl_proof=Deterministic real GPU frame captures at DNA 1.6s, living cell
 R2183_assets=docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js; docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js; billing-worker/src/production-content-entry.js; .github/scripts/validate-genesis-storyboard-r2182.cjs; .github/scripts/verify-desktop-genesis-r2164.cjs; .github/scripts/validate-intro-three-route-r2143.cjs; .github/scripts/validate-mag-debanding-r2035.cjs.
 R2183_engine_cache=20261025-r2183-four-arm-real-genome
 R2183_quality_limit=Source and browser conformance do not establish award-level cinematic appearance on a physical Android device; visual quality still requires actual device inspection.
+
+R2183b_evidence=Real first desktop GPU screenshot at 1.6 seconds confirmed visible centered cyan-violet double helix; live R533-to-R536 handoff, canonical and WWW permanent WebGL MAG checks passed on deployment 40183178011 before the static-frame QA timeout.
+R2183b_test_fix=The deterministic introframe snapshots halt the movie requestAnimationFrame loop by design; Playwright's default rAF-polling timed out despite the ready GPU proof marker. Desktop visual gate now polls the actual GPU-ready proof every 250 ms independently of animation frames. The four-axis donor and common-parent paired-helix WebGL assertions remain mandatory for ALL keyframe snapshots.
+R2183b_acceptance=Production source/CSP, two-domain revision, live permanent MAG, live R533 handoff, desktop film DNA/cell/assembly/MAG four frames, and GENESIS desktop/mobile routes must all pass in one production workflow before final success claim.
