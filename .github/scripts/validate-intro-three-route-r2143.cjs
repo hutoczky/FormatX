@@ -54,7 +54,7 @@ for(const token of [
   "const founding=this.dnas.find(h=>h.userData.primary)",
   "const u=Math.floor(i/2)/(count/2-1)",
   "const phase=u*Math.PI*2*3.82",
-  "const localX=(u-.5)*4.08",
+  "const localX=(u-.5)*3.54",
   "const localY=sign*Math.sin(phase)*helixRadius",
   "const localZ=sign*Math.cos(phase)*helixRadius",
   "const rolledX=localX*cosZ-localY*sinZ",
@@ -68,6 +68,7 @@ for(const token of [
 // to read as a biological double helix, not two slim glowing wires.
 for(const token of [
   'index===0?.410:.272',
+  'index===0?3.54:4.08',
   'const backbone=radius>.35?.043:.031;',
   'const aureole=radius>.35?.087:.065;',
   'const helixRadius=.410+(r()-.5)*.013;',
