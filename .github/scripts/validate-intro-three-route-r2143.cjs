@@ -116,7 +116,7 @@ assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
 assert.ok(engine.includes('const capillaries=this.mobileRender?5:9') &&
   engine.includes('this.embryoCapillaryMaterial.opacity=.105*visible') &&
-  engine.includes('const fade=1-smooth((t-2.72)/1.94)'),
+  engine.includes('const fade=1-smooth((t-3.10)/1.38)'),
   'R2175 biologic embryo must remain readable without the old DNA/capillary clutter');
 const land=t=>smoothNumber((t-8.45)/1.35);
 for(const [time,value] of [[4.2,0],[7.6,0],[8.45,0],[9.8,1]]){
