@@ -869,13 +869,28 @@
         // Both distributions use the same cell centre and an ellipsoid skin.
         const membrane=i%4!==0;
         const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;
-        cell.set([radius*Math.sin(b)*Math.cos(a),radius*1.08*Math.cos(b),radius*.80*Math.sin(b)*Math.sin(a)+.20],i*3);
+        // R2192: the biological target must occupy the SAME 3D volume as
+        // coreGroup's visible embryo, which is raised to z=1.10 during birth.
+        // Previously the genome condensed at z=.20, nearly a full world unit
+        // behind the cell membrane: a dissolve/crossfade, not a genuine morph.
+        // Slightly reduce the cloud envelope to fit the nonuniform glass shell.
+        cell.set([
+          radius*.82*Math.sin(b)*Math.cos(a),
+          radius*.94*Math.cos(b),
+          1.10+radius*.65*Math.sin(b)*Math.sin(a)
+        ],i*3);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
         const reach=.20+.74*r();
         const lateral=(r()-.5)*.15;
-        arms.set([Math.cos(phi)*reach-Math.sin(phi)*lateral,Math.sin(phi)*reach+Math.cos(phi)*lateral,.05+(r()-.5)*.22],i*3);
+        // R2192: molecular matter seats above the actual titanium front
+        // (typically z=.38-.48), rather than vanishing behind opaque armour.
+        arms.set([
+          Math.cos(phi)*reach-Math.sin(phi)*lateral,
+          Math.sin(phi)*reach+Math.cos(phi)*lateral,
+          .62+(r()-.5)*.16
+        ],i*3);
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
         seed[i]=strand===0?r()*.42:.58+r()*.42;
@@ -929,7 +944,9 @@
             float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));
             gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z)*(1.0+transferGlow*.24),1.0,6.6*uPixelRatio);
             float first=curve(0.08,.65,uPhase);
-            float last=1.0-curve(7.16,8.05,uPhase);
+            // R2192: all genetic matter departs BEFORE the optical organ
+            // starts igniting at 7.44 s; no ghost DNA over the born MAG.
+            float last=1.0-curve(6.96,7.44,uPhase);
             vEnergy=first*last*(1.0+transferGlow*.16);
             vSeed=aSeed;
           }`,
