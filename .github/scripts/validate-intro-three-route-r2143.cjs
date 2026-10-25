@@ -84,7 +84,7 @@ const donorOpacity=t=>smoothNumber((t-4.38)/.48)*(1-smoothNumber((t-5.95)/.85));
 for(const t of [0,1.6,2.6,4.2])assert.equal(donorOpacity(t),0,
   'Donor helices must be absent before the transition out of the embryo');
 assert(donorOpacity(5.1)>.99,'Donor helices must feed the four arms before titanium seating');
-assert.ok(engine.includes('const appear=smooth((t-2.38)/.76)') &&
+assert.ok(engine.includes('const appear=smooth((t-3.52)/.76)') &&
   engine.includes('const grow=smooth((t-5.88)/1.18)') &&
   engine.includes('const opticWake=smooth((t-7.44)/.78)'),
   'DNA / living embryo / assembled titanium MAG / optical ignition story order regressed');
