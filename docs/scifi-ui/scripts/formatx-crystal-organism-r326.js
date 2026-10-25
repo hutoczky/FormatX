@@ -662,6 +662,37 @@
       armorTri(last.left,last.crown,last.right,5.31);
       armorQuad(last.left,last.right,last.underRight,last.underLeft,5.72);
     }
+    /* R2194 — continuous polished titanium vein inlays. Two tapered
+       optically raised strips are machined into EACH of the four actual
+       arm hulls. Their depth is derived from the SAME R2153 mathematical
+       shell, so no disconnected wings, no z-fighting and no new draw pass. */
+    for(let axis=0;axis<4;axis++){
+      const angle=axis*Math.PI*.5;
+      const dx=Math.cos(angle),dy=Math.sin(angle);
+      const sx=-dy,sy=dx;
+      const tipRadius=axis===1?1.096:axis===3?1.045:1.075;
+      for(const side of [-1,1]){
+        let previous=null;
+        for(let j=0;j<=20;j++){
+          const u=j/20;
+          const r=.275+(tipRadius-.31)*u;
+          const ease=u*u*(3-2*u);
+          const half=(.110*(1-ease)+.006)*(1+.045*Math.sin(Math.PI*u));
+          const lateral=side*half*.53;
+          const ribbonWidth=.008*(1-.50*u);
+          const top=magSkinZ(dx*r,dy*r)+.153+.057*Math.sin(Math.PI*u);
+          const edge=magSkinZ(dx*r+sx*lateral,dy*r+sy*lateral)+.065+.032*Math.sin(Math.PI*u);
+          const z=top*.44+edge*.56+.034;
+          const pt=(w)=>[dx*r+sx*(lateral+w),dy*r+sy*(lateral+w),z];
+          const next=[pt(-ribbonWidth),pt(ribbonWidth)];
+          if(previous){
+            // Thin polished inlay relief, physically above the matte hull.
+            armorQuad(previous[0],previous[1],next[1],next[0],5.46+axis*.003);
+          }
+          previous=next;
+        }
+      }
+    }
     /* The centre is not a painted circle. A shallow, machined 48-facet
        silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
     const opticPoint=(radius,angle,depth)=>[
@@ -1663,6 +1694,15 @@
         titanium+=vec3(.11,.25,.28)*metalRim*.25;
         titanium+=vec3(.046,.100,.118)*side*.14;
         titanium*=1.0-.46*step(5.65,vFacet);
+        /* R2194: metallic inlays catch a sharper travelling softbox,
+           rather than blending into the same flat dark arm colour. */
+        float polishedRib=smoothstep(5.43,5.455,vFacet)*
+          (1.0-step(5.60,vFacet));
+        vec3 machinedSilver=vec3(.22,.30,.31)
+          +vec3(.53,.67,.68)*softboxB*.64
+          +vec3(.75,.90,.88)*metalSpec*.48
+          +vec3(.14,.37,.41)*metalSideSpec*.24;
+        titanium=mix(titanium,machinedSilver,polishedRib*.90);
         c=mix(c,titanium,machinedArmor*.99);
 
         /* Interaction/surface sweep remains physical and brief. */
