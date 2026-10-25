@@ -149,7 +149,7 @@ for(const resource of [
 const fallback=read('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js');
 assert.ok(fallback.includes("fxMagFallbackSilhouetteR2103")&&
   fallback.includes('for(let blade=0;blade<8;blade++)')&&
-  html.includes('formatx-mag-reference-film-r649.js?v=20261022-r2145-portrait-dna-genesis'),
+  html.includes('formatx-mag-reference-film-r649.js?v=20261025-r2182-studio-depth-first-genome'),
   'Missing actual cache-busted four-point R2103 Android replacement');
 // R2145: phone cover-crop cannot discard the genome. The opening must
 // show a centered vertical helix and an embryo BEFORE the metal object.
