@@ -295,6 +295,17 @@
         [-1.05,.06,-.82,1.38,.34],
         [1.05,.06,-.82,1.76,.34]
       ];
+      // R2183: explicit four-arm source assignment. On desktop, nearest-axis
+      // classification of the seven authored DNA parents produced ZERO south
+      // donors (every bottom diagonal was classified as east/west), leaving
+      // the lower titanium arm without any visible double-helix feed.
+      // This physical routing covers N/E/S/W on both viewport profiles.
+      const armAssignments=this.mobileRender
+        ? [1,2,0,3]
+        : [1,1,0,2,3,2,0];
+      if(placements.length!==armAssignments.length){
+        throw new Error('DNA donor routing must match the authored helix positions');
+      }
       // R2131: four persistent, GPU-light DNA-to-arm transfer strands.
       // Their endpoints are animated with the same chassis-axis mapping
       // as the parent helices, visually bridging DNA and emerging metal.
@@ -338,13 +349,13 @@
         this.birthRungs.push(bridges);
       }
       this.dnas=[];
-      for(const [x,y,z,rz,sc] of placements){
+      for(const [index,[x,y,z,rz,sc]] of placements.entries()){
         const h=this.createHelix(4.08,.272,3.82);
         h.position.set(x,y,z);
         h.rotation.z=rz;
         h.rotation.y=(this.rand()-.5)*.24;
         h.scale.setScalar(sc);
-        h.userData.base={x,y,z,rz,s:sc,phase:this.rand()*Math.PI*2};
+        h.userData.base={x,y,z,rz,s:sc,phase:this.rand()*Math.PI*2,armAxis:armAssignments[index]};
         // A dominant, recognizable nucleotide chain owns the opening shot.
         h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50;
         this.dnaGroup.add(h);
@@ -356,18 +367,28 @@
         const axis=line.userData.axis;
         const candidates=this.dnas.filter(h=>{
           const b=h.userData.base;
-          const nearest=Math.abs(b.x)>Math.abs(b.y)
-            ?(b.x>=0?0:2):(b.y>=0?1:3);
-          return nearest===axis;
+          return b.armAxis===axis;
         });
-        // R2134: bind the two lanes to distinct DNA parents when
-        // possible, so the doubled bridge has genuine spatial depth.
+        // R2183: the two opposing strands of ONE helix must share their
+        // genetic root. The old lane-index choice spanned unrelated donor
+        // helices with nucleotide bridges, producing impossible cross-frame
+        // rungs instead of a coherent DNA chain during MAG assembly.
         candidates.sort((a,b)=>
           Math.hypot(a.userData.base.x,a.userData.base.y)-
           Math.hypot(b.userData.base.x,b.userData.base.y)
         );
-        line.userData.source=candidates[line.userData.lane]||candidates[0]||null;
+        line.userData.source=candidates[0]||null;
       });
+      // A broken arm source must never silently render a blank DNA transfer.
+      if(this.birthStrands.some(line=>!line.userData.source)){
+        throw new Error('Every MAG arm requires an actual DNA donor source');
+      }
+      for(let axis=0;axis<4;axis++){
+        const pair=this.birthStrands.filter(line=>line.userData.axis===axis);
+        if(pair.length!==2 || pair[0].userData.source!==pair[1].userData.source){
+          throw new Error('A true double helix needs two strands from one donor');
+        }
+      }
     }
 
     makeGlowTexture(){
@@ -761,6 +782,10 @@
       const cell=new Float32Array(count*3);
       const arms=new Float32Array(count*3);
       const seed=new Float32Array(count);
+      // R2184: carry a physically paired cyan/violet nucleotide pair
+      // to ONE of the four titanium arms, rather than routing opposite
+      // DNA strands to unrelated cardinal arms.
+      const armIndex=new Float32Array(count);
       // R2176: a SINGLE founding DNA shape owns the opening shot. Previously
       // the 9,600 glowing nucleotides wound 7.75 turns while the visible
       // 3D helix wound 3.82; two mismatched objects overlapped on screen.
@@ -790,10 +815,13 @@
         const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
         const radius=.12+Math.cbrt(r())*.82;
         cell.set([radius*Math.sin(b)*Math.cos(a),radius*1.08*Math.cos(b),radius*.80*Math.sin(b)*Math.sin(a)+.20],i*3);
-        const axis=i%4,phi=axis*Math.PI*.5;
+        // Both nucleotides at one base-pair station share one arm destination.
+        // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
+        const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
         const reach=.20+.74*r();
         const lateral=(r()-.5)*.15;
         arms.set([Math.cos(phi)*reach-Math.sin(phi)*lateral,Math.sin(phi)*reach+Math.cos(phi)*lateral,.05+(r()-.5)*.22],i*3);
+        armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
         seed[i]=strand===0?r()*.42:.58+r()*.42;
       }
@@ -802,6 +830,7 @@
       geometry.setAttribute('aCell',new T.BufferAttribute(cell,3));
       geometry.setAttribute('aArm',new T.BufferAttribute(arms,3));
       geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
+      geometry.setAttribute('aArmIndex',new T.BufferAttribute(armIndex,1));
       const material=new T.ShaderMaterial({
         uniforms:{uTime:{value:0},uPhase:{value:0},uPixelRatio:{value:1}},
         transparent:true,depthWrite:false,depthTest:true,
@@ -810,6 +839,7 @@
           attribute vec3 aCell;
           attribute vec3 aArm;
           attribute float aSeed;
+          attribute float aArmIndex;
           uniform float uTime,uPhase,uPixelRatio;
           varying float vSeed,vEnergy;
           float curve(float a,float b,float x){
@@ -818,9 +848,21 @@
           }
           void main(){
             float condense=curve(2.94,4.38,uPhase);
-            float assemble=curve(5.36,7.18,uPhase);
+            // R2184: the four paired DNA streams seat at slightly offset
+            // beats. The final south/west feed reaches its titanium arm
+            // BEFORE the mechanical optic wakes at 7.44 seconds.
+            float armBeat=aArmIndex*.11;
+            float assemble=curve(5.34+armBeat,6.90+armBeat,uPhase);
             vec3 p=mix(position,aCell,condense);
             p=mix(p,aArm,assemble);
+            // Physically curl the genetic matter toward its destination,
+            // with zero residual motion at either endpoint of the morph.
+            float curlEnvelope=assemble*(1.0-assemble);
+            vec2 radial=normalize(aArm.xy+vec2(.0001,.0001));
+            vec2 tangent=vec2(-radial.y,radial.x);
+            float curlAngle=aSeed*31.4159+uTime*.0012;
+            p.xy+=tangent*(sin(curlAngle)*.19*curlEnvelope);
+            p.z+=cos(curlAngle)*.16*curlEnvelope;
             float coil=1.0-curve(2.94,4.38,uPhase);
             p.x+=coil*.018*sin(uTime*.00082+aSeed*32.0);
             p.y+=.013*sin(uTime*.0011+aSeed*20.0)*(1.0-assemble);
@@ -1884,8 +1926,7 @@
         // R2129: map each helix to the nearest actual four-point
         // chassis axis, rather than assigning directions by array index.
         // This prevents filaments from crossing the frame unnecessarily.
-        const nearestAxis=Math.abs(b.x)>Math.abs(b.y)
-          ?(b.x>=0?0:2):(b.y>=0?1:3);
+        const nearestAxis=b.armAxis;
         const armAngle=nearestAxis*Math.PI*.5;
         const armProgress=smooth((t-4.72-nearestAxis*.11)/2.06);
         // R2130: blend each filament onto its actual final arm position.
@@ -2421,6 +2462,19 @@
             }
           }
           const root=document.documentElement;
+          // R2183 visual-proof-only: inspect the ACTUAL assembled Three.js
+          // donor graph in the scene, rather than trusting source markers.
+          const donorArms=new Set(
+            this.birthStrands.filter(line=>Boolean(line.userData.source))
+              .map(line=>line.userData.axis)
+          );
+          const donorPairs=[0,1,2,3].every(axis=>{
+            const pair=this.birthStrands.filter(line=>line.userData.axis===axis);
+            return pair.length===2&&Boolean(pair[0].userData.source)&&
+              pair[0].userData.source===pair[1].userData.source;
+          });
+          root.dataset.fxMagBirthDonorArmsR2183=String(donorArms.size);
+          root.dataset.fxMagBirthDonorPairsR2183=String(donorPairs);
           root.dataset.fxMagBirthFramePeakR1557=String(peak);
           root.dataset.fxMagBirthVisibleArmorR2147=String(
             [...this.silverParts,...this.plates].filter(part=>part.visible).length

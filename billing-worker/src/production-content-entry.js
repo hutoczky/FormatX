@@ -27,9 +27,10 @@ const INLINE_R2173_BOOT_HASH = "'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx
 // R2175: exact parser-owned bootstrap fingerprint for the timed MAG landing.
 const INLINE_R2180_BOOT_HASH = "'sha256-vFnqrxhj1TyaRwUVyY50JweGkw0ezcXtOE1df2a68/c='";
 // R2182: exact CSP for the active cold-start DNA bootstrap.
-const INLINE_R2182_BOOT_HASH = "'sha256-UscerdUEddCt/c19W/h5Mu4c4TKIq/vpFC4050RSuJ8='";
-// R2182: parser-inline DNA first frame must paint without a stylesheet round trip.
+const INLINE_R2182_BOOT_HASH = "'sha256-F+RmFHIXR1oxGVwKjqN8rpbBJhBrA1y1yezuK7FLTJk='";
+// Parser-inline DNA first frame must paint without a stylesheet round trip.
 const INLINE_DNA_FIRST_FRAME_STYLE_HASH = "'sha256-g+qPpA2VpbE0ZLnpaoeInutQsWSCBO4Qdoa7WEULoP4='";
+const INLINE_GENESIS_AUDIO_STYLE_HASH = "'sha256-VlB2zUSZN35Ltx1NRDRuzEJ9yBZUmr6lrR6ih6XPZts='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -38,10 +39,10 @@ const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" 
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
 const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">';
-const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261024-r2179-optic-native-continuity';
+const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261024-r2179-true-optic-stable-titanium';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261013-r2054-verified-css-recovery"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' ${INLINE_DNA_FIRST_FRAME_STYLE_HASH} 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
+const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' ${INLINE_DNA_FIRST_FRAME_STYLE_HASH} ${INLINE_GENESIS_AUDIO_STYLE_HASH} 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -49,7 +50,7 @@ const HEADER_CSP = [
   "frame-ancestors 'none'",
   "form-action 'self'",
   `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} https://static.cloudflareinsights.com`,
-  `style-src 'self' ${INLINE_DNA_FIRST_FRAME_STYLE_HASH} 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI='`,
+  `style-src 'self' ${INLINE_DNA_FIRST_FRAME_STYLE_HASH} ${INLINE_GENESIS_AUDIO_STYLE_HASH} 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI='`,
   "img-src 'self' data: https://quickchart.io",
   "font-src 'self'",
   "connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com",
@@ -221,11 +222,11 @@ const DEFERRED_STYLE_PATHS = new Set([
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
     marker: 'scheduler-to-loader-r1950-desktop-edge-aa',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261024-r2179-optic-native-continuity']],
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261024-r2179-true-optic-stable-titanium']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261025-r2182-dna-chapter-first']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261025-r2184-paired-genetic-morph']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
