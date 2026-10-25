@@ -465,6 +465,10 @@
         Number.isFinite(radiusCap)?radiusCap:192
       );
       const S=R;
+      // R2182: the mechanical aperture is dormant until the last act.
+      // Titanium assembles first; the living MAG's optic ignites only
+      // after its four arms have fully seated.
+      const opticWake=smooth((t-7.38)/.76);
       ctx.save();
       ctx.translate(cx,cy);
       ctx.rotate(.012*Math.sin(time*.00033));
@@ -715,13 +719,13 @@
         ctx.restore();
       }
       const pupil=ctx.createRadialGradient(-rx*.12,-ry*.19,1,0,0,rx*.50);
-      pupil.addColorStop(0,'#75a5aa');
-      pupil.addColorStop(.14,'#35626d');
+      pupil.addColorStop(0,'rgba(117,165,170,'+(.14+.86*opticWake).toFixed(3)+')');
+      pupil.addColorStop(.14,opticWake>.20?'#35626d':'#0b1a24');
       pupil.addColorStop(.60,'#0c2938');
       pupil.addColorStop(1,'#030f1b');
       ctx.beginPath();ctx.arc(0,0,rx*.42,0,TAU);
       ctx.fillStyle=pupil;ctx.fill();
-      ctx.strokeStyle='rgba(198,240,235,.62)';
+      ctx.strokeStyle='rgba(198,240,235,'+(.10+.52*opticWake).toFixed(3)+')';
       ctx.lineWidth=Math.max(1,S*.010);ctx.stroke();
       // R2109: sapphire lens with a recessed concentric aperture and
       // directional catchlights. Detail is restricted to adequately sized
@@ -743,13 +747,13 @@
         }
       }
       ctx.beginPath();ctx.ellipse(-rx*.19,-ry*.23,rx*.14,ry*.085,-.42,0,TAU);
-      ctx.fillStyle='rgba(245,252,243,.68)';ctx.fill();
+      ctx.fillStyle='rgba(245,252,243,'+(.025+.655*opticWake).toFixed(3)+')';ctx.fill();
       // R2104 photographic side-light trace on the recessed blue glass:
       // one arc, two highlights and the original iris geometry.
       ctx.beginPath();
       ctx.ellipse(0,0,rx*.925,ry*.925,0,-2.68,-.84,false);
       ctx.strokeStyle='rgba(224,253,245,'+
-        (.30+.18*studioTravel).toFixed(3)+')';
+        (.035+opticWake*(.265+.18*studioTravel)).toFixed(3)+')';
       ctx.lineWidth=Math.max(.8,S*.009);
       ctx.stroke();
       ctx.beginPath();
