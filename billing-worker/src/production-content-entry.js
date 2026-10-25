@@ -27,7 +27,7 @@ const INLINE_R2173_BOOT_HASH = "'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx
 // R2175: exact parser-owned bootstrap fingerprint for the timed MAG landing.
 const INLINE_R2180_BOOT_HASH = "'sha256-vFnqrxhj1TyaRwUVyY50JweGkw0ezcXtOE1df2a68/c='";
 // R2182: exact CSP for the active cold-start DNA bootstrap.
-const INLINE_R2182_BOOT_HASH = "'sha256-UscerdUEddCt/c19W/h5Mu4c4TKIq/vpFC4050RSuJ8='";
+const INLINE_R2182_BOOT_HASH = "'sha256-F+RmFHIXR1oxGVwKjqN8rpbBJhBrA1y1yezuK7FLTJk='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -223,7 +223,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261025-r2183-four-arm-real-genome']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261025-r2184-paired-genetic-morph']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
