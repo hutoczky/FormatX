@@ -2434,6 +2434,19 @@
             }
           }
           const root=document.documentElement;
+          // R2183 visual-proof-only: inspect the ACTUAL assembled Three.js
+          // donor graph in the scene, rather than trusting source markers.
+          const donorArms=new Set(
+            this.birthStrands.filter(line=>Boolean(line.userData.source))
+              .map(line=>line.userData.axis)
+          );
+          const donorPairs=[0,1,2,3].every(axis=>{
+            const pair=this.birthStrands.filter(line=>line.userData.axis===axis);
+            return pair.length===2&&Boolean(pair[0].userData.source)&&
+              pair[0].userData.source===pair[1].userData.source;
+          });
+          root.dataset.fxMagBirthDonorArmsR2183=String(donorArms.size);
+          root.dataset.fxMagBirthDonorPairsR2183=String(donorPairs);
           root.dataset.fxMagBirthFramePeakR1557=String(peak);
           root.dataset.fxMagBirthVisibleArmorR2147=String(
             [...this.silverParts,...this.plates].filter(part=>part.visible).length
