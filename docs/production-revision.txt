@@ -75,3 +75,4 @@ R2182_storyboard=First 3.1 seconds: one clean full-size DNA double helix only. 2
 R2182_background=Prevent the production permanent MAG from showing through the film's transparent radial cutout before the late hero handoff; preserve opaque cinematic DNA and cell chapters.
 R2182_contracts=.github/scripts/validate-genesis-storyboard-r2182.cjs validates exact timeline and CSP-safe delivery; docs/scifi-ui/styles/formatx-mag-birth-live-r533.css and docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js carry authored change; both domains must pass exact revision and live cinematic browser tests.
 R2182_release_gate=GitHub production source, CSP, runtime, Worker and build validated on 3e6d17fc7a7; new release must pass exact live both-domain marker and true Three.js birth browser proofs.
+R2182_ci_gate=Production source, WebGL syntax, CSP integrity, storyboard chapter staging, and Worker preflight validated after prior timing assertions were updated.
