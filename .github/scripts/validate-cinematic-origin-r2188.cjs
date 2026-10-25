@@ -36,7 +36,7 @@ for(const text of [
 ]){
   assert(renderer.includes(text),'Missing R2188 film / biological chronology contract: '+text);
 }
-const filmURL='formatx-mag-genesis-three-r1280.js?v=20261025-r2191-full-arm-dna-studio';
+const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2192-physical-genome-morph';
 assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stale 3D intro');
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -52,6 +52,24 @@ assert(metal(6.8)>.7 && optic(6.8)===0,
   'Titanium must seat while the MAG eye is still unlit');
 assert(metal(8.3)===1 && optic(8.3)===1,
   'Final assembled MAG and optic must be fully formed');
+// R2192: particles must morph into the same 3D embryo as the visible
+// glass shell, then sit in FRONT of titanium before the pupil wakes.
+for(const token of [
+  '1.10+radius*.65*Math.sin(b)*Math.sin(a)',
+  'radius*.82*Math.sin(b)*Math.cos(a)',
+  '.62+(r()-.5)*.16',
+  'float last=1.0-curve(6.96,7.44,uPhase);'
+])assert(renderer.includes(token),'R2192 spatial continuity missing: '+token);
+const embryoCentreZ=1.10;
+const cellDepthRange=.77*.65;
+const metalMinZ=.62-.08;
+assert(cellDepthRange<.53 && embryoCentreZ>.95,
+  'Genome particle nucleus must coincide with 3D embryo envelope');
+assert(metalMinZ>.48,
+  'Genetic particles must not hide behind solid titanium panels');
+const geneticFade=t=>1-smooth((t-6.96)/.48);
+assert(geneticFade(6.80)>.99 && geneticFade(7.44)===0,
+  'Genome must remain visible during welding but vanish before eye ignition');
 console.log('R2188_GENESIS_STUDIO_SOURCE_PASS',JSON.stringify({
   dnaFirst:true,cellSecond:true,metalThird:true,opticLast:true,
   gpuParticles:{mobile:6000,desktop:9600},
