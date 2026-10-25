@@ -2300,3 +2300,25 @@ html:root .fx-mag-birth-r533 .fxb-skip:focus-visible{
   outline-offset:3px!important;
 }
 /* end-r2103-mobile-compact-four-point-intro */
+
+/* R2182 — single-subject genesis staging. The former radial cutout exposed
+   the permanent native MAG behind the DNA and read as a premature giant
+   dark sphere. Keep the film opaque during DNA and cell formation. Open the
+   native hero only during the final titanium/optical handoff. The live
+   WebGL DNA, stars and cell remain foreground children of this overlay. */
+html:root .fx-mag-birth-r533[data-phase="0"],
+html:root .fx-mag-birth-r533[data-phase="1"],
+html:root .fx-mag-birth-r533[data-phase="2"] {
+  background-color:#010407;
+}
+html:root .fx-mag-birth-r533[data-phase="3"] {
+  background-color:rgba(1,4,7,.94);
+}
+html:root .fx-mag-birth-r533[data-phase="4"] {
+  background-color:rgba(1,4,7,0);
+}
+html:root .fx-mag-birth-r533 {
+  transition:opacity .72s cubic-bezier(.22,.61,.36,1),
+    filter .72s cubic-bezier(.22,.61,.36,1),
+    background-color 1.30s cubic-bezier(.22,.61,.36,1);
+}
