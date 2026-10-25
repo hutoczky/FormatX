@@ -356,7 +356,9 @@
       for(const [index,[x,y,z,rz,sc]] of placements.entries()){
         // R2185: opening DNA is a wide, legible molecular subject rather
         // than a thin luminous wire. Preserve donors and total animation time.
-        const h=this.createHelix(4.08,index===0?.410:.272,3.82);
+        // R2187: keep the full founding DNA ladder within the cinematic frame.
+        // A shorter molecular shaft preserves its readable wide base pairs.
+        const h=this.createHelix(index===0?3.54:4.08,index===0?.410:.272,3.82);
         h.position.set(x,y,z);
         h.rotation.z=rz;
         h.rotation.y=(this.rand()-.5)*.24;
@@ -810,7 +812,7 @@
         // R2185: nucleotides must coincide with the wider real founding
         // 3D phosphate strands at every base-pair station.
         const helixRadius=.410+(r()-.5)*.013;
-        const localX=(u-.5)*4.08;
+        const localX=(u-.5)*3.54;
         const localY=sign*Math.sin(phase)*helixRadius;
         const localZ=sign*Math.cos(phase)*helixRadius;
         const rolledX=localX*cosZ-localY*sinZ;
