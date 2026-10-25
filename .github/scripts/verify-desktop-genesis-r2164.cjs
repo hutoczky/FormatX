@@ -124,6 +124,9 @@ async function main(){
           genomeCount:Number(root.dataset.fxMagBirthGenomeParticlesR2160||0),
           donorArms:Number(root.dataset.fxMagBirthDonorArmsR2183||0),
           donorPairs:root.dataset.fxMagBirthDonorPairsR2183||'',
+          transferOpacity:Number(root.dataset.fxMagBirthTransferTubeOpacityR2190||0),
+          transferFrontZ:Number(root.dataset.fxMagBirthTransferTubeFrontR2190||0),
+          transferSpan:Number(root.dataset.fxMagBirthTransferSpanR2191||0),
           peak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           litPixels:Number(root.dataset.fxMagBirthThreeLitPixelsR2146||0)
         };
@@ -148,6 +151,7 @@ async function main(){
       }
       if(name==='dna'){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
+        assert.ok(state.transferOpacity<.001,'Titanium bridge appeared before the DNA establishing shot');
         assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
         assert.equal(state.inlayPieces,0,'R2180 titanium appeared during DNA opening');
         assert.equal(state.assemblyWeld,false,'Welding began before the DNA introduction');
@@ -164,6 +168,11 @@ async function main(){
         assert.ok(state.armorPieces>=1,'Four-arm chassis did not begin assembling');
         assert.ok(state.inlayPieces>=2,'R2180 titanium inlays did not start seating');
         assert.ok(state.assemblyWeld,'R2187 physical genome welding light did not reach four metal arms');
+        // The screenshot must capture actual double-stranded DNA wiring
+        // above the front-facing titanium, not invisible strands behind it.
+        assert.ok(state.transferOpacity>.32,'R2190 real genetic tube is invisible while metal assembles');
+        assert.ok(state.transferFrontZ>.60,'R2190 genome transfer is buried behind the titanium face');
+        assert.ok(state.transferSpan>.56,'R2191 genome collapsed into tiny tip blobs instead of covering metal arms');
         assert.ok(state.eyeOpacity<.003,'MAG optical organ ignited before assembly');
       }
       if(name==='mag'){
@@ -171,6 +180,7 @@ async function main(){
         assert.equal(state.inlayPieces,4,'R2180 four machined arm inlays incomplete');
         assert.ok(state.inlayOpacity>.70,'R2180 optical titanium material missing');
         assert.ok(state.eyeOpacity>.07 && state.eyeOpacity<.25,'MAG eye not visibly awakened');
+        assert.ok(state.transferOpacity<.001,'DNA tubes must disappear before MAG optical ignition');
       }
       outputs.push({name,seconds,...state});
       await page.close();

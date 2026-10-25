@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261025-r2187-biotic-coherent-genome';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2192-living-depth';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -76,11 +76,23 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=i%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.86*visible;',
-  'this.embryoNucleusMaterial.opacity=.47*visible;',
-  'this.embryoCapillaryMaterial.opacity=.16*visible;'
+  'this.embryoMaterial.opacity=.72*visible;',
+  'this.embryoNucleusMaterial.opacity=.76*visible;',
+  'this.embryoCapillaryMaterial.opacity=.25*visible;'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
+}
+// R2192 depth pass: the biological chapter must contain a rough, textured
+// membrane and sparse warm organelles at real 3D depths in one instanced draw.
+for(const token of [
+  'roughness:.31,clearcoat:.42,clearcoatRoughness:.31',
+  'roughnessMap:this.bioticSurfaceTexture',
+  'const organelleCount=this.mobileRender?24:36;',
+  'this.embryoSites=new T.InstancedMesh(',
+  'this.embryoSites.setMatrixAt(i,siteDummy.matrix);',
+  'this.embryoSiteMaterial.opacity=.56*visible;'
+]){
+  assert.ok(engine.includes(token),'R2192 living-cell depth contract: '+token);
 }
 assert.equal(home.match(/<style data-fx-dna-first-frame-r2181="true">([\s\S]*?)<\/style>/)?.[1],
   fs.readFileSync('docs/scifi-ui/styles/formatx-dna-first-frame-r2181.css','utf8'),
@@ -136,7 +148,7 @@ assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
   birth.includes('const nativeCadence=r>=.90?40:'),
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
 assert.ok(engine.includes('const capillaries=this.mobileRender?5:9') &&
-  engine.includes('this.embryoCapillaryMaterial.opacity=.16*visible') &&
+  engine.includes('this.embryoCapillaryMaterial.opacity=.25*visible') &&
   engine.includes('const fade=1-smooth((t-3.10)/1.38)'),
   'R2175 biologic embryo must remain readable without the old DNA/capillary clutter');
 const land=t=>smoothNumber((t-8.45)/1.35);
