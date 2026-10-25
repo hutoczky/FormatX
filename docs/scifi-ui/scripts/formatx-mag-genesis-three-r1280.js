@@ -972,12 +972,17 @@
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
       this.embryoShell.scale.set(.88,1.12,.78);
       this.coreGroup.add(this.embryoShell);
-      this.embryoNucleusMaterial=new T.MeshBasicMaterial({
-        color:0x70d6df,transparent:true,opacity:0,
-        depthWrite:false,blending:T.AdditiveBlending
+      // R2189: no flat 2D turquoise button inside the embryo. The genetic
+      // nucleus is a physically shaded translucent organelle with an actual
+      // clear-coated lens, lit by the same three-dimensional studio rig.
+      this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({
+        color:0x248a9d,emissive:0x13718a,emissiveIntensity:.40,
+        metalness:.015,roughness:.13,transmission:.24,thickness:.23,ior:1.36,
+        clearcoat:1,clearcoatRoughness:.055,
+        transparent:true,opacity:0,depthWrite:false
       });
       this.embryoNucleus=new T.Mesh(
-        new T.SphereGeometry(.23,24,16),this.embryoNucleusMaterial
+        new T.SphereGeometry(.25,32,24),this.embryoNucleusMaterial
       );
       this.embryoNucleus.position.set(-.10,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
@@ -1022,6 +1027,44 @@
       });
       this.embryoCapillaries=new T.LineSegments(membranes,this.embryoCapillaryMaterial);
       this.coreGroup.add(this.embryoCapillaries);
+
+      // R2189: chromatin is a family of genuinely volumetric curved fibres
+      // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
+      // texture painted onto the glass shell; adaptive strand count on phones.
+      const chromatinPositions=[],chromatinColors=[];
+      const chromatinCount=this.mobileRender?10:17;
+      const cool=new T.Color(0x83f1e8),violet=new T.Color(0xb7a6e9);
+      for(let strand=0;strand<chromatinCount;strand++){
+        const phase=strand*Math.PI*2/chromatinCount;
+        const hue=cool.clone().lerp(violet,strand/(chromatinCount-1));
+        const points=[];
+        for(let k=0;k<=60;k++){
+          const u=k/60,turn=u*Math.PI*2.5+phase;
+          const radius=.32+.26*Math.sin(u*Math.PI)+.048*Math.sin(6*turn+phase);
+          points.push([
+            Math.cos(turn)*radius*.90,
+            Math.sin(turn)*radius*1.10,
+            .18+.30*Math.sin(turn*.75+phase)*Math.sin(u*Math.PI)
+          ]);
+        }
+        for(let k=0;k<60;k++){
+          chromatinPositions.push(...points[k],...points[k+1]);
+          for(let e=0;e<2;e++)chromatinColors.push(hue.r,hue.g,hue.b);
+        }
+      }
+      const chromatinGeometry=new T.BufferGeometry();
+      chromatinGeometry.setAttribute('position',
+        new T.Float32BufferAttribute(chromatinPositions,3));
+      chromatinGeometry.setAttribute('color',
+        new T.Float32BufferAttribute(chromatinColors,3));
+      this.embryoChromatinMaterial=new T.LineBasicMaterial({
+        vertexColors:true,transparent:true,opacity:0,
+        depthWrite:false,blending:T.AdditiveBlending
+      });
+      this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);
+      this.embryoChromatin.renderOrder=4;
+      this.coreGroup.add(this.embryoChromatin);
+      this.embryoChromatin.scale.set(1,1,.95);
     }
 
     updateGenomeParticles(t,time){
@@ -2211,8 +2254,13 @@
       const dissolve=1-smooth((t-5.66)/1.12);
       const visible=appear*dissolve;
       this.coreGroup.visible=visible>.002;
-      this.embryoMaterial.opacity=.86*visible;
-      this.embryoNucleusMaterial.opacity=.47*visible;
+      // R2189: translucent outer membrane reveals living chromatin and
+      // the physically shaded organelle without exposing a hard MAG eye.
+      this.embryoMaterial.opacity=.72*visible;
+      this.embryoNucleusMaterial.opacity=.76*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
+      this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
+      this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
       this.embryoShell.scale.set(.88*pulse,1.12*pulse,.78*pulse);
       this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
@@ -2221,7 +2269,7 @@
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoCapillaryMaterial.opacity=.16*visible;
+      this.embryoCapillaryMaterial.opacity=.25*visible;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
