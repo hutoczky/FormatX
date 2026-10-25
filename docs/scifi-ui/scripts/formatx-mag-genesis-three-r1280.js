@@ -2277,6 +2277,9 @@
             }
           }
           p.needsUpdate=true;
+          // R2193: specular softboxes need the ACTUAL moving tube surface
+          // normals; fixed fallback normals made the gene strands look flat.
+          tube.geometry.computeVertexNormals();
         }
       });
       // R2157: reuse the already-updated opposite DNA strands as the
