@@ -108,6 +108,8 @@ async function main(){
           inlayOpacity:Number(root.dataset.fxMagBirthArmInlayOpacityR2180||0),
           eyeOpacity:Number(root.dataset.fxMagBirthEyeOpacityR2148||0),
           genomeCount:Number(root.dataset.fxMagBirthGenomeParticlesR2160||0),
+          donorArms:Number(root.dataset.fxMagBirthDonorArmsR2183||0),
+          donorPairs:root.dataset.fxMagBirthDonorPairsR2183||'',
           peak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           litPixels:Number(root.dataset.fxMagBirthThreeLitPixelsR2146||0)
         };
@@ -118,6 +120,8 @@ async function main(){
       assert.equal(state.centeredDna,'true',name+': DNA origin is off-axis');
       assert.ok(state.peak>35 && state.litPixels>1,name+': actual GPU frame is blank');
       assert.ok(state.genomeCount>=9000,name+': 9600-point GPU genome regressed');
+      assert.equal(state.donorArms,4,name+': all four metal arms need a true DNA feed');
+      assert.equal(state.donorPairs,'true',name+': base-pair rungs cross unrelated DNA donor helices');
       if(name==='dna'||name==='embryo'||name==='assembly'){
         assert.ok(state.nativeOpacity<.025,
           name+': permanent MAG leaked into birth film before titanium assembly: '+JSON.stringify(state));
