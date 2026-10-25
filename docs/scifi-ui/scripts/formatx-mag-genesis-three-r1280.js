@@ -101,6 +101,7 @@
       this.makeOrganicLayer();
       this.makeCellularLayer();
       this.makeMechanicalLayer();
+      this.makeAssemblyWeld();
       this.makeTentacles();
       this.resize();
     }
@@ -1802,6 +1803,85 @@
       return geo;
     }
 
+    makeAssemblyWeld(){
+      // R2187 — sparse, actual 3D molecular welding along each arriving
+      // titanium arm. Single batched GPU draw; not a CSS overlay or a flash.
+      // The DNA remains the source and this welding is visible only AFTER
+      // the biological nucleus has condensed into four assembly lanes.
+      const T=this.THREE,r=this.rand;
+      const count=this.mobileRender?160:320;
+      const positions=new Float32Array(count*3);
+      const seed=new Float32Array(count);
+      for(let i=0;i<count;i++){
+        const axis=i%4;
+        const angle=axis*Math.PI*.5;
+        const reach=.24+r()*.66;
+        const tangent=(r()-.5)*.175;
+        positions[i*3]=Math.cos(angle)*reach-Math.sin(angle)*tangent;
+        positions[i*3+1]=Math.sin(angle)*reach+Math.cos(angle)*tangent;
+        positions[i*3+2]=.33+(r()-.5)*.21;
+        seed[i]=r();
+      }
+      const geometry=new T.BufferGeometry();
+      geometry.setAttribute('position',new T.BufferAttribute(positions,3));
+      geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
+      const material=new T.ShaderMaterial({
+        uniforms:{
+          uTime:{value:0},
+          uIntensity:{value:0},
+          uPixelRatio:{value:1}
+        },
+        vertexShader:`
+          attribute float aSeed;
+          uniform float uTime,uIntensity,uPixelRatio;
+          varying float vFlare,vSeed;
+          void main(){
+            vSeed=aSeed;
+            float pulse=pow(.5+.5*sin(uTime*.0054+aSeed*48.0),6.0);
+            vFlare=uIntensity*(.38+.62*pulse);
+            vec3 pos=position;
+            pos.z+=.025*sin(uTime*.0017+aSeed*23.0);
+            vec4 mv=modelViewMatrix*vec4(pos,1.0);
+            gl_Position=projectionMatrix*mv;
+            gl_PointSize=clamp((1.4+2.1*pulse)*uPixelRatio*4.2/max(1.0,-mv.z),
+              1.0,4.5*uPixelRatio);
+          }`,
+        fragmentShader:`
+          precision mediump float;
+          varying float vFlare,vSeed;
+          void main(){
+            vec2 p=gl_PointCoord-.5;
+            float d=dot(p,p);
+            if(d>.25)discard;
+            float core=exp(-d*21.0);
+            vec3 plasma=mix(vec3(.22,.77,.82),vec3(.80,.90,.98),
+              smoothstep(.25,.95,vSeed));
+            gl_FragColor=vec4(plasma*(.40+.60*core),
+              vFlare*core*.48);
+          }`,
+        transparent:true,depthTest:true,depthWrite:false,
+        blending:T.AdditiveBlending
+      });
+      this.assemblyWeld=new T.Points(geometry,material);
+      this.assemblyWeld.frustumCulled=false;
+      this.assemblyWeld.visible=false;
+      this.assemblyWeldMaterial=material;
+      this.mechanicalGroup.add(this.assemblyWeld);
+    }
+
+    updateAssemblyWeld(t,time){
+      const ignition=smooth((t-5.72)/.43);
+      const extinguish=1-smooth((t-7.22)/.55);
+      const strength=ignition*extinguish;
+      this.assemblyWeld.visible=strength>.002;
+      if(this.assemblyWeld.visible){
+        this.assemblyWeldMaterial.uniforms.uTime.value=time;
+        this.assemblyWeldMaterial.uniforms.uIntensity.value=strength;
+        this.assemblyWeldMaterial.uniforms.uPixelRatio.value=
+          Math.min(devicePixelRatio||1,this.mobileRender?1.15:1.8);
+      }
+    }
+
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshStandardMaterial({
@@ -2382,6 +2462,7 @@
       this.updateOrganic(t,time);
       this.updateCells(t,time);
       this.updateMechanical(t,time);
+      this.updateAssemblyWeld(t,time);
       this.updateTentacles(t,time);
 
       this.particles.rotation.z=time*.000018;
@@ -2497,6 +2578,10 @@
           );
           root.dataset.fxMagBirthArmInlayOpacityR2180=String(
             this.armInlayMaterial.opacity
+          );
+          root.dataset.fxMagBirthAssemblyWeldR2187=String(
+            this.assemblyWeld.visible &&
+            this.assemblyWeldMaterial.uniforms.uIntensity.value>.05
           );
           // R2148: test-only true GPU-scene optic state; never emit per-frame
           // telemetry during a normal mobile visitor's ten-second intro.
