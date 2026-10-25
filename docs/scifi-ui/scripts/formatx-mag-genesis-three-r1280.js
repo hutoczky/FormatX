@@ -210,21 +210,21 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const ma=new T.MeshPhysicalMaterial({
-        color:0x6caebc,emissive:0x173746,emissiveIntensity:.62,
-        roughness:.48,metalness:.02,transparent:true,opacity:.82,
-        depthWrite:false,clearcoat:.20,clearcoatRoughness:.32
+        color:0x80cbd5,emissive:0x185463,emissiveIntensity:.82,
+        roughness:.29,metalness:.06,transparent:true,opacity:.90,
+        depthWrite:false,clearcoat:.62,clearcoatRoughness:.14
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0x735f9f,emissive:0x291d4b,emissiveIntensity:.64,
-        roughness:.49,metalness:.02,transparent:true,opacity:.78,
-        depthWrite:false,clearcoat:.18,clearcoatRoughness:.34
+        color:0x9d8ad5,emissive:0x493176,emissiveIntensity:.82,
+        roughness:.30,metalness:.05,transparent:true,opacity:.88,
+        depthWrite:false,clearcoat:.58,clearcoatRoughness:.16
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x4bdfff,transparent:true,opacity:.050,depthWrite:false,
+        color:0x4bdfff,transparent:true,opacity:.080,depthWrite:false,
         blending:T.AdditiveBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x785cff,transparent:true,opacity:.045,depthWrite:false,
+        color:0x997bff,transparent:true,opacity:.070,depthWrite:false,
         blending:T.AdditiveBlending
       });
       const rungMat=new T.MeshPhysicalMaterial({
@@ -240,10 +240,14 @@
         depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true
       });
 
-      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,.031,10,false),ma);
-      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,.031,10,false),mb);
-      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,.065,8,false),ga);
-      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,.065,8,false),gb);
+      // R2185: broader founding helix receives a physically thicker hydrated
+      // phosphate backbone; smaller donors keep their original profile.
+      const backbone=radius>.35?.043:.031;
+      const aureole=radius>.35?.087:.065;
+      const tubeA=new T.Mesh(new T.TubeGeometry(curveA,seg,backbone,12,false),ma);
+      const tubeB=new T.Mesh(new T.TubeGeometry(curveB,seg,backbone,12,false),mb);
+      const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,aureole,8,false),ga);
+      const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,aureole,8,false),gb);
 
       const rungGeo=new T.CylinderGeometry(.018,.018,1,10,1,false);
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
@@ -265,7 +269,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.82,.76,.050,.046,.80,.42,.38];
+      group.userData.baseOpacity=[.90,.88,.080,.070,.88,.50,.46];
       return group;
     }
 
@@ -350,7 +354,9 @@
       }
       this.dnas=[];
       for(const [index,[x,y,z,rz,sc]] of placements.entries()){
-        const h=this.createHelix(4.08,.272,3.82);
+        // R2185: opening DNA is a wide, legible molecular subject rather
+        // than a thin luminous wire. Preserve donors and total animation time.
+        const h=this.createHelix(4.08,index===0?.410:.272,3.82);
         h.position.set(x,y,z);
         h.rotation.z=rz;
         h.rotation.y=(this.rand()-.5)*.24;
@@ -801,7 +807,9 @@
         const strand=i%2;
         const sign=strand===0?1:-1;
         const phase=u*Math.PI*2*3.82;
-        const helixRadius=.272+(r()-.5)*.016;
+        // R2185: nucleotides must coincide with the wider real founding
+        // 3D phosphate strands at every base-pair station.
+        const helixRadius=.410+(r()-.5)*.013;
         const localX=(u-.5)*4.08;
         const localY=sign*Math.sin(phase)*helixRadius;
         const localZ=sign*Math.cos(phase)*helixRadius;
@@ -813,7 +821,11 @@
           origin.z+scale*(-rolledX*sinY+localZ*cosY)
         ],i*3);
         const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
-        const radius=.12+Math.cbrt(r())*.82;
+        // R2185: biological nucleotides settle mostly in the envelope,
+        // with a smaller organelle interior rather than a noisy solid ball.
+        // Both distributions use the same cell centre and an ellipsoid skin.
+        const membrane=i%4!==0;
+        const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;
         cell.set([radius*Math.sin(b)*Math.cos(a),radius*1.08*Math.cos(b),radius*.80*Math.sin(b)*Math.sin(a)+.20],i*3);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
@@ -910,9 +922,9 @@
       }
       positions.needsUpdate=true;geometry.computeVertexNormals();
       this.embryoMaterial=new T.MeshPhysicalMaterial({
-        color:0x2a6775,emissive:0x0a3543,emissiveIntensity:.23,
-        metalness:.04,roughness:.17,clearcoat:.96,clearcoatRoughness:.075,
-        transmission:.26,thickness:.19,ior:1.34,
+        color:0x317887,emissive:0x0b3948,emissiveIntensity:.30,
+        metalness:.02,roughness:.14,clearcoat:.98,clearcoatRoughness:.065,
+        transmission:.21,thickness:.23,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
@@ -923,9 +935,9 @@
         depthWrite:false,blending:T.AdditiveBlending
       });
       this.embryoNucleus=new T.Mesh(
-        new T.SphereGeometry(.16,16,12),this.embryoNucleusMaterial
+        new T.SphereGeometry(.23,24,16),this.embryoNucleusMaterial
       );
-      this.embryoNucleus.position.set(-.13,.06,.37);
+      this.embryoNucleus.position.set(-.10,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
       // R2167 — nucleus organelle and continuous curved membrane networks.
       // These sit at genuinely different z depths inside the cell; they
@@ -2041,17 +2053,17 @@
       const dissolve=1-smooth((t-5.66)/1.12);
       const visible=appear*dissolve;
       this.coreGroup.visible=visible>.002;
-      this.embryoMaterial.opacity=.73*visible;
-      this.embryoNucleusMaterial.opacity=.29*visible;
+      this.embryoMaterial.opacity=.86*visible;
+      this.embryoNucleusMaterial.opacity=.47*visible;
       const pulse=1+.025*Math.sin(time*.0021);
       this.embryoShell.scale.set(.88*pulse,1.12*pulse,.78*pulse);
       this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
-      this.embryoInnerMaterial.opacity=.25*visible;
+      this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoCapillaryMaterial.opacity=.105*visible;
+      this.embryoCapillaryMaterial.opacity=.16*visible;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
