@@ -104,8 +104,8 @@ check(gpu,[
 // and fade completely BEFORE the optical eye wakes.
 check(gpu,[
   'const end=1-smooth((t-6.76)/.58)',
-  'line.material.opacity=(lane===0?.25:.21)*opacity',
-  'bridge.material.opacity=.32*opacity',
+  'line.material.opacity=(lane===0?.18:.16)*opacity',
+  'bridge.material.opacity=.29*opacity',
   'float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));',
   'vEnergy=first*last*(1.0+transferGlow*.16);',
   'this.assemblyWeldMaterial.uniforms.uIntensity.value=strength',
