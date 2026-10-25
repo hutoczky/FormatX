@@ -295,6 +295,17 @@
         [-1.05,.06,-.82,1.38,.34],
         [1.05,.06,-.82,1.76,.34]
       ];
+      // R2183: explicit four-arm source assignment. On desktop, nearest-axis
+      // classification of the seven authored DNA parents produced ZERO south
+      // donors (every bottom diagonal was classified as east/west), leaving
+      // the lower titanium arm without any visible double-helix feed.
+      // This physical routing covers N/E/S/W on both viewport profiles.
+      const armAssignments=this.mobileRender
+        ? [1,2,0,3]
+        : [1,1,0,2,3,2,0];
+      if(placements.length!==armAssignments.length){
+        throw new Error('DNA donor routing must match the authored helix positions');
+      }
       // R2131: four persistent, GPU-light DNA-to-arm transfer strands.
       // Their endpoints are animated with the same chassis-axis mapping
       // as the parent helices, visually bridging DNA and emerging metal.
@@ -338,13 +349,13 @@
         this.birthRungs.push(bridges);
       }
       this.dnas=[];
-      for(const [x,y,z,rz,sc] of placements){
+      for(const [index,[x,y,z,rz,sc]] of placements.entries()){
         const h=this.createHelix(4.08,.272,3.82);
         h.position.set(x,y,z);
         h.rotation.z=rz;
         h.rotation.y=(this.rand()-.5)*.24;
         h.scale.setScalar(sc);
-        h.userData.base={x,y,z,rz,s:sc,phase:this.rand()*Math.PI*2};
+        h.userData.base={x,y,z,rz,s:sc,phase:this.rand()*Math.PI*2,armAxis:armAssignments[index]};
         // A dominant, recognizable nucleotide chain owns the opening shot.
         h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50;
         this.dnaGroup.add(h);
@@ -356,9 +367,7 @@
         const axis=line.userData.axis;
         const candidates=this.dnas.filter(h=>{
           const b=h.userData.base;
-          const nearest=Math.abs(b.x)>Math.abs(b.y)
-            ?(b.x>=0?0:2):(b.y>=0?1:3);
-          return nearest===axis;
+          return b.armAxis===axis;
         });
         // R2134: bind the two lanes to distinct DNA parents when
         // possible, so the doubled bridge has genuine spatial depth.
@@ -368,6 +377,10 @@
         );
         line.userData.source=candidates[line.userData.lane]||candidates[0]||null;
       });
+      // A broken arm source must never silently render a blank DNA transfer.
+      if(this.birthStrands.some(line=>!line.userData.source)){
+        throw new Error('Every MAG arm requires an actual DNA donor source');
+      }
     }
 
     makeGlowTexture(){
@@ -1877,8 +1890,7 @@
         // R2129: map each helix to the nearest actual four-point
         // chassis axis, rather than assigning directions by array index.
         // This prevents filaments from crossing the frame unnecessarily.
-        const nearestAxis=Math.abs(b.x)>Math.abs(b.y)
-          ?(b.x>=0?0:2):(b.y>=0?1:3);
+        const nearestAxis=b.armAxis;
         const armAngle=nearestAxis*Math.PI*.5;
         const armProgress=smooth((t-4.72-nearestAxis*.11)/2.06);
         // R2130: blend each filament onto its actual final arm position.
