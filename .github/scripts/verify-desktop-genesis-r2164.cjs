@@ -56,15 +56,23 @@ async function main(){
         if(/formatx-|three-r185/.test(request.url()))
           failedRequests.push({url:request.url(),error:request.failure()?.errorText||'network failure'});
       });
-      // R2183b: deterministic introframe= freezes its film frame and can
-      // intentionally stop requestAnimationFrame. Playwright's default
-      // rAF-based wait therefore timed out even when the GPU framebuffer
-      // and DOM visualProof marker were already READY. Poll independently
-      // of the page's cinematic frame scheduler.
-      const awaitGpuFrame=()=>page.waitForFunction(
-        ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-        null,{polling:250,timeout:30000}
-      );
+      // R2187: the real desktop proof was demonstrably READY in the
+      // browser's DOM while Playwright waitForFunction continued to timeout.
+      // Probe using independent Node timers + fresh page.evaluate calls so a
+      // frozen cinematic frame, a background tab, or GPU scheduler throttle
+      // cannot stall the assertion framework. Keep the same real GPU proof.
+      const awaitGpuFrame=async()=>{
+        const until=Date.now()+40000;
+        let lastState='';
+        while(Date.now()<until){
+          lastState=await page.evaluate(()=>
+            document.documentElement.dataset.fxMagBirthVisualFrameR659||''
+          );
+          if(lastState==='ready')return;
+          await new Promise(resolve=>setTimeout(resolve,250));
+        }
+        throw new Error('R2187 desktop WebGL proof timed out; last state: '+lastState);
+      };
       try{
         await awaitGpuFrame();
       }catch(firstError){
@@ -111,6 +119,7 @@ async function main(){
           armorPieces:Number(root.dataset.fxMagBirthVisibleArmorR2147||0),
           inlayPieces:Number(root.dataset.fxMagBirthArmInlaysR2180||0),
           inlayOpacity:Number(root.dataset.fxMagBirthArmInlayOpacityR2180||0),
+          assemblyWeld:root.dataset.fxMagBirthAssemblyWeldR2187==='true',
           eyeOpacity:Number(root.dataset.fxMagBirthEyeOpacityR2148||0),
           genomeCount:Number(root.dataset.fxMagBirthGenomeParticlesR2160||0),
           donorArms:Number(root.dataset.fxMagBirthDonorArmsR2183||0),
@@ -141,6 +150,7 @@ async function main(){
         assert.ok(state.dnaOpacity>.45,'DNA does not dominate opening');
         assert.equal(state.armorPieces,0,'Metal appeared during DNA establishing shot');
         assert.equal(state.inlayPieces,0,'R2180 titanium appeared during DNA opening');
+        assert.equal(state.assemblyWeld,false,'Welding began before the DNA introduction');
         assert.ok(state.embryoOpacity<.01,'Embryo appeared before DNA origin');
       }
       if(name==='embryo'){
@@ -153,6 +163,7 @@ async function main(){
       if(name==='assembly'){
         assert.ok(state.armorPieces>=1,'Four-arm chassis did not begin assembling');
         assert.ok(state.inlayPieces>=2,'R2180 titanium inlays did not start seating');
+        assert.ok(state.assemblyWeld,'R2187 physical genome welding light did not reach four metal arms');
         assert.ok(state.eyeOpacity<.003,'MAG optical organ ignited before assembly');
       }
       if(name==='mag'){

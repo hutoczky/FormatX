@@ -24,7 +24,7 @@ for(const [label,value] of [['style',style],['importmap',imports],['module',sour
 assert(worker.includes("GENESIS_STUDIO_PATHS.has(url.pathname)"),'Studio route must use explicit CSP');
 assert(worker.includes("GENESIS_STUDIO_CSP"),'Studio needs a separately scoped CDN policy');
 assert(worker.includes("if (!isGenesis && !isGenesisStudio)"),'Homepage CSP must not rewrite Studio HTML');
-assert(home.includes('fx-genesis-entrance" href="/scifi-ui/genesis/index.html"'),'Main hero must launch this 9000-particle studio film');
+// R2187: the hero CTA intentionally replays the canonical production DNA-to-MAG\n// birth film; the independent 9000-point Genesis Studio retains its own route.\nassert(home.includes('fx-genesis-entrance" href="/?intro=1"'),'Main hero must replay the real DNA-to-MAG birth film');
 JSON.parse(imports);
 for(const token of [
  'const COUNT=9000','new THREE.Points(','new UnrealBloomPass(','new EffectComposer(','new OrbitControls(',

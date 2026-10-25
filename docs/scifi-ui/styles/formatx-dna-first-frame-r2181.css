@@ -12,14 +12,14 @@ html[data-fx-intro-prepaint-r1611="show"]
   display:block;
   left:50%;
   top:49%;
-  width:min(74vw,360px);
+  width:min(84vw,410px);
   height:min(74dvh,690px);
   max-width:none;
   overflow:visible;
   pointer-events:none;
   filter:drop-shadow(0 0 13px rgba(44,191,216,.34))
          drop-shadow(0 0 35px rgba(99,77,192,.19));
-  transform:translate(-50%,-50%) perspective(900px) rotateY(-15deg) rotateZ(-3deg);
+  transform:translate(-50%,-50%) scaleX(1.12) perspective(900px) rotateY(-15deg) rotateZ(-3deg);
   transform-origin:50% 50%;
   animation:fxb-first-frame-birth-r2181 5s ease-in-out infinite alternate;
 }
@@ -52,11 +52,11 @@ html[data-fx-intro-prepaint-r1611="show"]
 }
 @keyframes fxb-first-frame-birth-r2181 {
   0% {
-    transform:translate(-50%,-50%) perspective(900px) rotateY(-15deg) rotateZ(-3deg);
+    transform:translate(-50%,-50%) scaleX(1.12) perspective(900px) rotateY(-15deg) rotateZ(-3deg);
     opacity:.85;
   }
   100% {
-    transform:translate(-50%,-50%) perspective(900px) rotateY(11deg) rotateZ(2deg);
+    transform:translate(-50%,-50%) scaleX(1.12) perspective(900px) rotateY(11deg) rotateZ(2deg);
     opacity:1;
   }
 }
@@ -64,7 +64,7 @@ html[data-fx-intro-prepaint-r1611="show"]
   html[data-fx-intro-prepaint-r1611="show"]
   #fx-mag-birth-prepaint-r1606 .fxb-first-frame-dna-r2181 {
     top:49%;
-    width:min(77vw,320px);
+    width:min(88vw,370px);
     height:min(65dvh,560px);
     filter:drop-shadow(0 0 12px rgba(58,198,218,.32))
            drop-shadow(0 0 27px rgba(110,78,207,.18));
