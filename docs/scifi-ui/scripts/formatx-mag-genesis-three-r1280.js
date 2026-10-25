@@ -228,9 +228,13 @@
         color:0x997bff,transparent:true,opacity:.070,depthWrite:false,
         blending:T.AdditiveBlending
       });
+      // R2188: complementary nucleotide chemistry is readable as genuine
+      // alternating base pairs inside the 3D molecule. Per-instance color
+      // uses the SAME instanced draw call, including on Android.
       const rungMat=new T.MeshPhysicalMaterial({
-        color:0x8ac8d7,emissive:0x28435e,emissiveIntensity:.46,
-        roughness:.42,transparent:true,opacity:.88,depthWrite:false
+        color:0xf0f7ff,emissive:0x24353e,emissiveIntensity:.35,
+        metalness:.04,roughness:.28,clearcoat:.75,
+        transparent:true,opacity:.94,depthWrite:false
       });
       const mpa=new T.PointsMaterial({
         color:0xb7f3ff,size:.034,transparent:true,opacity:.42,
@@ -263,8 +267,13 @@
         dummy.scale.set(1,len,1);
         dummy.updateMatrix();
         rungs.setMatrixAt(i,dummy.matrix);
+        // A-T / G-C / T-A / C-G complementary pairs; icy turquoise,
+        // lilac, pale silver-blue and violet. One GPU instanced palette.
+        const baseColors=[0x8af5e2,0xc6a3fa,0xbce8fb,0x99b0ff];
+        rungs.setColorAt(i,new T.Color(baseColors[i%baseColors.length]));
       });
       rungs.instanceMatrix.needsUpdate=true;
+      if(rungs.instanceColor)rungs.instanceColor.needsUpdate=true;
 
       const pga=new T.BufferGeometry();pga.setAttribute('position',new T.Float32BufferAttribute(beadA,3));
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
@@ -334,6 +343,33 @@
           strand.frustumCulled=false;
           this.dnaGroup.add(strand);
           this.birthStrands.push(strand);
+          // R2188: actual 3D molecular transfer filaments. A standard
+          // WebGL line collapses to one pixel on mobile; a tiny preallocated
+          // tubular mesh has physical width and a genuine rotating surface.
+          const sides=6,rings=40;
+          const tubeGeometry=new T.BufferGeometry();
+          const tubePositions=new Float32Array(rings*sides*3);
+          const tubeIndices=[];
+          for(let k=0;k<rings-1;k++){
+            for(let side=0;side<sides;side++){
+              const nextSide=(side+1)%sides;
+              const a=k*sides+side,b=k*sides+nextSide;
+              const c=(k+1)*sides+side,d=(k+1)*sides+nextSide;
+              tubeIndices.push(a,c,b,b,c,d);
+            }
+          }
+          tubeGeometry.setAttribute('position',new T.BufferAttribute(tubePositions,3));
+          tubeGeometry.setIndex(tubeIndices);
+          const tubeMaterial=new T.MeshBasicMaterial({
+            color:lane===0?0x73eee8:0xbca2ff,
+            transparent:true,opacity:0,depthWrite:false,
+            blending:T.AdditiveBlending,side:T.DoubleSide
+          });
+          const tube=new T.Mesh(tubeGeometry,tubeMaterial);
+          tube.visible=false;
+          tube.frustumCulled=false;
+          strand.userData.tube=tube;
+          this.dnaGroup.add(tube);
         }
       }
       // R2157: paired cross-bridges make the arm transfer read as
@@ -1987,7 +2023,9 @@
       const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85));
       // R2180: DNA is readable on the FIRST rendered frame, not hidden
       // behind a zero-opacity establishing shot while Three.js warms up.
-      const intro=.46+.54*ease(t/.30);
+      // R2188: no dark DNA first frame. The molecular hero is at film-grade
+      // exposure immediately, even before the first browser rAF settles.
+      const intro=.82+.18*ease(t/.30);
       // R2164: the central DNA is alone during the establishing shot.
       // Side genomes develop AFTER viewers have recognized its double helix.
       // Keep the timing in the existing 10-second film (no delayed handoff).
@@ -2054,7 +2092,10 @@
         const axis=line.userData.axis;
         const lane=line.userData.lane;
         line.visible=opacity>.002;
-        if(!line.visible)return;
+        if(!line.visible){
+          if(line.userData.tube)line.userData.tube.visible=false;
+          return;
+        }
         line.material.opacity=(lane===0?.70:.54)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
@@ -2077,6 +2118,36 @@
           a.setXYZ(j,x-dy*sideways,y+dx*sideways,z+depth);
         }
         a.needsUpdate=true;
+        const tube=line.userData.tube;
+        if(tube){
+          tube.visible=opacity>.002;
+          tube.material.opacity=(lane===0?.38:.30)*opacity;
+          const p=tube.geometry.attributes.position;
+          const sides=6;
+          for(let j=0;j<40;j++){
+            const prev=Math.max(0,j-1),next=Math.min(39,j+1);
+            const cx=a.getX(j),cy=a.getY(j),cz=a.getZ(j);
+            let tx=a.getX(next)-a.getX(prev);
+            let ty=a.getY(next)-a.getY(prev);
+            let tz=a.getZ(next)-a.getZ(prev);
+            const length=Math.hypot(tx,ty,tz)||1;
+            tx/=length;ty/=length;tz/=length;
+            let nx=-ty,ny=tx;
+            const nl=Math.hypot(nx,ny)||1;
+            nx/=nl;ny/=nl;
+            const bx=-tz*ny,by=tz*nx,bz=tx*ny-ty*nx;
+            const radius=.013+.006*Math.sin(Math.PI*j/39);
+            for(let k=0;k<sides;k++){
+              const angle=k*Math.PI*2/sides;
+              const co=Math.cos(angle),si=Math.sin(angle);
+              p.setXYZ(j*sides+k,
+                cx+radius*(nx*co+bx*si),
+                cy+radius*(ny*co+by*si),
+                cz+radius*bz*si);
+            }
+          }
+          p.needsUpdate=true;
+        }
       });
       // R2157: reuse the already-updated opposite DNA strands as the
       // moving endpoints of the base-pair bridges. This tracks the same
