@@ -323,7 +323,7 @@
           const geometry=new T.BufferGeometry();
           geometry.setAttribute('position',new T.BufferAttribute(positions,3));
           const material=new T.LineBasicMaterial({
-            color:lane===0?0x79e8e3:0xb8e5f2,transparent:true,opacity:0,
+            color:lane===0?0x81fff3:0xb69bff,transparent:true,opacity:0,
             depthWrite:false,blending:T.AdditiveBlending
           });
           const strand=new T.Line(geometry,material);
@@ -881,10 +881,13 @@
             p.z+=.012*cos(uTime*.00072+aSeed*17.0);
             vec4 mv=modelViewMatrix*vec4(p,1.0);
             gl_Position=projectionMatrix*mv;
-            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z),1.0,5.6*uPixelRatio);
+            // R2186: the genetic matter becomes a visible energetic stream
+            // only while the metal is physically closing around it.
+            float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));
+            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z)*(1.0+transferGlow*.24),1.0,6.6*uPixelRatio);
             float first=curve(0.08,.65,uPhase);
             float last=1.0-curve(7.16,8.05,uPhase);
-            vEnergy=first*last;
+            vEnergy=first*last*(1.0+transferGlow*.16);
             vSeed=aSeed;
           }`,
         fragmentShader:`
@@ -1961,14 +1964,16 @@
       // R2131: each strand bridges its DNA origin to the corresponding
       // four-point metal arm. Reuse buffers; no frame-by-frame allocation.
       const start=smooth((t-4.68)/.62);
-      const end=1-smooth((t-6.48)/.75);
+      // R2186: the visible paired genetic bridges persist through titanium
+      // arm seating, then disappear completely before optical ignition.
+      const end=1-smooth((t-6.76)/.58);
       const opacity=start*end;
       this.birthStrands.forEach((line)=>{
         const axis=line.userData.axis;
         const lane=line.userData.lane;
         line.visible=opacity>.002;
         if(!line.visible)return;
-        line.material.opacity=(lane===0?.34:.27)*opacity;
+        line.material.opacity=(lane===0?.70:.54)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
         const source=line.userData.source;
@@ -2000,7 +2005,7 @@
         const show=opacity>.002 && first?.visible && second?.visible;
         bridge.visible=Boolean(show);
         if(!show)return;
-        bridge.material.opacity=.29*opacity;
+        bridge.material.opacity=.48*opacity;
         const a=bridge.geometry.attributes.position;
         const p=first.geometry.attributes.position;
         const q=second.geometry.attributes.position;
