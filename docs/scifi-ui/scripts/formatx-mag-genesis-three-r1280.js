@@ -369,17 +369,25 @@
           const b=h.userData.base;
           return b.armAxis===axis;
         });
-        // R2134: bind the two lanes to distinct DNA parents when
-        // possible, so the doubled bridge has genuine spatial depth.
+        // R2183: the two opposing strands of ONE helix must share their
+        // genetic root. The old lane-index choice spanned unrelated donor
+        // helices with nucleotide bridges, producing impossible cross-frame
+        // rungs instead of a coherent DNA chain during MAG assembly.
         candidates.sort((a,b)=>
           Math.hypot(a.userData.base.x,a.userData.base.y)-
           Math.hypot(b.userData.base.x,b.userData.base.y)
         );
-        line.userData.source=candidates[line.userData.lane]||candidates[0]||null;
+        line.userData.source=candidates[0]||null;
       });
       // A broken arm source must never silently render a blank DNA transfer.
       if(this.birthStrands.some(line=>!line.userData.source)){
         throw new Error('Every MAG arm requires an actual DNA donor source');
+      }
+      for(let axis=0;axis<4;axis++){
+        const pair=this.birthStrands.filter(line=>line.userData.axis===axis);
+        if(pair.length!==2 || pair[0].userData.source!==pair[1].userData.source){
+          throw new Error('A true double helix needs two strands from one donor');
+        }
       }
     }
 
