@@ -106,3 +106,5 @@ R2187_access=The main homepage GENESIS button now explicitly replays the same pr
 R2187_testing=The live desktop storyboard validator polls the real visual-frame readiness via independent Node timers after a documented false timeout in Playwright waitForFunction; reads real WebGL framebuffer and asserts DNA, embryo, metal, spark and eye phases.
 
 R2187_verified_candidate=Production validation passed at commit e2ae8e7a; molecular DNA first, 3.54-height founding helix, 9600-particle four-arm titanium welding, canonical Genesis replay link and independent browser frame polling. Deploy and require both-domain desktop and mobile cinematic evidence.
+
+R2187_final_release=GitHub Actions production source gates have passed for the corrected R2187 cinematic. Deploy after synchronizing all Three.js cache revisions and source validators. Require actual 1440x900 WebGL DNA, embryo, assembled-armor, optical-eye keyframes and independent user-visible permanent MAG checks.
