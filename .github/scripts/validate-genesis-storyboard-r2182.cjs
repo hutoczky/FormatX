@@ -27,6 +27,7 @@ check(gpu,[
   'this.updateGenomeParticles(t,time)',
   'this.updateCore(t,time)',
   'this.updateMechanical(t,time)',
+  'this.updateAssemblyWeld(t,time)',
   'this.coreGroup.visible=visible>.002'
 ],'Three.js storyboard');
 check(css,[
@@ -40,9 +41,9 @@ check(css,[
 ],'No premature native-MAG reveal');
 check(html,['formatx-mag-birth-live-r533.css?v=20261025-r2182-dna-chapter-first'],
   'Static stylesheet cache bust');
-check(birth,['formatx-mag-genesis-three-r1280.js?v=20261025-r2186-visible-genetic-arm-seating'],
+check(birth,['formatx-mag-genesis-three-r1280.js?v=20261025-r2187-molecular-welding'],
   'Live WebGL owner cache bust');
-check(edge,['formatx-mag-genesis-three-r1280.js?v=20261025-r2186-visible-genetic-arm-seating'],
+check(edge,['formatx-mag-genesis-three-r1280.js?v=20261025-r2187-molecular-welding'],
   'Cloudflare rewrite must not serve an older film');
 const embryo=t=>smooth((t-3.52)/.76)*(1-smooth((t-5.66)/1.12));
 const arm=t=>smooth((t-5.88)/1.18);
@@ -106,7 +107,9 @@ check(gpu,[
   'line.material.opacity=(lane===0?.70:.54)*opacity',
   'bridge.material.opacity=.48*opacity',
   'float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));',
-  'vEnergy=first*last*(1.0+transferGlow*.16);'
+  'vEnergy=first*last*(1.0+transferGlow*.16);',
+  'this.assemblyWeldMaterial.uniforms.uIntensity.value=strength',
+  'const count=this.mobileRender?160:320'
 ],'R2186 visible paired genetic-to-titanium transfer');
 const transfer=t=>1-smooth((t-6.76)/.58);
 assert(transfer(6.8)>.98,'Genetic bridge must still be luminous during arm assembly');
