@@ -782,6 +782,10 @@
       const cell=new Float32Array(count*3);
       const arms=new Float32Array(count*3);
       const seed=new Float32Array(count);
+      // R2184: carry a physically paired cyan/violet nucleotide pair
+      // to ONE of the four titanium arms, rather than routing opposite
+      // DNA strands to unrelated cardinal arms.
+      const armIndex=new Float32Array(count);
       // R2176: a SINGLE founding DNA shape owns the opening shot. Previously
       // the 9,600 glowing nucleotides wound 7.75 turns while the visible
       // 3D helix wound 3.82; two mismatched objects overlapped on screen.
@@ -811,10 +815,13 @@
         const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
         const radius=.12+Math.cbrt(r())*.82;
         cell.set([radius*Math.sin(b)*Math.cos(a),radius*1.08*Math.cos(b),radius*.80*Math.sin(b)*Math.sin(a)+.20],i*3);
-        const axis=i%4,phi=axis*Math.PI*.5;
+        // Both nucleotides at one base-pair station share one arm destination.
+        // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
+        const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
         const reach=.20+.74*r();
         const lateral=(r()-.5)*.15;
         arms.set([Math.cos(phi)*reach-Math.sin(phi)*lateral,Math.sin(phi)*reach+Math.cos(phi)*lateral,.05+(r()-.5)*.22],i*3);
+        armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
         seed[i]=strand===0?r()*.42:.58+r()*.42;
       }
@@ -823,6 +830,7 @@
       geometry.setAttribute('aCell',new T.BufferAttribute(cell,3));
       geometry.setAttribute('aArm',new T.BufferAttribute(arms,3));
       geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
+      geometry.setAttribute('aArmIndex',new T.BufferAttribute(armIndex,1));
       const material=new T.ShaderMaterial({
         uniforms:{uTime:{value:0},uPhase:{value:0},uPixelRatio:{value:1}},
         transparent:true,depthWrite:false,depthTest:true,
@@ -831,6 +839,7 @@
           attribute vec3 aCell;
           attribute vec3 aArm;
           attribute float aSeed;
+          attribute float aArmIndex;
           uniform float uTime,uPhase,uPixelRatio;
           varying float vSeed,vEnergy;
           float curve(float a,float b,float x){
@@ -839,9 +848,21 @@
           }
           void main(){
             float condense=curve(2.94,4.38,uPhase);
-            float assemble=curve(5.36,7.18,uPhase);
+            // R2184: the four paired DNA streams seat at slightly offset
+            // beats. The final south/west feed reaches its titanium arm
+            // BEFORE the mechanical optic wakes at 7.44 seconds.
+            float armBeat=aArmIndex*.11;
+            float assemble=curve(5.34+armBeat,6.90+armBeat,uPhase);
             vec3 p=mix(position,aCell,condense);
             p=mix(p,aArm,assemble);
+            // Physically curl the genetic matter toward its destination,
+            // with zero residual motion at either endpoint of the morph.
+            float curlEnvelope=assemble*(1.0-assemble);
+            vec2 radial=normalize(aArm.xy+vec2(.0001,.0001));
+            vec2 tangent=vec2(-radial.y,radial.x);
+            float curlAngle=aSeed*31.4159+uTime*.0012;
+            p.xy+=tangent*(sin(curlAngle)*.19*curlEnvelope);
+            p.z+=cos(curlAngle)*.16*curlEnvelope;
             float coil=1.0-curve(2.94,4.38,uPhase);
             p.x+=coil*.018*sin(uTime*.00082+aSeed*32.0);
             p.y+=.013*sin(uTime*.0011+aSeed*20.0)*(1.0-assemble);
