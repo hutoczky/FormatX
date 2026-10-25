@@ -22,7 +22,7 @@ for(const text of [
   'rungs.setColorAt(i,new T.Color(baseColors[i%baseColors.length]))',
   'strand.userData.tube=tube;',
   'const sides=6,rings=40;',
-  'tube.material.opacity=(lane===0?.64:.52)*opacity;',
+  'tube.material.opacity=(lane===0?.74:.65)*opacity;',
   'p.needsUpdate=true;',
   'const start=smooth((t-4.68)/.62);',
   'const opticWake=smooth((t-7.44)/.78);',
