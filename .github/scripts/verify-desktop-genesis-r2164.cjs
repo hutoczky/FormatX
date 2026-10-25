@@ -56,15 +56,23 @@ async function main(){
         if(/formatx-|three-r185/.test(request.url()))
           failedRequests.push({url:request.url(),error:request.failure()?.errorText||'network failure'});
       });
-      // R2183b: deterministic introframe= freezes its film frame and can
-      // intentionally stop requestAnimationFrame. Playwright's default
-      // rAF-based wait therefore timed out even when the GPU framebuffer
-      // and DOM visualProof marker were already READY. Poll independently
-      // of the page's cinematic frame scheduler.
-      const awaitGpuFrame=()=>page.waitForFunction(
-        ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
-        null,{polling:250,timeout:30000}
-      );
+      // R2187: the real desktop proof was demonstrably READY in the
+      // browser's DOM while Playwright waitForFunction continued to timeout.
+      // Probe using independent Node timers + fresh page.evaluate calls so a
+      // frozen cinematic frame, a background tab, or GPU scheduler throttle
+      // cannot stall the assertion framework. Keep the same real GPU proof.
+      const awaitGpuFrame=async()=>{
+        const until=Date.now()+40000;
+        let lastState='';
+        while(Date.now()<until){
+          lastState=await page.evaluate(()=>
+            document.documentElement.dataset.fxMagBirthVisualFrameR659||''
+          );
+          if(lastState==='ready')return;
+          await new Promise(resolve=>setTimeout(resolve,250));
+        }
+        throw new Error('R2187 desktop WebGL proof timed out; last state: '+lastState);
+      };
       try{
         await awaitGpuFrame();
       }catch(firstError){
