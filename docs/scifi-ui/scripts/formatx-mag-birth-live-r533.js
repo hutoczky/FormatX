@@ -574,7 +574,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2193-photographic-softbox-dna-metal';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2194-cinematic-raised-titanium-ribs';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
