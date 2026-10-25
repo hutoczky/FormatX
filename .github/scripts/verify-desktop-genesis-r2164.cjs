@@ -126,6 +126,7 @@ async function main(){
           donorPairs:root.dataset.fxMagBirthDonorPairsR2183||'',
           transferOpacity:Number(root.dataset.fxMagBirthTransferTubeOpacityR2190||0),
           transferFrontZ:Number(root.dataset.fxMagBirthTransferTubeFrontR2190||0),
+          transferSpan:Number(root.dataset.fxMagBirthTransferSpanR2191||0),
           peak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
           litPixels:Number(root.dataset.fxMagBirthThreeLitPixelsR2146||0)
         };
@@ -171,6 +172,7 @@ async function main(){
         // above the front-facing titanium, not invisible strands behind it.
         assert.ok(state.transferOpacity>.32,'R2190 real genetic tube is invisible while metal assembles');
         assert.ok(state.transferFrontZ>.60,'R2190 genome transfer is buried behind the titanium face');
+        assert.ok(state.transferSpan>.56,'R2191 genome collapsed into tiny tip blobs instead of covering metal arms');
         assert.ok(state.eyeOpacity<.003,'MAG optical organ ignited before assembly');
       }
       if(name==='mag'){
