@@ -86,8 +86,16 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
-        assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
-          'R2104 cinema material did not render in original phone canvas');
+        // At 4.40s the biological nucleus is deliberately visible instead
+        // of the final machined metal. Chrome is required only after
+        // the mechanical act begins at 5.58s.
+        if(shot.second>=5.58){
+          assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
+            'R2104 final-act cinema material did not render in original phone canvas');
+        }else{
+          assert.equal(info.material,'',
+            'Mechanical chrome appeared prematurely during the nucleus chapter');
+        }
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
@@ -104,8 +112,8 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2113-layered-chassis'),
-          'The Android fallback is loading an obsolete renderer instead of R2113');
+        assert.ok(info.loader.includes('r2182-studio-depth-first-genome'),
+          'The Android fallback must load the current R2182 biological-first reference film');
         records.push({shot,info});
       }finally{await context.close()}
     }
