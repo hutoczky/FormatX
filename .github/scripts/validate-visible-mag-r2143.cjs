@@ -121,6 +121,26 @@ async function capture(browser,{name,width,height,mobile}){
         opacity:style?.opacity,visibility:style?.visibility,display:style?.display
       };
     });
+    // R2197: desktop regression from real user report. CSS pseudo-icons
+    // must not duplicate the canonical branded IMG on any viewport.
+    const fxBrand=await page.evaluate(()=>{
+      const anchor=document.querySelector('header.topbar > a.brand');
+      const icons=anchor?[...anchor.querySelectorAll(':scope > img')]:[];
+      const image=icons[0];
+      const pseudo=anchor?getComputedStyle(anchor,'::before'):null;
+      const imageStyle=image?getComputedStyle(image):null;
+      const imageVisible=Boolean(image && imageStyle.display!=='none' &&
+        imageStyle.visibility!=='hidden' && Number(imageStyle.opacity||1)>.01 &&
+        image.getBoundingClientRect().width>=30);
+      const ghost=Boolean(pseudo && pseudo.content!=='none' &&
+        pseudo.content!=='normal' && pseudo.display!=='none');
+      return{domCount:icons.length,imageVisible,ghost,loaded:Boolean(image?.complete&&image.naturalWidth>0)};
+    });
+    state.fxBrand=fxBrand;
+    assert.equal(fxBrand.domCount,1,name+': duplicate FX IMG in desktop/mobile header');
+    assert(fxBrand.imageVisible,name+': canonical header FX image hidden');
+    assert(fxBrand.loaded,name+': canonical header FX asset failed to load');
+    assert(!fxBrand.ghost,name+': duplicate FX pseudo icon remains');
     assert.equal(state.canvasCount,1,name+': must use one permanent MAG canvas');
     assert.equal(state.ready,'ready',name+': core not initialized');
     assert.equal(state.firstFrame,'painted',name+': screenshot predates WebGL first frame');
