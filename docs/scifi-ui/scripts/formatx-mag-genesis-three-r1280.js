@@ -2703,8 +2703,8 @@
       for(let k=0;k<this.embryoNucleolusRings.length;k++){
         const ring=this.embryoNucleolusRings[k];
         ring.material.opacity=(k===1?.42:.32)*visible;
-        ring.rotation.y+=.00035*(k%2? -1:1);
-        ring.rotation.z+=.00019*(k===2?-1:1);
+        ring.rotation.y=k*1.047+time*.000021*(k%2?-1:1);
+        ring.rotation.z=.28+k*.56+time*.000013*(k===2?-1:1);
       }
       this.embryoNucleolusHaloMaterial.opacity=(.095+.025*Math.sin(time*.0024))*visible;
       this.embryoNucleolusHalo.scale.setScalar(1.15+.035*Math.sin(time*.0022));
