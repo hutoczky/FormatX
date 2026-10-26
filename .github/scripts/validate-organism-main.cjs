@@ -102,6 +102,11 @@ async function validateDesktop() {
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
+    // R2207: the HTML hidden property alone is insufficient if a later
+    // fullscreen display:block !important stylesheet overrides its display.
+    const hiddenDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(hiddenDisplay==='none','hidden console is still painted: display='+hiddenDisplay);
+    mark('desktop: hidden-console-css',hiddenDisplay);
     assert(current.pricingTriggers === 1, 'pricing section must expose exactly one organism trigger: ' + JSON.stringify(current));
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
     assert(current.footerInResources, 'footer must be inside the release/support console');
@@ -137,6 +142,9 @@ async function validateDesktop() {
     assert(closeHit.buttonIsHit,'close button is covered by another element: '+JSON.stringify(closeHit));
     await page.locator('.fx-organism-console-close').click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+    const closedDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(closedDisplay==='none','closed console remains painted: display='+closedDisplay);
+    mark('desktop: closed-console-css',closedDisplay);
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
 
