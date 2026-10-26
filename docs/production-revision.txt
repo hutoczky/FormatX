@@ -1,6 +1,12 @@
 FormatX production revision
-token=20261026-r2198-single-desktop-fx-paired-chromatin-studio
-release_line=R2198-SINGLE-FX-LOGO-PAIRED-DNA-EMBRYO-FOUR-ARM-MAG-CINEMATIC-BIRTH
+token=20261026-r2199-biophotonic-studio-genesis
+release_line=R2199-BIOLUMINESCENT-3D-DNA-EMBRYO-FOUR-ARM-MAG-STUDIO-BIRTH
+r2199_visual=Real first-party Three.js / WebGL movie: 620 desktop or 260 mobile 3D cyan-violet molecular sparkles physically parented to the founding DNA helix; 2200 desktop or 850 mobile cyan-turquoise/coral/orange metabolic photons inside the living embryo; closer DNA film camera and rounder larger translucent cell; GPU-shaded animated GLSL nebula replaces plain black studio background during DNA/cell chapters. No rendered image substitution or standalone mockup.
+r2199_chronology=0-3.1s physical DNA, 2.94-4.38s genome chromatin condensation, 3.52-5.66s living cell, 5.88-7.23s four-arm titanium MAG assembly, recessed optical awakening only after 7.44s, late native permanent MAG handoff to ten-second finale.
+r2199_assets=docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js; docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js; docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; .github/scripts/validate-biophotonic-genesis-r2199.cjs; .github/workflows/deploy-formatx-custom-domain.yml.
+r2199_qa=Source, CSP exact hash, WebGL script parse, Cloudflare Worker unit/build, R2199 geometry and optical chronology regression validation passed on commit a506134a. Require both-domain exact revision convergence, real browser storyboard at DNA/cell/metal/MAG and permanent native hero before live success claim.
+r2199_asset_cache=20261026-r2199-photonic-genesis-nucleus
+
 r2198_brand=Removed the duplicate CSS-generated desktop FX mark; canonical absolute-path real image is the single header logo from first paint across desktop, tablet and mobile.
 r2198_genesis=Paired nucleotide base stations now retain physical pairing through organic chromatin condensation and rejoin the same titanium MAG arm; 10-second single-take opens with centered 3D double helix and gentle true-depth orbit, shows embryo before arm seating, and ignites the optical organ after assembly.
 r2198_tests=R2197 header singleton source + desktop/mobile Chromium checks; R2198 physical pairing source contracts; production revision convergence and R533/R536 browser checks on both domains.
