@@ -186,6 +186,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `ea64486`: a 390×844 mobilos organism-main teszt most már a **nyitott** panel CSS-kijelzését is ellenőrzi, a kezdeti rejtett és a bezárás utáni rejtett állapot mellett. Ezzel a `hidden → visible → hidden` vizuális állapotgép ténylegesen tesztelt.
 - Következő: CI és Lighthouse eredmények ellenőrzése, majd R533/R1280 szinkronizált 14 s storyboard implementáció előkészítése.
 
+### 2026-10-27 – R2209 Playwright stabilitási hiba bizonyítéka
+
+- A `40420836368` organism-first workflow **FAIL**, artifact `12697229052` (`organism-main-report.json`). Desktop: `hidden-console-css=none`, `pricing-panel-open`, `currency-updated` mind PASS.
+- A `desktop: close-hit-test` eredmény: `x=1341`, `y=65.390625`, `hitTag=BUTTON`, `hitClass=fx-organism-console-close`, `buttonIsHit=true`, `pointerEvents=auto`. Tehát a gomb **nincs eltakarva** a mért ponton.
+- A `locator.click` **10 másodpercig** a `waiting for element to be visible, enabled and stable` állapotban marad. A kiváltó ok még nem bizonyított; a CSS `hidden` javítás ezt önmagában nem oldotta meg.
+- `8ac1893`: a kattintás előtt 12 `requestAnimationFrame` alatt mintavételezi a gomb bounding-box koordinátáit, valamint a szülő panel `animation` és `transform` állapotát. Az új `desktop: close-motion` artifact alapján dönthető el, kell-e animációs stabilizálás az éles CSS-ben.
+- A teszt továbbra sem használ erőltetett kattintást. Következő: friss artifact és célzott CSS/JS javítás, teljes desktop+mobil PASS.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
