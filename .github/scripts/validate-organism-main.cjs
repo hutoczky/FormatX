@@ -140,6 +140,21 @@ async function validateDesktop() {
     });
     mark('desktop: close-hit-test',closeHit);
     assert(closeHit.buttonIsHit,'close button is covered by another element: '+JSON.stringify(closeHit));
+    // R2209: record bounding-box drift across animation frames. Playwright
+    // requires a stable target before clicking; a continuously animated
+    // ancestor can make a real, unobscured button impossible to click.
+    const closeMotion=await page.locator('.fx-organism-console-close').evaluate(async button=>{
+      const samples=[];
+      for(let n=0;n<12;n++){
+        await new Promise(resolve=>requestAnimationFrame(resolve));
+        const b=button.getBoundingClientRect();
+        samples.push([Math.round(b.x*100)/100,Math.round(b.y*100)/100]);
+      }
+      const shell=button.closest('.fx-organism-console-shell');
+      const style=shell?getComputedStyle(shell):null;
+      return {samples,shellAnimation:style?.animation||'',shellTransform:style?.transform||''};
+    });
+    mark('desktop: close-motion',closeMotion);
     await page.locator('.fx-organism-console-close').click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     const closedDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
