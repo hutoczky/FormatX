@@ -940,15 +940,25 @@
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
-        const reach=.20+.74*r();
-        // R2195: paired DNA matter seats in narrow metallic arm channels.
-        const lateral=(r()-.5)*.088;
-        // R2192: molecular matter seats above the actual titanium front
-        // (typically z=.38-.48), rather than vanishing behind opaque armour.
+        // R2196: the two nucleotides of ONE base-pair station land on
+        // opposite sides of the SAME continuous four-arm double helix.
+        // Earlier, separate random reach/lateral/depth values for both
+        // halves turned the DNA-to-titanium transfer into random noise.
+        const pairIndex=Math.floor(i/2);
+        const armStation=Math.floor(pairIndex/4);
+        const armStations=Math.ceil((count/2-axis)/4);
+        const armU=armStation/Math.max(1,armStations-1);
+        const reach=.19+.75*armU;
+        const armTwist=armU*Math.PI*2*4.5+axis*.65;
+        const armRadius=.032+.012*Math.sin(armU*Math.PI);
+        const lateral=sign*Math.cos(armTwist)*armRadius;
+        const depth=sign*Math.sin(armTwist)*armRadius;
+        // Physical cyan/violet coils seat just above the titanium arm
+        // surface, then fade before the recessed optical organ wakes.
         arms.set([
           Math.cos(phi)*reach-Math.sin(phi)*lateral,
           Math.sin(phi)*reach+Math.cos(phi)*lateral,
-          .62+(r()-.5)*.11
+          .62+depth
         ],i*3);
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
