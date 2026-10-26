@@ -30,7 +30,7 @@ for(const text of [
   'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
   'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
   'this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;',
-  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoMaterial.opacity=.76*visible;',
   "const count=this.mobileRender?6000:9600;",
   "const fade=1-smooth((t-3.10)/1.38);"
 ]){
