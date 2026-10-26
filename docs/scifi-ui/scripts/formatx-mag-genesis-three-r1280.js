@@ -1138,10 +1138,12 @@
             +.20*noise(u+.07,v,78);
           const coralCloud=.56*noise(u+.13,v+.07,23)
             +.44*noise(u,v,61);
-          const coral=clamp((coralCloud-.585)*4.65);
+          const coral=clamp((coralCloud-.545)*5.1);
           const mineral=noise(u,v,116);
           const grain=(hash(x,y)-.5)*13;
-          const freckle=Math.pow(clamp((mineral-.71)*3.8),2);
+          // R2201: microscopic clustered chromatin, not a uniform aqua blob.
+        // A lower threshold produces many small coral organelle islands.
+        const freckle=Math.pow(clamp((mineral-.62)*3.9),2);
           const index=(y*width+x)*4;
           pixels[index]=Math.round(clamp(
             (20+72*cloud+202*coral+62*freckle+grain)/255)*255);
@@ -1179,11 +1181,15 @@
       positions.needsUpdate=true;geometry.computeVertexNormals();
       this.embryoTexture=this.makeEmbryoTexture();
       this.embryoMaterial=new T.MeshPhysicalMaterial({
-        color:0xe1f8f8,map:this.embryoTexture,
-        bumpMap:this.embryoTexture,bumpScale:.014,
-        emissive:0x0b3948,emissiveIntensity:.30,
-        metalness:.02,roughness:.14,clearcoat:.98,clearcoatRoughness:.065,
-        transmission:.21,thickness:.23,ior:1.34,
+        // R2201: microphotographic cyan/coral cell membrane. The R2200
+        // nucleus was too transparent against near-black (0.47 opacity),
+        // washing its coral metabolic freckles into a faint glass bead.
+        color:0xf5ffff,map:this.embryoTexture,
+        bumpMap:this.embryoTexture,bumpScale:.020,
+        emissive:0x12545b,emissiveMap:this.embryoTexture,
+        emissiveIntensity:.29,
+        metalness:.015,roughness:.265,clearcoat:.73,clearcoatRoughness:.18,
+        transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
@@ -2646,8 +2652,10 @@
       this.coreGroup.visible=visible>.002;
       // R2189: translucent outer membrane reveals living chromatin and
       // the physically shaded organelle without exposing a hard MAG eye.
-      this.embryoMaterial.opacity=.47*visible;
-      this.embryoNucleusMaterial.opacity=.56*visible;
+      // R2201: readable cellular color first, with enough transmission
+      // to retain actual internal organelles and the suspended chromatin.
+      this.embryoMaterial.opacity=.86*visible;
+      this.embryoNucleusMaterial.opacity=.68*visible;
       this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
