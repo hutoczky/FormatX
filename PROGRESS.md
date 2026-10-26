@@ -172,6 +172,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Következő: új CI ellenőrzés az `ead5af38` és `a8e67e2` módosításokra; mobilon ugyanezen CSS-rejtés regressziós ellenőrzés, Lighthouse.
 - A 14 s storyboard eltérés és a Lighthouse ≥0,95 kapu továbbra is nyitott.
 
+### 2026-10-27 – R2208 mobilos fullscreen overlay regresszió
+
+- `dd7fa40` commit workflow `40420610562` organism-main a lekérdezéskor **in_progress**; Lighthouse `40420610629` még **pending**. Az új szigorúbb desktop CSS ellenőrzésre nincs még PASS bizonyíték.
+- `0601f2e`: a 390×844 mobil érintéses organism-main tesztben is ellenőrizzük a `getComputedStyle(#fx-organism-console).display === 'none'` feltételt a kezdeti `hidden` állapotban és a bezáró `tap()` után.
+- A mobilon elfedő fullscreen réteg többé nem mehet át a teszten pusztán `element.hidden===true` értékkel. A teszt nem használ `force` kattintást.
+- Következő: új desktop+mobile organism CI PASS, majd Lighthouse; szükség esetén az `organism-main-report.json` és failure screenshot alapján javítás.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
