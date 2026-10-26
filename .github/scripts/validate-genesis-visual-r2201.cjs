@@ -40,7 +40,7 @@ const required=[
   "this.updateGenomeParticles(t,time);",
   "this.updateCore(t,time);",
   "this.updateMechanical(t,time);",
-  "const appear=smooth((t-3.52)/.76)",
+  "const appear=smooth((t-3.28)/1.02)",
   "const dissolve=1-smooth((t-5.66)/1.12)",
   "const grow=smooth((t-5.88)/1.18)"
 ];
