@@ -893,6 +893,10 @@
       // to ONE of the four titanium arms, rather than routing opposite
       // DNA strands to unrelated cardinal arms.
       const armIndex=new Float32Array(count);
+      // R2198: the two nucleotides at each DNA base-pair station remain a
+      // physical pair through the embryonic cell. One shared, deterministic
+      // chromatin landing point is computed for both strands (no new draw).
+      let pairCellX=0,pairCellY=0,pairCellZ=1.10;
       // R2176: a SINGLE founding DNA shape owns the opening shot. Previously
       // the 9,600 glowing nucleotides wound 7.75 turns while the visible
       // 3D helix wound 3.82; two mismatched objects overlapped on screen.
@@ -921,21 +925,26 @@
           origin.y+scale*rolledY,
           origin.z+scale*(-rolledX*sinY+localZ*cosY)
         ],i*3);
-        const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
-        // R2185: biological nucleotides settle mostly in the envelope,
-        // with a smaller organelle interior rather than a noisy solid ball.
-        // Both distributions use the same cell centre and an ellipsoid skin.
-        const membrane=i%4!==0;
-        const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;
-        // R2192: the biological target must occupy the SAME 3D volume as
-        // coreGroup's visible embryo, which is raised to z=1.10 during birth.
-        // Previously the genome condensed at z=.20, nearly a full world unit
-        // behind the cell membrane: a dissolve/crossfade, not a genuine morph.
-        // Slightly reduce the cloud envelope to fit the nonuniform glass shell.
+        // R2198: sample chromatin once per base pair. Both visible DNA
+        // phosphate strands now travel into one biological membrane site,
+        // then leave that same site together for the same MAG arm.
+        if(strand===0){
+          const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
+          const membrane=Math.floor(i/2)%4!==0;
+          const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;
+          // Match the living nucleus centred at z=1.10, not an offscreen
+          // cloud behind the physically shaded embryo.
+          pairCellX=radius*.82*Math.sin(b)*Math.cos(a);
+          pairCellY=radius*.94*Math.cos(b);
+          pairCellZ=1.10+radius*.65*Math.sin(b)*Math.sin(a);
+        }
+        // The tiny phase-opposed offset makes the paired DNA observable,
+        // while maintaining physical continuity through condensation.
+        const chromatide=.014;
         cell.set([
-          radius*.82*Math.sin(b)*Math.cos(a),
-          radius*.94*Math.cos(b),
-          1.10+radius*.65*Math.sin(b)*Math.sin(a)
+          pairCellX+sign*chromatide*Math.cos(phase),
+          pairCellY+sign*chromatide*Math.sin(phase),
+          pairCellZ+sign*chromatide*.55*Math.cos(phase*.5)
         ],i*3);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
@@ -2684,12 +2693,15 @@
       if(t<2.70){
         const k=smooth(t/2.70);
         z=mix(5.42,5.12,k);
-        x=Math.sin(time*.00027)*.024*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.009;
+        // R2198: a very slow orbital camera move exposes actual depth
+        // between the opposed DNA backbones without losing the silhouette.
+        // The orbit returns to centre at the end of the DNA establishing shot.
+        x=.115*Math.sin(Math.PI*k);
+        y=.010+.029*Math.sin(Math.PI*k);
       }else if(t<3.30){
         const k=smooth((t-2.70)/.60);
         z=mix(5.12,3.86,k);
-        x=mix(.018,0,k);y=mix(.012,0,k);
+        x=0;y=mix(.010,0,k);
       }else if(t<5.55){
         // R2115: restrained camera dolly and parallax while the mechanical
         // iris resolves; sub-centimetre movement keeps the MAG centered.
