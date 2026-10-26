@@ -97,6 +97,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - **Mobil Performance:** 0,83 / 0,81 / 0,83; FCP 1839 / 1845 / 1823 ms; TBT 364 / 427 / 365 ms; Speed Index 6648 / 6697 / 6638 ms. Hibás küszöbök: Performance, FCP, TBT.
 - Következő mérésalapú optimalizálás: mobil JS main-thread hosszú feladatok és TBT, első render/FCP, Speed Index; desktop LCP és Speed Index. **Nem szabad a CI-küszöböket lejjebb venni.**
 
+### 2026-10-26 – S5 forrásaudit, optimalizálási döntés
+
+- A `75204ec7` utáni futásokban a production `40414573072` **PASS**, a mobilos R2103/R2104 és Lighthouse munkafolyamatok a lekérdezés pillanatában **in_progress**; az új Lighthouse pontszámokat még nem lehet sikeresnek állítani.
+- Az éles HTML forrásban legalább 26 külön `<script defer>` szerepel; a `defer` szkriptek a HTML feldolgozása után, a DOMContentLoaded előtt hajtódnak végre. A mobilos TBT lehetséges forrása a nagy mennyiségű kezdő JS; **hipotézis, nem profilozással igazolt ok**.
+- A mobilos referenciafilm forrása 41 654 karakter. A 2D canvas fallback már tartalmaz pixelbudgetet, DPR-korlátot és futásidejű visszavételt; ennek vak eltávolítása tilos.
+- A `Validate organism-first FormatX main site` futás `40414573164` **FAIL** a Chromium telepítés lépésénél, nem a film vizuális assertjénél.
+- **Következő végrehajtás:** a Lighthouse JSON trace-ből a hosszú feladatok (long tasks), script evaluation és render-blocking erőforrások pontos rangsorolása; csak ezután egyetlen, nem kritikus JS betöltésének késleltetése, azonnali mobil+desktop Lighthouse és teljes regressziós CI teszttel. 0,95 küszöböt nem szabad csökkenteni.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -106,6 +114,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** elemezd a Lighthouse auditban a mobil TBT/FCP/Speed Index és a desktop LCP/Speed Index fő okait, készíts célzott teljesítményjavítást, majd futtasd újra mindkét profilt. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
+**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** töltsd le és elemezd a `40413514815` Lighthouse artifact JSON riportjait, rangsorold a tényleges JS long taskokat és render-blocking erőforrásokat; csak ezután módosíts kritikus betöltési sorrendet, majd futtasd újra mindkét profilt. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
