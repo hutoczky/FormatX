@@ -2101,7 +2101,17 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
+    // R2203: isolate synchronous WebGL buffer allocation/upload cost from
+    // CPU geometry generation. No GPU synchronization or extra draw calls.
+    const uploadStart=performance.now();
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    const uploadEnd=performance.now();
+    root.dataset.fxCoreBufferUploadMsR2203=(uploadEnd-uploadStart).toFixed(2);
+    try{
+      performance.measure('formatx:r326:buffer-upload-r2203',{
+        start:uploadStart,end:uploadEnd
+      });
+    }catch(_){}
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
