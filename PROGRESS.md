@@ -73,6 +73,15 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A mobilos runok `40409528612` és `40409528701` továbbra is hibásak: `R2104 cinema material did not render in original phone canvas`. Ez nem tesztidőzítés-problémaként kezelendő; renderelési vizsgálat szükséges.
 - Következő: új CI futás ellenőrzése, majd mobil canvas screenshot és a tényleges pixel/anyag megjelenítés diagnosztikája.
 
+### 2026-10-26 – Új CI ellenőrzés
+
+- Run `40409996865`: P0 fast source loop **PASS**.
+- Run `40409996879`: canonical content, evidence és visual contracts **PASS**.
+- Run `40409996845`: production preflight **FAIL**, pontosan `Three.js storyboard: const grow=smooth((t-3.76)/.72)`. Az R2182 storyboard teszt organikus és sejt növekedési időzítése frissítve (`041130c8`); újrafutási eredmény még nincs.
+- Run `40409996995` és `40409996863`: mobil MAG canvas **FAIL**, változatlan, nyitott renderelési hiba.
+- Run `40409996876`: Chromium telepítés **FAIL**.
+- Run `40409996898`: Lighthouse desktop/mobil **FAIL**.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -82,6 +91,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S1:** P0 szintaktikai CI PASS. Ellenőrizd az `ad49f21d` utáni production contract futást; javítsd a további valós teszthibákat. **S2:** a mobilos `R2104 cinema material did not render in original phone canvas` regresszió diagnosztikája és képkockás vizuális vizsgálata. Ne merge-elj, amíg a vizuális kapuk és a Lighthouse nem sikeresek.
+**S1:** P0 szintaktikai CI PASS. Ellenőrizd a `041130c8` utáni production contract futást, és az újabb pontos hibaüzenetek alapján javítsd a fennmaradó eltéréseket. **S2:** a mobilos `R2104 cinema material did not render in original phone canvas` regresszió diagnosztikája és képkockás vizuális vizsgálata. Ne merge-elj, amíg a vizuális kapuk és a Lighthouse nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
