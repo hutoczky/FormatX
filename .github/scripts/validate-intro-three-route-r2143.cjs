@@ -72,11 +72,17 @@ for(const token of [
   'const backbone=radius>.35?.043:.031;',
   'const aureole=radius>.35?.087:.065;',
   'const helixRadius=.410+(r()-.5)*.013;',
-  'const membrane=i%4!==0;',
+  'const membrane=Math.floor(i/2)%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
   'this.embryoMaterial.opacity=.72*visible;',
   'this.embryoNucleusMaterial.opacity=.76*visible;',
-  'this.embryoCapillaryMaterial.opacity=.25*visible;'
+  'this.embryoCapillaryMaterial.opacity=.25*visible;',
+  'let pairCellX=0,pairCellY=0,pairCellZ=1.10;',
+  'if(strand===0){',
+  'pairCellX=radius*.82*Math.sin(b)*Math.cos(a);',
+  'pairCellY=radius*.94*Math.cos(b);',
+  'pairCellZ=1.10+radius*.65*Math.sin(b)*Math.sin(a);',
+  'pairCellX+sign*chromatide*Math.cos(phase)'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
 }
