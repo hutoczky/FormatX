@@ -12,6 +12,9 @@ assert.doesNotThrow(()=>new Function(engine),'R2199 Three.js cinema must parse')
 for(const [name,source] of [['R533',birth],['rescue',rescue]])
   assert.doesNotThrow(()=>new Function(source),name+' must parse');
 const checks=[
+  ['3D atmospheric background','makeCosmicAtmosphere(){'],
+  ['blue/violet DNA stage','float dna=1.0-smoothstep(2.60,3.85,uPhase);'],
+  ['turquoise embryo atmosphere','float embryo=smoothstep(2.95,3.72,uPhase)*'],
   ['3D photon creation','makeCinematicBiophotons(){'],
   ['3D photon update','updateCinematicBiophotons(t,time){'],
   ['DNA founding parent','parent.add(dna.points);'],
