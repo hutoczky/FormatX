@@ -239,6 +239,10 @@
         mesh.setMatrixAt(i,dummy.matrix);
       }
       mesh.instanceMatrix.needsUpdate=true;
+      // R2195: polygonal rubble competed with the molecular hero and read as
+      // an asteroid game scene, not photographic studio set dressing.
+      // Retain the object for compatible lifecycle but exclude its draw call.
+      mesh.visible=false;
       this.debris=mesh;
       this.scene.add(mesh);
     }
@@ -937,13 +941,14 @@
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
         const reach=.20+.74*r();
-        const lateral=(r()-.5)*.15;
+        // R2195: paired DNA matter seats in narrow metallic arm channels.
+        const lateral=(r()-.5)*.088;
         // R2192: molecular matter seats above the actual titanium front
         // (typically z=.38-.48), rather than vanishing behind opaque armour.
         arms.set([
           Math.cos(phi)*reach-Math.sin(phi)*lateral,
           Math.sin(phi)*reach+Math.cos(phi)*lateral,
-          .62+(r()-.5)*.16
+          .62+(r()-.5)*.11
         ],i*3);
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
@@ -996,7 +1001,7 @@
             // R2186: the genetic matter becomes a visible energetic stream
             // only while the metal is physically closing around it.
             float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));
-            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z)*(1.0+transferGlow*.24),1.0,6.6*uPixelRatio);
+            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6/(-mv.z)*(1.0+transferGlow*.16),1.0,5.6*uPixelRatio);
             float first=curve(0.08,.65,uPhase);
             // R2192: all genetic matter departs BEFORE the optical organ
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
@@ -1015,7 +1020,7 @@
             float center=exp(-r*53.0);
             vec3 cool=mix(vec3(.14,.68,.75),vec3(.62,.34,.90),smoothstep(.46,.54,vSeed));
             vec3 color=cool*glow*.70+vec3(.75,1.0,.98)*center*.32;
-            gl_FragColor=vec4(color,vEnergy*mix(.37,.64,vSeed)*(1.0-smoothstep(.04,.25,r)));
+            gl_FragColor=vec4(color,vEnergy*mix(.32,.55,vSeed)*(1.0-smoothstep(.04,.25,r)));
           }`
       });
       this.genomeParticles=new T.Points(geometry,material);
@@ -2009,14 +2014,15 @@
       // The DNA remains the source and this welding is visible only AFTER
       // the biological nucleus has condensed into four assembly lanes.
       const T=this.THREE,r=this.rand;
-      const count=this.mobileRender?160:320;
+      // R2195: precise welding at metal edges, not a confetti cloud.
+      const count=this.mobileRender?112:224;
       const positions=new Float32Array(count*3);
       const seed=new Float32Array(count);
       for(let i=0;i<count;i++){
         const axis=i%4;
         const angle=axis*Math.PI*.5;
         const reach=.24+r()*.66;
-        const tangent=(r()-.5)*.175;
+        const tangent=(r()-.5)*.090;
         positions[i*3]=Math.cos(angle)*reach-Math.sin(angle)*tangent;
         positions[i*3+1]=Math.sin(angle)*reach+Math.cos(angle)*tangent;
         positions[i*3+2]=.33+(r()-.5)*.21;
@@ -2043,7 +2049,7 @@
             pos.z+=.025*sin(uTime*.0017+aSeed*23.0);
             vec4 mv=modelViewMatrix*vec4(pos,1.0);
             gl_Position=projectionMatrix*mv;
-            gl_PointSize=clamp((1.4+2.1*pulse)*uPixelRatio*4.2/max(1.0,-mv.z),
+            gl_PointSize=clamp((1.1+1.35*pulse)*uPixelRatio*4.2/max(1.0,-mv.z),
               1.0,4.5*uPixelRatio);
           }`,
         fragmentShader:`
@@ -2057,7 +2063,7 @@
             vec3 plasma=mix(vec3(.22,.77,.82),vec3(.80,.90,.98),
               smoothstep(.25,.95,vSeed));
             gl_FragColor=vec4(plasma*(.40+.60*core),
-              vFlare*core*.48);
+              vFlare*core*.36);
           }`,
         transparent:true,depthTest:true,depthWrite:false,
         blending:T.AdditiveBlending
@@ -2735,8 +2741,8 @@
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
       // Film the genetic origin against a restrained neutral studio set:
       // early drifting rubble competes with the DNA silhouette.
-      const setDressing=.28+.72*smooth((t-5.15)/1.22);
-      if(this.debris?.material)this.debris.material.opacity=.34*setDressing*(1-finaleClean*.94);
+      // R2195: keep tiny optical motes but no faceted polygonal rubble.
+      if(this.debris)this.debris.visible=false;
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
