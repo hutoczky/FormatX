@@ -7,7 +7,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261024-r2179
+mag_cache=20261026-r2194
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -135,3 +135,4 @@ R2193_cache=20261026-r2193-photographic-softbox-dna-metal
 R2194_actual_change=Visible permanent R326 four-arm chassis receives two narrow physically raised titanium veins per arm, seated on the existing single structural hull. The R1280 cinematic matches these with eight film-time chrome ribs during 5.88-7.4-second assembly while retaining first DNA, organic embryo, no early pupil and delayed permanent WebGL handoff.
 R2194_regression_fix=Corrected source test to distinguish the ONE four-arm structural hull from the optional four-arm decorative inlay pass, and still prohibit any overlapping full titanium armour system. Production candidate and browser archive syntax+WebGL source gates passed on GitHub Actions runs 40247632648 and 40247632663.
 R2194_release_gate=Deploy this exact marker to both formatxsuite.com and www.formatxsuite.com; require successful full live R533-to-R536 cinematic browser validation, canonical permanent MAG smoke and Android/desktop 3D frame checks before stating verified live deployment. Award-level visual quality remains subject to human-device inspection.
+R2194_cache_release_fix=Production R2151+ live native MAG checker reads mag_cache from the audited release marker. Its stale 20261024-r2179 value failed despite the R2194 renderer, P0 scheduler, motion loader, mobile loader and Worker rewrite graph all using exactly 20261026-r2194-polished-four-arm-mag. Set mag_cache=20261026-r2194 so the acceptance test checks the actually deployed release. No scripts/security guards were disabled.
