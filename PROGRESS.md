@@ -53,11 +53,19 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 |---|---|---|
 | Forrás- és belépésipont-audit | PASS (statikus) | GitHub fájltartalom ellenőrizve |
 | Módosítások GitHubra mentése | PASS | PR #578 commitjai |
-| `node --check` a jelenlegi módosításokon | NEM FUTTATOTT | A connector nem futtat lokális Node parancsot |
-| GitHub Actions a PR head SHA-n | NINCS IGAZOLT FUTÁS | A head SHA-n végzett workflow-lekérdezés üres listát adott; a PASS nem állítható |
+| `node --check` a jelenlegi módosításokon | PASS (CI P0 fast source loop) | Run 40408446602, targeted job 121872481885 sikeres; explicit r1280/R2126 ellenőrzés |
+| GitHub Actions a PR head SHA-n | RÉSZLEGES / FAIL | Runok 40408446602 PASS; 40408446493, 40408446951, 40408446484, 40408446653, 40408446692 FAIL |
 | Desktop/mobil WebGL screenshot | NEM FUTTATOTT | Böngészős bizonyíték hiányzik |
 | Lighthouse | NEM FUTTATOTT | Mérési riport hiányzik |
 | Éles telepítés | NEM TÖRTÉNT MEG | Draft PR, nincs merge |
+
+### 2026-10-26 – CI hibatriázs
+
+- **PASS:** P0 fast source loop, run `40408446602`, job `121872481885`.
+- **FAIL:** production candidate run `40408446493`, job `121872184333`: `R2201 cinematic stage missing: const appear=smooth((t-3.52)/.76)` – elavult, szövegillesztésre épülő tesztelvárás. A teszt a jelenlegi `3.28 / 1.02` átmenetre frissítve, commit `ad49f21d`; új CI eredmény még szükséges.
+- **FAIL:** mobilos R2104 run `40408446484` és R2103 run `40408446653`: `R2104 cinema material did not render in original phone canvas`. **Valós, nyitott vizuális regresszió; nem megoldott.**
+- **FAIL:** organism-main run `40408446951`: Chromium telepítési lépés; környezeti hibának tűnik, részletes log szükséges.
+- **FAIL:** Lighthouse CI run `40408446692`: mind desktop, mind mobil lépés hibás; pontszámok és részletes okok további vizsgálata szükséges.
 
 ## 6. Ismert hibák és kockázatok
 
@@ -68,6 +76,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S1:** adj a PR-hoz explicit `node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js` és `node --check docs/scifi-ui/scripts/genesis-cinematic-morph-r2126.js` CI-kaput; ellenőrizd a workflow futásának eredményét. Ha a teszt hibás, javítsd és dokumentáld a hibalogsorokat. Ezután S2 képkockás vizuális vizsgálat.
+**S1:** P0 szintaktikai CI PASS. Ellenőrizd az `ad49f21d` utáni production contract futást; javítsd a további valós teszthibákat. **S2:** a mobilos `R2104 cinema material did not render in original phone canvas` regresszió diagnosztikája és képkockás vizuális vizsgálata. Ne merge-elj, amíg a vizuális kapuk és a Lighthouse nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
