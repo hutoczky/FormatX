@@ -223,6 +223,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `877ccba`: a `.github/scripts/validate-genesis-visual-r2201.cjs` elvárt értéke `.76`; emellett a teszt ellenőrzi a háromdimenziós nukleoluszgyűrűk, membránkontúrok és pulzáló halo meglétét is.
 - Következő: új production és P0 CI eredmények ellenőrzése. A tesztmódosítás nem helyettesíti a WebGL screenshot alapú minőségi ellenőrzést, ezért a sejtmag még nem tekinthető késznek.
 
+### 2026-10-27 – R2214 második gyártási regresszió
+
+- `40422021258` production workflow **FAIL**, job `121918595911`: a `validate-biophotonic-genesis-r2199.cjs` továbbra is a régi `this.embryoMaterial.opacity=.86*visible;` kódrészletet követelte. Az előző R2201 kontraktus javítása után ez volt a következő tényleges blokkoló.
+- `d32f4f1`: a biophotonic WebGL kontraktus most a tudatosan megváltoztatott `.76` membrán-opacitást ellenőrzi. Az organellum és a DNA/photonic egyéb kontraktusai változatlanok.
+- Több CI ellenőrzés már PASS az előző commiton (mobil MAG visual proof, R2103, R2104, production architecture, bilingual, web performance contract, hero/nav). **Production még nem PASS**; következő friss futás eredménye szükséges.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
