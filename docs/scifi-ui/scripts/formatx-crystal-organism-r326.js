@@ -2112,6 +2112,11 @@
         start:uploadStart,end:uploadEnd
       });
     }catch(_){}
+    // R2204: GPU buffers now own the immutable vertex data. Retaining the
+    // seven CPU Float32Arrays for the entire page lifetime needlessly holds
+    // a second copy of the geometry. Rendering only uses count/topology.
+    geometry.arrays.length=0;
+    root.dataset.fxCoreCpuGeometryReleasedR2204='true';
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
