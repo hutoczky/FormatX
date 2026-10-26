@@ -151,6 +151,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - **Nem javítható** kizárólag `*10` → `*14` cserével: előbb az R533 szekvenciavezérlő időskáláját, a kamera- és részecske-kulcsképeket, a CSS-átmeneteket és a screenshot-assert időpontokat együtt kell feltérképezni.
 - Következő: ellenőrizd a Chromium telepítés befejezését; Lighthouse új eredményeit; készíts explicit R533 ↔ R1280 filmes időtengelyt, és egyetlen konzisztens storyboard-kontraktust.
 
+### 2026-10-27 – Organism panel close hit-test regresszió
+
+- A Chromium-telepítési javítás után a `40419629737` workflow már eljutott a `Test desktop and mobile organism interactions` lépésig, de az **FAIL**.
+- Letöltött bizonyíték: `formatx-organism-main-evidence`, artifact `12697182887`, `organism-main-report.json`. Desktop: `navigation-start`, `site-ready`, `initial-state`, `pricing-panel-open`, `currency-updated` mind sikeres. A következő `.fx-organism-console-close` Playwright kattintás 30 másodperc után timeoutolt; az elem látható/engedélyezett/stabil, de a kattintás nem fejeződik be.
+- `31f4f8a`: közvetlenül a kattintás előtt `document.elementFromPoint` alapján ellenőrizzük a tényleges hit-targetet és naplózzuk a gomb/overlay pozícióját; a timeout 10 s. A teszt nem erőlteti a kattintást és nem kerüli meg a hibát.
+- Következő: új artifact `desktop: close-hit-test` adatából azonosítsd az esetleges eltakaró réteget, és **az éles CSS/JS interakciót** javítsd; majd desktop+mobil organism CI PASS szükséges.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
