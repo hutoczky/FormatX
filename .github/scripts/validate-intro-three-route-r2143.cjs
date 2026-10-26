@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2199-photonic-genesis-nucleus';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2200-dna-cytoplasm-film';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -24,12 +24,12 @@ assert.ok(!engine.includes("new URL('./scripts/three-r185.module.js', location.h
   'Page-relative Three.js import would break canonical root homepage');
 // R2146 portrait composition must keep a real central 3D helix visible.
 assert.ok(engine.includes('const placements=this.mobileRender?[') &&
-  engine.includes('[.00,.06,.60,1.57,.92]') &&
+  engine.includes('[.00,.06,.60,1.28,.95]') &&
   engine.includes('[.00,-.87,-.20,1.58,.39]'),
   'Portrait Three.js DNA must be centered within the mobile camera frustum');
 // R2165: prevent the original offscreen desktop panorama from replacing
 // the new first-frame, fully visible DNA double helix.
-assert.ok(engine.includes('[.00,.03,.55,1.57,.76]') &&
+assert.ok(engine.includes('[.00,.03,.55,.32,1.48]') &&
   engine.includes('[-2.00,1.02,-.34,-.44,.43]') &&
   engine.includes('[2.00,1.02,-.34,.44,.43]'),
   'Desktop first-frame must establish a central helix and subdued arm donors');
@@ -43,8 +43,8 @@ const desktopPlacement=engine.split('const placements=this.mobileRender?[')[1]?.
 assert.ok(desktopPlacement,'Desktop DNA placements are missing');
 const [heroX,heroY,heroZ,heroRotation,heroScale]=desktopPlacement.slice(1).map(Number);
 assert.ok(Math.abs(heroX)<.10 && Math.abs(heroY)<.10 && heroZ>.45 &&
-  Math.abs(heroRotation-Math.PI/2)<.15 && heroScale>.70,
-  'Desktop establishing shot must show a centered, vertical 3D double helix');
+  Math.abs(heroRotation-.32)<.15 && heroScale>1.30,
+  'Desktop establishing shot must show a near-full-frame diagonal 3D double helix');
 assert.ok(engine.includes('h.userData.primary=Math.abs(x)<.03&&Math.abs(y)<.09&&z>.50'),
   'Desktop cinematic has no authoritative founding DNA');
 // R2176: the GPU nucleotides must follow precisely the same authored
