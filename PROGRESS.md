@@ -229,6 +229,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `d32f4f1`: a biophotonic WebGL kontraktus most a tudatosan megváltoztatott `.76` membrán-opacitást ellenőrzi. Az organellum és a DNA/photonic egyéb kontraktusai változatlanok.
 - Több CI ellenőrzés már PASS az előző commiton (mobil MAG visual proof, R2103, R2104, production architecture, bilingual, web performance contract, hero/nav). **Production még nem PASS**; következő friss futás eredménye szükséges.
 
+### 2026-10-27 – R2215 Genesis chronology és intro-route CI
+
+- `40422525883` production **FAIL**, job `121920164759`: `validate-cinematic-origin-r2188.cjs` régi `.86` membránértéket követelt, miközben az új renderelő `.76` értéket használ.
+- `8af9afd`: a chronology forráskontraktus frissítve a tényleges `.76` biológiai membránra.
+- `7a9b3f6`: az `validate-intro-three-route-r2143.cjs` ellenőrzésében is megtörtént ugyanennek az elavult értéknek a cseréje; az R2201 és R2199 tesztek már korábban frissültek.
+- `40422525819` organism-main **FAIL** a desktop+mobile interakciós lépésben. A pontos új okhoz a futás JSON artifactjának vizsgálata szükséges; a production hibától külön kell kezelni.
+- Következő: új CI és organikus panel browser artifact elemzése, valódi Genesis screenshot, nem kizárólag literális kódellenőrzés.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
