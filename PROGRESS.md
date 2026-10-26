@@ -32,6 +32,7 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - [ ] Stúdióminőségű megvilágítás, optika, térbeli sziluett és átmenetek referencia-összevetése.
 - [ ] Mobil WebGL context lost/restored, reduced-motion és fallback teszt.
 - [ ] 360×800, 390×844, 412×915, 768×1024, 1440×900 képernyőméretek, cold/warm load, 30 s stabil futás.
+- [x] Az aktív r1280 és az R2126 explicit szintaktikai CI-kapujának hozzáadása (workflow-módosítás, nem teszteredmény).
 - [ ] Szintaktikai teszt, projekt preflight, CI és vizuális regresszió PASS.
 - [ ] Lighthouse mobil/desktop mérések és elfogadási küszöbök dokumentálása.
 - [ ] Jóváhagyott merge, éles deploy, éles URL smoke-test és visszagörgetési terv.
@@ -53,7 +54,7 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 | Forrás- és belépésipont-audit | PASS (statikus) | GitHub fájltartalom ellenőrizve |
 | Módosítások GitHubra mentése | PASS | PR #578 commitjai |
 | `node --check` a jelenlegi módosításokon | NEM FUTTATOTT | A connector nem futtat lokális Node parancsot |
-| GitHub Actions a PR head SHA-n | ELLENŐRZENDŐ | Workflow futás és log szükséges |
+| GitHub Actions a PR head SHA-n | NINCS IGAZOLT FUTÁS | A head SHA-n végzett workflow-lekérdezés üres listát adott; a PASS nem állítható |
 | Desktop/mobil WebGL screenshot | NEM FUTTATOTT | Böngészős bizonyíték hiányzik |
 | Lighthouse | NEM FUTTATOTT | Mérési riport hiányzik |
 | Éles telepítés | NEM TÖRTÉNT MEG | Draft PR, nincs merge |
