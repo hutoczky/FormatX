@@ -2685,7 +2685,7 @@
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-3.76)/.72);
+      const grow=smooth((t-3.48)/.96);
       const fade=1-smooth((t-6.20)/1.15)*.96;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
@@ -2733,7 +2733,7 @@
     }
 
     updateCells(t,time){
-      const grow=smooth((t-3.90)/.70);
+      const grow=smooth((t-3.62)/.94);
       const fade=1-smooth((t-6.25)/1.10)*.96;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
