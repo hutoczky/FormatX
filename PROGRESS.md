@@ -194,6 +194,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `8ac1893`: a kattintás előtt 12 `requestAnimationFrame` alatt mintavételezi a gomb bounding-box koordinátáit, valamint a szülő panel `animation` és `transform` állapotát. Az új `desktop: close-motion` artifact alapján dönthető el, kell-e animációs stabilizálás az éles CSS-ben.
 - A teszt továbbra sem használ erőltetett kattintást. Következő: friss artifact és célzott CSS/JS javítás, teljes desktop+mobil PASS.
 
+### 2026-10-27 – R2210 fullscreen panel hit-target stabilizálás
+
+- `95bf8f95`: az éles `organism-interface-layering.css` `fx-console-fullscreen-enter` animációjából eltávolítottam a teljes dialog `scale(1.018) → scale(1)` transzformációját és `blur(5px) → blur(0)` filterét; az `opacity` áttűnés megmaradt.
+- Indok: a teljes dialogot mozgató/torzító animáció a benne lévő bezárógomb kattintási téglalapját is változtatja. Az új megoldás a panel geometriai helyzetét stabilan tartja, csökkenti az animációs renderköltséget, és megtartja a vizuális áttűnést.
+- **Nem igazolt még**, hogy a korábbi Playwright `stable` timeout kizárólag ettől szűnik meg. A `8ac1893` pozíciómintavételező teszt és az új desktop+mobil CI ezt ellenőrzi.
+- A Genesis 14 s filmes időtengelye továbbra is nyitott, a PR draft marad.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
