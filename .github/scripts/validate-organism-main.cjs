@@ -197,6 +197,12 @@ async function validateMobile() {
     diagnostics(page, errors);
     await enterSite(page, 'mobile');
 
+    // R2208: verify that the fullscreen overlay is not rendered while
+    // logically hidden, including on touch devices.
+    const initialConsoleDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(initialConsoleDisplay==='none','mobile hidden console is painted: '+initialConsoleDisplay);
+    mark('mobile: hidden-console-css',initialConsoleDisplay);
+
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
     const box = await pricingTrigger.boundingBox();
@@ -214,6 +220,9 @@ async function validateMobile() {
     assert(overflow <= 1, 'mobile horizontal overflow: ' + overflow);
     await page.locator('.fx-organism-console-close').tap();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+    const closedConsoleDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(closedConsoleDisplay==='none','mobile closed console remains painted: '+closedConsoleDisplay);
+    mark('mobile: closed-console-css',closedConsoleDisplay);
 
     await page.locator('#menu-toggle').tap();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
