@@ -179,6 +179,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A mobilon elfedő fullscreen réteg többé nem mehet át a teszten pusztán `element.hidden===true` értékkel. A teszt nem használ `force` kattintást.
 - Következő: új desktop+mobile organism CI PASS, majd Lighthouse; szükség esetén az `organism-main-report.json` és failure screenshot alapján javítás.
 
+### 2026-10-27 – Mobil overlay nyitás/zárás CSS háromállapotú kapu
+
+- `deaee6b2` commit organism-main `40420711411` a lekérdezéskor még az asztali/mobil böngészőtesztet futtatta; nem jelenthető PASS.
+- A `formatx-mag-birth-live-r533.js` tényleges `DURATION=10000` ms, az R1280 Three.js `render(r,time)` pedig `t=clamp(r)*10`. Így az időzítési eltérés a vezérlőben és a renderelőben egyaránt megerősített. A 14 másodperces átállás koordinált storyboard-változtatás, nem puszta egyértékes csere.
+- `ea64486`: a 390×844 mobilos organism-main teszt most már a **nyitott** panel CSS-kijelzését is ellenőrzi, a kezdeti rejtett és a bezárás utáni rejtett állapot mellett. Ezzel a `hidden → visible → hidden` vizuális állapotgép ténylegesen tesztelt.
+- Következő: CI és Lighthouse eredmények ellenőrzése, majd R533/R1280 szinkronizált 14 s storyboard implementáció előkészítése.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
