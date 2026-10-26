@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2200-dna-cytoplasm-film';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -74,8 +74,8 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=Math.floor(i/2)%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.47*visible;',
-  'this.embryoNucleusMaterial.opacity=.56*visible;',
+  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoNucleusMaterial.opacity=.68*visible;',
   'this.embryoCapillaryMaterial.opacity=.25*visible;',
   'let pairCellX=0,pairCellY=0,pairCellZ=1.10;',
   'if(strand===0){',
