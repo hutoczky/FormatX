@@ -209,6 +209,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - **Nem végleges vizuális elfogadás:** a változtatás éles renderelő-kód, de képi screenshot-összehasonlítás és új CI szükséges. A PR továbbra is draft, az éles `master` ág változatlan.
 - Következő: `node --check`, MAG vizuális CI, mobil/desktop screenshots és a sejtmag megfelelő kompozíciójának ellenőrzése; utána további felületi réteg/anyag finomítás.
 
+### 2026-10-27 – R2212 biológiai sejtmag perem és mélységi olvashatóság
+
+- `8709795`: a tényleges Three.js `makeEmbryoFilm()` renderelőben két finom, egymást metsző, türkiz és korall színű membránkontúr épül fel 3D `TorusGeometry` geometriával. A kontúrok a sejt pulzusával együtt lélegeznek, lassú abszolút idejű forgással, az eddigi biológiai `visible` időablakhoz kötött opacitással.
+- A külső sejtmembrán átlátszósága `.86` → `.76`, hogy a korábban hozzáadott belső nukleoluszgyűrűk ténylegesen jobban átsejljenek. A textúra és a fizikai membránanyag változatlan.
+- A membránkontúr geometriája mobilon 72, desktopon 112 szegmens; nincs extra utófeldolgozási/bloom passz és nincs frame-enkénti új geometriaallokáció.
+- **Ellenőrzés nyitott:** ezen a commiton nincs még sikeres CI és tényleges mobil/desktop WebGL screenshot vizuális összehasonlítás. A `master` nem változott; nem nevezhető végleges stúdióminőségű késznek.
+- Következő: MAG visual proof és R1280 syntax ellenőrzés, képkockák összehasonlítása a biológiai fázisban, utána szükség szerinti színtér/kompozíció javítás.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
