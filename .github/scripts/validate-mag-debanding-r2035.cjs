@@ -52,8 +52,19 @@ for(const token of [
 // R2178: reject the genuine root cause of visible titanium pepper-speckles:
  // the former R2141 double-lane armour overlaid the newer R2153 one-piece
  // arm hulls at almost identical projected depth. Exactly four arm hulls.
-assert.equal(core.split('for(let axis=0;axis<4;axis++)').length-1,1,
-  'R2178: permanent MAG must have one (and only one) four-arm geometry pass');
+const magHullStart=core.indexOf('/* R2153 — continuous 3D titanium arms');
+const magInlayStart=core.indexOf('/* R2194 — continuous polished titanium vein inlays');
+const magBezelStart=core.indexOf('/* The centre is not a painted circle.');
+assert.ok(magHullStart>=0&&magInlayStart>magHullStart&&magBezelStart>magInlayStart,
+  'R2194: the native four-arm hull, polished surface veins and optical bezel must be in order');
+const mainArmSection=core.slice(magHullStart,magInlayStart);
+const veinSection=core.slice(magInlayStart,magBezelStart);
+assert.equal(mainArmSection.split('for(let axis=0;axis<4;axis++)').length-1,1,
+  'R2178: permanent MAG must have exactly one structural four-arm hull');
+assert.equal(veinSection.split('for(let axis=0;axis<4;axis++)').length-1,1,
+  'R2194: polished veins must follow the four existing arms, without extra hulls');
+assert.ok(!/armorTri\(first\.left,first\.right,first\.crown/.test(veinSection),
+  'R2194: vein layer must not duplicate structural titanium hull caps');
 assert.ok(!core.includes('for(const lane of [-1,1])'),
   'R2178: retired duplicate titanium lane geometry has returned');
 assert.ok(core.includes('R2178: the retired eight raised titanium winglets'),
