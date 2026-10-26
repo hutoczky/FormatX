@@ -128,6 +128,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A korábbi `formatx:r326:geometry-build-r2202` és az új `buffer-upload-r2203` együtt szétválasztja a CPU-s geometriaépítés és a JS/WebGL feltöltés idejét. **Egyik méréshez sem áll rendelkezésre még új összehasonlítható trace-eredmény; CI futtatás ellenőrzendő.**
 - Következő: Chrome Performance trace és mobil Lighthouse regresszió a két mérés alapján; csak bizonyítottan domináns fázist optimalizálj. Ne rontsd a MAG geometriáját vagy a Genesis vizuális követelményeit.
 
+### 2026-10-27 – S5 tényleges R326 memóriaoptimalizálás
+
+- A `6483a880` utáni CI-ben production `40418671237` **PASS**, mobil MAG vizuális `40418671233` **PASS**, R2103 `40418671151` **PASS**, R2104 `40418671156` **PASS**. A Lighthouse `40418671133` **FAIL** (az új R2204 optimalizálás előtti mérés).
+- `1993e3a`: a WebGL `bufferData` hívások után `geometry.arrays.length=0` elengedi a hét CPU-s `Float32Array` referenciát. A további kódrészletek csak `geometry.count`, `geometry.topology`, `geometry.tendrils`, `geometry.microFibers` mezőket használják; ezek megmaradnak.
+- Várható hatás: kevesebb tartós CPU memória / GC nyomás; **még nincs mért Lighthouse vagy memóriaérték, ezért nincs bizonyított pontszámjavulás**. Új CI kötelező.
+- A `Validate organism-first FormatX main site` workflow Chromium telepítési hibája külön infrastruktúra-ügy maradt.
+- Következő: ellenőrizd a `1993e3a` és jelen PROGRESS commit CI-ját, különösen R326 runtime és mobil screenshot regresszió; hasonlítsd össze a Lighthouse méréseket, majd a geometriaépítés és bufferfeltöltés külön profilozását.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -137,6 +145,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** az R326 CPU geometriaépítés (`74871d9`) és WebGL bufferfeltöltés (`c1b32b5`) külön mérhető. Ellenőrizd az új CI-t, készíts összehasonlítható mobil/desktop trace-t és a domináns fázist optimalizáld. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
+**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** az R326 CPU geometriaépítés (`74871d9`) és WebGL bufferfeltöltés (`c1b32b5`) külön mérhető; a redundáns CPU vertex-tömbök felszabadítása (`1993e3a`) implementálva, regressziós CI és új Lighthouse összehasonlítás szükséges. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
