@@ -156,7 +156,7 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261026-r2199-photonic-genesis-nucleus';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261026-r2201-genesis-replay-cell';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
 assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),
