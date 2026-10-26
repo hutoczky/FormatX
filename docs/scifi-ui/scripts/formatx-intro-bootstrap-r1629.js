@@ -33,7 +33,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261025-r2187-biotic-coherent-film';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261026-r2200-aa-focused-biophotonic-nucleus';
 let retryCount=0,retryTimer=0;
 const RETRY_LIMIT=3;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;

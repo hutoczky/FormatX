@@ -5,14 +5,11 @@ const html=fs.readFileSync('docs/scifi-ui/genesis/index.html','utf8');
 const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
 const home=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const homeAudioStyle=fs.readFileSync('docs/scifi-ui/styles/formatx-genesis-studio-r2160.css','utf8');
-const embeddedHomeAudio=home.match(/<style data-fx-genesis-studio-r2160="true">([\s\S]*?)<\/style>/)?.[1];
-assert.equal(embeddedHomeAudio,homeAudioStyle,'Homepage cinematic audio control CSS must remain byte-exact inline');
-assert(!home.includes('<link rel="stylesheet" href="/scifi-ui/styles/formatx-genesis-studio-r2160.css'),'Homepage must not block its parser on the cinematic audio CSS request');
-const homeAudioHash="'sha256-"+crypto.createHash('sha256').update(homeAudioStyle,'utf8').digest('base64')+"'";
-assert(home.match(/<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/i)?.[1].includes(homeAudioHash),'Homepage CSP is missing exact cinematic audio style hash');
-assert(worker.includes(`const INLINE_GENESIS_AUDIO_STYLE_HASH = "${homeAudioHash}"`),'Worker is missing exact cinematic audio style hash');
-assert(worker.match(/const META_CSP = `([\s\S]*?)`;/)?.[1].includes('${INLINE_GENESIS_AUDIO_STYLE_HASH}'),'Worker META_CSP does not authorize cinematic audio style');
-assert(worker.match(/const HEADER_CSP = \[([\s\S]*?)\]\.join/)?.[1].includes('${INLINE_GENESIS_AUDIO_STYLE_HASH}'),'Worker HEADER_CSP does not authorize cinematic audio style');
+assert(homeAudioStyle.includes('.fxb-studio-audio-r2160'),'Canonical cinematic audio CSS is empty');
+assert(home.includes('<link rel="stylesheet" href="/scifi-ui/styles/formatx-genesis-studio-r2160.css?v=20261023-r2160-cinematic-audio" data-fx-genesis-studio-r2160="true">'),
+  'Homepage must load the canonical cinematic audio stylesheet once');
+assert(!home.includes('<style data-fx-genesis-studio-r2160="true">'),
+  'Legacy duplicated inline cinematic audio CSS returned');
 const take=(regex,label)=>{const x=html.match(regex);assert(x,'Studio HTML lacks '+label);return x[1];};
 const style=take(/<style>([\s\S]*?)<\/style>/,'embedded style');
 const imports=take(/<script type="importmap">([\s\S]*?)<\/script>/,'Three.js import map');

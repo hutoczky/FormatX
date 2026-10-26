@@ -63,9 +63,11 @@ jobs:
           python3 .github/scripts/validate-content-standard-v2.py
           python3 .github/scripts/validate-public-release-integration.py
           python3 .github/scripts/validate-webgpu-source.py
+          node .github/scripts/validate-logo-singleton-r2197.cjs
           node .github/scripts/validate-inline-csp-hashes-r2136.cjs
           node .github/scripts/validate-dna-first-frame-r2181.cjs
           node .github/scripts/validate-genesis-storyboard-r2182.cjs
+          node .github/scripts/validate-biophotonic-genesis-r2199.cjs
           node .github/scripts/validate-cinematic-origin-r2188.cjs
           node .github/scripts/validate-intro-three-route-r2143.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs

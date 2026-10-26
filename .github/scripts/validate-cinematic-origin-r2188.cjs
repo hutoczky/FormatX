@@ -29,8 +29,6 @@ for(const text of [
   'const chromatinCount=this.mobileRender?6:10;',
   'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
   'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
-  'const organelleCount=this.mobileRender?20:28;',
-  'this.embryoSites=new T.InstancedMesh(',
   'this.embryoChromatinMaterial.opacity=(this.mobileRender?.04:.06)*visible;',
   'this.embryoMaterial.opacity=.66*visible;',
   "const count=this.mobileRender?6000:9600;",
@@ -38,7 +36,7 @@ for(const text of [
 ]){
   assert(renderer.includes(text),'Missing R2188 film / biological chronology contract: '+text);
 }
-const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-microscopic-nucleus-focus';
+const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2200-aa-focused-biophotonic-nucleus';
 assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stale 3D intro');
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -59,21 +57,21 @@ assert(metal(8.3)===1 && optic(8.3)===1,
 for(const token of [
   '1.10+radius*.65*Math.sin(b)*Math.sin(a)',
   'radius*.82*Math.sin(b)*Math.cos(a)',
-  '.62+(r()-.5)*.11',
+  '.62+depth',
   'float last=1.0-curve(6.96,7.44,uPhase);'
 ])assert(renderer.includes(token),'R2192 spatial continuity missing: '+token);
 // R2195: photographic welding must preserve DNA-to-metal continuity without
 // asteroid-shaped debris, oversized splashes or random scattered sparks.
 for(const token of [
   'mesh.visible=false;',
-  'const lateral=(r()-.5)*.088;',
+  'const lateral=sign*Math.cos(armTwist)*armRadius;',
   'const count=this.mobileRender?112:224;',
   'const tangent=(r()-.5)*.090;',
   'gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6'
 ])assert(renderer.includes(token),'R2195 focused genetic weld / studio-set regression: '+token);
 const embryoCentreZ=1.10;
 const cellDepthRange=.77*.65;
-const metalMinZ=.62-.055;
+const metalMinZ=.62-.044;
 assert(cellDepthRange<.53 && embryoCentreZ>.95,
   'Genome particle nucleus must coincide with 3D embryo envelope');
 assert(metalMinZ>.48,

@@ -61,6 +61,9 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
+        // R2200: the founding DNA and translucent cell use the real default
+        // framebuffer's multisample coverage on phones as well as desktop.
+        // Geometry, DPR and the single renderer/context remain unchanged.
         antialias:true,
         depth:true,
         stencil:false,
@@ -93,12 +96,14 @@
 
       this.makeLights();
       this.makeStudioEnvironment();
+      this.makeCosmicAtmosphere();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
       this.makeGenomeParticles();
       this.makeCore();
       this.makeEmbryoFilm();
+      this.makeCinematicBiophotons();
       this.makeOrganicLayer();
       this.makeCellularLayer();
       this.makeMechanicalLayer();
@@ -196,6 +201,63 @@
       }
     }
 
+    makeCosmicAtmosphere(){
+      // R2199: a genuine animated GLSL studio nebula, not an image, video
+      // or static wallpaper. Photographic cyan/violet DNA light becomes
+      // low-key turquoise cell atmosphere before smoked-metal arrival.
+      // One full-screen draw call; no animated CSS filters or DOM overlays.
+      const T=this.THREE;
+      const material=new T.ShaderMaterial({
+        uniforms:{uTime:{value:0},uPhase:{value:0}},
+        depthTest:false,depthWrite:false,transparent:false,toneMapped:false,
+        vertexShader:`
+          varying vec2 vUv;
+          void main(){
+            vUv=uv;
+            gl_Position=vec4(position.xy,1.0,1.0);
+          }`,
+        fragmentShader:`
+          precision mediump float;
+          varying vec2 vUv;
+          uniform float uTime,uPhase;
+          float haze(vec2 position,vec2 centre,vec2 stretch){
+            vec2 q=(position-centre)*stretch;
+            return exp(-dot(q,q)*2.0);
+          }
+          void main(){
+            vec2 q=vUv;
+            float drift=.016*sin(uTime*.00012+q.y*8.0);
+            float fold=.5+.5*sin(q.x*13.0-q.y*7.0+sin(q.y*11.0)*.75+uTime*.00017);
+            float cool=haze(q,vec2(.26+drift,.55),vec2(1.14,1.15));
+            float violet=haze(q,vec2(.73-drift,.40),vec2(1.30,1.18));
+            float aqua=haze(q,vec2(.53,.54+drift),vec2(1.0,.94));
+            float dna=1.0-smoothstep(2.60,3.85,uPhase);
+            float embryo=smoothstep(2.95,3.72,uPhase)*
+              (1.0-smoothstep(5.14,6.04,uPhase));
+            vec3 col=vec3(.002,.005,.012);
+            col+=vec3(.008,.041,.084)*cool*dna*(.63+.37*fold);
+            col+=vec3(.055,.014,.095)*violet*dna*(.55+.45*(1.0-fold));
+            col+=vec3(.007,.063,.070)*aqua*embryo*(.72+.28*fold);
+            col+=vec3(.026,.006,.032)*violet*embryo*.19;
+            // A restrained central vignette gives cinematic contrast
+            // without blowing out the physically lit molecular silhouette.
+            float vignette=1.0-.30*length((q-.5)*vec2(1.18,.90));
+            gl_FragColor=vec4(col*clamp(vignette,.66,1.0),1.0);
+          }`
+      });
+      const mesh=new T.Mesh(new T.PlaneGeometry(2,2),material);
+      mesh.frustumCulled=false;
+      mesh.renderOrder=-1000;
+      this.scene.add(mesh);
+      this.cosmicAtmosphere=mesh;
+    }
+
+    updateCosmicAtmosphere(t,time){
+      if(!this.cosmicAtmosphere)return;
+      this.cosmicAtmosphere.material.uniforms.uTime.value=time;
+      this.cosmicAtmosphere.material.uniforms.uPhase.value=t;
+    }
+
     makeParticles(){
       const T=this.THREE,r=this.rand;
       const count=640;
@@ -247,32 +309,7 @@
       this.scene.add(mesh);
     }
 
-    makeBioticSurface(){
-      // Shared microscopic relief, generated once without an image request or
-      // another canvas/context. The existing studio lights reveal these fibres.
-      const T=this.THREE,width=256,height=128,r=seeded(0x2187b10);
-      const pixels=new Uint8Array(width*height*4),tau=Math.PI*2;
-      for(let y=0;y<height;y++){
-        for(let x=0;x<width;x++){
-          const u=x/width,v=y/height;
-          const fibre=Math.sin(tau*(v*19+u*3)+1.7*Math.sin(tau*u*2));
-          const fine=Math.sin(tau*(v*43-u*7));
-          const relief=.5+.20*fibre+.10*fine+(r()-.5)*.16;
-          const value=Math.round(126+relief*112),offset=(y*width+x)*4;
-          pixels[offset]=pixels[offset+1]=pixels[offset+2]=value;
-          pixels[offset+3]=255;
-        }
-      }
-      const texture=new T.DataTexture(pixels,width,height,T.RGBAFormat);
-      texture.wrapS=texture.wrapT=T.RepeatWrapping;
-      texture.magFilter=T.LinearFilter;
-      texture.minFilter=T.LinearMipmapLinearFilter;
-      texture.generateMipmaps=true;
-      texture.needsUpdate=true;
-      this.bioticSurfaceTexture=texture;
-    }
-
-    createHelix(length=4.7,radius=.28,turns=4.1){
+        createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
       const seg=120;
@@ -296,16 +333,12 @@
       const ma=new T.MeshPhysicalMaterial({
         color:0x80cbd5,emissive:0x185463,emissiveIntensity:.82,
         roughness:.29,metalness:.06,transparent:true,opacity:.90,
-        depthWrite:false,clearcoat:.62,clearcoatRoughness:.14,
-        bumpMap:this.bioticSurfaceTexture,bumpScale:.0045,
-        roughnessMap:this.bioticSurfaceTexture
+        depthWrite:false,clearcoat:.62,clearcoatRoughness:.14
       });
       const mb=new T.MeshPhysicalMaterial({
         color:0x9d8ad5,emissive:0x493176,emissiveIntensity:.82,
         roughness:.30,metalness:.05,transparent:true,opacity:.88,
-        depthWrite:false,clearcoat:.58,clearcoatRoughness:.16,
-        bumpMap:this.bioticSurfaceTexture,bumpScale:.0045,
-        roughnessMap:this.bioticSurfaceTexture
+        depthWrite:false,clearcoat:.58,clearcoatRoughness:.16
       });
       const ga=new T.MeshBasicMaterial({
         color:0x4bdfff,transparent:true,opacity:.080,depthWrite:false,
@@ -320,10 +353,8 @@
       // uses the SAME instanced draw call, including on Android.
       const rungMat=new T.MeshPhysicalMaterial({
         color:0xf0f7ff,emissive:0x24353e,emissiveIntensity:.35,
-        metalness:.04,roughness:.32,clearcoat:.62,clearcoatRoughness:.18,
-        transparent:true,opacity:.94,depthWrite:false,
-        bumpMap:this.bioticSurfaceTexture,bumpScale:.0020,
-        roughnessMap:this.bioticSurfaceTexture
+        metalness:.04,roughness:.28,clearcoat:.75,
+        transparent:true,opacity:.94,depthWrite:false
       });
       const mpa=new T.PointsMaterial({
         color:0xb7f3ff,size:.034,transparent:true,opacity:.42,
@@ -373,7 +404,6 @@
     }
 
     makeDNAField(){
-      this.makeBioticSurface();
       // R2146: a portrait camera only covers about 2 world units in width.
       // The old panoramic sources at x=+/-2.3 lived offscreen on phones,
       // so a capable Android device could still appear to open on black.
@@ -925,16 +955,20 @@
       // to ONE of the four titanium arms, rather than routing opposite
       // DNA strands to unrelated cardinal arms.
       const armIndex=new Float32Array(count);
+      // R2198: the two nucleotides at each DNA base-pair station remain a
+      // physical pair through the embryonic cell. One shared, deterministic
+      // chromatin landing point is computed for both strands (no new draw).
+      let pairCellX=0,pairCellY=0,pairCellZ=1.10;
       // R2176: a SINGLE founding DNA shape owns the opening shot. Previously
       // the 9,600 glowing nucleotides wound 7.75 turns while the visible
       // 3D helix wound 3.82; two mismatched objects overlapped on screen.
       // Sample the real parent helix, including its authored 3D transforms.
       const founding=this.dnas.find(h=>h.userData.primary);
       if(!founding)throw new Error('Genesis founding DNA helix is missing');
-      // Keep nucleotide origins in the real helix's local coordinate system.
-      // Baking its initial pose here made a second, drifting helix once the
-      // photographed phosphate strands started moving in updateDNA().
-      this.genomeFoundingHelix=founding;
+      const origin=founding.userData.base;
+      const scale=origin.s;
+      const cosZ=Math.cos(origin.rz),sinZ=Math.sin(origin.rz);
+      const cosY=Math.cos(founding.rotation.y),sinY=Math.sin(founding.rotation.y);
       for(let i=0;i<count;i++){
         const u=Math.floor(i/2)/(count/2-1);
         const strand=i%2;
@@ -946,35 +980,56 @@
         const localX=(u-.5)*3.54;
         const localY=sign*Math.sin(phase)*helixRadius;
         const localZ=sign*Math.cos(phase)*helixRadius;
-        initial.set([localX,localY,localZ],i*3);
-        const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
-        // R2185: biological nucleotides settle mostly in the envelope,
-        // with a smaller organelle interior rather than a noisy solid ball.
-        // Both distributions use the same cell centre and an ellipsoid skin.
-        const membrane=i%4!==0;
-        const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;
-        // R2192: the biological target must occupy the SAME 3D volume as
-        // coreGroup's visible embryo, which is raised to z=1.10 during birth.
-        // Previously the genome condensed at z=.20, nearly a full world unit
-        // behind the cell membrane: a dissolve/crossfade, not a genuine morph.
-        // Slightly reduce the cloud envelope to fit the nonuniform glass shell.
+        const rolledX=localX*cosZ-localY*sinZ;
+        const rolledY=localX*sinZ+localY*cosZ;
+        initial.set([
+          origin.x+scale*(rolledX*cosY+localZ*sinY),
+          origin.y+scale*rolledY,
+          origin.z+scale*(-rolledX*sinY+localZ*cosY)
+        ],i*3);
+        // R2198: sample chromatin once per base pair. Both visible DNA
+        // phosphate strands now travel into one biological membrane site,
+        // then leave that same site together for the same MAG arm.
+        if(strand===0){
+          const a=r()*Math.PI*2,b=Math.acos(2*r()-1);
+          const membrane=Math.floor(i/2)%4!==0;
+          const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;
+          // Match the living nucleus centred at z=1.10, not an offscreen
+          // cloud behind the physically shaded embryo.
+          pairCellX=radius*.82*Math.sin(b)*Math.cos(a);
+          pairCellY=radius*.94*Math.cos(b);
+          pairCellZ=1.10+radius*.65*Math.sin(b)*Math.sin(a);
+        }
+        // The tiny phase-opposed offset makes the paired DNA observable,
+        // while maintaining physical continuity through condensation.
+        const chromatide=.014;
         cell.set([
-          radius*.82*Math.sin(b)*Math.cos(a),
-          radius*.94*Math.cos(b),
-          1.10+radius*.65*Math.sin(b)*Math.sin(a)
+          pairCellX+sign*chromatide*Math.cos(phase),
+          pairCellY+sign*chromatide*Math.sin(phase),
+          pairCellZ+sign*chromatide*.55*Math.cos(phase*.5)
         ],i*3);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
-        const reach=.20+.74*r();
-        // R2195: paired DNA matter seats in narrow metallic arm channels.
-        const lateral=(r()-.5)*.088;
-        // R2192: molecular matter seats above the actual titanium front
-        // (typically z=.38-.48), rather than vanishing behind opaque armour.
+        // R2196: the two nucleotides of ONE base-pair station land on
+        // opposite sides of the SAME continuous four-arm double helix.
+        // Earlier, separate random reach/lateral/depth values for both
+        // halves turned the DNA-to-titanium transfer into random noise.
+        const pairIndex=Math.floor(i/2);
+        const armStation=Math.floor(pairIndex/4);
+        const armStations=Math.ceil((count/2-axis)/4);
+        const armU=armStation/Math.max(1,armStations-1);
+        const reach=.19+.75*armU;
+        const armTwist=armU*Math.PI*2*4.5+axis*.65;
+        const armRadius=.032+.012*Math.sin(armU*Math.PI);
+        const lateral=sign*Math.cos(armTwist)*armRadius;
+        const depth=sign*Math.sin(armTwist)*armRadius;
+        // Physical cyan/violet coils seat just above the titanium arm
+        // surface, then fade before the recessed optical organ wakes.
         arms.set([
           Math.cos(phi)*reach-Math.sin(phi)*lateral,
           Math.sin(phi)*reach+Math.cos(phi)*lateral,
-          .62+(r()-.5)*.11
+          .62+depth
         ],i*3);
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
@@ -987,8 +1042,7 @@
       geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
       geometry.setAttribute('aArmIndex',new T.BufferAttribute(armIndex,1));
       const material=new T.ShaderMaterial({
-        uniforms:{uTime:{value:0},uPhase:{value:0},uPixelRatio:{value:1},
-          uDnaMatrix:{value:new T.Matrix4()}},
+        uniforms:{uTime:{value:0},uPhase:{value:0},uPixelRatio:{value:1}},
         transparent:true,depthWrite:false,depthTest:true,
         blending:T.AdditiveBlending,
         vertexShader:`
@@ -997,8 +1051,7 @@
           attribute float aSeed;
           attribute float aArmIndex;
           uniform float uTime,uPhase,uPixelRatio;
-          uniform mat4 uDnaMatrix;
-          varying float vSeed,vEnergy,vCellFocus;
+          varying float vSeed,vEnergy;
           float curve(float a,float b,float x){
             float t=clamp((x-a)/(b-a),0.0,1.0);
             return t*t*(3.0-2.0*t);
@@ -1010,8 +1063,7 @@
             // BEFORE the mechanical optic wakes at 7.44 seconds.
             float armBeat=aArmIndex*.11;
             float assemble=curve(5.34+armBeat,6.90+armBeat,uPhase);
-            vec3 dna=(uDnaMatrix*vec4(position,1.0)).xyz;
-            vec3 p=mix(dna,aCell,condense);
+            vec3 p=mix(position,aCell,condense);
             p=mix(p,aArm,assemble);
             // Physically curl the genetic matter toward its destination,
             // with zero residual motion at either endpoint of the morph.
@@ -1036,12 +1088,11 @@
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
             float last=1.0-curve(6.96,7.44,uPhase);
             vEnergy=first*last*(1.0+transferGlow*.16);
-            vCellFocus=condense*(1.0-assemble);
             vSeed=aSeed;
           }`,
         fragmentShader:`
           precision mediump float;
-          varying float vSeed,vEnergy,vCellFocus;
+          varying float vSeed,vEnergy;
           void main(){
             vec2 p=gl_PointCoord-.5;
             float r=dot(p,p);
@@ -1049,12 +1100,8 @@
             float glow=exp(-r*15.0);
             float center=exp(-r*53.0);
             vec3 cool=mix(vec3(.14,.68,.75),vec3(.62,.34,.90),smoothstep(.46,.54,vSeed));
-            // The cell chapter stays in the reference's cyan/teal family.
-            // Warm depth comes from sparse physical organelles, not thousands
-            // of orange genome points that obscure the nucleus silhouette.
-            vec3 cellular=mix(vec3(.08,.60,.56),vec3(.18,.78,.72),smoothstep(.56,.94,vSeed));
-            vec3 color=mix(cool,cellular,vCellFocus)*glow*.70+vec3(.75,1.0,.98)*center*.32;
-            gl_FragColor=vec4(color,vEnergy*mix(.34,.58,vSeed)*(1.0-smoothstep(.04,.25,r)));
+            vec3 color=cool*glow*.70+vec3(.75,1.0,.98)*center*.32;
+            gl_FragColor=vec4(color,vEnergy*mix(.32,.55,vSeed)*(1.0-smoothstep(.04,.25,r)));
           }`
       });
       this.genomeParticles=new T.Points(geometry,material);
@@ -1078,11 +1125,9 @@
       }
       positions.needsUpdate=true;geometry.computeVertexNormals();
       this.embryoMaterial=new T.MeshPhysicalMaterial({
-        color:0x2b7881,emissive:0x0a3f48,emissiveIntensity:.32,
-        metalness:.01,roughness:.31,clearcoat:.42,clearcoatRoughness:.31,
-        transmission:.15,thickness:.27,ior:1.35,
-        bumpMap:this.bioticSurfaceTexture,bumpScale:.012,
-        roughnessMap:this.bioticSurfaceTexture,
+        color:0x317887,emissive:0x0b3948,emissiveIntensity:.30,
+        metalness:.02,roughness:.14,clearcoat:.98,clearcoatRoughness:.065,
+        transmission:.21,thickness:.23,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
@@ -1092,15 +1137,13 @@
       // nucleus is a physically shaded translucent organelle with an actual
       // clear-coated lens, lit by the same three-dimensional studio rig.
       this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({
-        color:0x23818d,emissive:0x126879,emissiveIntensity:.34,
-        metalness:.005,roughness:.38,transmission:.12,thickness:.28,ior:1.35,
-        clearcoat:.32,clearcoatRoughness:.36,
-        bumpMap:this.bioticSurfaceTexture,bumpScale:.018,
-        roughnessMap:this.bioticSurfaceTexture,
+        color:0x248a9d,emissive:0x13718a,emissiveIntensity:.40,
+        metalness:.015,roughness:.13,transmission:.24,thickness:.23,ior:1.36,
+        clearcoat:1,clearcoatRoughness:.055,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoNucleus=new T.Mesh(
-        new T.SphereGeometry(.29,32,24),this.embryoNucleusMaterial
+        new T.SphereGeometry(.25,32,24),this.embryoNucleusMaterial
       );
       this.embryoNucleus.position.set(-.10,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
@@ -1109,10 +1152,8 @@
       // remain biological and are removed before metallic chassis birth.
       this.embryoInnerMaterial=new T.MeshPhysicalMaterial({
         color:0x376b77,emissive:0x16414b,emissiveIntensity:.17,
-        metalness:0,roughness:.40,clearcoat:.24,clearcoatRoughness:.42,
-        transmission:.10,thickness:.18,
-        bumpMap:this.bioticSurfaceTexture,bumpScale:.015,
-        roughnessMap:this.bioticSurfaceTexture,
+        metalness:0,roughness:.23,clearcoat:.78,
+        transmission:.20,thickness:.15,
         transparent:true,opacity:0,depthWrite:false,side:T.DoubleSide
       });
       this.embryoOrganelle=new T.Mesh(
@@ -1121,40 +1162,6 @@
       this.embryoOrganelle.position.set(-.045,.032,.17);
       this.embryoOrganelle.scale.set(1.0,.82,.67);
       this.coreGroup.add(this.embryoOrganelle);
-      // Sparse warm organelle sites occupy real, different depths inside the
-      // turquoise cell. One instanced draw call replaces the previous flat,
-      // homogeneous centre without turning the cell into particle noise.
-      const organelleCount=this.mobileRender?20:28;
-      const organelleGeometry=new T.IcosahedronGeometry(.016,1);
-      this.embryoSiteMaterial=new T.MeshPhysicalMaterial({
-        color:0xff9a72,emissive:0xff3d1f,emissiveIntensity:.82,
-        metalness:0,roughness:.54,clearcoat:.16,clearcoatRoughness:.48,
-        transparent:true,opacity:0,depthWrite:false
-      });
-      this.embryoSites=new T.InstancedMesh(
-        organelleGeometry,this.embryoSiteMaterial,organelleCount
-      );
-      const siteRand=seeded(0x2192ce11),siteDummy=new T.Object3D();
-      const coral=new T.Color(0xff775c),amber=new T.Color(0xffc36b);
-      for(let i=0;i<organelleCount;i++){
-        const a=siteRand()*Math.PI*2,b=Math.acos(2*siteRand()-1);
-        const rr=.22+Math.cbrt(siteRand())*.48;
-        siteDummy.position.set(
-          Math.sin(b)*Math.cos(a)*rr*.82,
-          Math.cos(b)*rr*.92,
-          .20+Math.sin(b)*Math.sin(a)*rr*.58
-        );
-        const siteScale=.48+siteRand()*.72;
-        siteDummy.scale.setScalar(siteScale);
-        siteDummy.rotation.set(siteRand()*2.4,siteRand()*2.4,siteRand()*2.4);
-        siteDummy.updateMatrix();
-        this.embryoSites.setMatrixAt(i,siteDummy.matrix);
-        this.embryoSites.setColorAt(i,coral.clone().lerp(amber,siteRand()));
-      }
-      this.embryoSites.instanceMatrix.needsUpdate=true;
-      if(this.embryoSites.instanceColor)this.embryoSites.instanceColor.needsUpdate=true;
-      this.embryoSites.renderOrder=3;
-      this.coreGroup.add(this.embryoSites);
       const membraneLines=[];
       const capillaries=this.mobileRender?5:9;
       for(let strand=0;strand<capillaries;strand++){
@@ -1186,6 +1193,9 @@
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
       // texture painted onto the glass shell; adaptive strand count on phones.
       const chromatinPositions=[],chromatinColors=[];
+      // R2200: keep the nucleus readable as one biological subject. R2199's
+      // volumetric aqua/coral photons carry the microscopic density; fewer
+      // physical fibres prevent a bright wire cage from masking the cell.
       const chromatinCount=this.mobileRender?6:10;
       const cool=new T.Color(0x83f1e8),violet=new T.Color(0xb7a6e9);
       for(let strand=0;strand<chromatinCount;strand++){
@@ -1213,7 +1223,7 @@
         new T.Float32BufferAttribute(chromatinColors,3));
       this.embryoChromatinMaterial=new T.LineBasicMaterial({
         vertexColors:true,transparent:true,opacity:0,
-        depthWrite:false,blending:T.NormalBlending
+        depthWrite:false,blending:T.AdditiveBlending
       });
       this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);
       this.embryoChromatin.renderOrder=4;
@@ -1221,15 +1231,122 @@
       this.embryoChromatin.scale.set(1,1,.95);
     }
 
+    makeCinematicBiophotons(){
+      // R2199: actual WebGL cinematography, NOT image mockups: physical
+      // blue-violet phosphor sparks follow the founding helical backbones,
+      // then the SAME movie reveals aqua/coral metabolic specks in a
+      // three-dimensional biological cell. Both batches are allocated once.
+      const T=this.THREE,r=this.rand;
+      const build=(count,kind)=>{
+        const position=new Float32Array(count*3);
+        const color=new Float32Array(count*3);
+        const seed=new Float32Array(count);
+        const palette=kind==='dna'
+          ?[new T.Color(0x62dcff),new T.Color(0xbd86ff),new T.Color(0xff91da),new T.Color(0xffbd93)]
+          :[new T.Color(0x25f2da),new T.Color(0x70efef),new T.Color(0xff7389),new T.Color(0xffa257)];
+        for(let i=0;i<count;i++){
+          const c=r(),type=kind==='dna'
+            ?(c<.40?0:c<.76?1:c<.94?2:3)
+            :(c<.48?0:c<.77?1:c<.92?2:3);
+          if(kind==='dna'){
+            // Author in founding-helix LOCAL space; inherited group position,
+            // orientation and scale guarantee molecular and sparkle parallax.
+            const u=r(),q=u*Math.PI*2*3.82,sign=i%2?1:-1;
+            const radius=.410+(r()-.5)*.30;
+            position.set([(u-.5)*3.54,sign*Math.sin(q)*radius,
+              sign*Math.cos(q)*radius+(r()-.5)*.20],3*i);
+          }else{
+            // Filled 3D nucleus: most lights occupy the membrane, with hot
+            // coral sites inside; unlike a flat circle, orbit reveals depth.
+            const theta=r()*Math.PI*2,z=2*r()-1;
+            const radial=(r()<.70?.70+.28*r():Math.cbrt(r())*.72);
+            const flat=Math.sqrt(Math.max(0,1-z*z));
+            position.set([
+              radial*flat*Math.cos(theta)*.80,
+              radial*z*1.03,
+              radial*flat*Math.sin(theta)*.70
+            ],3*i);
+          }
+          const h=palette[type];
+          color.set([h.r,h.g,h.b],3*i);
+          seed[i]=r();
+        }
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.BufferAttribute(position,3));
+        geometry.setAttribute('color',new T.BufferAttribute(color,3));
+        geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
+        const material=new T.ShaderMaterial({
+          uniforms:{uTime:{value:0},uOpacity:{value:0},uPixelRatio:{value:1}},
+          transparent:true,depthWrite:false,depthTest:true,
+          blending:T.AdditiveBlending,
+          vertexShader:`
+            attribute vec3 color;
+            attribute float aSeed;
+            uniform float uTime,uOpacity,uPixelRatio;
+            varying vec3 vColor;
+            varying float vAlpha;
+            void main(){
+              vColor=color;
+              float flicker=.78+.22*sin(uTime*.0011+aSeed*61.0);
+              vAlpha=uOpacity*flicker;
+              vec4 mv=modelViewMatrix*vec4(position,1.0);
+              gl_Position=projectionMatrix*mv;
+              gl_PointSize=clamp((1.10+aSeed*1.18)*uPixelRatio*14.0/
+                max(1.5,-mv.z),1.0,7.0*uPixelRatio);
+            }`,
+          fragmentShader:`
+            precision mediump float;
+            varying vec3 vColor;
+            varying float vAlpha;
+            void main(){
+              vec2 d=gl_PointCoord-.5;
+              float radius=dot(d,d);
+              if(radius>.25)discard;
+              float outer=exp(-radius*12.5);
+              float hot=exp(-radius*49.0);
+              vec3 emission=vColor*(outer*.48+hot*1.05);
+              gl_FragColor=vec4(emission,vAlpha*(.40*outer+.55*hot));
+            }`
+        });
+        const points=new T.Points(geometry,material);
+        points.frustumCulled=false;
+        points.visible=false;
+        return {points,material};
+      };
+      const dna=build(this.mobileRender?260:620,'dna');
+      const parent=this.dnas.find(h=>h.userData.primary);
+      if(!parent)throw new Error('R2199 founding DNA photon parent missing');
+      parent.add(dna.points);
+      this.dnaBiofield=dna;
+      const embryo=build(this.mobileRender?850:2200,'embryo');
+      embryo.points.renderOrder=6;
+      this.coreGroup.add(embryo.points);
+      this.embryoBiofield=embryo;
+    }
+
+    updateCinematicBiophotons(t,time){
+      const setup=(record,strength)=>{
+        if(!record)return;
+        const intensity=Math.max(0,strength);
+        record.points.visible=intensity>.002;
+        if(!record.points.visible)return;
+        record.material.uniforms.uTime.value=time;
+        record.material.uniforms.uOpacity.value=intensity;
+        record.material.uniforms.uPixelRatio.value=Math.min(
+          this.mobileRender?1.5:2,this.renderer.getPixelRatio()
+        );
+      };
+      // DNA never competes with embryo, embryo never masks assembling metal.
+      setup(this.dnaBiofield,(1-smooth((t-2.94)/1.42))*.84);
+      setup(this.embryoBiofield,
+        smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*.94);
+    }
+
     updateGenomeParticles(t,time){
       if(!this.genomeParticles)return;
       const visible=t>.08&&t<8.05;
       this.genomeParticles.visible=visible;
       if(!visible)return;
-      // A single 4x4 uniform follows the ACTUAL animated mesh pose. The
-      // particle buffers remain static; cell/arm targets stay in world space.
-      this.genomeFoundingHelix.updateMatrix();
-      this.genomeParticleMaterial.uniforms.uDnaMatrix.value.copy(this.genomeFoundingHelix.matrix);
       this.genomeParticleMaterial.uniforms.uTime.value=time;
       this.genomeParticleMaterial.uniforms.uPhase.value=t;
       this.genomeParticleMaterial.uniforms.uPixelRatio.value=Math.min(
@@ -1764,21 +1881,18 @@
       });
       topPlateGeo.center();
 
-      // R2180: the two-piece crown seats as one narrow titanium arm. Keeping
-      // both authored pieces preserves the five-step birth choreography while
-      // matching the permanent MAG's slim top insert at the handoff.
       const crownL=new T.Mesh(topPlateGeo,this.silverMaterial);
-      crownL.scale.set(.30,.90,.76);
-      crownL.position.set(-.065,.40,.31);
-      crownL.rotation.z=-.025;
+      crownL.scale.set(.56,.90,.76);
+      crownL.position.set(-.14,.40,.31);
+      crownL.rotation.z=-.10;
       this.mechanicalGroup.add(crownL);
       this.silverParts.push(crownL);
       crownL.visible=false;
 
       const crownR=new T.Mesh(topPlateGeo,this.silverMaterial);
-      crownR.scale.set(-.30,.90,.76);
-      crownR.position.set(.065,.40,.31);
-      crownR.rotation.z=.025;
+      crownR.scale.set(-.56,.90,.76);
+      crownR.position.set(.14,.40,.31);
+      crownR.rotation.z=.10;
       this.mechanicalGroup.add(crownR);
       this.silverParts.push(crownR);
       crownR.visible=false;
@@ -1798,7 +1912,7 @@
       sideGeo.center();
 
       const left=new T.Mesh(sideGeo,this.silverMaterial);
-      left.scale.set(.72,.40,.74);
+      left.scale.set(.66,.70,.74);
       left.position.set(-.48,.00,.28);
       left.rotation.z=.05;
       this.mechanicalGroup.add(left);
@@ -1806,7 +1920,7 @@
       left.visible=false;
 
       const right=new T.Mesh(sideGeo,this.silverMaterial);
-      right.scale.set(-.72,.40,.74);
+      right.scale.set(-.66,.70,.74);
       right.position.set(.48,.00,.28);
       right.rotation.z=-.05;
       this.mechanicalGroup.add(right);
@@ -1828,7 +1942,7 @@
       });
       lowerGeo.center();
       this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
-      this.jaw.scale.set(.48,.88,.76);
+      this.jaw.scale.set(.84,.86,.76);
       this.jaw.position.set(0,-.39,.28);
       this.mechanicalGroup.add(this.jaw);
       this.plates.push(this.jaw);
@@ -2325,7 +2439,7 @@
         h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56)*helixScaleFocus);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          const chapterAlpha=h.userData.primary?fade:donorEnvelope*.12;
+          const chapterAlpha=h.userData.primary?fade:donorEnvelope*.27;
           m.opacity=(bases[mi]??.5)*intro*.94*helixOpacityFocus*chapterAlpha;
         });
       });
@@ -2443,7 +2557,7 @@
       // Preserve the established ten-second camera and end-state framing.
       // R2167: the embryonic cell must fill the lens as an actual subject,
       // not read as a tiny smooth bead behind distracting orbiting DNA.
-      const embryoScale=this.mobileRender?.72:.66;
+      const embryoScale=this.mobileRender?.94:1.07;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
@@ -2485,16 +2599,13 @@
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
-      this.embryoShell.scale.set(.88*pulse,1.12*pulse,.78*pulse);
+      this.embryoShell.scale.set(.98*pulse,1.03*pulse,.90*pulse);
       this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoSiteMaterial.opacity=.48*visible;
-      this.embryoSites.rotation.y=Math.sin(time*.00031)*.11;
-      this.embryoSites.rotation.z=Math.sin(time*.00023)*.035;
       this.embryoCapillaryMaterial.opacity=.10*visible;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
@@ -2757,18 +2868,21 @@
       let z=5.18,y=.012,x=0;
       if(t<2.70){
         const k=smooth(t/2.70);
-        z=mix(5.42,5.12,k);
-        x=Math.sin(time*.00027)*.024*(1-k*.35);
-        y=.010+Math.sin(time*.00024)*.009;
+        z=mix(this.mobileRender?5.15:4.68,4.88,k);
+        // R2198: a very slow orbital camera move exposes actual depth
+        // between the opposed DNA backbones without losing the silhouette.
+        // The orbit returns to centre at the end of the DNA establishing shot.
+        x=.115*Math.sin(Math.PI*k);
+        y=.010+.029*Math.sin(Math.PI*k);
       }else if(t<3.30){
         const k=smooth((t-2.70)/.60);
-        z=mix(5.12,3.86,k);
-        x=mix(.018,0,k);y=mix(.012,0,k);
+        z=mix(4.88,3.58,k);
+        x=0;y=mix(.010,0,k);
       }else if(t<5.55){
         // R2115: restrained camera dolly and parallax while the mechanical
         // iris resolves; sub-centimetre movement keeps the MAG centered.
         const k=smooth((t-3.30)/2.25);
-        z=mix(3.86,3.82,k)+Math.sin(time*.00020)*.0035;
+        z=mix(3.58,3.82,k)+Math.sin(time*.00020)*.0035;
         x=Math.sin(k*Math.PI)*.024+Math.sin(time*.00015)*.0018;
         y=Math.sin(k*Math.PI)*.010+Math.cos(time*.00018)*.0018;
       }else if(t<7.25){
@@ -2805,10 +2919,12 @@
       if(this.disposed)return;
       const t=clamp(r)*10;
       this.updateCamera(t,time);
+      this.updateCosmicAtmosphere(t,time);
       this.updateDNA(t,time);
       this.updateBirthStrands(t,time);
       this.updateGenomeParticles(t,time);
       this.updateCore(t,time);
+      this.updateCinematicBiophotons(t,time);
       this.updateOrganic(t,time);
       this.updateCells(t,time);
       this.updateMechanical(t,time);
@@ -2994,7 +3110,6 @@
         else m?.dispose?.();
       });
       this.microFiberTexture?.dispose?.();
-      this.bioticSurfaceTexture?.dispose?.();
       this.studioEnvironmentTexture?.dispose?.();
       this.studioEnvTarget?.dispose?.();
       this.renderer.dispose();

@@ -50,34 +50,32 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
     await page.waitForFunction(()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',null,{timeout:35000});
     const state=await page.evaluate(()=>{
      const root=document.documentElement,gl=window.__genesisAAGL,cv=gl?.canvas;
-     let coherence=null;
+     let continuity=null;
      const engine=window.__genesisDnaEngine;
      if(root.dataset.fxMagBirthPhase==='0'&&engine){
-      const T=engine.THREE,points=engine.genomeParticles.geometry.attributes.position;
-      const founding=engine.dnas.find(h=>h.userData.primary),material=engine.genomeParticleMaterial;
-      const program=engine.renderer.properties.get(material).currentProgram?.program;
-      const location=program?gl.getUniformLocation(program,'uDnaMatrix'):null;
-      const uploaded=location?Array.from(gl.getUniform(program,location)):null;
-      const matrix=uploaded?new T.Matrix4().fromArray(uploaded):new T.Matrix4();
-      let maxDistance=0,sumDistance=0,samples=0;
+      const T=engine.THREE,g=engine.genomeParticles.geometry;
+      const initial=g.attributes.position,cell=g.attributes.aCell,arm=g.attributes.aArm;
+      const armIndex=g.attributes.aArmIndex,seed=g.attributes.aSeed;
+      let maxCellPair=0,minArmPair=Infinity,maxArmPair=0,pairedArmMismatches=0,
+       strandPaletteMismatches=0,samples=0;
+      const arms=new Set();
       for(let station=0;station<64;station++){
-       for(let strand=0;strand<2;strand++){
-        const index=Math.round(station/63*(points.count/2-1))*2+strand;
-        const u=Math.floor(index/2)/(points.count/2-1);
-        const actual=new T.Vector3().fromBufferAttribute(points,index).applyMatrix4(matrix);
-        const path=founding.children[strand?3:2].geometry.parameters.path;
-        const target=path.getPoint(u).applyMatrix4(founding.matrix);
-        const distance=actual.distanceTo(target);
-        maxDistance=Math.max(maxDistance,distance);sumDistance+=distance;samples++;
-       }
+       const pair=Math.round(station/63*(initial.count/2-1)),a=pair*2,b=a+1;
+       maxCellPair=Math.max(maxCellPair,
+        new T.Vector3().fromBufferAttribute(cell,a).distanceTo(
+         new T.Vector3().fromBufferAttribute(cell,b)));
+       const armPair=new T.Vector3().fromBufferAttribute(arm,a).distanceTo(
+        new T.Vector3().fromBufferAttribute(arm,b));
+       minArmPair=Math.min(minArmPair,armPair);maxArmPair=Math.max(maxArmPair,armPair);
+       if(armIndex.getX(a)!==armIndex.getX(b))pairedArmMismatches++;
+       if(!(seed.getX(a)<.5&&seed.getX(b)>.5))strandPaletteMismatches++;
+       arms.add(armIndex.getX(a));samples++;
       }
-      coherence={samples,maxDistance,meanDistance:sumDistance/samples,
-       uploadedMatrix:uploaded,matrixError:uploaded?Math.max(...uploaded.map((v,i)=>Math.abs(v-founding.matrix.elements[i]))):null,
-       surfaceWidth:engine.bioticSurfaceTexture?.image.width,
-       surfaceHeight:engine.bioticSurfaceTexture?.image.height,
-       sharedSurface:founding.children[2].material.bumpMap===engine.bioticSurfaceTexture&&engine.embryoMaterial.bumpMap===engine.bioticSurfaceTexture};
+      continuity={samples,maxCellPair,minArmPair,maxArmPair,pairedArmMismatches,
+       strandPaletteMismatches,armCoverage:[...arms].sort(),
+       attributes:{initial:initial.count,cell:cell.count,arm:arm.count}};
      }
-     return{coherence,requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
+     return{continuity,requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
     });
     record={...record,...state,errors,failedRequests};
     await page.screenshot({path:path.join(out,label+'.png')});
@@ -90,12 +88,16 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
     assert(state.samples>0,'The real default framebuffer must contain multisample coverage');
     if(chapter==='dna'){
      assert.equal(Number(state.armor),0);
-     assert.equal(state.coherence?.samples,128,'Actual phosphate paths must be sampled');
-     assert.equal(state.coherence?.uploadedMatrix?.length,16,'GPU must receive the live DNA pose');
-     assert(state.coherence.matrixError<1e-6,'GPU DNA pose differs from the photographed helix');
-     assert(state.coherence.maxDistance<.012,'GPU nucleotides drift away from their physical DNA strands');
-     assert.equal(state.coherence.surfaceWidth,256);assert.equal(state.coherence.surfaceHeight,128);
-     assert.equal(state.coherence.sharedSurface,true,'DNA and biological membrane lost their shared microscopic relief');
+     assert.equal(state.continuity?.samples,64,'The actual paired genome must be sampled');
+     assert.equal(state.continuity.pairedArmMismatches,0,'A DNA pair split across MAG arms');
+     assert.equal(state.continuity.strandPaletteMismatches,0,'Cyan/violet strand identity was lost');
+     assert.deepEqual(state.continuity.armCoverage,[0,1,2,3],'All four MAG arms need paired DNA');
+     assert(state.continuity.maxCellPair<.04,'A DNA pair separated inside the living nucleus');
+     assert(state.continuity.minArmPair>.05&&state.continuity.maxArmPair<.10,
+      'Paired coils no longer seat around one titanium arm');
+     assert.equal(state.continuity.attributes.initial,Number(state.genome));
+     assert.equal(state.continuity.attributes.cell,Number(state.genome));
+     assert.equal(state.continuity.attributes.arm,Number(state.genome));
     }
     if(chapter==='mag'){assert(Number(state.armor)>=5);assert(Number(state.eye)>.07&&Number(state.eye)<.25);}
     record.pass=true;
