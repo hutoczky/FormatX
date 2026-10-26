@@ -217,6 +217,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - **Ellenőrzés nyitott:** ezen a commiton nincs még sikeres CI és tényleges mobil/desktop WebGL screenshot vizuális összehasonlítás. A `master` nem változott; nem nevezhető végleges stúdióminőségű késznek.
 - Következő: MAG visual proof és R1280 syntax ellenőrzés, képkockák összehasonlítása a biológiai fázisban, utána szükség szerinti színtér/kompozíció javítás.
 
+### 2026-10-27 – R2213 Genesis production CI regresszió javítása
+
+- `40421736983` production workflow **FAIL**, job `121917752647`, konkrét hiba: `R2201 cinematic stage missing: this.embryoMaterial.opacity=.86*visible`. Az új, tudatosan átlátszóbb R2212 membránérték `.76`, ezért a régi literális forráskontraktus hibás.
+- `877ccba`: a `.github/scripts/validate-genesis-visual-r2201.cjs` elvárt értéke `.76`; emellett a teszt ellenőrzi a háromdimenziós nukleoluszgyűrűk, membránkontúrok és pulzáló halo meglétét is.
+- Következő: új production és P0 CI eredmények ellenőrzése. A tesztmódosítás nem helyettesíti a WebGL screenshot alapú minőségi ellenőrzést, ezért a sejtmag még nem tekinthető késznek.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
