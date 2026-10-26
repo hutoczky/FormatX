@@ -158,6 +158,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `31f4f8a`: közvetlenül a kattintás előtt `document.elementFromPoint` alapján ellenőrizzük a tényleges hit-targetet és naplózzuk a gomb/overlay pozícióját; a timeout 10 s. A teszt nem erőlteti a kattintást és nem kerüli meg a hibát.
 - Következő: új artifact `desktop: close-hit-test` adatából azonosítsd az esetleges eltakaró réteget, és **az éles CSS/JS interakciót** javítsd; majd desktop+mobil organism CI PASS szükséges.
 
+### 2026-10-27 – R2206 fullscreen panel hidden CSS javítás
+
+- A `40420345381` organism-main workflow a lekérdezéskor már a tényleges desktop/mobil böngészőtesztet futtatta, de végső eredmény még nem állt rendelkezésre.
+- A `docs/scifi-ui/styles/organism-interface-layering.css` `.fx-organism-interface-ready .fx-organism-console { display:block !important; }` szabályának specifikussága megegyezik a `organism-interface.css` `.fx-organism-console[hidden] { display:none !important; }` szabályával. Ha a layering CSS később töltődik be, a panel `hidden` állapota vizuálisan felülírható.
+- `ead5af38`: explicit `.fx-organism-interface-ready .fx-organism-console[hidden] { display:none !important; }` szabály beépítve. Ez **valódi CSS szemantikai hibát javít**, de önmagában még nem bizonyítja, hogy az előző Playwright-kattintási timeout egyetlen oka ez volt.
+- Következő: organism-main desktop+mobile CI, screenshot/overlay regresszió, Lighthouse összehasonlítás. Hibás futás esetén a `31f4f8a` hit-test diagnosztikát olvasd ki, és a tényleges eltakaró réteget javítsd.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
