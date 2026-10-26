@@ -109,7 +109,7 @@ check(gpu,[
   'float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));',
   'vEnergy=first*last*(1.0+transferGlow*.16);',
   'this.assemblyWeldMaterial.uniforms.uIntensity.value=strength',
-  'const count=this.mobileRender?160:320'
+  'const count=this.mobileRender?112:224'
 ],'R2186 visible paired genetic-to-titanium transfer');
 const transfer=t=>1-smooth((t-6.76)/.58);
 assert(transfer(6.8)>.98,'Genetic bridge must still be luminous during arm assembly');
