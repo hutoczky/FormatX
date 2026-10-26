@@ -82,6 +82,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Run `40409996876`: Chromium telepítés **FAIL**.
 - Run `40409996898`: Lighthouse desktop/mobil **FAIL**.
 
+### 2026-10-26 – S2 mobilos fallback hiba okának azonosítása
+
+- Legutóbbi production run `40412250658`: **PASS**; P0 run `40412250668`: **PASS**.
+- R2104 job `121885928928`: 4,40 s-nél a `fxMagFallbackMaterialR2104` értéke üres. A `formatx-mag-reference-film-r649.js` forrás szerint a fémes MAG szándékosan csak `t>5.58` után jelenik meg; az eredeti teszt tévesen a biológiai szakaszban is fémanyagot követelt. A teszt most 4,40 s-nél a fém hiányát, 8,50 s-nél a fém jelenlétét ellenőrzi, commit `00aef867`.
+- A fallback loader aktuális `r2182-studio-depth-first-genome` verzióját is a tényleges betöltési állapothoz igazítottam; a korábbi `r2113` ellenőrzés elavult.
+- **Új CI-futás szükséges**; a módosított tesztet még nem minősítjük PASS-nak. A Lighthouse és a Chromium telepítés hibái nyitottak.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -91,6 +98,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S1:** P0 szintaktikai CI PASS. Ellenőrizd a `041130c8` utáni production contract futást, és az újabb pontos hibaüzenetek alapján javítsd a fennmaradó eltéréseket. **S2:** a mobilos `R2104 cinema material did not render in original phone canvas` regresszió diagnosztikája és képkockás vizuális vizsgálata. Ne merge-elj, amíg a vizuális kapuk és a Lighthouse nem sikeresek.
+**S1:** P0 és production CI PASS az `a582820b` commiton. **S2:** ellenőrizd a `00aef867` mobilos fallback teszt újrafutását, különösen a 4,40 s biológiai és a 8,50 s mechanikai képkockát; vizsgáld a megmaradó tényleges renderelési hibákat. **S2:** a mobilos `R2104 cinema material did not render in original phone canvas` regresszió diagnosztikája és képkockás vizuális vizsgálata. Ne merge-elj, amíg a vizuális kapuk és a Lighthouse nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
