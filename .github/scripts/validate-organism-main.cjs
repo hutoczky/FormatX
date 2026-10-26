@@ -123,7 +123,19 @@ async function validateDesktop() {
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
     mark('desktop: currency-updated', { checkoutHref });
 
-    await page.locator('.fx-organism-console-close').click();
+    // R2205: Playwright previously timed out after the close button was
+    // visible and stable. Capture the real hit target before clicking so a
+    // fixed overlay/animation intercept is distinguishable from broken logic.
+    const closeHit=await page.locator('.fx-organism-console-close').evaluate(button=>{
+      const rect=button.getBoundingClientRect();
+      const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+      const hit=document.elementFromPoint(x,y);
+      return {x,y,hitTag:hit?.tagName||'',hitClass:String(hit?.className||''),
+        buttonIsHit:hit===button||button.contains(hit),pointerEvents:getComputedStyle(button).pointerEvents};
+    });
+    mark('desktop: close-hit-test',closeHit);
+    assert(closeHit.buttonIsHit,'close button is covered by another element: '+JSON.stringify(closeHit));
+    await page.locator('.fx-organism-console-close').click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
