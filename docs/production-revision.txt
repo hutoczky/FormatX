@@ -1,6 +1,9 @@
 FormatX production revision
-token=20261026-r2196-physically-paired-genome-into-mag
-release_line=R2196-DNA-FIRST-EMBRYO-PAIRED-HELICAL-MAG-FOUR-ARM-STUDIO-CINEMA
+token=20261026-r2198-single-desktop-fx-paired-chromatin-studio
+release_line=R2198-SINGLE-FX-LOGO-PAIRED-DNA-EMBRYO-FOUR-ARM-MAG-CINEMATIC-BIRTH
+r2198_brand=Removed the duplicate CSS-generated desktop FX mark; canonical absolute-path real image is the single header logo from first paint across desktop, tablet and mobile.
+r2198_genesis=Paired nucleotide base stations now retain physical pairing through organic chromatin condensation and rejoin the same titanium MAG arm; 10-second single-take opens with centered 3D double helix and gentle true-depth orbit, shows embryo before arm seating, and ignites the optical organ after assembly.
+r2198_tests=R2197 header singleton source + desktop/mobile Chromium checks; R2198 physical pairing source contracts; production revision convergence and R533/R536 browser checks on both domains.
 r2196_pairing=Paired cyan/violet nucleotide endpoints now share each arm station and wind in opposite phase around continuous four-arm helical channels; removes independent random landing positions; 6000 mobile and 9600 desktop particles; preserves embryo-first and optical-ignition-last sequencing.
 r2196_ci_contract=Both DNA strands of each nucleotide pair share one axial MAG-arm station, have opposite 3D radial offsets and seat before optical ignition; validate source and live Chromium on both canonical domains.
 purpose=R2189 physically shaded biological cell nucleus with 10-to-17 three-dimensional chromatin filaments, restrained semi-transparent living membrane and deeper organelle optics, following R2188 first-frame high-contrast molecular backbone, four chromatic nucleotide types per real instanced DNA ladder and eight preallocated physical 3D double-helix transfer tubes, preserving the explicitly staged ten-second studio birth film: one smooth centered living DNA double helix, then genuine genome-particle condensation into a clean embryonic cell, followed by phased titanium arm assembly and delayed optical ignition. After the assembled MAG is established, it travels and scales into the permanent WebGL hero position during a continuous 1.35-second photographic landing; final native hero crossfade begins only after 9.15 seconds.
