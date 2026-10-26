@@ -93,6 +93,7 @@
 
       this.makeLights();
       this.makeStudioEnvironment();
+      this.makeCosmicAtmosphere();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
@@ -195,6 +196,63 @@
       }finally{
         pmrem?.dispose?.();
       }
+    }
+
+    makeCosmicAtmosphere(){
+      // R2199: a genuine animated GLSL studio nebula, not an image, video
+      // or static wallpaper. Photographic cyan/violet DNA light becomes
+      // low-key turquoise cell atmosphere before smoked-metal arrival.
+      // One full-screen draw call; no animated CSS filters or DOM overlays.
+      const T=this.THREE;
+      const material=new T.ShaderMaterial({
+        uniforms:{uTime:{value:0},uPhase:{value:0}},
+        depthTest:false,depthWrite:false,transparent:false,toneMapped:false,
+        vertexShader:`
+          varying vec2 vUv;
+          void main(){
+            vUv=uv;
+            gl_Position=vec4(position.xy,1.0,1.0);
+          }`,
+        fragmentShader:`
+          precision mediump float;
+          varying vec2 vUv;
+          uniform float uTime,uPhase;
+          float haze(vec2 position,vec2 centre,vec2 stretch){
+            vec2 q=(position-centre)*stretch;
+            return exp(-dot(q,q)*2.0);
+          }
+          void main(){
+            vec2 q=vUv;
+            float drift=.016*sin(uTime*.00012+q.y*8.0);
+            float fold=.5+.5*sin(q.x*13.0-q.y*7.0+sin(q.y*11.0)*.75+uTime*.00017);
+            float cool=haze(q,vec2(.26+drift,.55),vec2(1.14,1.15));
+            float violet=haze(q,vec2(.73-drift,.40),vec2(1.30,1.18));
+            float aqua=haze(q,vec2(.53,.54+drift),vec2(1.0,.94));
+            float dna=1.0-smoothstep(2.60,3.85,uPhase);
+            float embryo=smoothstep(2.95,3.72,uPhase)*
+              (1.0-smoothstep(5.14,6.04,uPhase));
+            vec3 col=vec3(.002,.005,.012);
+            col+=vec3(.008,.041,.084)*cool*dna*(.63+.37*fold);
+            col+=vec3(.055,.014,.095)*violet*dna*(.55+.45*(1.0-fold));
+            col+=vec3(.007,.063,.070)*aqua*embryo*(.72+.28*fold);
+            col+=vec3(.026,.006,.032)*violet*embryo*.19;
+            // A restrained central vignette gives cinematic contrast
+            // without blowing out the physically lit molecular silhouette.
+            float vignette=1.0-.30*length((q-.5)*vec2(1.18,.90));
+            gl_FragColor=vec4(col*clamp(vignette,.66,1.0),1.0);
+          }`
+      });
+      const mesh=new T.Mesh(new T.PlaneGeometry(2,2),material);
+      mesh.frustumCulled=false;
+      mesh.renderOrder=-1000;
+      this.scene.add(mesh);
+      this.cosmicAtmosphere=mesh;
+    }
+
+    updateCosmicAtmosphere(t,time){
+      if(!this.cosmicAtmosphere)return;
+      this.cosmicAtmosphere.material.uniforms.uTime.value=time;
+      this.cosmicAtmosphere.material.uniforms.uPhase.value=t;
     }
 
     makeParticles(){
@@ -2855,6 +2913,7 @@
       if(this.disposed)return;
       const t=clamp(r)*10;
       this.updateCamera(t,time);
+      this.updateCosmicAtmosphere(t,time);
       this.updateDNA(t,time);
       this.updateBirthStrands(t,time);
       this.updateGenomeParticles(t,time);
