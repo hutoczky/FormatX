@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-reference-cell-depth';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -76,8 +76,8 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=i%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.72*visible;',
-  'this.embryoNucleusMaterial.opacity=.76*visible;',
+  'this.embryoMaterial.opacity=.66*visible;',
+  'this.embryoNucleusMaterial.opacity=.82*visible;',
   'this.embryoCapillaryMaterial.opacity=.25*visible;'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
@@ -93,7 +93,7 @@ for(const token of [
   'this.embryoSites.setMatrixAt(i,siteDummy.matrix);',
   'this.embryoSiteMaterial.opacity=.48*visible;',
   'depthWrite:false,blending:T.NormalBlending',
-  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.16:.22)*visible;'
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.10:.14)*visible;'
 ]){
   assert.ok(engine.includes(token),'R2192 living-cell depth contract: '+token);
 }
@@ -104,7 +104,7 @@ assert.ok(!engine.includes('u*Math.PI*15.5+strand*Math.PI'),
   'Do not overlay an unrelated twice-coiled DNA particle geometry');
 
 assert.ok(engine.includes('const donorEnvelope=smooth((t-4.38)/.48)*(1-smooth((t-5.95)/.85))') &&
-  engine.includes('h.userData.primary?fade:donorEnvelope*.27'),
+  engine.includes('h.userData.primary?fade:donorEnvelope*.12'),
   'Secondary DNA must stay dark through the biological chapter and feed later assembly');
 // R2172: verified stage-specific optics, NOT an unrelated flash or model swap.
 assert.ok(engine.includes('const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.52)/1.12))') &&

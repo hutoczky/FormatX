@@ -1100,7 +1100,7 @@
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoNucleus=new T.Mesh(
-        new T.SphereGeometry(.25,32,24),this.embryoNucleusMaterial
+        new T.SphereGeometry(.29,32,24),this.embryoNucleusMaterial
       );
       this.embryoNucleus.position.set(-.10,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
@@ -1186,7 +1186,7 @@
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
       // texture painted onto the glass shell; adaptive strand count on phones.
       const chromatinPositions=[],chromatinColors=[];
-      const chromatinCount=this.mobileRender?10:17;
+      const chromatinCount=this.mobileRender?6:10;
       const cool=new T.Color(0x83f1e8),violet=new T.Color(0xb7a6e9);
       for(let strand=0;strand<chromatinCount;strand++){
         const phase=strand*Math.PI*2/chromatinCount;
@@ -2325,7 +2325,7 @@
         h.scale.setScalar(b.s*(.95+.05*intro)*(1-assembly*.56)*helixScaleFocus);
         const bases=h.userData.baseOpacity||[];
         h.userData.materials.forEach((m,mi)=>{
-          const chapterAlpha=h.userData.primary?fade:donorEnvelope*.27;
+          const chapterAlpha=h.userData.primary?fade:donorEnvelope*.12;
           m.opacity=(bases[mi]??.5)*intro*.94*helixOpacityFocus*chapterAlpha;
         });
       });
@@ -2479,9 +2479,9 @@
       this.coreGroup.visible=visible>.002;
       // R2189: translucent outer membrane reveals living chromatin and
       // the physically shaded organelle without exposing a hard MAG eye.
-      this.embryoMaterial.opacity=.72*visible;
-      this.embryoNucleusMaterial.opacity=.76*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.16:.22)*visible;
+      this.embryoMaterial.opacity=.66*visible;
+      this.embryoNucleusMaterial.opacity=.82*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.10:.14)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);

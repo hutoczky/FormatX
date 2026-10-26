@@ -26,19 +26,19 @@ for(const text of [
   'p.needsUpdate=true;',
   'const start=smooth((t-4.68)/.62);',
   'const opticWake=smooth((t-7.44)/.78);',
-  'const chromatinCount=this.mobileRender?10:17;',
+  'const chromatinCount=this.mobileRender?6:10;',
   'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
   'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
   'const organelleCount=this.mobileRender?20:28;',
   'this.embryoSites=new T.InstancedMesh(',
-  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.16:.22)*visible;',
-  'this.embryoMaterial.opacity=.72*visible;',
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.10:.14)*visible;',
+  'this.embryoMaterial.opacity=.66*visible;',
   "const count=this.mobileRender?6000:9600;",
   "const fade=1-smooth((t-3.10)/1.38);"
 ]){
   assert(renderer.includes(text),'Missing R2188 film / biological chronology contract: '+text);
 }
-const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth';
+const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-reference-cell-depth';
 assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stale 3D intro');
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -85,5 +85,5 @@ console.log('R2188_GENESIS_STUDIO_SOURCE_PASS',JSON.stringify({
   dnaFirst:true,cellSecond:true,metalThird:true,opticLast:true,
   gpuParticles:{mobile:6000,desktop:9600},
   pairedVolumetricStreams:8,
-  nucleotideColors:4,chromatin:{mobile:10,desktop:17},cloudflareRevision:'r2189'
+  nucleotideColors:4,chromatin:{mobile:6,desktop:10},cloudflareRevision:'r2189'
 }));
