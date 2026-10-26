@@ -67,6 +67,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - **FAIL:** organism-main run `40408446951`: Chromium telepítési lépés; környezeti hibának tűnik, részletes log szükséges.
 - **FAIL:** Lighthouse CI run `40408446692`: mind desktop, mind mobil lépés hibás; pontszámok és részletes okok további vizsgálata szükséges.
 
+### 2026-10-26 – S1 folytatás
+
+- Újabb production CI run `40409528623` hibája: `Three.js storyboard: const appear=smooth((t-3.52)/.76)`. Az R2182 storyboard, R2188 cinematic origin és R2143 route ellenőrzéseket az aktív `3.28 / 1.02` időzítéshez igazítottam (`3ac501fd`, `cefb8aa7`, `27d356da`). **Új CI PASS még nem igazolt.**
+- A mobilos runok `40409528612` és `40409528701` továbbra is hibásak: `R2104 cinema material did not render in original phone canvas`. Ez nem tesztidőzítés-problémaként kezelendő; renderelési vizsgálat szükséges.
+- Következő: új CI futás ellenőrzése, majd mobil canvas screenshot és a tényleges pixel/anyag megjelenítés diagnosztikája.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
