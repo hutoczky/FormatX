@@ -89,6 +89,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A fallback loader aktuális `r2182-studio-depth-first-genome` verzióját is a tényleges betöltési állapothoz igazítottam; a korábbi `r2113` ellenőrzés elavult.
 - **Új CI-futás szükséges**; a módosított tesztet még nem minősítjük PASS-nak. A Lighthouse és a Chromium telepítés hibái nyitottak.
 
+### 2026-10-26 – S2 mobil PASS, S5 Lighthouse mérési alapvonal
+
+- PR head `5a7937c9` CI: R2104 run `40413514780` **PASS**, R2103 run `40413514570` **PASS**, production `40413514555` **PASS**, P0 `40413515096` lekérdezéskor még folyamatban volt.
+- Lighthouse run `40413514815`, job `121891259179`: **FAIL**, valódi mérési küszöbök, nem pusztán környezeti hiba.
+- **Desktop Performance:** 0,89 / 0,89 / 0,91; LCP 1667 / 1750 / 1721 ms; TBT 111 / 16 / 26 ms. Performance követelmény ≥0,95.
+- **Mobil Performance:** 0,83 / 0,81 / 0,83; FCP 1839 / 1845 / 1823 ms; TBT 364 / 427 / 365 ms; Speed Index 6648 / 6697 / 6638 ms. Hibás küszöbök: Performance, FCP, TBT.
+- Következő mérésalapú optimalizálás: mobil JS main-thread hosszú feladatok és TBT, első render/FCP, Speed Index; desktop LCP és Speed Index. **Nem szabad a CI-küszöböket lejjebb venni.**
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -98,6 +106,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S1:** P0 és production CI PASS az `a582820b` commiton. **S2:** ellenőrizd a `00aef867` mobilos fallback teszt újrafutását, különösen a 4,40 s biológiai és a 8,50 s mechanikai képkockát; vizsgáld a megmaradó tényleges renderelési hibákat. **S2:** a mobilos `R2104 cinema material did not render in original phone canvas` regresszió diagnosztikája és képkockás vizuális vizsgálata. Ne merge-elj, amíg a vizuális kapuk és a Lighthouse nem sikeresek.
+**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** elemezd a Lighthouse auditban a mobil TBT/FCP/Speed Index és a desktop LCP/Speed Index fő okait, készíts célzott teljesítményjavítást, majd futtasd újra mindkét profilt. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
