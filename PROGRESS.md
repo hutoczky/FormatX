@@ -105,6 +105,15 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A `Validate organism-first FormatX main site` futás `40414573164` **FAIL** a Chromium telepítés lépésénél, nem a film vizuális assertjénél.
 - **Következő végrehajtás:** a Lighthouse JSON trace-ből a hosszú feladatok (long tasks), script evaluation és render-blocking erőforrások pontos rangsorolása; csak ezután egyetlen, nem kritikus JS betöltésének késleltetése, azonnali mobil+desktop Lighthouse és teljes regressziós CI teszttel. 0,95 küszöböt nem szabad csökkenteni.
 
+### 2026-10-26 – S5 Lighthouse JSON-riportok tényleges elemzése
+
+- Letöltöttem a `40414747601` futás `lighthouse-results` artifactját (`12695102114`), mindkét profil részletes LHR JSON-ját elemeztem.
+- **Mobil, vizsgált első futás:** Performance **0,72**; `formatx-crystal-organism-r326.js` long task **303,775 ms** és **252,733 ms**; ugyanennek a scriptnek a bootup auditban **1795,676 ms total**, ebből **251,834 ms scripting**. A main thread **5561,187 ms**, ebből **1783,345 ms Style & Layout**. Ez az elsődleges célpont.
+- **Desktop, vizsgált első futás:** Performance **0,84**; `formatx-mini-mag-assistant-r459.js` long task **171 ms**, `formatx-crystal-organism-r326.js` long task **111 ms**. A main thread **1544,985 ms**, ebből **375,824 ms Style & Layout**.
+- **Render blocking, mobil:** `formatx-genesis-studio-r2160.css` **721 ms**, `formatx-dna-first-frame-r2181.css` **871 ms** potenciális audit késleltetés. Mobil LCP render delay **1842,418 ms (99%)**; desktop LCP render delay **1713,599 ms (93%)**.
+- Ezek a **legelső** LHR futás értékei, nem a három mérés átlaga. A pontszámokat nem szabad más futásból vett 0,81–0,83 értékekkel összekeverni.
+- **Következő konkrét kódmunka:** `formatx-crystal-organism-r326.js` hosszú inicializációs/renderelési feladatainak vizsgálata és felosztása; a mini-assistant induláskori munkájának késleltetése csak akkor, ha az elsődleges UI és accessibility szerződések megmaradnak. Minden módosítást Lighthouse és funkcionális regresszió kövessen. A CSS-t nem szabad vakon deferredre váltani, mert a DNA első képkockája kritikus.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -114,6 +123,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** töltsd le és elemezd a `40413514815` Lighthouse artifact JSON riportjait, rangsorold a tényleges JS long taskokat és render-blocking erőforrásokat; csak ezután módosíts kritikus betöltési sorrendet, majd futtasd újra mindkét profilt. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
+**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** a `40414747601` Lighthouse artifact elemzése megtörtént; következő a `formatx-crystal-organism-r326.js` 304/253 ms-os mobil long taskjainak forrásszintű optimalizálása és az R459 desktop 171 ms-os feladatának vizsgálata. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
