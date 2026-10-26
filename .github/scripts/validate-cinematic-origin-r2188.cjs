@@ -30,13 +30,13 @@ for(const text of [
   'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
   'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
   'this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;',
-  'this.embryoMaterial.opacity=.47*visible;',
+  'this.embryoMaterial.opacity=.86*visible;',
   "const count=this.mobileRender?6000:9600;",
   "const fade=1-smooth((t-3.10)/1.38);"
 ]){
   assert(renderer.includes(text),'Missing R2188 film / biological chronology contract: '+text);
 }
-const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2200-dna-cytoplasm-film';
+const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema';
 assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stale 3D intro');
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
