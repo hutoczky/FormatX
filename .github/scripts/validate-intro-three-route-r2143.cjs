@@ -74,7 +74,7 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=Math.floor(i/2)%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoMaterial.opacity=.76*visible;',
   'this.embryoNucleusMaterial.opacity=.68*visible;',
   'this.embryoCapillaryMaterial.opacity=.25*visible;',
   'let pairCellX=0,pairCellY=0,pairCellZ=1.10;',
