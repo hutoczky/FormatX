@@ -1073,7 +1073,7 @@
             float coil=1.0-curve(2.94,4.38,uPhase);
             p.x+=coil*.018*sin(uTime*.00082+aSeed*32.0);
             p.y+=.013*sin(uTime*.0011+aSeed*20.0)*(1.0-assemble);
-            p.z+=.012*cos(uTime*.00072+aSeed*17.0);
+            p.z+=.012*cos(uTime*.00072+aSeed*17.0)*(1.0-assemble);
             vec4 mv=modelViewMatrix*vec4(p,1.0);
             gl_Position=projectionMatrix*mv;
             // R2186: the genetic matter becomes a visible energetic stream
