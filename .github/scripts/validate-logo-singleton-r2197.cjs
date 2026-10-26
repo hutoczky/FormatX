@@ -1,0 +1,23 @@
+'use strict';
+// R2197 desktop/mobile: only one actual FX logo is allowed in the header.
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const read=p=>fs.readFileSync(p,'utf8');
+const html=read('docs/scifi-ui/index.html');
+const shell=read('docs/scifi-ui/styles/formatx-critical-shell-v56.css');
+const guard=read('docs/scifi-ui/styles/formatx-mobile-brand-dedupe-r1952.css');
+const headers=html.match(/<header class="topbar">([\s\S]*?)<\/header>/g)||[];
+assert.equal(headers.length,1,'Canonical topbar must have one header');
+const brand=headers[0].match(/<a class="brand"[^>]*>([\s\S]*?)<\/a>/g)||[];
+assert.equal(brand.length,1,'Only one header brand anchor is allowed');
+assert.equal((brand[0].match(/<img\b/g)||[]).length,1,'Only one real FX logo IMG is allowed');
+assert(brand[0].includes('src="/scifi-ui/assets/images/formatx-icon-80.webp"'),'The logo must use the absolute first-party URL');
+assert(/\.brand\s*>\s*img\s*\{[^}]*display:\s*block\s*!important/s.test(shell),'Critical first paint must show actual logo image');
+assert(/\.brand::before\s*\{[^}]*content:\s*none\s*!important;[^}]*display:\s*none\s*!important/s.test(shell),'Critical first paint must not inject duplicate FX icon');
+assert(!/\.brand::before\s*\{[^}]*content:\s*""\s*;/s.test(shell),'Legacy image pseudo-element may not return');
+assert(guard.includes('html:root:root body.living-architecture .topbar > a.brand::before'),'Cross-device guard selector missing');
+assert(/html:root:root body\.living-architecture \.topbar > a\.brand::before\s*\{[^}]*content:none\s*!important;[^}]*display:none\s*!important/s.test(guard),'Cross-device guard must hide pseudo icon');
+const links=[...html.matchAll(/<link\b[^>]*formatx-mobile-brand-dedupe-r1952\.css[^>]*>/g)].map(x=>x[0]);
+assert.equal(links.length,2,'First-paint and end-head logo guards must both be present');
+for(const tag of links)assert(tag.includes('media="all"'),'Logo deduplication must not be limited to mobile');
+console.log('R2197_HEADER_SINGLE_FX_LOGO_PASS desktop=true mobile=true source=true');
