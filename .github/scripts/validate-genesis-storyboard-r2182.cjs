@@ -16,7 +16,7 @@ const check=(source,needles,label)=>{
 check(gpu,[
   'const fade=1-smooth((t-3.10)/1.38)',
   'const embryoFocus=smooth((t-3.12)/1.04)',
-  'const appear=smooth((t-3.52)/.76)',
+  'const appear=smooth((t-3.28)/1.02)',
   'const grow=smooth((t-3.76)/.72)',
   'const grow=smooth((t-3.90)/.70)',
   'float condense=curve(2.94,4.38,uPhase)',
@@ -45,7 +45,7 @@ check(birth,['formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cin
   'Live WebGL owner cache bust');
 check(edge,['formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema'],
   'Cloudflare rewrite must not serve an older film');
-const embryo=t=>smooth((t-3.52)/.76)*(1-smooth((t-5.66)/1.12));
+const embryo=t=>smooth((t-3.28)/1.02)*(1-smooth((t-5.66)/1.12));
 const arm=t=>smooth((t-5.88)/1.18);
 const dna=t=>1-smooth((t-3.10)/1.38);
 assert.equal(embryo(2.4),0,'Embryo visible during DNA opening');
