@@ -237,6 +237,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `40422525819` organism-main **FAIL** a desktop+mobile interakciós lépésben. A pontos új okhoz a futás JSON artifactjának vizsgálata szükséges; a production hibától külön kell kezelni.
 - Következő: új CI és organikus panel browser artifact elemzése, valódi Genesis screenshot, nem kizárólag literális kódellenőrzés.
 
+### 2026-10-27 – R2216 éles production PASS és Playwright hibabizonyíték
+
+- `40422759877`: **production workflow SUCCESS** a `03c97a23` fejlesztési ágon; nem jelenti a `master` vagy a nyilvános weboldal frissítését.
+- `40422759926`: mobile MAG visual proof **SUCCESS**; `40422759839` mobile/production architecture **SUCCESS**; `40422759920` site integrity **SUCCESS**; `40422759765` bilingual coverage **SUCCESS**; `40422760009` performance contracts **SUCCESS**.
+- A korábbi `40422525819` organism-main failure artifact `12697982051` JSON diagnosztikája: a close gomb közepét valóban a `BUTTON.fx-organism-console-close` foglalja el, `pointerEvents:auto`, a 12 animációs képkocka összes bounding-box mintája **azonos** `[1314,38.39]`, `shellTransform:none`. A korábbi animációs pozíció-instabilitás hipotézist a mérések **nem támasztják alá**.
+- Playwright click napló: `visible, enabled and stable`, `scrolling into view done`, majd **`performing click action` után 10s timeout**. Következő célzott vizsgálat: event-loop blokkolás és a `organism-interface.js` close eseménykezelő, illetve Chromium performance trace. **Nem szabad** a kattintást `force:true`/DOM `.click()` megkerüléssel elfedni.
+- `40422759821` új organism-main ellenőrzés lekérdezéskor még **in_progress**. A sejtmag screenshotos elfogadása és 14s storyboard összehangolása továbbra is nyitott.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
