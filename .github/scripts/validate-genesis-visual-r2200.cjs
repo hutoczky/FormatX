@@ -18,7 +18,7 @@ assert(edge.includes(revision),'Cloudflare must deliver R2200 rather than rewrit
 for(const token of [
   'new T.DataTexture(pixels,width,height,T.RGBAFormat)',
   'color:0xf5ffff,map:this.embryoTexture',
-  'bumpMap:this.embryoTexture,bumpScale:.014',
+  'bumpMap:this.embryoTexture,bumpScale:.020',
   'this.embryoTexture.offset.x=time*.0000038;',
   'this.embryoTexture?.dispose?.();'
 ])assert(source.includes(token),'R2200 mobile/desktop biological membrane regression: '+token);
