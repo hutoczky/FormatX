@@ -121,6 +121,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `74871d9`: nem invazív mérés hozzáadva: `document.documentElement.dataset.fxCoreGeometryBuildMsR2202` és `performance.measure('formatx:r326:geometry-build-r2202')`. A geometriát, a tesszellációt és a renderelést nem változtattam. **Új CI még nem ellenőrzött.**
 - Következő: valódi mobil és desktop trace-ben hasonlítsd össze a `geometry-build-r2202` időt a teljes long taskkal; ha a geometria dominál, bontsd kisebb aszinkron feladatokra vagy dolgozz ki worker-alapú adatgenerálást; GPU uploadot a WebGL főszálon tartsd. A Lighthouse ≥0,95 változatlan.
 
+### 2026-10-27 – S5 GPU bufferfeltöltés mérési szakasz
+
+- A `bc0bcd80` utáni futások: production `40417872551` **PASS**, mobil MAG vizuális bizonyítás `40417872598` **PASS**, canonical MAG runtime `40417872554` **PASS**, R2103 `40417872454` **PASS**, R2104 `40417872575` **PASS**, Lighthouse `40417872797` **FAIL**.
+- `c1b32b5`: az R326 `finishBoot` függvényben külön `performance.measure('formatx:r326:buffer-upload-r2203')` és `data-fx-core-buffer-upload-ms-r2203` / `root.dataset.fxCoreBufferUploadMsR2203` mérés készült. Nem hív `gl.finish()`-t, így a JS oldali feltöltési hívások idejét méri, nem a teljes aszinkron GPU-végrehajtást.
+- A korábbi `formatx:r326:geometry-build-r2202` és az új `buffer-upload-r2203` együtt szétválasztja a CPU-s geometriaépítés és a JS/WebGL feltöltés idejét. **Egyik méréshez sem áll rendelkezésre még új összehasonlítható trace-eredmény; CI futtatás ellenőrzendő.**
+- Következő: Chrome Performance trace és mobil Lighthouse regresszió a két mérés alapján; csak bizonyítottan domináns fázist optimalizálj. Ne rontsd a MAG geometriáját vagy a Genesis vizuális követelményeit.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -130,6 +137,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** az R326 geometriaépítés időmérése bekerült (`74871d9`); ellenőrizd a CI-t és a `formatx:r326:geometry-build-r2202` trace-mérést, majd bizonyított szűk keresztmetszetre készíts optimalizálást. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
+**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** az R326 CPU geometriaépítés (`74871d9`) és WebGL bufferfeltöltés (`c1b32b5`) külön mérhető. Ellenőrizd az új CI-t, készíts összehasonlítható mobil/desktop trace-t és a domináns fázist optimalizáld. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
