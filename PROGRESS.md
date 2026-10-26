@@ -165,6 +165,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `ead5af38`: explicit `.fx-organism-interface-ready .fx-organism-console[hidden] { display:none !important; }` szabály beépítve. Ez **valódi CSS szemantikai hibát javít**, de önmagában még nem bizonyítja, hogy az előző Playwright-kattintási timeout egyetlen oka ez volt.
 - Következő: organism-main desktop+mobile CI, screenshot/overlay regresszió, Lighthouse összehasonlítás. Hibás futás esetén a `31f4f8a` hit-test diagnosztikát olvasd ki, és a tényleges eltakaró réteget javítsd.
 
+### 2026-10-27 – Organism CI PASS és vizuális rejtés regressziós kapu
+
+- A `40420345381` organism-first workflow **SUCCESS** (desktop+mobile browser interaction), artifact `12696882988`. Ez az első megerősített teljes PASS a Chromium telepítési hiba javítása után, még az `ead5af38` CSS javítás előtti commiton.
+- `a8e67e2`: a desktop organism-main teszt a kezdetben `hidden` és a bezárás után `hidden` konzolra egyaránt `getComputedStyle(...).display === 'none'` assertet tartalmaz. Így a korábban elrejtettnek jelölt, de CSS miatt még kirajzolt overlay többé nem számít sikeres tesztnek.
+- Következő: új CI ellenőrzés az `ead5af38` és `a8e67e2` módosításokra; mobilon ugyanezen CSS-rejtés regressziós ellenőrzés, Lighthouse.
+- A 14 s storyboard eltérés és a Lighthouse ≥0,95 kapu továbbra is nyitott.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
