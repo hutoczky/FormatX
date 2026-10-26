@@ -2619,7 +2619,7 @@
       const embryoScale=this.mobileRender?.94:1.07;
       let sc;
       if(t<2.52) sc=.001;
-      else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
+      else if(t<3.28) sc=mix(.001,embryoScale,smooth((t-2.52)/.76));
       else if(t<5.58) sc=embryoScale+Math.sin((t-3.28)*1.02)*.002;
       else if(t<7.15) sc=mix(embryoScale,.30,smooth((t-5.58)/1.57));
       else sc=.30;
