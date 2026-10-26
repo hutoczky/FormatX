@@ -1,5 +1,7 @@
 import productionBase from './production-content-entry-r369-base.js';
 
+// R2199 verified cinematic lineage: 20261026-r2199-photonic-genesis-nucleus
+// R2200 Cloudflare rewrite must deliver the newly textured film renderer.
 /* FormatX R514 — preserve the proven R513 MAG runtime and R504/R506 first-paint
    contracts while removing the exact R513 Lighthouse first-divergence owner from
    the blocking path. R513 artifact 9912491940 showed critical-core-r227 as the
@@ -230,7 +232,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261026-r2199-photonic-genesis-nucleus']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261026-r2200-dna-cytoplasm-film']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
