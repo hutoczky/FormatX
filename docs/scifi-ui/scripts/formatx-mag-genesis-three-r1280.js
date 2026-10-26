@@ -99,6 +99,7 @@
       this.makeGenomeParticles();
       this.makeCore();
       this.makeEmbryoFilm();
+      this.makeCinematicBiophotons();
       this.makeOrganicLayer();
       this.makeCellularLayer();
       this.makeMechanicalLayer();
@@ -1164,6 +1165,117 @@
       this.embryoChromatin.renderOrder=4;
       this.coreGroup.add(this.embryoChromatin);
       this.embryoChromatin.scale.set(1,1,.95);
+    }
+
+    makeCinematicBiophotons(){
+      // R2199: actual WebGL cinematography, NOT image mockups: physical
+      // blue-violet phosphor sparks follow the founding helical backbones,
+      // then the SAME movie reveals aqua/coral metabolic specks in a
+      // three-dimensional biological cell. Both batches are allocated once.
+      const T=this.THREE,r=this.rand;
+      const build=(count,kind)=>{
+        const position=new Float32Array(count*3);
+        const color=new Float32Array(count*3);
+        const seed=new Float32Array(count);
+        const palette=kind==='dna'
+          ?[new T.Color(0x62dcff),new T.Color(0xbd86ff),new T.Color(0xff91da),new T.Color(0xffbd93)]
+          :[new T.Color(0x25f2da),new T.Color(0x70efef),new T.Color(0xff7389),new T.Color(0xffa257)];
+        for(let i=0;i<count;i++){
+          const c=r(),type=kind==='dna'
+            ?(c<.40?0:c<.76?1:c<.94?2:3)
+            :(c<.48?0:c<.77?1:c<.92?2:3);
+          if(kind==='dna'){
+            // Author in founding-helix LOCAL space; inherited group position,
+            // orientation and scale guarantee molecular and sparkle parallax.
+            const u=r(),q=u*Math.PI*2*3.82,sign=i%2?1:-1;
+            const radius=.410+(r()-.5)*.30;
+            position.set([(u-.5)*3.54,sign*Math.sin(q)*radius,
+              sign*Math.cos(q)*radius+(r()-.5)*.20],3*i);
+          }else{
+            // Filled 3D nucleus: most lights occupy the membrane, with hot
+            // coral sites inside; unlike a flat circle, orbit reveals depth.
+            const theta=r()*Math.PI*2,z=2*r()-1;
+            const radial=(r()<.70?.70+.28*r():Math.cbrt(r())*.72);
+            const flat=Math.sqrt(Math.max(0,1-z*z));
+            position.set([
+              radial*flat*Math.cos(theta)*.80,
+              radial*z*1.03,
+              radial*flat*Math.sin(theta)*.70
+            ],3*i);
+          }
+          const h=palette[type];
+          color.set([h.r,h.g,h.b],3*i);
+          seed[i]=r();
+        }
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.BufferAttribute(position,3));
+        geometry.setAttribute('color',new T.BufferAttribute(color,3));
+        geometry.setAttribute('aSeed',new T.BufferAttribute(seed,1));
+        const material=new T.ShaderMaterial({
+          uniforms:{uTime:{value:0},uOpacity:{value:0},uPixelRatio:{value:1}},
+          transparent:true,depthWrite:false,depthTest:true,
+          blending:T.AdditiveBlending,
+          vertexShader:`
+            attribute vec3 color;
+            attribute float aSeed;
+            uniform float uTime,uOpacity,uPixelRatio;
+            varying vec3 vColor;
+            varying float vAlpha;
+            void main(){
+              vColor=color;
+              float flicker=.78+.22*sin(uTime*.0011+aSeed*61.0);
+              vAlpha=uOpacity*flicker;
+              vec4 mv=modelViewMatrix*vec4(position,1.0);
+              gl_Position=projectionMatrix*mv;
+              gl_PointSize=clamp((1.10+aSeed*1.18)*uPixelRatio*14.0/
+                max(1.5,-mv.z),1.0,7.0*uPixelRatio);
+            }`,
+          fragmentShader:`
+            precision mediump float;
+            varying vec3 vColor;
+            varying float vAlpha;
+            void main(){
+              vec2 d=gl_PointCoord-.5;
+              float radius=dot(d,d);
+              if(radius>.25)discard;
+              float outer=exp(-radius*12.5);
+              float hot=exp(-radius*49.0);
+              vec3 emission=vColor*(outer*.48+hot*1.05);
+              gl_FragColor=vec4(emission,vAlpha*(.40*outer+.55*hot));
+            }`
+        });
+        const points=new T.Points(geometry,material);
+        points.frustumCulled=false;
+        points.visible=false;
+        return {points,material};
+      };
+      const dna=build(this.mobileRender?260:620,'dna');
+      const parent=this.dnas.find(h=>h.userData.primary);
+      if(!parent)throw new Error('R2199 founding DNA photon parent missing');
+      parent.add(dna.points);
+      this.dnaBiofield=dna;
+      const embryo=build(this.mobileRender?850:2200,'embryo');
+      embryo.points.renderOrder=6;
+      this.coreGroup.add(embryo.points);
+      this.embryoBiofield=embryo;
+    }
+
+    updateCinematicBiophotons(t,time){
+      const setup=(record,strength)=>{
+        if(!record)return;
+        const intensity=Math.max(0,strength);
+        record.points.visible=intensity>.002;
+        if(!record.points.visible)return;
+        record.material.uniforms.uTime.value=time;
+        record.material.uniforms.uOpacity.value=intensity;
+        record.material.uniforms.uPixelRatio.value=Math.min(
+          this.mobileRender?1.5:2,this.renderer.getPixelRatio()
+        );
+      };
+      // DNA never competes with embryo, embryo never masks assembling metal.
+      setup(this.dnaBiofield,(1-smooth((t-2.94)/1.42))*.84);
+      setup(this.embryoBiofield,
+        smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*.94);
     }
 
     updateGenomeParticles(t,time){
@@ -2381,7 +2493,7 @@
       // Preserve the established ten-second camera and end-state framing.
       // R2167: the embryonic cell must fill the lens as an actual subject,
       // not read as a tiny smooth bead behind distracting orbiting DNA.
-      const embryoScale=this.mobileRender?.72:.66;
+      const embryoScale=this.mobileRender?.94:1.07;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
@@ -2417,13 +2529,13 @@
       this.coreGroup.visible=visible>.002;
       // R2189: translucent outer membrane reveals living chromatin and
       // the physically shaded organelle without exposing a hard MAG eye.
-      this.embryoMaterial.opacity=.72*visible;
-      this.embryoNucleusMaterial.opacity=.76*visible;
+      this.embryoMaterial.opacity=.47*visible;
+      this.embryoNucleusMaterial.opacity=.56*visible;
       this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
-      this.embryoShell.scale.set(.88*pulse,1.12*pulse,.78*pulse);
+      this.embryoShell.scale.set(.98*pulse,1.03*pulse,.90*pulse);
       this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
@@ -2692,7 +2804,7 @@
       let z=5.18,y=.012,x=0;
       if(t<2.70){
         const k=smooth(t/2.70);
-        z=mix(5.42,5.12,k);
+        z=mix(this.mobileRender?5.15:4.68,4.88,k);
         // R2198: a very slow orbital camera move exposes actual depth
         // between the opposed DNA backbones without losing the silhouette.
         // The orbit returns to centre at the end of the DNA establishing shot.
@@ -2700,13 +2812,13 @@
         y=.010+.029*Math.sin(Math.PI*k);
       }else if(t<3.30){
         const k=smooth((t-2.70)/.60);
-        z=mix(5.12,3.86,k);
+        z=mix(4.88,3.58,k);
         x=0;y=mix(.010,0,k);
       }else if(t<5.55){
         // R2115: restrained camera dolly and parallax while the mechanical
         // iris resolves; sub-centimetre movement keeps the MAG centered.
         const k=smooth((t-3.30)/2.25);
-        z=mix(3.86,3.82,k)+Math.sin(time*.00020)*.0035;
+        z=mix(3.58,3.82,k)+Math.sin(time*.00020)*.0035;
         x=Math.sin(k*Math.PI)*.024+Math.sin(time*.00015)*.0018;
         y=Math.sin(k*Math.PI)*.010+Math.cos(time*.00018)*.0018;
       }else if(t<7.25){
@@ -2747,6 +2859,7 @@
       this.updateBirthStrands(t,time);
       this.updateGenomeParticles(t,time);
       this.updateCore(t,time);
+      this.updateCinematicBiophotons(t,time);
       this.updateOrganic(t,time);
       this.updateCells(t,time);
       this.updateMechanical(t,time);
