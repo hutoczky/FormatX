@@ -143,6 +143,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `5f75ffb`: a Chromium Playwright telepítése izolált `$RUNNER_TEMP/formatx-organism-browser` prefixbe került, Playwright `1.62.0` verzióval; a teszt `NODE_PATH` környezeti változón keresztül találja meg. A böngészőteszt és elfogadási állítások változatlanok.
 - Ez **telepítési hiba elleni javítás**, még nem bizonyított CI PASS. Következő: ellenőrizd az új `Validate organism-first` workflow teljes futását, és ha átjut a telepítésen, a tényleges vizuális teszt eredményét is.
 
+### 2026-10-27 – CI státusz és filmes időtengely audit
+
+- A `da5f18a` commit GitHub Actions futásaiban production `40419629655` **PASS**, mobil MAG vizuális `40419629693` **PASS**, R2103 `40419629647` **PASS**, R2104 `40419629866` **PASS**, teljesítményforrás-szerződések `40419629724` **PASS**.
+- A javított organism-main workflow `40419629737` a lekérdezéskor az `Install Chromium` lépésben **in_progress**; a tényleges vizuális teszt még nem indult el. PASS státuszt nem kap.
+- A `GENESIS-CINEMATIC-ACCEPTANCE.md` 0–3 s DNS, 3–7 s morph, 7–11 s nucleus, 11–14 s reveal felosztást követel. A tényleges `formatx-mag-genesis-three-r1280.js` `render(r,time)` függvényében `const t=clamp(r)*10` szerepel. A teljes filmes szekvencia 10 s belső időre van kalibrálva; a 14 s elfogadási dokumentum ettől eltér.
+- **Nem javítható** kizárólag `*10` → `*14` cserével: előbb az R533 szekvenciavezérlő időskáláját, a kamera- és részecske-kulcsképeket, a CSS-átmeneteket és a screenshot-assert időpontokat együtt kell feltérképezni.
+- Következő: ellenőrizd a Chromium telepítés befejezését; Lighthouse új eredményeit; készíts explicit R533 ↔ R1280 filmes időtengelyt, és egyetlen konzisztens storyboard-kontraktust.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
