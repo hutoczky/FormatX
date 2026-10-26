@@ -163,3 +163,5 @@ R2195_engine_cache=20261026-r2195-coherent-dna-studio-weld
 R2195_native_mag_cache=20261026-r2194-polished-four-arm-mag (unchanged permanent R326 hero)
 R2195_required_evidence=Production source/CSP and Worker tests; two-domain exact marker; real desktop GPU DNA/embryo/assembly/final screenshots, canonical and www browser cinematic handoff, mobile and permanent MAG check. Source chronology and cloudflare cache validators updated together.
 R2195_quality_limit=Photographic or awards-quality aesthetic not certified by automated checks; human and physical-device review still needed.
+
+r2202_desktop_proof_fix=Re-run the R2201 production cinematic with the corrected real WebGL READY sampling (6718ac4a93); do not reload a frame already confirmed ready; retain all four chromatic genome/cell/MAG pixel and timing assertions and strict CSP.
