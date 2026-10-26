@@ -2481,7 +2481,7 @@
       // the physically shaded organelle without exposing a hard MAG eye.
       this.embryoMaterial.opacity=.66*visible;
       this.embryoNucleusMaterial.opacity=.82*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.10:.14)*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.04:.06)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
@@ -2495,7 +2495,7 @@
       this.embryoSiteMaterial.opacity=.48*visible;
       this.embryoSites.rotation.y=Math.sin(time*.00031)*.11;
       this.embryoSites.rotation.z=Math.sin(time*.00023)*.035;
-      this.embryoCapillaryMaterial.opacity=.25*visible;
+      this.embryoCapillaryMaterial.opacity=.10*visible;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;

@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-reference-cell-depth';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-microscopic-nucleus-focus';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -78,7 +78,7 @@ for(const token of [
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
   'this.embryoMaterial.opacity=.66*visible;',
   'this.embryoNucleusMaterial.opacity=.82*visible;',
-  'this.embryoCapillaryMaterial.opacity=.25*visible;'
+  'this.embryoCapillaryMaterial.opacity=.10*visible;'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
 }
@@ -93,7 +93,7 @@ for(const token of [
   'this.embryoSites.setMatrixAt(i,siteDummy.matrix);',
   'this.embryoSiteMaterial.opacity=.48*visible;',
   'depthWrite:false,blending:T.NormalBlending',
-  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.10:.14)*visible;'
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.04:.06)*visible;'
 ]){
   assert.ok(engine.includes(token),'R2192 living-cell depth contract: '+token);
 }
@@ -151,7 +151,7 @@ assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
   birth.includes('const nativeCadence=r>=.90?40:'),
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
 assert.ok(engine.includes('const capillaries=this.mobileRender?5:9') &&
-  engine.includes('this.embryoCapillaryMaterial.opacity=.25*visible') &&
+  engine.includes('this.embryoCapillaryMaterial.opacity=.10*visible') &&
   engine.includes('const fade=1-smooth((t-3.10)/1.38)'),
   'R2175 biologic embryo must remain readable without the old DNA/capillary clutter');
 const land=t=>smoothNumber((t-8.45)/1.35);
