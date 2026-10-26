@@ -2646,7 +2646,7 @@
       // R2159: only a living, soft-edged biological cell is visible
       // between the founding DNA and the mechanically assembling MAG.
       // All the old early diamond/iris shapes stay invisible.
-      const appear=smooth((t-3.52)/.76);
+      const appear=smooth((t-3.28)/1.02);
       const dissolve=1-smooth((t-5.66)/1.12);
       const visible=appear*dissolve;
       this.coreGroup.visible=visible>.002;
