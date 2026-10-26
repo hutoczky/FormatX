@@ -210,6 +210,9 @@ async function validateMobile() {
     assert(box && box.x >= 0 && box.x + box.width <= 391, 'mobile pricing trigger outside viewport: ' + JSON.stringify(box));
     await pricingTrigger.tap();
     await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden);
+    const openedConsoleDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(openedConsoleDisplay!=='none','mobile console failed to become visible after tap');
+    mark('mobile: opened-console-css',openedConsoleDisplay);
 
     const shell = await page.locator('.fx-organism-console-shell').boundingBox();
     mark('mobile: sheet-box', shell);
