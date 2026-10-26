@@ -136,6 +136,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A `Validate organism-first FormatX main site` workflow Chromium telepítési hibája külön infrastruktúra-ügy maradt.
 - Következő: ellenőrizd a `1993e3a` és jelen PROGRESS commit CI-ját, különösen R326 runtime és mobil screenshot regresszió; hasonlítsd össze a Lighthouse méréseket, majd a geometriaépítés és bufferfeltöltés külön profilozását.
 
+### 2026-10-27 – S5 Chromium CI-telepítés javítása
+
+- `87ad770d` utáni workflow-k: production `40419243757` **PASS**, mobil vizuális `40419243758` **PASS**, R2103 `40419243955` **PASS**; az első lekérdezéskor több további futás még folyamatban volt.
+- A `Validate organism-first FormatX main site` `40419243789` továbbra is **FAIL** az `Install Chromium` lépésnél. A workflow közvetlenül a repo gyökerében futtatta a `npm install --no-save playwright@1.55.0` parancsot.
+- `5f75ffb`: a Chromium Playwright telepítése izolált `$RUNNER_TEMP/formatx-organism-browser` prefixbe került, Playwright `1.62.0` verzióval; a teszt `NODE_PATH` környezeti változón keresztül találja meg. A böngészőteszt és elfogadási állítások változatlanok.
+- Ez **telepítési hiba elleni javítás**, még nem bizonyított CI PASS. Következő: ellenőrizd az új `Validate organism-first` workflow teljes futását, és ha átjut a telepítésen, a tényleges vizuális teszt eredményét is.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
