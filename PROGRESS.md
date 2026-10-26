@@ -201,6 +201,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - **Nem igazolt még**, hogy a korábbi Playwright `stable` timeout kizárólag ettől szűnik meg. A `8ac1893` pozíciómintavételező teszt és az új desktop+mobil CI ezt ellenőrzi.
 - A Genesis 14 s filmes időtengelye továbbra is nyitott, a PR draft marad.
 
+### 2026-10-27 – R2211 valós 3D sejtmag látványfejlesztés
+
+- `d1c7422`: az éles honlapot kiszolgáló `docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js` `makeEmbryoFilm()` része új, térbeli sejtmag-belsőt kapott: 3 cyan/coral/violet `TorusGeometry` kromatingyűrű, külön áttetsző külső fényburok `SphereGeometry`, közös organellum-középpont, fényáteresztő `AdditiveBlending`.
+- A `render` biológiai fázisa az új elemek opacitását a már meglévő `visible=appear*dissolve` időablakhoz köti. A mechanikus MAG fázisban így eltűnnek a biológiai részek, és a korábbi időzítés megmarad.
+- `6f29288`: a gyűrűk forgása abszolút `time` alapú, tehát nem képkockánként összeadott, eltérő FPS mellett sem gyorsul/lassul.
+- **Nem végleges vizuális elfogadás:** a változtatás éles renderelő-kód, de képi screenshot-összehasonlítás és új CI szükséges. A PR továbbra is draft, az éles `master` ág változatlan.
+- Következő: `node --check`, MAG vizuális CI, mobil/desktop screenshots és a sejtmag megfelelő kompozíciójának ellenőrzése; utána további felületi réteg/anyag finomítás.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
