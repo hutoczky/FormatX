@@ -47,7 +47,7 @@
         void main(){
           float m=uMorph*uMorph*(3.0-2.0*uMorph);
           vec3 p=mix(aStart,aEnd,m);
-          p+=normalize(p+vec3(0.001))*sin(uTime*1.7+float(gl_VertexID)*0.13)*0.012*m;
+          p+=normalize(p+vec3(0.001))*sin(uTime*1.7+aStart.y*8.0+aStart.x*11.0)*0.012*m;
           vec4 mv=modelViewMatrix*vec4(p,1.0);
           gl_Position=projectionMatrix*mv;
           gl_PointSize=min(8.0,uSize*(210.0/max(1.0,-mv.z)));
