@@ -52,8 +52,19 @@ for(const token of [
 // R2178: reject the genuine root cause of visible titanium pepper-speckles:
  // the former R2141 double-lane armour overlaid the newer R2153 one-piece
  // arm hulls at almost identical projected depth. Exactly four arm hulls.
-assert.equal(core.split('for(let axis=0;axis<4;axis++)').length-1,1,
-  'R2178: permanent MAG must have one (and only one) four-arm geometry pass');
+const magHullStart=core.indexOf('/* R2153 — continuous 3D titanium arms');
+const magInlayStart=core.indexOf('/* R2194 — continuous polished titanium vein inlays');
+const magBezelStart=core.indexOf('/* The centre is not a painted circle.');
+assert.ok(magHullStart>=0&&magInlayStart>magHullStart&&magBezelStart>magInlayStart,
+  'R2194: the native four-arm hull, polished surface veins and optical bezel must be in order');
+const mainArmSection=core.slice(magHullStart,magInlayStart);
+const veinSection=core.slice(magInlayStart,magBezelStart);
+assert.equal(mainArmSection.split('for(let axis=0;axis<4;axis++)').length-1,1,
+  'R2178: permanent MAG must have exactly one structural four-arm hull');
+assert.equal(veinSection.split('for(let axis=0;axis<4;axis++)').length-1,1,
+  'R2194: polished veins must follow the four existing arms, without extra hulls');
+assert.ok(!/armorTri\(first\.left,first\.right,first\.crown/.test(veinSection),
+  'R2194: vein layer must not duplicate structural titanium hull caps');
 assert.ok(!core.includes('for(const lane of [-1,1])'),
   'R2178: retired duplicate titanium lane geometry has returned');
 assert.ok(core.includes('R2178: the retired eight raised titanium winglets'),
@@ -71,11 +82,11 @@ for(const token of [
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2179-true-optic-stable-titanium'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194-polished-four-arm-mag'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2179-true-optic-stable-titanium'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194-polished-four-arm-mag'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
-assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2192-living-depth'),
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
 // R2148: the user-visible native Three.js cinematic must end with a true
 // machined optical instrument rather than the small pre-R2148 glowing bead.
@@ -90,6 +101,16 @@ for(const token of [
 ]){
   assert.ok(introThree.includes(token),'R2148 physical optical assembly lost: '+token);
 }
+// R2194 MUST affect both the permanent visible R326 model and the
+// cinematic assembly, without creating a second permanent canvas.
+assert.ok(core.includes('R2194 — continuous polished titanium vein inlays')&&
+  core.includes('float polishedRib=smoothstep(5.43,5.455,vFacet)'),
+  'R2194 visible four-arm polished titanium relief missing from R326');
+const realIntro=read('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js');
+assert.ok(realIntro.includes('R2194 — the same eight continuous studio-polished titanium ribs')&&
+  realIntro.includes('this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial)')&&
+  realIntro.includes('const trimSeat=smooth((t-6.02)/1.18)'),
+  'R2194 film must seat the same raised chromium filaments after DNA');
 assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
@@ -130,14 +151,14 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261024-r2179'),
+  assert.ok(loader.includes('20261026-r2194'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261024-r2179'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261026-r2194'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261024-r2179'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261024-r2179'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',

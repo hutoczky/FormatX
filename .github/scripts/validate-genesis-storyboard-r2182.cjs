@@ -41,9 +41,9 @@ check(css,[
 ],'No premature native-MAG reveal');
 check(html,['formatx-mag-birth-live-r533.css?v=20261025-r2182-dna-chapter-first'],
   'Static stylesheet cache bust');
-check(birth,['formatx-mag-genesis-three-r1280.js?v=20261026-r2192-living-depth'],
+check(birth,['formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth'],
   'Live WebGL owner cache bust');
-check(edge,['formatx-mag-genesis-three-r1280.js?v=20261026-r2192-living-depth'],
+check(edge,['formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth'],
   'Cloudflare rewrite must not serve an older film');
 const embryo=t=>smooth((t-3.52)/.76)*(1-smooth((t-5.66)/1.12));
 const arm=t=>smooth((t-5.88)/1.18);
@@ -104,12 +104,12 @@ check(gpu,[
 // and fade completely BEFORE the optical eye wakes.
 check(gpu,[
   'const end=1-smooth((t-6.76)/.58)',
-  'line.material.opacity=(lane===0?.25:.21)*opacity',
-  'bridge.material.opacity=.32*opacity',
+  'line.material.opacity=(lane===0?.18:.16)*opacity',
+  'bridge.material.opacity=.29*opacity',
   'float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));',
   'vEnergy=first*last*(1.0+transferGlow*.16);',
   'this.assemblyWeldMaterial.uniforms.uIntensity.value=strength',
-  'const count=this.mobileRender?160:320'
+  'const count=this.mobileRender?112:224'
 ],'R2186 visible paired genetic-to-titanium transfer');
 const transfer=t=>1-smooth((t-6.76)/.58);
 assert(transfer(6.8)>.98,'Genetic bridge must still be luminous during arm assembly');

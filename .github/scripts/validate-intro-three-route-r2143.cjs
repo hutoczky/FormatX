@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2192-living-depth';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -87,10 +87,13 @@ for(const token of [
 for(const token of [
   'roughness:.31,clearcoat:.42,clearcoatRoughness:.31',
   'roughnessMap:this.bioticSurfaceTexture',
-  'const organelleCount=this.mobileRender?24:36;',
+  'const organelleCount=this.mobileRender?20:28;',
+  'const organelleGeometry=new T.IcosahedronGeometry(.016,1);',
   'this.embryoSites=new T.InstancedMesh(',
   'this.embryoSites.setMatrixAt(i,siteDummy.matrix);',
-  'this.embryoSiteMaterial.opacity=.56*visible;'
+  'this.embryoSiteMaterial.opacity=.48*visible;',
+  'depthWrite:false,blending:T.NormalBlending',
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.16:.22)*visible;'
 ]){
   assert.ok(engine.includes(token),'R2192 living-cell depth contract: '+token);
 }

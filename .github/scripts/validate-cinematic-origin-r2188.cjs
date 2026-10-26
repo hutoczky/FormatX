@@ -22,23 +22,23 @@ for(const text of [
   'rungs.setColorAt(i,new T.Color(baseColors[i%baseColors.length]))',
   'strand.userData.tube=tube;',
   'const sides=6,rings=40;',
-  'tube.material.opacity=(lane===0?.74:.65)*opacity;',
+  'tube.material.opacity=(lane===0?.59:.52)*opacity;',
   'p.needsUpdate=true;',
   'const start=smooth((t-4.68)/.62);',
   'const opticWake=smooth((t-7.44)/.78);',
   'const chromatinCount=this.mobileRender?10:17;',
   'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
   'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
-  'const organelleCount=this.mobileRender?24:36;',
+  'const organelleCount=this.mobileRender?20:28;',
   'this.embryoSites=new T.InstancedMesh(',
-  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;',
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.16:.22)*visible;',
   'this.embryoMaterial.opacity=.72*visible;',
   "const count=this.mobileRender?6000:9600;",
   "const fade=1-smooth((t-3.10)/1.38);"
 ]){
   assert(renderer.includes(text),'Missing R2188 film / biological chronology contract: '+text);
 }
-const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2192-living-depth';
+const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2195-coherent-living-depth';
 assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stale 3D intro');
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -59,12 +59,21 @@ assert(metal(8.3)===1 && optic(8.3)===1,
 for(const token of [
   '1.10+radius*.65*Math.sin(b)*Math.sin(a)',
   'radius*.82*Math.sin(b)*Math.cos(a)',
-  '.62+(r()-.5)*.16',
+  '.62+(r()-.5)*.11',
   'float last=1.0-curve(6.96,7.44,uPhase);'
 ])assert(renderer.includes(token),'R2192 spatial continuity missing: '+token);
+// R2195: photographic welding must preserve DNA-to-metal continuity without
+// asteroid-shaped debris, oversized splashes or random scattered sparks.
+for(const token of [
+  'mesh.visible=false;',
+  'const lateral=(r()-.5)*.088;',
+  'const count=this.mobileRender?112:224;',
+  'const tangent=(r()-.5)*.090;',
+  'gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6'
+])assert(renderer.includes(token),'R2195 focused genetic weld / studio-set regression: '+token);
 const embryoCentreZ=1.10;
 const cellDepthRange=.77*.65;
-const metalMinZ=.62-.08;
+const metalMinZ=.62-.055;
 assert(cellDepthRange<.53 && embryoCentreZ>.95,
   'Genome particle nucleus must coincide with 3D embryo envelope');
 assert(metalMinZ>.48,

@@ -1,13 +1,13 @@
 FormatX production revision
-token=20261026-r2192-physical-genome-morph
-release_line=R2192-DNA-FIRST-PHYSICAL-GENOME-TO-NUCLEUS-TO-MAG
+token=20261026-r2195-coherent-genetic-titanium-studio
+release_line=R2195-DNA-FIRST-EMBRYO-COHERENT-TITANIUM-STUDIO-CINEMA
 purpose=R2189 physically shaded biological cell nucleus with 10-to-17 three-dimensional chromatin filaments, restrained semi-transparent living membrane and deeper organelle optics, following R2188 first-frame high-contrast molecular backbone, four chromatic nucleotide types per real instanced DNA ladder and eight preallocated physical 3D double-helix transfer tubes, preserving the explicitly staged ten-second studio birth film: one smooth centered living DNA double helix, then genuine genome-particle condensation into a clean embryonic cell, followed by phased titanium arm assembly and delayed optical ignition. After the assembled MAG is established, it travels and scales into the permanent WebGL hero position during a continuous 1.35-second photographic landing; final native hero crossfade begins only after 9.15 seconds.
 assets=docs/scifi-ui/styles/formatx-intro-replay-r2150.css; visual validator: validate-visible-mag-r2143.cjs; docs/scifi-ui/scripts/formatx-crystal-organism-r326.js; docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js; docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js; docs/scifi-ui/scripts/formatx-core-mobile-v55.js; docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js; docs/scifi-ui/index.html; billing-worker/src/production-content-entry.js; source validator: validate-mag-debanding-r2035.cjs; R2156 layout/CSS: docs/scifi-ui/styles/formatx-intro-replay-r2150.css and docs/scifi-ui/index.html; R2156 visual audit: validate-visible-mag-r2143.cjs (CI)
 validation=Run production source/CSP/build gates and real 1440x900 desktop GPU snapshots at 1.6s DNA, 4.2s embryo, 6.8s unlit mechanical assembly, and 8.3s finished MAG; verify mobile cinematic, both-domain revision convergence, and live permanent WebGL MAG.
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261024-r2179
+mag_cache=20261026-r2194
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -125,3 +125,20 @@ R2191_renderer_cache=20261025-r2191-full-arm-dna-studio
 
 R2192_storyboard=One full centered physical double helix at 0-3.1 s; 6,000 mobile / 9,600 desktop paired nucleotides condense into the actual z=1.10 living embryo volume at 3-4.4 s; the same nucleotides traverse above the front-facing titanium at z=.62 and vanish by 7.44 s before recessed MAG optical ignition; stabilized permanent MAG handoff follows by 10 s.
 R2192_test=Live desktop GPU proof at 1.6/4.2/6.8/8.3 seconds, both-domain cinematic handoff and source-level spatial continuity regression must pass before this version is marked deployed.
+
+R2193_studio_environment=New 256-mobile / 512-desktop Three.js equirectangular photographic softbox environment, physically convolved through PMREM into real MeshPhysicalMaterial surface reflections on the DNA and titanium MAG chassis. All runtime fallback paths remain available if environment construction fails.
+R2193_genetic_surface=Both paired 3D genetic weld strands retain full-length cardinal-arm routing; normal-reflecting six-sided tubes have reduced additive flares and updated vertex normals during assembly, maintaining cyan/violet molecular identity with readable metal beneath.
+R2193_sequence=First central double-stranded DNA 0-3.1s, 9600/6000 real nucleotides condense to physical cell by 4.38s, titanium arm assembly from 5.88s, MAG optic ignites only after 7.44s, late transition to permanent R326 MAG 9.15-10s.
+R2193_validation=Source, security, Worker and runtime production candidate passed at GitHub run 40245206479. Full live canonical and WWW domains, real four-stage desktop GPU screenshots, mobile cinematic and standalone Genesis Studio remain mandatory to claim complete production release.
+R2193_cache=20261026-r2193-photographic-softbox-dna-metal
+
+R2194_actual_change=Visible permanent R326 four-arm chassis receives two narrow physically raised titanium veins per arm, seated on the existing single structural hull. The R1280 cinematic matches these with eight film-time chrome ribs during 5.88-7.4-second assembly while retaining first DNA, organic embryo, no early pupil and delayed permanent WebGL handoff.
+R2194_regression_fix=Corrected source test to distinguish the ONE four-arm structural hull from the optional four-arm decorative inlay pass, and still prohibit any overlapping full titanium armour system. Production candidate and browser archive syntax+WebGL source gates passed on GitHub Actions runs 40247632648 and 40247632663.
+R2194_release_gate=Deploy this exact marker to both formatxsuite.com and www.formatxsuite.com; require successful full live R533-to-R536 cinematic browser validation, canonical permanent MAG smoke and Android/desktop 3D frame checks before stating verified live deployment. Award-level visual quality remains subject to human-device inspection.
+R2194_cache_release_fix=Production R2151+ live native MAG checker reads mag_cache from the audited release marker. Its stale 20261024-r2179 value failed despite the R2194 renderer, P0 scheduler, motion loader, mobile loader and Worker rewrite graph all using exactly 20261026-r2194-polished-four-arm-mag. Set mag_cache=20261026-r2194 so the acceptance test checks the actually deployed release. No scripts/security guards were disabled.
+
+R2195_visual=The user's real R2194 live screenshots revealed polygonal asteroid-like debris and excessively wide additive genetic confetti at 6.8s. The real homepage R1280 Three.js movie now hides the instanced rock dressing, narrows the four-arm GPU nucleotide landing lanes and Z scatter, reduces transient point size / additive opacity, and makes 224-desktop / 112-mobile welding sparks more localized. Preserve 9600/6000 true double-stranded DNA origin, biologic embryo, 5.88s titanium assembly, eye only after 7.44s, seamless 9.15-10s permanent MAG reveal.
+R2195_engine_cache=20261026-r2195-coherent-dna-studio-weld
+R2195_native_mag_cache=20261026-r2194-polished-four-arm-mag (unchanged permanent R326 hero)
+R2195_required_evidence=Production source/CSP and Worker tests; two-domain exact marker; real desktop GPU DNA/embryo/assembly/final screenshots, canonical and www browser cinematic handoff, mobile and permanent MAG check. Source chronology and cloudflare cache validators updated together.
+R2195_quality_limit=Photographic or awards-quality aesthetic not certified by automated checks; human and physical-device review still needed.

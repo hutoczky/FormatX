@@ -92,6 +92,7 @@
       this.world.add(this.dnaGroup,this.organicGroup,this.cellGroup,this.tentacleGroup,this.mechanicalGroup,this.coreGroup);
 
       this.makeLights();
+      this.makeStudioEnvironment();
       this.makeParticles();
       this.makeDebris();
       this.makeDNAField();
@@ -142,6 +143,59 @@
       this.scene.add(this.mechLight);
     }
 
+    makeStudioEnvironment(){
+      // R2193 — camera-grade specular light tent. Three real broad light cards
+      // and a cool horizon are baked once into one low-resolution HDR-like
+      // equirectangular environment. Physically based metal receives coherent
+      // broad softbox reflections, not extra CSS overlays or neon bloom.
+      const T=this.THREE;
+      const canvas=document.createElement('canvas');
+      const w=this.mobileRender?256:512;
+      canvas.width=w;canvas.height=w/2;
+      const ctx=canvas.getContext('2d',{alpha:false});
+      if(!ctx)return;
+      const h=canvas.height;
+      const fill=ctx.createLinearGradient(0,0,0,h);
+      fill.addColorStop(0,'#18252b');
+      fill.addColorStop(.35,'#091319');
+      fill.addColorStop(.61,'#101b21');
+      fill.addColorStop(1,'#03070b');
+      ctx.fillStyle=fill;ctx.fillRect(0,0,w,h);
+      // Feathered reflections from long, physically plausible studio panels.
+      const card=(x,y,rx,ry,angle,white,outer)=>{
+        ctx.save();ctx.translate(x*w,y*h);ctx.rotate(angle);
+        ctx.scale(rx*w,ry*h);
+        const g=ctx.createRadialGradient(0,0,.02,0,0,1);
+        g.addColorStop(0,white);g.addColorStop(.50,white);
+        g.addColorStop(.78,outer);g.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);
+        ctx.fill();ctx.restore();
+      };
+      card(.22,.36,.063,.31,-.22,'rgba(226,244,242,.91)','rgba(94,142,145,.18)');
+      card(.68,.46,.043,.37,.14,'rgba(194,220,217,.77)','rgba(82,122,128,.14)');
+      card(.49,.19,.32,.068,0,'rgba(135,180,195,.32)','rgba(54,99,114,.05)');
+      card(.87,.58,.12,.18,.35,'rgba(71,154,175,.26)','rgba(34,83,110,.04)');
+      let texture=null,pmrem=null;
+      try{
+        texture=new T.CanvasTexture(canvas);
+        texture.mapping=T.EquirectangularReflectionMapping;
+        texture.colorSpace=T.SRGBColorSpace;
+        pmrem=new T.PMREMGenerator(this.renderer);
+        this.studioEnvTarget=pmrem.fromEquirectangular(texture);
+        this.scene.environment=this.studioEnvTarget.texture;
+        this.scene.environmentIntensity=this.mobileRender?.64:.84;
+        this.studioEnvironmentTexture=texture;
+      }catch(error){
+        this.studioEnvTarget?.dispose?.();
+        this.studioEnvTarget=null;
+        this.scene.environment=null;
+        texture?.dispose?.();
+        console.warn('FormatX neutral studio environment fallback:',error);
+      }finally{
+        pmrem?.dispose?.();
+      }
+    }
+
     makeParticles(){
       const T=this.THREE,r=this.rand;
       const count=640;
@@ -185,6 +239,10 @@
         mesh.setMatrixAt(i,dummy.matrix);
       }
       mesh.instanceMatrix.needsUpdate=true;
+      // R2195: polygonal rubble competed with the molecular hero and read as
+      // an asteroid game scene, not photographic studio set dressing.
+      // Retain the object for compatible lifecycle but exclude its draw call.
+      mesh.visible=false;
       this.debris=mesh;
       this.scene.add(mesh);
     }
@@ -909,13 +967,14 @@
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
         const reach=.20+.74*r();
-        const lateral=(r()-.5)*.15;
+        // R2195: paired DNA matter seats in narrow metallic arm channels.
+        const lateral=(r()-.5)*.088;
         // R2192: molecular matter seats above the actual titanium front
         // (typically z=.38-.48), rather than vanishing behind opaque armour.
         arms.set([
           Math.cos(phi)*reach-Math.sin(phi)*lateral,
           Math.sin(phi)*reach+Math.cos(phi)*lateral,
-          .62+(r()-.5)*.16
+          .62+(r()-.5)*.11
         ],i*3);
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
@@ -971,7 +1030,7 @@
             // R2186: the genetic matter becomes a visible energetic stream
             // only while the metal is physically closing around it.
             float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));
-            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*13.0/(-mv.z)*(1.0+transferGlow*.24),1.0,6.6*uPixelRatio);
+            gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6/(-mv.z)*(1.0+transferGlow*.16),1.0,5.6*uPixelRatio);
             float first=curve(0.08,.65,uPhase);
             // R2192: all genetic matter departs BEFORE the optical organ
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
@@ -990,11 +1049,12 @@
             float glow=exp(-r*15.0);
             float center=exp(-r*53.0);
             vec3 cool=mix(vec3(.14,.68,.75),vec3(.62,.34,.90),smoothstep(.46,.54,vSeed));
-            // Cool membrane with restrained warm organelle sites during the
-            // biological chapter; the paired DNA colours return for assembly.
-            vec3 cellular=mix(vec3(.10,.64,.57),vec3(.96,.31,.13),smoothstep(.78,.94,vSeed));
+            // The cell chapter stays in the reference's cyan/teal family.
+            // Warm depth comes from sparse physical organelles, not thousands
+            // of orange genome points that obscure the nucleus silhouette.
+            vec3 cellular=mix(vec3(.08,.60,.56),vec3(.18,.78,.72),smoothstep(.56,.94,vSeed));
             vec3 color=mix(cool,cellular,vCellFocus)*glow*.70+vec3(.75,1.0,.98)*center*.32;
-            gl_FragColor=vec4(color,vEnergy*mix(.37,.64,vSeed)*(1.0-smoothstep(.04,.25,r)));
+            gl_FragColor=vec4(color,vEnergy*mix(.34,.58,vSeed)*(1.0-smoothstep(.04,.25,r)));
           }`
       });
       this.genomeParticles=new T.Points(geometry,material);
@@ -1064,8 +1124,8 @@
       // Sparse warm organelle sites occupy real, different depths inside the
       // turquoise cell. One instanced draw call replaces the previous flat,
       // homogeneous centre without turning the cell into particle noise.
-      const organelleCount=this.mobileRender?24:36;
-      const organelleGeometry=new T.IcosahedronGeometry(.031,1);
+      const organelleCount=this.mobileRender?20:28;
+      const organelleGeometry=new T.IcosahedronGeometry(.016,1);
       this.embryoSiteMaterial=new T.MeshPhysicalMaterial({
         color:0xff9a72,emissive:0xff3d1f,emissiveIntensity:.82,
         metalness:0,roughness:.54,clearcoat:.16,clearcoatRoughness:.48,
@@ -1084,7 +1144,7 @@
           Math.cos(b)*rr*.92,
           .20+Math.sin(b)*Math.sin(a)*rr*.58
         );
-        const siteScale=.55+siteRand()*1.05;
+        const siteScale=.48+siteRand()*.72;
         siteDummy.scale.setScalar(siteScale);
         siteDummy.rotation.set(siteRand()*2.4,siteRand()*2.4,siteRand()*2.4);
         siteDummy.updateMatrix();
@@ -1153,7 +1213,7 @@
         new T.Float32BufferAttribute(chromatinColors,3));
       this.embryoChromatinMaterial=new T.LineBasicMaterial({
         vertexColors:true,transparent:true,opacity:0,
-        depthWrite:false,blending:T.AdditiveBlending
+        depthWrite:false,blending:T.NormalBlending
       });
       this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);
       this.embryoChromatin.renderOrder=4;
@@ -1819,6 +1879,52 @@
         this.armInlays.push(arm);
       }
 
+      // R2194 — the same eight continuous studio-polished titanium ribs
+      // as the permanent R326 MAG. One batched 3D mesh and one material;
+      // no second canvas or screen-space decorative overlay.
+      const ribPositions=[],ribIndices=[];
+      for(let axis=0;axis<4;axis++){
+        const angle=axis*Math.PI*.5;
+        const dx=Math.cos(angle),dy=Math.sin(angle);
+        const sx=-dy,sy=dx;
+        for(const side of [-1,1]){
+          const start=ribPositions.length/3;
+          for(let j=0;j<=20;j++){
+            const u=j/20;
+            const reach=.29+.59*u;
+            const lateral=side*(.053+.024*Math.sin(Math.PI*u));
+            const width=.010*(1-.43*u);
+            const z=.470-.034*u+.020*Math.sin(Math.PI*u);
+            ribPositions.push(
+              dx*reach+sx*(lateral-width),
+              dy*reach+sy*(lateral-width),z,
+              dx*reach+sx*(lateral+width),
+              dy*reach+sy*(lateral+width),z
+            );
+            if(j>0){
+              const p=start+(j-1)*2,q=start+j*2;
+              ribIndices.push(p,q,p+1,p+1,q,q+1);
+            }
+          }
+        }
+      }
+      const ribGeometry=new T.BufferGeometry();
+      ribGeometry.setAttribute('position',
+        new T.Float32BufferAttribute(ribPositions,3));
+      ribGeometry.setIndex(ribIndices);
+      ribGeometry.computeVertexNormals();
+      this.armTrimMaterial=new T.MeshPhysicalMaterial({
+        color:0xd5e6e2,metalness:.89,roughness:.16,
+        clearcoat:1,clearcoatRoughness:.042,
+        specularIntensity:1,
+        transparent:true,opacity:0,depthWrite:false,
+        side:T.DoubleSide,envMapIntensity:2.2
+      });
+      this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial);
+      this.armTrim.renderOrder=5;
+      this.armTrim.visible=false;
+      this.mechanicalGroup.add(this.armTrim);
+
       // Minimal internal seam energy; no external robotic rails in R1941.
       this.seamMaterial=new T.MeshBasicMaterial({
         color:0x52d9ef,transparent:true,opacity:0,
@@ -1989,14 +2095,15 @@
       // The DNA remains the source and this welding is visible only AFTER
       // the biological nucleus has condensed into four assembly lanes.
       const T=this.THREE,r=this.rand;
-      const count=this.mobileRender?160:320;
+      // R2195: precise welding at metal edges, not a confetti cloud.
+      const count=this.mobileRender?112:224;
       const positions=new Float32Array(count*3);
       const seed=new Float32Array(count);
       for(let i=0;i<count;i++){
         const axis=i%4;
         const angle=axis*Math.PI*.5;
         const reach=.24+r()*.66;
-        const tangent=(r()-.5)*.175;
+        const tangent=(r()-.5)*.090;
         positions[i*3]=Math.cos(angle)*reach-Math.sin(angle)*tangent;
         positions[i*3+1]=Math.sin(angle)*reach+Math.cos(angle)*tangent;
         positions[i*3+2]=.33+(r()-.5)*.21;
@@ -2023,7 +2130,7 @@
             pos.z+=.025*sin(uTime*.0017+aSeed*23.0);
             vec4 mv=modelViewMatrix*vec4(pos,1.0);
             gl_Position=projectionMatrix*mv;
-            gl_PointSize=clamp((1.4+2.1*pulse)*uPixelRatio*4.2/max(1.0,-mv.z),
+            gl_PointSize=clamp((1.1+1.35*pulse)*uPixelRatio*4.2/max(1.0,-mv.z),
               1.0,4.5*uPixelRatio);
           }`,
         fragmentShader:`
@@ -2037,7 +2144,7 @@
             vec3 plasma=mix(vec3(.22,.77,.82),vec3(.80,.90,.98),
               smoothstep(.25,.95,vSeed));
             gl_FragColor=vec4(plasma*(.40+.60*core),
-              vFlare*core*.48);
+              vFlare*core*.36);
           }`,
         transparent:true,depthTest:true,depthWrite:false,
         blending:T.AdditiveBlending
@@ -2240,7 +2347,7 @@
           if(line.userData.tube)line.userData.tube.visible=false;
           return;
         }
-        line.material.opacity=(lane===0?.25:.21)*opacity;
+        line.material.opacity=(lane===0?.18:.16)*opacity;
         const angle=axis*Math.PI*.5;
         const dx=Math.cos(angle),dy=Math.sin(angle);
         const source=line.userData.source;
@@ -2267,7 +2374,7 @@
           // R2135: a real volumetric, phase-opposed double helix twists
           // around each forming MAG arm, rather than oscillating in a plane.
           // Its tapered radius seats into the emerging metal at both ends.
-          const radius=.105*Math.sin(Math.PI*u)*(1-.45*smooth((t-5.15)/1.65));
+          const radius=.065*Math.sin(Math.PI*u)*(1-.38*smooth((t-5.15)/1.65));
           const phase=u*Math.PI*8+time*.0028+axis*Math.PI*.5+lane*Math.PI;
           const sideways=radius*Math.cos(phase);
           const depth=radius*Math.sin(phase);
@@ -2277,7 +2384,7 @@
         const tube=line.userData.tube;
         if(tube){
           tube.visible=opacity>.002;
-          tube.material.opacity=(lane===0?.74:.65)*opacity;
+          tube.material.opacity=(lane===0?.59:.52)*opacity;
           const p=tube.geometry.attributes.position;
           const sides=6;
           for(let j=0;j<40;j++){
@@ -2303,6 +2410,9 @@
             }
           }
           p.needsUpdate=true;
+          // R2193: specular softboxes need the ACTUAL moving tube surface
+          // normals; fixed fallback normals made the gene strands look flat.
+          tube.geometry.computeVertexNormals();
         }
       });
       // R2157: reuse the already-updated opposite DNA strands as the
@@ -2314,7 +2424,7 @@
         const show=opacity>.002 && first?.visible && second?.visible;
         bridge.visible=Boolean(show);
         if(!show)return;
-        bridge.material.opacity=.32*opacity;
+        bridge.material.opacity=.29*opacity;
         const a=bridge.geometry.attributes.position;
         const p=first.geometry.attributes.position;
         const q=second.geometry.attributes.position;
@@ -2371,7 +2481,7 @@
       // the physically shaded organelle without exposing a hard MAG eye.
       this.embryoMaterial.opacity=.72*visible;
       this.embryoNucleusMaterial.opacity=.76*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.16:.22)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
@@ -2382,7 +2492,7 @@
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoSiteMaterial.opacity=.56*visible;
+      this.embryoSiteMaterial.opacity=.48*visible;
       this.embryoSites.rotation.y=Math.sin(time*.00031)*.11;
       this.embryoSites.rotation.z=Math.sin(time*.00023)*.035;
       this.embryoCapillaryMaterial.opacity=.25*visible;
@@ -2590,6 +2700,11 @@
       // R2180: titanium inlays mechanically seat after the supporting DNA
       // reaches each arm. Shared geometry, deterministic authored end pose.
       const inlayBirth=smooth((t-5.86)/1.14);
+      // R2194: real metal veins only become visible after DNA molecular
+      // filaments begin seating into the four machined titanium arms.
+      const trimSeat=smooth((t-6.02)/1.18);
+      this.armTrim.visible=trimSeat>.002;
+      this.armTrimMaterial.opacity=.90*grow*trimSeat;
       this.armInlayMaterial.opacity=.985*grow;
       this.armEtchMaterial.opacity=.55*inlayBirth;
       this.armInlays.forEach((part,axis)=>{
@@ -2710,8 +2825,8 @@
       this.particles.material.opacity=(.26+.045*Math.sin(time*.00045))*(1-finaleClean*.78);
       // Film the genetic origin against a restrained neutral studio set:
       // early drifting rubble competes with the DNA silhouette.
-      const setDressing=.28+.72*smooth((t-5.15)/1.22);
-      if(this.debris?.material)this.debris.material.opacity=.34*setDressing*(1-finaleClean*.94);
+      // R2195: keep tiny optical motes but no faceted polygonal rubble.
+      if(this.debris)this.debris.visible=false;
 
       const flash=smooth((t-9.12)/.20)*(1-smooth((t-9.46)/.34));
       /* R1950 — controlled studio finale. The handoff lifts the optical core,
@@ -2880,6 +2995,8 @@
       });
       this.microFiberTexture?.dispose?.();
       this.bioticSurfaceTexture?.dispose?.();
+      this.studioEnvironmentTexture?.dispose?.();
+      this.studioEnvTarget?.dispose?.();
       this.renderer.dispose();
     }
   }
