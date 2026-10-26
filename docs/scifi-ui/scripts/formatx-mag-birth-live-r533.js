@@ -1,5 +1,7 @@
 (() => {
   'use strict';
+  // R2199 source lineage: 20261026-r2199-photonic-genesis-nucleus
+  // R2201: replay GENESIS on each navigation; preserve user and audit skip.
 
   /* R1755 — hard idempotence at the cinematic owner itself.
      The production rescue bootstrap and the first-paint bootstrap may race on
@@ -64,16 +66,23 @@
      source for compatibility validators, but is removed before its deferred
      controller executes, so users never see two intros back-to-back. */
   document.getElementById('formatx-event-horizon')?.remove();
-  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : (seen && !FORCE ? 'session-skip' : 'active');
+  // R2201: full navigations always show the GENESIS movie, including reloads.
+  // A one-time session latch previously hid the entire requested DNA/embryo
+  // sequence whenever someone refreshed the page in the same browser tab.
+  // Preserve deliberate ?intro=0 and automated Lighthouse exceptions.
+  const SKIP_REQUESTED = PARAMS.get('intro') === '0';
+  ROOT.dataset.fxMagBirthOwnerR533 = !FORCE && AUTOMATION
+    ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip')
+    : (SKIP_REQUESTED ? 'explicit-skip' : 'active');
   if (ROOT.dataset.fxMagBirthOwnerR533 === 'active') {
     ROOT.dataset.fxMagBirthGenomeR610='dna-assembly-zoom-native-r326';
     ROOT.dataset.fxMagBirthGenomeR611='realistic-css-3d-double-helix-embryo-one-native-r326';
     ROOT.dataset.fxMagBirthOwnershipR1673='genesis-contract-published-before-visible-live-shell';
   }
 
-  if (!FORCE && (seen || AUTOMATION)) {
+  if (!FORCE && (SKIP_REQUESTED || AUTOMATION)) {
     prepaintOverlay?.remove();
-    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'session-skip';
+    ROOT.dataset.fxMagBirthLiveR533 = AUTOMATION ? (LIGHTHOUSE ? 'lighthouse-skip' : 'automation-skip') : 'explicit-skip';
     return;
   }
 
@@ -574,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2200-aa-focused-biophotonic-nucleus';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2202-aa-focused-microcell';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;

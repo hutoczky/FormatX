@@ -27,7 +27,7 @@ const checks=[
   ['teal/coral cell palette','new T.Color(0xffa257)'],
   ['near-lens DNA approach',"z=mix(this.mobileRender?5.15:4.68,4.88,k);"],
   ['large living cell',"const embryoScale=this.mobileRender?.94:1.07;"],
-  ['translucent biological membrane',"this.embryoMaterial.opacity=.66*visible;"],
+  ['translucent biological membrane',"this.embryoMaterial.opacity=.86*visible;"],
   ['volumetric organelle',"this.embryoNucleusMaterial.opacity=.82*visible;"],
   ['first-frame genome','this.makeGenomeParticles();'],
   ['physical titanium chassis','this.updateMechanical(t,time);'],
@@ -53,9 +53,14 @@ assert(engine.includes('smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*.94'),
   'Biological lights must extinguish before titanium assembly');
 assert(engine.includes('const count=this.mobileRender?6000:9600;'),
   'GPU nucleotide morph must remain 6000/9600 instances');
-const revision='20261026-r2200-aa-focused-biophotonic-nucleus';
-for(const [label,src] of [['R533',birth],['rescue',rescue],['HTML',html],['Worker',worker]]){
-  assert(src.includes(revision),'Stale '+label+' cinematic delivery cache');
+// R2201: recovery/canonical boot load R533 while R533/edge load R1280.
+for(const [label,src,revision] of [
+  ['R533',birth,'20261026-r2202-aa-focused-microcell'],
+  ['rescue',rescue,'20261026-r2202-aa-focused-genesis'],
+  ['HTML',html,'20261026-r2202-aa-focused-genesis'],
+  ['Worker',worker,'20261026-r2202-aa-focused-microcell']
+]){
+  assert(src.includes(revision),'Stale '+label+' cinematic delivery cache: '+revision);
 }
 assert(html.includes('INLINE_R2199_BOOT_HASH')===false,
   'CSP hash constants belong in the Worker, not in HTML');

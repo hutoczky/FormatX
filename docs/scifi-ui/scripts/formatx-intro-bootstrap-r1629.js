@@ -18,7 +18,7 @@ if(l){
   o.observe(document.head,{childList:true});
   r.dataset.fxLighthouseCriticalCoreR1749='armed';
 }
-const v=f||(!s&&!a),o=v?(f?'forced-intro':'first-real-visit'):(a?'automation-skip':'session-skip');
+const v=f||(!a&&p.get('intro')!=='0'),o=v?(f?'forced-intro':'fresh-navigation-genesis'):(a?'automation-skip':'explicit-skip');
 r.dataset.fxIntroPrepaintR1611=v?'show':'skip';
 r.dataset.fxIntroPrepaintOwnerR1611=o;
 r.dataset.fxMagBirthOwnerR533=v?'active':o;
@@ -33,7 +33,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261026-r2200-aa-focused-biophotonic-nucleus';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261026-r2202-aa-focused-genesis';
 let retryCount=0,retryTimer=0;
 const RETRY_LIMIT=3;
 const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;

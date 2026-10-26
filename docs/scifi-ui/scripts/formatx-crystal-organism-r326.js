@@ -1354,6 +1354,18 @@
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
+        /* R2200: the same biological cyan/coral nucleus stays alive inside
+           the recessed MAG iris after the titanium arms finish seating.
+           This is spatial shader photochemistry, not a flat overlay. */
+        float cellVein=sin(oq.x*23.0+sin(oq.y*19.0+uTime*.25)*2.1);
+        float cellCross=sin(oq.y*31.0-oq.x*8.0+uTime*.18);
+        float cellNoise=(cellVein*.55+cellCross*.45)*.5+.5;
+        float livingInterior=exp(-pow(od/.73,4.0))*front;
+        float coralSite=pow(max(0.0,cellNoise-.67)*3.0,2.6);
+        float aquaSites=pow(max(0.0,cellNoise-.33),3.1);
+        c+=vec3(.05,.49,.51)*livingInterior*aquaSites*(.16+.10*uEnergy);
+        c+=vec3(.89,.27,.20)*livingInterior*coralSite*(.23+.10*uEnergy);
+
 
         /* R2137: raised metal panels visually separate from smoked bioglass. */
         float metalKey=max(dot(n,normalize(vec3(-.46,.72,.52))),0.0);
@@ -1406,6 +1418,7 @@
     /* R1930 visual parity: one authored studio shader on desktop, mobile and
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
+    root.dataset.fxNativeMagVisualR2200='organic-coral-cytoplasm-retained-in-four-arm-titanium-optic';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
