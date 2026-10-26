@@ -114,6 +114,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Ezek a **legelső** LHR futás értékei, nem a három mérés átlaga. A pontszámokat nem szabad más futásból vett 0,81–0,83 értékekkel összekeverni.
 - **Következő konkrét kódmunka:** `formatx-crystal-organism-r326.js` hosszú inicializációs/renderelési feladatainak vizsgálata és felosztása; a mini-assistant induláskori munkájának késleltetése csak akkor, ha az elsődleges UI és accessibility szerződések megmaradnak. Minden módosítást Lighthouse és funkcionális regresszió kövessen. A CSS-t nem szabad vakon deferredre váltani, mert a DNA első képkockája kritikus.
 
+### 2026-10-27 – S5 R326 geometria profilozási kapu
+
+- Az `f864368c` utáni GitHub Actions futásban (`40416915379`) production **PASS**, mobil R2103 (`40416915378`) **PASS**, R2104 (`40416915366`) **PASS**, P0 (`40416915375`) **PASS**; Lighthouse (`40416915350`) továbbra is **FAIL**.
+- Az R326 forrásban a `finishBoot(program)` szinkron módon építi a teljes `buildOrganismGeometry(softwareRenderer)` geometriát, majd GPU buffereket tölt fel. Ez alkalmas a hosszú main-thread feladatok előidézésére, de az ok-okozat még mérendő.
+- `74871d9`: nem invazív mérés hozzáadva: `document.documentElement.dataset.fxCoreGeometryBuildMsR2202` és `performance.measure('formatx:r326:geometry-build-r2202')`. A geometriát, a tesszellációt és a renderelést nem változtattam. **Új CI még nem ellenőrzött.**
+- Következő: valódi mobil és desktop trace-ben hasonlítsd össze a `geometry-build-r2202` időt a teljes long taskkal; ha a geometria dominál, bontsd kisebb aszinkron feladatokra vagy dolgozz ki worker-alapú adatgenerálást; GPU uploadot a WebGL főszálon tartsd. A Lighthouse ≥0,95 változatlan.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
@@ -123,6 +130,6 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 
 ## 7. Következő végrehajtandó feladat
 
-**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** a `40414747601` Lighthouse artifact elemzése megtörtént; következő a `formatx-crystal-organism-r326.js` 304/253 ms-os mobil long taskjainak forrásszintű optimalizálása és az R459 desktop 171 ms-os feladatának vizsgálata. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
+**S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** az R326 geometriaépítés időmérése bekerült (`74871d9`); ellenőrizd a CI-t és a `formatx:r326:geometry-build-r2202` trace-mérést, majd bizonyított szűk keresztmetszetre készíts optimalizálást. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
 
 **Folytatási szabály:** minden új munkamenet elején olvasd ezt a fájlt, csak az itt nyitott tételeket folytasd. A PASS státusz kizárólag ténylegesen lefuttatott teszthez rendelhető.
