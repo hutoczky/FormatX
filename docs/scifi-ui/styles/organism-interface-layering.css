@@ -292,6 +292,13 @@ html.fx-organism-menu-open body {
   background: #02070d;
 }
 
+/* R2206: the fullscreen display:block !important rule above has equal
+   specificity to the base [hidden] rule and can override it when this
+   layering stylesheet loads later. Preserve native hidden semantics. */
+.fx-organism-interface-ready .fx-organism-console[hidden] {
+  display: none !important;
+}
+
 .fx-organism-interface-ready .fx-organism-console-backdrop {
   display: none !important;
 }
