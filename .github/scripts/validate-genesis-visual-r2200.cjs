@@ -1,0 +1,12 @@
+'use strict';
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
+assert(source.includes('makeCinematicBiophotons(){'),'DNA and living-cell photon system must remain active');
+assert(source.includes('makeEmbryoFilm(){'),'Real 3D organic nucleus must remain active');
+assert(source.includes('makeGenomeParticles(){'),'DNA must physically morph into nucleus and MAG');
+assert(source.includes('makeEmbryoTexture(){'),'R2200 requires procedural turquoise and coral cytoplasm on 3D cell');
+assert(source.includes('this.embryoTexture=this.makeEmbryoTexture();'),'R2200 textured material must be physically connected');
+assert(source.includes('[.00,.03,.55,.32,1.48]'),'R2200 desktop helix must fill the cinematic opening shot');
+assert(source.includes('[.00,.06,.60,1.28,.95]'),'R2200 portrait helix must remain readable');
+console.log('R2200_REFERENCE_GENESIS_VISUAL_PASS');
