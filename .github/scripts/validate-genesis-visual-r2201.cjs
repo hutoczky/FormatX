@@ -18,8 +18,8 @@ assert(match,'Inline parser-owned GENESIS bootstrap missing');
 const hash="'sha256-"+crypto.createHash('sha256').update(match[1]).digest('base64')+"'";
 const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
 assert(meta?.[1]?.includes(hash),'The exact new GENESIS inline hash must appear in HTML CSP');
-assert(worker.includes('const INLINE_R2202_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
-assert(worker.includes('${INLINE_R2202_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
+assert(worker.includes('const INLINE_R2202_LISTENER_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
+assert(worker.includes('${INLINE_R2202_LISTENER_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
 assert(match[1].includes("const v=f||(!a&&p.get('intro')!=='0')"),
   'Every normal full navigation must play GENESIS; explicit ?intro=0 may skip');
 assert(match[1].includes('fresh-navigation-genesis'),'Must identify the new repeatable film bootstrap');
@@ -27,6 +27,15 @@ assert(!intro.includes('if (!FORCE && (seen || AUTOMATION))'),
   'The old sessionStorage skip must not silently suppress the DNA film');
 assert(intro.includes('if (!FORCE && (SKIP_REQUESTED || AUTOMATION))'),
   'User-initiated skip and automated audit skip must remain supported');
+for(const listener of [
+  "addEventListener('formatx:real3dready'",
+  "addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},interactionOptions)",
+  "addEventListener('orientationchange',()=>setTimeout(()=>{"
+])assert(intro.includes(listener),'Retired-film lifecycle listener missing: '+listener);
+assert(intro.includes("if(!finished)syncTarget(true);\n  },120),interactionOptions);"),
+  'Queued orientation work must stop after the genuine MAG handoff');
+assert(!intro.includes("addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},{passive:true})"),
+  'Geometry listener must not survive the film AbortController');
 const required=[
   "const placements=this.mobileRender?",
   "const h=this.createHelix(index===0?3.54:4.08",

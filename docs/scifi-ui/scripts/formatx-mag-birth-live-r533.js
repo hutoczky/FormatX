@@ -1465,16 +1465,18 @@
   addEventListener('pointerleave',event=>feedInteraction('leave',event,{strength:.18}),interactionOptions);
   addEventListener('resize',()=>semanticInteraction('resize',.30),interactionOptions);
   addEventListener('orientationchange',()=>semanticInteraction('orientation',.52),interactionOptions);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},interactionOptions);
 
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
     locateStage();
     syncTarget(true);
     coreApi=window.FormatXLivingCore||window.FormatXCoreMobileV69||coreApi;
-  },{passive:true});
-  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},{passive:true});
-  addEventListener('orientationchange',()=>setTimeout(()=>syncTarget(true),120),{passive:true});
+  },interactionOptions);
+  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},interactionOptions);
+  addEventListener('orientationchange',()=>setTimeout(()=>{
+    if(!finished)syncTarget(true);
+  },120),interactionOptions);
   addEventListener('pagehide',()=>finish('pagehide'),{once:true});
 
   start();

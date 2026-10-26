@@ -56,8 +56,8 @@ assert(engine.includes('const count=this.mobileRender?6000:9600;'),
 // R2201: recovery/canonical boot load R533 while R533/edge load R1280.
 for(const [label,src,revision] of [
   ['R533',birth,'20261026-r2202-aa-focused-microcell'],
-  ['rescue',rescue,'20261026-r2202-aa-focused-genesis'],
-  ['HTML',html,'20261026-r2202-aa-focused-genesis'],
+  ['rescue',rescue,'20261026-r2202-retired-listeners'],
+  ['HTML',html,'20261026-r2202-retired-listeners'],
   ['Worker',worker,'20261026-r2202-aa-focused-microcell']
 ]){
   assert(src.includes(revision),'Stale '+label+' cinematic delivery cache: '+revision);

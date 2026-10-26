@@ -41,6 +41,8 @@ const INLINE_R2200_BOOT_HASH = "'sha256-RNmomd3pAQVLMW4ZpoZKUqXQWgQMzKSWD7NBJRIM
 const INLINE_R2201_BOOT_HASH = "'sha256-FojrtuBLdf6rMDUpNp7FRT/xvzL0AFH40Qg4e2y6V/M='";
 // R2202 exact parser bootstrap after the focused mobile AA film cache promotion.
 const INLINE_R2202_BOOT_HASH = "'sha256-eBsjac1UkasQbGIbDmPoYXYJ1PHZ8H4dGa0JOdXeuoQ='";
+// R2202 follow-up: exact parser bootstrap after retiring completed-film listeners.
+const INLINE_R2202_LISTENER_BOOT_HASH = "'sha256-y3nLAeGJKtyzC3I7YsZo6RXuTSWzWmqMSk/peQFMuZU='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -52,14 +54,14 @@ const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(ma
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261026-r2194-polished-four-arm-mag';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261013-r2054-verified-css-recovery"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
+const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} https://static.cloudflareinsights.com`,
+  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} https://static.cloudflareinsights.com`,
   "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI='",
   "img-src 'self' data: https://quickchart.io",
   "font-src 'self'",
