@@ -1,6 +1,12 @@
 FormatX production revision
-token=20261026-r2200-cobalt-dna-coral-cell-mag
-release_line=R2200-REFERENCE-DNA-TO-CORAL-NUCLEUS-TO-LIVING-FOUR-ARM-MAG
+token=20261026-r2201-cyan-coral-genesis-replay
+release_line=R2201-CINEMATIC-DNA-TO-CORAL-CELL-TO-LIVING-MAG
+r2201_reference=First visible subject is the large blue/violet 3D double helix, then a substantially more visible near-opaque aqua/coral photomicrographic spherical cell with glowing chromatin, then the DNA winds across all four titanium arms and the final MAG optic awakens after chassis seating.
+r2201_visual=Rebalanced biological sphere physical material (opacity .86 during cell chapter vs .47 previously), lower transmission, increased relief and coral micro-hotspot coverage, textured metabolic emissiveMap. All 6000 mobile/9600 desktop genomic GPU particles and native cinematic biophotons retained.
+r2201_replay=GENESIS always plays at the beginning of each normal fresh document navigation including same-tab reload; explicit intro=0 and user Skip remain available. Browser test/audit skips preserved. Static first-paint and deferred recovery bootstrap are synchronized.
+r2201_security=Exact parser-inline SHA256 FojrtuBLdf6rMDUpNp7FRT/xvzL0AFH40Qg4e2y6V/M= authorized only in HTML and Worker CSP, without unsafe-inline.
+r2201_delivery=R533 and Worker deliver R1280 Three.js owner 20261026-r2201-coral-cell-cinema. New dedicated R2201 genesis source guard plus updated existing chronology, root module and visual regressions passed CI. Require both canonical domains to serve this precise full revision file before live browser pass.
+r2201_limits=Studio-grade resemblance and perceptual match to supplied stills require on-device visual review; pipeline and source validation alone do not certify photographic quality.
 r2200_reference_visual=Photographic blue-violet enlarged true 3D DNA, 6000 mobile / 9600 desktop GPU nucleotide morph, one spherical living cell with deterministic 384x192 mobile or 512x256 desktop aqua-coral biological DataTexture mapped to real 3D membrane and optically animated; continuous paired genomic transfer into four raised titanium arms; cyan/coral metabolic spectrum persists in the native MAG recessed optical core.
 r2200_source=Full-frame diagonal desktop founding DNA (.32 rad, 1.48 scale), portrait-safe mobile DNA (1.28 rad, .95 scale), coiling genetic particles align with same authored helix in R1280 film, actual GL shader biophoton lights and organic texture.
 r2200_delivery=R533 intro owner and Cloudflare Worker R502 rewrite force 20261026-r2200-dna-cytoplasm-film; exact HTML and Worker CSP include RNmomd3pAQVLMW4ZpoZKUqXQWgQMzKSWD7NBJRIMOrs bootstrap hash.
