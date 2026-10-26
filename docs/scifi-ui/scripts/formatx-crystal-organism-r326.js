@@ -2068,7 +2068,17 @@
     return;
 
     function finishBoot(program) {
+    // R2202: attribute the expensive first-frame work without changing
+    // topology, shader quality, or the real rendering schedule.
+    const geometryStart=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    const geometryBuildMs=performance.now()-geometryStart;
+    root.dataset.fxCoreGeometryBuildMsR2202=geometryBuildMs.toFixed(2);
+    try{
+      performance.measure('formatx:r326:geometry-build-r2202',{
+        start:geometryStart,end:performance.now()
+      });
+    }catch(_){}
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
