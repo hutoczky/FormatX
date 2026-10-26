@@ -57,12 +57,21 @@ assert(metal(8.3)===1 && optic(8.3)===1,
 for(const token of [
   '1.10+radius*.65*Math.sin(b)*Math.sin(a)',
   'radius*.82*Math.sin(b)*Math.cos(a)',
-  '.62+(r()-.5)*.16',
+  '.62+(r()-.5)*.11',
   'float last=1.0-curve(6.96,7.44,uPhase);'
 ])assert(renderer.includes(token),'R2192 spatial continuity missing: '+token);
+// R2195: photographic welding must preserve DNA-to-metal continuity without
+// asteroid-shaped debris, oversized splashes or random scattered sparks.
+for(const token of [
+  'mesh.visible=false;',
+  'const lateral=(r()-.5)*.088;',
+  'const count=this.mobileRender?112:224;',
+  'const tangent=(r()-.5)*.090;',
+  'gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6'
+])assert(renderer.includes(token),'R2195 focused genetic weld / studio-set regression: '+token);
 const embryoCentreZ=1.10;
 const cellDepthRange=.77*.65;
-const metalMinZ=.62-.08;
+const metalMinZ=.62-.055;
 assert(cellDepthRange<.53 && embryoCentreZ>.95,
   'Genome particle nucleus must coincide with 3D embryo envelope');
 assert(metalMinZ>.48,
