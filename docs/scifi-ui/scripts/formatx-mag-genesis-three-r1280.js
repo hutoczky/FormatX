@@ -1209,6 +1209,38 @@
       );
       this.embryoNucleus.position.set(-.10,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
+
+      // R2211: genuine three-dimensional nucleolus architecture. The inner
+      // chromatin cage and paired metabolic hoops share the same organelle
+      // centre; they are not screen-space decals or a premature MAG iris.
+      // Thin physical curves add silhouette, parallax and cyan/coral depth
+      // without bloom passes or per-frame geometry allocations.
+      this.embryoNucleolusRings=[];
+      const ringGeometry=new T.TorusGeometry(.31,.009,6,this.mobileRender?56:88);
+      const ringColors=[0x77fff0,0xff8b9f,0xa7b7ff];
+      for(let k=0;k<3;k++){
+        const material=new T.MeshBasicMaterial({
+          color:ringColors[k],transparent:true,opacity:0,
+          depthWrite:false,blending:T.AdditiveBlending
+        });
+        const ring=new T.Mesh(ringGeometry,material);
+        ring.position.copy(this.embryoNucleus.position);
+        ring.rotation.set(.35+k*.78,k*1.047,.28+k*.56);
+        ring.scale.set(1.12,.82+.10*k,1);
+        this.coreGroup.add(ring);
+        this.embryoNucleolusRings.push(ring);
+      }
+      this.embryoNucleolusHaloMaterial=new T.MeshBasicMaterial({
+        color:0x47f6e5,transparent:true,opacity:0,
+        depthWrite:false,blending:T.AdditiveBlending,side:T.BackSide
+      });
+      this.embryoNucleolusHalo=new T.Mesh(
+        new T.SphereGeometry(.30,this.mobileRender?18:28,this.mobileRender?12:20),
+        this.embryoNucleolusHaloMaterial
+      );
+      this.embryoNucleolusHalo.position.copy(this.embryoNucleus.position);
+      this.embryoNucleolusHalo.scale.set(1.20,1.14,1.08);
+      this.coreGroup.add(this.embryoNucleolusHalo);
       // R2167 — nucleus organelle and continuous curved membrane networks.
       // These sit at genuinely different z depths inside the cell; they
       // remain biological and are removed before metallic chassis birth.
@@ -2666,6 +2698,16 @@
       if(this.embryoTexture)this.embryoTexture.offset.x=time*.0000038;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
+      // The nucleolus has its own slow precession and metabolic pulse,
+      // independently of the enclosing membrane and DNA chromatin fibres.
+      for(let k=0;k<this.embryoNucleolusRings.length;k++){
+        const ring=this.embryoNucleolusRings[k];
+        ring.material.opacity=(k===1?.42:.32)*visible;
+        ring.rotation.y+=.00035*(k%2? -1:1);
+        ring.rotation.z+=.00019*(k===2?-1:1);
+      }
+      this.embryoNucleolusHaloMaterial.opacity=(.095+.025*Math.sin(time*.0024))*visible;
+      this.embryoNucleolusHalo.scale.setScalar(1.15+.035*Math.sin(time*.0022));
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
