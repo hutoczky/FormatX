@@ -328,12 +328,12 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const ma=new T.MeshPhysicalMaterial({
-        color:0x80cbd5,emissive:0x185463,emissiveIntensity:.82,
+        color:0x759cde,emissive:0x263c93,emissiveIntensity:.94,
         roughness:.29,metalness:.06,transparent:true,opacity:.90,
         depthWrite:false,clearcoat:.62,clearcoatRoughness:.14
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0x9d8ad5,emissive:0x493176,emissiveIntensity:.82,
+        color:0xb48add,emissive:0x5c2f9c,emissiveIntensity:.94,
         roughness:.30,metalness:.05,transparent:true,opacity:.88,
         depthWrite:false,clearcoat:.58,clearcoatRoughness:.16
       });
@@ -411,14 +411,14 @@
       // put all ten sources around the edges and left the hero centre empty.
       // Supporting helices join later and flow into the four MAG arms.
       const placements=this.mobileRender?[
-        [.00,.06,.60,1.57,.92],
+        [.00,.06,.60,1.28,.95],
         [-.55,.18,.16,1.30,.48],
         [.56,.16,.12,1.82,.48],
         [.00,-.87,-.20,1.58,.39]
       ]:[
         // R2165: the entire main helix remains inside the cinematic frame,
         // while smaller distant donors assemble into four chassis arms.
-        [.00,.03,.55,1.57,.76],
+        [.00,.03,.55,.32,1.48],
         [-2.00,1.02,-.34,-.44,.43],
         [2.00,1.02,-.34,.44,.43],
         [-2.01,-1.02,-.39,.45,.43],
@@ -1107,6 +1107,62 @@
       this.genomeParticleMaterial=material;
     }
 
+    makeEmbryoTexture(){
+      // R2200: a genuine biological photomicrograph over a 3D nucleus.
+      // Turquoise cytoplasm, coral metabolic hot spots and micrograin
+      // are generated deterministically once, never loaded as an image.
+      const T=this.THREE;
+      const width=this.mobileRender?384:512;
+      const height=this.mobileRender?192:256;
+      const pixels=new Uint8Array(width*height*4);
+      const hash=(x,y)=>{
+        let k=(Math.imul(x,374761393)+Math.imul(y,668265263))|0;
+        k=Math.imul(k^(k>>>13),1274126177);
+        return ((k^(k>>>16))>>>0)/4294967295;
+      };
+      const noise=(u,v,scale)=>{
+        const x=u*scale,y=v*scale;
+        const ix=Math.floor(x),iy=Math.floor(y);
+        let fx=x-ix,fy=y-iy;
+        fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
+        const sample=(px,py)=>hash(((px%scale)+scale)%scale,py);
+        return mix(mix(sample(ix,iy),sample(ix+1,iy),fx),
+          mix(sample(ix,iy+1),sample(ix+1,iy+1),fx),fy);
+      };
+      for(let y=0;y<height;y++){
+        for(let x=0;x<width;x++){
+          const u=x/width,v=y/(height-1);
+          const curl=noise(u+.036,v,11);
+          const cloud=.46*noise(u+.042*curl,v,12)
+            +.34*noise(u,v+.028*curl,34)
+            +.20*noise(u+.07,v,78);
+          const coralCloud=.56*noise(u+.13,v+.07,23)
+            +.44*noise(u,v,61);
+          const coral=clamp((coralCloud-.585)*4.65);
+          const mineral=noise(u,v,116);
+          const grain=(hash(x,y)-.5)*13;
+          const freckle=Math.pow(clamp((mineral-.71)*3.8),2);
+          const index=(y*width+x)*4;
+          pixels[index]=Math.round(clamp(
+            (20+72*cloud+202*coral+62*freckle+grain)/255)*255);
+          pixels[index+1]=Math.round(clamp(
+            (87+165*cloud-61*coral+24*freckle+grain)/255)*255);
+          pixels[index+2]=Math.round(clamp(
+            (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
+          pixels[index+3]=255;
+        }
+      }
+      const texture=new T.DataTexture(pixels,width,height,T.RGBAFormat);
+      texture.wrapS=T.RepeatWrapping;
+      texture.magFilter=T.LinearFilter;
+      texture.minFilter=T.LinearMipmapLinearFilter;
+      texture.generateMipmaps=true;
+      texture.colorSpace=T.SRGBColorSpace;
+      texture.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy());
+      texture.needsUpdate=true;
+      return texture;
+    }
+
     makeEmbryoFilm(){
       // R2159: the pre-mechanical nucleus is an irregular organic cell,
       // not the old metallic diamond with an illuminated MAG eye.
@@ -1121,8 +1177,11 @@
         positions.setXYZ(i,x*envelope,y*(1+.024*Math.cos(phi*4.0))*envelope,z*envelope);
       }
       positions.needsUpdate=true;geometry.computeVertexNormals();
+      this.embryoTexture=this.makeEmbryoTexture();
       this.embryoMaterial=new T.MeshPhysicalMaterial({
-        color:0x317887,emissive:0x0b3948,emissiveIntensity:.30,
+        color:0xe1f8f8,map:this.embryoTexture,
+        bumpMap:this.embryoTexture,bumpScale:.014,
+        emissive:0x0b3948,emissiveIntensity:.30,
         metalness:.02,roughness:.14,clearcoat:.98,clearcoatRoughness:.065,
         transmission:.21,thickness:.23,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
@@ -2595,6 +2654,8 @@
       const pulse=1+.025*Math.sin(time*.0021);
       this.embryoShell.scale.set(.98*pulse,1.03*pulse,.90*pulse);
       this.embryoShell.rotation.y=Math.sin(time*.00024)*.050;
+      // Optical motion on the living sphere, not a static flat image.
+      if(this.embryoTexture)this.embryoTexture.offset.x=time*.0000038;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
       this.embryoInnerMaterial.opacity=.34*visible;
@@ -3103,6 +3164,7 @@
         if(Array.isArray(m))m.forEach(x=>x?.dispose?.());
         else m?.dispose?.();
       });
+      this.embryoTexture?.dispose?.();
       this.microFiberTexture?.dispose?.();
       this.studioEnvironmentTexture?.dispose?.();
       this.studioEnvTarget?.dispose?.();
