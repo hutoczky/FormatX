@@ -1080,7 +1080,7 @@
             // only while the metal is physically closing around it.
             float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));
             gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6/(-mv.z)*(1.0+transferGlow*.16),1.0,5.6*uPixelRatio);
-            float first=curve(0.08,.65,uPhase);
+            float first=0.86+0.14*curve(0.0,.45,uPhase);
             // R2192: all genetic matter departs BEFORE the optical organ
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
             float last=1.0-curve(6.96,7.44,uPhase);
