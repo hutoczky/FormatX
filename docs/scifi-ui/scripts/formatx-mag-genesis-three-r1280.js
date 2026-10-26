@@ -1403,7 +1403,7 @@
 
     updateGenomeParticles(t,time){
       if(!this.genomeParticles)return;
-      const visible=t>.08&&t<8.05;
+      const visible=t>=0&&t<8.05;
       this.genomeParticles.visible=visible;
       if(!visible)return;
       this.genomeParticleMaterial.uniforms.uTime.value=time;
