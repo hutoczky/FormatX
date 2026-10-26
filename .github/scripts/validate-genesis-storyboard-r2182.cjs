@@ -81,6 +81,39 @@ for(const axis of [0,1,2,3]){
   const endTime=6.90+armBeat;
   assert(endTime<7.44,'A genetic arm assembled after the optic ignited');
 }
+// R2196: arm-bound genetic material must remain a genuine paired helix.
+// The earlier random per-particle reach/depth destroyed strand continuity.
+check(gpu,[
+  'const pairIndex=Math.floor(i/2);',
+  'const armStation=Math.floor(pairIndex/4);',
+  'const armStations=Math.ceil((count/2-axis)/4);',
+  'const armU=armStation/Math.max(1,armStations-1);',
+  'const armTwist=armU*Math.PI*2*4.5+axis*.65;',
+  'const lateral=sign*Math.cos(armTwist)*armRadius;',
+  'const depth=sign*Math.sin(armTwist)*armRadius;'
+],'R2196 physical paired-arm genome');
+assert(!gpu.includes('const reach=.20+.74*r();'),
+  'Random independent arm positions would break DNA base-pair geometry');
+for(const count of [6000,9600]){
+  for(let axis=0;axis<4;axis++){
+    const stations=Math.ceil((count/2-axis)/4);
+    for(const station of [0,Math.floor(stations/4),Math.floor(stations/2),stations-1]){
+      const u=station/Math.max(1,stations-1);
+      const reach=.19+.75*u;
+      const twist=u*Math.PI*2*4.5+axis*.65;
+      const radius=.032+.012*Math.sin(u*Math.PI);
+      const pair=[1,-1].map(sign=>({
+        reach,
+        lateral:sign*Math.cos(twist)*radius,
+        depth:.62+sign*Math.sin(twist)*radius
+      }));
+      assert.equal(pair[0].reach,pair[1].reach,'One nucleotide pair must seat at the same arm station');
+      assert(Math.abs(pair[0].lateral+pair[1].lateral)<1e-9,'Paired helices must oppose laterally');
+      assert(Math.abs(pair[0].depth+pair[1].depth-1.24)<1e-9,'Paired helices must oppose in 3D depth');
+      assert(reach>=.19&&reach<=.94,'Nucleotides must remain within the authored titanium arm');
+    }
+  }
+}
 // R2183: enforce real, independent sources for every MAG arm on desktop and
 // mobile. Previously the nearest-X/Y heuristic left the south arm unconnected.
 const assignment=gpu.match(/const armAssignments=this\.mobileRender\s*\?\s*(\[[^\]]+\])\s*:\s*(\[[^\]]+\]);/);
