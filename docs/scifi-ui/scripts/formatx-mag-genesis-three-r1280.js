@@ -1240,7 +1240,27 @@
       );
       this.embryoNucleolusHalo.position.copy(this.embryoNucleus.position);
       this.embryoNucleolusHalo.scale.set(1.20,1.14,1.08);
+      this.embryoNucleolusHalo.renderOrder=3;
       this.coreGroup.add(this.embryoNucleolusHalo);
+
+      // R2212: two translucent biological membrane rims give the living
+      // nucleus a recognisable three-dimensional silhouette from the first
+      // oblique camera angle. Both share the cell's breathing scale.
+      this.embryoMembraneRims=[];
+      const rimGeo=new T.TorusGeometry(.94,.007,5,this.mobileRender?72:112);
+      for(let k=0;k<2;k++){
+        const rimMat=new T.MeshBasicMaterial({
+          color:k===0?0x66e9e2:0xff829d,
+          transparent:true,opacity:0,depthWrite:false,
+          blending:T.AdditiveBlending
+        });
+        const rim=new T.Mesh(rimGeo,rimMat);
+        rim.rotation.set(k===0?.17:1.20,k===0?.24:-.38,k===0?.12:.35);
+        rim.scale.set(1.04,1.10,.86);
+        rim.renderOrder=5;
+        this.coreGroup.add(rim);
+        this.embryoMembraneRims.push(rim);
+      }
       // R2167 — nucleus organelle and continuous curved membrane networks.
       // These sit at genuinely different z depths inside the cell; they
       // remain biological and are removed before metallic chassis birth.
@@ -2686,7 +2706,7 @@
       // the physically shaded organelle without exposing a hard MAG eye.
       // R2201: readable cellular color first, with enough transmission
       // to retain actual internal organelles and the suspended chromatin.
-      this.embryoMaterial.opacity=.86*visible;
+      this.embryoMaterial.opacity=.76*visible;
       this.embryoNucleusMaterial.opacity=.68*visible;
       this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
@@ -2708,6 +2728,12 @@
       }
       this.embryoNucleolusHaloMaterial.opacity=(.095+.025*Math.sin(time*.0024))*visible;
       this.embryoNucleolusHalo.scale.setScalar(1.15+.035*Math.sin(time*.0022));
+      for(let k=0;k<this.embryoMembraneRims.length;k++){
+        const rim=this.embryoMembraneRims[k];
+        rim.material.opacity=(k===0?.25:.13)*visible;
+        rim.scale.set(1.04*pulse,1.10*pulse,.86*pulse);
+        rim.rotation.y=(k===0?.24:-.38)+Math.sin(time*.00014+k)*.09;
+      }
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
