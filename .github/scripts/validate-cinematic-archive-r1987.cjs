@@ -300,7 +300,7 @@ async function evaluate(viewport,isMobile,browser){
         'Inactive archived native HTML must skip expensive offscreen layout without deleting original content: '+JSON.stringify(tabSafety));
       console.log('ARCHIVE_SINGLE_LIVE_LAYOUT_PASS',JSON.stringify({scene:scene.key,active:tabSafety.activeContentVisibility,archived:tabSafety.archivedContentVisibility.length}));
             assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
-      assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');
+      assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf: '+JSON.stringify({expectedScene:scene.key,expectedSource:scene.source,actualSource:real3D.source,phase:real3D.phase,bridge:real3D.bridge}));
       assert.ok(real3D.phase&&real3D.transform.startsWith('matrix3d('),
         'Actual HTML papyrus lacks GPU-composited 3D presentation: '+JSON.stringify(real3D));
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
