@@ -252,6 +252,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `7fbb889`: `Set` alapú deduplikációval minden közösen használt Three.js geometria és anyag egyszer szabadul fel. Az élő renderelési képkockák nem változnak.
 - A sejtmag megjelenésének végső vizuális összehasonlítása és a 14s storyboard eltérés továbbra is nyitott. Új CI eredmények szükségesek az R2216 commitra.
 
+### 2026-10-27 – R2217 CI diagnosztika tényleges artifact alapján
+
+- `a950136` commit: production, canonical MAG, R2103, R2104, P0, public integrity és mobile MAG proof **PASS**. Organism-main `40448487560` **FAIL**; Lighthouse `40448487648` **FAIL**.
+- Az organism-main artifact `12709182793` `organism-main-report.json` fájlját megvizsgáltuk: desktop site-ready, initial-state, hidden-console-css és pricing-panel-open PASS, majd az **EUR currency button** Playwright kattintása `Timeout 30000ms` miatt megállt, mert nem lett stabil. Ez nem a korábbi close-button hiba.
+- `73d5b92`: a teszt 12 animation frame-en keresztül rögzíti az EUR gomb pozícióját/méretét, a valódi `elementFromPoint` hit targetet, a panel CSS animációját és transzformációját. A kattintás timeoutja 10s a gyorsabb és pontosabb CI-visszajelzéshez. **Ez diagnosztika, nem állítjuk, hogy a hiba javult.**
+- Lighthouse futás 40448487648 mind desktop, mind mobile küszöbellenőrzésen FAIL; a részletes JSON audit további elemzése szükséges, az elvárt ≥0.95 nem teljesült.
+- Következő: új organism-main artifact alapján célzott CSS/runtime javítás, Lighthouse JSON részletes bottleneck-elemzés, valódi 3D nucleus képkockák vizsgálata.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
