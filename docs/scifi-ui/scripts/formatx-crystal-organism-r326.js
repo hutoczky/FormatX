@@ -354,14 +354,19 @@
       };
     }
 
+    // R2245: immutable per-triangle barycentric coordinates are shared rather
+    // than allocated for every face; shader inputs and vertex ordering match.
+    const faceBarycentric=[[1,0,0],[0,1,0],[0,0,1]];
     function triangle(vertices, facet) {
       let crystalNormal = normalize(cross(
         subtract(vertices[1].crystal, vertices[0].crystal),
         subtract(vertices[2].crystal, vertices[0].crystal)
       ));
-      const centre = [0, 1, 2].map(index => (
-        vertices[0].crystal[index] + vertices[1].crystal[index] + vertices[2].crystal[index]
-      ) / 3);
+      const centre = [
+        (vertices[0].crystal[0]+vertices[1].crystal[0]+vertices[2].crystal[0])/3,
+        (vertices[0].crystal[1]+vertices[1].crystal[1]+vertices[2].crystal[1])/3,
+        (vertices[0].crystal[2]+vertices[1].crystal[2]+vertices[2].crystal[2])/3
+      ];
       /* R1556 — normal correction alone was not enough: BACK-face culling uses
          vertex winding, not the supplied normal. Reverse inward triangles so the
          closed mineral shell cannot develop the black pin-holes seen in real
@@ -370,7 +375,7 @@
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
-      const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      const barycentric=faceBarycentric;
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
       const bodySeamOverlap=0;
