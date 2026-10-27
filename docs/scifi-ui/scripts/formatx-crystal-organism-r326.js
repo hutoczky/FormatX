@@ -378,27 +378,11 @@
       const barycentric=faceBarycentric;
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
-      const bodySeamOverlap=0;
-      const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
-        (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
-      ):null;
+      // R2255: the closed shell has no seam overlap. Remove the dead
+      // branch while preserving emitted positions and triangle order.
       vertices.forEach((item, index) => {
-        if(bodySeamOverlap){
-          const k=1+bodySeamOverlap;
-          sphere.push(
-            sphereCentre[0]+(item.sphere[0]-sphereCentre[0])*k,
-            sphereCentre[1]+(item.sphere[1]-sphereCentre[1])*k,
-            sphereCentre[2]+(item.sphere[2]-sphereCentre[2])*k
-          );
-          crystal.push(
-            centre[0]+(item.crystal[0]-centre[0])*k,
-            centre[1]+(item.crystal[1]-centre[1])*k,
-            centre[2]+(item.crystal[2]-centre[2])*k
-          );
-        }else{
-          sphere.push(...item.sphere);
-          crystal.push(...item.crystal);
-        }
+        sphere.push(...item.sphere);
+        crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
