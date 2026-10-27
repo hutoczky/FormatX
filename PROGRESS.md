@@ -274,9 +274,16 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `e21b735`: az új teszt bekötve a P0 fast source loop CI-be. **Új CI eredmény még szükséges**, a WebGL képkockák és a 14s storyboard továbbra is nyitottak.
 - Következő: P0 futás tényleges PASS, 0/1/3/4.5/7/10 s WebGL képkockák, majd koherens 14s idővonal és produkciós vizuális jóváhagyás. Éles deploy/merge nincs engedélyezve.
 
+### 2026-10-27 – R2220 koherens Genesis elfogadási történet
+
+- `1611cfe`: `docs/scifi-ui/GENESIS-CINEMATIC-ACCEPTANCE.md` átvezetve a tényleges `DURATION=10000` és `t=clamp(r)*10` idővonalra. A korábbi 14 másodperces specifikáció tévesen a sejtmagot írta végső hero elemnek, szemben a kifejezett DNS → sejtmag → MAG igénnyel.
+- Az új négy fejezet: 0–3.28 s DNS, 3.28–5.66 s sejtmag, 5.58–8.45 s MAG-összeállás, 8.45–10 s kész MAG hero-handoff. A dokumentáció változott, nem a film futásideje.
+- A `6aecd79` commit CI-futásainak jelentős része még folyamatban volt a lekérdezéskor; a `f8ca393` R2219 teszt új P0 eredménye továbbra is ellenőrizendő.
+- Vizuális WebGL elfogadás, mobil kontextus-helyreállítás, Lighthouse és élesítés továbbra is nyitott. A projekt nem release-ready.
+
 ## 6. Ismert hibák és kockázatok
 
-1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
+1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
 2. **Magas:** a vizuális minőség és a GPU-kompatibilitás nem ellenőrzött.
 3. **Közepes:** külön R2126 prototípus redundáns a fejlettebb r1280 részecskerendszer mellett; nem szabad vakon bekötni.
 4. **Közepes:** a meglévő CI sok régebbi renderelőfájlt ellenőriz, az aktuális r1280 explicit syntax checkje külön igazolandó.
