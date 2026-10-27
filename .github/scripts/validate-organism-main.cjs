@@ -183,6 +183,11 @@ async function validateDesktop() {
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
 
+    // R2238: return to the header after exercising the pricing console.
+    // The previous interaction can leave the document thousands of pixels
+    // below the fixed navigation; verify an actual pointer click at the top.
+    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+    await page.waitForFunction(()=>window.scrollY<5,{},{timeout:5000});
     const menuToggle=page.locator('#menu-toggle');
     // R2237: record the header toggle hit target before Playwright's click.
     // A timeout waiting for a locator (rather than its hit test) indicates
