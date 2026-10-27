@@ -32,6 +32,15 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - [x] A MAG-karokra érkező részecskék végső mélységi remegésének megszüntetése.
 - [x] Külön 8192 részecskés kísérleti shader-modul létrehozása és WebGL1 `gl_VertexID` javítása; **nem integrált**.
 
+## 2/A. R2253 dokkolási regresszió – 2026-10-27, mért eredmény
+
+- Commit: `652eda6f51ca78e47f77248fb1597b6d8c79b092`; archív dokkoláskor a MAG stage inline fixed/100vw/100dvh geometriát kap, visszaállításkor az eredeti értékeket.
+- Újrafuttatott archív WebGL és nyolcforrásos scroll: **PASS** (run `40588818347`).
+- Újrafuttatott canonical content / visual contracts: **PASS** (run `40588818130`).
+- Lighthouse CI: **FAIL** (run `40588817997`). Desktop három futás: Performance 0,60 / 0,71 / 0,91; CLS 0,45843 / 0,26869 / 0,00164; TBT 232,86 / 168,54 / 20,39 ms. Mobil: Performance 0,75 / 0,73 / 0,74; CLS mindhárom 0,03816; TBT 781,16 / 878,76 / 834,97 ms.
+- Lighthouse desktop layout-shift attribution: `fx-core-mobile-v55-stage` és annak `fx-core-mobile-v55-canvas` eleme a legnagyobb elmozdulásokban. Mobil long task: R326 285 és 190 ms az első futásban.
+- **Nyitott:** desktop CLS determinisztikus megszüntetése, mobil TBT ≤150 ms és minden Lighthouse futás Performance ≥0,95; ezek nélkül merge/élesítés tilos.
+
 ## 3. Hiányzó funkciók / elfogadási kapuk
 
 - [ ] A 10 s/14 s idővonal eltérésének feloldása, az elvárt organikus sejtmag és MAG végállapot egyeztetése.
