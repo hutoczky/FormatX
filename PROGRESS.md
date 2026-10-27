@@ -454,6 +454,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A forrás szerint az R326 a `boot()` függvényben állítja elő a tartós WebGL MAG-ot, amelynek láthatóságát az R533 Genesis intro 10 s születési animációja alatt külön szabályozza. **Nem szabad** pusztán Lighthouse- vagy webdriver-felismerésre kikapcsolni, mert az eltérő termékélményt és félrevezető tesztet okozna.
 - Következő valódi kódmunka: a geometria-előállítás és WebGL feltöltés belső szakaszait külön instrumentálni / feladatokra bontani a valódi R326 tulajdonosban, az intro végén történő átadás megőrzésével. Kötelező új 3× mobil/desktop Lighthouse és R536 + mobil MAG vizuális teszt. PR draft, nincs merge.
 
+### 2026-10-27 – R2244 valódi R326 CPU geometria optimalizálás
+
+- `538e88d`: az aktív `formatx-crystal-organism-r326.js` `buildOrganismGeometry()` testháló ciklusa a közös rácscsúcsokat **szomszédos cellák között újrahasznosítja**. A korábbi 4 `vertex()` hívás/cella helyett két előállított szélességi sort használ, és csak a következő sort számítja újra. Változatlan a `triangle()` sorrend, winding, facet random, tesszelláció, UV és shader; nincs audit-specifikus ág.
+- A csúcskiértékelések elméleti száma a testhálónál `4*latitudeSegments*longitudeSegments` helyett `(latitudeSegments+1)*(longitudeSegments+1)`; a mikrofilamentumok saját `vertex()` hívásai változatlanok. **Ez CPU-munka csökkentés, de a valós TBT/FPS javulás még nem mért.**
+- Következő ellenőrzés: P0 source loop, mobil/desktop MAG WebGL vizuális, R536 Genesis és Lighthouse 3× mérés. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
