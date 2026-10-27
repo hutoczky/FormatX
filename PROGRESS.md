@@ -380,6 +380,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `body#top > main#main-content` layout-shift score ~0.03345 és `header.topbar > a.brand` ~0.02227; a tényleges mobil CLS-t és LCP-t teljes riportból kell kiolvasni.
 - Következő feladat: a két kritikus CSS betöltési sorrendjének/korai megjelenésének biztonságos javítása úgy, hogy a DNS első képkockája és a Genesis vizuális szerződés ne sérüljön; külön layout és JS long-task profilozás. Lighthouse cél >=0.95; nincs merge.
 
+### 2026-10-27 – R2233 kritikus DNS első képkocka CSS előtöltése
+
+- `8db9350` CI ellenőrzéskor production, mobil vizuális és performance-contract PASS; a többi workflow, köztük Lighthouse, még futott. Ez nem teljes PASS-igazolás.
+- `417f0a9`: a valós `docs/scifi-ui/index.html` `<head>` elejére magas prioritású `rel=preload as=style` került a később deklarált `formatx-dna-first-frame-r2181.css` **azonos URL-jére**. Az eredeti `rel=stylesheet` a korábbi helyén maradt, ezért a CSS cascade sorrendje nem változik. Cél a mobil Lighthouse trace-ben látott késői kritikus CSS-felfedezés csökkentése.
+- Ez mérésre váró optimalizálás; nincs igazolt Lighthouse-javulás vagy 0.95 PASS. Következő lépés az új futás és a hálózati vízesés, LCP/CLS/TBT ellenőrzése; ha a preload nem javít, vissza kell vonni.
+- PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
