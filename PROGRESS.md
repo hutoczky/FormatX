@@ -434,6 +434,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `a5324ce`: a tényleges R2054 CSS-helyreállítási Playwright teszt mobilon és desktopon is bevárja, hogy a Genesis audio kapcsoló külön halasztott stíluslapja `media=all` állapotú és betöltött `link.sheet` legyen. Külön ellenőrzi a `data-fx-r487-deferred-style=true` szerződést. Ez kizárja, hogy a Lighthouse-optimalizálás miatt a hangvezérlő stílusa tartósan `print` módban maradjon.
 - A teszt még nem igazolja a hangvezérlő tényleges vizuális minőségét vagy a 0.95 Lighthouse teljesítményt; CI eredmény szükséges. PR draft, nincs merge.
 
+### 2026-10-27 – R2241 teljes Lighthouse futás: mérhető javulás, 22/23 PASS
+
+- `a0e5840` CI: **22/23 completed PASS**, egyedül Lighthouse `40511640178` FAIL. Archive, canonical MAG, production, mobile visual, organism-main, CSS recovery PASS.
+- Mobil 3 mérés: Performance **0.87/0.89/0.89**, FCP/LCP **1.29–1.30 s**, TBT **306/263/258 ms**, CLS **0.03816**, Speed Index **6.42–6.43 s**. Előző mérés: Performance 0.84–0.86, TBT 330–385 ms, Speed Index ~6.52 s. CSS blocker lista most **üres**, ami alátámasztja az R2236 audio CSS halasztás előnyét, de az ok-okozat külön kísérlet nélkül nem bizonyított.
+- Desktop 3. mérés Performance **0.88**, LCP **1.763 s**, TBT **7.5 ms**, CLS **0.0911**, Speed Index **1.672 s**. A desktop CLS közel van a 0.10 felső küszöbhöz; diagnosztika szerint a mobil layout fő érintettje a `main#main-content` és fejléc brand.
+- **Következő feladat:** mobil Speed Index ~6.4 s, TBT 258–306 ms és desktop CLS 0.0911. Profilozni a 2–7 s vizuális progresszt és a CSS/layout mutációkat, majd csak bizonyított szűk keresztmetszeten változtatni. Lighthouse cél >=0.95 mindkét profil, nincs merge addig.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
