@@ -3234,11 +3234,22 @@
     destroy(){
       if(this.disposed)return;
       this.disposed=true;
+      // R2216: nucleus rings and membrane rims share geometry. Dispose
+      // each GPU resource once, even when many meshes reference it.
+      const releasedGeometries=new Set();
+      const releasedMaterials=new Set();
       this.scene.traverse(node=>{
-        node.geometry?.dispose?.();
-        const m=node.material;
-        if(Array.isArray(m))m.forEach(x=>x?.dispose?.());
-        else m?.dispose?.();
+        const geometry=node.geometry;
+        if(geometry&&!releasedGeometries.has(geometry)){
+          releasedGeometries.add(geometry);
+          geometry.dispose?.();
+        }
+        const materials=Array.isArray(node.material)?node.material:[node.material];
+        for(const material of materials){
+          if(!material||releasedMaterials.has(material))continue;
+          releasedMaterials.add(material);
+          material.dispose?.();
+        }
       });
       this.embryoTexture?.dispose?.();
       this.microFiberTexture?.dispose?.();
