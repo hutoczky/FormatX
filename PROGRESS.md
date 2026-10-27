@@ -295,6 +295,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `780531d`: az EUR kattintás `noWaitAfter:true` opciót kapott, az utána következő ár- és checkout-URL ellenőrzések változatlanul megmaradtak. Új CI PASS még nem igazolt.
 - Lighthouse továbbra is FAIL, a teljesítményoptimalizálás és a tényleges Genesis WebGL vizuális jóváhagyás nyitott.
 
+### 2026-10-27 – R2223 háromtengelyes biológiai membránmozgás
+
+- `e2b6cc0` commit ellenőrzésekor production `40483657157` és organism-main `40483657135` még futott, Lighthouse `40483657049` szintén folyamatban; korai PASS státusz nem adható.
+- `d5cbe75`: az éles r1280 renderelő két eltérő síkban elhelyezett, áttetsző sejtmembrán-pereme lassú, fáziseltolt X/Y/Z tengelyű precessziót kapott. A meglévő 3D geometriák és anyagok újrafelhasználásával történik, új draw call vagy képkockánkénti allokáció nélkül.
+- `41c5bc3`: az R2219 P0 teszt az új membránprecesszió mindhárom tengelyét forrásinvariánsként ellenőrzi.
+- Az új módosítások CI státusza ellenőrizendő. A fotórealisztikus látvány és a Lighthouse 0.95 továbbra sem igazolt; PR marad draft.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
