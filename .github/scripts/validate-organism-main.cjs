@@ -184,7 +184,22 @@ async function validateDesktop() {
     mark('desktop: close-control-passed');
 
     const menuToggle=page.locator('#menu-toggle');
-    await menuToggle.click();
+    // R2237: record the header toggle hit target before Playwright's click.
+    // A timeout waiting for a locator (rather than its hit test) indicates
+    // page scheduling/navigation contention; preserve evidence for diagnosis.
+    const toggleState=await page.evaluate(()=>{
+      const el=document.getElementById('menu-toggle');
+      if(!el)return {exists:false};
+      const r=el.getBoundingClientRect();
+      const x=r.left+r.width/2,y=r.top+r.height/2;
+      const hit=document.elementFromPoint(x,y);
+      return {exists:true,visible:!!el.getClientRects().length,disabled:el.disabled,
+        rect:[r.x,r.y,r.width,r.height],hitTag:hit?.tagName||'',
+        hitClass:String(hit?.className||''),hitSelf:hit===el||el.contains(hit)};
+    });
+    mark('desktop: menu-toggle-hit-test',toggleState);
+    assert(toggleState.exists&&toggleState.visible,'header menu toggle unavailable: '+JSON.stringify(toggleState));
+    await menuToggle.click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     const pricingNav=page.locator('#main-nav a[href="#pricing"]');
     await pricingNav.click();
