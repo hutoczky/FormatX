@@ -473,6 +473,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 3. **Közepes:** külön R2126 prototípus redundáns a fejlettebb r1280 részecskerendszer mellett; nem szabad vakon bekötni.
 4. **Közepes:** a meglévő CI sok régebbi renderelőfájlt ellenőriz, az aktuális r1280 explicit syntax checkje külön igazolandó.
 
+
+### 2026-10-27 – R2246 mérési és regressziós audit (d56e789)
+- A MAG stage/canvas abszolút pozicionálása után a Lighthouse desktop CLS 0.00164–0.00648, mobil CLS 0.03816; a korábbi 0.25419 / 0.12155 regresszió megszűnt az ellenőrzött futásban.
+- Mobil Lighthouse Performance 0.87/0.89/0.90; TBT 318.287/260.637/234.022 ms (futások sorrendjében 0.89/260.637, 0.87/318.287, 0.90/234.022). Desktop Performance 0.78/0.89/0.90, TBT 271.402/9/8 ms. A 0.95 küszöb továbbra sem teljesül: Lighthouse CI FAIL (40531890299).
+- A 40531890038 archív WebGL CI FAIL: desktop olvasópanel nyitásakor a MAG stage bounding rect y=-1233, a panel y=90; az overlay/scroll együttműködést célzottan javítani és újratesztelni kell. 21/23 workflow success, 2 failure a d56e789 commiton.
+- A mobil TBT és archív WebGL olvasópanel regresszió nyitott. A vizuális és Lighthouse kapuk teljes PASS-ig tilos merge vagy production élesítés.
+
 ## 7. Következő végrehajtandó feladat
 
 **S2:** R2103 és R2104 mobil fallback tesztek PASS a `5a7937c9` commiton. **S5:** az R326 CPU geometriaépítés (`74871d9`) és WebGL bufferfeltöltés (`c1b32b5`) külön mérhető; a redundáns CPU vertex-tömbök felszabadítása (`1993e3a`) implementálva, regressziós CI és új Lighthouse összehasonlítás szükséges. Módosítás után teljes mobil+desktop Lighthouse és funkcionális regresszió. A 0,95 Performance küszöb változatlan. Ne merge-elj, amíg a teljes vizuális és Lighthouse kapuk nem sikeresek.
