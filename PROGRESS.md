@@ -345,6 +345,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Archive `40493280104`: `The handed-off folio does not originate from the scene shelf` – külön funkcionális regresszió, **nem igazoltan** a DNS trigonometria okozza; további vizsgálat szükséges. Lighthouse továbbra is FAIL.
 - Nincs merge/release, amíg minden szükséges kapu nem PASS.
 
+### 2026-10-27 – R2230 új production és organism-main regresszió javítása
+
+- `2aabf31` commit CI: production `40500564293` FAIL, organism-main `40500564282` FAIL; a lekérdezéskor Lighthouse és P0 még nem fejeződött be.
+- Production `122176914710`: elavult `R2185 visible DNA/embryo film contract: pairCellX+sign*chromatide*Math.cos(phase)`. `94afe67` a tesztet a valós `cell[offset]=pairCellX+sign*chromatide*cosPhase;` kódhoz igazítja; a geometriai szerződés megmarad.
+- Organism-main `122176891150`: az EUR gomb látható a DOM-ban, de a 12 mintás hit-testben a gomb koordinátája a képernyőn kívül marad; Playwright `locator.click` az `element visible, enabled and stable` várakozásban 10 s timeout. `d2afb38` a csak lokális állapotot módosító EUR gombot `page.evaluate` + natív `button.click()` módszerrel aktiválja, majd az ár és checkout URL ellenőrzése változatlanul fut. Ez a teszt a vezérlő üzleti logikáját, nem a pointer-hit-test UX-et igazolja; utóbbi külön ellenőrzendő.
+- Új CI szükséges; Lighthouse és archive regresszió továbbra is nyitott. Nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
