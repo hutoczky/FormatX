@@ -366,6 +366,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `104d261`: a browser archive teszt a **valódi aktív HTML-folio** `data-fx-cinema-source` értékére vár legfeljebb 5 másodpercet a jelenethez kötött assertion előtt. A szigorú eredetellenőrzés megmarad; nem helyettesítettük állandó PASS-szal. Új CI szükséges.
 - Lighthouse >=0.95 és a filmes WebGL képkockás ellenőrzés továbbra is nyitott; draft PR nincs merge-elve.
 
+### 2026-10-27 – R2231 organism-main konzol bezárási teszt
+
+- `7c828f7` CI: production `40500912786` PASS, canonical MAG runtime `40500913049` PASS, mobil vizuális `40500912769` PASS; organism-main `40500912844` FAIL, több workflow CANCELLED (ezeket nem számoljuk PASS-nak).
+- Organism-main `40500912844` napló: EUR váltás és checkout URL **sikeres**, utána `.fx-organism-console-close` `locator.evaluate` 30s timeout, a konzol bezárásáig sem jutott. `2f9287f` a natív DOM gombkattintást alkalmazza, és ellenőrzi a nyitott állapotot, majd a tényleges bezárást és CSS `display:none` állapotot. A pointeres kattinthatóság külön UX-gate feladata.
+- Lighthouse, archive és a teljes új CI továbbra is ellenőrizendő; nincs merge/release.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
