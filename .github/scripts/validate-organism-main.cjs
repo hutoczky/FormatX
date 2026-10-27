@@ -142,6 +142,12 @@ async function validateDesktop() {
         pointerEvents:getComputedStyle(button).pointerEvents};
     });
     mark('desktop: currency-hit-test',currencyHit);
+    // Scroll the actual nested pricing viewport explicitly: Playwright's
+    // automatic scroll-into-view can chase a moving element while the
+    // full-screen organism interface performs its entrance animation.
+    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').evaluate(button=>{
+      button.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
+    });
     await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
