@@ -34,7 +34,7 @@ const tokens=[
 ];
 for(const token of tokens)assert(src.includes(token),'Missing Genesis DNA-first invariant: '+token);
 const gpuStaging=src.slice(src.indexOf('makeGenomeParticles(){'),src.indexOf('const geometry=new T.BufferGeometry();',src.indexOf('makeGenomeParticles(){')));
-assert(!/\\b(?:initial|cell|arms)\\.set\\(\\[/.test(gpuStaging),'GPU staging must not allocate a JS coordinate array per particle');
+assert(!['initial.set([','cell.set([','arms.set(['].some(token=>gpuStaging.includes(token)),'GPU staging must not allocate a JS coordinate array per particle');
 const clamp=v=>Math.max(0,Math.min(1,v));
 const smooth=v=>{v=clamp(v);return v*v*(3-2*v);};
 const state=t=>{
