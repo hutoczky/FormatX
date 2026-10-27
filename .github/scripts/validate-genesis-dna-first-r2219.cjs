@@ -19,7 +19,10 @@ const tokens=[
   'this.coreGroup.visible=visible>.002;',
   'this.coreShell.material.opacity=0;',
   'this.irisGroup.visible=false;',
-  'this.coreLight.intensity=0;'
+  'this.coreLight.intensity=0;',
+  'float living=condense*(1.0-assemble);',
+  'float nucleusBreath=1.0+.023*sin(uTime*.0021);',
+  'p+=living*(nucleusBreath-1.0)*(aCell-cellCentre);'
 ];
 for(const token of tokens)assert(src.includes(token),'Missing Genesis DNA-first invariant: '+token);
 const clamp=v=>Math.max(0,Math.min(1,v));
@@ -36,6 +39,16 @@ for(const t of [0,.5,1,2,2.5,3.28]){
  assert(!frame.nucleusVisible,'Nucleus must not precede DNA at '+t+'s');
  assert.equal(frame.nucleusOpacity,0,'Nucleus must be transparent at '+t+'s');
 }
+// R2221: the nucleus breathes only in its biological chapter. The
+// phase envelope is zero for DNA and again for the finished MAG arms.
+const breathEnvelope=(phase)=>{
+ const condense=smooth((phase-2.94)/(4.38-2.94));
+ const assemble=smooth((phase-5.34)/(6.90-5.34));
+ return condense*(1-assemble);
+};
+assert.equal(breathEnvelope(0),0,'DNA geometry must not breathe as a cell');
+assert(breathEnvelope(4.5)>.99,'nucleus must breathe after condensation');
+assert.equal(breathEnvelope(7.5),0,'MAG arm endpoints must remain stable');
 assert(state(3.8).nucleusVisible,'Biological nucleus should appear after DNA');
 assert(state(4.5).nucleusOpacity>.4,'Living nucleus must be readable at 4.5s');
 assert(src.indexOf('this.updateGenomeParticles(t,time);')<src.indexOf('this.updateCore(t,time);'),
