@@ -460,6 +460,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A csúcskiértékelések elméleti száma a testhálónál `4*latitudeSegments*longitudeSegments` helyett `(latitudeSegments+1)*(longitudeSegments+1)`; a mikrofilamentumok saját `vertex()` hívásai változatlanok. **Ez CPU-munka csökkentés, de a valós TBT/FPS javulás még nem mért.**
 - Következő ellenőrzés: P0 source loop, mobil/desktop MAG WebGL vizuális, R536 Genesis és Lighthouse 3× mérés. PR draft, nincs merge.
 
+### 2026-10-27 – R2244 tényleges geometriaoptimalizálás
+
+- Az aktív `docs/scifi-ui/scripts/formatx-crystal-organism-r326.js` modulban a korábbi négyszeres cellasarkonkénti `vertex(lat,lon)` újraszámítás helyett két szomszédos szélességi sor vertexei kerülnek újrahasznosításra. A háromszögek, attribútumok, felbontás és indexsorrend változatlan; a trigonometrikus és `Math.pow` számítások száma csökken.
+- Egy `latitudeSegments × longitudeSegments` hálón a cellasarkok számítása korábban `4×latitudeSegments×longitudeSegments`, most `(latitudeSegments+1)×(longitudeSegments+1)`. Például mobil 40×80 esetén 12800 helyett 3321, desktop 72×144 esetén 41472 helyett 10585 vertexértékelés.
+- A Lighthouse és P0 CI eredmények a lekérdezéskor még futottak. Ez a geometriaépítés célzott gyorsítása; tényleges TBT javulást csak a mérések igazolhatnak. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
