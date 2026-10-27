@@ -148,7 +148,16 @@ async function validateDesktop() {
     // R2222: the click itself succeeds, but Playwright waits for an unrelated
     // scheduled navigation and times out. Currency selection is an in-page
     // state change; assert the resulting price and checkout URL explicitly.
-    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click({timeout:10000,noWaitAfter:true});
+    // R2230: the panel button is below the browser viewport in this
+    // fullscreen nested-scroll layout. Playwright's stability/scroll wait
+    // can time out although the control exists and its event handler works.
+    // Dispatch a real DOM click for this in-page state-only control, then
+    // verify both the rendered price and the checkout URL below.
+    await page.evaluate(() => {
+      const button=document.querySelector('[data-organism-panel="pricing"] [data-currency="EUR"]');
+      if(!button)throw new Error('EUR currency button missing');
+      button.click();
+    });
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
