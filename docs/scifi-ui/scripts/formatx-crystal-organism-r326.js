@@ -2091,8 +2091,15 @@
     function finishWhenReady() {
       if(!stage.isConnected)return;
       let program;
+      const shaderPollStart=performance.now();
       try { program=finishProgram(gl,pendingProgram); }
       catch(error){ failShader(error); return; }
+      const shaderPollMs=performance.now()-shaderPollStart;
+      if(shaderPollMs>0.5){
+        root.dataset.fxCoreShaderPollMaxMsR2252=Math.max(
+          shaderPollMs,Number(root.dataset.fxCoreShaderPollMaxMsR2252||0)
+        ).toFixed(2);
+      }
       if(!program){
         shaderPollCount+=1;
         if(shaderPollCount>750){failShader(new Error('crystal organism parallel shader compile timeout'));return;}
@@ -2151,6 +2158,15 @@
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
     const uploadEnd=performance.now();
     root.dataset.fxCoreBufferUploadMsR2203=(uploadEnd-uploadStart).toFixed(2);
+    // R2252: distinguish CPU tessellation, driver upload and shader polling
+    // when investigating the 864 ms MAG long task in Lighthouse CI.
+    // The measurements do not change geometry, scheduling or draw calls.
+    root.dataset.fxCoreBootMeasuredMsR2252=(uploadEnd-geometryStart).toFixed(2);
+    try{
+      performance.measure('formatx:r326:geometry-and-upload-r2252',{
+        start:geometryStart,end:uploadEnd
+      });
+    }catch(_){};
     try{
       performance.measure('formatx:r326:buffer-upload-r2203',{
         start:uploadStart,end:uploadEnd
