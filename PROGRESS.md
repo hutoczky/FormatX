@@ -387,6 +387,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Ez mérésre váró optimalizálás; nincs igazolt Lighthouse-javulás vagy 0.95 PASS. Következő lépés az új futás és a hálózati vízesés, LCP/CLS/TBT ellenőrzése; ha a preload nem javít, vissza kell vonni.
 - PR draft, nincs merge.
 
+### 2026-10-27 – R2234 archive tartalmi egyezés hibadiagnosztika
+
+- `3418d85` CI közben az archive `40505391542` FAIL: `The MAG paper is not connected to the real section copy`; állapot `folio=true,liveCount=27,currentLive=1,actualContent=false,mode=native-paper-handoff`. Ez azt mutatja, hogy a fizikai papír és élő tartalom létezik, de a címek egyezése hibás, vagy a frissítés időzítése elcsúszik. Nem bizonyított, hogy a CSS preload okozta.
+- `2d93d1b` bővíti a tesztdiagnosztikát a `sourceTitle` és `folioTitle` konkrét értékével, hogy a következő CI-futás alapján a címválasztási/handoff hibát javíthassuk; az eredeti szigorú assert változatlan.
+- Lighthouse `40505391530` és más workflow-k a lekérdezéskor még futottak; új eredmény szükséges. Nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
