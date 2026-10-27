@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261026-r2202-aa-focused-biophotonic-nucleus
-release_line=R2202-AA-FOCUSED-DNA-TO-BIOPHOTONIC-NUCLEUS-TO-LIVING-MAG
+token=20261027-r2203-machined-silver-native-mag
+release_line=R2203-MACHINED-SILVER-RECESSED-OPTIC-DNA-CELL-LIVING-MAG
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
 r2202_delivery=R533 canonical and recovery owners load R1280 20261026-r2202-aa-focused-microcell. Exact parser CSP eBsjac1UkasQbGIbDmPoYXYJ1PHZ8H4dGa0JOdXeuoQ= is authorized in both HTML and Worker policies.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261026-r2194
+mag_cache=20261027-r2203
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -171,3 +171,8 @@ R2195_quality_limit=Photographic or awards-quality aesthetic not certified by au
 r2202_desktop_proof_fix=Re-run the R2201 production cinematic with the corrected real WebGL READY sampling (6718ac4a93); do not reload a frame already confirmed ready; retain all four chromatic genome/cell/MAG pixel and timing assertions and strict CSP.
 r2202_listener_lifecycle=The R533 film geometry, real3dready and orientation listeners now share its existing AbortController and stop at the genuine MAG handoff; a queued orientation callback also checks completion before reading layout. Active-film resize tracking, the same WebGL renderer, camera, visual sequence and permanent MAG remain unchanged.
 r2202_listener_security=Exact parser-inline SHA256 y3nLAeGJKtyzC3I7YsZo6RXuTSWzWmqMSk/peQFMuZU= is authorized in both HTML and Worker CSP for the cache-busted lifecycle release.
+
+r2203_native_mag=The original single WebGL body retains its four-point silhouette and reactive lifecycle, with body-local filtered machined-silver panel response, analytical shell normals, a physically profiled recessed optical bezel, a cleared front-skin aperture and glass-local optical depth. Membrane displacement is confined to the continuous biological skin; shared metal/glass edges remain rigid under the same breathing transform.
+r2203_film_continuity=The existing Three.js mechanical materials receive the same filtered body-local panel proportions through their physical shaders and converge to a neutral silver-blue finale. DNA and biological cell stages, particle counts, camera and ten-second clock are preserved. No new canvas, context, draw pass or animation loop.
+r2203_delivery=Native renderer and all desktop/mobile/motion/scheduler callers use 20261027-r2203-machined-silver-mag; Three.js uses 20261027-r2203-machined-silver-film; parser and rescue use 20261027-r2203-silver-optic-handoff. Exact parser-inline SHA256 /SgTWm+vrdARxjKyHmBzg0ozXdjzBAxkxR37nvDckVo= is authorized in HTML and Worker CSP.
+r2203_validation=Require actual browser transform-feedback proof of coincident native metal/glass edges, normal and reduced handoff, zero-idle and state response, desktop/mobile/WebGL1 regression and both-domain exact revision checks before release acceptance. Private Mesa raster proofs are software diagnostics, not hardware FPS, studio-quality acceptance or deployment evidence.

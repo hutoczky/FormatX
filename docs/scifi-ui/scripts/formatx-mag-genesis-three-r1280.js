@@ -1784,6 +1784,38 @@
       this.cellGroup.scale.setScalar(.001);
     }
 
+    bindMachinedMagSurface(material){
+      // R2203: the film and permanent MAG share body-local machined panel
+      // proportions. Keep Three's existing physical BRDF and softbox lighting.
+      material.onBeforeCompile=shader=>{
+        shader.vertexShader=shader.vertexShader.replace('#include <common>',
+          '#include <common>\nvarying vec3 vFxMagAnatomy;')
+          .replace('#include <begin_vertex>',
+            '#include <begin_vertex>\nvFxMagAnatomy=position;');
+        shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
+          `#include <common>
+          varying vec3 vFxMagAnatomy;
+          float fxMagPanelJoint(){
+            vec2 anatomy=abs(vFxMagAnatomy.xy);
+            float radial=max(anatomy.x,anatomy.y);
+            float lateral=min(anatomy.x,anatomy.y);
+            float width=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
+            vec2 cell=vec2(radial*28.0,lateral/width*4.0);
+            cell.y+=sin(floor(cell.x)*1.37)*.20;
+            vec2 edge=min(fract(cell),1.0-fract(cell));
+            vec2 aa=max(fwidth(cell),vec2(.018));
+            float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
+              smoothstep(.018,.035+aa.y,edge.y));
+            return joint*smoothstep(.21,.28,length(vFxMagAnatomy.xy));
+          }`)
+          .replace('#include <color_fragment>',
+            '#include <color_fragment>\ndiffuseColor.rgb*=1.0-fxMagPanelJoint()*.085;')
+          .replace('#include <roughnessmap_fragment>',
+            '#include <roughnessmap_fragment>\nroughnessFactor=min(.48,roughnessFactor+fxMagPanelJoint()*.055);');
+      };
+      material.customProgramCacheKey=()=> 'r2203-body-anchored-machined-silver';
+    }
+
     makeMechanicalLayer(){
       const T=this.THREE;
 
@@ -2085,6 +2117,27 @@
           }
         }
       }
+      // Match the permanent MAG's three conformal flank ridges in this same
+      // existing batched trim mesh. They remain inside the selected outline.
+      for(const scale of [.55,.70,.84]){
+        for(let quadrant=0;quadrant<4;quadrant++){
+          const start=ribPositions.length/3;
+          for(let j=0;j<=20;j++){
+            const angle=(quadrant+j/20)*Math.PI*.5;
+            const cx=Math.cos(angle),cy=Math.sin(angle),p=this.mobileRender?.78:.61;
+            for(const offset of [-.005,.005]){
+              ribPositions.push(
+                Math.sign(cx)*.99*Math.pow(Math.abs(cx),2/p)*(scale+offset),
+                Math.sign(cy)*1.08*Math.pow(Math.abs(cy),2/p)*(scale+offset),.276
+              );
+            }
+            if(j>0){
+              const a=start+(j-1)*2,b=start+j*2;
+              ribIndices.push(a,b,a+1,a+1,b,b+1);
+            }
+          }
+        }
+      }
       const ribGeometry=new T.BufferGeometry();
       ribGeometry.setAttribute('position',
         new T.Float32BufferAttribute(ribPositions,3));
@@ -2227,6 +2280,10 @@
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
+
+      for(const material of [this.mechMaterial,this.mechMidMaterial,
+        this.silverMaterial,this.armInlayMaterial,this.armTrimMaterial])
+        this.bindMachinedMagSurface(material);
 
       this.mechanicalGroup.scale.setScalar(.001);
     }
@@ -2772,19 +2829,19 @@
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
       this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
-        mix(.106,.132,finale)
+        mix(.105,.190,finale),
+        mix(.140,.230,finale),
+        mix(.170,.260,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.039,.066,finale),
-        mix(.125,.142,finale),
-        mix(.145,.150,finale)
+        mix(.130,.220,finale),
+        mix(.180,.270,finale),
+        mix(.210,.300,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
+        mix(.480,.600,finale),
+        mix(.575,.660,finale),
+        mix(.565,.690,finale)
       );
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression

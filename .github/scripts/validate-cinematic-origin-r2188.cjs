@@ -36,7 +36,7 @@ for(const text of [
 ]){
   assert(renderer.includes(text),'Missing R2188 film / biological chronology contract: '+text);
 }
-const filmURL='formatx-mag-genesis-three-r1280.js?v=20261026-r2202-aa-focused-microcell';
+const filmURL='formatx-mag-genesis-three-r1280.js?v=20261027-r2203-machined-silver-film';
 assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stale 3D intro');
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
@@ -83,5 +83,5 @@ console.log('R2188_GENESIS_STUDIO_SOURCE_PASS',JSON.stringify({
   dnaFirst:true,cellSecond:true,metalThird:true,opticLast:true,
   gpuParticles:{mobile:6000,desktop:9600},
   pairedVolumetricStreams:8,
-  nucleotideColors:4,chromatin:{mobile:6,desktop:10},cloudflareRevision:'r2202'
+  nucleotideColors:4,chromatin:{mobile:6,desktop:10},cloudflareRevision:'r2203'
 }));

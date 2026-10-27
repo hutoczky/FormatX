@@ -18,8 +18,8 @@ assert(match,'Inline parser-owned GENESIS bootstrap missing');
 const hash="'sha256-"+crypto.createHash('sha256').update(match[1]).digest('base64')+"'";
 const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
 assert(meta?.[1]?.includes(hash),'The exact new GENESIS inline hash must appear in HTML CSP');
-assert(worker.includes('const INLINE_R2202_LISTENER_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
-assert(worker.includes('${INLINE_R2202_LISTENER_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
+assert(worker.includes('const INLINE_R2203_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
+assert(worker.includes('${INLINE_R2203_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
 assert(match[1].includes("const v=f||(!a&&p.get('intro')!=='0')"),
   'Every normal full navigation must play GENESIS; explicit ?intro=0 may skip');
 assert(match[1].includes('fresh-navigation-genesis'),'Must identify the new repeatable film bootstrap');
@@ -58,7 +58,7 @@ assert(renderer.indexOf('this.updateDNA(t,time);')<renderer.indexOf('this.update
   'The DNA must be updated before the embryo');
 assert(renderer.indexOf('this.updateCore(t,time);')<renderer.indexOf('this.updateMechanical(t,time);'),
   'The embryo must be updated before the MAG');
-assert(worker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2202-aa-focused-microcell'),
+assert(worker.includes('formatx-mag-genesis-three-r1280.js?v=20261027-r2203-machined-silver-film'),
   'Cloudflare must never rewrite the live R533 film back to an older visual');
 console.log('GENESIS_R2201_SOURCE_CONTRACT_PASS',JSON.stringify({
   fullNavigationReplay:true,explicitSkip:true,stages:['DNA','cyan/coral cell','four-arm MAG'],

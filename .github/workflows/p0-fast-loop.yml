@@ -167,6 +167,11 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_VISUAL_DIR: artifacts/content-visuals
         run: node .github/scripts/validate-content-visuals.cjs
+      - name: Verify actual native metal and optical edges remain connected
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-mag-machined-optic-r2203.cjs
       - name: Run R533 to R536 cinematic handoff browser proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -209,6 +214,7 @@ jobs:
             artifacts/r533-r536-handoff/
             artifacts/reference-film-native-handoff-r2171/
             artifacts/intro-retired-layout-r2173/
+            artifacts/mag-machined-optic-r2203/
             artifacts/native-mag-dock-entry-r2173/
             artifacts/genesis-antialias-r2175/
             artifacts/mag-handoff-layout-r2181/

@@ -340,9 +340,9 @@
       /* Keep the original crystalline outline, but smooth the studio response.
          This prevents the four quadrants from reading as flat cardboard planes. */
       const crystalNormal=normalize([
-        direction[0]/axisX,
-        direction[1]/axisY,
-        direction[2]/axisZ
+        Math.sign(direction[0])*Math.pow(Math.max(.022,Math.abs(crystalPosition[0])/axisX),exponent-1)/axisX,
+        Math.sign(direction[1])*Math.pow(Math.max(.022,Math.abs(crystalPosition[1])/axisY),exponent-1)/axisY,
+        Math.sign(direction[2])*Math.pow(Math.max(.022,Math.abs(crystalPosition[2])/axisZ),exponent-1)/axisZ
       ]);
 
       return{
@@ -693,23 +693,59 @@
         }
       }
     }
+    // Three fine conformal ridges reveal the concave silver flanks in depth.
+    // Every point stays inside the existing outline and above its real skin.
+    for(const scale of [.55,.70,.84]){
+      for(let quadrant=0;quadrant<4;quadrant++){
+        let previous=null;
+        for(let j=0;j<=20;j++){
+          const angle=(quadrant+j/20)*Math.PI*.5;
+          const cx=Math.cos(angle),cy=Math.sin(angle),p=mobile?.78:.61;
+          const ax=mobile?(cx>=0?.88:.86):(cx>=0?1.02:.98);
+          const ay=mobile?(cy>=0?1.09:.97):(cy>=0?1.18:1.06);
+          const point=offset=>{
+            const x=Math.sign(cx)*ax*Math.pow(Math.abs(cx),2/p)*(scale+offset);
+            const y=Math.sign(cy)*ay*Math.pow(Math.abs(cy),2/p)*(scale+offset);
+            return [x,y,magSkinZ(x,y)+.030];
+          };
+          const next=[point(-.005),point(.005)];
+          if(previous)armorQuad(previous[0],previous[1],next[1],next[0],5.475);
+          previous=next;
+        }
+      }
+    }
+
     /* The centre is not a painted circle. A shallow, machined 48-facet
        silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
+    // A lens housing is a single machined plane. Following the pointed shell
+    // at every radius warped the bezel and let the body intersect the glass.
+    const opticalSocketZ=magSkinZ(0,0)-.135;
     const opticPoint=(radius,angle,depth)=>[
       radius*Math.cos(angle),radius*Math.sin(angle),
-      magSkinZ(radius*Math.cos(angle),radius*Math.sin(angle))+depth
+      opticalSocketZ+depth
     ];
-    // R2144: raised 48-piece optical bezel now has a true sloped crown and
-    // inner/outer machined side walls, not just a flat painted ring.
-    for(let j=0;j<48;j++){
-      const a=j*Math.PI/24,b=(j+1)*Math.PI/24;
-      const innerA=opticPoint(.143,a,.118),outerA=opticPoint(.203,a,.134);
-      const innerB=opticPoint(.143,b,.118),outerB=opticPoint(.203,b,.134);
-      armorQuad(innerA,outerA,outerB,innerB,5.22);
-      armorQuad(outerA,opticPoint(.203,a,.035),
-                opticPoint(.203,b,.035),outerB,5.72);
-      armorQuad(opticPoint(.143,a,.035),innerA,
-                innerB,opticPoint(.143,b,.035),5.72);
+    // R2203: one lathed bezel with an inner recess, rounded metal crown and
+    // outer shoulder. Analytical radial normals keep its highlights continuous.
+    const opticProfile=[
+      [.141,.035],[.141,.105],[.148,.133],[.158,.142],
+      [.184,.140],[.203,.115],[.208,.065],[.208,.035]
+    ];
+    for(let band=0;band<opticProfile.length-1;band++){
+      const [r0,z0]=opticProfile[band],[r1,z1]=opticProfile[band+1];
+      const dr=r1-r0,dz=z1-z0;
+      const point=(radius,depth,angle)=>surfaceVertex(
+        opticPoint(radius,angle,depth),
+        normalize([-dz*Math.cos(angle),-dz*Math.sin(angle),dr]),
+        [angle/(Math.PI*2),band/(opticProfile.length-1)]
+      );
+      for(let j=0;j<48;j++){
+        const a=j*Math.PI/24,b=(j+1)*Math.PI/24;
+        const p0=point(r0,z0,a),p1=point(r1,z1,a);
+        const p2=point(r1,z1,b),p3=point(r0,z0,b);
+        const facet=band===0||band>4?5.72:5.22;
+        triangle([p0,p1,p2],facet);
+        triangle([p0,p2,p3],facet);
+      }
     }
     for(let j=0;j<8;j++){
       const angle=j*Math.PI/4+.10;
@@ -1093,6 +1129,8 @@
     const fragmentIn = webgl2 ? 'in' : 'varying';
     const outputName = webgl2 ? 'outColor' : 'gl_FragColor';
     const versionLine = webgl2 ? '#version 300 es\n' : '';
+    const derivativeSupport=webgl2||Boolean(gl.getExtension('OES_standard_derivatives'));
+    const derivativeLine=!webgl2&&derivativeSupport?'#extension GL_OES_standard_derivatives : enable\n':'';
     const vertexSource = `${versionLine}precision highp float;
       ${vertexIn} vec3 aSphere;
       ${vertexIn} vec3 aCrystal;
@@ -1106,6 +1144,7 @@
       uniform vec3 uRotation;
       ${vertexOut} vec3 vNormal;
       ${vertexOut} vec3 vLocal;
+      ${vertexOut} vec3 vAnatomy;
       ${vertexOut} vec2 vUv;
       ${vertexOut} vec3 vBary;
       ${vertexOut} float vFacet;
@@ -1138,7 +1177,11 @@
            after geometry cleanup and created a mouth/visor-like horizontal seam. */
         float layerScale=uLayer>.5?.50:1.0;
         float heartbeat=1.0+uBreath*(uLayer>.5?.040:.020);
-        vec3 local=(base+normal*(living+cortex+microFold))*layerScale*heartbeat;
+        // Machined parts and the optical glass share vertices with different
+        // UV charts. Membrane displacement there tore their shared edges apart.
+        // Keep their rigid assembly on the same breathing transform; only the
+        // continuous biological skin receives local membrane deformation.
+        vec3 local=(base+normal*(living+cortex+microFold)*bodyVertexMask)*layerScale*heartbeat;
         float tendrilVertex=step(2.0,aFacet)*(1.0-step(4.0,aFacet));
         float tendrilTip=tendrilVertex*smoothstep(.10,1.0,aUv.y);
         float tendrilWave=sin(uTime*(1.18+.16*fract(aFacet)) + aUv.y*9.4 + aFacet*2.7);
@@ -1154,6 +1197,7 @@
         vec3 world=rotation*local;
         vNormal=normalize(rotation*normal);
         vLocal=world;
+        vAnatomy=local;
         vUv=aUv;
         vBary=aBary;
         vFacet=aFacet;
@@ -1175,7 +1219,8 @@
         // interleaving dark mineral fragments with the raised titanium.
         // A stable per-material clip-depth layer replaces subpixel z-fight
         // while retaining physical front/back ordering WITHIN each layer.
-        float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet));
+        float recessedIris=step(5.34,aFacet)*(1.0-step(5.40,aFacet));
+        float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet))*(1.0-recessedIris);
         gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.030,1.0);
       }`;
 
@@ -1192,11 +1237,12 @@
        One clean material, no procedural dirt/speckles, no black button optic.
        The four-point silhouette carries the identity; the shader only gives it
        physical depth, broad softbox reflections and restrained living energy. */
-    const constrainedFragmentSource = `${versionLine}precision highp float;
+    const constrainedFragmentSource = `${versionLine}${derivativeLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
       ${fragmentIn} vec3 vNormal;
       ${fragmentIn} vec3 vLocal;
+      ${fragmentIn} vec3 vAnatomy;
       ${fragmentIn} vec2 vUv;
       ${fragmentIn} vec3 vBary;
       ${fragmentIn} float vFacet;
@@ -1205,6 +1251,9 @@
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
+        // Trim the real front skin at the optical aperture. The old intact
+        // pointed body occupied the same volume as the recessed glass lens.
+        if(vFacet<2.0&&vAnatomy.z>0.0&&length(vAnatomy.xy)<.141)discard;
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
         float facing=sat(abs(dot(n,view)));
@@ -1333,7 +1382,7 @@
            A soft smoked cavity precedes the lens, giving the centre actual depth
            instead of a luminous disc painted onto the shell. */
         float front=smoothstep(.06,.50,vLocal.z);
-        vec2 oq=vec2(vLocal.x/${mobile?'.195':'.252'},vLocal.y/${mobile?'.195':'.252'});
+        vec2 oq=vAnatomy.xy/.135;
         float od=length(oq);
         float cavity=(1.0-smoothstep(.92,1.34,od))*front;
         float cavityCore=exp(-od*od*2.3)*front;
@@ -1394,7 +1443,63 @@
           +vec3(.75,.90,.88)*metalSpec*.48
           +vec3(.14,.37,.41)*metalSideSpec*.24;
         titanium=mix(titanium,machinedSilver,polishedRib*.90);
+
+        /* R2203: machined silver follows the actual four-arm anatomy. The
+           panel seams are filtered in raster space, with no random grit,
+           animated texture upload, additional geometry or rendering pass. */
+        vec2 anatomy=abs(vAnatomy.xy);
+        float radial=max(anatomy.x,anatomy.y);
+        float lateral=min(anatomy.x,anatomy.y);
+        float panelWidth=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
+        vec2 panelCoord=vec2(radial*28.0,lateral/panelWidth*4.0);
+        panelCoord.y+=sin(floor(panelCoord.x)*1.37)*.20;
+        vec2 panelEdge=min(fract(panelCoord),1.0-fract(panelCoord));
+        vec2 panelAA=${derivativeSupport?'max(fwidth(panelCoord),vec2(.018))':'vec2(.095)'};
+        float panelJoint=1.0-min(smoothstep(.018,.035+panelAA.x,panelEdge.x),
+          smoothstep(.018,.035+panelAA.y,panelEdge.y));
+        float panelBevel=exp(-pow((panelEdge.x-.10)/(.045+panelAA.x),2.0))*.35
+          +exp(-pow((panelEdge.y-.10)/(.045+panelAA.y),2.0))*.22;
+        float panelEnvelope=smoothstep(.21,.28,length(vAnatomy.xy))*
+          smoothstep(.015,.13,vAnatomy.z);
+        float brushed=.5+.5*sin(radial*73.0+lateral*11.0);
+        float silverKey=(1.0-smoothstep(.28,.48,abs(refl.x+.30)))*
+          (1.0-smoothstep(.16,.32,abs(refl.y-.53)))*smoothstep(.12,.64,refl.z);
+        vec3 studioSilver=vec3(.032,.046,.060)
+          +vec3(.22,.25,.28)*pow(metalKey,1.35)
+          +vec3(.59,.67,.74)*softboxB*.76
+          +vec3(.90,.94,.98)*softboxC*.38
+          +vec3(.80,.87,.93)*metalSpec*.72
+          +vec3(.94,.97,1.0)*silverKey*.90
+          +vec3(.12,.25,.31)*metalSideSpec*.25;
+        studioSilver*=1.0-panelJoint*.085*panelEnvelope;
+        studioSilver+=vec3(.21,.27,.31)*panelBevel*panelEnvelope*(.10+.22*metalKey);
+        studioSilver*=.985+.015*brushed;
+        float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
+        c=mix(c,studioSilver,shellSilver);
+        titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
+        titanium*=1.0-panelJoint*panelEnvelope*.07;
         c=mix(c,titanium,machinedArmor*.99);
+
+        // The curved glass has its own optical response. All interior detail
+        // stays in body coordinates while studio reflections move with view.
+        float opticalGlass=step(6.0,vFacet);
+        float lensEdge=smoothstep(.60,1.02,od);
+        float lensHeart=exp(-dot(oq,oq)*5.2);
+        float lensCaustic=exp(-pow((od-.62)/.11,2.0));
+        float lensKey=exp(-pow((oq.x+.31)/.22,2.0)-pow((oq.y-.34)/.25,2.0));
+        float lensFill=exp(-pow((oq.x-.42)/.14,2.0)-pow((oq.y+.30)/.29,2.0));
+        float lensPin=exp(-pow((oq.x+.25)/.075,2.0)-pow((oq.y-.27)/.09,2.0));
+        vec3 lensColor=vec3(.008,.038,.055)+vec3(.035,.23,.29)*(.28+.72*lensHeart);
+        lensColor+=vec3(.13,.57,.64)*lensHeart*(.46+.20*uEnergy);
+        lensColor+=vec3(.12,.35,.39)*lensCaustic*(.28+.18*side);
+        lensColor+=vec3(.78,.93,.95)*lensKey*.76;
+        lensColor+=vec3(.26,.62,.68)*lensFill*.32;
+        lensColor+=vec3(2.2,2.8,3.0)*lensPin;
+        lensColor+=vec3(.22,.72,.78)*exp(-dot(oq,oq)*32.0)*(.40+.18*uEnergy);
+        lensColor+=vec3(.22,.33,.39)*lensEdge*(.22+.34*softboxB);
+        lensColor+=vec3(.03,.24,.27)*livingInterior*aquaSites*.09;
+        lensColor+=vec3(.60,.18,.13)*livingInterior*coralSite*.035;
+        c=mix(c,lensColor,opticalGlass);
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
@@ -1419,6 +1524,7 @@
        software proof. This removes the hardware/CI split that hid ugly live paths. */
     const fragmentSource = constrainedFragmentSource;
     root.dataset.fxNativeMagVisualR2200='organic-coral-cytoplasm-retained-in-four-arm-titanium-optic';
+    root.dataset.fxNativeMagSurfaceR2203='body-anchored-filtered-machined-silver-recessed-optical-aperture';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

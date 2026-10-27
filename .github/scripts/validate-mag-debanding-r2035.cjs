@@ -33,7 +33,9 @@ for(const token of [
   'armorQuad(a.left,a.crown,b.crown,b.left,5.20+axis*.008)',
   'armorQuad(a.crown,a.right,b.right,b.crown,5.24+axis*.008)',
   'const metalFacet=facet>=5.0&&facet<6.0',
-  'armorQuad(innerA,outerA,outerB,innerB,5.22)',
+  'const opticProfile=[',
+  'const facet=band===0||band>4?5.72:5.22',
+  'normalize([-dz*Math.cos(angle),-dz*Math.sin(angle),dr])',
   'const normal=normalize([position[0]*1.14,position[1]*1.14,1.40])',
   "float yaw=${mobile?'.535':'.465'}+uRotation.y",
   'const opticPoint=(radius,angle,depth)=>',
@@ -45,7 +47,7 @@ for(const token of [
   'c=mix(c,titanium,machinedArmor*.99)',
   'float titaniumDepthBias=step(5.0,aFacet)*(1.0-step(6.0,aFacet))',
   'gl_Position=vec4(projected,-world.z*.13-titaniumDepthBias*.030,1.0)',
-  "mobile?'.195':'.252'"
+  "vec2 oq=vAnatomy.xy/.135"
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
@@ -82,11 +84,11 @@ for(const token of [
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194-polished-four-arm-mag'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261027-r2203-machined-silver-mag'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194-polished-four-arm-mag'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261027-r2203-machined-silver-mag'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
-assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2202-aa-focused-microcell'),
+assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261027-r2203-machined-silver-film'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
 // R2148: the user-visible native Three.js cinematic must end with a true
 // machined optical instrument rather than the small pre-R2148 glowing bead.
@@ -151,14 +153,14 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261026-r2194'),
+  assert.ok(loader.includes('20261027-r2203'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261026-r2194'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261027-r2203'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261027-r2203'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261027-r2203'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
@@ -206,5 +208,5 @@ assert.ok(intro.includes('end-r2103-mobile-compact-four-point-intro')&&
 console.log('MAG_R2035_DEBANDING_SOURCE_PASS',JSON.stringify({
  pc:true,mobile:true,canonicalWebgl:true,oldRearDepth:oldDepth(-1.15),
  correctedRearDepth:depth(-1.15),retrievedSheetDepth:depth(2.30),
- noCssScanlines:true,unmodifiedMagTopology:true
+ noCssScanlines:true,singleNativeGeometry:true,profiledRecessedBezel:true
 }));
