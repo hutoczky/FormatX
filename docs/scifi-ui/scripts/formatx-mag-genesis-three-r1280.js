@@ -975,8 +975,11 @@
         // 3D phosphate strands at every base-pair station.
         const helixRadius=.410+(r()-.5)*.013;
         const localX=(u-.5)*3.54;
-        const localY=sign*Math.sin(phase)*helixRadius;
-        const localZ=sign*Math.cos(phase)*helixRadius;
+        // R2228: both DNA strands and chromatid offsets reuse one
+        // trigonometric pair per nucleotide, reducing startup CPU work.
+        const sinPhase=Math.sin(phase),cosPhase=Math.cos(phase);
+        const localY=sign*sinPhase*helixRadius;
+        const localZ=sign*cosPhase*helixRadius;
         const rolledX=localX*cosZ-localY*sinZ;
         const rolledY=localX*sinZ+localY*cosZ;
         // R2226: direct typed-buffer writes avoid per-particle GC churn.
@@ -1000,8 +1003,8 @@
         // The tiny phase-opposed offset makes the paired DNA observable,
         // while maintaining physical continuity through condensation.
         const chromatide=.014;
-        cell[offset]=pairCellX+sign*chromatide*Math.cos(phase);
-        cell[offset+1]=pairCellY+sign*chromatide*Math.sin(phase);
+        cell[offset]=pairCellX+sign*chromatide*cosPhase;
+        cell[offset+1]=pairCellY+sign*chromatide*sinPhase;
         cell[offset+2]=pairCellZ+sign*chromatide*.55*Math.cos(phase*.5);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
