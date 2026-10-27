@@ -615,6 +615,14 @@
       // original MAG DOM contract and WebGL identity checks. The external
       // archive stylesheet owns docking geometry so strict style-src remains
       // intact and renderer-authored canvas state is never overwritten.
+      // R2247: R326 reserves its initial layout with inline !important
+      // position/inset/size. Inline important wins over the archive stylesheet
+      // and kept the MAG scrolling with the hero (y=-1233 in desktop CI).
+      // Release only those six layout properties while docked so the existing
+      // archive CSS can position the SAME canvas fixed in the viewport.
+      stage._fxArchiveDockLayout=['position','inset','width','height','min-width','min-height']
+        .map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)]);
+      for(const [name] of stage._fxArchiveDockLayout)stage.style.removeProperty(name);
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
@@ -623,6 +631,11 @@
     static restore(){
       if(!archiveActive||!stage)return;
       stage.classList.remove('fx-archive-native-docked');
+      for(const [name,value,priority] of stage._fxArchiveDockLayout||[]){
+        if(value)stage.style.setProperty(name,value,priority);
+        else stage.style.removeProperty(name);
+      }
+      delete stage._fxArchiveDockLayout;
       root.dataset.fxArchiveDock='home';
       archiveActive=false;
       window.FormatXLivingCore?.requestRender?.(1);
