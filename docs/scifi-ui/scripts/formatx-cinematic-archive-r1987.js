@@ -622,6 +622,12 @@
       // hero-lead visibility failure and severe mobile long tasks. Restore
       // the last archive layout contract with passing content validation.
       // Lighthouse CLS remains a separate open issue requiring attribution.
+      // R2254: count actual archive geometry transitions. These counters
+      // distinguish a genuine dock/restore layout shift from unrelated
+      // initial hero layout changes without touching the rendering pipeline.
+      root.dataset.fxArchiveDockCountR2254=String(
+        Number(root.dataset.fxArchiveDockCountR2254||0)+1
+      );
       stage._fxArchiveDockLayout=['position','inset','width','height','min-width','min-height']
         .map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)]);
       // R2253: switch directly between two fully specified geometries.
@@ -641,6 +647,9 @@
     }
     static restore(){
       if(!archiveActive||!stage)return;
+      root.dataset.fxArchiveRestoreCountR2254=String(
+        Number(root.dataset.fxArchiveRestoreCountR2254||0)+1
+      );
       stage.classList.remove('fx-archive-native-docked');
       for(const [name,value,priority] of stage._fxArchiveDockLayout||[]){
         if(value)stage.style.setProperty(name,value,priority);
