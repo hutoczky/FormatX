@@ -309,6 +309,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `f6c758c`: eltávolítva a külön `evaluate(scrollIntoView)` lépés; Playwright saját kattintása végzi a scrollt, a `noWaitAfter:true` és az ár/checkout ellenőrzések megmaradtak. Új CI eredmény szükséges.
 - Lighthouse desktop és mobile audit FAIL továbbra is; performance artifact részletes feldolgozása, WebGL vizuális ellenőrzés, release nyitott.
 
+### 2026-10-27 – R2225 GPU-előkészítés CPU-allokáció csökkentése
+
+- `e02438c` workflow-k ellenőrzésekor a Lighthouse `40485379101` és organism-main `40485378467` még futott, tehát azokhoz nem rendelhető PASS.
+- `15cfe74`: a valós r1280 `makeGenomeParticles` kódban az `arms.set([x,y,z],i*3)` minden egyes részecskére létrehozott ideiglenes JS tömb helyett közvetlen `Float32Array` indexírás. 9600 desktop / 6000 mobil részecske mellett 9600 / 6000 rövid életű tömbbel kevesebb a kezdeti MAG-kar GPU-buffer előállításakor. Azonos matematikai koordináták, változatlan shader és draw-call szám.
+- `3fcb861`: a P0 forrásinvariáns ellenőrzi a közvetlen typed-array koordinátaírást. Új CI futás és Lighthouse összehasonlítás még szükséges.
+- Nyitott: Lighthouse 0.95 desktop/mobile, valós WebGL filmes képkocka-összehasonlítás, organism-main regresszió, release.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
