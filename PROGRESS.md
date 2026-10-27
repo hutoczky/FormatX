@@ -447,6 +447,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `6cd9532` kiegészíti a Lighthouse `LIGHTHOUSE_DIAG` és `paint-diagnostics.json` kimenetet a `long-tasks` audit egyedi `startTime/duration/url` adataival és a `bootup-time` audit szkriptenkénti `total/scriptEvaluation/scriptParseCompile` értékeivel. Így a következő futásból konkrétan megállapítható, mely feladatok terhelik a főszálat.
 - A módosítás **diagnosztika**, nem FPS/TBT gyorsítás. Következő lépés a mért long-task források célzott javítása, majd három-három mérés; PR draft, nincs merge.
 
+### 2026-10-27 – R2243 long-task audit: R326 bizonyított mobil TBT hotspot
+
+- `624b167` CI **22/23 PASS**; Lighthouse `40518107190` FAIL. Mobil Performance **0.74/0.74/0.74**, TBT **831.83/814.37/848.44 ms**, Speed Index **6557/6540/6567 ms**. Desktop Performance **0.78/0.85/0.88**.
+- Új `long-tasks` audit három egymástól független mobil futásban a `formatx-crystal-organism-r326.js` modulban **242–247 ms** és **282–294 ms** hosszú feladatokat azonosított, a navigáció kezdete után kb. **9.2–9.75 s** időpontban. A `bootup-time` összesítése ugyanennél a modulnál **1.67–1.75 s**. Ez **bizonyított hotspot**, de a teljes TBT-t nem lehet kizárólag ehhez rendelni; `index.html` alatt további ~171–191 ms feladat szerepel.
+- A forrás szerint az R326 a `boot()` függvényben állítja elő a tartós WebGL MAG-ot, amelynek láthatóságát az R533 Genesis intro 10 s születési animációja alatt külön szabályozza. **Nem szabad** pusztán Lighthouse- vagy webdriver-felismerésre kikapcsolni, mert az eltérő termékélményt és félrevezető tesztet okozna.
+- Következő valódi kódmunka: a geometria-előállítás és WebGL feltöltés belső szakaszait külön instrumentálni / feladatokra bontani a valódi R326 tulajdonosban, az intro végén történő átadás megőrzésével. Kötelező új 3× mobil/desktop Lighthouse és R536 + mobil MAG vizuális teszt. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
