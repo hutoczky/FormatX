@@ -323,6 +323,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `eb770dd`: a P0 teszt a három GPU-buffer közvetlen írását és a régi `.set([...` allokációs minta hiányát is ellenőrzi. Új CI és Lighthouse összehasonlítás szükséges.
 - Nyitott: Lighthouse desktop/mobile >=0.95, valós WebGL képkockás jóváhagyás; draft PR, nincs release.
 
+### 2026-10-27 – R2227 P0 syntax regresszió javítása
+
+- `920871f` commit 16 workflow: 14 PASS, P0 fast source loop `40489073634` FAIL, Lighthouse `40489073365` FAIL; organism-main `40489073395` PASS.
+- P0 `122138297147` job napló: `.github/scripts/validate-genesis-dna-first-r2219.cjs:37` hibás regex literál miatt `SyntaxError: Invalid regular expression: missing /`. Ez a tesztforrás hibája, nem a WebGL renderelő bizonyított meghibásodása.
+- `0c00679`: hibás regex helyett három konkrét `initial.set([ / cell.set([ / arms.set([` minta `includes` alapú tiltása. Új P0 CI eredmény szükséges.
+- Lighthouse és a tényleges Genesis 3D vizuális elfogadás továbbra is nyitott.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
