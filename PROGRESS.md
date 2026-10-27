@@ -288,6 +288,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `fd0536d`: R2219 forrás- és idővonal teszt kiegészítve az új shader- és pulzus-envelope invariánsokkal. Az új commitokra a CI PASS még ellenőrizendő.
 - Következő: Lighthouse mért auditok optimalizálása; 0/3/4.5/6.5/9.5 s valós WebGL screenshot; kontextusvesztés/fallback tesztek; release csak igazolt elfogadási kapukkal.
 
+### 2026-10-27 – R2222 organism-main CI konkrét hibaok
+
+- A `29aace7` commit 16 workflow-jából 14 PASS, organism-main `40468368048` FAIL, Lighthouse `40468368052` FAIL. P0 `40468368039` PASS, production `40468368029` PASS, R2103/R2104 PASS, mobile MAG visual proof PASS.
+- Az organism-main `122069191527` job logja szerint az EUR gomb `locator.click` művelete **sikeresen megtörtént** (`click action done`), a teszt azonban utána `waiting for scheduled navigations to finish` állapotban időtúllépett. A korábbi pozíciódiagnosztika szerint a gomb állandó koordinátán volt, tehát a hiba nem instabil gombpozíció.
+- `780531d`: az EUR kattintás `noWaitAfter:true` opciót kapott, az utána következő ár- és checkout-URL ellenőrzések változatlanul megmaradtak. Új CI PASS még nem igazolt.
+- Lighthouse továbbra is FAIL, a teljesítményoptimalizálás és a tényleges Genesis WebGL vizuális jóváhagyás nyitott.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
