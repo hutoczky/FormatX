@@ -1,11 +1,15 @@
 # FormatX Genesis – cinematic acceptance gates
 
-## Kötelező narratíva
+## Kötelező narratíva – R2220, 10 másodperces valós film
 
-1. **DNA / birth (0–3 s):** a képernyő középpontjában egy jól felismerhető, mélységgel rendelkező, két spirálszálból és keresztkötésekből álló DNS-hélix jelenik meg. Filmes makrókamera, térbeli megvilágítás és finom részecskék.
-2. **Morphogenesis (3–7 s):** a DNS folytonosan részecskékre bomlik; ugyanazok a részecskék interpolálnak egy zárt, organikus maggá. Nem megengedett az egyszerű áttűnés két egymástól független modell között.
-3. **Nucleus (7–11 s):** a létrejött sejtmag térfogatos, türkiz-kék, pulzáló, belső narancs/rózsaszín aktív gócokkal, parallaxissal és jól olvasható sziluettel. Nem fémes négyágú csillag.
-4. **Reveal (11–14 s):** kameramozgás után a FormatX felület finoman megjelenik, a mag a fő hero elem marad. A navigáció nem takarhatja el.
+Az éles intro vezérlője `formatx-mag-birth-live-r533.js` jelenleg `DURATION = 10000` értékkel fut, és a tényleges Three.js renderelő `t=clamp(r)*10` leképezést használ. A korábbi 14 másodperces leírás nem felelt meg a működő filmnek és tévesen a sejtmagot jelölte végső hero elemnek. A felhasználó kifejezett elvárása: **DNS → biológiai sejtmag → mechanikus MAG**. Az elfogadási idővonal ezért a valós 10 másodperces filmet rögzíti; a film hossza később csak külön mért és tesztelt módosítással növelhető.
+
+1. **DNS / születés (0–3,28 s):** felismerhető, térbeli kettős hélix, keresztkötésekkel és világító bázispárokkal. A központi mechanikus MAG-test és az organikus mag az első képkockákon **nem látható**. A genetikai részecskék első képkockától jelen vannak.
+2. **Biológiai sejtmag (3,28–5,66 s):** ugyanazon 6000 mobil / 9600 desktop genetikai részecske folytonosan kondenzálódik térbeli kromatinná. Türkiz membrán, korall/rózsaszín aktív gócok, pulzáló belső nukleolusz és parallaxissal olvasható sziluett. A sejtmag a 3,28 s után fokozatosan válik láthatóvá, majd az 5,66 s utáni átmenetben elhalványul. Egyszerű, egymástól független objektumok közti áttűnés önmagában **nem elegendő**.
+3. **MAG megszületése (5,58–8,45 s):** a párosított DNS-részecskék azonos kromatin-kiindulópontjukról a négy MAG-karba interpolálnak, miközben a mechanikai burkolat és a központi optika fokozatosan aktiválódik. A MAG nem jelenhet meg kész tárgyként a DNS nyitójelenetében.
+4. **Hero-handoff (8,45–10 s):** kontrollált kameramozgás és fényátmenet után a kész, négykarú MAG lesz a fő hero elem; a FormatX felület láthatóvá válik, a navigáció nem takarhatja el.
+
+**Időhatár-átfedések:** a sejtmag és a MAG átmenete szándékosan átfed 5,58–5,66 s között. Az időpontok a jelenlegi implementációból származó elfogadási célok, nem automatikusan sikeres vizuális teszteredmények.
 
 ## Vizuális referencia
 
