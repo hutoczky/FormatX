@@ -359,6 +359,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `1eb6b35`: az archive assertion most kiírja az elvárt jelenet/source és tényleges folio source, phase, bridge értékeket; a szigorú összehasonlítás változatlan. Az új CI napló alapján lehet javítani a tényleges handoff hibát, nem a követelményt enyhítve.
 - Nyitott: archive gyökérok, Lighthouse >=0.95, valódi WebGL filmes ellenőrzés; nincs merge.
 
+### 2026-10-27 – R2231 archive handoff aszinkron forrásellenőrzés
+
+- `7c828f7` commit workflow-k lekérdezésekor a production, organism-main, archive, P0 és Lighthouse még futott; nincs igazolt összesített PASS.
+- A korábbi archive `40493280104` futás `The handed-off folio does not originate from the scene shelf` hibát jelzett. A teszt a scene-state váltás után azonnal olvasta a DOM folio forrását; a handoff egy következő frame-ben frissülhet.
+- `104d261`: a browser archive teszt a **valódi aktív HTML-folio** `data-fx-cinema-source` értékére vár legfeljebb 5 másodpercet a jelenethez kötött assertion előtt. A szigorú eredetellenőrzés megmarad; nem helyettesítettük állandó PASS-szal. Új CI szükséges.
+- Lighthouse >=0.95 és a filmes WebGL képkockás ellenőrzés továbbra is nyitott; draft PR nincs merge-elve.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
