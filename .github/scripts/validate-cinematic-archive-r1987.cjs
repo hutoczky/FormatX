@@ -222,6 +222,15 @@ async function evaluate(viewport,isMobile,browser){
       // R2026: a status label alone cannot satisfy the requested cinematic
       // archival handoff. The active folio must use actual section copy, and
       // the ORIGINAL semantic content must itself receive a 3D arrival.
+      // R2235: archive handoff updates on its animation frame. Wait for the
+      // live section heading to reach the folio rather than racing that frame.
+      // The strict content equality assertion below remains mandatory.
+      await page.waitForFunction(key=>{
+        const current=document.querySelector('[data-fx-archive-scene="'+key+'"]');
+        const heading=current?.querySelector('h2,h3');
+        const title=document.querySelector('.fx-archive-physical-paper-r2026 .fx-archive-telemetry-r2022__title');
+        return !!heading&&!!title&&title.textContent.trim()===heading.textContent.trim().slice(0,140);
+      },scene.key,{timeout:5000});
       const physical=await page.evaluate(key=>{
         const folio=document.querySelector('.fx-archive-physical-paper-r2026');
         const live=[...document.querySelectorAll('.fx-archive-live-sheet-r2026')];
