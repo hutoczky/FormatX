@@ -27,7 +27,9 @@ const tokens=[
   'rim.rotation.y=(k===0?.24:-.38)+Math.sin(time*.00014+k)*.09;',
   'rim.rotation.z=(k===0?.12:.35)+Math.sin(time*.00011+k*2.1)*.045;',
   'initial[offset]=origin.x+scale*(rolledX*cosY+localZ*sinY);',
-  'cell[offset]=pairCellX+sign*chromatide*Math.cos(phase);',
+  'const sinPhase=Math.sin(phase),cosPhase=Math.cos(phase);',
+  'cell[offset]=pairCellX+sign*chromatide*cosPhase;',
+  'cell[offset+1]=pairCellY+sign*chromatide*sinPhase;',
   'arms[offset]=Math.cos(phi)*reach-Math.sin(phi)*lateral;',
   'arms[offset+1]=Math.sin(phi)*reach+Math.cos(phi)*lateral;',
   'arms[offset+2]=.62+depth;'
