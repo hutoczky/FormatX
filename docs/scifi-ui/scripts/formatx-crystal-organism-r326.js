@@ -423,16 +423,23 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    // R2244: adjacent cells share the exact same analytical vertices.
+    // Compute each latitude row once instead of rebuilding all four corners
+    // per cell; triangle order, winding, attributes and tessellation stay intact.
+    const makeLatitudeRow=lat=>Array.from({length:longitudeSegments+1},(_,lon)=>vertex(lat,lon));
+    let upperRow=makeLatitudeRow(0);
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const lowerRow=makeLatitudeRow(lat+1);
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=upperRow[lon];
+        const b=upperRow[lon+1];
+        const c=lowerRow[lon];
+        const d=lowerRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+      upperRow=lowerRow;
     }
 
     /* R1982 — real microfibril geometry.
