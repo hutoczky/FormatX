@@ -618,9 +618,12 @@
       // R2247: R326 reserves its initial layout with inline !important
       // position/inset/size. Inline important wins over the archive stylesheet
       // and kept the MAG scrolling with the hero (y=-1233 in desktop CI).
-      // Release only those six layout properties while docked so the existing
-      // archive CSS can position the SAME canvas fixed in the viewport.
-      stage._fxArchiveDockLayout=['position','inset','width','height','min-width','min-height']
+      // R2250: only the positioning mode conflicts with archive CSS.
+      // Preserve the renderer's reserved inset and dimensions throughout
+      // docking; removing all six properties caused a full-size canvas
+      // reflow and severe Lighthouse layout shifts on desktop and mobile.
+      // A fixed stage's 100% width/height resolve against the viewport.
+      stage._fxArchiveDockLayout=['position']
         .map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)]);
       for(const [name] of stage._fxArchiveDockLayout)stage.style.removeProperty(name);
       stage.classList.add('fx-archive-native-docked');
