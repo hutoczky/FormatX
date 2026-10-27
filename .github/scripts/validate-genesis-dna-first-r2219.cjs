@@ -25,7 +25,10 @@ const tokens=[
   'p+=living*(nucleusBreath-1.0)*(aCell-cellCentre);',
   'rim.rotation.x=(k===0?.17:1.20)+Math.sin(time*.00017+k*1.7)*.065;',
   'rim.rotation.y=(k===0?.24:-.38)+Math.sin(time*.00014+k)*.09;',
-  'rim.rotation.z=(k===0?.12:.35)+Math.sin(time*.00011+k*2.1)*.045;'
+  'rim.rotation.z=(k===0?.12:.35)+Math.sin(time*.00011+k*2.1)*.045;',
+  'arms[offset]=Math.cos(phi)*reach-Math.sin(phi)*lateral;',
+  'arms[offset+1]=Math.sin(phi)*reach+Math.cos(phi)*lateral;',
+  'arms[offset+2]=.62+depth;'
 ];
 for(const token of tokens)assert(src.includes(token),'Missing Genesis DNA-first invariant: '+token);
 const clamp=v=>Math.max(0,Math.min(1,v));
