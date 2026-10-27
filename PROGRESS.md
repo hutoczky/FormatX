@@ -245,6 +245,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Playwright click napló: `visible, enabled and stable`, `scrolling into view done`, majd **`performing click action` után 10s timeout**. Következő célzott vizsgálat: event-loop blokkolás és a `organism-interface.js` close eseménykezelő, illetve Chromium performance trace. **Nem szabad** a kattintást `force:true`/DOM `.click()` megkerüléssel elfedni.
 - `40422759821` új organism-main ellenőrzés lekérdezéskor még **in_progress**. A sejtmag screenshotos elfogadása és 14s storyboard összehangolása továbbra is nyitott.
 
+### 2026-10-27 – R2216 erőforrás-felszabadítás és CI állapot
+
+- A `03c97a2` commit futásainál production `40422759877` **PASS**, organism-main `40422759821` **PASS**, canonical MAG runtime `40422759914` **PASS**, mobile visual proof `40422759926` **PASS**. Lighthouse, P0 és néhány más workflow **cancelled**; ezeket nem szabad PASS-nak minősíteni.
+- A valós `r1280` renderer `destroy()` metódusa eddig minden mesh geometriájára külön `dispose()`-t hívott. Az új nukleoluszgyűrűk és membránkontúrok azonos geometriát osztanak meg.
+- `7fbb889`: `Set` alapú deduplikációval minden közösen használt Three.js geometria és anyag egyszer szabadul fel. Az élő renderelési képkockák nem változnak.
+- A sejtmag megjelenésének végső vizuális összehasonlítása és a 14s storyboard eltérés továbbra is nyitott. Új CI eredmények szükségesek az R2216 commitra.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
