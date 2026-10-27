@@ -2069,7 +2069,13 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
-      finishBoot(program);
+      // R2245: yield once between shader completion and the expensive CPU mesh
+      // build. The permanent MAG is still constructed from the same geometry;
+      // no Lighthouse-specific bypass and no change to the Genesis timeline.
+      // This avoids chaining shader compilation and mesh creation into one task.
+      setTimeout(() => {
+        if(stage.isConnected) finishBoot(program);
+      }, 0);
     }
     finishWhenReady();
     return;
