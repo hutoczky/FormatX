@@ -1506,10 +1506,15 @@
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.10,2.0))*(.24+.76*fresnel);
+          /* R2204: keep the travelling softbox readable across the broad,
+             newly silver body at both ends of its path. The wider physical
+             reflection crosses adjacent panels instead of collapsing to a
+             few isolated pixels near the upper point. */
+          sweep=exp(-pow((coordinate-head)/.145,2.0))*(.24+.76*fresnel);
         }
-        c+=mix(vec3(.08,.30,.34),vec3(.44,.66,.68),machinedArmor)*sweep*.24;
-        c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
+        float silverSweep=max(machinedArmor,panelEnvelope*.72);
+        c+=mix(vec3(.10,.34,.38),vec3(.62,.78,.80),silverSweep)*sweep*.34;
+        c+=vec3(.78,.86,.83)*sweep*softboxA*.12;
 
         ${outputName}=vec4(tone(c*${mobile?'3.08':'2.68'}),1.0);
       }`;
@@ -1525,6 +1530,7 @@
     const fragmentSource = constrainedFragmentSource;
     root.dataset.fxNativeMagVisualR2200='organic-coral-cytoplasm-retained-in-four-arm-titanium-optic';
     root.dataset.fxNativeMagSurfaceR2203='body-anchored-filtered-machined-silver-recessed-optical-aperture';
+    root.dataset.fxNativeMagSurfaceR2204='travelling-softbox-readable-across-machined-silver';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

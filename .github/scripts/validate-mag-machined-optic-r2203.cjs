@@ -120,6 +120,9 @@ function proveEdges(){
         await context.addInitScript(observe);const page=await context.newPage(),errors=[];
         page.on('pageerror',e=>errors.push(e.message));
         const url=new URL(home);url.searchParams.set('intro','0');
+        // webdriver normally selects the audit renderer. This explicit,
+        // existing functional route keeps the actual native material active.
+        url.searchParams.set('r486-optics-energy-check',`machined-edges-${width}`);
         await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
         await page.waitForFunction(()=>window.__machinedNative&&document.documentElement.dataset.fxCrystalOrganismR326==='ready',null,{timeout:30000});
         const result=await page.evaluate(proveEdges);report.cases.push({width,...result,errors});
@@ -131,6 +134,8 @@ function proveEdges(){
           assert(sample.maximumSharedEdgeSeparation<1e-6,'Rigid metal/glass edges tear during membrane animation');
         }
         assert.equal(result.surface,'body-anchored-filtered-machined-silver-recessed-optical-aperture');
+        assert.equal(await page.evaluate(()=>document.documentElement.dataset.fxNativeMagSurfaceR2204),
+          'travelling-softbox-readable-across-machined-silver');
         await page.locator('.fx-crystal-organism-r326-canvas').screenshot({path:`${output}/${width}-native-mag.png`});
         assert.equal(await page.evaluate(()=>window.__machinedNative.gl.getError()),0,'Proof failed to restore native GL state');
       }finally{await context.close();}
