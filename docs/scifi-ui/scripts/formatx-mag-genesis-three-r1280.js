@@ -1061,6 +1061,14 @@
             float armBeat=aArmIndex*.11;
             float assemble=curve(5.34+armBeat,6.90+armBeat,uPhase);
             vec3 p=mix(position,aCell,condense);
+            // R2221: chromatin must breathe as a single living nucleus, not
+            // resemble a frozen particle shell. The radial envelope reaches
+            // zero during the DNA opening and at the mechanical arm landing;
+            // paired nucleotides retain their shared chromatin anchor.
+            float living=condense*(1.0-assemble);
+            float nucleusBreath=1.0+.023*sin(uTime*.0021);
+            vec3 cellCentre=vec3(0.0,0.0,1.10);
+            p+=living*(nucleusBreath-1.0)*(aCell-cellCentre);
             p=mix(p,aArm,assemble);
             // Physically curl the genetic matter toward its destination,
             // with zero residual motion at either endpoint of the morph.
