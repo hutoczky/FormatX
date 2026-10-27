@@ -266,6 +266,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `36f6972`: az organism-main Playwright desktop EUR gomb előtt `scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})` hívással kifejezetten a belső pricing panelt állítja stabil, középre igazított pozícióba. A 12-frame hit-test diagnosztika megmarad.
 - Ez célzott interakciós tesztstabilizálás, nem a Genesis vizuális minőség elfogadása. Új CI szükséges, a 0.95 Lighthouse kapu változatlan.
 
+### 2026-10-27 – R2219 DNS → sejtmag → MAG audit és új regressziós kapu
+
+- Ellenőrizve: a felhasználó által említett `477b7e95`, `7e69e573`, `641bca1d` R2125 commitok léteznek a GitHubban. A jelenlegi feature branch élő r1280 kódja **nem** tartalmazza az R2125 `stage1` változóját, mert a későbbi r1280 implementáció `updateCore()` útvonala már `coreGroup.visible=visible>.002`, `t<2.52 → sc=.001`, `appear=smooth((t-3.28)/1.02)` feltételekkel dolgozik. Nem szabad a régi R2125 patch-et vakon újra alkalmazni.
+- A valós GPU `makeGenomeParticles()` 6000/9600 részecskét hoz létre; párosított DNS-bázisok egyazon kromatin-pontot és MAG-kar útvonalat kapnak. Ez forráskód-audit, **nem** vizuális bizonyíték.
+- `f8ca393`: új `.github/scripts/validate-genesis-dna-first-r2219.cjs` determinisztikus forrás/idővonal regressziós teszt. 0–3.28 s között a biológiai mag rejtett, 3.8–4.5 s körül látható; ellenőrzi a paired particle alapinvariánsokat és az elavult korai mechanikai mag kikapcsolását.
+- `e21b735`: az új teszt bekötve a P0 fast source loop CI-be. **Új CI eredmény még szükséges**, a WebGL képkockák és a 14s storyboard továbbra is nyitottak.
+- Következő: P0 futás tényleges PASS, 0/1/3/4.5/7/10 s WebGL képkockák, majd koherens 14s idővonal és produkciós vizuális jóváhagyás. Éles deploy/merge nincs engedélyezve.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
