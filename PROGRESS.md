@@ -5,6 +5,14 @@ Fejlesztési ág: `feature/genesis-cinematic-20261026`
 PR: https://github.com/hutoczky/FormatX/pull/578
 Állapot: **FOLYAMATBAN – NEM RELEASE-READY**
 
+## 2026-10-27 – R2252 Lighthouse mérés (b8393b1)
+
+- CI: Lighthouse **FAIL**, a többi már befejezett ellenőrzés PASS; két ellenőrzés a lekérdezéskor még futott.
+- Desktop Performance: 0,32 / 0,77 / 0,75; CLS: 0,5431 / 0,2542 / 0,2542; TBT: 2187 / 79,5 / 80,5 ms.
+- Mobil Performance: 0,69 / 0,70 / 0,70; CLS: 0,1090 mindhárom; TBT: 896 / 884 / 839 ms.
+- Desktop első futás: R326 renderelőhöz rendelt 1046 ms hosszú feladat. A script-URL hozzárendelés önmagában **nem** bizonyítja, hogy kizárólag a geometria okozta; a R2202/R2203/R2252 időmérések konkrét értékeit külön ki kell olvasni.
+- Következő teendő: a Lighthouse hosszú feladatát CPU-geometria, shaderprogram-poll és WebGL-feltöltés szakaszokra bontani, a CLS layout-shift elemeit külön azonosítani; látványcsökkentés nélkül. **Nem release-ready.**
+
 ## 1. Ellenőrzött projektállapot
 
 - Éles belépési pont: `docs/scifi-ui/index.html` → `formatx-intro-bootstrap-r1629.js` → `formatx-mag-birth-live-r533.js`.
