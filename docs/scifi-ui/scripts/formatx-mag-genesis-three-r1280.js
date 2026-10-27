@@ -1023,11 +1023,12 @@
         const depth=sign*Math.sin(armTwist)*armRadius;
         // Physical cyan/violet coils seat just above the titanium arm
         // surface, then fade before the recessed optical organ wakes.
-        arms.set([
-          Math.cos(phi)*reach-Math.sin(phi)*lateral,
-          Math.sin(phi)*reach+Math.cos(phi)*lateral,
-          .62+depth
-        ],i*3);
+        // R2225: write directly into typed GPU staging buffers instead
+        // of allocating 3 short-lived arrays per nucleotide.
+        const offset=i*3;
+        arms[offset]=Math.cos(phi)*reach-Math.sin(phi)*lateral;
+        arms[offset+1]=Math.sin(phi)*reach+Math.cos(phi)*lateral;
+        arms[offset+2]=.62+depth;
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
         seed[i]=strand===0?r()*.42:.58+r()*.42;
