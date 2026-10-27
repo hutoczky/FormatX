@@ -352,6 +352,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Organism-main `122176891150`: az EUR gomb látható a DOM-ban, de a 12 mintás hit-testben a gomb koordinátája a képernyőn kívül marad; Playwright `locator.click` az `element visible, enabled and stable` várakozásban 10 s timeout. `d2afb38` a csak lokális állapotot módosító EUR gombot `page.evaluate` + natív `button.click()` módszerrel aktiválja, majd az ár és checkout URL ellenőrzése változatlanul fut. Ez a teszt a vezérlő üzleti logikáját, nem a pointer-hit-test UX-et igazolja; utóbbi külön ellenőrzendő.
 - Új CI szükséges; Lighthouse és archive regresszió továbbra is nyitott. Nincs merge.
 
+### 2026-10-27 – R2231 archive forráseltérés diagnosztika
+
+- `7c828f7` commit CI lekérdezésekor 16 workflow-ból több még pending/in_progress; production `40500912786`, archive `40500912760`, P0 `40500912821`, Lighthouse `40500912799` eredménye még nem állapítható meg.
+- Korábbi archive `40493280104` logban a systems/ecosystem/diagnostics folio ellenőrzése PASS; licensing jelenetnél a `real3D.source !== scene.source` hiba jelentkezett. A pontos két source-érték nem volt naplózva, ezért gyökérok még nem bizonyított.
+- `1eb6b35`: az archive assertion most kiírja az elvárt jelenet/source és tényleges folio source, phase, bridge értékeket; a szigorú összehasonlítás változatlan. Az új CI napló alapján lehet javítani a tényleges handoff hibát, nem a követelményt enyhítve.
+- Nyitott: archive gyökérok, Lighthouse >=0.95, valódi WebGL filmes ellenőrzés; nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
