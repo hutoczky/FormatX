@@ -421,6 +421,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `bbae392`: a pricing panel / console interakció után a desktop organism-main böngészős teszt explicit `scrollTo({top:0,behavior:'instant'})` visszatérést és `scrollY<5` igazolást végez, mielőtt a **valódi Playwright pointer kattintással** megnyitja a fejléc menüjét. A hit-test diagnosztika és a menü/navigáció assert változatlan.
 - Ez a teszt megbízhatóságát célozza, **nem** bizonyított termékfunkció-javítás. A 0.95 Lighthouse és a teljes CI még ellenőrizendő. PR draft, nincs merge.
 
+### 2026-10-27 – R2239 valódi menü kattintás PASS, Lighthouse mérés folyamatban
+
+- `39ae0ae` workflow `40510526339` **organism-main PASS**. A böngészős log ténylegesen mutatja: `menu-toggle-hit-test` `exists=true,visible=true,disabled=false,hitSelf=true`, majd `header-navigation-passed` `hash=#pricing,navOpen=false`. Ez igazolja a fejléc valódi kattintását és a navigáció bezárását.
+- Production, mobile MAG, P0 browser matrix, semantic first paint, canonical MAG runtime PASS ugyanebben a futásban. Archive és Lighthouse a lekérdezéskor még futott.
+- A `0cd4b44` és `c8e39d5` korábbi Lighthouse futásai **cancelled** lettek, ezért a hangvezérlő CSS defer gyorsulásáról nem áll rendelkezésre mérési eredmény; nem szabad PASS-nak tekinteni.
+- Következő munka: megvárni egy teljes, nem megszakított Lighthouse futást, összevetni a mobil TBT / Speed Index értékeket, szükség esetén célzott render/layout optimalizálás. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
