@@ -142,12 +142,9 @@ async function validateDesktop() {
         pointerEvents:getComputedStyle(button).pointerEvents};
     });
     mark('desktop: currency-hit-test',currencyHit);
-    // Scroll the actual nested pricing viewport explicitly: Playwright's
-    // automatic scroll-into-view can chase a moving element while the
-    // full-screen organism interface performs its entrance animation.
-    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').evaluate(button=>{
-      button.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
-    });
+    // R2224: let Playwright's click perform its own scroll. The prior
+    // explicit evaluate() sometimes hung for 30 seconds while navigation
+    // was pending, before the currency click could even be attempted.
     // R2222: the click itself succeeds, but Playwright waits for an unrelated
     // scheduled navigation and times out. Currency selection is an in-page
     // state change; assert the resulting price and checkout URL explicitly.
