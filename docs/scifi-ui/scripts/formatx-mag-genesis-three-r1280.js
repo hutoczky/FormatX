@@ -2738,9 +2738,14 @@
       this.embryoNucleolusHalo.scale.setScalar(1.15+.035*Math.sin(time*.0022));
       for(let k=0;k<this.embryoMembraneRims.length;k++){
         const rim=this.embryoMembraneRims[k];
+        // R2223: the two membranes are tilted in independent planes.
+        // Gentle phase-opposed precession exposes real parallax and the
+        // translucent nucleus volume, without per-frame mesh allocation.
         rim.material.opacity=(k===0?.25:.13)*visible;
         rim.scale.set(1.04*pulse,1.10*pulse,.86*pulse);
+        rim.rotation.x=(k===0?.17:1.20)+Math.sin(time*.00017+k*1.7)*.065;
         rim.rotation.y=(k===0?.24:-.38)+Math.sin(time*.00014+k)*.09;
+        rim.rotation.z=(k===0?.12:.35)+Math.sin(time*.00011+k*2.1)*.045;
       }
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
