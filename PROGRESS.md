@@ -281,6 +281,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A `6aecd79` commit CI-futásainak jelentős része még folyamatban volt a lekérdezéskor; a `f8ca393` R2219 teszt új P0 eredménye továbbra is ellenőrizendő.
 - Vizuális WebGL elfogadás, mobil kontextus-helyreállítás, Lighthouse és élesítés továbbra is nyitott. A projekt nem release-ready.
 
+### 2026-10-27 – R2221 élő kromatin és regresszió
+
+- A `aaacbf1` commit 16 workflow-jából **15 PASS**, egyedül Lighthouse `40452959456` **FAIL**. P0 `40452959495`, production `40452959422`, organism-main `40452959444`, R2103 és R2104 mobil, MAG runtime és mobile visual proof PASS.
+- `0b8a67b`: az éles `r1280` GPU vertex shaderben a kondenzálódott kromatin sejtmag középpontja körül ±2.3% lassú, közös térfogati pulzust kap. A `condense*(1-assemble)` envelope a DNS kezdetén és a mechanikus MAG végállapotában zéró; nem okoz végponti remegést, és nem ad hozzá draw callt vagy CPU-geometriafeltöltést.
+- `fd0536d`: R2219 forrás- és idővonal teszt kiegészítve az új shader- és pulzus-envelope invariánsokkal. Az új commitokra a CI PASS még ellenőrizendő.
+- Következő: Lighthouse mért auditok optimalizálása; 0/3/4.5/6.5/9.5 s valós WebGL screenshot; kontextusvesztés/fallback tesztek; release csak igazolt elfogadási kapukkal.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
