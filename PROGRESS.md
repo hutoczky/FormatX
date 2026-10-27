@@ -400,6 +400,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `4de6e87`: a teszt legfeljebb 5 másodpercig várja, hogy a folio cím ténylegesen egyezzen az aktív eredeti HTML szakasz címével. A tartalmi egyezést ellenőrző eredeti szigorú assert és minden vizuális ellenőrzés megmaradt. Ha a cím valóban hibás, a teszt továbbra is FAIL; az új log alapján a tényleges mismatch javítandó.
 - Lighthouse és teljes CI még nincs igazolva, PR draft; nincs merge.
 
+### 2026-10-27 – R2236 nem kritikus Genesis hangvezérlő CSS halasztása
+
+- `e0b419e` CI: **22/23 PASS**, beleértve az archive és P0/production/MAG runtime ellenőrzéseket; Lighthouse `40505907247` FAIL.
+- Lighthouse mobil: Performance **0.86 / 0.86 / 0.84**, LCP **1.31 s**, TBT **330 / 337 / 385 ms**, CLS **0.0382**, Speed Index ~6.5 s. A LCP/CLS jó, a TBT és vizuális előrehaladás akadályozza a 0.95 célt.
+- A mobil blokkoló listában `formatx-genesis-studio-r2160.css` ~**872 ms**. Forrását ellenőrizve mindössze **1324 karakter**, kizárólag az intro opcionális audio kapcsolóját formázza, tehát nem szükséges a DNS első képkockájának layoutjához.
+- `8e966ce`: ezt az egy stíluslapot `media=print` + a már létező R487 post-paint deferred CSS loader szerződésével töltjük be. A DNA first-frame CSS továbbra is kritikus és előtöltött; nem változtattunk a részecskék vagy MAG geometriáján. Kockázat: audio gomb átmeneti stílusváltása, ezért visual/functional CI ellenőrzendő.
+- **Nem bizonyított még a gyorsulás**; következő CI Lighthouse és intro audio stílus ellenőrzése szükséges, visszaállítás ha romlik. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
