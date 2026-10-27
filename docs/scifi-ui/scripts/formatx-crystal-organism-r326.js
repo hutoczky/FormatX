@@ -2102,22 +2102,23 @@
         // not accumulate in one Total Blocking Time interval.
         const geometryStart=performance.now();
         const geometry=buildOrganismGeometry(softwareRenderer);
+        const geometryEnd=performance.now();
         setTimeout(() => {
-          if(stage.isConnected)finishBoot(program,geometry,geometryStart);
+          if(stage.isConnected)finishBoot(program,geometry,geometryStart,geometryEnd);
         },0);
       }, 0);
     }
     finishWhenReady();
     return;
 
-    function finishBoot(program,geometry,geometryStart) {
+    function finishBoot(program,geometry,geometryStart,geometryEnd) {
     // R2257: CPU tessellation finished in the preceding task. Upload and
     // renderer initialization keep their original order and identical data.
-    const geometryBuildMs=performance.now()-geometryStart;
+    const geometryBuildMs=geometryEnd-geometryStart;
     root.dataset.fxCoreGeometryBuildMsR2202=geometryBuildMs.toFixed(2);
     try{
       performance.measure('formatx:r326:geometry-build-r2202',{
-        start:geometryStart,end:performance.now()
+        start:geometryStart,end:geometryEnd
       });
     }catch(_){}
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
