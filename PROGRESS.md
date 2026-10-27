@@ -393,6 +393,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `2d93d1b` bővíti a tesztdiagnosztikát a `sourceTitle` és `folioTitle` konkrét értékével, hogy a következő CI-futás alapján a címválasztási/handoff hibát javíthassuk; az eredeti szigorú assert változatlan.
 - Lighthouse `40505391530` és más workflow-k a lekérdezéskor még futottak; új eredmény szükséges. Nincs merge.
 
+### 2026-10-27 – R2235 archive élő cím szinkronizáció
+
+- `b0bdb43` CI ellenőrzéskor archive és Lighthouse még pending; production/mobil visual/site integrity PASS, több workflow in_progress.
+- Az élő archive `updateHandoff()` frame-alapú, és minden frissítésnél a valós `scene.node` headingből írja a folio címét. Az archive teszt eddig az aktív jelenet beállítása után azonnal, a következő frame bevárása nélkül ellenőrizte a címeket.
+- `4de6e87`: a teszt legfeljebb 5 másodpercig várja, hogy a folio cím ténylegesen egyezzen az aktív eredeti HTML szakasz címével. A tartalmi egyezést ellenőrző eredeti szigorú assert és minden vizuális ellenőrzés megmaradt. Ha a cím valóban hibás, a teszt továbbra is FAIL; az új log alapján a tényleges mismatch javítandó.
+- Lighthouse és teljes CI még nincs igazolva, PR draft; nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
