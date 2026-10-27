@@ -1183,6 +1183,14 @@ void main(){
         const active=selectLiveChapter();
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
+        // R2256: restore the original hero synchronously when leaving the
+        // archive. Waiting for the DOM rAF can strand .hero-copy at
+        // display:none during immediate scroll/visibility assertions.
+        if(!active&&legacyHeroDisplay.size){
+          setLegacyHeroHidden(false);
+          setHeroCanvasLaneFront(false);
+          root.dataset.fxArchiveCinema='home';
+        }
         setPanelState();
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
