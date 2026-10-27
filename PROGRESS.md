@@ -428,6 +428,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - A `0cd4b44` és `c8e39d5` korábbi Lighthouse futásai **cancelled** lettek, ezért a hangvezérlő CSS defer gyorsulásáról nem áll rendelkezésre mérési eredmény; nem szabad PASS-nak tekinteni.
 - Következő munka: megvárni egy teljes, nem megszakított Lighthouse futást, összevetni a mobil TBT / Speed Index értékeket, szükség esetén célzott render/layout optimalizálás. PR draft, nincs merge.
 
+### 2026-10-27 – R2240 Genesis audio CSS post-FCP funkcionális regresszióteszt
+
+- `715d3aa` CI ellenőrzéskor organism-main `40511246282` PASS, production/mobile MAG/R536 cinematic/P0 és CSS recovery PASS; Lighthouse `40511246502` még futott.
+- `a5324ce`: a tényleges R2054 CSS-helyreállítási Playwright teszt mobilon és desktopon is bevárja, hogy a Genesis audio kapcsoló külön halasztott stíluslapja `media=all` állapotú és betöltött `link.sheet` legyen. Külön ellenőrzi a `data-fx-r487-deferred-style=true` szerződést. Ez kizárja, hogy a Lighthouse-optimalizálás miatt a hangvezérlő stílusa tartósan `print` módban maradjon.
+- A teszt még nem igazolja a hangvezérlő tényleges vizuális minőségét vagy a 0.95 Lighthouse teljesítményt; CI eredmény szükséges. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
