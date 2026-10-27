@@ -1508,6 +1508,17 @@
         physicalLens+=vec3(.44,.57,.57)*lensEdge*(.07+.08*softboxA+.05*sideSpec);
         physicalLens=mix(physicalLens,vec3(.003,.014,.018),lensDepthShade*.09);
         physicalLens+=vec3(.58,.82,.86)*lensGlint*.10;
+        /* R2248: reference-grade luminous optical iris, not a flat painted
+           cyan disk. Three concentric glass depths and a slow, bounded
+           caustic breathe in the existing single fragment pass. */
+        float irisRing=exp(-pow((lensRadial-.305)/.052,2.0));
+        float irisPupil=exp(-pow(lensRadial/.145,2.0));
+        float irisCaustic=.5+.5*sin(atan(lensVector.y,lensVector.x)*9.0
+          +lensRadial*28.0-uTime*.31);
+        float irisPulse=.88+.12*sin(uTime*.83);
+        physicalLens+=vec3(.085,.40,.47)*irisRing*(.30+.24*irisCaustic)*irisPulse;
+        physicalLens+=vec3(.24,.77,.86)*irisPupil*(.14+.09*uEnergy)*irisPulse;
+        physicalLens+=vec3(.78,.96,1.00)*lensRim*.095;
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
