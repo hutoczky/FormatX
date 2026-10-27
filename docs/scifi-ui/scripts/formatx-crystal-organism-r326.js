@@ -2096,17 +2096,23 @@
       // no Lighthouse-specific bypass and no change to the Genesis timeline.
       // This avoids chaining shader compilation and mesh creation into one task.
       setTimeout(() => {
-        if(stage.isConnected) finishBoot(program);
+        if(!stage.isConnected)return;
+        // R2257: build the identical immutable mesh in its own task. Yield
+        // before WebGL allocation/upload so tessellation and driver work do
+        // not accumulate in one Total Blocking Time interval.
+        const geometryStart=performance.now();
+        const geometry=buildOrganismGeometry(softwareRenderer);
+        setTimeout(() => {
+          if(stage.isConnected)finishBoot(program,geometry,geometryStart);
+        },0);
       }, 0);
     }
     finishWhenReady();
     return;
 
-    function finishBoot(program) {
-    // R2202: attribute the expensive first-frame work without changing
-    // topology, shader quality, or the real rendering schedule.
-    const geometryStart=performance.now();
-    const geometry=buildOrganismGeometry(softwareRenderer);
+    function finishBoot(program,geometry,geometryStart) {
+    // R2257: CPU tessellation finished in the preceding task. Upload and
+    // renderer initialization keep their original order and identical data.
     const geometryBuildMs=performance.now()-geometryStart;
     root.dataset.fxCoreGeometryBuildMsR2202=geometryBuildMs.toFixed(2);
     try{
