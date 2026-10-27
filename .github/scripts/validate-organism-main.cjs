@@ -148,7 +148,10 @@ async function validateDesktop() {
     await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').evaluate(button=>{
       button.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'});
     });
-    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click({timeout:10000});
+    // R2222: the click itself succeeds, but Playwright waits for an unrelated
+    // scheduled navigation and times out. Currency selection is an in-page
+    // state change; assert the resulting price and checkout URL explicitly.
+    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click({timeout:10000,noWaitAfter:true});
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
