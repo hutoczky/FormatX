@@ -979,11 +979,11 @@
         const localZ=sign*Math.cos(phase)*helixRadius;
         const rolledX=localX*cosZ-localY*sinZ;
         const rolledY=localX*sinZ+localY*cosZ;
-        initial.set([
-          origin.x+scale*(rolledX*cosY+localZ*sinY),
-          origin.y+scale*rolledY,
-          origin.z+scale*(-rolledX*sinY+localZ*cosY)
-        ],i*3);
+        // R2226: direct typed-buffer writes avoid per-particle GC churn.
+        const offset=i*3;
+        initial[offset]=origin.x+scale*(rolledX*cosY+localZ*sinY);
+        initial[offset+1]=origin.y+scale*rolledY;
+        initial[offset+2]=origin.z+scale*(-rolledX*sinY+localZ*cosY);
         // R2198: sample chromatin once per base pair. Both visible DNA
         // phosphate strands now travel into one biological membrane site,
         // then leave that same site together for the same MAG arm.
@@ -1000,11 +1000,9 @@
         // The tiny phase-opposed offset makes the paired DNA observable,
         // while maintaining physical continuity through condensation.
         const chromatide=.014;
-        cell.set([
-          pairCellX+sign*chromatide*Math.cos(phase),
-          pairCellY+sign*chromatide*Math.sin(phase),
-          pairCellZ+sign*chromatide*.55*Math.cos(phase*.5)
-        ],i*3);
+        cell[offset]=pairCellX+sign*chromatide*Math.cos(phase);
+        cell[offset+1]=pairCellY+sign*chromatide*Math.sin(phase);
+        cell[offset+2]=pairCellZ+sign*chromatide*.55*Math.cos(phase*.5);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
@@ -1025,7 +1023,6 @@
         // surface, then fade before the recessed optical organ wakes.
         // R2225: write directly into typed GPU staging buffers instead
         // of allocating 3 short-lived arrays per nucleotide.
-        const offset=i*3;
         arms[offset]=Math.cos(phi)*reach-Math.sin(phi)*lateral;
         arms[offset+1]=Math.sin(phi)*reach+Math.cos(phi)*lateral;
         arms[offset+2]=.62+depth;
