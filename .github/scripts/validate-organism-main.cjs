@@ -122,7 +122,27 @@ async function validateDesktop() {
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'pricing cards missing in open console');
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-qr]').count() === 3, 'QR cards missing in open console');
 
-    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click();
+    // R2217: CI intermittently stalls while waiting for a stable EUR
+    // target. Record actual motion and hit-testing before the action.
+    const currencyHit=await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').evaluate(async button=>{
+      const samples=[];
+      for(let n=0;n<12;n++){
+        await new Promise(resolve=>requestAnimationFrame(resolve));
+        const rect=button.getBoundingClientRect();
+        samples.push([Math.round(rect.x*100)/100,Math.round(rect.y*100)/100,
+          Math.round(rect.width*100)/100,Math.round(rect.height*100)/100]);
+      }
+      const rect=button.getBoundingClientRect();
+      const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+      const panel=button.closest('.fx-organism-panel');
+      return {samples,hitTag:hit?.tagName||'',hitClass:String(hit?.className||''),
+        buttonIsHit:hit===button||button.contains(hit),
+        panelAnimation:panel?getComputedStyle(panel).animation:'',
+        panelTransform:panel?getComputedStyle(panel).transform:'',
+        pointerEvents:getComputedStyle(button).pointerEvents};
+    });
+    mark('desktop: currency-hit-test',currencyHit);
+    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
