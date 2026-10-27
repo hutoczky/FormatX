@@ -316,6 +316,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `3fcb861`: a P0 forrásinvariáns ellenőrzi a közvetlen typed-array koordinátaírást. Új CI futás és Lighthouse összehasonlítás még szükséges.
 - Nyitott: Lighthouse 0.95 desktop/mobile, valós WebGL filmes képkocka-összehasonlítás, organism-main regresszió, release.
 
+### 2026-10-27 – R2226 teljes DNS/sejtmag/MAG GPU staging allokációmentesítése
+
+- `90ba554` commit CI: **15/16 PASS**. Organism-main `40485646572` **PASS** (korábbi EUR-hiba ebben a futásban nem reprodukálódott), P0 `40485646571` PASS, production `40485646805` PASS, mobil vizuális PASS. Lighthouse `40485646759` **FAIL**.
+- `cc26649`: az éles r1280 `makeGenomeParticles` kezdeti DNS (`initial`) és sejtmag (`cell`) `Float32Array` pozícióinak beírása közvetlen indexeléssel történik. A MAG (`arms`) ugyanilyen R2225 megoldást használ. Ezzel a korábbi 3 darab, részecskénként keletkező `[x,y,z]` JS tömbből **egy sem marad**: desktop 28 800 / mobil 18 000 ideiglenes koordinátatömb létrehozása elkerülhető a kezdeti GPU-buffer építés során. A számított koordináták változatlanok.
+- `eb770dd`: a P0 teszt a három GPU-buffer közvetlen írását és a régi `.set([...` allokációs minta hiányát is ellenőrzi. Új CI és Lighthouse összehasonlítás szükséges.
+- Nyitott: Lighthouse desktop/mobile >=0.95, valós WebGL képkockás jóváhagyás; draft PR, nincs release.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
