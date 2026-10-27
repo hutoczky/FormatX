@@ -302,6 +302,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `41c5bc3`: az R2219 P0 teszt az új membránprecesszió mindhárom tengelyét forrásinvariánsként ellenőrzi.
 - Az új módosítások CI státusza ellenőrizendő. A fotórealisztikus látvány és a Lighthouse 0.95 továbbra sem igazolt; PR marad draft.
 
+### 2026-10-27 – R2224 organism-main CI új bizonyíték és javítás
+
+- `eb52611` commit 16 workflow-jából 14 PASS, organism-main `40483796601` FAIL, Lighthouse `40483796583` FAIL. P0 `40483796616`, production `40483796577`, MAG runtime, mobile proof, R2103/R2104 PASS.
+- Organism-main `122120414725` napló: `desktop: currency-hit-test` 12 képkockán változatlan EUR gombpozíciót mutatott, utána az explicit `locator.evaluate` (`scrollIntoView`) **30 s timeout** hibával állt le a kattintás előtt. Az előző explicit scroll tehát regressziót okozott.
+- `f6c758c`: eltávolítva a külön `evaluate(scrollIntoView)` lépés; Playwright saját kattintása végzi a scrollt, a `noWaitAfter:true` és az ár/checkout ellenőrzések megmaradtak. Új CI eredmény szükséges.
+- Lighthouse desktop és mobile audit FAIL továbbra is; performance artifact részletes feldolgozása, WebGL vizuális ellenőrzés, release nyitott.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
