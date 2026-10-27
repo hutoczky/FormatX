@@ -330,6 +330,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `0c00679`: hibás regex helyett három konkrét `initial.set([ / cell.set([ / arms.set([` minta `includes` alapú tiltása. Új P0 CI eredmény szükséges.
 - Lighthouse és a tényleges Genesis 3D vizuális elfogadás továbbra is nyitott.
 
+### 2026-10-27 – R2228 P0 helyreállt, DNS trigonometria optimalizálva
+
+- `f767d18` CI: P0 fast source loop `40492481096` **PASS**, a korábbi hibás regex regresszió megszűnt; Lighthouse `40492481750` **FAIL**. A lekérdezéskor organism-main és canonical MAG runtime még futott, ezért nem állítható teljes PASS.
+- `76cd4e3`: a valós r1280 DNS → sejtmag GPU buffer-előkészítés a `sinPhase` és `cosPhase` értékeket újrahasználja, elkerülve két ismételt trigonometrikus függvényhívást részecskénként (desktop 19 200, mobil 12 000 elkerült hívás). Azonos koordináta-matematika, változatlan shader.
+- `949b3ed`: az R2219 P0 regressziós teszt frissítve az új trigonometria-megosztásra. Új CI eredmény még szükséges.
+- Lighthouse >=0.95 és a valódi filmes WebGL képkockák ellenőrzése nyitott; draft PR változatlan.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
