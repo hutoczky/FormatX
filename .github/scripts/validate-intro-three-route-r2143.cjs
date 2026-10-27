@@ -83,7 +83,7 @@ for(const token of [
   'pairCellX=radius*.82*Math.sin(b)*Math.cos(a);',
   'pairCellY=radius*.94*Math.cos(b);',
   'pairCellZ=1.10+radius*.65*Math.sin(b)*Math.sin(a);',
-  'pairCellX+sign*chromatide*Math.cos(phase)'
+  'cell[offset]=pairCellX+sign*chromatide*cosPhase;'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
 }
