@@ -415,6 +415,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `36be86b` a menü gomb valós DOM-létezését, méretét, láthatóságát és `elementFromPoint` hit-targetjét naplózza; a valódi Playwright kattintás megmarad, 10s határidővel. A következő CI logból lehet megállapítani, hogy takarás, elhelyezés vagy browser scheduling okozza.
 - A Lighthouse audio CSS defer javulása még nem igazolt. Nincs merge.
 
+### 2026-10-27 – R2238 valódi menüteszt visszatérés az oldal tetejére
+
+- `c8e39d5` CI lekérdezéskor organism-main és Lighthouse még futott; a production, P0 browser matrix, CSS recovery, mobile MAG, semantic first paint PASS.
+- `bbae392`: a pricing panel / console interakció után a desktop organism-main böngészős teszt explicit `scrollTo({top:0,behavior:'instant'})` visszatérést és `scrollY<5` igazolást végez, mielőtt a **valódi Playwright pointer kattintással** megnyitja a fejléc menüjét. A hit-test diagnosztika és a menü/navigáció assert változatlan.
+- Ez a teszt megbízhatóságát célozza, **nem** bizonyított termékfunkció-javítás. A 0.95 Lighthouse és a teljes CI még ellenőrizendő. PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
