@@ -230,6 +230,7 @@ async function evaluate(viewport,isMobile,browser){
         const folioTitle=folio?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent?.trim()||'';
         return {folio:!!folio,liveCount:live.length,currentLive:(current?.classList.contains('fx-archive-live-sheet-r2026')?1:0)+(current?.querySelectorAll('.fx-archive-live-sheet-r2026').length||0),
           actualContent:!!headings&&folioTitle===headings.textContent.trim().slice(0,140),
+          sourceTitle:headings?.textContent?.trim().slice(0,140)||'',folioTitle,
           mode:document.documentElement.dataset.fxArchiveRealContent||null};
       },scene.key);
       assert.ok(physical.folio,'Missing physical MAG paper for '+scene.key);
