@@ -260,6 +260,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Lighthouse futás 40448487648 mind desktop, mind mobile küszöbellenőrzésen FAIL; a részletes JSON audit további elemzése szükséges, az elvárt ≥0.95 nem teljesült.
 - Következő: új organism-main artifact alapján célzott CSS/runtime javítás, Lighthouse JSON részletes bottleneck-elemzés, valódi 3D nucleus képkockák vizsgálata.
 
+### 2026-10-27 – R2218 pricing scroll stabilizálás
+
+- `40452452338` production PASS; `40452452154` mobile MAG visual proof PASS; `40452452253` organism-main és `40452452206` Lighthouse az ellenőrzéskor még in_progress/pending, ezért nincs új PASS állítás.
+- `36f6972`: az organism-main Playwright desktop EUR gomb előtt `scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})` hívással kifejezetten a belső pricing panelt állítja stabil, középre igazított pozícióba. A 12-frame hit-test diagnosztika megmarad.
+- Ez célzott interakciós tesztstabilizálás, nem a Genesis vizuális minőség elfogadása. Új CI szükséges, a 0.95 Lighthouse kapu változatlan.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Kritikus:** a 14 másodperces elfogadási narratíva nem egyezik a 10 másodperces implementációval.
