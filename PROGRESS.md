@@ -408,6 +408,13 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `8e966ce`: ezt az egy stíluslapot `media=print` + a már létező R487 post-paint deferred CSS loader szerződésével töltjük be. A DNA first-frame CSS továbbra is kritikus és előtöltött; nem változtattunk a részecskék vagy MAG geometriáján. Kockázat: audio gomb átmeneti stílusváltása, ezért visual/functional CI ellenőrzendő.
 - **Nem bizonyított még a gyorsulás**; következő CI Lighthouse és intro audio stílus ellenőrzése szükséges, visszaállítás ha romlik. PR draft, nincs merge.
 
+### 2026-10-27 – R2237 organism-main menü regressziódiagnosztika
+
+- `0cd4b44` CI futásakor production, CSS recovery, mobile visual, first paint, design system, performance-contract PASS; Lighthouse és több MAG/archive workflow még in_progress.
+- Organism-main `40509514353` FAIL: EUR váltás, checkout URL és konzol bezárás PASS, majd `#menu-toggle` Playwright `locator.click` 30 másodperces timeout. A menü funkciójának tényleges hibája nem bizonyított; a locator várakozása sem jutott hit-testig.
+- `36be86b` a menü gomb valós DOM-létezését, méretét, láthatóságát és `elementFromPoint` hit-targetjét naplózza; a valódi Playwright kattintás megmarad, 10s határidővel. A következő CI logból lehet megállapítani, hogy takarás, elhelyezés vagy browser scheduling okozza.
+- A Lighthouse audio CSS defer javulása még nem igazolt. Nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
