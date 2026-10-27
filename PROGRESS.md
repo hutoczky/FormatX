@@ -337,6 +337,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - `949b3ed`: az R2219 P0 regressziós teszt frissítve az új trigonometria-megosztásra. Új CI eredmény még szükséges.
 - Lighthouse >=0.95 és a valódi filmes WebGL képkockák ellenőrzése nyitott; draft PR változatlan.
 
+### 2026-10-27 – R2229 production forráskontraktus helyreállítása
+
+- `5f3ef7b` commit CI: P0 `40493280017` PASS, organism-main `40493280222` PASS, canonical MAG runtime `40493280090` PASS, mobil MAG visual `40493280098` PASS. Production `40493280101` FAIL, archive `40493280104` FAIL, Lighthouse `40493280797` FAIL.
+- Production `122152282765` pontos hiba: `R2176 founding double-helix particle mismatch: const localY=sign*Math.sin(phase)*helixRadius`. Az R2228 megosztott szinusz/koszinusz optimalizálás után a régi szöveges source-kontraktus elavult.
+- `7a60d2b`: `.github/scripts/validate-intro-three-route-r2143.cjs` R2176 ellenőrzését a valós `sinPhase/cosPhase` kódhoz igazítottam, megtartva a két szál, 3.82 fordulat és geometriai koordináta ellenőrzéseket. Production újrafutás szükséges.
+- Archive `40493280104`: `The handed-off folio does not originate from the scene shelf` – külön funkcionális regresszió, **nem igazoltan** a DNS trigonometria okozza; további vizsgálat szükséges. Lighthouse továbbra is FAIL.
+- Nincs merge/release, amíg minden szükséges kapu nem PASS.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
