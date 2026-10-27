@@ -372,6 +372,14 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Organism-main `40500912844` napló: EUR váltás és checkout URL **sikeres**, utána `.fx-organism-console-close` `locator.evaluate` 30s timeout, a konzol bezárásáig sem jutott. `2f9287f` a natív DOM gombkattintást alkalmazza, és ellenőrzi a nyitott állapotot, majd a tényleges bezárást és CSS `display:none` állapotot. A pointeres kattinthatóság külön UX-gate feladata.
 - Lighthouse, archive és a teljes új CI továbbra is ellenőrizendő; nincs merge/release.
 
+### 2026-10-27 – R2232 Lighthouse valódi diagnózis (15/16 PASS)
+
+- `2694721` CI: **15/16 PASS**; egyedül Lighthouse `40502647145` FAIL. Production `40502647003`, P0 `40502647280`, organism-main `40502647014`, archive `40502647205`, MAG runtime `40502647222` mind PASS.
+- Lighthouse job `122185282424` mobil 3. mérés: főszál `Other 2892 ms`, `Style & Layout 2221 ms`, `Script Evaluation 496 ms`, `Rendering 410 ms`. A legnagyobb szűk keresztmetszet tehát nem pusztán a DNS részecske JS trigonometria, hanem főszál és stílus/layout munka.
+- A mobil trace két késleltető CSS-t mutat: `formatx-genesis-studio-r2160.css` 721 ms és `formatx-dna-first-frame-r2181.css` 871 ms; render-blocking audit ~150 ms becsült megtakarítás, unused CSS ~62 kB és 150 ms becsült megtakarítás, minify JS ~180 ms. Ezek diagnosztikai auditbecslések, nem bizonyított tényleges gyorsulás.
+- `body#top > main#main-content` layout-shift score ~0.03345 és `header.topbar > a.brand` ~0.02227; a tényleges mobil CLS-t és LCP-t teljes riportból kell kiolvasni.
+- Következő feladat: a két kritikus CSS betöltési sorrendjének/korai megjelenésének biztonságos javítása úgy, hogy a DNS első képkockája és a Genesis vizuális szerződés ne sérüljön; külön layout és JS long-task profilozás. Lighthouse cél >=0.95; nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
