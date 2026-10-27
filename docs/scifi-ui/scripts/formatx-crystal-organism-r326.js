@@ -991,6 +991,16 @@
     stage.dataset.revision = REVISION;
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
+    // R2246: reserve the permanent MAG compositor inside the existing hero
+    // without letting its late DOM insertion participate in document flow.
+    // Size the stage before prepend and the canvas before append: the browser
+    // must never lay out an intrinsic 300x150 canvas during the Genesis handoff.
+    stage.style.setProperty('position','absolute','important');
+    stage.style.setProperty('inset','0','important');
+    stage.style.setProperty('width','100%','important');
+    stage.style.setProperty('height','100%','important');
+    stage.style.setProperty('min-width','0','important');
+    stage.style.setProperty('min-height','0','important');
     // R2173: if the permanent WebGL core mounts during the 10-second birth
     // film, it must start completely invisible. R533 owns the gradual
     // reveal only AFTER the final titanium assembly has seated.
@@ -1005,6 +1015,11 @@
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
+    canvas.style.setProperty('position','absolute','important');
+    canvas.style.setProperty('inset','0','important');
+    canvas.style.setProperty('width','100%','important');
+    canvas.style.setProperty('height','100%','important');
+    canvas.style.setProperty('display','block','important');
     stage.appendChild(canvas);
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
