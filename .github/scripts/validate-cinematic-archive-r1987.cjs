@@ -276,6 +276,13 @@ async function evaluate(viewport,isMobile,browser){
         assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
           'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
       }
+      // R2231: scene state can advance one frame before the native folio
+      // handoff data attribute updates. Wait for the actual DOM source,
+      // rather than asserting during the intermediate transition frame.
+      await page.waitForFunction(expected=>{
+        const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        return panel?.dataset.fxCinemaSource===expected;
+      },scene.source,{timeout:5000});
       const real3D=await page.evaluate(()=>{
         const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
         return {bridge:document.documentElement.dataset.fxArchiveNativeHandoff,
