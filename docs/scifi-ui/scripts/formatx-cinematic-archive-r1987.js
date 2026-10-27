@@ -624,7 +624,16 @@
       // Lighthouse CLS remains a separate open issue requiring attribution.
       stage._fxArchiveDockLayout=['position','inset','width','height','min-width','min-height']
         .map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)]);
-      for(const [name] of stage._fxArchiveDockLayout)stage.style.removeProperty(name);
+      // R2253: switch directly between two fully specified geometries.
+      // Clearing all six inline properties temporarily exposed the legacy
+      // v55 stage/canvas rules and contributed to Lighthouse layout shifts.
+      // Apply the fixed viewport box without an intermediate auto-sized box.
+      stage.style.setProperty('position','fixed','important');
+      stage.style.setProperty('inset','0','important');
+      stage.style.setProperty('width','100vw','important');
+      stage.style.setProperty('height','100dvh','important');
+      stage.style.setProperty('min-width','0','important');
+      stage.style.setProperty('min-height','0','important');
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
