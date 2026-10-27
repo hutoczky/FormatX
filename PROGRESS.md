@@ -441,6 +441,12 @@ PR: https://github.com/hutoczky/FormatX/pull/578
 - Desktop 3. mérés Performance **0.88**, LCP **1.763 s**, TBT **7.5 ms**, CLS **0.0911**, Speed Index **1.672 s**. A desktop CLS közel van a 0.10 felső küszöbhöz; diagnosztika szerint a mobil layout fő érintettje a `main#main-content` és fejléc brand.
 - **Következő feladat:** mobil Speed Index ~6.4 s, TBT 258–306 ms és desktop CLS 0.0911. Profilozni a 2–7 s vizuális progresszt és a CSS/layout mutációkat, majd csak bizonyított szűk keresztmetszeten változtatni. Lighthouse cél >=0.95 mindkét profil, nincs merge addig.
 
+### 2026-10-27 – R2242 Lighthouse szórás és egyedi long-task diagnosztika
+
+- `b76f1f1` teljes CI: **22/23 PASS**, Lighthouse `40513454302` FAIL. A mobil Lighthouse eredmények jelentősen ingadoznak: **0.83 / 0.94 / 0.86** Performance; TBT **439.75 / 0.74 / 338.14 ms**; Speed Index **6490 / 6128 / 6460 ms**. Desktop **0.67 / 0.89 / 0.88**, az első futás TBT **541 ms**, második/harmadik **18 / 28 ms**. Ezt nem szabad egyetlen stabil javulásként értelmezni.
+- `6cd9532` kiegészíti a Lighthouse `LIGHTHOUSE_DIAG` és `paint-diagnostics.json` kimenetet a `long-tasks` audit egyedi `startTime/duration/url` adataival és a `bootup-time` audit szkriptenkénti `total/scriptEvaluation/scriptParseCompile` értékeivel. Így a következő futásból konkrétan megállapítható, mely feladatok terhelik a főszálat.
+- A módosítás **diagnosztika**, nem FPS/TBT gyorsítás. Következő lépés a mért long-task források célzott javítása, majd három-három mérés; PR draft, nincs merge.
+
 ## 6. Ismert hibák és kockázatok
 
 1. **Rendezve a specifikációban, vizuálisan még ellenőrizendő:** a 14 s/10 s eltérés a R2220 acceptance-dokumentumban feloldva a valós 10 s DNS → sejtmag → MAG narratívával.
