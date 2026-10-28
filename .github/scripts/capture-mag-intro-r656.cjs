@@ -259,6 +259,7 @@ const SHOTS=[
             count:Number(root.dataset.fxMagBirthVesiclesR2215||0),
             opacity:Number(root.dataset.fxMagBirthVesicleOpacityR2215||0),
             framebufferPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+            embryoScale:Number(root.dataset.fxMagBirthEmbryoScaleR2149||0),
             viewport:[innerWidth,innerHeight],
             canvasCount:document.querySelectorAll('.fxb-three-canvas').length
           };
@@ -269,6 +270,11 @@ const SHOTS=[
         });
         if(state.count!==42||state.opacity<.35||state.framebufferPeak<50)
           errors.push('R2215 mobile nucleus physical cell not visible: '+JSON.stringify(state));
+        // R2216: keep the entire sphere within portrait cinematography,
+        // with air around the membrane instead of clipping its left/right rim.
+        if(!(state.embryoScale>=.72&&state.embryoScale<=.78))
+          errors.push('R2216 phone cellular scale violates safe-frame range: '+
+            JSON.stringify(state));
         report.push({
           seconds:'mobile-5.50',name:'10-mobile-biological-cell-5.50s',
           state,errors
