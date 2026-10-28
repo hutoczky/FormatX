@@ -28,9 +28,13 @@ on:
       - '.github/workflows/p0-fast-loop.yml'
   workflow_dispatch:
 
+# R2225: never abort an in-flight complete cinematic P0 proof when multiple
+# development commits land. GitHub keeps the newest pending job for the same
+# PR ref, so the latest SHA will still be tested without erasing earlier
+# cold-start evidence needed to diagnose nondeterministic compositor failures.
 concurrency:
   group: formatx-p0-fast-loop-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
