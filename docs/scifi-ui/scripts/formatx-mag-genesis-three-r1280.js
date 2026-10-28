@@ -1155,6 +1155,7 @@
           pixels[index+2]=Math.round(clamp(
             (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
           pixels[index+3]=255;
+          // R2212: deepen coral trabeculae within the teal metabolic matrix.
           // R2206: cluster coral metabolic islands within living teal
           // cytoplasm; preserve the membrane's fine-scale native texture.
           // All sampling happens once at initialization, never per frame.
@@ -1163,11 +1164,11 @@
           const capillary=clamp((.5+.5*Math.sin(u*39+
             3.0*Math.sin(v*24+curl*5.0))-.74)*3.6)*cloud;
           pixels[index]=Math.min(255,pixels[index]+Math.round(
-            metabolic*23+capillary*12));
+            metabolic*39+capillary*22));
           pixels[index+1]=Math.max(0,pixels[index+1]-Math.round(
-            metabolic*12));
+            metabolic*19));
           pixels[index+2]=Math.min(255,pixels[index+2]+Math.round(
-            capillary*19));
+            capillary*28));
         }
       }
       const texture=new T.DataTexture(pixels,width,height,T.RGBAFormat);
@@ -1201,10 +1202,10 @@
         // nucleus was too transparent against near-black (0.47 opacity),
         // washing its coral metabolic freckles into a faint glass bead.
         color:0xf5ffff,map:this.embryoTexture,
-        bumpMap:this.embryoTexture,bumpScale:.020,
+        bumpMap:this.embryoTexture,bumpScale:.034,
         emissive:0x16676b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.35,
-        metalness:.015,roughness:.29,clearcoat:.73,clearcoatRoughness:.18,
+        emissiveIntensity:.40,
+        metalness:.015,roughness:.25,clearcoat:.82,clearcoatRoughness:.14,
         transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
