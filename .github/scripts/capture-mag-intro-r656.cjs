@@ -347,7 +347,18 @@ const SHOTS=[
               ||root.dataset.fxCoreReferenceGeometry
               ||'',
             coreGeometry:root.dataset.fxCoreGeometry||'',
-            handoff:root.dataset.fxMagBirthHandoff||root.dataset.fxMagBirthLive||''
+            handoff:root.dataset.fxMagBirthHandoff||root.dataset.fxMagBirthLive||'',
+            // R2209 diagnostics: a GPU-ready native model can still be
+            // outside the visible hero or hidden under a stale compositor.
+            // Record the actual screenshot viewport BEFORE locator capture,
+            // which scrolls the element into view and can conceal this bug.
+            viewport:{w:innerWidth,h:innerHeight,scrollX,scrollY},
+            introPrepaint:root.dataset.fxIntroPrepaintR1611||'',
+            nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
+            activeFilm:root.getAttribute('data-fx-mag-birth-live'),
+            heroRect:(()=>{const el=document.querySelector('#hero');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})(),
+            stageRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-stage');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility}:null;})(),
+            canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display}:null;})()
           };
         });
   
