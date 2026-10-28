@@ -264,10 +264,44 @@ const SHOTS=[
             canvasCount:document.querySelectorAll('.fxb-three-canvas').length
           };
         });
-        await page.screenshot({
+        const cellPng=await page.screenshot({
           path:path.join(OUT,'10-mobile-biological-cell-5.50s.png'),
           fullPage:false
         });
+        // R2216: directly inspect the photographed image, not just a
+        // camera/scale flag. The old R2215 phone sphere reached BOTH edges.
+        // Physical cyan tissue must leave dark breathing room on both sides.
+        const edges=await page.evaluate(async(encoded)=>{
+          const image=new Image();
+          image.src='data:image/png;base64,'+encoded;
+          await image.decode();
+          const canvas=document.createElement('canvas');
+          canvas.width=image.naturalWidth;
+          canvas.height=image.naturalHeight;
+          const ctx=canvas.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(image,0,0);
+          const w=canvas.width,h=canvas.height;
+          const sample=ctx.getImageData(0,0,w,h).data;
+          let left=0,right=0,count=0;
+          for(let y=Math.floor(h*.26);y<Math.floor(h*.74);y+=3){
+            for(let n=0;n<3;n++){
+              for(const side of [0,1]){
+                const x=side===0 ? n*3 : w-1-n*3;
+                const i=(y*w+x)*4;
+                const red=sample[i],green=sample[i+1],blue=sample[i+2];
+                if(green>62&&blue>70&&green>red*1.22){
+                  if(side===0)left++;else right++;
+                }
+              }
+              count++;
+            }
+          }
+          return {left:left/count,right:right/count,width:w,height:h};
+        },cellPng.toString('base64'));
+        state.cellSafeFrameR2216=edges;
+        if(edges.left>.09||edges.right>.09)
+          errors.push('R2216 living cell is clipped against phone edge: '+
+            JSON.stringify(edges));
         if(state.count!==42||state.opacity<.35||state.framebufferPeak<50)
           errors.push('R2215 mobile nucleus physical cell not visible: '+JSON.stringify(state));
         // R2216: keep the entire sphere within portrait cinematography,
