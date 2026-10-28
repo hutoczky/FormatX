@@ -2,7 +2,7 @@ name: Lighthouse CI
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, fix/r2171-native-titanium-surface]
     paths:
       - 'docs/scifi-ui/**'
       - 'lighthouserc.json'
