@@ -187,7 +187,7 @@
         pmrem=new T.PMREMGenerator(this.renderer);
         this.studioEnvTarget=pmrem.fromEquirectangular(texture);
         this.scene.environment=this.studioEnvTarget.texture;
-        this.scene.environmentIntensity=this.mobileRender?.64:.84;
+        this.scene.environmentIntensity=this.mobileRender?.77:1.02;
         this.studioEnvironmentTexture=texture;
       }catch(error){
         this.studioEnvTarget?.dispose?.();
@@ -262,6 +262,12 @@
             // stays brighter than its surrounding atmosphere.
             col+=vec3(.012,.045,.060)*aqua*metal*(.35+.45*vapor);
             col+=vec3(.023,.013,.046)*violet*metal*.30;
+            // R2217: preserve real photographic black, but make visible
+            // spectral depth behind the object. The previous 0.01–0.04
+            // linear background looked empty after display tonemapping.
+            float halo=haze(q,vec2(.50,.48),vec2(2.35,1.65));
+            col+=vec3(.022,.095,.110)*halo*metal*(.46+.54*vapor);
+            col*=mix(1.78,1.38,metal);
             float vignette=1.0-.40*length((q-.5)*vec2(1.20,.94));
             gl_FragColor=vec4(col*clamp(vignette,.54,1.0),1.0);
           }`
@@ -3166,6 +3172,12 @@
       // This keeps the 10-second story and mobile crop intact.
       const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.52)/1.12));
       z-=birthDolly*(this.mobileRender?.27:.47);
+      // R2217: emphasize the physical titanium assembly during its
+      // signature studio reveal. This smooth lens dolly returns to ZERO
+      // before the real native MAG handoff; camera and topology unchanged.
+      const revealDolly=smooth((t-6.75)/.85)*
+        (1-smooth((t-8.45)/1.10));
+      z-=revealDolly*(this.mobileRender?.20:.76);
       x+=birthDolly*.038*Math.sin((t-5.68)*1.12);
       y+=birthDolly*.018;
       if(this.width<this.height)z+=.90;
