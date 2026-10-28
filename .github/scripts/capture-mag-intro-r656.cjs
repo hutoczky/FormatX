@@ -470,6 +470,9 @@ const SHOTS=[
             nativeHandoff:root.dataset.fxMagNativeHandoffR2218||'',
             productionCompositor:root.dataset.fxMagCompositorR2219||'',
             nativePresent:root.dataset.fxMagNativePresentR2220||'',
+            nativeGpu:root.dataset.fxMagHandoffGpuR2226||'',
+            nativeGpuMs:Number(root.dataset.fxMagHandoffGpuMsR2226||0),
+            nativeGpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
             nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
             nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
             nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
@@ -544,8 +547,25 @@ const SHOTS=[
             state.productionCompositor);
         }
         if(!state.handoffPixels.visible||state.handoffPixels.bright<40){
+          const detail={
+            screenshot:state.handoffPixels,canvas:state.canvasRect,
+            gpu:state.nativeGpu,gpuMs:state.nativeGpuMs,
+            gpuPixel:state.nativeGpuPixel,
+            firstFrame:state.nativeFirstFrame,
+            nativeHandoff:state.nativeHandoff,
+            productionCompositor:state.productionCompositor,
+            nativeCompositor:state.nativeCompositor,
+            nativePresent:state.nativePresent,
+            viewport:state.viewport,
+            introPrepaint:state.introPrepaint,
+            ancestorVisibility:state.ancestorVisibility
+          };
+          console.error('R2226_BLACK_VIEWPORT_GPU_DIAGNOSTICS '+JSON.stringify(detail));
           errors.push('R2209 full-viewport MAG is black, despite renderer-ready: '+
-            JSON.stringify(state.handoffPixels)+' '+JSON.stringify(state.canvasRect));
+            JSON.stringify(detail));
+        }
+        if(state.nativeGpu!=='finished'){
+          errors.push('R2226 GPU frame not committed at native handoff: '+state.nativeGpu);
         }
         // R2225: investigate black FULL viewport without accidentally
         // approving it. The original 06 image and its pixel assertion ABOVE
