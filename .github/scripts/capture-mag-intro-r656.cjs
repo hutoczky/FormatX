@@ -283,6 +283,8 @@ const SHOTS=[
           phase:root.dataset.fxMagBirthPhase||document.querySelector('.fx-mag-birth-r533')?.dataset.phase||'',
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+          vesicleCount:Number(root.dataset.fxMagBirthVesiclesR2215||0),
+          vesicleOpacity:Number(root.dataset.fxMagBirthVesicleOpacityR2215||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
           overlay:document.querySelectorAll('.fx-mag-birth-r533').length
         };
@@ -290,6 +292,12 @@ const SHOTS=[
 
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
+      }
+      if(Number(seconds)===5.5){
+        if(state.vesicleCount!==84||state.vesicleOpacity<.35){
+          errors.push('R2215 living cell missing volumetric 3D organelles: '+
+            JSON.stringify({count:state.vesicleCount,opacity:state.vesicleOpacity}));
+        }
       }
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
