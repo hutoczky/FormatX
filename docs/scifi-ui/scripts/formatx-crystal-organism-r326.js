@@ -1557,6 +1557,22 @@
         lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
           (.26+.10*uEnergy)*metabolicPulse;
         lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
+        /* R2212: the optical center is a living, layered organ, not a
+           static luminous button. Two physically coherent rings trace the
+           membrane at different apparent depths. All color stays inside
+           the existing recessed glass triangles and its single GL pass. */
+        float membraneDistortion=.027*tissueFold+.012*tissueIslands;
+        float innerMembrane=exp(-pow((od-.48-membraneDistortion)/.057,2.0));
+        float outerMembrane=exp(-pow((od-.79+.015*tissueFold)/.065,2.0));
+        float bioticFilament=.5+.5*sin(oq.x*28.0+oq.y*11.0+
+          tissueFold*2.7-uTime*.18);
+        float filamentMask=smoothstep(.55,.88,bioticFilament)*
+          tissueEnvelope*(.45+.55*coralOrganelles);
+        lensColor+=vec3(.055,.60,.62)*innerMembrane*(.18+.08*uEnergy);
+        lensColor+=vec3(.16,.52,.56)*outerMembrane*(.24+.05*uEnergy);
+        lensColor+=vec3(.84,.25,.17)*filamentMask*(.18+.08*uEnergy);
+        // Keep broad photographic contrast instead of an all-white iris.
+        lensColor*=1.0-.13*coralOrganelles*filamentMask;
         c=lensColor;
         }
 
@@ -1591,6 +1607,7 @@
     root.dataset.fxNativeMagSurfaceR2203='body-anchored-filtered-machined-silver-recessed-optical-aperture';
     root.dataset.fxNativeMagSurfaceR2204='travelling-softbox-readable-across-machined-silver';
     root.dataset.fxNativeMagSurfaceR2206='biophotonic-cyan-coral-living-optic-machined-titanium-no-extra-pass';
+    root.dataset.fxNativeMagSurfaceR2212='laminated-living-cyan-coral-lens-deep-silver-single-pass';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
