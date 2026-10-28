@@ -104,12 +104,32 @@ async function pixels(page,bytes,rect){
         fullPage:false
       });
       result.pixels=await pixels(page,shot,state.rect);
+      // R2227: the R2226 GL owner independently reads a small center patch
+      // of its *actual* framebuffer. Compare that to the FIRST full page
+      // screenshot to distinguish genuine empty WebGL content from an
+      // already-painted MAG hidden by stale compositor/DOM layers.
+      // Do NOT trigger a second readback, scroll, hit test or repaint here.
+      const gpuPair=/^(\\d+),(\\d+)$/.exec(state.gpuPixel);
+      const luma=gpuPair?Number(gpuPair[1]):null;
+      const alpha=gpuPair?Number(gpuPair[2]):null;
+      result.ownership={
+        framebufferPeak:luma,framebufferAlpha:alpha,
+        browserBright:result.pixels?.bright||0,
+        failureClass:
+          luma===null?'framebuffer-not-measured':
+          luma===0?'gpu-framebuffer-black':
+          (result.pixels?.bright||0)<40?'browser-compositor-not-presented':
+          'both-framebuffer-and-viewport-visible'
+      };
       if(state.overlay!==0||state.canvases!==1)
         result.errors.push('cinematic layer/renderer duplication');
       if(state.gpu!=='finished')
         result.errors.push('GL final frame was not finished');
+      if(luma===null||alpha===null)
+        result.errors.push('R2227 GPU center readback telemetry invalid');
       if(!result.pixels||result.pixels.bright<40)
-        result.errors.push('black FIRST full viewport; bright='+result.pixels?.bright);
+        result.errors.push('black FIRST full viewport; bright='+result.pixels?.bright+
+          '; cause='+result.ownership.failureClass);
       result.ok=result.errors.length===0;
     }catch(error){result.errors.push(String(error));}
     finally{
