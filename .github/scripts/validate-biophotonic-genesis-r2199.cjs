@@ -20,14 +20,14 @@ const checks=[
   ['DNA founding parent','parent.add(dna.points);'],
   ['biological cell parent','this.coreGroup.add(embryo.points);'],
   ['DNA particle density',"build(this.mobileRender?260:620,'dna')"],
-  ['cellular photon density',"build(this.mobileRender?850:2200,'embryo')"],
+  ['cellular photon density',"build(this.mobileRender?1200:3100,'embryo')"],
   ['photo-real bokeh softness','gl_PointCoord-.5'],
   ['3D WebGL soft glow','fragmentShader:'],
   ['cyan/purple DNA palette','new T.Color(0xbd86ff)'],
   ['teal/coral cell palette','new T.Color(0xffa257)'],
   ['near-lens DNA approach',"z=mix(this.mobileRender?5.15:4.68,4.88,k);"],
   ['large living cell',"const embryoScale=this.mobileRender?.94:1.07;"],
-  ['translucent biological membrane',"this.embryoMaterial.opacity=.86*visible;"],
+  ['translucent biological membrane',"this.embryoMaterial.opacity=.89*visible;"],
   ['volumetric organelle',"this.embryoNucleusMaterial.opacity=.82*visible;"],
   ['first-frame genome','this.makeGenomeParticles();'],
   ['physical titanium chassis','this.updateMechanical(t,time);'],
@@ -55,10 +55,10 @@ assert(engine.includes('const count=this.mobileRender?6000:9600;'),
   'GPU nucleotide morph must remain 6000/9600 instances');
 // R2201: recovery/canonical boot load R533 while R533/edge load R1280.
 for(const [label,src,revision] of [
-  ['R533',birth,'20261027-r2203-machined-silver-film'],
-  ['rescue',rescue,'20261027-r2203-silver-optic-handoff'],
-  ['HTML',html,'20261027-r2203-silver-optic-handoff'],
-  ['Worker',worker,'20261027-r2203-machined-silver-film']
+  ['R533',birth,'20261028-r2206-biophotonic-nucleus-mag'],
+  ['rescue',rescue,'20261028-r2206-biophotonic-nucleus-mag'],
+  ['HTML',html,'20261028-r2206-biophotonic-nucleus-mag'],
+  ['Worker',worker,'20261028-r2206-biophotonic-nucleus-mag']
 ]){
   assert(src.includes(revision),'Stale '+label+' cinematic delivery cache: '+revision);
 }
@@ -67,6 +67,6 @@ assert(html.includes('INLINE_R2199_BOOT_HASH')===false,
 assert(worker.includes('INLINE_R2199_BOOT_HASH'),
   'Worker must authorize the exact R2199 first-byte bootstrap');
 console.log('R2199_BIOPHOTONIC_GENESIS_PASS',{
-  dnaPhotons:620,embryoPhotons:2200,genomeParticles:9600,
-  mobileDnaPhotons:260,mobileEmbryoPhotons:850,mobileGenome:6000
+  dnaPhotons:620,embryoPhotons:3100,genomeParticles:9600,
+  mobileDnaPhotons:260,mobileEmbryoPhotons:1200,mobileGenome:6000
 });
