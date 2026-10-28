@@ -2601,8 +2601,20 @@
       if(!onScreen)return;
       visible=true;
       root.dataset.fxMagNativeHandoffR2218='visible-reconciled';
-      // A bounded explicit repaint is safe even if the normal intersection
-      // callback has yet to run. Request two additional presentation frames.
+      // R2220: R2219 black-frame proof showed that a queued RAF is not
+      // guaranteed to run, even 350 ms after teardown, and the visitor
+      // may have intentionally paused all ongoing motion. One synchronous
+      // paint of the original GL canvas is still required to reveal a
+      // STATIC MAG on the newly exposed page. It starts no animation loop.
+      try{
+        render(performance.now());
+        gl.flush();
+        root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
+      }catch(error){
+        root.dataset.fxMagNativePresentR2220='paint-unavailable';
+        console.warn('FormatX native MAG final presentation:',error);
+      }
+      // Preserve the existing bounded dynamic follow-up only when unpaused.
       if(!paused&&root.dataset.fxReferenceMotionPaused!=='true'){
         schedule(2);
         requestAnimationFrame(()=>{
