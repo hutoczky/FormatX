@@ -95,6 +95,20 @@ assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');
 assert(intro.includes('const THREE_OWNER_SRC ='),
   'Original cinematic runtime ownership must remain');
+// R2227: render-time DOM mutation must not re-publish immutable
+// html[data-*] telemetry every 250ms and force style invalidation.
+assert(mag.includes('let publishedRuntimeStaticR2227=false;'),
+  'R2227 immutable telemetry must be one-shot');
+assert(mag.includes('if(!publishedRuntimeStaticR2227){'),
+  'Permanent diagnostic flags must be inside the one-shot guard');
+assert(mag.includes('if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity)'),
+  'Live GPU telemetry must retain its bounded 250ms cadence');
+const once=mag.slice(mag.indexOf('if(!publishedRuntimeStaticR2227){'),
+  mag.indexOf('root.dataset.fxCoreRenderMs='));
+for(const marker of [
+  'fxNativeMagPerformanceR1694','fxNativeMagPerformanceR1701',
+  'fxNativeMagPerformanceR1710','fxNativeMagDesktopInteractionR1944'
+])assert(once.includes(marker),marker+' should only be published once');
 console.log('MAG_BIOPHOTONIC_R2206_SOURCE_PASS', JSON.stringify({
   genomeMobile: 6000, genomeDesktop: 9600,
   cellPhotonsMobile: 1200, cellPhotonsDesktop: 3100,
