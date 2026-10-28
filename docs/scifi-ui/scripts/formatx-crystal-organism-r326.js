@@ -380,6 +380,13 @@
          Removing overlap also removes software/mobile z-fighting speckles. */
       // R2255: the closed shell has no seam overlap. Remove the dead
       // branch while preserving emitted positions and triangle order.
+      // R2257: material blend is constant across all three vertices of a
+      // triangle. Evaluate it once per face without changing vertex output.
+      const metalFacet=facet>=5.0&&facet<6.0;
+      const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
+        (facet<2.0?(mobile?.985:(software?.94:.90)):
+        (software?.95:(mobile?.985:(constrained?.972:.978))));
+      const faceWeight=1-smoothWeight;
       vertices.forEach((item, index) => {
         sphere.push(...item.sphere);
         crystal.push(...item.crystal);
@@ -391,12 +398,7 @@
         // R2144: the machined raised armour is truly bevelled. A controlled
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
-        const metalFacet=facet>=5.0&&facet<6.0;
-        // R2177: avoid jagged per-triangle metal shading on the phone.
-        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
-          (facet<2.0?(mobile?.985:(software?.94:.90)):
-          (software?.95:(mobile?.985:(constrained?.972:.978))));
-        const faceWeight=1-smoothWeight;
+        // R2177: preserve the mobile metal-facet smoothing weights.
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
           smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
