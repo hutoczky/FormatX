@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261027-r2204
+mag_cache=20261028-r2206-biophotonic-nucleus-mag
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -183,3 +183,8 @@ r2205_mag_focus=During the core hero scene, the deferred desktop depth sheet now
 r2205_edge_proof=The reduced-motion GPU edge proof starts the unchanged real product runtime through its existing trusted keyboard-intent path. It retains the original 30-second readiness limit, actual shader capture, transform feedback, shared-edge assertions and GL checks; no product bypass, fake clock or hardware claim is introduced.
 r2206_studio_separation=The restrained desktop core world is also cooled and dimmed behind the live MAG, reducing blue-violet environmental wash while leaving the machined silver body, recessed optic and their own travelling light untouched.
 r2206_proof_artifact=The reduced-motion edge oracle records the actual reduced page state rather than demanding visibility from its intentionally concealed WebGL canvas. Actual shader capture, 17,592 mobile vertices, shared-edge transform feedback and GL assertions remain the authoritative proof and are unchanged.
+
+
+r2206_biophotonic_development=R2206 cyan/coral metabolic tissue added inside the existing physical four-arm silver MAG optic, with improved silver grazing key. The Three.js film has an enriched generated microtexture, 1200/3100 (mobile/desktop) embryo photons, .89 membrane and .11/.16 chromatin visibility. Original 6000/9600 genomic particles, ten-second DNA -> cell -> MAG chronology, native single WebGL ownership and reduced-motion policy unchanged.
+r2206_biophotonic_delivery=All R533 -> R1280 and R490 -> R239 -> R422 -> R326 URLs use 20261028-r2206-biophotonic-nucleus-mag. Exact inline SHA256 lGPKw2slszeCOq/FIHj93C7a7TNTnG9pK02fiUnPrnc= is present in both HTML meta CSP and Worker header/meta CSP. The legacy cached bootstrap fingerprint remains permitted.
+r2206_biophotonic_release_gate=Development branch only. Require source tests, real Chromium shader checks, mobile/desktop storyboard review, uninterrupted handoff, WebGL error/idle-frame checks and Lighthouse budgets before any production merge/deployment. No device FPS, reference equivalence, live deployment or visual acceptance claimed.
