@@ -2154,7 +2154,10 @@
     // R2252: distinguish CPU tessellation, driver upload and shader polling
     // when investigating the 864 ms MAG long task in Lighthouse CI.
     // The measurements do not change geometry, scheduling or draw calls.
-    root.dataset.fxCoreBootMeasuredMsR2252=(uploadEnd-geometryStart).toFixed(2);
+    // R2258: R2257 yields between geometry and GPU upload. Exclude the
+    // scheduler gap: this telemetry represents active CPU/driver work only.
+    root.dataset.fxCoreBootMeasuredMsR2252=(geometryBuildMs+uploadEnd-uploadStart).toFixed(2);
+    root.dataset.fxCoreBootYieldGapMsR2258=Math.max(0,uploadStart-geometryEnd).toFixed(2);
     try{
       performance.measure('formatx:r326:geometry-and-upload-r2252',{
         start:geometryStart,end:uploadEnd
