@@ -547,6 +547,45 @@ const SHOTS=[
           errors.push('R2209 full-viewport MAG is black, despite renderer-ready: '+
             JSON.stringify(state.handoffPixels)+' '+JSON.stringify(state.canvasRect));
         }
+        // R2225: investigate black FULL viewport without accidentally
+        // approving it. The original 06 image and its pixel assertion ABOVE
+        // remain untouched. Only AFTER that first snapshot, inspect the
+        // hit-test stack and capture a second UNCLIPPED diagnostic screenshot.
+        // These reads are intentionally absent before the release oracle.
+        state.postSnapshotOcclusion=await page.evaluate(()=>{
+          const native=document.querySelector(
+            '#hero .fx-crystal-organism-r326-canvas'
+          );
+          const r=native?.getBoundingClientRect();
+          const spots=[
+            {name:'mag-center',x:r?r.x+r.width*.5:innerWidth*.25,
+              y:r?r.y+r.height*.5:innerHeight*.32},
+            {name:'header',x:Math.min(innerWidth-1,165),
+              y:Math.min(innerHeight-1,42)},
+            {name:'hero-copy',x:Math.min(innerWidth-1,innerWidth*.73),
+              y:Math.min(innerHeight-1,innerHeight*.4)}
+          ];
+          return spots.map(({name,x,y})=>({
+            name,x:Math.round(x),y:Math.round(y),
+            stack:document.elementsFromPoint(x,y).slice(0,10).map(el=>{
+              const c=getComputedStyle(el);
+              return {
+                tag:el.tagName,
+                id:el.id,
+                className:String(el.className||'').slice(0,100),
+                opacity:c.opacity,visibility:c.visibility,
+                zIndex:c.zIndex,display:c.display,
+                position:c.position,pointerEvents:c.pointerEvents,
+                background:c.backgroundColor,
+                transform:c.transform==='none'?'none':'transformed'
+              };
+            })
+          }));
+        });
+        await page.screenshot({
+          path:path.join(OUT,'06b-after-first-capture-layer-diagnostic.png'),
+          fullPage:false
+        });
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'07-native-hero-mag.png');
         report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
