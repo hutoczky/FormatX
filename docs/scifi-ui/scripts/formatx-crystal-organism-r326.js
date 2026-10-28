@@ -1509,6 +1509,21 @@
         float titaniumGrazing=pow(1.0-facing,2.4);
         studioSilver+=vec3(.31,.43,.48)*titaniumGrazing*
           panelEnvelope*.14;
+        /* R2214 — functional titanium machining.
+           Highlight a recessed lengthwise capillary on each of the four
+           real 3D arms, plus selective micro-fasteners inside panel cells.
+           Gradients are anti-aliased and locked to body coordinates:
+           no flickering procedural noise, overlays or extra GPU passes. */
+        float insetCoord=lateral/max(.045,panelWidth);
+        float axialHairline=exp(-pow((insetCoord-.59)/
+          (.040+panelAA.y*.20),2.0))*panelEnvelope;
+        float microSocket=length(fract(panelCoord*vec2(.50,.50))-.50);
+        float socketMask=(1.0-smoothstep(.10+panelAA.x*.06,
+          .17+panelAA.x*.12,microSocket))*
+          panelEnvelope*(1.0-panelJoint);
+        studioSilver+=vec3(.34,.57,.63)*axialHairline*.13;
+        studioSilver*=1.0-socketMask*.11;
+        studioSilver+=vec3(.24,.36,.39)*socketMask*metalSpec*.30;
         float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
         c=mix(c,studioSilver,shellSilver);
         titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
@@ -1608,6 +1623,7 @@
     root.dataset.fxNativeMagSurfaceR2204='travelling-softbox-readable-across-machined-silver';
     root.dataset.fxNativeMagSurfaceR2206='biophotonic-cyan-coral-living-optic-machined-titanium-no-extra-pass';
     root.dataset.fxNativeMagSurfaceR2212='laminated-living-cyan-coral-lens-deep-silver-single-pass';
+    root.dataset.fxNativeMagSurfaceR2214='anti-aliased-titanium-capillaries-fasteners-micro-machined-four-arm-body';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
