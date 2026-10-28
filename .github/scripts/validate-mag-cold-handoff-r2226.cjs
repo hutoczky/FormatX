@@ -109,7 +109,7 @@ async function pixels(page,bytes,rect){
       // screenshot to distinguish genuine empty WebGL content from an
       // already-painted MAG hidden by stale compositor/DOM layers.
       // Do NOT trigger a second readback, scroll, hit test or repaint here.
-      const gpuPair=/^(\\d+),(\\d+)$/.exec(state.gpuPixel);
+      const gpuPair=/^(\d+),(\d+)$/.exec(state.gpuPixel);
       const luma=gpuPair?Number(gpuPair[1]):null;
       const alpha=gpuPair?Number(gpuPair[2]):null;
       result.ownership={
