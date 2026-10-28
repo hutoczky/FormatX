@@ -2652,24 +2652,42 @@
         section.dataset.fxMagRevealR2213='waiting';
       }
       root.dataset.fxMagExtractionR2213='armed';
+      const materializeSection=section=>{
+        if(section.dataset.fxMagRevealR2213!=='waiting')return;
+        section.dataset.fxMagRevealR2213='revealed';
+        extractObserver?.unobserve(section);
+        extractedCount+=1;
+        root.dataset.fxMagRevealedCountR2213=String(extractedCount);
+        const id=section.id||'chapter';
+        signalPhysiology(sectionPhysiology[id]||'curiosity',
+          'mag-materialize-'+id,false,false);
+        dispatchEvent(new CustomEvent('formatx:magmaterialize',{
+          detail:{section:id,index:extractedCount,owner:'original-r326-mag'}
+        }));
+      };
       extractObserver=new IntersectionObserver(entries=>{
         for(const entry of entries.filter(item=>item.isIntersecting)
-          .sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)){
-          const section=entry.target;
-          if(section.dataset.fxMagRevealR2213!=='waiting')continue;
-          section.dataset.fxMagRevealR2213='revealed';
-          extractObserver.unobserve(section);
-          extractedCount+=1;
-          root.dataset.fxMagRevealedCountR2213=String(extractedCount);
-          const id=section.id||'chapter';
-          signalPhysiology(sectionPhysiology[id]||'curiosity',
-            'mag-materialize-'+id,false,false);
-          dispatchEvent(new CustomEvent('formatx:magmaterialize',{
-            detail:{section:id,index:extractedCount,owner:'original-r326-mag'}
-          }));
-        }
+          .sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top))
+          materializeSection(entry.target);
       },{rootMargin:'0px 0px -12% 0px',threshold:0.005});
       for(const section of extractionTargets)extractObserver.observe(section);
+      // A keyboard or programmatic focus must never land invisibly on a
+      // yet-unmaterialized chapter. Reveal without an extra scroll listener.
+      listen(document,'focusin',event=>{
+        if(!(event.target instanceof Element))return;
+        const target=event.target.closest(
+          '#main-content > section.scene[data-fx-mag-reveal-r2213="waiting"]'
+        );
+        if(target)materializeSection(target);
+      },{passive:true});
+      listen(reduced,'change',()=>{
+        if(!reduced.matches)return;
+        root.dataset.fxMagExtractionR2213='accessible-immediate';
+        extractObserver?.disconnect();
+        for(const section of extractionTargets)
+          if(section.dataset.fxMagRevealR2213==='waiting')
+            section.dataset.fxMagRevealR2213='revealed';
+      },{passive:true});
     }else{
       root.dataset.fxMagExtractionR2213='accessible-immediate';
     }
