@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261028-r2212-photonic-permanent-mag
+token=20261028-r2218-native-handoff-visible
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261028-r2212-photonic-permanent-mag
+mag_cache=20261028-r2218-native-handoff-visible
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -216,3 +216,7 @@ r2217_studio_atmosphere=The same R1280 Three.js film shader now exposes stronger
 r2217_cinematic_camera=The silver four-arm MAG gets an eased studio reveal dolly between 6.75 and 9.55 seconds (0.20 mobile / 0.76 desktop maximum), completely returning to the original camera position before the final 10-second native hero handoff. Mechanical scale, physical iris assembly and DNA-to-cell transition remain the same.
 r2217_asset_integrity=R533/R1280 film entry revision 20261028-r2217-studio-spectral-titanium, exact HTML inline CSP sha256-i4AWa4nHY4l1ap99YfVHe/boNIcHJCUeNW2qETcNszc= also present in both Worker CSP variants. Permanent native R326 renderer remains on its independently validated R2212 cache key.
 r2217_gates=Do not merge or deploy without real 390x844 and desktop screenshot comparisons, error-free shader compilation, correct final handoff, accessibility and strict Lighthouse results. This remains a development-only refinement.
+
+r2218_handoff_visibility=The original single R326 WebGL owner now reacts to the actual formatx:magbirthcomplete event. It recomputes viewport intersection after the film overlay is removed, reconciles stale IntersectionObserver visibility, then schedules exactly two bounded native display frames and a single follow-up display opportunity. No second canvas, permanent RAF, copied imagery or altered 3D mesh.
+r2218_regression_evidence=Previous R2217 full screenshot 06-post-intro-handoff was black in the 5200-sample lens-center window although 07-native-hero-mag locator screenshot was populated. P0 keeps its strict zero-bright-pixel rejection; it now also records actual ancestor computed visibility and new handoff first-frame telemetry so a GPU-ready flag cannot hide a failed presentation.
+r2218_delivery=Native R490/R239/R422/R326 plus V55, HTML and Worker use 20261028-r2218-native-handoff-visible; separate cinematic R533/R1280 remains R2217 and its inline CSP is unchanged. Not production deployed; the black-frame bug is pending true browser validation.
