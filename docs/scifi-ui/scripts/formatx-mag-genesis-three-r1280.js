@@ -3285,6 +3285,12 @@
           root.dataset.fxMagBirthDonorArmsR2183=String(donorArms.size);
           root.dataset.fxMagBirthDonorPairsR2183=String(donorPairs);
           root.dataset.fxMagBirthFramePeakR1557=String(peak);
+          // R2215: true scene objects, audited only during deterministic
+          // proof frames; never write this telemetry during visitor playback.
+          root.dataset.fxMagBirthVesiclesR2215=String(this.embryoVesicles?.count||0);
+          root.dataset.fxMagBirthVesicleOpacityR2215=String(
+            this.embryoVesicleMaterial?.opacity||0
+          );
           root.dataset.fxMagBirthVisibleArmorR2147=String(
             [...this.silverParts,...this.plates].filter(part=>part.visible).length
           );
