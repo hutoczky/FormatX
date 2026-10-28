@@ -124,6 +124,10 @@ function proveEdges(){
         // existing functional route keeps the actual native material active.
         url.searchParams.set('r486-optics-energy-check',`machined-edges-${width}`);
         await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
+        // Reduced motion intentionally has no ambient WebGL start. Exercise
+        // the existing trusted keyboard-intent path a visitor uses instead of
+        // adding a test-only product bypass or weakening the readiness limit.
+        await page.keyboard.press('Shift');
         await page.waitForFunction(()=>window.__machinedNative&&document.documentElement.dataset.fxCrystalOrganismR326==='ready',null,{timeout:30000});
         const result=await page.evaluate(proveEdges);report.cases.push({width,...result,errors});
         console.log('MACHINED_MAG_GPU_EDGES',JSON.stringify(report.cases.at(-1)));
