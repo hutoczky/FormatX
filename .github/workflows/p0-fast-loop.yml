@@ -15,7 +15,7 @@ on:
       - '.github/scripts/**'
       - '.github/workflows/p0-fast-loop.yml'
   pull_request:
-    branches: [master]
+    branches: [master, fix/r2171-native-titanium-surface]
     paths:
       - 'docs/styles.css'
       - 'docs/scifi-ui/index.html'
