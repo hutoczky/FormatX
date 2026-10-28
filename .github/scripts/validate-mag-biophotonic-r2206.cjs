@@ -18,6 +18,8 @@ for (const [name, source] of Object.entries({ mag, birth, intro, rescue, current
 }
 const tokens = [
   [mag, 'fxNativeMagSurfaceR2206'],
+  [mag, "listen(document,'formatx:magbirthcomplete',()=>"],
+  [mag, "root.dataset.fxMagNativeHandoffR2218='visible-reconciled'"],
   [mag, 'float tissueFold=sin('],
   [mag, 'float coralOrganelles=smoothstep(.61,.84,'],
   [mag, 'lensColor+=vec3(.93,.235,.145)*coralOrganelles'],
@@ -60,7 +62,7 @@ assert(worker.includes('const INLINE_R2217_BOOT_HASH = "' + hash + '";'),
 assert((worker.match(/\$\{INLINE_R2217_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261028-r2212-photonic-permanent-mag';
+const magRevision = '20261028-r2218-native-handoff-visible';
 for (const [name, source] of Object.entries({ intro, rescue }))
   assert(source.includes(filmRevision), name + ' must preserve the canonical biological film');
 for (const [name, source] of Object.entries({ current, runtime, scheduler }))
