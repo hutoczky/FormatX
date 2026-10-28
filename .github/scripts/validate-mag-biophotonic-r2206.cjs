@@ -31,9 +31,9 @@ const tokens = [
   [birth, 'this.updateCore(t,time);'],
   [birth, 'this.updateMechanical(t,time);'],
   [mag, 'const constrainedFragmentSource ='],
-  [mag, 'const polishedRib='],
-  [mag, 'const panelAA='],
-  [mag, 'const opticalGlass=step(6.0,vFacet);'],
+  [mag, 'float polishedRib='],
+  [mag, 'vec2 panelAA='],
+  [mag, 'float opticalGlass=step(6.0,vFacet);'],
 ];
 for (const [source, token] of tokens)
   assert(source.includes(token), 'Missing cinema/optic contract: ' + token);
@@ -51,7 +51,7 @@ assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
   'Worker must authorize the exact R2206 inline bootstrap');
 assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
-const revision = '20261028-r2206-biophotonic-nucleus-mag';
+const revision = '20261028-r2207-filtered-silver-living-optic';
 for (const [name, source] of Object.entries({ html, worker, intro, rescue, current, runtime, scheduler }))
   assert(source.includes(revision), name + ' must reference the R2206 cache generation');
 assert(html.includes('data-fx-dna-first-frame-r2181'),

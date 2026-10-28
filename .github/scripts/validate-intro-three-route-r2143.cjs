@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261027-r2203-machined-silver-film';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261028-r2207-filtered-silver-living-optic';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -74,7 +74,7 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=Math.floor(i/2)%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoMaterial.opacity=.89*visible;',
   'this.embryoNucleusMaterial.opacity=.82*visible;',
   'this.embryoCapillaryMaterial.opacity=.10*visible;',
   'let pairCellX=0,pairCellY=0,pairCellZ=1.10;',
@@ -156,7 +156,7 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261027-r2203-silver-optic-handoff';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261028-r2207-filtered-silver-living-optic';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
 assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),

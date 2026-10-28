@@ -1810,7 +1810,7 @@
         shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
           `#include <common>
           varying vec3 vFxMagAnatomy;
-          float fxMagPanelJoint(){
+          vec3 fxMagPlateFinish(){
             vec2 anatomy=abs(vFxMagAnatomy.xy);
             float radial=max(anatomy.x,anatomy.y);
             float lateral=min(anatomy.x,anatomy.y);
@@ -1821,14 +1821,19 @@
             vec2 aa=max(fwidth(cell),vec2(.018));
             float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
               smoothstep(.018,.035+aa.y,edge.y));
-            return joint*smoothstep(.21,.28,length(vFxMagAnatomy.xy));
+            float envelope=smoothstep(.21,.28,length(vFxMagAnatomy.xy));
+            float plateFinish=.5+.5*sin(dot(floor(cell),vec2(1.71,2.39)));
+            float grainPhase=radial*360.0+lateral*24.0;
+            float grainVisibility=1.0-smoothstep(.65,1.65,fwidth(grainPhase));
+            float brushed=sin(grainPhase)*grainVisibility;
+            return vec3(joint*envelope,plateFinish,brushed);
           }`)
           .replace('#include <color_fragment>',
-            '#include <color_fragment>\ndiffuseColor.rgb*=1.0-fxMagPanelJoint()*.085;')
+            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.24)*(1.0+.018*fxPlate.z);')
           .replace('#include <roughnessmap_fragment>',
-            '#include <roughnessmap_fragment>\nroughnessFactor=min(.48,roughnessFactor+fxMagPanelJoint()*.055);');
+            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.095+(fxPlate.y-.5)*.035,.10,.48);');
       };
-      material.customProgramCacheKey=()=> 'r2203-body-anchored-machined-silver';
+      material.customProgramCacheKey=()=> 'r2207-filtered-machined-silver-plate-finish';
     }
 
     makeMechanicalLayer(){

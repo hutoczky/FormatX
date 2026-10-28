@@ -1461,7 +1461,14 @@
           +exp(-pow((panelEdge.y-.10)/(.045+panelAA.y),2.0))*.22;
         float panelEnvelope=smoothstep(.21,.28,length(vAnatomy.xy))*
           smoothstep(.015,.13,vAnatomy.z);
-        float brushed=.5+.5*sin(radial*73.0+lateral*11.0);
+        /* R2207: each body-local plate has a subtle finish direction. Keep
+           the machining below the raster Nyquist limit instead of adding
+           screen-space noise or glitter to the selected four-arm body. */
+        vec2 plateId=floor(panelCoord);
+        float plateFinish=.5+.5*sin(dot(plateId,vec2(1.71,2.39)));
+        float grainPhase=radial*360.0+lateral*24.0;
+        float grainVisibility=${derivativeSupport?'1.0-smoothstep(.65,1.65,fwidth(grainPhase))':'0.0'};
+        float brushed=sin(grainPhase)*grainVisibility;
         float silverKey=(1.0-smoothstep(.28,.48,abs(refl.x+.30)))*
           (1.0-smoothstep(.16,.32,abs(refl.y-.53)))*smoothstep(.12,.64,refl.z);
         vec3 studioSilver=vec3(.032,.046,.060)
@@ -1471,9 +1478,10 @@
           +vec3(.80,.87,.93)*metalSpec*.72
           +vec3(.94,.97,1.0)*silverKey*.90
           +vec3(.12,.25,.31)*metalSideSpec*.25;
-        studioSilver*=1.0-panelJoint*.085*panelEnvelope;
-        studioSilver+=vec3(.21,.27,.31)*panelBevel*panelEnvelope*(.10+.22*metalKey);
-        studioSilver*=.985+.015*brushed;
+        studioSilver*=mix(.94,1.045,plateFinish);
+        studioSilver*=1.0-panelJoint*.24*panelEnvelope;
+        studioSilver+=vec3(.38,.44,.49)*panelBevel*panelEnvelope*(.16+.38*metalKey);
+        studioSilver*=1.0+.018*brushed;
         /* R2206 — a cool grazing studio strip keeps the curved titanium
            recognizable against the biological cyan/coral core without raising
            world opacity or adding an extra pass. */
@@ -1483,12 +1491,16 @@
         float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
         c=mix(c,studioSilver,shellSilver);
         titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
-        titanium*=1.0-panelJoint*panelEnvelope*.07;
+        titanium*=1.0-panelJoint*panelEnvelope*.16;
         c=mix(c,titanium,machinedArmor*.99);
 
+        // R2207: the living cortex belongs only to actual glass fragments.
+        // Metal pixels keep their silver response without evaluating the
+        // nested optical tissue field across the complete four-arm body.
+        float opticalGlass=step(6.0,vFacet);
+        if(opticalGlass>.5){
         // The curved glass has its own optical response. All interior detail
         // stays in body coordinates while studio reflections move with view.
-        float opticalGlass=step(6.0,vFacet);
         float lensEdge=smoothstep(.60,1.02,od);
         float lensHeart=exp(-dot(oq,oq)*5.2);
         float lensCaustic=exp(-pow((od-.62)/.11,2.0));
@@ -1524,7 +1536,8 @@
         lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
           (.26+.10*uEnergy)*metabolicPulse;
         lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
-        c=mix(c,lensColor,opticalGlass);
+        c=lensColor;
+        }
 
         /* Interaction/surface sweep remains physical and brief. */
         float sweep=0.0;
