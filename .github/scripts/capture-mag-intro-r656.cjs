@@ -468,57 +468,11 @@ const SHOTS=[
             introPrepaint:root.dataset.fxIntroPrepaintR1611||'',
             nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
             nativeHandoff:root.dataset.fxMagNativeHandoffR2218||'',
+            productionCompositor:root.dataset.fxMagCompositorR2219||'',
             nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
             nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
             postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
             activeFilm:root.getAttribute('data-fx-mag-birth-live'),
-            // R2219: failing R2218 archive showed an *entirely dark page*,
-            // not only a missing WebGL drawing buffer. Determine which
-            // element wins hit-testing at the exact failed optic location.
-            // This data is captured before any locator-triggered scroll.
-            hitTest:(()=>{
-              const stage=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-              const box=stage?.getBoundingClientRect();
-              const sites=[
-                {name:'optic',x:box?box.left+box.width*.5:innerWidth*.25,
-                  y:box?box.top+box.height*.5:innerHeight*.35},
-                {name:'header',x:160,y:45},
-                {name:'hero-copy',x:Math.min(innerWidth-20,innerWidth*.68),
-                  y:Math.min(innerHeight-20,innerHeight*.38)}
-              ];
-              return sites.map(({name,x,y})=>({
-                name,x:Math.round(x),y:Math.round(y),
-                layers:document.elementsFromPoint(x,y).slice(0,12).map(el=>{
-                  const css=getComputedStyle(el);
-                  return {
-                    tag:el.tagName,id:el.id,
-                    cls:String(el.className||'').slice(0,95),
-                    z:css.zIndex,opacity:css.opacity,
-                    visibility:css.visibility,
-                    display:css.display,
-                    position:css.position,
-                    background:css.backgroundColor,
-                    filter:css.filter,
-                    pointerEvents:css.pointerEvents
-                  };
-                })
-              }));
-            })(),
-            shellVisibility:(()=>{
-              const result={};
-              for(const selector of ['header.topbar','#hero .hero-copy',
-                '#hero .hero-space','#hero .hero-grid',
-                '#fx-mag-birth-prepaint-r1606','.fx-intro-overlay',
-                '.fx-reference-controls-r204']){
-                const el=document.querySelector(selector);
-                if(!el)continue;
-                const st=getComputedStyle(el),box=el.getBoundingClientRect();
-                result[selector]={opacity:st.opacity,display:st.display,
-                  visibility:st.visibility,position:st.position,z:st.zIndex,
-                  x:box.x,y:box.y,w:box.width,h:box.height};
-              }
-              return result;
-            })(),
             // Diagnostic only: computed visibility along the actual render
             // ancestor chain before Playwright scrolls to the stage.
             ancestorVisibility:(()=>{
@@ -575,6 +529,10 @@ const SHOTS=[
           }
           return {visible:true,bright,samples,region:{x:x0,y:y0,w:x1-x0,h:y1-y0}};
         },{png:handoffPng.toString('base64'),rect:state.canvasRect});
+        if(state.productionCompositor!=='exposure-hit-test-flushed'){
+          errors.push('R2219 production handoff did not reconcile layers: '+
+            state.productionCompositor);
+        }
         if(!state.handoffPixels.visible||state.handoffPixels.bright<40){
           errors.push('R2209 full-viewport MAG is black, despite renderer-ready: '+
             JSON.stringify(state.handoffPixels)+' '+JSON.stringify(state.canvasRect));
