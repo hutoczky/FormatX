@@ -2594,6 +2594,12 @@
        after exposure, without starting a second renderer or idle loop.
        This only runs on one film-end event, never during DNA/embryo. */
     listen(document,'formatx:magbirthcomplete',()=>{
+      // R2223: the completed-film event originates in R533. The original
+      // native viewport read took place synchronously inside R533's
+      // dispatch stack, violating the retired-film no-layout contract.
+      // Queue exactly one native-owned microtask: finish R533 first, then
+      // reconcile the original R326 renderer before the next paint.
+      queueMicrotask(()=>{
       if(disposed||contextLost||document.hidden||!stage.isConnected)return;
       const rect=stage.getBoundingClientRect();
       const onScreen=rect.width>8&&rect.height>8&&rect.right>0&&rect.bottom>0
@@ -2641,6 +2647,7 @@
           root.dataset.fxMagNativeHandoffR2218='post-overlay-frame-requested';
         });
       }
+      });
     },{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
     listen(window,'formatx:storychapter',()=>signalPhysiology('curiosity','story-chapter'),{passive:true});
