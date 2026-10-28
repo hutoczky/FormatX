@@ -21,6 +21,9 @@ const tokens = [
   [mag, "listen(document,'formatx:magbirthcomplete',()=>"],
   [mag, "root.dataset.fxMagNativeHandoffR2218='visible-reconciled'"],
   [mag, "root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed'"],
+  [mag, 'gl.finish();'],
+  [mag, 'gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),'],
+  [mag, "root.dataset.fxMagHandoffGpuR2226='finished'"],
   [mag, "stage.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'})"],
   [mag, "root.dataset.fxMagNativeCompositorR2222='already-onscreen-scroll-reconciled'"],
   [intro, "if(finished||!overlay.isConnected)return;"],
@@ -72,7 +75,7 @@ assert(worker.includes('const INLINE_R2220_BOOT_HASH = "' + hash + '";'),
 assert((worker.match(/\$\{INLINE_R2220_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261028-r2224-atomic-mag-telemetry-throttle';
+const magRevision = '20261028-r2226-gpu-finished-handoff';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(rescue.includes('20261028-r2220-direct-gl-handoff'),
   'Parser fallback must load R2219 canonical bridge only');
