@@ -2638,7 +2638,30 @@
       // STATIC MAG on the newly exposed page. It starts no animation loop.
       try{
         render(performance.now());
+        /* R2226: flush only queues commands; it does not prove the final
+           physical framebuffer is complete before the compositor captures
+           the newly exposed native MAG. Finish ONCE at film teardown only.
+           Read a tiny center patch to distinguish GL content from a dark
+           full-viewport screenshot without changing the user-visible image. */
+        const gpuStarted=performance.now();
         gl.flush();
+        gl.finish();
+        const gpuFinishedMs=performance.now()-gpuStarted;
+        const centerPatch=new Uint8Array(8*8*4);
+        const px=Math.max(0,Math.floor((canvas.width-8)/2));
+        const py=Math.max(0,Math.floor((canvas.height-8)/2));
+        gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),
+          gl.RGBA,gl.UNSIGNED_BYTE,centerPatch);
+        let patchLumaPeak=0,patchAlphaPeak=0;
+        for(let i=0;i<centerPatch.length;i+=4){
+          patchLumaPeak=Math.max(patchLumaPeak,
+            centerPatch[i],centerPatch[i+1],centerPatch[i+2]);
+          patchAlphaPeak=Math.max(patchAlphaPeak,centerPatch[i+3]);
+        }
+        root.dataset.fxMagHandoffGpuR2226='finished';
+        root.dataset.fxMagHandoffGpuMsR2226=gpuFinishedMs.toFixed(1);
+        root.dataset.fxMagHandoffPixelR2226=
+          patchLumaPeak+','+patchAlphaPeak;
         root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
       }catch(error){
         root.dataset.fxMagNativePresentR2220='paint-unavailable';
