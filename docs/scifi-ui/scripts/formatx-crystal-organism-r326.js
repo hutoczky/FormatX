@@ -1108,11 +1108,18 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
+      // R2212: the MAG is the persistent world, not a disposable animation.
+      // The renderer may intentionally stop all idle RAFs while its canvas
+      // continues to breathe through compositor-only WAAPI. Without a
+      // preserved drawing buffer, Chrome can present an empty/black canvas
+      // after the film occluder is removed or a layer is recomposited.
+      // Keep the last real GL frame across compositing; no second context.
+      preserveDrawingBuffer:true,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
+    root.dataset.fxMagPersistentFrameR2212='preserve-last-webgl-frame-across-cinematic-handoff';
     if (!gl) gl = canvas.getContext('webgl', options);
     if (!gl) {
       stage.remove();
