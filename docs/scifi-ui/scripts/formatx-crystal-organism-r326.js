@@ -2124,6 +2124,7 @@
       root.dataset.fxCoreAutonomousMorphR441='disabled-until-explicit-interaction';
     }
 
+    let publishedRuntimeStaticR2227=false;
     function render(now){
       const begin=performance.now();
       const dt=Math.min(48,Math.max(1,now-last));last=now;
@@ -2268,23 +2269,38 @@
 
       if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity){
         lastRuntimeTelemetryAt=now;
+        if(!publishedRuntimeStaticR2227){
+          publishedRuntimeStaticR2227=true;
+          root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
+          root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
+          root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
+          root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
+          root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
+          root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
+          root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
+          root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
+          root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
+          root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
+          root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+          root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
+        }
       root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
       root.dataset.fxCoreFrameMs=dt.toFixed(2);
       root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
       root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
       root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
-      root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
-      root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
-      root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
-      root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
-      root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
-      root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
-      root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
-      root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
-      root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
-      root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
-      root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
-      root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
+
+
+
+
+
+
+
+
+
+
+
+
       root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
       root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
       }
