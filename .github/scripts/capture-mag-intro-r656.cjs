@@ -380,6 +380,7 @@ const SHOTS=[
           phase:root.dataset.fxMagBirthPhase||document.querySelector('.fx-mag-birth-r533')?.dataset.phase||'',
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+          cameraZ:Number(root.dataset.fxMagBirthCameraZ2217||0),
           vesicleCount:Number(root.dataset.fxMagBirthVesiclesR2215||0),
           vesicleOpacity:Number(root.dataset.fxMagBirthVesicleOpacityR2215||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
@@ -396,6 +397,12 @@ const SHOTS=[
             JSON.stringify({count:state.vesicleCount,opacity:state.vesicleOpacity}));
         }
       }
+      // R2217: the film must show an actual physical studio close-up
+      // during titanium assembly, then ease back toward the native hero.
+      if(Number(seconds)===7.5&&!(state.cameraZ>2.85&&state.cameraZ<3.40))
+        errors.push('R2217 titanium assembly missing studio dolly: '+state.cameraZ);
+      if(Number(seconds)===9.25&&!(state.cameraZ>3.75&&state.cameraZ<4.35))
+        errors.push('R2217 final optical dock violates handoff framing: '+state.cameraZ);
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
       await page.close();
