@@ -57,20 +57,25 @@ const parser = html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*
 assert(parser, 'Parser-owned intro bootstrap missing');
 const hash = "'sha256-" + crypto.createHash('sha256').update(parser[1]).digest('base64') + "'";
 assert(html.includes(hash), 'New bootstrap must be authorized by HTML CSP');
-assert(worker.includes('const INLINE_R2217_BOOT_HASH = "' + hash + '";'),
-  'Worker must authorize the exact R2211 inline bootstrap');
-assert((worker.match(/\$\{INLINE_R2217_BOOT_HASH\}/g) || []).length === 2,
+assert(worker.includes('const INLINE_R2219_BOOT_HASH = "' + hash + '";'),
+  'Worker must authorize the exact R2219 inline bootstrap');
+assert((worker.match(/\$\{INLINE_R2219_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
 const magRevision = '20261028-r2218-native-handoff-visible';
-for (const [name, source] of Object.entries({ intro, rescue }))
-  assert(source.includes(filmRevision), name + ' must preserve the canonical biological film');
+assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
+assert(rescue.includes('20261028-r2219-post-overlay-compositor'),
+  'Parser fallback must load R2219 canonical bridge only');
+assert(intro.includes('reconcileExposedCompositorR2219()'),
+  'Film must flush exposed compositor on both teardown routes');
+assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flushed'"),
+  'Native exposure must be acknowledged after real hit testing');
 for (const [name, source] of Object.entries({ current, runtime, scheduler }))
   assert(source.includes(magRevision), name + ' must load the optimized native MAG');
-assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2217-studio-spectral-titanium'),
+assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2219-post-overlay-compositor'),
   'R533 entrypoint must have a distinct R2211 cache generation');
-assert(html.includes(filmRevision)&&html.includes(magRevision),
-  'HTML must preserve film and native MAG cache keys');
+assert(html.includes('20261028-r2219-post-overlay-compositor')&&html.includes(magRevision),
+  'HTML must reference fresh R533 bridge and original native MAG cache key');
 assert(worker.includes(filmRevision)&&worker.includes(magRevision),
   'Worker must preserve film and native MAG rewrite keys');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
