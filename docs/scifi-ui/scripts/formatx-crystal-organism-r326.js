@@ -2601,6 +2601,20 @@
       if(!onScreen)return;
       visible=true;
       root.dataset.fxMagNativeHandoffR2218='visible-reconciled';
+      // R2222: P0 verified a genuine first-viewport compositing mismatch:
+      // the element screenshot paints the MAG, but the identical full
+      // viewport does not. Playwright's stage screenshot first reconciles
+      // native scroll/compositing. Request that same *real* browser viewport
+      // reconciliation in production, only if the entire native stage is
+      // ALREADY visible. This cannot jump the visitor to another section.
+      const entirelyVisible=rect.top>=0&&rect.left>=0
+        &&rect.bottom<=innerHeight&&rect.right<=innerWidth;
+      if(entirelyVisible){
+        try{
+          stage.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+          root.dataset.fxMagNativeCompositorR2222='already-onscreen-scroll-reconciled';
+        }catch(_){root.dataset.fxMagNativeCompositorR2222='scroll-reconcile-unavailable';}
+      }
       // R2220: R2219 black-frame proof showed that a queued RAF is not
       // guaranteed to run, even 350 ms after teardown, and the visitor
       // may have intentionally paused all ongoing motion. One synchronous
