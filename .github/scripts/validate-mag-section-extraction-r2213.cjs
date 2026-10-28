@@ -18,6 +18,12 @@ assert(js.includes("!auditMode&&!reduced.matches"),
 assert(js.includes("section.dataset.fxMagRevealR2213='waiting'"),'Chapter starts visually concealed');
 assert(js.includes("section.dataset.fxMagRevealR2213='revealed'"),'MAG must release chapter');
 assert(js.includes('formatx:magmaterialize'),'Core-owned extraction event required');
+assert(js.includes("listen(document,'focusin',event=>"),
+  'Keyboard focus must reveal a pending chapter without hidden focus');
+assert(js.includes("listen(reduced,'change',()=>"),
+  'Runtime reduced-motion toggle must release concealed chapters');
+assert(js.includes("const materializeSection=section=>"),
+  'The same original MAG materializes scroll and focus destinations');
 assert(js.includes("signalPhysiology(sectionPhysiology[id]||'curiosity'"),
   'Section reveal must be physically linked to native MAG');
 assert(js.includes("extractObserver?.disconnect()"),'Observer must be disposed');
