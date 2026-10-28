@@ -1028,6 +1028,11 @@
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    // R2210: the parser-only first-paint permission must not remain "show"
+    // once its adopted cinematic node has left the document.
+    // This cannot affect the first DNA frame, and prevents later scripts
+    // from treating a finished intro as an active prepaint surface.
+    ROOT.dataset.fxIntroPrepaintR1611='complete';
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
@@ -1353,6 +1358,7 @@
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
       overlay.remove();
+      ROOT.dataset.fxIntroPrepaintR1611='complete';
       try{
         document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
