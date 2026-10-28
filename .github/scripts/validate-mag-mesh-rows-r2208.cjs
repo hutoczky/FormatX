@@ -35,8 +35,29 @@ const profiles=[
   ['software',true,true,true,false,true],
   ['audit-mobile',true,false,false,true,false]
 ];
+// R2210: independent byte-level golden fixtures from the pre-optimization
+// R2208 source, so an equally broken 'old vs new' triangle routine cannot
+// pass simply because the validator reconstructs only the old row traversal.
+const golden={
+  desktop:{vertices:70722,fnv:'c45af6f5'},
+  mobile:{vertices:27474,fnv:'784cc99f'},
+  'constrained-mobile':{vertices:19092,fnv:'bdf36106'},
+  software:{vertices:17592,fnv:'ab564ea3'},
+  'audit-mobile':{vertices:27474,fnv:'784cc99f'}
+};
+function hashBufferArrays(arrays){
+  let h=2166136261>>>0;
+  for(const array of arrays){
+    const bytes=new Uint8Array(array.buffer,array.byteOffset,array.byteLength);
+    for(let i=0;i<bytes.length;i++)h=Math.imul(h^bytes[i],16777619)>>>0;
+  }
+  return h.toString(16).padStart(8,'0');
+}
 for(const [name,...args] of profiles){
   const x=before(...args),y=after(...args);
+  assert.equal(y.count,golden[name].vertices,name+' expected vertex count');
+  assert.equal(hashBufferArrays(y.arrays),golden[name].fnv,
+    name+' stable original MAG topology/optic byte fingerprint');
   assert.equal(x.count,y.count,name+' vertex count');
   assert.equal(x.topology,y.topology,name+' topology');
   assert.deepEqual(x.sizes,y.sizes,name+' attribute arity');
