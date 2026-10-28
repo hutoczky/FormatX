@@ -1875,6 +1875,8 @@
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
+    // R2224: refresh telemetry does not belong on every rAF or skipped tick.
+    let lastRefreshTelemetryAt=-Infinity;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
        creates artificial 200ms+ frames and is the opposite of the production
@@ -2203,19 +2205,20 @@
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
       }
-      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
+      if(root.dataset.fxCorePassModelR1450!=='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719')
+        root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
       renderPeak=Math.max(ms,renderPeak*.86);
       framePeak=Math.max(dt,framePeak*.90);
-      if(renderAverage>(mobile?15.5:15.8)){
+      if(renderAverage>(mobile?15.5:15.8)&&!slowRenderer){
         slowRenderer=true;
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
         root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
         root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
         root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
-      }else if(!slowRenderer){
+      }else if(!slowRenderer&&root.dataset.fxCoreAdaptiveOpticsR588!==(mobile?'single-pass-mobile-capable':'single-pass-60fps-capable')){
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
@@ -2333,9 +2336,12 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
-        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
-        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity){
+          lastRefreshTelemetryAt=now;
+          root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
+          root.dataset.fxCoreRenderDivisorR1622=String(divisor);
+          root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        }
         if(divisor>1 && schedulerTick!==0){
           raf=requestAnimationFrame(frame);
           return;
