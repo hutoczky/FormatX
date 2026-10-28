@@ -370,14 +370,21 @@
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
-      const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      // R2210: use literal barycentrics rather than three per-face arrays.
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
       const bodySeamOverlap=0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
-      vertices.forEach((item, index) => {
+      // R2210: constant facet weights computed once per triangle, not vertex.
+      const metalFacet=facet>=5.0&&facet<6.0;
+      const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
+        (facet<2.0?(mobile?.985:(software?.94:.90)):
+        (software?.95:(mobile?.985:(constrained?.972:.978))));
+      const faceWeight=1-smoothWeight;
+      for(let index=0;index<3;index+=1){
+        const item=vertices[index];
         if(bodySeamOverlap){
           const k=1+bodySeamOverlap;
           sphere.push(
@@ -402,12 +409,7 @@
         // R2144: the machined raised armour is truly bevelled. A controlled
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
-        const metalFacet=facet>=5.0&&facet<6.0;
-        // R2177: avoid jagged per-triangle metal shading on the phone.
-        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
-          (facet<2.0?(mobile?.985:(software?.94:.90)):
-          (software?.95:(mobile?.985:(constrained?.972:.978))));
-        const faceWeight=1-smoothWeight;
+
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
           smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
@@ -415,9 +417,11 @@
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
-        barycentrics.push(...barycentric[index]);
+        if(index===0)barycentrics.push(1,0,0);
+        else if(index===1)barycentrics.push(0,1,0);
+        else barycentrics.push(0,0,1);
         facets.push(facet);
-      });
+      }
     }
 
     /* R1931 — clean P0-derived body topology.
