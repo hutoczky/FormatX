@@ -1023,12 +1023,51 @@
     ctx.globalCompositeOperation='source-over';
   }
 
+  /* R2219: Chromium can keep the cinematic full-viewport compositing
+     surface until its next style/hit-test reconciliation, despite the DOM
+     overlay being removed and R326 reporting a painted GL frame.
+     Verified symptom: a black FULL viewport, followed by a visible MAG
+     when a Playwright locator triggered a hit-test/scroll. Force the
+     document's actual hit-test and computed style once at teardown,
+     before requesting final native display frames. No ongoing work. */
+  function reconcileExposedCompositorR2219(){
+    try{
+      const canvas=document.querySelector(
+        '#hero .fx-crystal-organism-r326-canvas'
+      );
+      const rect=canvas?.getBoundingClientRect();
+      const sites=[
+        [rect?rect.left+rect.width*.5:innerWidth*.25,
+         rect?rect.top+rect.height*.5:innerHeight*.35],
+        [Math.min(innerWidth-1,160),Math.min(innerHeight-1,45)],
+        [Math.min(innerWidth-20,innerWidth*.68),
+         Math.min(innerHeight-20,innerHeight*.38)]
+      ];
+      for(const [x,y] of sites){
+        for(const el of document.elementsFromPoint(x,y).slice(0,12)){
+          const computed=getComputedStyle(el);
+          // Read used style after the layer tree was invalidated by
+          // removing the cinematic occluder. No style mutation.
+          void computed.opacity;
+          void computed.visibility;
+          void computed.display;
+          void computed.position;
+          void computed.backgroundColor;
+        }
+      }
+      ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flushed';
+    }catch(_){
+      ROOT.dataset.fxMagCompositorR2219='reconciliation-unavailable';
+    }
+  }
+
   function safeTeardownOverlay(source) {
     if(!overlay.isConnected)return;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    reconcileExposedCompositorR2219();
     // R2211: a finished R326 renderer may have spent its final burst frames
     // behind the cinematic overlay and then gone deliberately idle. The
     // backdrop disappears 180 ms AFTER finish(), so drawing before removal
@@ -1376,6 +1415,7 @@
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
       overlay.remove();
+      reconcileExposedCompositorR2219();
       // R2211: watchdog teardown must also expose a freshly painted native
       // frame; do not leave a painted-but-uncomposited WebGL canvas behind.
       try {
