@@ -47,9 +47,9 @@ const parser = html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*
 assert(parser, 'Parser-owned intro bootstrap missing');
 const hash = "'sha256-" + crypto.createHash('sha256').update(parser[1]).digest('base64') + "'";
 assert(html.includes(hash), 'New bootstrap must be authorized by HTML CSP');
-assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
-  'Worker must authorize the exact R2206 inline bootstrap');
-assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
+assert(worker.includes('const INLINE_R2211_BOOT_HASH = "' + hash + '";'),
+  'Worker must authorize the exact R2211 inline bootstrap');
+assert((worker.match(/\$\{INLINE_R2211_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2207-filtered-silver-living-optic';
 const magRevision = '20261028-r2208-mag-mesh-row-cache';
@@ -57,6 +57,8 @@ for (const [name, source] of Object.entries({ intro, rescue }))
   assert(source.includes(filmRevision), name + ' must preserve the canonical biological film');
 for (const [name, source] of Object.entries({ current, runtime, scheduler }))
   assert(source.includes(magRevision), name + ' must load the optimized native MAG');
+assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2211-native-handoff-present-frame'),
+  'R533 entrypoint must have a distinct R2211 cache generation');
 assert(html.includes(filmRevision)&&html.includes(magRevision),
   'HTML must preserve film and native MAG cache keys');
 assert(worker.includes(filmRevision)&&worker.includes(magRevision),
