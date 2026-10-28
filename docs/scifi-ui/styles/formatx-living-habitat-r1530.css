@@ -1745,3 +1745,32 @@ body>.fx-mag-birth-r533 .fxb-particles{opacity:.40!important;}
   }
 }
 /* production-r1778-mobile-monolith */
+
+
+/* R2213 — the world is one living MAG. Content chapters remain semantic
+   HTML, but only the original R326 core authorizes their visual extraction.
+   Parent-only opacity avoids per-card observers, GPU blur filters, layout
+   shifts, a second renderer and work on the scroll hot path. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-fx-mag-extraction-r2213="armed"]
+  body.living-architecture #main-content > section.scene:not(#hero)[data-fx-mag-reveal-r2213="waiting"]{
+    opacity:0!important;
+    pointer-events:none!important;
+    transition:none!important;
+  }
+
+  html[data-fx-mag-extraction-r2213="armed"]
+  body.living-architecture #main-content > section.scene:not(#hero)[data-fx-mag-reveal-r2213="revealed"]{
+    opacity:1!important;
+    pointer-events:auto;
+    transition:opacity .72s cubic-bezier(.20,.66,.20,1)!important;
+  }
+}
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  html[data-fx-mag-extraction-r2213] body.living-architecture
+  #main-content > section.scene:not(#hero) {
+    opacity:1!important;
+    transition:none!important;
+  }
+}
+/* production-r2213-original-mag-extracts-page-chapters */
