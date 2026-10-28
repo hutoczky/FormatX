@@ -1322,6 +1322,55 @@
       this.embryoCapillaries=new T.LineSegments(membranes,this.embryoCapillaryMaterial);
       this.coreGroup.add(this.embryoCapillaries);
 
+      // R2215 — actual living vesicles suspended along the front cortex.
+      // Unlike the old purely painted coral freckles, these are shaded 3D
+      // micro-organelle clusters with parallax and individual colors. ONE
+      // instanced draw call, bounded at 42 phones / 84 desktop. The opaque
+      // silhouette, one cinematic canvas and DNA choreography stay intact.
+      const vesicleCount=this.mobileRender?42:84;
+      const vesicleGeometry=new T.IcosahedronGeometry(.036,1);
+      const vesicleMaterial=new T.MeshPhysicalMaterial({
+        color:0xffffff,metalness:0,roughness:.32,
+        clearcoat:.56,clearcoatRoughness:.23,
+        emissive:0x2b363a,emissiveIntensity:.16,
+        transparent:true,opacity:0,depthWrite:false
+      });
+      const vesicles=new T.InstancedMesh(
+        vesicleGeometry,vesicleMaterial,vesicleCount
+      );
+      const positioner=new T.Object3D();
+      const coral=new T.Color(0xf56d59);
+      const amber=new T.Color(0xf4a168);
+      const aqua=new T.Color(0x45d5cb);
+      const pale=new T.Color(0x8be9e3);
+      for(let i=0;i<vesicleCount;i++){
+        // Golden-angle coverage avoids a repeated lattice. Surface normals
+        // place true 3D cells over a range of front-facing z depths.
+        const az=i*2.399963229728653;
+        const zz=.24+.70*this.rand();
+        const radial=Math.sqrt(Math.max(0,1-zz*zz));
+        const jitter=.92+.10*this.rand();
+        positioner.position.set(
+          radial*Math.cos(az)*.90*jitter,
+          radial*Math.sin(az)*1.07*jitter,
+          zz*.86
+        );
+        const size=.52+this.rand()*.90;
+        positioner.scale.set(size,size*(.73+this.rand()*.60),size*.70);
+        positioner.rotation.set(az*.14,az*.28,az);
+        positioner.updateMatrix();
+        vesicles.setMatrixAt(i,positioner.matrix);
+        const hue=(i%9===0)?amber:(i%4===0)?aqua:(i%7===0)?pale:coral;
+        vesicles.setColorAt(i,hue);
+      }
+      vesicles.instanceMatrix.needsUpdate=true;
+      if(vesicles.instanceColor)vesicles.instanceColor.needsUpdate=true;
+      vesicles.frustumCulled=false;
+      vesicles.renderOrder=7;
+      this.embryoVesicles=vesicles;
+      this.embryoVesicleMaterial=vesicleMaterial;
+      this.coreGroup.add(vesicles);
+
       // R2189: chromatin is a family of genuinely volumetric curved fibres
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
       // texture painted onto the glass shell; adaptive strand count on phones.
@@ -2806,6 +2855,8 @@
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
       this.embryoCapillaryMaterial.opacity=.10*visible;
+      this.embryoVesicleMaterial.opacity=.70*visible;
+      this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
