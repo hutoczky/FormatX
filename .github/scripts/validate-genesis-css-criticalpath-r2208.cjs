@@ -29,4 +29,9 @@ assert(loader.includes("link.dataset.fxR487Media || 'all'"),
   'deferred print media must restore all styles after paint');
 assert.doesNotThrow(()=>new Function(loader),'deferred CSS engine must parse');
 assert(!html.includes('onload="this.media='),'no CSP-unsafe inline event handler');
+const film=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
+assert.equal((film.match(/ROOT\.dataset\.fxIntroPrepaintR1611='complete'/g)||[]).length,2,
+  'Both normal and absolute watchdog teardown must clear parser prepaint');
+assert(film.includes('function safeTeardownOverlay(source)'),
+  'Canonical film teardown must remain present');
 console.log('GENESIS_R2208_NONBLOCKING_AUDIO_CSS_PASS');
