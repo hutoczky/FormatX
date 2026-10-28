@@ -1024,10 +1024,28 @@
   }
 
   function safeTeardownOverlay(source) {
+    if(!overlay.isConnected)return;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    // R2211: a finished R326 renderer may have spent its final burst frames
+    // behind the cinematic overlay and then gone deliberately idle. The
+    // backdrop disappears 180 ms AFTER finish(), so drawing before removal
+    // is not proof that Chromium has presented the exposed WebGL canvas.
+    // Commit one real frame after the occluder is removed, then one bounded
+    // follow-up on the next display opportunity. No continuing RAF or extra
+    // renderer is created; normal idle remains zero frames.
+    try {
+      locateStage();
+      coreApi?.requestRender?.(2);
+      ROOT.dataset.fxMagBirthPostTeardownRenderR2211='requested';
+      requestAnimationFrame(()=>{
+        if(document.hidden||!stage?.isConnected)return;
+        coreApi?.requestRender?.(1);
+        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='present-frame-scheduled';
+      });
+    } catch (_) { ROOT.dataset.fxMagBirthPostTeardownRenderR2211='unavailable'; }
     // R2210: the parser-only first-paint permission must not remain "show"
     // once its adopted cinematic node has left the document.
     // This cannot affect the first DNA frame, and prevents later scripts
@@ -1358,6 +1376,17 @@
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
       overlay.remove();
+      // R2211: watchdog teardown must also expose a freshly painted native
+      // frame; do not leave a painted-but-uncomposited WebGL canvas behind.
+      try {
+        locateStage();
+        coreApi?.requestRender?.(2);
+        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='watchdog-requested';
+        requestAnimationFrame(()=>{
+          if(document.hidden||!stage?.isConnected)return;
+          coreApi?.requestRender?.(1);
+        });
+      } catch (_) {}
       ROOT.dataset.fxIntroPrepaintR1611='complete';
       try{
         document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
