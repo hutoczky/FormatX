@@ -26,6 +26,9 @@ const tokens = [
   [intro, "if(finished||!overlay.isConnected)return;"],
   [mag, 'render(performance.now());'],
   [mag, 'gl.flush();'],
+  [mag, 'async function finishBoot(program)'],
+  [mag, 'await new Promise(resolve=>setTimeout(resolve,0));'],
+  [mag, 'if(index===1||index===3||index===5)'],
   [mag, 'float tissueFold=sin('],
   [mag, 'float coralOrganelles=smoothstep(.61,.84,'],
   [mag, 'lensColor+=vec3(.93,.235,.145)*coralOrganelles'],
@@ -68,7 +71,7 @@ assert(worker.includes('const INLINE_R2220_BOOT_HASH = "' + hash + '";'),
 assert((worker.match(/\$\{INLINE_R2220_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261028-r2220-direct-gl-handoff';
+const magRevision = '20261028-r2223-yielded-native-uploads';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(rescue.includes('20261028-r2220-direct-gl-handoff'),
   'Parser fallback must load R2219 canonical bridge only');
@@ -80,7 +83,7 @@ for (const [name, source] of Object.entries({ current, runtime, scheduler }))
   assert(source.includes(magRevision), name + ' must load the optimized native MAG');
 assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2220-direct-gl-handoff'),
   'R533 entrypoint must have a distinct R2211 cache generation');
-assert(html.includes('20261028-r2220-direct-gl-handoff')&&html.includes(magRevision),
+assert(html.includes('20261028-r2220-direct-gl-handoff')&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+magRevision),
   'HTML must reference fresh R533 bridge and original native MAG cache key');
 assert(worker.includes(filmRevision)&&worker.includes(magRevision),
   'Worker must preserve film and native MAG rewrite keys');
