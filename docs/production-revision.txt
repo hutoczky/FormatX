@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261028-r2220-direct-gl-handoff
+token=20261028-r2223-yielded-native-uploads
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261028-r2220-direct-gl-handoff
+mag_cache=20261028-r2223-yielded-native-uploads
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -229,3 +229,7 @@ r2220_direct_gl_handoff=R2219 exact-head P0 proved that early post-overlay hit t
 r2220_intro_finalization=R533 sets fxIntroPrepaintR1611 to complete immediately after removing the overlay, then runs R2219 compositor hit testing and emits magbirthcomplete. This avoids invalidating the page layer state again after the hit-test. Both normal and watchdog paths are covered, 2 cleanup markers preserved.
 r2220_cache_csp=R533 bridge query 20261028-r2220-direct-gl-handoff; R1280 physical film stays R2217. Original R326 + loaders + HTML/Worker use native key 20261028-r2220-direct-gl-handoff. New inline CSP fingerprint sha256-xAc8GVtMnezasUDIrTWjGSS87fer8WpvFiEajFPNk7k= authorized by HTML and both Worker policies. R656 browser test now requires synchronous-gl-frame-committed and still checks first full-frame MAG pixels before locator interaction.
 r2220_gate=Draft/unmerged/undeployed. Require real P0 screenshot, user-accessible full hero, strict Lighthouse and WebGL context stability before any promotion. Source-level readiness alone is NOT a valid release.
+
+r2223_gpu_upload_optimization=Original R326 WebGL renderer now yields once between synchronous vertex/topology generation and GPU buffer upload, then yields after groups of two out of seven unchanged GPU attributes. Same precise Float32Array geometry, vertex count, single draw call, shaders and material; this is CPU scheduling, not LOD reduction or deferred-above-the-fold hiding. Retains the successful R2222 microtask final-viewport MAG handoff. No new canvas/worker/RAF.
+r2223_asset_chain=Native renderer and R490/R239/R422/V55 bootstrap assets use 20261028-r2223-yielded-native-uploads in HTML and Worker. The canonical cinematic R533 and R1280 films remain on their separate R2220 and R2217 cache revisions; parser-owned inline JS and SHA-256 CSP unchanged.
+r2223_release_gate=Inspect exact-head P0 and first screenshot pixel oracle plus Lighthouse 3x mobile/desktop for real TBT improvement. Development branch only, not approved for production deployment.
