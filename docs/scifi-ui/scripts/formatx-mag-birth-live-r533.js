@@ -714,6 +714,11 @@
   }
 
   function syncTarget(force=false) {
+    // R2221: after the last film frame, ONLY the native R326 owns layout.
+    // An obsolete deferred birth/resize callback must not read the stage
+    // rectangle (or mutate the detached film's CSS variables). The R2173
+    // retired-intro test correctly forbids even one such late geometry read.
+    if(finished||!overlay.isConnected)return;
     const now = performance.now();
     if (!force && now-lastTargetSync < 180) return;
     lastTargetSync = now;
