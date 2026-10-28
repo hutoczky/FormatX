@@ -49,6 +49,7 @@ const INLINE_R2203_BOOT_HASH = "'sha256-/SgTWm+vrdARxjKyHmBzg0ozXdjzBAxkxR37nvDc
 const INLINE_R2206_BOOT_HASH = "'sha256-NsviAKGZIW0SI9OZ4iEtErUiCQWirY8LAK+7We0AiE8='";
 // R2211 parser inline boot now requests the post-occluder native repaint.
 const INLINE_R2211_BOOT_HASH = "'sha256-isDtCkaAh4575Y76RVNaCtBeo+hBFICcomzhPwc4EOY='";
+const INLINE_R2212_BOOT_HASH = "'sha256-hqyJ4fB0N7UkTn+YhF9F/k06Rz+HL2xf8Fjc5Kk/ACM='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -57,17 +58,17 @@ const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" 
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
 const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">';
-const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261028-r2208-mag-mesh-row-cache';
+const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261028-r2212-photonic-permanent-mag';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261013-r2054-verified-css-recovery"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
+const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} ${INLINE_R2212_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} https://static.cloudflareinsights.com`,
+  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} ${INLINE_R2212_BOOT_HASH} https://static.cloudflareinsights.com`,
   "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI='",
   "img-src 'self' data: https://quickchart.io",
   "font-src 'self'",
@@ -240,11 +241,11 @@ const DEFERRED_STYLE_PATHS = new Set([
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
     marker: 'scheduler-to-loader-r1950-desktop-edge-aa',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261028-r2208-mag-mesh-row-cache']],
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261028-r2212-photonic-permanent-mag']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261028-r2207-filtered-silver-living-optic']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261028-r2212-living-cell-photonic-core']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',
