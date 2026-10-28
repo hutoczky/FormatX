@@ -469,6 +469,7 @@ const SHOTS=[
             nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
             nativeHandoff:root.dataset.fxMagNativeHandoffR2218||'',
             productionCompositor:root.dataset.fxMagCompositorR2219||'',
+            nativePresent:root.dataset.fxMagNativePresentR2220||'',
             nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
             nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
             postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
@@ -529,6 +530,10 @@ const SHOTS=[
           }
           return {visible:true,bright,samples,region:{x:x0,y:y0,w:x1-x0,h:y1-y0}};
         },{png:handoffPng.toString('base64'),rect:state.canvasRect});
+        if(state.nativePresent!=='synchronous-gl-frame-committed'){
+          errors.push('R2220 original native WebGL direct presentation missing: '+
+            state.nativePresent);
+        }
         if(state.productionCompositor!=='exposure-hit-test-flushed'){
           errors.push('R2219 production handoff did not reconcile layers: '+
             state.productionCompositor);
