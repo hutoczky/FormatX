@@ -423,16 +423,26 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    /* R2208: keep only two adjacent latitude rows of pure analytical
+       positions/normals. Previously every quad recomputed four expensive
+       anisotropic superellipsoid vertices, including shared neighbours.
+       This is mathematically the same non-indexed triangle stream, winding,
+       facet IDs, UVs and material contract; memory stays O(longitude). */
+    let upperRow=Array.from({length:longitudeSegments+1},
+      (_,lon)=>vertex(0,lon));
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const lowerRow=Array.from({length:longitudeSegments+1},
+        (_,lon)=>vertex(lat+1,lon));
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=upperRow[lon];
+        const b=upperRow[lon+1];
+        const c=lowerRow[lon];
+        const d=lowerRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+      upperRow=lowerRow;
     }
 
     /* R1982 — real microfibril geometry.
