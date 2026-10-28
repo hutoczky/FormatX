@@ -1790,20 +1790,17 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
-      finishBoot(program).catch(failShader);
+      finishBoot(program);
     }
     finishWhenReady();
     return;
 
-    async function finishBoot(program) {
-    // R2223: this path used to run CPU topology construction AND seven
-    // WebGL buffer uploads in one uninterrupted task. Preserve the exact
-    // same mesh data and draw call, but yield to input/compositor between
-    // the independent blocking phases. No worker, second canvas, or
-    // quality reduction; the native core is already warming behind film.
+    function finishBoot(program) {
+    // R2224: keep shader/geometry initialization atomic. R2223's cross-task
+    // yields caused repeatable CLS (0.146 phone / 0.254 desktop) when the
+    // hero stage was activated between browser paints. Preserve the same
+    // geometry, seven uploads and successful R2222 first viewport handoff.
     const geometry=buildOrganismGeometry(softwareRenderer);
-    await new Promise(resolve=>setTimeout(resolve,0));
-    if(!stage.isConnected||gl.isContextLost())return;
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -1826,15 +1823,7 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
-    for(let index=0;index<buffers.length;index++){
-      upload(buffers[index],geometry.arrays[index],attributes[index],geometry.sizes[index]);
-      // Split CPU->GPU uploads into at most two attributes per turn.
-      // This preserves vertex order, buffers, material and topology.
-      if(index===1||index===3||index===5){
-        await new Promise(resolve=>setTimeout(resolve,0));
-        if(!stage.isConnected||gl.isContextLost())return;
-      }
-    }
+    buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
