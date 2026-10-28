@@ -1328,10 +1328,14 @@
       // instanced draw call, bounded at 42 phones / 84 desktop. The opaque
       // silhouette, one cinematic canvas and DNA choreography stay intact.
       const vesicleCount=this.mobileRender?42:84;
-      const vesicleGeometry=new T.IcosahedronGeometry(.036,1);
+      // R2216: micro-organelles should read as tissue under a macro lens,
+      // not floating toy beads. Keep true instancing and real depth.
+      const vesicleGeometry=new T.IcosahedronGeometry(
+        this.mobileRender?.023:.028,1
+      );
       const vesicleMaterial=new T.MeshPhysicalMaterial({
-        color:0xffffff,metalness:0,roughness:.32,
-        clearcoat:.56,clearcoatRoughness:.23,
+        color:0xffffff,metalness:0,roughness:.40,
+        clearcoat:.43,clearcoatRoughness:.27,
         emissive:0x2b363a,emissiveIntensity:.16,
         transparent:true,opacity:0,depthWrite:false
       });
@@ -1339,10 +1343,10 @@
         vesicleGeometry,vesicleMaterial,vesicleCount
       );
       const positioner=new T.Object3D();
-      const coral=new T.Color(0xf56d59);
-      const amber=new T.Color(0xf4a168);
-      const aqua=new T.Color(0x45d5cb);
-      const pale=new T.Color(0x8be9e3);
+      const coral=new T.Color(0xd97c71);
+      const amber=new T.Color(0xd9a17f);
+      const aqua=new T.Color(0x67c5bc);
+      const pale=new T.Color(0x92cfcc);
       for(let i=0;i<vesicleCount;i++){
         // Golden-angle coverage avoids a repeated lattice. Surface normals
         // place true 3D cells over a range of front-facing z depths.
@@ -2859,7 +2863,7 @@
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
       this.embryoCapillaryMaterial.opacity=.10*visible;
-      this.embryoVesicleMaterial.opacity=.70*visible;
+      this.embryoVesicleMaterial.opacity=.58*visible;
       this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
