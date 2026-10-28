@@ -1474,6 +1474,12 @@
         studioSilver*=1.0-panelJoint*.085*panelEnvelope;
         studioSilver+=vec3(.21,.27,.31)*panelBevel*panelEnvelope*(.10+.22*metalKey);
         studioSilver*=.985+.015*brushed;
+        /* R2206 — a cool grazing studio strip keeps the curved titanium
+           recognizable against the biological cyan/coral core without raising
+           world opacity or adding an extra pass. */
+        float titaniumGrazing=pow(1.0-facing,2.4);
+        studioSilver+=vec3(.31,.43,.48)*titaniumGrazing*
+          panelEnvelope*.14;
         float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
         c=mix(c,studioSilver,shellSilver);
         titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
@@ -1499,6 +1505,25 @@
         lensColor+=vec3(.22,.33,.39)*lensEdge*(.22+.34*softboxB);
         lensColor+=vec3(.03,.24,.27)*livingInterior*aquaSites*.09;
         lensColor+=vec3(.60,.18,.13)*livingInterior*coralSite*.035;
+        /* R2206 — the born MAG contains the SAME living cell chemistry
+           established in the DNA film. Chromatin clusters have body-local
+           depth cues and slow metabolism; the glass stays a curved optical
+           surface, never a pasted sprite or an independent rendering layer. */
+        vec2 tissueUv=oq*1.12;
+        float tissueFold=sin(tissueUv.x*18.0+
+          2.0*sin(tissueUv.y*13.0+uTime*.13))*
+          cos(tissueUv.y*21.0-1.6*sin(tissueUv.x*11.0-uTime*.11));
+        float tissueIslands=sin(tissueUv.x*37.0+tissueUv.y*19.0)*
+          sin(tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16);
+        float tissueEnvelope=exp(-pow(od/.81,4.0));
+        float cyanCortex=smoothstep(.08,.67,tissueFold*.5+.5);
+        float coralOrganelles=smoothstep(.61,.84,
+          .52+.29*tissueFold+.19*tissueIslands);
+        float metabolicPulse=.82+.18*sin(uTime*.72+oq.x*4.0);
+        lensColor+=vec3(.025,.34,.34)*cyanCortex*tissueEnvelope*.30;
+        lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
+          (.26+.10*uEnergy)*metabolicPulse;
+        lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
         c=mix(c,lensColor,opticalGlass);
 
         /* Interaction/surface sweep remains physical and brief. */
@@ -1531,6 +1556,7 @@
     root.dataset.fxNativeMagVisualR2200='organic-coral-cytoplasm-retained-in-four-arm-titanium-optic';
     root.dataset.fxNativeMagSurfaceR2203='body-anchored-filtered-machined-silver-recessed-optical-aperture';
     root.dataset.fxNativeMagSurfaceR2204='travelling-softbox-readable-across-machined-silver';
+    root.dataset.fxNativeMagSurfaceR2206='biophotonic-cyan-coral-living-optic-machined-titanium-no-extra-pass';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
