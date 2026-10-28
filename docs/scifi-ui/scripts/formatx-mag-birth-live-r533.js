@@ -1067,6 +1067,7 @@
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    ROOT.dataset.fxIntroPrepaintR1611='complete';
     reconcileExposedCompositorR2219();
     // R2211: a finished R326 renderer may have spent its final burst frames
     // behind the cinematic overlay and then gone deliberately idle. The
@@ -1089,7 +1090,6 @@
     // once its adopted cinematic node has left the document.
     // This cannot affect the first DNA frame, and prevents later scripts
     // from treating a finished intro as an active prepaint surface.
-    ROOT.dataset.fxIntroPrepaintR1611='complete';
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
@@ -1415,6 +1415,7 @@
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
       overlay.remove();
+      ROOT.dataset.fxIntroPrepaintR1611='complete';
       reconcileExposedCompositorR2219();
       // R2211: watchdog teardown must also expose a freshly painted native
       // frame; do not leave a painted-but-uncomposited WebGL canvas behind.
@@ -1427,7 +1428,6 @@
           coreApi?.requestRender?.(1);
         });
       } catch (_) {}
-      ROOT.dataset.fxIntroPrepaintR1611='complete';
       try{
         document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
