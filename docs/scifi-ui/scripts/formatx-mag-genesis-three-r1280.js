@@ -3305,6 +3305,8 @@
           root.dataset.fxMagBirthDonorArmsR2183=String(donorArms.size);
           root.dataset.fxMagBirthDonorPairsR2183=String(donorPairs);
           root.dataset.fxMagBirthFramePeakR1557=String(peak);
+          // R2217: capture the actual lens distance during deterministic frames.
+          root.dataset.fxMagBirthCameraZ2217=String(this.camera.position.z);
           // R2215: true scene objects, audited only during deterministic
           // proof frames; never write this telemetry during visitor playback.
           root.dataset.fxMagBirthVesiclesR2215=String(this.embryoVesicles?.count||0);
