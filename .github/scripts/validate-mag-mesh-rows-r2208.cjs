@@ -19,7 +19,17 @@ const oldLoop=[
 '        if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);',
 '      }',
 '    }'].join('\n');
-const legacy=source.slice(0,a)+oldLoop+source.slice(b);
+let legacy=source.slice(0,a)+oldLoop+source.slice(b);
+// R2210: compare original and optimized emitted triangles WITHIN the same JS
+// engine. Cross-runtime Math trig rounding makes hardcoded V8 fingerprints
+// nonportable on Node 22, so never accept or reject shapes using those hashes.
+const fixture=fs.readFileSync('.github/fixtures/r2208-original-mag-triangle.jsfrag','utf8');
+const triStart=legacy.indexOf('    function triangle(vertices, facet) {');
+const triEnd=legacy.indexOf('\n    /* R1931 — clean P0-derived body topology.',triStart);
+assert(triStart>=0&&triEnd>triStart,'Original triangle function boundaries missing');
+assert(fixture.startsWith('    function triangle(vertices, facet) {'),
+  'Original source reference fixture invalid');
+legacy=legacy.slice(0,triStart)+fixture+legacy.slice(triEnd);
 function compile(text){
   const start=text.indexOf('  function normalize(vector) {');
   const end=text.indexOf('\n  function boot(',start);
@@ -35,29 +45,8 @@ const profiles=[
   ['software',true,true,true,false,true],
   ['audit-mobile',true,false,false,true,false]
 ];
-// R2210: independent byte-level golden fixtures from the pre-optimization
-// R2208 source, so an equally broken 'old vs new' triangle routine cannot
-// pass simply because the validator reconstructs only the old row traversal.
-const golden={
-  desktop:{vertices:70722,fnv:'c45af6f5'},
-  mobile:{vertices:27474,fnv:'784cc99f'},
-  'constrained-mobile':{vertices:19092,fnv:'bdf36106'},
-  software:{vertices:17592,fnv:'ab564ea3'},
-  'audit-mobile':{vertices:27474,fnv:'784cc99f'}
-};
-function hashBufferArrays(arrays){
-  let h=2166136261>>>0;
-  for(const array of arrays){
-    const bytes=new Uint8Array(array.buffer,array.byteOffset,array.byteLength);
-    for(let i=0;i<bytes.length;i++)h=Math.imul(h^bytes[i],16777619)>>>0;
-  }
-  return h.toString(16).padStart(8,'0');
-}
 for(const [name,...args] of profiles){
   const x=before(...args),y=after(...args);
-  assert.equal(y.count,golden[name].vertices,name+' expected vertex count');
-  assert.equal(hashBufferArrays(y.arrays),golden[name].fnv,
-    name+' stable original MAG topology/optic byte fingerprint');
   assert.equal(x.count,y.count,name+' vertex count');
   assert.equal(x.topology,y.topology,name+' topology');
   assert.deepEqual(x.sizes,y.sizes,name+' attribute arity');
@@ -67,5 +56,5 @@ for(const [name,...args] of profiles){
     const right=Buffer.from(y.arrays[i].buffer,y.arrays[i].byteOffset,y.arrays[i].byteLength);
     assert.equal(Buffer.compare(left,right),0,name+' original WebGL array '+i+' differs');
   }
-  console.log('MAG_R2208_EXACT_MESH_PASS',name,x.count);
+  console.log('MAG_R2208_R2210_ENGINE_LOCAL_EXACT_MESH_PASS',name,x.count);
 }
