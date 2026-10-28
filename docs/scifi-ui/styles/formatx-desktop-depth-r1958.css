@@ -35,6 +35,7 @@
      later desktop depth sheet used to override the core-scene restraint and
      wash the machined silver silhouette in the surrounding world layer. */
   html[data-fx-cinematic-journey-r536="ready"][data-fx-cinematic-scene-r536="core"] .fx-c536-world{
+    filter:saturate(.92) contrast(1.04) brightness(.88)!important;
     opacity:.10!important;
   }
 

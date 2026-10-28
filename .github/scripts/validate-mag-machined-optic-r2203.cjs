@@ -140,7 +140,10 @@ function proveEdges(){
         assert.equal(result.surface,'body-anchored-filtered-machined-silver-recessed-optical-aperture');
         assert.equal(await page.evaluate(()=>document.documentElement.dataset.fxNativeMagSurfaceR2204),
           'travelling-softbox-readable-across-machined-silver');
-        await page.locator('.fx-crystal-organism-r326-canvas').screenshot({path:`${output}/${width}-native-mag.png`});
+        // The reduced-motion product state intentionally keeps its WebGL
+        // canvas visually concealed. Preserve that actual page state in the
+        // auxiliary artifact; the shader/buffer proof above is authoritative.
+        await page.screenshot({path:`${output}/${width}-reduced-page.png`,fullPage:false});
         assert.equal(await page.evaluate(()=>window.__machinedNative.gl.getError()),0,'Proof failed to restore native GL state');
       }finally{await context.close();}
     }

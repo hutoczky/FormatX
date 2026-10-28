@@ -1,6 +1,6 @@
 FormatX production revision
-token=20261028-r2205-restrained-world-travelling-silver-native-mag
-release_line=R2205-RESTRAINED-WORLD-TRAVELLING-SILVER-RECESSED-OPTIC-DNA-CELL-LIVING-MAG
+token=20261028-r2206-studio-separated-travelling-silver-native-mag
+release_line=R2206-STUDIO-SEPARATED-TRAVELLING-SILVER-RECESSED-OPTIC-DNA-CELL-LIVING-MAG
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
 r2202_delivery=R533 canonical and recovery owners load R1280 20261026-r2202-aa-focused-microcell. Exact parser CSP eBsjac1UkasQbGIbDmPoYXYJ1PHZ8H4dGa0JOdXeuoQ= is authorized in both HTML and Worker policies.
@@ -181,3 +181,5 @@ r2204_delivery=The native renderer and all desktop/mobile/motion/scheduler calle
 r2204_validation=Require the existing canonical early and late surface-energy thresholds plus actual browser transform feedback on the native vertex program. The transform-feedback route explicitly selects the existing functional native renderer under webdriver; it does not spoof hardware, user agent, product time or readiness.
 r2205_mag_focus=During the core hero scene, the deferred desktop depth sheet now preserves the authored .10 world-layer opacity instead of overriding it with the broader non-core energy formula. This restores a restrained cinematic field around the single live MAG and keeps the travelling machined-silver silhouette readable.
 r2205_edge_proof=The reduced-motion GPU edge proof starts the unchanged real product runtime through its existing trusted keyboard-intent path. It retains the original 30-second readiness limit, actual shader capture, transform feedback, shared-edge assertions and GL checks; no product bypass, fake clock or hardware claim is introduced.
+r2206_studio_separation=The restrained desktop core world is also cooled and dimmed behind the live MAG, reducing blue-violet environmental wash while leaving the machined silver body, recessed optic and their own travelling light untouched.
+r2206_proof_artifact=The reduced-motion edge oracle records the actual reduced page state rather than demanding visibility from its intentionally concealed WebGL canvas. Actual shader capture, 17,592 mobile vertices, shared-edge transform feedback and GL assertions remain the authoritative proof and are unchanged.
