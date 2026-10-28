@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261028-r2224-atomic-mag-telemetry-throttle
+token=20261028-r2226-gpu-finished-handoff
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261028-r2224-atomic-mag-telemetry-throttle
+mag_cache=20261028-r2226-gpu-finished-handoff
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -236,3 +236,6 @@ r2223_release_gate=Inspect exact-head P0 and first screenshot pixel oracle plus 
 
 r2224_cls_rollback_and_low_overhead_telemetry=R2223 Lighthouse reported repeatable native stage/canvas layout shift: desktop 0.25418994 and mobile 0.1462018. Yielding between preexisting seven GL buffer uploads produced inconsistent TBT and compromised the hero. R2224 restores atomic build/upload exactly as in successful R2222 P0, with identical topology and zero extra canvases or render loops. Instead it throttles DOM refresh-hz/divisor telemetry to every 250ms and only writes unchanged pass model or adaptive optics state when necessary.
 r2224_versioning=All original native entrypoints R490/R239/R422/V55, HTML and Worker use 20261028-r2224-atomic-mag-telemetry-throttle. R533 and R1280 film entry hashes unchanged, exact CSP unchanged. CI source tests assert atomic mesh construction and throttled refresh metrics. Draft PR only. Require exact first nonblack screenshot and 3x desktop/mobile Lighthouse including CLS, TBT, no regressions before deployment.
+
+r2226_handoff_gpu_verification=Single native R326 WebGL renderer synchronously completes its final post-film GPU frame with one gl.finish() and reads a tiny 8x8 center framebuffer patch once, at handoff only. The 8x8 readback is evidence of real GPU contents, not an alternative screenshot, draw pass, canvas or live-loop. Adds exact-head P0 diagnostics comparing framebuffer peak and first unmodified viewport screenshot pixels. Prior R2225 first viewport P0 varied between green 949/5200 and black 0/5200 despite the same visible GL stage; this needs repeatable proof before release.
+r2226_native_cache=R490-R239-R422-R326/V55, HTML and Worker use 20261028-r2226-gpu-finished-handoff. The cinematic R533-R1280 film and its inline bootstrap CSP are unchanged. Strict Lighthouse gate remains unchanged, and PR stays draft; do not deploy until P0 cold-start reliability and performance are proven.
