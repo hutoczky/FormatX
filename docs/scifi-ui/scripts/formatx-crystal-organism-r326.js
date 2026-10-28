@@ -2284,25 +2284,15 @@
           root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
           root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
         }
-      root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
-      root.dataset.fxCoreFrameMs=dt.toFixed(2);
-      root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
-      root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
-      root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
-
-
-
-
-
-
-
-
-
-
-
-
-      root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
-      root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
+        root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
+        root.dataset.fxCoreFrameMs=dt.toFixed(2);
+        root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
+        root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
+        root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
+        root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
+        root.dataset.fxCoreReal3dFps=String(
+          Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage)))
+        );
       }
     }
 
