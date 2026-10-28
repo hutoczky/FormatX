@@ -1,6 +1,6 @@
 FormatX production revision
 token=20261028-r2208-mag-mesh-row-cache
-release_line=R2208-MAG-IDENTICAL-MESH-ROW-CACHE-GENESIS-CONTROLS-AFTER-FCP
+release_line=R2211-MAG-EXPOSED-FRAME-REPAINT-PLUS-R2208-FAST-EXACT-MESH
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
 r2202_delivery=R533 canonical and recovery owners load R1280 20261026-r2202-aa-focused-microcell. Exact parser CSP eBsjac1UkasQbGIbDmPoYXYJ1PHZ8H4dGa0JOdXeuoQ= is authorized in both HTML and Worker policies.
@@ -197,3 +197,7 @@ r2208_mesh_optimization=The canonical R326 four-arm metallic MAG computes each a
 r2208_css_optimization=The intro-only R2160 audio-control CSS is activated after FCP through existing R487 deferred styles. Critical DNA first-frame stylesheet stays first-paint blocking and visually unchanged.
 r2208_cache=Native R490 -> R239 -> R422 -> R326 and the mobile V55 loader plus Worker scheduler/rewrites use 20261028-r2208-mag-mesh-row-cache. The separate unchanged R1280 Genesis film and parser CSP remain at 20261028-r2207-filtered-silver-living-optic.
 r2208_gate=Development-only candidate. Exact-head WebGL, intro, CSS and Lighthouse checks must pass; no production deployment or verified FPS/performance-score gain claimed.
+
+r2211_handoff_fix=The original R533 intro now schedules two bounded native R326 WebGL presentation opportunities after the film overlay has actually been removed, on normal completion, user Skip and absolute watchdog. The real image cannot rely solely on renderer-ready telemetry or a locator-triggered scroll repaint; P0 tests the first full-viewport screenshot pixels before locator capture. No second renderer, permanent extra RAF or raster artwork.
+r2211_browser_cache=Parser-owned R533 external script query is 20261028-r2211-native-handoff-present-frame, while its R1280 cinematic renderer keeps 20261028-r2207-filtered-silver-living-optic. Both HTML meta CSP and Worker header/meta CSP authorize exact new R2211 bootstrap hash isDtCkaAh4575Y76RVNaCtBeo+hBFICcomzhPwc4EOY=. WebGL runtime's independent R2208 MAG URL remains unchanged.
+r2211_release_gate=Development only. Require exact-head P0 full-screen post-intro pixels visible, mobile/desktop browser integrity, strict Lighthouse and visual comparison before merge into master; no live deployment performed.
