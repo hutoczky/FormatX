@@ -467,7 +467,28 @@ const SHOTS=[
             viewport:{w:innerWidth,h:innerHeight,scrollX,scrollY},
             introPrepaint:root.dataset.fxIntroPrepaintR1611||'',
             nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
+            nativeHandoff:root.dataset.fxMagNativeHandoffR2218||'',
+            nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+            nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
+            postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
             activeFilm:root.getAttribute('data-fx-mag-birth-live'),
+            // Diagnostic only: computed visibility along the actual render
+            // ancestor chain before Playwright scrolls to the stage.
+            ancestorVisibility:(()=>{
+              const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+              const nodes=[];let el=stage;
+              while(el&&nodes.length<10){
+                const cs=getComputedStyle(el);
+                nodes.push({
+                  node:el.id||String(el.className||el.tagName).slice(0,90),
+                  opacity:cs.opacity,visibility:cs.visibility,
+                  display:cs.display,contentVisibility:cs.contentVisibility,
+                  transform:cs.transform==='none'?'none':'transformed'
+                });
+                el=el.parentElement;
+              }
+              return nodes;
+            })(),
             heroRect:(()=>{const el=document.querySelector('#hero');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})(),
             stageRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-stage');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility}:null;})(),
             canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display}:null;})()
