@@ -223,6 +223,103 @@ const SHOTS=[
       return;
     }
 
+    // R2215 mobile film proof: the main reference is a phone composition.
+    // Audit a genuine 390x844 biological cell frame, not only the desktop
+    // keyframe or a static native-MAG phone screen. One scene, one canvas.
+    {
+      const browser=await launchBrowser();
+      const context=await browser.newContext({
+        viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+        deviceScaleFactor:2,colorScheme:'dark',reducedMotion:'no-preference',
+        locale:'hu-HU'
+      });
+      const page=await context.newPage(),errors=[];
+      page.on('pageerror',e=>errors.push(String(e)));
+      page.on('console',m=>{
+        if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))
+          errors.push(m.text());
+      });
+      try{
+        const url=new URL(BASE);
+        url.searchParams.set('intro','1');
+        url.searchParams.set('visualintro','1');
+        url.searchParams.set('introframe','5.50');
+        url.searchParams.set('r659','deterministic-mobile-biological-frame');
+        await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
+        if(!await pollPage(page,
+          ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
+          30000,100)){
+          throw new Error('R2215 mobile 5.5s living nucleus proof not ready');
+        }
+        await page.waitForTimeout(150);
+        const state=await page.evaluate(()=>{
+          const root=document.documentElement;
+          return {
+            renderer:root.dataset.fxMagBirthRendererR1490||'',
+            count:Number(root.dataset.fxMagBirthVesiclesR2215||0),
+            opacity:Number(root.dataset.fxMagBirthVesicleOpacityR2215||0),
+            framebufferPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+            embryoScale:Number(root.dataset.fxMagBirthEmbryoScaleR2149||0),
+            viewport:[innerWidth,innerHeight],
+            canvasCount:document.querySelectorAll('.fxb-three-canvas').length
+          };
+        });
+        const cellPng=await page.screenshot({
+          path:path.join(OUT,'10-mobile-biological-cell-5.50s.png'),
+          fullPage:false
+        });
+        // R2216: directly inspect the photographed image, not just a
+        // camera/scale flag. The old R2215 phone sphere reached BOTH edges.
+        // Physical cyan tissue must leave dark breathing room on both sides.
+        const edges=await page.evaluate(async(encoded)=>{
+          const image=new Image();
+          image.src='data:image/png;base64,'+encoded;
+          await image.decode();
+          const canvas=document.createElement('canvas');
+          canvas.width=image.naturalWidth;
+          canvas.height=image.naturalHeight;
+          const ctx=canvas.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(image,0,0);
+          const w=canvas.width,h=canvas.height;
+          const sample=ctx.getImageData(0,0,w,h).data;
+          let left=0,right=0,count=0;
+          for(let y=Math.floor(h*.26);y<Math.floor(h*.74);y+=3){
+            for(let n=0;n<3;n++){
+              for(const side of [0,1]){
+                const x=side===0 ? n*3 : w-1-n*3;
+                const i=(y*w+x)*4;
+                const red=sample[i],green=sample[i+1],blue=sample[i+2];
+                if(green>62&&blue>70&&green>red*1.22){
+                  if(side===0)left++;else right++;
+                }
+              }
+              count++;
+            }
+          }
+          return {left:left/count,right:right/count,width:w,height:h};
+        },cellPng.toString('base64'));
+        state.cellSafeFrameR2216=edges;
+        if(edges.left>.09||edges.right>.09)
+          errors.push('R2216 living cell is clipped against phone edge: '+
+            JSON.stringify(edges));
+        if(state.count!==42||state.opacity<.35||state.framebufferPeak<50)
+          errors.push('R2215 mobile nucleus physical cell not visible: '+JSON.stringify(state));
+        // R2216: keep the entire sphere within portrait cinematography,
+        // with air around the membrane instead of clipping its left/right rim.
+        if(!(state.embryoScale>=.72&&state.embryoScale<=.78))
+          errors.push('R2216 phone cellular scale violates safe-frame range: '+
+            JSON.stringify(state));
+        report.push({
+          seconds:'mobile-5.50',name:'10-mobile-biological-cell-5.50s',
+          state,errors
+        });
+      }finally{
+        await page.close();
+        await context.close();
+        await browser.close();
+      }
+    }
+
     const shotBrowser=await launchBrowser();
     try{
     for(const [seconds,name] of SHOTS){
@@ -283,6 +380,9 @@ const SHOTS=[
           phase:root.dataset.fxMagBirthPhase||document.querySelector('.fx-mag-birth-r533')?.dataset.phase||'',
           frameSync:root.dataset.fxMagBirthFrameR1557||'',
           framePeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+          cameraZ:Number(root.dataset.fxMagBirthCameraZ2217||0),
+          vesicleCount:Number(root.dataset.fxMagBirthVesiclesR2215||0),
+          vesicleOpacity:Number(root.dataset.fxMagBirthVesicleOpacityR2215||0),
           proofSync:root.dataset.fxMagBirthVisualFrameR1557||'',
           overlay:document.querySelectorAll('.fx-mag-birth-r533').length
         };
@@ -291,6 +391,18 @@ const SHOTS=[
       if(!/^(?:threejs-active|three-primary-active|threejs-active-production-path|cinematic-three-active|cinematic-cortical-three-active|realistic-cinematic-three-active|photoreal-cinematic-three-active)$/.test(state.renderer)){
         errors.push('R1500 intro is not using the cinematic Three.js renderer: '+state.renderer);
       }
+      if(Number(seconds)===5.5){
+        if(state.vesicleCount!==84||state.vesicleOpacity<.35){
+          errors.push('R2215 living cell missing volumetric 3D organelles: '+
+            JSON.stringify({count:state.vesicleCount,opacity:state.vesicleOpacity}));
+        }
+      }
+      // R2217: the film must show an actual physical studio close-up
+      // during titanium assembly, then ease back toward the native hero.
+      if(Number(seconds)===7.5&&!(state.cameraZ>2.85&&state.cameraZ<3.40))
+        errors.push('R2217 titanium assembly missing studio dolly: '+state.cameraZ);
+      if(Number(seconds)===9.25&&!(state.cameraZ>3.75&&state.cameraZ<4.35))
+        errors.push('R2217 final optical dock violates handoff framing: '+state.cameraZ);
       await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
       report.push({seconds,name,state,errors});
       await page.close();
@@ -347,11 +459,153 @@ const SHOTS=[
               ||root.dataset.fxCoreReferenceGeometry
               ||'',
             coreGeometry:root.dataset.fxCoreGeometry||'',
-            handoff:root.dataset.fxMagBirthHandoff||root.dataset.fxMagBirthLive||''
+            handoff:root.dataset.fxMagBirthHandoff||root.dataset.fxMagBirthLive||'',
+            // R2209 diagnostics: a GPU-ready native model can still be
+            // outside the visible hero or hidden under a stale compositor.
+            // Record the actual screenshot viewport BEFORE locator capture,
+            // which scrolls the element into view and can conceal this bug.
+            viewport:{w:innerWidth,h:innerHeight,scrollX,scrollY},
+            introPrepaint:root.dataset.fxIntroPrepaintR1611||'',
+            nativeReveal:root.dataset.fxMagBirthNativeRevealR2173||'',
+            nativeHandoff:root.dataset.fxMagNativeHandoffR2218||'',
+            productionCompositor:root.dataset.fxMagCompositorR2219||'',
+            nativePresent:root.dataset.fxMagNativePresentR2220||'',
+            nativeGpu:root.dataset.fxMagHandoffGpuR2226||'',
+            nativeGpuMs:Number(root.dataset.fxMagHandoffGpuMsR2226||0),
+            nativeGpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
+            nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
+            nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+            nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
+            postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
+            activeFilm:root.getAttribute('data-fx-mag-birth-live'),
+            // Diagnostic only: computed visibility along the actual render
+            // ancestor chain before Playwright scrolls to the stage.
+            ancestorVisibility:(()=>{
+              const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+              const nodes=[];let el=stage;
+              while(el&&nodes.length<10){
+                const cs=getComputedStyle(el);
+                nodes.push({
+                  node:el.id||String(el.className||el.tagName).slice(0,90),
+                  opacity:cs.opacity,visibility:cs.visibility,
+                  display:cs.display,contentVisibility:cs.contentVisibility,
+                  transform:cs.transform==='none'?'none':'transformed'
+                });
+                el=el.parentElement;
+              }
+              return nodes;
+            })(),
+            heroRect:(()=>{const el=document.querySelector('#hero');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})(),
+            stageRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-stage');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility}:null;})(),
+            canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display}:null;})()
           };
         });
   
-        await page.screenshot({path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false});
+        // R2209: measure the TRUE full viewport BEFORE locator.screenshot
+        // can scroll or trigger a fresh WebGL compositing pass. The previous
+        // archive showed an almost black handoff even though the subsequent
+        // cropped stage screenshot looked correct. Decode the captured PNG in
+        // browser memory; this test-only 2D canvas is never attached to site.
+        const handoffPng=await page.screenshot({
+          path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false
+        });
+        state.handoffPixels=await page.evaluate(async({png,rect})=>{
+          if(!rect||rect.w<40||rect.h<40)return {visible:false,bright:0,samples:0};
+          const img=new Image();
+          img.src='data:image/png;base64,'+png;
+          await img.decode();
+          const scratch=document.createElement('canvas');
+          scratch.width=img.naturalWidth;
+          scratch.height=img.naturalHeight;
+          const ctx=scratch.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(img,0,0);
+          const x0=Math.max(0,Math.floor(rect.x+rect.w*.23));
+          const y0=Math.max(0,Math.floor(rect.y+rect.h*.20));
+          const x1=Math.min(scratch.width,Math.ceil(rect.x+rect.w*.77));
+          const y1=Math.min(scratch.height,Math.ceil(rect.y+rect.h*.80));
+          if(x1<=x0||y1<=y0)return {visible:false,bright:0,samples:0};
+          const image=ctx.getImageData(x0,y0,x1-x0,y1-y0);
+          let bright=0,samples=0;
+          for(let y=0;y<image.height;y+=3)for(let x=0;x<image.width;x+=3){
+            const i=(y*image.width+x)*4;
+            const r=image.data[i],g=image.data[i+1],b=image.data[i+2];
+            if((r+g+b)/3>60&&Math.max(r,g,b)>105)bright++;
+            samples++;
+          }
+          return {visible:true,bright,samples,region:{x:x0,y:y0,w:x1-x0,h:y1-y0}};
+        },{png:handoffPng.toString('base64'),rect:state.canvasRect});
+        if(state.nativePresent!=='synchronous-gl-frame-committed'){
+          errors.push('R2220 original native WebGL direct presentation missing: '+
+            state.nativePresent);
+        }
+        if(state.nativeCompositor!=='already-onscreen-scroll-reconciled'){
+          errors.push('R2222 onscreen native compositor reconciliation missing: '+
+            state.nativeCompositor);
+        }
+        if(state.productionCompositor!=='exposure-hit-test-flushed'){
+          errors.push('R2219 production handoff did not reconcile layers: '+
+            state.productionCompositor);
+        }
+        if(!state.handoffPixels.visible||state.handoffPixels.bright<40){
+          const detail={
+            screenshot:state.handoffPixels,canvas:state.canvasRect,
+            gpu:state.nativeGpu,gpuMs:state.nativeGpuMs,
+            gpuPixel:state.nativeGpuPixel,
+            firstFrame:state.nativeFirstFrame,
+            nativeHandoff:state.nativeHandoff,
+            productionCompositor:state.productionCompositor,
+            nativeCompositor:state.nativeCompositor,
+            nativePresent:state.nativePresent,
+            viewport:state.viewport,
+            introPrepaint:state.introPrepaint,
+            ancestorVisibility:state.ancestorVisibility
+          };
+          console.error('R2226_BLACK_VIEWPORT_GPU_DIAGNOSTICS '+JSON.stringify(detail));
+          errors.push('R2209 full-viewport MAG is black, despite renderer-ready: '+
+            JSON.stringify(detail));
+        }
+        if(state.nativeGpu!=='finished'){
+          errors.push('R2226 GPU frame not committed at native handoff: '+state.nativeGpu);
+        }
+        // R2225: investigate black FULL viewport without accidentally
+        // approving it. The original 06 image and its pixel assertion ABOVE
+        // remain untouched. Only AFTER that first snapshot, inspect the
+        // hit-test stack and capture a second UNCLIPPED diagnostic screenshot.
+        // These reads are intentionally absent before the release oracle.
+        state.postSnapshotOcclusion=await page.evaluate(()=>{
+          const native=document.querySelector(
+            '#hero .fx-crystal-organism-r326-canvas'
+          );
+          const r=native?.getBoundingClientRect();
+          const spots=[
+            {name:'mag-center',x:r?r.x+r.width*.5:innerWidth*.25,
+              y:r?r.y+r.height*.5:innerHeight*.32},
+            {name:'header',x:Math.min(innerWidth-1,165),
+              y:Math.min(innerHeight-1,42)},
+            {name:'hero-copy',x:Math.min(innerWidth-1,innerWidth*.73),
+              y:Math.min(innerHeight-1,innerHeight*.4)}
+          ];
+          return spots.map(({name,x,y})=>({
+            name,x:Math.round(x),y:Math.round(y),
+            stack:document.elementsFromPoint(x,y).slice(0,10).map(el=>{
+              const c=getComputedStyle(el);
+              return {
+                tag:el.tagName,
+                id:el.id,
+                className:String(el.className||'').slice(0,100),
+                opacity:c.opacity,visibility:c.visibility,
+                zIndex:c.zIndex,display:c.display,
+                position:c.position,pointerEvents:c.pointerEvents,
+                background:c.backgroundColor,
+                transform:c.transform==='none'?'none':'transformed'
+              };
+            })
+          }));
+        });
+        await page.screenshot({
+          path:path.join(OUT,'06b-after-first-capture-layer-diagnostic.png'),
+          fullPage:false
+        });
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'07-native-hero-mag.png');
         report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});

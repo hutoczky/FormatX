@@ -187,7 +187,7 @@
         pmrem=new T.PMREMGenerator(this.renderer);
         this.studioEnvTarget=pmrem.fromEquirectangular(texture);
         this.scene.environment=this.studioEnvTarget.texture;
-        this.scene.environmentIntensity=this.mobileRender?.64:.84;
+        this.scene.environmentIntensity=this.mobileRender?.77:1.02;
         this.studioEnvironmentTexture=texture;
       }catch(error){
         this.studioEnvTarget?.dispose?.();
@@ -225,23 +225,51 @@
           }
           void main(){
             vec2 q=vUv;
-            float drift=.016*sin(uTime*.00012+q.y*8.0);
-            float fold=.5+.5*sin(q.x*13.0-q.y*7.0+sin(q.y*11.0)*.75+uTime*.00017);
-            float cool=haze(q,vec2(.26+drift,.55),vec2(1.14,1.15));
-            float violet=haze(q,vec2(.73-drift,.40),vec2(1.30,1.18));
-            float aqua=haze(q,vec2(.53,.54+drift),vec2(1.0,.94));
+            // R2214: volumetric-looking spectral flow, evaluated inside the
+            // SAME existing atmosphere shader and single draw call.
+            // Three coherent depth layers move at different rates. Avoid
+            // noisy full-resolution texture uploads, screen-sized bloom or
+            // additional RAF/canvas passes on Android.
+            float drift=.022*sin(uTime*.00012+q.y*7.0);
+            float fold=.5+.5*sin(q.x*13.0-q.y*7.0+
+              sin(q.y*11.0)*.75+uTime*.00017);
+            float cool=haze(q,vec2(.24+drift,.57),vec2(1.18,1.22));
+            float violet=haze(q,vec2(.74-drift,.39),vec2(1.30,1.20));
+            float aqua=haze(q,vec2(.53,.52+drift),vec2(1.06,.98));
+            vec2 stream=(q-.5)*vec2(1.55,1.0);
+            float fluid=sin(stream.x*7.2+stream.y*11.0+
+              1.65*sin(stream.y*4.6+uTime*.00015));
+            float filament=pow(max(0.0,1.0-abs(fluid)),10.0);
+            float turbulence=.5+.5*sin(q.x*17.0-q.y*12.0+
+              uTime*.00008)*sin(q.y*15.0+q.x*5.0);
+            float vapor=smoothstep(.30,.78,.62*fold+.38*turbulence);
             float dna=1.0-smoothstep(2.60,3.85,uPhase);
             float embryo=smoothstep(2.95,3.72,uPhase)*
               (1.0-smoothstep(5.14,6.04,uPhase));
-            vec3 col=vec3(.002,.005,.012);
-            col+=vec3(.008,.041,.084)*cool*dna*(.63+.37*fold);
-            col+=vec3(.055,.014,.095)*violet*dna*(.55+.45*(1.0-fold));
-            col+=vec3(.007,.063,.070)*aqua*embryo*(.72+.28*fold);
-            col+=vec3(.026,.006,.032)*violet*embryo*.19;
-            // A restrained central vignette gives cinematic contrast
-            // without blowing out the physically lit molecular silhouette.
-            float vignette=1.0-.30*length((q-.5)*vec2(1.18,.90));
-            gl_FragColor=vec4(col*clamp(vignette,.66,1.0),1.0);
+            float metal=smoothstep(5.70,7.60,uPhase);
+            vec3 col=vec3(.003,.006,.015);
+            // Deep-blue ultraviolet haze catches the thick physical DNA.
+            col+=vec3(.028,.075,.155)*cool*dna*(.42+.58*vapor);
+            col+=vec3(.095,.039,.165)*violet*dna*(.45+.55*(1.0-fold));
+            col+=vec3(.020,.22,.26)*filament*cool*dna*.58;
+            col+=vec3(.10,.038,.20)*filament*violet*dna*.37;
+            // The cell is born into the same spectral volume: the colors
+            // evolve, rather than cutting to a different flat background.
+            col+=vec3(.026,.135,.139)*aqua*embryo*(.46+.54*vapor);
+            col+=vec3(.066,.022,.080)*violet*embryo*.34;
+            col+=vec3(.026,.22,.20)*filament*aqua*embryo*.40;
+            // Remaining silver MAG retains depth, but the optical organ
+            // stays brighter than its surrounding atmosphere.
+            col+=vec3(.012,.045,.060)*aqua*metal*(.35+.45*vapor);
+            col+=vec3(.023,.013,.046)*violet*metal*.30;
+            // R2217: preserve real photographic black, but make visible
+            // spectral depth behind the object. The previous 0.01–0.04
+            // linear background looked empty after display tonemapping.
+            float halo=haze(q,vec2(.50,.48),vec2(2.35,1.65));
+            col+=vec3(.022,.095,.110)*halo*metal*(.46+.54*vapor);
+            col*=mix(1.78,1.38,metal);
+            float vignette=1.0-.40*length((q-.5)*vec2(1.20,.94));
+            gl_FragColor=vec4(col*clamp(vignette,.54,1.0),1.0);
           }`
       });
       const mesh=new T.Mesh(new T.PlaneGeometry(2,2),material);
@@ -308,6 +336,35 @@
       this.scene.add(mesh);
     }
 
+    makeDNAFiberTexture(){
+      // R2214: authentic phosphate-fiber microrelief, synthesized once.
+      // One shared 64 x 64 GPU texture on the existing physical helices;
+      // no external image, no render target, no animated texture upload.
+      if(this.dnaFiberTexture)return this.dnaFiberTexture;
+      const T=this.THREE,size=64;
+      const pixels=new Uint8Array(size*size*4);
+      const fract=x=>x-Math.floor(x);
+      for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+        const grain=fract(Math.sin(x*127.1+y*311.7)*43758.5453);
+        const fibril=Math.sin(x*.58+.23*Math.sin(y*.29));
+        const cross=Math.sin(y*1.03+x*.24);
+        const density=Math.max(0,Math.min(255,
+          129+34*fibril+19*cross+14*(grain-.5)));
+        const i=(y*size+x)*4;
+        pixels[i]=pixels[i+1]=pixels[i+2]=Math.round(density);
+        pixels[i+3]=255;
+      }
+      const texture=new T.DataTexture(pixels,size,size,T.RGBAFormat);
+      texture.wrapS=texture.wrapT=T.RepeatWrapping;
+      texture.repeat.set(5,3);
+      texture.magFilter=T.LinearFilter;
+      texture.minFilter=T.LinearMipmapLinearFilter;
+      texture.generateMipmaps=true;
+      texture.needsUpdate=true;
+      this.dnaFiberTexture=texture;
+      return texture;
+    }
+
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
@@ -329,22 +386,25 @@
 
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
+      const phosphateTexture=this.makeDNAFiberTexture();
       const ma=new T.MeshPhysicalMaterial({
-        color:0x759cde,emissive:0x263c93,emissiveIntensity:.94,
-        roughness:.29,metalness:.06,transparent:true,opacity:.90,
-        depthWrite:false,clearcoat:.62,clearcoatRoughness:.14
+        color:0x9cc6ea,emissive:0x28538d,emissiveIntensity:1.08,
+        roughness:.225,metalness:.11,transparent:true,opacity:.93,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
+        depthWrite:false,clearcoat:.88,clearcoatRoughness:.085
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0xb48add,emissive:0x5c2f9c,emissiveIntensity:.94,
-        roughness:.30,metalness:.05,transparent:true,opacity:.88,
-        depthWrite:false,clearcoat:.58,clearcoatRoughness:.16
+        color:0xc2a2eb,emissive:0x5e3997,emissiveIntensity:1.05,
+        roughness:.23,metalness:.10,transparent:true,opacity:.92,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
+        depthWrite:false,clearcoat:.86,clearcoatRoughness:.10
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x4bdfff,transparent:true,opacity:.080,depthWrite:false,
+        color:0x4bdfff,transparent:true,opacity:.095,depthWrite:false,
         blending:T.AdditiveBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x997bff,transparent:true,opacity:.070,depthWrite:false,
+        color:0x997bff,transparent:true,opacity:.085,depthWrite:false,
         blending:T.AdditiveBlending
       });
       // R2188: complementary nucleotide chemistry is readable as genuine
@@ -398,7 +458,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.90,.88,.080,.070,.88,.50,.46];
+      group.userData.baseOpacity=[.93,.92,.095,.085,.91,.50,.46];
       return group;
     }
 
@@ -1155,6 +1215,7 @@
           pixels[index+2]=Math.round(clamp(
             (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
           pixels[index+3]=255;
+          // R2212: deepen coral trabeculae within the teal metabolic matrix.
           // R2206: cluster coral metabolic islands within living teal
           // cytoplasm; preserve the membrane's fine-scale native texture.
           // All sampling happens once at initialization, never per frame.
@@ -1163,11 +1224,11 @@
           const capillary=clamp((.5+.5*Math.sin(u*39+
             3.0*Math.sin(v*24+curl*5.0))-.74)*3.6)*cloud;
           pixels[index]=Math.min(255,pixels[index]+Math.round(
-            metabolic*23+capillary*12));
+            metabolic*39+capillary*22));
           pixels[index+1]=Math.max(0,pixels[index+1]-Math.round(
-            metabolic*12));
+            metabolic*19));
           pixels[index+2]=Math.min(255,pixels[index+2]+Math.round(
-            capillary*19));
+            capillary*28));
         }
       }
       const texture=new T.DataTexture(pixels,width,height,T.RGBAFormat);
@@ -1201,10 +1262,10 @@
         // nucleus was too transparent against near-black (0.47 opacity),
         // washing its coral metabolic freckles into a faint glass bead.
         color:0xf5ffff,map:this.embryoTexture,
-        bumpMap:this.embryoTexture,bumpScale:.020,
+        bumpMap:this.embryoTexture,bumpScale:.034,
         emissive:0x16676b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.35,
-        metalness:.015,roughness:.29,clearcoat:.73,clearcoatRoughness:.18,
+        emissiveIntensity:.40,
+        metalness:.015,roughness:.25,clearcoat:.82,clearcoatRoughness:.14,
         transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
@@ -1266,6 +1327,59 @@
       });
       this.embryoCapillaries=new T.LineSegments(membranes,this.embryoCapillaryMaterial);
       this.coreGroup.add(this.embryoCapillaries);
+
+      // R2215 — actual living vesicles suspended along the front cortex.
+      // Unlike the old purely painted coral freckles, these are shaded 3D
+      // micro-organelle clusters with parallax and individual colors. ONE
+      // instanced draw call, bounded at 42 phones / 84 desktop. The opaque
+      // silhouette, one cinematic canvas and DNA choreography stay intact.
+      const vesicleCount=this.mobileRender?42:84;
+      // R2216: micro-organelles should read as tissue under a macro lens,
+      // not floating toy beads. Keep true instancing and real depth.
+      const vesicleGeometry=new T.IcosahedronGeometry(
+        this.mobileRender?.023:.028,1
+      );
+      const vesicleMaterial=new T.MeshPhysicalMaterial({
+        color:0xffffff,metalness:0,roughness:.40,
+        clearcoat:.43,clearcoatRoughness:.27,
+        emissive:0x2b363a,emissiveIntensity:.16,
+        transparent:true,opacity:0,depthWrite:false
+      });
+      const vesicles=new T.InstancedMesh(
+        vesicleGeometry,vesicleMaterial,vesicleCount
+      );
+      const positioner=new T.Object3D();
+      const coral=new T.Color(0xd97c71);
+      const amber=new T.Color(0xd9a17f);
+      const aqua=new T.Color(0x67c5bc);
+      const pale=new T.Color(0x92cfcc);
+      for(let i=0;i<vesicleCount;i++){
+        // Golden-angle coverage avoids a repeated lattice. Surface normals
+        // place true 3D cells over a range of front-facing z depths.
+        const az=i*2.399963229728653;
+        const zz=.24+.70*this.rand();
+        const radial=Math.sqrt(Math.max(0,1-zz*zz));
+        const jitter=.92+.10*this.rand();
+        positioner.position.set(
+          radial*Math.cos(az)*.90*jitter,
+          radial*Math.sin(az)*1.07*jitter,
+          zz*.86
+        );
+        const size=.52+this.rand()*.90;
+        positioner.scale.set(size,size*(.73+this.rand()*.60),size*.70);
+        positioner.rotation.set(az*.14,az*.28,az);
+        positioner.updateMatrix();
+        vesicles.setMatrixAt(i,positioner.matrix);
+        const hue=(i%9===0)?amber:(i%4===0)?aqua:(i%7===0)?pale:coral;
+        vesicles.setColorAt(i,hue);
+      }
+      vesicles.instanceMatrix.needsUpdate=true;
+      if(vesicles.instanceColor)vesicles.instanceColor.needsUpdate=true;
+      vesicles.frustumCulled=false;
+      vesicles.renderOrder=7;
+      this.embryoVesicles=vesicles;
+      this.embryoVesicleMaterial=vesicleMaterial;
+      this.coreGroup.add(vesicles);
 
       // R2189: chromatin is a family of genuinely volumetric curved fibres
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
@@ -2697,7 +2811,11 @@
       // Preserve the established ten-second camera and end-state framing.
       // R2167: the embryonic cell must fill the lens as an actual subject,
       // not read as a tiny smooth bead behind distracting orbiting DNA.
-      const embryoScale=this.mobileRender?.94:1.07;
+      // R2216: on 390px portraits the R2215 cell filled 100% of viewport
+      // width, cropping the membrane and flattening the apparent depth.
+      // Preserve the 3D subject and cell microstructure with a clear ~15%
+      // breathing margin, while leaving desktop cinematic scale unchanged.
+      const embryoScale=this.mobileRender?.74:.90;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
@@ -2751,6 +2869,8 @@
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
       this.embryoCapillaryMaterial.opacity=.10*visible;
+      this.embryoVesicleMaterial.opacity=.58*visible;
+      this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
@@ -3052,6 +3172,12 @@
       // This keeps the 10-second story and mobile crop intact.
       const birthDolly=smooth((t-5.68)/.80)*(1-smooth((t-8.52)/1.12));
       z-=birthDolly*(this.mobileRender?.27:.47);
+      // R2217: emphasize the physical titanium assembly during its
+      // signature studio reveal. This smooth lens dolly returns to ZERO
+      // before the real native MAG handoff; camera and topology unchanged.
+      const revealDolly=smooth((t-6.75)/.85)*
+        (1-smooth((t-8.45)/1.10));
+      z-=revealDolly*(this.mobileRender?.20:.76);
       x+=birthDolly*.038*Math.sin((t-5.68)*1.12);
       y+=birthDolly*.018;
       if(this.width<this.height)z+=.90;
@@ -3179,6 +3305,14 @@
           root.dataset.fxMagBirthDonorArmsR2183=String(donorArms.size);
           root.dataset.fxMagBirthDonorPairsR2183=String(donorPairs);
           root.dataset.fxMagBirthFramePeakR1557=String(peak);
+          // R2217: capture the actual lens distance during deterministic frames.
+          root.dataset.fxMagBirthCameraZ2217=String(this.camera.position.z);
+          // R2215: true scene objects, audited only during deterministic
+          // proof frames; never write this telemetry during visitor playback.
+          root.dataset.fxMagBirthVesiclesR2215=String(this.embryoVesicles?.count||0);
+          root.dataset.fxMagBirthVesicleOpacityR2215=String(
+            this.embryoVesicleMaterial?.opacity||0
+          );
           root.dataset.fxMagBirthVisibleArmorR2147=String(
             [...this.silverParts,...this.plates].filter(part=>part.visible).length
           );
@@ -3254,6 +3388,7 @@
         else m?.dispose?.();
       });
       this.embryoTexture?.dispose?.();
+      this.dnaFiberTexture?.dispose?.();
       this.microFiberTexture?.dispose?.();
       this.studioEnvironmentTexture?.dispose?.();
       this.studioEnvTarget?.dispose?.();

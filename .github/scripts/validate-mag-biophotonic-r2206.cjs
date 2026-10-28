@@ -18,6 +18,21 @@ for (const [name, source] of Object.entries({ mag, birth, intro, rescue, current
 }
 const tokens = [
   [mag, 'fxNativeMagSurfaceR2206'],
+  [mag, "listen(document,'formatx:magbirthcomplete',()=>"],
+  [mag, "root.dataset.fxMagNativeHandoffR2218='visible-reconciled'"],
+  [mag, "root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed'"],
+  [mag, 'gl.finish();'],
+  [mag, 'gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),'],
+  [mag, "root.dataset.fxMagHandoffGpuR2226='finished'"],
+  [mag, "stage.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'})"],
+  [mag, "root.dataset.fxMagNativeCompositorR2222='already-onscreen-scroll-reconciled'"],
+  [intro, "if(finished||!overlay.isConnected)return;"],
+  [mag, 'render(performance.now());'],
+  [mag, 'gl.flush();'],
+  [mag, 'function finishBoot(program)'],
+  [mag, 'buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]))'],
+  [mag, 'if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity)'],
+  [mag, 'let lastRefreshTelemetryAt=-Infinity;'],
   [mag, 'float tissueFold=sin('],
   [mag, 'float coralOrganelles=smoothstep(.61,.84,'],
   [mag, 'lensColor+=vec3(.93,.235,.145)*coralOrganelles'],
@@ -29,6 +44,14 @@ const tokens = [
   [birth, 'const metabolic=clamp(Math.pow(clamp('],
   [birth, 'this.updateDNA(t,time);'],
   [birth, 'this.updateCore(t,time);'],
+  [birth, 'const vesicleCount=this.mobileRender?42:84;'],
+  [birth, 'const embryoScale=this.mobileRender?.74:.90;'],
+  [birth, 'const revealDolly=smooth((t-6.75)/.85)*'],
+  [birth, 'col*=mix(1.78,1.38,metal);'],
+  [birth, 'this.scene.environmentIntensity=this.mobileRender?.77:1.02;'],
+  [birth, 'new T.InstancedMesh('],
+  [birth, 'this.embryoVesicleMaterial.opacity=.58*visible;'],
+  [birth, 'this.coreGroup.add(vesicles);'],
   [birth, 'this.updateMechanical(t,time);'],
   [mag, 'const constrainedFragmentSource ='],
   [mag, 'float polishedRib='],
@@ -47,17 +70,45 @@ const parser = html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*
 assert(parser, 'Parser-owned intro bootstrap missing');
 const hash = "'sha256-" + crypto.createHash('sha256').update(parser[1]).digest('base64') + "'";
 assert(html.includes(hash), 'New bootstrap must be authorized by HTML CSP');
-assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
-  'Worker must authorize the exact R2206 inline bootstrap');
-assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
+assert(worker.includes('const INLINE_R2220_BOOT_HASH = "' + hash + '";'),
+  'Worker must authorize the exact R2219 inline bootstrap');
+assert((worker.match(/\$\{INLINE_R2220_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
-const revision = '20261028-r2207-filtered-silver-living-optic';
-for (const [name, source] of Object.entries({ html, worker, intro, rescue, current, runtime, scheduler }))
-  assert(source.includes(revision), name + ' must reference the R2206 cache generation');
+const filmRevision = '20261028-r2217-studio-spectral-titanium';
+const magRevision = '20261028-r2226-gpu-finished-handoff';
+assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
+assert(rescue.includes('20261028-r2220-direct-gl-handoff'),
+  'Parser fallback must load R2219 canonical bridge only');
+assert(intro.includes('reconcileExposedCompositorR2219()'),
+  'Film must flush exposed compositor on both teardown routes');
+assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flushed'"),
+  'Native exposure must be acknowledged after real hit testing');
+for (const [name, source] of Object.entries({ current, runtime, scheduler }))
+  assert(source.includes(magRevision), name + ' must load the optimized native MAG');
+assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2220-direct-gl-handoff'),
+  'R533 entrypoint must have a distinct R2211 cache generation');
+assert(html.includes('20261028-r2220-direct-gl-handoff')&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+magRevision),
+  'HTML must reference fresh R533 bridge and original native MAG cache key');
+assert(worker.includes(filmRevision)&&worker.includes(magRevision),
+  'Worker must preserve film and native MAG rewrite keys');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');
 assert(intro.includes('const THREE_OWNER_SRC ='),
   'Original cinematic runtime ownership must remain');
+// R2227: render-time DOM mutation must not re-publish immutable
+// html[data-*] telemetry every 250ms and force style invalidation.
+assert(mag.includes('let publishedRuntimeStaticR2227=false;'),
+  'R2227 immutable telemetry must be one-shot');
+assert(mag.includes('if(!publishedRuntimeStaticR2227){'),
+  'Permanent diagnostic flags must be inside the one-shot guard');
+assert(mag.includes('if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity)'),
+  'Live GPU telemetry must retain its bounded 250ms cadence');
+const once=mag.slice(mag.indexOf('if(!publishedRuntimeStaticR2227){'),
+  mag.indexOf('root.dataset.fxCoreRenderMs='));
+for(const marker of [
+  'fxNativeMagPerformanceR1694','fxNativeMagPerformanceR1701',
+  'fxNativeMagPerformanceR1710','fxNativeMagDesktopInteractionR1944'
+])assert(once.includes(marker),marker+' should only be published once');
 console.log('MAG_BIOPHOTONIC_R2206_SOURCE_PASS', JSON.stringify({
   genomeMobile: 6000, genomeDesktop: 9600,
   cellPhotonsMobile: 1200, cellPhotonsDesktop: 3100,

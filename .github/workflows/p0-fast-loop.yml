@@ -15,7 +15,7 @@ on:
       - '.github/scripts/**'
       - '.github/workflows/p0-fast-loop.yml'
   pull_request:
-    branches: [master]
+    branches: [master, fix/r2171-native-titanium-surface]
     paths:
       - 'docs/styles.css'
       - 'docs/scifi-ui/index.html'
@@ -28,9 +28,13 @@ on:
       - '.github/workflows/p0-fast-loop.yml'
   workflow_dispatch:
 
+# R2225: never abort an in-flight complete cinematic P0 proof when multiple
+# development commits land. GitHub keeps the newest pending job for the same
+# PR ref, so the latest SHA will still be tested without erasing earlier
+# cold-start evidence needed to diagnose nondeterministic compositor failures.
 concurrency:
   group: formatx-p0-fast-loop-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -109,6 +113,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
           node --check .github/scripts/validate-r533-r536-handoff.cjs
           node --check .github/scripts/capture-mag-intro-r656.cjs
+          node --check .github/scripts/validate-mag-cold-handoff-r2226.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
@@ -118,6 +123,9 @@ jobs:
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-mag-biophotonic-r2206.cjs
+          node .github/scripts/validate-genesis-css-criticalpath-r2208.cjs
+          node .github/scripts/validate-mag-mesh-rows-r2208.cjs
+          node .github/scripts/validate-mag-section-extraction-r2213.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site
@@ -143,6 +151,11 @@ jobs:
           path: artifacts/r656-intro-keyframes/
           if-no-files-found: error
           retention-days: 14
+      - name: Confirm three independent cold starts render a visible MAG
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_COLD_HANDOFF_DIR: artifacts/r2226-handoff-coldstarts
+        run: node .github/scripts/validate-mag-cold-handoff-r2226.cjs
       - name: Run retained semantic source proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -220,5 +233,6 @@ jobs:
             artifacts/genesis-antialias-r2175/
             artifacts/mag-handoff-layout-r2181/
             artifacts/r656-intro-keyframes/
+            artifacts/r2226-handoff-coldstarts/
           if-no-files-found: warn
           retention-days: 30

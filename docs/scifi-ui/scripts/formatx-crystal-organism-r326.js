@@ -370,14 +370,21 @@
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
-      const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      // R2210: use literal barycentrics rather than three per-face arrays.
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
       const bodySeamOverlap=0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
-      vertices.forEach((item, index) => {
+      // R2210: constant facet weights computed once per triangle, not vertex.
+      const metalFacet=facet>=5.0&&facet<6.0;
+      const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
+        (facet<2.0?(mobile?.985:(software?.94:.90)):
+        (software?.95:(mobile?.985:(constrained?.972:.978))));
+      const faceWeight=1-smoothWeight;
+      for(let index=0;index<3;index+=1){
+        const item=vertices[index];
         if(bodySeamOverlap){
           const k=1+bodySeamOverlap;
           sphere.push(
@@ -402,12 +409,7 @@
         // R2144: the machined raised armour is truly bevelled. A controlled
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
-        const metalFacet=facet>=5.0&&facet<6.0;
-        // R2177: avoid jagged per-triangle metal shading on the phone.
-        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
-          (facet<2.0?(mobile?.985:(software?.94:.90)):
-          (software?.95:(mobile?.985:(constrained?.972:.978))));
-        const faceWeight=1-smoothWeight;
+
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
           smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
@@ -415,24 +417,36 @@
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
-        barycentrics.push(...barycentric[index]);
+        if(index===0)barycentrics.push(1,0,0);
+        else if(index===1)barycentrics.push(0,1,0);
+        else barycentrics.push(0,0,1);
         facets.push(facet);
-      });
+      }
     }
 
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    /* R2208: keep only two adjacent latitude rows of pure analytical
+       positions/normals. Previously every quad recomputed four expensive
+       anisotropic superellipsoid vertices, including shared neighbours.
+       This is mathematically the same non-indexed triangle stream, winding,
+       facet IDs, UVs and material contract; memory stays O(longitude). */
+    let upperRow=Array.from({length:longitudeSegments+1},
+      (_,lon)=>vertex(0,lon));
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const lowerRow=Array.from({length:longitudeSegments+1},
+        (_,lon)=>vertex(lat+1,lon));
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=upperRow[lon];
+        const b=upperRow[lon+1];
+        const c=lowerRow[lon];
+        const d=lowerRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+      upperRow=lowerRow;
     }
 
     /* R1982 — real microfibril geometry.
@@ -1094,11 +1108,18 @@
       depth:true,
       stencil:false,
       premultipliedAlpha:false,
-      preserveDrawingBuffer:mobileVisualProof || surfaceEnergyFunctionalCheck,
+      // R2212: the MAG is the persistent world, not a disposable animation.
+      // The renderer may intentionally stop all idle RAFs while its canvas
+      // continues to breathe through compositor-only WAAPI. Without a
+      // preserved drawing buffer, Chrome can present an empty/black canvas
+      // after the film occluder is removed or a layer is recomposited.
+      // Keep the last real GL frame across compositing; no second context.
+      preserveDrawingBuffer:true,
       powerPreference:'high-performance'
     };
     let gl = canvas.getContext('webgl2', options);
     const webgl2 = Boolean(gl);
+    root.dataset.fxMagPersistentFrameR2212='preserve-last-webgl-frame-across-cinematic-handoff';
     if (!gl) gl = canvas.getContext('webgl', options);
     if (!gl) {
       stage.remove();
@@ -1488,6 +1509,21 @@
         float titaniumGrazing=pow(1.0-facing,2.4);
         studioSilver+=vec3(.31,.43,.48)*titaniumGrazing*
           panelEnvelope*.14;
+        /* R2214 — functional titanium machining.
+           Highlight a recessed lengthwise capillary on each of the four
+           real 3D arms, plus selective micro-fasteners inside panel cells.
+           Gradients are anti-aliased and locked to body coordinates:
+           no flickering procedural noise, overlays or extra GPU passes. */
+        float insetCoord=lateral/max(.045,panelWidth);
+        float axialHairline=exp(-pow((insetCoord-.59)/
+          (.040+panelAA.y*.20),2.0))*panelEnvelope;
+        float microSocket=length(fract(panelCoord*vec2(.50,.50))-.50);
+        float socketMask=(1.0-smoothstep(.10+panelAA.x*.06,
+          .17+panelAA.x*.12,microSocket))*
+          panelEnvelope*(1.0-panelJoint);
+        studioSilver+=vec3(.34,.57,.63)*axialHairline*.13;
+        studioSilver*=1.0-socketMask*.11;
+        studioSilver+=vec3(.24,.36,.39)*socketMask*metalSpec*.30;
         float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
         c=mix(c,studioSilver,shellSilver);
         titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
@@ -1536,6 +1572,22 @@
         lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
           (.26+.10*uEnergy)*metabolicPulse;
         lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
+        /* R2212: the optical center is a living, layered organ, not a
+           static luminous button. Two physically coherent rings trace the
+           membrane at different apparent depths. All color stays inside
+           the existing recessed glass triangles and its single GL pass. */
+        float membraneDistortion=.027*tissueFold+.012*tissueIslands;
+        float innerMembrane=exp(-pow((od-.48-membraneDistortion)/.057,2.0));
+        float outerMembrane=exp(-pow((od-.79+.015*tissueFold)/.065,2.0));
+        float bioticFilament=.5+.5*sin(oq.x*28.0+oq.y*11.0+
+          tissueFold*2.7-uTime*.18);
+        float filamentMask=smoothstep(.55,.88,bioticFilament)*
+          tissueEnvelope*(.45+.55*coralOrganelles);
+        lensColor+=vec3(.055,.60,.62)*innerMembrane*(.18+.08*uEnergy);
+        lensColor+=vec3(.16,.52,.56)*outerMembrane*(.24+.05*uEnergy);
+        lensColor+=vec3(.84,.25,.17)*filamentMask*(.18+.08*uEnergy);
+        // Keep broad photographic contrast instead of an all-white iris.
+        lensColor*=1.0-.13*coralOrganelles*filamentMask;
         c=lensColor;
         }
 
@@ -1570,6 +1622,8 @@
     root.dataset.fxNativeMagSurfaceR2203='body-anchored-filtered-machined-silver-recessed-optical-aperture';
     root.dataset.fxNativeMagSurfaceR2204='travelling-softbox-readable-across-machined-silver';
     root.dataset.fxNativeMagSurfaceR2206='biophotonic-cyan-coral-living-optic-machined-titanium-no-extra-pass';
+    root.dataset.fxNativeMagSurfaceR2212='laminated-living-cyan-coral-lens-deep-silver-single-pass';
+    root.dataset.fxNativeMagSurfaceR2214='anti-aliased-titanium-capillaries-fasteners-micro-machined-four-arm-body';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
@@ -1742,6 +1796,10 @@
     return;
 
     function finishBoot(program) {
+    // R2224: keep shader/geometry initialization atomic. R2223's cross-task
+    // yields caused repeatable CLS (0.146 phone / 0.254 desktop) when the
+    // hero stage was activated between browser paints. Preserve the same
+    // geometry, seven uploads and successful R2222 first viewport handoff.
     const geometry=buildOrganismGeometry(softwareRenderer);
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
@@ -1806,6 +1864,8 @@
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
+    // R2224: refresh telemetry does not belong on every rAF or skipped tick.
+    let lastRefreshTelemetryAt=-Infinity;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
        creates artificial 200ms+ frames and is the opposite of the production
@@ -2064,6 +2124,7 @@
       root.dataset.fxCoreAutonomousMorphR441='disabled-until-explicit-interaction';
     }
 
+    let publishedRuntimeStaticR2227=false;
     function render(now){
       const begin=performance.now();
       const dt=Math.min(48,Math.max(1,now-last));last=now;
@@ -2134,19 +2195,20 @@
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
       }
-      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
+      if(root.dataset.fxCorePassModelR1450!=='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719')
+        root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
       renderPeak=Math.max(ms,renderPeak*.86);
       framePeak=Math.max(dt,framePeak*.90);
-      if(renderAverage>(mobile?15.5:15.8)){
+      if(renderAverage>(mobile?15.5:15.8)&&!slowRenderer){
         slowRenderer=true;
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
         root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
         root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
         root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
-      }else if(!slowRenderer){
+      }else if(!slowRenderer&&root.dataset.fxCoreAdaptiveOpticsR588!==(mobile?'single-pass-mobile-capable':'single-pass-60fps-capable')){
         root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
@@ -2207,25 +2269,30 @@
 
       if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity){
         lastRuntimeTelemetryAt=now;
-      root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
-      root.dataset.fxCoreFrameMs=dt.toFixed(2);
-      root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
-      root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
-      root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
-      root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
-      root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
-      root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
-      root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
-      root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
-      root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
-      root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
-      root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
-      root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
-      root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
-      root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
-      root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
-      root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
-      root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
+        if(!publishedRuntimeStaticR2227){
+          publishedRuntimeStaticR2227=true;
+          root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
+          root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
+          root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
+          root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
+          root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
+          root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
+          root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
+          root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
+          root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
+          root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
+          root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+          root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
+        }
+        root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
+        root.dataset.fxCoreFrameMs=dt.toFixed(2);
+        root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
+        root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
+        root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
+        root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
+        root.dataset.fxCoreReal3dFps=String(
+          Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage)))
+        );
       }
     }
 
@@ -2264,9 +2331,12 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
-        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
-        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity){
+          lastRefreshTelemetryAt=now;
+          root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
+          root.dataset.fxCoreRenderDivisorR1622=String(divisor);
+          root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        }
         if(divisor>1 && schedulerTick!==0){
           raf=requestAnimationFrame(frame);
           return;
@@ -2534,6 +2604,90 @@
     listen(window,'formatx:loop',()=>{signalPhysiology('renewal','site-loop');boost(.92,mobile?4:6);},{passive:true});
     listen(window,'formatx:menustatechange',event=>signalPhysiology(event.detail?.open?'attention':'stability',event.detail?.open?'menu-open':'menu-close'),{passive:true});
     listen(window,'formatx:languagechange',()=>signalPhysiology('curiosity','language-change'),{passive:true});
+    /* R2218: when the cinematic DOM occluder is removed, the original
+       observer may still report 'not intersecting' from the covered frame.
+       Reconcile against the REAL viewport and paint the *same* WebGL owner
+       after exposure, without starting a second renderer or idle loop.
+       This only runs on one film-end event, never during DNA/embryo. */
+    listen(document,'formatx:magbirthcomplete',()=>{
+      // R2223: the completed-film event originates in R533. The original
+      // native viewport read took place synchronously inside R533's
+      // dispatch stack, violating the retired-film no-layout contract.
+      // Queue exactly one native-owned microtask: finish R533 first, then
+      // reconcile the original R326 renderer before the next paint.
+      queueMicrotask(()=>{
+      if(disposed||contextLost||document.hidden||!stage.isConnected)return;
+      const rect=stage.getBoundingClientRect();
+      const onScreen=rect.width>8&&rect.height>8&&rect.right>0&&rect.bottom>0
+        &&rect.left<innerWidth&&rect.top<innerHeight;
+      if(!onScreen)return;
+      visible=true;
+      root.dataset.fxMagNativeHandoffR2218='visible-reconciled';
+      // R2222: P0 verified a genuine first-viewport compositing mismatch:
+      // the element screenshot paints the MAG, but the identical full
+      // viewport does not. Playwright's stage screenshot first reconciles
+      // native scroll/compositing. Request that same *real* browser viewport
+      // reconciliation in production, only if the entire native stage is
+      // ALREADY visible. This cannot jump the visitor to another section.
+      const entirelyVisible=rect.top>=0&&rect.left>=0
+        &&rect.bottom<=innerHeight&&rect.right<=innerWidth;
+      if(entirelyVisible){
+        try{
+          stage.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+          root.dataset.fxMagNativeCompositorR2222='already-onscreen-scroll-reconciled';
+        }catch(_){root.dataset.fxMagNativeCompositorR2222='scroll-reconcile-unavailable';}
+      }
+      // R2220: R2219 black-frame proof showed that a queued RAF is not
+      // guaranteed to run, even 350 ms after teardown, and the visitor
+      // may have intentionally paused all ongoing motion. One synchronous
+      // paint of the original GL canvas is still required to reveal a
+      // STATIC MAG on the newly exposed page. It starts no animation loop.
+      try{
+        render(performance.now());
+        /* R2226: flush only queues commands; it does not prove the final
+           physical framebuffer is complete before the compositor captures
+           the newly exposed native MAG. Finish ONCE at film teardown only.
+           Read a tiny center patch to distinguish GL content from a dark
+           full-viewport screenshot without changing the user-visible image. */
+        const gpuStarted=performance.now();
+        gl.flush();
+        gl.finish();
+        const gpuFinishedMs=performance.now()-gpuStarted;
+        const centerPatch=new Uint8Array(8*8*4);
+        const px=Math.max(0,Math.floor((canvas.width-8)/2));
+        const py=Math.max(0,Math.floor((canvas.height-8)/2));
+        gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),
+          gl.RGBA,gl.UNSIGNED_BYTE,centerPatch);
+        let patchLumaPeak=0,patchAlphaPeak=0;
+        for(let i=0;i<centerPatch.length;i+=4){
+          patchLumaPeak=Math.max(patchLumaPeak,
+            centerPatch[i],centerPatch[i+1],centerPatch[i+2]);
+          patchAlphaPeak=Math.max(patchAlphaPeak,centerPatch[i+3]);
+        }
+        root.dataset.fxMagHandoffGpuR2226='finished';
+        root.dataset.fxMagHandoffGpuMsR2226=gpuFinishedMs.toFixed(1);
+        root.dataset.fxMagHandoffPixelR2226=
+          patchLumaPeak+','+patchAlphaPeak;
+        root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
+      }catch(error){
+        root.dataset.fxMagNativePresentR2220='paint-unavailable';
+        console.warn('FormatX native MAG final presentation:',error);
+      }
+      // Preserve the existing bounded dynamic follow-up only when unpaused.
+      if(!paused&&root.dataset.fxReferenceMotionPaused!=='true'){
+        schedule(2);
+        requestAnimationFrame(()=>{
+          if(disposed||contextLost||document.hidden||!stage.isConnected)return;
+          const current=stage.getBoundingClientRect();
+          if(current.right<=0||current.bottom<=0||
+             current.left>=innerWidth||current.top>=innerHeight)return;
+          visible=true;
+          schedule(1);
+          root.dataset.fxMagNativeHandoffR2218='post-overlay-frame-requested';
+        });
+      }
+      });
+    },{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
     listen(window,'formatx:storychapter',()=>signalPhysiology('curiosity','story-chapter'),{passive:true});
     listen(document,'input',()=>{targetEnergy=Math.max(targetEnergy,.60);targetBreath=Math.max(targetBreath,.30);schedule(mobile?1:2);},{passive:true});
@@ -2582,8 +2736,11 @@
     },{threshold:[0,.04]});
     io.observe(stage);
     const sectionPhysiology={
+      // The same original MAG responds to every primary section: pages are
+      // physiological organs of one living system, not separate 3D widgets.
       hero:'homeostasis',experience:'attention',capabilities:'activation',
-      pricing:'heartbeat',system:'stability',resources:'curiosity'
+      pricing:'heartbeat',system:'stability',network:'system-attention',
+      resources:'curiosity'
     };
     const organObserver=new IntersectionObserver(entries=>{
       const candidate=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
@@ -2594,12 +2751,77 @@
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
 
+    /* R2213 — one MAG births the whole site. Sections are already in the
+       semantic document for indexing, assistive technology and deep links,
+       but sighted users see them only when the original MAG materializes
+       each chapter. No second canvas, animation loop or scroll handler.
+       Native IntersectionObserver also covers touch, keyboard, back/forward
+       restores and programmatic navigation in either direction. */
+    const extractionTargets=Array.from(
+      document.querySelectorAll('#main-content > section.scene:not(#hero)')
+    );
+    const extractionEnabled=!auditMode&&!reduced.matches
+      &&typeof IntersectionObserver==='function';
+    let extractObserver=null,extractedCount=0;
+    if(extractionEnabled&&extractionTargets.length){
+      for(const section of extractionTargets){
+        section.dataset.fxMagRevealR2213='waiting';
+      }
+      root.dataset.fxMagExtractionR2213='armed';
+      const materializeSection=section=>{
+        if(section.dataset.fxMagRevealR2213!=='waiting')return;
+        section.dataset.fxMagRevealR2213='revealed';
+        extractObserver?.unobserve(section);
+        extractedCount+=1;
+        root.dataset.fxMagRevealedCountR2213=String(extractedCount);
+        const id=section.id||'chapter';
+        signalPhysiology(sectionPhysiology[id]||'curiosity',
+          'mag-materialize-'+id,false,false);
+        dispatchEvent(new CustomEvent('formatx:magmaterialize',{
+          detail:{section:id,index:extractedCount,owner:'original-r326-mag'}
+        }));
+      };
+      extractObserver=new IntersectionObserver(entries=>{
+        for(const entry of entries.filter(item=>item.isIntersecting)
+          .sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top))
+          materializeSection(entry.target);
+      },{rootMargin:'0px 0px -12% 0px',threshold:0.005});
+      for(const section of extractionTargets)extractObserver.observe(section);
+      // A keyboard or programmatic focus must never land invisibly on a
+      // yet-unmaterialized chapter. Reveal without an extra scroll listener.
+      listen(document,'focusin',event=>{
+        if(!(event.target instanceof Element))return;
+        const target=event.target.closest(
+          '#main-content > section.scene[data-fx-mag-reveal-r2213="waiting"]'
+        );
+        if(target)materializeSection(target);
+      },{passive:true});
+      listen(reduced,'change',()=>{
+        if(!reduced.matches)return;
+        root.dataset.fxMagExtractionR2213='accessible-immediate';
+        extractObserver?.disconnect();
+        for(const section of extractionTargets)
+          if(section.dataset.fxMagRevealR2213==='waiting')
+            section.dataset.fxMagRevealR2213='revealed';
+      },{passive:true});
+    }else{
+      root.dataset.fxMagExtractionR2213='accessible-immediate';
+    }
+
     function destroy(){
       if(disposed)return;disposed=true;
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;
+      // No chapter may remain visually concealed when WebGL is lost,
+      // the renderer is replaced, or reduced-fidelity mode takes over.
+      root.dataset.fxMagExtractionR2213='released';
+      extractObserver?.disconnect();
+      extractionTargets.forEach(section=>{
+        if(section.dataset.fxMagRevealR2213==='waiting')
+          section.dataset.fxMagRevealR2213='revealed';
+      });
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
       for(const pass of scenePasses){try{pass.dispose?.();}catch(_){}}scenePasses.clear();

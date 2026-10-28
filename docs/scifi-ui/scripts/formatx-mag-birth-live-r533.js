@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261028-r2207-filtered-silver-living-optic';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261028-r2217-studio-spectral-titanium';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -714,6 +714,11 @@
   }
 
   function syncTarget(force=false) {
+    // R2221: after the last film frame, ONLY the native R326 owns layout.
+    // An obsolete deferred birth/resize callback must not read the stage
+    // rectangle (or mutate the detached film's CSS variables). The R2173
+    // retired-intro test correctly forbids even one such late geometry read.
+    if(finished||!overlay.isConnected)return;
     const now = performance.now();
     if (!force && now-lastTargetSync < 180) return;
     lastTargetSync = now;
@@ -1023,11 +1028,73 @@
     ctx.globalCompositeOperation='source-over';
   }
 
+  /* R2219: Chromium can keep the cinematic full-viewport compositing
+     surface until its next style/hit-test reconciliation, despite the DOM
+     overlay being removed and R326 reporting a painted GL frame.
+     Verified symptom: a black FULL viewport, followed by a visible MAG
+     when a Playwright locator triggered a hit-test/scroll. Force the
+     document's actual hit-test and computed style once at teardown,
+     before requesting final native display frames. No ongoing work. */
+  function reconcileExposedCompositorR2219(){
+    try{
+      const canvas=document.querySelector(
+        '#hero .fx-crystal-organism-r326-canvas'
+      );
+      const rect=canvas?.getBoundingClientRect();
+      const sites=[
+        [rect?rect.left+rect.width*.5:innerWidth*.25,
+         rect?rect.top+rect.height*.5:innerHeight*.35],
+        [Math.min(innerWidth-1,160),Math.min(innerHeight-1,45)],
+        [Math.min(innerWidth-20,innerWidth*.68),
+         Math.min(innerHeight-20,innerHeight*.38)]
+      ];
+      for(const [x,y] of sites){
+        for(const el of document.elementsFromPoint(x,y).slice(0,12)){
+          const computed=getComputedStyle(el);
+          // Read used style after the layer tree was invalidated by
+          // removing the cinematic occluder. No style mutation.
+          void computed.opacity;
+          void computed.visibility;
+          void computed.display;
+          void computed.position;
+          void computed.backgroundColor;
+        }
+      }
+      ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flushed';
+    }catch(_){
+      ROOT.dataset.fxMagCompositorR2219='reconciliation-unavailable';
+    }
+  }
+
   function safeTeardownOverlay(source) {
+    if(!overlay.isConnected)return;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    ROOT.dataset.fxIntroPrepaintR1611='complete';
+    reconcileExposedCompositorR2219();
+    // R2211: a finished R326 renderer may have spent its final burst frames
+    // behind the cinematic overlay and then gone deliberately idle. The
+    // backdrop disappears 180 ms AFTER finish(), so drawing before removal
+    // is not proof that Chromium has presented the exposed WebGL canvas.
+    // Commit one real frame after the occluder is removed, then one bounded
+    // follow-up on the next display opportunity. No continuing RAF or extra
+    // renderer is created; normal idle remains zero frames.
+    try {
+      locateStage();
+      coreApi?.requestRender?.(2);
+      ROOT.dataset.fxMagBirthPostTeardownRenderR2211='requested';
+      requestAnimationFrame(()=>{
+        if(document.hidden||!stage?.isConnected)return;
+        coreApi?.requestRender?.(1);
+        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='present-frame-scheduled';
+      });
+    } catch (_) { ROOT.dataset.fxMagBirthPostTeardownRenderR2211='unavailable'; }
+    // R2210: the parser-only first-paint permission must not remain "show"
+    // once its adopted cinematic node has left the document.
+    // This cannot affect the first DNA frame, and prevents later scripts
+    // from treating a finished intro as an active prepaint surface.
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
@@ -1353,6 +1420,19 @@
       try{filmRenderer?.destroy?.();}catch(_){}
       filmRenderer=null;
       overlay.remove();
+      ROOT.dataset.fxIntroPrepaintR1611='complete';
+      reconcileExposedCompositorR2219();
+      // R2211: watchdog teardown must also expose a freshly painted native
+      // frame; do not leave a painted-but-uncomposited WebGL canvas behind.
+      try {
+        locateStage();
+        coreApi?.requestRender?.(2);
+        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='watchdog-requested';
+        requestAnimationFrame(()=>{
+          if(document.hidden||!stage?.isConnected)return;
+          coreApi?.requestRender?.(1);
+        });
+      } catch (_) {}
       try{
         document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
