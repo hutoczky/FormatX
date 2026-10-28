@@ -2801,7 +2801,11 @@
       // Preserve the established ten-second camera and end-state framing.
       // R2167: the embryonic cell must fill the lens as an actual subject,
       // not read as a tiny smooth bead behind distracting orbiting DNA.
-      const embryoScale=this.mobileRender?.90:.90;
+      // R2216: on 390px portraits the R2215 cell filled 100% of viewport
+      // width, cropping the membrane and flattening the apparent depth.
+      // Preserve the 3D subject and cell microstructure with a clear ~15%
+      // breathing margin, while leaving desktop cinematic scale unchanged.
+      const embryoScale=this.mobileRender?.74:.90;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
