@@ -26,9 +26,10 @@ const tokens = [
   [intro, "if(finished||!overlay.isConnected)return;"],
   [mag, 'render(performance.now());'],
   [mag, 'gl.flush();'],
-  [mag, 'async function finishBoot(program)'],
-  [mag, 'await new Promise(resolve=>setTimeout(resolve,0));'],
-  [mag, 'if(index===1||index===3||index===5)'],
+  [mag, 'function finishBoot(program)'],
+  [mag, 'buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]))'],
+  [mag, 'if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity)'],
+  [mag, 'let lastRefreshTelemetryAt=-Infinity;'],
   [mag, 'float tissueFold=sin('],
   [mag, 'float coralOrganelles=smoothstep(.61,.84,'],
   [mag, 'lensColor+=vec3(.93,.235,.145)*coralOrganelles'],
@@ -71,7 +72,7 @@ assert(worker.includes('const INLINE_R2220_BOOT_HASH = "' + hash + '";'),
 assert((worker.match(/\$\{INLINE_R2220_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261028-r2223-yielded-native-uploads';
+const magRevision = '20261028-r2224-atomic-mag-telemetry-throttle';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(rescue.includes('20261028-r2220-direct-gl-handoff'),
   'Parser fallback must load R2219 canonical bridge only');
