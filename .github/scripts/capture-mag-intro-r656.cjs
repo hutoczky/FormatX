@@ -362,7 +362,43 @@ const SHOTS=[
           };
         });
   
-        await page.screenshot({path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false});
+        // R2209: measure the TRUE full viewport BEFORE locator.screenshot
+        // can scroll or trigger a fresh WebGL compositing pass. The previous
+        // archive showed an almost black handoff even though the subsequent
+        // cropped stage screenshot looked correct. Decode the captured PNG in
+        // browser memory; this test-only 2D canvas is never attached to site.
+        const handoffPng=await page.screenshot({
+          path:path.join(OUT,'06-post-intro-handoff.png'),fullPage:false
+        });
+        state.handoffPixels=await page.evaluate(async({png,rect})=>{
+          if(!rect||rect.w<40||rect.h<40)return {visible:false,bright:0,samples:0};
+          const img=new Image();
+          img.src='data:image/png;base64,'+png;
+          await img.decode();
+          const scratch=document.createElement('canvas');
+          scratch.width=img.naturalWidth;
+          scratch.height=img.naturalHeight;
+          const ctx=scratch.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(img,0,0);
+          const x0=Math.max(0,Math.floor(rect.x+rect.w*.23));
+          const y0=Math.max(0,Math.floor(rect.y+rect.h*.20));
+          const x1=Math.min(scratch.width,Math.ceil(rect.x+rect.w*.77));
+          const y1=Math.min(scratch.height,Math.ceil(rect.y+rect.h*.80));
+          if(x1<=x0||y1<=y0)return {visible:false,bright:0,samples:0};
+          const image=ctx.getImageData(x0,y0,x1-x0,y1-y0);
+          let bright=0,samples=0;
+          for(let y=0;y<image.height;y+=3)for(let x=0;x<image.width;x+=3){
+            const i=(y*image.width+x)*4;
+            const r=image.data[i],g=image.data[i+1],b=image.data[i+2];
+            if((r+g+b)/3>60&&Math.max(r,g,b)>105)bright++;
+            samples++;
+          }
+          return {visible:true,bright,samples,region:{x:x0,y:y0,w:x1-x0,h:y1-y0}};
+        },{png:handoffPng.toString('base64'),rect:state.canvasRect});
+        if(!state.handoffPixels.visible||state.handoffPixels.bright<40){
+          errors.push('R2209 full-viewport MAG is black, despite renderer-ready: '+
+            JSON.stringify(state.handoffPixels)+' '+JSON.stringify(state.canvasRect));
+        }
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'07-native-hero-mag.png');
         report.push({seconds:'post-intro',name:'06-post-intro-handoff',state,errors});
