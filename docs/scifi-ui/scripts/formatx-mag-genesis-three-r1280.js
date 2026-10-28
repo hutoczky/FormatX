@@ -330,6 +330,35 @@
       this.scene.add(mesh);
     }
 
+    makeDNAFiberTexture(){
+      // R2214: authentic phosphate-fiber microrelief, synthesized once.
+      // One shared 64 x 64 GPU texture on the existing physical helices;
+      // no external image, no render target, no animated texture upload.
+      if(this.dnaFiberTexture)return this.dnaFiberTexture;
+      const T=this.THREE,size=64;
+      const pixels=new Uint8Array(size*size*4);
+      const fract=x=>x-Math.floor(x);
+      for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+        const grain=fract(Math.sin(x*127.1+y*311.7)*43758.5453);
+        const fibril=Math.sin(x*.58+.23*Math.sin(y*.29));
+        const cross=Math.sin(y*1.03+x*.24);
+        const density=Math.max(0,Math.min(255,
+          129+34*fibril+19*cross+14*(grain-.5)));
+        const i=(y*size+x)*4;
+        pixels[i]=pixels[i+1]=pixels[i+2]=Math.round(density);
+        pixels[i+3]=255;
+      }
+      const texture=new T.DataTexture(pixels,size,size,T.RGBAFormat);
+      texture.wrapS=texture.wrapT=T.RepeatWrapping;
+      texture.repeat.set(5,3);
+      texture.magFilter=T.LinearFilter;
+      texture.minFilter=T.LinearMipmapLinearFilter;
+      texture.generateMipmaps=true;
+      texture.needsUpdate=true;
+      this.dnaFiberTexture=texture;
+      return texture;
+    }
+
         createHelix(length=4.7,radius=.28,turns=4.1){
       const T=this.THREE;
       const group=new T.Group();
@@ -351,14 +380,17 @@
 
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
+      const phosphateTexture=this.makeDNAFiberTexture();
       const ma=new T.MeshPhysicalMaterial({
         color:0x9cc6ea,emissive:0x28538d,emissiveIntensity:1.08,
         roughness:.225,metalness:.11,transparent:true,opacity:.93,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
         depthWrite:false,clearcoat:.88,clearcoatRoughness:.085
       });
       const mb=new T.MeshPhysicalMaterial({
         color:0xc2a2eb,emissive:0x5e3997,emissiveIntensity:1.05,
         roughness:.23,metalness:.10,transparent:true,opacity:.92,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
         depthWrite:false,clearcoat:.86,clearcoatRoughness:.10
       });
       const ga=new T.MeshBasicMaterial({
@@ -3277,6 +3309,7 @@
         else m?.dispose?.();
       });
       this.embryoTexture?.dispose?.();
+      this.dnaFiberTexture?.dispose?.();
       this.microFiberTexture?.dispose?.();
       this.studioEnvironmentTexture?.dispose?.();
       this.studioEnvTarget?.dispose?.();
