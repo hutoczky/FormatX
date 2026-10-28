@@ -225,23 +225,45 @@
           }
           void main(){
             vec2 q=vUv;
-            float drift=.016*sin(uTime*.00012+q.y*8.0);
-            float fold=.5+.5*sin(q.x*13.0-q.y*7.0+sin(q.y*11.0)*.75+uTime*.00017);
-            float cool=haze(q,vec2(.26+drift,.55),vec2(1.14,1.15));
-            float violet=haze(q,vec2(.73-drift,.40),vec2(1.30,1.18));
-            float aqua=haze(q,vec2(.53,.54+drift),vec2(1.0,.94));
+            // R2214: volumetric-looking spectral flow, evaluated inside the
+            // SAME existing atmosphere shader and single draw call.
+            // Three coherent depth layers move at different rates. Avoid
+            // noisy full-resolution texture uploads, screen-sized bloom or
+            // additional RAF/canvas passes on Android.
+            float drift=.022*sin(uTime*.00012+q.y*7.0);
+            float fold=.5+.5*sin(q.x*13.0-q.y*7.0+
+              sin(q.y*11.0)*.75+uTime*.00017);
+            float cool=haze(q,vec2(.24+drift,.57),vec2(1.18,1.22));
+            float violet=haze(q,vec2(.74-drift,.39),vec2(1.30,1.20));
+            float aqua=haze(q,vec2(.53,.52+drift),vec2(1.06,.98));
+            vec2 stream=(q-.5)*vec2(1.55,1.0);
+            float fluid=sin(stream.x*7.2+stream.y*11.0+
+              1.65*sin(stream.y*4.6+uTime*.00015));
+            float filament=pow(max(0.0,1.0-abs(fluid)),10.0);
+            float turbulence=.5+.5*sin(q.x*17.0-q.y*12.0+
+              uTime*.00008)*sin(q.y*15.0+q.x*5.0);
+            float vapor=smoothstep(.30,.78,.62*fold+.38*turbulence);
             float dna=1.0-smoothstep(2.60,3.85,uPhase);
             float embryo=smoothstep(2.95,3.72,uPhase)*
               (1.0-smoothstep(5.14,6.04,uPhase));
-            vec3 col=vec3(.002,.005,.012);
-            col+=vec3(.008,.041,.084)*cool*dna*(.63+.37*fold);
-            col+=vec3(.055,.014,.095)*violet*dna*(.55+.45*(1.0-fold));
-            col+=vec3(.007,.063,.070)*aqua*embryo*(.72+.28*fold);
-            col+=vec3(.026,.006,.032)*violet*embryo*.19;
-            // A restrained central vignette gives cinematic contrast
-            // without blowing out the physically lit molecular silhouette.
-            float vignette=1.0-.30*length((q-.5)*vec2(1.18,.90));
-            gl_FragColor=vec4(col*clamp(vignette,.66,1.0),1.0);
+            float metal=smoothstep(5.70,7.60,uPhase);
+            vec3 col=vec3(.003,.006,.015);
+            // Deep-blue ultraviolet haze catches the thick physical DNA.
+            col+=vec3(.028,.075,.155)*cool*dna*(.42+.58*vapor);
+            col+=vec3(.095,.039,.165)*violet*dna*(.45+.55*(1.0-fold));
+            col+=vec3(.020,.22,.26)*filament*cool*dna*.58;
+            col+=vec3(.10,.038,.20)*filament*violet*dna*.37;
+            // The cell is born into the same spectral volume: the colors
+            // evolve, rather than cutting to a different flat background.
+            col+=vec3(.026,.135,.139)*aqua*embryo*(.46+.54*vapor);
+            col+=vec3(.066,.022,.080)*violet*embryo*.34;
+            col+=vec3(.026,.22,.20)*filament*aqua*embryo*.40;
+            // Remaining silver MAG retains depth, but the optical organ
+            // stays brighter than its surrounding atmosphere.
+            col+=vec3(.012,.045,.060)*aqua*metal*(.35+.45*vapor);
+            col+=vec3(.023,.013,.046)*violet*metal*.30;
+            float vignette=1.0-.40*length((q-.5)*vec2(1.20,.94));
+            gl_FragColor=vec4(col*clamp(vignette,.54,1.0),1.0);
           }`
       });
       const mesh=new T.Mesh(new T.PlaneGeometry(2,2),material);
