@@ -2588,6 +2588,34 @@
     listen(window,'formatx:loop',()=>{signalPhysiology('renewal','site-loop');boost(.92,mobile?4:6);},{passive:true});
     listen(window,'formatx:menustatechange',event=>signalPhysiology(event.detail?.open?'attention':'stability',event.detail?.open?'menu-open':'menu-close'),{passive:true});
     listen(window,'formatx:languagechange',()=>signalPhysiology('curiosity','language-change'),{passive:true});
+    /* R2218: when the cinematic DOM occluder is removed, the original
+       observer may still report 'not intersecting' from the covered frame.
+       Reconcile against the REAL viewport and paint the *same* WebGL owner
+       after exposure, without starting a second renderer or idle loop.
+       This only runs on one film-end event, never during DNA/embryo. */
+    listen(document,'formatx:magbirthcomplete',()=>{
+      if(disposed||contextLost||document.hidden||!stage.isConnected)return;
+      const rect=stage.getBoundingClientRect();
+      const onScreen=rect.width>8&&rect.height>8&&rect.right>0&&rect.bottom>0
+        &&rect.left<innerWidth&&rect.top<innerHeight;
+      if(!onScreen)return;
+      visible=true;
+      root.dataset.fxMagNativeHandoffR2218='visible-reconciled';
+      // A bounded explicit repaint is safe even if the normal intersection
+      // callback has yet to run. Request two additional presentation frames.
+      if(!paused&&root.dataset.fxReferenceMotionPaused!=='true'){
+        schedule(2);
+        requestAnimationFrame(()=>{
+          if(disposed||contextLost||document.hidden||!stage.isConnected)return;
+          const current=stage.getBoundingClientRect();
+          if(current.right<=0||current.bottom<=0||
+             current.left>=innerWidth||current.top>=innerHeight)return;
+          visible=true;
+          schedule(1);
+          root.dataset.fxMagNativeHandoffR2218='post-overlay-frame-requested';
+        });
+      }
+    },{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
     listen(window,'formatx:storychapter',()=>signalPhysiology('curiosity','story-chapter'),{passive:true});
     listen(document,'input',()=>{targetEnergy=Math.max(targetEnergy,.60);targetBreath=Math.max(targetBreath,.30);schedule(mobile?1:2);},{passive:true});
