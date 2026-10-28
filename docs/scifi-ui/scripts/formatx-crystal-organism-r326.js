@@ -354,14 +354,19 @@
       };
     }
 
+    // R2245: immutable per-triangle barycentric coordinates are shared rather
+    // than allocated for every face; shader inputs and vertex ordering match.
+    const faceBarycentric=[[1,0,0],[0,1,0],[0,0,1]];
     function triangle(vertices, facet) {
       let crystalNormal = normalize(cross(
         subtract(vertices[1].crystal, vertices[0].crystal),
         subtract(vertices[2].crystal, vertices[0].crystal)
       ));
-      const centre = [0, 1, 2].map(index => (
-        vertices[0].crystal[index] + vertices[1].crystal[index] + vertices[2].crystal[index]
-      ) / 3);
+      const centre = [
+        (vertices[0].crystal[0]+vertices[1].crystal[0]+vertices[2].crystal[0])/3,
+        (vertices[0].crystal[1]+vertices[1].crystal[1]+vertices[2].crystal[1])/3,
+        (vertices[0].crystal[2]+vertices[1].crystal[2]+vertices[2].crystal[2])/3
+      ];
       /* R1556 — normal correction alone was not enough: BACK-face culling uses
          vertex winding, not the supplied normal. Reverse inward triangles so the
          closed mineral shell cannot develop the black pin-holes seen in real
@@ -370,30 +375,21 @@
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
-      const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      const barycentric=faceBarycentric;
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
-      const bodySeamOverlap=0;
-      const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
-        (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
-      ):null;
+      // R2255: the closed shell has no seam overlap. Remove the dead
+      // branch while preserving emitted positions and triangle order.
+      // R2257: material blend is constant across all three vertices of a
+      // triangle. Evaluate it once per face without changing vertex output.
+      const metalFacet=facet>=5.0&&facet<6.0;
+      const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
+        (facet<2.0?(mobile?.985:(software?.94:.90)):
+        (software?.95:(mobile?.985:(constrained?.972:.978))));
+      const faceWeight=1-smoothWeight;
       vertices.forEach((item, index) => {
-        if(bodySeamOverlap){
-          const k=1+bodySeamOverlap;
-          sphere.push(
-            sphereCentre[0]+(item.sphere[0]-sphereCentre[0])*k,
-            sphereCentre[1]+(item.sphere[1]-sphereCentre[1])*k,
-            sphereCentre[2]+(item.sphere[2]-sphereCentre[2])*k
-          );
-          crystal.push(
-            centre[0]+(item.crystal[0]-centre[0])*k,
-            centre[1]+(item.crystal[1]-centre[1])*k,
-            centre[2]+(item.crystal[2]-centre[2])*k
-          );
-        }else{
-          sphere.push(...item.sphere);
-          crystal.push(...item.crystal);
-        }
+        sphere.push(...item.sphere);
+        crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
@@ -402,12 +398,7 @@
         // R2144: the machined raised armour is truly bevelled. A controlled
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
-        const metalFacet=facet>=5.0&&facet<6.0;
-        // R2177: avoid jagged per-triangle metal shading on the phone.
-        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
-          (facet<2.0?(mobile?.985:(software?.94:.90)):
-          (software?.95:(mobile?.985:(constrained?.972:.978))));
-        const faceWeight=1-smoothWeight;
+        // R2177: preserve the mobile metal-facet smoothing weights.
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
           smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
@@ -423,16 +414,23 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    // R2244: adjacent cells share the exact same analytical vertices.
+    // Compute each latitude row once instead of rebuilding all four corners
+    // per cell; triangle order, winding, attributes and tessellation stay intact.
+    const makeLatitudeRow=lat=>Array.from({length:longitudeSegments+1},(_,lon)=>vertex(lat,lon));
+    let upperRow=makeLatitudeRow(0);
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const lowerRow=makeLatitudeRow(lat+1);
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=upperRow[lon];
+        const b=upperRow[lon+1];
+        const c=lowerRow[lon];
+        const d=lowerRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+      upperRow=lowerRow;
     }
 
     /* R1982 — real microfibril geometry.
@@ -979,6 +977,16 @@
     stage.dataset.revision = REVISION;
     stage.dataset.active = 'true';
     stage.setAttribute('aria-hidden','true');
+    // R2246: reserve the permanent MAG compositor inside the existing hero
+    // without letting its late DOM insertion participate in document flow.
+    // Size the stage before prepend and the canvas before append: the browser
+    // must never lay out an intrinsic 300x150 canvas during the Genesis handoff.
+    stage.style.setProperty('position','absolute','important');
+    stage.style.setProperty('inset','0','important');
+    stage.style.setProperty('width','100%','important');
+    stage.style.setProperty('height','100%','important');
+    stage.style.setProperty('min-width','0','important');
+    stage.style.setProperty('min-height','0','important');
     // R2173: if the permanent WebGL core mounts during the 10-second birth
     // film, it must start completely invisible. R533 owns the gradual
     // reveal only AFTER the final titanium assembly has seated.
@@ -993,6 +1001,11 @@
     const canvas = document.createElement('canvas');
     canvas.className = 'fx-core-mobile-v55-canvas fx-crystal-organism-r326-canvas';
     canvas.setAttribute('aria-hidden','true');
+    canvas.style.setProperty('position','absolute','important');
+    canvas.style.setProperty('inset','0','important');
+    canvas.style.setProperty('width','100%','important');
+    canvas.style.setProperty('height','100%','important');
+    canvas.style.setProperty('display','block','important');
     stage.appendChild(canvas);
     /* R1559 owns the final compositor treatment inline so dynamically loaded
        legacy CSS cannot restore synthetic drop-shadow optics. Keep the correction
@@ -1481,6 +1494,17 @@
         physicalLens+=vec3(.44,.57,.57)*lensEdge*(.07+.08*softboxA+.05*sideSpec);
         physicalLens=mix(physicalLens,vec3(.003,.014,.018),lensDepthShade*.09);
         physicalLens+=vec3(.58,.82,.86)*lensGlint*.10;
+        /* R2248: reference-grade luminous optical iris, not a flat painted
+           cyan disk. Three concentric glass depths and a slow, bounded
+           caustic breathe in the existing single fragment pass. */
+        float irisRing=exp(-pow((lensRadial-.305)/.052,2.0));
+        float irisPupil=exp(-pow(lensRadial/.145,2.0));
+        float irisCaustic=.5+.5*sin(atan(lensVector.y,lensVector.x)*9.0
+          +lensRadial*28.0-uTime*.31);
+        float irisPulse=.88+.12*sin(uTime*.83);
+        physicalLens+=vec3(.085,.40,.47)*irisRing*(.30+.24*irisCaustic)*irisPulse;
+        physicalLens+=vec3(.24,.77,.86)*irisPupil*(.14+.09*uEnergy)*irisPulse;
+        physicalLens+=vec3(.78,.96,1.00)*lensRim*.095;
         mineral=mix(mineral,physicalLens,lensMeshMask*.997);
 
         float cableSegment=pow(.5+.5*cos(vUv.y*31.4+vUv.x*11.0+uTime*.22),14.0);
@@ -2053,8 +2077,15 @@
     function finishWhenReady() {
       if(!stage.isConnected)return;
       let program;
+      const shaderPollStart=performance.now();
       try { program=finishProgram(gl,pendingProgram); }
       catch(error){ failShader(error); return; }
+      const shaderPollMs=performance.now()-shaderPollStart;
+      if(shaderPollMs>0.5){
+        root.dataset.fxCoreShaderPollMaxMsR2252=Math.max(
+          shaderPollMs,Number(root.dataset.fxCoreShaderPollMaxMsR2252||0)
+        ).toFixed(2);
+      }
       if(!program){
         shaderPollCount+=1;
         if(shaderPollCount>750){failShader(new Error('crystal organism parallel shader compile timeout'));return;}
@@ -2062,13 +2093,36 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
-      finishBoot(program);
+      // R2245: yield once between shader completion and the expensive CPU mesh
+      // build. The permanent MAG is still constructed from the same geometry;
+      // no Lighthouse-specific bypass and no change to the Genesis timeline.
+      // This avoids chaining shader compilation and mesh creation into one task.
+      setTimeout(() => {
+        if(!stage.isConnected)return;
+        // R2257: build the identical immutable mesh in its own task. Yield
+        // before WebGL allocation/upload so tessellation and driver work do
+        // not accumulate in one Total Blocking Time interval.
+        const geometryStart=performance.now();
+        const geometry=buildOrganismGeometry(softwareRenderer);
+        const geometryEnd=performance.now();
+        setTimeout(() => {
+          if(stage.isConnected)finishBoot(program,geometry,geometryStart,geometryEnd);
+        },0);
+      }, 0);
     }
     finishWhenReady();
     return;
 
-    function finishBoot(program) {
-    const geometry=buildOrganismGeometry(softwareRenderer);
+    function finishBoot(program,geometry,geometryStart,geometryEnd) {
+    // R2257: CPU tessellation finished in the preceding task. Upload and
+    // renderer initialization keep their original order and identical data.
+    const geometryBuildMs=geometryEnd-geometryStart;
+    root.dataset.fxCoreGeometryBuildMsR2202=geometryBuildMs.toFixed(2);
+    try{
+      performance.measure('formatx:r326:geometry-build-r2202',{
+        start:geometryStart,end:geometryEnd
+      });
+    }catch(_){}
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -2091,7 +2145,34 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
+    // R2203: isolate synchronous WebGL buffer allocation/upload cost from
+    // CPU geometry generation. No GPU synchronization or extra draw calls.
+    const uploadStart=performance.now();
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    const uploadEnd=performance.now();
+    root.dataset.fxCoreBufferUploadMsR2203=(uploadEnd-uploadStart).toFixed(2);
+    // R2252: distinguish CPU tessellation, driver upload and shader polling
+    // when investigating the 864 ms MAG long task in Lighthouse CI.
+    // The measurements do not change geometry, scheduling or draw calls.
+    // R2258: R2257 yields between geometry and GPU upload. Exclude the
+    // scheduler gap: this telemetry represents active CPU/driver work only.
+    root.dataset.fxCoreBootMeasuredMsR2252=(geometryBuildMs+uploadEnd-uploadStart).toFixed(2);
+    root.dataset.fxCoreBootYieldGapMsR2258=Math.max(0,uploadStart-geometryEnd).toFixed(2);
+    try{
+      performance.measure('formatx:r326:geometry-and-upload-r2252',{
+        start:geometryStart,end:uploadEnd
+      });
+    }catch(_){};
+    try{
+      performance.measure('formatx:r326:buffer-upload-r2203',{
+        start:uploadStart,end:uploadEnd
+      });
+    }catch(_){}
+    // R2204: GPU buffers now own the immutable vertex data. Retaining the
+    // seven CPU Float32Arrays for the entire page lifetime needlessly holds
+    // a second copy of the geometry. Rendering only uses count/topology.
+    geometry.arrays.length=0;
+    root.dataset.fxCoreCpuGeometryReleasedR2204='true';
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
@@ -2183,8 +2264,17 @@
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
-      if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
-      width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
+      // R2249: avoid resetting the drawing buffer and viewport on every
+      // ResizeObserver notification when CSS layout changed but pixel size
+      // did not. Canvas width/height writes clear the WebGL drawing buffer.
+      const resolutionChanged=canvas.width!==w||canvas.height!==h;
+      if(resolutionChanged){
+        if(canvas.width!==w)canvas.width=w;
+        if(canvas.height!==h)canvas.height=h;
+      }
+      const viewportChanged=width!==w||height!==h;
+      width=w;height=h;aspect=rect.width/Math.max(1,rect.height);
+      if(resolutionChanged||viewportChanged)gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);

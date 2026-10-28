@@ -43,6 +43,13 @@ const paintDetails=files.map((file,index)=>{
     lcpBreakdown:audits['lcp-breakdown-insight']?.details?.items?.slice(0,3)||[],
     lcpDiscovery:audits['lcp-discovery-insight']?.details?.items?.slice(0,2)||[],
     mainThread:audits['mainthread-work-breakdown']?.details?.items?.slice(0,8)||[],
+    // R2242: expose individual blocking tasks and JS boot cost, rather than
+    // attributing aggregate main-thread time to an unverified script.
+    longTasks:audits['long-tasks']?.details?.items?.slice(0,12)
+      .map(x=>({url:x.url||null,startTime:x.startTime,duration:x.duration}))||[],
+    bootup:audits['bootup-time']?.details?.items?.slice(0,12)
+      .map(x=>({url:x.url||null,total:x.total,scriptEvaluation:x.scriptEvaluation,
+        scriptParseCompile:x.scriptParseCompile}))||[],
     blockers:audits['render-blocking-resources']?.details?.items?.slice(0,12)
       .map(x=>({url:x.url,ms:x.wastedMs}))||[],
     visualProgress:audits['screenshot-thumbnails']?.details?.items?.slice(0,16)

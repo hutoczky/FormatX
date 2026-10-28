@@ -30,7 +30,7 @@ for(const text of [
   'this.embryoChromatin=new T.LineSegments(chromatinGeometry,this.embryoChromatinMaterial);',
   'this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({',
   'this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;',
-  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoMaterial.opacity=.76*visible;',
   "const count=this.mobileRender?6000:9600;",
   "const fade=1-smooth((t-3.10)/1.38);"
 ]){
@@ -41,7 +41,7 @@ assert(birth.includes(filmURL),'R533 loader must request R2188 instead of a stal
 assert(edge.includes(filmURL),'Cloudflare asset rewrite must not downgrade R2188');
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
 const dna=t=>(.82+.18*(1-Math.pow(1-Math.max(0,Math.min(1,t/.30)),3)))*(1-smooth((t-3.10)/1.38));
-const embryo=t=>smooth((t-3.52)/.76)*(1-smooth((t-5.66)/1.12));
+const embryo=t=>smooth((t-3.28)/1.02)*(1-smooth((t-5.66)/1.12));
 const metal=t=>smooth((t-5.88)/1.18);
 const optic=t=>smooth((t-7.44)/.78);
 assert(dna(0)>.8 && embryo(0)===0 && metal(0)===0 && optic(0)===0,

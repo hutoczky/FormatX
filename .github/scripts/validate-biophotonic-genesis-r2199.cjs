@@ -27,7 +27,7 @@ const checks=[
   ['teal/coral cell palette','new T.Color(0xffa257)'],
   ['near-lens DNA approach',"z=mix(this.mobileRender?5.15:4.68,4.88,k);"],
   ['large living cell',"const embryoScale=this.mobileRender?.94:1.07;"],
-  ['translucent biological membrane',"this.embryoMaterial.opacity=.86*visible;"],
+  ['translucent biological membrane',"this.embryoMaterial.opacity=.76*visible;"],
   ['volumetric organelle',"this.embryoNucleusMaterial.opacity=.68*visible;"],
   ['first-frame genome','this.makeGenomeParticles();'],
   ['physical titanium chassis','this.updateMechanical(t,time);'],

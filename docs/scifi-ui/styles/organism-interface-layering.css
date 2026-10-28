@@ -292,6 +292,13 @@ html.fx-organism-menu-open body {
   background: #02070d;
 }
 
+/* R2206: the fullscreen display:block !important rule above has equal
+   specificity to the base [hidden] rule and can override it when this
+   layering stylesheet loads later. Preserve native hidden semantics. */
+.fx-organism-interface-ready .fx-organism-console[hidden] {
+  display: none !important;
+}
+
 .fx-organism-interface-ready .fx-organism-console-backdrop {
   display: none !important;
 }
@@ -310,12 +317,15 @@ html.fx-organism-menu-open body {
     radial-gradient(circle at 82% 8%, rgba(var(--fx-panel-accent), .13), transparent 34%),
     radial-gradient(circle at 18% 92%, rgba(var(--fx-panel-accent), .055), transparent 38%) !important;
   box-shadow: none !important;
+  /* R2210: animate opacity only. Scaling/filtering the entire dialog
+     shifts the close button's hit rectangle while Playwright and touch
+     accessibility tooling wait for a stable clickable target. */
   animation: fx-console-fullscreen-enter .5s cubic-bezier(.18,.82,.18,1) both !important;
 }
 
 @keyframes fx-console-fullscreen-enter {
-  from { opacity: 0; transform: scale(1.018); filter: blur(5px); }
-  to { opacity: 1; transform: scale(1); filter: blur(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .fx-organism-interface-ready .fx-organism-console-head {

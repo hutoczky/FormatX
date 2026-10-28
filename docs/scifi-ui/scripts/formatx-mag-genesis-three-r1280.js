@@ -975,15 +975,18 @@
         // 3D phosphate strands at every base-pair station.
         const helixRadius=.410+(r()-.5)*.013;
         const localX=(u-.5)*3.54;
-        const localY=sign*Math.sin(phase)*helixRadius;
-        const localZ=sign*Math.cos(phase)*helixRadius;
+        // R2228: both DNA strands and chromatid offsets reuse one
+        // trigonometric pair per nucleotide, reducing startup CPU work.
+        const sinPhase=Math.sin(phase),cosPhase=Math.cos(phase);
+        const localY=sign*sinPhase*helixRadius;
+        const localZ=sign*cosPhase*helixRadius;
         const rolledX=localX*cosZ-localY*sinZ;
         const rolledY=localX*sinZ+localY*cosZ;
-        initial.set([
-          origin.x+scale*(rolledX*cosY+localZ*sinY),
-          origin.y+scale*rolledY,
-          origin.z+scale*(-rolledX*sinY+localZ*cosY)
-        ],i*3);
+        // R2226: direct typed-buffer writes avoid per-particle GC churn.
+        const offset=i*3;
+        initial[offset]=origin.x+scale*(rolledX*cosY+localZ*sinY);
+        initial[offset+1]=origin.y+scale*rolledY;
+        initial[offset+2]=origin.z+scale*(-rolledX*sinY+localZ*cosY);
         // R2198: sample chromatin once per base pair. Both visible DNA
         // phosphate strands now travel into one biological membrane site,
         // then leave that same site together for the same MAG arm.
@@ -1000,11 +1003,9 @@
         // The tiny phase-opposed offset makes the paired DNA observable,
         // while maintaining physical continuity through condensation.
         const chromatide=.014;
-        cell.set([
-          pairCellX+sign*chromatide*Math.cos(phase),
-          pairCellY+sign*chromatide*Math.sin(phase),
-          pairCellZ+sign*chromatide*.55*Math.cos(phase*.5)
-        ],i*3);
+        cell[offset]=pairCellX+sign*chromatide*cosPhase;
+        cell[offset+1]=pairCellY+sign*chromatide*sinPhase;
+        cell[offset+2]=pairCellZ+sign*chromatide*.55*Math.cos(phase*.5);
         // Both nucleotides at one base-pair station share one arm destination.
         // The old i%4 tied cyan to N/S and violet to E/W: not a double helix.
         const axis=Math.floor(i/2)%4,phi=axis*Math.PI*.5;
@@ -1023,11 +1024,11 @@
         const depth=sign*Math.sin(armTwist)*armRadius;
         // Physical cyan/violet coils seat just above the titanium arm
         // surface, then fade before the recessed optical organ wakes.
-        arms.set([
-          Math.cos(phi)*reach-Math.sin(phi)*lateral,
-          Math.sin(phi)*reach+Math.cos(phi)*lateral,
-          .62+depth
-        ],i*3);
+        // R2225: write directly into typed GPU staging buffers instead
+        // of allocating 3 short-lived arrays per nucleotide.
+        arms[offset]=Math.cos(phi)*reach-Math.sin(phi)*lateral;
+        arms[offset+1]=Math.sin(phi)*reach+Math.cos(phi)*lateral;
+        arms[offset+2]=.62+depth;
         armIndex[i]=axis;
         // Cyan strand A, violet strand B: one identifiable double helix.
         seed[i]=strand===0?r()*.42:.58+r()*.42;
@@ -1061,6 +1062,14 @@
             float armBeat=aArmIndex*.11;
             float assemble=curve(5.34+armBeat,6.90+armBeat,uPhase);
             vec3 p=mix(position,aCell,condense);
+            // R2221: chromatin must breathe as a single living nucleus, not
+            // resemble a frozen particle shell. The radial envelope reaches
+            // zero during the DNA opening and at the mechanical arm landing;
+            // paired nucleotides retain their shared chromatin anchor.
+            float living=condense*(1.0-assemble);
+            float nucleusBreath=1.0+.023*sin(uTime*.0021);
+            vec3 cellCentre=vec3(0.0,0.0,1.10);
+            p+=living*(nucleusBreath-1.0)*(aCell-cellCentre);
             p=mix(p,aArm,assemble);
             // Physically curl the genetic matter toward its destination,
             // with zero residual motion at either endpoint of the morph.
@@ -1073,14 +1082,14 @@
             float coil=1.0-curve(2.94,4.38,uPhase);
             p.x+=coil*.018*sin(uTime*.00082+aSeed*32.0);
             p.y+=.013*sin(uTime*.0011+aSeed*20.0)*(1.0-assemble);
-            p.z+=.012*cos(uTime*.00072+aSeed*17.0);
+            p.z+=.012*cos(uTime*.00072+aSeed*17.0)*(1.0-assemble);
             vec4 mv=modelViewMatrix*vec4(p,1.0);
             gl_Position=projectionMatrix*mv;
             // R2186: the genetic matter becomes a visible energetic stream
             // only while the metal is physically closing around it.
             float transferGlow=curve(5.50,6.05,uPhase)*(1.0-curve(7.02,7.38,uPhase));
             gl_PointSize=clamp((aSeed*.76+1.02)*uPixelRatio*11.6/(-mv.z)*(1.0+transferGlow*.16),1.0,5.6*uPixelRatio);
-            float first=curve(0.08,.65,uPhase);
+            float first=0.86+0.14*curve(0.0,.45,uPhase);
             // R2192: all genetic matter departs BEFORE the optical organ
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
             float last=1.0-curve(6.96,7.44,uPhase);
@@ -1209,6 +1218,58 @@
       );
       this.embryoNucleus.position.set(-.10,.06,.37);
       this.coreGroup.add(this.embryoNucleus);
+
+      // R2211: genuine three-dimensional nucleolus architecture. The inner
+      // chromatin cage and paired metabolic hoops share the same organelle
+      // centre; they are not screen-space decals or a premature MAG iris.
+      // Thin physical curves add silhouette, parallax and cyan/coral depth
+      // without bloom passes or per-frame geometry allocations.
+      this.embryoNucleolusRings=[];
+      const ringGeometry=new T.TorusGeometry(.31,.009,6,this.mobileRender?56:88);
+      const ringColors=[0x77fff0,0xff8b9f,0xa7b7ff];
+      for(let k=0;k<3;k++){
+        const material=new T.MeshBasicMaterial({
+          color:ringColors[k],transparent:true,opacity:0,
+          depthWrite:false,blending:T.AdditiveBlending
+        });
+        const ring=new T.Mesh(ringGeometry,material);
+        ring.position.copy(this.embryoNucleus.position);
+        ring.rotation.set(.35+k*.78,k*1.047,.28+k*.56);
+        ring.scale.set(1.12,.82+.10*k,1);
+        this.coreGroup.add(ring);
+        this.embryoNucleolusRings.push(ring);
+      }
+      this.embryoNucleolusHaloMaterial=new T.MeshBasicMaterial({
+        color:0x47f6e5,transparent:true,opacity:0,
+        depthWrite:false,blending:T.AdditiveBlending,side:T.BackSide
+      });
+      this.embryoNucleolusHalo=new T.Mesh(
+        new T.SphereGeometry(.30,this.mobileRender?18:28,this.mobileRender?12:20),
+        this.embryoNucleolusHaloMaterial
+      );
+      this.embryoNucleolusHalo.position.copy(this.embryoNucleus.position);
+      this.embryoNucleolusHalo.scale.set(1.20,1.14,1.08);
+      this.embryoNucleolusHalo.renderOrder=3;
+      this.coreGroup.add(this.embryoNucleolusHalo);
+
+      // R2212: two translucent biological membrane rims give the living
+      // nucleus a recognisable three-dimensional silhouette from the first
+      // oblique camera angle. Both share the cell's breathing scale.
+      this.embryoMembraneRims=[];
+      const rimGeo=new T.TorusGeometry(.94,.007,5,this.mobileRender?72:112);
+      for(let k=0;k<2;k++){
+        const rimMat=new T.MeshBasicMaterial({
+          color:k===0?0x66e9e2:0xff829d,
+          transparent:true,opacity:0,depthWrite:false,
+          blending:T.AdditiveBlending
+        });
+        const rim=new T.Mesh(rimGeo,rimMat);
+        rim.rotation.set(k===0?.17:1.20,k===0?.24:-.38,k===0?.12:.35);
+        rim.scale.set(1.04,1.10,.86);
+        rim.renderOrder=5;
+        this.coreGroup.add(rim);
+        this.embryoMembraneRims.push(rim);
+      }
       // R2167 — nucleus organelle and continuous curved membrane networks.
       // These sit at genuinely different z depths inside the cell; they
       // remain biological and are removed before metallic chassis birth.
@@ -1403,7 +1464,7 @@
 
     updateGenomeParticles(t,time){
       if(!this.genomeParticles)return;
-      const visible=t>.08&&t<8.05;
+      const visible=t>=0&&t<8.05;
       this.genomeParticles.visible=visible;
       if(!visible)return;
       this.genomeParticleMaterial.uniforms.uTime.value=time;
@@ -2618,8 +2679,8 @@
       // not read as a tiny smooth bead behind distracting orbiting DNA.
       const embryoScale=this.mobileRender?.94:1.07;
       let sc;
-      if(t<2.52) sc=1.28+ease(t/2.52)*.12;
-      else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
+      if(t<2.52) sc=.001;
+      else if(t<3.28) sc=mix(.001,embryoScale,smooth((t-2.52)/.76));
       else if(t<5.58) sc=embryoScale+Math.sin((t-3.28)*1.02)*.002;
       else if(t<7.15) sc=mix(embryoScale,.30,smooth((t-5.58)/1.57));
       else sc=.30;
@@ -2646,7 +2707,7 @@
       // R2159: only a living, soft-edged biological cell is visible
       // between the founding DNA and the mechanically assembling MAG.
       // All the old early diamond/iris shapes stay invisible.
-      const appear=smooth((t-3.52)/.76);
+      const appear=smooth((t-3.28)/1.02);
       const dissolve=1-smooth((t-5.66)/1.12);
       const visible=appear*dissolve;
       this.coreGroup.visible=visible>.002;
@@ -2654,7 +2715,7 @@
       // the physically shaded organelle without exposing a hard MAG eye.
       // R2201: readable cellular color first, with enough transmission
       // to retain actual internal organelles and the suspended chromatin.
-      this.embryoMaterial.opacity=.86*visible;
+      this.embryoMaterial.opacity=.76*visible;
       this.embryoNucleusMaterial.opacity=.68*visible;
       this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
@@ -2666,6 +2727,27 @@
       if(this.embryoTexture)this.embryoTexture.offset.x=time*.0000038;
       this.embryoShell.rotation.z=Math.sin(time*.00018)*.018;
       this.embryoNucleus.scale.setScalar(.96+.045*Math.sin(time*.0030));
+      // The nucleolus has its own slow precession and metabolic pulse,
+      // independently of the enclosing membrane and DNA chromatin fibres.
+      for(let k=0;k<this.embryoNucleolusRings.length;k++){
+        const ring=this.embryoNucleolusRings[k];
+        ring.material.opacity=(k===1?.42:.32)*visible;
+        ring.rotation.y=k*1.047+time*.000021*(k%2?-1:1);
+        ring.rotation.z=.28+k*.56+time*.000013*(k===2?-1:1);
+      }
+      this.embryoNucleolusHaloMaterial.opacity=(.095+.025*Math.sin(time*.0024))*visible;
+      this.embryoNucleolusHalo.scale.setScalar(1.15+.035*Math.sin(time*.0022));
+      for(let k=0;k<this.embryoMembraneRims.length;k++){
+        const rim=this.embryoMembraneRims[k];
+        // R2223: the two membranes are tilted in independent planes.
+        // Gentle phase-opposed precession exposes real parallax and the
+        // translucent nucleus volume, without per-frame mesh allocation.
+        rim.material.opacity=(k===0?.25:.13)*visible;
+        rim.scale.set(1.04*pulse,1.10*pulse,.86*pulse);
+        rim.rotation.x=(k===0?.17:1.20)+Math.sin(time*.00017+k*1.7)*.065;
+        rim.rotation.y=(k===0?.24:-.38)+Math.sin(time*.00014+k)*.09;
+        rim.rotation.z=(k===0?.12:.35)+Math.sin(time*.00011+k*2.1)*.045;
+      }
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
@@ -2685,7 +2767,7 @@
     }
 
     updateOrganic(t,time){
-      const grow=smooth((t-3.76)/.72);
+      const grow=smooth((t-3.48)/.96);
       const fade=1-smooth((t-6.20)/1.15)*.96;
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
@@ -2733,7 +2815,7 @@
     }
 
     updateCells(t,time){
-      const grow=smooth((t-3.90)/.70);
+      const grow=smooth((t-3.62)/.94);
       const fade=1-smooth((t-6.25)/1.10)*.96;
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
@@ -3166,11 +3248,22 @@
     destroy(){
       if(this.disposed)return;
       this.disposed=true;
+      // R2216: nucleus rings and membrane rims share geometry. Dispose
+      // each GPU resource once, even when many meshes reference it.
+      const releasedGeometries=new Set();
+      const releasedMaterials=new Set();
       this.scene.traverse(node=>{
-        node.geometry?.dispose?.();
-        const m=node.material;
-        if(Array.isArray(m))m.forEach(x=>x?.dispose?.());
-        else m?.dispose?.();
+        const geometry=node.geometry;
+        if(geometry&&!releasedGeometries.has(geometry)){
+          releasedGeometries.add(geometry);
+          geometry.dispose?.();
+        }
+        const materials=Array.isArray(node.material)?node.material:[node.material];
+        for(const material of materials){
+          if(!material||releasedMaterials.has(material))continue;
+          releasedMaterials.add(material);
+          material.dispose?.();
+        }
       });
       this.embryoTexture?.dispose?.();
       this.microFiberTexture?.dispose?.();

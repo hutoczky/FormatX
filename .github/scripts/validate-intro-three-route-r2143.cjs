@@ -55,8 +55,9 @@ for(const token of [
   "const u=Math.floor(i/2)/(count/2-1)",
   "const phase=u*Math.PI*2*3.82",
   "const localX=(u-.5)*3.54",
-  "const localY=sign*Math.sin(phase)*helixRadius",
-  "const localZ=sign*Math.cos(phase)*helixRadius",
+  "const sinPhase=Math.sin(phase),cosPhase=Math.cos(phase)",
+  "const localY=sign*sinPhase*helixRadius",
+  "const localZ=sign*cosPhase*helixRadius",
   "const rolledX=localX*cosZ-localY*sinZ",
   "origin.z+scale*(-rolledX*sinY+localZ*cosY)",
   "seed[i]=strand===0?r()*.42:.58+r()*.42",
@@ -74,7 +75,7 @@ for(const token of [
   'const helixRadius=.410+(r()-.5)*.013;',
   'const membrane=Math.floor(i/2)%4!==0;',
   'const radius=membrane?.77+(r()-.5)*.13:.14+Math.cbrt(r())*.56;',
-  'this.embryoMaterial.opacity=.86*visible;',
+  'this.embryoMaterial.opacity=.76*visible;',
   'this.embryoNucleusMaterial.opacity=.68*visible;',
   'this.embryoCapillaryMaterial.opacity=.25*visible;',
   'let pairCellX=0,pairCellY=0,pairCellZ=1.10;',
@@ -82,7 +83,7 @@ for(const token of [
   'pairCellX=radius*.82*Math.sin(b)*Math.cos(a);',
   'pairCellY=radius*.94*Math.cos(b);',
   'pairCellZ=1.10+radius*.65*Math.sin(b)*Math.sin(a);',
-  'pairCellX+sign*chromatide*Math.cos(phase)'
+  'cell[offset]=pairCellX+sign*chromatide*cosPhase;'
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
 }
@@ -108,7 +109,7 @@ const donorOpacity=t=>smoothNumber((t-4.38)/.48)*(1-smoothNumber((t-5.95)/.85));
 for(const t of [0,1.6,2.6,4.2])assert.equal(donorOpacity(t),0,
   'Donor helices must be absent before the transition out of the embryo');
 assert(donorOpacity(5.1)>.99,'Donor helices must feed the four arms before titanium seating');
-assert.ok(engine.includes('const appear=smooth((t-3.52)/.76)') &&
+assert.ok(engine.includes('const appear=smooth((t-3.28)/1.02)') &&
   engine.includes('const grow=smooth((t-5.88)/1.18)') &&
   engine.includes('const opticWake=smooth((t-7.44)/.78)'),
   'DNA / living embryo / assembled titanium MAG / optical ignition story order regressed');

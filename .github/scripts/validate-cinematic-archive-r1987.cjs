@@ -222,6 +222,15 @@ async function evaluate(viewport,isMobile,browser){
       // R2026: a status label alone cannot satisfy the requested cinematic
       // archival handoff. The active folio must use actual section copy, and
       // the ORIGINAL semantic content must itself receive a 3D arrival.
+      // R2235: archive handoff updates on its animation frame. Wait for the
+      // live section heading to reach the folio rather than racing that frame.
+      // The strict content equality assertion below remains mandatory.
+      await page.waitForFunction(key=>{
+        const current=document.querySelector('[data-fx-archive-scene="'+key+'"]');
+        const heading=current?.querySelector('h2,h3');
+        const title=document.querySelector('.fx-archive-physical-paper-r2026 .fx-archive-telemetry-r2022__title');
+        return !!heading&&!!title&&title.textContent.trim()===heading.textContent.trim().slice(0,140);
+      },scene.key,{timeout:5000});
       const physical=await page.evaluate(key=>{
         const folio=document.querySelector('.fx-archive-physical-paper-r2026');
         const live=[...document.querySelectorAll('.fx-archive-live-sheet-r2026')];
@@ -230,6 +239,7 @@ async function evaluate(viewport,isMobile,browser){
         const folioTitle=folio?.querySelector('.fx-archive-telemetry-r2022__title')?.textContent?.trim()||'';
         return {folio:!!folio,liveCount:live.length,currentLive:(current?.classList.contains('fx-archive-live-sheet-r2026')?1:0)+(current?.querySelectorAll('.fx-archive-live-sheet-r2026').length||0),
           actualContent:!!headings&&folioTitle===headings.textContent.trim().slice(0,140),
+          sourceTitle:headings?.textContent?.trim().slice(0,140)||'',folioTitle,
           mode:document.documentElement.dataset.fxArchiveRealContent||null};
       },scene.key);
       assert.ok(physical.folio,'Missing physical MAG paper for '+scene.key);
@@ -276,6 +286,13 @@ async function evaluate(viewport,isMobile,browser){
         assert.ok(existingCTA.exists&&existingCTA.inPaper&&existingCTA.href==='/download/multiplatform',
           'Final scene must deliver the original functional primary CTA: '+JSON.stringify(existingCTA));
       }
+      // R2231: scene state can advance one frame before the native folio
+      // handoff data attribute updates. Wait for the actual DOM source,
+      // rather than asserting during the intermediate transition frame.
+      await page.waitForFunction(expected=>{
+        const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
+        return panel?.dataset.fxCinemaSource===expected;
+      },scene.source,{timeout:5000});
       const real3D=await page.evaluate(()=>{
         const panel=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
         return {bridge:document.documentElement.dataset.fxArchiveNativeHandoff,
@@ -300,7 +317,7 @@ async function evaluate(viewport,isMobile,browser){
         'Inactive archived native HTML must skip expensive offscreen layout without deleting original content: '+JSON.stringify(tabSafety));
       console.log('ARCHIVE_SINGLE_LIVE_LAYOUT_PASS',JSON.stringify({scene:scene.key,active:tabSafety.activeContentVisibility,archived:tabSafety.archivedContentVisibility.length}));
             assert.equal(real3D.bridge,'scroll-coupled-real-3d-paper','Native HTML was not coupled to actual MAG retrieval');
-      assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf');
+      assert.equal(real3D.source,scene.source,'The handed-off folio does not originate from the scene shelf: '+JSON.stringify({expectedScene:scene.key,expectedSource:scene.source,actualSource:real3D.source,phase:real3D.phase,bridge:real3D.bridge}));
       assert.ok(real3D.phase&&real3D.transform.startsWith('matrix3d('),
         'Actual HTML papyrus lacks GPU-composited 3D presentation: '+JSON.stringify(real3D));
       assert.equal(cinema.mode,'active','MAG did not replace legacy site');
