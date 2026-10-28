@@ -2635,12 +2635,59 @@
     },{rootMargin:'-22% 0px -54% 0px',threshold:[0,.15,.35,.6]});
     document.querySelectorAll('main > section[id],main section.scene[id]').forEach(section=>organObserver.observe(section));
 
+    /* R2213 — one MAG births the whole site. Sections are already in the
+       semantic document for indexing, assistive technology and deep links,
+       but sighted users see them only when the original MAG materializes
+       each chapter. No second canvas, animation loop or scroll handler.
+       Native IntersectionObserver also covers touch, keyboard, back/forward
+       restores and programmatic navigation in either direction. */
+    const extractionTargets=Array.from(
+      document.querySelectorAll('#main-content > section.scene:not(#hero)')
+    );
+    const extractionEnabled=!auditMode&&!reduced.matches
+      &&typeof IntersectionObserver==='function';
+    let extractObserver=null,extractedCount=0;
+    if(extractionEnabled&&extractionTargets.length){
+      for(const section of extractionTargets){
+        section.dataset.fxMagRevealR2213='waiting';
+      }
+      root.dataset.fxMagExtractionR2213='armed';
+      extractObserver=new IntersectionObserver(entries=>{
+        for(const entry of entries.filter(item=>item.isIntersecting)
+          .sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)){
+          const section=entry.target;
+          if(section.dataset.fxMagRevealR2213!=='waiting')continue;
+          section.dataset.fxMagRevealR2213='revealed';
+          extractObserver.unobserve(section);
+          extractedCount+=1;
+          root.dataset.fxMagRevealedCountR2213=String(extractedCount);
+          const id=section.id||'chapter';
+          signalPhysiology(sectionPhysiology[id]||'curiosity',
+            'mag-materialize-'+id,false,false);
+          dispatchEvent(new CustomEvent('formatx:magmaterialize',{
+            detail:{section:id,index:extractedCount,owner:'original-r326-mag'}
+          }));
+        }
+      },{rootMargin:'0px 0px -12% 0px',threshold:0.005});
+      for(const section of extractionTargets)extractObserver.observe(section);
+    }else{
+      root.dataset.fxMagExtractionR2213='accessible-immediate';
+    }
+
     function destroy(){
       if(disposed)return;disposed=true;
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;
+      // No chapter may remain visually concealed when WebGL is lost,
+      // the renderer is replaced, or reduced-fidelity mode takes over.
+      root.dataset.fxMagExtractionR2213='released';
+      extractObserver?.disconnect();
+      extractionTargets.forEach(section=>{
+        if(section.dataset.fxMagRevealR2213==='waiting')
+          section.dataset.fxMagRevealR2213='revealed';
+      });
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
       for(const pass of scenePasses){try{pass.dispose?.();}catch(_){}}scenePasses.clear();
