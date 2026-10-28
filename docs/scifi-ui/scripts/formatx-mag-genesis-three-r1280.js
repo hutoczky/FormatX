@@ -330,21 +330,21 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const ma=new T.MeshPhysicalMaterial({
-        color:0x759cde,emissive:0x263c93,emissiveIntensity:.94,
-        roughness:.29,metalness:.06,transparent:true,opacity:.90,
-        depthWrite:false,clearcoat:.62,clearcoatRoughness:.14
+        color:0x9cc6ea,emissive:0x28538d,emissiveIntensity:1.08,
+        roughness:.225,metalness:.11,transparent:true,opacity:.93,
+        depthWrite:false,clearcoat:.88,clearcoatRoughness:.085
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0xb48add,emissive:0x5c2f9c,emissiveIntensity:.94,
-        roughness:.30,metalness:.05,transparent:true,opacity:.88,
-        depthWrite:false,clearcoat:.58,clearcoatRoughness:.16
+        color:0xc2a2eb,emissive:0x5e3997,emissiveIntensity:1.05,
+        roughness:.23,metalness:.10,transparent:true,opacity:.92,
+        depthWrite:false,clearcoat:.86,clearcoatRoughness:.10
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x4bdfff,transparent:true,opacity:.080,depthWrite:false,
+        color:0x4bdfff,transparent:true,opacity:.095,depthWrite:false,
         blending:T.AdditiveBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x997bff,transparent:true,opacity:.070,depthWrite:false,
+        color:0x997bff,transparent:true,opacity:.085,depthWrite:false,
         blending:T.AdditiveBlending
       });
       // R2188: complementary nucleotide chemistry is readable as genuine
@@ -398,7 +398,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.90,.88,.080,.070,.88,.50,.46];
+      group.userData.baseOpacity=[.93,.92,.095,.085,.91,.50,.46];
       return group;
     }
 
@@ -2698,7 +2698,7 @@
       // Preserve the established ten-second camera and end-state framing.
       // R2167: the embryonic cell must fill the lens as an actual subject,
       // not read as a tiny smooth bead behind distracting orbiting DNA.
-      const embryoScale=this.mobileRender?.94:1.07;
+      const embryoScale=this.mobileRender?.90:.90;
       let sc;
       if(t<2.52) sc=1.28+ease(t/2.52)*.12;
       else if(t<3.28) sc=mix(1.40,embryoScale,smooth((t-2.52)/.76));
