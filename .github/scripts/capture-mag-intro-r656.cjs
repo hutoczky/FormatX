@@ -470,6 +470,7 @@ const SHOTS=[
             nativeHandoff:root.dataset.fxMagNativeHandoffR2218||'',
             productionCompositor:root.dataset.fxMagCompositorR2219||'',
             nativePresent:root.dataset.fxMagNativePresentR2220||'',
+            nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
             nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
             nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
             postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
@@ -533,6 +534,10 @@ const SHOTS=[
         if(state.nativePresent!=='synchronous-gl-frame-committed'){
           errors.push('R2220 original native WebGL direct presentation missing: '+
             state.nativePresent);
+        }
+        if(state.nativeCompositor!=='already-onscreen-scroll-reconciled'){
+          errors.push('R2222 onscreen native compositor reconciliation missing: '+
+            state.nativeCompositor);
         }
         if(state.productionCompositor!=='exposure-hit-test-flushed'){
           errors.push('R2219 production handoff did not reconcile layers: '+
