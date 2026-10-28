@@ -1110,6 +1110,7 @@
     }
 
     makeEmbryoTexture(){
+      // R2206: reference-inspired, layered turquoise/coral living microtexture.
       // R2200: a genuine biological photomicrograph over a 3D nucleus.
       // Turquoise cytoplasm, coral metabolic hot spots and micrograin
       // are generated deterministically once, never loaded as an image.
@@ -1154,6 +1155,19 @@
           pixels[index+2]=Math.round(clamp(
             (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
           pixels[index+3]=255;
+          // R2206: cluster coral metabolic islands within living teal
+          // cytoplasm; preserve the membrane's fine-scale native texture.
+          // All sampling happens once at initialization, never per frame.
+          const metabolic=clamp(Math.pow(clamp(
+            (coralCloud-.52)*4.7),1.8)*(.48+.52*mineral));
+          const capillary=clamp((.5+.5*Math.sin(u*39+
+            3.0*Math.sin(v*24+curl*5.0))-.74)*3.6)*cloud;
+          pixels[index]=Math.min(255,pixels[index]+Math.round(
+            metabolic*23+capillary*12));
+          pixels[index+1]=Math.max(0,pixels[index+1]-Math.round(
+            metabolic*12));
+          pixels[index+2]=Math.min(255,pixels[index+2]+Math.round(
+            capillary*19));
         }
       }
       const texture=new T.DataTexture(pixels,width,height,T.RGBAFormat);
@@ -1188,9 +1202,9 @@
         // washing its coral metabolic freckles into a faint glass bead.
         color:0xf5ffff,map:this.embryoTexture,
         bumpMap:this.embryoTexture,bumpScale:.020,
-        emissive:0x12545b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.29,
-        metalness:.015,roughness:.265,clearcoat:.73,clearcoatRoughness:.18,
+        emissive:0x16676b,emissiveMap:this.embryoTexture,
+        emissiveIntensity:.35,
+        metalness:.015,roughness:.29,clearcoat:.73,clearcoatRoughness:.18,
         transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
@@ -1381,7 +1395,8 @@
       if(!parent)throw new Error('R2199 founding DNA photon parent missing');
       parent.add(dna.points);
       this.dnaBiofield=dna;
-      const embryo=build(this.mobileRender?850:2200,'embryo');
+      // R2206: denser volumetric membranes, still ONE existing Points draw.
+      const embryo=build(this.mobileRender?1200:3100,'embryo');
       embryo.points.renderOrder=6;
       this.coreGroup.add(embryo.points);
       this.embryoBiofield=embryo;
@@ -2715,9 +2730,9 @@
       // the physically shaded organelle without exposing a hard MAG eye.
       // R2201: readable cellular color first, with enough transmission
       // to retain actual internal organelles and the suspended chromatin.
-      this.embryoMaterial.opacity=.86*visible;
+      this.embryoMaterial.opacity=.89*visible;
       this.embryoNucleusMaterial.opacity=.82*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.04:.06)*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.11:.16)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
