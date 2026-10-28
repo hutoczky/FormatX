@@ -223,6 +223,63 @@ const SHOTS=[
       return;
     }
 
+    // R2215 mobile film proof: the main reference is a phone composition.
+    // Audit a genuine 390x844 biological cell frame, not only the desktop
+    // keyframe or a static native-MAG phone screen. One scene, one canvas.
+    {
+      const browser=await launchBrowser();
+      const context=await browser.newContext({
+        viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+        deviceScaleFactor:2,colorScheme:'dark',reducedMotion:'no-preference',
+        locale:'hu-HU'
+      });
+      const page=await context.newPage(),errors=[];
+      page.on('pageerror',e=>errors.push(String(e)));
+      page.on('console',m=>{
+        if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))
+          errors.push(m.text());
+      });
+      try{
+        const url=new URL(BASE);
+        url.searchParams.set('intro','1');
+        url.searchParams.set('visualintro','1');
+        url.searchParams.set('introframe','5.50');
+        url.searchParams.set('r659','deterministic-mobile-biological-frame');
+        await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
+        if(!await pollPage(page,
+          ()=>document.documentElement.dataset.fxMagBirthVisualFrameR659==='ready',
+          30000,100)){
+          throw new Error('R2215 mobile 5.5s living nucleus proof not ready');
+        }
+        await page.waitForTimeout(150);
+        const state=await page.evaluate(()=>{
+          const root=document.documentElement;
+          return {
+            renderer:root.dataset.fxMagBirthRendererR1490||'',
+            count:Number(root.dataset.fxMagBirthVesiclesR2215||0),
+            opacity:Number(root.dataset.fxMagBirthVesicleOpacityR2215||0),
+            framebufferPeak:Number(root.dataset.fxMagBirthFramePeakR1557||0),
+            viewport:[innerWidth,innerHeight],
+            canvasCount:document.querySelectorAll('.fxb-three-canvas').length
+          };
+        });
+        await page.screenshot({
+          path:path.join(OUT,'10-mobile-biological-cell-5.50s.png'),
+          fullPage:false
+        });
+        if(state.count!==42||state.opacity<.35||state.framebufferPeak<50)
+          errors.push('R2215 mobile nucleus physical cell not visible: '+JSON.stringify(state));
+        report.push({
+          seconds:'mobile-5.50',name:'10-mobile-biological-cell-5.50s',
+          state,errors
+        });
+      }finally{
+        await page.close();
+        await context.close();
+        await browser.close();
+      }
+    }
+
     const shotBrowser=await launchBrowser();
     try{
     for(const [seconds,name] of SHOTS){
