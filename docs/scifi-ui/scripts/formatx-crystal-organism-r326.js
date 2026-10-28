@@ -2620,8 +2620,11 @@
     },{threshold:[0,.04]});
     io.observe(stage);
     const sectionPhysiology={
+      // The same original MAG responds to every primary section: pages are
+      // physiological organs of one living system, not separate 3D widgets.
       hero:'homeostasis',experience:'attention',capabilities:'activation',
-      pricing:'heartbeat',system:'stability',resources:'curiosity'
+      pricing:'heartbeat',system:'stability',network:'system-attention',
+      resources:'curiosity'
     };
     const organObserver=new IntersectionObserver(entries=>{
       const candidate=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
