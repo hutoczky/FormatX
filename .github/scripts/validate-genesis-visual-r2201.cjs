@@ -18,8 +18,10 @@ assert(match,'Inline parser-owned GENESIS bootstrap missing');
 const hash="'sha256-"+crypto.createHash('sha256').update(match[1]).digest('base64')+"'";
 const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
 assert(meta?.[1]?.includes(hash),'The exact new GENESIS inline hash must appear in HTML CSP');
-assert(worker.includes('const INLINE_R2206_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
-assert(worker.includes('${INLINE_R2206_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
+assert(worker.includes('const INLINE_R2211_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
+assert(worker.includes('${INLINE_R2211_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
+assert(match[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2211-native-handoff-present-frame'),
+  'Parser must load the patched, post-teardown R2211 renderer instead of a stale R2207 film');
 assert(match[1].includes("const v=f||(!a&&p.get('intro')!=='0')"),
   'Every normal full navigation must play GENESIS; explicit ?intro=0 may skip');
 assert(match[1].includes('fresh-navigation-genesis'),'Must identify the new repeatable film bootstrap');
