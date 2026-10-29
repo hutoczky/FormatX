@@ -8,6 +8,13 @@ assert(source.includes('const ax=v1[0]-v0[0],ay=v1[1]-v0[1],az=v1[2]-v0[2];'),
   'R2232 MAG must use its faster inline face vectors without altering original math');
 assert(source.includes('const centre=['),
   'R2232 triangle centroid must avoid per-face callback allocations');
+assert(!source.includes('const bodySeamOverlap=0;') &&
+       !source.includes('if(bodySeamOverlap){'),
+  'R2233 native triangle emitter must not execute retired seam-overlap branches');
+assert(source.includes('sphere.push(...item.sphere);') &&
+       source.includes('crystal.push(...item.crystal);'),
+  'R2233 must keep byte-identical original sphere and crystal geometry');
+
 const a=source.indexOf('    /* R2208: keep only two adjacent latitude rows');
 const b=source.indexOf('\n    /* R1982 — real microfibril geometry.',a);
 assert(a>0&&b>a,'Optimized analytical-body loop missing');
@@ -60,5 +67,5 @@ for(const [name,...args] of profiles){
     const right=Buffer.from(y.arrays[i].buffer,y.arrays[i].byteOffset,y.arrays[i].byteLength);
     assert.equal(Buffer.compare(left,right),0,name+' original WebGL array '+i+' differs');
   }
-  console.log('MAG_R2232_BYTE_IDENTICAL_FACE_GEOMETRY_PASS',name,x.count);
+  console.log('MAG_R2233_BYTE_IDENTICAL_CLOSED_SHELL_PASS',name,x.count);
 }
