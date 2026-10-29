@@ -1945,6 +1945,11 @@
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
+      // R2246: quality may change without altering either rounded GPU
+      // dimension. Do NOT wake the GL viewport, invalidate root style,
+      // or schedule a redundant frame for an identical backing store.
+      // Real layout resizes still always refresh the viewport and aspect.
+      if(qualityOnly&&canvas.width===w&&canvas.height===h)return false;
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
       width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
       root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
