@@ -126,6 +126,14 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
       }));
   }
   assert.equal(finalState,'complete','NET must finish the first user-initiated test');
+  const bindingOwners=await page.evaluate(()=>({
+    sectionBound:document.querySelector('section[data-fx-net-speed-r1800="true"]')
+      ?.dataset.fxNetBoundR1800,
+    scriptShadowing:document.querySelectorAll('script[data-fx-net-speed-r1800]').length,
+    bundleMarker:document.querySelectorAll('script[data-fx-net-controller-bundle-r2240]').length
+  }));
+  assert.deepEqual(bindingOwners,{sectionBound:'true',scriptShadowing:0,bundleMarker:1},
+    'R2240 NET controller must bind the real section, not a script element');
 
   assert.equal(await page.locator('#network').getAttribute('data-fx-net-loader-r2238'),
     'loaded','First scroll or click must bootstrap the real meter exactly once');
