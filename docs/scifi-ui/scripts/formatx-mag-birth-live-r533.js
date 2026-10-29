@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261029-r2208-cinematic-living-optic';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261029-r2209-single-owner-handoff';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -591,6 +591,7 @@
   let schedulerTick = 0;
   let startedAt = 0;
   let finished = false;
+  let completionDispatched = false;
   let exitTimer = 0;
   let hardFinishTimer = 0;
   let frameTimer = 0;
@@ -1028,6 +1029,10 @@
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
+    // R2209: graceful exit and the independent DOM guarantee may both run.
+    // Always retry DOM cleanup, but publish the handoff exactly once.
+    if(completionDispatched)return;
+    completionDispatched=true;
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
@@ -1337,27 +1342,14 @@
     }
     window.setTimeout(()=>{
       if(!overlay.isConnected)return;
+      // The absolute deadline must also retire the canonical RAF, listeners
+      // and pending timers. A parallel teardown left `finished` false and
+      // allowed the bounded failsafe to dispatch a second completion.
       try{
-        locateStage();
-        if(stage instanceof HTMLElement){
-          stage.style.removeProperty('opacity');
-          stage.style.removeProperty('transition');
-        }
-        coreApi?.setMorph?.(0,'r653-absolute-dom-watchdog');
-        coreApi?.setShape?.('organism','r653-absolute-dom-watchdog');
-        coreApi?.requestRender?.(1);
-      }catch(_){}
-      ROOT.removeAttribute('data-fx-mag-birth-live');
-      ROOT.removeAttribute('data-fx-mag-birth-phase');
-      ROOT.dataset.fxMagBirthLiveR533='absolute-dom-watchdog-r653';
-      try{filmRenderer?.destroy?.();}catch(_){}
-      filmRenderer=null;
-      overlay.remove();
-      try{
-        document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
-          detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
-        }));
-      }catch(_){}
+        finish('absolute-dom-watchdog-r653');
+      }finally{
+        safeTeardownOverlay('absolute-dom-watchdog-r653');
+      }
     },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
