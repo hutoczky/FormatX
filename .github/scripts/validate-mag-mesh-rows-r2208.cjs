@@ -11,10 +11,17 @@ assert(source.includes('const centre=['),
 assert(!source.includes('const bodySeamOverlap=0;') &&
        !source.includes('if(bodySeamOverlap){'),
   'R2233 native triangle emitter must not execute retired seam-overlap branches');
-assert(source.includes('const hlen=Math.hypot(hx,hy,hz)||1;') &&
-       source.includes('crystalNormals.push(hx/hlen,hy/hlen,hz/hlen);') &&
-       !source.includes('const hybridNormal=normalize(['),
-  'R2234 normal path must avoid transient arrays without changing normalization');
+// R2235: verify the OPTIMIZED TRIANGLE EMITTER, not unrelated geometry.
+// Auxiliary decorative meshes legitimately use independent hybrid normals.
+const triangleBegin=source.indexOf('    function triangle(vertices, facet) {');
+const triangleEnd=source.indexOf('\n    /* R1931 — clean P0-derived body topology.',triangleBegin);
+assert(triangleBegin>=0&&triangleEnd>triangleBegin,
+  'Canonical MAG triangle emitter must exist');
+const triangleSource=source.slice(triangleBegin,triangleEnd);
+assert(triangleSource.includes('const hlen=Math.hypot(hx,hy,hz)||1;') &&
+       triangleSource.includes('crystalNormals.push(hx/hlen,hy/hlen,hz/hlen);') &&
+       !triangleSource.includes('const hybridNormal=normalize(['),
+  'R2234 native triangle normals must avoid transient arrays without changing normalization');
 assert(source.includes('sphere.push(...item.sphere);') &&
        source.includes('crystal.push(...item.crystal);'),
   'R2233 must keep byte-identical original sphere and crystal geometry');
