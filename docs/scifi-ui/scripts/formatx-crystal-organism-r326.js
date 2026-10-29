@@ -2284,15 +2284,34 @@
           root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
           root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
         }
-        root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
-        root.dataset.fxCoreFrameMs=dt.toFixed(2);
-        root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
-        root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
-        root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
-        root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
-        root.dataset.fxCoreReal3dFps=String(
+        // R2228: only a changed telemetry value should invalidate a root
+        // data attribute. On mobile, unchanged 250ms status rewrites force
+        // expensive style matching across dozens of live CSS sheets.
+        // Keep all original public field names and values, and do not touch
+        // the GL scene or its cadence.
+        const nextRenderMs=renderAverage.toFixed(2);
+        const nextFrameMs=dt.toFixed(2);
+        const nextIntervalMs=frameIntervalAverage.toFixed(2);
+        const nextRenderPeak=renderPeak.toFixed(2);
+        const nextFramePeak=framePeak.toFixed(2);
+        const nextQuality=qualityScale.toFixed(2);
+        const nextFps=String(
           Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage)))
         );
+        if(root.dataset.fxCoreRenderMs!==nextRenderMs)
+          root.dataset.fxCoreRenderMs=nextRenderMs;
+        if(root.dataset.fxCoreFrameMs!==nextFrameMs)
+          root.dataset.fxCoreFrameMs=nextFrameMs;
+        if(root.dataset.fxCoreFrameIntervalR1602!==nextIntervalMs)
+          root.dataset.fxCoreFrameIntervalR1602=nextIntervalMs;
+        if(root.dataset.fxCoreRenderPeakR1626!==nextRenderPeak)
+          root.dataset.fxCoreRenderPeakR1626=nextRenderPeak;
+        if(root.dataset.fxCoreFramePeakR1626!==nextFramePeak)
+          root.dataset.fxCoreFramePeakR1626=nextFramePeak;
+        if(root.dataset.fxCoreQualityScaleR1600!==nextQuality)
+          root.dataset.fxCoreQualityScaleR1600=nextQuality;
+        if(root.dataset.fxCoreReal3dFps!==nextFps)
+          root.dataset.fxCoreReal3dFps=nextFps;
       }
     }
 
