@@ -5,7 +5,9 @@
 (function(){
 'use strict';
 
-const section=document.querySelector('[data-fx-net-speed-r1800]');
+// R2240: explicitly select the semantic section, not a script carrying a
+// similarly named asset marker in the head.
+const section=document.querySelector('section[data-fx-net-speed-r1800="true"]');
 if(!(section instanceof HTMLElement)||section.dataset.fxNetBoundR1800==='true')return;
 section.dataset.fxNetBoundR1800='true';
 
