@@ -355,13 +355,20 @@
     }
 
     function triangle(vertices, facet) {
-      let crystalNormal = normalize(cross(
-        subtract(vertices[1].crystal, vertices[0].crystal),
-        subtract(vertices[2].crystal, vertices[0].crystal)
-      ));
-      const centre = [0, 1, 2].map(index => (
-        vertices[0].crystal[index] + vertices[1].crystal[index] + vertices[2].crystal[index]
-      ) / 3);
+      // R2232: same face normal and centroid mathematics, but no
+      // transient vector arrays or callback for each of ~24k triangles.
+      // Preserve operand order and the original normalize() exactly.
+      const v0=vertices[0].crystal,v1=vertices[1].crystal,v2=vertices[2].crystal;
+      const ax=v1[0]-v0[0],ay=v1[1]-v0[1],az=v1[2]-v0[2];
+      const bx=v2[0]-v0[0],by=v2[1]-v0[1],bz=v2[2]-v0[2];
+      let crystalNormal=normalize([
+        ay*bz-az*by,az*bx-ax*bz,ax*by-ay*bx
+      ]);
+      const centre=[
+        (v0[0]+v1[0]+v2[0])/3,
+        (v0[1]+v1[1]+v2[1])/3,
+        (v0[2]+v1[2]+v2[2])/3
+      ];
       /* R1556 — normal correction alone was not enough: BACK-face culling uses
          vertex winding, not the supplied normal. Reverse inward triangles so the
          closed mineral shell cannot develop the black pin-holes seen in real
