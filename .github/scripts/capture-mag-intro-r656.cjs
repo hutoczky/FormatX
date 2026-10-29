@@ -363,7 +363,44 @@ const SHOTS=[
         30000,
         100
       );
-      if(!frameReady)throw new Error('R1500 deterministic intro frame did not become ready at '+seconds+'s');
+      if(!frameReady){
+        // R2236: an invisible "ready" latch conceals whether the headless
+        // renderer, JS loop or proof scheduling failed. Capture the *real*
+        // frame and all relevant state while still marking the P0 as FAIL.
+        const debug=await page.evaluate(()=>{
+          const root=document.documentElement;
+          const overlay=document.querySelector('.fx-mag-birth-r533');
+          const canvas=overlay?.querySelector('canvas');
+          return {
+            owner:root.dataset.fxMagBirthOwnerR533||'',
+            film:root.dataset.fxMagBirthLiveR533||'',
+            renderer:root.dataset.fxMagBirthRendererR1360||'',
+            loading:root.dataset.fxMagBirthRendererR1450||'',
+            three:root.dataset.fxMagBirthThreeR658||'',
+            proof:root.dataset.fxMagBirthVisualFrameR659||'',
+            proofScheduler:root.dataset.fxMagBirthProofSchedulerR2236||'',
+            proofAttempts:root.dataset.fxMagBirthVisualFrameAttemptsR1560||'',
+            proofReadback:root.dataset.fxMagBirthFrameR1557||'',
+            peak:root.dataset.fxMagBirthFramePeakR1557||'',
+            fallback:root.dataset.fxMagBirthR1280||'',
+            overlayConnected:Boolean(overlay?.isConnected),
+            rendererMode:overlay?.dataset.fxRenderer||'',
+            canvasDimensions:canvas?[canvas.width,canvas.height]:null,
+            hidden:document.hidden,visibility:document.visibilityState,
+            ready:document.readyState,
+            script:[...document.scripts].find(item=>
+              /formatx-mag-birth-live-r533\.js/.test(item.src))?.src||''
+          };
+        }).catch(e=>({diagnosticError:String(e)}));
+        try{
+          await page.screenshot({
+            path:path.join(OUT,'stalled-'+name+'.png'),fullPage:false
+          });
+        }catch(e){debug.screenshotError=String(e);}
+        throw new Error('R2236 deterministic Three.js frame NOT ready at '+
+          seconds+'s; state='+JSON.stringify(debug)+
+          '; browserErrors='+JSON.stringify(errors.slice(-8)));
+      }
       await page.waitForTimeout(150);
 
       const state=await page.evaluate(()=>{
