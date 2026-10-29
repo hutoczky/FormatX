@@ -14,8 +14,8 @@ const [index,client,css,workerSource]=await Promise.all([
 
 const lazyLoader=await read('docs/scifi-ui/scripts/formatx-net-speed-on-demand-r2238.js');
 assert.doesNotThrow(()=>new Function(lazyLoader),'NET viewport loader JavaScript syntax');
-assert.match(index,/formatx-net-speed-on-demand-r2238\.js\?v=20261029-r2238-viewport-intent/);
-assert.match(lazyLoader,/formatx-net-speed-r1800\.js\?v=20260929-r1810-gigabit-multistream/);
+assert.match(index,/formatx-net-speed-on-demand-r2238\.js\?v=20261029-r2240-controller-selector/);
+assert.match(lazyLoader,/formatx-net-speed-r1800\.js\?v=20261029-r2240-controller-selector/);
 assert.match(lazyLoader,/IntersectionObserver/);
 assert.match(lazyLoader,/start\.click\(\)/);
 assert.match(lazyLoader,/rootMargin:'800px 0px'/);
