@@ -90,6 +90,10 @@ async function pixels(page,bytes,rect){
           gpu:root.dataset.fxMagHandoffGpuR2226||'',
           gpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
           gpuMs:root.dataset.fxMagHandoffGpuMsR2226||'',
+          bootPhases:(()=>{
+            try{return JSON.parse(root.dataset.fxMagBootPhasesR2241||'null');}
+            catch(_){return null;}
+          })(),
           postRender:root.dataset.fxMagNativePresentR2220||'',
           nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
           viewport:{w:innerWidth,h:innerHeight,scrollY},
@@ -123,6 +127,11 @@ async function pixels(page,bytes,rect){
       };
       if(state.overlay!==0||state.canvases!==1)
         result.errors.push('cinematic layer/renderer duplication');
+      if(!state.bootPhases||!Number.isFinite(state.bootPhases.geometryMs)
+        ||!Number.isFinite(state.bootPhases.uploadMs)
+        ||!Number.isFinite(state.bootPhases.shaderMs)
+        ||state.bootPhases.vertices<10000)
+        result.errors.push('R2241 MAG phase timing missing from actual cold start');
       if(state.gpu!=='finished')
         result.errors.push('GL final frame was not finished');
       if(luma===null||alpha===null)
