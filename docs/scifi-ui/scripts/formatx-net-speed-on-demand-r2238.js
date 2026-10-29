@@ -13,7 +13,7 @@ section.dataset.fxNetLoaderR2238='armed';
 // R2239: a fixed same-origin app asset URL is not dependent on document.currentScript,
 // which can be null in deferred/relayed boot paths. The page has a /scifi-ui/
 // base but a script may be resumed after the parser relinquishes currentScript.
-const source=new URL('/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream',
+const source=new URL('/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20261029-r2240-controller-selector',
   location.origin).href;
 let state='idle',promise=null,observer=null,pendingActivation=false;
 const cleanup=()=>{observer?.disconnect();observer=null;};
