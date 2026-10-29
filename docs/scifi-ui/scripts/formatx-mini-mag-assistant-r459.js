@@ -81,6 +81,20 @@ function install(){
   }
   function updateContextSafety(source='runtime'){
     contextFrame=0;
+    // R2242: during the canonical Genesis film, the cinema occluder owns the
+    // visible viewport. Sampling 16 underlying hit-test rays forces Chrome
+    // to resolve the full layout/style tree before the actual MAG is ready.
+    // Keep the closed mini controller hidden (the full hero MAG remains);
+    // resume accurate collision protection on the real film-end event.
+    // Intro=0, reduced-motion fallback and an explicitly open panel are
+    // unaffected. One owner, no extra renderer or polling timer.
+    const cinematicActive=root.dataset.fxMagBirthLiveR533==='active'
+      ||!!document.getElementById('fx-mag-birth-prepaint-r1606');
+    if(host.dataset.open!=='true'&&cinematicActive){
+      collisionHidden=true;
+      applyContextSafety('cinematic-safe-deferred');
+      return;
+    }
     collisionHidden=collidesWithInformation();
     applyContextSafety(source);
   }
@@ -100,6 +114,7 @@ function install(){
   addEventListener('resize',()=>scheduleContextSafety('resize'),{passive:true});
   addEventListener('orientationchange',()=>scheduleContextSafety('orientation'),{passive:true});
   addEventListener('formatx:cinematicscene',()=>scheduleContextSafety('cinematic-scene'),{passive:true});
+  addEventListener('formatx:magbirthcomplete',()=>scheduleContextSafety('post-genesis'),{passive:true});
   addEventListener('formatx:loop',()=>scheduleContextSafety('loop'),{passive:true});
   addEventListener('pageshow',()=>scheduleContextSafety('pageshow'),{passive:true});
   scheduleContextSafety('install');
