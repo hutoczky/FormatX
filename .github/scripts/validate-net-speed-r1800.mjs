@@ -12,9 +12,20 @@ const [index,client,css,workerSource]=await Promise.all([
   read('billing-worker/src/production-content-entry.js'),
 ]);
 
+const lazyLoader=await read('docs/scifi-ui/scripts/formatx-net-speed-on-demand-r2238.js');
+assert.doesNotThrow(()=>new Function(lazyLoader),'NET viewport loader JavaScript syntax');
+assert.match(index,/formatx-net-speed-on-demand-r2238\.js\?v=20261029-r2238-viewport-intent/);
+assert.match(lazyLoader,/formatx-net-speed-r1800\.js\?v=20260929-r1810-gigabit-multistream/);
+assert.match(lazyLoader,/IntersectionObserver/);
+assert.match(lazyLoader,/start\.click\(\)/);
+assert.match(lazyLoader,/rootMargin:'800px 0px'/);
+assert.match(lazyLoader,/section\.dataset\.fxNetBoundR1800/);
+assert.match(lazyLoader,/addEventListener\('click'/);
+assert.doesNotMatch(index,/<script[^>]+src="\.\/scripts\/formatx-net-speed-r1800\.js/);
+
 assert.match(index,/id="network"/);
 assert.match(index,/data-fx-net-speed-r1800="true"/);
-assert.match(index,/formatx-net-speed-r1800\.js\?v=20260929-r1810-gigabit-multistream/);
+
 assert.match(index,/formatx-net-speed-r1800\.css\?v=20261004-r1902-touch-target/);
 assert.match(index,/https:\/\/www\.speedtest\.net\//);
 assert.match(client,/user-initiated-same-origin-multistream-gigabit-no-idle-network-r1810/);
