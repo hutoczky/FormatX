@@ -10,8 +10,11 @@ const start=section?.querySelector('[data-net-start]');
 if(!(section instanceof HTMLElement)||!(start instanceof HTMLButtonElement))return;
 if(section.dataset.fxNetLoaderR2238)return;
 section.dataset.fxNetLoaderR2238='armed';
-const source=new URL('./formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream',
-  document.currentScript?.src||document.baseURI).href;
+// R2239: a fixed same-origin app asset URL is not dependent on document.currentScript,
+// which can be null in deferred/relayed boot paths. The page has a /scifi-ui/
+// base but a script may be resumed after the parser relinquishes currentScript.
+const source=new URL('/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream',
+  location.origin).href;
 let state='idle',promise=null,observer=null,pendingActivation=false;
 const cleanup=()=>{observer?.disconnect();observer=null;};
 function load(reason){
@@ -28,7 +31,7 @@ function load(reason){
       if(section.dataset.fxNetBoundR1800!=='true'){
         state='failed';
         section.dataset.fxNetLoaderR2238='bind-failed';
-        reject(new Error('NET R1800 loaded without binding'));
+        reject(new Error('NET R1800 loaded without binding: '+script.src));
         return;
       }
       state='loaded';
