@@ -125,6 +125,7 @@ jobs:
           node .github/scripts/validate-mag-biophotonic-r2206.cjs
           node .github/scripts/validate-genesis-css-criticalpath-r2208.cjs
           node .github/scripts/validate-mag-mesh-rows-r2208.cjs
+          node .github/scripts/validate-mag-telemetry-r2228.cjs
           node .github/scripts/validate-mag-section-extraction-r2213.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
