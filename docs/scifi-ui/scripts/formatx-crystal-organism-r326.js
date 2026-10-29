@@ -1828,6 +1828,18 @@
     const uploadStartedR2241=performance.now();
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
     const uploadMsR2241=performance.now()-uploadStartedR2241;
+    // R2249: WebGL bufferData copies typed vertex attributes into the
+    // context-owned buffers. The original CPU Float32Array copies are NOT
+    // referenced by render, resize, pause, physiology or destruction;
+    // context restoration re-runs boot/buildOrganismGeometry from scratch.
+    // Release the seven large typed arrays after all seven uploads, while
+    // retaining geometry.count, sizes, topology and every GPU buffer.
+    // Neither triangle ordering nor a single rendered pixel changes.
+    const releasedCpuBytesR2249=geometry.arrays.reduce(
+      (bytes,attribute)=>bytes+attribute.byteLength,0
+    );
+    geometry.arrays.length=0;
+    root.dataset.fxMagCpuMeshReleasedR2249=String(releasedCpuBytesR2249);
     // Write once after all seven real buffer uploads; no per-frame DOM work.
     root.dataset.fxMagBootPhasesR2241=JSON.stringify({
       shaderMs:+shaderReadyMsR2241.toFixed(2),
