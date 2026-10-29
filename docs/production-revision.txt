@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261029-r2209-single-owner-handoff
+token=20261029-r2210-retired-stage-owner
 release_line=R2209-SINGLE-OWNER-LIVING-MAG-HANDOFF
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261029-r2209-single-owner-handoff
+mag_cache=20261029-r2210-retired-stage-owner
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -200,3 +200,6 @@ r2208_validation=Require actual linked Three.js cell-lens program draws at mobil
 r2209_handoff=The existing absolute DOM watchdog now retires the same canonical finish owner as normal completion and the bounded failsafe, aborting pending film/input RAF, listeners and timers. All teardown paths retry DOM cleanup but publish exactly one MAG birth completion. Original deadlines and the original browser one-completion assertion remain unchanged.
 r2209_delivery=The preserved R2208 shared living optic and original owner graph use 20261029-r2209-single-owner-handoff. Exact parser inline SHA256 nRw9VXF+8gnwoODmkQf8ZNPeUt92xpy9qA46nkGW7KQ= is authorized in HTML and both Worker CSP layers.
 r2209_validation=Six direct original-callback order cases cover normal/reduced watchdog-first, graceful-first and overlapping exit. Exact C6/R2208 negative control reproduces two completions. These callback checks have no clock model; the original real-clock browser handoff remains authoritative. No new timer, forced click, UA detection, deadline extension or test-assertion weakening.
+r2210_handoff=After the first completion the receiving page owns the native stage. Late graceful/watchdog cleanup may retry removal of the retired overlay only; it no longer clears the stage opacity/transition or root intro attributes after handoff. Completion is claimed before cleanup to prevent reentrant duplication. Original clocks, deadlines, geometry and renderer ownership remain unchanged.
+r2210_validation=Six original-callback normal/reduced order cases now assert one stage/root release and preservation of the receiving page state after completion and retry. Exact R2209 negative control fails at two stage releases. Original browser handoff, antialias, retired-listener and dock assertions remain unchanged.
+r2210_delivery=The preserved R2208 living optic uses 20261029-r2210-retired-stage-owner. Exact parser inline SHA256 BZ67nUK8e+f3BBeNkMNkL2aiwMDJg4qet+YyU+yUjFs= is authorized in HTML and both Worker CSP layers. No production deployment or hardware performance acceptance is asserted.

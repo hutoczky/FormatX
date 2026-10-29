@@ -71,7 +71,7 @@ assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
   'Worker must authorize the exact R2206 inline bootstrap');
 assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
-const revision = '20261029-r2209-single-owner-handoff';
+const revision = '20261029-r2210-retired-stage-owner';
 for (const [name, source] of Object.entries({ html, worker, intro, rescue, current, runtime, scheduler }))
   assert(source.includes(revision), name + ' must reference the R2206 cache generation');
 assert(html.includes('data-fx-dna-first-frame-r2181'),

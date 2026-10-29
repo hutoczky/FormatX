@@ -19,16 +19,20 @@ const watchdog=source.slice(watchdogStart+'    window.setTimeout(()=>{'.length,w
 const cases=[];
 for(const reduced of [false,true]){
  for(const order of ['watchdog-first','graceful-first','watchdog-during-exit']){
-  const state={events:[],aborts:0,destroys:0,styleReleases:0,cancelledFrames:[],clearedTimers:[]};
+  const state={events:[],aborts:0,destroys:0,styleReleases:0,rootReleases:0,stageOpacity:'intro',stageTransition:'intro',cancelledFrames:[],clearedTimers:[]};
   const timers=new Map();let timerId=100;
   const c={
    finished:false,completionDispatched:false,raf:13,interactionMoveRaf:14,
    pendingInteraction:{},pendingRendererInteraction:{},frameTimer:15,exitTimer:0,hardFinishTimer:77,
    phaseTimers:new Set([91,92]),REDUCED:reduced,EXIT_MS:180,threeWaitTimer:6,
-   ROOT:{dataset:{},removeAttribute(){}},overlay:{isConnected:true,dataset:{},classList:{add(){}},remove(){this.isConnected=false;}},
-   document:{dispatchEvent(e){state.events.push({type:e.type,source:e.detail.source});}},
+   ROOT:{dataset:{},removeAttribute(){state.rootReleases++;}},overlay:{isConnected:true,dataset:{},classList:{add(){}},remove(){this.isConnected=false;}},
+   document:{dispatchEvent(e){
+    state.events.push({type:e.type,source:e.detail.source});
+    // The receiving page may immediately claim the native stage at handoff.
+    state.stageOpacity='native-page';state.stageTransition='native-page';
+   }},
    CustomEvent:class{constructor(type,init){this.type=type;this.detail=init.detail;}},
-   releaseStageStyle(){state.styleReleases++;},setStageOpacity(){},requestCoreWarmup(){},locateStage(){},stage:null,HTMLElement:class{},
+   releaseStageStyle(){state.styleReleases++;state.stageOpacity=null;state.stageTransition=null;},setStageOpacity(){},requestCoreWarmup(){},locateStage(){},stage:null,HTMLElement:class{},
    coreApi:{setMorph(){},setShape(){},requestRender(){}},
    percent:{value:''},progress:{value:0},status:{textContent:''},copy:{statuses:[[1,'MAG BORN']]},
    audioContext:{close(){}},filmRenderer:{destroy(){state.destroys++;}},
@@ -56,10 +60,16 @@ for(const reduced of [false,true]){
   assert.equal(result.destroys,1,'The existing film renderer must be destroyed once');
   assert(state.cancelledFrames.includes(13)&&state.cancelledFrames.includes(14),'Pending film/input RAF work must stop');
   assert(state.clearedTimers.includes(77),'The bounded failsafe must be cancelled');
+  assert.equal(state.styleReleases,1,'Retired callbacks must release the intro stage only once');
+  assert.equal(state.rootReleases,2,'Retired callbacks must release the intro root attributes only once');
+  assert.equal(state.stageOpacity,'native-page','Late intro cleanup must preserve the receiving page opacity');
+  assert.equal(state.stageTransition,'native-page','Late intro cleanup must preserve the receiving page transition');
   // Independent DOM cleanup remains retryable after completion, without
   // emitting another public handoff if an extension re-attaches the overlay.
   c.overlay.isConnected=true;c.safeTeardownOverlay('repeat-dom-cleanup');
   assert.equal(c.overlay.isConnected,false);assert.equal(state.events.length,1);
+  assert.equal(state.styleReleases,1);assert.equal(state.rootReleases,2);
+  assert.equal(state.stageOpacity,'native-page');assert.equal(state.stageTransition,'native-page');
   cases.push(result);
  }
 }

@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261029-r2209-single-owner-handoff';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261029-r2210-retired-stage-owner';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1025,14 +1025,17 @@
   }
 
   function safeTeardownOverlay(source) {
+    // R2210: after handoff the page owns the stage. Retired callbacks may
+    // remove only this old overlay; they must not clear the new owner's styles.
+    if(completionDispatched){
+      try { overlay.remove(); } catch (_) {}
+      return;
+    }
+    completionDispatched=true;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
     try { overlay.remove(); } catch (_) {}
-    // R2209: graceful exit and the independent DOM guarantee may both run.
-    // Always retry DOM cleanup, but publish the handoff exactly once.
-    if(completionDispatched)return;
-    completionDispatched=true;
     try {
       document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
         detail:{source,revision:'r900-three-stage-reference-genesis-handoff'}
