@@ -70,14 +70,18 @@ const parser = html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*
 assert(parser, 'Parser-owned intro bootstrap missing');
 const hash = "'sha256-" + crypto.createHash('sha256').update(parser[1]).digest('base64') + "'";
 assert(html.includes(hash), 'New bootstrap must be authorized by HTML CSP');
-assert(worker.includes('const INLINE_R2220_BOOT_HASH = "' + hash + '";'),
+assert(worker.includes('const INLINE_R2236_BOOT_HASH = "' + hash + '";'),
   'Worker must authorize the exact R2219 inline bootstrap');
-assert((worker.match(/\$\{INLINE_R2220_BOOT_HASH\}/g) || []).length === 2,
+assert((worker.match(/\$\{INLINE_R2236_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
 const magRevision = '20261029-r2234-scalar-normals';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
-assert(rescue.includes('20261028-r2220-direct-gl-handoff'),
+assert(intro.includes('const proofTurn=callback=>'),
+  'R2236 cinematic test must bound animation-frame and timer scheduling');
+assert(intro.includes("ROOT.dataset.fxMagBirthProofSchedulerR2236='bounded-raf-or-timeout'"),
+  'R2236 proof scheduler state must be emitted only during deterministic capture');
+assert(rescue.includes('20261029-r2236-bounded-proof-frame'),
   'Parser fallback must load R2219 canonical bridge only');
 assert(intro.includes('reconcileExposedCompositorR2219()'),
   'Film must flush exposed compositor on both teardown routes');
@@ -85,7 +89,7 @@ assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flus
   'Native exposure must be acknowledged after real hit testing');
 for (const [name, source] of Object.entries({ current, runtime, scheduler }))
   assert(source.includes(magRevision), name + ' must load the optimized native MAG');
-assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261028-r2220-direct-gl-handoff'),
+assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261029-r2236-bounded-proof-frame'),
   'R533 entrypoint must have a distinct R2211 cache generation');
 assert(html.includes('20261028-r2220-direct-gl-handoff')&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+magRevision),
   'HTML must reference fresh R533 bridge and original native MAG cache key');
