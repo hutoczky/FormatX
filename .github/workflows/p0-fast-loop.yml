@@ -46,7 +46,12 @@ permissions:
 jobs:
   targeted:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    # R2236: exact-head R2235 hit GitHub's 12-minute job cap at the real
+    # seven-scene mobile/desktop cinematic AA test. It had already passed
+    # source geometry, three independent cold starts, semantic/CLS/mobile
+    # matrices, and the native visual contract. Keep ALL remaining checks
+    # instead of silently skipping them or accepting a cancelled run.
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
