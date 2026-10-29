@@ -11,6 +11,10 @@ assert(source.includes('const centre=['),
 assert(!source.includes('const bodySeamOverlap=0;') &&
        !source.includes('if(bodySeamOverlap){'),
   'R2233 native triangle emitter must not execute retired seam-overlap branches');
+assert(source.includes('const hlen=Math.hypot(hx,hy,hz)||1;') &&
+       source.includes('crystalNormals.push(hx/hlen,hy/hlen,hz/hlen);') &&
+       !source.includes('const hybridNormal=normalize(['),
+  'R2234 normal path must avoid transient arrays without changing normalization');
 assert(source.includes('sphere.push(...item.sphere);') &&
        source.includes('crystal.push(...item.crystal);'),
   'R2233 must keep byte-identical original sphere and crystal geometry');
@@ -67,5 +71,5 @@ for(const [name,...args] of profiles){
     const right=Buffer.from(y.arrays[i].buffer,y.arrays[i].byteOffset,y.arrays[i].byteLength);
     assert.equal(Buffer.compare(left,right),0,name+' original WebGL array '+i+' differs');
   }
-  console.log('MAG_R2233_BYTE_IDENTICAL_CLOSED_SHELL_PASS',name,x.count);
+  console.log('MAG_R2234_BYTE_IDENTICAL_SCALAR_NORMAL_PASS',name,x.count);
 }
