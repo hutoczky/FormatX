@@ -1810,7 +1810,7 @@
         shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
           `#include <common>
           varying vec3 vFxMagAnatomy;
-          vec3 fxMagPlateFinish(){
+          vec4 fxMagPlateFinish(){
             vec2 anatomy=abs(vFxMagAnatomy.xy);
             float radial=max(anatomy.x,anatomy.y);
             float lateral=min(anatomy.x,anatomy.y);
@@ -1826,14 +1826,32 @@
             float grainPhase=radial*360.0+lateral*24.0;
             float grainVisibility=1.0-smoothstep(.65,1.65,fwidth(grainPhase));
             float brushed=sin(grainPhase)*grainVisibility;
-            return vec3(joint*envelope,plateFinish,brushed);
+            // R2213: shallow recessed joints bend the existing physical
+            // metal and clearcoat normals. Fade subpixel relief instead of
+            // turning distant machining into shimmering specular noise.
+            float reliefVisibility=1.0-smoothstep(.30,.75,max(aa.x,aa.y));
+            float plateHeight=-.00035*joint*envelope*reliefVisibility;
+            return vec4(joint*envelope,plateFinish,brushed,plateHeight);
+          }
+          vec3 fxMagPlateNormal(vec3 surfaceNormal,float plateHeight){
+            vec3 dx=dFdx(-vViewPosition),dy=dFdy(-vViewPosition);
+            vec3 acrossX=cross(dy,surfaceNormal);
+            vec3 acrossY=cross(surfaceNormal,dx);
+            float determinant=dot(dx,acrossX);
+            vec3 gradient=dFdx(plateHeight)*acrossX+dFdy(plateHeight)*acrossY;
+            return normalize(max(abs(determinant),1e-10)*surfaceNormal-
+              sign(determinant)*gradient);
           }`)
           .replace('#include <color_fragment>',
-            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.24)*(1.0+.018*fxPlate.z);')
+            '#include <color_fragment>\nvec4 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.24)*(1.0+.018*fxPlate.z);')
           .replace('#include <roughnessmap_fragment>',
-            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.095+(fxPlate.y-.5)*.035,.10,.48);');
+            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.095+(fxPlate.y-.5)*.035,.10,.48);')
+          .replace('#include <normal_fragment_maps>',
+            '#include <normal_fragment_maps>\nnormal=fxMagPlateNormal(normal,fxPlate.w);')
+          .replace('#include <clearcoat_normal_fragment_maps>',
+            '#include <clearcoat_normal_fragment_maps>\n#ifdef USE_CLEARCOAT\nclearcoatNormal=fxMagPlateNormal(clearcoatNormal,fxPlate.w);\n#endif');
       };
-      material.customProgramCacheKey=()=> 'r2207-filtered-machined-silver-plate-finish';
+      material.customProgramCacheKey=()=> 'r2213-filtered-machined-silver-relief';
     }
 
     bindLivingMagOptic(material){

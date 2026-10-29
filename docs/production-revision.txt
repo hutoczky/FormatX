@@ -1,3 +1,7 @@
+r2213_visual=Existing body-local plate joints now perturb the actual Three.js physical metal and clearcoat normals with shallow derivative-filtered recesses. Retains silver luminance, studio key, shared living optic, geometry, silhouette, animation and one handoff owner. No added render pass, texture, geometry, renderer or RAF.
+r2213_delivery=20261029-r2213-machined-relief; exact parser-inline CSP SHA256 rKNbKWoFkXVZEZ+UvdVhuko1lDEV+9zOuy/51k+x+Sw= in static HTML and Worker policies. Native source unchanged.
+r2213_validation=Component-only llvmpipe EGL renders compile the actual bundled Three r185 physical shader and body geometry; full browser cases must verify the published SHA. This is not hardware, FPS, final visual acceptance or a performance improvement claim.
+
 FormatX production revision
 token=20261029-r2212-neutral-optical-key
 release_line=R2209-SINGLE-OWNER-LIVING-MAG-HANDOFF

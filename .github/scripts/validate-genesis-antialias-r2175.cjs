@@ -21,6 +21,7 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
      const get=HTMLCanvasElement.prototype.getContext,ids=new WeakMap();let next=0;
      window.__genesisAA={requests:[]};
      window.__genesisLivingOpticPrograms=[];
+     window.__genesisMetalPrograms=new WeakMap();
      // Observe the actual owner returned to R533 without changing its frame,
      // clock, renderer selection, readiness, or geometry.
      let owner;
@@ -41,7 +42,8 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
           engine.scene.traverseVisible(object=>{if(object.isPointLight&&object.layers.test(engine.camera.layers))pointLights.push(object);});
           const keyIndex=pointLights.indexOf(engine.mechLight);
           const keyUniform=keyIndex<0?null:gl.getUniform(program,gl.getUniformLocation(program,'pointLights['+keyIndex+'].color'));
-          window.__genesisMetalDraw={diffuse:Array.from(diffuse),keyIndex,keyColor:keyUniform?Array.from(keyUniform):null,draws:(window.__genesisMetalDraw?.draws||0)+1};
+          window.__genesisMetalDraw={diffuse:Array.from(diffuse),keyIndex,keyColor:keyUniform?Array.from(keyUniform):null,
+           relief:window.__genesisMetalPrograms.get(program)||null,draws:(window.__genesisMetalDraw?.draws||0)+1};
           return Reflect.apply(after,this,arguments);
          };
         }
@@ -65,6 +67,14 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
          const fragment=(gl.getAttachedShaders(program)||[])
           .filter(shader=>gl.getShaderParameter(shader,gl.SHADER_TYPE)===gl.FRAGMENT_SHADER)
           .map(shader=>gl.getShaderSource(shader)||'').join('\n');
+         if(fragment.includes('fxMagPlateFinish(){')){
+          window.__genesisMetalPrograms.set(program,{
+           linked:gl.getProgramParameter(program,gl.LINK_STATUS),
+           physicalNormal:fragment.includes('normal=fxMagPlateNormal(normal,fxPlate.w);'),
+           clearcoatNormal:fragment.includes('clearcoatNormal=fxMagPlateNormal(clearcoatNormal,fxPlate.w);'),
+           filtered:fragment.includes('reliefVisibility=1.0-smoothstep(.30,.75,max(aa.x,aa.y));')
+          });
+         }
          if(fragment.includes('void fxLivingMagCell(')){
           const record={program,linked:gl.getProgramParameter(program,gl.LINK_STATUS),draws:0,
            physicalEmission:fragment.includes('totalEmissiveRadiance+=fxCellRadiance*1.35;')};
@@ -155,6 +165,9 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
       assert(Math.abs(r-g)<1e-8&&Math.abs(g-b)<1e-8,'The actual animated '+metal.name+' must stay neutral silver');
      }
      assert(state.metalDraw?.draws>0,'The actual chassis draw must be observed');
+     const relief=state.metalDraw.relief;
+     assert(relief?.linked&&relief.physicalNormal&&relief.clearcoatNormal&&relief.filtered,
+      'The actual chassis draw must use filtered recesses in both physical metal and clearcoat normals');
      const [red,green,blue]=state.metalDraw.diffuse;
      assert(Math.abs(red-green)<1e-6&&Math.abs(green-blue)<1e-6,'The actual WebGL chassis diffuse uniform must stay neutral');
      const key=state.opticalKey;
