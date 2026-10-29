@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261029-r2233-no-dead-seam
+token=20261029-r2234-scalar-normals
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -251,3 +251,8 @@ r2233_native_geometry=R326 removes permanently disabled zero-overlap shell-expan
 r2233_local_microbenchmark=Thirteen V8-isolate iterations per profile measured desktop 184ms to 171ms, constrained-mobile 47ms to 44ms, software 43ms to 40ms, mobile unchanged at 64ms. These are architecture-local geometrical medians, NOT whole-page FPS, Lighthouse score or Android production claims. A separate cached-trigonometry experiment was rejected because desktop/software performance regressed.
 r2233_native_delivery=R490/R239/R422/R326, V55, HTML, Worker and the source-contract CI all use 20261029-r2233-no-dead-seam. The real Three.js Genesis film R533/R1280 and its exact CSP remain unchanged.
 r2233_release_gate=Remain DRAFT, unmerged, undeployed. Exact-head Lighthouse and three independent unaltered first-full-viewport Chrome handoff tests must be successful; outstanding dirty parent-branch conflicts must be reconciled without silently overriding upstream changes.
+
+r2234_native_normal_geometry=The canonical R326 physical MAG preserves every original GL mesh vertex, smooth-face blend, winding, UV, facet and optical normal. It removes ephemeral three-component arrays from the ~70k desktop / ~27k mobile per-vertex hybrid normal computation, using the identical operand order, Math.hypot and division. Five V8 profile runs compared all seven Float32Array buffers byte-for-byte: all identical. The attempted explicit source vertex .push conversion was measured and rejected rather than published.
+r2234_local_geometry_medians=Nine alternating V8 geometry-only measurements: desktop 160ms -> 141ms, phone 61ms -> 59ms, software 39ms -> 32ms. This is a local isolate microbenchmark, not measured WebGL startup, phone FPS, visual fidelity or Lighthouse progress.
+r2234_asset_chain=Original R490/R239/R422/R326 and mobile V55, HTML, Worker, source validators and regression cache IDs use 20261029-r2234-scalar-normals. Cinematic R533/R1280 DNA-to-cell film, all parser CSP hashes, and the visual original MAG identity are unchanged.
+r2234_release_gate=Remain draft, unmerged and not deployed. The stacked PR has unresolved parent conflicts. Require exact-HEAD P0 cold-start screenshots on three real Chromium processes, full native screenshot / GPU readback, and strict 3x desktop/mobile Lighthouse before any promotion.
