@@ -1920,9 +1920,19 @@
     cinematic.version=REVISION;
     cinematic.corePosition=[0,0,.52];
 
-    function resize(){
-      const rect=stage.getBoundingClientRect();
+    // R2245: a quality-only GPU backing-store resize does not change the
+    // stage's CSS box. Reuse the last measured layout box rather than
+    // synchronously flushing layout on each 48ms quality governor pulse.
+    // Real ResizeObserver/window/orientation paths still remeasure.
+    let lastStageBoxR2245=null;
+    function resize(qualityOnly=false){
+      const rect=qualityOnly&&lastStageBoxR2245
+        ? lastStageBoxR2245
+        : stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
+      if(!qualityOnly)lastStageBoxR2245={
+        width:rect.width,height:rect.height
+      };
       const baseCap=softwareRenderer
         ? (mobile?1.58:1.28)
         : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
@@ -1953,7 +1963,7 @@
       if(qualityResizeTimer)return;
       qualityResizeTimer=later(()=>{
         qualityResizeTimer=0;
-        if(!disposed&&!contextLost&&resize())schedule(1);
+        if(!disposed&&!contextLost&&resize(true))schedule(1);
       },48);
     }
 
