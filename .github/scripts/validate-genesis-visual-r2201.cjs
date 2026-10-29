@@ -58,7 +58,7 @@ assert(renderer.indexOf('this.updateDNA(t,time);')<renderer.indexOf('this.update
   'The DNA must be updated before the embryo');
 assert(renderer.indexOf('this.updateCore(t,time);')<renderer.indexOf('this.updateMechanical(t,time);'),
   'The embryo must be updated before the MAG');
-assert(worker.includes('formatx-mag-genesis-three-r1280.js?v=20261028-r2207-filtered-silver-living-optic'),
+assert(worker.includes('formatx-mag-genesis-three-r1280.js?v=20261029-r2208-cinematic-living-optic'),
   'Cloudflare must never rewrite the live R533 film back to an older visual');
 console.log('GENESIS_R2201_SOURCE_CONTRACT_PASS',JSON.stringify({
   fullNavigationReplay:true,explicitSkip:true,stages:['DNA','cyan/coral cell','four-arm MAG'],

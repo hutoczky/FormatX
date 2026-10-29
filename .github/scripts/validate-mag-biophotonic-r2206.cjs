@@ -43,6 +43,26 @@ assert(birth.indexOf('this.updateCore(t,time);') < birth.indexOf('this.updateMec
   'Cell nucleus must precede metal assembly');
 assert(!birth.includes('new T.WebGLRenderer(') || birth.includes('canvas,'),
   'The film must remain tied to its existing canvas');
+// R2208: the assembled film optic must contain the same living cell as the
+// permanent MAG, rather than dropping to an untextured blue glass sphere.
+const cellFunction = source => source.match(
+  /void fxLivingMagCell\(inout vec3 lensColor,vec2 oq,float od\)\{[\s\S]*?\n      \}/
+)?.[0];
+assert(cellFunction(mag), 'The native living-cell material function is missing');
+assert.equal(cellFunction(birth), cellFunction(mag),
+  'Cinematic and permanent MAG cell chemistry must stay byte-identical');
+assert(mag.includes('fxLivingMagCell(lensColor,oq,od);'),
+  'The native optical glass must execute the shared living-cell field');
+assert(birth.includes('this.bindLivingMagOptic(this.mechEyeCore.material);'),
+  'The existing curved cinematic lens must own the living-cell material');
+assert(birth.includes('totalEmissiveRadiance+=fxCellRadiance*1.35;'),
+  'The living cell must contribute to the physical lens emission path');
+assert(birth.includes('this.livingMagOpticUniforms.uTime.value=time*.001;') &&
+  birth.includes('this.livingMagOpticUniforms.uEnergy.value=.18+.32*opticWake;'),
+  'The lens must use the original film clock and delayed optical ignition');
+assert(birth.includes('this.mechEyeCore.material.opacity=.92*opticWake;') &&
+  birth.includes('const opticWake=smooth((t-7.44)/.78);'),
+  'The living lens must remain invisible before the original ignition beat');
 const parser = html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*?)<\/script>/);
 assert(parser, 'Parser-owned intro bootstrap missing');
 const hash = "'sha256-" + crypto.createHash('sha256').update(parser[1]).digest('base64') + "'";
@@ -51,7 +71,7 @@ assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
   'Worker must authorize the exact R2206 inline bootstrap');
 assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
-const revision = '20261028-r2207-filtered-silver-living-optic';
+const revision = '20261029-r2208-cinematic-living-optic';
 for (const [name, source] of Object.entries({ html, worker, intro, rescue, current, runtime, scheduler }))
   assert(source.includes(revision), name + ' must reference the R2206 cache generation');
 assert(html.includes('data-fx-dna-first-frame-r2181'),

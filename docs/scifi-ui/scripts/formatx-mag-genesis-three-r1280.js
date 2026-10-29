@@ -1836,6 +1836,54 @@
       material.customProgramCacheKey=()=> 'r2207-filtered-machined-silver-plate-finish';
     }
 
+    bindLivingMagOptic(material){
+      // R2208: the assembled cinematic MAG retains the same cyan/coral cell
+      // chemistry as its permanent native optic. Shade the existing curved
+      // glass in body coordinates; retain Three's physical light/transmission.
+      const uniforms={uTime:{value:0},uEnergy:{value:.18}};
+      this.livingMagOpticUniforms=uniforms;
+      material.onBeforeCompile=shader=>{
+        Object.assign(shader.uniforms,uniforms);
+        shader.vertexShader=shader.vertexShader.replace('#include <common>',
+          '#include <common>\nvarying vec3 vFxMagOpticLocal;')
+          .replace('#include <begin_vertex>',
+            '#include <begin_vertex>\nvFxMagOpticLocal=position;');
+        shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
+          `#include <common>
+          varying vec3 vFxMagOpticLocal;
+          uniform float uTime,uEnergy;
+      void fxLivingMagCell(inout vec3 lensColor,vec2 oq,float od){
+      /* R2206 — the born MAG contains the SAME living cell chemistry
+         established in the DNA film. Chromatin clusters have body-local
+         depth cues and slow metabolism; the glass stays a curved optical
+         surface, never a pasted sprite or an independent rendering layer. */
+      vec2 tissueUv=oq*1.12;
+      float tissueFold=sin(tissueUv.x*18.0+
+        2.0*sin(tissueUv.y*13.0+uTime*.13))*
+        cos(tissueUv.y*21.0-1.6*sin(tissueUv.x*11.0-uTime*.11));
+      float tissueIslands=sin(tissueUv.x*37.0+tissueUv.y*19.0)*
+        sin(tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16);
+      float tissueEnvelope=exp(-pow(od/.81,4.0));
+      float cyanCortex=smoothstep(.08,.67,tissueFold*.5+.5);
+      float coralOrganelles=smoothstep(.61,.84,
+        .52+.29*tissueFold+.19*tissueIslands);
+      float metabolicPulse=.82+.18*sin(uTime*.72+oq.x*4.0);
+      lensColor+=vec3(.025,.34,.34)*cyanCortex*tissueEnvelope*.30;
+      lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
+        (.26+.10*uEnergy)*metabolicPulse;
+      lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
+      }
+          `)
+          .replace('#include <emissivemap_fragment>',
+            `#include <emissivemap_fragment>
+            vec2 fxCellQ=vFxMagOpticLocal.xy/.135;
+            vec3 fxCellRadiance=vec3(0.0);
+            fxLivingMagCell(fxCellRadiance,fxCellQ,length(fxCellQ));
+            totalEmissiveRadiance+=fxCellRadiance*1.35;`);
+      };
+      material.customProgramCacheKey=()=> 'r2208-shared-cyan-coral-living-optic';
+    }
+
     makeMechanicalLayer(){
       const T=this.THREE;
 
@@ -2219,6 +2267,7 @@
           transparent:true,opacity:.92
         })
       );
+      this.bindLivingMagOptic(this.mechEyeCore.material);
       this.mechEyeCore.scale.set(1,1,.30);
       this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -2901,6 +2950,8 @@
       if(this.mechEyeCore){
         this.mechEyeCore.material.opacity=.92*opticWake;
         this.mechEyeCore.material.emissiveIntensity=.045+opticWake*.17;
+        this.livingMagOpticUniforms.uTime.value=time*.001;
+        this.livingMagOpticUniforms.uEnergy.value=.18+.32*opticWake;
       }
       // The iris seats only after the armour closes; no premature luminous
       // HUD or arbitrary late flash in the DNA/embryo chapters.

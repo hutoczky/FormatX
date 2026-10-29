@@ -20,6 +20,7 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
     await context.addInitScript(()=>{
      const get=HTMLCanvasElement.prototype.getContext,ids=new WeakMap();let next=0;
      window.__genesisAA={requests:[]};
+     window.__genesisLivingOpticPrograms=[];
      // Observe the actual owner returned to R533 without changing its frame,
      // clock, renderer selection, readiness, or geometry.
      let owner;
@@ -37,7 +38,29 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
      HTMLCanvasElement.prototype.getContext=function(type,options){
       const gl=Reflect.apply(get,this,arguments);
       if(gl&&/^webgl/.test(type)&&this.classList.contains('fxb-particles')){
-       if(!ids.has(gl))ids.set(gl,++next);
+       if(!ids.has(gl)){
+        ids.set(gl,++next);
+        // Observe linked programs and actual draws on the existing film GL.
+        // This proof never substitutes shaders, uniforms, geometry or time.
+        const link=gl.linkProgram,use=gl.useProgram,
+         arrays=gl.drawArrays,elements=gl.drawElements,programs=new WeakMap();
+        let active=null;
+        gl.linkProgram=function(program){
+         const result=Reflect.apply(link,this,arguments);
+         const fragment=(gl.getAttachedShaders(program)||[])
+          .filter(shader=>gl.getShaderParameter(shader,gl.SHADER_TYPE)===gl.FRAGMENT_SHADER)
+          .map(shader=>gl.getShaderSource(shader)||'').join('\n');
+         if(fragment.includes('void fxLivingMagCell(')){
+          const record={program,linked:gl.getProgramParameter(program,gl.LINK_STATUS),draws:0,
+           physicalEmission:fragment.includes('totalEmissiveRadiance+=fxCellRadiance*1.35;')};
+          programs.set(program,record);window.__genesisLivingOpticPrograms.push(record);
+         }
+         return result;
+        };
+        gl.useProgram=function(program){const result=Reflect.apply(use,this,arguments);active=program;return result;};
+        gl.drawArrays=function(){const result=Reflect.apply(arrays,this,arguments);const record=programs.get(active);if(record)record.draws++;return result;};
+        gl.drawElements=function(){const result=Reflect.apply(elements,this,arguments);const record=programs.get(active);if(record)record.draws++;return result;};
+       }
        window.__genesisAA.requests.push({id:ids.get(gl),type,antialias:options?.antialias});window.__genesisAAGL=gl;
       }
       return gl;
@@ -75,7 +98,15 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
        strandPaletteMismatches,armCoverage:[...arms].sort(),
        attributes:{initial:initial.count,cell:cell.count,arm:arm.count}};
      }
-     return{continuity,requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
+     const livingOptic=(window.__genesisLivingOpticPrograms||[]).map(record=>({
+      linked:record.linked,draws:record.draws,physicalEmission:record.physicalEmission,
+      time:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uTime')),
+      energy:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uEnergy'))
+     }));
+     return{continuity,livingOptic,opticOpacity:engine?.mechEyeCore?.material?.opacity,
+      opticGeometry:engine?{positions:engine.mechEyeCore.geometry.attributes.position.count,indices:engine.mechEyeCore.geometry.index.count}:null,
+      renderInfo:engine?{calls:engine.renderer.info.render.calls,programs:engine.renderer.info.programs.length,textures:engine.renderer.info.memory.textures}:null,
+      requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
     });
     record={...record,...state,errors,failedRequests};
     await page.screenshot({path:path.join(out,label+'.png')});
@@ -99,7 +130,14 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
      assert.equal(state.continuity.attributes.cell,Number(state.genome));
      assert.equal(state.continuity.attributes.arm,Number(state.genome));
     }
-    if(chapter==='mag'){assert(Number(state.armor)>=5);assert(Number(state.eye)>.07&&Number(state.eye)<.25);}
+    if(chapter==='dna'||chapter==='embryo')assert.equal(state.opticOpacity,0,'The MAG optic must remain dark before metal assembly');
+    if(chapter==='mag'){
+     assert(Number(state.armor)>=5);assert(Number(state.eye)>.07&&Number(state.eye)<.25);
+     assert.deepEqual(state.opticGeometry,{positions:1225,indices:6624},'The original physical lens geometry must stay unchanged');
+     assert(state.opticOpacity>.9,'The existing physical lens must wake after arm seating');
+     assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.physicalEmission&&program.time>0&&program.energy>.45&&program.energy<=.5),
+      'The actual linked Three.js living-cell lens program must draw with the original real film clock');
+    }
     record.pass=true;
    }catch(error){record.pass=false;record.error=error.message;}
    finally{report.cases.push(record);console.log('GENESIS_ANTIALIAS',JSON.stringify(record));await context.close();}

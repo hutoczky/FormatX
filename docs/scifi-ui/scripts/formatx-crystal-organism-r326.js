@@ -1250,6 +1250,27 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      void fxLivingMagCell(inout vec3 lensColor,vec2 oq,float od){
+      /* R2206 — the born MAG contains the SAME living cell chemistry
+         established in the DNA film. Chromatin clusters have body-local
+         depth cues and slow metabolism; the glass stays a curved optical
+         surface, never a pasted sprite or an independent rendering layer. */
+      vec2 tissueUv=oq*1.12;
+      float tissueFold=sin(tissueUv.x*18.0+
+        2.0*sin(tissueUv.y*13.0+uTime*.13))*
+        cos(tissueUv.y*21.0-1.6*sin(tissueUv.x*11.0-uTime*.11));
+      float tissueIslands=sin(tissueUv.x*37.0+tissueUv.y*19.0)*
+        sin(tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16);
+      float tissueEnvelope=exp(-pow(od/.81,4.0));
+      float cyanCortex=smoothstep(.08,.67,tissueFold*.5+.5);
+      float coralOrganelles=smoothstep(.61,.84,
+        .52+.29*tissueFold+.19*tissueIslands);
+      float metabolicPulse=.82+.18*sin(uTime*.72+oq.x*4.0);
+      lensColor+=vec3(.025,.34,.34)*cyanCortex*tissueEnvelope*.30;
+      lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
+        (.26+.10*uEnergy)*metabolicPulse;
+      lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
+      }
       void main(){
         // Trim the real front skin at the optical aperture. The old intact
         // pointed body occupied the same volume as the recessed glass lens.
@@ -1517,25 +1538,7 @@
         lensColor+=vec3(.22,.33,.39)*lensEdge*(.22+.34*softboxB);
         lensColor+=vec3(.03,.24,.27)*livingInterior*aquaSites*.09;
         lensColor+=vec3(.60,.18,.13)*livingInterior*coralSite*.035;
-        /* R2206 — the born MAG contains the SAME living cell chemistry
-           established in the DNA film. Chromatin clusters have body-local
-           depth cues and slow metabolism; the glass stays a curved optical
-           surface, never a pasted sprite or an independent rendering layer. */
-        vec2 tissueUv=oq*1.12;
-        float tissueFold=sin(tissueUv.x*18.0+
-          2.0*sin(tissueUv.y*13.0+uTime*.13))*
-          cos(tissueUv.y*21.0-1.6*sin(tissueUv.x*11.0-uTime*.11));
-        float tissueIslands=sin(tissueUv.x*37.0+tissueUv.y*19.0)*
-          sin(tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16);
-        float tissueEnvelope=exp(-pow(od/.81,4.0));
-        float cyanCortex=smoothstep(.08,.67,tissueFold*.5+.5);
-        float coralOrganelles=smoothstep(.61,.84,
-          .52+.29*tissueFold+.19*tissueIslands);
-        float metabolicPulse=.82+.18*sin(uTime*.72+oq.x*4.0);
-        lensColor+=vec3(.025,.34,.34)*cyanCortex*tissueEnvelope*.30;
-        lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
-          (.26+.10*uEnergy)*metabolicPulse;
-        lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
+        fxLivingMagCell(lensColor,oq,od);
         c=lensColor;
         }
 

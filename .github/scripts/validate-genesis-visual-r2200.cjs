@@ -12,7 +12,7 @@ assert(source.includes('[.00,.06,.60,1.28,.95]'),'R2200 portrait helix must rema
 const native=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 const delivery=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
 const edge=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261028-r2207-filtered-silver-living-optic';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261029-r2208-cinematic-living-optic';
 assert(delivery.includes(revision),'R2200 WebGL source must bypass the old DNA/cell cinematic cache');
 assert(edge.includes(revision),'Cloudflare must deliver R2200 rather than rewriting an older film');
 for(const token of [
