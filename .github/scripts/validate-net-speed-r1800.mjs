@@ -20,6 +20,12 @@ assert.match(lazyLoader,/IntersectionObserver/);
 assert.match(lazyLoader,/start\.click\(\)/);
 assert.match(lazyLoader,/rootMargin:'800px 0px'/);
 assert.match(lazyLoader,/section\.dataset\.fxNetBoundR1800/);
+assert.match(client,/document\.querySelector\('section\[data-fx-net-speed-r1800="true"\]'\)/,
+  'Controller must target real network section, never a script element');
+assert.match(lazyLoader,/script\.dataset\.fxNetControllerBundleR2240='true'/,
+  'Dynamic bundle uses its own R2240 identity');
+assert.doesNotMatch(lazyLoader,/script\.dataset\.fxNetSpeedR1800\s*=/,
+  'Script must never shadow real section selector in head');
 assert.match(lazyLoader,/addEventListener\('click'/);
 assert.doesNotMatch(index,/<script[^>]+src="\.\/scripts\/formatx-net-speed-r1800\.js/);
 
