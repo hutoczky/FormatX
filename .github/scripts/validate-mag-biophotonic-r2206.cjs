@@ -75,7 +75,7 @@ assert(worker.includes('const INLINE_R2220_BOOT_HASH = "' + hash + '";'),
 assert((worker.match(/\$\{INLINE_R2220_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261029-r2228-changed-telemetry';
+const magRevision = '20261029-r2232-exact-geometry';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(rescue.includes('20261028-r2220-direct-gl-handoff'),
   'Parser fallback must load R2219 canonical bridge only');
