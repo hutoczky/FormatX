@@ -1754,6 +1754,10 @@
       ? 'software-cortical-tissue-membrane-cartilage-energy-organ'
       : 'hardware-photographic-material-preserved';
 
+    // R2241: one-time performance-phase telemetry. The art and framebuffer
+    // stay untouched; measurable GPU/JS startup costs are separated before
+    // changing any cinematic quality or topology.
+    const shaderStartedR2241=performance.now();
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
@@ -1795,7 +1799,10 @@
     // yields caused repeatable CLS (0.146 phone / 0.254 desktop) when the
     // hero stage was activated between browser paints. Preserve the same
     // geometry, seven uploads and successful R2222 first viewport handoff.
+    const geometryStartedR2241=performance.now();
+    const shaderReadyMsR2241=geometryStartedR2241-shaderStartedR2241;
     const geometry=buildOrganismGeometry(softwareRenderer);
+    const geometryMsR2241=performance.now()-geometryStartedR2241;
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -1818,7 +1825,22 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
+    const uploadStartedR2241=performance.now();
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    const uploadMsR2241=performance.now()-uploadStartedR2241;
+    // Write once after all seven real buffer uploads; no per-frame DOM work.
+    root.dataset.fxMagBootPhasesR2241=JSON.stringify({
+      shaderMs:+shaderReadyMsR2241.toFixed(2),
+      geometryMs:+geometryMsR2241.toFixed(2),
+      uploadMs:+uploadMsR2241.toFixed(2),
+      vertices:geometry.count,
+      profile:softwareRenderer?'software':mobile?'mobile':'desktop'
+    });
+    try{
+      performance.measure('formatx-r2241-mag-geometry',{start:geometryStartedR2241,duration:geometryMsR2241});
+      performance.measure('formatx-r2241-mag-upload',{start:uploadStartedR2241,duration:uploadMsR2241});
+    }catch(_){/* Marks are diagnostic only. */}
+
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
