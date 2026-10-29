@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261029-r2228-changed-telemetry
+token=20261029-r2232-exact-geometry
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261029-r2228-changed-telemetry
+mag_cache=20261029-r2232-exact-geometry
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -242,3 +242,7 @@ r2226_native_cache=R490-R239-R422-R326/V55, HTML and Worker use 20261028-r2226-g
 
 r2228_runtime_telemetry=Existing R326 original WebGL seven 250ms metric fields retain their exact names and values, but skip unchanged root data-attribute writes. Source regression uses a Proxy to prove initial seven writes, zero duplicate writes on a repeated sample and only updated metrics on changed samples. No shader, geometry, animation owner or frame budget modification.
 r2228_native_cache=HTML, Worker, R490 scheduler, R239 motion loader, R422 core loader, R326 native source and V55 phone fallback now use 20261029-r2228-changed-telemetry. The cinematic DNA-to-cell-to-MAG R533/R1280 film cache and its inline CSP are deliberately unchanged. Strict Lighthouse and three independent full-viewport cold starts remain the release gate. Development-only; no merge or production deployment.
+
+r2232_native_geometry=The original R326 GPU mesh still emits exactly 70722 desktop, 27474 mobile, 19092 constrained-mobile and 17592 software vertices. All seven Float32Array WebGL attribute streams were compared against the original geometry byte-for-byte in five execution profiles and remained IDENTICAL. The original facet centroid and cross-product mathematical operand order is unchanged; only temporary face-vector arrays and an array-map callback were removed. The original R533/R1280 DNA-to-cell-to-MAG film remains unmodified. No additional renderer, draw pass or continuous RAF.
+r2232_performance_measurement=Nine geometry-only V8 isolate runs per profile: desktop median original 160ms -> current 142ms, mobile 53ms -> 52ms and constrained mobile 38ms -> 37ms. These are LOCAL MICROBENCHMARKS, NOT browser FPS or Lighthouse improvements. A different typed-array bulk-buffer experiment measured slower and was rejected; no such version was committed.
+r2232_asset_chain=R490/R239/R422/R326, V55 fallback, HTML and Worker plus source CI checks use 20261029-r2232-exact-geometry. Film-specific script URLs and CSP hashes remain unchanged. The independent exact-head Chrome P0 and Lighthouse remain required; no live production deployment or merge authorized. Parent PR conflict remains an independent release blocker.
