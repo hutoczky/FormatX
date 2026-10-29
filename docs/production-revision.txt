@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261029-r2211-neutral-silver-albedo
+token=20261029-r2212-neutral-optical-key
 release_line=R2209-SINGLE-OWNER-LIVING-MAG-HANDOFF
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -32,7 +32,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261029-r2211-neutral-silver-albedo
+mag_cache=20261029-r2212-neutral-optical-key
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -206,3 +206,7 @@ r2210_delivery=The preserved R2208 living optic uses 20261029-r2210-retired-stag
 r2211_silver=The three animated chassis/insert/silver albedos are now neutral RGB throughout the original finale ramp. Their original linear-light D65 luminance is preserved; the existing studio lights and living optic still supply colored reflection. No shader, geometry, texture, light, camera, clock or lifecycle change is claimed. This is not rendered-brightness or studio-quality acceptance.
 r2211_validation=303 actual animated-material samples retain the previous linear albedo luminance within floating-point precision; exact BF847826 negative control fails on the old green base tint. The original seven browser cases additionally observe the actual body draw diffuse uniform and the three live animated materials without adding draws or render requests. Browser results remain a separate check.
 r2211_delivery=20261029-r2211-neutral-silver-albedo; parser inline SHA256 AQ/9ox0NoSVJN30FQWmhq300L6Ls0KHaVXQc8AXo8y0= matches HTML and both Worker CSP layers. Original deadlines and test assertions are preserved; no deployment or performance certificate.
+r2212_optical_key=The existing local PointLight now has neutral RGB 0.7624076434266844, preserving the previous cyan lamp linear D65 luminance. Its original distance 4.2, decay 2, position, late ignition, intensity envelope and moving studio rig remain unchanged. The existing living cyan/coral optic still emits its own biological field. No new light, renderer, draw, texture, geometry or clock.
+r2212_validation=The actual Three r185 PointLight calibration and original intensity expression are source checked; exact R2211 negative control fails on the old green key. Browser proof reads the actual chassis diffuse and local key color uniform after the existing body draw. Normal hardware, rendered brightness, FPS and studio quality remain separate unproven targets.
+r2212_ci_layout=The original seven fixed-frame WebGL cases and two normal-clock anchor-transfer cases run serially in their own independent runner job. Both P0 jobs retain a 12-minute cap and the original test steps, case timeouts and assertions; this is verification isolation, not a product performance fix. Prior R2210/R2211 cancellations remain historical failures to complete coverage.
+r2212_delivery=20261029-r2212-neutral-optical-key; parser inline SHA256 XT7Zn1STLaW0q/qTgpCWXCqnkwHuS/oxgr19/osqhkE= matches HTML and both Worker CSP layers. No deployment or visual acceptance.

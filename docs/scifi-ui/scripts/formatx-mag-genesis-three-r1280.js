@@ -2347,6 +2347,13 @@
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
+      // R2212: illuminate silver with a neutral local studio key. The living
+      // cell supplies the cyan/coral emission inside the optic; the former
+      // cyan lamp must not dye the whole chassis. Preserve its linear-light
+      // luminance, distance, decay and existing per-frame intensity envelope.
+      const opticalKeyY=this.mechLight.color.r*.2126+
+        this.mechLight.color.g*.7152+this.mechLight.color.b*.0722;
+      this.mechLight.color.setRGB(opticalKeyY,opticalKeyY,opticalKeyY);
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
 

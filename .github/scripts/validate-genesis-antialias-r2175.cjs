@@ -37,7 +37,11 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
          body.onAfterRender=function(renderer){
           const gl=renderer.getContext(),program=gl.getParameter(gl.CURRENT_PROGRAM);
           const diffuse=gl.getUniform(program,gl.getUniformLocation(program,'diffuse'));
-          window.__genesisMetalDraw={diffuse:Array.from(diffuse),draws:(window.__genesisMetalDraw?.draws||0)+1};
+          const pointLights=[];
+          engine.scene.traverseVisible(object=>{if(object.isPointLight&&object.layers.test(engine.camera.layers))pointLights.push(object);});
+          const keyIndex=pointLights.indexOf(engine.mechLight);
+          const keyUniform=keyIndex<0?null:gl.getUniform(program,gl.getUniformLocation(program,'pointLights['+keyIndex+'].color'));
+          window.__genesisMetalDraw={diffuse:Array.from(diffuse),keyIndex,keyColor:keyUniform?Array.from(keyUniform):null,draws:(window.__genesisMetalDraw?.draws||0)+1};
           return Reflect.apply(after,this,arguments);
          };
         }
@@ -115,7 +119,8 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
       energy:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uEnergy'))
      }));
      const metals=engine?['mechMaterial','mechMidMaterial','silverMaterial'].map(name=>({name,color:engine[name].color.toArray()})):[];
-     return{continuity,livingOptic,metals,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
+     const opticalKey=engine?{color:engine.mechLight.color.toArray(),intensity:engine.mechLight.intensity,distance:engine.mechLight.distance,decay:engine.mechLight.decay}:null;
+     return{continuity,livingOptic,metals,opticalKey,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
       opticGeometry:engine?{positions:engine.mechEyeCore.geometry.attributes.position.count,indices:engine.mechEyeCore.geometry.index.count}:null,
       renderInfo:engine?{calls:engine.renderer.info.render.calls,programs:engine.renderer.info.programs.length,textures:engine.renderer.info.memory.textures}:null,
       requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
@@ -152,6 +157,13 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
      assert(state.metalDraw?.draws>0,'The actual chassis draw must be observed');
      const [red,green,blue]=state.metalDraw.diffuse;
      assert(Math.abs(red-green)<1e-6&&Math.abs(green-blue)<1e-6,'The actual WebGL chassis diffuse uniform must stay neutral');
+     const key=state.opticalKey;
+     assert(key&&key.intensity>0);assert.equal(key.distance,4.2);assert.equal(key.decay,2);
+     assert(Math.abs(key.color[0]-key.color[1])<1e-8&&Math.abs(key.color[1]-key.color[2])<1e-8,'The existing physical key must be neutral');
+     const keyDraw=state.metalDraw.keyColor;
+     assert(keyDraw&&keyDraw.every(channel=>channel>.01),'The actual local key uniform must illuminate the chassis draw');
+     assert(Math.abs(keyDraw[0]-keyDraw[1])<1e-6&&Math.abs(keyDraw[1]-keyDraw[2])<1e-6,'The actual linked physical key must be neutral');
+     assert(Math.abs(keyDraw[0]-key.color[0]*key.intensity)<1e-4,'The observed light slot must be the existing local optical key');
      assert(Number(state.armor)>=5);assert(Number(state.eye)>.07&&Number(state.eye)<.25);
      assert.deepEqual(state.opticGeometry,{positions:1225,indices:6624},'The original physical lens geometry must stay unchanged');
      assert(state.opticOpacity>.9,'The existing physical lens must wake after arm seating');
