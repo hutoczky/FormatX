@@ -1911,6 +1911,7 @@
       ? (mobile?.80:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
+    root.dataset.fxCoreQualityResizeR2244='coalesced-once-per-48ms-burst';
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
     let surfacePulseStart=-Infinity,lastSurfacePulseAt=-Infinity,surfacePulseCount=0;
@@ -1940,6 +1941,20 @@
       root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
       root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
       return true;
+    }
+
+    /* R2244: a burst of overloaded frames can lower quality twice inside
+       ~48ms. Recreating the GPU drawing buffer after EVERY panic step adds
+       a second avoidable allocation, layout invalidation and compositor
+       wakeup. Coalesce into one bounded 48ms resize; the last qualityScale
+       wins, without modifying geometry, shaders or the final quality floor.
+       Do not continuously defer by restarting the timer. */
+    function requestQualityResizeR2244(){
+      if(qualityResizeTimer)return;
+      qualityResizeTimer=later(()=>{
+        qualityResizeTimer=0;
+        if(!disposed&&!contextLost&&resize())schedule(1);
+      },48);
     }
 
     function blocked(){
@@ -2239,11 +2254,7 @@
           if(Math.abs(previous-qualityScale)>.001){
             lastQualityAdjust=now;
             root.dataset.fxCoreGovernorR1660='panic-lod-one-frame-spike';
-            if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
-            qualityResizeTimer=later(()=>{
-              qualityResizeTimer=0;
-              if(!disposed&&!contextLost&&resize())schedule(1);
-            },0);
+            requestQualityResizeR2244();
           }
         }else if(now-lastQualityAdjust>120){
           const previous=qualityScale;
@@ -2275,11 +2286,7 @@
             lastQualityAdjust=now;
             root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
             root.dataset.fxCoreGovernorR1660=qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';
-            if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
-            qualityResizeTimer=later(()=>{
-              qualityResizeTimer=0;
-              if(!disposed&&!contextLost&&resize())schedule(1);
-            },0);
+            requestQualityResizeR2244();
           }
         }
       }
