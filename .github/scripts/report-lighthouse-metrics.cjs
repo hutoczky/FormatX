@@ -38,7 +38,33 @@ const paintDetails=files.map((file,index)=>{
     .map(a=>({id:a.id,score:a.score,title:a.title,
       savingsMs:a.details?.overallSavingsMs||0}))
     .sort((a,b)=>(b.savingsMs-a.savingsMs)||(a.score-b.score)).slice(0,13);
+  // R2229: surface specific bottlenecks from the already-collected LHR.
+  // No extra page run, synthetic browsing mode or weakened thresholds.
+  // Mobile's 2+s Style & Layout must be traceable to a reproducible task.
+  const auditRows=id=>{
+    const values=audits[id]?.details?.items;
+    return Array.isArray(values)?values:[];
+  };
+  const longTasks=auditRows('long-tasks')
+    .map(item=>({
+      durationMs:item.duration??null,
+      startTimeMs:item.startTime??null,
+      source:item.url||item.source||null
+    }))
+    .sort((a,b)=>(b.durationMs||0)-(a.durationMs||0)).slice(0,12);
+  const bootupTasks=auditRows('bootup-time')
+    .map(item=>({
+      url:item.url||null,
+      totalMs:item.total??null,
+      scriptingMs:item.scripting??null,
+      scriptParseCompileMs:item.scriptParseCompile??null
+    }))
+    .sort((a,b)=>(b.totalMs||0)-(a.totalMs||0)).slice(0,12);
+  const forcedReflows=auditRows('forced-reflow-insight')
+    .map(item=>({url:item.url||null,durationMs:item.duration||item.wastedMs||null,
+      source:item.source||null})).slice(0,8);
   const result={profile,run:index+1,
+    longTasks,bootupTasks,forcedReflows,
     lcpElement:node?.snippet||null,lcpSelector:node?.selector||null,
     lcpBreakdown:audits['lcp-breakdown-insight']?.details?.items?.slice(0,3)||[],
     lcpDiscovery:audits['lcp-discovery-insight']?.details?.items?.slice(0,2)||[],
