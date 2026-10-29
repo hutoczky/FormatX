@@ -60,6 +60,9 @@ function install(){
     const rect=launcher.getBoundingClientRect();
     if(rect.width<1||rect.height<1)return false;
     const samples=[.12,.38,.62,.88];
+    // R2231: repeated sample points often hit the same DOM element.
+    // Its style and geometry cannot change during this read-only pass.
+    const inspectedTargets=new Set();
     for(const fx of samples)for(const fy of samples){
       const x=Math.max(1,Math.min(innerWidth-1,rect.left+rect.width*fx));
       const y=Math.max(1,Math.min(innerHeight-1,rect.top+rect.height*fy));
@@ -67,6 +70,8 @@ function install(){
         if(!(el instanceof Element)||host.contains(el))continue;
         const target=el.matches(collisionSelector)?el:el.closest(collisionSelector);
         if(!(target instanceof Element)||host.contains(target))continue;
+        if(inspectedTargets.has(target))continue;
+        inspectedTargets.add(target);
         const style=getComputedStyle(target),box=target.getBoundingClientRect();
         const visible=style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity||1)>.02&&box.width>0&&box.height>0;
         if(visible)return true;
