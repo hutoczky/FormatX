@@ -29,8 +29,16 @@ assert(api.resize(),'first real layout should be measurable');
 assert.equal(reads,1);
 const first={w:canvas.width,h:canvas.height};
 api.setQuality(.82);
-for(let i=0;i<24;i++)assert(api.resize(true));
-assert.equal(reads,1,'24 quality changes must not force any layout read');
+assert(api.resize(true),'first changed GPU backing-store dimensions must render');
+const firstQualityViewportCount=viewports;
+const firstQualityResolution=root.dataset.fxCoreReal3dResolution;
+for(let i=1;i<24;i++)assert.equal(api.resize(true),false,
+  'identical LOD dimensions must not queue redundant GPU renders');
+assert.equal(reads,1,'24 quality-only checks must not force any layout read');
+assert.equal(viewports,firstQualityViewportCount,
+  'identical backing-store dimensions must not issue gl.viewport');
+assert.equal(root.dataset.fxCoreReal3dResolution,firstQualityResolution,
+  'unchanged LOD dimensions must not rewrite root resolution telemetry');
 assert(canvas.width<first.w&&canvas.height<first.h,
   'Quality-only framebuffer must still adapt to the real pixel budget');
 rect={width:430,height:515};
@@ -42,5 +50,8 @@ assert(api.resize(true));
 assert.equal(reads,2,'quality changes after real resize must use fresh cache');
 assert(root.dataset.fxCoreReal3dResolution===canvas.width+'x'+canvas.height,
   'public framebuffer telemetry contract must remain intact');
-assert.equal(viewports,27,'one WebGL viewport configuration per resize');
-console.log('MAG_R2245_QUALITY_ONLY_RESIZE_LAYOUT_CACHE_PASS');
+assert.equal(viewports,4,
+  'only initial, changed quality, actual CSS resize and changed quality use GPU viewport');
+assert.equal(api.resize(true),false,'stable final LOD must remain zero-work');
+assert.equal(viewports,4,'stable final LOD must not wake the GL viewport');
+console.log('MAG_R2246_NOOP_GPU_RESIZE_AND_R2245_LAYOUT_CACHE_PASS');
