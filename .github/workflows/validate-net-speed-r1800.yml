@@ -14,7 +14,7 @@ on:
       - '.github/scripts/validate-net-speed-browser-r1800.cjs'
       - '.github/workflows/validate-net-speed-r1800.yml'
   push:
-    branches: [master]
+    branches: [master, fix/r2208-genesis-controls-nonblocking-css]
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-net-speed-r1800.js'
