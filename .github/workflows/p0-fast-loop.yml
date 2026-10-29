@@ -133,6 +133,7 @@ jobs:
           node .github/scripts/production-preflight.cjs
           node .github/scripts/validate-mag-biophotonic-r2206.cjs
           node .github/scripts/validate-genesis-css-criticalpath-r2208.cjs
+          node .github/scripts/validate-genesis-proof-clock-r2236.cjs
           node .github/scripts/validate-mag-mesh-rows-r2208.cjs
           node .github/scripts/validate-mag-telemetry-r2228.cjs
           node .github/scripts/validate-lighthouse-bottlenecks-r2229.cjs
