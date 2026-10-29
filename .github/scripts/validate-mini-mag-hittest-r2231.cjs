@@ -48,8 +48,10 @@ assert.equal(shown.hitTests,1,'The early-visible path must still short-circuit')
 const st=source.indexOf("  function updateContextSafety(source='runtime'){");
 const ed=source.indexOf("\n  function scheduleContextSafety(",st);
 assert(st>0&&ed>st,'Original context safety update must remain present');
-assert(source.includes("addEventListener('formatx:magbirthcomplete',"),
-  'The controller must resume safety on the canonical film completion event');
+assert(source.includes("document.addEventListener('formatx:magbirthcomplete',"),
+  'R533 emits a non-bubbling event on document, never on window');
+assert(!source.includes("  addEventListener('formatx:magbirthcomplete',"),
+  'Listening to window would silently miss the canonical film-end event');
 const maker=new Function('root','document','host','hit','report',
   'let contextFrame=0,collisionHidden=false;'+
   'const collidesWithInformation=()=>hit();'+
