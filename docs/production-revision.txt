@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261029-r2234-scalar-normals
+token=20261029-r2244-coalesced-gpu-resize
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -256,3 +256,7 @@ r2234_native_normal_geometry=The canonical R326 physical MAG preserves every ori
 r2234_local_geometry_medians=Nine alternating V8 geometry-only measurements: desktop 160ms -> 141ms, phone 61ms -> 59ms, software 39ms -> 32ms. This is a local isolate microbenchmark, not measured WebGL startup, phone FPS, visual fidelity or Lighthouse progress.
 r2234_asset_chain=Original R490/R239/R422/R326 and mobile V55, HTML, Worker, source validators and regression cache IDs use 20261029-r2234-scalar-normals. Cinematic R533/R1280 DNA-to-cell film, all parser CSP hashes, and the visual original MAG identity are unchanged.
 r2234_release_gate=Remain draft, unmerged and not deployed. The stacked PR has unresolved parent conflicts. Require exact-HEAD P0 cold-start screenshots on three real Chromium processes, full native screenshot / GPU readback, and strict 3x desktop/mobile Lighthouse before any promotion.
+
+r2244_framebuffer_governor=The original native R326 shader, geometry, WebGL buffers, depth and cinematic material remain unchanged. Instead of two or more short-lived drawing-buffer reallocations during a burst of overloaded frames, both panic and steady-state quality paths queue at most one GPU resize callback per 48ms, using the latest requested qualityScale. No second WebGL renderer, new per-frame observer, modified quality floor, or additional idle RAF. Exact scenario-based Node guard covers rapid repeated scheduling and lost-context suppression.
+r2244_delivery=Native R490/R239/R422/R326, mobile V55, HTML, Worker rewrites and exact source validation use 20261029-r2244-coalesced-gpu-resize. The Three.js DNA-to-cell film R533/R1280 and its security CSP are unchanged. Draft only; the latest R2243 three-run Lighthouse still failed mobile performance, and no claimed FPS/TBT gain is made without R2244 exact-head measurements.
+r2244_release_gate=Three independent cold-start real Chrome handoff screenshots, strict desktop/mobile 3x Lighthouse, smooth phone animation, keyboard/semantic chapter reveals, and parent-branch conflict resolution are mandatory before any merge or live deployment.
