@@ -114,7 +114,8 @@ function install(){
   addEventListener('resize',()=>scheduleContextSafety('resize'),{passive:true});
   addEventListener('orientationchange',()=>scheduleContextSafety('orientation'),{passive:true});
   addEventListener('formatx:cinematicscene',()=>scheduleContextSafety('cinematic-scene'),{passive:true});
-  addEventListener('formatx:magbirthcomplete',()=>scheduleContextSafety('post-genesis'),{passive:true});
+  // R2243: canonical R533 dispatches this NON-bubbling event on document.
+  document.addEventListener('formatx:magbirthcomplete',()=>scheduleContextSafety('post-genesis'),{passive:true});
   addEventListener('formatx:loop',()=>scheduleContextSafety('loop'),{passive:true});
   addEventListener('pageshow',()=>scheduleContextSafety('pageshow'),{passive:true});
   scheduleContextSafety('install');
