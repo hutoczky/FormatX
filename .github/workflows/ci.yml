@@ -11,6 +11,9 @@ on:
       - '.github/workflows/ci.yml'
       - '.github/scripts/report-lighthouse-metrics.cjs'
       - '.github/scripts/validate-mag-mesh-rows-r2208.cjs'
+      - '.github/scripts/validate-mag-cold-handoff-r2226.cjs'
+      - '.github/scripts/validate-net-speed-browser-r1800.cjs'
+      - '.github/scripts/validate-net-speed-r1800.mjs'
   push:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
@@ -23,6 +26,9 @@ on:
       - '.github/workflows/ci.yml'
       - '.github/scripts/report-lighthouse-metrics.cjs'
       - '.github/scripts/validate-mag-mesh-rows-r2208.cjs'
+      - '.github/scripts/validate-mag-cold-handoff-r2226.cjs'
+      - '.github/scripts/validate-net-speed-browser-r1800.cjs'
+      - '.github/scripts/validate-net-speed-r1800.mjs'
   workflow_dispatch:
 
 permissions:
