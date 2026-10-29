@@ -139,6 +139,7 @@ jobs:
           node .github/scripts/validate-mag-mesh-rows-r2208.cjs
           node .github/scripts/validate-mag-quality-resize-r2244.cjs
           node .github/scripts/validate-mag-resize-layout-cache-r2245.cjs
+          node .github/scripts/validate-mag-cpu-upload-release-r2249.cjs
           node .github/scripts/validate-mag-telemetry-r2228.cjs
           node .github/scripts/validate-lighthouse-bottlenecks-r2229.cjs
           node .github/scripts/validate-mini-mag-hittest-r2231.cjs
