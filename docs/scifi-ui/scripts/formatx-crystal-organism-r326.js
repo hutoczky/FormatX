@@ -402,12 +402,14 @@
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
 
-        const hybridNormal=normalize([
-          smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
-          smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
-          smoothNormal[2]*smoothWeight+crystalNormal[2]*faceWeight
-        ]);
-        crystalNormals.push(...hybridNormal);
+        // R2234: same floating-point order and Math.hypot normalization,
+        // but skip two ephemeral 3-component arrays per output vertex.
+        // The seven authored GL buffers remain byte-for-byte identical.
+        const hx=smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight;
+        const hy=smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight;
+        const hz=smoothNormal[2]*smoothWeight+crystalNormal[2]*faceWeight;
+        const hlen=Math.hypot(hx,hy,hz)||1;
+        crystalNormals.push(hx/hlen,hy/hlen,hz/hlen);
         uvs.push(...item.uv);
         if(index===0)barycentrics.push(1,0,0);
         else if(index===1)barycentrics.push(0,1,0);
