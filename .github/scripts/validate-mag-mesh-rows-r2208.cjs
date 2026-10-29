@@ -4,6 +4,10 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
+assert(source.includes('const ax=v1[0]-v0[0],ay=v1[1]-v0[1],az=v1[2]-v0[2];'),
+  'R2232 MAG must use its faster inline face vectors without altering original math');
+assert(source.includes('const centre=['),
+  'R2232 triangle centroid must avoid per-face callback allocations');
 const a=source.indexOf('    /* R2208: keep only two adjacent latitude rows');
 const b=source.indexOf('\n    /* R1982 — real microfibril geometry.',a);
 assert(a>0&&b>a,'Optimized analytical-body loop missing');
@@ -56,5 +60,5 @@ for(const [name,...args] of profiles){
     const right=Buffer.from(y.arrays[i].buffer,y.arrays[i].byteOffset,y.arrays[i].byteLength);
     assert.equal(Buffer.compare(left,right),0,name+' original WebGL array '+i+' differs');
   }
-  console.log('MAG_R2208_R2210_ENGINE_LOCAL_EXACT_MESH_PASS',name,x.count);
+  console.log('MAG_R2232_BYTE_IDENTICAL_FACE_GEOMETRY_PASS',name,x.count);
 }
