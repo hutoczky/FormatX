@@ -361,19 +361,20 @@
       const v0=vertices[0].crystal,v1=vertices[1].crystal,v2=vertices[2].crystal;
       const ax=v1[0]-v0[0],ay=v1[1]-v0[1],az=v1[2]-v0[2];
       const bx=v2[0]-v0[0],by=v2[1]-v0[1],bz=v2[2]-v0[2];
-      let crystalNormal=normalize([
-        ay*bz-az*by,az*bx-ax*bz,ax*by-ay*bx
-      ]);
-      const centre=[
-        (v0[0]+v1[0]+v2[0])/3,
-        (v0[1]+v1[1]+v2[1])/3,
-        (v0[2]+v1[2]+v2[2])/3
-      ];
+      // R2237: eliminate temporary centroid/normal vectors on the hot
+      // face path. Preserve the authored Math.hypot and arithmetic order
+      // to keep all seven original GPU buffers bit-for-bit identical.
+      const nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx;
+      const nlen=Math.hypot(nx,ny,nz)||1;
+      let crystalNormal=[nx/nlen,ny/nlen,nz/nlen];
+      const cx=(v0[0]+v1[0]+v2[0])/3;
+      const cy=(v0[1]+v1[1]+v2[1])/3;
+      const cz=(v0[2]+v1[2]+v2[2])/3;
       /* R1556 — normal correction alone was not enough: BACK-face culling uses
          vertex winding, not the supplied normal. Reverse inward triangles so the
          closed mineral shell cannot develop the black pin-holes seen in real
          mobile captures. */
-      if (dot(crystalNormal, centre) < 0) {
+      if (crystalNormal[0]*cx+crystalNormal[1]*cy+crystalNormal[2]*cz < 0) {
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
