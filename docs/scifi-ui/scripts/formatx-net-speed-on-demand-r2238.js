@@ -12,7 +12,7 @@ if(section.dataset.fxNetLoaderR2238)return;
 section.dataset.fxNetLoaderR2238='armed';
 const source=new URL('./formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream',
   document.currentScript?.src||document.baseURI).href;
-let state='idle',promise=null,observer=null;
+let state='idle',promise=null,observer=null,pendingActivation=false;
 const cleanup=()=>{observer?.disconnect();observer=null;};
 function load(reason){
   if(promise)return promise;
@@ -56,7 +56,13 @@ start.addEventListener('click',event=>{
   event.preventDefault();
   event.stopImmediatePropagation();
   if(state==='failed'){fail(new Error('NET loader unavailable'));return;}
-  load('activation').then(()=>start.click()).catch(fail);
+  // A rapid double-click while the JS bundle is in flight must start only
+  // one real measurement, never queue multiple synthetic activations.
+  if(pendingActivation)return;
+  pendingActivation=true;
+  load('activation')
+    .then(()=>{pendingActivation=false;start.click();})
+    .catch(error=>{pendingActivation=false;fail(error);});
 },true);
 start.addEventListener('pointerdown',()=>{if(state==='idle')load('pointer-intent').catch(fail);},{passive:true});
 start.addEventListener('keydown',event=>{
