@@ -58,7 +58,10 @@ const profiles=[
   ['mobile',true,false,false,false,false],
   ['constrained-mobile',true,true,true,false,false],
   ['software',true,true,true,false,true],
-  ['audit-mobile',true,false,false,true,false]
+  ['audit-mobile',true,false,false,true,false],
+  // R2234: also cover low-power desktop and reference-color desktop.
+  ['constrained-desktop',false,true,true,false,false],
+  ['audit-desktop',false,false,false,true,false]
 ];
 for(const [name,...args] of profiles){
   const x=before(...args),y=after(...args);
