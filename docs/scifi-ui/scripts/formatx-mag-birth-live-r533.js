@@ -1365,6 +1365,26 @@
            retained framebuffer still read as black, which made valid Three
            geometry look absent in screenshot evidence. */
         let proofAttempts=0;
+        // R2236: a deterministic visual-proof page must not depend on
+        // requestAnimationFrame alone. Headless Chromium occasionally
+        // throttles an RAF after Three's software GL readback. Each proof
+        // opportunity is bounded and can be released by either a genuine
+        // frame callback or a one-shot timeout; the earlier callback wins.
+        // This affects only ?introframe= proof, never visitor playback.
+        const proofTurn=callback=>{
+          let delivered=false;
+          let timeoutId=0;
+          let frameId=0;
+          const fire=()=>{
+            if(delivered)return;
+            delivered=true;
+            clearTimeout(timeoutId);
+            cancelAnimationFrame(frameId);
+            callback();
+          };
+          frameId=requestAnimationFrame(fire);
+          timeoutId=window.setTimeout(fire,180);
+        };
         const settleProof=()=>{
           if(finished||!overlay.isConnected)return;
           proofAttempts+=1;
@@ -1373,7 +1393,7 @@
           }
           const peak=Number(ROOT.dataset.fxMagBirthFramePeakR1557||0);
           if(peak<8 && proofAttempts<8){
-            requestAnimationFrame(()=>requestAnimationFrame(settleProof));
+            proofTurn(()=>proofTurn(settleProof));
             return;
           }
           ROOT.dataset.fxMagBirthVisualFrameSeconds=seconds.toFixed(3);
@@ -1387,7 +1407,7 @@
             }));
           }catch(_){}
         };
-        requestAnimationFrame(()=>requestAnimationFrame(settleProof));
+        proofTurn(()=>proofTurn(settleProof));
       };
       const rendererReady=filmRendererPromise
         ? Promise.race([
@@ -1395,11 +1415,30 @@
             new Promise(resolve=>setTimeout(resolve,6000))
           ])
         : Promise.resolve();
-      rendererReady.then(()=>{
-        requestAnimationFrame(()=>requestAnimationFrame(renderFixedFrame));
-      }).catch(()=>{
-        requestAnimationFrame(renderFixedFrame);
-      });
+      // Boot must be started even if Chromium skips animation ticks while
+      // the browser's GPU pipeline is waking. The proof is still rejected
+      // by R656 unless a *real* Three renderer, frame and scene exist.
+      let booted=false;
+      const bootProof=()=>{
+        if(booted)return;
+        booted=true;
+        ROOT.dataset.fxMagBirthProofSchedulerR2236='bounded-raf-or-timeout';
+        const trigger=()=>{
+          if(finished||!overlay.isConnected)return;
+          renderFixedFrame();
+        };
+        let delivered=false;
+        const fire=()=>{
+          if(delivered)return;
+          delivered=true;
+          clearTimeout(timer);
+          cancelAnimationFrame(frame);
+          trigger();
+        };
+        const frame=requestAnimationFrame(fire);
+        const timer=window.setTimeout(fire,180);
+      };
+      rendererReady.then(bootProof,bootProof);
       return;
     }
     window.setTimeout(()=>{
