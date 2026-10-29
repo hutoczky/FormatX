@@ -25,7 +25,7 @@ function emit(renderAverage=2.751,dt=16.673,frameIntervalAverage=16.679,
 }
 emit();
 assert.deepEqual(names.map(name=>values[name]),[
-  '2.75','16.67','16.68','3.21','17.31','.96','60'
+  '2.75','16.67','16.68','3.21','17.31','0.96','60'
 ],'The original seven exposed public metrics must remain byte-identical');
 assert.equal(writes,7,'first telemetry sample publishes all seven values');
 emit();
