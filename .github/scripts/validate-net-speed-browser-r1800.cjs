@@ -55,6 +55,27 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
 
   assert.equal(apiRequests,0,'NET test must not generate traffic before explicit user action');
   assert.equal(await page.locator('#network').getAttribute('data-fx-net-state'),'idle');
+  // R2238: prove the heavy controller is NOT booted far below the fold.
+  // The scroll below immediately exercises the genuine first-click replay.
+  const initial=await page.evaluate(()=>{
+    const section=document.getElementById('network');
+    const rect=section.getBoundingClientRect();
+    return {
+      farBelow:rect.top>innerHeight+800,
+      loader:section.dataset.fxNetLoaderR2238||'',
+      controller:section.dataset.fxNetBoundR1800||'',
+      heavyScript:!!document.querySelector(
+        'script[src*="formatx-net-speed-r1800.js"]'
+      )
+    };
+  });
+  assert.ok(initial.loader,'NET must have an active viewport/intent loader');
+  if(initial.farBelow){
+    assert.equal(initial.heavyScript,false,
+      'Heavy NET benchmark script must not execute on first hero paint');
+    assert.equal(initial.controller,'',
+      'Controller must not bind offscreen on first hero paint');
+  }
 
   await page.locator('#network').scrollIntoViewIfNeeded();
   await page.locator('[data-net-start]').click();
@@ -64,6 +85,8 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
     return el?.getAttribute('data-fx-net-state')==='complete';
   },null,{timeout:90000});
 
+  assert.equal(await page.locator('#network').getAttribute('data-fx-net-loader-r2238'),
+    'loaded','First scroll or click must bootstrap the real meter exactly once');
   assert.ok(apiRequests>=30,'Expected parallel ping/download/upload traffic after user action');
   for(const selector of ['[data-net-ping]','[data-net-jitter]','[data-net-download]','[data-net-down-latency]','[data-net-upload]','[data-net-up-latency]']){
     const value=(await page.locator(selector).textContent()||'').trim();
