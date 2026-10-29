@@ -380,10 +380,9 @@
       // R2210: use literal barycentrics rather than three per-face arrays.
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
-      const bodySeamOverlap=0;
-      const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
-        (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
-      ):null;
+      // R2233: the closed P0 shell has zero seam overlap; omit the
+      // unreachable expanded-triangle branch to reduce V8 hot-path cost.
+      // No vertex, face, winding, normal, optic or shader changes.
       // R2210: constant facet weights computed once per triangle, not vertex.
       const metalFacet=facet>=5.0&&facet<6.0;
       const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
@@ -392,22 +391,8 @@
       const faceWeight=1-smoothWeight;
       for(let index=0;index<3;index+=1){
         const item=vertices[index];
-        if(bodySeamOverlap){
-          const k=1+bodySeamOverlap;
-          sphere.push(
-            sphereCentre[0]+(item.sphere[0]-sphereCentre[0])*k,
-            sphereCentre[1]+(item.sphere[1]-sphereCentre[1])*k,
-            sphereCentre[2]+(item.sphere[2]-sphereCentre[2])*k
-          );
-          crystal.push(
-            centre[0]+(item.crystal[0]-centre[0])*k,
-            centre[1]+(item.crystal[1]-centre[1])*k,
-            centre[2]+(item.crystal[2]-centre[2])*k
-          );
-        }else{
-          sphere.push(...item.sphere);
-          crystal.push(...item.crystal);
-        }
+        sphere.push(...item.sphere);
+        crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
         const smoothNormal=item.crystalNormal||crystalNormal;
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
