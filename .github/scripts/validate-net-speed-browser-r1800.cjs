@@ -80,10 +80,52 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   await page.locator('#network').scrollIntoViewIfNeeded();
   await page.locator('[data-net-start]').click();
 
-  await page.waitForFunction(()=>{
-    const el=document.querySelector('#network');
-    return el?.getAttribute('data-fx-net-state')==='complete';
-  },null,{timeout:90000});
+  // R2239: distinguish a failed lazy bootstrap from a real measurement
+  // failure. The old 90-second timeout hid the actual browser state and
+  // console diagnostics, so no functional cause could be established.
+  try{
+    await page.waitForFunction(()=>{
+      const el=document.querySelector('#network');
+      return ['complete','error','cancelled'].includes(
+        el?.getAttribute('data-fx-net-state')
+      )||['bind-failed','load-failed'].includes(
+        el?.getAttribute('data-fx-net-loader-r2238')
+      );
+    },null,{timeout:45000});
+  }catch(error){
+    const state=await page.evaluate(()=>{
+      const el=document.querySelector('#network');
+      const btn=el?.querySelector('[data-net-start]');
+      return {
+        state:el?.dataset.fxNetState,
+        loader:el?.dataset.fxNetLoaderR2238,
+        bound:el?.dataset.fxNetBoundR1800,
+        status:el?.querySelector('[data-net-status]')?.textContent,
+        startDisabled:btn?.disabled,
+        startVisible:!!(btn?.getClientRects().length),
+        loadingScripts:[...document.scripts].filter(
+          s=>s.src.includes('formatx-net-speed')
+        ).map(s=>s.src),
+        documentReady:document.readyState,
+        viewport:[innerWidth,innerHeight],
+        networkTop:el?.getBoundingClientRect().top
+      };
+    });
+    console.error('FORMATX_NET_R2239_TIMEOUT_DIAGNOSTICS',
+      JSON.stringify({state,apiRequests,errors}));
+    throw error;
+  }
+  const finalState=await page.locator('#network').getAttribute('data-fx-net-state');
+  if(finalState!=='complete'){
+    console.error('FORMATX_NET_R2239_FAILURE_DIAGNOSTICS',
+      JSON.stringify({
+        finalState,apiRequests,errors,
+        loader:await page.locator('#network').getAttribute('data-fx-net-loader-r2238'),
+        bound:await page.locator('#network').getAttribute('data-fx-net-bound-r1800'),
+        status:await page.locator('[data-net-status]').textContent()
+      }));
+  }
+  assert.equal(finalState,'complete','NET must finish the first user-initiated test');
 
   assert.equal(await page.locator('#network').getAttribute('data-fx-net-loader-r2238'),
     'loaded','First scroll or click must bootstrap the real meter exactly once');
