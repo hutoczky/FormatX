@@ -129,10 +129,15 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   const bindingOwners=await page.evaluate(()=>({
     sectionBound:document.querySelector('section[data-fx-net-speed-r1800="true"]')
       ?.dataset.fxNetBoundR1800,
-    scriptShadowing:document.querySelectorAll('script[data-fx-net-speed-r1800]').length,
+    // The original deferred on-demand bootstrap in <body> legitimately
+    // carries data-fx-net-speed-r1800. Only an injected HEAD script could
+    // shadow the SECTION in document-order and cause the R2238 regression.
+    headScriptShadowing:document.head.querySelectorAll(
+      'script[data-fx-net-speed-r1800]'
+    ).length,
     bundleMarker:document.querySelectorAll('script[data-fx-net-controller-bundle-r2240]').length
   }));
-  assert.deepEqual(bindingOwners,{sectionBound:'true',scriptShadowing:0,bundleMarker:1},
+  assert.deepEqual(bindingOwners,{sectionBound:'true',headScriptShadowing:0,bundleMarker:1},
     'R2240 NET controller must bind the real section, not a script element');
 
   assert.equal(await page.locator('#network').getAttribute('data-fx-net-loader-r2238'),
