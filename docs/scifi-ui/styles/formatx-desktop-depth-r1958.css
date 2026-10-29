@@ -31,6 +31,14 @@
     opacity:calc(.13 + var(--fx-c536-energy) * .30)!important;
   }
 
+  /* R2205: keep the completed MAG as the single readable hero subject. The
+     later desktop depth sheet used to override the core-scene restraint and
+     wash the machined silver silhouette in the surrounding world layer. */
+  html[data-fx-cinematic-journey-r536="ready"][data-fx-cinematic-scene-r536="core"] .fx-c536-world{
+    filter:saturate(.92) contrast(1.04) brightness(.88)!important;
+    opacity:.10!important;
+  }
+
   html[data-fx-cinematic-journey-r536="ready"] .fx-c536-iris{
     border-color:rgba(var(--fx-c536-a),.060)!important;
     box-shadow:

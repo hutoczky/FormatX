@@ -61,7 +61,9 @@
       this.renderer=new THREE.WebGLRenderer({
         canvas,
         alpha:false,
-        antialias:!this.mobileRender,
+        // R2202: preserve real default-framebuffer multisampling on phones.
+        // DPR, geometry and the single renderer/context stay unchanged.
+        antialias:true,
         depth:true,
         stencil:false,
         powerPreference:'high-performance',
@@ -1108,6 +1110,7 @@
     }
 
     makeEmbryoTexture(){
+      // R2206: reference-inspired, layered turquoise/coral living microtexture.
       // R2200: a genuine biological photomicrograph over a 3D nucleus.
       // Turquoise cytoplasm, coral metabolic hot spots and micrograin
       // are generated deterministically once, never loaded as an image.
@@ -1152,6 +1155,19 @@
           pixels[index+2]=Math.round(clamp(
             (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
           pixels[index+3]=255;
+          // R2206: cluster coral metabolic islands within living teal
+          // cytoplasm; preserve the membrane's fine-scale native texture.
+          // All sampling happens once at initialization, never per frame.
+          const metabolic=clamp(Math.pow(clamp(
+            (coralCloud-.52)*4.7),1.8)*(.48+.52*mineral));
+          const capillary=clamp((.5+.5*Math.sin(u*39+
+            3.0*Math.sin(v*24+curl*5.0))-.74)*3.6)*cloud;
+          pixels[index]=Math.min(255,pixels[index]+Math.round(
+            metabolic*23+capillary*12));
+          pixels[index+1]=Math.max(0,pixels[index+1]-Math.round(
+            metabolic*12));
+          pixels[index+2]=Math.min(255,pixels[index+2]+Math.round(
+            capillary*19));
         }
       }
       const texture=new T.DataTexture(pixels,width,height,T.RGBAFormat);
@@ -1186,9 +1202,9 @@
         // washing its coral metabolic freckles into a faint glass bead.
         color:0xf5ffff,map:this.embryoTexture,
         bumpMap:this.embryoTexture,bumpScale:.020,
-        emissive:0x12545b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.29,
-        metalness:.015,roughness:.265,clearcoat:.73,clearcoatRoughness:.18,
+        emissive:0x16676b,emissiveMap:this.embryoTexture,
+        emissiveIntensity:.35,
+        metalness:.015,roughness:.29,clearcoat:.73,clearcoatRoughness:.18,
         transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
@@ -1255,7 +1271,9 @@
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
       // texture painted onto the glass shell; adaptive strand count on phones.
       const chromatinPositions=[],chromatinColors=[];
-      const chromatinCount=this.mobileRender?10:17;
+      // The R2201 photon field and microtexture provide biological density;
+      // fewer physical fibres keep the nucleus legible instead of wire-caged.
+      const chromatinCount=this.mobileRender?6:10;
       const cool=new T.Color(0x83f1e8),violet=new T.Color(0xb7a6e9);
       for(let strand=0;strand<chromatinCount;strand++){
         const phase=strand*Math.PI*2/chromatinCount;
@@ -1377,7 +1395,8 @@
       if(!parent)throw new Error('R2199 founding DNA photon parent missing');
       parent.add(dna.points);
       this.dnaBiofield=dna;
-      const embryo=build(this.mobileRender?850:2200,'embryo');
+      // R2206: denser volumetric membranes, still ONE existing Points draw.
+      const embryo=build(this.mobileRender?1200:3100,'embryo');
       embryo.points.renderOrder=6;
       this.coreGroup.add(embryo.points);
       this.embryoBiofield=embryo;
@@ -1780,6 +1799,109 @@
       this.cellGroup.scale.setScalar(.001);
     }
 
+    bindMachinedMagSurface(material){
+      // R2203: the film and permanent MAG share body-local machined panel
+      // proportions. Keep Three's existing physical BRDF and softbox lighting.
+      material.onBeforeCompile=shader=>{
+        shader.vertexShader=shader.vertexShader.replace('#include <common>',
+          '#include <common>\nvarying vec3 vFxMagAnatomy;')
+          .replace('#include <begin_vertex>',
+            '#include <begin_vertex>\nvFxMagAnatomy=position;');
+        shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
+          `#include <common>
+          varying vec3 vFxMagAnatomy;
+          vec4 fxMagPlateFinish(){
+            vec2 anatomy=abs(vFxMagAnatomy.xy);
+            float radial=max(anatomy.x,anatomy.y);
+            float lateral=min(anatomy.x,anatomy.y);
+            float width=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
+            vec2 cell=vec2(radial*28.0,lateral/width*4.0);
+            cell.y+=sin(floor(cell.x)*1.37)*.20;
+            vec2 edge=min(fract(cell),1.0-fract(cell));
+            vec2 aa=max(fwidth(cell),vec2(.018));
+            float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
+              smoothstep(.018,.035+aa.y,edge.y));
+            float envelope=smoothstep(.21,.28,length(vFxMagAnatomy.xy));
+            float plateFinish=.5+.5*sin(dot(floor(cell),vec2(1.71,2.39)));
+            float grainPhase=radial*360.0+lateral*24.0;
+            float grainVisibility=1.0-smoothstep(.65,1.65,fwidth(grainPhase));
+            float brushed=sin(grainPhase)*grainVisibility;
+            // R2213: shallow recessed joints bend the existing physical
+            // metal and clearcoat normals. Fade subpixel relief instead of
+            // turning distant machining into shimmering specular noise.
+            float reliefVisibility=1.0-smoothstep(.30,.75,max(aa.x,aa.y));
+            float plateHeight=-.00035*joint*envelope*reliefVisibility;
+            return vec4(joint*envelope,plateFinish,brushed,plateHeight);
+          }
+          vec3 fxMagPlateNormal(vec3 surfaceNormal,float plateHeight){
+            vec3 dx=dFdx(-vViewPosition),dy=dFdy(-vViewPosition);
+            vec3 acrossX=cross(dy,surfaceNormal);
+            vec3 acrossY=cross(surfaceNormal,dx);
+            float determinant=dot(dx,acrossX);
+            vec3 gradient=dFdx(plateHeight)*acrossX+dFdy(plateHeight)*acrossY;
+            return normalize(max(abs(determinant),1e-10)*surfaceNormal-
+              sign(determinant)*gradient);
+          }`)
+          .replace('#include <color_fragment>',
+            '#include <color_fragment>\nvec4 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.24)*(1.0+.018*fxPlate.z);')
+          .replace('#include <roughnessmap_fragment>',
+            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.095+(fxPlate.y-.5)*.035,.10,.48);')
+          .replace('#include <normal_fragment_maps>',
+            '#include <normal_fragment_maps>\nnormal=fxMagPlateNormal(normal,fxPlate.w);')
+          .replace('#include <clearcoat_normal_fragment_maps>',
+            '#include <clearcoat_normal_fragment_maps>\n#ifdef USE_CLEARCOAT\nclearcoatNormal=fxMagPlateNormal(clearcoatNormal,fxPlate.w);\n#endif');
+      };
+      material.customProgramCacheKey=()=> 'r2213-filtered-machined-silver-relief';
+    }
+
+    bindLivingMagOptic(material){
+      // R2208: the assembled cinematic MAG retains the same cyan/coral cell
+      // chemistry as its permanent native optic. Shade the existing curved
+      // glass in body coordinates; retain Three's physical light/transmission.
+      const uniforms={uTime:{value:0},uEnergy:{value:.18}};
+      this.livingMagOpticUniforms=uniforms;
+      material.onBeforeCompile=shader=>{
+        Object.assign(shader.uniforms,uniforms);
+        shader.vertexShader=shader.vertexShader.replace('#include <common>',
+          '#include <common>\nvarying vec3 vFxMagOpticLocal;')
+          .replace('#include <begin_vertex>',
+            '#include <begin_vertex>\nvFxMagOpticLocal=position;');
+        shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
+          `#include <common>
+          varying vec3 vFxMagOpticLocal;
+          uniform float uTime,uEnergy;
+      void fxLivingMagCell(inout vec3 lensColor,vec2 oq,float od){
+      /* R2206 — the born MAG contains the SAME living cell chemistry
+         established in the DNA film. Chromatin clusters have body-local
+         depth cues and slow metabolism; the glass stays a curved optical
+         surface, never a pasted sprite or an independent rendering layer. */
+      vec2 tissueUv=oq*1.12;
+      float tissueFold=sin(tissueUv.x*18.0+
+        2.0*sin(tissueUv.y*13.0+uTime*.13))*
+        cos(tissueUv.y*21.0-1.6*sin(tissueUv.x*11.0-uTime*.11));
+      float tissueIslands=sin(tissueUv.x*37.0+tissueUv.y*19.0)*
+        sin(tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16);
+      float tissueEnvelope=exp(-pow(od/.81,4.0));
+      float cyanCortex=smoothstep(.08,.67,tissueFold*.5+.5);
+      float coralOrganelles=smoothstep(.61,.84,
+        .52+.29*tissueFold+.19*tissueIslands);
+      float metabolicPulse=.82+.18*sin(uTime*.72+oq.x*4.0);
+      lensColor+=vec3(.025,.34,.34)*cyanCortex*tissueEnvelope*.30;
+      lensColor+=vec3(.93,.235,.145)*coralOrganelles*tissueEnvelope*
+        (.26+.10*uEnergy)*metabolicPulse;
+      lensColor+=vec3(.045,.20,.20)*tissueIslands*tissueEnvelope*.050;
+      }
+          `)
+          .replace('#include <emissivemap_fragment>',
+            `#include <emissivemap_fragment>
+            vec2 fxCellQ=vFxMagOpticLocal.xy/.135;
+            vec3 fxCellRadiance=vec3(0.0);
+            fxLivingMagCell(fxCellRadiance,fxCellQ,length(fxCellQ));
+            totalEmissiveRadiance+=fxCellRadiance*1.35;`);
+      };
+      material.customProgramCacheKey=()=> 'r2208-shared-cyan-coral-living-optic';
+    }
+
     makeMechanicalLayer(){
       const T=this.THREE;
 
@@ -2081,6 +2203,27 @@
           }
         }
       }
+      // Match the permanent MAG's three conformal flank ridges in this same
+      // existing batched trim mesh. They remain inside the selected outline.
+      for(const scale of [.55,.70,.84]){
+        for(let quadrant=0;quadrant<4;quadrant++){
+          const start=ribPositions.length/3;
+          for(let j=0;j<=20;j++){
+            const angle=(quadrant+j/20)*Math.PI*.5;
+            const cx=Math.cos(angle),cy=Math.sin(angle),p=this.mobileRender?.78:.61;
+            for(const offset of [-.005,.005]){
+              ribPositions.push(
+                Math.sign(cx)*.99*Math.pow(Math.abs(cx),2/p)*(scale+offset),
+                Math.sign(cy)*1.08*Math.pow(Math.abs(cy),2/p)*(scale+offset),.276
+              );
+            }
+            if(j>0){
+              const a=start+(j-1)*2,b=start+j*2;
+              ribIndices.push(a,b,a+1,a+1,b,b+1);
+            }
+          }
+        }
+      }
       const ribGeometry=new T.BufferGeometry();
       ribGeometry.setAttribute('position',
         new T.Float32BufferAttribute(ribPositions,3));
@@ -2142,6 +2285,7 @@
           transparent:true,opacity:.92
         })
       );
+      this.bindLivingMagOptic(this.mechEyeCore.material);
       this.mechEyeCore.scale.set(1,1,.30);
       this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -2221,8 +2365,19 @@
       this.mechanicalGroup.add(this.mechInnerRing);
 
       this.mechLight=new T.PointLight(0x86f4f3,0,4.2,2);
+      // R2212: illuminate silver with a neutral local studio key. The living
+      // cell supplies the cyan/coral emission inside the optic; the former
+      // cyan lamp must not dye the whole chassis. Preserve its linear-light
+      // luminance, distance, decay and existing per-frame intensity envelope.
+      const opticalKeyY=this.mechLight.color.r*.2126+
+        this.mechLight.color.g*.7152+this.mechLight.color.b*.0722;
+      this.mechLight.color.setRGB(opticalKeyY,opticalKeyY,opticalKeyY);
       this.mechLight.position.set(0,0,.90);
       this.mechanicalGroup.add(this.mechLight);
+
+      for(const material of [this.mechMaterial,this.mechMidMaterial,
+        this.silverMaterial,this.armInlayMaterial,this.armTrimMaterial])
+        this.bindMachinedMagSurface(material);
 
       this.mechanicalGroup.scale.setScalar(.001);
     }
@@ -2654,9 +2809,9 @@
       // the physically shaded organelle without exposing a hard MAG eye.
       // R2201: readable cellular color first, with enough transmission
       // to retain actual internal organelles and the suspended chromatin.
-      this.embryoMaterial.opacity=.86*visible;
-      this.embryoNucleusMaterial.opacity=.68*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.36:.43)*visible;
+      this.embryoMaterial.opacity=.89*visible;
+      this.embryoNucleusMaterial.opacity=.82*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.11:.16)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
@@ -2669,7 +2824,7 @@
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoCapillaryMaterial.opacity=.25*visible;
+      this.embryoCapillaryMaterial.opacity=.10*visible;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
       this.coreShell.material.opacity=0;
@@ -2764,24 +2919,16 @@
       const landingScale=1-.26*smooth((t-8.55)/1.30);
       this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
 
-      /* R1945k — studio-smoked material convergence, not a flash.
-         The final 2.5 s gradually become the same smoked-silver/cyan bioglass
-         family as the permanent hero, so handoff reads as one continuous object. */
-      this.mechMaterial.color.setRGB(
-        mix(.031,.072,finale),
-        mix(.090,.124,finale),
-        mix(.106,.132,finale)
-      );
-      this.mechMidMaterial.color.setRGB(
-        mix(.039,.066,finale),
-        mix(.125,.142,finale),
-        mix(.145,.150,finale)
-      );
-      this.silverMaterial.color.setRGB(
-        mix(.480,.440,finale),
-        mix(.575,.540,finale),
-        mix(.565,.530,finale)
-      );
+      // R2211: the animated metal albedo stays neutral silver, so the studio
+      // and living optic supply the cool reflections instead of a second
+      // blue-green body tint. Preserve the old linear-light luminance ramp
+      // (D65 Y = .2126 R + .7152 G + .0722 B) and the original finale timing.
+      const chassisTone=mix(.134725,.223662,finale);
+      const insertTone=mix(.171536,.261536,finale);
+      const silverTone=mix(.554081,.649410,finale);
+      this.mechMaterial.color.setRGB(chassisTone,chassisTone,chassisTone);
+      this.mechMidMaterial.color.setRGB(insertTone,insertTone,insertTone);
+      this.silverMaterial.color.setRGB(silverTone,silverTone,silverTone);
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression
       // while retaining an opaque, textured machined chassis.
@@ -2820,6 +2967,8 @@
       if(this.mechEyeCore){
         this.mechEyeCore.material.opacity=.92*opticWake;
         this.mechEyeCore.material.emissiveIntensity=.045+opticWake*.17;
+        this.livingMagOpticUniforms.uTime.value=time*.001;
+        this.livingMagOpticUniforms.uEnergy.value=.18+.32*opticWake;
       }
       // The iris seats only after the armour closes; no premature luminous
       // HUD or arbitrary late flash in the DNA/embryo chapters.

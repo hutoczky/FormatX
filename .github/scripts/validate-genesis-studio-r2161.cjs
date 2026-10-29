@@ -4,6 +4,12 @@ const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:a
 const html=fs.readFileSync('docs/scifi-ui/genesis/index.html','utf8');
 const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
 const home=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const homeAudioStyle=fs.readFileSync('docs/scifi-ui/styles/formatx-genesis-studio-r2160.css','utf8');
+assert(homeAudioStyle.includes('.fxb-studio-audio-r2160'),'Canonical cinematic audio CSS is empty');
+assert(home.includes('<link rel="stylesheet" href="/scifi-ui/styles/formatx-genesis-studio-r2160.css?v=20261023-r2160-cinematic-audio" data-fx-genesis-studio-r2160="true">'),
+  'Homepage must load the canonical cinematic audio stylesheet once');
+assert(!home.includes('<style data-fx-genesis-studio-r2160="true">'),
+  'Legacy duplicated inline cinematic audio CSS returned');
 const take=(regex,label)=>{const x=html.match(regex);assert(x,'Studio HTML lacks '+label);return x[1];};
 const style=take(/<style>([\s\S]*?)<\/style>/,'embedded style');
 const imports=take(/<script type="importmap">([\s\S]*?)<\/script>/,'Three.js import map');

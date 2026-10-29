@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261029-r2213-machined-relief';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -591,6 +591,7 @@
   let schedulerTick = 0;
   let startedAt = 0;
   let finished = false;
+  let completionDispatched = false;
   let exitTimer = 0;
   let hardFinishTimer = 0;
   let frameTimer = 0;
@@ -1024,6 +1025,13 @@
   }
 
   function safeTeardownOverlay(source) {
+    // R2210: after handoff the page owns the stage. Retired callbacks may
+    // remove only this old overlay; they must not clear the new owner's styles.
+    if(completionDispatched){
+      try { overlay.remove(); } catch (_) {}
+      return;
+    }
+    completionDispatched=true;
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
@@ -1337,27 +1345,14 @@
     }
     window.setTimeout(()=>{
       if(!overlay.isConnected)return;
+      // The absolute deadline must also retire the canonical RAF, listeners
+      // and pending timers. A parallel teardown left `finished` false and
+      // allowed the bounded failsafe to dispatch a second completion.
       try{
-        locateStage();
-        if(stage instanceof HTMLElement){
-          stage.style.removeProperty('opacity');
-          stage.style.removeProperty('transition');
-        }
-        coreApi?.setMorph?.(0,'r653-absolute-dom-watchdog');
-        coreApi?.setShape?.('organism','r653-absolute-dom-watchdog');
-        coreApi?.requestRender?.(1);
-      }catch(_){}
-      ROOT.removeAttribute('data-fx-mag-birth-live');
-      ROOT.removeAttribute('data-fx-mag-birth-phase');
-      ROOT.dataset.fxMagBirthLiveR533='absolute-dom-watchdog-r653';
-      try{filmRenderer?.destroy?.();}catch(_){}
-      filmRenderer=null;
-      overlay.remove();
-      try{
-        document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
-          detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
-        }));
-      }catch(_){}
+        finish('absolute-dom-watchdog-r653');
+      }finally{
+        safeTeardownOverlay('absolute-dom-watchdog-r653');
+      }
     },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
@@ -1465,16 +1460,18 @@
   addEventListener('pointerleave',event=>feedInteraction('leave',event,{strength:.18}),interactionOptions);
   addEventListener('resize',()=>semanticInteraction('resize',.30),interactionOptions);
   addEventListener('orientationchange',()=>semanticInteraction('orientation',.52),interactionOptions);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)semanticInteraction('visibility-return',.38);},interactionOptions);
 
   skip.addEventListener('click',()=>finish('user-skip'));
   addEventListener('formatx:real3dready',()=>{
     locateStage();
     syncTarget(true);
     coreApi=window.FormatXLivingCore||window.FormatXCoreMobileV69||coreApi;
-  },{passive:true});
-  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},{passive:true});
-  addEventListener('orientationchange',()=>setTimeout(()=>syncTarget(true),120),{passive:true});
+  },interactionOptions);
+  addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},interactionOptions);
+  addEventListener('orientationchange',()=>setTimeout(()=>{
+    if(!finished)syncTarget(true);
+  },120),interactionOptions);
   addEventListener('pagehide',()=>finish('pagehide'),{once:true});
 
   start();

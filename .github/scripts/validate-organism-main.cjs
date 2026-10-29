@@ -59,7 +59,7 @@ async function enterSite(page, label) {
   await page.goto(TEST_URL + '?organism-validation=1&archive=off', { waitUntil: 'domcontentloaded', timeout: 60000 });
   const skip = page.locator('.fx-intro-skip');
   if (await skip.isVisible().catch(() => false)) {
-    await skip.click({ force: true, timeout: 1500 }).catch(() => {});
+    await skip.click({ timeout: 1500 }).catch(() => {});
   }
   await page.waitForFunction(() => document.documentElement.dataset.fxOrganismInterface === 'ready', null, { timeout: 30000 });
   await page.waitForFunction(() => ['ready','delegated-r264'].includes(document.documentElement.dataset.fxOrganismMenu || ''), null, { timeout: 30000 });

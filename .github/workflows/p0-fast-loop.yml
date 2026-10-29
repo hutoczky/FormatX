@@ -117,6 +117,10 @@ jobs:
           node .github/scripts/validate-real3d-core.cjs
           node .github/scripts/validate-real3d-core-v20.cjs
           node .github/scripts/production-preflight.cjs
+          node .github/scripts/validate-mag-biophotonic-r2206.cjs
+          node .github/scripts/validate-intro-finalizer-r2209.cjs
+          node .github/scripts/validate-mag-neutral-silver-r2211.cjs
+          node .github/scripts/validate-mag-studio-key-r2212.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site
@@ -167,11 +171,31 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_VISUAL_DIR: artifacts/content-visuals
         run: node .github/scripts/validate-content-visuals.cjs
+      - name: Verify actual native metal and optical edges remain connected
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-mag-machined-optic-r2203.cjs
       - name: Run R533 to R536 cinematic handoff browser proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_INTRO_EVIDENCE_DIR: artifacts/r533-r536-handoff
         run: node .github/scripts/validate-r533-r536-handoff.cjs
+      - name: Verify reference-film native frame before handoff
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-reference-film-native-handoff-r2171.cjs
+      - name: Verify completed intro releases geometry listeners
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-intro-retired-layout-r2173.cjs
+      - name: Verify native MAG enters its final dock without a viewport flash
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-native-mag-dock-entry-r2173.cjs
       - name: Upload compact evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -182,6 +206,62 @@ jobs:
             artifacts/r522-semantic-mag/
             artifacts/content-visuals/
             artifacts/r533-r536-handoff/
+            artifacts/reference-film-native-handoff-r2171/
+            artifacts/intro-retired-layout-r2173/
+            artifacts/mag-machined-optic-r2203/
+            artifacts/native-mag-dock-entry-r2173/
             artifacts/r656-intro-keyframes/
           if-no-files-found: warn
+          retention-days: 30
+
+  # Independent runner: retain every original case and its timeout without
+  # extending the 12-minute job cap or serializing all GPU proofs behind film capture.
+  cinematic-optics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser validation runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+      - name: Resolve runner Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Start exact source site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/p0-fast-http.log" 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null && exit 0
+            sleep 0.2
+          done
+          cat "$RUNNER_TEMP/p0-fast-http.log"
+          exit 1
+      - name: Verify real mobile cinematic antialias coverage
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-genesis-antialias-r2175.cjs
+      - name: Verify MAG handoff measures original anchors before live DOM transfers
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node .github/scripts/validate-mag-handoff-layout-r2181.cjs
+      - name: Upload cinematic optics and anchor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-optics-handoff-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/genesis-antialias-r2175/
+            artifacts/mag-handoff-layout-r2181/
+          if-no-files-found: error
           retention-days: 30

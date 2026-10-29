@@ -49,9 +49,9 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
 const mobile=matchMedia('(max-width:900px),(max-aspect-ratio:27/25)');
 const template=document.getElementById('fx-motion-runtime-r239');
 const LANGUAGE_TOGGLE='/scifi-ui/scripts/single-language-toggle.js?v=20260830-r462-semantic-owner';
-const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261026-r2194-polished-four-arm-mag';
+const CURRENT_MAG='/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20261029-r2213-machined-relief';
 const CURRENT_SOLID_GLASS='/scifi-ui/scripts/formatx-mobile-solid-glass-r456.js?v=20260831-r484-native-surface-filaments';
-const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261026-r2194-polished-four-arm-mag';
+const CURRENT_RENDERER='/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261029-r2213-machined-relief';
 const CURRENT_STYLE='/scifi-ui/styles/formatx-current-mag-r422.css?v=20260920-r594-semantic-hit-owner';
 const CURRENT_OPTICS='/scifi-ui/styles/formatx-core-shapeshifter-r337.css?v=20260927-r1756-first-final-geometry-parity';
 const CURRENT_LIFE_STYLE='/scifi-ui/styles/formatx-core-life-r455.css?v=20260928-r1782-mobile-smoky-bioglass-clean';
@@ -165,7 +165,11 @@ function activateMagRuntime(source='startup'){
 function onMagBirthWarmup(event){
   const source=String(event?.detail?.source||root.dataset.fxMagBirthCoreWarmupR618||'cinematic-warmup');
   const validationWarmup=/validated-skip|mobile-skip|automation|webdriver/i.test(source);
-  if(mobile.matches && !validationWarmup){
+  // The reference film owns a 2D canvas. Its phase-2 warmup can prepare the
+  // single native WebGL MAG under the overlay, as on desktop. Deferring that
+  // work until completion leaves an empty handoff while R326 first boots.
+  const referenceFilm=root.dataset.fxMagBirthRendererR1360==='native-canvas-reference-film';
+  if(mobile.matches && !referenceFilm && !validationWarmup){
     /* R1774: preserve the exclusive intro GPU budget, but use the existing
        phase-2 warmup event (~3.15 s on the 10 s film) to fetch the permanent
        MAG owners into HTTP cache. No script executes here, no WebGL context is

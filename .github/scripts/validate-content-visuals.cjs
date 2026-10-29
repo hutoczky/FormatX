@@ -110,14 +110,52 @@ async function waitForProductShell(page) {
 }
 
 async function assertCommon(page, { mobile = false, reduced = false } = {}) {
-  const hero = await visibleBox(page, '#hero');
-  const archiveActive = await page.evaluate(() => document.documentElement.dataset.fxArchiveCinema==='active');
-  const lead = await visibleBox(page, '#hero .hero-lead', !archiveActive);
+  // Read the mode and every related layout contract in the same browser task.
+  // The native dock may switch to cinema between separate Playwright round trips.
+  const snapshot = await page.evaluate(({ PAUSE, CONTROLS, ASK, SOUND }) => {
+    const selectors = ['#hero', '#hero .hero-lead', 'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]', ASK, '.topbar .fx-reference-mag-button', CONTROLS, SOUND, '#menu-toggle', '#hero .hero-space', '#hero .hero-copy', '#hero-title', '#hero-download'];
+    const boxes = Object.fromEntries(selectors.map(selector => {
+      const element = document.querySelector(selector);
+      if (!element) return [selector, null];
+      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      return [selector, { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height, display: style.display, visibility: style.visibility, opacity: Number(style.opacity || 1), text: (element.textContent || '').trim() }];
+    }));
+    const toggles = [...document.querySelectorAll('.fx-language-toggle')];
+    const visible = toggles.filter(element => {
+      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
+      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
+    });
+    const viewport = document.documentElement.clientWidth;
+    const width = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    const offenders = [];
+    for (const element of document.querySelectorAll('body *')) {
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
+      const rect = element.getBoundingClientRect();
+      if (!Number.isFinite(rect.left) || !Number.isFinite(rect.right) || rect.width <= 0 || rect.height <= 0) continue;
+      if (rect.left < -2 || rect.right > viewport + 2) offenders.push({ tag: element.tagName.toLowerCase(), id: element.id || '', className: typeof element.className === 'string' ? element.className.slice(0, 140) : '', left: Math.round(rect.left * 10) / 10, right: Math.round(rect.right * 10) / 10, width: Math.round(rect.width * 10) / 10, position: style.position });
+    }
+    const canvas = document.querySelector('#hero .fx-crystal-organism-r326-canvas');
+    return { archiveActive: document.documentElement.dataset.fxArchiveCinema === 'active', boxes, pauseCount: document.querySelectorAll(PAUSE).length, soundExists: document.querySelectorAll(SOUND).length, language: { total: toggles.length, visible: visible.length }, overflow: { viewport, width, overflow: width - viewport, offenders: offenders.slice(0, 16) }, owned: document.querySelector(CONTROLS)?.parentElement?.classList.contains('hero-space'), reducedState: { reduced: matchMedia('(prefers-reduced-motion: reduce)').matches, running: (canvas?.getAnimations?.() || []).filter(animation => animation.playState === 'running').length } };
+  }, { PAUSE, CONTROLS, ASK, SOUND });
+  const box = (selector, required = true) => {
+    const state = snapshot.boxes[selector];
+    if (!state) {
+      if (required) throw new Error(`Missing selector: ${selector}`);
+      return null;
+    }
+    state.visible = state.display !== 'none' && state.visibility !== 'hidden' && state.opacity > .02 && state.width > 0 && state.height > 0;
+    if (required) assert(state.visible, `Selector is not visible: ${selector} ${JSON.stringify(state)}`);
+    return state.visible ? state : null;
+  };
+  const hero = box('#hero');
+  const archiveActive = snapshot.archiveActive;
+  const lead = box('#hero .hero-lead', !archiveActive);
   const folio = archiveActive
-    ? await visibleBox(page, 'main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]')
+    ? box('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]')
     : null;
-  const ask = await visibleBox(page, ASK);
-  const core = await visibleBox(page, '.topbar .fx-reference-mag-button');
+  const ask = box(ASK);
+  const core = box('.topbar .fx-reference-mag-button');
   assert(hero.width > 200 && hero.height > 200, `Hero geometry invalid: ${JSON.stringify(hero)}`);
   if(archiveActive){
     assert(folio.width >= 220 && folio.height >= 160,
@@ -130,51 +168,44 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
   assert(ask.width >= 44 && ask.height >= 44, `ASK target is below 44px: ${JSON.stringify(ask)}`);
   assert(core.width >= 40 && core.height >= 40, `MAG header target is too small: ${JSON.stringify(core)}`);
 
-  const pauseCount = await page.locator(PAUSE).count();
+  const pauseCount = snapshot.pauseCount;
   assert(pauseCount === 0, `Obsolete manual PAUSE returned (${pauseCount})`);
 
-  const controls = await visibleBox(page, CONTROLS);
-  const soundExists = await page.locator(SOUND).count();
+  const controls = box(CONTROLS);
+  const soundExists = snapshot.soundExists;
   assert(soundExists === 1, `Canonical SOUND control missing or duplicated (${soundExists})`);
-  const sound = await visibleBox(page, SOUND, false);
+  const sound = box(SOUND, false);
   if (sound) {
     assert(sound.width >= 44 && sound.height >= 44, `Visible SOUND target is below 44px: ${JSON.stringify(sound)}`);
     assert(!overlaps(sound, ask, 2), `SOUND and ASK overlap: ${JSON.stringify({ sound, ask, controls })}`);
   }
 
-  const language = await page.evaluate(() => {
-    const toggles = [...document.querySelectorAll('.fx-language-toggle')];
-    const visible = toggles.filter(element => {
-      const style = getComputedStyle(element), rect = element.getBoundingClientRect();
-      return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || 1) > .02 && rect.width > 0 && rect.height > 0;
-    });
-    return { total: toggles.length, visible: visible.length };
-  });
+  const language = snapshot.language;
   assert(language.total === 1 && language.visible === 1, `Language control ownership invalid: ${JSON.stringify(language)}`);
 
-  const overflow = await overflowState(page);
+  const overflow = snapshot.overflow;
   assert(overflow.overflow <= 2, `Horizontal overflow detected: ${JSON.stringify(overflow)}`);
 
   if (mobile) {
-    const menu = await visibleBox(page, '#menu-toggle');
-    const heroSpace = await visibleBox(page, '#hero .hero-space');
-    const copy = archiveActive ? null : await visibleBox(page, '#hero .hero-copy');
+    const menu = box('#menu-toggle');
+    const heroSpace = box('#hero .hero-space');
+    const copy = archiveActive ? null : box('#hero .hero-copy');
     assert(menu.width >= 40 && menu.height >= 40, `Mobile menu target is too small: ${JSON.stringify(menu)}`);
     if(!archiveActive){
     assert(controls.left >= heroSpace.left - 1 && controls.right <= heroSpace.right + 1,
       `Mobile controls escaped MAG stage horizontally: ${JSON.stringify({ controls, heroSpace })}`);
     assert(controls.top >= heroSpace.top - 1 && controls.bottom <= heroSpace.bottom + 1,
       `Mobile controls escaped MAG stage vertically: ${JSON.stringify({ controls, heroSpace })}`);
-    const owned = await page.locator(CONTROLS).evaluate(node => node.parentElement?.classList.contains('hero-space'));
+    const owned = snapshot.owned;
     assert(owned, 'Mobile controls are not owned by .hero-space');
     assert(copy.width >= 280 && copy.top >= heroSpace.bottom - 2,
       `Mobile hero copy must follow the MAG stage in normal flow: ${JSON.stringify({ copy, heroSpace })}`);
     } // Cinematic mode docks the canonical controls independently of the MAG stage.
   } else if(!archiveActive) {
-    const title = await visibleBox(page, '#hero-title');
-    const cta = await visibleBox(page, '#hero-download');
-    const copy = await visibleBox(page, '#hero .hero-copy');
-    const heroSpace = await visibleBox(page, '#hero .hero-space', false);
+    const title = box('#hero-title');
+    const cta = box('#hero-download');
+    const copy = box('#hero .hero-copy');
+    const heroSpace = box('#hero .hero-space', false);
     assert(title.width > 100 && title.height > 20, `Desktop hero title invalid: ${JSON.stringify(title)}`);
     assert(!overlaps(lead, cta), `Desktop CTA overlaps copy: ${JSON.stringify({ lead, cta })}`);
     if (heroSpace) assert(copy.right <= heroSpace.left + 4,
@@ -182,13 +213,7 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
   }
 
   if (reduced) {
-    const state = await page.evaluate(() => {
-      const canvas = document.querySelector('#hero .fx-crystal-organism-r326-canvas');
-      return {
-        reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
-        running: (canvas?.getAnimations?.() || []).filter(animation => animation.playState === 'running').length
-      };
-    });
+    const state = snapshot.reducedState;
     assert(state.reduced, 'Reduced-motion media query was not applied');
     assert(state.running === 0, `Reduced-motion MAG still has running animations: ${JSON.stringify(state)}`);
   }

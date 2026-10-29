@@ -18,8 +18,8 @@ assert(match,'Inline parser-owned GENESIS bootstrap missing');
 const hash="'sha256-"+crypto.createHash('sha256').update(match[1]).digest('base64')+"'";
 const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
 assert(meta?.[1]?.includes(hash),'The exact new GENESIS inline hash must appear in HTML CSP');
-assert(worker.includes('const INLINE_R2201_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
-assert(worker.includes('${INLINE_R2201_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
+assert(worker.includes('const INLINE_R2206_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
+assert(worker.includes('${INLINE_R2206_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
 assert(match[1].includes("const v=f||(!a&&p.get('intro')!=='0')"),
   'Every normal full navigation must play GENESIS; explicit ?intro=0 may skip');
 assert(match[1].includes('fresh-navigation-genesis'),'Must identify the new repeatable film bootstrap');
@@ -27,13 +27,22 @@ assert(!intro.includes('if (!FORCE && (seen || AUTOMATION))'),
   'The old sessionStorage skip must not silently suppress the DNA film');
 assert(intro.includes('if (!FORCE && (SKIP_REQUESTED || AUTOMATION))'),
   'User-initiated skip and automated audit skip must remain supported');
+for(const listener of [
+  "addEventListener('formatx:real3dready'",
+  "addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},interactionOptions)",
+  "addEventListener('orientationchange',()=>setTimeout(()=>{"
+])assert(intro.includes(listener),'Retired-film lifecycle listener missing: '+listener);
+assert(intro.includes("if(!finished)syncTarget(true);\n  },120),interactionOptions);"),
+  'Queued orientation work must stop after the genuine MAG handoff');
+assert(!intro.includes("addEventListener('resize',()=>{sizeCanvas();syncTarget(true);},{passive:true})"),
+  'Geometry listener must not survive the film AbortController');
 const required=[
   "const placements=this.mobileRender?",
   "const h=this.createHelix(index===0?3.54:4.08",
   "this.makeGenomeParticles();",
   "this.makeEmbryoFilm();",
   "this.makeCinematicBiophotons();",
-  "this.embryoMaterial.opacity=.86*visible",
+  "this.embryoMaterial.opacity=.89*visible",
   "emissiveMap:this.embryoTexture",
   "const coral=clamp((coralCloud-.545)*5.1)",
   "this.updateDNA(t,time);",
@@ -49,7 +58,7 @@ assert(renderer.indexOf('this.updateDNA(t,time);')<renderer.indexOf('this.update
   'The DNA must be updated before the embryo');
 assert(renderer.indexOf('this.updateCore(t,time);')<renderer.indexOf('this.updateMechanical(t,time);'),
   'The embryo must be updated before the MAG');
-assert(worker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema'),
+assert(worker.includes('formatx-mag-genesis-three-r1280.js?v=20261029-r2213-machined-relief'),
   'Cloudflare must never rewrite the live R533 film back to an older visual');
 console.log('GENESIS_R2201_SOURCE_CONTRACT_PASS',JSON.stringify({
   fullNavigationReplay:true,explicitSkip:true,stages:['DNA','cyan/coral cell','four-arm MAG'],
