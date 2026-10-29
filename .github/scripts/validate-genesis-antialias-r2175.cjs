@@ -29,7 +29,18 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
        const attach=value.attach;
        value.attach=async function(...args){
         const result=await Reflect.apply(attach,this,args);
-        if(result?.engine)window.__genesisDnaEngine=result.engine;
+        if(result?.engine){
+         const engine=result.engine;window.__genesisDnaEngine=engine;
+         // Observe the real body draw after Three has uploaded its material.
+         // No substituted shader, additional draw, clock or render request.
+         const body=engine.mechBody,after=body.onAfterRender;
+         body.onAfterRender=function(renderer){
+          const gl=renderer.getContext(),program=gl.getParameter(gl.CURRENT_PROGRAM);
+          const diffuse=gl.getUniform(program,gl.getUniformLocation(program,'diffuse'));
+          window.__genesisMetalDraw={diffuse:Array.from(diffuse),draws:(window.__genesisMetalDraw?.draws||0)+1};
+          return Reflect.apply(after,this,arguments);
+         };
+        }
         return result;
        };
        owner=value;
@@ -103,7 +114,8 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
       time:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uTime')),
       energy:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uEnergy'))
      }));
-     return{continuity,livingOptic,opticOpacity:engine?.mechEyeCore?.material?.opacity,
+     const metals=engine?['mechMaterial','mechMidMaterial','silverMaterial'].map(name=>({name,color:engine[name].color.toArray()})):[];
+     return{continuity,livingOptic,metals,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
       opticGeometry:engine?{positions:engine.mechEyeCore.geometry.attributes.position.count,indices:engine.mechEyeCore.geometry.index.count}:null,
       renderInfo:engine?{calls:engine.renderer.info.render.calls,programs:engine.renderer.info.programs.length,textures:engine.renderer.info.memory.textures}:null,
       requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
@@ -132,6 +144,14 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
     }
     if(chapter==='dna'||chapter==='embryo')assert.equal(state.opticOpacity,0,'The MAG optic must remain dark before metal assembly');
     if(chapter==='mag'){
+     assert.equal(state.metals.length,3);
+     for(const metal of state.metals){
+      const [r,g,b]=metal.color;
+      assert(Math.abs(r-g)<1e-8&&Math.abs(g-b)<1e-8,'The actual animated '+metal.name+' must stay neutral silver');
+     }
+     assert(state.metalDraw?.draws>0,'The actual chassis draw must be observed');
+     const [red,green,blue]=state.metalDraw.diffuse;
+     assert(Math.abs(red-green)<1e-6&&Math.abs(green-blue)<1e-6,'The actual WebGL chassis diffuse uniform must stay neutral');
      assert(Number(state.armor)>=5);assert(Number(state.eye)>.07&&Number(state.eye)<.25);
      assert.deepEqual(state.opticGeometry,{positions:1225,indices:6624},'The original physical lens geometry must stay unchanged');
      assert(state.opticOpacity>.9,'The existing physical lens must wake after arm seating');

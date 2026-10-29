@@ -2894,24 +2894,16 @@
       const landingScale=1-.26*smooth((t-8.55)/1.30);
       this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
 
-      /* R1945k — studio-smoked material convergence, not a flash.
-         The final 2.5 s gradually become the same smoked-silver/cyan bioglass
-         family as the permanent hero, so handoff reads as one continuous object. */
-      this.mechMaterial.color.setRGB(
-        mix(.105,.190,finale),
-        mix(.140,.230,finale),
-        mix(.170,.260,finale)
-      );
-      this.mechMidMaterial.color.setRGB(
-        mix(.130,.220,finale),
-        mix(.180,.270,finale),
-        mix(.210,.300,finale)
-      );
-      this.silverMaterial.color.setRGB(
-        mix(.480,.600,finale),
-        mix(.575,.660,finale),
-        mix(.565,.690,finale)
-      );
+      // R2211: the animated metal albedo stays neutral silver, so the studio
+      // and living optic supply the cool reflections instead of a second
+      // blue-green body tint. Preserve the old linear-light luminance ramp
+      // (D65 Y = .2126 R + .7152 G + .0722 B) and the original finale timing.
+      const chassisTone=mix(.134725,.223662,finale);
+      const insertTone=mix(.171536,.261536,finale);
+      const silverTone=mix(.554081,.649410,finale);
+      this.mechMaterial.color.setRGB(chassisTone,chassisTone,chassisTone);
+      this.mechMidMaterial.color.setRGB(insertTone,insertTone,insertTone);
+      this.silverMaterial.color.setRGB(silverTone,silverTone,silverTone);
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression
       // while retaining an opaque, textured machined chassis.
