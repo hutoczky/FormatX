@@ -1,4 +1,5 @@
 name: Lighthouse CI
+# R2232: independent exact-head check; physical DNA/cell/MAG assets unchanged.
 
 on:
   pull_request:
