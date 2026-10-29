@@ -25,7 +25,9 @@ function load(reason){
   promise=new Promise((resolve,reject)=>{
     const script=document.createElement('script');
     script.async=true;
-    script.dataset.fxNetSpeedR1800='true';
+    // R2240: never reuse the section selector on a script in <head>.
+    // R1800 uses that selector to locate its actual HTML section.
+    script.dataset.fxNetControllerBundleR2240='true';
     script.src=source;
     script.onload=()=>{
       if(section.dataset.fxNetBoundR1800!=='true'){
