@@ -71,6 +71,45 @@ async function pixels(page,bytes,rect){
       await page.addInitScript(()=>{
         try{sessionStorage.clear();localStorage.removeItem('formatx:mag-birth-live-r533-seen');}catch(_){}
       });
+      // R2247 browser-only profiler. Instrument the real WebGL calls BEFORE
+      // page JS starts, without patching the production source or screenshot.
+      // Preserve return values/exceptions and never invoke rendering.
+      await page.addInitScript(()=>{
+        const events=[];
+        const counts=Object.create(null);
+        const methods=['compileShader','linkProgram','bufferData','drawArrays','finish'];
+        const maxPerMethod=24;
+        for(const name of ['WebGLRenderingContext','WebGL2RenderingContext']){
+          const proto=window[name]?.prototype;
+          if(!proto)continue;
+          for(const method of methods){
+            const original=proto[method];
+            if(typeof original!=='function')continue;
+            Object.defineProperty(proto,method,{
+              configurable:true,writable:true,value:function(...args){
+                const start=performance.now();
+                try{return Reflect.apply(original,this,args);}
+                finally{
+                  const canvas=this.canvas;
+                  const owner=canvas?.classList?.contains('fx-crystal-organism-r326-canvas')
+                    ?'native-mag':'intro-film';
+                  const key=owner+':'+method;
+                  const number=(counts[key]||0)+1;
+                  counts[key]=number;
+                  if(number<=maxPerMethod){
+                    events.push({
+                      owner,method,index:number,
+                      startMs:+start.toFixed(2),
+                      durationMs:+(performance.now()-start).toFixed(2)
+                    });
+                  }
+                }
+              }
+            });
+          }
+        }
+        window.__fxMagBootProfilerR2247={events,counts};
+      });
       const url=new URL(BASE);
       url.searchParams.set('intro','1');
       url.searchParams.set('visualintro','1');
@@ -93,6 +132,23 @@ async function pixels(page,bytes,rect){
           bootPhases:(()=>{
             try{return JSON.parse(root.dataset.fxMagBootPhasesR2241||'null');}
             catch(_){return null;}
+          })(),
+          // Real browser context API cost, not synthetic geometry microbench.
+          gpuCallTrace:(()=>{
+            const probe=window.__fxMagBootProfilerR2247;
+            if(!probe)return null;
+            const native=probe.events.filter(event=>event.owner==='native-mag');
+            const summary={};
+            for(const method of ['compileShader','linkProgram','bufferData','drawArrays','finish']){
+              const samples=native.filter(event=>event.method===method);
+              summary[method]={
+                calls:probe.counts['native-mag:'+method]||0,
+                sampled:samples.length,
+                cpuSumMs:+samples.reduce((a,e)=>a+e.durationMs,0).toFixed(2),
+                cpuMaxMs:+Math.max(0,...samples.map(e=>e.durationMs)).toFixed(2)
+              };
+            }
+            return summary;
           })(),
           postRender:root.dataset.fxMagNativePresentR2220||'',
           nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
