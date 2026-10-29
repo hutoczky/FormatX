@@ -16,11 +16,26 @@ assert.equal(studio.length,1,'exactly one studio audio CSS link');
 assert.match(studio[0],/data-fx-r487-deferred-style="true"/);
 assert.match(studio[0],/data-fx-r487-media="all"/);
 assert.match(studio[0],/media="print"/);
-const opening=parseLink('data-fx-dna-first-frame-r2181="true"');
-assert.equal(opening.length,1,'first-frame DNA CSS must remain present');
-assert(!opening[0].includes('data-fx-r487-deferred-style'),
-  'first visible DNA must never wait for deferred CSS');
-assert.match(opening[0],/fetchpriority="high"/);
+// R2248 exact first-frame DNA CSS is now parser-inline, not network blocking.
+const crypto=require('node:crypto');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+assert.equal(parseLink('data-fx-dna-first-frame-r2181="true"').length,0,
+  'First DNA stylesheet must no longer block on a network request');
+const openTag='<style data-fx-dna-first-frame-r2181="true" data-fx-dna-inline-r2248="true">';
+const start=html.indexOf(openTag);
+const end=html.indexOf('</style>',start);
+assert(start>0&&end>start,'Critical DNA style must be parser-owned');
+const exact=html.slice(start+openTag.length,end);
+assert.equal(exact,'\n'+dna+'\n','Inline DNA CSS must match original exactly');
+const hash="'sha256-"+crypto.createHash('sha256').update(exact,'utf8').digest('base64')+"'";
+const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
+assert(meta&&meta[1].includes("style-src 'self'"),'Strict HTML style CSP required');
+assert(meta[1].split('style-src')[1].split(';')[0].includes(hash),
+  'Exact CSS SHA-256 must be allowed in HTML meta CSP');
+assert.equal(worker.split(hash).length-1,2,
+  'Exact CSS SHA-256 must be allowed in both homepage Worker CSP policies');
+assert(start<html.indexOf('<link rel="canonical"'),
+  'Critical DNA stylesheet must appear before body content');
 assert(css.includes('.fxb-studio-audio-r2160'),'audio control focus styling retained');
 assert(dna.includes('.fxb-first-frame-dna-r2181'),'visible DNA poster retained');
 assert(loader.includes("performance.getEntriesByName('first-contentful-paint'"),
@@ -34,4 +49,4 @@ assert.equal((film.match(/ROOT\.dataset\.fxIntroPrepaintR1611='complete'/g)||[])
   'Both normal and absolute watchdog teardown must clear parser prepaint');
 assert(film.includes('function safeTeardownOverlay(source)'),
   'Canonical film teardown must remain present');
-console.log('GENESIS_R2208_NONBLOCKING_AUDIO_CSS_PASS');
+console.log('GENESIS_R2248_INLINE_CRITICAL_DNA_AND_NONBLOCKING_AUDIO_CSS_PASS');
