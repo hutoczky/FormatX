@@ -10,6 +10,7 @@ on:
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
       - '.github/scripts/report-lighthouse-metrics.cjs'
+      - '.github/scripts/validate-mag-mesh-rows-r2208.cjs'
   push:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
@@ -21,6 +22,7 @@ on:
       - 'lighthouserc.mobile.json'
       - '.github/workflows/ci.yml'
       - '.github/scripts/report-lighthouse-metrics.cjs'
+      - '.github/scripts/validate-mag-mesh-rows-r2208.cjs'
   workflow_dispatch:
 
 permissions:
