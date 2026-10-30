@@ -52,6 +52,21 @@ assert(triStart>=0&&triEnd>triStart,'Original triangle function boundaries missi
 assert(fixture.startsWith('    function triangle(vertices, facet) {'),
   'Original source reference fixture invalid');
 legacy=legacy.slice(0,triStart)+fixture+legacy.slice(triEnd);
+// R2250: reconstruct the authored original curved-glass emitter separately.
+// Both versions run in the same JS engine to avoid cross-runtime Math rounding.
+const originalGuardian=fs.readFileSync(
+  '.github/fixtures/r2250-original-mag-guardian.jsfrag','utf8'
+);
+const gStart=legacy.indexOf('    function guardianTriangle(vertices,facet,origin=[0,0,0]){');
+const gEnd=legacy.indexOf('\n    function appendEllipsoid(',gStart);
+assert(gStart>=0&&gEnd>gStart,'R2250 guardian emission boundary missing');
+assert(originalGuardian.startsWith('    function guardianTriangle('),
+  'R2250 original optical lens fixture corrupted');
+assert(originalGuardian.includes('vertices.forEach((item,index)=>'),
+  'R2250 fixture must preserve the original 3D optic triangle contract');
+assert(source.includes('for(let index=0;index<3;index+=1){'),
+  'R2250 optimized optical triangle loop missing');
+legacy=legacy.slice(0,gStart)+originalGuardian+legacy.slice(gEnd);
 function compile(text){
   const start=text.indexOf('  function normalize(vector) {');
   const end=text.indexOf('\n  function boot(',start);
@@ -81,5 +96,5 @@ for(const [name,...args] of profiles){
     const right=Buffer.from(y.arrays[i].buffer,y.arrays[i].byteOffset,y.arrays[i].byteLength);
     assert.equal(Buffer.compare(left,right),0,name+' original WebGL array '+i+' differs');
   }
-  console.log('MAG_R2234_BYTE_IDENTICAL_SCALAR_NORMAL_PASS',name,x.count);
+  console.log('MAG_R2250_EXACT_OPTICAL_LENS_BUFFERS_PASS',name,x.count);
 }
