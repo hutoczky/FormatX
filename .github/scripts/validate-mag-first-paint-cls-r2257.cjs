@@ -171,8 +171,44 @@ const profiles=[
             const y=target?target.getBoundingClientRect().top+scrollY:900;
             return Math.max(240,Math.min(2000,Math.round(y-scrollY+80)));
           });
+          // R2260: Playwright's emulated mouse wheel is not an Android
+          // swipe. Preserve its diagnostic value, but if it fails to move
+          // the document, replay an actual Chromium touch gesture along
+          // the unobstructed left edge of the original living MAG.
+          // Never use scrollTo/scrollBy or test-side CSS: a real visitor
+          // must be able to reach the next chapter with touch input.
+          await page.mouse.move(12,Math.floor(config.height*.76));
           await page.mouse.wheel(0,targetDelta);
-          await page.waitForTimeout(550);
+          await page.waitForTimeout(450);
+          const wheelY=await page.evaluate(()=>scrollY);
+          let touchY=null;
+          if(wheelY<100&&config.mobile){
+            const session=await context.newCDPSession(page);
+            try{
+              const x=14;
+              for(let swipe=0;swipe<2;swipe++){
+                const yStart=Math.round(config.height*.78);
+                const yEnd=Math.round(config.height*.24);
+                await session.send('Input.dispatchTouchEvent',{
+                  type:'touchStart',touchPoints:[{x,y:yStart,id:0}]
+                });
+                for(let step=1;step<=12;step++){
+                  await session.send('Input.dispatchTouchEvent',{
+                    type:'touchMove',
+                    touchPoints:[{x,y:Math.round(yStart+(yEnd-yStart)*step/12),id:0}]
+                  });
+                  await page.waitForTimeout(18);
+                }
+                await session.send('Input.dispatchTouchEvent',{
+                  type:'touchEnd',touchPoints:[]
+                });
+                await page.waitForTimeout(210);
+                if((await page.evaluate(()=>scrollY))>=100)break;
+              }
+              touchY=await page.evaluate(()=>scrollY);
+            }finally{await session.detach();}
+          }
+          await page.waitForTimeout(500);
           const reveal=await page.evaluate(()=>{
             const root=document.documentElement;
             const folio=document.querySelector(
@@ -194,7 +230,23 @@ const profiles=[
                 &&box.width>190&&box.height>70
             };
           });
+          result.scrollInput={targetDelta,wheelY,touchY,
+            method:wheelY>=100?'wheel':'real-cdp-touch'};
           result.scrollExtraction=reveal;
+          if(reveal.scrollY<100){
+            result.scrollInput.scrollContext=await page.evaluate(()=>{
+              const html=getComputedStyle(document.documentElement);
+              const body=getComputedStyle(document.body);
+              return {
+                scrollingElement:document.scrollingElement?.tagName||'none',
+                scrollHeight:document.scrollingElement?.scrollHeight||0,
+                clientHeight:document.scrollingElement?.clientHeight||0,
+                htmlOverflowY:html.overflowY,bodyOverflowY:body.overflowY,
+                htmlTouchAction:html.touchAction,bodyTouchAction:body.touchAction,
+                archive:document.documentElement.dataset.fxArchiveCinema||'none'
+              };
+            });
+          }
           await page.screenshot({
             path:path.join(out,config.name+'-mag-reveals-first-chapter.png'),
             fullPage:false
