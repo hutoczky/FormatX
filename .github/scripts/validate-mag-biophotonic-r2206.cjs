@@ -83,7 +83,7 @@ assert(worker.includes('const INLINE_R2254_BOOT_HASH = "' + hash + '";'),
 assert((worker.match(/\$\{INLINE_R2254_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2236');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261030-r2254-gpu-ready-film-gate';
+const magRevision = '20261030-r2255-hidden-fence-cadence';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(intro.includes('const proofTurn=callback=>'),
   'R2236 cinematic test must bound animation-frame and timer scheduling');
