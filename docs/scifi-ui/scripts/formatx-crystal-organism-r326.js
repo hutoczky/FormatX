@@ -2713,7 +2713,11 @@
        Reconcile against the REAL viewport and paint the *same* WebGL owner
        after exposure, without starting a second renderer or idle loop.
        This only runs on one film-end event, never during DNA/embryo. */
-    listen(document,'formatx:magbirthcomplete',()=>{
+    // R2254: prepare the existing native WebGL frame behind the finished
+    // cinematic layer, instead of exposing an unfinished GPU submission.
+    const prepareNativeFrameR2254=()=>{
+      if(root.dataset.fxMagHandoffGpuR2226==='async-gpu-pending'||
+         root.dataset.fxMagHandoffGpuR2226==='finished')return;
       // R2223: the completed-film event originates in R533. The original
       // native viewport read took place synchronously inside R533's
       // dispatch stack, violating the retired-film no-layout contract.
@@ -2799,7 +2803,9 @@
                 gl.deleteSync(fence);
                 if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
                 root.dataset.fxMagHandoffGpuR2226='gpu-fence-failed';
-              }else if(++attempts<=60){
+              }else if(++attempts<=210){
+                // Slow software GL still gets a bounded asynchronous
+                // completion window, with zero GPU wait on the main thread.
                 later(pollFence,16);
               }else{
                 gl.deleteSync(fence);
@@ -2839,6 +2845,12 @@
         });
       }
       });
+    };
+    listen(document,'formatx:magbirthprepare',prepareNativeFrameR2254,{passive:true});
+    listen(document,'formatx:magbirthcomplete',()=>{
+      // The original owner is still the fail-safe for Skip and other
+      // paths that did not obtain a real GPU-complete frame in advance.
+      prepareNativeFrameR2254();
     },{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
     listen(window,'formatx:storychapter',()=>signalPhysiology('curiosity','story-chapter'),{passive:true});
