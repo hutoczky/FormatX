@@ -131,6 +131,8 @@ async function pixels(page,bytes,rect){
           gpuMs:root.dataset.fxMagHandoffGpuMsR2226||'',
           gpuCapability:root.dataset.fxGpuCapability||'',
           gpuSyncMode:root.dataset.fxMagHandoffSyncR2253||'',
+          gpuGate:root.dataset.fxMagHandoffGateR2254||'',
+          gpuPrepare:root.dataset.fxMagHandoffPrepareR2254||'',
           bootPhases:(()=>{
             try{return JSON.parse(root.dataset.fxMagBootPhasesR2241||'null');}
             catch(_){return null;}
@@ -192,6 +194,13 @@ async function pixels(page,bytes,rect){
         result.errors.push('R2241 MAG phase timing missing from actual cold start');
       if(state.gpu!=='finished')
         result.errors.push('GL final frame was not finished');
+      // R2254: an overlay disappearing while a WebGL2 fence remains pending
+      // is the exact 1-in-3 black-frame race. No screenshot retry is allowed.
+      if(state.gpuCapability==='webgl2'&&
+        (state.gpuGate!=='gpu-finished-before-exposure'||
+         state.gpuPrepare!=='requested'))
+        result.errors.push('R2254 film exposed before a finished native GPU frame: '+
+          JSON.stringify({gate:state.gpuGate,prepare:state.gpuPrepare}));
       // R2253: the WebGL2 path must never fall back to an unconditional
       // blocking gl.finish. WebGL1 retains its proven synchronous safety.
       if(state.gpuCapability==='webgl2'&&
