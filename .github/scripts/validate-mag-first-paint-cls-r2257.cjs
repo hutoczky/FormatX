@@ -104,6 +104,16 @@ const profiles=[
             nativeStatus:root.dataset.fxCrystalOrganismR326||'',
             gpuProof:root.dataset.fxMagHandoffGpuR2226||'',
             filmCount:document.querySelectorAll('.fx-mag-birth-r533').length,
+            archiveCinema:root.dataset.fxArchiveCinema||'home',
+            archiveHero:root.dataset.fxArchiveLegacyHero||'not-suppressed',
+            archiveCurrent:root.dataset.fxArchiveCurrent||'none',
+            archiveSceneCount:Number(root.dataset.fxArchiveSceneCount||0),
+            activeFolios:[...document.querySelectorAll(
+              '.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+            )].map(el=>({
+              textLength:(el.textContent||'').trim().length,
+              inert:el.inert
+            })),
             header:select('header.topbar'),
             mag:select('#hero .fx-crystal-organism-r326-canvas'),
             hero:select('#hero .hero-grid'),
@@ -125,13 +135,36 @@ const profiles=[
         assert.equal(result.filmCount,0,config.name+': film remains attached');
         assert(result.mag&&result.mag.w>100,
           config.name+': original 3D MAG canvas absent');
-        assert(result.copy&&result.copy.w>250,
-          config.name+': semantic hero-copy collapsed');
+        // R2258: the design deliberately hides the *legacy* hero-copy
+        // while the original MAG is retrieving native HTML in its exclusive
+        // archive. Its display:none is NOT a 0px layout defect. In that mode
+        // require a real active, non-inert HTML folio, never a blank overlay.
+        // Only ordinary/home mode must show the original full-width copy.
+        const cinemaOwnsPage=result.archiveCinema==='active'
+          &&result.archiveHero==='suppressed';
+        if(cinemaOwnsPage){
+          assert(result.archiveSceneCount>=2,
+            config.name+': MAG archive has no native chapters');
+          assert.equal(result.activeFolios.length,1,
+            config.name+': archive must present precisely one native folio');
+          assert(result.activeFolios[0].textLength>=30
+            &&result.activeFolios[0].inert===false,
+            config.name+': active MAG folio must expose real readable HTML');
+          assert(result.copy!==null,
+            config.name+': canonical semantic hero-copy removed from DOM');
+        }else{
+          assert(result.copy&&result.copy.w>250,
+            config.name+': semantic hero-copy collapsed outside archive mode '
+              +JSON.stringify({copy:result.copy,archive:result.archiveCinema,
+                hero:result.archiveHero}));
+        }
         assert(result.cls<=0.10,
           config.name+': real visitor CLS '+result.cls+' > 0.10');
         assert.deepEqual(errors,[],config.name+': browser JS errors');
-        console.log('MAG_R2257_MOBILE_FIRST_PAINT_CLS_PASS',
-          config.name,JSON.stringify({cls:result.cls,copyWidth:result.copy.w,
+        console.log('MAG_R2258_MOBILE_FIRST_PAINT_CLS_PASS',
+          config.name,JSON.stringify({cls:result.cls,
+            mode:cinemaOwnsPage?'mag-owned-archive':'semantic-hero',
+            copyWidth:result.copy?.w||0,folioCount:result.activeFolios.length,
             magWidth:result.mag.w,totalEntries:result.totalEntries}));
       }finally{
         await context.close();
