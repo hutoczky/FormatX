@@ -161,6 +161,54 @@ const profiles=[
         assert(result.cls<=0.10,
           config.name+': real visitor CLS '+result.cls+' > 0.10');
         assert.deepEqual(errors,[],config.name+': browser JS errors');
+        if(cinemaOwnsPage){
+          // R2259: the living MAG must actually retrieve the next original
+          // content when a person scrolls. Prevent a false pass where the
+          // legacy hero is hidden but no content ever arrives onscreen.
+          const targetDelta=await page.evaluate(()=>{
+            const first=window.FormatXArchiveExperience?.scenes?.[0];
+            const target=first?.id&&document.getElementById(first.id);
+            const y=target?target.getBoundingClientRect().top+scrollY:900;
+            return Math.max(240,Math.min(2000,Math.round(y-scrollY+80)));
+          });
+          await page.mouse.wheel(0,targetDelta);
+          await page.waitForTimeout(550);
+          const reveal=await page.evaluate(()=>{
+            const root=document.documentElement;
+            const folio=document.querySelector(
+              '.fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]'
+            );
+            const box=folio?.getBoundingClientRect();
+            const style=folio&&getComputedStyle(folio);
+            return {
+              scrollY,scene:root.dataset.fxArchiveCurrent||'none',
+              camera:root.dataset.fxArchiveCinema||'home',
+              viewportH:innerHeight,
+              folioPresent:!!folio,
+              textLength:(folio?.textContent||'').trim().length,
+              inert:folio?.inert??true,
+              display:style?.display||'none',
+              visibility:style?.visibility||'hidden',
+              opacity:Number(style?.opacity||0),
+              intersects:!!box&&box.bottom>90&&box.top<innerHeight-25
+                &&box.width>190&&box.height>70
+            };
+          });
+          result.scrollExtraction=reveal;
+          await page.screenshot({
+            path:path.join(out,config.name+'-mag-reveals-first-chapter.png'),
+            fullPage:false
+          });
+          assert(reveal.scrollY>=100&&reveal.camera==='active'
+            &&reveal.scene!=='none'&&reveal.folioPresent
+            &&!reveal.inert&&reveal.display!=='none'
+            &&reveal.visibility==='visible'&&reveal.opacity>.10
+            &&reveal.intersects&&reveal.textLength>=30,
+            config.name+': original MAG did not reveal a readable chapter on scroll '
+              +JSON.stringify(reveal));
+          console.log('MAG_R2259_SCROLL_MATERIALIZATION_PASS',
+            config.name,JSON.stringify(reveal));
+        }
         console.log('MAG_R2258_MOBILE_FIRST_PAINT_CLS_PASS',
           config.name,JSON.stringify({cls:result.cls,
             mode:cinemaOwnsPage?'mag-owned-archive':'semantic-hero',
