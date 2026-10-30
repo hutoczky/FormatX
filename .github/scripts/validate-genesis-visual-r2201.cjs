@@ -18,10 +18,17 @@ assert(match,'Inline parser-owned GENESIS bootstrap missing');
 const hash="'sha256-"+crypto.createHash('sha256').update(match[1]).digest('base64')+"'";
 const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
 assert(meta?.[1]?.includes(hash),'The exact new GENESIS inline hash must appear in HTML CSP');
-assert(worker.includes('const INLINE_R2254_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
-assert(worker.includes('${INLINE_R2254_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
-assert(match[1].includes('formatx-mag-birth-live-r533.js?v=20261030-r2254-gpu-ready-film-gate'),
-  'Parser must load the patched, post-teardown R2211 renderer instead of a stale R2207 film');
+const declared=worker.split('\n').find(line=>
+  /^const INLINE_R\d+_BOOT_HASH = "/.test(line)&&line.includes(' = "'+hash+'";'));
+assert(declared,'Worker must declare the exact active GENESIS inline hash');
+const hashName=declared.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1];
+assert(worker.split('${'+hashName+'}').length-1===2,
+  'Worker meta/header CSP must both include the current GENESIS hash');
+const activeFilm=match[1].match(/formatx-mag-birth-live-r533\.js\?v=[^"']+/)?.[0];
+assert(activeFilm,'Parser must load a versioned canonical cinematic bridge');
+const rescue=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
+assert(rescue.includes(activeFilm),
+  'Parser and rescue must load the same current cinematic revision');
 assert(match[1].includes("const v=f||(!a&&p.get('intro')!=='0')"),
   'Every normal full navigation must play GENESIS; explicit ?intro=0 may skip');
 assert(match[1].includes('fresh-navigation-genesis'),'Must identify the new repeatable film bootstrap');
