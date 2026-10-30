@@ -13,6 +13,7 @@ const rescue = read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const current = read('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js');
 const runtime = read('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js');
 const scheduler = read('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js');
+const mobileCritical = read('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css');
 for (const [name, source] of Object.entries({ mag, birth, intro, rescue, current, runtime, scheduler })) {
   assert.doesNotThrow(() => new Function(source), name + ' JavaScript syntax');
 }
@@ -109,6 +110,24 @@ assert(html.includes(runtimeSrc)&&html.includes('formatx-p0-motion-scheduler-r49
   'HTML must reference active R533 bridge and original native MAG cache key');
 assert(worker.includes(filmRevision)&&worker.includes(magRevision),
   'Worker must preserve film and native MAG rewrite keys');
+// R2256: materialize the real hero in layout before FCP. The film may
+// cover the page visually, but an initial 1px clipped panel followed by a
+// full-height copy creates a deterministic 0.33+ mobile CLS.
+const cssPar=mobileCritical.split('/* R2256 — reserve final mobile hero copy geometry at initial paint. */')[1];
+assert(cssPar&&cssPar.includes('production-r2256-critical-mobile-copy-geometry-parity'),
+  'Mobile critical CSS must include settled R2256 source geometry');
+for(const property of [
+  'position:relative!important;',
+  'width:calc(100% - 24px)!important;',
+  'height:auto!important;',
+  'max-height:none!important;',
+  'clip-path:none!important;',
+  'white-space:normal!important;'
+])assert(cssPar.includes(property),'Missing first-paint hero geometry: '+property);
+assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261030-r2256-layout-parity-before-fcp/g)?.length===2,
+  'Preload and blocking mobile stylesheet must have identical R2256 URL');
+assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261030-r2256-layout-parity-before-fcp'),
+  'Worker mobile stylesheet must share the R2256 cache identity');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');
 assert(intro.includes('const THREE_OWNER_SRC ='),
