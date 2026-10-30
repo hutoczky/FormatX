@@ -1,5 +1,5 @@
 FormatX production revision
-token=20261030-r2252-frame-state-dedup
+token=20261030-r2253-async-gpu-handoff
 release_line=R2212-PERSISTENT-MAG-PHOTONIC-LENS-LIVING-CORAL-NUCLEUS
 r2202_visual=Preserve the R2201 full-frame blue/violet DNA and textured cyan/coral membrane while focusing the mobile nucleus: 6 mobile / 10 desktop chromatin ribbons, .82 luminous nucleus, .04/.06 chromatin and .10 capillary opacity. The same genetic particles still condense into the same four titanium arms and final MAG.
 r2202_raster=The existing Three WebGLRenderer requests antialiasing on mobile as well as desktop using the same canvas, context, geometry, 6000/9600 GPU-particle budget, camera and lifecycle. This adds real default-framebuffer multisampling where supported; it is not a speed or FPS claim.
@@ -276,3 +276,6 @@ r2251_ci=Both P0 and Lighthouse workflows now run on release-manifest-only chang
 r2252_native_shape_cadence=Only change-aware DOM publishing for the original R326 organism shape, frame burst/surface cadence and refresh telemetry. GL shader, geometry, three-dimensional lens, original film, frame cadence and visual materials are unchanged. Guard .github/scripts/validate-mag-shape-cadence-r2252.cjs validates all unchanged public values across 120 repeat publishes, 120 burst/surface updates and 120 refresh measurements, plus changed-state propagation.
 r2252_native_assets=R490/R239/R422/R326, fallback V55, HTML and Worker now reference 20261030-r2252-frame-state-dedup. Separate R533/R1280 DNA-to-cell cinematic asset and exact CSP unchanged.
 r2252_gate=Draft candidate only. Full exact-head GitHub P0, real-mobile viewport screenshot, 3x desktop/mobile Lighthouse, and visual QA must pass before merging or production; no inferred FPS or Lighthouse gain from isolated state-write tests.
+
+r2253_handoff=The original R326 permanent MAG now paints once after cinematic teardown and, on WebGL2, waits for GPU completion with a bounded zero-timeout clientWaitSync fence poll rather than blocking the main thread via gl.finish. The existing 8x8 real GPU framebuffer proof is preserved after the GPU signal. WebGL1 and missing fence creation retain the old finish/readback fallback. Original canvas, geometry, shaders and 3D film are unchanged.
+r2253_release_safety=R2226 cold-browser P0 still requires a nonblack first full viewport, physical GPU pixel readback, and three independent starts. It additionally rejects any WebGL2 gl.finish call. The native R490/R239/R422/R326, fallback V55, HTML and Worker asset identity is 20261030-r2253-async-gpu-handoff. This is development only: exact-head browser CI, visual handoff and strict Lighthouse must pass before merging/deployment.
