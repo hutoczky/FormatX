@@ -129,6 +129,8 @@ async function pixels(page,bytes,rect){
           gpu:root.dataset.fxMagHandoffGpuR2226||'',
           gpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
           gpuMs:root.dataset.fxMagHandoffGpuMsR2226||'',
+          gpuCapability:root.dataset.fxGpuCapability||'',
+          gpuSyncMode:root.dataset.fxMagHandoffSyncR2253||'',
           bootPhases:(()=>{
             try{return JSON.parse(root.dataset.fxMagBootPhasesR2241||'null');}
             catch(_){return null;}
@@ -190,6 +192,17 @@ async function pixels(page,bytes,rect){
         result.errors.push('R2241 MAG phase timing missing from actual cold start');
       if(state.gpu!=='finished')
         result.errors.push('GL final frame was not finished');
+      // R2253: the WebGL2 path must never fall back to an unconditional
+      // blocking gl.finish. WebGL1 retains its proven synchronous safety.
+      if(state.gpuCapability==='webgl2'&&
+         (state.gpuSyncMode!=='webgl2-nonblocking-fence'||
+          (state.gpuCallTrace?.finish?.calls||0)!==0))
+        result.errors.push('R2253 WebGL2 GPU sync blocked the main thread: '+
+          JSON.stringify({mode:state.gpuSyncMode,
+            finishes:state.gpuCallTrace?.finish?.calls||0}));
+      if(state.gpuCapability==='webgl1'&&
+         state.gpuSyncMode!=='webgl1-finish-fallback')
+        result.errors.push('R2253 WebGL1 fallback not recorded');
       if(luma===null||alpha===null)
         result.errors.push('R2227 GPU center readback telemetry invalid');
       // Center patch is diagnostic, not a standalone visual oracle:
