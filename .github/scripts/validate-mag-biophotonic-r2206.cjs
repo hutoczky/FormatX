@@ -78,10 +78,14 @@ const parser = html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*
 assert(parser, 'Parser-owned intro bootstrap missing');
 const hash = "'sha256-" + crypto.createHash('sha256').update(parser[1]).digest('base64') + "'";
 assert(html.includes(hash), 'New bootstrap must be authorized by HTML CSP');
-assert(worker.includes('const INLINE_R2254_BOOT_HASH = "' + hash + '";'),
-  'Worker must authorize the exact R2254 inline bootstrap');
-assert((worker.match(/\$\{INLINE_R2254_BOOT_HASH\}/g) || []).length === 2,
-  'Both Worker CSPs must authorize R2236');
+// Active parser SHA-256 must match the Worker declaration and BOTH CSP policies.
+// Compare hashes from source instead of pinning a stale R-number.
+const hashDeclaration=worker.split('\n').find(line=>
+  /^const INLINE_R\d+_BOOT_HASH = "/.test(line)&&line.includes(' = "'+hash+'";'));
+assert(hashDeclaration,'Worker must declare exact active parser SHA-256');
+const hashVariable=hashDeclaration.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1];
+assert(worker.split('${'+hashVariable+'}').length-1===2,
+  'Both Worker CSPs must authorize the active parser hash');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
 const magRevision = '20261030-r2255-hidden-fence-cadence';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
@@ -89,18 +93,20 @@ assert(intro.includes('const proofTurn=callback=>'),
   'R2236 cinematic test must bound animation-frame and timer scheduling');
 assert(intro.includes("ROOT.dataset.fxMagBirthProofSchedulerR2236='bounded-raf-or-timeout'"),
   'R2236 proof scheduler state must be emitted only during deterministic capture');
-assert(rescue.includes('20261030-r2254-gpu-ready-film-gate'),
-  'Parser fallback must load R2254 canonical bridge only');
+const runtimeSrc=parser[1].match(/formatx-mag-birth-live-r533\.js\?v=[^"']+/)?.[0];
+assert(runtimeSrc,'Inline parser must select a versioned R533 film bridge');
+assert(rescue.includes(runtimeSrc),
+  'Rescue and parser must load the EXACT same film revision');
 assert(intro.includes('reconcileExposedCompositorR2219()'),
   'Film must flush exposed compositor on both teardown routes');
 assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flushed'"),
   'Native exposure must be acknowledged after real hit testing');
 for (const [name, source] of Object.entries({ current, runtime, scheduler }))
   assert(source.includes(magRevision), name + ' must load the optimized native MAG');
-assert(parser[1].includes('formatx-mag-birth-live-r533.js?v=20261030-r2254-gpu-ready-film-gate'),
-  'R533 entrypoint must have distinct R2254 cache generation');
-assert(html.includes('20261030-r2254-gpu-ready-film-gate')&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+magRevision),
-  'HTML must reference fresh R533 bridge and original native MAG cache key');
+assert(runtimeSrc.startsWith('formatx-mag-birth-live-r533.js?v='),
+  'R533 entrypoint must have an explicit cache revision');
+assert(html.includes(runtimeSrc)&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+magRevision),
+  'HTML must reference active R533 bridge and original native MAG cache key');
 assert(worker.includes(filmRevision)&&worker.includes(magRevision),
   'Worker must preserve film and native MAG rewrite keys');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
