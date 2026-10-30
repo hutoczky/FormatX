@@ -188,6 +188,11 @@ jobs:
         env:
           FORMATX_FAST_EVIDENCE_DIR: artifacts/p0-fast-loop
         run: node .github/scripts/p0-fast-loop.cjs --cls
+      - name: Verify real first-paint CLS on two normal mobile viewports
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_FIRST_PAINT_CLS_DIR: artifacts/r2257-first-paint-cls
+        run: node .github/scripts/validate-mag-first-paint-cls-r2257.cjs
       - name: Run retained responsive overflow proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -257,5 +262,6 @@ jobs:
             artifacts/mag-handoff-layout-r2181/
             artifacts/r656-intro-keyframes/
             artifacts/r2226-handoff-coldstarts/
+            artifacts/r2257-first-paint-cls/
           if-no-files-found: warn
           retention-days: 30
