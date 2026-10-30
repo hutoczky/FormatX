@@ -5,6 +5,7 @@ on:
   pull_request:
     branches: [master, fix/r2171-native-titanium-surface]
     paths:
+      - 'docs/production-revision.txt'
       - 'docs/scifi-ui/**'
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
@@ -21,6 +22,7 @@ on:
     # Never deploy: these are local-source / local-Lighthouse checks only.
     branches: [master, fix/r2208-genesis-controls-nonblocking-css]
     paths:
+      - 'docs/production-revision.txt'
       - 'docs/scifi-ui/**'
       - 'lighthouserc.json'
       - 'lighthouserc.mobile.json'
