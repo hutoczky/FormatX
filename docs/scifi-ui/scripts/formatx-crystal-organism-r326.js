@@ -2747,31 +2747,73 @@
       // STATIC MAG on the newly exposed page. It starts no animation loop.
       try{
         render(performance.now());
-        /* R2226: flush only queues commands; it does not prove the final
-           physical framebuffer is complete before the compositor captures
-           the newly exposed native MAG. Finish ONCE at film teardown only.
-           Read a tiny center patch to distinguish GL content from a dark
-           full-viewport screenshot without changing the user-visible image. */
+        // R2253: avoid blocking Chromium's main thread on a full GPU
+        // gl.finish() before the cinematic layer has composited. Keep the
+        // exact original framebuffer readback, but wait on the real WebGL2
+        // fence with ZERO timeout in bounded event-loop turns. No new GL
+        // context, canvas, render pass, frame stream or geometry mutation.
         const gpuStarted=performance.now();
+        const proofPixel=()=>{
+          if(disposed||contextLost||!stage.isConnected)return;
+          const centerPatch=new Uint8Array(8*8*4);
+          const px=Math.max(0,Math.floor((canvas.width-8)/2));
+          const py=Math.max(0,Math.floor((canvas.height-8)/2));
+          gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),
+            gl.RGBA,gl.UNSIGNED_BYTE,centerPatch);
+          let patchLumaPeak=0,patchAlphaPeak=0;
+          for(let i=0;i<centerPatch.length;i+=4){
+            patchLumaPeak=Math.max(patchLumaPeak,
+              centerPatch[i],centerPatch[i+1],centerPatch[i+2]);
+            patchAlphaPeak=Math.max(patchAlphaPeak,centerPatch[i+3]);
+          }
+          root.dataset.fxMagHandoffGpuR2226='finished';
+          root.dataset.fxMagHandoffGpuMsR2226=
+            (performance.now()-gpuStarted).toFixed(1);
+          root.dataset.fxMagHandoffPixelR2226=
+            patchLumaPeak+','+patchAlphaPeak;
+        };
         gl.flush();
-        gl.finish();
-        const gpuFinishedMs=performance.now()-gpuStarted;
-        const centerPatch=new Uint8Array(8*8*4);
-        const px=Math.max(0,Math.floor((canvas.width-8)/2));
-        const py=Math.max(0,Math.floor((canvas.height-8)/2));
-        gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),
-          gl.RGBA,gl.UNSIGNED_BYTE,centerPatch);
-        let patchLumaPeak=0,patchAlphaPeak=0;
-        for(let i=0;i<centerPatch.length;i+=4){
-          patchLumaPeak=Math.max(patchLumaPeak,
-            centerPatch[i],centerPatch[i+1],centerPatch[i+2]);
-          patchAlphaPeak=Math.max(patchAlphaPeak,centerPatch[i+3]);
-        }
-        root.dataset.fxMagHandoffGpuR2226='finished';
-        root.dataset.fxMagHandoffGpuMsR2226=gpuFinishedMs.toFixed(1);
-        root.dataset.fxMagHandoffPixelR2226=
-          patchLumaPeak+','+patchAlphaPeak;
         root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
+        if(webgl2&&typeof gl.fenceSync==='function'&&
+           typeof gl.clientWaitSync==='function'){
+          const fence=gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);
+          if(fence){
+            gl.flush();
+            root.dataset.fxMagHandoffGpuR2226='async-gpu-pending';
+            let attempts=0;
+            const pollFence=()=>{
+              if(disposed||contextLost||!stage.isConnected){
+                gl.deleteSync(fence);return;
+              }
+              const status=gl.clientWaitSync(fence,0,0);
+              if(status===gl.ALREADY_SIGNALED||
+                 status===gl.CONDITION_SATISFIED){
+                gl.deleteSync(fence);
+                proofPixel();
+              }else if(status===gl.WAIT_FAILED){
+                gl.deleteSync(fence);
+                root.dataset.fxMagHandoffGpuR2226='gpu-fence-failed';
+              }else if(++attempts<=60){
+                later(pollFence,16);
+              }else{
+                gl.deleteSync(fence);
+                root.dataset.fxMagHandoffGpuR2226='gpu-fence-timeout';
+              }
+            };
+            later(pollFence,0);
+            root.dataset.fxMagHandoffSyncR2253='webgl2-nonblocking-fence';
+          }else{
+            gl.finish();
+            proofPixel();
+            root.dataset.fxMagHandoffSyncR2253='webgl2-fence-null-fallback';
+          }
+        }else{
+          // WebGL1 cannot create GPU completion fences. Preserve the
+          // established single frame handoff, never silently skip pixels.
+          gl.finish();
+          proofPixel();
+          root.dataset.fxMagHandoffSyncR2253='webgl1-finish-fallback';
+        }
       }catch(error){
         root.dataset.fxMagNativePresentR2220='paint-unavailable';
         console.warn('FormatX native MAG final presentation:',error);
