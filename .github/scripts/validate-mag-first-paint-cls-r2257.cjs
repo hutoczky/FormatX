@@ -73,7 +73,21 @@ const profiles=[
         const result=await page.evaluate(()=>{
           const root=document.documentElement;
           const items=window.__fxLayoutShiftsR2257||[];
-          const cls=items.reduce((sum,item)=>sum+item.value,0);
+          // Core Web Vitals CLS is the largest layout-shift SESSION WINDOW,
+          // NOT the sum of shifts over an arbitrarily long film. A session
+          // ends after >1s quiet or 5s elapsed; recent-input shifts were
+          // excluded by the pre-navigation observer.
+          let cls=0,session=0,first=-Infinity,previous=-Infinity;
+          for(const item of items){
+            const at=item.startTime;
+            if(at-previous>1000||at-first>5000){
+              session=0;
+              first=at;
+            }
+            session+=item.value;
+            cls=Math.max(cls,session);
+            previous=at;
+          }
           const select=selector=>{
             const el=document.querySelector(selector);
             if(!el)return null;
