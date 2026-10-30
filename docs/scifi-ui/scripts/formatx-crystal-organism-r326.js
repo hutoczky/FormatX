@@ -1868,6 +1868,7 @@
     const listen=(target,type,handler,options={})=>target.addEventListener(type,handler,{...options,signal:controller.signal});
     const delayed=new Set();
     let pendingGpuFenceR2253=null;
+    let heldCinematicFramesR2255=0;
     const later=(handler,delay)=>{
       const timer=setTimeout(()=>{delayed.delete(timer);handler();},delay);
       delayed.add(timer);
@@ -2410,6 +2411,13 @@
 
     function frame(now){
       raf=0;if(blocked())return;
+      // R2255: avoid redundant hidden GPU submissions until the one
+      // handoff WebGL2 fence has finished; do not change visible cadence.
+      if(pendingGpuFenceR2253){
+        if(++heldCinematicFramesR2255===1)
+          root.dataset.fxMagHandoffCadenceR2255='hidden-gpu-proof-hold';
+        return;
+      }
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
@@ -2776,6 +2784,11 @@
             (performance.now()-gpuStarted).toFixed(1);
           root.dataset.fxMagHandoffPixelR2226=
             patchLumaPeak+','+patchAlphaPeak;
+          if(heldCinematicFramesR2255){
+            heldCinematicFramesR2255=0;
+            root.dataset.fxMagHandoffCadenceR2255='resumed-after-gpu-proof';
+            if(!blocked())schedule(2);
+          }
         };
         gl.flush();
         root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
@@ -2803,6 +2816,11 @@
                 gl.deleteSync(fence);
                 if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
                 root.dataset.fxMagHandoffGpuR2226='gpu-fence-failed';
+                if(heldCinematicFramesR2255){
+                  heldCinematicFramesR2255=0;
+                  root.dataset.fxMagHandoffCadenceR2255='fallback-unblocked';
+                  if(!blocked())schedule(1);
+                }
               }else if(++attempts<=210){
                 // Slow software GL still gets a bounded asynchronous
                 // completion window, with zero GPU wait on the main thread.
@@ -2811,6 +2829,11 @@
                 gl.deleteSync(fence);
                 if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
                 root.dataset.fxMagHandoffGpuR2226='gpu-fence-timeout';
+                if(heldCinematicFramesR2255){
+                  heldCinematicFramesR2255=0;
+                  root.dataset.fxMagHandoffCadenceR2255='fallback-unblocked';
+                  if(!blocked())schedule(1);
+                }
               }
             };
             later(pollFence,0);
