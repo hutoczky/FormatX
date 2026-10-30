@@ -1060,3 +1060,48 @@
   }
 }
 /* production-r2039-release-link-touch-44px */
+
+
+/* R2256 — reserve final mobile hero copy geometry at initial paint. */
+/* The parser sets data-fx-reference-production-r244=ready in the HEAD.
+   Reserve the same block dimensions as the final R244 stylesheet BEFORE
+   first content paint. The cinematic intro still visually occludes the
+   page until the living MAG reveals it. This fixes 1px -> full-width copy
+   expansion without forcing display:none or removing semantic content. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html[data-fx-reference-production-r244="ready"] body.living-architecture
+  #hero .hero-grid > .hero-space {
+    order:1!important;
+    height:clamp(350px,97.6vw,470px)!important;
+    min-height:clamp(350px,97.6vw,470px)!important;
+    max-height:470px!important;
+  }
+  html[data-fx-reference-production-r244="ready"] body.living-architecture
+  #hero .hero-grid > .hero-copy {
+    order:2!important;
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    width:calc(100% - 24px)!important;
+    min-width:0!important;
+    max-width:700px!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0 auto 16px!important;
+    padding:clamp(24px,6vw,34px) clamp(20px,5.5vw,30px)
+      clamp(26px,6.5vw,38px)!important;
+    overflow:visible!important;
+    clip:auto!important;
+    clip-path:none!important;
+    white-space:normal!important;
+    border:1px solid rgba(151,224,255,.12)!important;
+    border-radius:24px!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+/* production-r2256-critical-mobile-copy-geometry-parity */
