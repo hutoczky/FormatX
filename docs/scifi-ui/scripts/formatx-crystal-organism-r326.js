@@ -2284,7 +2284,10 @@
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
             lastQualityAdjust=now;
-            root.dataset.fxCoreGovernorR1660='panic-lod-one-frame-spike';
+            // R2251: identical governor statuses must not invalidate the
+            // entire living page style tree on every overloaded frame.
+            if(root.dataset.fxCoreGovernorR1660!=='panic-lod-one-frame-spike')
+              root.dataset.fxCoreGovernorR1660='panic-lod-one-frame-spike';
             requestQualityResizeR2244();
           }
         }else if(now-lastQualityAdjust>120){
@@ -2315,8 +2318,12 @@
 
           if(Math.abs(previous-qualityScale)>.001){
             lastQualityAdjust=now;
-            root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
-            root.dataset.fxCoreGovernorR1660=qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';
+            const governorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
+            const governorR1660=qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';
+            if(root.dataset.fxCoreGovernorR1626!==governorR1626)
+              root.dataset.fxCoreGovernorR1626=governorR1626;
+            if(root.dataset.fxCoreGovernorR1660!==governorR1660)
+              root.dataset.fxCoreGovernorR1660=governorR1660;
             requestQualityResizeR2244();
           }
         }
