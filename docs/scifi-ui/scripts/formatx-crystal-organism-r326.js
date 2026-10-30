@@ -786,8 +786,10 @@
         [vertices[1],vertices[2]]=[vertices[2],vertices[1]];
         faceNormal=faceNormal.map(value=>-value);
       }
-      const barycentric=[[1,0,0],[0,1,0],[0,0,1]];
-      vertices.forEach((item,index)=>{
+      // R2250: retain the same optical triangle order and normals without
+      // allocating 3 tiny barycentric arrays and a callback per lens face.
+      for(let index=0;index<3;index+=1){
+        const item=vertices[index];
         sphere.push(...item.sphere);
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
@@ -799,9 +801,11 @@
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
-        barycentrics.push(...barycentric[index]);
+        if(index===0)barycentrics.push(1,0,0);
+        else if(index===1)barycentrics.push(0,1,0);
+        else barycentrics.push(0,0,1);
         facets.push(facet);
-      });
+      }
     }
     function appendEllipsoid(center,radii,facetBase=.72,latSteps=8,lonSteps=14,rotZ=0){
       const [cx,cy,cz]=center,[rx0,ry0,rz0]=radii;
