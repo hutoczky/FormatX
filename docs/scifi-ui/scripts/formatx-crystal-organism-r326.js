@@ -1867,6 +1867,7 @@
     const controller=new AbortController();
     const listen=(target,type,handler,options={})=>target.addEventListener(type,handler,{...options,signal:controller.signal});
     const delayed=new Set();
+    let pendingGpuFenceR2253=null;
     const later=(handler,delay)=>{
       const timer=setTimeout(()=>{delayed.delete(timer);handler();},delay);
       delayed.add(timer);
@@ -2778,25 +2779,31 @@
            typeof gl.clientWaitSync==='function'){
           const fence=gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);
           if(fence){
+            pendingGpuFenceR2253=fence;
             gl.flush();
             root.dataset.fxMagHandoffGpuR2226='async-gpu-pending';
             let attempts=0;
             const pollFence=()=>{
               if(disposed||contextLost||!stage.isConnected){
-                gl.deleteSync(fence);return;
+                if(!contextLost)gl.deleteSync(fence);
+                if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
+                return;
               }
               const status=gl.clientWaitSync(fence,0,0);
               if(status===gl.ALREADY_SIGNALED||
                  status===gl.CONDITION_SATISFIED){
                 gl.deleteSync(fence);
+                if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
                 proofPixel();
               }else if(status===gl.WAIT_FAILED){
                 gl.deleteSync(fence);
+                if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
                 root.dataset.fxMagHandoffGpuR2226='gpu-fence-failed';
               }else if(++attempts<=60){
                 later(pollFence,16);
               }else{
                 gl.deleteSync(fence);
+                if(pendingGpuFenceR2253===fence)pendingGpuFenceR2253=null;
                 root.dataset.fxMagHandoffGpuR2226='gpu-fence-timeout';
               }
             };
@@ -2955,6 +2962,10 @@
 
     function destroy(){
       if(disposed)return;disposed=true;
+      if(pendingGpuFenceR2253&&!contextLost){
+        gl.deleteSync(pendingGpuFenceR2253);
+        pendingGpuFenceR2253=null;
+      }
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
