@@ -1,0 +1,30 @@
+    function guardianTriangle(vertices,facet,origin=[0,0,0]){
+      let faceNormal=normalize(cross(
+        subtract(vertices[1].crystal,vertices[0].crystal),
+        subtract(vertices[2].crystal,vertices[0].crystal)
+      ));
+      const centre=[0,1,2].map(axis=>
+        (vertices[0].crystal[axis]+vertices[1].crystal[axis]+vertices[2].crystal[axis])/3
+      );
+      const localCentre=subtract(centre,origin);
+      if(dot(faceNormal,localCentre)<0){
+        [vertices[1],vertices[2]]=[vertices[2],vertices[1]];
+        faceNormal=faceNormal.map(value=>-value);
+      }
+      const barycentric=[[1,0,0],[0,1,0],[0,0,1]];
+      vertices.forEach((item,index)=>{
+        sphere.push(...item.sphere);
+        crystal.push(...item.crystal);
+        sphereNormals.push(...item.sphereNormal);
+        const smoothNormal=item.crystalNormal||faceNormal;
+        const hybridNormal=normalize([
+          smoothNormal[0]*.78+faceNormal[0]*.22,
+          smoothNormal[1]*.78+faceNormal[1]*.22,
+          smoothNormal[2]*.78+faceNormal[2]*.22
+        ]);
+        crystalNormals.push(...hybridNormal);
+        uvs.push(...item.uv);
+        barycentrics.push(...barycentric[index]);
+        facets.push(facet);
+      });
+    }
