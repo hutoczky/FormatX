@@ -1066,8 +1066,37 @@
     }
   }
 
+  let nativeHandoffGateStartedR2254=0;
+  let nativeHandoffFadeR2254=false;
   function safeTeardownOverlay(source) {
     if(!overlay.isConnected)return;
+    // R2254: R2226 proved that the native DOM could be "ready" while its
+    // WebGL2 fence was still pending. Do not expose a black GPU surface.
+    // Keep the final cinematic subject visible until the ORIGINAL native
+    // GL frame has actually completed. This runs only at the handoff,
+    // never inside the 60 FPS DNA/cell animation.
+    const gpuGate=!REDUCED&&!document.hidden&&coreApi&&
+      ROOT.dataset.fxGpuCapability==='webgl2';
+    if(gpuGate){
+      const gpuState=ROOT.dataset.fxMagHandoffGpuR2226||'';
+      if(gpuState!=='finished'){
+        if(!nativeHandoffGateStartedR2254)
+          nativeHandoffGateStartedR2254=performance.now();
+        if(performance.now()-nativeHandoffGateStartedR2254<4200){
+          ROOT.dataset.fxMagHandoffGateR2254='waiting-for-actual-gpu-frame';
+          exitTimer=window.setTimeout(()=>safeTeardownOverlay(source),50);
+          return;
+        }
+        // Fail open after a finite bound: never trap Skip/keyboard users.
+        ROOT.dataset.fxMagHandoffGateR2254='gpu-timeout-released';
+      }else ROOT.dataset.fxMagHandoffGateR2254='gpu-finished-before-exposure';
+      if(!nativeHandoffFadeR2254){
+        nativeHandoffFadeR2254=true;
+        overlay.classList.add('is-leaving');
+        exitTimer=window.setTimeout(()=>safeTeardownOverlay(source),120);
+        return;
+      }
+    }
     try { releaseStageStyle(); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-live'); } catch (_) {}
     try { ROOT.removeAttribute('data-fx-mag-birth-phase'); } catch (_) {}
@@ -1138,7 +1167,19 @@
     try { filmRenderer?.destroy?.(); } catch (_) {}
     filmRenderer=null;
     if(threeWaitTimer){try{clearTimeout(threeWaitTimer);}catch(_){}threeWaitTimer=0;}
-    try { overlay.classList.add('is-leaving'); } catch (_) {}
+    // R2254: prepare the real GPU frame BEFORE the film exposes the
+    // native canvas. The canonical completion event still fires only
+    // after the overlay is physically removed.
+    try{
+      document.dispatchEvent(new CustomEvent('formatx:magbirthprepare',{
+        detail:{source,revision:'r2254-gpu-prepared-cinematic-handoff'}
+      }));
+      ROOT.dataset.fxMagHandoffPrepareR2254='requested';
+    }catch(_){}
+    // WebGL1/reduced-motion retains the proven original bounded exit.
+    if(REDUCED||!coreApi||ROOT.dataset.fxGpuCapability!=='webgl2'){
+      try { overlay.classList.add('is-leaving'); } catch (_) {}
+    }
 
     exitTimer=window.setTimeout(
       ()=>safeTeardownOverlay(source),
@@ -1443,6 +1484,12 @@
     }
     window.setTimeout(()=>{
       if(!overlay.isConnected)return;
+      // A healthy asynchronous WebGL2 fence may still be in flight.
+      // Never let the old watchdog bypass the R2254 native GPU gate.
+      if(finished){
+        safeTeardownOverlay('absolute-dom-watchdog-r653');
+        return;
+      }
       try{
         locateStage();
         if(stage instanceof HTMLElement){
