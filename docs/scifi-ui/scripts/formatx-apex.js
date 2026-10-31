@@ -30,21 +30,7 @@
     if(link)link.href='./checkout.html?plan=business_pro&cycle=monthly&currency='+selected+'&lang='+language;
   },true);
 
-  const AUDIT_MODE =
-    navigator.webdriver === true
-    || /Chrome-Lighthouse/i.test(navigator.userAgent || '')
-    || new URLSearchParams(location.search).get('lighthouse') === '1'
-    || document.documentElement.dataset.fxP0AuditModeR1728 === 'static-first-paint-no-late-webgl';
-  if (AUDIT_MODE) {
-    ROOT.dataset.fxApex = 'audit-skip';
-    ROOT.dataset.fxRenderer = 'static-audit';
-    ROOT.dataset.fxScene = '0';
-    ROOT.dataset.fxFlow = '0';
-    ROOT.style.setProperty('--accent', '120,210,255');
-    ROOT.style.setProperty('--progress', '0');
-    dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'static-audit', infinite: 'skipped' } }));
-    return;
-  }
+  // R2266: keep the same mobile/native control architecture for all browsers.
 
   // r294: on phone/coarse-pointer surfaces the current native core, canonical
   // language control, release metadata runtime and r268 navigation already own
