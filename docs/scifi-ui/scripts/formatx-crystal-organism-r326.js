@@ -2409,8 +2409,31 @@
       root.dataset.fxCoreIdleRenderR441='zero-frame';
     }
 
+    // R2261: retain ONE native warm-up frame for the shader and first-frame
+    // contract, but do not repeatedly draw a completely invisible MAG behind
+    // the DNA/cellular film. The real R533 crossfade still requests visible
+    // native frames at r>=.915; the GPU-fence handoff calls render() directly
+    // and is deliberately unaffected. No geometry/quality downgrade.
+    let concealedWarmFramesR2261=0,concealedSkippedFramesR2261=0;
+    function filmConcealsNativeR2261(){
+      if(root.getAttribute('data-fx-mag-birth-live')!=='active' &&
+         root.dataset.fxMagBirthLiveR533!=='active')return false;
+      return stage.dataset.fxBirthConcealedR2174==='true'||
+        (stage.dataset.fxBirthDeferredR2173==='true'&&
+         stage.style.getPropertyValue('opacity')==='0');
+    }
     function frame(now){
       raf=0;if(blocked())return;
+      if(filmConcealsNativeR2261()){
+        if(concealedWarmFramesR2261>=1){
+          ++concealedSkippedFramesR2261;
+          burstFrames=0;
+          if(concealedSkippedFramesR2261===1)
+            root.dataset.fxMagHiddenFilmCadenceR2261='one-warm-frame-then-zero-hidden-draw';
+          return;
+        }
+        concealedWarmFramesR2261=1;
+      }
       // R2255: avoid redundant hidden GPU submissions until the one
       // handoff WebGL2 fence has finished; do not change visible cadence.
       if(pendingGpuFenceR2253){
@@ -2724,6 +2747,9 @@
     // R2254: prepare the existing native WebGL frame behind the finished
     // cinematic layer, instead of exposing an unfinished GPU submission.
     const prepareNativeFrameR2254=()=>{
+      // A one-time count is published when the intro enters GPU handoff,
+      // never by a per-frame DOM update.
+      root.dataset.fxMagHiddenFramesSkippedR2261=String(concealedSkippedFramesR2261);
       if(root.dataset.fxMagHandoffGpuR2226==='async-gpu-pending'||
          root.dataset.fxMagHandoffGpuR2226==='finished')return;
       // R2223: the completed-film event originates in R533. The original
