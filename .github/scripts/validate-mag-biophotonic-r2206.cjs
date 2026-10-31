@@ -88,7 +88,7 @@ const hashVariable=hashDeclaration.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1]
 assert(worker.split('${'+hashVariable+'}').length-1===2,
   'Both Worker CSPs must authorize the active parser hash');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261031-r2261-invisible-film-gpu-cadence';
+const magRevision = '20261031-r2264-fence-only-visitor';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(intro.includes('const proofTurn=callback=>'),
   'R2236 cinematic test must bound animation-frame and timer scheduling');
@@ -104,9 +104,11 @@ assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flus
   'Native exposure must be acknowledged after real hit testing');
 // R2262: keep the previously proven R2261 WebGL source while deferring
 // the supplementary Mini MAG DOM/CSS until the original film completes.
-const miniLoaderRevision='20261031-r2263-primary-first-mini-scheduling';
+const miniLoaderRevision='20261031-r2264-fence-only-visitor';
 for (const [name, source] of Object.entries({ current, runtime }))
   assert(source.includes(magRevision), name + ' must preserve the original native GL');
+assert(mag.includes('const proofReadbackR2264='),
+  'R2264 original WebGL owner must reserve CPU readback for explicit proof');
 assert(scheduler.includes(miniLoaderRevision),'Scheduler must load fresh R2262 controller owner');
 assert(runtimeSrc.startsWith('formatx-mag-birth-live-r533.js?v='),
   'R533 entrypoint must have an explicit cache revision');
