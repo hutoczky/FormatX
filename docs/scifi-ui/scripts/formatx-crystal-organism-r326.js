@@ -2341,7 +2341,13 @@
         }
       }
 
-      if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity){
+      // R2265: diagnostic DOM attributes are NOT part of rendering or
+      // interaction. Publishing 7 volatile root attributes four times a
+      // second forces global selector invalidation on mobile WebKit/Chrome.
+      // Keep the very first snapshot immediate; thereafter publish at 1 Hz.
+      // GL frames, physiology, first-frame/fence and quality governor
+      // continue at their original unthrottled cadence.
+      if(now-lastRuntimeTelemetryAt>=1000 || lastRuntimeTelemetryAt===-Infinity){
         lastRuntimeTelemetryAt=now;
         if(!publishedRuntimeStaticR2227){
           publishedRuntimeStaticR2227=true;
@@ -2359,7 +2365,7 @@
           root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
         }
         // R2228: only a changed telemetry value should invalidate a root
-        // data attribute. On mobile, unchanged 250ms status rewrites force
+        // data attribute. Avoid even changed 250ms values on the root;
         // expensive style matching across dozens of live CSS sheets.
         // Keep all original public field names and values, and do not touch
         // the GL scene or its cadence.
@@ -2454,7 +2460,9 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity){
+        // Same 1 Hz budget for nonessential refresh-rate telemetry.
+        // The 60 FPS hardware refresh divisor is still recomputed every RAF.
+        if(now-lastRefreshTelemetryAt>=1000 || lastRefreshTelemetryAt===-Infinity){
           lastRefreshTelemetryAt=now;
           const hzText=estimatedHz.toFixed(1);
           if(root.dataset.fxCoreRefreshHzR1622!==hzText)
