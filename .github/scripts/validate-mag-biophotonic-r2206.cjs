@@ -88,7 +88,7 @@ const hashVariable=hashDeclaration.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1]
 assert(worker.split('${'+hashVariable+'}').length-1===2,
   'Both Worker CSPs must authorize the active parser hash');
 const filmRevision = '20261028-r2217-studio-spectral-titanium';
-const magRevision = '20261030-r2255-hidden-fence-cadence';
+const magRevision = '20261031-r2261-invisible-film-gpu-cadence';
 assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
 assert(intro.includes('const proofTurn=callback=>'),
   'R2236 cinematic test must bound animation-frame and timer scheduling');
