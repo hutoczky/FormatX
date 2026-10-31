@@ -104,7 +104,7 @@ assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flus
   'Native exposure must be acknowledged after real hit testing');
 // R2262: keep the previously proven R2261 WebGL source while deferring
 // the supplementary Mini MAG DOM/CSS until the original film completes.
-const miniLoaderRevision='20261031-r2262-mini-after-cinema-isolation';
+const miniLoaderRevision='20261031-r2263-primary-first-mini-scheduling';
 for (const [name, source] of Object.entries({ current, runtime }))
   assert(source.includes(magRevision), name + ' must preserve the original native GL');
 assert(scheduler.includes(miniLoaderRevision),'Scheduler must load fresh R2262 controller owner');
