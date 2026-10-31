@@ -7,6 +7,8 @@ const assert=require('node:assert/strict');
 const src=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 const cold=fs.readFileSync('.github/scripts/validate-mag-cold-handoff-r2226.cjs','utf8');
 const capture=fs.readFileSync('.github/scripts/capture-mag-intro-r656.cjs','utf8');
+const ordinary=fs.readFileSync(
+  '.github/scripts/validate-mag-visitor-fence-r2264.cjs','utf8');
 assert.doesNotThrow(()=>new Function(src),'Canonical WebGL source must parse');
 const start=src.indexOf('        const proofParamsR2264=new URLSearchParams(location.search);');
 const end=src.indexOf('\n        root.dataset.fxMagReadbackPolicyR2264=',start);
@@ -42,4 +44,16 @@ assert(cold.includes("url.searchParams.set('visualintro','1')"),
   'Three independent visual cold starts must still enable real pixel readback');
 assert(capture.includes("url.searchParams.set('visualintro','1')"),
   'Original film reference frames must still verify real WebGL pixels');
-console.log('MAG_R2264_PRODUCTION_FENCE_ONLY_PASS (10 query scenarios)');
+// R2267: a genuine ordinary-navigation visual gate may not force the
+// film's automation-specific ownership path or select any diagnostic URL.
+assert(ordinary.includes("url.search='';"),
+  'Ordinary first-visit proof must use an unmodified URL');
+assert(!ordinary.includes("url.searchParams.set('intro','1')"),
+  'Do not force the intro on the normal visitor test');
+assert(ordinary.includes("root.dataset.fxMagBirthOwnerR533==='active'"),
+  'Ordinary visitor must have the actual cinematic owner');
+assert(ordinary.includes("root.dataset.fxMagBirthRendererR1490==='realistic-cinematic-three-active'"),
+  'Normal visitor must render actual Three.js DNA/cell film');
+assert(ordinary.includes("state.readbacks!==0||state.gpuPixel!=='not-sampled'"),
+  'Normal visitor must not perform diagnostic GPU readback');
+console.log('MAG_R2264_R2267_REAL_VISITOR_FENCE_PASS (10 policy scenarios)');
