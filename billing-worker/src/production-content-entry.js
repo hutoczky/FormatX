@@ -58,7 +58,7 @@ const INLINE_R2220_BOOT_HASH = "'sha256-xAc8GVtMnezasUDIrTWjGSS87fer8WpvFiEajFPN
 const INLINE_R2236_BOOT_HASH = "'sha256-bYKdkY44Ec1zfGbssl8z3Sx+yhpLLqHeyDiip6RAyqE='";
 const INLINE_R2254_BOOT_HASH = "'sha256-LUsZw5C9x8eOVqy1tnX0lxNhJQLe2s8XNNhag8ujGxg='";
 const INLINE_R2255_BOOT_HASH = "'sha256-ArsuHXb4Skryh0fBAWs2cXcVvjUKhMIxdDBR7WphYLU='";
-const INLINE_R2266_BOOT_HASH = "'sha256-bCxhaSm/u2iht/KRS0ulY4jehrdAYwxVCUmCpd2LhNA='";
+const INLINE_R2266_BOOT_HASH = "'sha256-VMy+jHAdHCdB23VRoHb/AkM+0KbbT2AyrXWvTgyn0YE='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
