@@ -144,6 +144,7 @@ jobs:
           node .github/scripts/validate-mag-resize-layout-cache-r2245.cjs
           node .github/scripts/validate-mag-cpu-upload-release-r2249.cjs
           node .github/scripts/validate-mag-telemetry-r2228.cjs
+          node .github/scripts/validate-mag-telemetry-cadence-r2265.cjs
           node .github/scripts/validate-mag-shape-cadence-r2252.cjs
           node .github/scripts/validate-mag-hidden-fence-cadence-r2255.cjs
           node .github/scripts/validate-mag-film-hidden-cadence-r2261.cjs
