@@ -102,14 +102,18 @@ assert(intro.includes('reconcileExposedCompositorR2219()'),
   'Film must flush exposed compositor on both teardown routes');
 assert(intro.includes("ROOT.dataset.fxMagCompositorR2219='exposure-hit-test-flushed'"),
   'Native exposure must be acknowledged after real hit testing');
-for (const [name, source] of Object.entries({ current, runtime, scheduler }))
-  assert(source.includes(magRevision), name + ' must load the optimized native MAG');
+// R2262: keep the previously proven R2261 WebGL source while deferring
+// the supplementary Mini MAG DOM/CSS until the original film completes.
+const miniLoaderRevision='20261031-r2262-mini-after-cinema-isolation';
+for (const [name, source] of Object.entries({ current, runtime }))
+  assert(source.includes(magRevision), name + ' must preserve the original native GL');
+assert(scheduler.includes(miniLoaderRevision),'Scheduler must load fresh R2262 controller owner');
 assert(runtimeSrc.startsWith('formatx-mag-birth-live-r533.js?v='),
   'R533 entrypoint must have an explicit cache revision');
-assert(html.includes(runtimeSrc)&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+magRevision),
-  'HTML must reference active R533 bridge and original native MAG cache key');
-assert(worker.includes(filmRevision)&&worker.includes(magRevision),
-  'Worker must preserve film and native MAG rewrite keys');
+assert(html.includes(runtimeSrc)&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+miniLoaderRevision),
+  'HTML must use new Mini MAG loader while preserving original cinematic bridge');
+assert(worker.includes(filmRevision)&&worker.includes(miniLoaderRevision),
+  'Worker must preserve canonical film and deferred controller rewrites');
 // R2256: materialize the real hero in layout before FCP. The film may
 // cover the page visually, but an initial 1px clipped panel followed by a
 // full-height copy creates a deterministic 0.33+ mobile CLS.
