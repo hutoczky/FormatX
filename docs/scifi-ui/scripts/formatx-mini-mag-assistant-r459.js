@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-if(['ready','booting','cinematic-deferred'].includes(root.dataset.fxMiniMagAssistantR459))return;
+if(['ready','booting','cinematic-deferred','primary-deferred'].includes(root.dataset.fxMiniMagAssistantR459))return;
 root.dataset.fxMiniMagAssistantR459='booting';
 const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
@@ -135,14 +135,30 @@ function install(){
 function mountAfterCinemaR2262(){
   const cinematicActive=root.dataset.fxMagBirthLiveR533==='active'
     ||!!document.getElementById('fx-mag-birth-prepaint-r1606');
-  if(!cinematicActive){addStyle();install();return;}
-  root.dataset.fxMiniMagAssistantR459='cinematic-deferred';
+  const hasPrimaryHero=!!document.getElementById('hero');
+  if(!cinematicActive&&(!hasPrimaryHero||document.body?.dataset.fxPublicPage)){
+    addStyle();install();return;
+  }
+  // R2263: the no-intro (including audit/skip) startup is also a real
+  // primary-MAG-first experience. Building the secondary Mini MAG at 3.7s
+  // while the native R326 is compiling caused 128–137 ms competing tasks.
+  // Listen to the ORIGINAL current-MAG readiness event on WINDOW, unlike
+  // the non-bubbling film completion event which is dispatched on DOCUMENT.
+  const primaryReady=!cinematicActive&&(
+    root.dataset.fxCurrentMagRuntimeR422==='ready'
+    ||root.dataset.fxCoreFirstFrameR1913==='painted'
+  );
+  const eventTarget=cinematicActive?document:window;
+  const eventName=cinematicActive?'formatx:magbirthcomplete'
+    :'formatx:currentmagready';
+  root.dataset.fxMiniMagAssistantR459=cinematicActive?
+    'cinematic-deferred':'primary-deferred';
   let pending=true,watchdog=0;
-  const onFilmComplete=()=>settle(false);
+  const onSafe=()=>settle(false);
   function settle(urgent){
     if(!pending)return;
     pending=false;
-    document.removeEventListener('formatx:magbirthcomplete',onFilmComplete);
+    eventTarget.removeEventListener(eventName,onSafe);
     if(watchdog)clearTimeout(watchdog);
     installDeferredNow=null;
     const attach=()=>{
@@ -155,11 +171,11 @@ function mountAfterCinemaR2262(){
     else setTimeout(attach,150);
   }
   installDeferredNow=()=>settle(true);
-  document.addEventListener('formatx:magbirthcomplete',
-    onFilmComplete,{once:true,passive:true});
-  // The R533 absolute teardown normally emits completion. This one-shot
-  // fail-safe also handles an unexpected external film removal.
-  watchdog=setTimeout(()=>settle(false),11500);
+  if(primaryReady){settle(false);return;}
+  eventTarget.addEventListener(eventName,onSafe,{once:true,passive:true});
+  // One-shot safety net: never leave controls absent if a third-party
+  // script suppresses the expected lifecycle event.
+  watchdog=setTimeout(()=>settle(false),cinematicActive?11500:6000);
 }
 if(document.readyState==='loading')
   document.addEventListener('DOMContentLoaded',mountAfterCinemaR2262,{once:true});
