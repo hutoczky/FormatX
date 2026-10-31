@@ -11,10 +11,10 @@ const motion=fs.readFileSync('docs/scifi-ui/scripts/formatx-motion-runtime-loade
 const scheduler=fs.readFileSync('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','utf8');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
-const secondary='20261031-r2262-mini-after-cinema-isolation';
+const secondary='20261031-r2263-primary-first-mini-scheduling';
 const native='20261031-r2261-invisible-film-gpu-cadence';
 for(const [name,value,expected] of [
- ['mini assistant',current,'formatx-mini-mag-assistant-r459.js?v=20261031-r2262-after-cinema-idle'],
+ ['mini assistant',current,'formatx-mini-mag-assistant-r459.js?v=20261031-r2263-primary-mag-first-idle'],
  ['R422 loader',motion,'formatx-current-mag-loader-r422.js?v='+secondary],
  ['R239 loader',scheduler,'formatx-motion-runtime-loader-r239.js?v='+secondary],
  ['R490 html',html,'formatx-p0-motion-scheduler-r490.js?v='+secondary],
