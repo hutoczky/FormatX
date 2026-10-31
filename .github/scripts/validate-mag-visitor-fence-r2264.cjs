@@ -43,10 +43,22 @@ fs.mkdirSync(OUT,{recursive:true});
         });
       }
     });
+    // R2267: test the ACTUAL first-time visitor, not ?intro=1.
+    // A forced intro changes the automation/film ownership contract and
+    // could hide a normal-navigation regression. Keep the URL free from
+    // all proof/debug flags; the clean context already has no seen latch.
     const url=new URL(BASE);
-    url.searchParams.set('intro','1');
-    url.searchParams.set('r2264normal','1');
+    url.search='';
     await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
+    // Confirm that the physical 3D film *really ran* before its teardown.
+    // Only state predicates are read: no locator, scroll or screenshot-side
+    // hit testing that could accidentally repair the compositor.
+    await page.waitForFunction(()=>{
+      const root=document.documentElement;
+      return root.dataset.fxMagBirthOwnerR533==='active'&&
+        root.dataset.fxMagBirthRendererR1490==='realistic-cinematic-three-active'&&
+        document.querySelector('.fx-mag-birth-r533')!==null;
+    },null,{timeout:60000,polling:100});
     await page.waitForFunction(()=>{
       const root=document.documentElement;
       return !document.querySelector('.fx-mag-birth-r533')&&
@@ -65,6 +77,8 @@ fs.mkdirSync(OUT,{recursive:true});
       const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
       const box=el?.getBoundingClientRect();
       return {
+        introOwner:root.dataset.fxMagBirthOwnerR533||'',
+        filmRenderer:root.dataset.fxMagBirthRendererR1490||'',
         policy:root.dataset.fxMagReadbackPolicyR2264||'',
         gpu:root.dataset.fxMagHandoffGpuR2226||'',
         gpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
@@ -101,6 +115,9 @@ fs.mkdirSync(OUT,{recursive:true});
       return {bright,samples};
     },{encoded:png.toString('base64'),rect:state.rect});
     report.state=state;report.pixels=pixels;
+    if(state.introOwner!=='active'||
+       state.filmRenderer!=='realistic-cinematic-three-active')
+      report.errors.push('normal navigation did not play the original physical Genesis');
     if(state.policy!=='production-gpu-fence-only')
       report.errors.push('normal visitor did not take production fence-only path');
     if(state.readbacks!==0||state.gpuPixel!=='not-sampled')
