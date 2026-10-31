@@ -8,16 +8,8 @@ const f=p.get('intro')==='1'||p.get('visualintro')==='1';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 r.dataset.fxIntroMotionR2105=reduced?'reduced':'full';
 let s=false;try{s=sessionStorage.getItem('formatx:mag-birth-live-r533-seen')==='1'}catch(_){}
-const l=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||p.get('lighthouse')==='1',a=navigator.webdriver===true||l;
-if(l){
-  r.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
-  const o=new MutationObserver(()=>{
-    const e=document.querySelector('link[data-fx-critical-core-r227]');
-    if(e){e.media='print';e.dataset.fxLighthouseCriticalCoreR1749='deferred';o.disconnect();}
-  });
-  o.observe(document.head,{childList:true});
-  r.dataset.fxLighthouseCriticalCoreR1749='armed';
-}
+// R2266: no agent-specific static film/critical CSS; explicit user skip only.
+const a=navigator.webdriver===true&&f;
 const v=f||(!a&&p.get('intro')!=='0'),o=v?(f?'forced-intro':'fresh-navigation-genesis'):(a?'automation-skip':'explicit-skip');
 r.dataset.fxIntroPrepaintR1611=v?'show':'skip';
 r.dataset.fxIntroPrepaintOwnerR1611=o;
