@@ -84,9 +84,9 @@ for(const token of [
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261031-r2262-mini-after-cinema-isolation'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261031-r2263-primary-first-mini-scheduling'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261031-r2262-mini-after-cinema-isolation'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261031-r2263-primary-first-mini-scheduling'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261028-r2207-filtered-silver-living-optic'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
@@ -156,11 +156,11 @@ for(const loader of [desk,mobile,motion]){
   assert.ok(loader.includes('20261031-r2261-invisible-film-gpu-cadence'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261031-r2262-mini-after-cinema-isolation'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261031-r2263-primary-first-mini-scheduling'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261031-r2262-mini-after-cinema-isolation'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261031-r2263-primary-first-mini-scheduling'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261031-r2262-mini-after-cinema-isolation'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261031-r2263-primary-first-mini-scheduling'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
