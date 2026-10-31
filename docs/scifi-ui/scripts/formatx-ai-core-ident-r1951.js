@@ -6,8 +6,8 @@
   ROOT.dataset.fxAiCoreIdentityR1951 = 'armed';
 
   const PARAMS = new URLSearchParams(location.search);
-  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1' || /Chrome-Lighthouse/i.test(navigator.userAgent || '');
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  // R2266: the post-film identity is the same under performance audit.
+  const AUTOMATION = navigator.webdriver === true && PARAMS.get('visualintro') === '1';
   const MOBILE = matchMedia('(max-width:900px),(max-aspect-ratio:27/25)').matches;
   const REDUCED = matchMedia('(prefers-reduced-motion:reduce)').matches;
   let shown = false;
