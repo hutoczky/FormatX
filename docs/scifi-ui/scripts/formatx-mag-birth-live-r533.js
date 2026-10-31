@@ -24,9 +24,12 @@
   const PROOF_REFERENCE_RENDERER = VISUAL_PROOF && PARAMS.get('proofrenderer') === 'reference';
   const KEY = 'formatx:mag-birth-live-r533-seen';
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LIGHTHOUSE = PARAMS.get('lighthouse') === '1';
-  if (LIGHTHOUSE) ROOT.dataset.fxLighthouseAuditR1391 = 'true';
-  const AUTOMATION = navigator.webdriver === true || LIGHTHOUSE;
+  // R2266: the real film cannot be omitted solely because its browser
+  // runs a performance audit. Legacy automation fast-paths are restricted
+  // to explicit cinematic regression requests, never ordinary navigation.
+  const LIGHTHOUSE = false;
+  const AUTOMATION = navigator.webdriver === true &&
+    (FORCE || VISUAL_PROOF || PARAMS.get('r548') === 'mobile-skip');
   const VALIDATED_SKIP_MODE = AUTOMATION && PARAMS.get('r548') === 'mobile-skip';
   const MOBILE = matchMedia('(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25)').matches;
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
