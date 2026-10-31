@@ -3,6 +3,7 @@
 
   const ROOT = document.documentElement;
   const PARAMS = new URLSearchParams(location.search);
+  const ORGANISM_VALIDATION = PARAMS.get('organism-validation') === '1';
   // R2266: same semantic living world for all visitors and auditors.
 
   const PLAN_IDS = ['business_lite', 'business_pro', 'technician_team'];
