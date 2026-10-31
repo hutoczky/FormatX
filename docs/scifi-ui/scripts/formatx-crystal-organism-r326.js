@@ -2792,24 +2792,42 @@
         // fence with ZERO timeout in bounded event-loop turns. No new GL
         // context, canvas, render pass, frame stream or geometry mutation.
         const gpuStarted=performance.now();
+        // R2264: a completed WebGL2 fence already proves that the original
+        // MAG frame reached the GPU. The synchronous readPixels round-trip
+        // is diagnostics only, not needed to present the real canvas.
+        // Preserve genuine 8x8 framebuffer readback in the three independent
+        // P0 cold-start proofs and deterministic cinematic visual tests.
+        // Normal visitors AND Lighthouse take the same zero-readback path.
+        const proofParamsR2264=new URLSearchParams(location.search);
+        const proofReadbackR2264=
+          proofParamsR2264.get('visualintro')==='1'||
+          proofParamsR2264.has('r2226cold')||
+          proofParamsR2264.has('r720handoff')||
+          proofParamsR2264.get('nativeproof')==='1';
+        root.dataset.fxMagReadbackPolicyR2264=proofReadbackR2264
+          ? 'explicit-visual-proof-only':'production-gpu-fence-only';
         const proofPixel=()=>{
           if(disposed||contextLost||!stage.isConnected)return;
-          const centerPatch=new Uint8Array(8*8*4);
-          const px=Math.max(0,Math.floor((canvas.width-8)/2));
-          const py=Math.max(0,Math.floor((canvas.height-8)/2));
-          gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),
-            gl.RGBA,gl.UNSIGNED_BYTE,centerPatch);
-          let patchLumaPeak=0,patchAlphaPeak=0;
-          for(let i=0;i<centerPatch.length;i+=4){
-            patchLumaPeak=Math.max(patchLumaPeak,
-              centerPatch[i],centerPatch[i+1],centerPatch[i+2]);
-            patchAlphaPeak=Math.max(patchAlphaPeak,centerPatch[i+3]);
+          if(proofReadbackR2264){
+            const centerPatch=new Uint8Array(8*8*4);
+            const px=Math.max(0,Math.floor((canvas.width-8)/2));
+            const py=Math.max(0,Math.floor((canvas.height-8)/2));
+            gl.readPixels(px,py,Math.min(8,canvas.width),
+              Math.min(8,canvas.height),gl.RGBA,gl.UNSIGNED_BYTE,centerPatch);
+            let patchLumaPeak=0,patchAlphaPeak=0;
+            for(let i=0;i<centerPatch.length;i+=4){
+              patchLumaPeak=Math.max(patchLumaPeak,
+                centerPatch[i],centerPatch[i+1],centerPatch[i+2]);
+              patchAlphaPeak=Math.max(patchAlphaPeak,centerPatch[i+3]);
+            }
+            root.dataset.fxMagHandoffPixelR2226=
+              patchLumaPeak+','+patchAlphaPeak;
+          }else{
+            root.dataset.fxMagHandoffPixelR2226='not-sampled';
           }
           root.dataset.fxMagHandoffGpuR2226='finished';
           root.dataset.fxMagHandoffGpuMsR2226=
             (performance.now()-gpuStarted).toFixed(1);
-          root.dataset.fxMagHandoffPixelR2226=
-            patchLumaPeak+','+patchAlphaPeak;
           if(heldCinematicFramesR2255){
             heldCinematicFramesR2255=0;
             root.dataset.fxMagHandoffCadenceR2255='resumed-after-gpu-proof';
