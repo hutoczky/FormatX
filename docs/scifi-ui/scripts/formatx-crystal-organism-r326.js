@@ -12,7 +12,11 @@
   const auditParams = new URLSearchParams(location.search);
   const surfaceEnergyFunctionalCheck = auditParams.has('r486-optics-energy-check');
   const mobileVisualProof = auditParams.has('mobileproof');
-  const auditMode = !surfaceEnergyFunctionalCheck && !mobileVisualProof && (navigator.webdriver === true || /Chrome-Lighthouse/i.test(navigator.userAgent || '') || auditParams.get('lighthouse') === '1');
+  // R2266: original physical 3D topology and frame cadence are not
+  // negotiated by the browser user agent or Lighthouse status.
+  // Proof tools may continue to collect pixels, but measured visitors
+  // receive the same full renderer and actual responsive quality governor.
+  const auditMode = false;
   const hardwareConcurrency = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const deviceMemory = Math.max(1, Number(navigator.deviceMemory || 8));
   const constrained = hardwareConcurrency <= 4 || deviceMemory <= 4;
