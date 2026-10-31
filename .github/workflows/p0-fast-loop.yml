@@ -146,6 +146,7 @@ jobs:
           node .github/scripts/validate-mag-shape-cadence-r2252.cjs
           node .github/scripts/validate-mag-hidden-fence-cadence-r2255.cjs
           node .github/scripts/validate-mag-film-hidden-cadence-r2261.cjs
+          node .github/scripts/validate-mag-production-fence-r2264.cjs
           node .github/scripts/validate-mag-governor-dom-r2251.cjs
           node .github/scripts/validate-lighthouse-bottlenecks-r2229.cjs
           node .github/scripts/validate-mini-mag-hittest-r2231.cjs
