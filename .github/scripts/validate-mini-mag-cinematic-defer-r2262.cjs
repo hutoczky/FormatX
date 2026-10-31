@@ -5,14 +5,14 @@ const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const src=fs.readFileSync('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js','utf8');
 // Distinct cache keys: refresh the controller's bootstrap chain without
-// retransmitting R326 geometry or invalidating physical Genesis/CSP.
+// changing the original physical MAG geometry or Genesis/CSP.
 const current=fs.readFileSync('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js','utf8');
 const motion=fs.readFileSync('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js','utf8');
 const scheduler=fs.readFileSync('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','utf8');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
-const secondary='20261031-r2263-primary-first-mini-scheduling';
-const native='20261031-r2261-invisible-film-gpu-cadence';
+const secondary='20261031-r2264-fence-only-visitor';
+const native='20261031-r2264-fence-only-visitor';
 for(const [name,value,expected] of [
  ['mini assistant',current,'formatx-mini-mag-assistant-r459.js?v=20261031-r2263-primary-mag-first-idle'],
  ['R422 loader',motion,'formatx-current-mag-loader-r422.js?v='+secondary],
