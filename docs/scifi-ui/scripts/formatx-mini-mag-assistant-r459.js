@@ -3,11 +3,11 @@
 (function(){
 'use strict';
 const root=document.documentElement;
-if(root.dataset.fxMiniMagAssistantR459==='ready'||root.dataset.fxMiniMagAssistantR459==='booting')return;
+if(['ready','booting','cinematic-deferred'].includes(root.dataset.fxMiniMagAssistantR459))return;
 root.dataset.fxMiniMagAssistantR459='booting';
 const STYLE='/scifi-ui/styles/formatx-mini-mag-assistant-r459.css?v=20260920-r560-context-collision-safe';
 const SECTION_IDS=['hero','experience','capabilities','pricing','system','resources'];
-let pendingHeroRequest=false;
+let pendingHeroRequest=false,installDeferredNow=null;
 const COPY={
   hu:{launcher:'MAG vezérlő megnyitása',title:'MAG',subtitle:'Állandó oldalvezérlő · a fő MAG megmarad',close:'Bezárás',controls:'VEZÉRLÉS',navigation:'NAVIGÁCIÓ',ask:['ASSZISZTENS','Kérdezz'],menu:['OLDAL','Menü'],sound:['HANG','Hang ki / be'],language:['NYELV','HU / EN'],shape:['MAG','Élő reakció'],hero:['01','Kezdőlap'],experience:['02','Munkafolyamat'],capabilities:['03','Képességek'],pricing:['04','Csomagok'],system:['05','Rendszer'],resources:['06','Letöltések'],foot:'Alt+M: MAG · Esc: panel bezárása'},
   en:{launcher:'Open MAG controller',title:'MAG',subtitle:'Persistent site controller · primary MAG remains',close:'Close',controls:'CONTROLS',navigation:'NAVIGATION',ask:['ASSISTANT','Ask'],menu:['SITE','Menu'],sound:['SOUND','Sound on / off'],language:['LANGUAGE','HU / EN'],shape:['MAG','Living response'],hero:['01','Home'],experience:['02','Workflow'],capabilities:['03','Capabilities'],pricing:['04','Plans'],system:['05','System'],resources:['06','Downloads'],foot:'Alt+M: MAG · Esc: close panel'}
@@ -26,7 +26,7 @@ function toggleLanguage(){return clickButton('.fx-language-toggle');}
 function triggerLivingResponse(){if(typeof window.FormatXCoreShapeR337?.next==='function'){window.FormatXCoreShapeR337.next('mini-mag-living-response');return true;}return clickButton('.fx-reference-mag-button');}
 function buildAction(action){const button=node('button','fx-mini-mag-action-r459');button.type='button';button.dataset.action=action;button.append(node('span'),node('b'));return button;}
 function buildNav(id){const button=node('button');button.type='button';button.dataset.section=id;button.append(node('span'),node('b'));return button;}
-addEventListener('formatx:heromagcontrollerrequest',()=>{const api=window.FormatXMiniMagR459;if(typeof api?.toggle==='function'){api.toggle();root.dataset.fxMiniMagHeroBridgeR460='handled-live-request';}else{pendingHeroRequest=true;root.dataset.fxMiniMagHeroBridgeR460='queued-until-ready';}},{passive:true});
+addEventListener('formatx:heromagcontrollerrequest',()=>{const api=window.FormatXMiniMagR459;if(typeof api?.toggle==='function'){api.toggle();root.dataset.fxMiniMagHeroBridgeR460='handled-live-request';}else{pendingHeroRequest=true;root.dataset.fxMiniMagHeroBridgeR460='queued-until-ready';installDeferredNow?.();}},{passive:true});
 function install(){
   if(!document.body||document.body.dataset.fxPublicPage){root.dataset.fxMiniMagAssistantR459='public-page-skip';return;}
   if(document.querySelector('.fx-mini-mag-assistant-r459')){root.dataset.fxMiniMagAssistantR459='ready';return;}
@@ -125,5 +125,43 @@ function install(){
   if(pendingHeroRequest){pendingHeroRequest=false;setOpen(true,true);root.dataset.fxMiniMagHeroBridgeR460='opened-queued-request';}
   dispatchEvent(new CustomEvent('formatx:minimagready',{detail:{version:'r528',persistent:true,heroBridge:'r460'}}));
 }
-addStyle();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+/* R2262 — do not build the duplicate control DOM and synchronously load its
+   stylesheet while the full-screen cinematic birth already owns the display.
+   Desktop Lighthouse isolated a 114–118 ms Mini MAG source task overlapping
+   native R326 GPU startup around 3.7–3.9 s. Keep the command bridge ready,
+   defer only this secondary controller until the first post-film idle slot.
+   Direct user requests always mount immediately; intro=0/public fallbacks
+   retain the original prompt startup. No recurring timer or observer. */
+function mountAfterCinemaR2262(){
+  const cinematicActive=root.dataset.fxMagBirthLiveR533==='active'
+    ||!!document.getElementById('fx-mag-birth-prepaint-r1606');
+  if(!cinematicActive){addStyle();install();return;}
+  root.dataset.fxMiniMagAssistantR459='cinematic-deferred';
+  let pending=true,watchdog=0;
+  const onFilmComplete=()=>settle(false);
+  function settle(urgent){
+    if(!pending)return;
+    pending=false;
+    document.removeEventListener('formatx:magbirthcomplete',onFilmComplete);
+    if(watchdog)clearTimeout(watchdog);
+    installDeferredNow=null;
+    const attach=()=>{
+      if(root.dataset.fxMiniMagAssistantR459==='ready')return;
+      addStyle();install();
+    };
+    if(urgent)attach();
+    else if('requestIdleCallback' in window)
+      requestIdleCallback(attach,{timeout:800});
+    else setTimeout(attach,150);
+  }
+  installDeferredNow=()=>settle(true);
+  document.addEventListener('formatx:magbirthcomplete',
+    onFilmComplete,{once:true,passive:true});
+  // The R533 absolute teardown normally emits completion. This one-shot
+  // fail-safe also handles an unexpected external film removal.
+  watchdog=setTimeout(()=>settle(false),11500);
+}
+if(document.readyState==='loading')
+  document.addEventListener('DOMContentLoaded',mountAfterCinemaR2262,{once:true});
+else mountAfterCinemaR2262();
 }());
