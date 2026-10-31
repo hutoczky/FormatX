@@ -75,6 +75,11 @@ jobs:
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js
+          node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
+          node --check docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js
+          node --check docs/scifi-ui/scripts/formatx-deferred-css-r487.js
+          node --check docs/scifi-ui/scripts/formatx-living-architecture-loader-r1985.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r651.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r657.js
@@ -145,6 +150,7 @@ jobs:
           node .github/scripts/validate-mag-cpu-upload-release-r2249.cjs
           node .github/scripts/validate-mag-telemetry-r2228.cjs
           node .github/scripts/validate-mag-telemetry-cadence-r2265.cjs
+          node .github/scripts/validate-real-visitor-parity-r2266.cjs
           node .github/scripts/validate-mag-shape-cadence-r2252.cjs
           node .github/scripts/validate-mag-hidden-fence-cadence-r2255.cjs
           node .github/scripts/validate-mag-film-hidden-cadence-r2261.cjs
