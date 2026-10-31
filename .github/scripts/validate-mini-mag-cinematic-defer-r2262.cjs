@@ -4,6 +4,25 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const src=fs.readFileSync('docs/scifi-ui/scripts/formatx-mini-mag-assistant-r459.js','utf8');
+// Distinct cache keys: refresh the controller's bootstrap chain without
+// retransmitting R326 geometry or invalidating physical Genesis/CSP.
+const current=fs.readFileSync('docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js','utf8');
+const motion=fs.readFileSync('docs/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js','utf8');
+const scheduler=fs.readFileSync('docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js','utf8');
+const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+const secondary='20261031-r2262-mini-after-cinema-isolation';
+const native='20261031-r2261-invisible-film-gpu-cadence';
+for(const [name,value,expected] of [
+ ['mini assistant',current,'formatx-mini-mag-assistant-r459.js?v=20261031-r2262-after-cinema-idle'],
+ ['R422 loader',motion,'formatx-current-mag-loader-r422.js?v='+secondary],
+ ['R239 loader',scheduler,'formatx-motion-runtime-loader-r239.js?v='+secondary],
+ ['R490 html',html,'formatx-p0-motion-scheduler-r490.js?v='+secondary],
+ ['Worker scheduler',worker,'formatx-p0-motion-scheduler-r490.js?v='+secondary],
+ ['Worker rewrite',worker,'formatx-motion-runtime-loader-r239.js?v='+secondary],
+ ['native R326',current,'formatx-crystal-organism-r326.js?v='+native],
+ ['native R239',motion,'formatx-crystal-organism-r326.js?v='+native]
+])assert(value.includes(expected),name+' must use correct split cache version');
 const a=src.indexOf('function mountAfterCinemaR2262(){');
 const b=src.indexOf("\nif(document.readyState==='loading')",a);
 assert(a>=0&&b>a,'R2262 cinematic deferral owner missing');
