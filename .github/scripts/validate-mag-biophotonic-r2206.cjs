@@ -40,7 +40,7 @@ const tokens = [
   [mag, 'gl.flush();'],
   [mag, 'function finishBoot(program)'],
   [mag, 'buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]))'],
-  [mag, 'if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity)'],
+  [mag, 'if(now-lastRefreshTelemetryAt>=1000 || lastRefreshTelemetryAt===-Infinity)'],
   [mag, 'let lastRefreshTelemetryAt=-Infinity;'],
   [mag, 'float tissueFold=sin('],
   [mag, 'float coralOrganelles=smoothstep(.61,.84,'],
@@ -139,13 +139,13 @@ assert(html.includes('data-fx-dna-first-frame-r2181'),
 assert(intro.includes('const THREE_OWNER_SRC ='),
   'Original cinematic runtime ownership must remain');
 // R2227: render-time DOM mutation must not re-publish immutable
-// html[data-*] telemetry every 250ms and force style invalidation.
+// html[data-*] telemetry every 1s to bound style invalidation.
 assert(mag.includes('let publishedRuntimeStaticR2227=false;'),
   'R2227 immutable telemetry must be one-shot');
 assert(mag.includes('if(!publishedRuntimeStaticR2227){'),
   'Permanent diagnostic flags must be inside the one-shot guard');
-assert(mag.includes('if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity)'),
-  'Live GPU telemetry must retain its bounded 250ms cadence');
+assert(mag.includes('if(now-lastRuntimeTelemetryAt>=1000 || lastRuntimeTelemetryAt===-Infinity)'),
+  'Live GPU telemetry must retain its bounded 1000ms cadence');
 const once=mag.slice(mag.indexOf('if(!publishedRuntimeStaticR2227){'),
   mag.indexOf('root.dataset.fxCoreRenderMs='));
 for(const marker of [
