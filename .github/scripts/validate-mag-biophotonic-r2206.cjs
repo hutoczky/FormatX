@@ -31,7 +31,7 @@ const tokens = [
   [mag, 'gl.clientWaitSync(fence,0,0)'],
   [mag, "root.dataset.fxMagHandoffSyncR2253='webgl2-nonblocking-fence'"],
   [mag, "root.dataset.fxMagHandoffGpuR2226='async-gpu-pending'"],
-  [mag, 'gl.readPixels(px,py,Math.min(8,canvas.width),Math.min(8,canvas.height),'],
+  [mag, 'gl.readPixels(px,py,Math.min(8,canvas.width),'],
   [mag, "root.dataset.fxMagHandoffGpuR2226='finished'"],
   [mag, "stage.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'})"],
   [mag, "root.dataset.fxMagNativeCompositorR2222='already-onscreen-scroll-reconciled'"],
