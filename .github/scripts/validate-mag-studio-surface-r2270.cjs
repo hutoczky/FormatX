@@ -54,8 +54,8 @@ for(const token of [
   '#hero .hero-space > .fx-core-mobile-v55-stage',
   'canvas.fx-core-mobile-v55-canvas'
 ]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
-assert.equal((html.match(/20261101-r2294-stable-mobile-stage-compositor/g)||[]).length,2,
-  'R2276 HTML firstpaint CSS preload and stylesheet must use the same cache key');
+assert.equal((html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2294-stable-mobile-stage-compositor/g)||[]).length,2,
+  'R2294 HTML firstpaint CSS preload and stylesheet must use exactly the same cache key');
 assert(worker.includes('20261101-r2294-stable-mobile-stage-compositor'),
   'R2276 Cloudflare Worker must serve the same critical CSS revision');
 assert(mobileFirstPaint.includes('left:50%!important;') &&
