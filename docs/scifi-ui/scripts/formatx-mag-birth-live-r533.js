@@ -1219,6 +1219,7 @@
   let lastCoreCostSampleAt=0;
   let cachedCoreRenderCost=0;
   let finalParticleFrameDrawn=false;
+  let nativeFencePrefetchedR2278=false;
 
   function render(now) {
     raf=0;
@@ -1254,6 +1255,24 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
+    // R2278: while the real GENESIS final shot still occludes the page,
+    // submit ONE early native WebGL2 frame to the existing R2254 owner.
+    // This pipelines the GPU fence, avoiding the verified cold-start race
+    // where a finished visual film exposes a still-pending original MAG.
+    // Same 10s film, same R326 context, geometry and draw call; no new RAF.
+    if(!nativeFencePrefetchedR2278 && r>=.90 &&
+       !REDUCED && !document.hidden &&
+       ROOT.dataset.fxGpuCapability==='webgl2' &&
+       ROOT.dataset.fxCrystalOrganismR326==='ready'){
+      nativeFencePrefetchedR2278=true;
+      ROOT.dataset.fxMagEarlyNativePrepareR2278='submitted-behind-genesis';
+      ROOT.dataset.fxMagHandoffPrepareR2254='requested';
+      try{
+        document.dispatchEvent(new CustomEvent('formatx:magbirthprepare',{
+          detail:{source:'last-second-film',revision:'r2278-early-native-fence'}
+        }));
+      }catch(_){}
+    }
     // Read the core's render-cost hint at the same cadence as native synchronization.
     // Avoid an attribute lookup and numeric parse on every cinematic frame.
     if(!lastCoreCostSampleAt || now-lastCoreCostSampleAt>=200){

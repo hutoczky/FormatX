@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2278 – stúdió Genesis végén korai valódi GPU-képkocka
+- Az R2275 c74ab580 P0 normál Chromiumban a 3 MAG hidegindításból kettőnél FAIL: 4.2s után, még a WebGL2 fence elkészülte előtt a film levette a takarást. Ez valódi időzítési hiba, nem érvényes stúdió elfogadás.
+- Az R2278 a 10s filmes történet 90%-ától, csak kész WebGL2 MAG esetén, egyszer meghívja a meglévő formátumú native `formatx:magbirthprepare` eseményt. A valódi fence így még a film utolsó másodperce alatt elindulhat. A finish() eredeti eseménye továbbra is helyreállítási útvonal. A 4.2s fail-open korlát, tiltott diagnosztikai readback és egyetlen canvas változatlan.
+- A HTML parser, az R1629 tartalék script, a Cloudflare Worker mindkét CSP-je és a pontos új SHA256-engedélyezés ugyanahhoz a verziózott R533 ownerhez igazodik.
+- Az R2277 képi centrálás-ellenőrzés és az R2276 visszaállított mobil középpontja a fejlesztői ágon marad. Az R2278 friss teljes P0, 390/412px vizuális képkocka és Lighthouse ×3 eredményei szükségesek, nincs végső stúdióminőségi jóváhagyás.
+
 ## R2276 – kritikus mobil MAG középre igazítás
 - A R2275 valós mobil Chromium állóképein a MAG nagy része a bal oldalon kívülre került. A korábbi R2274 CSS tévesen a natív WebGL stage eredeti `left:50%` / `translateX(-50%)` kompenzációját `left:0`-ra cserélte. A mobil screenshot ugyan nem tudott helyes vizuális oracle-ként elbukni, de a kép valóban hibás volt.
 - R2276 ugyanabban a renderblocking első-festés CSS-ben visszaállítja az eredeti R303 vizuális képernyőközép szerződést: 100vw szélességű stage, 50%-os eredet, valós -50% kompenzáció, megtartott 0.935 vertikális vágás. A stabil 70px fejléc és három fix vezérlő megmarad.

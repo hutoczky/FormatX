@@ -70,4 +70,12 @@ assert(source.includes('float originalMineralMask=1.0-step(1.0,vFacet);') &&
   source.includes('vec3 cortexMaterial=vec3(.009,.020,.027)'),
   'R2275 living cortex must be dark physical bioglass, not silver-washed flat geometry');
 assert(source.includes('fxNativeMagStudioR2275='),'R2275 studio profile missing');
-console.log('MAG_R2270_R2271_R2274_R2275_STUDIO_SOURCE_PASS');
+assert(birth.includes('let nativeFencePrefetchedR2278=false;') &&
+  birth.includes("ROOT.dataset.fxMagEarlyNativePrepareR2278='submitted-behind-genesis'") &&
+  birth.includes("revision:'r2278-early-native-fence'") &&
+  birth.includes("ROOT.dataset.fxCrystalOrganismR326==='ready'"),
+  'R2278 must preflight only the original ready WebGL2 native MAG behind its real film');
+assert(birth.includes("ROOT.dataset.fxMagHandoffGateR2254='gpu-finished-before-exposure'") &&
+  birth.includes("ROOT.dataset.fxMagHandoffGateR2254='gpu-timeout-released'"),
+  'Do not weaken the original real GPU complete safety gate or accessibility bound');
+console.log('MAG_R2278_EARLY_NATIVE_GPU_FENCE_SOURCE_PASS');
