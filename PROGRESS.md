@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2268 – filmes CI szerződés és új exact-head mérési kapuk
+- A #581 korábbi `26d89d1` commitján a nyelvi és a public integrity CI PASS, de az R536 filmes teszt egy 2026.10.13-as R487 cache-verzióhoz kötött, elavult ellenőrzés miatt FAIL volt.
+- A 2026.11.01-i R2268 test-korrekció a tényleges HTML R487 betöltő URL-jét ellenőrzi a Cloudflare Worker valós cache-URL-jével együtt. A `12295f1` SHA-n: **R536 PASS, i18n PASS, public integrity PASS**.
+- A P0 és a Lighthouse workflow korábban kizárólag az R2266 szülőágra volt beállítva a push-eseményeknél; ez az R2267-es ág teljesítménymérését nem indította. Ezen a fejlesztői ágon mindkét workflow push eseménye most az R2267-es ágat is figyeli. Küszöb, ellenőrzés, timeout nem lett csökkentve.
+- Új P0 és desktop ×3/mobil ×3 teljes Lighthouse eredmény még nem áll rendelkezésre; a korábbi R2266 méréseket nem szabad az új MAG/GENESIS képi bizonyításának tekinteni.
+
 Utolsó fejlesztési szakasz: **R2267 – valódi 3D Genesis a normál headless látogatóknál**
 
 ## Elkészült (forráskód)

@@ -23,7 +23,7 @@ on:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
     # Never deploy: these are local-source / local-Lighthouse checks only.
-    branches: [master, fix/r2208-genesis-controls-nonblocking-css]
+    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity]
     paths:
       - 'docs/production-revision.txt'
       - 'docs/scifi-ui/**'
