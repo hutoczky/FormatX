@@ -303,22 +303,24 @@ async function assertHeroDisclosure(page) {
   }
 
   await page.evaluate(() => scrollTo({ top: 0, left: 0, behavior: 'instant' }));
-  // R2040: the former R536 'core' is no longer the terminal reverse-scroll
-  // state when the user-selected MAG-only cinematic archive owns the page.
-  // Still REQUIRE an actual reversible chapter with exactly one working
-  // original HTML folio; never silently accept a stuck or empty scene.
+  // R2287: R2286 deliberately restored the REAL original MAG and hero
+  // product copy at scrollY=0. The retired test incorrectly required an
+  // archive folio to remain open at the top after a reversible scroll.
+  // Assert both the on-scroll cinematic transition and its true reversal.
   await page.waitForFunction(() => {
     const root=document.documentElement;
-    if(root.dataset.fxArchiveExperience!=='ready')
-      return root.dataset.fxCinematicSceneR536==='core';
-    const first=window.FormatXArchiveExperience?.scenes?.[0]?.key;
-    const visible=[...document.querySelectorAll('main#main-content > [data-fx-cinema-host-active="true"]')];
-    const paper=visible[0]?.querySelector(':scope > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]');
-    return root.dataset.fxArchiveCinema==='active'
-      && !!first&&root.dataset.fxArchiveCurrent===first
-      && visible.length===1&&!!paper
-      && getComputedStyle(paper).visibility==='visible'
-      && (paper.textContent||'').trim().length>70;
+    if(scrollY>2||root.dataset.fxCinematicSceneR536!=='core')
+      return false;
+    if(root.dataset.fxArchiveExperience!=='ready')return true;
+    const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage');
+    const hero=document.getElementById('hero');
+    const box=hero?.getBoundingClientRect();
+    return root.dataset.fxArchiveCinema==='home'
+      && root.dataset.fxArchiveCurrent==='none'
+      && !stage?.classList.contains('fx-archive-native-docked')
+      && !!box&&box.width>200&&box.height>200
+      && getComputedStyle(hero).visibility==='visible'
+      && document.querySelectorAll('main#main-content > [data-fx-cinema-host-active="true"]').length===0;
   }, null, { timeout: 9000 });
   await page.waitForTimeout(250);
 }
@@ -345,6 +347,13 @@ async function capture(browser, name, viewport, options = {}) {
   try {
     await page.goto(urlWith({
       visual: `${name}-${Date.now()}`,
+      // R2287: this suite measures the visible PRODUCT SHELL, not the
+      // ten-second DNA film. The real normal-visitor film+handoff is covered
+      // independently by R2264; R656 verifies physical cinematic keyframes.
+      // The historic headless-UA auto-skip was removed in R2267, so omitting
+      // intro=0 now inspected a deliberately hidden site behind the real
+      // Genesis overlay and incorrectly treated it as an absent product UI.
+      intro: 0,
       ...(options.lang ? { lang: options.lang } : {}),
       ...(options.disclosure ? { cinema: 1 } : {})
     }), {
