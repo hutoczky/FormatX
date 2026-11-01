@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2269 – valódi képellenőrzés és energiaosztályhoz kötött film
+- A b958763 pontos commiton a teljes P0: 3/3 hidegindításos natív MAG-megjelenés, GPU fence, egy canvas PASS; a normál látogatói filmellenőrzés FAIL. Naplózott ok: a CI valóban korlátozott CPU/RAM osztályba került, és az R533 a megőrzött CONSTRAINED referenciarenderre váltott. Ez nem HeadlessChrome alapú megkülönböztetés.
+- A normál látogatói teszt most a böngésző valós hardwareConcurrency/deviceMemory értékét rögzíti. Erős hardveren teljes fizikai Three.js GENESIS szükséges; gyenge osztályban kizárólag a valódi hardver-alapú R649 adaptáció megengedett. Mindkét útvonalon ugyanaz a natív, egycanvasos MAG, nulla blocking readPixels és a valódi első teljes viewport pixelteszt kötelező.
+- A 2026-10-31-i R2266 képi ZIP 08/09 nevű mobil állóképei DNS-filmet mutattak a native MAG helyett, mert a régi automatikus Lighthouse/Playwright skip már nem él. Az új mobil **képkocka-bizonyító** explicit intro=0 paraméterrel valódi natív WebGL MAG-ot rögzít, és hibázik, ha filmes overlay marad. A külön normál látogatói filmteszt változatlanul URL-paraméter nélkül fut.
+- A b958763 valódi desktop Lighthouse Performance: **93/88/90**, mobil **79/80/78**. Mobil CLS 0.107664, TBT 410.85/378.33/430.48 ms. Mindkét teljes sebességi workflow FAIL. Még nincs stúdiókép- vagy stabil 60 FPS-elfogadás.
+
 ## R2268 – filmes CI szerződés és új exact-head mérési kapuk
 - A #581 korábbi `26d89d1` commitján a nyelvi és a public integrity CI PASS, de az R536 filmes teszt egy 2026.10.13-as R487 cache-verzióhoz kötött, elavult ellenőrzés miatt FAIL volt.
 - A 2026.11.01-i R2268 test-korrekció a tényleges HTML R487 betöltő URL-jét ellenőrzi a Cloudflare Worker valós cache-URL-jével együtt. A `12295f1` SHA-n: **R536 PASS, i18n PASS, public integrity PASS**.

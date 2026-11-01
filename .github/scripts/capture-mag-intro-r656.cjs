@@ -82,6 +82,7 @@ const SHOTS=[
     try{
       const u=new URL(BASE);
       u.searchParams.set('mobileproof','r1500-preflight');
+      u.searchParams.set('intro','0'); // R2269: genuine unobscured native MAG
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const ready=await pollPage(
         page,
@@ -103,6 +104,8 @@ const SHOTS=[
         throw new Error('R1500 mobile preflight MAG did not become ready: '+JSON.stringify({diagnostic,errors}));
       }
       await page.waitForTimeout(650);
+      if(await page.locator('.fx-mag-birth-r533').count())
+        throw new Error('R2269 mobile preflight screenshot is covered by GENESIS film');
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
         const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -171,6 +174,7 @@ const SHOTS=[
       page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());});
       const u=new URL(BASE);
       u.searchParams.set('mobileproof','r1500');
+      u.searchParams.set('intro','0'); // R2269: genuine unobscured native MAG
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const mobileReady=await pollPage(
         page,
@@ -181,6 +185,8 @@ const SHOTS=[
       );
       if(!mobileReady)throw new Error('R1500 early mobile native MAG did not become ready');
       await page.waitForTimeout(700);
+      if(await page.locator('.fx-mag-birth-r533').count())
+        throw new Error('R2269 mobile native screenshot is still covered by GENESIS film');
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
         const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -673,6 +679,7 @@ const SHOTS=[
         });
         const u=new URL(BASE);
         u.searchParams.set('mobileproof','r1500');
+      u.searchParams.set('intro','0'); // R2269: genuine unobscured native MAG
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
         const mobileReady=await pollPage(
           page,
@@ -683,6 +690,8 @@ const SHOTS=[
         );
         if(!mobileReady)throw new Error('R1500 mobile native MAG did not become ready');
         await page.waitForTimeout(700);
+      if(await page.locator('.fx-mag-birth-r533').count())
+        throw new Error('R2269 mobile native screenshot is still covered by GENESIS film');
         const state=await page.evaluate(()=>{
           const root=document.documentElement;
           const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
