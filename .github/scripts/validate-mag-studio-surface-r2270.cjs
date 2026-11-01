@@ -54,9 +54,9 @@ for(const token of [
   '#hero .hero-space > .fx-core-mobile-v55-stage',
   'canvas.fx-core-mobile-v55-canvas'
 ]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
-assert.equal((html.match(/20261101-r2281-no-double-mobile-translate/g)||[]).length,2,
+assert.equal((html.match(/20261101-r2285-first-byte-mobile-rail-and-native-dock/g)||[]).length,2,
   'R2276 HTML firstpaint CSS preload and stylesheet must use the same cache key');
-assert(worker.includes('20261101-r2281-no-double-mobile-translate'),
+assert(worker.includes('20261101-r2285-first-byte-mobile-rail-and-native-dock'),
   'R2276 Cloudflare Worker must serve the same critical CSS revision');
 assert(mobileFirstPaint.includes('left:50%!important;') &&
   mobileFirstPaint.includes('transform:translate(-50%,-1.4%) scaleY(.935)!important;'),
@@ -87,4 +87,13 @@ assert(mobileFirstPaint.includes('R2280 — genuine archive-state MAG') &&
 assert(mobileFirstPaint.includes('R2281: prevent a second -50% independent CSS translate') &&
   mobileFirstPaint.includes('transform:translate(-50%,-1.4%) scaleY(.935)!important;\n    translate:none!important;'),
   'R2281 native mobile MAG must not combine transform and independent translateX(-50%)');
-console.log('MAG_R2281_SINGLE_NATIVE_MOBILE_TRANSLATION_SOURCE_PASS');
+const inlineRail=html.match(/<style data-fx-mobile-rail-prepaint-r2285="true">([\s\S]*?)<\/style>/);
+assert(inlineRail,'R2285 mobile navigation layout lock must exist in first byte');
+const railHash="'sha256-"+require('node:crypto').createHash('sha256').update(inlineRail[1]).digest('base64')+"'";
+assert(html.includes(railHash),'R2285 parser mobile CSS must be authorized by HTML CSP');
+assert.equal(worker.split(railHash).length-1,2,'R2285 CSS must be in both Worker CSPs');
+assert(mobileFirstPaint.includes('R2285 — initial mobile layout / final native dock geometry')&&
+  mobileFirstPaint.includes('body.living-architecture > aside.fx-rail')&&
+  mobileFirstPaint.includes('div.fx-core-mobile-v55-stage.fx-archive-native-docked'),
+  'R2285 initial legacy rail and final dock source missing');
+console.log('MAG_R2285_MOBILE_RAIL_AND_DOCK_SOURCE_PASS');

@@ -87,6 +87,11 @@ assert(hashDeclaration,'Worker must declare exact active parser SHA-256');
 const hashVariable=hashDeclaration.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1];
 assert(worker.split('${'+hashVariable+'}').length-1===2,
   'Both Worker CSPs must authorize the active parser hash');
+const railPrepaint=html.match(/<style data-fx-mobile-rail-prepaint-r2285="true">([\s\S]*?)<\/style>/);
+assert(railPrepaint,'R2285 real mobile first-byte style missing');
+const railCsp="'sha256-"+crypto.createHash('sha256').update(railPrepaint[1]).digest('base64')+"'";
+assert(html.includes(railCsp)&&worker.split(railCsp).length-1===2,
+  'R2285 inline CSS must have exact HTML/Worker CSP parity');
 const filmRevision = '20261101-r2271-film-grade-genesis-optics';
 const magRevision = '20261031-r2266-full-visitor-mag';
 assert(intro.includes(filmRevision),'The real R1280 studio Genesis owner must use its current cache-busted revision');
@@ -131,9 +136,9 @@ for(const property of [
   'clip-path:none!important;',
   'white-space:normal!important;'
 ])assert(cssPar.includes(property),'Missing first-paint hero geometry: '+property);
-assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2281-no-double-mobile-translate/g)?.length===2,
+assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2285-first-byte-mobile-rail-and-native-dock/g)?.length===2,
   'Preload and render-blocking mobile stylesheet must share the current R2274 URL');
-assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261101-r2281-no-double-mobile-translate'),
+assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261101-r2285-first-byte-mobile-rail-and-native-dock'),
   'Worker critical mobile stylesheet must share the current R2276 cache identity');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');

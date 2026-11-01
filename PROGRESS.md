@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2285 – kritikus mobil CLS: rail első festés és atomikus natív MAG dokkolás
+- Az R2284 első valós CLS elmozdulása 390px-en 0.212973 volt: a main Y 94.796875→70px, pontosan 24.797px. A fejléc és main közötti `.fx-rail` aside a legvalószínűbb normál flow tulajdonos; az R358 kritikus CSS nem célozta, a késői stílusok viszont kivették a normál elrendezésből.
+- R2285 a `fx-rail` mobil oldalsávot CSP-hash-sel hitelesített, **parser-korai inline CSS** segítségével már az első paint előtt kivonja a flow-ból. A navigációt a valódi, használható mobil menü biztosítja. Ugyanezt védi az eredeti blokkoló R358 stílus, azonos HTML preload/stylesheet/Worker verzióval.
+- A külön ~11.38s-os 0.101834 CLS elmozdulásban a natív MAG stage x195,width195→x0,width390 lett az archive class megjelenése közben. R2285 a végleges 100vw × 43dvh mobil archív színpadot már az eredeti `.fx-archive-native-docked` class felhelyezésétől megköveteli, így nem függ a később változó root data attribútumtól.
+- A parser inline stílus új `style-src` SHA256 ujjlenyomata a HTML meta CSP-ben és a Worker mindkét CSP-jében hitelesített. A P0 biophotonic és studio szerződés is pontos hash-t számol: nem elég deklarálni; az aktív CSS bytes egyezése kötelező.
+- R2284 P0: 3/3 hidegindítás PASS, normál látogatói WebGL megjelenés PASS, mobil CLS FAIL 0.212973; Lighthouse desktop 91/91/91, mobil 78/77/78 és CLS 0.114963 – FAIL. R2285 képi és teljesítmény-elfogadás a pontos új SHA-n még nincs, ezért a PR #581 továbbra is draft és nem éles.
+
 ## R2284 – filmszinthez kötött GPU-zárolás és mért CLS okfeltárás
 - Az R2283 pontos SHA-n a P0 három független WebGL2 hidegindítása **3/3 PASS**; a normál látogatói átadás szintén PASS: valódi első viewport MAG (644 fényes pixel/5200 minta), egyetlen canvas, GPU fence `finished`, nulla normál CPU readPixels. Így a korábbi 1/3 fekete frame race az ellenőrzött futáson nem ismétlődött.
 - A P0 tényleges mobil CLS továbbra is FAIL: 390px-en 0.212973. A 2139ms-os fő layout shift az eredeti fejléc/main Y 94.796875→70px mozgását és a nyelvi gomb 44×44→120×69 növekedését rögzítette; 11174ms-nál a MAG stage 195px szélesről 390px-re ugrik. Ezek az eredeti normál navigáció során történnek, nem tesztcsalások.
