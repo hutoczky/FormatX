@@ -85,7 +85,8 @@ function observe({normal}){
         const atHome=await page.evaluate(()=>({
           scrollY,cinema:document.documentElement.dataset.fxArchiveCinema,
           dock:document.documentElement.dataset.fxArchiveDock,
-          stage:document.querySelector('.fx-crystal-organism-r326-stage')?.getBoundingClientRect().toJSON()
+          stage:document.querySelector('.fx-crystal-organism-r326-stage')?.getBoundingClientRect().toJSON(),
+          position:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).position
         }));
         assert(atHome.scrollY===0 && atHome.cinema!=='active',
           'R2290: normal visitor must land on the real undocked MAG before scrolling');
@@ -104,7 +105,7 @@ function observe({normal}){
         await page.waitForTimeout(550);
         const result=await page.evaluate(()=>{
           const root=document.documentElement,stage=document.querySelector('.fx-crystal-organism-r326-stage'),canvas=stage?.querySelector('.fx-crystal-organism-r326-canvas'),r=stage?.getBoundingClientRect();
-          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema,flip:root.dataset.fxArchiveFlipR2293||''};
+          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema,flip:root.dataset.fxArchiveFlipR2293||'',position:stage?getComputedStyle(stage).position:null};
         });
         const record={profile:config.name,...result,errors,failedRequests};report.cases.push(record);
         console.log('NATIVE_MAG_DOCK_ENTRY',JSON.stringify(record));
@@ -128,8 +129,21 @@ function observe({normal}){
           'Cinematic MAG disappeared during its actual transition');
         if(!config.mobile)assert(result.final.width<first.viewport.width*.5,
           'Final desktop archive did not dock the MAG into its split-screen lane');
-        else assert(result.final.width<=first.viewport.width+1,
-          'Final mobile MAG escaped the screen after the transition');
+        else {
+          assert(result.final.width<=first.viewport.width+1,
+            'Final mobile MAG escaped the screen after the transition');
+          // R2294: real mobile home and archive must share EXACT physical
+          // layout. A FLIP over an absolute->fixed box still contributes to
+          // Chrome LayoutShift even when its painted pixels appear smooth.
+          // Test the same stage before and after actual scroll + handoff.
+          assert.equal(atHome.position,'fixed',
+            'R2294 mobile MAG is not viewport-owned BEFORE the first scroll');
+          assert.equal(result.position,'fixed',
+            'R2294 mobile MAG lost fixed box ownership when the archive opened');
+          assert(Math.abs(atHome.stage.width-result.final.width)<1 &&
+                 Math.abs(atHome.stage.height-result.final.height)<1,
+            'R2294 mobile MAG changed its underlying layout dimensions at archive entry');
+        }
         assert(result.final.height<first.viewport.height*.8,
           'Final MAG improperly covers the entire physical archive viewport');
         assert.deepEqual(first.canvas,cinema.canvas,'The first dock must already use the final native canvas scale and optics');
