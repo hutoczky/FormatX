@@ -651,6 +651,21 @@
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
+      // R2294: on phones the native stage has a stable fixed layout box
+      // before AND after docking. Only the authored CSS translate3d changes.
+      // Do not run the R2293 FLIP path here: measuring a new position/size
+      // after class-toggle is exactly what Chrome counted as 0.101834 CLS.
+      if(mobile()&&!reduced.matches){
+        root.dataset.fxArchiveFlipR2293='mobile-fixed-layout-compositor-entry';
+        stageFlipTimerR2293=setTimeout(()=>{
+          stageFlipTimerR2293=0;
+          if(!archiveActive||!stage?.isConnected)return;
+          root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+          window.FormatXLivingCore?.requestRender?.(1);
+        },440);
+        window.FormatXLivingCore?.requestRender?.(1);
+        return;
+      }
       const target=stage.getBoundingClientRect();
       const valid=previous.width>8&&previous.height>8&&
         target.width>8&&target.height>8&&
