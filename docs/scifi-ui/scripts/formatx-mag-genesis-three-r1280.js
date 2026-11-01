@@ -1578,6 +1578,22 @@
       });
 
       const shell=new T.Mesh(new T.IcosahedronGeometry(1.38,4),this.organicShellMaterial);
+      // R2291: sculpt the EXISTING 3D cell membrane once, before its original
+      // GPU upload. No extra geometry, render pass, scene owner or RAF.
+      const shellPosition=shell.geometry.getAttribute('position');
+      for(let i=0;i<shellPosition.count;i++){
+        const x=shellPosition.getX(i),y=shellPosition.getY(i),z=shellPosition.getZ(i);
+        const ridge=Math.sin(x*2.78+y*1.41)*Math.cos(z*2.31-y*1.68);
+        const lobe=Math.sin(y*3.21-z*2.18)*Math.cos(x*2.14+z*1.27);
+        const stretch=1+.063*ridge+.037*lobe;
+        shellPosition.setXYZ(i,x*stretch,y*stretch,z*stretch);
+      }
+      shellPosition.needsUpdate=true;
+      shell.geometry.computeVertexNormals();
+      this.organicShellSourceColor=this.organicShellMaterial.color.clone();
+      this.organicShellBornColor=new T.Color(0x1a5961);
+      this.organicLobeSourceColor=this.organicLobeMaterial.color.clone();
+      this.organicLobeBornColor=new T.Color(0x17414c);
       shell.scale.set(1.00,1.03,.78);
       this.organicShell=shell;
       this.organicGroup.add(shell);
@@ -2899,17 +2915,28 @@
       // (4%) before the film handed off to a prominent live R326 cortex.
       // Reuse the existing textured 3D shell; allocate ZERO new meshes.
       const handoffCortex=smooth((t-7.28)/1.43);
-      const visible=grow*mix(fade,.56,handoffCortex);
+      const visible=grow*mix(fade,.82,handoffCortex);
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+.63*grow*mix(fade,.88,handoffCortex);
+      const bodyScale=.001+.63*grow*mix(fade,1.08,handoffCortex);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
-
-      this.organicShellMaterial.opacity=.18*visible;
-      this.organicLobeMaterial.opacity=.15*visible*(1-.72*handoffCortex);
+      // R2291: the hydrated cortex is PHYSICAL VOLUME behind the glass
+      // pupil and titanium shoulders; the 9.25s proof was previously only
+      // a metal emblem because the organ was dark purple and 10% opaque.
+      this.organicGroup.position.z=-.54*handoffCortex;
+      this.organicShellMaterial.color.copy(this.organicShellSourceColor)
+        .lerp(this.organicShellBornColor,handoffCortex);
+      this.organicLobeMaterial.color.copy(this.organicLobeSourceColor)
+        .lerp(this.organicLobeBornColor,handoffCortex);
+      this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);
+      this.organicShellMaterial.roughness=mix(.66,.33,handoffCortex);
+      this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);
+      this.organicShellMaterial.clearcoatRoughness=mix(.54,.18,handoffCortex);
+      this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.068*visible;
-      this.organicHoodMaterial.opacity=.13*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
+      this.organicVeinMaterial.opacity=mix(.068*visible,.12*grow,handoffCortex);
+      this.organicHoodMaterial.opacity=mix(.13*visible,.16*grow,handoffCortex);
+      if(this.organicFoldMaterial)
+        this.organicFoldMaterial.opacity=mix(.16*visible,.23*grow,handoffCortex);
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
       if(this.organicFibers){
