@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2276 – kritikus mobil MAG középre igazítás
+- A R2275 valós mobil Chromium állóképein a MAG nagy része a bal oldalon kívülre került. A korábbi R2274 CSS tévesen a natív WebGL stage eredeti `left:50%` / `translateX(-50%)` kompenzációját `left:0`-ra cserélte. A mobil screenshot ugyan nem tudott helyes vizuális oracle-ként elbukni, de a kép valóban hibás volt.
+- R2276 ugyanabban a renderblocking első-festés CSS-ben visszaállítja az eredeti R303 vizuális képernyőközép szerződést: 100vw szélességű stage, 50%-os eredet, valós -50% kompenzáció, megtartott 0.935 vertikális vágás. A stabil 70px fejléc és három fix vezérlő megmarad.
+- Az eredeti mobil viewporton a R2273 előtti ágon a MAG középen volt. R2276-ot új, valódi 390px képkockával és elsőfestés CLS-sel kötelező igazolni. Képi PASS és végleges stúdióminőség még NINCS kijelentve.
+- HTML előtöltés és blokkoló mobile-first-paint CSS, valamint a Worker azonos frissített cache-azonosítót használ; a fejlesztés továbbra is csak draft PR, nem live.
+
 ## R2275 – valódi élő MAG kortikális stúdióanyag és organikus test
 - A 2026.11.01-i R2273 képfelvételen a natív MAG még geometrikusan tökéletes, fehér gömb volt négy fényes titánkarral. A konkrét ok: a régi anyagshader a később hozzáadott R2273 kortikális geometriát is 84%-os ezüstlemezes színnel felülírta.
 - R2275 az ezüst felületet a tényleges eredeti ásványi testre korlátozza, a titán négy karját enyhén sötétebb fémre hangolja, a sejtkortex pedig külön anyag-ágban mély füstüveg, rétegzett türkiz biokémiai erezet és visszafogott korall-organella fényt kap. Mindez az eredeti, **egyetlen** fragment shader és WebGL draw call része.

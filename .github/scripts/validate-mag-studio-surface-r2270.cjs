@@ -54,10 +54,13 @@ for(const token of [
   '#hero .hero-space > .fx-core-mobile-v55-stage',
   'canvas.fx-core-mobile-v55-canvas'
 ]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
-assert.equal((html.match(/20261101-r2274-physical-first-paint-layout-lock/g)||[]).length,2,
-  'R2274 HTML mobile CSS preload and stylesheet must have the same cache key');
-assert(worker.includes('20261101-r2274-physical-first-paint-layout-lock'),
-  'R2274 Cloudflare Worker must serve the exact critical mobile CSS key');
+assert.equal((html.match(/20261101-r2276-firstpaint-mag-centered/g)||[]).length,2,
+  'R2276 HTML firstpaint CSS preload and stylesheet must use the same cache key');
+assert(worker.includes('20261101-r2276-firstpaint-mag-centered'),
+  'R2276 Cloudflare Worker must serve the same critical CSS revision');
+assert(mobileFirstPaint.includes('left:50%!important;') &&
+  mobileFirstPaint.includes('transform:translate(-50%,-1.4%) scaleY(.935)!important;'),
+  'Native MAG must preserve its exact centered 100vw R303 mobile stage placement');
 assert(source.includes('const isCortex=facetBase>=1.10&&facetBase<1.34;') &&
   source.includes('.103*Math.sin(th*3.0+cp*4.20)') &&
   source.includes('software?18:mobile?22:30,software?28:mobile?38:52'),
