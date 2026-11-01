@@ -54,9 +54,9 @@ for(const token of [
   '#hero .hero-space > .fx-core-mobile-v55-stage',
   'canvas.fx-core-mobile-v55-canvas'
 ]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
-assert.equal((html.match(/20261101-r2285-first-byte-mobile-rail-and-native-dock/g)||[]).length,2,
+assert.equal((html.match(/20261101-r2294-stable-mobile-stage-compositor/g)||[]).length,2,
   'R2276 HTML firstpaint CSS preload and stylesheet must use the same cache key');
-assert(worker.includes('20261101-r2285-first-byte-mobile-rail-and-native-dock'),
+assert(worker.includes('20261101-r2294-stable-mobile-stage-compositor'),
   'R2276 Cloudflare Worker must serve the same critical CSS revision');
 assert(mobileFirstPaint.includes('left:50%!important;') &&
   mobileFirstPaint.includes('transform:translate(-50%,-1.4%) scaleY(.935)!important;'),
@@ -105,6 +105,18 @@ assert(archive.includes("if(active&&stage)ResponsiveExperience.dock();") &&
   archive.includes('else if(archiveActive)ResponsiveExperience.restore();'),
   'R2286 must keep native reversible scroll and the original home MAG');
 console.log('MAG_R2286_USER_SCROLL_ARCHIVE_GATE_PASS');
+const stableStageCss=[
+  'R2294 — stable viewport-owned mobile MAG lane',
+  'position:fixed!important',
+  'top:152px!important',
+  'height:43dvh!important',
+  'transform:translate3d(0,calc(2dvh - 152px),0)!important'
+];
+for(const token of stableStageCss)
+  assert(mobileFirstPaint.includes(token),'R2294 mobile fixed layout missing: '+token);
+assert(archive.includes("root.dataset.fxArchiveFlipR2293='mobile-fixed-layout-compositor-entry'"),
+  'R2294 live mobile native MAG cannot traverse a geometry-changing FLIP path');
+console.log('MAG_R2294_SINGLE_BOX_SCROLL_COMPOSITOR_SOURCE_PASS');
 for(const token of [
   'R2289: a real cortex survives the titanium assembly',
   'const handoffCortex=smooth((t-7.28)/1.43);',
@@ -144,6 +156,6 @@ assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor
   archive.includes('void stage.getBoundingClientRect();') &&
   archive.includes('transform 360ms cubic-bezier(.20,.66,.16,1)'),
   'R2293 real native MAG must enter archive through actual compositor FLIP');
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261101-r2293-scroll-compositor-flip'),
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261101-r2294-stable-mobile-stage-compositor'),
   'R2293 HTML loader must use correct cache-busted canonical scroll owner');
 console.log('MAG_R2293_NATIVE_COMPOSITOR_FLIP_SOURCE_PASS');
