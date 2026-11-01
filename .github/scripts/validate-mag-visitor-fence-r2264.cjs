@@ -74,12 +74,8 @@ fs.mkdirSync(OUT,{recursive:true});
       return root.dataset.fxMagBirthOwnerR533==='active' &&
         (realThree||(constrained&&genuineAdaptive));
     },capability,{timeout:60000,polling:100});
-    await page.waitForFunction(()=>{
-      const root=document.documentElement;
-      return root.dataset.fxMagBirthOwnerR533==='active'&&
-        root.dataset.fxMagBirthRendererR1490==='realistic-cinematic-three-active'&&
-        document.querySelector('.fx-mag-birth-r533')!==null;
-    },null,{timeout:60000,polling:100});
+    // R2272: no second Three-only predicate. A capability-bound real film
+    // was already verified above. Keep native GPU-fence and screenshot gates.
     await page.waitForFunction(()=>{
       const root=document.documentElement;
       return !document.querySelector('.fx-mag-birth-r533')&&
