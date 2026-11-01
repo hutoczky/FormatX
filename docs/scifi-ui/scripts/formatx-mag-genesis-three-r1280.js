@@ -1951,8 +1951,13 @@
             float radial=max(anatomy.x,anatomy.y);
             float lateral=min(anatomy.x,anatomy.y);
             float width=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
-            vec2 cell=vec2(radial*28.0,lateral/width*4.0);
-            cell.y+=sin(floor(cell.x)*1.37)*.20;
+            // R2294: EXACT anatomical lamellae frequency and warped flow
+            // used by the permanent R326 MAG. The retired 28x4 checkerboard
+            // made the last Genesis frame look like tiled metal, then jumped
+            // to an entirely different real-time material at the 10s cut.
+            vec2 cell=vec2(radial*17.0,lateral/width*2.4);
+            cell.y+=.29*sin(cell.x*.54+radial*1.60)
+              +.12*sin(cell.x*1.17+.60);
             vec2 edge=min(fract(cell),1.0-fract(cell));
             vec2 aa=max(fwidth(cell),vec2(.018));
             float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
@@ -1965,11 +1970,11 @@
             return vec3(joint*envelope,plateFinish,brushed);
           }`)
           .replace('#include <color_fragment>',
-            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.24)*(1.0+.018*fxPlate.z);')
+            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.125)*(1.0+.018*fxPlate.z);')
           .replace('#include <roughnessmap_fragment>',
-            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.095+(fxPlate.y-.5)*.035,.10,.48);');
+            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.060+(fxPlate.y-.5)*.028,.10,.48);');
       };
-      material.customProgramCacheKey=()=> 'r2207-filtered-machined-silver-plate-finish';
+      material.customProgramCacheKey=()=> 'r2294-sinuous-studio-titanium-matched-native';
     }
 
     makeMechanicalLayer(){
