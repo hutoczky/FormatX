@@ -1560,6 +1560,9 @@
         color:0x160d20,roughness:.66,metalness:.010,
         clearcoat:.11,clearcoatRoughness:.54,
         bumpMap:microFiberTexture,bumpScale:.036,
+        // R2295: the original vertex colors belong to the ACTUAL curved
+        // embryonic cortex, not a two-dimensional aura or texture overlay.
+        vertexColors:true,
         transparent:true,opacity:0,
         emissive:0x1c0b29,emissiveIntensity:.18,
         depthWrite:true
@@ -1581,15 +1584,39 @@
       // R2291: sculpt the EXISTING 3D cell membrane once, before its original
       // GPU upload. No extra geometry, render pass, scene owner or RAF.
       const shellPosition=shell.geometry.getAttribute('position');
+      const cortexChromatinR2295=new Float32Array(shellPosition.count*3);
       for(let i=0;i<shellPosition.count;i++){
         const x=shellPosition.getX(i),y=shellPosition.getY(i),z=shellPosition.getZ(i);
         const ridge=Math.sin(x*2.78+y*1.41)*Math.cos(z*2.31-y*1.68);
         const lobe=Math.sin(y*3.21-z*2.18)*Math.cos(x*2.14+z*1.27);
-        const stretch=1+.063*ridge+.037*lobe;
+        // R2295: coherent high-order cellular pleats actually displace the
+        // same physical 3D mesh. Every duplicate edge vertex samples the
+        // identical continuous local coordinate field, without UV seams.
+        const microPleat=Math.sin(x*8.4+z*2.8+2.1*Math.sin(y*3.1))*
+          Math.cos(y*6.0-z*4.1);
+        const stretch=1+.063*ridge+.037*lobe+.016*microPleat;
         shellPosition.setXYZ(i,x*stretch,y*stretch,z*stretch);
+        // Studio microscopic vascular channels and sparse coral organelles
+        // follow *the existing geometry* through its PBR vertex-color VBO.
+        // All values are deterministic, computed once at construction.
+        const marrow=Math.sin(x*7.6+y*3.9+2.0*Math.sin(z*3.1))*
+          Math.cos(y*6.2-z*4.7);
+        const vessel=Math.pow(.5+.5*marrow,6);
+        const fleck=Math.sin(x*5.7-y*7.6+z*4.1)*
+          Math.cos(y*5.3+z*6.2);
+        const coral=Math.pow(Math.max(0,(fleck-.33)/.67),3);
+        const pearl=.80+.13*(.5+.5*microPleat)+.10*vessel;
+        const at=i*3;
+        cortexChromatinR2295[at]=pearl*(.89+2.30*coral);
+        cortexChromatinR2295[at+1]=pearl*(.94+.25*vessel-.36*coral);
+        cortexChromatinR2295[at+2]=pearl*(.97+.22*vessel-.29*coral);
       }
       shellPosition.needsUpdate=true;
+      shell.geometry.setAttribute('color',
+        new T.BufferAttribute(cortexChromatinR2295,3));
       shell.geometry.computeVertexNormals();
+      document.documentElement.dataset.fxGenesisCortexR2295=
+        'true-3d-pleated-chromatin-capillaries-coral-PBR-one-shell';
       this.organicShellSourceColor=this.organicShellMaterial.color.clone();
       this.organicShellBornColor=new T.Color(0x1a5961);
       this.organicLobeSourceColor=this.organicLobeMaterial.color.clone();
