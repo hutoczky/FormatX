@@ -27,4 +27,16 @@ assert(birth.includes('const DURATION = 10000;'),
   'physical Genesis 10-second DNA-to-core sequence must be preserved');
 assert.equal((source.match(/createElement\('canvas'\)/g)||[]).length,1,
   'native MAG must retain exactly one original WebGL canvas allocation');
-console.log('MAG_R2270_STUDIO_SURFACE_SOURCE_PASS');
+const three=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
+for(const token of [
+  'R2271: hydrated biopolymer, not emissive candy-light tubing',
+  'color:0xa7c8e2,emissive:0x224267,emissiveIntensity:.63',
+  'color:0xc8b5dd,emissive:0x523b77,emissiveIntensity:.61',
+  'R2271: both axes tile seamlessly on the curved cell',
+  'const coral=Math.pow(clamp((coralCloud-.575)*4.25),1.4)',
+  'bumpMap:this.embryoTexture,bumpScale:.023',
+  'dataset.fxGenesisStudioR2271'
+]) assert(three.includes(token),'R2271 Genesis studio source missing: '+token);
+assert(birth.includes('20261101-r2271-film-grade-genesis-optics'),
+  'R2271 film must use a versioned physical Three.js owner');
+console.log('MAG_R2270_R2271_STUDIO_SOURCE_PASS');
