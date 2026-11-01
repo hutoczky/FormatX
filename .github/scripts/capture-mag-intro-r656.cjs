@@ -91,10 +91,32 @@ const SHOTS=[
         }
       }
       const centre=hits?sumX/(hits*cv.width):null;
+      // R2279: browser-computed geometry is diagnostic only. Never
+      // mutate transforms or recenter the PNG in the test. The real
+      // first-visible mobile frame remains the acceptance oracle.
+      const rectOf=selector=>{
+        const el=document.querySelector(selector);
+        if(!el)return null;
+        const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+        return {x:r.x,y:r.y,w:r.width,h:r.height,
+          left:s.left,right:s.right,top:s.top,
+          transform:s.transform,translate:s.translate,
+          position:s.position,width:s.width,
+          parent:el.parentElement?.className||el.parentElement?.id||''};
+      };
       return {pass:hits>=250&&centre>=.30&&centre<=.70,
         brightSamples:hits,
         centroidX:centre===null?null:Number(centre.toFixed(4)),
-        viewportWidth:cv.width};
+        viewportWidth:cv.width,
+        layout:{
+          viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},
+          main:rectOf('main#main-content'),
+          hero:rectOf('#hero'),
+          grid:rectOf('#hero .hero-grid'),
+          space:rectOf('#hero .hero-space'),
+          stage:rectOf('#hero .fx-crystal-organism-r326-stage'),
+          canvas:rectOf('#hero .fx-crystal-organism-r326-canvas')
+        }};
     },png.toString('base64'));
   }
 
