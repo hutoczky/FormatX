@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2297 – valódi mobil MAG-lencse szabadon hagyása
+- A 390px-es R2296 új, valós 3D képkockáján a 50×50px SOUND és KÉRDEZZ gombok egymás mellett, közvetlenül az élő biokristály fő optikai lencséjén voltak. Ez grafikai és használhatósági hiba: a modell lényege takarásban maradt.
+- R2297: az eredeti, változatlan interaktív r264 gombok a mobil kezdőoldali MAG két szélére kerülnek, balra SOUND, jobbra ASK, 50×50px hitcélokkal. Kritikus, renderblocking R358 CSS, amely már első paintkor a végleges 2-oszlopos elrendezést adja. Az aktív 3D scroll-archívum saját kontrollhelyzete érintetlen.
+- Az új P0 browser-vizuálteszt számszerűen megköveteli, hogy a SOUND jobb széle a MAG középtengelyétől balra, az ASK bal széle jobbra legalább 20% hero-szélesség távolságra legyen. Ez **valódi kattintható DOM-rect mérés**, nem csupán CSS-szöveg keresése.
+- Az R358 HTML preload/stylesheet URL-je, a Worker statikus útvonala és a két QA forrásőr azonos verziót kapott; a külön R1987 archív script R2294-es cache-kulcsa érintetlen.
+- **NEM KÉSZ / NEM ÉLES:** a pontos R2297 új képkocka, CLS, P0, Lighthouse és stabil 60 FPS még kötelezően ellenőrizendő. PR #581 továbbra is draft.
+
 ## R2294 – mobil MAG: ténylegesen változatlan fizikai doboz görgetéskor
 - A R2293-as, natív FLIP 360ms átmenet a Chromium valós P0-jában **nem** oldotta meg a mobil archive-belépéskor regisztrált CLS-t. A 390px felbontású dokkoláskor továbbra is 0.10183396599357607 LayoutShift jelentkezett; forrás a natív stage 195px→390px fizikai doboza, még akkor is, ha az inverz kompozitortranszformáció lágyította a látványt. Az eredeti R2173 P0 kapu helyesen FAIL maradt.
 - R2294 a natív R326 stage-et már kezdetben és az archív képernyőn **ugyanabban az egyetlen viewporthoz rögzített 100vw × 43dvh CSS layout dobozban** tartja. Az első hero állapottól a görgetéses archívumig nem változhat a `position`, `width`, `height`, `left` vagy `top` fizikai elrendezése; a látható művelet csak compositor-only `translate3d()` transform. A `.hero-space` továbbra is teljes magasságot tart fenn a terméktartalomnak.

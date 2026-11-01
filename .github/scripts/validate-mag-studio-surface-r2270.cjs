@@ -54,9 +54,9 @@ for(const token of [
   '#hero .hero-space > .fx-core-mobile-v55-stage',
   'canvas.fx-core-mobile-v55-canvas'
 ]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
-assert.equal((html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2294-stable-mobile-stage-compositor/g)||[]).length,2,
+assert.equal((html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2297-optic-safe-mobile-controls/g)||[]).length,2,
   'R2294 HTML firstpaint CSS preload and stylesheet must use exactly the same cache key');
-assert(worker.includes('20261101-r2294-stable-mobile-stage-compositor'),
+assert(worker.includes('20261101-r2297-optic-safe-mobile-controls'),
   'R2276 Cloudflare Worker must serve the same critical CSS revision');
 assert(mobileFirstPaint.includes('left:50%!important;') &&
   mobileFirstPaint.includes('transform:translate(-50%,-1.4%) scaleY(.935)!important;'),
@@ -155,6 +155,16 @@ assert(three.includes('glow.visible=false;wire.visible=false;') &&
 assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2292 must load the exact immutable bioglass filament film');
 console.log('MAG_R2292_BIOFILAMENT_SOURCE_PASS');
+for(const token of [
+  'R2297 — real mobile MAG optic-safe control placement',
+  'grid-template-columns:50px 50px!important;',
+  'justify-content:space-between!important;',
+  'grid-column:2!important;',
+  'pointer-events:auto!important;'
+]) assert(mobileFirstPaint.includes(token),'R2297 accessible mobile optical corridor missing: '+token);
+assert.equal((html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2297-optic-safe-mobile-controls/g)||[]).length,2,
+  'R2297 must be the exact critical CSS preload+stylesheet revision');
+console.log('MAG_R2297_MOBILE_OPTIC_CLEARANCE_SOURCE_PASS');
 assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry'") &&
   archive.includes("root.dataset.fxArchiveFlipR2293='settled-native-onecanvas'") &&
   archive.includes('void stage.getBoundingClientRect();') &&

@@ -1333,3 +1333,75 @@
     transform:translate3d(0,calc(2dvh - 152px),0)!important;
   }
 }
+
+/* R2297 — real mobile MAG optic-safe control placement.
+   390px R2296 native screenshot shows SOUND+ASK physically covering the
+   biological iris. Keep original accessible r264 DOM and 50px hit boxes;
+   spread two controls to opposite viewport edges BEFORE first paint.
+   Archive has its own established scroll-state control composition. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-space >
+  .fx-reference-controls-r204.fx-reference-controls-r264 {
+    position:absolute!important;
+    inset:auto 18px clamp(22px,3.2svh,34px) 18px!important;
+    top:auto!important;
+    right:18px!important;
+    bottom:clamp(22px,3.2svh,34px)!important;
+    left:18px!important;
+    display:grid!important;
+    grid-template-columns:50px 50px!important;
+    grid-template-rows:50px!important;
+    grid-auto-flow:row!important;
+    justify-content:space-between!important;
+    justify-items:center!important;
+    align-items:center!important;
+    width:calc(100% - 36px)!important;
+    min-width:0!important;
+    max-width:calc(100% - 36px)!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+    padding:0!important;
+    margin:0!important;
+    column-gap:0!important;
+    row-gap:0!important;
+    transform:none!important;
+    translate:none!important;
+    pointer-events:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-space >
+  .fx-reference-controls-r204.fx-reference-controls-r264 > :is(.fx-reference-rail,.fx-reference-rail-r264) {
+    display:contents!important;
+  }
+  html:root:root:root:root:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-space >
+  .fx-reference-controls-r204.fx-reference-controls-r264 > .fx-three-sound {
+    grid-column:1!important;
+    grid-row:1!important;
+    justify-self:start!important;
+    pointer-events:auto!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+  }
+  html:root:root:root:root:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-space >
+  .fx-reference-controls-r204.fx-reference-controls-r264 .fx-reference-ask {
+    grid-column:2!important;
+    grid-row:1!important;
+    justify-self:end!important;
+    pointer-events:auto!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+  }
+}

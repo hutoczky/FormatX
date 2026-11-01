@@ -198,6 +198,14 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
       `Mobile controls escaped MAG stage vertically: ${JSON.stringify({ controls, heroSpace })}`);
     const owned = snapshot.owned;
     assert(owned, 'Mobile controls are not owned by .hero-space');
+    // R2297 actual browser hit-box guard: SOUND and ASK must no longer
+    // occlude the central living glass iris on 390/430px devices.
+    const opticCenterX=heroSpace.left+heroSpace.width*.5;
+    const opticClearance=heroSpace.width*.20;
+    assert(sound&&sound.right<=opticCenterX-opticClearance &&
+      ask.left>=opticCenterX+opticClearance,
+      `MAG optical center covered by mobile controls: ${JSON.stringify({sound,ask,heroSpace})}`);
+
     assert(copy.width >= 280 && copy.top >= heroSpace.bottom - 2,
       `Mobile hero copy must follow the MAG stage in normal flow: ${JSON.stringify({ copy, heroSpace })}`);
     } // Cinematic mode docks the canonical controls independently of the MAG stage.

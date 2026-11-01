@@ -136,9 +136,9 @@ for(const property of [
   'clip-path:none!important;',
   'white-space:normal!important;'
 ])assert(cssPar.includes(property),'Missing first-paint hero geometry: '+property);
-assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2294-stable-mobile-stage-compositor/g)?.length===2,
+assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2297-optic-safe-mobile-controls/g)?.length===2,
   'Preload and render-blocking mobile stylesheet must share the current R2274 URL');
-assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261101-r2294-stable-mobile-stage-compositor'),
+assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261101-r2297-optic-safe-mobile-controls'),
   'Worker critical mobile stylesheet must share the current R2276 cache identity');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');
