@@ -25,6 +25,6 @@ assert(source.includes("root.dataset.fxNativeMagSurfaceR2203="),
   'original titanium surface and optical iris must remain');
 assert(birth.includes('const DURATION = 10000;'),
   'physical Genesis 10-second DNA-to-core sequence must be preserved');
-assert(!source.includes('createElement(\'canvas\')'),
-  'native MAG must never introduce a second offscreen canvas');
+assert.equal((source.match(/createElement\('canvas'\)/g)||[]).length,1,
+  'native MAG must retain exactly one original WebGL canvas allocation');
 console.log('MAG_R2270_STUDIO_SURFACE_SOURCE_PASS');
