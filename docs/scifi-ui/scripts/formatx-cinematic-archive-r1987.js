@@ -621,24 +621,81 @@
       }
     }
   }
+  // R2293: smooth FLIP handoff from the already painted hero into
+  // the existing fixed cinematic lane. One WebGL canvas, NO cloned canvas,
+  // image snapshot, extra renderer or perpetual animation frame.
+  let stageFlipRafR2293=0,stageFlipTimerR2293=0;
+  function clearStageFlipR2293(){
+    if(stageFlipRafR2293)cancelAnimationFrame(stageFlipRafR2293);
+    stageFlipRafR2293=0;
+    if(stageFlipTimerR2293)clearTimeout(stageFlipTimerR2293);
+    stageFlipTimerR2293=0;
+    if(stage?._fxArchiveFlipOriginalR2293){
+      for(const [prop,value,priority] of stage._fxArchiveFlipOriginalR2293){
+        if(value)stage.style.setProperty(prop,value,priority);
+        else stage.style.removeProperty(prop);
+      }
+      delete stage._fxArchiveFlipOriginalR2293;
+    }
+  }
   class ResponsiveExperience {
     static dock(){
       if(!stage||archiveActive)return;
       if(!heroHost||!heroHost.isConnected)return;
-      // Keep the canonical canvas inside #hero. Moving it would break the
-      // original MAG DOM contract and WebGL identity checks. The external
-      // archive stylesheet owns docking geometry so strict style-src remains
-      // intact and renderer-authored canvas state is never overwritten.
+      // R2286: native scrolling enters the archive only after a user action.
+      // R2293: first measure the actual visible hero, then use compositor
+      // transforms to hand its EXISTING physical pixels into the fixed MAG
+      // lane instead of causing a 0.101834 CLS 195px width snap.
+      clearStageFlipR2293();
+      const previous=stage.getBoundingClientRect();
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
+      const target=stage.getBoundingClientRect();
+      const valid=previous.width>8&&previous.height>8&&
+        target.width>8&&target.height>8&&
+        Number.isFinite(previous.x)&&Number.isFinite(target.x);
+      if(valid&&!reduced.matches){
+        const dx=previous.x-target.x,dy=previous.y-target.y;
+        const sx=previous.width/target.width,sy=previous.height/target.height;
+        if(Math.abs(dx)>1||Math.abs(dy)>1||
+           Math.abs(sx-1)>.008||Math.abs(sy-1)>.008){
+          stage._fxArchiveFlipOriginalR2293=
+            ['transform','transform-origin','transition'].map(prop=>[
+              prop,stage.style.getPropertyValue(prop),
+              stage.style.getPropertyPriority(prop)
+            ]);
+          stage.style.setProperty('transition','none','important');
+          stage.style.setProperty('transform-origin','0 0','important');
+          stage.style.setProperty('transform',
+            `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${sx.toFixed(5)},${sy.toFixed(5)})`,
+            'important');
+          root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry';
+          stageFlipRafR2293=requestAnimationFrame(()=>{
+            stageFlipRafR2293=0;
+            if(!archiveActive||!stage?.isConnected)return;
+            stage.style.setProperty('transition',
+              'transform 360ms cubic-bezier(.20,.66,.16,1)','important');
+            stage.style.setProperty('transform','none','important');
+          });
+          stageFlipTimerR2293=setTimeout(()=>{
+            stageFlipTimerR2293=0;
+            if(!archiveActive||!stage?.isConnected)return;
+            clearStageFlipR2293();
+            root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+            window.FormatXLivingCore?.requestRender?.(1);
+          },440);
+        }
+      }
       window.FormatXLivingCore?.requestRender?.(1);
     }
     static restore(){
       if(!archiveActive||!stage)return;
+      clearStageFlipR2293();
       stage.classList.remove('fx-archive-native-docked');
       root.dataset.fxArchiveDock='home';
       archiveActive=false;
+      root.dataset.fxArchiveFlipR2293='restored-home';
       window.FormatXLivingCore?.requestRender?.(1);
     }
   }
