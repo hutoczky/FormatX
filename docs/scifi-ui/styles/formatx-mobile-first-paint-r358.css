@@ -1105,3 +1105,105 @@
   }
 }
 /* production-r2256-critical-mobile-copy-geometry-parity */
+
+/* R2274 — exact first-byte mobile layout-lock from real 390px CLS trace.
+   Measured FCP shifted main by 24.797px, enlarged the language/menu
+   controls, then moved the physical WebGL canvas 195px sideways after the
+   10s film. These selectors match the FINAL native geometry from the
+   start, never hide the MAG or replace it with a performance-only image.
+   No display:none, containment tricks or test-only user-agent branches. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root body.living-architecture > header.topbar {
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:70px!important;
+    min-height:70px!important;
+    max-height:70px!important;
+    padding:0!important;
+    margin:0!important;
+    flex:0 0 70px!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture > main#main-content {
+    margin-block-start:0!important;
+    padding-block-start:0!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture
+    header.topbar > .fx-reference-mag-button,
+  html:root:root:root:root:root:root body.living-architecture
+    header.topbar > .fx-language-toggle,
+  html:root:root:root:root:root:root body.living-architecture
+    header.topbar > #menu-toggle {
+    position:absolute!important;
+    bottom:auto!important;
+    left:auto!important;
+    box-sizing:border-box!important;
+    margin:0!important;
+    padding:0!important;
+    transform:none!important;
+    translate:none!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture
+    header.topbar > .fx-reference-mag-button {
+    top:12px!important;
+    right:138px!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:46px!important;
+    min-height:46px!important;
+    max-height:46px!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture
+    header.topbar > .fx-language-toggle {
+    top:13px!important;
+    right:78px!important;
+    width:44px!important;
+    min-width:44px!important;
+    max-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture
+    header.topbar > #menu-toggle {
+    top:8px!important;
+    right:20px!important;
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture
+    #hero .hero-space > .fx-core-mobile-v55-stage {
+    position:absolute!important;
+    inset:0!important;
+    left:0!important;
+    top:0!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:100%!important;
+    transform:translateY(-1.4%) scaleY(.935)!important;
+    transform-origin:50% 50%!important;
+  }
+  html:root:root:root:root:root:root body.living-architecture
+    #hero .hero-space > .fx-core-mobile-v55-stage > canvas.fx-core-mobile-v55-canvas {
+    position:absolute!important;
+    inset:0!important;
+    left:0!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:100%!important;
+    transform:none!important;
+  }
+}

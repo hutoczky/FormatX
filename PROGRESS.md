@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2274 – mobil első képkocka CLS: fejléc és natív MAG stabil elhelyezése
+- A normál R2272 P0 biztonságos 3/3 WebGL MAG hidegindítást és külön PASS 0 readback / 1 canvas / 972 látható pixel vizsgálatot adott. A külön mobil CLS ellenőrzés viszont **0.213962 FAIL**.
+- A P0 valódi 390x844-es layout-shift JSON-ja kimutatta, hogy 2068 ms körül a főtartalom Y 94.796875→70px-re mozdult, a nyelvi vezérlő 42x40→120x69, a menü 50x54→98x69 méretre ugrott. Később 11055ms körül a natív WebGL canvas X 195→0 és szélessége 195→390 lett.
+- Az R2274 a valóban kritikus, renderblocking mobil elsőfestés CSS végére helyezett, magasabb szelektorspecifikusságú végleges geometriát. A fejléc és mindhárom vezérlő 70px-es mobil sávban stabil, a MAG stage/canvas már a kezdeti képkockától a teljes 390px-es szélességet használja.
+- A meglévő vizuális gép, WebGL shader, film és a scrollon átadott natív tartalom működése megmarad; nem alkalmazunk Lighthouse-specifikus vizuális bypass-t vagy rejtést. HTML preload és stylesheet valamint Worker cache-kulcs együtt frissítve.
+- **Elvárt valós ellenőrzés:** friss R2274 390/412px normál 10s film CLS és natív screenshot, Lighthouse Desktop/Mobile ×3. Nem tekintjük megoldottnak a friss böngészőteszt bizonyítéka nélkül.
+
 ## R2273 – geometriai stúdiófelhozatal: biokortex és élő filamentumok
 - A korábbi R2270 képi archívumon a MAG még szabályos, négyágú, lapos emblémaként hatott. R2273: a négy, megmunkált titán kar mögé egy valódi, árnyékolt konvex biologikus 3D kortikális tömeg kerül, amely a köztes negatív teret kitölti, és nem takarja el a központi üveglencsét.
 - Valódi, finoman hullámzó, vékony organikus nyúlványok a meglévő R326 attribútum-pufferekből: 3 a szoftveres tesztrendernél, 4 mobilon, 6 asztali profilon. A nyúlványok a GPU vertex shaderben mozognak, nem új CPU/RAF ciklusban. Ugyanaz az egyetlen natív vászon és anyagshader.

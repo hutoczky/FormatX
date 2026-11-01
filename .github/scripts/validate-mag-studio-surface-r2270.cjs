@@ -43,4 +43,19 @@ for(const token of [
 ]) assert(three.includes(token),'R2271 Genesis studio source missing: '+token);
 assert(birth.includes('20261101-r2271-film-grade-genesis-optics'),
   'R2271 film must use a versioned physical Three.js owner');
-console.log('MAG_R2270_R2271_STUDIO_SOURCE_PASS');
+const mobileFirstPaint=fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css','utf8');
+const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+for(const token of [
+  'R2274 — exact first-byte mobile layout-lock',
+  'height:70px!important',
+  'header.topbar > .fx-language-toggle',
+  'header.topbar > #menu-toggle',
+  '#hero .hero-space > .fx-core-mobile-v55-stage',
+  'canvas.fx-core-mobile-v55-canvas'
+]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
+assert.equal((html.match(/20261101-r2274-physical-first-paint-layout-lock/g)||[]).length,2,
+  'R2274 HTML mobile CSS preload and stylesheet must have the same cache key');
+assert(worker.includes('20261101-r2274-physical-first-paint-layout-lock'),
+  'R2274 Cloudflare Worker must serve the exact critical mobile CSS key');
+console.log('MAG_R2270_R2271_R2274_STUDIO_SOURCE_PASS');
