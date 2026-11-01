@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2282 – fekete viewport GPU-kész MAG mellett: valódi film utáni kompozitor-keret
+- Az R2281 pontos commitján a 1280×720-as Chromium fő viewport 0 világos MAG-pixelt mutatott, miközben az eredeti R326 WebGL framebuffer mérhetően világos volt (GPU pixel 160/255, fence finished). A későbbi, kizárólag stage-re vágott Playwright screenshot viszont magát az organizmust megjelenítette. A teljes viewport hibáját nem lehet egy újabb screenshot-teszthackkel eltüntetni.
+- Az R2278 idő előtti, 90%-os filmbeli GPU-előkészítése már készre jelölhette a fence-t az R533 DOM-takarás levétele előtt. Az R326 finish-event hívás ugyanakkor ilyen állapotban a kész frame miatt azonnal visszatért, és nem adott át egy friss látható framebuffer-t a Chromium kompozitorának.
+- R2282: az eredeti `formatx:magbirthcomplete` eseményben, **csak kész GPU-fence-nél**, a tényleges takarás eltávolítása után egyszer közvetlenül meghívjuk ugyanazon R326 `render()`-t, majd `gl.flush()`-t. Nincs második WebGL context, új rajzoló, leállíthatatlan RAF, felesleges `readPixels`, vagy CSS képhelyettesítés. Az eredeti fail-safe GPU-fence út megmarad, ha a film nem készítette elő a MAG-ot.
+- A teljes főviewport MAG-kép, 390/412px mobil közép, P0, CLS és Lighthouse továbbra is kötelező. **A javítás a forrásban elkészült, de a képkockás bizonyító teszt még nem igazolta.** PR #581 draft, nincs élesítve.
+
 ## R2281 – a valós −195 px mobil MAG eltolás megszüntetése
 - A R2279 valós Chromium mobil képének részletes Layout diagnosztikája igazolta: a 390 px széles natív MAG stage `left:195px`, `transform:matrix(...,-195,...)` és **önálló `translate:-50%`** volt. A két külön -195 px eltolás összeadódott, ezért lett a végső canvas `x:-195` és a vizuális centroid ~0.088.
 - Az R2280 korábbi célzott archive-state kivétele nem szüntette meg az eredeti, archív nélküli dupla transzlációt. R2281 a korai render-blocking R358 CSS elsőfestési stage tulajdonosán `translate:none!important`-ot rögzít, a létező `left:50%` + `transform:translate(-50%,-1.4%) scaleY(.935)` megtartásával. Ez a tényleges középre igazítás, nem képfeldolgozási teszt-hack.
