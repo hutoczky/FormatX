@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2283 – valódi WebGL-fence / canvas resize versenyhelyzet javítása
+- Az R2282 kódos SHA (71f3e168) P0-ján három hidegindítás közül **2/3 PASS**, a harmadik esetben a GPU proof RGB/alpha **0/0**, az első normál viewport is fekete. A 48 ms-ra késleltetett adaptív minőség-átméretezés a korábban beadott frame rajzbufferét törölhette még a GPU-fence befejezése vagy a kompozitor megjelenítése előtt.
+- R2283 az eredeti minőségi szabályozó két útvonalát megtartja, de az aktív filmes fázis, a WebGL2 pending fence és a legelső látható képkocka ~1100 ms-os védelme alatt *nem módosítja* a canvas width/height bufferét. A 48 ms-os timer az aktiválódó filmet a callbackben is újraellenőrzi. A további, normál interakciós adaptív felbontáskezelés változatlan.
+- A natív ResizeObserver sem nullázhatja az in-flight GPU-buffert. A tényleges viewport-méretet film utáni egyszeri render előtt szinkronizálja az eredeti tulajdonos. Ha a finish eseménynél még pending a korábbi fence, a készre jelzés után történik az egyszeri natív kirajzolás. Nincs új renderer, WebGL context, tartós RAF, readback vagy vizuális bypass.
+- Az R2244 unit forrás- és viselkedésteszt kiterjesztve aktív film, in-flight GPU-fence, megjelenítési zárolás és időközben elinduló film eseteire. A 3/3 valódi pixel-proof továbbra is kötelező; a fix státusza **CI validálás előtt – nem kész**.
+- Legutóbbi valódi R2282 Lighthouse: desktop Performance **93/93/92** (LCP ~1.78–1.83s, CLS 0.012), mobil **86/87/87** (LCP ~1.32–1.34s, CLS 0.11496), mindkettő küszöb miatt FAIL. A stúdióminőség, hardware 60 FPS és 100/100/100/100 továbbra sem teljesült.
+
 ## R2282 – fekete viewport GPU-kész MAG mellett: valódi film utáni kompozitor-keret
 - Az R2281 pontos commitján a 1280×720-as Chromium fő viewport 0 világos MAG-pixelt mutatott, miközben az eredeti R326 WebGL framebuffer mérhetően világos volt (GPU pixel 160/255, fence finished). A későbbi, kizárólag stage-re vágott Playwright screenshot viszont magát az organizmust megjelenítette. A teljes viewport hibáját nem lehet egy újabb screenshot-teszthackkel eltüntetni.
 - Az R2278 idő előtti, 90%-os filmbeli GPU-előkészítése már készre jelölhette a fence-t az R533 DOM-takarás levétele előtt. Az R326 finish-event hívás ugyanakkor ilyen állapotban a kész frame miatt azonnal visszatért, és nem adott át egy friss látható framebuffer-t a Chromium kompozitorának.

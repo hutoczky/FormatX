@@ -2023,6 +2023,11 @@
       ? (mobile?.80:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
+    // R2283: a canvas resize discards its color/depth buffers regardless
+    // of a successful WebGL fence. Keep the real initial frame immutable
+    // during birth, GPU validation and the first exposed compositor interval.
+    let nativeExposureLockUntilR2283=0;
+    let postFilmNeedsPresentR2283=false;
     root.dataset.fxCoreQualityResizeR2244='coalesced-once-per-48ms-burst';
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -2076,10 +2081,21 @@
        wakeup. Coalesce into one bounded 48ms resize; the last qualityScale
        wins, without modifying geometry, shaders or the final quality floor.
        Do not continuously defer by restarting the timer. */
+    function qualityResizeProtectedR2283(){
+      return !!pendingGpuFenceR2253 ||
+        root.dataset.fxMagBirthLiveR533==='active' ||
+        root.getAttribute('data-fx-mag-birth-live')==='active' ||
+        performance.now()<nativeExposureLockUntilR2283;
+    }
     function requestQualityResizeR2244(){
+      // R2283: the 48ms quality timer must never invalidate an in-flight
+      // film handoff or a still-unexposed GL drawing buffer.
+      if(qualityResizeProtectedR2283())return;
       if(qualityResizeTimer)return;
       qualityResizeTimer=later(()=>{
         qualityResizeTimer=0;
+        // The film may start while this timer is already pending.
+        if(qualityResizeProtectedR2283())return;
         if(!disposed&&!contextLost&&resize(true))schedule(1);
       },48);
     }
@@ -2935,6 +2951,16 @@
             root.dataset.fxMagHandoffCadenceR2255='resumed-after-gpu-proof';
             if(!blocked())schedule(2);
           }
+          // R2283: the occluder may have departed while this genuine GPU
+          // fence was in flight. Submit ONE native post-film frame after
+          // completion. A successful fence alone is not canvas presentation.
+          if(postFilmNeedsPresentR2283){
+            postFilmNeedsPresentR2283=false;
+            resize(); // reconcile actual viewport only AFTER fence release
+            render(performance.now());
+            gl.flush();
+            root.dataset.fxMagPostFilmPresentR2283='late-fence-native-frame';
+          }
         };
         gl.flush();
         root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
@@ -3017,6 +3043,18 @@
     };
     listen(document,'formatx:magbirthprepare',prepareNativeFrameR2254,{passive:true});
     listen(document,'formatx:magbirthcomplete',()=>{
+      // R2283: freeze the drawing buffer across Chromium's compositing
+      // boundary, not for the entire lifetime of the living MAG.
+      nativeExposureLockUntilR2283=performance.now()+1100;
+      if(qualityResizeTimer){
+        clearTimeout(qualityResizeTimer);
+        delayed.delete(qualityResizeTimer);
+        qualityResizeTimer=0;
+      }
+      if(pendingGpuFenceR2253){
+        postFilmNeedsPresentR2283=true;
+        return;
+      }
       // R2282: the R2278 early GPU fence can finish while the cinematic
       // occluder is still on top. Merely returning 'finished' here leaves
       // a valid framebuffer that the browser has not composited into the
@@ -3032,6 +3070,7 @@
              bounds.top>=innerHeight)return;
           visible=true;
           try{
+            resize(); // exact stage dimensions after physical DOM teardown
             render(performance.now());
             gl.flush();
             root.dataset.fxMagPostFilmPresentR2282='single-native-compositor-frame';
@@ -3084,7 +3123,12 @@
       root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>boot());
     });
 
-    const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
+    const ro=new ResizeObserver(()=>{
+      // R2283: observer callbacks cannot zero a pending GL framebuffer.
+      // The post-film renderer reconciles current stage dimensions once.
+      if(qualityResizeProtectedR2283())return;
+      if(resize())schedule(1);
+    });
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
       visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
