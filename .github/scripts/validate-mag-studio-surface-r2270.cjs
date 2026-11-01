@@ -139,3 +139,11 @@ assert(three.includes('glow.visible=false;wire.visible=false;') &&
 assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
   'R2292 must load the exact immutable bioglass filament film');
 console.log('MAG_R2292_BIOFILAMENT_SOURCE_PASS');
+assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry'") &&
+  archive.includes("root.dataset.fxArchiveFlipR2293='settled-native-onecanvas'") &&
+  archive.includes('void stage.getBoundingClientRect();') &&
+  archive.includes('transform 360ms cubic-bezier(.20,.66,.16,1)'),
+  'R2293 real native MAG must enter archive through actual compositor FLIP');
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261101-r2293-scroll-compositor-flip'),
+  'R2293 HTML loader must use correct cache-busted canonical scroll owner');
+console.log('MAG_R2293_NATIVE_COMPOSITOR_FLIP_SOURCE_PASS');

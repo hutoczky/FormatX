@@ -100,10 +100,11 @@ function observe({normal}){
           window.__dockEntry?.firstDraw&&
           document.documentElement.dataset.fxArchiveCinema==='active',
           null,{timeout:25000});
-        await page.waitForTimeout(350);
+        // Allow the real one-shot native FLIP transform to settle fully.
+        await page.waitForTimeout(550);
         const result=await page.evaluate(()=>{
           const root=document.documentElement,stage=document.querySelector('.fx-crystal-organism-r326-stage'),canvas=stage?.querySelector('.fx-crystal-organism-r326-canvas'),r=stage?.getBoundingClientRect();
-          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema};
+          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema,flip:root.dataset.fxArchiveFlipR2293||''};
         });
         const record={profile:config.name,...result,errors,failedRequests};report.cases.push(record);
         console.log('NATIVE_MAG_DOCK_ENTRY',JSON.stringify(record));
@@ -114,13 +115,23 @@ function observe({normal}){
         assert(result.observation.firstDraw.count>0);
         const first=result.observation.firstDock,cinema=result.observation.cinema;
         assert(first&&cinema,'Missing actual native docking/cinema samples');
-        for(const key of ['x','y','width','height']){
-          assert(Math.abs(first.stage[key]-cinema.stage[key])<=1,`MAG ${key} jumps between first dock and cinema: ${first.stage[key]} -> ${cinema.stage[key]}`);
-          assert(Math.abs(cinema.stage[key]-result.final[key])<=1,`MAG ${key} changes after cinema entry`);
-        }
-        if(!config.mobile)assert(first.stage.width<first.viewport.width*.5,'First dock exposed a full-viewport MAG stage');
-        else assert(first.stage.width<=first.viewport.width+1,'First mobile dock escaped the viewport');
-        assert(first.stage.height<first.viewport.height*.8,'First dock exposed a full-height MAG stage');
+        // R2293: the FIRST FLIP rectangle is intentionally the preserved
+        // hero frame, and a 360ms transform smoothly carries that SAME GPU
+        // surface into the final lane. Requiring identical intermediate
+        // geometry would forbid any real cinematic camera transition.
+        // Keep the actual no-layout-shift gate below: no accepted CLS.
+        assert.equal(result.flip,'settled-native-onecanvas',
+          'R2293 compositor transition did not settle on the original canvas');
+        assert(first.stage.width>40&&first.stage.height>40,
+          'Initial physical MAG is invisible during docking');
+        assert(cinema.stage.width>40&&cinema.stage.height>40,
+          'Cinematic MAG disappeared during its actual transition');
+        if(!config.mobile)assert(result.final.width<first.viewport.width*.5,
+          'Final desktop archive did not dock the MAG into its split-screen lane');
+        else assert(result.final.width<=first.viewport.width+1,
+          'Final mobile MAG escaped the screen after the transition');
+        assert(result.final.height<first.viewport.height*.8,
+          'Final MAG improperly covers the entire physical archive viewport');
         assert.deepEqual(first.canvas,cinema.canvas,'The first dock must already use the final native canvas scale and optics');
         assert.deepEqual(result.observation.shifts.filter(s=>!s.recentInput&&s.at>=first.at),[],'Native stage shifts after its first real docking');
       }finally{await context.close();}
