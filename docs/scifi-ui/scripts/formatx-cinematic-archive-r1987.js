@@ -1125,7 +1125,15 @@ void main(){
     // From the moment the intro ends, the MAG owns the page. Do not leave the
     // old landing page visible for a whole first viewport of scrolling.
     // The same native scrolling and eight source anchors remain intact.
-    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
+    // R2286: the first native MAG portrait owns the landing viewport.
+    // Never dock into the scrolling archive merely because the 10s film
+    // finished. The original 390px Chromium CLS trace showed an unprompted
+    // 195px -> 390px stage geometry jump at 11.3s, scrollY=0.
+    // The user explicitly enters the archive by scrolling down; returning
+    // to the top restores the uninterrupted native MAG hero.
+    const enteredScroll=scrollY>Math.max(24,innerHeight*.06);
+    const inArchive=Boolean(introDone&&enteredScroll&&
+      root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
