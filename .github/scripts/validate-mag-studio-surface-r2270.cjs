@@ -41,7 +41,7 @@ for(const token of [
   'bumpMap:this.embryoTexture,bumpScale:.023',
   'dataset.fxGenesisStudioR2271'
 ]) assert(three.includes(token),'R2271 Genesis studio source missing: '+token);
-assert(birth.includes('20261101-r2291-deep-hydrated-organic-handoff'),
+assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
   'R2271 film must use a versioned physical Three.js owner');
 const mobileFirstPaint=fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css','utf8');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
@@ -113,7 +113,7 @@ for(const token of [
   'this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);',
   'this.silverMaterial.roughness=mix(.18,.19,finale);'
 ]) assert(three.includes(token),'R2289 physical film-to-live cortex continuity missing: '+token);
-assert(birth.includes('20261101-r2291-deep-hydrated-organic-handoff'),
+assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
   'R2289 film bridge must use the freshly cached true Three.js asset');
 console.log('MAG_R2289_FILM_CORTEX_CONTINUITY_SOURCE_PASS');
 assert(three.includes("const shellPosition=shell.geometry.getAttribute('position');") &&
@@ -124,6 +124,18 @@ assert(three.includes('this.organicGroup.position.z=-.54*handoffCortex;') &&
   three.includes('this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);') &&
   three.includes('this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);'),
   'R2291 requires hydrated PBR cortex behind the real titanium chassis');
-assert(birth.includes('20261101-r2291-deep-hydrated-organic-handoff'),
+assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
   'R2291 must load the exact new physical film version');
 console.log('MAG_R2291_SCULPTED_CORTEX_SOURCE_PASS');
+assert(three.includes('const born=smooth((t-8.12)/1.05);') &&
+  three.includes('const leftSide=(i===3||i===4||(!this.mobileRender&&i===5));') &&
+  three.includes('this.tentacleGroup.visible=born>.002;') &&
+  three.includes('this.tentacleGroup.position.z=-.43*born;') &&
+  three.includes('this.tentacleMaterial.opacity=(this.mobileRender?.21:.27)*born;'),
+  'R2292 must reveal only bounded leftward living 3D strands');
+assert(three.includes('glow.visible=false;wire.visible=false;') &&
+  three.includes('dash.visible=false;nodes.visible=false;'),
+  'R2292 must not resurrect neon dotted robot-cable draw passes');
+assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
+  'R2292 must load the exact immutable bioglass filament film');
+console.log('MAG_R2292_BIOFILAMENT_SOURCE_PASS');

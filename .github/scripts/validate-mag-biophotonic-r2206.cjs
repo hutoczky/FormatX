@@ -92,7 +92,7 @@ assert(railPrepaint,'R2285 real mobile first-byte style missing');
 const railCsp="'sha256-"+crypto.createHash('sha256').update(railPrepaint[1]).digest('base64')+"'";
 assert(html.includes(railCsp)&&worker.split(railCsp).length-1===2,
   'R2285 inline CSS must have exact HTML/Worker CSP parity');
-const filmRevision = '20261101-r2291-deep-hydrated-organic-handoff';
+const filmRevision = '20261101-r2292-left-bioglass-tendrils';
 const magRevision = '20261031-r2266-full-visitor-mag';
 assert(intro.includes(filmRevision),'The real R1280 studio Genesis owner must use its current cache-busted revision');
 assert(intro.includes('const proofTurn=callback=>'),

@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2292 – egyoldalas, térbeli, élő biokristályszálak a filmvégi MAG-on
+- A P0 R2289 és R2291 9,25s képkockáit egymás mellé téve ellenőriztük: R2291-ben a korábbi hiányzó kékeszöld térbeli biokortex és a részletes lencse ténylegesen megjelent a fémváz mögött. A natív R326 állandó MAG-nál azonban három balra nyúló finom élő szál is van, amit a filmvég még nem mutatott.
+- **R2292:** az eredeti R1280 `makeTentacles()` nyolc valódi kúpos 3D csőgörbéjéből asztalon három baloldali, mobilon két baloldali aktiválódik csak 8,12s után. Az összes többi radiális robotkábel rejtve marad. A szálak meglévő MeshStandardMaterial anyaga sötétebb, alacsony emissziójú hidratált biokristály; finom élettani rezgéssel és a titán mögé helyezett Z-mélységgel.
+- A meglévő neon-glow, huzalháló, csomópont és szaggatott csík `visible=false`, ezért az eredeti szálak csak egy-egy valódi térbeli mesh-draw. Nem hoztunk létre új geometriát, WebGL vásznat, RAF-ot, hálózati textúrát vagy renderelőt. A korai DNA/embrió és a natív állandó R326 változatlan.
+- Az R533/R1280 verzió, HTML parser, R1629 fallback, Cloudflare Worker két CSP-jének pontos új SHA256-engedélyezése és R2266/R2206/R2270 QA forrás-őr konzisztens.
+- **QA:** az R2291 renderelt javulása vizuálisan igazolt. Az R2292 új tényleges 9,25s képkockáját, a normál MAG-handoffot, P0-t, Lighthouse ×3-at és a hardveres 60 FPS követelményt még ellenőrizni kell. PR #581 draft, nincs élesítés.
+
 ## R2290–R2291 – valódi archív-dokkolás és mély, organikus filmvégi MAG
 - **Valódi hibabizonyíték:** az R2289 környéki 9,25 mp-es Three.js képen még csak lapos, négyágú titán MAG látszott. A 10 mp utáni R326 natív képen már jól kivehető a hátsó aszimmetrikus élő biokortex. A R2289 biológiai film-burok ~10% átlátszóságú lila szövet maradt; a pozitív geometriai módosítás önmagában nem mutatkozott meg.
 - **R2291 grafikai változás:** a meglévő IcosahedronGeometry kortikális héjának vertexeit gyártáskor determinisztikus térbeli redőzettel deformáljuk, a normálokat újraszámítjuk. A 42 meglévő organikus lebeny jobban látható a fém összeállása után. A nagyobb élő térfogatot valódi Z-mélységben a mechanikai váz és optika mögé helyezzük, sötét-türkiz, fényelnyelő, hidratált PBR héjjal, clearcoattal.
