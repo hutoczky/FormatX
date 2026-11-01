@@ -2562,9 +2562,10 @@
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshStandardMaterial({
-        color:0x17333d,metalness:.44,roughness:.34,
-        emissive:0x0c4b58,emissiveIntensity:.42,
-        transparent:true,opacity:0
+        // R2292: restrained wet bioglass fibrils, not robotic cables.
+        color:0x315661,metalness:.22,roughness:.42,
+        emissive:0x0e3d47,emissiveIntensity:.28,
+        transparent:true,opacity:0,depthWrite:false
       });
       this.tentacleEdgeMaterial=new T.MeshBasicMaterial({
         color:0x5a9eaa,wireframe:true,transparent:true,opacity:0,
@@ -2617,6 +2618,11 @@
         dash.computeLineDistances();
         const g=new T.Group();
         g.add(mesh,glow,wire,dash,nodes);
+        // R2292: keep only the existing physically shaded tube visible.
+        // Decorative glowing meshes, wireframes, nodes and dashed skeleton
+        // remain disabled: each living filament is a SINGLE real 3D draw.
+        glow.visible=false;wire.visible=false;
+        dash.visible=false;nodes.visible=false;
         g.scale.setScalar(.001);
         g.userData.phase=phase;
         this.tentacleGroup.add(g);
@@ -3156,14 +3162,29 @@
     }
 
     updateTentacles(t,time){
-      /* R1941 — the award hero ends as one uninterrupted signature object.
-         The old segmented cables made the final frame read as a robot prop. */
-      this.tentacleGroup.visible=false;
-      if(this.tentacleMaterial)this.tentacleMaterial.opacity=0;
-      if(this.tentacleEdgeMaterial)this.tentacleEdgeMaterial.opacity=0;
-      if(this.tentacleNodeMaterial)this.tentacleNodeMaterial.opacity=0;
-      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
-      if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
+      // R2292: the R2291 hydrated rear shell now matches the native organ,
+      // but the final shot was missing R326's three delicate trailing limbs.
+      // Reuse ONLY the leftward three of the original eight tapered 3D
+      // curves. No new geometry, materials, textures or animation loop.
+      // A small one-sided living silhouette replaces the disabled radial
+      // robotic tentacle fan; DNA/embryo chapters remain completely clean.
+      const born=smooth((t-8.12)/1.05);
+      this.tentacleGroup.visible=born>.002;
+      this.tentacleGroup.position.z=-.43*born;
+      this.tentacleGroup.rotation.y=Math.sin(time*.00018)*.014*born;
+      this.tentacleMaterial.opacity=(this.mobileRender?.21:.27)*born;
+      this.tentacleEdgeMaterial.opacity=0;
+      this.tentacleNodeMaterial.opacity=0;
+      this.tentacleGlowMaterial.opacity=0;
+      this.tentacleDashMaterial.opacity=0;
+      this.tentacles.forEach((tube,i)=>{
+        const leftSide=(i===3||i===4||(!this.mobileRender&&i===5));
+        tube.visible=leftSide&&born>.002;
+        if(!tube.visible)return;
+        const pulse=1+.024*Math.sin(time*.00077+tube.userData.phase);
+        tube.scale.setScalar((this.mobileRender?.48:.57)*born*pulse);
+        tube.rotation.z=.012*Math.sin(time*.00019+tube.userData.phase)*born;
+      });
     }
 
     updateCamera(t,time){
