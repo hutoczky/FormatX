@@ -41,7 +41,7 @@ for(const token of [
   'bumpMap:this.embryoTexture,bumpScale:.023',
   'dataset.fxGenesisStudioR2271'
 ]) assert(three.includes(token),'R2271 Genesis studio source missing: '+token);
-assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
+assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2271 film must use a versioned physical Three.js owner');
 const mobileFirstPaint=fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css','utf8');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
@@ -125,7 +125,7 @@ for(const token of [
   'this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);',
   'this.silverMaterial.roughness=mix(.18,.19,finale);'
 ]) assert(three.includes(token),'R2289 physical film-to-live cortex continuity missing: '+token);
-assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
+assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2289 film bridge must use the freshly cached true Three.js asset');
 console.log('MAG_R2289_FILM_CORTEX_CONTINUITY_SOURCE_PASS');
 assert(three.includes("const shellPosition=shell.geometry.getAttribute('position');") &&
@@ -136,7 +136,7 @@ assert(three.includes('this.organicGroup.position.z=-.54*handoffCortex;') &&
   three.includes('this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);') &&
   three.includes('this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);'),
   'R2291 requires hydrated PBR cortex behind the real titanium chassis');
-assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
+assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2291 must load the exact new physical film version');
 console.log('MAG_R2291_SCULPTED_CORTEX_SOURCE_PASS');
 assert(three.includes('const born=smooth((t-8.12)/1.05);') &&
@@ -148,7 +148,7 @@ assert(three.includes('const born=smooth((t-8.12)/1.05);') &&
 assert(three.includes('glow.visible=false;wire.visible=false;') &&
   three.includes('dash.visible=false;nodes.visible=false;'),
   'R2292 must not resurrect neon dotted robot-cable draw passes');
-assert(birth.includes('20261101-r2292-left-bioglass-tendrils'),
+assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2292 must load the exact immutable bioglass filament film');
 console.log('MAG_R2292_BIOFILAMENT_SOURCE_PASS');
 assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry'") &&
@@ -159,3 +159,16 @@ assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor
 assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261101-r2294-stable-mobile-stage-compositor'),
   'R2293 HTML loader must use correct cache-busted canonical scroll owner');
 console.log('MAG_R2293_NATIVE_COMPOSITOR_FLIP_SOURCE_PASS');
+for(const token of [
+  'vertexColors:true,',
+  'const cortexChromatinR2295=new Float32Array(shellPosition.count*3);',
+  'const microPleat=Math.sin(x*8.4+z*2.8+2.1*Math.sin(y*3.1))',
+  'const vessel=Math.pow(.5+.5*marrow,6);',
+  'const coral=Math.pow(Math.max(0,(fleck-.33)/.67),3);',
+  "shell.geometry.setAttribute('color',",
+  'shell.geometry.computeVertexNormals();',
+  'fxGenesisCortexR2295='
+])assert(three.includes(token),'R2295 physical vascular cortex source missing: '+token);
+assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
+  'R2295 Three.js owner must be loaded with a physical new asset version');
+console.log('MAG_R2295_REAL_PBR_CHROMATIN_SURFACE_SOURCE_PASS');
