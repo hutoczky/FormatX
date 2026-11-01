@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2273 – geometriai stúdiófelhozatal: biokortex és élő filamentumok
+- A korábbi R2270 képi archívumon a MAG még szabályos, négyágú, lapos emblémaként hatott. R2273: a négy, megmunkált titán kar mögé egy valódi, árnyékolt konvex biologikus 3D kortikális tömeg kerül, amely a köztes negatív teret kitölti, és nem takarja el a központi üveglencsét.
+- Valódi, finoman hullámzó, vékony organikus nyúlványok a meglévő R326 attribútum-pufferekből: 3 a szoftveres tesztrendernél, 4 mobilon, 6 asztali profilon. A nyúlványok a GPU vertex shaderben mozognak, nem új CPU/RAF ciklusban. Ugyanaz az egyetlen natív vászon és anyagshader.
+- A GPU-tesszellációs sűrűség a szoftver/mobil/asztali profil szerint korlátozott. A négyágú eredeti signature váz, fizikailag mély üveglencse, a film és az átadott tartalomvezérlés érintetlen.
+- Ez a commit egy vizuális iteráció, **nem elfogadott végleges stúdiókép**. A forrás-, WebGL-pixel, reszponzív, CLS és Lighthouse-teszteket az új pontos SHA-n meg kell ismételni; a valós artefaktumból kell eldönteni, hogy a kitöltött sziluett valóban közelít-e a referenciához.
+
 ## R2271–R2272 – stúdió Genesis anyagjavítás + tesztellentmondás feloldása
 - Az R2270 natív MAG shader a négyágú testet és a titánpaneleket ugyanabban a GPU-draw callban organikusan meghajlítja. A vasaltnak ható, sűrű négyzetrácsot ívelt, szélesebb lemezek és finom fotonikus szövet váltják fel.
 - A Genesis eredeti, valódi Three.js dupla DNS-láncának anyaga R2271-ben kevésbé neon-emisszív; a PBR clearcoat és a biopolimer mikrodomborzat több szerepet kap. A sejthártya két tengelyen ismétlődő textúrája varratmentes, a korall-metabolikus foltok és a szemcsék kevésbé túlvezéreltek.

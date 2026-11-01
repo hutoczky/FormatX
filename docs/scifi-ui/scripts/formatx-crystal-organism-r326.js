@@ -282,9 +282,11 @@
        desktop full-quality and device-dependent render governor unchanged. */
     const latitudeSegments = software ? 28 : constrainedMobile ? 30 : mobile ? 40 : constrained ? 48 : 72;
     const longitudeSegments = software ? 56 : constrainedMobile ? 60 : mobile ? 80 : constrained ? 96 : 144;
-    /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
-       with the four-point body; the living response stays in material, light and motion. */
-    const tendrilCount = 0;
+    /* R2273: six fine biologically animated trailing filaments on desktop,
+       four on phones, three in software; all join the SAME existing triangle
+       stream, material, renderer and GPU-frame loop. No detached hard-surface
+       wings and no additional context. Genuine cortex is sculpted below. */
+    const tendrilCount = software ? 3 : mobile ? 4 : 6;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
     const sphere = [];
@@ -512,12 +514,12 @@
       const rootX=-.56+.040*Math.sin(index*1.71);
       const rootY=.12+lane*.54+.035*Math.cos(index*1.13);
       const rootZ=.04+.10*Math.sin(index*.91);
-      const sweep=.52+.34*(.5+.5*Math.sin(index*1.37));
+      const sweep=.30+.17*(.5+.5*Math.sin(index*1.37));
       const wave=Math.sin(t*Math.PI*1.55+index*.83)*(.025+.095*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.028*t;
       const rise=Math.sin(t*Math.PI*.92+index*.73)*(.035+.10*t);
       return [
-        rootX-(.30+sweep)*t-.18*t*t,
+        rootX-(.27+sweep)*t-.10*t*t,
         rootY+rise+lane*.12*t+wave*.34,
         rootZ+.10*Math.sin(t*Math.PI+index*.61)+wave
       ];
@@ -911,6 +913,15 @@
       if(face[2]<0)[vertices[1],vertices[2]]=[vertices[2],vertices[1]];
       guardianTriangle(vertices,facet,[.62,.90,-.24]);
     }
+
+    /* R2273 — an ACTUAL convex, three-dimensional living cortex behind
+       the machined titanium limbs. This fills the implausibly empty space
+       between the pointed arms without obscuring the front-mounted optic.
+       It is part of the original R326 non-indexed attribute stream:
+       no second mesh, renderer, WebGL context, frame loop or asset fetch.
+       Bounded tessellation retains the measured mobile/software budget. */
+    appendEllipsoid([.055,.055,-.170],[.665,.710,.405],1.12,
+      software?10:mobile?13:18,software?18:mobile?24:36,.095);
 
     /* R1724 — unique FormatX crystal creature anatomy.
        Living cortical lobes and membranes replace animal limbs and robotic armour. */
@@ -1664,6 +1675,7 @@
     root.dataset.fxNativeMagSurfaceR2212='laminated-living-cyan-coral-lens-deep-silver-single-pass';
     root.dataset.fxNativeMagSurfaceR2214='anti-aliased-titanium-capillaries-fasteners-micro-machined-four-arm-body';
     root.dataset.fxNativeMagStudioR2270='asymmetric-living-sculpt-sinuous-titanium-lamellae-nacre-vascular-backscatter-single-pass';
+    root.dataset.fxNativeMagStudioR2273='sculpted-deep-cortex-biological-filaments-canonical-single-draw';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

@@ -19,8 +19,12 @@ for(const token of [
 ]) assert(source.includes(token),'R2270 live MAG studio optics missing: '+token);
 assert(!source.includes('vec2 panelCoord=vec2(radial*28.0,lateral/panelWidth*4.0)'),
   'old rectilinear checker-grid is still active');
-assert(source.includes('const tendrilCount = 0;'),
-  'no new detached appendage silhouette without proof');
+assert(source.includes('const tendrilCount = software ? 3 : mobile ? 4 : 6;'),
+  'R2273 actual cortical filaments must be bounded across GPU tiers');
+assert(source.includes('appendEllipsoid([.055,.055,-.170],[.665,.710,.405],1.12,'),
+  'R2273 deep biological cortex must be genuine canonical 3D geometry');
+assert(source.includes('fxNativeMagStudioR2273='),
+  'R2273 studio geometry state missing');
 assert(source.includes("root.dataset.fxNativeMagSurfaceR2203="),
   'original titanium surface and optical iris must remain');
 assert(birth.includes('const DURATION = 10000;'),
