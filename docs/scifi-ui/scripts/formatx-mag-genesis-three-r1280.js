@@ -387,24 +387,27 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const phosphateTexture=this.makeDNAFiberTexture();
+      // R2271: hydrated biopolymer, not emissive candy-light tubing.
+      // The existing true 3D double helix gains neutral photographic
+      // reflections over the original phosphate microrelief texture.
       const ma=new T.MeshPhysicalMaterial({
-        color:0x9cc6ea,emissive:0x28538d,emissiveIntensity:1.08,
-        roughness:.225,metalness:.11,transparent:true,opacity:.93,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
-        depthWrite:false,clearcoat:.88,clearcoatRoughness:.085
+        color:0xa7c8e2,emissive:0x224267,emissiveIntensity:.63,
+        roughness:.255,metalness:.065,transparent:true,opacity:.95,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.008:.012,
+        depthWrite:false,clearcoat:.96,clearcoatRoughness:.075
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0xc2a2eb,emissive:0x5e3997,emissiveIntensity:1.05,
-        roughness:.23,metalness:.10,transparent:true,opacity:.92,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
-        depthWrite:false,clearcoat:.86,clearcoatRoughness:.10
+        color:0xc8b5dd,emissive:0x523b77,emissiveIntensity:.61,
+        roughness:.26,metalness:.062,transparent:true,opacity:.95,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.008:.012,
+        depthWrite:false,clearcoat:.95,clearcoatRoughness:.08
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x4bdfff,transparent:true,opacity:.095,depthWrite:false,
+        color:0x65bad6,transparent:true,opacity:.055,depthWrite:false,
         blending:T.AdditiveBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x997bff,transparent:true,opacity:.085,depthWrite:false,
+        color:0xa090d3,transparent:true,opacity:.050,depthWrite:false,
         blending:T.AdditiveBlending
       });
       // R2188: complementary nucleotide chemistry is readable as genuine
@@ -1188,7 +1191,8 @@
         const ix=Math.floor(x),iy=Math.floor(y);
         let fx=x-ix,fy=y-iy;
         fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
-        const sample=(px,py)=>hash(((px%scale)+scale)%scale,py);
+        // R2271: both axes tile seamlessly on the curved cell.
+        const sample=(px,py)=>hash(((px%scale)+scale)%scale,((py%scale)+scale)%scale);
         return mix(mix(sample(ix,iy),sample(ix+1,iy),fx),
           mix(sample(ix,iy+1),sample(ix+1,iy+1),fx),fy);
       };
@@ -1201,26 +1205,26 @@
             +.20*noise(u+.07,v,78);
           const coralCloud=.56*noise(u+.13,v+.07,23)
             +.44*noise(u,v,61);
-          const coral=clamp((coralCloud-.545)*5.1);
+          const coral=Math.pow(clamp((coralCloud-.575)*4.25),1.4);
           const mineral=noise(u,v,116);
-          const grain=(hash(x,y)-.5)*13;
+          const grain=(hash(x,y)-.5)*8;
           // R2201: microscopic clustered chromatin, not a uniform aqua blob.
         // A lower threshold produces many small coral organelle islands.
         const freckle=Math.pow(clamp((mineral-.62)*3.9),2);
           const index=(y*width+x)*4;
           pixels[index]=Math.round(clamp(
-            (20+72*cloud+202*coral+62*freckle+grain)/255)*255);
+            (20+72*cloud+155*coral+58*freckle+grain)/255)*255);
           pixels[index+1]=Math.round(clamp(
-            (87+165*cloud-61*coral+24*freckle+grain)/255)*255);
+            (87+165*cloud-36*coral+24*freckle+grain)/255)*255);
           pixels[index+2]=Math.round(clamp(
-            (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
+            (95+169*cloud-54*coral+18*freckle+grain)/255)*255);
           pixels[index+3]=255;
           // R2212: deepen coral trabeculae within the teal metabolic matrix.
           // R2206: cluster coral metabolic islands within living teal
           // cytoplasm; preserve the membrane's fine-scale native texture.
           // All sampling happens once at initialization, never per frame.
           const metabolic=clamp(Math.pow(clamp(
-            (coralCloud-.52)*4.7),1.8)*(.48+.52*mineral));
+            (coralCloud-.54)*4.5),1.8)*(.48+.52*mineral));
           const capillary=clamp((.5+.5*Math.sin(u*39+
             3.0*Math.sin(v*24+curl*5.0))-.74)*3.6)*cloud;
           pixels[index]=Math.min(255,pixels[index]+Math.round(
@@ -1239,6 +1243,8 @@
       texture.colorSpace=T.SRGBColorSpace;
       texture.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy());
       texture.needsUpdate=true;
+      document.documentElement.dataset.fxGenesisStudioR2271=
+        'hydrated-dna-satin-cell-membrane-seamless-microscopic-coral';
       return texture;
     }
 
@@ -1262,10 +1268,10 @@
         // nucleus was too transparent against near-black (0.47 opacity),
         // washing its coral metabolic freckles into a faint glass bead.
         color:0xf5ffff,map:this.embryoTexture,
-        bumpMap:this.embryoTexture,bumpScale:.034,
+        bumpMap:this.embryoTexture,bumpScale:.023,
         emissive:0x16676b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.40,
-        metalness:.015,roughness:.25,clearcoat:.82,clearcoatRoughness:.14,
+        emissiveIntensity:.28,
+        metalness:.015,roughness:.32,clearcoat:.90,clearcoatRoughness:.16,
         transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
@@ -1276,7 +1282,7 @@
       // nucleus is a physically shaded translucent organelle with an actual
       // clear-coated lens, lit by the same three-dimensional studio rig.
       this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({
-        color:0x248a9d,emissive:0x13718a,emissiveIntensity:.40,
+        color:0x28788d,emissive:0x15546f,emissiveIntensity:.28,
         metalness:.015,roughness:.13,transmission:.24,thickness:.23,ior:1.36,
         clearcoat:1,clearcoatRoughness:.055,
         transparent:true,opacity:0,depthWrite:false
