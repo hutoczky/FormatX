@@ -2894,13 +2894,18 @@
     updateOrganic(t,time){
       const grow=smooth((t-3.76)/.72);
       const fade=1-smooth((t-6.20)/1.15)*.96;
-      const visible=grow*fade;
+      // R2289: a real cortex survives the titanium assembly and gently
+      // reforms by the final 9.25s shot. Previously it was almost gone
+      // (4%) before the film handed off to a prominent live R326 cortex.
+      // Reuse the existing textured 3D shell; allocate ZERO new meshes.
+      const handoffCortex=smooth((t-7.28)/1.43);
+      const visible=grow*mix(fade,.56,handoffCortex);
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+visible*.63;
+      const bodyScale=.001+.63*grow*mix(fade,.88,handoffCortex);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
 
       this.organicShellMaterial.opacity=.18*visible;
-      this.organicLobeMaterial.opacity=.15*visible;
+      this.organicLobeMaterial.opacity=.15*visible*(1-.72*handoffCortex);
       this.organicWireMaterial.opacity=.0003*visible;
       this.organicVeinMaterial.opacity=.068*visible;
       this.organicHoodMaterial.opacity=.13*visible;
@@ -2985,9 +2990,9 @@
         mix(.210,.300,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.600,finale),
-        mix(.575,.660,finale),
-        mix(.565,.690,finale)
+        mix(.480,.505,finale),
+        mix(.575,.575,finale),
+        mix(.565,.603,finale)
       );
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression
@@ -2997,10 +3002,10 @@
       this.silverMaterial.transmission=mix(.040,.020,finale);
       this.mechMaterial.metalness=mix(.50,.64,finale);
       this.mechMidMaterial.metalness=mix(.43,.54,finale);
-      this.silverMaterial.metalness=mix(.70,.82,finale);
-      this.mechMaterial.roughness=mix(.26,.21,finale);
-      this.mechMidMaterial.roughness=mix(.24,.19,finale);
-      this.silverMaterial.roughness=mix(.18,.14,finale);
+      this.silverMaterial.metalness=mix(.70,.78,finale);
+      this.mechMaterial.roughness=mix(.26,.23,finale);
+      this.mechMidMaterial.roughness=mix(.24,.21,finale);
+      this.silverMaterial.roughness=mix(.18,.19,finale);
 
       this.mechMaterial.opacity=(.97+.018*finale)*grow;
       // R2119: reveal machined inserts as solid layers, not ghosted decals.
