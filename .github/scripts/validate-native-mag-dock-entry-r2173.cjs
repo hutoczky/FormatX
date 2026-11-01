@@ -69,7 +69,37 @@ function observe({normal}){
         page.on('pageerror',e=>errors.push(e.message));
         page.on('requestfailed',r=>failedRequests.push({url:r.url(),error:r.failure()?.errorText}));
         await page.goto(home,{waitUntil:'domcontentloaded',timeout:30000});
-        await page.waitForFunction(()=>window.__dockEntry?.cinema&&window.__dockEntry?.firstDraw,null,{timeout:45000});
+        // R2290: the genuine R2286 product intentionally keeps the MAG
+        // fullscreen hero at scrollY=0, even after a full Genesis replay.
+        // The old test waited for a cinematic dock without scrolling and
+        // therefore timed out while the browser was correctly at home.
+        // Complete the actual visitor film and GPU warmup first.
+        await page.waitForFunction(()=>{
+          const root=document.documentElement;
+          return root.dataset.fxCrystalOrganismR326==='ready' &&
+            !document.querySelector('.fx-mag-birth-r533') &&
+            !document.querySelector('#fx-mag-birth-prepaint-r1606') &&
+            root.dataset.fxArchiveExperience==='ready' &&
+            root.dataset.fxArchiveCinema!=='active';
+        },null,{timeout:45000});
+        const atHome=await page.evaluate(()=>({
+          scrollY,cinema:document.documentElement.dataset.fxArchiveCinema,
+          dock:document.documentElement.dataset.fxArchiveDock,
+          stage:document.querySelector('.fx-crystal-organism-r326-stage')?.getBoundingClientRect().toJSON()
+        }));
+        assert(atHome.scrollY===0 && atHome.cinema!=='active',
+          'R2290: normal visitor must land on the real undocked MAG before scrolling');
+        assert(atHome.dock!=='active','R2290: no unsolicited archive dock at page top');
+        // Native scroll is the ACTUAL user entry into the cinematic
+        // folio. The first dock and subsequent compositor size must match;
+        // never synthesize archive data attributes or bypass original code.
+        await page.evaluate(()=>scrollTo({
+          top:Math.max(140,Math.round(innerHeight*.42)),behavior:'instant'
+        }));
+        await page.waitForFunction(()=>window.__dockEntry?.cinema&&
+          window.__dockEntry?.firstDraw&&
+          document.documentElement.dataset.fxArchiveCinema==='active',
+          null,{timeout:25000});
         await page.waitForTimeout(350);
         const result=await page.evaluate(()=>{
           const root=document.documentElement,stage=document.querySelector('.fx-crystal-organism-r326-stage'),canvas=stage?.querySelector('.fx-crystal-organism-r326-canvas'),r=stage?.getBoundingClientRect();
