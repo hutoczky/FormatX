@@ -41,7 +41,7 @@ for(const token of [
   'bumpMap:this.embryoTexture,bumpScale:.023',
   'dataset.fxGenesisStudioR2271'
 ]) assert(three.includes(token),'R2271 Genesis studio source missing: '+token);
-assert(birth.includes('20261101-r2289-biological-cortex-native-handoff'),
+assert(birth.includes('20261101-r2291-deep-hydrated-organic-handoff'),
   'R2271 film must use a versioned physical Three.js owner');
 const mobileFirstPaint=fs.readFileSync('docs/scifi-ui/styles/formatx-mobile-first-paint-r358.css','utf8');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
@@ -108,11 +108,22 @@ console.log('MAG_R2286_USER_SCROLL_ARCHIVE_GATE_PASS');
 for(const token of [
   'R2289: a real cortex survives the titanium assembly',
   'const handoffCortex=smooth((t-7.28)/1.43);',
-  'const visible=grow*mix(fade,.56,handoffCortex);',
-  'const bodyScale=.001+.63*grow*mix(fade,.88,handoffCortex);',
-  'this.organicLobeMaterial.opacity=.15*visible*(1-.72*handoffCortex);',
+  'const visible=grow*mix(fade,.82,handoffCortex);',
+  'const bodyScale=.001+.63*grow*mix(fade,1.08,handoffCortex);',
+  'this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);',
   'this.silverMaterial.roughness=mix(.18,.19,finale);'
 ]) assert(three.includes(token),'R2289 physical film-to-live cortex continuity missing: '+token);
-assert(birth.includes('20261101-r2289-biological-cortex-native-handoff'),
+assert(birth.includes('20261101-r2291-deep-hydrated-organic-handoff'),
   'R2289 film bridge must use the freshly cached true Three.js asset');
 console.log('MAG_R2289_FILM_CORTEX_CONTINUITY_SOURCE_PASS');
+assert(three.includes("const shellPosition=shell.geometry.getAttribute('position');") &&
+  three.includes('const stretch=1+.063*ridge+.037*lobe;') &&
+  three.includes('shell.geometry.computeVertexNormals();'),
+  'R2291 requires genuine organic distortion of original 3D cortex normals');
+assert(three.includes('this.organicGroup.position.z=-.54*handoffCortex;') &&
+  three.includes('this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);') &&
+  three.includes('this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);'),
+  'R2291 requires hydrated PBR cortex behind the real titanium chassis');
+assert(birth.includes('20261101-r2291-deep-hydrated-organic-handoff'),
+  'R2291 must load the exact new physical film version');
+console.log('MAG_R2291_SCULPTED_CORTEX_SOURCE_PASS');
