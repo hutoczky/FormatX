@@ -3017,8 +3017,32 @@
     };
     listen(document,'formatx:magbirthprepare',prepareNativeFrameR2254,{passive:true});
     listen(document,'formatx:magbirthcomplete',()=>{
-      // The original owner is still the fail-safe for Skip and other
-      // paths that did not obtain a real GPU-complete frame in advance.
+      // R2282: the R2278 early GPU fence can finish while the cinematic
+      // occluder is still on top. Merely returning 'finished' here leaves
+      // a valid framebuffer that the browser has not composited into the
+      // newly revealed desktop viewport (real R2281 P0 black-frame proof).
+      // Present ONE frame from the canonical renderer after DOM teardown.
+      // Preserve the zero-readback policy and the existing idle governor.
+      if(root.dataset.fxMagHandoffGpuR2226==='finished'){
+        queueMicrotask(()=>{
+          if(disposed||contextLost||document.hidden||!stage.isConnected)return;
+          const bounds=stage.getBoundingClientRect();
+          if(bounds.width<8||bounds.height<8||bounds.right<=0||
+             bounds.bottom<=0||bounds.left>=innerWidth||
+             bounds.top>=innerHeight)return;
+          visible=true;
+          try{
+            render(performance.now());
+            gl.flush();
+            root.dataset.fxMagPostFilmPresentR2282='single-native-compositor-frame';
+          }catch(error){
+            root.dataset.fxMagPostFilmPresentR2282='single-frame-unavailable';
+            console.warn('FormatX R2282 post-film presentation:',error);
+          }
+        });
+        return;
+      }
+      // Skipped/failed warmup still uses the original guarded GPU proof.
       prepareNativeFrameR2254();
     },{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
