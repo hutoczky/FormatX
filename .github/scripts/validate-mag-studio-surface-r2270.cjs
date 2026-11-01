@@ -54,9 +54,9 @@ for(const token of [
   '#hero .hero-space > .fx-core-mobile-v55-stage',
   'canvas.fx-core-mobile-v55-canvas'
 ]) assert(mobileFirstPaint.includes(token),'R2274 critical mobile stability missing: '+token);
-assert.equal((html.match(/20261101-r2276-firstpaint-mag-centered/g)||[]).length,2,
+assert.equal((html.match(/20261101-r2280-archive-native-stage-centered/g)||[]).length,2,
   'R2276 HTML firstpaint CSS preload and stylesheet must use the same cache key');
-assert(worker.includes('20261101-r2276-firstpaint-mag-centered'),
+assert(worker.includes('20261101-r2280-archive-native-stage-centered'),
   'R2276 Cloudflare Worker must serve the same critical CSS revision');
 assert(mobileFirstPaint.includes('left:50%!important;') &&
   mobileFirstPaint.includes('transform:translate(-50%,-1.4%) scaleY(.935)!important;'),
@@ -78,4 +78,10 @@ assert(birth.includes('let nativeFencePrefetchedR2278=false;') &&
 assert(birth.includes("ROOT.dataset.fxMagHandoffGateR2254='gpu-finished-before-exposure'") &&
   birth.includes("ROOT.dataset.fxMagHandoffGateR2254='gpu-timeout-released'"),
   'Do not weaken the original real GPU complete safety gate or accessibility bound');
-console.log('MAG_R2278_EARLY_NATIVE_GPU_FENCE_SOURCE_PASS');
+assert(mobileFirstPaint.includes('R2280 — genuine archive-state MAG') &&
+  mobileFirstPaint.includes('[data-fx-archive-cinema="active"]') &&
+  mobileFirstPaint.includes('[data-fx-archive-dock="active"]') &&
+  mobileFirstPaint.includes('.fx-core-mobile-v55-stage.fx-archive-native-docked') &&
+  mobileFirstPaint.includes('transform:none!important;'),
+  'R2280 native archive must cancel half-width translation on the actual mobile GL stage');
+console.log('MAG_R2280_ARCHIVE_NATIVE_CENTERING_SOURCE_PASS');

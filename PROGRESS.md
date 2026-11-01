@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2280 – natív mobil MAG levágásának célzott javítása
+- Az R2277 valódi mobil PNG bizonyította: a 390px széles MAG canvas x=-195 pozícióban volt, a fénypontok súlypontja 0.0887 képszélesség. Ez elfogadhatatlan, a screenshot-test jogosan FAIL.
+- A gyökérok a CSS-kaszkád: az R2276 első képkockában helyes left:50% + translate(-50%) párosát az R1987 natív archív fixed left:0 pozícióra váltotta, de a transzformáció megmaradt. R2280 csak valós archív módban törli ezt a maradék eltolást a natív stage-ről és canvasról.
+- Az első festés CSS preload, a valódi stylesheet és a Worker cache-revízió egységes; a biophotonic és studio forrásőr frissítve. Az R2277 képi centroid és a CLS/GL P0 változatlanul kötelező.
+- A végső képet, mobil CLS-t, 3/3 GPU-fence-t és Lightroom teljesítményt csak új, pontos SHA-ra futó CI után lehet PASS-nak tekinteni. Fejlesztői ág, nem éles.
+
 ## R2278 – stúdió Genesis végén korai valódi GPU-képkocka
 - Az R2275 c74ab580 P0 normál Chromiumban a 3 MAG hidegindításból kettőnél FAIL: 4.2s után, még a WebGL2 fence elkészülte előtt a film levette a takarást. Ez valódi időzítési hiba, nem érvényes stúdió elfogadás.
 - Az R2278 a 10s filmes történet 90%-ától, csak kész WebGL2 MAG esetén, egyszer meghívja a meglévő formátumú native `formatx:magbirthprepare` eseményt. A valódi fence így még a film utolsó másodperce alatt elindulhat. A finish() eredeti eseménye továbbra is helyreállítási útvonal. A 4.2s fail-open korlát, tiltott diagnosztikai readback és egyetlen canvas változatlan.
