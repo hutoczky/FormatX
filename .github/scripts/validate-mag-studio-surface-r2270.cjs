@@ -129,9 +129,13 @@ assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2289 film bridge must use the freshly cached true Three.js asset');
 console.log('MAG_R2289_FILM_CORTEX_CONTINUITY_SOURCE_PASS');
 assert(three.includes("const shellPosition=shell.geometry.getAttribute('position');") &&
-  three.includes('const stretch=1+.063*ridge+.037*lobe;') &&
-  three.includes('shell.geometry.computeVertexNormals();'),
-  'R2291 requires genuine organic distortion of original 3D cortex normals');
+  three.includes('const microPleat=Math.sin(x*8.4+z*2.8+2.1*Math.sin(y*3.1))*') &&
+  three.includes('const stretch=1+.063*ridge+.037*lobe+.016*microPleat;') &&
+  three.includes("shell.geometry.setAttribute('color',") &&
+  three.includes('new T.BufferAttribute(cortexChromatinR2295,3)') &&
+  three.includes('shell.geometry.computeVertexNormals();') &&
+  three.includes('vertexColors:true,'),
+  'R2295 must deform the genuine 3D cortex and upload biological vertex colors with recomputed normals');
 assert(three.includes('this.organicGroup.position.z=-.54*handoffCortex;') &&
   three.includes('this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);') &&
   three.includes('this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);'),
