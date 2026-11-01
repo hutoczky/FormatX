@@ -97,3 +97,11 @@ assert(mobileFirstPaint.includes('R2285 — initial mobile layout / final native
   mobileFirstPaint.includes('div.fx-core-mobile-v55-stage.fx-archive-native-docked'),
   'R2285 initial legacy rail and final dock source missing');
 console.log('MAG_R2285_MOBILE_RAIL_AND_DOCK_SOURCE_PASS');
+const archive=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
+assert(archive.includes('const enteredScroll=scrollY>Math.max(24,innerHeight*.06);') &&
+  archive.includes('Boolean(introDone&&enteredScroll&&'),
+  'R2286 must never activate archive docking at scrollY=0 after film teardown');
+assert(archive.includes("if(active&&stage)ResponsiveExperience.dock();") &&
+  archive.includes('else if(archiveActive)ResponsiveExperience.restore();'),
+  'R2286 must keep native reversible scroll and the original home MAG');
+console.log('MAG_R2286_USER_SCROLL_ARCHIVE_GATE_PASS');
