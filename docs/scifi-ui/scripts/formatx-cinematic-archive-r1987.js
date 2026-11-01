@@ -671,6 +671,10 @@
             `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${sx.toFixed(5)},${sy.toFixed(5)})`,
             'important');
           root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry';
+          // One bounded style flush on MODE ENTRY (not every animation
+          // frame) ensures Chromium captures the inverse transform as
+          // the FLIP transition's real starting geometry.
+          void stage.getBoundingClientRect();
           stageFlipRafR2293=requestAnimationFrame(()=>{
             stageFlipRafR2293=0;
             if(!archiveActive||!stage?.isConnected)return;
