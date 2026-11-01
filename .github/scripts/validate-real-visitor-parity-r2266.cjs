@@ -32,9 +32,9 @@ assert.equal(worker.split(token).length-1,2,
   'Cloudflare meta and header CSP must both allow the visitor film');
 assert(inline.includes("const a=navigator.webdriver===true&&f;"),
   'Automated metrics cannot silently skip normal Genesis');
-assert(inline.includes('formatx-mag-birth-live-r533.js?v=20261101-r2278-early-native-gpu-fence'),
+assert(inline.includes('formatx-mag-birth-live-r533.js?v=20261101-r2289-biological-cortex-native-handoff'),
   'Exact full cinematic cache key not active');
-assert(rescue.includes('20261101-r2278-early-native-gpu-fence'),
+assert(rescue.includes('20261101-r2289-biological-cortex-native-handoff'),
   'Fallback and parser must load identical film');
 assert(intro.includes('const AUTOMATION = navigator.webdriver === true &&'),
   'Automation fast path must be explicitly requested by QA');
