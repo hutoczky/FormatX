@@ -114,8 +114,9 @@ assert(runtimeSrc.startsWith('formatx-mag-birth-live-r533.js?v='),
   'R533 entrypoint must have an explicit cache revision');
 assert(html.includes(runtimeSrc)&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+miniLoaderRevision),
   'HTML must use new Mini MAG loader while preserving original cinematic bridge');
-assert(worker.includes(filmRevision)&&worker.includes(miniLoaderRevision),
-  'Worker must preserve canonical film and deferred controller rewrites');
+assert(intro.includes(filmRevision)&&worker.includes(miniLoaderRevision)&&
+  worker.split('${'+hashVariable+'}').length-1===2,
+  'Worker must preserve the active parser CSP, native controller and real R1280 film');
 // R2256: materialize the real hero in layout before FCP. The film may
 // cover the page visually, but an initial 1px clipped panel followed by a
 // full-height copy creates a deterministic 0.33+ mobile CLS.
