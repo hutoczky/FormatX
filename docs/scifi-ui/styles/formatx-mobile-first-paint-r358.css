@@ -1197,6 +1197,7 @@
     max-width:100vw!important;
     height:100%!important;
     transform:translate(-50%,-1.4%) scaleY(.935)!important;
+    translate:none!important; /* R2281: prevent a second -50% independent CSS translate */
     transform-origin:50% 50%!important;
   }
   html:root:root:root:root:root:root body.living-architecture

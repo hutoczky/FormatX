@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2281 – a valós −195 px mobil MAG eltolás megszüntetése
+- A R2279 valós Chromium mobil képének részletes Layout diagnosztikája igazolta: a 390 px széles natív MAG stage `left:195px`, `transform:matrix(...,-195,...)` és **önálló `translate:-50%`** volt. A két külön -195 px eltolás összeadódott, ezért lett a végső canvas `x:-195` és a vizuális centroid ~0.088.
+- Az R2280 korábbi célzott archive-state kivétele nem szüntette meg az eredeti, archív nélküli dupla transzlációt. R2281 a korai render-blocking R358 CSS elsőfestési stage tulajdonosán `translate:none!important`-ot rögzít, a létező `left:50%` + `transform:translate(-50%,-1.4%) scaleY(.935)` megtartásával. Ez a tényleges középre igazítás, nem képfeldolgozási teszt-hack.
+- A frontend HTML preload+stylesheet cache, Worker átírás, két P0 forráskontraktus és PROGRESS egységes verziót kapott. Az R2277 eredeti PNG centroid, első mobil CLS, 3/3 natív WebGL GPU és Lighthouse küszöbök **változatlanul kötelezőek**.
+- **QA státusz: ellenőrizendő**. A vizuális hiba valódi javulását kizárólag az új commit képpontmérésével lehet megállapítani.
+
 ## R2280 – natív mobil MAG levágásának célzott javítása
 - Az R2277 valódi mobil PNG bizonyította: a 390px széles MAG canvas x=-195 pozícióban volt, a fénypontok súlypontja 0.0887 képszélesség. Ez elfogadhatatlan, a screenshot-test jogosan FAIL.
 - A gyökérok a CSS-kaszkád: az R2276 első képkockában helyes left:50% + translate(-50%) párosát az R1987 natív archív fixed left:0 pozícióra váltotta, de a transzformáció megmaradt. R2280 csak valós archív módban törli ezt a maradék eltolást a natív stage-ről és canvasról.
