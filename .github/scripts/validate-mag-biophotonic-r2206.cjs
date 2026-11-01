@@ -87,9 +87,9 @@ assert(hashDeclaration,'Worker must declare exact active parser SHA-256');
 const hashVariable=hashDeclaration.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1];
 assert(worker.split('${'+hashVariable+'}').length-1===2,
   'Both Worker CSPs must authorize the active parser hash');
-const filmRevision = '20261028-r2217-studio-spectral-titanium';
+const filmRevision = '20261101-r2271-film-grade-genesis-optics';
 const magRevision = '20261031-r2266-full-visitor-mag';
-assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
+assert(intro.includes(filmRevision),'The real R1280 studio Genesis owner must use its current cache-busted revision');
 assert(intro.includes('const proofTurn=callback=>'),
   'R2236 cinematic test must bound animation-frame and timer scheduling');
 assert(intro.includes("ROOT.dataset.fxMagBirthProofSchedulerR2236='bounded-raf-or-timeout'"),
