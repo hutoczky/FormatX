@@ -1213,6 +1213,21 @@
         local.x+=tendrilTip*(uPointer.x*.060 + tendrilWave*(.012+.020*uEnergy));
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
+        // R2270: a single material-coherent asymmetric cortical warp. This
+        // bends the original mineral and its titanium veins together; the
+        // recessed glass iris is left rigid, so the socket cannot tear.
+        // Existing seven GPU buffers, one renderer and one RAF are unchanged.
+        float sculptRadius=length(local.xy);
+        float sculptEnvelope=smoothstep(.22,.72,sculptRadius)*
+          (1.0-step(6.0,aFacet));
+        float sculptX=.064*sin(local.y*3.10+.45)+
+          .031*sin(local.x*4.30-1.50);
+        float sculptY=.034*sin(local.x*3.20-.48)+
+          .027*cos(local.y*4.70+.32);
+        local.x+=sculptX*sculptEnvelope;
+        local.y+=sculptY*sculptEnvelope;
+        local.z+=.023*sin(local.x*2.70+local.y*3.30)*
+          sculptEnvelope;
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
         float yaw=${mobile?'.535':'.465'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
         float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
@@ -1475,8 +1490,13 @@
         float radial=max(anatomy.x,anatomy.y);
         float lateral=min(anatomy.x,anatomy.y);
         float panelWidth=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
-        vec2 panelCoord=vec2(radial*28.0,lateral/panelWidth*4.0);
-        panelCoord.y+=sin(floor(panelCoord.x)*1.37)*.20;
+        /* R2270: continuous body-following, elongated sinuous titanium
+           lamellae instead of a repetitive rectilinear tile grid. The
+           original shell provides actual geometric relief; the material
+           simply adds filtered seams in the same physical draw. */
+        vec2 panelCoord=vec2(radial*17.0,lateral/panelWidth*2.4);
+        panelCoord.y+=.29*sin(panelCoord.x*.54+radial*1.60)
+          +.12*sin(panelCoord.x*1.17+.60);
         vec2 panelEdge=min(fract(panelCoord),1.0-fract(panelCoord));
         vec2 panelAA=${derivativeSupport?'max(fwidth(panelCoord),vec2(.018))':'vec2(.095)'};
         float panelJoint=1.0-min(smoothstep(.018,.035+panelAA.x,panelEdge.x),
@@ -1503,8 +1523,8 @@
           +vec3(.94,.97,1.0)*silverKey*.90
           +vec3(.12,.25,.31)*metalSideSpec*.25;
         studioSilver*=mix(.94,1.045,plateFinish);
-        studioSilver*=1.0-panelJoint*.24*panelEnvelope;
-        studioSilver+=vec3(.38,.44,.49)*panelBevel*panelEnvelope*(.16+.38*metalKey);
+        studioSilver*=1.0-panelJoint*.125*panelEnvelope;
+        studioSilver+=vec3(.38,.44,.49)*panelBevel*panelEnvelope*(.20+.43*metalKey);
         studioSilver*=1.0+.018*brushed;
         /* R2206 — a cool grazing studio strip keeps the curved titanium
            recognizable against the biological cyan/coral core without raising
@@ -1512,6 +1532,22 @@
         float titaniumGrazing=pow(1.0-facing,2.4);
         studioSilver+=vec3(.31,.43,.48)*titaniumGrazing*
           panelEnvelope*.14;
+        /* R2270: photographic nacre and living vascular backscatter
+           follow the real curved anatomy. No synthetic bloom, textures,
+           extra sampling or screen-space effects are introduced. */
+        float metabolicStrand=.5+.5*sin(radial*18.0+
+          1.65*sin(lateral*15.0+radial*2.4));
+        float vascularEnvelope=panelEnvelope*(1.0-panelJoint);
+        float narrowVein=pow(metabolicStrand,8.0)*vascularEnvelope;
+        float warmCapillary=.5+.5*sin(radial*9.6-lateral*17.2+1.40);
+        studioSilver+=vec3(.035,.155,.166)*narrowVein*
+          (.18+.35*softboxB);
+        studioSilver+=vec3(.18,.066,.054)*narrowVein*
+          warmCapillary*.14;
+        float satinFresnel=pow(1.0-facing,2.6);
+        studioSilver+=mix(vec3(.045,.130,.150),
+          vec3(.085,.071,.128),sat(.5+.5*n.x))*
+          satinFresnel*vascularEnvelope*.20;
         /* R2214 — functional titanium machining.
            Highlight a recessed lengthwise capillary on each of the four
            real 3D arms, plus selective micro-fasteners inside panel cells.
@@ -1627,6 +1663,7 @@
     root.dataset.fxNativeMagSurfaceR2206='biophotonic-cyan-coral-living-optic-machined-titanium-no-extra-pass';
     root.dataset.fxNativeMagSurfaceR2212='laminated-living-cyan-coral-lens-deep-silver-single-pass';
     root.dataset.fxNativeMagSurfaceR2214='anti-aliased-titanium-capillaries-fasteners-micro-machined-four-arm-body';
+    root.dataset.fxNativeMagStudioR2270='asymmetric-living-sculpt-sinuous-titanium-lamellae-nacre-vascular-backscatter-single-pass';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2270 – organikus MAG: formaplasztika, titánfelület, fotonikus szövet (fejlesztői)
+- A 2026.11.01-i 1c3ecfb CI-n a natív MAG három egymást követő hidegindítása 3/3 PASS, de a normál látogató ellenőrzése FAIL maradt. Ok: a screenshot-teszt egyetlen RAF-mintában követelte a 10 mp-es overlay és a renderer-állapot egyidejű fennállását, amit a 4 magos SwiftShader CI nem garantál. R2270 a tartós renderer-fajtát ellenőrzi, utána külön megköveteli a teljes natív MAG képkockát, GPU fence-t, egyetlen vásznat és nulla produkciós readbacket.
+- A megőrzött natív R326 GPU-bufferek és draw call mellett a 3D vertex shader egyforma, determinisztikus organikus elhajlítást ad a biokristály testnek és a titánereknek; a recessed üveglencse és a mechanikai illesztés merev marad.
+- A fotókon túl szabályos négyzetes panelezést szélesebb, ívelt anatómiai titánlemezek váltják fel. A meglévő fénykártyák mellett nagyon visszafogott gyöngyház-visszfény és energiaszövet jelenik meg, további renderer, FPS-limit, CSS filter, textúraletöltés vagy külön vászon nélkül.
+- Új kiegészítő shader-forrásellenőrzés R2270 a P0 mátrixban. Ez csak forráskontraktus: a WebGL fordítás és valódi screenshot bizonyításának helyét nem veheti át.
+- **NEM kész:** az R2270 vizuális, böngészős és desktop/mobil Lighthouse ×3 eredményei még nincsenek meg, stúdióminőséget vagy 60 FPS-t nem igazolunk. A legutóbbi 1c3ecfb Lighthouse FAIL desktop 92/92/91, mobile 81/82/84, CLS 0.107664.
+
 ## R2269 – valódi képellenőrzés és energiaosztályhoz kötött film
 - A b958763 pontos commiton a teljes P0: 3/3 hidegindításos natív MAG-megjelenés, GPU fence, egy canvas PASS; a normál látogatói filmellenőrzés FAIL. Naplózott ok: a CI valóban korlátozott CPU/RAM osztályba került, és az R533 a megőrzött CONSTRAINED referenciarenderre váltott. Ez nem HeadlessChrome alapú megkülönböztetés.
 - A normál látogatói teszt most a böngésző valós hardwareConcurrency/deviceMemory értékét rögzíti. Erős hardveren teljes fizikai Three.js GENESIS szükséges; gyenge osztályban kizárólag a valódi hardver-alapú R649 adaptáció megengedett. Mindkét útvonalon ugyanaz a natív, egycanvasos MAG, nulla blocking readPixels és a valódi első teljes viewport pixelteszt kötelező.

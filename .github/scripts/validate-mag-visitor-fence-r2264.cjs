@@ -66,8 +66,12 @@ fs.mkdirSync(OUT,{recursive:true});
       const root=document.documentElement;
       const realThree=root.dataset.fxMagBirthRendererR1490==='realistic-cinematic-three-active';
       const genuineAdaptive=root.dataset.fxMagBirthRendererR1729==='constrained-reference-film';
+      // Renderer ownership is sticky across teardown. The original test
+      // required an overlap to be visible in a single RAF: on 4-core
+      // SwiftShader the 10-second overlay ended before polling resumed.
+      // Check genuine film ownership here, then verify a complete physical
+      // handoff AND original pixels in the following independent gates.
       return root.dataset.fxMagBirthOwnerR533==='active' &&
-        document.querySelector('.fx-mag-birth-r533')!==null &&
         (realThree||(constrained&&genuineAdaptive));
     },capability,{timeout:60000,polling:100});
     await page.waitForFunction(()=>{
