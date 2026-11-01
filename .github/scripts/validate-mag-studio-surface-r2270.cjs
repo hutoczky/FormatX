@@ -58,4 +58,13 @@ assert.equal((html.match(/20261101-r2274-physical-first-paint-layout-lock/g)||[]
   'R2274 HTML mobile CSS preload and stylesheet must have the same cache key');
 assert(worker.includes('20261101-r2274-physical-first-paint-layout-lock'),
   'R2274 Cloudflare Worker must serve the exact critical mobile CSS key');
-console.log('MAG_R2270_R2271_R2274_STUDIO_SOURCE_PASS');
+assert(source.includes('const isCortex=facetBase>=1.10&&facetBase<1.34;') &&
+  source.includes('.103*Math.sin(th*3.0+cp*4.20)') &&
+  source.includes('software?18:mobile?22:30,software?28:mobile?38:52'),
+  'R2275 native cortex geometry must be irregular, pole-safe and topology-bounded');
+assert(source.includes('float originalMineralMask=1.0-step(1.0,vFacet);') &&
+  source.includes('float livingCortex=step(1.10,vFacet)') &&
+  source.includes('vec3 cortexMaterial=vec3(.009,.020,.027)'),
+  'R2275 living cortex must be dark physical bioglass, not silver-washed flat geometry');
+assert(source.includes('fxNativeMagStudioR2275='),'R2275 studio profile missing');
+console.log('MAG_R2270_R2271_R2274_R2275_STUDIO_SOURCE_PASS');

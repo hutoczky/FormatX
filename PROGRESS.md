@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2275 – valódi élő MAG kortikális stúdióanyag és organikus test
+- A 2026.11.01-i R2273 képfelvételen a natív MAG még geometrikusan tökéletes, fehér gömb volt négy fényes titánkarral. A konkrét ok: a régi anyagshader a később hozzáadott R2273 kortikális geometriát is 84%-os ezüstlemezes színnel felülírta.
+- R2275 az ezüst felületet a tényleges eredeti ásványi testre korlátozza, a titán négy karját enyhén sötétebb fémre hangolja, a sejtkortex pedig külön anyag-ágban mély füstüveg, rétegzett türkiz biokémiai erezet és visszafogott korall-organella fényt kap. Mindez az eredeti, **egyetlen** fragment shader és WebGL draw call része.
+- A korábbi tökéletes ellipszoid térbeli, determinisztikus, a sarkoknál folytonos szerves lebenydeformációt kap; a szoftver/mobil/asztali tesszelláció továbbra is korlátos. Nincs extra rajzfelület, kirenderelt kép, shader-program vagy RAF.
+- A P0 forráskontraktus külön védi a biokortex geometriáját, saját stúdióanyagát és azt, hogy az eredeti szem, a film és a tartalom-feltáró natív MAG változatlanul egy rendszer maradjon.
+- **Előző vizuális R2273 verzió elutasítva mint stúdió-minőség**. R2275 még QA előtt; csak valódi screenshot + GLSL + Lighthouse és 60 FPS után lehet késznek minősíteni.
+
 ## R2274 – mobil első képkocka CLS: fejléc és natív MAG stabil elhelyezése
 - A normál R2272 P0 biztonságos 3/3 WebGL MAG hidegindítást és külön PASS 0 readback / 1 canvas / 972 látható pixel vizsgálatot adott. A külön mobil CLS ellenőrzés viszont **0.213962 FAIL**.
 - A P0 valódi 390x844-es layout-shift JSON-ja kimutatta, hogy 2068 ms körül a főtartalom Y 94.796875→70px-re mozdult, a nyelvi vezérlő 42x40→120x69, a menü 50x54→98x69 méretre ugrott. Később 11055ms körül a natív WebGL canvas X 195→0 és szélessége 195→390 lett.

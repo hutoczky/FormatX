@@ -825,9 +825,18 @@
         for(let ix=0;ix<lonSteps;ix++){
           const u=ix/lonSteps;
           const th=u*Math.PI*2;
-          const lx=Math.cos(th)*sp*rx0;
-          const ly=cp*ry0;
-          const lz=Math.sin(th)*sp*rz0;
+          // R2275: break the sterile ellipsoid into connected irregular
+          // three-dimensional living cortex lobes. Pole-safe, periodic and
+          // deterministic; all vertices stay in the original R326 VBO.
+          // Auxiliary optical ellipsoids use their unchanged geometry.
+          const isCortex=facetBase>=1.10&&facetBase<1.34;
+          const lobe=isCortex?1+sp*sp*(
+            .103*Math.sin(th*3.0+cp*4.20)+
+            .055*Math.cos(th*5.0-phi*3.60)+
+            .031*Math.sin(th*2.0+phi*6.20)):1;
+          const lx=Math.cos(th)*sp*rx0*lobe;
+          const ly=cp*ry0*lobe;
+          const lz=Math.sin(th)*sp*rz0*lobe;
           const x=cx+lx*czr-ly*szr;
           const y=cy+lx*szr+ly*czr;
           const z=cz+lz;
@@ -921,7 +930,7 @@
        no second mesh, renderer, WebGL context, frame loop or asset fetch.
        Bounded tessellation retains the measured mobile/software budget. */
     appendEllipsoid([.055,.055,-.170],[.665,.710,.405],1.12,
-      software?10:mobile?13:18,software?18:mobile?24:36,.095);
+      software?18:mobile?22:30,software?28:mobile?38:52,.095);
 
     /* R1724 — unique FormatX crystal creature anatomy.
        Living cortical lobes and membranes replace animal limbs and robotic armour. */
@@ -1574,11 +1583,42 @@
         studioSilver+=vec3(.34,.57,.63)*axialHairline*.13;
         studioSilver*=1.0-socketMask*.11;
         studioSilver+=vec3(.24,.36,.39)*socketMask*metalSpec*.30;
-        float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
+        // R2275: only the original glass-mineral body is silver-washed.
+        // The R2273 cortex and filaments were incorrectly receiving the
+        // same bright metal plate color and looked like a perfect white ball.
+        float originalMineralMask=1.0-step(1.0,vFacet);
+        float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84*
+          originalMineralMask;
         c=mix(c,studioSilver,shellSilver);
-        titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
+        titanium=mix(titanium,studioSilver*.94,machinedArmor*.67);
         titanium*=1.0-panelJoint*panelEnvelope*.16;
-        c=mix(c,titanium,machinedArmor*.99);
+        c=mix(c,titanium*.90,machinedArmor*.99);
+
+        /* R2275: a shaded anatomical interior, never a silver-white
+           perfect sphere. The genuine irregular cortical VBO has a dark
+           smoked bioglass material with layered turquoise photochemistry,
+           coral organelles and low-key large-format studio reflections.
+           This is still ONE existing fragment shader and draw call. */
+        float livingCortex=step(1.10,vFacet)*(1.0-step(1.34,vFacet));
+        if(livingCortex>.5){
+          float foldA=.5+.5*sin(vAnatomy.x*16.0+
+            1.7*sin(vAnatomy.y*9.0+vAnatomy.z*4.0));
+          float foldB=.5+.5*cos(vAnatomy.y*20.0-
+            vAnatomy.x*7.0+uTime*.075);
+          float vein=pow(.56*foldA+.44*foldB,7.0);
+          float livingPulse=.86+.14*sin(uTime*.48+vAnatomy.x*3.0);
+          float coralNest=pow(max(0.0,foldA*foldB-.52)*2.1,2.0);
+          vec3 cortexMaterial=vec3(.009,.020,.027)
+            +vec3(.085,.145,.163)*(.20+.80*key)
+            +vec3(.13,.23,.25)*softboxB*.34
+            +vec3(.16,.25,.29)*softboxC*.17;
+          cortexMaterial+=vec3(.035,.24,.26)*vein*
+            (.20+.38*uEnergy)*livingPulse;
+          cortexMaterial+=vec3(.22,.070,.048)*coralNest*.12;
+          cortexMaterial+=vec3(.040,.13,.16)*
+            pow(1.0-facing,2.3)*.31;
+          c=mix(c,cortexMaterial,livingCortex*.97);
+        }
 
         // R2207: the living cortex belongs only to actual glass fragments.
         // Metal pixels keep their silver response without evaluating the
@@ -1676,6 +1716,7 @@
     root.dataset.fxNativeMagSurfaceR2214='anti-aliased-titanium-capillaries-fasteners-micro-machined-four-arm-body';
     root.dataset.fxNativeMagStudioR2270='asymmetric-living-sculpt-sinuous-titanium-lamellae-nacre-vascular-backscatter-single-pass';
     root.dataset.fxNativeMagStudioR2273='sculpted-deep-cortex-biological-filaments-canonical-single-draw';
+    root.dataset.fxNativeMagStudioR2275='irregular-three-dimensional-smoked-bioglass-cortex-scoped-silver-living-vascular-organelle-studio';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
