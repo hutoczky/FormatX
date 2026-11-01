@@ -37,6 +37,38 @@ const profiles=[
         await page.addInitScript(()=>{
           // Captures standard CLS contributions, not page screenshots.
           window.__fxLayoutShiftsR2257=[];
+          // R2284: diagnostic-only CSSOM evidence for the actual first-paint
+          // shift. Read after a shift, NEVER mutate the real page's styles.
+          const layoutStyleSnapshot=()=>{
+            const capture=selector=>{
+              const el=document.querySelector(selector);
+              if(!el)return null;
+              const cs=getComputedStyle(el);
+              const rect=el.getBoundingClientRect();
+              return {className:String(el.className||'').slice(0,100),
+                inline:el.getAttribute('style')||'',
+                x:rect.x,y:rect.y,w:rect.width,h:rect.height,
+                display:cs.display,position:cs.position,
+                width:cs.width,minWidth:cs.minWidth,maxWidth:cs.maxWidth,
+                height:cs.height,minHeight:cs.minHeight,maxHeight:cs.maxHeight,
+                top:cs.top,right:cs.right,marginTop:cs.marginTop,
+                paddingTop:cs.paddingTop,transform:cs.transform,
+                translate:cs.translate,scale:cs.scale};
+            };
+            return {
+              header:capture('body.living-architecture > header.topbar'),
+              main:capture('#main-content'),
+              magButton:capture('header.topbar > .fx-reference-mag-button'),
+              language:capture('header.topbar > .fx-language-toggle'),
+              menu:capture('header.topbar > #menu-toggle'),
+              actions:capture('header.topbar > .header-actions'),
+              mag:capture('#hero .fx-core-mobile-v55-stage'),
+              activeStyleSheets:[...document.styleSheets].filter(sheet=>
+                /mobile-first-paint-r358|mobile-header-final-r418|cinematic-archive-r1987/.test(sheet.href||''))
+                .map(sheet=>({href:sheet.href,media:sheet.media?.mediaText||''})),
+              archive:document.documentElement.dataset.fxArchiveCinema||'home'
+            };
+          };
           try{
             const observer=new PerformanceObserver(list=>{
               for(const entry of list.getEntries()){
@@ -52,7 +84,8 @@ const profiles=[
                     current:source.currentRect?
                       {x:source.currentRect.x,y:source.currentRect.y,
                         w:source.currentRect.width,h:source.currentRect.height}:null
-                  }))
+                  })),
+                  layoutSnapshot:layoutStyleSnapshot()
                 });
               }
             });

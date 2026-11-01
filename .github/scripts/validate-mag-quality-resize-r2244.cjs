@@ -42,30 +42,37 @@ tasks[1].fn();
 assert.equal(resizeCount,1,'context loss must prevent GPU resize');
 assert.equal(renderCount,1,'context loss must not schedule GL frames');
 runtime.recover();
-// R2283: a real film/fence must not create any canvas-resize timer.
+// R2284: early cinematic work must STILL adapt GPU resolution. The
+// protection starts only after the original film requests a real GPU frame.
 root.dataset.fxMagBirthLiveR533='active';
 runtime.request();
-assert.equal(tasks.length,2,'birth film must freeze GPU backing dimensions');
-root.dataset.fxMagBirthLiveR533='';
-runtime.fence({live:true});
+assert.equal(tasks.length,3,'early-film adaptive quality must remain active');
+tasks[2].fn();
+assert.equal(resizeCount,2,'early-film quality scaling must not be frozen');
+assert.equal(renderCount,2);
+root.dataset.fxMagHandoffPrepareR2254='requested';
 runtime.request();
-assert.equal(tasks.length,2,'pending GPU fence must freeze resize');
+assert.equal(tasks.length,3,'prepared physical film must freeze backing buffer');
+runtime.fence({live:true});
+root.dataset.fxMagBirthLiveR533='';
+runtime.request();
+assert.equal(tasks.length,3,'pending GPU fence must freeze resize');
 runtime.fence(null);
 runtime.lock(2000);
 runtime.request();
-assert.equal(tasks.length,2,'first exposed native frame must be preserved');
+assert.equal(tasks.length,3,'first exposed native frame must be preserved');
 runtime.lock(0);
 runtime.request();
-assert.equal(tasks.length,3,'quality changes resume after protected handoff');
+assert.equal(tasks.length,4,'quality scaling must resume after real exposure');
 root.dataset.fxMagBirthLiveR533='active';
-tasks[2].fn();
-assert.equal(resizeCount,1,
-  'film becoming active during 48ms timer must not clear framebuffer');
-assert.equal(runtime.pending(),0,'discarded timer must be released');
+tasks[3].fn();
+assert.equal(resizeCount,2,
+  'film becoming active during 48ms timer must preserve framebuffer');
+assert.equal(runtime.pending(),0,'discarded timer must clear');
 root.dataset.fxMagBirthLiveR533='';
 runtime.request();
-assert.equal(tasks.length,4);
-tasks[3].fn();
-assert.equal(resizeCount,2,'adaptive resizing must remain live after handoff');
-assert.equal(renderCount,2);
-console.log('MAG_R2283_HANDOFF_FRAMEBUFFER_RESIZE_GUARD_PASS');
+assert.equal(tasks.length,5);
+tasks[4].fn();
+assert.equal(resizeCount,3,'post-film quality scaling must remain operational');
+assert.equal(renderCount,3);
+console.log('MAG_R2284_PREPARED_ONLY_GPU_RESIZE_GUARD_PASS');

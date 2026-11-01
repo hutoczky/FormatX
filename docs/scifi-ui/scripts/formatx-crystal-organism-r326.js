@@ -2082,9 +2082,14 @@
        wins, without modifying geometry, shaders or the final quality floor.
        Do not continuously defer by restarting the timer. */
     function qualityResizeProtectedR2283(){
+      // R2284: early 3D warmup must retain its normal adaptive GPU budget.
+      // Only the final R2278 prepared frame and GPU fence are immutable.
+      const filmActive=root.dataset.fxMagBirthLiveR533==='active' ||
+        root.getAttribute('data-fx-mag-birth-live')==='active';
+      const nativePrepareRequested=
+        root.dataset.fxMagHandoffPrepareR2254==='requested';
       return !!pendingGpuFenceR2253 ||
-        root.dataset.fxMagBirthLiveR533==='active' ||
-        root.getAttribute('data-fx-mag-birth-live')==='active' ||
+        (filmActive&&nativePrepareRequested) ||
         performance.now()<nativeExposureLockUntilR2283;
     }
     function requestQualityResizeR2244(){

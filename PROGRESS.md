@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2284 – filmszinthez kötött GPU-zárolás és mért CLS okfeltárás
+- Az R2283 pontos SHA-n a P0 három független WebGL2 hidegindítása **3/3 PASS**; a normál látogatói átadás szintén PASS: valódi első viewport MAG (644 fényes pixel/5200 minta), egyetlen canvas, GPU fence `finished`, nulla normál CPU readPixels. Így a korábbi 1/3 fekete frame race az ellenőrzött futáson nem ismétlődött.
+- A P0 tényleges mobil CLS továbbra is FAIL: 390px-en 0.212973. A 2139ms-os fő layout shift az eredeti fejléc/main Y 94.796875→70px mozgását és a nyelvi gomb 44×44→120×69 növekedését rögzítette; 11174ms-nál a MAG stage 195px szélesről 390px-re ugrik. Ezek az eredeti normál navigáció során történnek, nem tesztcsalások.
+- Az R2283 a teljes film alatt zárolta az adaptív minőség-átméretezést, ami a lassú szoftveres WebGL-en regressziót okozott: desktop 90/92/87, mobil 79/78/78 Performance; mobil CLS 0.11496. Az R2284 visszaengedi az adaptív quality resize-t az intro korai 90%-ában. Zárolás csak a ténylegesen **kért GPU-előkészítéstől**, in-flight fence közben és az első fizikai kompozitálás rövid védelmében marad. A 3/3 hidegindítás változatlan küszöbű.
+- A mobil CLS P0 bizonyító módosítatlanul FAIL-ol a 0.10 kapun; de az eredeti PerformanceObserver most minden valódi elmozduláshoz a fejléc, vezérlők, natív MAG stage CSSOM-ját és aktivált kritikus stylesheetjeit naplózza. Ez lehetővé teszi a pontos első-festés CSS/JS tulajdonos kijavítását, találgatás és látványromboló rejtés nélkül.
+- Az R2284 önálló fejlesztői commit, élesítés nélkül. Teljes P0, Lighthouse ×3 és stúdióképi minőség friss SHA-n még nem igazolt.
+
 ## R2283 – valódi WebGL-fence / canvas resize versenyhelyzet javítása
 - Az R2282 kódos SHA (71f3e168) P0-ján három hidegindítás közül **2/3 PASS**, a harmadik esetben a GPU proof RGB/alpha **0/0**, az első normál viewport is fekete. A 48 ms-ra késleltetett adaptív minőség-átméretezés a korábban beadott frame rajzbufferét törölhette még a GPU-fence befejezése vagy a kompozitor megjelenítése előtt.
 - R2283 az eredeti minőségi szabályozó két útvonalát megtartja, de az aktív filmes fázis, a WebGL2 pending fence és a legelső látható képkocka ~1100 ms-os védelme alatt *nem módosítja* a canvas width/height bufferét. A 48 ms-os timer az aktiválódó filmet a callbackben is újraellenőrzi. A további, normál interakciós adaptív felbontáskezelés változatlan.
