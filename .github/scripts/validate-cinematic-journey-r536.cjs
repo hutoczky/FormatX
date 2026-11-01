@@ -16,7 +16,13 @@ assert.equal((index.match(/formatx-cinematic-journey-r536\.js/g)||[]).length,1,'
 assert.ok(!index.includes('data-fx-cinematic-continuity-r535'),'R535 active bootstrap must be retired');
 assert.ok(index.includes('data-fx-r487-deferred-style="true"'),'R536 visual CSS must stay post-FCP deferred');
 assert.equal((index.match(/data-fx-deferred-css-r487="true"/g)||[]).length,1,'R487 deferred CSS scheduler must load exactly once in source');
-assert.ok(index.includes('formatx-deferred-css-r487.js?v=20261013-r2054-verified-css-recovery'),'R487 updated FCP scheduler revision missing from source');
+// R2268: pin the *effective delivery contract*, not a retired cache version.
+const r487Script=index.match(/<script\\b[^>]*\\bdata-fx-deferred-css-r487="true"[^>]*\\bsrc="([^"]+)"[^>]*><\\/script>/);
+assert.ok(r487Script,'R487 deferred CSS owner script not found');
+assert.match(r487Script[1],/^\\.\\/scripts\\/formatx-deferred-css-r487\\.js\\?v=[0-9A-Za-z-]+$/,'R487 must use the versioned original scheduler');
+const canonicalR487=r487Script[1].replace(/^\\.\\//,'/scifi-ui/');
+assert.ok(read('billing-worker/src/production-content-entry.js').includes(canonicalR487),
+  'R487 HTML scheduler and Cloudflare Worker must reference the same exact version');
 assert.ok(read('docs/scifi-ui/scripts/formatx-deferred-css-r487.js').includes('visible-tab-fcp-watchdog'),'R487 must activate when the FCP observer fails to fire');
 
 for (const token of [
