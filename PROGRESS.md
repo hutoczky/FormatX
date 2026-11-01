@@ -1,5 +1,11 @@
 # FormatX – fejlesztési állapot
 
+## R2286 – az első MAG-portré marad az oldal tetején, az archívum görgetésre indul
+- Az R2285 pontos SHA-n a normál látogatói WebGL átadás PASS: 3/3 hidegindítás, 642 látható MAG-mintapixel, 1 canvas, kész WebGL2 GPU fence, 0 readback. A mobil P0 CLS **0.101834 FAIL** volt, de a korábbi 24.8 px rail/header ugrás megszűnt.
+- A valódi 390×844-as CLS JSON szerint **11.31 s, scrollY=0** állapotban a natív MAG stage 195×380.6 px-ről 390×362.9 px-re váltott, amikor az R1987 archive állapot automatikusan bekapcsolt a Genesis-film után. Ez 0.101834 CLS-t adott. A felhasználó ekkor még nem görgetett, tehát ez nem szükséges tartalomfeltárás.
+- R2286: a natív MAG hero marad az első teljes viewport tulajdonosa a Genesis vége után. Az archivált foliók és a MAG-kísért scroll-narratíva csak tényleges lefelé görgetésnél (24 px vagy a viewport 6%-a felett) kapcsolnak be. Az oldal tetejére visszatérve a meglévő reversible `restore()` visszaadja a valódi hero állapotot; a teljes HTML, 3D renderer, film, natív GPU és eredeti fókusz/menü nem változik.
+- A forrásteszt R2286 külön védi az eredeti scrollos dokkolást és visszaállítást. A valódi első viewport P0/CLS, 390/412px mobil képkockák, Lighthouse ×3 és hardveres 60 FPS újraellenőrzése még kötelező. Nincs küszöbcsökkentés, nincs élesítés.
+
 ## R2285 – kritikus mobil CLS: rail első festés és atomikus natív MAG dokkolás
 - Az R2284 első valós CLS elmozdulása 390px-en 0.212973 volt: a main Y 94.796875→70px, pontosan 24.797px. A fejléc és main közötti `.fx-rail` aside a legvalószínűbb normál flow tulajdonos; az R358 kritikus CSS nem célozta, a késői stílusok viszont kivették a normál elrendezésből.
 - R2285 a `fx-rail` mobil oldalsávot CSP-hash-sel hitelesített, **parser-korai inline CSS** segítségével már az első paint előtt kivonja a flow-ból. A navigációt a valódi, használható mobil menü biztosítja. Ugyanezt védi az eredeti blokkoló R358 stílus, azonos HTML preload/stylesheet/Worker verzióval.
