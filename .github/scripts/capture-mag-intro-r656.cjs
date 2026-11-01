@@ -62,6 +62,42 @@ const SHOTS=[
     return true;
   }
 
+  // R2277: genuine PNG visual oracle for mobile MAG centering. The earlier
+  // CSS regression moved the WebGL creature almost entirely off the left
+  // edge, while DOM/canvas flags still claimed "ready". Decode ONLY the
+  // existing screenshot in detached 2D test memory; never paint the page,
+  // inspect the GPU framebuffer or perform a corrective scroll.
+  async function verifyMobileMagVisualCentreR2277(page,png){
+    return page.evaluate(async encoded=>{
+      const img=new Image();
+      img.src='data:image/png;base64,'+encoded;
+      await img.decode();
+      const cv=document.createElement('canvas');
+      cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+      const ctx=cv.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(img,0,0);
+      // From below the 70px header through the upper 43% of the page,
+      // BEFORE controls and body text: only the real native living MAG.
+      const start=Math.floor(cv.height*.12);
+      const end=Math.floor(cv.height*.43);
+      const data=ctx.getImageData(0,start,cv.width,end-start);
+      let hits=0,sumX=0;
+      for(let y=0;y<data.height;y+=3){
+        for(let x=0;x<data.width;x+=3){
+          const i=(y*data.width+x)*4;
+          if(Math.max(data.data[i],data.data[i+1],data.data[i+2])<=70)continue;
+          hits++;
+          sumX+=x;
+        }
+      }
+      const centre=hits?sumX/(hits*cv.width):null;
+      return {pass:hits>=250&&centre>=.30&&centre<=.70,
+        brightSamples:hits,
+        centroidX:centre===null?null:Number(centre.toFixed(4)),
+        viewportWidth:cv.width};
+    },png.toString('base64'));
+  }
+
   async function captureMobileNativePreflight(){
     const mobileBrowser=await launchBrowser();
     const mobileContext=await mobileBrowser.newContext({
@@ -125,7 +161,14 @@ const SHOTS=[
           overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
         };
       });
-      await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+      const mobileHeroPngR2277=await page.screenshot({
+        path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false
+      });
+      const centreProofR2277=await verifyMobileMagVisualCentreR2277(page,mobileHeroPngR2277);
+      state.mobileCentreProofR2277=centreProofR2277;
+      if(!centreProofR2277.pass)
+        errors.push('R2277 real mobile MAG physically off-centre: '+
+          JSON.stringify(centreProofR2277));
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
       if(state.shape!=='organism')errors.push('R1500 preflight shape is not organism: '+state.shape);
@@ -205,7 +248,14 @@ const SHOTS=[
           overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
         };
       });
-      await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+      const mobileHeroPngR2277=await page.screenshot({
+        path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false
+      });
+      const centreProofR2277=await verifyMobileMagVisualCentreR2277(page,mobileHeroPngR2277);
+      state.mobileCentreProofR2277=centreProofR2277;
+      if(!centreProofR2277.pass)
+        errors.push('R2277 real mobile MAG physically off-centre: '+
+          JSON.stringify(centreProofR2277));
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
       if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure')errors.push('R1723 living organism visual marker missing: '+state.visual);
@@ -715,7 +765,14 @@ const SHOTS=[
             overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
           };
         });
-        await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+        const mobileHeroPngR2277=await page.screenshot({
+        path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false
+      });
+      const centreProofR2277=await verifyMobileMagVisualCentreR2277(page,mobileHeroPngR2277);
+      state.mobileCentreProofR2277=centreProofR2277;
+      if(!centreProofR2277.pass)
+        errors.push('R2277 real mobile MAG physically off-centre: '+
+          JSON.stringify(centreProofR2277));
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
         if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure'){
