@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2271–R2272 – stúdió Genesis anyagjavítás + tesztellentmondás feloldása
+- Az R2270 natív MAG shader a négyágú testet és a titánpaneleket ugyanabban a GPU-draw callban organikusan meghajlítja. A vasaltnak ható, sűrű négyzetrácsot ívelt, szélesebb lemezek és finom fotonikus szövet váltják fel.
+- A Genesis eredeti, valódi Three.js dupla DNS-láncának anyaga R2271-ben kevésbé neon-emisszív; a PBR clearcoat és a biopolimer mikrodomborzat több szerepet kap. A sejthártya két tengelyen ismétlődő textúrája varratmentes, a korall-metabolikus foltok és a szemcsék kevésbé túlvezéreltek.
+- Az R2271 renderelő cache-kulcsa és a tényleges R533 parser, R1629 tartalék útvonal, HTML és két Cloudflare Worker CSP pontos SHA256-hash-e konzisztensen frissült. Sem a genetikai részecskék száma, sem az intro idővonala, sem a natív egycanvasos MAG architektúra nem változott.
+- Az R2270 P0-n a három hidegindítás WebGL2 GPU fence + valódi képpont ellenőrzése 3/3 PASS, a forrásellenőrzés PASS; a normál látogatói ellenőrzés FAIL volt. R2272 javította az okot: két egymásnak ellentmondó film-ellenőrzés közül a régi, kizárólag Three.js-t engedő feltétel véletlenül bent maradt, ezt eltávolítottuk. Az új filmkompetencia-ellenőrzés, natív GPU-fence, egyetlen canvas és képi bizonyítás megmaradt.
+- A teljes mobil CLS, Lighthouse 100/100/100/100, valódi eszközös stabil 60 FPS és a végső képi stúdióminőség **még nem igazolt**; a PR #581 továbbra is draft és nem élesített.
+
 ## R2270 – organikus MAG: formaplasztika, titánfelület, fotonikus szövet (fejlesztői)
 - A 2026.11.01-i 1c3ecfb CI-n a natív MAG három egymást követő hidegindítása 3/3 PASS, de a normál látogató ellenőrzése FAIL maradt. Ok: a screenshot-teszt egyetlen RAF-mintában követelte a 10 mp-es overlay és a renderer-állapot egyidejű fennállását, amit a 4 magos SwiftShader CI nem garantál. R2270 a tartós renderer-fajtát ellenőrzi, utána külön megköveteli a teljes natív MAG képkockát, GPU fence-t, egyetlen vásznat és nulla produkciós readbacket.
 - A megőrzött natív R326 GPU-bufferek és draw call mellett a 3D vertex shader egyforma, determinisztikus organikus elhajlítást ad a biokristály testnek és a titánereknek; a recessed üveglencse és a mechanikai illesztés merev marad.
