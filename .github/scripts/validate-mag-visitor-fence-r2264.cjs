@@ -15,14 +15,14 @@ fs.mkdirSync(OUT,{recursive:true});
     args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl',
       '--ignore-gpu-blocklist','--no-sandbox']
   });
-  let context;
+  let context,page;
   const report={ok:false,errors:[]};
   try{
     context=await browser.newContext({
       viewport:{width:1280,height:720},
       colorScheme:'dark',reducedMotion:'no-preference',locale:'hu-HU'
     });
-    const page=await context.newPage();
+    page=await context.newPage();
     page.on('pageerror',e=>report.errors.push(String(e)));
     await page.addInitScript(()=>{
       try{
@@ -129,7 +129,26 @@ fs.mkdirSync(OUT,{recursive:true});
     if(pixels.bright<40)
       report.errors.push('black FIRST full viewport after GPU-fence-only handoff');
     report.ok=report.errors.length===0;
-  }catch(error){report.errors.push(String(error));}
+  }catch(error){
+    report.errors.push(String(error));
+    // R2267: collect real failure state, never alter the visitor/viewport.
+    if(page&&!page.isClosed()){
+      try{
+        report.failureState=await page.evaluate(()=>{
+          const r=document.documentElement;
+          return {owner:r.dataset.fxMagBirthOwnerR533||'',
+            live:r.dataset.fxMagBirthLiveR533||'',
+            renderer:r.dataset.fxMagBirthRendererR1490||'',
+            fallback:r.dataset.fxMagBirthRendererR1729||'',
+            loader:r.dataset.fxMagBirthThreeLoaderR1608||'',
+            native:r.dataset.fxCrystalOrganismR326||'',
+            gpu:r.dataset.fxMagHandoffGpuR2226||'',
+            overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
+            nativeCanvases:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length};
+        });
+      }catch(diagnosticError){report.diagnosticError=String(diagnosticError);}
+    }
+  }
   finally{if(context)await context.close().catch(()=>{});await browser.close();}
   fs.writeFileSync(path.join(OUT,'evidence.json'),JSON.stringify(report,null,2)+'\n');
   console.log('MAG_R2264_NORMAL_VISITOR_FENCE '+JSON.stringify(report));

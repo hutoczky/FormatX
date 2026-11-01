@@ -35,8 +35,10 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 2;
-  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
-  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
+  // R2267: headless user agent is not a physical GPU capability.
+  // Keep the constrained-hardware fallback; preserve full Three.js for all
+  // other normal visitors, including real browser performance tests.
+  const SOFTWARE_SAFE = CONSTRAINED;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
      The R533/critical birth styles are normally deferred for first-paint cost,
      but ?intro=1 / visualintro must own their geometry immediately so the
@@ -909,8 +911,8 @@
        10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
        proof frames remain on the Three owner so design evidence stays exact. */
     if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
-      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
-      overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
+      ROOT.dataset.fxMagBirthRendererR1729='constrained-reference-film';
+      overlay.dataset.fxRenderer='fallback-constrained';
       startR649Fallback();
       if(filmRenderer)filmRenderer.resize?.();
       return;

@@ -32,12 +32,16 @@ assert.equal(worker.split(token).length-1,2,
   'Cloudflare meta and header CSP must both allow the visitor film');
 assert(inline.includes("const a=navigator.webdriver===true&&f;"),
   'Automated metrics cannot silently skip normal Genesis');
-assert(inline.includes('formatx-mag-birth-live-r533.js?v=20261031-r2266-real-visitor-genesis'),
+assert(inline.includes('formatx-mag-birth-live-r533.js?v=20261101-r2267-physical-genesis-headless-parity'),
   'Exact full cinematic cache key not active');
-assert(rescue.includes('20261031-r2266-real-visitor-genesis'),
+assert(rescue.includes('20261101-r2267-physical-genesis-headless-parity'),
   'Fallback and parser must load identical film');
 assert(intro.includes('const AUTOMATION = navigator.webdriver === true &&'),
   'Automation fast path must be explicitly requested by QA');
+assert(intro.includes('const SOFTWARE_SAFE = CONSTRAINED;') &&
+  !intro.includes('HEADLESS_SOFTWARE') &&
+  !intro.includes('/HeadlessChrome/i'),
+  'Normal headless visitor must not silently receive the 2D film');
 assert(intro.includes("PARAMS.get('r548') === 'mobile-skip'"),
   'Preserve explicit legacy QA skip');
 assert(!scheduler.includes('if(AUDIT)') &&
