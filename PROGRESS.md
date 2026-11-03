@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2302.1 – CSP forrásellenőrző karakterlánc hibájának javítása (2026-11-03)
+
+- A pontos R2302 P0 elején az R2300 QA elhasalt: a várt dinamikus Worker CSP hivatkozás egy korábbi szöveggenerálás során hibás `'+name+'` literállá alakult. A HTML CSP hash és a két Worker CSP-hivatkozás helyes volt; a hibás teszt adott téves FAIL-t.
+- Az ellenőrzőben a CSP token pontos karakterei `String.fromCharCode(36,123)+name+String.fromCharCode(125)` alapján képződnek. Az aktuális SHA256-egyezés és a két CSP előfordulás továbbra is kötelező; nincs gyengített vagy kihagyott ellenőrzés.
+- Nem változik a MAG, shader, 3D geometry, DNS/sejtmag film, FLIP és Lighthouse-cél. Következő pontos SHA-ra új P0 szükséges; draft, nem éles.
+
+
+
 ## R2302 – natív MAG asztali dokkolás: hibás hero FLIP-mátrix (2026-11-03)
 
 - A teljes P0 `d40e564` böngészős R2173 mérése megmutatta: 1350×940 desktopon a MAG fixed archív stage tévesen x526/y−221, 683×567 px, miközben az előírt 38vw×74dvh helye ~513×696 px. A stage számított `transform:matrix(1.33224,0,0,.81513,-33.75,-112.8)`; a szülő lánc már nem transzformált. Tehát R2299 ancestor-fix önmagában nem elég: a stage saját fontos inline home/FLIP transformja az aktív archív CSS-en túlélte az átadást.

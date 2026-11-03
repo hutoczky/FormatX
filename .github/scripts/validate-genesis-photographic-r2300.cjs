@@ -40,6 +40,6 @@ assert(html.includes(digest),'HTML CSP hash must match exact active parser scrip
 // Require a literal current SHA declaration referenced by BOTH Worker CSPs.
 const authorized=[...worker.matchAll(/const (INLINE_R\d+_BOOT_HASH) = "([^"]+)";/g)]
   .some(([,name,value])=>value===digest &&
-    worker.split('+name+').length===3);
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
 assert(authorized,'both Worker policies must authorize exact current parser SHA256');
 console.log('GENESIS_R2300_REAL_PHYSICAL_STUDIO_SOURCE_PASS');
