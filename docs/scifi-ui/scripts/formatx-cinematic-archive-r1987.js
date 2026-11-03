@@ -141,13 +141,6 @@
   }
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
-  // R2310: the normal 10-second GENESIS handoff may remove its overlay
-  // before the native MAG has a fully presented compositor home frame.
-  // A scroll in that window made its old layout-shift rectangle (0,0,0,0).
-  // This is not an artificial test delay: gate real desktop docking until
-  // two bounded native paint opportunities have passed after the handoff.
-  let nativeHomeCompositedR2310=introDone;
-  let nativeHomeGateScheduledR2310=false;
   const paperLast=new WeakMap();
   const memoryGB=Number(navigator.deviceMemory||0);
   const cores=Number(navigator.hardwareConcurrency||0);
@@ -664,15 +657,6 @@
       clearStageFlipR2293();
       const previous=stage.getBoundingClientRect();
       const desktopNativeDockR2302=!mobile();
-      // R2311: calculate the FINAL CSS viewport lane BEFORE mutating the
-      // stage. Reading its newly fixed (but not yet FLIP-inverted) rect
-      // forces Chrome to commit a transient layout and 0.106 CLS.
-      // Authored CSS: left 2.5vw, top 12dvh, width 38vw, height 74dvh.
-      // Both the real native compositor gate and the mobile path remain.
-      const desktopViewportTargetR2311=desktopNativeDockR2302?{
-        x:innerWidth*.025,y:innerHeight*.12,
-        width:innerWidth*.38,height:innerHeight*.74
-      }:null;
       if(desktopNativeDockR2302){
         // The live R326 hero may own an inline, important transform. CSS
         // cannot override it, even with a very specific !important rule.
@@ -704,9 +688,7 @@
         window.FormatXLivingCore?.requestRender?.(1);
         return;
       }
-      // No geometry read between switching to fixed positioning and
-      // installing inverse transform. Mobile already returned above.
-      const target=desktopViewportTargetR2311||stage.getBoundingClientRect();
+      const target=stage.getBoundingClientRect();
       const valid=previous.width>8&&previous.height>8&&
         target.width>8&&target.height>8&&
         Number.isFinite(previous.x)&&Number.isFinite(target.x);
@@ -723,9 +705,6 @@
             `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${sx.toFixed(5)},${sy.toFixed(5)})`,
             'important');
           root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry';
-          // R2311: the first post-toggle layout flush MUST occur after
-          // the compositor inverse is installed, never at the naked
-          // fixed-position target. Real native visual continuity.
           // One bounded style flush on MODE ENTRY (not every animation
           // frame) ensures Chromium captures the inverse transform as
           // the FLIP transition's real starting geometry.
@@ -1254,7 +1233,7 @@ void main(){
     // The user explicitly enters the archive by scrolling down; returning
     // to the top restores the uninterrupted native MAG hero.
     const enteredScroll=scrollY>Math.max(24,innerHeight*.06);
-    const inArchive=Boolean(introDone&&nativeHomeCompositedR2310&&enteredScroll&&
+    const inArchive=Boolean(introDone&&enteredScroll&&
       root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
@@ -1432,15 +1411,6 @@ void main(){
     if(root.dataset.fxMagBirthOwnerR533!=='active'
         && !document.getElementById('fx-mag-birth-prepaint-r1606')
         && !document.querySelector('[data-fx-mag-birth-live]'))introDone=true;
-    // R2312: the permanent mobile MAG has a stable fixed compositor box
-    // both before and after docking (R2294). The R2310 two-frame gate
-    // applies ONLY to desktop absolute-to-fixed FLIP; marking mobile
-    // unready forever prevents legitimate scroll from opening chapters.
-    // This also handles the delayed module loading after a finished film.
-    if(introDone&&mobile()){
-      nativeHomeCompositedR2310=true;
-      root.dataset.fxArchiveNativeHomeR2310='mobile-stable-fixed-lane';
-    }
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
@@ -1449,48 +1419,13 @@ void main(){
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
-    // R2310: a real first painted native stage must exist before a user
-    // scroll changes the same original GPU surface from hero to archive.
-    // Only the normal desktop film needs this; mobile has a stable fixed
-    // physical stage both at home and in the scroll archive (R2294).
-    function settleNativeHomeR2310(){
-      if(nativeHomeCompositedR2310||nativeHomeGateScheduledR2310||document.hidden)return;
-      nativeHomeGateScheduledR2310=true;
-      root.dataset.fxArchiveNativeHomeR2310='awaiting-two-frames';
-      window.FormatXLivingCore?.requestRender?.(1);
-      requestAnimationFrame(()=>{
-        if(disposed){nativeHomeGateScheduledR2310=false;return;}
-        window.FormatXLivingCore?.requestRender?.(1);
-        requestAnimationFrame(()=>{
-          nativeHomeGateScheduledR2310=false;
-          if(disposed)return;
-          nativeHomeCompositedR2310=true;
-          root.dataset.fxArchiveNativeHomeR2310='painted-before-archive';
-          invalidate();
-        });
-      });
-    }
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
-      if(mobile()){
-        // R2312: no desktop-only double-rAF compositor gate on phones.
-        // Keep the native stage on the same R2294 fixed geometry and
-        // enable the real native scroll chapters immediately at handoff.
-        nativeHomeCompositedR2310=true;
-        root.dataset.fxArchiveNativeHomeR2310='mobile-stable-fixed-lane';
-      }else{
-        nativeHomeCompositedR2310=false;
-        settleNativeHomeR2310();
-      }
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
     addEventListener('pageshow',invalidate,{passive:true});
-    document.addEventListener('visibilitychange',()=>{
-      if(document.hidden)return;
-      if(introDone&&!nativeHomeCompositedR2310)settleNativeHomeR2310();
-      else invalidate();
-    },{passive:true});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
     addEventListener('pagehide',stop,{once:true});
     invalidate();

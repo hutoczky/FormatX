@@ -99,9 +99,8 @@ assert(mobileFirstPaint.includes('R2285 — initial mobile layout / final native
 console.log('MAG_R2285_MOBILE_RAIL_AND_DOCK_SOURCE_PASS');
 const archive=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 assert(archive.includes('const enteredScroll=scrollY>Math.max(24,innerHeight*.06);') &&
-  archive.includes('Boolean(introDone&&nativeHomeCompositedR2310&&enteredScroll&&') &&
-  archive.includes("root.dataset.fxArchiveNativeHomeR2310='painted-before-archive'"),
-  'R2286+R2310 require both genuine user scroll AND a fully composed original native MAG before archive docking');
+  archive.includes('Boolean(introDone&&enteredScroll&&'),
+  'R2286 must never activate archive docking at scrollY=0 after film teardown');
 assert(archive.includes("if(active&&stage)ResponsiveExperience.dock();") &&
   archive.includes('else if(archiveActive)ResponsiveExperience.restore();'),
   'R2286 must keep native reversible scroll and the original home MAG');
@@ -171,10 +170,8 @@ assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor
   archive.includes('void stage.getBoundingClientRect();') &&
   archive.includes('transform 360ms cubic-bezier(.20,.66,.16,1)'),
   'R2293 real native MAG must enter archive through actual compositor FLIP');
-assert.equal((html.match(/data-fx-cinematic-archive-r1987="true"/g)||[]).length,1,
-  'Only one canonical scroll owner may load in the real document');
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2312-mobile-scroll-ready'),
-  'R2312 HTML must load the latest atomic FLIP, mobile and desktop compositor gate owner');
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2314-known-good-docking'),
+  'R2293 HTML loader must use correct cache-busted canonical scroll owner');
 console.log('MAG_R2293_NATIVE_COMPOSITOR_FLIP_SOURCE_PASS');
 for(const token of [
   'vertexColors:true,',

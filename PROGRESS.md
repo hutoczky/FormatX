@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2314 – visszatérés az igazolt négynézetes MAG-dokkoláshoz (2026-11-03)
+
+- Az R2313 gyors Chromium workflow bizonyítéka: **390 px mobil PASS; 430 px mobil PASS; 1350 px desktop PASS; 1440 px desktop FAIL (CLS 0,1060799576)**. Mind a négy tesztben ugyanaz az egy WebGL2 canvas maradt, GPU-hiba nélkül.
+- Az R2309.1 `8a46d0bf3` pontos commit **ugyanezeken a valódi viewportokon P0 SUCCESS, 0 natív stage layout shift** volt. A 1440 regresszió csak az utána bevezetett R2310 (két natív kompozitor-frame gate) és R2311 (matematikai FLIP-cél) után jelentkezett. Ezért az R2310–R2312 kísérleti scroll-gate/FLIP logikát visszavontuk; ez mérésen alapuló rollback, nem teszt-kikapcsolás.
+- A `docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js` kódja **byte-pontos** visszaállítás a négy viewporton zöld R2309.1 verzióra. A HTML új R2314 cache-keyt kap, így valódi látogatóknál nincs régi script-cache. Az R2270 forrás QA újra a zöld, scrollY>6% natív belépési szerződést védi. A korábbi R2310/11 őrzőellenőrzések eltávolítva a P0 futásból, mert csak a **visszavont** kísérleti implementációt ellenőrizték.
+- A R2310/11 specifikus guard-fájlokat eltávolítjuk, hogy ne lehessen elavult követelményből álhibát előállítani. A valódi 4× képernyőméretet, GPU, fixed pozíciót, CLS=0 és scroll-átadást vizsgáló **eredeti R2173 böngészőteszt továbbra is változatlan**; az új R2313 külön gyors workflow is marad.
+- DNS→sejtmag→MAG R2303 valós membrán, R2307 titánírisz, R2309 7,50s teljes képkivágás, CSP, három hideg GPU-indítás és a 10s film teljesen érintetlen. **R2314 saját gyors viewport + teljes P0 + Lighthouse háromszori mérése még szükséges.** PR #581 draft, nincs élesítés.
+
+
+
 ## R2313 – négy valódi böngészős MAG-dokkolás külön gyors ellenőrzése (2026-11-03)
 
 - A teljes P0 15+ percig is tarthat, a négy valódi viewport-dokkolási ellenőrzés csak a végén fut. Közben a korábbi R2311 hibát a tényleges scroll-gate teszt túl későn mutatta meg.
