@@ -26,8 +26,8 @@ for(const token of [
  'height:var(--fx-native-home-height-r2315)!important',
  'scale:none!important'
 ])assert(css.includes(token),'R2315 CSS native stage stable geometry lost: '+token);
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2315-prepared-fixed-home'));
-assert(html.includes('formatx-cinematic-archive-r1987.css?v=20261103-r2315-prepared-fixed-home'));
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2316-layout-invariant-dock'));
+assert(html.includes('formatx-cinematic-archive-r1987.css?v=20261103-r2316-layout-invariant-dock'));
 assert(p0.includes("assert.equal(atHome.position,'fixed'"),'Real P0 must enforce initial fixed desktop MAG');
 assert(p0.includes("'Native stage shifts after its first real docking'"),
  'No native stage CLS test may be bypassed');
