@@ -105,7 +105,20 @@ function observe({normal}){
         await page.waitForTimeout(550);
         const result=await page.evaluate(()=>{
           const root=document.documentElement,stage=document.querySelector('.fx-crystal-organism-r326-stage'),canvas=stage?.querySelector('.fx-crystal-organism-r326-canvas'),r=stage?.getBoundingClientRect();
-          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema,flip:root.dataset.fxArchiveFlipR2293||'',position:stage?getComputedStyle(stage).position:null};
+          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema,flip:root.dataset.fxArchiveFlipR2293||'',position:stage?getComputedStyle(stage).position:null,
+          fixedChain:stage?(()=>{
+            const chain=[];let node=stage;
+            while(node&&node instanceof HTMLElement&&chain.length<8){
+              const s=getComputedStyle(node),b=node.getBoundingClientRect();
+              chain.push({id:node.id,tag:node.tagName,className:String(node.className||'').slice(0,90),
+                position:s.position,transform:s.transform,scale:s.scale,translate:s.translate,
+                contain:s.contain,contentVisibility:s.contentVisibility,
+                willChange:s.willChange,perspective:s.perspective,filter:s.filter,
+                rect:{x:b.x,y:b.y,width:b.width,height:b.height}});
+              node=node.parentElement;
+            }
+            return chain;
+          })():[]};
         });
         const record={profile:config.name,...result,errors,failedRequests};report.cases.push(record);
         console.log('NATIVE_MAG_DOCK_ENTRY',JSON.stringify(record));
@@ -127,8 +140,14 @@ function observe({normal}){
           'Initial physical MAG is invisible during docking');
         assert(cinema.stage.width>40&&cinema.stage.height>40,
           'Cinematic MAG disappeared during its actual transition');
-        if(!config.mobile)assert(result.final.width<first.viewport.width*.5,
-          'Final desktop archive did not dock the MAG into its split-screen lane');
+        if(!config.mobile){
+          assert(result.final.width<first.viewport.width*.5,
+            'Final desktop archive did not dock the MAG into its split-screen lane');
+          assert(result.final.x>=-2&&result.final.x+result.final.width<first.viewport.width*.53,
+            'R2299 desktop MAG escaped the left photographic lane');
+          assert(result.final.y>=0&&result.final.y+result.final.height<=first.viewport.height+2,
+            'R2299 fixed desktop MAG must be positioned in the real viewport');
+        }
         else {
           assert(result.final.width<=first.viewport.width+1,
             'Final mobile MAG escaped the screen after the transition');

@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2299 – asztali MAG viewport-dokkolás javítása (2026-11-03)
+
+- R2298 pontos 4314666d P0: mobil 390px és 430px natív dokkolás PASS, LayoutShift a stage-en 0, egy WebGL2 canvas. Desktop 1350×940 FAIL: stage x526.34/y−221.28, 683.44×567 px a 38vw × 74dvh viewport-lane helyett.
+- R2299 csak az aktív desktop archívum szülő elemeiről távolítja el a fixed containing-block csapdákat: transform, scale/rotate/translate, will-change, perspective, filter és contain. A normál hero, a DNS, az organikus sejt, a MAG WebGL geometria és a mobil átadás nem változik.
+- Az R2173 valódi Chromium tesztje változatlanul követeli a natív vásznat és a nulla stage CLS-t. Új desktop képernyőkoordináta-ellenőrzés és hibakori computed ancestor-chain napló kerül bele. CSS cache-verzió frissítve; inline CSP-hash változatlan.
+- R2298 Lighthouse desktop 93/92/89, mobil 89/88/88, mobil CLS 0.024648: nem elégséges. Pontos új SHA P0/Lighthouse, screenshot, hardveres 60 FPS még hiányzik; PR #581 draft, nem élesített.
+
+
+
 ## R2298 – natív filmes GPU-fényköltség és allokációmentes célprojekció (2026-11-03)
 
 - A tényleges, R533 által betöltött `formatx-mag-genesis-three-r1280.js` kódban a `makeLights()` eredetileg létrehozott egy 0 intenzitású `mechLight` pontfényt. A `makeMechanicalLayer()` ugyanazt a mezőt felülírta egy második, ténylegesen használt pupillafénnyel. Az első, már nem elérhető fény a jelenetben maradt; R2298 eltávolítja. **Az optikai fény, PBR anyagok, 3D részletesség, geometria, DNS és 10 s film érintetlen.**

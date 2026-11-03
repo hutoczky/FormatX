@@ -136,6 +136,7 @@ jobs:
           node --check .github/scripts/validate-mag-visitor-fence-r2264.cjs
           node --check .github/scripts/validate-mag-studio-surface-r2270.cjs
           node --check .github/scripts/validate-genesis-light-budget-r2298.cjs
+          node --check .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
@@ -150,6 +151,7 @@ jobs:
           node .github/scripts/validate-mag-mesh-rows-r2208.cjs
           node .github/scripts/validate-mag-studio-surface-r2270.cjs
           node .github/scripts/validate-genesis-light-budget-r2298.cjs
+          node .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node .github/scripts/validate-mag-quality-resize-r2244.cjs
           node .github/scripts/validate-mag-resize-layout-cache-r2245.cjs
           node .github/scripts/validate-mag-cpu-upload-release-r2249.cjs

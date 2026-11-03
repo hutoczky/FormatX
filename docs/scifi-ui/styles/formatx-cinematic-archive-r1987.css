@@ -1399,3 +1399,37 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
   }
 }
 /* production-r2049-inactive-original-folio-layout-isolation */
+
+/* R2299: keep the desktop native MAG in the REAL viewport during scroll.
+   R2298 Chromium proof: 1350x940 stage x526/y-221/width683 after dock.
+   A transformed / paint-contained ancestor was still rebasing position:fixed.
+   Never alter the home portrait or the mobile compositor-only dock. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture,
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture main#main-content,
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture main#main-content > #hero,
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture #hero .hero-grid,
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture #hero .hero-space {
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:1!important;
+    perspective:none!important;
+    filter:none!important;
+    backdrop-filter:none!important;
+    will-change:auto!important;
+    contain:none!important;
+  }
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture main#main-content > #hero {
+    content-visibility:visible!important;
+  }
+  html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked {
+    transform:none!important;
+    translate:none!important;
+    rotate:none!important;
+    scale:1!important;
+    perspective:none!important;
+    will-change:auto!important;
+  }
+}
+/* production-r2299-fixed-viewport-owner-desktop-archive */
