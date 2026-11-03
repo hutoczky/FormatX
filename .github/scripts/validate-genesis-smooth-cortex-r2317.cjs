@@ -32,6 +32,8 @@ const parser=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*
 assert(parser&&parser.includes(current));
 const digest="'sha256-"+crypto.createHash('sha256').update(parser).digest('base64')+"'";
 assert(html.includes(digest),'HTML CSP must authorize exact R2317 parser');
-assert(worker.includes('const INLINE_R2317_BOOT_HASH = "'+digest+'";'));
-assert.equal((worker.match(/\$\{INLINE_R2317_BOOT_HASH\}/g)||[]).length,2);
+const currentWorkerCsp=[...worker.matchAll(/const (INLINE_R[0-9]+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
+assert(currentWorkerCsp,'current cellular film SHA256 must be authorized in both Worker CSP policies');
 console.log('R2317_SMOOTH_3D_CORTEX_SAME_MESH_AND_EXACT_CSP_PASS');
