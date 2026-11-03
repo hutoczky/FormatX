@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2300 – fizikai DNA-bond, stúdiófény és aszférikus MAG-lencse (2026-11-03)
+
+- A valós R1280 Three.js film első, domináns DNS láncának nukleotid-hídjai már nem egyenletes hengerek: az eredeti egy GPU instanced draw-callon belül két térbeli ligand-kiemelkedés és egy visszafogott kontakt-nyak alakult ki; színezése ugyanazon PBR shaderen belül a tényleges 3D vertexekhez tartozik. A többi donorspirál változatlan könnyű geometriával fut. Új DNS hálózat, mesh, részecskeszám vagy WebGL context nem jött létre.
+- A MAG meglévő központi lencséjének eredeti SphereGeometry vertexei a perem felé ellaposodó aszférikus meniszkuszt formálnak. A felületi normálok újraszámítása fizikai csillanást biztosít. Az eredeti lencse átmérője, háromszögszáma, 3D sziluett és 10 mp filmes átadás megmarad.
+- Két keskeny és visszafogott, meleg/hideg fotós softbox-reflex kerül a meglévő, egyszer generált PMREM stúdiókörnyezetbe. **Nem kerül új fény, postprocess, extra renderer, vászon, RAF, kép vagy hálózati textúra a jelenetbe.**
+- R533 film, R1629 tartalék betöltő és HTML-parser ugyanarra az új verzióra állítva. A HTML CSP és a Cloudflare Worker két CSP-listája a parser betűpontos SHA256-ját engedélyezi. Az R2298 forrásőr frissítve, és új R2300 stúdió szerződés kapcsolva a P0-ba.
+- **QA még szükséges:** pontos R2300 commiton teljes Chromium P0, 3/3 MAG frame, DNA/embrió/lencse képi összehasonlítás, Lighthouse desktop/mobile 3×, CLS, hardveres 60 FPS. A stúdiószint és a 100-as Lighthouse még nem igazolt, PR #581 továbbra is draft és nem éles.
+
+
+
 ## R2299 – asztali MAG viewport-dokkolás javítása (2026-11-03)
 
 - R2298 pontos 4314666d P0: mobil 390px és 430px natív dokkolás PASS, LayoutShift a stage-en 0, egy WebGL2 canvas. Desktop 1350×940 FAIL: stage x526.34/y−221.28, 683.44×567 px a 38vw × 74dvh viewport-lane helyett.

@@ -181,6 +181,11 @@
       card(.68,.46,.043,.37,.14,'rgba(194,220,217,.77)','rgba(82,122,128,.14)');
       card(.49,.19,.32,.068,0,'rgba(135,180,195,.32)','rgba(54,99,114,.05)');
       card(.87,.58,.12,.18,.35,'rgba(71,154,175,.26)','rgba(34,83,110,.04)');
+      // R2300: two narrow, physically plausible softbox banks carve a
+      // glancing studio edge into titanium and glass. Prebaked in the same
+      // PMREM: no additional GPU draw calls, render passes, or lights.
+      card(.375,.59,.014,.265,-.13,'rgba(218,240,237,.40)','rgba(90,139,148,.045)');
+      card(.80,.23,.017,.18,.18,'rgba(240,218,202,.25)','rgba(105,85,79,.030)');
       let texture=null,pmrem=null;
       try{
         texture=new T.CanvasTexture(canvas);
@@ -418,6 +423,8 @@
       const rungMat=new T.MeshPhysicalMaterial({
         color:0xf0f7ff,emissive:0x24353e,emissiveIntensity:.35,
         metalness:.04,roughness:.28,clearcoat:.75,
+        // R2300: only the main 3D molecular rung has vertex colors.
+        vertexColors:radius>.35,
         transparent:true,opacity:.94,depthWrite:false
       });
       const mpa=new T.PointsMaterial({
@@ -438,7 +445,30 @@
       const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,aureole,8,false),ga);
       const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,aureole,8,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.018,.018,1,10,1,false);
+      // R2300: actual sculpted contact neck and two molecular ligand heads.
+      // Keep ONE instanced draw; secondary donor helices keep legacy LOD.
+      const primaryMolecule=radius>.35;
+      const rungGeo=new T.CylinderGeometry(.018,.018,1,
+        primaryMolecule?(this.mobileRender?8:10):10,
+        primaryMolecule?6:1,false);
+      if(primaryMolecule){
+        const pos=rungGeo.getAttribute('position');
+        const chromaticBond=new Float32Array(pos.count*3);
+        for(let k=0;k<pos.count;k++){
+          const y=pos.getY(k),ay=Math.abs(y);
+          const contact=1-.38*Math.exp(-Math.pow(y/.115,2));
+          const terminal=1+.17*Math.exp(-Math.pow((ay-.35)/.085,2));
+          const width=contact*terminal;
+          pos.setXYZ(k,pos.getX(k)*width,y,pos.getZ(k)*width);
+          const shadow=1-smooth((ay-.035)/.275);
+          chromaticBond[k*3]=1-.37*shadow;
+          chromaticBond[k*3+1]=1-.29*shadow;
+          chromaticBond[k*3+2]=1-.20*shadow;
+        }
+        pos.needsUpdate=true;
+        rungGeo.setAttribute('color',new T.BufferAttribute(chromaticBond,3));
+        rungGeo.computeVertexNormals();
+      }
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -2389,6 +2419,18 @@
           transparent:true,opacity:.92
         })
       );
+      // R2300: aspheric meniscus on the EXISTING optical sphere topology.
+      // Physical crown, same number of triangles, repaired lighting normals.
+      const opticVertices=this.mechEyeCore.geometry.getAttribute('position');
+      for(let k=0;k<opticVertices.count;k++){
+        const x=opticVertices.getX(k),y=opticVertices.getY(k);
+        const oldZ=opticVertices.getZ(k);
+        const radius=Math.min(1,Math.hypot(x,y)/.120);
+        const sag=Math.pow(Math.max(0,1-radius*radius),1.35);
+        opticVertices.setZ(k,oldZ*(.80+.20*sag)+Math.sign(oldZ)*.003*sag);
+      }
+      opticVertices.needsUpdate=true;
+      this.mechEyeCore.geometry.computeVertexNormals();
       this.mechEyeCore.scale.set(1,1,.30);
       this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -3559,4 +3601,5 @@
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
+  document.documentElement.dataset.fxGenesisStudioR2300='polarized-softbox-sculpted-primary-nucleotides-aspheric-optic-single-physical-film';
 })();
