@@ -5,6 +5,7 @@ const birth=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.j
 const boot=fs.readFileSync('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js','utf8');
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+const screenshot=fs.readFileSync('.github/scripts/capture-mag-intro-r656.cjs','utf8');
 const camera=three.slice(three.indexOf('    updateCamera(t,time){'),three.indexOf('    render(r,time){'));
 for(const fragment of ['R2309: frame the ENTIRE four-point titanium chassis',
  'const assemblyFraming=smooth((t-6.28)/.68)*',
@@ -24,4 +25,13 @@ const digest="'sha256-"+crypto.createHash('sha256').update(inline).digest('base6
 assert(html.includes(digest));
 assert(worker.includes('const INLINE_R2309_BOOT_HASH = "'+digest+'";'));
 assert.equal((worker.match(/\$\{INLINE_R2309_BOOT_HASH\}/g)||[]).length,2);
-console.log('R2309_COMPLETE_TITANIUM_REVEAL_ONE_CAMERA_AND_STRICT_CSP_PASS');
+for(const token of [
+ 'R2309.1: real Chromium screenshot GPU pixels, not a camera flag.',
+ 'state.chassisFrameR2309=framing',
+ 'framing.physicalBody>450',
+ 'framing.croppedTop<64',
+ 'framing.croppedBottom<64'
+])assert(screenshot.includes(token),'R2309 actual visual screenshot regression guard lost: '+token);
+assert(!screenshot.includes('R2217 titanium assembly missing studio dolly:'),
+  'obsolete cropped-camera QA must not return');
+console.log('R2309_FULL_FRAME_ONE_CAMERA_REAL_GPU_SCREENSHOT_AND_CSP_PASS');

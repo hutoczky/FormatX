@@ -512,13 +512,50 @@ const SHOTS=[
             JSON.stringify({count:state.vesicleCount,opacity:state.vesicleOpacity}));
         }
       }
-      // R2217: the film must show an actual physical studio close-up
-      // during titanium assembly, then ease back toward the native hero.
-      if(Number(seconds)===7.5&&!(state.cameraZ>2.85&&state.cameraZ<3.40))
-        errors.push('R2217 titanium assembly missing studio dolly: '+state.cameraZ);
+      // R2309.1: the entire 3D chassis must be IN FRAME. The former
+      // R2217 fixed 3.2-unit dolly clipped both tips at the 7.50s shot.
+      if(Number(seconds)===7.5&&!(state.cameraZ>=4.30&&state.cameraZ<=4.45))
+        errors.push('R2309 full-frame titanium camera out of range: '+state.cameraZ);
       if(Number(seconds)===9.25&&!(state.cameraZ>3.75&&state.cameraZ<4.35))
         errors.push('R2217 final optical dock violates handoff framing: '+state.cameraZ);
-      await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
+      const filmPng=await page.screenshot({
+        path:path.join(OUT,name+'.png'),fullPage:false
+      });
+      if(Number(seconds)===7.5){
+        // R2309.1: real Chromium screenshot GPU pixels, not a camera flag.
+        // The temporary 2D sampler exists ONLY inside the CI browser.
+        const framing=await page.evaluate(async encoded=>{
+          const img=new Image();img.src='data:image/png;base64,'+encoded;
+          await img.decode();
+          const proof=document.createElement('canvas');
+          proof.width=img.naturalWidth;proof.height=img.naturalHeight;
+          const ctx=proof.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(img,0,0);
+          const w=proof.width,h=proof.height;
+          const rgb=ctx.getImageData(0,0,w,h).data;
+          const x0=Math.floor(w*.22),x1=Math.ceil(w*.78);
+          const top=Math.floor(h*.075),bottom=Math.ceil(h*.925);
+          let croppedTop=0,croppedBottom=0,physicalBody=0;
+          const metal=(x,y)=>{
+            const i=(y*w+x)*4;
+            return rgb[i]>55&&rgb[i+1]>90&&rgb[i+2]>90;
+          };
+          for(let y=0;y<top;y++)
+            for(let x=x0;x<x1;x+=2)if(metal(x,y))croppedTop++;
+          for(let y=bottom;y<h;y++)
+            for(let x=x0;x<x1;x+=2)if(metal(x,y))croppedBottom++;
+          for(let y=Math.floor(h*.21);y<Math.floor(h*.79);y+=3)
+            for(let x=x0;x<x1;x+=3)if(metal(x,y))physicalBody++;
+          return {width:w,height:h,croppedTop,croppedBottom,physicalBody};
+        },filmPng.toString('base64'));
+        state.chassisFrameR2309=framing;
+        if(!(framing.width>=1000&&framing.height>=600&&
+          framing.physicalBody>450&&framing.croppedTop<64&&
+          framing.croppedBottom<64)){
+          errors.push('R2309 real Chromium film silhouette clipped: '+
+            JSON.stringify(framing));
+        }
+      }
       report.push({seconds,name,state,errors});
       await page.close();
       await shotContext.close();

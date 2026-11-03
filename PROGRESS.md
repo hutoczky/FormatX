@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2309.1 – a teljes MAG-kamerakeretezés automatikus valódi képkockás kapuja (2026-11-03)
+
+- Az R2309 pontos SHA-n a 7,5 másodperces 1280×720 valódi Chromium-felvételt összevetve a korábbi R2307-tel a felső és alsó MAG-csúcs kilógása **megszűnt**. A R2309 P0 forrás-QA PASS volt, a filmképkocka rögzült, viszont a régi R2217 teszt a hibásan 2,85–3,40 egység közötti kamera-Z-t követelte, ezért téves FAIL-t adott az új **4,36** helyes z-re.
+- Az R656 képkockateszt most már a kamera Z-t **és a valódi PNG pixeleket is** vizsgálja 7,5s-nél: a felső és alsó 7,5%-os képsáv nem tartalmazhat levágott világos fémcsúcsot, ugyanakkor a középső területnek bizonyíthatóan valódi fémes MAG pixeleket kell tartalmaznia. Továbbra is valódi Three.js WebGL2 renderelésből készül a screenshot.
+- A 9,25s natív kameraátadás régi pontos ellenőrzése, a CSS, a motor, a film, a CSP, a shader, a geometria, az egyetlen kamera/renderer és a 10s idővonal változatlan. **Csak a P0 vizuális követelménye lett szigorúbb és pontosabb.** A 1440×900 normál látogatós stage CLS még nyitott, nem kerül megkerülésre.
+- Következő R2309.1 pontos SHA ellenőrzése: új 7,5s screenshot pixel PASS, 1440-as MAG-átadás, Lighthouse 3×, majd hardver 60 FPS. A PR #581 draft marad, nincs élesítés.
+
+
+
 ## R2309 – 7,50 s teljes mechanikus MAG kamerakeretezés, valós filmképkocka alapján (2026-11-03)
 
 - Az R2307 GitHub Actions 1280×720 képkockája alapján a 7,50s MAG felső és alsó csúcsa a kamera túl közeli két egymásra fedő dolly-ja miatt fizikailag kilógott a képből. A 9,25s kész MAG már látszott teljes egészében.
