@@ -142,6 +142,7 @@ jobs:
           node --check .github/scripts/validate-conservative-first-paint-r2308.cjs
           node --check .github/scripts/validate-mag-faceted-iris-r2307.cjs
           node --check .github/scripts/validate-genesis-camera-framing-r2309.cjs
+          node --check .github/scripts/validate-fixed-native-home-r2315.cjs
           node --check .github/scripts/validate-desktop-dock-transform-r2302.cjs
           node --check .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
@@ -164,6 +165,7 @@ jobs:
           node .github/scripts/validate-conservative-first-paint-r2308.cjs
           node .github/scripts/validate-mag-faceted-iris-r2307.cjs
           node .github/scripts/validate-genesis-camera-framing-r2309.cjs
+          node .github/scripts/validate-fixed-native-home-r2315.cjs
           node .github/scripts/validate-desktop-dock-transform-r2302.cjs
           node .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node .github/scripts/validate-mag-quality-resize-r2244.cjs

@@ -37,6 +37,36 @@
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
+  // R2315: normal desktop hero must already use the same viewport-fixed
+  // layout primitive as its archive mode. The original absolute->fixed
+  // switch after a real 10s film contributed ~0.106 native-stage CLS.
+  // Keep the ORIGINAL canvas and physical 3D renderer. These four CSS
+  // coordinates only pin the fully composited hero in exactly the same
+  // visible pixels; no clone, screenshot, extra draw or new WebGL context.
+  function prepareNativeHomeR2315(){
+    if(disposed||reduced.matches||mobile()||archiveActive||!introDone||document.hidden)
+      return;
+    if(scrollY>Math.max(24,innerHeight*.06))return;
+    if(root.dataset.fxCrystalOrganismR326!=='ready')return;
+    const target=window.FormatXLivingCore?.stage||
+      document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage');
+    const host=document.querySelector('#hero .hero-space');
+    if(!(target instanceof HTMLElement)||!target.isConnected||
+       !(host instanceof HTMLElement))return;
+    const original=target.getBoundingClientRect();
+    if(original.width<40||original.height<40)return;
+    // When already prepared, the visible stage is fixed: the authentic
+    // desktop HTML hero-space remains the reserved layout anchor on resize.
+    const rect=root.dataset.fxMagNativeHomeR2315==='prepared'?
+      host.getBoundingClientRect():original;
+    for(const [name,value] of [
+      ['--fx-native-home-left-r2315',rect.left],
+      ['--fx-native-home-top-r2315',rect.top],
+      ['--fx-native-home-width-r2315',rect.width],
+      ['--fx-native-home-height-r2315',rect.height]
+    ])target.style.setProperty(name,value.toFixed(3)+'px');
+    root.dataset.fxMagNativeHomeR2315='prepared';
+  }
   function setHeroCanvasLaneFront(active){
     const hero=document.getElementById('hero');
     if(!hero)return;
@@ -1391,6 +1421,13 @@ void main(){
       for(const prop of ['--fx-archive-paper-x','--fx-archive-paper-y','--fx-archive-paper-rot','--fx-archive-paper-scale','--fx-archive-paper-opacity'])node.style.removeProperty(prop);
     }
     ResponsiveExperience.restore();
+    // R2315: native stage reverts to original authored layout if an archive
+    // fallback or lifecycle cleanup stops the cinematic controller.
+    delete root.dataset.fxMagNativeHomeR2315;
+    for(const name of [
+      '--fx-native-home-left-r2315','--fx-native-home-top-r2315',
+      '--fx-native-home-width-r2315','--fx-native-home-height-r2315'
+    ])stage?.style.removeProperty(name);
     detach?.();detach=null;drawPass=null;
     registeredCanvas=null;registeredApi=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
@@ -1414,17 +1451,34 @@ void main(){
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
-    addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
+    prepareNativeHomeR2315();
+    addEventListener('formatx:real3dready',()=>{
+      connect();
+      prepareNativeHomeR2315();
+    },{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
-    addEventListener('resize',invalidate,{passive:true});
+    addEventListener('resize',()=>{
+      prepareNativeHomeR2315();
+      invalidate();
+    },{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
-    addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
+    addEventListener('formatx:livingready',()=>{
+      discover();
+      prepareNativeHomeR2315();
+      invalidate();
+    },{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      // Before any normal scroll, preserve the hero viewport rectangle
+      // while switching only the layout primitive to fixed positioning.
+      prepareNativeHomeR2315();
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
-    addEventListener('pageshow',invalidate,{passive:true});
+    addEventListener('pageshow',()=>{
+      prepareNativeHomeR2315();
+      invalidate();
+    },{passive:true});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
     addEventListener('pagehide',stop,{once:true});

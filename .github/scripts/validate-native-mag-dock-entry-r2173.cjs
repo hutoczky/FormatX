@@ -150,6 +150,13 @@ function observe({normal}){
         assert(cinema.stage.width>40&&cinema.stage.height>40,
           'Cinematic MAG disappeared during its actual transition');
         if(!config.mobile){
+          // R2315: the genuine desktop native MAG must be viewport-owned
+          // in the FIRST real home portrait, before scroll or archive CSS.
+          // A late absolute->fixed toggle after the 10s film generates CLS.
+          assert.equal(atHome.position,'fixed',
+            'R2315 desktop MAG must be fixed at the visible original hero before scroll');
+          assert(Math.abs(atHome.stage.y-112)<3,
+            'R2315 desktop fixed home must preserve the original studio hero y');
           // R2304: scale:1 is not a harmless reset on a fixed ancestor.
           // The real Chromium computed-style chain must be fully neutral,
           // not simply a visually identity matrix.

@@ -170,7 +170,7 @@ assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor
   archive.includes('void stage.getBoundingClientRect();') &&
   archive.includes('transform 360ms cubic-bezier(.20,.66,.16,1)'),
   'R2293 real native MAG must enter archive through actual compositor FLIP');
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2314-known-good-docking'),
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2315-prepared-fixed-home'),
   'R2293 HTML loader must use correct cache-busted canonical scroll owner');
 console.log('MAG_R2293_NATIVE_COMPOSITOR_FLIP_SOURCE_PASS');
 for(const token of [

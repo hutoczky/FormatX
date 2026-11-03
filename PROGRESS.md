@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2315 – stabil, viewport-fixed MAG már az első asztali hero képkockán (2026-11-03)
+
+- Az új R2313 gyors **valódi** Chromium négyviewport teszt az R2314 rollback után is: mobil 390/430 és desktop 1350 PASS, **1440px normál 10s intro → scroll FAIL CLS=0,10622972**. Az eredeti R2309.1 zöld P0 csak az egyik időzítési mintában sikerült; rollback nem oldotta meg a race-et.
+- A 1440-as `LayoutShift` forrása az **ugyanazon natív canvas** először y=-266px-re görgetett, még `position:absolute` stage-ből a viewport `position:fixed` dockba lépésénél jelent meg. A CSS-only 360ms inverse-FLIP az animált pixeleket megtartja, de a DOM-layout primitive tényleges váltását nem tudja teljesen kompenzálni.
+- **R2315 megoldás:** a 10s GENESIS `formatx:magbirthcomplete` eventnél, a felhasználó első scroll-ja **előtt**, a már ténylegesen kirajzolt egyetlen R326 stage eredeti, képernyőben látható pontos 4 koordinátáját CSS custom propertyként rögzítjük. Az új desktop-only archive CSS ekkor a stage-et **ugyanabban a látható 720×605px hero helyben** `position:fixed` állapotba állítja, miközben a .hero-space eredeti 520–620px magasságú grid horgonya megmarad. A scroll-kori natív archive dock ekkor fixed→fixed layoutból, kizárólag compositor invertált transformból indul. Mobil R2294 változatlan, 0 új WebGL canvas, draw, frame vagy render.
+- A `livingready`, `real3dready`, `pageshow`, `resize` útvonalak ugyanazt a natív stage-et készítik elő, későn betöltött archívum esetén is; reduced-motion/lifecycle stop visszaadja az eredeti layoutot és törli a custom propertyket.
+- A valódi P0 most **kifejezetten megköveteli**, hogy desktop 1350/1440 esetén már `scrollY=0`-nál a natív MAG `position:fixed`, y≈112px legyen, majd ugyanúgy nincs `LayoutShift`. Külön source QA + HTML/CSS/JS cache key frissült. A R2315 négyviewport screenshot és teljes P0 eredmény még **ellenőrizendő**, nincs megalapozatlan PASS. PR #581 draft, nincs deploy.
+
+
+
 ## R2314 – visszatérés az igazolt négynézetes MAG-dokkoláshoz (2026-11-03)
 
 - Az R2313 gyors Chromium workflow bizonyítéka: **390 px mobil PASS; 430 px mobil PASS; 1350 px desktop PASS; 1440 px desktop FAIL (CLS 0,1060799576)**. Mind a négy tesztben ugyanaz az egy WebGL2 canvas maradt, GPU-hiba nélkül.
