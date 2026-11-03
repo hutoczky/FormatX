@@ -14,8 +14,13 @@ assert(js.includes('window.FormatXLivingCore?.requestRender?.(1)'));
 assert(js.includes('requestAnimationFrame(()=>{\n        if(disposed)'));
 assert(js.includes('requestAnimationFrame(()=>{\n          nativeHomeGateScheduledR2310=false'));
 assert(js.includes('if(introDone&&!nativeHomeCompositedR2310)settleNativeHomeR2310()'));
-assert(js.includes('if(!mobile()){\n        nativeHomeCompositedR2310=false;'));
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2311-compositor-atomic-flip'));
+assert(js.includes("if(introDone&&mobile()){") &&
+  js.includes("root.dataset.fxArchiveNativeHomeR2310='mobile-stable-fixed-lane'") &&
+  js.includes("if(mobile()){\n        // R2312: no desktop-only double-rAF compositor gate on phones."),
+  'R2312 mobile film handoff must activate stable native archive scroll without desktop frame-gate deadlock');
+assert(js.includes("}else{\n        nativeHomeCompositedR2310=false;\n        settleNativeHomeR2310();"),
+  'Desktop double-frame genuine compositor gate must remain after R2312 mobile fix');
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2312-mobile-scroll-ready'));
 for(const token of [
  'Native stage shifts after its first real docking',
  'R2299 desktop MAG escaped the left photographic lane',

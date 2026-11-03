@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2312 – mobil DNA → MAG átadás és natív scroll-deadlock javítása (2026-11-03)
+
+- Az R2311.3 pontos SHA `a7db5d2` GitHub Actions P0 sikeresen elvégezte a forrás QA-t, a 3/3 valódi WebGL cold-startot, a 10s filmes képkocka QA-t, a valódi kétirányú session-handoffot és a CSS visszaállítást; a **mobil-390** natív dokkolás 25s timeoutot adott, még a CLS-ellenőrzés előtt.
+- **Valódi gyökérok:** az R2310 asztali, két kompozitor-képkockát megkövetelő `nativeHomeCompositedR2310` gate inicializálása az aktív film alatt `false` volt; a `magbirthcomplete` event csak asztali gépen aktiválta, így **390/430px mobilon örökre `false` maradt**, és minden scroll-blokk tiltva volt.
+- **R2312:** mobilon az eredeti R2294 állandó, `position:fixed` stage-geometria miatt a natív scroll azonnal biztonságos a 10s film végén. Mind a normál `magbirthcomplete` event, mind a késleltetett `init()` esetén `nativeHomeCompositedR2310=true` és `mobile-stable-fixed-lane` jelzés áll be. Asztali gépen a két valódi GPU/RAF kompozitor-képkockás R2310 gate és az atomikus R2311 viewport-FLIP **változatlan**.
+- A szigorú forrás QA minden új R2312 mobil feltételt és a desktop gate fennmaradását ellenőrzi. Az R1987 archive JS cache-azonosítója megváltozott; CSP, film, shader, 3D mesh, MAG canvas és a 10s timeline nem változott.
+- A **teljes R2312 P0** (mobil 390/430; desktop 1350/1440; CLS=0) és Lighthouse 3× jelenleg még nem igazolt az új commiton. PR #581 draft, élesítés nem történt.
+
+
+
 ## R2311 – CLS-mentes, atomikus natív MAG képkocka-átadás (2026-11-03)
 
 - Az R2310 friss javítása először két natív WebGL compositor képkockát követel a 10 mp-es film vége és a scroll-archívum között; ezt **megtartjuk**. Az R2307–R2309 normál Chromium 1440×900 tesztben a viewportba ugró MAG kezdeti stage-layout 0,1062297 LayoutShift-et okozott.

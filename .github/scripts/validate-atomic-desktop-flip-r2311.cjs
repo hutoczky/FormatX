@@ -25,7 +25,7 @@ assert(!dock.includes('const target=stage.getBoundingClientRect()'),
 assert(css.includes('left:2.5vw!important;')&&css.includes('top:12dvh!important;'));
 assert(css.includes('width:38vw!important;')&&css.includes('height:74dvh!important;'));
 assert(css.includes('scale:none!important;'),'No transformed ancestor may capture fixed MAG');
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2311-compositor-atomic-flip'));
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2312-mobile-scroll-ready'));
 assert(js.includes('introDone&&nativeHomeCompositedR2310&&enteredScroll'),
  'R2310 real painted-native compositor must remain gated');
 console.log('R2311_REAL_VIEWPORT_ATOMIC_FLIP_WITH_R2310_COMPOSITOR_PASS');

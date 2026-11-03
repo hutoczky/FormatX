@@ -1432,6 +1432,15 @@ void main(){
     if(root.dataset.fxMagBirthOwnerR533!=='active'
         && !document.getElementById('fx-mag-birth-prepaint-r1606')
         && !document.querySelector('[data-fx-mag-birth-live]'))introDone=true;
+    // R2312: the permanent mobile MAG has a stable fixed compositor box
+    // both before and after docking (R2294). The R2310 two-frame gate
+    // applies ONLY to desktop absolute-to-fixed FLIP; marking mobile
+    // unready forever prevents legitimate scroll from opening chapters.
+    // This also handles the delayed module loading after a finished film.
+    if(introDone&&mobile()){
+      nativeHomeCompositedR2310=true;
+      root.dataset.fxArchiveNativeHomeR2310='mobile-stable-fixed-lane';
+    }
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
@@ -1463,7 +1472,13 @@ void main(){
     }
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
-      if(!mobile()){
+      if(mobile()){
+        // R2312: no desktop-only double-rAF compositor gate on phones.
+        // Keep the native stage on the same R2294 fixed geometry and
+        // enable the real native scroll chapters immediately at handoff.
+        nativeHomeCompositedR2310=true;
+        root.dataset.fxArchiveNativeHomeR2310='mobile-stable-fixed-lane';
+      }else{
         nativeHomeCompositedR2310=false;
         settleNativeHomeR2310();
       }
