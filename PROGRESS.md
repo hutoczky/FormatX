@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2301 – renderelt képkockából feltárt sejtmag-fénylés korrekciója (2026-11-03)
+
+- A valós GitHub Chromium R2300 képkockák 3.50/5.50s állapota és a 780×1688 mobil képkocka alapján a biológiai sejt tényleges felülete, belső orgánuma, kapillárisai és kromatinrostjai túl erős additív fotonfelhő mögé kerültek. Ez valódi filmes képminőségi hiba, nem pusztán CSS vagy referencia-eltérés.
+- **R2301:** a meglevő R1280 GPU-részecskeshader a DNS→kromatin 3.38–6.52 s közötti mélységi fázisában szelídített alfaenergiát használ (legfeljebb 44%-kal visszafogott), míg a valódi 3D sejt saját fényforrásai és PBR membránja változatlan. A korábbi 6000 mobil / 9600 desktop genetikai pont, 1200 / 3100 külön biophoton, morfing, sejtmembrán, színes valódi organellák és 10s timeline megmaradt. A második fotonbatch expozíciója a sejt képkockáján platform szerint enyhébb.
+- Nem lett hozzáadva kép, új draw call, renderer, extra RAF, hálózati textúra, vagy Lighthouse-kivételezés. Az R2300 stúdió-fénykártyák és aszférikus MAG lencse érintetlenek. HTML bootstrap, R533, R1629 és mindkét Worker CSP aktuális cache/SHA frissítve, az R2298/R2300 QA és új R2301 teszt szinkronban.
+- **Kapu:** összevetendő 5.50s desktop/mobil valódi új GPU képkocka a mentett R2300 alapképpel. Teljes P0, DNS/film/optika, mobil CLS, Lighthouse 3×, 60 FPS még szükséges. PR #581 draft, nincs élesítve és a stúdióminőség nincs igazolva.
+
+
+
 ## R2300.1 – R2298 QA cache-hash érvényesség javítása (2026-11-03)
 
 - A `fc8c03a` filmes commit P0 futása a korai forrástesztben FAIL lett, nem a GPU-ban: az R2298 forrásőr az aktuális parserhez továbbra is a régi `INLINE_R2298_BOOT_HASH` literált várta. A valódi R2300 script jogszerűen új, két Worker CSP-ben engedélyezett SHA256-t kapott.

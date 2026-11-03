@@ -1181,7 +1181,13 @@
             // R2192: all genetic matter departs BEFORE the optical organ
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
             float last=1.0-curve(6.96,7.44,uPhase);
-            vEnergy=first*last*(1.0+transferGlow*.16);
+            // R2301: after DNA has condensed, the bright genetic stream
+            // becomes internal chromatin, not a foreground confetti cloud.
+            // All 6000/9600 physical GPU morph particles remain present.
+            float cellOpticalDepth=curve(3.38,4.28,uPhase)*
+              (1.0-curve(5.66,6.52,uPhase));
+            vEnergy=first*last*(1.0+transferGlow*.16)*
+              (1.0-.44*cellOpticalDepth);
             vSeed=aSeed;
           }`,
         fragmentShader:`
@@ -1568,8 +1574,12 @@
       };
       // DNA never competes with embryo, embryo never masks assembling metal.
       setup(this.dnaBiofield,(1-smooth((t-2.94)/1.42))*.84);
+      // R2301: retain every physical biophoton, but make the organelle,
+      // membrane and capillaries the photographic subject at 5.50 seconds.
+      // Lower additive exposure without hiding/changing particle geometry.
       setup(this.embryoBiofield,
-        smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*.94);
+        smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*
+        (this.mobileRender?.48:.55));
     }
 
     updateGenomeParticles(t,time){
@@ -3602,4 +3612,5 @@
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
   document.documentElement.dataset.fxGenesisStudioR2300='polarized-softbox-sculpted-primary-nucleotides-aspheric-optic-single-physical-film';
+  document.documentElement.dataset.fxGenesisStudioR2301='cellular-depth-first-tamed-additive-chromatin-real-3d-geometry';
 })();
