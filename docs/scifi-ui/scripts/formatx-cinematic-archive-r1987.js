@@ -625,17 +625,25 @@
   // the existing fixed cinematic lane. One WebGL canvas, NO cloned canvas,
   // image snapshot, extra renderer or perpetual animation frame.
   let stageFlipRafR2293=0,stageFlipTimerR2293=0;
-  function clearStageFlipR2293(){
+  function clearStageFlipR2293(restoreHome=true){
     if(stageFlipRafR2293)cancelAnimationFrame(stageFlipRafR2293);
     stageFlipRafR2293=0;
     if(stageFlipTimerR2293)clearTimeout(stageFlipTimerR2293);
     stageFlipTimerR2293=0;
     if(stage?._fxArchiveFlipOriginalR2293){
-      for(const [prop,value,priority] of stage._fxArchiveFlipOriginalR2293){
-        if(value)stage.style.setProperty(prop,value,priority);
-        else stage.style.removeProperty(prop);
+      if(restoreHome){
+        for(const [prop,value,priority] of stage._fxArchiveFlipOriginalR2293){
+          if(value)stage.style.setProperty(prop,value,priority);
+          else stage.style.removeProperty(prop);
+        }
+        delete stage._fxArchiveFlipOriginalR2293;
+      }else{
+        // R2302: keep the desktop fixed archive lane's geometry neutral.
+        // Restoring the pre-dock hero matrix here used to rescale 38vw
+        // into a 683px stage and push the supposedly fixed MAG offscreen.
+        stage.style.setProperty('transition','none','important');
+        stage.style.setProperty('transform','none','important');
       }
-      delete stage._fxArchiveFlipOriginalR2293;
     }
   }
   class ResponsiveExperience {
@@ -648,9 +656,23 @@
       // lane instead of causing a 0.101834 CLS 195px width snap.
       clearStageFlipR2293();
       const previous=stage.getBoundingClientRect();
+      const desktopNativeDockR2302=!mobile();
+      if(desktopNativeDockR2302){
+        // The live R326 hero may own an inline, important transform. CSS
+        // cannot override it, even with a very specific !important rule.
+        // Save all three original inline values BEFORE measuring the
+        // physical archive target, so FLIP animates to the real viewport lane.
+        stage._fxArchiveFlipOriginalR2293=
+          ['transform','transform-origin','transition'].map(prop=>[
+            prop,stage.style.getPropertyValue(prop),
+            stage.style.getPropertyPriority(prop)
+          ]);
+      }
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
+      if(desktopNativeDockR2302)
+        stage.style.setProperty('transform','none','important');
       // R2294: on phones the native stage has a stable fixed layout box
       // before AND after docking. Only the authored CSS translate3d changes.
       // Do not run the R2293 FLIP path here: measuring a new position/size
@@ -675,11 +697,8 @@
         const sx=previous.width/target.width,sy=previous.height/target.height;
         if(Math.abs(dx)>1||Math.abs(dy)>1||
            Math.abs(sx-1)>.008||Math.abs(sy-1)>.008){
-          stage._fxArchiveFlipOriginalR2293=
-            ['transform','transform-origin','transition'].map(prop=>[
-              prop,stage.style.getPropertyValue(prop),
-              stage.style.getPropertyPriority(prop)
-            ]);
+          // R2302: restore only when leaving the archive; never restore a
+          // stale home matrix at the end of the compositor-only FLIP.
           stage.style.setProperty('transition','none','important');
           stage.style.setProperty('transform-origin','0 0','important');
           stage.style.setProperty('transform',
@@ -700,11 +719,17 @@
           stageFlipTimerR2293=setTimeout(()=>{
             stageFlipTimerR2293=0;
             if(!archiveActive||!stage?.isConnected)return;
-            clearStageFlipR2293();
+            clearStageFlipR2293(false);
             root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
             window.FormatXLivingCore?.requestRender?.(1);
           },440);
         }
+      }
+      // If no FLIP was needed, the original canvas is already in the fixed
+      // viewport slot. Keep its home matrix deferred until restore().
+      if(!stageFlipRafR2293&&!stageFlipTimerR2293){
+        if(desktopNativeDockR2302)stage.style.setProperty('transform','none','important');
+        root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
       }
       window.FormatXLivingCore?.requestRender?.(1);
     }

@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2302 – natív MAG asztali dokkolás: hibás hero FLIP-mátrix (2026-11-03)
+
+- A teljes P0 `d40e564` böngészős R2173 mérése megmutatta: 1350×940 desktopon a MAG fixed archív stage tévesen x526/y−221, 683×567 px, miközben az előírt 38vw×74dvh helye ~513×696 px. A stage számított `transform:matrix(1.33224,0,0,.81513,-33.75,-112.8)`; a szülő lánc már nem transzformált. Tehát R2299 ancestor-fix önmagában nem elég: a stage saját fontos inline home/FLIP transformja az aktív archív CSS-en túlélte az átadást.
+- R2302 az eredeti home `transform`/`transform-origin`/`transition` inline értékeit desktopon **a dokkolás előtt** menti. Az archive első target rectjét már semlegesített, valós `position:fixed` geometriával méri. A FLIP 360ms kompozitor-átmenet végén a mátrixot **nem** állítja vissza; csak tényleges home visszatéréskor kapja vissza a korábbi értékeket. No-FLIP esetben a stage szintén natív fixed lane-ben marad.
+- Telefonon az R2294 fix fizikai doboz, compositor-only átadás és CLS-szerződés változatlan. Az R326 eredeti WebGL2 3D MAG, a filmes DNS/sejtmag/MAG, PBR shader, geometria, 10mp, teljesítményprofil és egyetlen canvas nem változik.
+- A már szigorú R2173 valós Chromium teszt továbbra is megköveteli a bal 38vw sávot, a teljes viewportban levő 74dvh stage-et és nulla véletlen LayoutShift-et. Új forrás QA hozzáadva a P0-ba; e teszt **nem helyettesíti** a böngészős mérést. Exact-head P0/Lighthouse/film-képkockák/fizikai 60 FPS még szükségesek. PR #581 draft, nincs merge, nincs élesítés.
+
+
+
 ## R2301.1 – történeti QA-hash hibajavítás (2026-11-03)
 
 - Az R2301 első P0-ján a teljes geometriai forrásellenőrzés és R2298 SHA QA PASS, de az R2300 teszt korábbi `INLINE_R2300_BOOT_HASH` konstansát várta az érvényes új R2301 CSP-ben. Ez QA szerződéselavulás, nem böngészős grafikai hiba.
