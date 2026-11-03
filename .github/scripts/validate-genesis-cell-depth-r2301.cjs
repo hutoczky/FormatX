@@ -9,7 +9,7 @@ const birth=read('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js');
 const boot=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const html=read('docs/scifi-ui/index.html');
 const worker=read('billing-worker/src/production-content-entry.js');
-const version='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis';
+const version='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals';
 for(const token of [
  'const count=this.mobileRender?6000:9600;',
  "const embryo=build(this.mobileRender?1200:3100,'embryo');",

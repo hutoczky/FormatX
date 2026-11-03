@@ -16,15 +16,17 @@ for(const fragment of ['R2309: frame the ENTIRE four-point titanium chassis',
  assert(camera.includes(fragment),'R2309 continuous 3D camera framing absent: '+fragment);
 assert(three.includes('new THREE.PerspectiveCamera(42,1,0.05,80)'));
 assert.equal((three.match(/this\.camera=new THREE\.PerspectiveCamera/g)||[]).length,1);
-const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis';
+const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals';
 assert(birth.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+key));
 assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+key));
 const inline=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*>([\s\S]*?)<\/script>/)?.[1];
 assert(inline?.includes(key));
 const digest="'sha256-"+crypto.createHash('sha256').update(inline).digest('base64')+"'";
 assert(html.includes(digest));
-assert(worker.includes('const INLINE_R2309_BOOT_HASH = "'+digest+'";'));
-assert.equal((worker.match(/\$\{INLINE_R2309_BOOT_HASH\}/g)||[]).length,2);
+const currentCsp=[...worker.matchAll(/const (INLINE_R[0-9]+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
+assert(currentCsp,'current filmed optical parser digest must be allowed in both CSPs');
 for(const token of [
  'R2309.1: real Chromium screenshot GPU pixels, not a camera flag.',
  'state.chassisFrameR2309=framing',

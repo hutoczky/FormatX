@@ -1664,6 +1664,20 @@
       shell.geometry.setAttribute('color',
         new T.BufferAttribute(cortexChromatinR2295,3));
       shell.geometry.computeVertexNormals();
+      // R2317: this IcosahedronGeometry is NON-INDEXED. Three's generated
+      // normals are per-face, so the R2307 9.25s GPU screenshot exposed
+      // flat, polygonal biological tissue behind the optical MAG.
+      // Reuse the SAME existing geometry and normal attribute once at boot:
+      // continuous radial normals on the already physically pleated surface
+      // preserve real 3D contours, PBR chromatin, fiber bump and bioglass.
+      // No new vertices, materials, render passes or per-frame work.
+      const cortexNormalsR2317=shell.geometry.getAttribute('normal');
+      for(let i=0;i<shellPosition.count;i++){
+        const x=shellPosition.getX(i),y=shellPosition.getY(i),z=shellPosition.getZ(i);
+        const inv=1/Math.max(.00001,Math.hypot(x,y,z));
+        cortexNormalsR2317.setXYZ(i,x*inv,y*inv,z*inv);
+      }
+      cortexNormalsR2317.needsUpdate=true;
       document.documentElement.dataset.fxGenesisCortexR2295=
         'true-3d-pleated-chromatin-capillaries-coral-PBR-one-shell';
       this.organicShellSourceColor=this.organicShellMaterial.color.clone();

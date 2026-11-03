@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2317 – stúdió MAG: valódi 3D biológiai cortex fénykezelés (2026-11-03)
+
+- A korábbi 9,25s tényleges GPU screenshoton a fém MAG mögötti valós biológiai sejtburkon háromszögszerű szögletes világítás látszott. Az R2295 `IcosahedronGeometry(1.38,4)` **nem indexelt**, ezért a `computeVertexNormals()` minden arcot külön normállal árnyalt.
+- **R2317:** a már fizikailag deformált **ugyanazon létező** cortex mesh `position` attribútumából konstrukciókor egyszer, normalizált radiális normálokkal felülírjuk az eredeti `normal` buffert. A redők, szín-VBO, biológiai erek, PBR clearcoat és mikro-textúra megmaradnak, a szövet mélységi fényátmenete folytonos.
+- Nincs további mesh, canvas, renderer, fény, triangle, draw call, textúra, animációs passz vagy per-frame JS-normálszámítás. A változás kizárólag egy régi GPU-vertexattribútum egyszeri korrekt kitöltése; a 60Hz célhoz nem ad frame-költséget.
+- Frissített R1280, R533, R1629, HTML-parser cache verzió: `20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals`; számolt új `SHA256` parser hash: `'sha256-vh2bzwpV1DHROGxgvbLipn4xxvFA7RTDFj5ao0/l3ZE='`. HTML CSP, valamint mindkét Worker CSP pontosan engedélyezi. Előző hash-ek megmaradnak. Az R2309 kamerateszt a legfrissebb CSP-t dinamikusan ellenőrzi.
+- Új `validate-genesis-smooth-cortex-r2317.cjs` a P0 workflow-ba integrálva. **Valódi R2317 filmes screenshot, P0 és 3× Lighthouse futás szükséges, eredményt nem előlegezünk meg.** PR #581 draft, nincs élesítés.
+
+
+
 ## R2316 – MAG: változatlan fizikai képernyődoboz, kizárólag kompozitoros dokkolás (2026-11-03)
 
 - A R2315 (`dd8bbd47`) **valódi** 390/430/1350/1440 Chromium gyors tesztjén a desktop home MAG már mindkét asztali nézetben `position:fixed` y=112px volt, tehát a korábbi absolute→fixed hiba megszűnt; ennek ellenére **1440 normal intro** dock CLS=0,1893181916 volt. Forrás stage previousRect 0→currentRect 652,112 / 720×605.
