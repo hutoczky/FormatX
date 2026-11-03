@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2309 – 7,50 s teljes mechanikus MAG kamerakeretezés, valós filmképkocka alapján (2026-11-03)
+
+- Az R2307 GitHub Actions 1280×720 képkockája alapján a 7,50s MAG felső és alsó csúcsa a kamera túl közeli két egymásra fedő dolly-ja miatt fizikailag kilógott a képből. A 9,25s kész MAG már látszott teljes egészében.
+- **Javítás:** egyetlen már meglévő 42°-os perspektívakamera, egyetlen folyamatos 10 másodperces film. A 6,28–8,58s születési fázisban fokozatosan és végponti ugrás nélkül megőrzött minimum `z=4.36` kameratávolság biztosít helyet a még nagyobb, születő titánkeret csúcsainak. Az eredeti kamera és a 9,8s natív MAG-handoff állapot változatlan, mobil képkocka változatlan.
+- Nem változik a R2303 biológiai hártya, a R2307 16 fizikai titánfacetta, a DNA filament/részecske, a 3D világ, a mozgás-RAF és a WebGL2 canvas. 0 új mesh, fény, kamera, draw pass, shader vagy frame-allokáció.
+- Az R533→R1280, az R1629→R533 és a HTML inline korai parser azonos `20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis` asset-verziót kapott. Új **számolt** SHA256 `'sha256-K0p8k+dD/0/VM2JmXW6XXkELuawyxdIzJ/UGhsITzAQ='` engedélyezve HTML CSP-ben és mindkét Worker CSP policy-ban. A régi audit-hash-ek megmaradtak.
+- Külön P0 forrásregresszió ellenőrzi az egykamerás folytonos képkivágást, loader-paritást és a két pontos CSP-t. **Szükséges** az új 7,50s/9,25s valós Chromium screenshot és a teljes R2309 P0 1440 CLS / 3× Lighthouse ellenőrzése. PR #581 draft, nincs élesítés.
+
+
+
 ## R2308 – R2306 CSS preload visszavonása a valós P0 és Lighthouse regresszió miatt (2026-11-03)
 
 - **Ok:** az R2306 spekulatív desktop CSS preload után a natív MAG átvitel 1440×900-as, normál 10s intróindításnál 0,1062297 váratlan stage-eltolódást mér, miközben az R2304 pontos SHA-ján az ugyanez a négy valódi Chromium nézet **PASS** volt (mobile 390/430, desktop 1350/1440).

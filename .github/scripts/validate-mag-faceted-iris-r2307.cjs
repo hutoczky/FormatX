@@ -15,7 +15,7 @@ for(const val of ['const heel=p(.107,-.15,.519)','const leading=p(.178,-.23,.505
 assert(block.includes('for(let blade=0;blade<8;blade++)'));
 assert.equal((block.match(/this\.mechOpticShutters=new T\.Mesh\(/g)||[]).length,1,
  'The iris must keep one physical GPU mesh and one draw call');
-const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris';
+const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis';
 assert(birth.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+key));
 assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+key));
 assert(html.includes(key));
@@ -23,6 +23,8 @@ const script=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*
 assert(script);
 const digest="'sha256-"+crypto.createHash('sha256').update(script).digest('base64')+"'";
 assert(html.includes(digest),'Current HTML CSP parser hash invalid');
-assert(worker.includes('const INLINE_R2307_BOOT_HASH = "'+digest+'";'));
-assert.equal((worker.match(/\$\{INLINE_R2307_BOOT_HASH\}/g)||[]).length,2);
+const currentAuthorized=[...worker.matchAll(/const (INLINE_R[0-9]+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
+assert(currentAuthorized,'active parser SHA256 must match both Worker CSPs');
 console.log('R2307_REAL_FACETED_OPTICAL_IRIS_CSP_SOURCE_PASS');

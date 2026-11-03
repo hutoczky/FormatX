@@ -3343,6 +3343,16 @@
       z-=revealDolly*(this.mobileRender?.20:.76);
       x+=birthDolly*.038*Math.sin((t-5.68)*1.12);
       y+=birthDolly*.018;
+      // R2309: frame the ENTIRE four-point titanium chassis during the
+      // 7.50s macro birth. Two simultaneous camera dollies previously
+      // cropped both sharp tips in the actual Chromium film screenshot.
+      // One original 42-degree perspective camera, no cut or extra pass.
+      const assemblyFraming=smooth((t-6.28)/.68)*
+        (1-smooth((t-8.58)/.92));
+      if(!this.mobileRender){
+        const fullFrameZ=Math.max(z,4.36);
+        z=mix(z,fullFrameZ,assemblyFraming);
+      }
       if(this.width<this.height)z+=.90;
       this.camera.position.set(x,y,z);
       this.camera.lookAt(0,0,0);
