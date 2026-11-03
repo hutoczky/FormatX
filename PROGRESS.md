@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2313 – négy valódi böngészős MAG-dokkolás külön gyors ellenőrzése (2026-11-03)
+
+- A teljes P0 15+ percig is tarthat, a négy valódi viewport-dokkolási ellenőrzés csak a végén fut. Közben a korábbi R2311 hibát a tényleges scroll-gate teszt túl későn mutatta meg.
+- Új **független, pontos SHA-ra futó** GitHub Actions workflow: `MAG real browser viewport dock gate`. Playwright 1.62 / Chrome, eredeti production HTML/JS helyi 4178-as webszerverről, **ugyanazt a változtatás nélküli** `validate-native-mag-dock-entry-r2173.cjs` tesztet futtatja: mobil 390/430, desktop 1350/1440, valódi intro+scroll, MAG valódi GPU canvas, R2304 fix lane, R2310 compositor readiness, egy context és 0 unexpected layout shift.
+- Sikertelen esetben is megőrzi a valódi böngészőképek és naplók `artifacts/native-mag-dock-entry-r2173/` bizonyítékait. A teljes P0 és a Lighthouse **külön továbbra is kötelező**; ez a workflow nem kerülheti meg őket.
+- Nem módosult a DNS, a sejt, a MAG, a shader, a WebGL renderer, a CSP és a felhasználói UI. PR #581 draft, nincs deploy; a 4× browser PASS az új commiton még ellenőrzendő.
+
+
+
 ## R2312 – mobil DNA → MAG átadás és natív scroll-deadlock javítása (2026-11-03)
 
 - Az R2311.3 pontos SHA `a7db5d2` GitHub Actions P0 sikeresen elvégezte a forrás QA-t, a 3/3 valódi WebGL cold-startot, a 10s filmes képkocka QA-t, a valódi kétirányú session-handoffot és a CSS visszaállítást; a **mobil-390** natív dokkolás 25s timeoutot adott, még a CLS-ellenőrzés előtt.

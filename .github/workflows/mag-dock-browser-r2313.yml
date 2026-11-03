@@ -1,0 +1,70 @@
+name: MAG real browser viewport dock gate
+# R2313: compact, independent exact-commit Chromium proof. Does not
+# replace full P0. Validates the original WebGL2 MAG, strict CLS and
+# 390/430/mobile + 1350/1440/desktop genuine viewport scroll.
+on:
+  push:
+    branches: [fix/r2267-real-genesis-headless-parity]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/**'
+      - 'docs/scifi-ui/styles/**'
+      - '.github/scripts/validate-native-mag-dock-entry-r2173.cjs'
+      - '.github/workflows/mag-dock-browser-r2313.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-mag-dock-r2313-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-mag-dock:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium validation dependencies
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+      - name: Locate Chromium and validate the exact unchanged P0 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+          node --check .github/scripts/validate-native-mag-dock-entry-r2173.cjs
+          node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
+      - name: Start actual production HTML and scripts locally
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/r2313-http.log" 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 0.25
+          done
+          cat "$RUNNER_TEMP/r2313-http.log"
+          exit 1
+      - name: Four genuine viewport MAG handoffs, 1 canvas, no unexpected CLS
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          AUDITED_SHA: ${{ github.sha }}
+          FORMATX_DOCK_ENTRY_EVIDENCE_DIR: artifacts/native-mag-dock-entry-r2173
+        run: node .github/scripts/validate-native-mag-dock-entry-r2173.cjs
+      - name: Publish authentic browser evidence even when the gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-mag-dock-r2313-${{ github.sha }}
+          path: artifacts/native-mag-dock-entry-r2173/
+          if-no-files-found: warn
+          retention-days: 14
