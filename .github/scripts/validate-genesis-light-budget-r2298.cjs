@@ -40,8 +40,11 @@ const inline=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*
 assert(inline,'parser boot script missing');
 const csp="'sha256-"+crypto.createHash('sha256').update(inline).digest('base64')+"'";
 assert(html.includes(csp),'HTML parser CSP must authorize exact current inline bytes');
-assert(worker.includes('const INLINE_R2298_BOOT_HASH = "'+csp+'";'),
-  'Cloudflare Worker exact CSP SHA256 must match parser');
-assert.equal((worker.match(/\$\{INLINE_R2298_BOOT_HASH\}/g)||[]).length,2,
-  'both Worker policy paths must authorize active parser bootstrap');
+// R2300+: the R2298 geometry guard must protect the *current* parser,
+// not require an obsolete hash constant after each legitimate film upgrade.
+// Match the literal declaration AND exactly two active Worker policy entries.
+const authorized=[...worker.matchAll(/const (INLINE_R\d+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===csp &&
+    worker.split('\${'+name+'}').length===3);
+assert(authorized,'both Cloudflare Worker CSPs must authorize exact current parser SHA256');
 console.log('GENESIS_R2298_LIGHT_BUDGET_SINGLE_CANVAS_SOURCE_PASS');

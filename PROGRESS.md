@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2300.1 – R2298 QA cache-hash érvényesség javítása (2026-11-03)
+
+- A `fc8c03a` filmes commit P0 futása a korai forrástesztben FAIL lett, nem a GPU-ban: az R2298 forrásőr az aktuális parserhez továbbra is a régi `INLINE_R2298_BOOT_HASH` literált várta. A valódi R2300 script jogszerűen új, két Worker CSP-ben engedélyezett SHA256-t kapott.
+- Az R2298 source guard most nem verzióhoz kötött állandót, hanem a **jelenleg aktív parser inline tartalmának SHA256-jával azonos literálisan deklarált Worker hash-t** és annak mindkét CSP hivatkozását követeli. Nem csökkentettük a CSP biztonságát vagy a tesztek szigorúságát; a következő valódi filmezési cache-revíziót is helyesen kezeli.
+- A 3D modell, DNS, lencse, shader, grafikus frame, 10 s film és stúdiófény változatlan. Új pontos SHA P0 és Lighthouse eredmény még kötelező; PR #581 draft, nincs élesítés.
+
+
+
 ## R2300 – fizikai DNA-bond, stúdiófény és aszférikus MAG-lencse (2026-11-03)
 
 - A valós R1280 Three.js film első, domináns DNS láncának nukleotid-hídjai már nem egyenletes hengerek: az eredeti egy GPU instanced draw-callon belül két térbeli ligand-kiemelkedés és egy visszafogott kontakt-nyak alakult ki; színezése ugyanazon PBR shaderen belül a tényleges 3D vertexekhez tartozik. A többi donorspirál változatlan könnyű geometriával fut. Új DNS hálózat, mesh, részecskeszám vagy WebGL context nem jött létre.
