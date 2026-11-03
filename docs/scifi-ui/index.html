@@ -52,10 +52,16 @@
   <!-- production-r1901d-stable-bootstrap-hash-r1901-visual-assets-live -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <!-- production-r2039-phone-critical-css-preload: same hrefs as actual stylesheets; keep cascade unchanged -->
-  <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="./styles/formatx-menu-owner-r1956.css?v=20261013-r2056-critical-single-proof">
+  <!-- R2306: exact absolute critical CSS URLs discovered in the first HTML packet.
+       The homepage is served at / as well as /scifi-ui/index.html; relative
+       preloads before <base> otherwise fetch /styles/* and miss the real CSS.
+       CSS application order and all native MAG animation remain untouched. -->
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">
+  <link rel="preload" as="style" fetchpriority="high" media="all" href="/scifi-ui/styles/formatx-menu-owner-r1956.css?v=20261013-r2056-critical-single-proof">
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261101-r2297-optic-safe-mobile-controls">
-  <link rel="preload" as="style" fetchpriority="high" media="all" href="./styles/formatx-mobile-brand-dedupe-r1952.css?v=20261026-r2197-one-fx-logo-desktop-mobile">
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="/scifi-ui/styles/formatx-desktop-first-paint-r328.css?v=20261007-r1969-single-control-owner">
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="/scifi-ui/styles/formatx-reference-production-r244.css?v=20261007-r1972-first-frame-stability">
+  <link rel="preload" as="style" fetchpriority="high" media="all" href="/scifi-ui/styles/formatx-mobile-brand-dedupe-r1952.css?v=20261026-r2197-one-fx-logo-desktop-mobile">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="description" content="FormatX Suite Pro — élő rendszerarchitektúraként bemutatott, interaktív technikusi platform meghajtókezeléshez, diagnosztikához, telepítéshez és biztonságos rendszerkarbantartáshoz.">
   <meta name="theme-color" content="#01040b">

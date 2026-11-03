@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2306 – az első valódi DNA/MAG képkocka kritikus CSS útvonalának gyorsítása (2026-11-03)
+
+- A pontos R2305 Lighthouse desktop mérések 92/92/91, render-blocking CSS becsült 180–195 ms, valódi LCP ~1.76–1.91 s. Az asztali R490 first-paint, menu-owner, R328 desktop first-paint és R244 referencia stylesheet a renderelés kritikus útján maradt.
+- A HTML dokumentum elején új, `as=style`, `fetchpriority=high`, **méretfüggő** preloadok hivatkoznak a tényleges, változatlan CSS-címekre, még a sok CSS és inline első képkocka előtt. A három korábbi relatív preloadból kettő azonos, abszolút `/scifi-ui/styles/` URL-re vált, mert a `/` útvonalon az első `<base>` előtt egy relatív `./styles/` hibás, cache-et nem megosztó címet kérhetett.
+- Megmaradt az eredeti CSS alkalmazási sorrend, média-szűrés, CSP, az első SVG DNS-sziluett, valódi 3D film, MAG és minden shader/mesh/RAF. Nincs inline onload, letiltott stylesheet, hamis LCP vagy látványcsökkentés.
+- Új P0 forrás-QA csak pontos, duplázatlan preloader URL-t és stylesheet cache-key egyezést fogad el, mindkét root és /scifi-ui útvonalhoz. Valódi 3× Lighthouse és 3.5/5.5s vizuális regresszió szükséges; **100 pont nincs igazolva**, PR #581 draft, nincs élesítés.
+
+
+
 ## R2305 – R2303 valódi 3D hártya biztonságos asset-frissítése (2026-11-03)
 
 - Az R2303 sejtmembrán térbeli mikroredői már a R1280 forráskódban voltak, de az oldal az előző R2301 query-cache kulccsal kérte a filmet. Emiatt a böngésző vagy CDN megőrizhette a régebbi JS-t; stúdióminőségű új képkockát e nélkül nem lehet egyértelműen igazolni.
