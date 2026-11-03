@@ -18,13 +18,15 @@ assert(!film.includes('(this.mobileRender?.48:.55)'),
  'R2318 must not recreate the overexposed 5.5s biophoton source');
 assert(three.includes('cortexNormalsR2317.needsUpdate=true'));
 assert(three.includes('const fullFrameZ=Math.max(z,4.36)'));
-const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth';
+const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth-r2319-native-own-final-presentation';
 assert(birth.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+key));
 assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+key));
 const parser=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*>([\s\S]*?)<\/script>/)?.[1];
 assert(parser?.includes(key));
 const digest="'sha256-"+crypto.createHash('sha256').update(parser).digest('base64')+"'";
 assert(html.includes(digest));
-assert(worker.includes('const INLINE_R2318_BOOT_HASH = "'+digest+'";'));
-assert.equal((worker.match(/\$\{INLINE_R2318_BOOT_HASH\}/g)||[]).length,2);
+const activeWorkerCsp=[...worker.matchAll(/const (INLINE_R[0-9]+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
+assert(activeWorkerCsp,'the active born-cell parser SHA must be present in both Worker CSPs');
 console.log('R2318_CELLULAR_PHOTON_DEPTH_FULL_PARTICLE_COUNTS_AND_EXACT_CSP_PASS');

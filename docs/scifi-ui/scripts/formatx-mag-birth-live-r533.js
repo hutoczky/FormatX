@@ -588,7 +588,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth-r2319-native-own-final-presentation';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1108,22 +1108,17 @@
     try { overlay.remove(); } catch (_) {}
     ROOT.dataset.fxIntroPrepaintR1611='complete';
     reconcileExposedCompositorR2219();
-    // R2211: a finished R326 renderer may have spent its final burst frames
-    // behind the cinematic overlay and then gone deliberately idle. The
-    // backdrop disappears 180 ms AFTER finish(), so drawing before removal
-    // is not proof that Chromium has presented the exposed WebGL canvas.
-    // Commit one real frame after the occluder is removed, then one bounded
-    // follow-up on the next display opportunity. No continuing RAF or extra
-    // renderer is created; normal idle remains zero frames.
+    // R2319: the completed GENESIS film MUST NOT own even one deferred
+    // native layout/render callback after formatx:magbirthcomplete. The
+    // R2173 actual Chromium proof caught a late stage geometry read from
+    // this obsolete R533 requestAnimationFrame. Submit the final bounded
+    // request before dispatch and hand ALL post-film presentation to the
+    // original R326 native listener (which paints after the real event).
+    // No canvas/renderer/RAF additions and no perceptual frame downgrade.
     try {
       locateStage();
       coreApi?.requestRender?.(2);
-      ROOT.dataset.fxMagBirthPostTeardownRenderR2211='requested';
-      requestAnimationFrame(()=>{
-        if(document.hidden||!stage?.isConnected)return;
-        coreApi?.requestRender?.(1);
-        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='present-frame-scheduled';
-      });
+      ROOT.dataset.fxMagBirthPostTeardownRenderR2211='native-owner-before-completion';
     } catch (_) { ROOT.dataset.fxMagBirthPostTeardownRenderR2211='unavailable'; }
     // R2210: the parser-only first-paint permission must not remain "show"
     // once its adopted cinematic node has left the document.
@@ -1532,16 +1527,12 @@
       overlay.remove();
       ROOT.dataset.fxIntroPrepaintR1611='complete';
       reconcileExposedCompositorR2219();
-      // R2211: watchdog teardown must also expose a freshly painted native
-      // frame; do not leave a painted-but-uncomposited WebGL canvas behind.
+      // R2319: watchdog follows the SAME one-owner retirement policy.
+      // Native R326's own completion listener presents the final GL frame.
       try {
         locateStage();
         coreApi?.requestRender?.(2);
-        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='watchdog-requested';
-        requestAnimationFrame(()=>{
-          if(document.hidden||!stage?.isConnected)return;
-          coreApi?.requestRender?.(1);
-        });
+        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='watchdog-native-owned';
       } catch (_) {}
       try{
         document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{

@@ -25,7 +25,7 @@ assert.equal((layer.match(/new T\.IcosahedronGeometry\(1\.38,4\)/g)||[]).length,
 const render=film.slice(film.indexOf('    render(r,time){'));
 assert(!render.includes('cortexNormalsR2317'),
  'No new vertex-normal calculations allowed in the visitor animation loop');
-const current='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth';
+const current='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth-r2319-native-own-final-presentation';
 assert(birth.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+current));
 assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+current));
 const parser=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*>([\s\S]*?)<\/script>/)?.[1];

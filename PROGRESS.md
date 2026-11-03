@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2319 – az intro teljes leállítása: utólagos MAG-elrendezésolvasás megszüntetése (2026-11-03)
+
+- A valós R2317 P0-ban **hidegindítás 3/3 PASS**, normál látogatói natív MAG GPU PASS, 2× mobil CLS PASS és első film→natív átadás PASS. A `validate-intro-retired-layout-r2173` viszont 60 ms-mal a valódi `formatx:magbirthcomplete` esemény **után** egy R533 stackből érkező natív stage `getBoundingClientRect()` olvasást mért. Ez nem szabad, hogy a filmé legyen: a már eltávolított GENESIS-nek nulla utólagos elrendezésmunkát kell végeznie.
+- **R2319:** mind a normál `safeTeardownOverlay()`, mind a watchdog bontási ág a film eltávolítása után egyetlen **szinkron natív requestRender(2)** kérést küld még a completed esemény előtt. Az R533 által ütemezett, már az esemény után végrehajtódó kiegészítő RAF meg lett szüntetve. Az eredeti R326 saját `formatx:magbirthcomplete` event listener, `render(performance.now())`, WebGL2 fence és bounded native scheduling változatlan. Nincs eltávolított motorból érkező késői geometry/layout és nincsen további renderelő.
+- R2317 cortex folyamatos 3D normálok, R2318 valódi cellafoton-expozíció, 10s DNS→sejt→MAG film, 1 native canvas és 60Hz cél marad.
+- R533/R1629/HTML szinkron `20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth-r2319-native-own-final-presentation` cache-kulcs, új számolt szigorú CSP `'sha256-SrQl4alVNJZhNQYPRB8ZTPYXpv+Fijfo1l3K1jGnhCw='` a HTML és a Worker mindkét policy-jában. Historikus SHA értékek változatlanok; az R2318 guard az aktuális digestet vizsgálja.
+- Az új R2319 P0 source guard külön tiltja a befejezett film saját RAF-ját mindkét teardown ágban, és a valós R2173 Chromium teszt továbbra is az **összes utólagos geometriamérést tiltja**. A teljes R2319 valós P0, hidegindítás 3/3, filmes képkocka és Lighthouse×3 még ellenőrzendő. PR #581 draft, nem élesített.
+
+
+
 ## R2318 – biológiai születési felvétel: a valódi sejtmag visszaemelése az additív fényfelhőből (2026-11-03)
 
 - A valós R2307 5.5 s Chromium screenshoton a 3100 volumetrikus sejtfoton túl intenzív additív fényével eltakarja a valódi 3D membrán redőit és az organellumokat. A cél nem részecske- vagy fényrészlet-csökkentés, hanem valós fotográfiai fényegyensúly.
