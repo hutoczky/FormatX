@@ -173,8 +173,8 @@ assert(archive.includes("root.dataset.fxArchiveFlipR2293='same-pixels-compositor
   'R2293 real native MAG must enter archive through actual compositor FLIP');
 assert.equal((html.match(/data-fx-cinematic-archive-r1987="true"/g)||[]).length,1,
   'Only one canonical scroll owner may load in the real document');
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2311-compositor-atomic-flip'),
-  'R2311 HTML must load the current atomic FLIP + composed-native scroll owner');
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2312-mobile-scroll-ready'),
+  'R2312 HTML must load the latest atomic FLIP, mobile and desktop compositor gate owner');
 console.log('MAG_R2293_NATIVE_COMPOSITOR_FLIP_SOURCE_PASS');
 for(const token of [
   'vertexColors:true,',
