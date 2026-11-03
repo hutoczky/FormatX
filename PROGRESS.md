@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2303 – Filmes biológiai sejthártya, valódi 3D mikroredők (2026-11-03)
+
+- Az R1280 teljes DNS→sejt→MAG film meglévő biológiai sejtmembránján új, folytonos térbeli mikroredők és stromális hullámok vannak. Az eredeti hártya geometriája, PBR türkiz/korall textúrája, normál-újraszámítása és animációja megmaradt.
+- A redők kizárólag a meglévő vertexeket mozgatják egyszer az inicializáláskor. **Nincs extra mesh, GPU draw, fény, textúra, shaderpass, canvas, RAF vagy képkockánkénti számolás.** A 10 másodperces morfing, MAG lencse és a teljes részecskeszám változatlan.
+- R2303 külön forrásregressziós teszt a P0-ban. **Hátralévő:** új GPU-képkocka összehasonlítás, valós P0 + Lighthouse 3×, hardveres 60 FPS és későbbi cache-asset verziópromóció. Képminőségi és 100 pontos követelmények még nincsenek igazolva. PR #581 draft, nincs élesítés.
+
+
+
 ## R2302.1 – CSP forrásellenőrző karakterlánc hibájának javítása (2026-11-03)
 
 - A pontos R2302 P0 elején az R2300 QA elhasalt: a várt dinamikus Worker CSP hivatkozás egy korábbi szöveggenerálás során hibás `'+name+'` literállá alakult. A HTML CSP hash és a két Worker CSP-hivatkozás helyes volt; a hibás teszt adott téves FAIL-t.

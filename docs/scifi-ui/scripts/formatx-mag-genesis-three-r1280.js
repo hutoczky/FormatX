@@ -1297,7 +1297,14 @@
         const x=positions.getX(i),y=positions.getY(i),z=positions.getZ(i);
         const phi=Math.atan2(z,x);
         const envelope=1+.045*Math.sin(phi*5.0+y*4.2)+.024*Math.cos(phi*3.0-y*7.1);
-        positions.setXYZ(i,x*envelope,y*(1+.024*Math.cos(phi*4.0))*envelope,z*envelope);
+        // R2303: sculpt coherent lamellar microfolds in real 3D coordinates.
+        // Exact same mesh, vertex count, WebGL context and per-frame budget.
+        const lamella=Math.sin(x*9.4+y*4.2+1.15*Math.sin(z*3.6))*
+          Math.cos(z*7.2-y*3.3);
+        const stromalVein=Math.sin(x*5.8+z*4.2+1.4*Math.sin(y*3.2))*
+          Math.cos(y*6.7-z*3.1);
+        const folded=envelope*(1+.014*lamella+.006*stromalVein);
+        positions.setXYZ(i,x*folded,y*(1+.024*Math.cos(phi*4.0))*folded,z*folded);
       }
       positions.needsUpdate=true;geometry.computeVertexNormals();
       this.embryoTexture=this.makeEmbryoTexture();

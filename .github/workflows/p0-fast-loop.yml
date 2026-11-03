@@ -138,6 +138,7 @@ jobs:
           node --check .github/scripts/validate-genesis-light-budget-r2298.cjs
           node --check .github/scripts/validate-genesis-photographic-r2300.cjs
           node --check .github/scripts/validate-genesis-cell-depth-r2301.cjs
+          node --check .github/scripts/validate-genesis-membrane-r2303.cjs
           node --check .github/scripts/validate-desktop-dock-transform-r2302.cjs
           node --check .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
@@ -156,6 +157,7 @@ jobs:
           node .github/scripts/validate-genesis-light-budget-r2298.cjs
           node .github/scripts/validate-genesis-photographic-r2300.cjs
           node .github/scripts/validate-genesis-cell-depth-r2301.cjs
+          node .github/scripts/validate-genesis-membrane-r2303.cjs
           node .github/scripts/validate-desktop-dock-transform-r2302.cjs
           node .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node .github/scripts/validate-mag-quality-resize-r2244.cjs
