@@ -16,7 +16,8 @@ for(const item of ['min-width:901px','prefers-reduced-motion:no-preference',
  '.fx-crystal-organism-r326-stage.fx-archive-native-docked']){
  assert(section.includes(item),'R2299 runtime desktop ancestor reset incomplete: '+item);
 }
-assert(html.includes('formatx-cinematic-archive-r1987.css?v=20261103-r2304-no-fixed-scale-capture'));
+assert(html.includes('formatx-cinematic-archive-r1987.css?v=20261103-r2316-layout-invariant-dock'),
+  'R2316 must load the current native viewport stylesheet while R2304 fixed ancestor-scale guard remains');
 assert(dock.includes('R2299 desktop MAG escaped the left photographic lane') &&
  dock.includes('R2299 fixed desktop MAG must be positioned in the real viewport')&&
  dock.includes('fixedChain:stage?'),'P0 must keep strict viewport proof and ancestor telemetry');
