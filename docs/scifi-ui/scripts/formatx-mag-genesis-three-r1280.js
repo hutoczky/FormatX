@@ -80,6 +80,9 @@
 
       this.camera=new THREE.PerspectiveCamera(42,1,0.05,80);
       this.camera.position.set(0,0.12,7.25);
+      // R2298: reuse target-projection scratch storage across film frames.
+      this.targetRayR2298=new THREE.Vector3();
+      this.targetWorldR2298=new THREE.Vector3();
 
       this.world=new THREE.Group();
       this.scene.add(this.world);
@@ -142,9 +145,8 @@
       this.coreLight=new T.PointLight(0x78e6e8,0,7.2,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
-      this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
-      this.mechLight.position.set(-2.6,3.0,4.4);
-      this.scene.add(this.mechLight);
+      // R2298: the actual pupil light is created once in makeMechanicalLayer().
+      // The former zero-output duplicate remained in the scene's PBR light loop.
     }
 
     makeStudioEnvironment(){
@@ -2676,15 +2678,17 @@
     }
 
     targetWorld(){
-      const T=this.THREE;
+      // R2298: the only caller immediately consumes x/y. Reusing the vectors
+      // avoids three transient Vec3 allocations per rendered film frame.
       let p=null;
       try { p=this.getTarget?.(); } catch(_){}
-      if(!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return new T.Vector3(0,0,0);
-      const ndc=new T.Vector3((p.x/this.width)*2-1,1-(p.y/this.height)*2,.1);
-      ndc.unproject(this.camera);
-      const dir=ndc.sub(this.camera.position).normalize();
-      const distance=(0-this.camera.position.z)/dir.z;
-      return this.camera.position.clone().add(dir.multiplyScalar(distance));
+      if(!p || !Number.isFinite(p.x) || !Number.isFinite(p.y))
+        return this.targetWorldR2298.set(0,0,0);
+      const ray=this.targetRayR2298.set(
+        (p.x/this.width)*2-1,1-(p.y/this.height)*2,.1
+      ).unproject(this.camera).sub(this.camera.position).normalize();
+      const distance=(0-this.camera.position.z)/ray.z;
+      return this.targetWorldR2298.copy(this.camera.position).addScaledVector(ray,distance);
     }
 
     updateDNA(t,time){

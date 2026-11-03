@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2298 – natív filmes GPU-fényköltség és allokációmentes célprojekció (2026-11-03)
+
+- A tényleges, R533 által betöltött `formatx-mag-genesis-three-r1280.js` kódban a `makeLights()` eredetileg létrehozott egy 0 intenzitású `mechLight` pontfényt. A `makeMechanicalLayer()` ugyanazt a mezőt felülírta egy második, ténylegesen használt pupillafénnyel. Az első, már nem elérhető fény a jelenetben maradt; R2298 eltávolítja. **Az optikai fény, PBR anyagok, 3D részletesség, geometria, DNS és 10 s film érintetlen.**
+- A `targetWorld()` képkockánként létrehozott átmeneti `Vector3` objektumai helyett két, konstruktorban lefoglalt scratch vektort használ. A cél koordinátaszámítás, a kameramozgás és a MAG elhelyezése megmarad. Nem jön létre második renderer, vászon, RAF, textúra vagy új fény.
+- A R1280 tényleges betöltéséhez R533/R1629/HTML cache-kulcs frissítve. A parser-inline SHA256 új hash-e a HTML-meta CSP-ben és a Cloudflare Worker **mindkét** CSP-kimenetében engedélyezett, a régi hash kompatibilitás megtartásával.
+- R2298 külön regressziós forrásőr a P0-ban: egyetlen fizikai pupillafény, allokációmentes per-frame célprojekció, aktív Three.js asset, SHA256-egyezés, meglévő 10 s film/egyvászon kontraktus.
+- **Mérési kapu még nyitott:** pontos új commiton P0, 3/3 WebGL-hidegindítás, valós mobil CLS, Lighthouse desktop/mobil ×3, képminőség-összevetés és valódi hardveres 60 FPS. PR #581 továbbra is draft; nincs production deploy. Forrásoptimalizálás önmagában nem FPS- vagy stúdióminőség-bizonyíték.
+
+
+
 ## R2297 – valódi mobil MAG-lencse szabadon hagyása
 - A 390px-es R2296 új, valós 3D képkockáján a 50×50px SOUND és KÉRDEZZ gombok egymás mellett, közvetlenül az élő biokristály fő optikai lencséjén voltak. Ez grafikai és használhatósági hiba: a modell lényege takarásban maradt.
 - R2297: az eredeti, változatlan interaktív r264 gombok a mobil kezdőoldali MAG két szélére kerülnek, balra SOUND, jobbra ASK, 50×50px hitcélokkal. Kritikus, renderblocking R358 CSS, amely már első paintkor a végleges 2-oszlopos elrendezést adja. Az aktív 3D scroll-archívum saját kontrollhelyzete érintetlen.

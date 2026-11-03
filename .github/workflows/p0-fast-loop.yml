@@ -126,6 +126,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1140.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1200.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1250.js
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1300.js
           node --check docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js
           node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
@@ -134,6 +135,7 @@ jobs:
           node --check .github/scripts/validate-mag-cold-handoff-r2226.cjs
           node --check .github/scripts/validate-mag-visitor-fence-r2264.cjs
           node --check .github/scripts/validate-mag-studio-surface-r2270.cjs
+          node --check .github/scripts/validate-genesis-light-budget-r2298.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
           node --check docs/scifi-ui/scripts/formatx-core-direct-interaction.js
@@ -147,6 +149,7 @@ jobs:
           node .github/scripts/validate-genesis-proof-clock-r2236.cjs
           node .github/scripts/validate-mag-mesh-rows-r2208.cjs
           node .github/scripts/validate-mag-studio-surface-r2270.cjs
+          node .github/scripts/validate-genesis-light-budget-r2298.cjs
           node .github/scripts/validate-mag-quality-resize-r2244.cjs
           node .github/scripts/validate-mag-resize-layout-cache-r2245.cjs
           node .github/scripts/validate-mag-cpu-upload-release-r2249.cjs
