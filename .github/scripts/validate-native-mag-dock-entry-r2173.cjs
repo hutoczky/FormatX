@@ -88,6 +88,11 @@ function observe({normal}){
           stage:document.querySelector('.fx-crystal-organism-r326-stage')?.getBoundingClientRect().toJSON(),
           position:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).position
         }));
+        console.log('NATIVE_MAG_HOME_BEFORE_SCROLL',JSON.stringify({
+          profile:config.name,rect:atHome.stage,position:atHome.position
+        }));
+        assert(atHome.stage&&atHome.stage.width>40&&atHome.stage.height>40,
+          'R2308 normal intro must reveal a laid-out real MAG before user scroll');
         assert(atHome.scrollY===0 && atHome.cinema!=='active',
           'R2290: normal visitor must land on the real undocked MAG before scrolling');
         assert(atHome.dock!=='active','R2290: no unsolicited archive dock at page top');

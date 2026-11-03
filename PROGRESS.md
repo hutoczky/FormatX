@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2308 – R2306 CSS preload visszavonása a valós P0 és Lighthouse regresszió miatt (2026-11-03)
+
+- **Ok:** az R2306 spekulatív desktop CSS preload után a natív MAG átvitel 1440×900-as, normál 10s intróindításnál 0,1062297 váratlan stage-eltolódást mér, miközben az R2304 pontos SHA-ján az ugyanez a négy valódi Chromium nézet **PASS** volt (mobile 390/430, desktop 1350/1440).
+- Az R2307 Lighthouse desktop 92/87/90, mobil 82/84/84. A korábbi R2305 desktop 92/92/91, mobil 82/81/83; a kritikus CSS sorba helyezése tehát nem igazolt stabil javulást, és az első képkocka betöltésének időzítését kiszámíthatatlanná tette.
+- **R2308:** a HTML legelső CSS preload-sorai pontosan visszaálltak a valós böngészős R2304 zöld változathoz: három korábbi mobil/design hint, nem öt új desktop magas prioritású kérés. Az eredeti stylesheet alkalmazási sorrend, minden CSP, és a R2307 új valós titánírisz 3D geometria **érintetlen**; az R2307 film betöltési SHA és verzió megmaradt.
+- A P0 a nem sikeres R2306 preload guard helyett külön **konzervatív első képkockás QA-t** futtat, amely tiltja a három új desktop preload újrabevezetését. A valós P0 böngészőteszt most logolja a natív MAG tényleges geometriai állapotát a görgetés **előtt**, és megköveteli, hogy a film utáni MAG már ténylegesen elrendezett legyen.
+- A régi R2306 forrástesztet a Git fában töröljük. Nincs elrejtett regressziós kivétel; a legszigorúbb 1440×900 és CLS=0 átadás-vizsgálat változatlan. **R2308 saját, teljes P0 és LH eredménye szükséges, amíg ez nincs meg, a módosítás nem igazolt és nincs élesítés.**
+ 
+
+
 ## R2307 – stúdió MAG: kétszintű 3D titán-írisz (2026-11-03)
 
 - A végső R1280 mechanikus MAG íriszzár korábban 8 db teljesen sík, z=.495 háromszögből állt. Közelről ezek csak HUD-szerű lapokként árnyalódnak.
