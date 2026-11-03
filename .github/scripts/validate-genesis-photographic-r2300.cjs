@@ -36,8 +36,10 @@ const inline=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*
 assert(inline);
 const digest="'sha256-"+crypto.createHash('sha256').update(inline).digest('base64')+"'";
 assert(html.includes(digest),'HTML CSP hash must match exact active parser script');
-assert(worker.includes('const INLINE_R2300_BOOT_HASH = "'+digest+'";'),
-  'Worker CSP must contain exact active parser SHA256');
-assert.equal((worker.match(/\$\{INLINE_R2300_BOOT_HASH\}/g)||[]).length,2,
-  'both Worker policies must authorize exact current parser script');
+// Keep source safety independent of the release revision identifier.
+// Require a literal current SHA declaration referenced by BOTH Worker CSPs.
+const authorized=[...worker.matchAll(/const (INLINE_R\d+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split('+name+').length===3);
+assert(authorized,'both Worker policies must authorize exact current parser SHA256');
 console.log('GENESIS_R2300_REAL_PHYSICAL_STUDIO_SOURCE_PASS');

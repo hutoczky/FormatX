@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2301.1 – történeti QA-hash hibajavítás (2026-11-03)
+
+- Az R2301 első P0-ján a teljes geometriai forrásellenőrzés és R2298 SHA QA PASS, de az R2300 teszt korábbi `INLINE_R2300_BOOT_HASH` konstansát várta az érvényes új R2301 CSP-ben. Ez QA szerződéselavulás, nem böngészős grafikai hiba.
+- Az R2300 QA most a jelenleg ténylegesen betöltött parser szó szerinti SHA256-egyezését és két aktív Cloudflare Worker CSP hivatkozást követeli, verziófüggetlenül. A 10 másodperces film, DNS, MAG, PBR anyagok, GPU, színek, shader és 3D mesh változatlanok.
+- **Állapot:** pontos következő SHA-n P0 és Lighthouse szükséges. Nem kész, nem élesített; PR #581 draft.
+
+
+
 ## R2301 – renderelt képkockából feltárt sejtmag-fénylés korrekciója (2026-11-03)
 
 - A valós GitHub Chromium R2300 képkockák 3.50/5.50s állapota és a 780×1688 mobil képkocka alapján a biológiai sejt tényleges felülete, belső orgánuma, kapillárisai és kromatinrostjai túl erős additív fotonfelhő mögé kerültek. Ez valódi filmes képminőségi hiba, nem pusztán CSS vagy referencia-eltérés.
