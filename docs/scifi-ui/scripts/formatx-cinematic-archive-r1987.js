@@ -141,6 +141,13 @@
   }
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
+  // R2310: the normal 10-second GENESIS handoff may remove its overlay
+  // before the native MAG has a fully presented compositor home frame.
+  // A scroll in that window made its old layout-shift rectangle (0,0,0,0).
+  // This is not an artificial test delay: gate real desktop docking until
+  // two bounded native paint opportunities have passed after the handoff.
+  let nativeHomeCompositedR2310=introDone;
+  let nativeHomeGateScheduledR2310=false;
   const paperLast=new WeakMap();
   const memoryGB=Number(navigator.deviceMemory||0);
   const cores=Number(navigator.hardwareConcurrency||0);
@@ -1233,7 +1240,7 @@ void main(){
     // The user explicitly enters the archive by scrolling down; returning
     // to the top restores the uninterrupted native MAG hero.
     const enteredScroll=scrollY>Math.max(24,innerHeight*.06);
-    const inArchive=Boolean(introDone&&enteredScroll&&
+    const inArchive=Boolean(introDone&&nativeHomeCompositedR2310&&enteredScroll&&
       root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
@@ -1419,13 +1426,42 @@ void main(){
     addEventListener('resize',invalidate,{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
+    // R2310: a real first painted native stage must exist before a user
+    // scroll changes the same original GPU surface from hero to archive.
+    // Only the normal desktop film needs this; mobile has a stable fixed
+    // physical stage both at home and in the scroll archive (R2294).
+    function settleNativeHomeR2310(){
+      if(nativeHomeCompositedR2310||nativeHomeGateScheduledR2310||document.hidden)return;
+      nativeHomeGateScheduledR2310=true;
+      root.dataset.fxArchiveNativeHomeR2310='awaiting-two-frames';
+      window.FormatXLivingCore?.requestRender?.(1);
+      requestAnimationFrame(()=>{
+        if(disposed){nativeHomeGateScheduledR2310=false;return;}
+        window.FormatXLivingCore?.requestRender?.(1);
+        requestAnimationFrame(()=>{
+          nativeHomeGateScheduledR2310=false;
+          if(disposed)return;
+          nativeHomeCompositedR2310=true;
+          root.dataset.fxArchiveNativeHomeR2310='painted-before-archive';
+          invalidate();
+        });
+      });
+    }
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      if(!mobile()){
+        nativeHomeCompositedR2310=false;
+        settleNativeHomeR2310();
+      }
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
     addEventListener('pageshow',invalidate,{passive:true});
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden)return;
+      if(introDone&&!nativeHomeCompositedR2310)settleNativeHomeR2310();
+      else invalidate();
+    },{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
     addEventListener('pagehide',stop,{once:true});
     invalidate();

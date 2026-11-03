@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2310 – normál intró utáni natív MAG 1440px első kompozitor-képkocka (2026-11-03)
+
+- A valós R2308 P0 log szerint 1440×900 **normál 10mp látogató** esetén a MAG home fizikai pozíciója x652.02/y112/720.48×604.80, de az első görgetéskor a böngésző a stage LayoutShift `previousRect=(0,0,0,0)`, `currentRect=(652,0,720,338)` állapotot adta és CLS=0.10623. A 1350-as automatizált, intrót kihagyó belépés 0 váratlan stage-eltolódással PASS. Ez a két teljesen eltérő belépési időzítéshez tartozó compositor-átadási versenyhelyzetre utal.
+- A következő R2310 módosítás **normál desktop** filmes `formatx:magbirthcomplete` esemény után két egyszeri, bounded `requestAnimationFrame` megjelenítési lehetőséget ad az eredeti natív WebGL2 MAG-nak. Az ezalatt bekövetkező scroll események nem dokkolhatnak azonnal; a valódi görgetési pozíciót azonban megtartjuk, és a következő vizuális ciklus után a helyes 38vw×74dvh natív archívba kapcsolunk. Nem lesz új canvas, WebGL2 renderer, RAF-hurok, képhelyettesítő vagy eldobott szekció.
+- A mobil R2294 fizikai stage változatlan, a fej nélküli oldallátogatás film nélkül azonnali, a reduced-motion/html fallback szintén érintetlen. Visibility resume esetén a még várakozó egyszeri gate befejeződik, nem marad beragadt archívállapot.
+- A R1987 JS cache-kulcsa frissült (nincs inline CSP hash-változás). A P0 továbbra is megköveteli a 1440×900 és 1350×940 képernyőhelyet, az egyetlen kontextust, hibamentes WebGL2-t és **nulla kéretlen LayoutShift-et**; a home stílus opacity/display/visibility és az egyszeri gate státusza új telemetria.
+- Az R2309.1 valós PNG képszél QA, 10s studio film, R2307 fémírisz és R2303 sejthártya érintetlen. **Új pontos SHA P0/Lighthouse még szükséges, ne tekintsük késznek a vizuális célokat.** PR #581 draft, nincs élesítés.
+
+
+
 ## R2309.1 – a teljes MAG-kamerakeretezés automatikus valódi képkockás kapuja (2026-11-03)
 
 - Az R2309 pontos SHA-n a 7,5 másodperces 1280×720 valódi Chromium-felvételt összevetve a korábbi R2307-tel a felső és alsó MAG-csúcs kilógása **megszűnt**. A R2309 P0 forrás-QA PASS volt, a filmképkocka rögzült, viszont a régi R2217 teszt a hibásan 2,85–3,40 egység közötti kamera-Z-t követelte, ezért téves FAIL-t adott az új **4,36** helyes z-re.

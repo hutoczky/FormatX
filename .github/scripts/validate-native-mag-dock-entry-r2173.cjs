@@ -86,7 +86,11 @@ function observe({normal}){
           scrollY,cinema:document.documentElement.dataset.fxArchiveCinema,
           dock:document.documentElement.dataset.fxArchiveDock,
           stage:document.querySelector('.fx-crystal-organism-r326-stage')?.getBoundingClientRect().toJSON(),
-          position:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).position
+          position:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).position,
+          opacity:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).opacity,
+          display:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).display,
+          visibility:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).visibility,
+          homeGate:document.documentElement.dataset.fxArchiveNativeHomeR2310||'not-applicable'
         }));
         console.log('NATIVE_MAG_HOME_BEFORE_SCROLL',JSON.stringify({
           profile:config.name,rect:atHome.stage,position:atHome.position
