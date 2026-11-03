@@ -686,6 +686,50 @@
       // lane instead of causing a 0.101834 CLS 195px width snap.
       clearStageFlipR2293();
       const previous=stage.getBoundingClientRect();
+      // R2316: stable fixed-layout desktop hero (R2315) moves ONLY with a
+      // GPU compositor transform. The earlier change of left/top/width/height
+      // during first dock generated a 0.189 LayoutShift on the real 1440px
+      // normal-visitor Chromium run, despite matching the initial pixels.
+      // Leave the underlying physical canvas box and native WebGL renderer
+      // untouched while moving its presentation into the 38vw/74dvh lane.
+      if(!mobile()&&root.dataset.fxMagNativeHomeR2315==='prepared'&&
+         previous.width>40&&previous.height>40){
+        const x=innerWidth*.025,y=innerHeight*.12;
+        const w=innerWidth*.38,h=innerHeight*.74;
+        const dx=x-previous.x,dy=y-previous.y;
+        const sx=w/previous.width,sy=h/previous.height;
+        const finalTransform='translate('+dx.toFixed(3)+'px,'+
+          dy.toFixed(3)+'px) scale('+sx.toFixed(7)+','+sy.toFixed(7)+')';
+        stage._fxArchiveFlipOriginalR2293=
+          ['transform','transform-origin','transition'].map(prop=>[
+            prop,stage.style.getPropertyValue(prop),
+            stage.style.getPropertyPriority(prop)
+          ]);
+        stage.classList.add('fx-archive-native-docked');
+        root.dataset.fxArchiveDock='active';
+        archiveActive=true;
+        stage.style.setProperty('transition','none','important');
+        stage.style.setProperty('transform-origin','0 0','important');
+        stage.style.setProperty('transform','none','important');
+        root.dataset.fxArchiveFlipR2293='fixed-box-compositor-only-entry';
+        stageFlipRafR2293=requestAnimationFrame(()=>{
+          stageFlipRafR2293=0;
+          if(!archiveActive||!stage?.isConnected)return;
+          stage.style.setProperty('transition',
+            'transform 360ms cubic-bezier(.20,.66,.16,1)','important');
+          stage.style.setProperty('transform',finalTransform,'important');
+        });
+        stageFlipTimerR2293=setTimeout(()=>{
+          stageFlipTimerR2293=0;
+          if(!archiveActive||!stage?.isConnected)return;
+          stage.style.setProperty('transition','none','important');
+          stage.style.setProperty('transform',finalTransform,'important');
+          root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+          window.FormatXLivingCore?.requestRender?.(1);
+        },440);
+        window.FormatXLivingCore?.requestRender?.(1);
+        return;
+      }
       const desktopNativeDockR2302=!mobile();
       if(desktopNativeDockR2302){
         // The live R326 hero may own an inline, important transform. CSS

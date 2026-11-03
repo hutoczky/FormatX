@@ -1488,3 +1488,30 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
     transform-origin:50% 50%!important;
   }
 }
+ 
+/* R2316 – physical-layout invariant for native MAG dock.
+   The desktop R326 source remains one fixed 3D canvas in its original hero
+   layout rectangle, even WHILE the archive is active. Visual 38vw/74dvh
+   placement is a compositor-only transform applied to that SAME real box.
+   No fixed geometry mutation -> no unexpected layout-shift candidate. */
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+  html:root:root:root:root:root:root:root:root[data-fx-mag-native-home-r2315="prepared"][data-fx-archive-dock="active"]
+  body.living-architecture #hero .hero-space
+  > .fx-crystal-organism-r326-stage.fx-archive-native-docked {
+    position:fixed!important;
+    inset:var(--fx-native-home-top-r2315) auto auto var(--fx-native-home-left-r2315)!important;
+    top:var(--fx-native-home-top-r2315)!important;
+    left:var(--fx-native-home-left-r2315)!important;
+    bottom:auto!important;
+    right:auto!important;
+    width:var(--fx-native-home-width-r2315)!important;
+    min-width:var(--fx-native-home-width-r2315)!important;
+    max-width:var(--fx-native-home-width-r2315)!important;
+    height:var(--fx-native-home-height-r2315)!important;
+    min-height:var(--fx-native-home-height-r2315)!important;
+    max-height:var(--fx-native-home-height-r2315)!important;
+    margin:0!important;
+    overflow:hidden!important;
+    transform-origin:0 0!important;
+  }
+}

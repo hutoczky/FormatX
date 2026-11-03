@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2316 – MAG: változatlan fizikai képernyődoboz, kizárólag kompozitoros dokkolás (2026-11-03)
+
+- A R2315 (`dd8bbd47`) **valódi** 390/430/1350/1440 Chromium gyors tesztjén a desktop home MAG már mindkét asztali nézetben `position:fixed` y=112px volt, tehát a korábbi absolute→fixed hiba megszűnt; ennek ellenére **1440 normal intro** dock CLS=0,1893181916 volt. Forrás stage previousRect 0→currentRect 652,112 / 720×605.
+- **Következtetés:** a layout primitive már nem változik, a stage alap `top/left/width/height` mérete és helyzete viszont továbbra is a CSS natív archívum aktiválásakor mutált. A 360ms FLIP a vizuális pixeleket kompenzálta, de a Chrome a kiemelt layout-objektumot újra elszámolta.
+- **R2316:** az egyetlen létező R326 canvas stage eredeti, R2315-ben a 10s film végén pixelpontosan előkészített viewport-fixed helye **változatlan marad az egész scroll dokkolás alatt is**. Új, csak desktop aktív archive szabály a tényleges `left/top/width/height` tulajdonságokat a már meglévő `--fx-native-home-*` értékeken tartja; a bal sáv cél méretét és helyét a JavaScript a dokkolás **előtt** számítja és kizárólag CSS `translate/scale` transformmal 360ms alatt jeleníti meg. A natív render/texture/shader/context, DNA→MAG film, mobil-only R2294 és visszaállítható eredeti DOM változatlan.
+- A test P0 nem módosult és továbbra is 1440 CLS=0, natív stage közvetlen GPU draw, egy canvas/context, valódi scroll→archívum, végső bal sáv x36,y108,width547,height666 és mobile 390/430 + desktop1350 geometria igazolásra vár. A régi fallback desktop FLIP csak akkor marad, ha a fix home nem előkészíthető, így akadálymentes html fallback nem romlik.
+- A CSS és JS R2316 cache bust, külön forrás-QA és `PROGRESS.md` aktualizálva. A négyviewport **valódi** R2316 CI még nyitott; nincs hamis sikerjelentés, PR #581 draft, nincs deploy.
+
+
+
 ## R2315 – stabil, viewport-fixed MAG már az első asztali hero képkockán (2026-11-03)
 
 - Az új R2313 gyors **valódi** Chromium négyviewport teszt az R2314 rollback után is: mobil 390/430 és desktop 1350 PASS, **1440px normál 10s intro → scroll FAIL CLS=0,10622972**. Az eredeti R2309.1 zöld P0 csak az egyik időzítési mintában sikerült; rollback nem oldotta meg a race-et.
