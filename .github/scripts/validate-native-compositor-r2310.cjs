@@ -15,7 +15,7 @@ assert(js.includes('requestAnimationFrame(()=>{\n        if(disposed)'));
 assert(js.includes('requestAnimationFrame(()=>{\n          nativeHomeGateScheduledR2310=false'));
 assert(js.includes('if(introDone&&!nativeHomeCompositedR2310)settleNativeHomeR2310()'));
 assert(js.includes('if(!mobile()){\n        nativeHomeCompositedR2310=false;'));
-assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2310-native-compositor-two-frame-gate'));
+assert(html.includes('formatx-cinematic-archive-r1987.js?v=20261103-r2311-compositor-atomic-flip'));
 for(const token of [
  'Native stage shifts after its first real docking',
  'R2299 desktop MAG escaped the left photographic lane',

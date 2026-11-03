@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2311 – CLS-mentes, atomikus natív MAG képkocka-átadás (2026-11-03)
+
+- Az R2310 friss javítása először két natív WebGL compositor képkockát követel a 10 mp-es film vége és a scroll-archívum között; ezt **megtartjuk**. Az R2307–R2309 normál Chromium 1440×900 tesztben a viewportba ugró MAG kezdeti stage-layout 0,1062297 LayoutShift-et okozott.
+- **R2311 további gyökérok:** a desktop `ResponsiveExperience.dock()` közvetlenül a fixed-position class/dataset váltás után `stage.getBoundingClientRect()`-tel forced layoutot váltott ki, még a fordított FLIP transform telepítése előtt. A böngésző ekkor már bejegyezhette a közbenső, natív stage-ugrást.
+- **Javítás:** a desktop cél-lane determinisztikus értékei `left=2.5vw,top=12dvh,width=38vw,height=74dvh` a görgetés és classváltás **előtt**, az eredeti CSS-sel azonos CSS mértékekből származnak. A class átállítás után az első post-toggle geometry flush már csak a `translate/scale` inverz CSS transform feltelepítése után történik. Mobilon az eredeti csupán kompozitoros dokkolás marad, a R2310 kétképkockás natív gate megmarad.
+- Ugyanaz az egyetlen native R326 WebGL2 MAG canvas, 360 ms-os FLIP, DOM tartalom és minden motor. Nem változik a DNS→sejt→MAG film, 7,5 s teljes kivágás, PBR árnyalás, 60 Hz cél, CSS pozícionálás vagy CSP. A külső JS fájl R2311 új cache-címet kapott, szigorú CSP-hash változtatás nem szükséges.
+- Új forrás QA ellenőrzi a tényleges CSS és JS lane paritást, a mérések sorrendjét, kétképkockás R2310 gate fennmaradását. A **valódi 1440px és 1350px böngészős CLS=0**, az intro R2309.1 pixelkapu és 3× LH ezen az SHA-n még ellenőrzendő; nincs fiktív PASS, PR #581 draft, nem került élesítésre.
+
+
+
 ## R2310 – normál intró utáni natív MAG 1440px első kompozitor-képkocka (2026-11-03)
 
 - A valós R2308 P0 log szerint 1440×900 **normál 10mp látogató** esetén a MAG home fizikai pozíciója x652.02/y112/720.48×604.80, de az első görgetéskor a böngésző a stage LayoutShift `previousRect=(0,0,0,0)`, `currentRect=(652,0,720,338)` állapotot adta és CLS=0.10623. A 1350-as automatizált, intrót kihagyó belépés 0 váratlan stage-eltolódással PASS. Ez a két teljesen eltérő belépési időzítéshez tartozó compositor-átadási versenyhelyzetre utal.

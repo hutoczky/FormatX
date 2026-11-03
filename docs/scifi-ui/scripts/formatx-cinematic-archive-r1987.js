@@ -664,6 +664,15 @@
       clearStageFlipR2293();
       const previous=stage.getBoundingClientRect();
       const desktopNativeDockR2302=!mobile();
+      // R2311: calculate the FINAL CSS viewport lane BEFORE mutating the
+      // stage. Reading its newly fixed (but not yet FLIP-inverted) rect
+      // forces Chrome to commit a transient layout and 0.106 CLS.
+      // Authored CSS: left 2.5vw, top 12dvh, width 38vw, height 74dvh.
+      // Both the real native compositor gate and the mobile path remain.
+      const desktopViewportTargetR2311=desktopNativeDockR2302?{
+        x:innerWidth*.025,y:innerHeight*.12,
+        width:innerWidth*.38,height:innerHeight*.74
+      }:null;
       if(desktopNativeDockR2302){
         // The live R326 hero may own an inline, important transform. CSS
         // cannot override it, even with a very specific !important rule.
@@ -695,7 +704,9 @@
         window.FormatXLivingCore?.requestRender?.(1);
         return;
       }
-      const target=stage.getBoundingClientRect();
+      // No geometry read between switching to fixed positioning and
+      // installing inverse transform. Mobile already returned above.
+      const target=desktopViewportTargetR2311||stage.getBoundingClientRect();
       const valid=previous.width>8&&previous.height>8&&
         target.width>8&&target.height>8&&
         Number.isFinite(previous.x)&&Number.isFinite(target.x);
@@ -712,6 +723,9 @@
             `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${sx.toFixed(5)},${sy.toFixed(5)})`,
             'important');
           root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry';
+          // R2311: the first post-toggle layout flush MUST occur after
+          // the compositor inverse is installed, never at the naked
+          // fixed-position target. Real native visual continuity.
           // One bounded style flush on MODE ENTRY (not every animation
           // frame) ensures Chromium captures the inverse transform as
           // the FLIP transition's real starting geometry.
