@@ -16,7 +16,7 @@ const measured=dock.indexOf('const previous=stage.getBoundingClientRect()');
 const target=dock.indexOf('const desktopViewportTargetR2311');
 const toggled=dock.indexOf("stage.classList.add('fx-archive-native-docked')");
 const inverted=dock.indexOf('const target=desktopViewportTargetR2311');
-const applied=dock.indexOf("stage.style.setProperty('transform',");
+const applied=dock.indexOf("stage.style.setProperty('transform',",inverted);
 const flush=dock.indexOf('void stage.getBoundingClientRect()');
 assert(measured>=0&&measured<target&&target<toggled&&toggled<inverted&&
  inverted<applied&&applied<flush,'FLIP must not flush the raw fixed position');
