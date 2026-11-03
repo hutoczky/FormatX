@@ -17,7 +17,7 @@ for(const literal of [
 assert(three.includes('this.embryoShell=new T.Mesh(geometry,this.embryoMaterial)'),
  'must keep the one original PBR membrane mesh');
 assert(birth.includes('const DURATION = 10000;'),'film duration must stay ten seconds');
-const active='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals';
+const active='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth';
 assert(birth.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+active),
   'R533 must load the R2303 living surface by the promoted cache key');
 assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+active),

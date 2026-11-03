@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2318 – biológiai születési felvétel: a valódi sejtmag visszaemelése az additív fényfelhőből (2026-11-03)
+
+- A valós R2307 5.5 s Chromium screenshoton a 3100 volumetrikus sejtfoton túl intenzív additív fényével eltakarja a valódi 3D membrán redőit és az organellumokat. A cél nem részecske- vagy fényrészlet-csökkentés, hanem valós fotográfiai fényegyensúly.
+- **R2318:** az eredeti **3100 desktop / 1200 mobil** sejtfoton, azok teljes 3D pozíciója, meglévő GPU shader és draw call, a 84 organellum és PBR burkolat változatlan. Csak a szemcsés biolumineszcens **expozíció** módosul `0.55→0.44` desktopon és `0.48→0.39` mobilon. A DNS 620/260 fotonjának fényviszonyai, a tényleges genom 9600/6000 pontja és a MAG optikája teljesen változatlan.
+- R2317 folyamatos szövetnormálok és R2309 teljes filmsziluett megmaradnak; ez a fotonfény-súly 5.5 másodpercnél több anyag- és mélységi információt hagy láthatóvá, nem vált 2D sprite-helyettesítésre.
+- R1280/R533/R1629/HTML ugyanazt a `20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth` verziót tölti. Számolt új `SHA256`: `'sha256-I9BV716/if4kiSgvO1NB8uWx1E1JodXBfzfVSWPBEpI='`, HTML CSP-ben és Worker **mindkét** CSP-jében. Régi hashek változatlanok. Új valódi geometria és részecskeszámot rögzítő source guard P0-ban.
+- A Lighthouse és P0 új commiton mért eredménye, 5.5s GPU screenshot és a teljes 60 Hz teljesítmény **még nincs igazolva**. PR #581 draft, nincs élesítés.
+
+
+
 ## R2317 – stúdió MAG: valódi 3D biológiai cortex fénykezelés (2026-11-03)
 
 - A korábbi 9,25s tényleges GPU screenshoton a fém MAG mögötti valós biológiai sejtburkon háromszögszerű szögletes világítás látszott. Az R2295 `IcosahedronGeometry(1.38,4)` **nem indexelt**, ezért a `computeVertexNormals()` minden arcot külön normállal árnyalt.

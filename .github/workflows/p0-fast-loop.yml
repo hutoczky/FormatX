@@ -143,6 +143,7 @@ jobs:
           node --check .github/scripts/validate-mag-faceted-iris-r2307.cjs
           node --check .github/scripts/validate-genesis-camera-framing-r2309.cjs
           node --check .github/scripts/validate-genesis-smooth-cortex-r2317.cjs
+          node --check .github/scripts/validate-embryo-studio-balance-r2318.cjs
           node --check .github/scripts/validate-fixed-native-home-r2315.cjs
           node --check .github/scripts/validate-compositor-only-dock-r2316.cjs
           node --check .github/scripts/validate-desktop-dock-transform-r2302.cjs
@@ -168,6 +169,7 @@ jobs:
           node .github/scripts/validate-mag-faceted-iris-r2307.cjs
           node .github/scripts/validate-genesis-camera-framing-r2309.cjs
           node .github/scripts/validate-genesis-smooth-cortex-r2317.cjs
+          node .github/scripts/validate-embryo-studio-balance-r2318.cjs
           node .github/scripts/validate-fixed-native-home-r2315.cjs
           node .github/scripts/validate-compositor-only-dock-r2316.cjs
           node .github/scripts/validate-desktop-dock-transform-r2302.cjs

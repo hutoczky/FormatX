@@ -1581,12 +1581,15 @@
       };
       // DNA never competes with embryo, embryo never masks assembling metal.
       setup(this.dnaBiofield,(1-smooth((t-2.94)/1.42))*.84);
-      // R2301: retain every physical biophoton, but make the organelle,
-      // membrane and capillaries the photographic subject at 5.50 seconds.
-      // Lower additive exposure without hiding/changing particle geometry.
+      // R2318: retain the full physical cellular photon population, but
+      // reduce additive energy so the REAL translucent membrane, 84
+      // organelles and flowing nucleus remain visible at 5.50s.
+      // This is not a geometry/particle-count/quality reduction: exactly
+      // the same shader program, GPU points, textures and draw call.
+      // DNA's original bright founding-helix lighting is unchanged.
       setup(this.embryoBiofield,
         smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*
-        (this.mobileRender?.48:.55));
+        (this.mobileRender?.39:.44));
     }
 
     updateGenomeParticles(t,time){
