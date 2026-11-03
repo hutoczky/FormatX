@@ -141,6 +141,13 @@ function observe({normal}){
         assert(cinema.stage.width>40&&cinema.stage.height>40,
           'Cinematic MAG disappeared during its actual transition');
         if(!config.mobile){
+          // R2304: scale:1 is not a harmless reset on a fixed ancestor.
+          // The real Chromium computed-style chain must be fully neutral,
+          // not simply a visually identity matrix.
+          for(const ancestor of result.fixedChain.slice(1,6)){
+            assert.equal(ancestor.scale,'none',
+              'R2304 non-none scale captures the fixed MAG: '+ancestor.tag+'#'+ancestor.id);
+          }
           assert(result.final.width<first.viewport.width*.5,
             'Final desktop archive did not dock the MAG into its split-screen lane');
           assert(result.final.x>=-2&&result.final.x+result.final.width<first.viewport.width*.53,

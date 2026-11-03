@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2304 – valódi viewport-rögzítés: CSS identity scale hiba (2026-11-03)
+
+- Az R2303 pontos `b4b68b0` GitHub P0-ján a mobil 430px natív dokkolás **PASS**, a rétegelt 390px mobil átmenet a rögzített dobozon belül maradt. **Desktop FAIL:** 1350×940 viewport, MAG x645.31/y−170.20, 513×695.59 px. A dobozméret 38vw×74dvh-re javult, de a szülő `.hero-space` computed CSS `scale:"1"` maradt, rect x611.56/y−283, így a gyermek `position:fixed` relatív koordinátái pontosan a szülőből származtak.
+- **Gyökérok:** az önálló CSS `scale:1` vizuálisan identitás, de a `none`-tól eltérő minden megadott scale új containing blockot hozhat létre. Az R2299 `scale:1!important` éppen azt a hibát tartotta fenn, amit a `transform:none` felszabadított.
+- **Javítás:** csak az aktív desktop archive CSS-szelektor két `scale:1!important` értéke változik `scale:none!important`-ra. A mobil sáv, a 10mp DNS→sejt→MAG film, PBR geometria, fények, részecskék és egyetlen WebGL2 renderer érintetlen. R1987 CSS cache-verzió frissült.
+- A valódi R2173 Chromium teszt most külön **ellenőrzi a szülő lánc scale=none állapotát**, majd a szokásos valódi bal oldali viewport x/y koordinátát, egyetlen WebGL2 canvas/kontextus, tiszta GL és nulla akaratlan stage LayoutShift feltételt. Az R2299 source guard tiltja az identitás scale visszakerülését.
+- A korábbi R2303 Lighthouse desktop 94/92/92, mobil 90/92/92, mobil CLS 0.02465: **FAIL** a 95+ kapun; valós 100 és 60 FPS még nem bizonyított. Az új pontos SHA böngészős P0-ja és LH tesztje szükséges. PR #581 draft, nincs élesítés.
+
+
+
 ## R2303 – Filmes biológiai sejthártya, valódi 3D mikroredők (2026-11-03)
 
 - Az R1280 teljes DNS→sejt→MAG film meglévő biológiai sejtmembránján új, folytonos térbeli mikroredők és stromális hullámok vannak. Az eredeti hártya geometriája, PBR türkiz/korall textúrája, normál-újraszámítása és animációja megmaradt.

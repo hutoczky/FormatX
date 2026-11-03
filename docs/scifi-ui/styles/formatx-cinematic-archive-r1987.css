@@ -1402,7 +1402,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
 
 /* R2299: keep the desktop native MAG in the REAL viewport during scroll.
    R2298 Chromium proof: 1350x940 stage x526/y-221/width683 after dock.
-   A transformed / paint-contained ancestor was still rebasing position:fixed.
+   An identity individual scale:1 on the hero still established a fixed-position containing block.
    Never alter the home portrait or the mobile compositor-only dock. */
 @media (min-width:901px) and (prefers-reduced-motion:no-preference) {
   html:root:root:root:root:root:root:root:root:is([data-fx-archive-dock="active"],[data-fx-archive-cinema="active"]) body.living-architecture,
@@ -1413,7 +1413,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
     transform:none!important;
     translate:none!important;
     rotate:none!important;
-    scale:1!important;
+    scale:none!important;
     perspective:none!important;
     filter:none!important;
     backdrop-filter:none!important;
@@ -1427,9 +1427,14 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
     transform:none!important;
     translate:none!important;
     rotate:none!important;
-    scale:1!important;
+    scale:none!important;
     perspective:none!important;
     will-change:auto!important;
   }
 }
+/* R2304: scale:1 is visually neutral but NOT layout-neutral.
+   The individual scale property with any non-none value establishes a
+   containing block for fixed descendants in Chromium. Never restore it on
+   active hero ancestors. R2303 screenshot: x645/y-170 despite fixed stage,
+   because .hero-space had computed scale:1 and x611/y-283. */
 /* production-r2299-fixed-viewport-owner-desktop-archive */
