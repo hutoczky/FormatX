@@ -17,7 +17,7 @@ for(const literal of [
 assert(three.includes('this.embryoShell=new T.Mesh(geometry,this.embryoMaterial)'),
  'must keep the one original PBR membrane mesh');
 assert(birth.includes('const DURATION = 10000;'),'film duration must stay ten seconds');
-const active='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold';
+const active='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris';
 assert(birth.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+active),
   'R533 must load the R2303 living surface by the promoted cache key');
 assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+active),
@@ -27,9 +27,9 @@ const script=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*
 assert(script);
 const digest="'sha256-"+crypto.createHash('sha256').update(script).digest('base64')+"'";
 assert(html.includes(digest),'the live HTML CSP must authorize its exact parser');
-assert(worker.includes('const INLINE_R2303_BOOT_HASH = "'+digest+'";'),
-  'the Worker CSP hash must exactly match the R2303 parser');
-assert.equal((worker.match(/\$\{INLINE_R2303_BOOT_HASH\}/g)||[]).length,2,
-  'both Worker CSPs must authorize the same new parser');
+const authorized=[...worker.matchAll(/const (INLINE_R[0-9]+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
+assert(authorized,'the active parser SHA must be authorized in both Worker CSP policies');
 assert.equal((three.match(/this\.mechLight=new T\.PointLight/g)||[]).length,1);
 console.log('R2303_REAL_3D_MEMBRANE_MICROFOLDS_SOURCE_PASS');

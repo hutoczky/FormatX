@@ -2492,13 +2492,22 @@
       const shutterVertices=[];
       for(let blade=0;blade<8;blade++){
         const angle=blade*Math.PI/4+.12;
-        const p=(radius,offset)=>[
+        const p=(radius,offset,depth)=>[
           Math.cos(angle+offset)*radius,
           .01+Math.sin(angle+offset)*radius,
-          .495
+          depth
         ];
+        // R2307: each existing optical shutter has two authentic 3D
+        // titanium bevel facets. The raised crease captures the moving
+        // studio reflection, while the inner heel follows the meniscus.
+        // ONE existing MeshPhysicalMaterial and ONE original GPU draw.
+        const heel=p(.107,-.15,.519);
+        const leading=p(.178,-.23,.505);
+        const crease=p(.151,.070,.526);
+        const trailing=p(.178,.35,.505);
         shutterVertices.push(
-          ...p(.107,-.15),...p(.178,-.23),...p(.178,.35)
+          ...heel,...leading,...crease,
+          ...heel,...crease,...trailing
         );
       }
       const shutterGeometry=new T.BufferGeometry();
@@ -2510,7 +2519,7 @@
         new T.MeshPhysicalMaterial({
           color:0x98b5b7,metalness:.67,roughness:.23,
           clearcoat:.9,clearcoatRoughness:.08,
-          side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
+          side:T.DoubleSide,flatShading:true,transparent:true,opacity:0,depthWrite:false
         })
       );
       this.mechanicalGroup.add(this.mechOpticShutters);

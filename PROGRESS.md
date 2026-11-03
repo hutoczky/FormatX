@@ -1,5 +1,16 @@
 # FormatX – fejlesztési állapot
 
+## R2307 – stúdió MAG: kétszintű 3D titán-írisz (2026-11-03)
+
+- A végső R1280 mechanikus MAG íriszzár korábban 8 db teljesen sík, z=.495 háromszögből állt. Közelről ezek csak HUD-szerű lapokként árnyalódnak.
+- Az azonos nyolc zárólap most valódi térbeli, két síkfacettából összerakott titán geometriát kapott: belső sarok .519, külső perem .505, emelt gerinc .526. A normálok és a flat-shaded MeshPhysicalMaterial kemény éle valódi kétoldali stúdió-softbox tükröződést hoz létre a meglévő stúdiófények alatt.
+- 8 → 16 háromszög **ugyanabban az egy meglévő iris meshben**. Nincs új draw call, canvas, fény, renderer, JS animáció, mesh vagy per-frame CPU terhelés. A DNS→sejt→MAG 10s film, cella, 6000/9600 DNS-részecske és scroll-átadás nem változik.
+- A loader verziója: `20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris`. R533→R1280, R1629→R533 és a HTML parser együtt frissült; a **számolt és SHA256-abc tesztvektorral ellenőrzött** CSP hash: `'sha256-44SN0anChN0bK6huFl1UhtBS2RUHmY4EnkltMfOHe5g='`. A HTML CSP és mindkét Worker policy ugyanazt az új digestet engedélyezi, a régiek megtartva.
+- A R2303 geometriai QA már mindenkor az aktuális CSP-t ellenőrzi; külön R2307 P0 forrásteszt vizsgálja a fizikai zárólemezt, az egyetlen mesh-t, a loader és a szigorú hash egyezést.
+- További valós Chromium 8–10s optikai képkocka, P0, Lighthouse×3, 60FPS hardvermérés szükséges. PR #581 draft, nincs élesítés.
+
+
+
 ## R2306 – az első valódi DNA/MAG képkocka kritikus CSS útvonalának gyorsítása (2026-11-03)
 
 - A pontos R2305 Lighthouse desktop mérések 92/92/91, render-blocking CSS becsült 180–195 ms, valódi LCP ~1.76–1.91 s. Az asztali R490 first-paint, menu-owner, R328 desktop first-paint és R244 referencia stylesheet a renderelés kritikus útján maradt.
