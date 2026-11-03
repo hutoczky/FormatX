@@ -9,7 +9,7 @@ const birth=read('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js');
 const boot=read('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js');
 const html=read('docs/scifi-ui/index.html');
 const worker=read('billing-worker/src/production-content-entry.js');
-const version='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth';
+const version='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold';
 for(const token of [
  'const count=this.mobileRender?6000:9600;',
  "const embryo=build(this.mobileRender?1200:3100,'embryo');",
@@ -29,6 +29,8 @@ const inline=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*
 assert(inline);
 const digest="'sha256-"+crypto.createHash('sha256').update(inline).digest('base64')+"'";
 assert(html.includes(digest));
-assert(worker.includes('const INLINE_R2301_BOOT_HASH = "'+digest+'";'));
-assert.equal((worker.match(/\$\{INLINE_R2301_BOOT_HASH\}/g)||[]).length,2);
+const authorized=[...worker.matchAll(/const (INLINE_R[0-9]+_BOOT_HASH) = "([^"]+)";/g)]
+  .some(([,name,value])=>value===digest &&
+    worker.split(String.fromCharCode(36,123)+name+String.fromCharCode(125)).length===3);
+assert(authorized,'the active parser SHA256 must be authorized by both Worker CSPs');
 console.log('GENESIS_R2301_CELL_DEPTH_STUDIO_SOURCE_PASS');

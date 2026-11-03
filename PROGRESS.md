@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2305 – R2303 valódi 3D hártya biztonságos asset-frissítése (2026-11-03)
+
+- Az R2303 sejtmembrán térbeli mikroredői már a R1280 forráskódban voltak, de az oldal az előző R2301 query-cache kulccsal kérte a filmet. Emiatt a böngésző vagy CDN megőrizhette a régebbi JS-t; stúdióminőségű új képkockát e nélkül nem lehet egyértelműen igazolni.
+- Az R533 aktív Three.js asset URL-je, az R1629 tartalék betöltő és az inline első-bájtos HTML parser most ugyanazt az **R2303** cache kulcsot használják. A parser valódi számolt SHA256: `'sha256-kW0o6hJ/4Aw5022e5o9BqU9CMaOfa/cdCIbbR8gDzPo='`. HTML CSP-ben a hash engedélyezett, és a Worker két script-src CSP szabálya betűpontosan azonos hash-t kapott.
+- Az R2298/R2300/R2301 történeti forrásellenőrzői frissült aktuális betöltőkulccsal futnak. Az R2301 CSP-ellenőrzés minden kiadásnál **számolt aktuális** parser SHA-t és két Worker CSP hivatkozást vizsgál; az R2303 teszt külön ellenőrzi a pontos asset-kulcsot, hash-t és mindkét szabályt. Nincs gyengített CSP, inline wildcard vagy WebGL-t kiváltó statikus kép.
+- A R2304 viewport-fix és az R2303 fizikai 3D film változatlan. Kötelező a következő pontos commit P0, 3× Lighthouse, natív dokkolás, 3.5/5.5 s képkocka és valós GPU 60 FPS. PR #581 draft, nincs élesítés.
+
+
+
 ## R2304 – valódi viewport-rögzítés: CSS identity scale hiba (2026-11-03)
 
 - Az R2303 pontos `b4b68b0` GitHub P0-ján a mobil 430px natív dokkolás **PASS**, a rétegelt 390px mobil átmenet a rögzített dobozon belül maradt. **Desktop FAIL:** 1350×940 viewport, MAG x645.31/y−170.20, 513×695.59 px. A dobozméret 38vw×74dvh-re javult, de a szülő `.hero-space` computed CSS `scale:"1"` maradt, rect x611.56/y−283, így a gyermek `position:fixed` relatív koordinátái pontosan a szülőből származtak.
