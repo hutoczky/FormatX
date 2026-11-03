@@ -1694,6 +1694,7 @@
           k*(.78+r()*.22)
         );
         lobe.rotation.set(r()*2.4,r()*2.4,r()*2.4);
+        lobe.userData.baseRotationY=lobe.rotation.y;
         lobe.userData.phase=r()*Math.PI*2;
         lobe.userData.baseScale=lobe.scale.clone();
         this.organicGroup.add(lobe);
@@ -1981,6 +1982,7 @@
         const sz=sc*(.54+r()*.28);
         g.scale.set(sx,sy,sz);
         g.rotation.set(r()*2.8,r()*2.8,r()*2.8);
+        g.userData.baseRotationY=g.rotation.y;
         g.userData.phase=r()*Math.PI*2;
         g.userData.baseScale=g.scale.clone();
         this.cellGroup.add(g);this.cells.push(g);
@@ -3066,7 +3068,10 @@
         const q=1+Math.sin(time*.00096+lobe.userData.phase)*.012*visible;
         const b=lobe.userData.baseScale;
         if(b)lobe.scale.set(b.x*q,b.y*q,b.z*q);
-        lobe.rotation.y+=.000065*(i%2?1:-1);
+        // R2312: tissue sway derives from film time, not frame count.
+        // Both 30 and 60 FPS replay reach the same true 3D pose.
+        lobe.rotation.y=lobe.userData.baseRotationY+
+          Math.sin(time*.00042+lobe.userData.phase)*.019*visible;
       });
       this.organicVeins.forEach(vein=>{
         vein.rotation.z=Math.sin(time*.00025+vein.userData.phase)*.007;
@@ -3093,7 +3098,9 @@
       this.cellVeinMaterial.opacity=.040*visible;
       this.cells.forEach((c,i)=>{
         const q=1+Math.sin(time*.00102+c.userData.phase)*.010*visible;
-        c.rotation.y+=.00010*(i%2?1:-1);
+        // R2312: physically repeatable organelle pose across frame drops.
+        c.rotation.y=c.userData.baseRotationY+
+          Math.sin(time*.00048+c.userData.phase)*.012*visible;
         const b=c.userData.baseScale;
         if(b)c.scale.set(b.x*q,b.y*q,b.z*q);
       });

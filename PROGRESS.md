@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2312 – kísérleti, képkockaszámtól független valódi 3D sejtszövetmikromozgás (2026-11-03)
+
+- A GENESIS film R1280 42 darab organikus lebenye korábban minden rendernél `rotation.y+=0.000065`, a 68 belső 3D sejtes organellum `rotation.y+=0.00010` elforgatást kapott. 30 és 60 FPS mellett ez két eltérő filmbeli szövetpozíciót eredményez ugyanabban a másodpercben, és hibát halmoz fel ismétlődő proof-frame lejátszáskor.
+- **R2312:** mindkét meglévő 3D komponens eredeti forgási fázisa egyszer mentett, majd a mozgás kizárólag a renderelt időpontból és az egyedi, determinisztikus objektumfázisból számolódik. Lassú fiziológiai szövetpulzus marad (legfeljebb 0.019 és 0.012 radián), megszűnik a frame-count drift. Nincs új mesh, draw call, GPU buffer, shader, renderer, canvas vagy RAF.
+- A R2311.3 normál 1440×900 P0 eredményének megőrzésére **külön tesztágon készült**, nem a #581 fő PR ágán. A JS cache kulcs még nincs kiadásra promótálva: élesítés vagy merge előtt kötelező az egységes R533/R1629/HTML és CSP új verzió, majd teljes pontos SHA böngészős és teljesítményteszt. 
+- Új R2312 source QA biztosítja, hogy az objektumok tárolják a kezdeti forgásukat, a mikromozgás ugyanazon időpillanatban reprodukálható, a régi akkumuláló kód nem marad benn, a valódi egykamerás 3D film megmarad. Ez determinisztikus mozgás, **nem hardveres 60 FPS bizonyíték**.
+
+
+
 ## R2311 – CLS-mentes, atomikus natív MAG képkocka-átadás (2026-11-03)
 
 - Az R2310 friss javítása először két natív WebGL compositor képkockát követel a 10 mp-es film vége és a scroll-archívum között; ezt **megtartjuk**. Az R2307–R2309 normál Chromium 1440×900 tesztben a viewportba ugró MAG kezdeti stage-layout 0,1062297 LayoutShift-et okozott.

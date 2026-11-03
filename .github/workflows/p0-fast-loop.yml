@@ -144,6 +144,7 @@ jobs:
           node --check .github/scripts/validate-genesis-camera-framing-r2309.cjs
           node --check .github/scripts/validate-native-compositor-r2310.cjs
           node --check .github/scripts/validate-atomic-desktop-flip-r2311.cjs
+          node --check .github/scripts/validate-genesis-biomechanical-time-r2312.cjs
           node --check .github/scripts/validate-desktop-dock-transform-r2302.cjs
           node --check .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
@@ -168,6 +169,7 @@ jobs:
           node .github/scripts/validate-genesis-camera-framing-r2309.cjs
           node .github/scripts/validate-native-compositor-r2310.cjs
           node .github/scripts/validate-atomic-desktop-flip-r2311.cjs
+          node .github/scripts/validate-genesis-biomechanical-time-r2312.cjs
           node .github/scripts/validate-desktop-dock-transform-r2302.cjs
           node .github/scripts/validate-desktop-dock-viewport-r2299.cjs
           node .github/scripts/validate-mag-quality-resize-r2244.cjs
