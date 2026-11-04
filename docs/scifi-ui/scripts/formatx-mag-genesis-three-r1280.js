@@ -2841,7 +2841,9 @@
 
     updateOrganic(t,time){
       const grow=smooth((t-3.76)/.72);
-      const fade=1-smooth((t-6.20)/1.15)*.96;
+      // R2214: finish the existing biological dissolve. A permanent .04
+      // floor kept the old lobe/fold meshes drawing beneath the metal MAG.
+      const fade=1-smooth((t-6.20)/1.15);
       const visible=grow*fade;
       this.organicGroup.visible=visible>.002;
       const bodyScale=.001+visible*.63;
@@ -2889,7 +2891,8 @@
 
     updateCells(t,time){
       const grow=smooth((t-3.90)/.70);
-      const fade=1-smooth((t-6.25)/1.10)*.96;
+      // Retire this supporting cell shell with the same authored 7.35s end.
+      const fade=1-smooth((t-6.25)/1.10);
       const visible=grow*fade;
       this.cellGroup.visible=visible>.002;
       const cellScale=.001+visible*.76;

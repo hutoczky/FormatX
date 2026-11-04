@@ -130,7 +130,12 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
      }));
      const metals=engine?['mechMaterial','mechMidMaterial','silverMaterial'].map(name=>({name,color:engine[name].color.toArray()})):[];
      const opticalKey=engine?{color:engine.mechLight.color.toArray(),intensity:engine.mechLight.intensity,distance:engine.mechLight.distance,decay:engine.mechLight.decay}:null;
-     return{continuity,livingOptic,metals,opticalKey,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
+     const supportingChapters=engine?['organicGroup','cellGroup'].map(name=>{
+      const group=engine[name];let visibleDrawables=0;
+      group.traverseVisible(node=>{if(node.isMesh||node.isLine||node.isPoints)visibleDrawables++;});
+      return{name,visible:group.visible,visibleDrawables};
+     }):[];
+     return{continuity,livingOptic,metals,opticalKey,supportingChapters,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
       opticGeometry:engine?{positions:engine.mechEyeCore.geometry.attributes.position.count,indices:engine.mechEyeCore.geometry.index.count}:null,
       renderInfo:engine?{calls:engine.renderer.info.render.calls,programs:engine.renderer.info.programs.length,textures:engine.renderer.info.memory.textures}:null,
       requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
@@ -159,6 +164,12 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
     }
     if(chapter==='dna'||chapter==='embryo')assert.equal(state.opticOpacity,0,'The MAG optic must remain dark before metal assembly');
     if(chapter==='mag'){
+     assert.equal(state.supportingChapters.length,2,'Observe both actual biological scene branches');
+     for(const branch of state.supportingChapters){
+      assert.equal(branch.visible,false,'The completed '+branch.name+' still draws beneath the final MAG');
+      assert.equal(branch.visibleDrawables,0,'Retired biological meshes remain in the final render traversal');
+     }
+     assert(state.renderInfo.calls<100,'The final MAG must not keep hundreds of retired biological draws');
      assert.equal(state.metals.length,3);
      for(const metal of state.metals){
       const [r,g,b]=metal.color;
