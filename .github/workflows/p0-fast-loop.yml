@@ -122,6 +122,7 @@ jobs:
           node .github/scripts/validate-mag-neutral-silver-r2211.cjs
           node .github/scripts/validate-mag-studio-key-r2212.cjs
           node .github/scripts/validate-genesis-chapter-retirement-r2214.cjs
+          node .github/scripts/validate-mag-key-continuity-r2215.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site

@@ -1,3 +1,7 @@
+FormatX R2215 camera-key continuity — 2026-11-04
+cache=20261104-r2215-camera-key-continuity
+The existing cinematic studio key settles onto the permanent MAG camera-space direction before handoff, with frontal irradiance preserved. DNA/embryo lighting, studio fill, physical silhouette/materials, shared living optic, camera and timeline remain. No extra light, GPU resource, pass, context, canvas, RAF, timer or detection path. Actual uploaded direction and final-image quality require published CI observation; no hardware/FPS/final visual acceptance is claimed.
+
 r2214_retirement=The existing supporting organic and cellular fades now finish at the authored 7.35s endpoint instead of leaving a permanent 4-percent remnant. The final MAG no longer traverses those retired scene branches; the DNA/cell chapter, titanium anatomy, shared living optic, camera and ten-second timeline remain. No geometry rebuild, extra texture, program, pass, context, canvas, RAF or timer.
 r2214_delivery=20261104-r2214-retired-biology; exact parser inline SHA256 zHIrDMjm6IWBGiVhChU8jtcni1lTKoL7MkPcDJ3ltag= in static HTML and Worker policies. Native R326 bytes unchanged. Fresh master release metadata is retained byte-for-byte.
 r2214_validation=Actual bundled Three r185 scene builders and chapter updates pass for mobile/desktop; geometry buffers remain unchanged. The exact parent reproduces the permanent-remnant failure. Full browser results are tied to the published SHA in PR577. No hardware FPS, full cold TBT or studio-acceptance claim.

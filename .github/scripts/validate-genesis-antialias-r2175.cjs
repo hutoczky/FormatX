@@ -5,6 +5,11 @@ const path=require('node:path');
 const {chromium}=require('playwright');
 const base=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
 const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175';
+const nativeSource=fs.readFileSync(path.resolve('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'),'utf8');
+const nativeKeyMatch=nativeSource.match(/vec3 keyDir=normalize\(vec3\(([-.\d]+),([-.\d]+),([-.\d]+)\)\);/);
+assert(nativeKeyMatch,'Read the actual permanent MAG studio-key direction');
+const nativeKey=nativeKeyMatch.slice(1).map(Number),nativeKeyLength=Math.hypot(...nativeKey);
+const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
 // Fixed visual frames exercise the genuine Three default framebuffer. These
 // observations are not normal-clock, hardware-GPU or frame-rate certification.
 (async()=>{
@@ -38,11 +43,19 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
          body.onAfterRender=function(renderer){
           const gl=renderer.getContext(),program=gl.getParameter(gl.CURRENT_PROGRAM);
           const diffuse=gl.getUniform(program,gl.getUniformLocation(program,'diffuse'));
-          const pointLights=[];
-          engine.scene.traverseVisible(object=>{if(object.isPointLight&&object.layers.test(engine.camera.layers))pointLights.push(object);});
+          const pointLights=[],directionalLights=[];
+          engine.scene.traverseVisible(object=>{
+           if(!object.layers.test(engine.camera.layers))return;
+           if(object.isPointLight)pointLights.push(object);
+           if(object.isDirectionalLight)directionalLights.push(object);
+          });
           const keyIndex=pointLights.indexOf(engine.mechLight);
           const keyUniform=keyIndex<0?null:gl.getUniform(program,gl.getUniformLocation(program,'pointLights['+keyIndex+'].color'));
+          const studioKeyIndex=directionalLights.indexOf(engine.studioKey);
+          const studioDirection=studioKeyIndex<0?null:gl.getUniform(program,gl.getUniformLocation(program,'directionalLights['+studioKeyIndex+'].direction'));
+          const studioColor=studioKeyIndex<0?null:gl.getUniform(program,gl.getUniformLocation(program,'directionalLights['+studioKeyIndex+'].color'));
           window.__genesisMetalDraw={diffuse:Array.from(diffuse),keyIndex,keyColor:keyUniform?Array.from(keyUniform):null,
+           studioKeyIndex,studioKeyDirection:studioDirection?Array.from(studioDirection):null,studioKeyColor:studioColor?Array.from(studioColor):null,
            relief:window.__genesisMetalPrograms.get(program)||null,draws:(window.__genesisMetalDraw?.draws||0)+1};
           return Reflect.apply(after,this,arguments);
          };
@@ -176,6 +189,12 @@ const out=process.env.FORMATX_GENESIS_AA_DIR||'artifacts/genesis-antialias-r2175
       assert(Math.abs(r-g)<1e-8&&Math.abs(g-b)<1e-8,'The actual animated '+metal.name+' must stay neutral silver');
      }
      assert(state.metalDraw?.draws>0,'The actual chassis draw must be observed');
+     assert(state.metalDraw.studioKeyIndex>=0,'Observe the existing physical studio key');
+     const studioDirection=state.metalDraw.studioKeyDirection;
+     assert(studioDirection&&studioDirection.every((value,index)=>Math.abs(value-nativeKeyDirection[index])<1e-5),
+      'The actual cinematic studio-key direction must converge to the permanent MAG key');
+     assert(state.metalDraw.studioKeyColor?.every(value=>value>0&&Number.isFinite(value)),
+      'The same actual physical key must retain finite positive illumination');
      const relief=state.metalDraw.relief;
      assert(relief?.linked&&relief.physicalNormal&&relief.clearcoatNormal&&relief.filtered,
       'The actual chassis draw must use filtered recesses in both physical metal and clearcoat normals');

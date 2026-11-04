@@ -3186,6 +3186,21 @@
         4.4-dnaStudio*.32-assemblyStudio*1.15,
         1.8+embryoStudio*.65+assemblyStudio*.50,5.2
       );
+      // R2215: settle the same physical key onto the permanent MAG's
+      // view-space direction before the handoff. Keep the frontal irradiance
+      // while revealing the grazing roof planes; do not dim the whole metal
+      // just because the source moves out of its former frontal position.
+      const handoffKey=smooth((t-7.25)/.85);
+      if(handoffKey>0){
+        const key=this.studioKey.position,distance=key.length();
+        const x=key.x,y=key.y,z=key.z;
+        const frontal=key.dot(this.camera.position)/distance;
+        key.set(-.50,.78,.38).normalize()
+          .applyQuaternion(this.camera.quaternion).multiplyScalar(distance);
+        key.set(mix(x,key.x,handoffKey),mix(y,key.y,handoffKey),mix(z,key.z,handoffKey));
+        const settledFrontal=key.dot(this.camera.position)/key.length();
+        this.studioKey.intensity*=frontal/settledFrontal;
+      }
       this.renderer.toneMappingExposure=
         1.075+dnaStudio*.035+embryoStudio*.045+assemblyStudio*.11+
         flash*.006+after*.002;
