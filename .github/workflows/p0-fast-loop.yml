@@ -123,6 +123,7 @@ jobs:
           node .github/scripts/validate-mag-studio-key-r2212.cjs
           node .github/scripts/validate-genesis-chapter-retirement-r2214.cjs
           node .github/scripts/validate-mag-key-continuity-r2215.cjs
+          node .github/scripts/validate-mag-cell-filter-r2216.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site
@@ -177,7 +178,9 @@ jobs:
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           AUDITED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: node .github/scripts/validate-mag-machined-optic-r2203.cjs
+        run: |
+          node .github/scripts/validate-mag-machined-optic-r2203.cjs
+          node .github/scripts/validate-mag-cell-filter-gl1-r2216.cjs
       - name: Run R533 to R536 cinematic handoff browser proof
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
@@ -211,6 +214,7 @@ jobs:
             artifacts/reference-film-native-handoff-r2171/
             artifacts/intro-retired-layout-r2173/
             artifacts/mag-machined-optic-r2203/
+            artifacts/mag-cell-filter-gl1-r2216/
             artifacts/native-mag-dock-entry-r2173/
             artifacts/r656-intro-keyframes/
           if-no-files-found: warn

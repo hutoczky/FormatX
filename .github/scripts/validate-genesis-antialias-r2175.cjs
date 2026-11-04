@@ -90,6 +90,9 @@ const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
          }
          if(fragment.includes('void fxLivingMagCell(')){
           const record={program,linked:gl.getProgramParameter(program,gl.LINK_STATUS),draws:0,
+           filteredCell:fragment.includes('#define FX_MAG_CELL_DERIVATIVES')&&
+            fragment.includes('float fineFootprint=max(fwidth(tissuePhaseA),fwidth(tissuePhaseB));')&&
+            fragment.includes('tissueIslands*=fineVisibility;'),
            physicalEmission:fragment.includes('totalEmissiveRadiance+=fxCellRadiance*1.35;')};
           programs.set(program,record);window.__genesisLivingOpticPrograms.push(record);
          }
@@ -137,7 +140,7 @@ const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
        attributes:{initial:initial.count,cell:cell.count,arm:arm.count}};
      }
      const livingOptic=(window.__genesisLivingOpticPrograms||[]).map(record=>({
-      linked:record.linked,draws:record.draws,physicalEmission:record.physicalEmission,
+      linked:record.linked,draws:record.draws,physicalEmission:record.physicalEmission,filteredCell:record.filteredCell,
       time:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uTime')),
       energy:gl.getUniform(record.program,gl.getUniformLocation(record.program,'uEnergy'))
      }));
@@ -212,6 +215,8 @@ const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
      assert(state.opticOpacity>.9,'The existing physical lens must wake after arm seating');
      assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.physicalEmission&&program.time>0&&program.energy>.45&&program.energy<=.5),
       'The actual linked Three.js living-cell lens program must draw with the original real film clock');
+     assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.filteredCell),
+      'The actual physical lens draw must use the shared pixel-footprint cell filter');
     }
     record.pass=true;
    }catch(error){record.pass=false;record.error=error.message;}

@@ -1,3 +1,7 @@
+FormatX R2216 shared living-cell footprint filter — 2026-11-04
+cache=20261104-r2216-footprint-filtered-cell
+The same living cyan/coral optic in the cinematic and permanent MAG now attenuates only its fine tissue carrier using the actual projected shader phase footprint. Broad tissue folds and the original metabolism clocks remain. The native path reuses its existing derivative capability and preserves the genuine non-derivative fallback. No added geometry, texture, light, render pass, context, canvas, RAF or timer. Real fragment derivatives add work; no speed, FPS, hardware-motion or final visual-acceptance claim. Published WebGL1/WebGL2, original handoff and Lighthouse results remain required.
+
 FormatX R2215 camera-key continuity — 2026-11-04
 cache=20261104-r2215-camera-key-continuity
 The existing cinematic studio key settles onto the permanent MAG camera-space direction before handoff, with frontal irradiance preserved. DNA/embryo lighting, studio fill, physical silhouette/materials, shared living optic, camera and timeline remain. No extra light, GPU resource, pass, context, canvas, RAF, timer or detection path. Actual uploaded direction and final-image quality require published CI observation; no hardware/FPS/final visual acceptance is claimed.

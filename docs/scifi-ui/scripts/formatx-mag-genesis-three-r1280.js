@@ -1869,6 +1869,7 @@
         shader.fragmentShader=shader.fragmentShader.replace('#include <common>',
           `#include <common>
           varying vec3 vFxMagOpticLocal;
+          #define FX_MAG_CELL_DERIVATIVES
           uniform float uTime,uEnergy;
       void fxLivingMagCell(inout vec3 lensColor,vec2 oq,float od){
       /* R2206 — the born MAG contains the SAME living cell chemistry
@@ -1879,8 +1880,16 @@
       float tissueFold=sin(tissueUv.x*18.0+
         2.0*sin(tissueUv.y*13.0+uTime*.13))*
         cos(tissueUv.y*21.0-1.6*sin(tissueUv.x*11.0-uTime*.11));
-      float tissueIslands=sin(tissueUv.x*37.0+tissueUv.y*19.0)*
-        sin(tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16);
+      float tissuePhaseA=tissueUv.x*37.0+tissueUv.y*19.0;
+      float tissuePhaseB=tissueUv.y*33.0-tissueUv.x*15.0+uTime*.16;
+      float tissueIslands=sin(tissuePhaseA)*sin(tissuePhaseB);
+#ifdef FX_MAG_CELL_DERIVATIVES
+      // R2216: retain close-up chromatin, then fade only the fine carrier
+      // as its footprint approaches a pixel. Both MAGs use the same filter.
+      float fineFootprint=max(fwidth(tissuePhaseA),fwidth(tissuePhaseB));
+      float fineVisibility=1.0-smoothstep(.75,2.8,fineFootprint);
+      tissueIslands*=fineVisibility;
+#endif
       float tissueEnvelope=exp(-pow(od/.81,4.0));
       float cyanCortex=smoothstep(.08,.67,tissueFold*.5+.5);
       float coralOrganelles=smoothstep(.61,.84,
@@ -1899,7 +1908,7 @@
             fxLivingMagCell(fxCellRadiance,fxCellQ,length(fxCellQ));
             totalEmissiveRadiance+=fxCellRadiance*1.35;`);
       };
-      material.customProgramCacheKey=()=> 'r2208-shared-cyan-coral-living-optic';
+      material.customProgramCacheKey=()=> 'r2216-filtered-cyan-coral-living-optic';
     }
 
     makeMechanicalLayer(){

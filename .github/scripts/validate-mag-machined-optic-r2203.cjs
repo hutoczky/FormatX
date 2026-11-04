@@ -31,6 +31,12 @@ function observe(){
 
 function proveEdges(){
   const {gl,program,attributes,count}=window.__machinedNative;
+  const actualFragment=(gl.getAttachedShaders(program)||[])
+    .filter(shader=>gl.getShaderParameter(shader,gl.SHADER_TYPE)===gl.FRAGMENT_SHADER)
+    .map(shader=>gl.getShaderSource(shader)||'').join('\n');
+  const filteredCell=actualFragment.includes('#define FX_MAG_CELL_DERIVATIVES')&&
+    actualFragment.includes('float fineFootprint=max(fwidth(tissuePhaseA),fwidth(tissuePhaseB));')&&
+    actualFragment.includes('tissueIslands*=fineVisibility;');
   const saved={program:gl.getParameter(gl.CURRENT_PROGRAM),vao:gl.getParameter(gl.VERTEX_ARRAY_BINDING),
     array:gl.getParameter(gl.ARRAY_BUFFER_BINDING),feedback:gl.getParameter(gl.TRANSFORM_FEEDBACK_BINDING),
     feedbackBuffer:gl.getParameter(gl.TRANSFORM_FEEDBACK_BUFFER_BINDING),discard:gl.isEnabled(gl.RASTERIZER_DISCARD)};
@@ -93,6 +99,7 @@ function proveEdges(){
       samples.push({time,maximumSharedEdgeSeparation:maximum,extent});
     }
     return {vertices:count,sharedEdgeGroups:groups.length,samples,
+      filteredCell,
       actualVertexProgram:true,actualNativeBuffers:true,glError:gl.getError(),
       renderer:gl.getParameter(gl.RENDERER),surface:document.documentElement.dataset.fxNativeMagSurfaceR2203,
       canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length};
@@ -132,6 +139,7 @@ function proveEdges(){
         const result=await page.evaluate(proveEdges);report.cases.push({width,...result,errors});
         console.log('MACHINED_MAG_GPU_EDGES',JSON.stringify(report.cases.at(-1)));
         assert.deepEqual(errors,[]);assert.equal(result.glError,0);assert.equal(result.canvases,1);
+        assert.equal(result.filteredCell,true,'The actual native optical program must use the shared pixel-footprint filter');
         assert(result.sharedEdgeGroups>150,'Actual connected metal/glass geometry was not observed');
         for(const sample of result.samples){
           assert(sample.extent>.4,'Transform feedback returned an empty or invalid vertex stream');
