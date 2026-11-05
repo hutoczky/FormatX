@@ -1821,7 +1821,9 @@
             vec2 aa=max(fwidth(cell),vec2(.018));
             float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
               smoothstep(.018,.035+aa.y,edge.y));
-            float envelope=smoothstep(.21,.28,length(vFxMagAnatomy.xy));
+            // R2218: native R326 limits panel machining to the front titanium skin.
+            float envelope=smoothstep(.21,.28,length(vFxMagAnatomy.xy))*
+              smoothstep(.015,.13,vFxMagAnatomy.z);
             float plateFinish=.5+.5*sin(dot(floor(cell),vec2(1.71,2.39)));
             float grainPhase=radial*360.0+lateral*24.0;
             float grainVisibility=1.0-smoothstep(.65,1.65,fwidth(grainPhase));
@@ -1849,9 +1851,18 @@
           .replace('#include <normal_fragment_maps>',
             '#include <normal_fragment_maps>\nnormal=fxMagPlateNormal(normal,fxPlate.w);')
           .replace('#include <clearcoat_normal_fragment_maps>',
-            '#include <clearcoat_normal_fragment_maps>\n#ifdef USE_CLEARCOAT\nclearcoatNormal=fxMagPlateNormal(clearcoatNormal,fxPlate.w);\n#endif');
+            '#include <clearcoat_normal_fragment_maps>\n#ifdef USE_CLEARCOAT\nclearcoatNormal=fxMagPlateNormal(clearcoatNormal,fxPlate.w);\n#endif')
+          .replace('#include <opaque_fragment>',
+            `// R2218: the permanent MAG uses this same body-local grazing strip.
+            float fxPanelEnvelope=smoothstep(.21,.28,length(vFxMagAnatomy.xy))*
+              smoothstep(.015,.13,vFxMagAnatomy.z);
+            float fxPanelFacing=abs(dot(normal,normalize(vViewPosition)));
+            float fxTitaniumGrazing=pow(1.0-fxPanelFacing,2.4);
+            outgoingLight+=vec3(.31,.43,.48)*fxTitaniumGrazing*
+              fxPanelEnvelope*.14;
+            #include <opaque_fragment>`);
       };
-      material.customProgramCacheKey=()=> 'r2213-filtered-machined-silver-relief';
+      material.customProgramCacheKey=()=> 'r2218-front-filtered-machined-silver-grazing';
     }
 
     bindLivingMagOptic(material){
@@ -3454,4 +3465,5 @@
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
+  document.documentElement.dataset.fxMagCinematicSurfaceR2218='front-filtered-machined-silver-native-grazing';
 })();

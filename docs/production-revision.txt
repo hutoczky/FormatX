@@ -1,5 +1,9 @@
+FormatX R2218 front titanium response — 2026-11-05
+cache=20261105-r2218-front-titanium-response
+The cinematic physical metal now limits machined joints and relief to the same front titanium domain as the permanent MAG and reuses its cool body-local grazing strip. Geometry, fresh four-point silhouette, physical materials, existing studio lights, camera, living optic, story clock and handoff are unchanged. No added draw, program, light, pass, texture, context, canvas, RAF, timer, input or detection. This is one visible body/light continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
+
 FormatX R2217 native optical anatomy — 2026-11-04
-cache=20261104-r2217-native-optical-anatomy
+cache=20261105-r2218-front-titanium-response
 The cinematic optical assembly now uses the permanent MAG's .135 radial/.055 axial lens, exact eight-knot lathed bezel profile with analytical radial normals, and eight iris quads seated beneath the glass. Reuses the existing lens topology and socket/rim/shutter meshes and materials; no extra rendering object, light, pass, shader, context, canvas, RAF or timer. Native source, outer silhouette, body geometry, studio lighting, original story clock and handoff remain. Actual mesh/source and published WebGL image checks are required; no complete body/light continuity, hardware motion, FPS or performance acceptance claim.
 
 FormatX R2216 shared living-cell footprint filter — 2026-11-04
