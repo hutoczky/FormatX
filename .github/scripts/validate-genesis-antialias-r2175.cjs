@@ -10,6 +10,13 @@ const nativeKeyMatch=nativeSource.match(/vec3 keyDir=normalize\(vec3\(([-.\d]+),
 assert(nativeKeyMatch,'Read the actual permanent MAG studio-key direction');
 const nativeKey=nativeKeyMatch.slice(1).map(Number),nativeKeyLength=Math.hypot(...nativeKey);
 const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
+const nativeLensMatch=nativeSource.match(/const opticalCentreZ=magSkinZ\(0,0\)-([.\d]+);\s*appendEllipsoid\(\[0,0,opticalCentreZ\],\[([.\d]+),([.\d]+),([.\d]+)\]/);
+const nativeSocketMatch=nativeSource.match(/const opticalSocketZ=magSkinZ\(0,0\)-([.\d]+);/);
+const nativeProfileMatch=nativeSource.match(/const opticProfile=\[([\s\S]*?)\n    \];/);
+assert(nativeLensMatch&&nativeSocketMatch&&nativeProfileMatch,'Read actual permanent optical geometry');
+const nativeLensRadii=nativeLensMatch.slice(2).map(Number);
+const nativeOpticProfile=Array.from(nativeProfileMatch[1].matchAll(/\[([.\d]+),([.\d]+)\]/g),m=>m.slice(1).map(Number));
+const nativeDepthOffset=Number(nativeLensMatch[1])-Number(nativeSocketMatch[1]);
 // Fixed visual frames exercise the genuine Three default framebuffer. These
 // observations are not normal-clock, hardware-GPU or frame-rate certification.
 (async()=>{
@@ -37,6 +44,11 @@ const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
         const result=await Reflect.apply(attach,this,args);
         if(result?.engine){
          const engine=result.engine;window.__genesisDnaEngine=engine;
+         window.__genesisOpticDraws={};
+         for(const name of ['mechEyeCore','mechOpticSocket','mechOpticRim','mechOpticShutters']){
+          const mesh=engine[name],after=mesh.onAfterRender;
+          mesh.onAfterRender=function(){window.__genesisOpticDraws[name]=(window.__genesisOpticDraws[name]||0)+1;return Reflect.apply(after,this,arguments);};
+         }
          // Observe the real body draw after Three has uploaded its material.
          // No substituted shader, additional draw, clock or render request.
          const body=engine.mechBody,after=body.onAfterRender;
@@ -151,7 +163,23 @@ const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
       group.traverseVisible(node=>{if(node.isMesh||node.isLine||node.isPoints)visibleDrawables++;});
       return{name,visible:group.visible,visibleDrawables};
      }):[];
-     return{continuity,livingOptic,metals,opticalKey,supportingChapters,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
+     let opticAnatomy=null;
+     if(engine){
+      const eye=engine.mechEyeCore,p=eye.geometry.attributes.position,radii=[0,0,0];
+      for(let i=0;i<p.count;i++)for(let c=0;c<3;c++)radii[c]=Math.max(radii[c],Math.abs(p.getComponent(i,c)*eye.scale.getComponent(c)));
+      let minRadius=Infinity,maxRadius=0,minDepth=Infinity,maxDepth=-Infinity,bezelVertices=0;
+      for(const mesh of [engine.mechOpticSocket,engine.mechOpticRim]){
+       const a=mesh.geometry.attributes.position;bezelVertices+=a.count;
+       for(let i=0;i<a.count;i++){
+        const radius=Math.hypot(a.getX(i),a.getY(i)),depth=a.getZ(i)+mesh.position.z-eye.position.z;
+        minRadius=Math.min(minRadius,radius);maxRadius=Math.max(maxRadius,radius);
+        minDepth=Math.min(minDepth,depth);maxDepth=Math.max(maxDepth,depth);
+       }
+      }
+      opticAnatomy={radii,minRadius,maxRadius,minDepth,maxDepth,bezelVertices,
+       shutterVertices:engine.mechOpticShutters.geometry.attributes.position.count,draws:window.__genesisOpticDraws};
+     }
+     return{continuity,livingOptic,metals,opticalKey,supportingChapters,opticAnatomy,metalDraw:window.__genesisMetalDraw||null,opticOpacity:engine?.mechEyeCore?.material?.opacity,
       opticGeometry:engine?{positions:engine.mechEyeCore.geometry.attributes.position.count,indices:engine.mechEyeCore.geometry.index.count}:null,
       renderInfo:engine?{calls:engine.renderer.info.render.calls,programs:engine.renderer.info.programs.length,textures:engine.renderer.info.memory.textures}:null,
       requests:window.__genesisAA.requests,renderer:root.dataset.fxMagBirthRendererR1360,phase:root.dataset.fxMagBirthPhase,peak:root.dataset.fxMagBirthFramePeakR1557,litPixels:root.dataset.fxMagBirthThreeLitPixelsR2146,armor:root.dataset.fxMagBirthVisibleArmorR2147,eye:root.dataset.fxMagBirthEyeOpacityR2148,genome:root.dataset.fxMagBirthGenomeParticlesR2160,attributes:gl?.getContextAttributes(),samples:gl?.getParameter(gl.SAMPLES),width:cv?.width,height:cv?.height,canvases:document.querySelectorAll('.fx-mag-birth-r533 canvas.fxb-particles').length,glError:gl?.getError(),contextLost:gl?.isContextLost()};
@@ -212,6 +240,15 @@ const nativeKeyDirection=nativeKey.map(value=>value/nativeKeyLength);
      assert(Math.abs(keyDraw[0]-key.color[0]*key.intensity)<1e-4,'The observed light slot must be the existing local optical key');
      assert(Number(state.armor)>=5);assert(Number(state.eye)>.07&&Number(state.eye)<.25);
      assert.deepEqual(state.opticGeometry,{positions:1225,indices:6624},'The original physical lens geometry must stay unchanged');
+     const anatomy=state.opticAnatomy;
+     assert(anatomy&&anatomy.radii.every((value,i)=>Math.abs(value-nativeLensRadii[i])<2e-8),'The actual curved lens must match native radial/axial anatomy');
+     assert.equal(anatomy.bezelVertices,7*48*6);assert.equal(anatomy.shutterVertices,48);
+     for(const [value,target]of [[anatomy.minRadius,Math.min(...nativeOpticProfile.map(p=>p[0]))],
+      [anatomy.maxRadius,Math.max(...nativeOpticProfile.map(p=>p[0]))],
+      [anatomy.minDepth,Math.min(...nativeOpticProfile.map(p=>p[1]))+nativeDepthOffset],
+      [anatomy.maxDepth,Math.max(...nativeOpticProfile.map(p=>p[1]))+nativeDepthOffset]])
+      assert(Math.abs(value-target)<4e-8,'The actual socket/rim bounds must match native optical anatomy');
+     for(const name of ['mechEyeCore','mechOpticSocket','mechOpticRim','mechOpticShutters'])assert(anatomy.draws[name]>0,'The actual optical component must draw: '+name);
      assert(state.opticOpacity>.9,'The existing physical lens must wake after arm seating');
      assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.physicalEmission&&program.time>0&&program.energy>.45&&program.energy<=.5),
       'The actual linked Three.js living-cell lens program must draw with the original real film clock');

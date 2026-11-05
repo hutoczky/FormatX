@@ -2295,27 +2295,56 @@
         })
       );
       this.bindLivingMagOptic(this.mechEyeCore.material);
-      this.mechEyeCore.scale.set(1,1,.30);
+      // R2217: retain the original sphere topology, with the permanent
+      // MAG's actual .135 radial / .055 axial optical anatomy.
+      this.mechEyeCore.scale.set(.135/.120,.135/.120,.055/.120);
       this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
 
-      // R2148 — physically raised optical assembly: a dark machined socket,
-      // bright brushed-titanium rim, secondary cyan capillary and eight
-      // individual shutter facets. The final R326 hero uses this same
-      // approximately 0.20-unit aperture, preventing a small-eye handoff.
+      // R2217: the same lathed profile and radial normals as the native MAG,
+      // split between the two EXISTING socket/rim meshes and materials.
+      // Depths are measured from the same lens centre: -.135 - (-.073).
+      const opticProfile=[
+        [.141,.035],[.141,.105],[.148,.133],[.158,.142],
+        [.184,.140],[.203,.115],[.208,.065],[.208,.035]
+      ];
+      const opticBandGeometry=bands=>{
+        const positions=[],normals=[],uvs=[];
+        const segments=48;
+        for(const band of bands){
+          const [r0,z0]=opticProfile[band],[r1,z1]=opticProfile[band+1];
+          const dr=r1-r0,dz=z1-z0,length=Math.hypot(dr,dz);
+          for(let j=0;j<segments;j++){
+            const a=j*Math.PI/24,b=(j+1)*Math.PI/24;
+            for(const [radius,depth,angle] of [
+              [r0,z0,a],[r1,z1,a],[r1,z1,b],
+              [r0,z0,a],[r1,z1,b],[r0,z0,b]
+            ]){
+              positions.push(radius*Math.cos(angle),radius*Math.sin(angle),depth-.062);
+              normals.push(-dz*Math.cos(angle)/length,-dz*Math.sin(angle)/length,dr/length);
+              uvs.push(angle/(Math.PI*2),band/(opticProfile.length-1));
+            }
+          }
+        }
+        const geometry=new T.BufferGeometry();
+        geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+        geometry.setAttribute('normal',new T.Float32BufferAttribute(normals,3));
+        geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));
+        return geometry;
+      };
       this.mechOpticSocket=new T.Mesh(
-        new T.TorusGeometry(.191,.026,12,96),
+        opticBandGeometry([0,5,6]),
         new T.MeshPhysicalMaterial({
           color:0x081a20,metalness:.55,roughness:.31,
           clearcoat:.72,clearcoatRoughness:.12,
           transparent:true,opacity:0,depthWrite:false
         })
       );
-      this.mechOpticSocket.position.set(0,.01,.477);
+      this.mechOpticSocket.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechOpticSocket);
 
       this.mechOpticRim=new T.Mesh(
-        new T.TorusGeometry(.192,.010,12,96),
+        opticBandGeometry([1,2,3,4]),
         new T.MeshPhysicalMaterial({
           color:0xc2d7d4,metalness:.69,roughness:.15,
           clearcoat:1,clearcoatRoughness:.043,
@@ -2323,7 +2352,7 @@
           transparent:true,opacity:0,depthWrite:false
         })
       );
-      this.mechOpticRim.position.set(0,.01,.507);
+      this.mechOpticRim.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechOpticRim);
 
       this.mechOpticCapillary=new T.Mesh(
@@ -2338,14 +2367,15 @@
 
       const shutterVertices=[];
       for(let blade=0;blade<8;blade++){
-        const angle=blade*Math.PI/4+.12;
+        const angle=blade*Math.PI/4+.10;
         const p=(radius,offset)=>[
           Math.cos(angle+offset)*radius,
           .01+Math.sin(angle+offset)*radius,
-          .495
+          .505-.026
         ];
         shutterVertices.push(
-          ...p(.107,-.15),...p(.178,-.23),...p(.178,.35)
+          ...p(.084,0),...p(.123,.06),...p(.125,.42),
+          ...p(.084,0),...p(.125,.42),...p(.084,.32)
         );
       }
       const shutterGeometry=new T.BufferGeometry();

@@ -1,3 +1,7 @@
+FormatX R2217 native optical anatomy — 2026-11-04
+cache=20261104-r2217-native-optical-anatomy
+The cinematic optical assembly now uses the permanent MAG's .135 radial/.055 axial lens, exact eight-knot lathed bezel profile with analytical radial normals, and eight iris quads seated beneath the glass. Reuses the existing lens topology and socket/rim/shutter meshes and materials; no extra rendering object, light, pass, shader, context, canvas, RAF or timer. Native source, outer silhouette, body geometry, studio lighting, original story clock and handoff remain. Actual mesh/source and published WebGL image checks are required; no complete body/light continuity, hardware motion, FPS or performance acceptance claim.
+
 FormatX R2216 shared living-cell footprint filter — 2026-11-04
 cache=20261104-r2216-footprint-filtered-cell
 The same living cyan/coral optic in the cinematic and permanent MAG now attenuates only its fine tissue carrier using the actual projected shader phase footprint. Broad tissue folds and the original metabolism clocks remain. The native path reuses its existing derivative capability and preserves the genuine non-derivative fallback. No added geometry, texture, light, render pass, context, canvas, RAF or timer. Real fragment derivatives add work; no speed, FPS, hardware-motion or final visual-acceptance claim. Published WebGL1/WebGL2, original handoff and Lighthouse results remain required.
