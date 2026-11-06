@@ -1329,16 +1329,21 @@
       // nucleus is a physically shaded translucent organelle with an actual
       // clear-coated lens, lit by the same three-dimensional studio rig.
       this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({
-        // R2328: hydrated internal organelle; the metal iris awakens later.
-        color:0x408e92,emissive:0x1c656c,emissiveIntensity:.31,
-        metalness:.015,roughness:.32,transmission:.24,thickness:.23,ior:1.36,
-        clearcoat:.72,clearcoatRoughness:.20,
+        // R2331: the biological organelle shares the ORIGINAL 3D cell's
+        // cyan/coral metabolic texture. No new image/GPU texture allocation.
+        // A hydrated irregular tissue surface replaces the black button-like
+        // center visible in the actual 5.50s phone screenshot.
+        color:0xd6eeed,map:this.embryoTexture,
+        bumpMap:this.embryoTexture,bumpScale:.012,
+        emissive:0x256c71,emissiveMap:this.embryoTexture,emissiveIntensity:.42,
+        metalness:.012,roughness:.44,transmission:.13,thickness:.17,ior:1.35,
+        clearcoat:.70,clearcoatRoughness:.24,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoNucleus=new T.Mesh(
-        new T.SphereGeometry(.25,32,24),this.embryoNucleusMaterial
+        new T.SphereGeometry(.22,32,24),this.embryoNucleusMaterial
       );
-      this.embryoNucleus.position.set(-.10,.06,.37);
+      this.embryoNucleus.position.set(-.10,.06,.28);
       this.coreGroup.add(this.embryoNucleus);
       // R2167 — nucleus organelle and continuous curved membrane networks.
       // These sit at genuinely different z depths inside the cell; they
@@ -1394,9 +1399,10 @@
         this.mobileRender?.023:.028,1
       );
       const vesicleMaterial=new T.MeshPhysicalMaterial({
-        color:0xffffff,metalness:0,roughness:.40,
-        clearcoat:.43,clearcoatRoughness:.27,
-        emissive:0x2b363a,emissiveIntensity:.16,
+        // R2331: 3D vesicles are wet living tissue, not polished pearls.
+        color:0xffffff,metalness:0,roughness:.68,
+        clearcoat:.22,clearcoatRoughness:.34,
+        emissive:0x2b363a,emissiveIntensity:.12,
         transparent:true,opacity:0,depthWrite:false
       });
       const vesicles=new T.InstancedMesh(
@@ -1434,6 +1440,8 @@
       this.embryoVesicles=vesicles;
       this.embryoVesicleMaterial=vesicleMaterial;
       this.coreGroup.add(vesicles);
+      document.documentElement.dataset.fxGenesisCellTissueR2331=
+        'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles';
 
       // R2189: chromatin is a family of genuinely volumetric curved fibres
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
@@ -3021,7 +3029,7 @@
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
       this.embryoCapillaryMaterial.opacity=.10*visible;
-      this.embryoVesicleMaterial.opacity=.58*visible;
+      this.embryoVesicleMaterial.opacity=.43*visible;
       this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;

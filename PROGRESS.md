@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2331 – biológiai sejtmagszövet makrofotográfiai anyaga (2026-11-06)
+
+- **Vizuális bizonyíték:** a korábbi valódi 5,50s mobil GENESIS screenshoton a türkiz–korall sejthéj mögött kontrasztos, szinte fekete, tökéletes kör alakú organellum volt; az apró felszíni vesiculák túl csillogó gyöngysorokra hasonlítottak. A referencia térbeli, diffúz, sejtszöveti belsőt kíván.
+- **R2331 változás:** a **meglévő** `embryoTexture` közös foszfát-/sejtszövetes mintát a valódi, 32×24 szegmensű 3D nucleus `map`, `emissiveMap` és finom `bumpMap` rétegként is használja; nincs második kép, további DataTexture vagy WebGL vászon. A mag sugara `.25→.22`, z-depth `.37→.28`, a kerek sötét arc mérete és előugrása csökken. Roughness `.44`, alacsonyabb transmission `.13`, meglévő fényrig.
+- **Sejtes felület:** a már meglévő **42 mobil / 84 desktop** instanced vesicula változatlan darabszámmal, de visszafogott `roughness=.68`, `clearcoat=.22`, `opacity=.43` felülettel dolgozik; nem olcsó fémgyöngyként ül a seben. Nem nő a mesh-szám.
+- **Kontroll:** R2331 új source guard; a meglévő 10 s filmsorrend, három kísérleti first-frame pixel, R536 filmes folytonosság, 4 viewport, Lighthouse ×3 ellenőrzések követendők. Teljes stúdióminőségi igazolás továbbra is hiányzik, nincs merge/deploy.
+
+
 ## R2330 – APEX asztali főszálterhelés szétválasztása (2026-11-06)
 
 - **Mérési alap:** a R2328 `d567a102` három Lighthouse desktop futása 84/92/88 Performance, az elsőben `formatx-apex.js` **309 ms** összefüggő főszál-feladatot okozott. Mobilon az APEX korábban is a korai native-core ágon visszatért: ehhez nem nyúlunk.
