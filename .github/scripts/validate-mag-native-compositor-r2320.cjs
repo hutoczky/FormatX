@@ -17,4 +17,6 @@ assert.doesNotMatch(mag,/canvas\.animate\(\s*\[\s*\{opacity:/);
 assert.match(capture,/nativeSurfacePolicy:root\.dataset\.fxMagCanvasCompositeR2320/);
 assert.match(capture,/state\.canvasRect\.filter!=='none'/);
 assert.match(capture,/R2209 full-viewport MAG is black/);
-console.log('R2320_NATIVE_MAG_DIRECT_COMPOSITOR_CONTRACT_PASS');
+assert.doesNotMatch(mag,/mobileBreathPreference|syncMobileBreathOpacity/);
+assert.match(mag,/livingTimeline\\?\\.cancel\\?\\.\\(\\)/);
+console.log('R2321_NATIVE_MAG_CLEANUP_CONTRACT_PASS');

@@ -3212,7 +3212,9 @@
         gl.deleteSync(pendingGpuFenceR2253);
         pendingGpuFenceR2253=null;
       }
-      mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
+      // R2321: R2320 removed the legacy matchMedia opacity listener.
+      // Cancel the actual owned WAAPI instance instead; no dangling closures.
+      livingTimeline?.cancel?.();
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;

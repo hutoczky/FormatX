@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2321 – R2320 WebGL animáció tiszta felszabadítása (2026-11-06)
+
+- **R2320 valós P0 hiba (run `42138643575`):** a korábbi `mobileBreathPreference` figyelő már megszűnt, de a R326 `destroy()` még el akarta távolítani. Valódi Chromium `ReferenceError: mobileBreathPreference is not defined` hibát mért, ezért a P0 piros; NEM a fekete képkocka javítását sikernek nyilvánító jel.
+- **R2321:** a `destroy()` most a tényleges `livingTimeline?.cancel?.()` animációt állítja le; a régi, már nem létező matchMedia-listener hivatkozás eltűnt. A WebGL canvas, a teljes 3D test, az intro és a fizikai fotonrészlet érintetlen.
+- **Védelem:** az R2320 guard kiterjesztve a törölt névre és a WAAPI cleanupra. Új P0 és Lighthouse csak a pontos R2321 commitra fogadható el.
+- **Tényadat:** az R2320 négy viewport dokkolási tesztje zöld (run `42138643404`), de a Lighthouse desktop 89/88/90, mobil 84/79/82 Performance értékekkel piros, TBT mobil 355/477/409 ms. A fotorealisztikus cél és a valódi 60 Hz nincs igazolva. Nem élesíthető.
+
+
 ## R2320 – fizikai MAG kompozitorjavítás (2026-11-06)
 
 - **Valós hiba:** PR #581 SHA `4490f8e`, P0 run `41674346492`. A legelső 1280×720 MAG viewport 0/12528 világos pixelt mutatott, bár a GPU-fence `finished`, a WebGL center pixel `160,255`, és a vászon DOM-látható.
