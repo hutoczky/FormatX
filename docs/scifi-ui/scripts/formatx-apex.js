@@ -353,18 +353,43 @@
   }
 
   function initialise() {
+    // R2330: keep essential controls and first-paint scene synchronous.
+    // Desktop Lighthouse previously attributed a 309ms long task to this
+    // script. The many below-fold reveal/flow observers and hover listener
+    // are NOT prerequisites for the actual 3D MAG or the intro.
+    const criticalStart=performance.now();
     navigation();
-    applyLanguage(language, false);
-    reveal();
+    applyLanguage(language, false); // also initialises price and flow text
     scenes();
-    flow();
-    pointerVariables();
-    updatePrice();
     latestRelease();
     setScene(activeScene);
     ROOT.dataset.fxApex = 'controller-performance-v2';
     ROOT.dataset.fxRenderer = 'three-host';
+    ROOT.dataset.fxApexCriticalMsR2330=(performance.now()-criticalStart).toFixed(1);
     dispatchEvent(new CustomEvent('formatx:apexready', { detail: { renderer: 'three-host', infinite: 'delegated' } }));
+
+    // Macrotask boundaries, NOT queueMicrotask: the browser can actually
+    // paint the hero between startup and optional observer registration.
+    // Both timers are bounded and cancelled when navigation leaves page.
+    // Neither creates a RAF, canvas or alternative scene/renderer.
+    let revealTimer=window.setTimeout(()=>{
+      revealTimer=0;
+      const start=performance.now();
+      reveal();
+      ROOT.dataset.fxApexRevealMsR2330=(performance.now()-start).toFixed(1);
+    },48);
+    let flowTimer=window.setTimeout(()=>{
+      flowTimer=0;
+      const start=performance.now();
+      flow();
+      pointerVariables();
+      ROOT.dataset.fxApexDeferredMsR2330=(performance.now()-start).toFixed(1);
+      ROOT.dataset.fxApexObserversR2330='installed';
+    },116);
+    addEventListener('pagehide',()=>{
+      if(revealTimer)clearTimeout(revealTimer);
+      if(flowTimer)clearTimeout(flowTimer);
+    },{once:true});
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true });

@@ -75,6 +75,9 @@ jobs:
         run: |
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
+          node --check docs/scifi-ui/scripts/formatx-apex.js
+          node --check .github/scripts/validate-apex-startup-r2330.cjs
+          node .github/scripts/validate-apex-startup-r2330.cjs
           node --check docs/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js
           node --check docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js
           node --check docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js

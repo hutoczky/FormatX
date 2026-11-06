@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2330 – APEX asztali főszálterhelés szétválasztása (2026-11-06)
+
+- **Mérési alap:** a R2328 `d567a102` három Lighthouse desktop futása 84/92/88 Performance, az elsőben `formatx-apex.js` **309 ms** összefüggő főszál-feladatot okozott. Mobilon az APEX korábban is a korai native-core ágon visszatért: ehhez nem nyúlunk.
+- **Változtatás:** az első festés szempontjából kötelező navigáció, már kész statikus HU/EN szöveg, kezdő scene, árak és `formatx:apexready` esemény szinkron marad. A tömeges `[data-reveal]` megfigyelő regisztráció 48 ms-os, a lenti interaktív folyamatszakasz és az egérkövető 116 ms-os külön macrotaskban inicializálódik. Ezek nem változtatják a natív MAG renderert, DNS-filmet vagy tartalmi sorrendet.
+- **Takarítás:** a korábban dupla `updatePrice()` hívás megszűnt, mert az első `applyLanguage()` már elvégzi. A függő időzítők oldalelhagyáskor törlődnek. A kritikus, reveal és deferred szakaszok millimásodpercben mérhetőek az `fxApex*R2330` dataseten.
+- **Regresszió:** külön R2330 source guard a P0-ba. A kötelező elvárás: eredeti `apexready`, HU/EN és vásárlás, scroll MAG-content, desktop/mobile Lighthouse×3 és eredeti P0; a főszálterhelés javulását csak **új, pontos SHA-ra futtatott méréssel** lehet állítani.
+- **R2329:** a MAG kanonikus pixel/surface-energy ellenőrzése zöld (run `42207311030`), a teljes film P0 eredménye külön ellenőrzendő. **Nincs production deploy vagy merge**.
+
+
 ## R2329 – MAG anyagvizsgálat a valódi pixelhez kötve (2026-11-06)
 
 - **Konkrét blokkoló:** a R2328 `d567a102` Canonical MAG job a `validate-mag-surface-energy-r484.cjs` scriptben a `mobile-390: final mobile crystal is too dim; computed=none` hibával leállt, mivel a 2026-os R2320 módosítás óta a WebGL MAG-on szándékosan `filter:none` van. Az elavult teszt CSS-fényességet mért, nem a valódi kompozitorkép fényességét.
