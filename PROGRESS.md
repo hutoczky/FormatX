@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2335 – APEX asztali optimalizálás funkcionális böngészőbizonyítéka (2026-11-06)
+
+- **R2330 változás:** a desktop `formatx-apex.js` kezdeti feladatai felosztva; Lighthouse egyik asztali runban APEX hosszú feladat 309→135ms, TBT 249→50ms, de a három teljes Perf run 93/88/87 és mobil 82/81/84, ezért **nem 100 és nem stabil**.
+- **R2335 új funkcionális kapu:** a korábbi csak source-proof mellett önálló valódi Playwright/Chromium teszt indul a pontos fejlesztői HTML `?intro=0&lang=hu` útvonalán. A böngésző saját `formatx:apexready` eseményét még az első JS előtt megfigyeli; ellenőrzi az egyetlen ready eseményt, valódi asztali menüt, magyar hero-szöveget, scene/flow kezdeti állapotot és a `critical/reveal/deferred` külön időmérőket. A konzol/böngésző JS hiba tilos.
+- **P0 sorrend:** új önálló desktop APEX-bizonyíték a hosszú R656 film screenshot **előtt**, nem módosítja annak fekete képkocka kapuját; az R2334 390px grafikus MAG kontroll továbbra is külön marad. Nincs új renderer/RAF/assets és nincs élesítés.
+
+
 ## R2334 – valódi 390px grafikus MAG-képkocka kontroll (2026-11-06)
 
 - **R2333 pontos `8254c2c5` P0 `42209415251`:** a forráskód-ellenőrzések PASS; a headless R656 mobil képkockán `brightSamples=0`, `centroidX=null`, miközben a mobil MAG canvas ténylegesen `x=0,width=390` és viewport `width=390`. A hibaüzenet tévesen *physically off-centre*-nak nevezte a nullpixeles kompozitorfelvételt. A külön Xvfb grafikus Chromium 3/3 MAG coldstart **PASS**. A teljes P0 tehát továbbra is RED.

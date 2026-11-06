@@ -77,6 +77,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-apex.js
           node --check .github/scripts/validate-apex-startup-r2330.cjs
+          node --check .github/scripts/validate-apex-runtime-r2335.cjs
           node --check .github/scripts/validate-genesis-cell-tissue-r2331.cjs
           node .github/scripts/validate-apex-startup-r2330.cjs
           node .github/scripts/validate-genesis-cell-tissue-r2331.cjs
@@ -217,6 +218,10 @@ jobs:
           done
           cat "$RUNNER_TEMP/p0-fast-http.log"
           exit 1
+      - name: R2335 verify APEX first-paint controls and deferred observers in real Chromium
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+        run: node .github/scripts/validate-apex-runtime-r2335.cjs
       - name: Capture current MAG intro reference keyframes early
         env:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
