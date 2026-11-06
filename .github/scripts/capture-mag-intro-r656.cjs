@@ -627,6 +627,7 @@ const SHOTS=[
             nativeGpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
             nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
             nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+            nativeSurfacePolicy:root.dataset.fxMagCanvasCompositeR2320||'',
             nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
             postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
             activeFilm:root.getAttribute('data-fx-mag-birth-live'),
@@ -649,7 +650,7 @@ const SHOTS=[
             })(),
             heroRect:(()=>{const el=document.querySelector('#hero');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})(),
             stageRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-stage');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility}:null;})(),
-            canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display}:null;})()
+            canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();if(!r)return null;const cs=getComputedStyle(el);return {x:r.x,y:r.y,w:r.width,h:r.height,opacity:cs.opacity,display:cs.display,filter:cs.filter,webkitFilter:cs.webkitFilter,blend:cs.mixBlendMode,animationIds:el.getAnimations().map(a=>a.id||'anonymous')};})()
           };
         });
   
@@ -686,6 +687,14 @@ const SHOTS=[
           }
           return {visible:true,bright,samples,region:{x:x0,y:y0,w:x1-x0,h:y1-y0}};
         },{png:handoffPng.toString('base64'),rect:state.canvasRect});
+        // R2320: the actual pixel oracle remains strict; verify its CSS
+        // compositor inputs independently, before any locator screenshot.
+        if(state.nativeSurfacePolicy==='direct-unfiltered-opaque-preserved-webgl' &&
+           (!state.canvasRect || state.canvasRect.filter!=='none' ||
+            Number(state.canvasRect.opacity)<.99)){
+          errors.push('R2320 original GL canvas compositor mismatch: '+
+            JSON.stringify(state.canvasRect));
+        }
         if(state.nativePresent!=='synchronous-gl-frame-committed'){
           errors.push('R2220 original native WebGL direct presentation missing: '+
             state.nativePresent);
@@ -701,6 +710,7 @@ const SHOTS=[
         if(!state.handoffPixels.visible||state.handoffPixels.bright<40){
           const detail={
             screenshot:state.handoffPixels,canvas:state.canvasRect,
+            nativeSurfacePolicy:state.nativeSurfacePolicy,
             gpu:state.nativeGpu,gpuMs:state.nativeGpuMs,
             gpuPixel:state.nativeGpuPixel,
             firstFrame:state.nativeFirstFrame,

@@ -1073,41 +1073,27 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     /* R1959: physically neutral compositor tone. The previous inline
        !important saturation overrode the canonical material CSS. */
-    const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
-      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
-    canvas.style.setProperty('filter',compositorFilter,'important');
-    canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
+    /* R2320: P0 caught a black first full-viewport canvas even though the
+       physical MAG was already GPU-ready. Remove CSS filter compositing on
+       the preserved, single WebGL drawing buffer; lighting stays in shaders. */
+    canvas.style.setProperty('filter','none','important');
+    canvas.style.setProperty('-webkit-filter','none','important');
     canvas.style.setProperty('box-shadow','none','important');
+    root.dataset.fxMagCanvasCompositeR2320='direct-unfiltered-opaque-preserved-webgl';
 
-    /* R2045: the original canvas is also subject to older !important opacity
-       overrides. They outrank CSS and WAAPI animations, leaving MAG visually
-       frozen even while its registered --fx-mag-life-opacity animates.
-       Bind the SAME original canvas's inline important opacity to that
-       compositor-only numeric custom property. Do this once at creation,
-       never in a JS RAF; preserve system reduced-motion changes. */
-    const mobileBreathPreference=mobile?matchMedia('(prefers-reduced-motion: reduce)'):null;
-    const syncMobileBreathOpacity=()=>{
-      if(!mobileBreathPreference)return;
-      if(mobileBreathPreference.matches){
-        canvas.style.removeProperty('opacity');
-      }else{
-        canvas.style.setProperty('opacity','var(--fx-mag-life-opacity,.965)','important');
-      }
-    };
-    syncMobileBreathOpacity();
-    mobileBreathPreference?.addEventListener?.('change',syncMobileBreathOpacity);
-    if(mobile)root.dataset.fxMagMobileBreathBindingR2045='inline-important-registered-compositor';
-
-    /* R1930 — one slow compositor breath on every capable screen.
-       No idle JS RAF is introduced; reduced-motion remains fully respected. */
+    /* R2320: the real GL canvas keeps a fixed CSS opacity of 1.
+       No opacity-WAAPI can trap its latest physical frame under the film.
+       The unchanged R326 shaders own the living optical physiology. */
+    canvas.style.setProperty('opacity','1','important');
+    root.dataset.fxMagMobileBreathBindingR2045='native-shader-life-stable-canvas-opacity';
+    let livingTimeline=null;
     if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
+      livingTimeline=canvas.animate(
         [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
+          {transform:'scale(.996)',offset:0},
+          {transform:'scale(1.004)',offset:.48},
+          {transform:'scale(.999)',offset:.76},
+          {transform:'scale(.996)',offset:1}
         ],
         {
           duration:6800,
@@ -1117,8 +1103,12 @@
         }
       );
       livingTimeline.id='fx-primary-mag-living-breath-r1930';
-      root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
-      root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+      // Prevent a moving native compositor layer behind the opaque Genesis.
+      if(root.dataset.fxMagBirthLiveR533==='active' ||
+         root.getAttribute('data-fx-mag-birth-live')==='active')
+        livingTimeline.pause();
+      root.dataset.fxNativeMagDesktopLifeR1902='native-webgl-microbreath-no-opacity';
+      root.dataset.fxNativeMagBreathR1930='transform-only-compositor-shader-life';
     }
 
     const options = {
@@ -3051,6 +3041,8 @@
       // R2283: freeze the drawing buffer across Chromium's compositing
       // boundary, not for the entire lifetime of the living MAG.
       nativeExposureLockUntilR2283=performance.now()+1100;
+      // R2320: the film has departed; resume the existing compositor microbreath.
+      try{livingTimeline?.play?.();}catch(_){};
       if(qualityResizeTimer){
         clearTimeout(qualityResizeTimer);
         delayed.delete(qualityResizeTimer);

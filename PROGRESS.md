@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2320 – fizikai MAG kompozitorjavítás (2026-11-06)
+
+- **Valós hiba:** PR #581 SHA `4490f8e`, P0 run `41674346492`. A legelső 1280×720 MAG viewport 0/12528 világos pixelt mutatott, bár a GPU-fence `finished`, a WebGL center pixel `160,255`, és a vászon DOM-látható.
+- **Javítás:** az eredeti, `preserveDrawingBuffer`-es egyetlen R326 WebGL canvas elveszíti a külön CSS filterréteget és a folyamatos opacity-animációt. CSS opacity állandó 1. A meglévő 0,4%-os mikrotransform kizárólag a film eltávolítása után indul; a valódi R326 fizikai optika, textúra, titántest, shader, fények és minden egyes MAG-háromszög változatlan. Nincs új renderer/canvas/RAF.
+- **Vizsgálat:** az R2320 source guard bekerült P0-ba, a böngészőteszt az első full-viewport pixelfelvétel előtt a canvas valódi filter/opacity/animáció állapotát is naplózza. Az eredeti szigorú fekete-képkocka teszt nincs gyengítve.
+- **Korábbi eredmények a javítás ELŐTT:** desktop Lighthouse 93/92/89; mobil 86/87/87, TBT 313/278/257 ms. R2320-nál P0, stúdiókép, mobil 390/430, desktop 1350/1440, Lighthouse×3, reduced-motion/Skip és valódi eszközös FPS még igazolásra vár.
+- **Kiadás:** PR #581 draft; nincs merge/deploy. Következő: első valódi pixelkapu és CI kiértékelése, majd anyag- és DNS/cellafény-fejlesztés.
+
+
 ## R2319 – az intro teljes leállítása: utólagos MAG-elrendezésolvasás megszüntetése (2026-11-03)
 
 - A valós R2317 P0-ban **hidegindítás 3/3 PASS**, normál látogatói natív MAG GPU PASS, 2× mobil CLS PASS és első film→natív átadás PASS. A `validate-intro-retired-layout-r2173` viszont 60 ms-mal a valódi `formatx:magbirthcomplete` esemény **után** egy R533 stackből érkező natív stage `getBoundingClientRect()` olvasást mért. Ez nem szabad, hogy a filmé legyen: a már eltávolított GENESIS-nek nulla utólagos elrendezésmunkát kell végeznie.
