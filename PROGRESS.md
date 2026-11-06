@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2322 – MAG első képkocka: átadás és lélegző animáció elkülönítése (2026-11-06)
+
+- **R2321 pontos `bc9c96e` P0 `42139288180` FAIL:** a teljes viewport fizikai MAG-régiója továbbra is **0/12528 világos mintát** tartalmaz, noha az eredeti WebGL központi GPU pixel `160,255`, a fence `finished`, a canvas `filter:none`, `opacity:1` és minden vizsgált DOM-ős látható. A R2320 CSS filter/opacity-elvétel **önmagában nem oldotta meg** a hibát.
+- **R2322 kísérlet:** az eredeti R326 canvas meglévő finom 0,4%-os `transform` alapú lélegzése a GENESIS befejezése után 1150 ms-mal indul újra, nem ugyanabban a kompozitorablakban mint az első kanonikus natív `render()`. Egyetlen canvas, egyetlen renderer, eredeti 3D shaderek/geometria, meglévő timeout-tulajdonos; nincs új RAF. Ha a valódi P0 pixelteszt sikertelen, a hipotézist vissza kell vonni.
+- **P0:** kiegészített forrásvédő ellenőrzés. A 350 ms-mal az átadás után készített valódi full-viewport screenshot fekete küszöbe változatlan; csak ez bizonyítja az első frame helyességét. Skip/reduced-motion, 4 viewport dokkolás és Lighthouse 3× továbbra is kötelező.
+- **R2321 Lighthouse-mérés:** desktop és mobil kategóriahiba maradt; korábbi R2320 desktop 89/88/90, mobil 84/79/82. A fotórealisztikus minőség és a 60 Hz továbbra sem igazolt. Nincs merge vagy deployment.
+
+
 ## R2321 – R2320 WebGL animáció tiszta felszabadítása (2026-11-06)
 
 - **R2320 valós P0 hiba (run `42138643575`):** a korábbi `mobileBreathPreference` figyelő már megszűnt, de a R326 `destroy()` még el akarta távolítani. Valódi Chromium `ReferenceError: mobileBreathPreference is not defined` hibát mért, ezért a P0 piros; NEM a fekete képkocka javítását sikernek nyilvánító jel.

@@ -3041,8 +3041,23 @@
       // R2283: freeze the drawing buffer across Chromium's compositing
       // boundary, not for the entire lifetime of the living MAG.
       nativeExposureLockUntilR2283=performance.now()+1100;
-      // R2320: the film has departed; resume the existing compositor microbreath.
-      try{livingTimeline?.play?.();}catch(_){};
+      // R2322: the original WebGL frame must become visible before its
+      // compositor-only breathing timeline resumes. The verified 350ms
+      // initial-viewport capture on R2321 was black despite a finished GPU
+      // fence and a direct, unfiltered canvas: avoid a new moving layer in
+      // that critical presentation window. No second renderer or RAF.
+      if(livingTimeline){
+        root.dataset.fxMagBirthBreathR2322='awaiting-first-native-composite';
+        later(()=>{
+          if(disposed||contextLost||!stage.isConnected)return;
+          try{
+            livingTimeline.play();
+            root.dataset.fxMagBirthBreathR2322='post-exposure-transform-resumed';
+          }catch(_){
+            root.dataset.fxMagBirthBreathR2322='resume-unavailable';
+          }
+        },1150);
+      }
       if(qualityResizeTimer){
         clearTimeout(qualityResizeTimer);
         delayed.delete(qualityResizeTimer);
