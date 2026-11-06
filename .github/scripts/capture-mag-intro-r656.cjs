@@ -9,6 +9,9 @@ const OUT=process.env.FORMATX_INTRO_KEYFRAME_DIR||'artifacts/r659-intro-keyframe
 const CHROME=process.env.CHROME_BIN||undefined;
 const SKIP_HANDOFF=process.env.FORMATX_SKIP_HANDOFF==='1';
 const MOBILE_ONLY=process.env.FORMATX_MOBILE_ONLY==='1';
+// R2334: an independent headed mobile compositor proves whether the MAG
+// truly drifts off-screen, without changing the original headless oracle.
+const HEADFUL_VISUAL_R2334=process.env.FORMATX_HEADFUL_VISUAL_R2334==='1';
 fs.mkdirSync(OUT,{recursive:true});
 
 const SHOTS=[
@@ -22,7 +25,7 @@ const SHOTS=[
 
 (async()=>{
   const launchBrowser=()=>chromium.launch({
-    headless:true,
+    headless:!HEADFUL_VISUAL_R2334,
     executablePath:CHROME,
     args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--no-sandbox']
   });
@@ -62,6 +65,67 @@ const SHOTS=[
     return true;
   }
 
+  // R2277: genuine PNG visual oracle for mobile MAG centering. The earlier
+  // CSS regression moved the WebGL creature almost entirely off the left
+  // edge, while DOM/canvas flags still claimed "ready". Decode ONLY the
+  // existing screenshot in detached 2D test memory; never paint the page,
+  // inspect the GPU framebuffer or perform a corrective scroll.
+  async function verifyMobileMagVisualCentreR2277(page,png){
+    return page.evaluate(async encoded=>{
+      const img=new Image();
+      img.src='data:image/png;base64,'+encoded;
+      await img.decode();
+      const cv=document.createElement('canvas');
+      cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+      const ctx=cv.getContext('2d',{willReadFrequently:true});
+      ctx.drawImage(img,0,0);
+      // From below the 70px header through the upper 43% of the page,
+      // BEFORE controls and body text: only the real native living MAG.
+      const start=Math.floor(cv.height*.12);
+      const end=Math.floor(cv.height*.43);
+      const data=ctx.getImageData(0,start,cv.width,end-start);
+      let hits=0,sumX=0;
+      for(let y=0;y<data.height;y+=3){
+        for(let x=0;x<data.width;x+=3){
+          const i=(y*data.width+x)*4;
+          if(Math.max(data.data[i],data.data[i+1],data.data[i+2])<=70)continue;
+          hits++;
+          sumX+=x;
+        }
+      }
+      const centre=hits?sumX/(hits*cv.width):null;
+      // R2279: browser-computed geometry is diagnostic only. Never
+      // mutate transforms or recenter the PNG in the test. The real
+      // first-visible mobile frame remains the acceptance oracle.
+      const rectOf=selector=>{
+        const el=document.querySelector(selector);
+        if(!el)return null;
+        const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+        return {x:r.x,y:r.y,w:r.width,h:r.height,
+          left:s.left,right:s.right,top:s.top,
+          transform:s.transform,translate:s.translate,
+          position:s.position,width:s.width,
+          parent:el.parentElement?.className||el.parentElement?.id||''};
+      };
+      return {pass:hits>=250&&centre>=.30&&centre<=.70,
+        failureClass:hits===0?'headless-compositor-black-not-physical-offset':
+          hits<250?'physical-surface-insufficiently-visible':
+          centre<.30||centre>.70?'actual-mag-centering-outside-30-70-percent':'visible-and-centered',
+        brightSamples:hits,
+        centroidX:centre===null?null:Number(centre.toFixed(4)),
+        viewportWidth:cv.width,
+        layout:{
+          viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio},
+          main:rectOf('main#main-content'),
+          hero:rectOf('#hero'),
+          grid:rectOf('#hero .hero-grid'),
+          space:rectOf('#hero .hero-space'),
+          stage:rectOf('#hero .fx-crystal-organism-r326-stage'),
+          canvas:rectOf('#hero .fx-crystal-organism-r326-canvas')
+        }};
+    },png.toString('base64'));
+  }
+
   async function captureMobileNativePreflight(){
     const mobileBrowser=await launchBrowser();
     const mobileContext=await mobileBrowser.newContext({
@@ -82,6 +146,7 @@ const SHOTS=[
     try{
       const u=new URL(BASE);
       u.searchParams.set('mobileproof','r1500-preflight');
+      u.searchParams.set('intro','0'); // R2269: genuine unobscured native MAG
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const ready=await pollPage(
         page,
@@ -103,6 +168,8 @@ const SHOTS=[
         throw new Error('R1500 mobile preflight MAG did not become ready: '+JSON.stringify({diagnostic,errors}));
       }
       await page.waitForTimeout(650);
+      if(await page.locator('.fx-mag-birth-r533').count())
+        throw new Error('R2269 mobile preflight screenshot is covered by GENESIS film');
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
         const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -122,7 +189,14 @@ const SHOTS=[
           overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
         };
       });
-      await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+      const mobileHeroPngR2277=await page.screenshot({
+        path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false
+      });
+      const centreProofR2277=await verifyMobileMagVisualCentreR2277(page,mobileHeroPngR2277);
+      state.mobileCentreProofR2277=centreProofR2277;
+      if(!centreProofR2277.pass)
+        errors.push('R2277 real mobile MAG physically off-centre: '+
+          JSON.stringify(centreProofR2277));
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
       if(state.shape!=='organism')errors.push('R1500 preflight shape is not organism: '+state.shape);
@@ -139,6 +213,9 @@ const SHOTS=[
 
   const report=[];
   try{
+    if(HEADFUL_VISUAL_R2334)
+      console.log('R2334_GENUINE_MOBILE_HEADED_COMPOSITOR_PROOF: '
+        +'one Playwright 390x844 first viewport, same source and GPU');
     // Always capture the exact phone hero first. Even if an intro-keyframe
     // renderer later fails, the artifact still contains the user-facing MAG.
     await captureMobileNativePreflight();
@@ -171,6 +248,7 @@ const SHOTS=[
       page.on('console',m=>{if(m.type()==='error'&&!/favicon|WebGL|GPU/i.test(m.text()))errors.push(m.text());});
       const u=new URL(BASE);
       u.searchParams.set('mobileproof','r1500');
+      u.searchParams.set('intro','0'); // R2269: genuine unobscured native MAG
       await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
       const mobileReady=await pollPage(
         page,
@@ -181,6 +259,8 @@ const SHOTS=[
       );
       if(!mobileReady)throw new Error('R1500 early mobile native MAG did not become ready');
       await page.waitForTimeout(700);
+      if(await page.locator('.fx-mag-birth-r533').count())
+        throw new Error('R2269 mobile native screenshot is still covered by GENESIS film');
       const state=await page.evaluate(()=>{
         const root=document.documentElement;
         const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -199,7 +279,14 @@ const SHOTS=[
           overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
         };
       });
-      await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+      const mobileHeroPngR2277=await page.screenshot({
+        path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false
+      });
+      const centreProofR2277=await verifyMobileMagVisualCentreR2277(page,mobileHeroPngR2277);
+      state.mobileCentreProofR2277=centreProofR2277;
+      if(!centreProofR2277.pass)
+        errors.push('R2277 real mobile MAG physically off-centre: '+
+          JSON.stringify(centreProofR2277));
       const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
       await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
       if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure')errors.push('R1723 living organism visual marker missing: '+state.visual);
@@ -434,13 +521,50 @@ const SHOTS=[
             JSON.stringify({count:state.vesicleCount,opacity:state.vesicleOpacity}));
         }
       }
-      // R2217: the film must show an actual physical studio close-up
-      // during titanium assembly, then ease back toward the native hero.
-      if(Number(seconds)===7.5&&!(state.cameraZ>2.85&&state.cameraZ<3.40))
-        errors.push('R2217 titanium assembly missing studio dolly: '+state.cameraZ);
+      // R2309.1: the entire 3D chassis must be IN FRAME. The former
+      // R2217 fixed 3.2-unit dolly clipped both tips at the 7.50s shot.
+      if(Number(seconds)===7.5&&!(state.cameraZ>=4.30&&state.cameraZ<=4.45))
+        errors.push('R2309 full-frame titanium camera out of range: '+state.cameraZ);
       if(Number(seconds)===9.25&&!(state.cameraZ>3.75&&state.cameraZ<4.35))
         errors.push('R2217 final optical dock violates handoff framing: '+state.cameraZ);
-      await page.screenshot({path:path.join(OUT,name+'.png'),fullPage:false});
+      const filmPng=await page.screenshot({
+        path:path.join(OUT,name+'.png'),fullPage:false
+      });
+      if(Number(seconds)===7.5){
+        // R2309.1: real Chromium screenshot GPU pixels, not a camera flag.
+        // The temporary 2D sampler exists ONLY inside the CI browser.
+        const framing=await page.evaluate(async encoded=>{
+          const img=new Image();img.src='data:image/png;base64,'+encoded;
+          await img.decode();
+          const proof=document.createElement('canvas');
+          proof.width=img.naturalWidth;proof.height=img.naturalHeight;
+          const ctx=proof.getContext('2d',{willReadFrequently:true});
+          ctx.drawImage(img,0,0);
+          const w=proof.width,h=proof.height;
+          const rgb=ctx.getImageData(0,0,w,h).data;
+          const x0=Math.floor(w*.22),x1=Math.ceil(w*.78);
+          const top=Math.floor(h*.075),bottom=Math.ceil(h*.925);
+          let croppedTop=0,croppedBottom=0,physicalBody=0;
+          const metal=(x,y)=>{
+            const i=(y*w+x)*4;
+            return rgb[i]>55&&rgb[i+1]>90&&rgb[i+2]>90;
+          };
+          for(let y=0;y<top;y++)
+            for(let x=x0;x<x1;x+=2)if(metal(x,y))croppedTop++;
+          for(let y=bottom;y<h;y++)
+            for(let x=x0;x<x1;x+=2)if(metal(x,y))croppedBottom++;
+          for(let y=Math.floor(h*.21);y<Math.floor(h*.79);y+=3)
+            for(let x=x0;x<x1;x+=3)if(metal(x,y))physicalBody++;
+          return {width:w,height:h,croppedTop,croppedBottom,physicalBody};
+        },filmPng.toString('base64'));
+        state.chassisFrameR2309=framing;
+        if(!(framing.width>=1000&&framing.height>=600&&
+          framing.physicalBody>450&&framing.croppedTop<64&&
+          framing.croppedBottom<64)){
+          errors.push('R2309 real Chromium film silhouette clipped: '+
+            JSON.stringify(framing));
+        }
+      }
       report.push({seconds,name,state,errors});
       await page.close();
       await shotContext.close();
@@ -512,6 +636,7 @@ const SHOTS=[
             nativeGpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
             nativeCompositor:root.dataset.fxMagNativeCompositorR2222||'',
             nativeFirstFrame:root.dataset.fxCoreFirstFrameR1913||'',
+            nativeSurfacePolicy:root.dataset.fxMagCanvasCompositeR2320||'',
             nativeRuntimeFps:root.dataset.fxCoreReal3dFps||'',
             postOverlayRequest:root.dataset.fxMagBirthPostTeardownRenderR2211||'',
             activeFilm:root.getAttribute('data-fx-mag-birth-live'),
@@ -534,7 +659,7 @@ const SHOTS=[
             })(),
             heroRect:(()=>{const el=document.querySelector('#hero');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height}:null;})(),
             stageRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-stage');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility}:null;})(),
-            canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();return r?{x:r.x,y:r.y,w:r.width,h:r.height,opacity:getComputedStyle(el).opacity,display:getComputedStyle(el).display}:null;})()
+            canvasRect:(()=>{const el=document.querySelector('#hero .fx-crystal-organism-r326-canvas');const r=el?.getBoundingClientRect();if(!r)return null;const cs=getComputedStyle(el);return {x:r.x,y:r.y,w:r.width,h:r.height,opacity:cs.opacity,display:cs.display,filter:cs.filter,webkitFilter:cs.webkitFilter,blend:cs.mixBlendMode,animationIds:el.getAnimations().map(a=>a.id||'anonymous')};})()
           };
         });
   
@@ -571,6 +696,14 @@ const SHOTS=[
           }
           return {visible:true,bright,samples,region:{x:x0,y:y0,w:x1-x0,h:y1-y0}};
         },{png:handoffPng.toString('base64'),rect:state.canvasRect});
+        // R2320: the actual pixel oracle remains strict; verify its CSS
+        // compositor inputs independently, before any locator screenshot.
+        if(state.nativeSurfacePolicy==='direct-unfiltered-opaque-preserved-webgl' &&
+           (!state.canvasRect || state.canvasRect.filter!=='none' ||
+            Number(state.canvasRect.opacity)<.99)){
+          errors.push('R2320 original GL canvas compositor mismatch: '+
+            JSON.stringify(state.canvasRect));
+        }
         if(state.nativePresent!=='synchronous-gl-frame-committed'){
           errors.push('R2220 original native WebGL direct presentation missing: '+
             state.nativePresent);
@@ -586,6 +719,7 @@ const SHOTS=[
         if(!state.handoffPixels.visible||state.handoffPixels.bright<40){
           const detail={
             screenshot:state.handoffPixels,canvas:state.canvasRect,
+            nativeSurfacePolicy:state.nativeSurfacePolicy,
             gpu:state.nativeGpu,gpuMs:state.nativeGpuMs,
             gpuPixel:state.nativeGpuPixel,
             firstFrame:state.nativeFirstFrame,
@@ -673,6 +807,7 @@ const SHOTS=[
         });
         const u=new URL(BASE);
         u.searchParams.set('mobileproof','r1500');
+      u.searchParams.set('intro','0'); // R2269: genuine unobscured native MAG
         await page.goto(u.href,{waitUntil:'domcontentloaded',timeout:30000});
         const mobileReady=await pollPage(
           page,
@@ -683,6 +818,8 @@ const SHOTS=[
         );
         if(!mobileReady)throw new Error('R1500 mobile native MAG did not become ready');
         await page.waitForTimeout(700);
+      if(await page.locator('.fx-mag-birth-r533').count())
+        throw new Error('R2269 mobile native screenshot is still covered by GENESIS film');
         const state=await page.evaluate(()=>{
           const root=document.documentElement;
           const canvas=document.querySelector('#hero .fx-crystal-organism-r326-canvas');
@@ -706,7 +843,14 @@ const SHOTS=[
             overflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-innerWidth
           };
         });
-        await page.screenshot({path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false});
+        const mobileHeroPngR2277=await page.screenshot({
+        path:path.join(OUT,'08-mobile-native-hero.png'),fullPage:false
+      });
+      const centreProofR2277=await verifyMobileMagVisualCentreR2277(page,mobileHeroPngR2277);
+      state.mobileCentreProofR2277=centreProofR2277;
+      if(!centreProofR2277.pass)
+        errors.push('R2277 real mobile MAG physically off-centre: '+
+          JSON.stringify(centreProofR2277));
         const stage=page.locator('#hero .fx-crystal-organism-r326-stage').first();
         await captureLocatorClip(page,stage,'09-mobile-native-mag.png');
         if(state.visual!=='cinematic-vertex-normal-obsidian-shard-smooth-reflections-readable-hand-cut-silhouette-subtle-fissure'){

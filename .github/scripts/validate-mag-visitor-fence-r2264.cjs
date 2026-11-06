@@ -15,14 +15,14 @@ fs.mkdirSync(OUT,{recursive:true});
     args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl',
       '--ignore-gpu-blocklist','--no-sandbox']
   });
-  let context;
+  let context,page;
   const report={ok:false,errors:[]};
   try{
     context=await browser.newContext({
       viewport:{width:1280,height:720},
       colorScheme:'dark',reducedMotion:'no-preference',locale:'hu-HU'
     });
-    const page=await context.newPage();
+    page=await context.newPage();
     page.on('pageerror',e=>report.errors.push(String(e)));
     await page.addInitScript(()=>{
       try{
@@ -50,15 +50,32 @@ fs.mkdirSync(OUT,{recursive:true});
     const url=new URL(BASE);
     url.search='';
     await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:30000});
-    // Confirm that the physical 3D film *really ran* before its teardown.
-    // Only state predicates are read: no locator, scroll or screenshot-side
-    // hit testing that could accidentally repair the compositor.
-    await page.waitForFunction(()=>{
+    // R2269: check the ordinary visitor against its REAL hardware class.
+    // A software-only, <=4-core runner cannot be treated as a 60fps GPU.
+    // On capable browsers require the full physical Three film. On genuinely
+    // constrained devices accept only the authored CPU/RAM adaptive film,
+    // then require the same native WebGL MAG and first-viewport pixel proof.
+    // Never switch paths based on webdriver/headless identity.
+    const capability=await page.evaluate(()=>{
+      const cores=Math.max(1,Number(navigator.hardwareConcurrency||8));
+      const memory=Math.max(1,Number(navigator.deviceMemory||8));
+      return {cores,memory,constrained:cores<=4||memory<=2};
+    });
+    report.capability=capability;
+    await page.waitForFunction(({constrained})=>{
       const root=document.documentElement;
-      return root.dataset.fxMagBirthOwnerR533==='active'&&
-        root.dataset.fxMagBirthRendererR1490==='realistic-cinematic-three-active'&&
-        document.querySelector('.fx-mag-birth-r533')!==null;
-    },null,{timeout:60000,polling:100});
+      const realThree=root.dataset.fxMagBirthRendererR1490==='realistic-cinematic-three-active';
+      const genuineAdaptive=root.dataset.fxMagBirthRendererR1729==='constrained-reference-film';
+      // Renderer ownership is sticky across teardown. The original test
+      // required an overlap to be visible in a single RAF: on 4-core
+      // SwiftShader the 10-second overlay ended before polling resumed.
+      // Check genuine film ownership here, then verify a complete physical
+      // handoff AND original pixels in the following independent gates.
+      return root.dataset.fxMagBirthOwnerR533==='active' &&
+        (realThree||(constrained&&genuineAdaptive));
+    },capability,{timeout:60000,polling:100});
+    // R2272: no second Three-only predicate. A capability-bound real film
+    // was already verified above. Keep native GPU-fence and screenshot gates.
     await page.waitForFunction(()=>{
       const root=document.documentElement;
       return !document.querySelector('.fx-mag-birth-r533')&&
@@ -79,6 +96,7 @@ fs.mkdirSync(OUT,{recursive:true});
       return {
         introOwner:root.dataset.fxMagBirthOwnerR533||'',
         filmRenderer:root.dataset.fxMagBirthRendererR1490||'',
+        filmAdaptiveFallback:root.dataset.fxMagBirthRendererR1729||'',
         policy:root.dataset.fxMagReadbackPolicyR2264||'',
         gpu:root.dataset.fxMagHandoffGpuR2226||'',
         gpuPixel:root.dataset.fxMagHandoffPixelR2226||'',
@@ -116,8 +134,9 @@ fs.mkdirSync(OUT,{recursive:true});
     },{encoded:png.toString('base64'),rect:state.rect});
     report.state=state;report.pixels=pixels;
     if(state.introOwner!=='active'||
-       state.filmRenderer!=='realistic-cinematic-three-active')
-      report.errors.push('normal navigation did not play the original physical Genesis');
+       !(state.filmRenderer==='realistic-cinematic-three-active'||
+         (capability.constrained&&state.filmAdaptiveFallback==='constrained-reference-film')))
+      report.errors.push('normal visitor used a film path inconsistent with physical capability');
     if(state.policy!=='production-gpu-fence-only')
       report.errors.push('normal visitor did not take production fence-only path');
     if(state.readbacks!==0||state.gpuPixel!=='not-sampled')
@@ -129,7 +148,26 @@ fs.mkdirSync(OUT,{recursive:true});
     if(pixels.bright<40)
       report.errors.push('black FIRST full viewport after GPU-fence-only handoff');
     report.ok=report.errors.length===0;
-  }catch(error){report.errors.push(String(error));}
+  }catch(error){
+    report.errors.push(String(error));
+    // R2267: collect real failure state, never alter the visitor/viewport.
+    if(page&&!page.isClosed()){
+      try{
+        report.failureState=await page.evaluate(()=>{
+          const r=document.documentElement;
+          return {owner:r.dataset.fxMagBirthOwnerR533||'',
+            live:r.dataset.fxMagBirthLiveR533||'',
+            renderer:r.dataset.fxMagBirthRendererR1490||'',
+            fallback:r.dataset.fxMagBirthRendererR1729||'',
+            loader:r.dataset.fxMagBirthThreeLoaderR1608||'',
+            native:r.dataset.fxCrystalOrganismR326||'',
+            gpu:r.dataset.fxMagHandoffGpuR2226||'',
+            overlay:document.querySelectorAll('.fx-mag-birth-r533').length,
+            nativeCanvases:document.querySelectorAll('#hero .fx-crystal-organism-r326-canvas').length};
+        });
+      }catch(diagnosticError){report.diagnosticError=String(diagnosticError);}
+    }
+  }
   finally{if(context)await context.close().catch(()=>{});await browser.close();}
   fs.writeFileSync(path.join(OUT,'evidence.json'),JSON.stringify(report,null,2)+'\n');
   console.log('MAG_R2264_NORMAL_VISITOR_FENCE '+JSON.stringify(report));

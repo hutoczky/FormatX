@@ -282,9 +282,11 @@
        desktop full-quality and device-dependent render governor unchanged. */
     const latitudeSegments = software ? 28 : constrainedMobile ? 30 : mobile ? 40 : constrained ? 48 : 72;
     const longitudeSegments = software ? 56 : constrainedMobile ? 60 : mobile ? 80 : constrained ? 96 : 144;
-    /* R1941 — the Signature MAG is one iconic sculpt. No cable silhouette competes
-       with the four-point body; the living response stays in material, light and motion. */
-    const tendrilCount = 0;
+    /* R2273: six fine biologically animated trailing filaments on desktop,
+       four on phones, three in software; all join the SAME existing triangle
+       stream, material, renderer and GPU-frame loop. No detached hard-surface
+       wings and no additional context. Genuine cortex is sculpted below. */
+    const tendrilCount = software ? 3 : mobile ? 4 : 6;
     const tendrilSegments = software ? 10 : constrainedMobile ? 12 : mobile ? 14 : constrained ? 18 : 26;
     const tendrilSides = software ? 4 : mobile || constrained ? 4 : 6;
     const sphere = [];
@@ -512,12 +514,12 @@
       const rootX=-.56+.040*Math.sin(index*1.71);
       const rootY=.12+lane*.54+.035*Math.cos(index*1.13);
       const rootZ=.04+.10*Math.sin(index*.91);
-      const sweep=.52+.34*(.5+.5*Math.sin(index*1.37));
+      const sweep=.30+.17*(.5+.5*Math.sin(index*1.37));
       const wave=Math.sin(t*Math.PI*1.55+index*.83)*(.025+.095*t)
         +Math.sin(t*Math.PI*.72+index*.47)*.028*t;
       const rise=Math.sin(t*Math.PI*.92+index*.73)*(.035+.10*t);
       return [
-        rootX-(.30+sweep)*t-.18*t*t,
+        rootX-(.27+sweep)*t-.10*t*t,
         rootY+rise+lane*.12*t+wave*.34,
         rootZ+.10*Math.sin(t*Math.PI+index*.61)+wave
       ];
@@ -823,9 +825,18 @@
         for(let ix=0;ix<lonSteps;ix++){
           const u=ix/lonSteps;
           const th=u*Math.PI*2;
-          const lx=Math.cos(th)*sp*rx0;
-          const ly=cp*ry0;
-          const lz=Math.sin(th)*sp*rz0;
+          // R2275: break the sterile ellipsoid into connected irregular
+          // three-dimensional living cortex lobes. Pole-safe, periodic and
+          // deterministic; all vertices stay in the original R326 VBO.
+          // Auxiliary optical ellipsoids use their unchanged geometry.
+          const isCortex=facetBase>=1.10&&facetBase<1.34;
+          const lobe=isCortex?1+sp*sp*(
+            .103*Math.sin(th*3.0+cp*4.20)+
+            .055*Math.cos(th*5.0-phi*3.60)+
+            .031*Math.sin(th*2.0+phi*6.20)):1;
+          const lx=Math.cos(th)*sp*rx0*lobe;
+          const ly=cp*ry0*lobe;
+          const lz=Math.sin(th)*sp*rz0*lobe;
           const x=cx+lx*czr-ly*szr;
           const y=cy+lx*szr+ly*czr;
           const z=cz+lz;
@@ -911,6 +922,19 @@
       if(face[2]<0)[vertices[1],vertices[2]]=[vertices[2],vertices[1]];
       guardianTriangle(vertices,facet,[.62,.90,-.24]);
     }
+
+    /* R2273 — an ACTUAL convex, three-dimensional living cortex behind
+       the machined titanium limbs. This fills the implausibly empty space
+       between the pointed arms without obscuring the front-mounted optic.
+       It is part of the original R326 non-indexed attribute stream:
+       no second mesh, renderer, WebGL context, frame loop or asset fetch.
+       Bounded tessellation retains the measured mobile/software budget. */
+    /* R2327: the large living ovum belongs to GENESIS. After titanium
+       assembly, its permanent photobiological cortex retracts behind the
+       four genuine machined arms. Same 3D topology, facets, iris and one
+       GPU draw; no opaque circular blob covering the star silhouette. */
+    appendEllipsoid([.045,.040,-.235],[.540,.575,.320],1.12,
+      software?18:mobile?22:30,software?28:mobile?38:52,.095);
 
     /* R1724 — unique FormatX crystal creature anatomy.
        Living cortical lobes and membranes replace animal limbs and robotic armour. */
@@ -1053,41 +1077,27 @@
        planes on OLED/mobile displays and the canonical surface-energy contract. */
     /* R1959: physically neutral compositor tone. The previous inline
        !important saturation overrode the canonical material CSS. */
-    const compositorFilter=mobile
-      ? 'brightness(1.06) contrast(1.14) saturate(.98) hue-rotate(-1deg) blur(0px)'
-      : 'brightness(1.025) contrast(1.11) saturate(.97) blur(0px)';
-    canvas.style.setProperty('filter',compositorFilter,'important');
-    canvas.style.setProperty('-webkit-filter',compositorFilter,'important');
+    /* R2320: P0 caught a black first full-viewport canvas even though the
+       physical MAG was already GPU-ready. Remove CSS filter compositing on
+       the preserved, single WebGL drawing buffer; lighting stays in shaders. */
+    canvas.style.setProperty('filter','none','important');
+    canvas.style.setProperty('-webkit-filter','none','important');
     canvas.style.setProperty('box-shadow','none','important');
+    root.dataset.fxMagCanvasCompositeR2320='direct-unfiltered-opaque-preserved-webgl';
 
-    /* R2045: the original canvas is also subject to older !important opacity
-       overrides. They outrank CSS and WAAPI animations, leaving MAG visually
-       frozen even while its registered --fx-mag-life-opacity animates.
-       Bind the SAME original canvas's inline important opacity to that
-       compositor-only numeric custom property. Do this once at creation,
-       never in a JS RAF; preserve system reduced-motion changes. */
-    const mobileBreathPreference=mobile?matchMedia('(prefers-reduced-motion: reduce)'):null;
-    const syncMobileBreathOpacity=()=>{
-      if(!mobileBreathPreference)return;
-      if(mobileBreathPreference.matches){
-        canvas.style.removeProperty('opacity');
-      }else{
-        canvas.style.setProperty('opacity','var(--fx-mag-life-opacity,.965)','important');
-      }
-    };
-    syncMobileBreathOpacity();
-    mobileBreathPreference?.addEventListener?.('change',syncMobileBreathOpacity);
-    if(mobile)root.dataset.fxMagMobileBreathBindingR2045='inline-important-registered-compositor';
-
-    /* R1930 — one slow compositor breath on every capable screen.
-       No idle JS RAF is introduced; reduced-motion remains fully respected. */
+    /* R2320: the real GL canvas keeps a fixed CSS opacity of 1.
+       No opacity-WAAPI can trap its latest physical frame under the film.
+       The unchanged R326 shaders own the living optical physiology. */
+    canvas.style.setProperty('opacity','1','important');
+    root.dataset.fxMagMobileBreathBindingR2045='native-shader-life-stable-canvas-opacity';
+    let livingTimeline=null;
     if(!reduced.matches && typeof canvas.animate==='function'){
-      const livingTimeline=canvas.animate(
+      livingTimeline=canvas.animate(
         [
-          {opacity:.985,transform:'scale(.996)',offset:0},
-          {opacity:1,transform:'scale(1.004)',offset:.48},
-          {opacity:.990,transform:'scale(.999)',offset:.76},
-          {opacity:.985,transform:'scale(.996)',offset:1}
+          {transform:'scale(.996)',offset:0},
+          {transform:'scale(1.004)',offset:.48},
+          {transform:'scale(.999)',offset:.76},
+          {transform:'scale(.996)',offset:1}
         ],
         {
           duration:6800,
@@ -1097,8 +1107,12 @@
         }
       );
       livingTimeline.id='fx-primary-mag-living-breath-r1930';
-      root.dataset.fxNativeMagDesktopLifeR1902='waapi-compositor-opacity-no-raf';
-      root.dataset.fxNativeMagBreathR1930='all-screen-compositor-breath-no-idle-raf';
+      // Prevent a moving native compositor layer behind the opaque Genesis.
+      if(root.dataset.fxMagBirthLiveR533==='active' ||
+         root.getAttribute('data-fx-mag-birth-live')==='active')
+        livingTimeline.pause();
+      root.dataset.fxNativeMagDesktopLifeR1902='native-webgl-microbreath-no-opacity';
+      root.dataset.fxNativeMagBreathR1930='transform-only-compositor-shader-life';
     }
 
     const options = {
@@ -1213,6 +1227,21 @@
         local.x+=tendrilTip*(uPointer.x*.060 + tendrilWave*(.012+.020*uEnergy));
         local.y+=tendrilTip*(-uPointer.y*.048 + tendrilWave2*(.010+.016*uEnergy));
         local.z+=tendrilTip*(tendrilWave*.012+tendrilWave2*.008)*(.55+.45*uEnergy);
+        // R2270: a single material-coherent asymmetric cortical warp. This
+        // bends the original mineral and its titanium veins together; the
+        // recessed glass iris is left rigid, so the socket cannot tear.
+        // Existing seven GPU buffers, one renderer and one RAF are unchanged.
+        float sculptRadius=length(local.xy);
+        float sculptEnvelope=smoothstep(.22,.72,sculptRadius)*
+          (1.0-step(6.0,aFacet));
+        float sculptX=.064*sin(local.y*3.10+.45)+
+          .031*sin(local.x*4.30-1.50);
+        float sculptY=.034*sin(local.x*3.20-.48)+
+          .027*cos(local.y*4.70+.32);
+        local.x+=sculptX*sculptEnvelope;
+        local.y+=sculptY*sculptEnvelope;
+        local.z+=.023*sin(local.x*2.70+local.y*3.30)*
+          sculptEnvelope;
         local.xy+=uPointer*${mobile?'.038':'.052'}*uLayer;
         float yaw=${mobile?'.535':'.465'}+uRotation.y+uPointer.x*${mobile?'.12':'.16'}+uTime*.007;
         float pitch=-.070+uRotation.x-uPointer.y*${mobile?'.085':'.125'}+.006*sin(uTime*.19);
@@ -1475,8 +1504,13 @@
         float radial=max(anatomy.x,anatomy.y);
         float lateral=min(anatomy.x,anatomy.y);
         float panelWidth=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
-        vec2 panelCoord=vec2(radial*28.0,lateral/panelWidth*4.0);
-        panelCoord.y+=sin(floor(panelCoord.x)*1.37)*.20;
+        /* R2270: continuous body-following, elongated sinuous titanium
+           lamellae instead of a repetitive rectilinear tile grid. The
+           original shell provides actual geometric relief; the material
+           simply adds filtered seams in the same physical draw. */
+        vec2 panelCoord=vec2(radial*17.0,lateral/panelWidth*2.4);
+        panelCoord.y+=.29*sin(panelCoord.x*.54+radial*1.60)
+          +.12*sin(panelCoord.x*1.17+.60);
         vec2 panelEdge=min(fract(panelCoord),1.0-fract(panelCoord));
         vec2 panelAA=${derivativeSupport?'max(fwidth(panelCoord),vec2(.018))':'vec2(.095)'};
         float panelJoint=1.0-min(smoothstep(.018,.035+panelAA.x,panelEdge.x),
@@ -1503,8 +1537,8 @@
           +vec3(.94,.97,1.0)*silverKey*.90
           +vec3(.12,.25,.31)*metalSideSpec*.25;
         studioSilver*=mix(.94,1.045,plateFinish);
-        studioSilver*=1.0-panelJoint*.24*panelEnvelope;
-        studioSilver+=vec3(.38,.44,.49)*panelBevel*panelEnvelope*(.16+.38*metalKey);
+        studioSilver*=1.0-panelJoint*.125*panelEnvelope;
+        studioSilver+=vec3(.38,.44,.49)*panelBevel*panelEnvelope*(.20+.43*metalKey);
         studioSilver*=1.0+.018*brushed;
         /* R2206 — a cool grazing studio strip keeps the curved titanium
            recognizable against the biological cyan/coral core without raising
@@ -1512,6 +1546,22 @@
         float titaniumGrazing=pow(1.0-facing,2.4);
         studioSilver+=vec3(.31,.43,.48)*titaniumGrazing*
           panelEnvelope*.14;
+        /* R2270: photographic nacre and living vascular backscatter
+           follow the real curved anatomy. No synthetic bloom, textures,
+           extra sampling or screen-space effects are introduced. */
+        float metabolicStrand=.5+.5*sin(radial*18.0+
+          1.65*sin(lateral*15.0+radial*2.4));
+        float vascularEnvelope=panelEnvelope*(1.0-panelJoint);
+        float narrowVein=pow(metabolicStrand,8.0)*vascularEnvelope;
+        float warmCapillary=.5+.5*sin(radial*9.6-lateral*17.2+1.40);
+        studioSilver+=vec3(.035,.155,.166)*narrowVein*
+          (.18+.35*softboxB);
+        studioSilver+=vec3(.18,.066,.054)*narrowVein*
+          warmCapillary*.14;
+        float satinFresnel=pow(1.0-facing,2.6);
+        studioSilver+=mix(vec3(.045,.130,.150),
+          vec3(.085,.071,.128),sat(.5+.5*n.x))*
+          satinFresnel*vascularEnvelope*.20;
         /* R2214 — functional titanium machining.
            Highlight a recessed lengthwise capillary on each of the four
            real 3D arms, plus selective micro-fasteners inside panel cells.
@@ -1527,11 +1577,61 @@
         studioSilver+=vec3(.34,.57,.63)*axialHairline*.13;
         studioSilver*=1.0-socketMask*.11;
         studioSilver+=vec3(.24,.36,.39)*socketMask*metalSpec*.30;
-        float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84;
+        /* R2326: a physically bounded paired satin incision on the
+           existing four curved titanium lamellae. This derives entirely
+           from their body-space panel coordinates and the filtered panelAA.
+           Reflected softboxes reveal relief when the actual MAG turns;
+           it is NOT a flat white line, overlay, texture or extra pass.
+           Avoid new trigonometry, branches, textures and pixel aliasing. */
+        float microBevel=exp(-pow((panelEdge.y-.125)/
+          (.045+panelAA.y*.50),2.0))*panelEnvelope;
+        float grazingMachining=microBevel*(.23+.77*softboxC)*
+          (.35+.65*metalKey)*(1.0-.72*panelJoint);
+        studioSilver+=vec3(.32,.40,.44)*grazingMachining*.24;
+        studioSilver+=vec3(.055,.18,.20)*grazingMachining*
+          (1.0-softboxC)*.14;
+        // R2275: only the original glass-mineral body is silver-washed.
+        // The R2273 cortex and filaments were incorrectly receiving the
+        // same bright metal plate color and looked like a perfect white ball.
+        float originalMineralMask=1.0-step(1.0,vFacet);
+        float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84*
+          originalMineralMask;
         c=mix(c,studioSilver,shellSilver);
-        titanium=mix(titanium,studioSilver*1.12,machinedArmor*.67);
+        titanium=mix(titanium,studioSilver*.94,machinedArmor*.67);
         titanium*=1.0-panelJoint*panelEnvelope*.16;
-        c=mix(c,titanium,machinedArmor*.99);
+        c=mix(c,titanium*.90,machinedArmor*.99);
+
+        /* R2275: a shaded anatomical interior, never a silver-white
+           perfect sphere. The genuine irregular cortical VBO has a dark
+           smoked bioglass material with layered turquoise photochemistry,
+           coral organelles and low-key large-format studio reflections.
+           This is still ONE existing fragment shader and draw call. */
+        float livingCortex=step(1.10,vFacet)*(1.0-step(1.34,vFacet));
+        if(livingCortex>.5){
+          float foldA=.5+.5*sin(vAnatomy.x*16.0+
+            1.7*sin(vAnatomy.y*9.0+vAnatomy.z*4.0));
+          float foldB=.5+.5*cos(vAnatomy.y*20.0-
+            vAnatomy.x*7.0+uTime*.075);
+          float vein=pow(.56*foldA+.44*foldB,7.0);
+          float livingPulse=.86+.14*sin(uTime*.48+vAnatomy.x*3.0);
+          float coralNest=pow(max(0.0,foldA*foldB-.52)*2.1,2.0);
+          vec3 cortexMaterial=vec3(.009,.020,.027)
+            +vec3(.085,.145,.163)*(.20+.80*key)
+            +vec3(.13,.23,.25)*softboxB*.34
+            +vec3(.16,.25,.29)*softboxC*.17;
+          cortexMaterial+=vec3(.035,.24,.26)*vein*
+            (.20+.38*uEnergy)*livingPulse;
+          cortexMaterial+=vec3(.22,.070,.048)*coralNest*.12;
+          // R2326: keep the coral chemistry inside the concave living
+          // cortex, never on the titanium faces or transparent page.
+          // The already computed folds control hot and cold organelles.
+          float warmStroma=coralNest*(.38+.62*livingPulse);
+          cortexMaterial+=vec3(.15,.037,.024)*warmStroma*.18;
+          cortexMaterial+=vec3(.022,.11,.125)*vein*(1.0-warmStroma)*.12;
+          cortexMaterial+=vec3(.040,.13,.16)*
+            pow(1.0-facing,2.3)*.31;
+          c=mix(c,cortexMaterial,livingCortex*.97);
+        }
 
         // R2207: the living cortex belongs only to actual glass fragments.
         // Metal pixels keep their silver response without evaluating the
@@ -1589,6 +1689,12 @@
         lensColor+=vec3(.055,.60,.62)*innerMembrane*(.18+.08*uEnergy);
         lensColor+=vec3(.16,.52,.56)*outerMembrane*(.24+.05*uEnergy);
         lensColor+=vec3(.84,.25,.17)*filamentMask*(.18+.08*uEnergy);
+        /* R2326: a thin folded cyan refraction on the EXISTING curved
+           glass iris. Reuse the same biological filament and membrane
+           fields; keep its optical center clear instead of whitewashing. */
+        float cellRefraction=innerMembrane*bioticFilament*
+          (.35+.65*softboxB)*tissueEnvelope;
+        lensColor+=vec3(.070,.30,.34)*cellRefraction*.16;
         // Keep broad photographic contrast instead of an all-white iris.
         lensColor*=1.0-.13*coralOrganelles*filamentMask;
         c=lensColor;
@@ -1627,6 +1733,11 @@
     root.dataset.fxNativeMagSurfaceR2206='biophotonic-cyan-coral-living-optic-machined-titanium-no-extra-pass';
     root.dataset.fxNativeMagSurfaceR2212='laminated-living-cyan-coral-lens-deep-silver-single-pass';
     root.dataset.fxNativeMagSurfaceR2214='anti-aliased-titanium-capillaries-fasteners-micro-machined-four-arm-body';
+    root.dataset.fxNativeMagStudioR2270='asymmetric-living-sculpt-sinuous-titanium-lamellae-nacre-vascular-backscatter-single-pass';
+    root.dataset.fxNativeMagStudioR2273='sculpted-deep-cortex-biological-filaments-canonical-single-draw';
+    root.dataset.fxNativeMagStudioR2275='irregular-three-dimensional-smoked-bioglass-cortex-scoped-silver-living-vascular-organelle-studio';
+    root.dataset.fxNativeMagStudioR2326='single-pass-reflection-coupled-titanium-microbevel-living-coral-stroma-refracted-iris';
+    root.dataset.fxNativeMagAnatomyR2327='compact-recessed-living-cortex-four-machined-arms-foreground';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'
@@ -1933,6 +2044,11 @@
       ? (mobile?.80:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
+    // R2283: a canvas resize discards its color/depth buffers regardless
+    // of a successful WebGL fence. Keep the real initial frame immutable
+    // during birth, GPU validation and the first exposed compositor interval.
+    let nativeExposureLockUntilR2283=0;
+    let postFilmNeedsPresentR2283=false;
     root.dataset.fxCoreQualityResizeR2244='coalesced-once-per-48ms-burst';
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
     let heartbeatTimer=0,surfacePulseTimer=0,autonomousTimer=0,scrollFrame=0,scrollSettleTimer=0,tapCandidate=null;
@@ -1986,10 +2102,26 @@
        wakeup. Coalesce into one bounded 48ms resize; the last qualityScale
        wins, without modifying geometry, shaders or the final quality floor.
        Do not continuously defer by restarting the timer. */
+    function qualityResizeProtectedR2283(){
+      // R2284: early 3D warmup must retain its normal adaptive GPU budget.
+      // Only the final R2278 prepared frame and GPU fence are immutable.
+      const filmActive=root.dataset.fxMagBirthLiveR533==='active' ||
+        root.getAttribute('data-fx-mag-birth-live')==='active';
+      const nativePrepareRequested=
+        root.dataset.fxMagHandoffPrepareR2254==='requested';
+      return !!pendingGpuFenceR2253 ||
+        (filmActive&&nativePrepareRequested) ||
+        performance.now()<nativeExposureLockUntilR2283;
+    }
     function requestQualityResizeR2244(){
+      // R2283: the 48ms quality timer must never invalidate an in-flight
+      // film handoff or a still-unexposed GL drawing buffer.
+      if(qualityResizeProtectedR2283())return;
       if(qualityResizeTimer)return;
       qualityResizeTimer=later(()=>{
         qualityResizeTimer=0;
+        // The film may start while this timer is already pending.
+        if(qualityResizeProtectedR2283())return;
         if(!disposed&&!contextLost&&resize(true))schedule(1);
       },48);
     }
@@ -2845,6 +2977,16 @@
             root.dataset.fxMagHandoffCadenceR2255='resumed-after-gpu-proof';
             if(!blocked())schedule(2);
           }
+          // R2283: the occluder may have departed while this genuine GPU
+          // fence was in flight. Submit ONE native post-film frame after
+          // completion. A successful fence alone is not canvas presentation.
+          if(postFilmNeedsPresentR2283){
+            postFilmNeedsPresentR2283=false;
+            resize(); // reconcile actual viewport only AFTER fence release
+            render(performance.now());
+            gl.flush();
+            root.dataset.fxMagPostFilmPresentR2283='late-fence-native-frame';
+          }
         };
         gl.flush();
         root.dataset.fxMagNativePresentR2220='synchronous-gl-frame-committed';
@@ -2927,8 +3069,66 @@
     };
     listen(document,'formatx:magbirthprepare',prepareNativeFrameR2254,{passive:true});
     listen(document,'formatx:magbirthcomplete',()=>{
-      // The original owner is still the fail-safe for Skip and other
-      // paths that did not obtain a real GPU-complete frame in advance.
+      // R2283: freeze the drawing buffer across Chromium's compositing
+      // boundary, not for the entire lifetime of the living MAG.
+      nativeExposureLockUntilR2283=performance.now()+1100;
+      // R2322: the original WebGL frame must become visible before its
+      // compositor-only breathing timeline resumes. The verified 350ms
+      // initial-viewport capture on R2321 was black despite a finished GPU
+      // fence and a direct, unfiltered canvas: avoid a new moving layer in
+      // that critical presentation window. No second renderer or RAF.
+      if(livingTimeline){
+        root.dataset.fxMagBirthBreathR2322='awaiting-first-native-composite';
+        later(()=>{
+          if(disposed||contextLost||!stage.isConnected)return;
+          try{
+            if(!paused && root.dataset.fxReferenceMotionPaused!=='true'){
+              livingTimeline.play();
+              root.dataset.fxMagBirthBreathR2322='post-exposure-transform-resumed';
+            }else{
+              root.dataset.fxMagBirthBreathR2322='held-by-user-pause';
+            }
+          }catch(_){
+            root.dataset.fxMagBirthBreathR2322='resume-unavailable';
+          }
+        },1150);
+      }
+      if(qualityResizeTimer){
+        clearTimeout(qualityResizeTimer);
+        delayed.delete(qualityResizeTimer);
+        qualityResizeTimer=0;
+      }
+      if(pendingGpuFenceR2253){
+        postFilmNeedsPresentR2283=true;
+        return;
+      }
+      // R2282: the R2278 early GPU fence can finish while the cinematic
+      // occluder is still on top. Merely returning 'finished' here leaves
+      // a valid framebuffer that the browser has not composited into the
+      // newly revealed desktop viewport (real R2281 P0 black-frame proof).
+      // Present ONE frame from the canonical renderer after DOM teardown.
+      // Preserve the zero-readback policy and the existing idle governor.
+      if(root.dataset.fxMagHandoffGpuR2226==='finished'){
+        queueMicrotask(()=>{
+          if(disposed||contextLost||document.hidden||!stage.isConnected)return;
+          const bounds=stage.getBoundingClientRect();
+          if(bounds.width<8||bounds.height<8||bounds.right<=0||
+             bounds.bottom<=0||bounds.left>=innerWidth||
+             bounds.top>=innerHeight)return;
+          visible=true;
+          try{
+            resize(); // exact stage dimensions after physical DOM teardown
+            render(performance.now());
+            gl.flush();
+            root.dataset.fxMagPostFilmPresentR2282='single-native-compositor-frame';
+          }catch(error){
+            root.dataset.fxMagPostFilmPresentR2282='single-frame-unavailable';
+            console.warn('FormatX R2282 post-film presentation:',error);
+          }
+        });
+        return;
+      }
+      // Skipped/failed warmup still uses the original guarded GPU proof.
       prepareNativeFrameR2254();
     },{passive:true});
     listen(window,'formatx:cinematicscene',onCinematicScene,{passive:true});
@@ -2970,7 +3170,12 @@
       root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>boot());
     });
 
-    const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
+    const ro=new ResizeObserver(()=>{
+      // R2283: observer callbacks cannot zero a pending GL framebuffer.
+      // The post-film renderer reconciles current stage dimensions once.
+      if(qualityResizeProtectedR2283())return;
+      if(resize())schedule(1);
+    });
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
       visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
@@ -3057,7 +3262,9 @@
         gl.deleteSync(pendingGpuFenceR2253);
         pendingGpuFenceR2253=null;
       }
-      mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
+      // R2321: R2320 removed the legacy matchMedia opacity listener.
+      // Cancel the actual owned WAAPI instance instead; no dangling closures.
+      livingTimeline?.cancel?.();
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;

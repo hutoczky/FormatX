@@ -35,8 +35,10 @@
   const HARDWARE_CONCURRENCY = Math.max(1, Number(navigator.hardwareConcurrency || 8));
   const DEVICE_MEMORY = Math.max(1, Number(navigator.deviceMemory || 8));
   const CONSTRAINED = HARDWARE_CONCURRENCY <= 4 || DEVICE_MEMORY <= 2;
-  const HEADLESS_SOFTWARE = /HeadlessChrome/i.test(String(navigator.userAgent||''));
-  const SOFTWARE_SAFE = CONSTRAINED || HEADLESS_SOFTWARE;
+  // R2267: headless user agent is not a physical GPU capability.
+  // Keep the constrained-hardware fallback; preserve full Three.js for all
+  // other normal visitors, including real browser performance tests.
+  const SOFTWARE_SAFE = CONSTRAINED;
   /* R1753 — forced cinematic proof is a real intro path, not an audit path.
      The R533/critical birth styles are normally deferred for first-paint cost,
      but ?intro=1 / visualintro must own their geometry immediately so the
@@ -586,7 +588,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261028-r2217-studio-spectral-titanium';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth-r2319-native-own-final-presentation';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -909,8 +911,8 @@
        10 s story and visual handoff while avoiding >50 ms frame tasks. Visual
        proof frames remain on the Three owner so design evidence stays exact. */
     if(SOFTWARE_SAFE && !HAS_VISUAL_FRAME){
-      ROOT.dataset.fxMagBirthRendererR1729=HEADLESS_SOFTWARE?'headless-reference-film':'constrained-reference-film';
-      overlay.dataset.fxRenderer=HEADLESS_SOFTWARE?'fallback-software':'fallback-constrained';
+      ROOT.dataset.fxMagBirthRendererR1729='constrained-reference-film';
+      overlay.dataset.fxRenderer='fallback-constrained';
       startR649Fallback();
       if(filmRenderer)filmRenderer.resize?.();
       return;
@@ -1071,6 +1073,11 @@
 
   let nativeHandoffGateStartedR2254=0;
   let nativeHandoffFadeR2254=false;
+  // R2324: the real source CSS animated a .42-.72s fade, but the R2254
+  // controller cut it off after 120ms. Allow the exposed canonical WebGL
+  // layer a complete compositor transition BEFORE film DOM destruction.
+  // The physical 10s GENESIS frame timeline remains unchanged.
+  const NATIVE_CROSSFADE_MS_R2324=360;
   function safeTeardownOverlay(source) {
     if(!overlay.isConnected)return;
     // R2254: R2226 proved that the native DOM could be "ready" while its
@@ -1095,8 +1102,17 @@
       }else ROOT.dataset.fxMagHandoffGateR2254='gpu-finished-before-exposure';
       if(!nativeHandoffFadeR2254){
         nativeHandoffFadeR2254=true;
+        // R2324: expose the ready ORIGINAL native canvas under the still-
+        // present cinematic occluder before starting the gentle crossfade.
+        // R2322 had 2/3 reliable cold starts; R2323 CSS pause was 0/1.
+        // Never remove the cinematic layer in the same compositor task.
+        try{releaseStageStyle();}catch(_){}
+        overlay.style.setProperty('transition',
+          'opacity .26s ease, filter .26s ease','important');
         overlay.classList.add('is-leaving');
-        exitTimer=window.setTimeout(()=>safeTeardownOverlay(source),120);
+        ROOT.dataset.fxMagHandoffBlendR2324='pre-exposed-native-360ms-crossfade';
+        exitTimer=window.setTimeout(
+          ()=>safeTeardownOverlay(source),NATIVE_CROSSFADE_MS_R2324);
         return;
       }
     }
@@ -1106,22 +1122,17 @@
     try { overlay.remove(); } catch (_) {}
     ROOT.dataset.fxIntroPrepaintR1611='complete';
     reconcileExposedCompositorR2219();
-    // R2211: a finished R326 renderer may have spent its final burst frames
-    // behind the cinematic overlay and then gone deliberately idle. The
-    // backdrop disappears 180 ms AFTER finish(), so drawing before removal
-    // is not proof that Chromium has presented the exposed WebGL canvas.
-    // Commit one real frame after the occluder is removed, then one bounded
-    // follow-up on the next display opportunity. No continuing RAF or extra
-    // renderer is created; normal idle remains zero frames.
+    // R2319: the completed GENESIS film MUST NOT own even one deferred
+    // native layout/render callback after formatx:magbirthcomplete. The
+    // R2173 actual Chromium proof caught a late stage geometry read from
+    // this obsolete R533 requestAnimationFrame. Submit the final bounded
+    // request before dispatch and hand ALL post-film presentation to the
+    // original R326 native listener (which paints after the real event).
+    // No canvas/renderer/RAF additions and no perceptual frame downgrade.
     try {
       locateStage();
       coreApi?.requestRender?.(2);
-      ROOT.dataset.fxMagBirthPostTeardownRenderR2211='requested';
-      requestAnimationFrame(()=>{
-        if(document.hidden||!stage?.isConnected)return;
-        coreApi?.requestRender?.(1);
-        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='present-frame-scheduled';
-      });
+      ROOT.dataset.fxMagBirthPostTeardownRenderR2211='native-owner-before-completion';
     } catch (_) { ROOT.dataset.fxMagBirthPostTeardownRenderR2211='unavailable'; }
     // R2210: the parser-only first-paint permission must not remain "show"
     // once its adopted cinematic node has left the document.
@@ -1195,7 +1206,7 @@
     // survive past the reference endpoint + exit allowance.
     window.setTimeout(()=>{
       if(overlay.isConnected) safeTeardownOverlay('forced-overlay-cleanup-r655');
-    },(REDUCED ? 20 : EXIT_MS)+140);
+    },(REDUCED ? 20 : EXIT_MS)+NATIVE_CROSSFADE_MS_R2324+100);
   }
 
   function queueRender(delay=0) {
@@ -1217,6 +1228,7 @@
   let lastCoreCostSampleAt=0;
   let cachedCoreRenderCost=0;
   let finalParticleFrameDrawn=false;
+  let nativeFencePrefetchedR2278=false;
 
   function render(now) {
     raf=0;
@@ -1252,6 +1264,24 @@
     const r=Math.min(1,(now-startedAt)/DURATION);
     catchUpPhase(r);
     if (r >= CORE_WARMUP_PROGRESS) requestCoreWarmup('timeline-'+Math.round(r*100));
+    // R2278: while the real GENESIS final shot still occludes the page,
+    // submit ONE early native WebGL2 frame to the existing R2254 owner.
+    // This pipelines the GPU fence, avoiding the verified cold-start race
+    // where a finished visual film exposes a still-pending original MAG.
+    // Same 10s film, same R326 context, geometry and draw call; no new RAF.
+    if(!nativeFencePrefetchedR2278 && r>=.90 &&
+       !REDUCED && !document.hidden &&
+       ROOT.dataset.fxGpuCapability==='webgl2' &&
+       ROOT.dataset.fxCrystalOrganismR326==='ready'){
+      nativeFencePrefetchedR2278=true;
+      ROOT.dataset.fxMagEarlyNativePrepareR2278='submitted-behind-genesis';
+      ROOT.dataset.fxMagHandoffPrepareR2254='requested';
+      try{
+        document.dispatchEvent(new CustomEvent('formatx:magbirthprepare',{
+          detail:{source:'last-second-film',revision:'r2278-early-native-fence'}
+        }));
+      }catch(_){}
+    }
     // Read the core's render-cost hint at the same cadence as native synchronization.
     // Avoid an attribute lookup and numeric parse on every cinematic frame.
     if(!lastCoreCostSampleAt || now-lastCoreCostSampleAt>=200){
@@ -1511,23 +1541,19 @@
       overlay.remove();
       ROOT.dataset.fxIntroPrepaintR1611='complete';
       reconcileExposedCompositorR2219();
-      // R2211: watchdog teardown must also expose a freshly painted native
-      // frame; do not leave a painted-but-uncomposited WebGL canvas behind.
+      // R2319: watchdog follows the SAME one-owner retirement policy.
+      // Native R326's own completion listener presents the final GL frame.
       try {
         locateStage();
         coreApi?.requestRender?.(2);
-        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='watchdog-requested';
-        requestAnimationFrame(()=>{
-          if(document.hidden||!stage?.isConnected)return;
-          coreApi?.requestRender?.(1);
-        });
+        ROOT.dataset.fxMagBirthPostTeardownRenderR2211='watchdog-native-owned';
       } catch (_) {}
       try{
         document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
         }));
       }catch(_){}
-    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
+    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+820));
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path

@@ -59,7 +59,11 @@ const tokens = [
   [birth, 'col*=mix(1.78,1.38,metal);'],
   [birth, 'this.scene.environmentIntensity=this.mobileRender?.77:1.02;'],
   [birth, 'new T.InstancedMesh('],
-  [birth, 'this.embryoVesicleMaterial.opacity=.58*visible;'],
+  // R2331: keep the same actual 42/84 instanced 3D organelles and
+  // physically accurate lower specular coat, not the former plastic beads.
+  [birth, 'this.embryoVesicleMaterial.opacity=.43*visible;'],
+  [birth, 'clearcoat:.22,clearcoatRoughness:.34,'],
+  [birth, 'this.embryoNucleus.position.set(-.10,.06,.28);'],
   [birth, 'this.coreGroup.add(vesicles);'],
   [birth, 'this.updateMechanical(t,time);'],
   [mag, 'const constrainedFragmentSource ='],
@@ -87,9 +91,14 @@ assert(hashDeclaration,'Worker must declare exact active parser SHA-256');
 const hashVariable=hashDeclaration.match(/^const (INLINE_R\d+_BOOT_HASH) = /)[1];
 assert(worker.split('${'+hashVariable+'}').length-1===2,
   'Both Worker CSPs must authorize the active parser hash');
-const filmRevision = '20261028-r2217-studio-spectral-titanium';
+const railPrepaint=html.match(/<style data-fx-mobile-rail-prepaint-r2285="true">([\s\S]*?)<\/style>/);
+assert(railPrepaint,'R2285 real mobile first-byte style missing');
+const railCsp="'sha256-"+crypto.createHash('sha256').update(railPrepaint[1]).digest('base64')+"'";
+assert(html.includes(railCsp)&&worker.split(railCsp).length-1===2,
+  'R2285 inline CSS must have exact HTML/Worker CSP parity');
+const filmRevision = '20261101-r2295-vascular-cortex-microgeometry';
 const magRevision = '20261031-r2266-full-visitor-mag';
-assert(intro.includes(filmRevision),'Original R1280 biological film cache key must remain unchanged');
+assert(intro.includes(filmRevision),'The real R1280 studio Genesis owner must use its current cache-busted revision');
 assert(intro.includes('const proofTurn=callback=>'),
   'R2236 cinematic test must bound animation-frame and timer scheduling');
 assert(intro.includes("ROOT.dataset.fxMagBirthProofSchedulerR2236='bounded-raf-or-timeout'"),
@@ -114,8 +123,9 @@ assert(runtimeSrc.startsWith('formatx-mag-birth-live-r533.js?v='),
   'R533 entrypoint must have an explicit cache revision');
 assert(html.includes(runtimeSrc)&&html.includes('formatx-p0-motion-scheduler-r490.js?v='+miniLoaderRevision),
   'HTML must use new Mini MAG loader while preserving original cinematic bridge');
-assert(worker.includes(filmRevision)&&worker.includes(miniLoaderRevision),
-  'Worker must preserve canonical film and deferred controller rewrites');
+assert(intro.includes(filmRevision)&&worker.includes(miniLoaderRevision)&&
+  worker.split('${'+hashVariable+'}').length-1===2,
+  'Worker must preserve the active parser CSP, native controller and real R1280 film');
 // R2256: materialize the real hero in layout before FCP. The film may
 // cover the page visually, but an initial 1px clipped panel followed by a
 // full-height copy creates a deterministic 0.33+ mobile CLS.
@@ -130,10 +140,10 @@ for(const property of [
   'clip-path:none!important;',
   'white-space:normal!important;'
 ])assert(cssPar.includes(property),'Missing first-paint hero geometry: '+property);
-assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261030-r2256-layout-parity-before-fcp/g)?.length===2,
-  'Preload and blocking mobile stylesheet must have identical R2256 URL');
-assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261030-r2256-layout-parity-before-fcp'),
-  'Worker mobile stylesheet must share the R2256 cache identity');
+assert(html.match(/formatx-mobile-first-paint-r358\.css\?v=20261101-r2297-optic-safe-mobile-controls/g)?.length===2,
+  'Preload and render-blocking mobile stylesheet must share the current R2274 URL');
+assert(worker.includes('formatx-mobile-first-paint-r358.css?v=20261101-r2297-optic-safe-mobile-controls'),
+  'Worker critical mobile stylesheet must share the current R2276 cache identity');
 assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');
 assert(intro.includes('const THREE_OWNER_SRC ='),

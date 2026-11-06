@@ -37,6 +37,36 @@
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
+  // R2315: normal desktop hero must already use the same viewport-fixed
+  // layout primitive as its archive mode. The original absolute->fixed
+  // switch after a real 10s film contributed ~0.106 native-stage CLS.
+  // Keep the ORIGINAL canvas and physical 3D renderer. These four CSS
+  // coordinates only pin the fully composited hero in exactly the same
+  // visible pixels; no clone, screenshot, extra draw or new WebGL context.
+  function prepareNativeHomeR2315(){
+    if(disposed||reduced.matches||mobile()||archiveActive||!introDone||document.hidden)
+      return;
+    if(scrollY>Math.max(24,innerHeight*.06))return;
+    if(root.dataset.fxCrystalOrganismR326!=='ready')return;
+    const target=window.FormatXLivingCore?.stage||
+      document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage');
+    const host=document.querySelector('#hero .hero-space');
+    if(!(target instanceof HTMLElement)||!target.isConnected||
+       !(host instanceof HTMLElement))return;
+    const original=target.getBoundingClientRect();
+    if(original.width<40||original.height<40)return;
+    // When already prepared, the visible stage is fixed: the authentic
+    // desktop HTML hero-space remains the reserved layout anchor on resize.
+    const rect=root.dataset.fxMagNativeHomeR2315==='prepared'?
+      host.getBoundingClientRect():original;
+    for(const [name,value] of [
+      ['--fx-native-home-left-r2315',rect.left],
+      ['--fx-native-home-top-r2315',rect.top],
+      ['--fx-native-home-width-r2315',rect.width],
+      ['--fx-native-home-height-r2315',rect.height]
+    ])target.style.setProperty(name,value.toFixed(3)+'px');
+    root.dataset.fxMagNativeHomeR2315='prepared';
+  }
   function setHeroCanvasLaneFront(active){
     const hero=document.getElementById('hero');
     if(!hero)return;
@@ -621,24 +651,169 @@
       }
     }
   }
+  // R2293: smooth FLIP handoff from the already painted hero into
+  // the existing fixed cinematic lane. One WebGL canvas, NO cloned canvas,
+  // image snapshot, extra renderer or perpetual animation frame.
+  let stageFlipRafR2293=0,stageFlipTimerR2293=0;
+  function clearStageFlipR2293(restoreHome=true){
+    if(stageFlipRafR2293)cancelAnimationFrame(stageFlipRafR2293);
+    stageFlipRafR2293=0;
+    if(stageFlipTimerR2293)clearTimeout(stageFlipTimerR2293);
+    stageFlipTimerR2293=0;
+    if(stage?._fxArchiveFlipOriginalR2293){
+      if(restoreHome){
+        for(const [prop,value,priority] of stage._fxArchiveFlipOriginalR2293){
+          if(value)stage.style.setProperty(prop,value,priority);
+          else stage.style.removeProperty(prop);
+        }
+        delete stage._fxArchiveFlipOriginalR2293;
+      }else{
+        // R2302: keep the desktop fixed archive lane's geometry neutral.
+        // Restoring the pre-dock hero matrix here used to rescale 38vw
+        // into a 683px stage and push the supposedly fixed MAG offscreen.
+        stage.style.setProperty('transition','none','important');
+        stage.style.setProperty('transform','none','important');
+      }
+    }
+  }
   class ResponsiveExperience {
     static dock(){
       if(!stage||archiveActive)return;
       if(!heroHost||!heroHost.isConnected)return;
-      // Keep the canonical canvas inside #hero. Moving it would break the
-      // original MAG DOM contract and WebGL identity checks. The external
-      // archive stylesheet owns docking geometry so strict style-src remains
-      // intact and renderer-authored canvas state is never overwritten.
+      // R2286: native scrolling enters the archive only after a user action.
+      // R2293: first measure the actual visible hero, then use compositor
+      // transforms to hand its EXISTING physical pixels into the fixed MAG
+      // lane instead of causing a 0.101834 CLS 195px width snap.
+      clearStageFlipR2293();
+      const previous=stage.getBoundingClientRect();
+      // R2316: stable fixed-layout desktop hero (R2315) moves ONLY with a
+      // GPU compositor transform. The earlier change of left/top/width/height
+      // during first dock generated a 0.189 LayoutShift on the real 1440px
+      // normal-visitor Chromium run, despite matching the initial pixels.
+      // Leave the underlying physical canvas box and native WebGL renderer
+      // untouched while moving its presentation into the 38vw/74dvh lane.
+      if(!mobile()&&root.dataset.fxMagNativeHomeR2315==='prepared'&&
+         previous.width>40&&previous.height>40){
+        const x=innerWidth*.025,y=innerHeight*.12;
+        const w=innerWidth*.38,h=innerHeight*.74;
+        const dx=x-previous.x,dy=y-previous.y;
+        const sx=w/previous.width,sy=h/previous.height;
+        const finalTransform='translate('+dx.toFixed(3)+'px,'+
+          dy.toFixed(3)+'px) scale('+sx.toFixed(7)+','+sy.toFixed(7)+')';
+        stage._fxArchiveFlipOriginalR2293=
+          ['transform','transform-origin','transition'].map(prop=>[
+            prop,stage.style.getPropertyValue(prop),
+            stage.style.getPropertyPriority(prop)
+          ]);
+        stage.classList.add('fx-archive-native-docked');
+        root.dataset.fxArchiveDock='active';
+        archiveActive=true;
+        stage.style.setProperty('transition','none','important');
+        stage.style.setProperty('transform-origin','0 0','important');
+        stage.style.setProperty('transform','none','important');
+        root.dataset.fxArchiveFlipR2293='fixed-box-compositor-only-entry';
+        stageFlipRafR2293=requestAnimationFrame(()=>{
+          stageFlipRafR2293=0;
+          if(!archiveActive||!stage?.isConnected)return;
+          stage.style.setProperty('transition',
+            'transform 360ms cubic-bezier(.20,.66,.16,1)','important');
+          stage.style.setProperty('transform',finalTransform,'important');
+        });
+        stageFlipTimerR2293=setTimeout(()=>{
+          stageFlipTimerR2293=0;
+          if(!archiveActive||!stage?.isConnected)return;
+          stage.style.setProperty('transition','none','important');
+          stage.style.setProperty('transform',finalTransform,'important');
+          root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+          window.FormatXLivingCore?.requestRender?.(1);
+        },440);
+        window.FormatXLivingCore?.requestRender?.(1);
+        return;
+      }
+      const desktopNativeDockR2302=!mobile();
+      if(desktopNativeDockR2302){
+        // The live R326 hero may own an inline, important transform. CSS
+        // cannot override it, even with a very specific !important rule.
+        // Save all three original inline values BEFORE measuring the
+        // physical archive target, so FLIP animates to the real viewport lane.
+        stage._fxArchiveFlipOriginalR2293=
+          ['transform','transform-origin','transition'].map(prop=>[
+            prop,stage.style.getPropertyValue(prop),
+            stage.style.getPropertyPriority(prop)
+          ]);
+      }
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
+      if(desktopNativeDockR2302)
+        stage.style.setProperty('transform','none','important');
+      // R2294: on phones the native stage has a stable fixed layout box
+      // before AND after docking. Only the authored CSS translate3d changes.
+      // Do not run the R2293 FLIP path here: measuring a new position/size
+      // after class-toggle is exactly what Chrome counted as 0.101834 CLS.
+      if(mobile()&&!reduced.matches){
+        root.dataset.fxArchiveFlipR2293='mobile-fixed-layout-compositor-entry';
+        stageFlipTimerR2293=setTimeout(()=>{
+          stageFlipTimerR2293=0;
+          if(!archiveActive||!stage?.isConnected)return;
+          root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+          window.FormatXLivingCore?.requestRender?.(1);
+        },440);
+        window.FormatXLivingCore?.requestRender?.(1);
+        return;
+      }
+      const target=stage.getBoundingClientRect();
+      const valid=previous.width>8&&previous.height>8&&
+        target.width>8&&target.height>8&&
+        Number.isFinite(previous.x)&&Number.isFinite(target.x);
+      if(valid&&!reduced.matches){
+        const dx=previous.x-target.x,dy=previous.y-target.y;
+        const sx=previous.width/target.width,sy=previous.height/target.height;
+        if(Math.abs(dx)>1||Math.abs(dy)>1||
+           Math.abs(sx-1)>.008||Math.abs(sy-1)>.008){
+          // R2302: restore only when leaving the archive; never restore a
+          // stale home matrix at the end of the compositor-only FLIP.
+          stage.style.setProperty('transition','none','important');
+          stage.style.setProperty('transform-origin','0 0','important');
+          stage.style.setProperty('transform',
+            `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) scale(${sx.toFixed(5)},${sy.toFixed(5)})`,
+            'important');
+          root.dataset.fxArchiveFlipR2293='same-pixels-compositor-entry';
+          // One bounded style flush on MODE ENTRY (not every animation
+          // frame) ensures Chromium captures the inverse transform as
+          // the FLIP transition's real starting geometry.
+          void stage.getBoundingClientRect();
+          stageFlipRafR2293=requestAnimationFrame(()=>{
+            stageFlipRafR2293=0;
+            if(!archiveActive||!stage?.isConnected)return;
+            stage.style.setProperty('transition',
+              'transform 360ms cubic-bezier(.20,.66,.16,1)','important');
+            stage.style.setProperty('transform','none','important');
+          });
+          stageFlipTimerR2293=setTimeout(()=>{
+            stageFlipTimerR2293=0;
+            if(!archiveActive||!stage?.isConnected)return;
+            clearStageFlipR2293(false);
+            root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+            window.FormatXLivingCore?.requestRender?.(1);
+          },440);
+        }
+      }
+      // If no FLIP was needed, the original canvas is already in the fixed
+      // viewport slot. Keep its home matrix deferred until restore().
+      if(!stageFlipRafR2293&&!stageFlipTimerR2293){
+        if(desktopNativeDockR2302)stage.style.setProperty('transform','none','important');
+        root.dataset.fxArchiveFlipR2293='settled-native-onecanvas';
+      }
       window.FormatXLivingCore?.requestRender?.(1);
     }
     static restore(){
       if(!archiveActive||!stage)return;
+      clearStageFlipR2293();
       stage.classList.remove('fx-archive-native-docked');
       root.dataset.fxArchiveDock='home';
       archiveActive=false;
+      root.dataset.fxArchiveFlipR2293='restored-home';
       window.FormatXLivingCore?.requestRender?.(1);
     }
   }
@@ -1125,7 +1300,15 @@ void main(){
     // From the moment the intro ends, the MAG owns the page. Do not leave the
     // old landing page visible for a whole first viewport of scrolling.
     // The same native scrolling and eight source anchors remain intact.
-    const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
+    // R2286: the first native MAG portrait owns the landing viewport.
+    // Never dock into the scrolling archive merely because the 10s film
+    // finished. The original 390px Chromium CLS trace showed an unprompted
+    // 195px -> 390px stage geometry jump at 11.3s, scrollY=0.
+    // The user explicitly enters the archive by scrolling down; returning
+    // to the top restores the uninterrupted native MAG hero.
+    const enteredScroll=scrollY>Math.max(24,innerHeight*.06);
+    const inArchive=Boolean(introDone&&enteredScroll&&
+      root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
@@ -1282,6 +1465,13 @@ void main(){
       for(const prop of ['--fx-archive-paper-x','--fx-archive-paper-y','--fx-archive-paper-rot','--fx-archive-paper-scale','--fx-archive-paper-opacity'])node.style.removeProperty(prop);
     }
     ResponsiveExperience.restore();
+    // R2315: native stage reverts to original authored layout if an archive
+    // fallback or lifecycle cleanup stops the cinematic controller.
+    delete root.dataset.fxMagNativeHomeR2315;
+    for(const name of [
+      '--fx-native-home-left-r2315','--fx-native-home-top-r2315',
+      '--fx-native-home-width-r2315','--fx-native-home-height-r2315'
+    ])stage?.style.removeProperty(name);
     detach?.();detach=null;drawPass=null;
     registeredCanvas=null;registeredApi=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
@@ -1305,17 +1495,34 @@ void main(){
     discover();
     if(scenes.length<2){root.dataset.fxArchiveExperience='no-scenes';return;}
     connect();
-    addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
+    prepareNativeHomeR2315();
+    addEventListener('formatx:real3dready',()=>{
+      connect();
+      prepareNativeHomeR2315();
+    },{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
-    addEventListener('resize',invalidate,{passive:true});
+    addEventListener('resize',()=>{
+      prepareNativeHomeR2315();
+      invalidate();
+    },{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
-    addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
+    addEventListener('formatx:livingready',()=>{
+      discover();
+      prepareNativeHomeR2315();
+      invalidate();
+    },{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      // Before any normal scroll, preserve the hero viewport rectangle
+      // while switching only the layout primitive to fixed positioning.
+      prepareNativeHomeR2315();
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
-    addEventListener('pageshow',invalidate,{passive:true});
+    addEventListener('pageshow',()=>{
+      prepareNativeHomeR2315();
+      invalidate();
+    },{passive:true});
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
     addEventListener('pagehide',stop,{once:true});

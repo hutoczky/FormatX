@@ -80,6 +80,9 @@
 
       this.camera=new THREE.PerspectiveCamera(42,1,0.05,80);
       this.camera.position.set(0,0.12,7.25);
+      // R2298: reuse target-projection scratch storage across film frames.
+      this.targetRayR2298=new THREE.Vector3();
+      this.targetWorldR2298=new THREE.Vector3();
 
       this.world=new THREE.Group();
       this.scene.add(this.world);
@@ -142,9 +145,8 @@
       this.coreLight=new T.PointLight(0x78e6e8,0,7.2,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
-      this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
-      this.mechLight.position.set(-2.6,3.0,4.4);
-      this.scene.add(this.mechLight);
+      // R2298: the actual pupil light is created once in makeMechanicalLayer().
+      // The former zero-output duplicate remained in the scene's PBR light loop.
     }
 
     makeStudioEnvironment(){
@@ -179,6 +181,11 @@
       card(.68,.46,.043,.37,.14,'rgba(194,220,217,.77)','rgba(82,122,128,.14)');
       card(.49,.19,.32,.068,0,'rgba(135,180,195,.32)','rgba(54,99,114,.05)');
       card(.87,.58,.12,.18,.35,'rgba(71,154,175,.26)','rgba(34,83,110,.04)');
+      // R2300: two narrow, physically plausible softbox banks carve a
+      // glancing studio edge into titanium and glass. Prebaked in the same
+      // PMREM: no additional GPU draw calls, render passes, or lights.
+      card(.375,.59,.014,.265,-.13,'rgba(218,240,237,.40)','rgba(90,139,148,.045)');
+      card(.80,.23,.017,.18,.18,'rgba(240,218,202,.25)','rgba(105,85,79,.030)');
       let texture=null,pmrem=null;
       try{
         texture=new T.CanvasTexture(canvas);
@@ -341,7 +348,9 @@
       // One shared 64 x 64 GPU texture on the existing physical helices;
       // no external image, no render target, no animated texture upload.
       if(this.dnaFiberTexture)return this.dnaFiberTexture;
-      const T=this.THREE,size=64;
+      // R2328: higher-resolution phosphatic microfibrils on the SAME
+      // genuine 3D DNA tube; single 64 KiB shared GPU texture, once.
+      const T=this.THREE,size=128;
       const pixels=new Uint8Array(size*size*4);
       const fract=x=>x-Math.floor(x);
       for(let y=0;y<size;y++)for(let x=0;x<size;x++){
@@ -387,24 +396,27 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const phosphateTexture=this.makeDNAFiberTexture();
+      // R2271: hydrated biopolymer, not emissive candy-light tubing.
+      // The existing true 3D double helix gains neutral photographic
+      // reflections over the original phosphate microrelief texture.
       const ma=new T.MeshPhysicalMaterial({
-        color:0x9cc6ea,emissive:0x28538d,emissiveIntensity:1.08,
-        roughness:.225,metalness:.11,transparent:true,opacity:.93,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
-        depthWrite:false,clearcoat:.88,clearcoatRoughness:.085
+        color:0xa7c8e2,emissive:0x224267,emissiveIntensity:.63,
+        roughness:.255,metalness:.065,transparent:true,opacity:.95,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
+        depthWrite:false,clearcoat:.96,clearcoatRoughness:.075
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0xc2a2eb,emissive:0x5e3997,emissiveIntensity:1.05,
-        roughness:.23,metalness:.10,transparent:true,opacity:.92,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.009:.013,
-        depthWrite:false,clearcoat:.86,clearcoatRoughness:.10
+        color:0xc8b5dd,emissive:0x523b77,emissiveIntensity:.61,
+        roughness:.26,metalness:.062,transparent:true,opacity:.95,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
+        depthWrite:false,clearcoat:.95,clearcoatRoughness:.08
       });
       const ga=new T.MeshBasicMaterial({
-        color:0x4bdfff,transparent:true,opacity:.095,depthWrite:false,
+        color:0x65bad6,transparent:true,opacity:.055,depthWrite:false,
         blending:T.AdditiveBlending
       });
       const gb=new T.MeshBasicMaterial({
-        color:0x997bff,transparent:true,opacity:.085,depthWrite:false,
+        color:0xa090d3,transparent:true,opacity:.050,depthWrite:false,
         blending:T.AdditiveBlending
       });
       // R2188: complementary nucleotide chemistry is readable as genuine
@@ -413,6 +425,8 @@
       const rungMat=new T.MeshPhysicalMaterial({
         color:0xf0f7ff,emissive:0x24353e,emissiveIntensity:.35,
         metalness:.04,roughness:.28,clearcoat:.75,
+        // R2300: only the main 3D molecular rung has vertex colors.
+        vertexColors:radius>.35,
         transparent:true,opacity:.94,depthWrite:false
       });
       const mpa=new T.PointsMaterial({
@@ -433,7 +447,30 @@
       const auraA=new T.Mesh(new T.TubeGeometry(curveA,seg,aureole,8,false),ga);
       const auraB=new T.Mesh(new T.TubeGeometry(curveB,seg,aureole,8,false),gb);
 
-      const rungGeo=new T.CylinderGeometry(.018,.018,1,10,1,false);
+      // R2300: actual sculpted contact neck and two molecular ligand heads.
+      // Keep ONE instanced draw; secondary donor helices keep legacy LOD.
+      const primaryMolecule=radius>.35;
+      const rungGeo=new T.CylinderGeometry(.018,.018,1,
+        primaryMolecule?(this.mobileRender?8:10):10,
+        primaryMolecule?6:1,false);
+      if(primaryMolecule){
+        const pos=rungGeo.getAttribute('position');
+        const chromaticBond=new Float32Array(pos.count*3);
+        for(let k=0;k<pos.count;k++){
+          const y=pos.getY(k),ay=Math.abs(y);
+          const contact=1-.38*Math.exp(-Math.pow(y/.115,2));
+          const terminal=1+.17*Math.exp(-Math.pow((ay-.35)/.085,2));
+          const width=contact*terminal;
+          pos.setXYZ(k,pos.getX(k)*width,y,pos.getZ(k)*width);
+          const shadow=1-smooth((ay-.035)/.275);
+          chromaticBond[k*3]=1-.37*shadow;
+          chromaticBond[k*3+1]=1-.29*shadow;
+          chromaticBond[k*3+2]=1-.20*shadow;
+        }
+        pos.needsUpdate=true;
+        rungGeo.setAttribute('color',new T.BufferAttribute(chromaticBond,3));
+        rungGeo.computeVertexNormals();
+      }
       const rungs=new T.InstancedMesh(rungGeo,rungMat,rungPairs.length);
       const dummy=new T.Object3D();
       const up=new T.Vector3(0,1,0);
@@ -1146,7 +1183,13 @@
             // R2192: all genetic matter departs BEFORE the optical organ
             // starts igniting at 7.44 s; no ghost DNA over the born MAG.
             float last=1.0-curve(6.96,7.44,uPhase);
-            vEnergy=first*last*(1.0+transferGlow*.16);
+            // R2301: after DNA has condensed, the bright genetic stream
+            // becomes internal chromatin, not a foreground confetti cloud.
+            // All 6000/9600 physical GPU morph particles remain present.
+            float cellOpticalDepth=curve(3.38,4.28,uPhase)*
+              (1.0-curve(5.66,6.52,uPhase));
+            vEnergy=first*last*(1.0+transferGlow*.16)*
+              (1.0-.44*cellOpticalDepth);
             vSeed=aSeed;
           }`,
         fragmentShader:`
@@ -1188,7 +1231,8 @@
         const ix=Math.floor(x),iy=Math.floor(y);
         let fx=x-ix,fy=y-iy;
         fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
-        const sample=(px,py)=>hash(((px%scale)+scale)%scale,py);
+        // R2271: both axes tile seamlessly on the curved cell.
+        const sample=(px,py)=>hash(((px%scale)+scale)%scale,((py%scale)+scale)%scale);
         return mix(mix(sample(ix,iy),sample(ix+1,iy),fx),
           mix(sample(ix,iy+1),sample(ix+1,iy+1),fx),fy);
       };
@@ -1201,26 +1245,26 @@
             +.20*noise(u+.07,v,78);
           const coralCloud=.56*noise(u+.13,v+.07,23)
             +.44*noise(u,v,61);
-          const coral=clamp((coralCloud-.545)*5.1);
+          const coral=Math.pow(clamp((coralCloud-.575)*4.25),1.4);
           const mineral=noise(u,v,116);
-          const grain=(hash(x,y)-.5)*13;
+          const grain=(hash(x,y)-.5)*8;
           // R2201: microscopic clustered chromatin, not a uniform aqua blob.
         // A lower threshold produces many small coral organelle islands.
         const freckle=Math.pow(clamp((mineral-.62)*3.9),2);
           const index=(y*width+x)*4;
           pixels[index]=Math.round(clamp(
-            (20+72*cloud+202*coral+62*freckle+grain)/255)*255);
+            (20+72*cloud+155*coral+58*freckle+grain)/255)*255);
           pixels[index+1]=Math.round(clamp(
-            (87+165*cloud-61*coral+24*freckle+grain)/255)*255);
+            (87+165*cloud-36*coral+24*freckle+grain)/255)*255);
           pixels[index+2]=Math.round(clamp(
-            (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
+            (95+169*cloud-54*coral+18*freckle+grain)/255)*255);
           pixels[index+3]=255;
           // R2212: deepen coral trabeculae within the teal metabolic matrix.
           // R2206: cluster coral metabolic islands within living teal
           // cytoplasm; preserve the membrane's fine-scale native texture.
           // All sampling happens once at initialization, never per frame.
           const metabolic=clamp(Math.pow(clamp(
-            (coralCloud-.52)*4.7),1.8)*(.48+.52*mineral));
+            (coralCloud-.54)*4.5),1.8)*(.48+.52*mineral));
           const capillary=clamp((.5+.5*Math.sin(u*39+
             3.0*Math.sin(v*24+curl*5.0))-.74)*3.6)*cloud;
           pixels[index]=Math.min(255,pixels[index]+Math.round(
@@ -1239,6 +1283,8 @@
       texture.colorSpace=T.SRGBColorSpace;
       texture.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy());
       texture.needsUpdate=true;
+      document.documentElement.dataset.fxGenesisStudioR2271=
+        'hydrated-dna-satin-cell-membrane-seamless-microscopic-coral';
       return texture;
     }
 
@@ -1253,7 +1299,14 @@
         const x=positions.getX(i),y=positions.getY(i),z=positions.getZ(i);
         const phi=Math.atan2(z,x);
         const envelope=1+.045*Math.sin(phi*5.0+y*4.2)+.024*Math.cos(phi*3.0-y*7.1);
-        positions.setXYZ(i,x*envelope,y*(1+.024*Math.cos(phi*4.0))*envelope,z*envelope);
+        // R2303: sculpt coherent lamellar microfolds in real 3D coordinates.
+        // Exact same mesh, vertex count, WebGL context and per-frame budget.
+        const lamella=Math.sin(x*9.4+y*4.2+1.15*Math.sin(z*3.6))*
+          Math.cos(z*7.2-y*3.3);
+        const stromalVein=Math.sin(x*5.8+z*4.2+1.4*Math.sin(y*3.2))*
+          Math.cos(y*6.7-z*3.1);
+        const folded=envelope*(1+.014*lamella+.006*stromalVein);
+        positions.setXYZ(i,x*folded,y*(1+.024*Math.cos(phi*4.0))*folded,z*folded);
       }
       positions.needsUpdate=true;geometry.computeVertexNormals();
       this.embryoTexture=this.makeEmbryoTexture();
@@ -1262,10 +1315,10 @@
         // nucleus was too transparent against near-black (0.47 opacity),
         // washing its coral metabolic freckles into a faint glass bead.
         color:0xf5ffff,map:this.embryoTexture,
-        bumpMap:this.embryoTexture,bumpScale:.034,
+        bumpMap:this.embryoTexture,bumpScale:.023,
         emissive:0x16676b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.40,
-        metalness:.015,roughness:.25,clearcoat:.82,clearcoatRoughness:.14,
+        emissiveIntensity:.28,
+        metalness:.015,roughness:.32,clearcoat:.90,clearcoatRoughness:.16,
         transmission:.075,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
@@ -1276,15 +1329,21 @@
       // nucleus is a physically shaded translucent organelle with an actual
       // clear-coated lens, lit by the same three-dimensional studio rig.
       this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({
-        color:0x248a9d,emissive:0x13718a,emissiveIntensity:.40,
-        metalness:.015,roughness:.13,transmission:.24,thickness:.23,ior:1.36,
-        clearcoat:1,clearcoatRoughness:.055,
+        // R2331: the biological organelle shares the ORIGINAL 3D cell's
+        // cyan/coral metabolic texture. No new image/GPU texture allocation.
+        // A hydrated irregular tissue surface replaces the black button-like
+        // center visible in the actual 5.50s phone screenshot.
+        color:0xd6eeed,map:this.embryoTexture,
+        bumpMap:this.embryoTexture,bumpScale:.012,
+        emissive:0x256c71,emissiveMap:this.embryoTexture,emissiveIntensity:.42,
+        metalness:.012,roughness:.44,transmission:.13,thickness:.17,ior:1.35,
+        clearcoat:.70,clearcoatRoughness:.24,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoNucleus=new T.Mesh(
-        new T.SphereGeometry(.25,32,24),this.embryoNucleusMaterial
+        new T.SphereGeometry(.22,32,24),this.embryoNucleusMaterial
       );
-      this.embryoNucleus.position.set(-.10,.06,.37);
+      this.embryoNucleus.position.set(-.10,.06,.28);
       this.coreGroup.add(this.embryoNucleus);
       // R2167 — nucleus organelle and continuous curved membrane networks.
       // These sit at genuinely different z depths inside the cell; they
@@ -1340,9 +1399,10 @@
         this.mobileRender?.023:.028,1
       );
       const vesicleMaterial=new T.MeshPhysicalMaterial({
-        color:0xffffff,metalness:0,roughness:.40,
-        clearcoat:.43,clearcoatRoughness:.27,
-        emissive:0x2b363a,emissiveIntensity:.16,
+        // R2331: 3D vesicles are wet living tissue, not polished pearls.
+        color:0xffffff,metalness:0,roughness:.68,
+        clearcoat:.22,clearcoatRoughness:.34,
+        emissive:0x2b363a,emissiveIntensity:.12,
         transparent:true,opacity:0,depthWrite:false
       });
       const vesicles=new T.InstancedMesh(
@@ -1380,6 +1440,8 @@
       this.embryoVesicles=vesicles;
       this.embryoVesicleMaterial=vesicleMaterial;
       this.coreGroup.add(vesicles);
+      document.documentElement.dataset.fxGenesisCellTissueR2331=
+        'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles';
 
       // R2189: chromatin is a family of genuinely volumetric curved fibres
       // suspended BETWEEN membrane and nucleus. One GPU line batch, not a
@@ -1530,8 +1592,15 @@
       };
       // DNA never competes with embryo, embryo never masks assembling metal.
       setup(this.dnaBiofield,(1-smooth((t-2.94)/1.42))*.84);
+      // R2318: retain the full physical cellular photon population, but
+      // reduce additive energy so the REAL translucent membrane, 84
+      // organelles and flowing nucleus remain visible at 5.50s.
+      // This is not a geometry/particle-count/quality reduction: exactly
+      // the same shader program, GPU points, textures and draw call.
+      // DNA's original bright founding-helix lighting is unchanged.
       setup(this.embryoBiofield,
-        smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*.94);
+        smooth((t-3.47)/.66)*(1-smooth((t-5.63)/1.03))*
+        (this.mobileRender?.39:.44));
     }
 
     updateGenomeParticles(t,time){
@@ -1554,6 +1623,9 @@
         color:0x160d20,roughness:.66,metalness:.010,
         clearcoat:.11,clearcoatRoughness:.54,
         bumpMap:microFiberTexture,bumpScale:.036,
+        // R2295: the original vertex colors belong to the ACTUAL curved
+        // embryonic cortex, not a two-dimensional aura or texture overlay.
+        vertexColors:true,
         transparent:true,opacity:0,
         emissive:0x1c0b29,emissiveIntensity:.18,
         depthWrite:true
@@ -1572,6 +1644,60 @@
       });
 
       const shell=new T.Mesh(new T.IcosahedronGeometry(1.38,4),this.organicShellMaterial);
+      // R2291: sculpt the EXISTING 3D cell membrane once, before its original
+      // GPU upload. No extra geometry, render pass, scene owner or RAF.
+      const shellPosition=shell.geometry.getAttribute('position');
+      const cortexChromatinR2295=new Float32Array(shellPosition.count*3);
+      for(let i=0;i<shellPosition.count;i++){
+        const x=shellPosition.getX(i),y=shellPosition.getY(i),z=shellPosition.getZ(i);
+        const ridge=Math.sin(x*2.78+y*1.41)*Math.cos(z*2.31-y*1.68);
+        const lobe=Math.sin(y*3.21-z*2.18)*Math.cos(x*2.14+z*1.27);
+        // R2295: coherent high-order cellular pleats actually displace the
+        // same physical 3D mesh. Every duplicate edge vertex samples the
+        // identical continuous local coordinate field, without UV seams.
+        const microPleat=Math.sin(x*8.4+z*2.8+2.1*Math.sin(y*3.1))*
+          Math.cos(y*6.0-z*4.1);
+        const stretch=1+.063*ridge+.037*lobe+.016*microPleat;
+        shellPosition.setXYZ(i,x*stretch,y*stretch,z*stretch);
+        // Studio microscopic vascular channels and sparse coral organelles
+        // follow *the existing geometry* through its PBR vertex-color VBO.
+        // All values are deterministic, computed once at construction.
+        const marrow=Math.sin(x*7.6+y*3.9+2.0*Math.sin(z*3.1))*
+          Math.cos(y*6.2-z*4.7);
+        const vessel=Math.pow(.5+.5*marrow,6);
+        const fleck=Math.sin(x*5.7-y*7.6+z*4.1)*
+          Math.cos(y*5.3+z*6.2);
+        const coral=Math.pow(Math.max(0,(fleck-.33)/.67),3);
+        const pearl=.80+.13*(.5+.5*microPleat)+.10*vessel;
+        const at=i*3;
+        cortexChromatinR2295[at]=pearl*(.89+2.30*coral);
+        cortexChromatinR2295[at+1]=pearl*(.94+.25*vessel-.36*coral);
+        cortexChromatinR2295[at+2]=pearl*(.97+.22*vessel-.29*coral);
+      }
+      shellPosition.needsUpdate=true;
+      shell.geometry.setAttribute('color',
+        new T.BufferAttribute(cortexChromatinR2295,3));
+      shell.geometry.computeVertexNormals();
+      // R2317: this IcosahedronGeometry is NON-INDEXED. Three's generated
+      // normals are per-face, so the R2307 9.25s GPU screenshot exposed
+      // flat, polygonal biological tissue behind the optical MAG.
+      // Reuse the SAME existing geometry and normal attribute once at boot:
+      // continuous radial normals on the already physically pleated surface
+      // preserve real 3D contours, PBR chromatin, fiber bump and bioglass.
+      // No new vertices, materials, render passes or per-frame work.
+      const cortexNormalsR2317=shell.geometry.getAttribute('normal');
+      for(let i=0;i<shellPosition.count;i++){
+        const x=shellPosition.getX(i),y=shellPosition.getY(i),z=shellPosition.getZ(i);
+        const inv=1/Math.max(.00001,Math.hypot(x,y,z));
+        cortexNormalsR2317.setXYZ(i,x*inv,y*inv,z*inv);
+      }
+      cortexNormalsR2317.needsUpdate=true;
+      document.documentElement.dataset.fxGenesisCortexR2295=
+        'true-3d-pleated-chromatin-capillaries-coral-PBR-one-shell';
+      this.organicShellSourceColor=this.organicShellMaterial.color.clone();
+      this.organicShellBornColor=new T.Color(0x1a5961);
+      this.organicLobeSourceColor=this.organicLobeMaterial.color.clone();
+      this.organicLobeBornColor=new T.Color(0x17414c);
       shell.scale.set(1.00,1.03,.78);
       this.organicShell=shell;
       this.organicGroup.add(shell);
@@ -1929,8 +2055,13 @@
             float radial=max(anatomy.x,anatomy.y);
             float lateral=min(anatomy.x,anatomy.y);
             float width=max(.045,.27*(1.0-smoothstep(.22,1.08,radial)));
-            vec2 cell=vec2(radial*28.0,lateral/width*4.0);
-            cell.y+=sin(floor(cell.x)*1.37)*.20;
+            // R2294: EXACT anatomical lamellae frequency and warped flow
+            // used by the permanent R326 MAG. The retired 28x4 checkerboard
+            // made the last Genesis frame look like tiled metal, then jumped
+            // to an entirely different real-time material at the 10s cut.
+            vec2 cell=vec2(radial*17.0,lateral/width*2.4);
+            cell.y+=.29*sin(cell.x*.54+radial*1.60)
+              +.12*sin(cell.x*1.17+.60);
             vec2 edge=min(fract(cell),1.0-fract(cell));
             vec2 aa=max(fwidth(cell),vec2(.018));
             float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
@@ -1943,11 +2074,11 @@
             return vec3(joint*envelope,plateFinish,brushed);
           }`)
           .replace('#include <color_fragment>',
-            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.24)*(1.0+.018*fxPlate.z);')
+            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.125)*(1.0+.018*fxPlate.z);')
           .replace('#include <roughnessmap_fragment>',
-            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.095+(fxPlate.y-.5)*.035,.10,.48);');
+            '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.060+(fxPlate.y-.5)*.028,.10,.48);');
       };
-      material.customProgramCacheKey=()=> 'r2207-filtered-machined-silver-plate-finish';
+      material.customProgramCacheKey=()=> 'r2294-sinuous-studio-titanium-matched-native';
     }
 
     makeMechanicalLayer(){
@@ -2333,6 +2464,18 @@
           transparent:true,opacity:.92
         })
       );
+      // R2300: aspheric meniscus on the EXISTING optical sphere topology.
+      // Physical crown, same number of triangles, repaired lighting normals.
+      const opticVertices=this.mechEyeCore.geometry.getAttribute('position');
+      for(let k=0;k<opticVertices.count;k++){
+        const x=opticVertices.getX(k),y=opticVertices.getY(k);
+        const oldZ=opticVertices.getZ(k);
+        const radius=Math.min(1,Math.hypot(x,y)/.120);
+        const sag=Math.pow(Math.max(0,1-radius*radius),1.35);
+        opticVertices.setZ(k,oldZ*(.80+.20*sag)+Math.sign(oldZ)*.003*sag);
+      }
+      opticVertices.needsUpdate=true;
+      this.mechEyeCore.geometry.computeVertexNormals();
       this.mechEyeCore.scale.set(1,1,.30);
       this.mechEyeCore.position.set(0,.01,.505);
       this.mechanicalGroup.add(this.mechEyeCore);
@@ -2377,13 +2520,22 @@
       const shutterVertices=[];
       for(let blade=0;blade<8;blade++){
         const angle=blade*Math.PI/4+.12;
-        const p=(radius,offset)=>[
+        const p=(radius,offset,depth)=>[
           Math.cos(angle+offset)*radius,
           .01+Math.sin(angle+offset)*radius,
-          .495
+          depth
         ];
+        // R2307: each existing optical shutter has two authentic 3D
+        // titanium bevel facets. The raised crease captures the moving
+        // studio reflection, while the inner heel follows the meniscus.
+        // ONE existing MeshPhysicalMaterial and ONE original GPU draw.
+        const heel=p(.107,-.15,.519);
+        const leading=p(.178,-.23,.505);
+        const crease=p(.151,.070,.526);
+        const trailing=p(.178,.35,.505);
         shutterVertices.push(
-          ...p(.107,-.15),...p(.178,-.23),...p(.178,.35)
+          ...heel,...leading,...crease,
+          ...heel,...crease,...trailing
         );
       }
       const shutterGeometry=new T.BufferGeometry();
@@ -2395,7 +2547,7 @@
         new T.MeshPhysicalMaterial({
           color:0x98b5b7,metalness:.67,roughness:.23,
           clearcoat:.9,clearcoatRoughness:.08,
-          side:T.DoubleSide,transparent:true,opacity:0,depthWrite:false
+          side:T.DoubleSide,flatShading:true,transparent:true,opacity:0,depthWrite:false
         })
       );
       this.mechanicalGroup.add(this.mechOpticShutters);
@@ -2540,9 +2692,10 @@
     makeTentacles(){
       const T=this.THREE,r=this.rand;
       this.tentacleMaterial=new T.MeshStandardMaterial({
-        color:0x17333d,metalness:.44,roughness:.34,
-        emissive:0x0c4b58,emissiveIntensity:.42,
-        transparent:true,opacity:0
+        // R2292: restrained wet bioglass fibrils, not robotic cables.
+        color:0x315661,metalness:.22,roughness:.42,
+        emissive:0x0e3d47,emissiveIntensity:.28,
+        transparent:true,opacity:0,depthWrite:false
       });
       this.tentacleEdgeMaterial=new T.MeshBasicMaterial({
         color:0x5a9eaa,wireframe:true,transparent:true,opacity:0,
@@ -2595,6 +2748,11 @@
         dash.computeLineDistances();
         const g=new T.Group();
         g.add(mesh,glow,wire,dash,nodes);
+        // R2292: keep only the existing physically shaded tube visible.
+        // Decorative glowing meshes, wireframes, nodes and dashed skeleton
+        // remain disabled: each living filament is a SINGLE real 3D draw.
+        glow.visible=false;wire.visible=false;
+        dash.visible=false;nodes.visible=false;
         g.scale.setScalar(.001);
         g.userData.phase=phase;
         this.tentacleGroup.add(g);
@@ -2616,15 +2774,17 @@
     }
 
     targetWorld(){
-      const T=this.THREE;
+      // R2298: the only caller immediately consumes x/y. Reusing the vectors
+      // avoids three transient Vec3 allocations per rendered film frame.
       let p=null;
       try { p=this.getTarget?.(); } catch(_){}
-      if(!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return new T.Vector3(0,0,0);
-      const ndc=new T.Vector3((p.x/this.width)*2-1,1-(p.y/this.height)*2,.1);
-      ndc.unproject(this.camera);
-      const dir=ndc.sub(this.camera.position).normalize();
-      const distance=(0-this.camera.position.z)/dir.z;
-      return this.camera.position.clone().add(dir.multiplyScalar(distance));
+      if(!p || !Number.isFinite(p.x) || !Number.isFinite(p.y))
+        return this.targetWorldR2298.set(0,0,0);
+      const ray=this.targetRayR2298.set(
+        (p.x/this.width)*2-1,1-(p.y/this.height)*2,.1
+      ).unproject(this.camera).sub(this.camera.position).normalize();
+      const distance=(0-this.camera.position.z)/ray.z;
+      return this.targetWorldR2298.copy(this.camera.position).addScaledVector(ray,distance);
     }
 
     updateDNA(t,time){
@@ -2869,7 +3029,7 @@
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
       this.embryoCapillaryMaterial.opacity=.10*visible;
-      this.embryoVesicleMaterial.opacity=.58*visible;
+      this.embryoVesicleMaterial.opacity=.43*visible;
       this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
@@ -2888,17 +3048,35 @@
     updateOrganic(t,time){
       const grow=smooth((t-3.76)/.72);
       const fade=1-smooth((t-6.20)/1.15)*.96;
-      const visible=grow*fade;
+      // R2289: a real cortex survives the titanium assembly and gently
+      // reforms by the final 9.25s shot. Previously it was almost gone
+      // (4%) before the film handed off to a prominent live R326 cortex.
+      // Reuse the existing textured 3D shell; allocate ZERO new meshes.
+      const handoffCortex=smooth((t-7.28)/1.43);
+      const visible=grow*mix(fade,.82,handoffCortex);
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+visible*.63;
+      // R2328: preserve large photobiological ovum in the cell chapter;
+      // after titanium seating its cortex retracts to R2327 native scale.
+      const bodyScale=.001+.63*grow*mix(fade,.86,handoffCortex);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
-
-      this.organicShellMaterial.opacity=.18*visible;
-      this.organicLobeMaterial.opacity=.15*visible;
+      // R2291: the hydrated cortex is PHYSICAL VOLUME behind the glass
+      // pupil and titanium shoulders; the 9.25s proof was previously only
+      // a metal emblem because the organ was dark purple and 10% opaque.
+      this.organicGroup.position.z=-.54*handoffCortex;
+      this.organicShellMaterial.color.copy(this.organicShellSourceColor)
+        .lerp(this.organicShellBornColor,handoffCortex);
+      this.organicLobeMaterial.color.copy(this.organicLobeSourceColor)
+        .lerp(this.organicLobeBornColor,handoffCortex);
+      this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);
+      this.organicShellMaterial.roughness=mix(.66,.33,handoffCortex);
+      this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);
+      this.organicShellMaterial.clearcoatRoughness=mix(.54,.18,handoffCortex);
+      this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);
       this.organicWireMaterial.opacity=.0003*visible;
-      this.organicVeinMaterial.opacity=.068*visible;
-      this.organicHoodMaterial.opacity=.13*visible;
-      if(this.organicFoldMaterial)this.organicFoldMaterial.opacity=.16*visible;
+      this.organicVeinMaterial.opacity=mix(.068*visible,.12*grow,handoffCortex);
+      this.organicHoodMaterial.opacity=mix(.13*visible,.16*grow,handoffCortex);
+      if(this.organicFoldMaterial)
+        this.organicFoldMaterial.opacity=mix(.16*visible,.23*grow,handoffCortex);
       if(this.organicFoldGlowMaterial)this.organicFoldGlowMaterial.opacity=.022*visible;
       if(this.organicFiberMaterial)this.organicFiberMaterial.opacity=(this.mobileRender?.20:.34)*visible*(.94+.06*Math.sin(time*.0011));
       if(this.organicFibers){
@@ -2979,9 +3157,9 @@
         mix(.210,.300,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.600,finale),
-        mix(.575,.660,finale),
-        mix(.565,.690,finale)
+        mix(.480,.505,finale),
+        mix(.575,.575,finale),
+        mix(.565,.603,finale)
       );
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression
@@ -2991,10 +3169,10 @@
       this.silverMaterial.transmission=mix(.040,.020,finale);
       this.mechMaterial.metalness=mix(.50,.64,finale);
       this.mechMidMaterial.metalness=mix(.43,.54,finale);
-      this.silverMaterial.metalness=mix(.70,.82,finale);
-      this.mechMaterial.roughness=mix(.26,.21,finale);
-      this.mechMidMaterial.roughness=mix(.24,.19,finale);
-      this.silverMaterial.roughness=mix(.18,.14,finale);
+      this.silverMaterial.metalness=mix(.70,.78,finale);
+      this.mechMaterial.roughness=mix(.26,.23,finale);
+      this.mechMidMaterial.roughness=mix(.24,.21,finale);
+      this.silverMaterial.roughness=mix(.18,.19,finale);
 
       this.mechMaterial.opacity=(.97+.018*finale)*grow;
       // R2119: reveal machined inserts as solid layers, not ghosted decals.
@@ -3118,14 +3296,29 @@
     }
 
     updateTentacles(t,time){
-      /* R1941 — the award hero ends as one uninterrupted signature object.
-         The old segmented cables made the final frame read as a robot prop. */
-      this.tentacleGroup.visible=false;
-      if(this.tentacleMaterial)this.tentacleMaterial.opacity=0;
-      if(this.tentacleEdgeMaterial)this.tentacleEdgeMaterial.opacity=0;
-      if(this.tentacleNodeMaterial)this.tentacleNodeMaterial.opacity=0;
-      if(this.tentacleGlowMaterial)this.tentacleGlowMaterial.opacity=0;
-      if(this.tentacleDashMaterial)this.tentacleDashMaterial.opacity=0;
+      // R2292: the R2291 hydrated rear shell now matches the native organ,
+      // but the final shot was missing R326's three delicate trailing limbs.
+      // Reuse ONLY the leftward three of the original eight tapered 3D
+      // curves. No new geometry, materials, textures or animation loop.
+      // A small one-sided living silhouette replaces the disabled radial
+      // robotic tentacle fan; DNA/embryo chapters remain completely clean.
+      const born=smooth((t-8.12)/1.05);
+      this.tentacleGroup.visible=born>.002;
+      this.tentacleGroup.position.z=-.43*born;
+      this.tentacleGroup.rotation.y=Math.sin(time*.00018)*.014*born;
+      this.tentacleMaterial.opacity=(this.mobileRender?.21:.27)*born;
+      this.tentacleEdgeMaterial.opacity=0;
+      this.tentacleNodeMaterial.opacity=0;
+      this.tentacleGlowMaterial.opacity=0;
+      this.tentacleDashMaterial.opacity=0;
+      this.tentacles.forEach((tube,i)=>{
+        const leftSide=(i===3||i===4||(!this.mobileRender&&i===5));
+        tube.visible=leftSide&&born>.002;
+        if(!tube.visible)return;
+        const pulse=1+.024*Math.sin(time*.00077+tube.userData.phase);
+        tube.scale.setScalar((this.mobileRender?.48:.57)*born*pulse);
+        tube.rotation.z=.012*Math.sin(time*.00019+tube.userData.phase)*born;
+      });
     }
 
     updateCamera(t,time){
@@ -3180,6 +3373,16 @@
       z-=revealDolly*(this.mobileRender?.20:.76);
       x+=birthDolly*.038*Math.sin((t-5.68)*1.12);
       y+=birthDolly*.018;
+      // R2309: frame the ENTIRE four-point titanium chassis during the
+      // 7.50s macro birth. Two simultaneous camera dollies previously
+      // cropped both sharp tips in the actual Chromium film screenshot.
+      // One original 42-degree perspective camera, no cut or extra pass.
+      const assemblyFraming=smooth((t-6.28)/.68)*
+        (1-smooth((t-8.58)/.92));
+      if(!this.mobileRender){
+        const fullFrameZ=Math.max(z,4.36);
+        z=mix(z,fullFrameZ,assemblyFraming);
+      }
       if(this.width<this.height)z+=.90;
       this.camera.position.set(x,y,z);
       this.camera.lookAt(0,0,0);
@@ -3464,4 +3667,6 @@
   document.documentElement.dataset.fxMagIntroStudioR1950c='clean-genome-transition-neutral-fill-early-debris-fade';
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
+  document.documentElement.dataset.fxGenesisStudioR2300='polarized-softbox-sculpted-primary-nucleotides-aspheric-optic-single-physical-film';
+  document.documentElement.dataset.fxGenesisStudioR2301='cellular-depth-first-tamed-additive-chromatin-real-3d-geometry';
 })();

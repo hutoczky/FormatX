@@ -59,6 +59,31 @@ const INLINE_R2236_BOOT_HASH = "'sha256-bYKdkY44Ec1zfGbssl8z3Sx+yhpLLqHeyDiip6RA
 const INLINE_R2254_BOOT_HASH = "'sha256-LUsZw5C9x8eOVqy1tnX0lxNhJQLe2s8XNNhag8ujGxg='";
 const INLINE_R2255_BOOT_HASH = "'sha256-ArsuHXb4Skryh0fBAWs2cXcVvjUKhMIxdDBR7WphYLU='";
 const INLINE_R2266_BOOT_HASH = "'sha256-VMy+jHAdHCdB23VRoHb/AkM+0KbbT2AyrXWvTgyn0YE='";
+const INLINE_R2267_BOOT_HASH = "'sha256-jzpTgS8J1pGYZEB8tB8Rh6yZhQnm7SZeS7Djfv+ESXs='";
+const INLINE_R2271_BOOT_HASH = "'sha256-S7tOTRJ0VAXjqw4JK4j/vTMhcbsjGoGGuuHds+ooLKc='";
+const INLINE_R2278_BOOT_HASH = "'sha256-ZXKvzqUHzpKOQjrqsZCPa/ILpiQvkwrHRs8JaA1EJEc='";
+const INLINE_R2289_BOOT_HASH = "'sha256-nPM78vmvOeVxgOxdurqI9lm+21dKoJ/VXmJD5xVvn+c='";
+const INLINE_R2291_BOOT_HASH = "'sha256-A5NPcNHyLjo0klIK7aI1I5SgX7hSD165B/p+G1tTVvM='";
+const INLINE_R2292_BOOT_HASH = "'sha256-2V3xCeYza4dqO/L8cYuRqy5H+/rkut717zkpEyv2o6o='";
+const INLINE_R2295_BOOT_HASH = "'sha256-ll3S0dp0eFwyt3znd6dvgN0HFs41qWA9GfOrX22IQxg='";
+// R2298: exact parser SHA256 after versioning the optimized physical Genesis owner.
+const INLINE_R2298_BOOT_HASH = "'sha256-BwdHDhw7wjJqEHTX9Nf4Bu7Z1BqQc1bgEFQMLDbr6Ss='";
+// R2300: exact parser hash for current 3D molecular studio film.
+const INLINE_R2300_BOOT_HASH = "'sha256-O5WcXSFGE29Y2iud6dfdufO67iwCpA8C6uXuj/oWYI4='";
+// R2301: exact parser CSP hash for the photographic cell depth pass.
+const INLINE_R2301_BOOT_HASH = "'sha256-2zooATsMFIHQbjysklzqHDHDmQ6qWxKiEwQ9zG2ChhA='";
+// R2305: exact parser CSP for promoted R2303 cell microfold renderer.
+const INLINE_R2303_BOOT_HASH = "'sha256-kW0o6hJ/4Aw5022e5o9BqU9CMaOfa/cdCIbbR8gDzPo='";
+// R2307: exact studio iris parser hash, both policies remain strict.
+const INLINE_R2307_BOOT_HASH = "'sha256-44SN0anChN0bK6huFl1UhtBS2RUHmY4EnkltMfOHe5g='";
+// R2309: exact full-frame cinematic parser SHA256, both strict policies.
+const INLINE_R2309_BOOT_HASH = "'sha256-K0p8k+dD/0/VM2JmXW6XXkELuawyxdIzJ/UGhsITzAQ='";
+// R2317 current immutable biological tissue film bootstrap SHA-256.
+const INLINE_R2317_BOOT_HASH = "'sha256-vh2bzwpV1DHROGxgvbLipn4xxvFA7RTDFj5ao0/l3ZE='";
+// R2318: exact perceptually balanced cellular photon film parser.
+const INLINE_R2318_BOOT_HASH = "'sha256-I9BV716/if4kiSgvO1NB8uWx1E1JodXBfzfVSWPBEpI='";
+// R2319 native handoff ownership, exact new first-byte parser SHA256.
+const INLINE_R2319_BOOT_HASH = "'sha256-SrQl4alVNJZhNQYPRB8ZTPYXpv+Fijfo1l3K1jGnhCw='";
 const PUBLIC_HOSTS = new Set(['formatxsuite.com', 'www.formatxsuite.com']);
 const HOMEPAGE_PATHS = new Set(['/', '/index.html', '/scifi-ui', '/scifi-ui/', '/scifi-ui/index.html']);
 const EVENT_HORIZON_PATH = '/scifi-ui/styles/formatx-event-horizon.css';
@@ -66,19 +91,19 @@ const REFERENCE_MODE_BOOT_SCRIPT = '<script fetchpriority="high" data-fx-referen
 const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" media="(prefers-reduced-motion: no-preference) and (min-width: 901px) and (pointer: fine)" data-fx-first-frame-stability-r500="true" href="/scifi-ui/styles/formatx-first-frame-stability-r283.css?v=20260923-r1666-source-production-parity">';
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
 const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261010-r2038-optimized-real-layout">';
-const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261030-r2256-layout-parity-before-fcp">';
+const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261101-r2297-optic-safe-mobile-controls">';
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261031-r2266-full-visitor-mag';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261031-r2266-visitor-parity"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} ${INLINE_R2212_BOOT_HASH} ${INLINE_R2215_BOOT_HASH} ${INLINE_R2216_BOOT_HASH} ${INLINE_R2217_BOOT_HASH} ${INLINE_R2219_BOOT_HASH} ${INLINE_R2220_BOOT_HASH} ${INLINE_R2236_BOOT_HASH} ${INLINE_R2254_BOOT_HASH} ${INLINE_R2255_BOOT_HASH} ${INLINE_R2266_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-E5cP+fOKE9fiWbh/sMPZZIkIh/7VXgbPqCjRknefJVc=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
+const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} ${INLINE_R2212_BOOT_HASH} ${INLINE_R2215_BOOT_HASH} ${INLINE_R2216_BOOT_HASH} ${INLINE_R2217_BOOT_HASH} ${INLINE_R2219_BOOT_HASH} ${INLINE_R2220_BOOT_HASH} ${INLINE_R2236_BOOT_HASH} ${INLINE_R2254_BOOT_HASH} ${INLINE_R2255_BOOT_HASH} ${INLINE_R2266_BOOT_HASH} ${INLINE_R2267_BOOT_HASH} ${INLINE_R2271_BOOT_HASH} ${INLINE_R2278_BOOT_HASH} ${INLINE_R2289_BOOT_HASH} ${INLINE_R2291_BOOT_HASH} ${INLINE_R2292_BOOT_HASH} ${INLINE_R2295_BOOT_HASH} ${INLINE_R2298_BOOT_HASH} ${INLINE_R2300_BOOT_HASH} ${INLINE_R2301_BOOT_HASH} ${INLINE_R2303_BOOT_HASH} ${INLINE_R2307_BOOT_HASH} ${INLINE_R2309_BOOT_HASH} ${INLINE_R2317_BOOT_HASH} ${INLINE_R2318_BOOT_HASH} ${INLINE_R2319_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-E5cP+fOKE9fiWbh/sMPZZIkIh/7VXgbPqCjRknefJVc=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=' 'sha256-vlmZTmTev1ZgAS8zImrdrsr6Bqx3HFupK5t9W+bv5Zk=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} ${INLINE_R2212_BOOT_HASH} ${INLINE_R2215_BOOT_HASH} ${INLINE_R2216_BOOT_HASH} ${INLINE_R2217_BOOT_HASH} ${INLINE_R2219_BOOT_HASH} ${INLINE_R2220_BOOT_HASH} ${INLINE_R2236_BOOT_HASH} ${INLINE_R2254_BOOT_HASH} ${INLINE_R2255_BOOT_HASH} ${INLINE_R2266_BOOT_HASH} https://static.cloudflareinsights.com`,
-  "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-E5cP+fOKE9fiWbh/sMPZZIkIh/7VXgbPqCjRknefJVc=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI='",
+  `script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2202_BOOT_HASH} ${INLINE_R2202_LISTENER_BOOT_HASH} ${INLINE_R2203_BOOT_HASH} ${INLINE_R2206_BOOT_HASH} ${INLINE_R2211_BOOT_HASH} ${INLINE_R2212_BOOT_HASH} ${INLINE_R2215_BOOT_HASH} ${INLINE_R2216_BOOT_HASH} ${INLINE_R2217_BOOT_HASH} ${INLINE_R2219_BOOT_HASH} ${INLINE_R2220_BOOT_HASH} ${INLINE_R2236_BOOT_HASH} ${INLINE_R2254_BOOT_HASH} ${INLINE_R2255_BOOT_HASH} ${INLINE_R2266_BOOT_HASH} ${INLINE_R2267_BOOT_HASH} ${INLINE_R2271_BOOT_HASH} ${INLINE_R2278_BOOT_HASH} ${INLINE_R2289_BOOT_HASH} ${INLINE_R2291_BOOT_HASH} ${INLINE_R2292_BOOT_HASH} ${INLINE_R2295_BOOT_HASH} ${INLINE_R2298_BOOT_HASH} ${INLINE_R2300_BOOT_HASH} ${INLINE_R2301_BOOT_HASH} ${INLINE_R2303_BOOT_HASH} ${INLINE_R2307_BOOT_HASH} ${INLINE_R2309_BOOT_HASH} ${INLINE_R2317_BOOT_HASH} ${INLINE_R2318_BOOT_HASH} ${INLINE_R2319_BOOT_HASH} https://static.cloudflareinsights.com`,
+  "style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-E5cP+fOKE9fiWbh/sMPZZIkIh/7VXgbPqCjRknefJVc=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=' 'sha256-vlmZTmTev1ZgAS8zImrdrsr6Bqx3HFupK5t9W+bv5Zk='",
   "img-src 'self' data: https://quickchart.io",
   "font-src 'self'",
   "connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com",

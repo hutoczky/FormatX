@@ -69,11 +69,65 @@ function observe({normal}){
         page.on('pageerror',e=>errors.push(e.message));
         page.on('requestfailed',r=>failedRequests.push({url:r.url(),error:r.failure()?.errorText}));
         await page.goto(home,{waitUntil:'domcontentloaded',timeout:30000});
-        await page.waitForFunction(()=>window.__dockEntry?.cinema&&window.__dockEntry?.firstDraw,null,{timeout:45000});
-        await page.waitForTimeout(350);
+        // R2290: the genuine R2286 product intentionally keeps the MAG
+        // fullscreen hero at scrollY=0, even after a full Genesis replay.
+        // The old test waited for a cinematic dock without scrolling and
+        // therefore timed out while the browser was correctly at home.
+        // Complete the actual visitor film and GPU warmup first.
+        await page.waitForFunction(()=>{
+          const root=document.documentElement;
+          return root.dataset.fxCrystalOrganismR326==='ready' &&
+            !document.querySelector('.fx-mag-birth-r533') &&
+            !document.querySelector('#fx-mag-birth-prepaint-r1606') &&
+            root.dataset.fxArchiveExperience==='ready' &&
+            root.dataset.fxArchiveCinema!=='active';
+        },null,{timeout:45000});
+        const atHome=await page.evaluate(()=>({
+          scrollY,cinema:document.documentElement.dataset.fxArchiveCinema,
+          dock:document.documentElement.dataset.fxArchiveDock,
+          stage:document.querySelector('.fx-crystal-organism-r326-stage')?.getBoundingClientRect().toJSON(),
+          position:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).position,
+          opacity:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).opacity,
+          display:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).display,
+          visibility:getComputedStyle(document.querySelector('.fx-crystal-organism-r326-stage')).visibility,
+          homeGate:document.documentElement.dataset.fxArchiveNativeHomeR2310||'not-applicable'
+        }));
+        console.log('NATIVE_MAG_HOME_BEFORE_SCROLL',JSON.stringify({
+          profile:config.name,rect:atHome.stage,position:atHome.position
+        }));
+        assert(atHome.stage&&atHome.stage.width>40&&atHome.stage.height>40,
+          'R2308 normal intro must reveal a laid-out real MAG before user scroll');
+        assert(atHome.scrollY===0 && atHome.cinema!=='active',
+          'R2290: normal visitor must land on the real undocked MAG before scrolling');
+        assert(atHome.dock!=='active','R2290: no unsolicited archive dock at page top');
+        // Native scroll is the ACTUAL user entry into the cinematic
+        // folio. The first dock and subsequent compositor size must match;
+        // never synthesize archive data attributes or bypass original code.
+        await page.evaluate(()=>scrollTo({
+          top:Math.max(140,Math.round(innerHeight*.42)),behavior:'instant'
+        }));
+        await page.waitForFunction(()=>window.__dockEntry?.cinema&&
+          window.__dockEntry?.firstDraw&&
+          document.documentElement.dataset.fxArchiveCinema==='active',
+          null,{timeout:25000});
+        // Allow the real one-shot native FLIP transform to settle fully.
+        await page.waitForTimeout(550);
         const result=await page.evaluate(()=>{
           const root=document.documentElement,stage=document.querySelector('.fx-crystal-organism-r326-stage'),canvas=stage?.querySelector('.fx-crystal-organism-r326-canvas'),r=stage?.getBoundingClientRect();
-          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema};
+          return{observation:window.__dockEntry,final:r?{x:r.x,y:r.y,width:r.width,height:r.height}:null,sameCanvas:canvas===window.__dockCanvas&&stage===window.__dockStage,canvases:document.querySelectorAll('.fx-crystal-organism-r326-canvas').length,shared:window.FormatXLivingCore?.sharedWebGL2,glError:window.__dockGL?.getError(),contextLost:window.__dockGL?.isContextLost(),dock:root.dataset.fxArchiveDock,cinema:root.dataset.fxArchiveCinema,flip:root.dataset.fxArchiveFlipR2293||'',position:stage?getComputedStyle(stage).position:null,
+          fixedChain:stage?(()=>{
+            const chain=[];let node=stage;
+            while(node&&node instanceof HTMLElement&&chain.length<8){
+              const s=getComputedStyle(node),b=node.getBoundingClientRect();
+              chain.push({id:node.id,tag:node.tagName,className:String(node.className||'').slice(0,90),
+                position:s.position,transform:s.transform,scale:s.scale,translate:s.translate,
+                contain:s.contain,contentVisibility:s.contentVisibility,
+                willChange:s.willChange,perspective:s.perspective,filter:s.filter,
+                rect:{x:b.x,y:b.y,width:b.width,height:b.height}});
+              node=node.parentElement;
+            }
+            return chain;
+          })():[]};
         });
         const record={profile:config.name,...result,errors,failedRequests};report.cases.push(record);
         console.log('NATIVE_MAG_DOCK_ENTRY',JSON.stringify(record));
@@ -84,13 +138,56 @@ function observe({normal}){
         assert(result.observation.firstDraw.count>0);
         const first=result.observation.firstDock,cinema=result.observation.cinema;
         assert(first&&cinema,'Missing actual native docking/cinema samples');
-        for(const key of ['x','y','width','height']){
-          assert(Math.abs(first.stage[key]-cinema.stage[key])<=1,`MAG ${key} jumps between first dock and cinema: ${first.stage[key]} -> ${cinema.stage[key]}`);
-          assert(Math.abs(cinema.stage[key]-result.final[key])<=1,`MAG ${key} changes after cinema entry`);
+        // R2293: the FIRST FLIP rectangle is intentionally the preserved
+        // hero frame, and a 360ms transform smoothly carries that SAME GPU
+        // surface into the final lane. Requiring identical intermediate
+        // geometry would forbid any real cinematic camera transition.
+        // Keep the actual no-layout-shift gate below: no accepted CLS.
+        assert.equal(result.flip,'settled-native-onecanvas',
+          'R2293 compositor transition did not settle on the original canvas');
+        assert(first.stage.width>40&&first.stage.height>40,
+          'Initial physical MAG is invisible during docking');
+        assert(cinema.stage.width>40&&cinema.stage.height>40,
+          'Cinematic MAG disappeared during its actual transition');
+        if(!config.mobile){
+          // R2315: the genuine desktop native MAG must be viewport-owned
+          // in the FIRST real home portrait, before scroll or archive CSS.
+          // A late absolute->fixed toggle after the 10s film generates CLS.
+          assert.equal(atHome.position,'fixed',
+            'R2315 desktop MAG must be fixed at the visible original hero before scroll');
+          assert(Math.abs(atHome.stage.y-112)<3,
+            'R2315 desktop fixed home must preserve the original studio hero y');
+          // R2304: scale:1 is not a harmless reset on a fixed ancestor.
+          // The real Chromium computed-style chain must be fully neutral,
+          // not simply a visually identity matrix.
+          for(const ancestor of result.fixedChain.slice(1,6)){
+            assert.equal(ancestor.scale,'none',
+              'R2304 non-none scale captures the fixed MAG: '+ancestor.tag+'#'+ancestor.id);
+          }
+          assert(result.final.width<first.viewport.width*.5,
+            'Final desktop archive did not dock the MAG into its split-screen lane');
+          assert(result.final.x>=-2&&result.final.x+result.final.width<first.viewport.width*.53,
+            'R2299 desktop MAG escaped the left photographic lane');
+          assert(result.final.y>=0&&result.final.y+result.final.height<=first.viewport.height+2,
+            'R2299 fixed desktop MAG must be positioned in the real viewport');
         }
-        if(!config.mobile)assert(first.stage.width<first.viewport.width*.5,'First dock exposed a full-viewport MAG stage');
-        else assert(first.stage.width<=first.viewport.width+1,'First mobile dock escaped the viewport');
-        assert(first.stage.height<first.viewport.height*.8,'First dock exposed a full-height MAG stage');
+        else {
+          assert(result.final.width<=first.viewport.width+1,
+            'Final mobile MAG escaped the screen after the transition');
+          // R2294: real mobile home and archive must share EXACT physical
+          // layout. A FLIP over an absolute->fixed box still contributes to
+          // Chrome LayoutShift even when its painted pixels appear smooth.
+          // Test the same stage before and after actual scroll + handoff.
+          assert.equal(atHome.position,'fixed',
+            'R2294 mobile MAG is not viewport-owned BEFORE the first scroll');
+          assert.equal(result.position,'fixed',
+            'R2294 mobile MAG lost fixed box ownership when the archive opened');
+          assert(Math.abs(atHome.stage.width-result.final.width)<1 &&
+                 Math.abs(atHome.stage.height-result.final.height)<1,
+            'R2294 mobile MAG changed its underlying layout dimensions at archive entry');
+        }
+        assert(result.final.height<first.viewport.height*.8,
+          'Final MAG improperly covers the entire physical archive viewport');
         assert.deepEqual(first.canvas,cinema.canvas,'The first dock must already use the final native canvas scale and optics');
         assert.deepEqual(result.observation.shifts.filter(s=>!s.recentInput&&s.at>=first.at),[],'Native stage shifts after its first real docking');
       }finally{await context.close();}

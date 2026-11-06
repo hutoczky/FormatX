@@ -1,0 +1,28 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto');
+const film=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
+const native=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
+const boot=fs.readFileSync('docs/scifi-ui/scripts/formatx-intro-bootstrap-r1629.js','utf8');
+const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+const retired=fs.readFileSync('.github/scripts/validate-intro-retired-layout-r2173.cjs','utf8');
+const handoff=film.slice(film.indexOf('  function safeTeardownOverlay('),film.indexOf('  function finish('));
+const watchdog=film.slice(film.indexOf('// R2319: watchdog follows'),film.indexOf("document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete'",film.indexOf('// R2319: watchdog follows')));
+assert(handoff.includes('R2319: the completed GENESIS film MUST NOT own'));
+assert(handoff.includes("coreApi?.requestRender?.(2);"));
+assert(!handoff.includes('requestAnimationFrame('),'R533 may not schedule a native frame AFTER real completion');
+assert(!watchdog.includes('requestAnimationFrame('),'watchdog may not schedule a late birth-owned native frame');
+assert(native.includes("listen(document,'formatx:magbirthcomplete',()=>"));
+assert(native.includes('render(performance.now());')&&native.includes('gl.flush();'),
+ 'The native R326 canvas must retain independent genuine GPU presentation');
+assert(retired.includes("'Retired intro still forces geometry/layout work after the real completion event'"));
+const key='20261101-r2295-vascular-cortex-microgeometry-r2298-lightbudget-scratch-r2300-macro-molecule-lens-r2301-cell-depth-r2303-physical-membrane-fold-r2307-faceted-optic-iris-r2309-studio-full-frame-chassis-r2317-smooth-living-cortex-normals-r2318-cell-photon-depth-r2319-native-own-final-presentation';
+assert(film.includes('/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v='+key));
+assert(boot.includes('/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v='+key));
+const parser=html.match(/<script\b[^>]*data-fx-intro-bootstrap-r1629="true"[^>]*>([\s\S]*?)<\/script>/)?.[1];
+assert(parser&&parser.includes(key));
+const digest="'sha256-"+crypto.createHash('sha256').update(parser).digest('base64')+"'";
+assert(html.includes(digest));
+assert(worker.includes('const INLINE_R2319_BOOT_HASH = "'+digest+'";'));
+assert.equal((worker.match(/\$\{INLINE_R2319_BOOT_HASH\}/g)||[]).length,2);
+console.log('R2319_RETIRED_FILM_NO_LATE_NATIVE_LAYOUT_AND_EXACT_CSP_PASS');

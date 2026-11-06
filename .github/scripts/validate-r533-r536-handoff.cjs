@@ -213,18 +213,28 @@ async function verifyFullBirth(browser){
     assert.equal(final.cinemaMotion,'scroll-interaction-driven-no-idle-raf','desktop-full: R536 motion contract drift');
     assert.equal(final.cinemaPointerEvents,'none','desktop-full: cinematic visual layer intercepts input');
 
-    await page.goto(url({cinema:1,r548:'session-reload'}),{waitUntil:'domcontentloaded',timeout:30000});
-    await page.waitForTimeout(900);
-    const reload=await snapshot(page);
-    assert.notEqual(reload.birthOwner,'active','session-reload: R533 replayed despite session ownership');
-    assert.equal(reload.overlayCount,0,'session-reload: birth overlay replayed in same session');
-    assert.equal(reload.legacyPreloaderCount,0,'session-reload: legacy preloader returned');
-    await page.waitForFunction(()=>document.documentElement.dataset.fxCrystalOrganismR326==='ready',{timeout:20000});
+    // R2288: the R2201 visitor contract deliberately REPLAYS the physical
+    // DNA -> embryo -> MAG Genesis on every full navigation, even within
+    // the same session. The old "once per session" assertion contradicted
+    // the product and rejected a correct full cinematic reload.
+    // Verify actual overlay, scroll lock, teardown AND the same native
+    // one-canvas WebGL owner after the second 10-second film.
+    await page.goto(url({cinema:1,r548:'session-reload'}),{waitUntil:'commit',timeout:30000});
+    await page.locator(OVERLAY).waitFor({state:'visible',timeout:20000});
+    const replay=await snapshot(page);
+    assert.equal(replay.birthOwner,'active','session-reload: full Genesis did not restart on navigation');
+    assert.equal(replay.overlayCount,1,'session-reload: duplicate or absent film');
+    assert.equal(replay.scrollLock,'active','session-reload: film scroll lock missing');
+    assert.equal(replay.legacyPreloaderCount,0,'session-reload: legacy preloader returned');
+    await page.waitForFunction(sel=>
+      !document.querySelector(sel)&&
+      document.documentElement.dataset.fxCrystalOrganismR326==='ready',OVERLAY,
+      {timeout:18000});
     const reloadReady=await snapshot(page);
     assertStable(reloadReady,'session-reload');
-    // R2157: the visible replay button was removed at the user's request.
-    // A forced intro URL remains functional for regression checks, while
-    // normal session revisits do not replay the film.
+    assert.equal(reloadReady.scrollLock,'','session-reload: scroll lock persisted after complete film');
+    // R2157: the visible replay button was removed. Forced intro URLs
+    // remain available for QA, while normal navigation now replays GENESIS.
     assert.equal(await page.locator('#hero .fx-mag-replay-r2150').count(),0,
       'desktop-full: removed replay action returned');
     await page.goto(url({intro:1,cinema:1,r548:'forced-regression'}),{waitUntil:'commit',timeout:30000});
@@ -286,7 +296,7 @@ async function verifySkip(browser){
     const mobile=await verifySkip(browser);
     const report={base:BASE,contract:'r611-realistic-css3d-dna-genesis-to-single-native-r326-handoff',desktop,mobile};
     writeJson('report.json',report);
-    console.log('PASS: R533 full birth + skip + once-per-session hand off to the same single native R326 MAG and R536 journey without stuck scroll lock or duplicate preloader.');
+    console.log('PASS: R533 first birth + real session-navigation replay + explicit skip, each handing off to the same canonical single R326 MAG and R536 journey without scroll lock or duplicate preloader.');
   }finally{await browser.close();}
 })().catch(error=>{
   writeJson('failure.json',{base:BASE,error:String(error?.stack||error)});
