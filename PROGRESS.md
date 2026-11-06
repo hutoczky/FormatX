@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2328 – filmes DNS és sejt: biopolimer mikrodomborzat, szerves átmenet (2026-11-06)
+
+- **DNS térbeli szálai:** a procedurális 64×64 foszfátrost-textúra 128×128-ra növelt; továbbra is **egyetlen** közös, indításkor generált 64 KiB GPU-textúra, sem új vászon, sem új renderpass. A bump-pontosság `mobile .008→.011`, `desktop .012→.015`, a valódi hajlított Three.js DNS-geometrián.
+- **Sejtfázis:** a MAG fém-irisét megelőző belső organellum mattabb, hidratált türkiz anyagot kapott (roughness .32, emissiveIntensity .31), a túl sötét kör helyett. A külön anyamembrán, citoplazmás szemcsék és korall-kapillárisok megmaradtak.
+- **Transzformáció:** a 7.28 s-tól kialakuló filmen belüli hátsó cortex mérete a sejtfázis után 1.08 helyett .86-ra ül be, követve az R2327 kisebb és mélyebben ülő permanens MAG kérget. A korábbi nagy sejt képi fázisa változatlan, 10.00s animációs idővonal és renderloop marad.
+- **Vizsgálat:** az R2327 négy valódi viewport dokkolása zöld (`42144033307`). R2328 új, szigorú source-proof és meglévő vizuális/film/P0/3× Lighthouse egyaránt kötelező. Grafikus Chromium R2325 3/3, headless compositor nem determinisztikus; a teljes CI továbbra is piros, élesítés nincs.
+
+
 ## R2327 – a kész MAG arányainak helyreállítása (2026-11-06)
 
 - **Valódi grafikus bizonyíték:** R2325 Xvfb/Chromium `cold-handoff-1.png` képen a négyágú titán-MAG mögött a kékeszöld sejtkéreg túl nagy kerek tömeget alkot. A sejtkéreg a GENESIS 5,5s-es filmképen viszont helyes: makroméretű életforma. A két állapot *különböző* vizuális szerepet kíván.

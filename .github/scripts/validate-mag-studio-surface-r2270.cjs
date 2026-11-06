@@ -121,7 +121,7 @@ for(const token of [
   'R2289: a real cortex survives the titanium assembly',
   'const handoffCortex=smooth((t-7.28)/1.43);',
   'const visible=grow*mix(fade,.82,handoffCortex);',
-  'const bodyScale=.001+.63*grow*mix(fade,1.08,handoffCortex);',
+  'const bodyScale=.001+.63*grow*mix(fade,.86,handoffCortex);',
   'this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);',
   'this.silverMaterial.roughness=mix(.18,.19,finale);'
 ]) assert(three.includes(token),'R2289 physical film-to-live cortex continuity missing: '+token);

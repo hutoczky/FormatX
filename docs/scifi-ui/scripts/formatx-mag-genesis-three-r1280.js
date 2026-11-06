@@ -348,7 +348,9 @@
       // One shared 64 x 64 GPU texture on the existing physical helices;
       // no external image, no render target, no animated texture upload.
       if(this.dnaFiberTexture)return this.dnaFiberTexture;
-      const T=this.THREE,size=64;
+      // R2328: higher-resolution phosphatic microfibrils on the SAME
+      // genuine 3D DNA tube; single 64 KiB shared GPU texture, once.
+      const T=this.THREE,size=128;
       const pixels=new Uint8Array(size*size*4);
       const fract=x=>x-Math.floor(x);
       for(let y=0;y<size;y++)for(let x=0;x<size;x++){
@@ -400,13 +402,13 @@
       const ma=new T.MeshPhysicalMaterial({
         color:0xa7c8e2,emissive:0x224267,emissiveIntensity:.63,
         roughness:.255,metalness:.065,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.008:.012,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
         depthWrite:false,clearcoat:.96,clearcoatRoughness:.075
       });
       const mb=new T.MeshPhysicalMaterial({
         color:0xc8b5dd,emissive:0x523b77,emissiveIntensity:.61,
         roughness:.26,metalness:.062,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.008:.012,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
         depthWrite:false,clearcoat:.95,clearcoatRoughness:.08
       });
       const ga=new T.MeshBasicMaterial({
@@ -1327,9 +1329,10 @@
       // nucleus is a physically shaded translucent organelle with an actual
       // clear-coated lens, lit by the same three-dimensional studio rig.
       this.embryoNucleusMaterial=new T.MeshPhysicalMaterial({
-        color:0x28788d,emissive:0x15546f,emissiveIntensity:.28,
-        metalness:.015,roughness:.13,transmission:.24,thickness:.23,ior:1.36,
-        clearcoat:1,clearcoatRoughness:.055,
+        // R2328: hydrated internal organelle; the metal iris awakens later.
+        color:0x408e92,emissive:0x1c656c,emissiveIntensity:.31,
+        metalness:.015,roughness:.32,transmission:.24,thickness:.23,ior:1.36,
+        clearcoat:.72,clearcoatRoughness:.20,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoNucleus=new T.Mesh(
@@ -3044,7 +3047,9 @@
       const handoffCortex=smooth((t-7.28)/1.43);
       const visible=grow*mix(fade,.82,handoffCortex);
       this.organicGroup.visible=visible>.002;
-      const bodyScale=.001+.63*grow*mix(fade,1.08,handoffCortex);
+      // R2328: preserve large photobiological ovum in the cell chapter;
+      // after titanium seating its cortex retracts to R2327 native scale.
+      const bodyScale=.001+.63*grow*mix(fade,.86,handoffCortex);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
       // R2291: the hydrated cortex is PHYSICAL VOLUME behind the glass
       // pupil and titanium shoulders; the 9.25s proof was previously only
