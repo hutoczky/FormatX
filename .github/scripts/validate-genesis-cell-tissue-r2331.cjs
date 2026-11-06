@@ -17,5 +17,7 @@ for(const token of [
 assert.match(src,/this\.embryoTexture=this\.makeEmbryoTexture\(\);/);
 assert.match(src,/const vesicles=new T\.InstancedMesh\(/);
 assert.match(src,/const vesicleCount=this\.mobileRender\?42:84/);
-assert.match(src,/const DURATION = 10000/);
+// The ten-second film clock is owned by R533, never by R1280.
+const birth=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
+assert.match(birth,/const DURATION = 10000/);
 console.log('R2331_PHOTOBIOLOGICAL_3D_CELL_SHARED_TEXTURE_PASS');
