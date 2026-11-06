@@ -126,6 +126,7 @@ jobs:
           node .github/scripts/validate-mag-cell-filter-r2216.cjs
           node .github/scripts/validate-mag-optical-anatomy-r2217.cjs
           node .github/scripts/validate-mag-front-response-r2218.cjs
+          node .github/scripts/validate-mag-body-pose-r2219.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site

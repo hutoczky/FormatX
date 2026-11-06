@@ -1,3 +1,7 @@
+FormatX R2219 native body-pose handoff — 2026-11-06
+cache=20261106-r2219-native-body-pose
+The complete cinematic chassis now settles continuously into the permanent MAG's composed hardware-path rest pose before the crossfade. The mobile and desktop angles include the native shader base and resting body rotation, without a new per-frame state read. Geometry, four-point silhouette, material programs, physical studio lights, camera, scale/position landing, story clock and renderer ownership remain. No added draw, program, pass, texture, context, canvas, RAF, timer, input or detection. This is one visible pose/motion continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
+
 FormatX R2218 front titanium response — 2026-11-05
 cache=20261105-r2218-front-titanium-response
 The cinematic physical metal now limits machined joints and relief to the same front titanium domain as the permanent MAG and reuses its cool body-local grazing strip. Geometry, fresh four-point silhouette, physical materials, existing studio lights, camera, living optic, story clock and handoff are unchanged. No added draw, program, light, pass, texture, context, canvas, RAF, timer, input or detection. This is one visible body/light continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.

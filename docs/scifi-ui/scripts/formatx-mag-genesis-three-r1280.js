@@ -2972,6 +2972,19 @@
       const landingScale=1-.26*smooth((t-8.55)/1.30);
       this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
 
+      // R2219: land the complete cinematic chassis in the permanent MAG's
+      // composed resting pose before the crossfade. These angles include the
+      // native shader base and its hardware-path rest rotation, so lighting
+      // and silhouette do not jump when the permanent renderer is revealed.
+      const nativePose=smooth((t-7.25)/.85);
+      const nativePitch=this.mobileRender?-.160:-.140;
+      const nativeYaw=this.mobileRender?.135:.145;
+      this.mechanicalGroup.rotation.set(
+        nativePose*nativePitch,
+        nativePose*nativeYaw,
+        nativePose*(-.037)
+      );
+
       // R2211: the animated metal albedo stays neutral silver, so the studio
       // and living optic supply the cool reflections instead of a second
       // blue-green body tint. Preserve the old linear-light luminance ramp
@@ -3466,4 +3479,5 @@
   document.documentElement.dataset.fxMagSignatureR1945='controlled-softbox-finale-no-whiteout-prism-optic-handoff';
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
   document.documentElement.dataset.fxMagCinematicSurfaceR2218='front-filtered-machined-silver-native-grazing';
+  document.documentElement.dataset.fxMagCinematicPoseR2219='native-base-pose-continuous-handoff';
 })();
