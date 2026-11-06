@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2327 – a kész MAG arányainak helyreállítása (2026-11-06)
+
+- **Valódi grafikus bizonyíték:** R2325 Xvfb/Chromium `cold-handoff-1.png` képen a négyágú titán-MAG mögött a kékeszöld sejtkéreg túl nagy kerek tömeget alkot. A sejtkéreg a GENESIS 5,5s-es filmképen viszont helyes: makroméretű életforma. A két állapot *különböző* vizuális szerepet kíván.
+- **R2327 kész MAG:** az eredeti egyetlen R326 natív 3D mesh corticalis ellipszoidja `[.665,.710,.405]` → `[.540,.575,.320]`, és mögötte `[.055,.055,-.170]` → `[.045,.040,-.235]`. A valódi biológiai kéreg, a mozgó kapilláris, a komplex titán geometria és a cyan iris **megmarad**, de a négyágú 3D csillag dominál. Változatlan tesszelláció/draw count/context/RAF.
+- **R2326 anyagok:** titán mikroél, türkiz–korall stroma és átlátszó, belső optikai fénytörés külön commitban elkészült; négy viewport-dokkolás teszt **PASS** (`42143601619`). Az eredeti P0 fekete-screenshot és a Lighthouse továbbra is piros; studio, 60fps és production még nem minősíthető.
+- **Biztonság:** az R2270 eredeti kortex-kontraktusát az új valós 3D-koordinátákra frissítettük, külön R2327 regresszióteszttel. A film eredeti DNS→cell története változatlan. Következő: friss vizuális proof és valódi grafikus viewport, majd az intro anyagfejlesztése.
+
+
 ## R2326 – valódi natív MAG anyagminőség (2026-11-06)
 
 - **Bemenet:** a felhasználó által küldött négyágú ezüst/titán MAG, biológiai türkiz–korall sejtmagszövet, makrofotós DNS. Első prioritás a permanens MAG.

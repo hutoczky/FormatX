@@ -929,7 +929,11 @@
        It is part of the original R326 non-indexed attribute stream:
        no second mesh, renderer, WebGL context, frame loop or asset fetch.
        Bounded tessellation retains the measured mobile/software budget. */
-    appendEllipsoid([.055,.055,-.170],[.665,.710,.405],1.12,
+    /* R2327: the large living ovum belongs to GENESIS. After titanium
+       assembly, its permanent photobiological cortex retracts behind the
+       four genuine machined arms. Same 3D topology, facets, iris and one
+       GPU draw; no opaque circular blob covering the star silhouette. */
+    appendEllipsoid([.045,.040,-.235],[.540,.575,.320],1.12,
       software?18:mobile?22:30,software?28:mobile?38:52,.095);
 
     /* R1724 — unique FormatX crystal creature anatomy.
@@ -1733,6 +1737,7 @@
     root.dataset.fxNativeMagStudioR2273='sculpted-deep-cortex-biological-filaments-canonical-single-draw';
     root.dataset.fxNativeMagStudioR2275='irregular-three-dimensional-smoked-bioglass-cortex-scoped-silver-living-vascular-organelle-studio';
     root.dataset.fxNativeMagStudioR2326='single-pass-reflection-coupled-titanium-microbevel-living-coral-stroma-refracted-iris';
+    root.dataset.fxNativeMagAnatomyR2327='compact-recessed-living-cortex-four-machined-arms-foreground';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

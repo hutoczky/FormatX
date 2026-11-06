@@ -21,8 +21,8 @@ assert(!source.includes('vec2 panelCoord=vec2(radial*28.0,lateral/panelWidth*4.0
   'old rectilinear checker-grid is still active');
 assert(source.includes('const tendrilCount = software ? 3 : mobile ? 4 : 6;'),
   'R2273 actual cortical filaments must be bounded across GPU tiers');
-assert(source.includes('appendEllipsoid([.055,.055,-.170],[.665,.710,.405],1.12,'),
-  'R2273 deep biological cortex must be genuine canonical 3D geometry');
+assert(source.includes('appendEllipsoid([.045,.040,-.235],[.540,.575,.320],1.12,'),
+  'R2327 recessed living cortex must be genuine canonical 3D geometry');
 assert(source.includes('fxNativeMagStudioR2273='),
   'R2273 studio geometry state missing');
 assert(source.includes("root.dataset.fxNativeMagSurfaceR2203="),
