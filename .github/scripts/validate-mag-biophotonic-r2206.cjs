@@ -59,7 +59,11 @@ const tokens = [
   [birth, 'col*=mix(1.78,1.38,metal);'],
   [birth, 'this.scene.environmentIntensity=this.mobileRender?.77:1.02;'],
   [birth, 'new T.InstancedMesh('],
-  [birth, 'this.embryoVesicleMaterial.opacity=.58*visible;'],
+  // R2331: keep the same actual 42/84 instanced 3D organelles and
+  // physically accurate lower specular coat, not the former plastic beads.
+  [birth, 'this.embryoVesicleMaterial.opacity=.43*visible;'],
+  [birth, 'clearcoat:.22,clearcoatRoughness:.34,'],
+  [birth, 'this.embryoNucleus.position.set(-.10,.06,.28);'],
   [birth, 'this.coreGroup.add(vesicles);'],
   [birth, 'this.updateMechanical(t,time);'],
   [mag, 'const constrainedFragmentSource ='],
