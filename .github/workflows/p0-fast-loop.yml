@@ -59,6 +59,9 @@ jobs:
           set -euo pipefail
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js
+          node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js
+          node .github/scripts/validate-genesis-dna-first-r2219.cjs
+          node --check docs/scifi-ui/scripts/genesis-cinematic-morph-r2126.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r651.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r657.js
           node --check docs/scifi-ui/scripts/formatx-mag-genesis-three-r660.js

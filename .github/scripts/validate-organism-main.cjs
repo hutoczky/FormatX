@@ -102,6 +102,11 @@ async function validateDesktop() {
     assert(current.triggers === 5 && current.panels === 5, 'chapter/panel count: ' + JSON.stringify(current));
     assert(current.actionLinks === 3, 'action bar links: ' + JSON.stringify(current));
     assert(current.overlayHidden === true, 'console must start hidden');
+    // R2207: the HTML hidden property alone is insufficient if a later
+    // fullscreen display:block !important stylesheet overrides its display.
+    const hiddenDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(hiddenDisplay==='none','hidden console is still painted: display='+hiddenDisplay);
+    mark('desktop: hidden-console-css',hiddenDisplay);
     assert(current.pricingTriggers === 1, 'pricing section must expose exactly one organism trigger: ' + JSON.stringify(current));
     assert(current.pricingCards === 3 && current.qrCards === 3, 'commerce content was not moved intact');
     assert(current.footerInResources, 'footer must be inside the release/support console');
@@ -117,19 +122,89 @@ async function validateDesktop() {
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-id]').count() === 3, 'pricing cards missing in open console');
     assert(await page.locator('[data-organism-panel="pricing"] [data-plan-qr]').count() === 3, 'QR cards missing in open console');
 
-    await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').click();
+    // R2217: CI intermittently stalls while waiting for a stable EUR
+    // target. Record actual motion and hit-testing before the action.
+    const currencyHit=await page.locator('[data-organism-panel="pricing"] [data-currency="EUR"]').evaluate(async button=>{
+      const samples=[];
+      for(let n=0;n<12;n++){
+        await new Promise(resolve=>requestAnimationFrame(resolve));
+        const rect=button.getBoundingClientRect();
+        samples.push([Math.round(rect.x*100)/100,Math.round(rect.y*100)/100,
+          Math.round(rect.width*100)/100,Math.round(rect.height*100)/100]);
+      }
+      const rect=button.getBoundingClientRect();
+      const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+      const panel=button.closest('.fx-organism-panel');
+      return {samples,hitTag:hit?.tagName||'',hitClass:String(hit?.className||''),
+        buttonIsHit:hit===button||button.contains(hit),
+        panelAnimation:panel?getComputedStyle(panel).animation:'',
+        panelTransform:panel?getComputedStyle(panel).transform:'',
+        pointerEvents:getComputedStyle(button).pointerEvents};
+    });
+    mark('desktop: currency-hit-test',currencyHit);
+    // R2224: let Playwright's click perform its own scroll. The prior
+    // explicit evaluate() sometimes hung for 30 seconds while navigation
+    // was pending, before the currency click could even be attempted.
+    // R2222: the click itself succeeds, but Playwright waits for an unrelated
+    // scheduled navigation and times out. Currency selection is an in-page
+    // state change; assert the resulting price and checkout URL explicitly.
+    // R2230: the panel button is below the browser viewport in this
+    // fullscreen nested-scroll layout. Playwright's stability/scroll wait
+    // can time out although the control exists and its event handler works.
+    // Dispatch a real DOM click for this in-page state-only control, then
+    // verify both the rendered price and the checkout URL below.
+    await page.evaluate(() => {
+      const button=document.querySelector('[data-organism-panel="pricing"] [data-currency="EUR"]');
+      if(!button)throw new Error('EUR currency button missing');
+      button.click();
+    });
     await page.waitForFunction(() => document.getElementById('preview-main-price')?.textContent.includes('44'));
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
     mark('desktop: currency-updated', { checkoutHref });
 
-    await page.locator('.fx-organism-console-close').click();
+    // R2231: close the in-page console through its native button handler.
+    // A pending navigation/animation can strand locator.evaluate() for 30s;
+    // verify that the console actually becomes hidden immediately below.
+    const closeResult=await page.evaluate(() => {
+      const button=document.querySelector('.fx-organism-console-close');
+      const root=document.getElementById('fx-organism-console');
+      if(!root)throw new Error('Organism console missing');
+      if(!button)throw new Error('Organism close control missing');
+      const wasOpen=!root.hidden;
+      button.click();
+      return {wasOpen};
+    });
+    assert(closeResult.wasOpen,'organism console was already closed before close interaction');
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+    const closedDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(closedDisplay==='none','closed console remains painted: display='+closedDisplay);
+    mark('desktop: closed-console-css',closedDisplay);
     await page.waitForTimeout(550);
     mark('desktop: close-control-passed');
 
+    // R2238: return to the header after exercising the pricing console.
+    // The previous interaction can leave the document thousands of pixels
+    // below the fixed navigation; verify an actual pointer click at the top.
+    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+    await page.waitForFunction(()=>window.scrollY<5,{},{timeout:5000});
     const menuToggle=page.locator('#menu-toggle');
-    await menuToggle.click();
+    // R2237: record the header toggle hit target before Playwright's click.
+    // A timeout waiting for a locator (rather than its hit test) indicates
+    // page scheduling/navigation contention; preserve evidence for diagnosis.
+    const toggleState=await page.evaluate(()=>{
+      const el=document.getElementById('menu-toggle');
+      if(!el)return {exists:false};
+      const r=el.getBoundingClientRect();
+      const x=r.left+r.width/2,y=r.top+r.height/2;
+      const hit=document.elementFromPoint(x,y);
+      return {exists:true,visible:!!el.getClientRects().length,disabled:el.disabled,
+        rect:[r.x,r.y,r.width,r.height],hitTag:hit?.tagName||'',
+        hitClass:String(hit?.className||''),hitSelf:hit===el||el.contains(hit)};
+    });
+    mark('desktop: menu-toggle-hit-test',toggleState);
+    assert(toggleState.exists&&toggleState.visible,'header menu toggle unavailable: '+JSON.stringify(toggleState));
+    await menuToggle.click({timeout:10000});
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     const pricingNav=page.locator('#main-nav a[href="#pricing"]');
     await pricingNav.click();
@@ -177,6 +252,12 @@ async function validateMobile() {
     diagnostics(page, errors);
     await enterSite(page, 'mobile');
 
+    // R2208: verify that the fullscreen overlay is not rendered while
+    // logically hidden, including on touch devices.
+    const initialConsoleDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(initialConsoleDisplay==='none','mobile hidden console is painted: '+initialConsoleDisplay);
+    mark('mobile: hidden-console-css',initialConsoleDisplay);
+
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
     const box = await pricingTrigger.boundingBox();
@@ -184,6 +265,9 @@ async function validateMobile() {
     assert(box && box.x >= 0 && box.x + box.width <= 391, 'mobile pricing trigger outside viewport: ' + JSON.stringify(box));
     await pricingTrigger.tap();
     await page.waitForFunction(() => !document.getElementById('fx-organism-console').hidden);
+    const openedConsoleDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(openedConsoleDisplay!=='none','mobile console failed to become visible after tap');
+    mark('mobile: opened-console-css',openedConsoleDisplay);
 
     const shell = await page.locator('.fx-organism-console-shell').boundingBox();
     mark('mobile: sheet-box', shell);
@@ -194,6 +278,9 @@ async function validateMobile() {
     assert(overflow <= 1, 'mobile horizontal overflow: ' + overflow);
     await page.locator('.fx-organism-console-close').tap();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
+    const closedConsoleDisplay=await page.locator('#fx-organism-console').evaluate(node=>getComputedStyle(node).display);
+    assert(closedConsoleDisplay==='none','mobile closed console remains painted: '+closedConsoleDisplay);
+    mark('mobile: closed-console-css',closedConsoleDisplay);
 
     await page.locator('#menu-toggle').tap();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));

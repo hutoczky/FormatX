@@ -615,6 +615,31 @@
       // original MAG DOM contract and WebGL identity checks. The external
       // archive stylesheet owns docking geometry so strict style-src remains
       // intact and renderer-authored canvas state is never overwritten.
+      // R2247: R326 reserves its initial layout with inline !important
+      // position/inset/size. Inline important wins over the archive stylesheet
+      // and kept the MAG scrolling with the hero (y=-1233 in desktop CI).
+      // R2251: revert the position-only experiment: the R2250 CI exposed
+      // hero-lead visibility failure and severe mobile long tasks. Restore
+      // the last archive layout contract with passing content validation.
+      // Lighthouse CLS remains a separate open issue requiring attribution.
+      // R2254: count actual archive geometry transitions. These counters
+      // distinguish a genuine dock/restore layout shift from unrelated
+      // initial hero layout changes without touching the rendering pipeline.
+      root.dataset.fxArchiveDockCountR2254=String(
+        Number(root.dataset.fxArchiveDockCountR2254||0)+1
+      );
+      stage._fxArchiveDockLayout=['position','inset','width','height','min-width','min-height']
+        .map(name=>[name,stage.style.getPropertyValue(name),stage.style.getPropertyPriority(name)]);
+      // R2253: switch directly between two fully specified geometries.
+      // Clearing all six inline properties temporarily exposed the legacy
+      // v55 stage/canvas rules and contributed to Lighthouse layout shifts.
+      // Apply the fixed viewport box without an intermediate auto-sized box.
+      stage.style.setProperty('position','fixed','important');
+      stage.style.setProperty('inset','0','important');
+      stage.style.setProperty('width','100vw','important');
+      stage.style.setProperty('height','100dvh','important');
+      stage.style.setProperty('min-width','0','important');
+      stage.style.setProperty('min-height','0','important');
       stage.classList.add('fx-archive-native-docked');
       root.dataset.fxArchiveDock='active';
       archiveActive=true;
@@ -622,7 +647,15 @@
     }
     static restore(){
       if(!archiveActive||!stage)return;
+      root.dataset.fxArchiveRestoreCountR2254=String(
+        Number(root.dataset.fxArchiveRestoreCountR2254||0)+1
+      );
       stage.classList.remove('fx-archive-native-docked');
+      for(const [name,value,priority] of stage._fxArchiveDockLayout||[]){
+        if(value)stage.style.setProperty(name,value,priority);
+        else stage.style.removeProperty(name);
+      }
+      delete stage._fxArchiveDockLayout;
       root.dataset.fxArchiveDock='home';
       archiveActive=false;
       window.FormatXLivingCore?.requestRender?.(1);
@@ -1150,6 +1183,14 @@ void main(){
         const active=selectLiveChapter();
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
+        // R2256: restore the original hero synchronously when leaving the
+        // archive. Waiting for the DOM rAF can strand .hero-copy at
+        // display:none during immediate scroll/visibility assertions.
+        if(!active&&legacyHeroDisplay.size){
+          setLegacyHeroHidden(false);
+          setHeroCanvasLaneFront(false);
+          root.dataset.fxArchiveCinema='home';
+        }
         setPanelState();
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint

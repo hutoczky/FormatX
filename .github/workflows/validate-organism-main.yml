@@ -37,8 +37,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --no-audit --no-fund playwright@1.55.0
-          npx playwright install --with-deps chromium
+          # Isolate Playwright from the repository's npm dependency graph.
+          # Root npm install can fail on unrelated peer dependencies.
+          npm install --prefix "$RUNNER_TEMP/formatx-organism-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-organism-browser/node_modules/.bin/playwright" install --with-deps chromium
 
       - name: Start static website
         shell: bash
@@ -54,6 +56,8 @@ jobs:
 
       - name: Test desktop and mobile organism interactions
         shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-organism-browser/node_modules
         run: node .github/scripts/validate-organism-main.cjs
 
       - name: Upload visual evidence and diagnostics
