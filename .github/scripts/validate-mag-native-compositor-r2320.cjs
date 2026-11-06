@@ -14,6 +14,8 @@ assert.match(mag,/fxMagCanvasCompositeR2320='direct-unfiltered-opaque-preserved-
 assert.match(mag,/livingTimeline\.pause\(\)/);
 assert.match(mag,/livingTimeline\.play\(\)/);
 assert.match(mag,/fxMagBirthBreathR2322='awaiting-first-native-composite'/);
+assert.match(mag,/canvas\.style\.setProperty\('animation-play-state','paused','important'\)/);
+assert.match(mag,/canvas\.style\.removeProperty\('animation-play-state'\)/);
 assert.match(mag,/\},1150\);/);
 assert.doesNotMatch(mag,/canvas\.animate\(\s*\[\s*\{opacity:/);
 assert.match(capture,/nativeSurfacePolicy:root\.dataset\.fxMagCanvasCompositeR2320/);
@@ -21,4 +23,4 @@ assert.match(capture,/state\.canvasRect\.filter!=='none'/);
 assert.match(capture,/R2209 full-viewport MAG is black/);
 assert.doesNotMatch(mag,/mobileBreathPreference|syncMobileBreathOpacity/);
 assert.match(mag,/livingTimeline\?\.cancel\?\.\(\)/);
-console.log('R2322_NATIVE_MAG_POST_EXPOSURE_BREATH_GUARD_PASS');
+console.log('R2323_NATIVE_MAG_CSS_AND_WAAPI_OWNER_GUARD_PASS');

@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2323 – duplán animált natív WebGL réteg versenyhelyzetének izolálása (2026-11-06)
+
+- **R2322 bizonyíték:** a `d3af6c7` P0 filmátadás első képkockája `1271/12528` világos minta, korábban `0/12528` – tényleges pixeljavulás. A három *független* R2226 hidegindításból **2 PASS, 1 FAIL** (1320/0/1320 bright), ezért a P0 még **FAIL**.
+- **Feltárt második animációs tulajdonos:** a `formatx-mag-mobile-optics-r480.css` `fx-primary-mag-mobile-heart-r488` CSSAnimation mindig működött az R326 vásznon a külön `fx-primary-mag-living-breath-r1930` WAAPI mellett. A CSS `animation` még desktopon is létezik és `will-change:opacity` kompozitorréteget tart aktívan.
+- **R2323 forrásváltoztatás:** a film alatti natív MAG-vászon **mindkét animációja** szünetel; a CSS-hez csak ideiglenes inline `animation-play-state:paused!important` kerül, amelyet a meglévő 1150ms post-exposure callback eltávolít. A CSS keyframes, animation identity, tényleges WebGL render, fontossági sorrend, reduced-motion és a globális PAUSE/RESUME owner nem törlődik. Ha a felhasználó kézzel megállított, a WAAPI nem indul újra önkényesen.
+- **Elfogadás:** valós R656 első képkocka, 3/3 hidegindítás, négyviewportos dokkolás, Lighthouse 3× és PAUSE/RESUME ×5 szükséges. A legkorábbi tételes fekete-képkocka pixelgate érintetlen; sem fallback, sem screenshot-emuláció nem került be. PR draft marad, élesítés nincs.
+
+
 ## R2322 – MAG első képkocka: átadás és lélegző animáció elkülönítése (2026-11-06)
 
 - **R2321 pontos `bc9c96e` P0 `42139288180` FAIL:** a teljes viewport fizikai MAG-régiója továbbra is **0/12528 világos mintát** tartalmaz, noha az eredeti WebGL központi GPU pixel `160,255`, a fence `finished`, a canvas `filter:none`, `opacity:1` és minden vizsgált DOM-ős látható. A R2320 CSS filter/opacity-elvétel **önmagában nem oldotta meg** a hibát.
