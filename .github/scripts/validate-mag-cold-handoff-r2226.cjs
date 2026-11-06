@@ -8,9 +8,13 @@ const {chromium}=require('playwright');
 const BASE=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT=process.env.FORMATX_COLD_HANDOFF_DIR||'artifacts/r2226-handoff-coldstarts';
 fs.mkdirSync(OUT,{recursive:true});
+const HEADFUL_DIAGNOSTIC_R2325=process.env.FORMATX_MAG_HEADED_PROOF_R2325==='1';
 const launch=()=>chromium.launch({
   executablePath:process.env.CHROME_BIN||undefined,
-  headless:true,
+  // R2325: run identical strict first-full-viewport validation in BOTH
+  // Chromium compositor modes. Headless remains the mandatory original gate.
+  // Headed under Xvfb is a diagnostic control: no screenshots retried.
+  headless:!HEADFUL_DIAGNOSTIC_R2325,
   args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--no-sandbox']
 });
 const pause=(page,ms)=>page.waitForTimeout(ms);
@@ -56,6 +60,7 @@ async function pixels(page,bytes,rect){
 }
 (async()=>{
   const report=[];
+  console.log('R2325_COLD_COMPOSITOR_MODE',HEADFUL_DIAGNOSTIC_R2325?'headed-Xvfb':'headless-SwiftShader');
   for(let attempt=1;attempt<=3;attempt++){
     const browser=await launch();
     let context;

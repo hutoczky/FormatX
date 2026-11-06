@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2325 – WebGL képernyőkép: headless és headed Chromium szétválasztása (2026-11-06)
+
+- **R2324 teljes P0 `42141679457` FAIL:** R656 film első teljes képernyős MAG képe **PASS**, de az R2226 három *független* hidegindítása **0/3** (mind 0/12528 világos minta). Mindhárom GPU fence `finished`, `gl.readPixels` luma 160/160/160, nem veszít contextet. A filmes crossfade javítása tehát nem biztosít determinisztikus headless megjelenítést. Az oldal továbbra sem élesíthető.
+- **Érvényes hipotézisek:** a Chromium `headless + ANGLE SwiftShader` page screenshot kompozitorútja nem feltétlenül azonos a grafikus móddal; a valós megjelenítés hibája még nincs igazolva. A korábbi második screenshot gyakran már látható, de ezt **nem** használjuk pass feltételnek.
+- **R2325 új, független kontroll:** a meglevő R2226 szigorú 3× *első teljes viewport* tesztje változatlan pixel- és GPU-feltételekkel másodszor is fut `xvfb-run` alatti **valóban fejjel futó** Chromiumon. A tesztet `always()` módon a meglévő headless 3× kapu után indítjuk, így a headless FAIL **nem** írható felül. Mindkét mód képernyőképei és JSON riportja külön artifactban marad; a Chrome azonos SwiftShader backenddel működik, csak a kompozitorút különböző.
+- **Döntési kapu:** ha headed 3/3 PASS, a grafikus kompozitor jó, a headless teszt reprodukálhatóságát kell javítani vagy upstream hibaként elkülöníteni. Ha headed is 0/3, valódi native layout/Compositor/WebGL handoff hiba áll fenn. Bármely esetben a MAG és 10s DNS→sejt film vizuális stúdió-felminősítése, Lighthouse 3× továbbra is nyitott. PR #581 draft, nincs merge/deploy.
+
+
 ## R2324 – filmes réteg valódi, időben befejezett natív WebGL áttűnése (2026-11-06)
 
 - **R2323 valós P0 eredmény:** `f9c54d5` / `42140926679` **FAIL**, első viewport `0/12528` világos pixel, GPU-fence `finished`. A plusz CSSAnimation-PAUSE nem biztosított megbízható megjelenítést; **R2323 kísérlet visszavonva** mindkét kódútvonalon.
