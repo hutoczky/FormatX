@@ -18,5 +18,5 @@ assert.match(capture,/nativeSurfacePolicy:root\.dataset\.fxMagCanvasCompositeR23
 assert.match(capture,/state\.canvasRect\.filter!=='none'/);
 assert.match(capture,/R2209 full-viewport MAG is black/);
 assert.doesNotMatch(mag,/mobileBreathPreference|syncMobileBreathOpacity/);
-assert.match(mag,/livingTimeline\\?\\.cancel\\?\\.\\(\\)/);
+assert.match(mag,/livingTimeline\?\.cancel\?\.\(\)/);
 console.log('R2321_NATIVE_MAG_CLEANUP_CONTRACT_PASS');
