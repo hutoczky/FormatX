@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2324 – filmes réteg valódi, időben befejezett natív WebGL áttűnése (2026-11-06)
+
+- **R2323 valós P0 eredmény:** `f9c54d5` / `42140926679` **FAIL**, első viewport `0/12528` világos pixel, GPU-fence `finished`. A plusz CSSAnimation-PAUSE nem biztosított megbízható megjelenítést; **R2323 kísérlet visszavonva** mindkét kódútvonalon.
+- **Feltárt időzítési konfliktus:** R533 CSS `.is-leaving` áttűnés `.42–.72s` volt, miközben az R2254 vezérlő csak **120 ms** után eltávolította az átlátszatlan filmes réteget. Az első natív WebGL képkocka ezért a teljes viewport kompozitorában esetenként fekete maradt, hiába `gl.flush()` és `fenceSync`.
+- **R2324 tényleges javítás:** sikeres natív GPU-fence után a **meglévő** R326 canvas és stage a filmes overlay alatt láthatóvá válik, majd az overlay **260 ms tényleges opacity fade** útján távozik. A filmet csak **360 ms** összes kompozitoridő után bontja le a vezérlő. Mindkét `watchdog` ehhez igazodik, így nem vágja le korábban a crossfade-et. 10,00s filmhossz nem módosul, nincs új render/canvas/RAF, nincs autoplay megkerülés.
+- **A megőrzött R2322:** WAAPI mikrobreath 1150 ms utáni késleltetett visszaállítása. Egyetlen WebGL renderer, fizikai anyag és minden screenshot-pixelkapu változatlan.
+- **Elfogadás:** R656 valódi első teljes viewport, 3/3 R2226 hidegindítás, 4 nézet dock, reduced/Skip, PAUSE/RESUME ×5, Lighthouse ×3. A hibás R2323 regresszió nincs élesítve; PR #581 draft, no merge.
+
+
 ## R2323 – duplán animált natív WebGL réteg versenyhelyzetének izolálása (2026-11-06)
 
 - **R2322 bizonyíték:** a `d3af6c7` P0 filmátadás első képkockája `1271/12528` világos minta, korábban `0/12528` – tényleges pixeljavulás. A három *független* R2226 hidegindításból **2 PASS, 1 FAIL** (1320/0/1320 bright), ezért a P0 még **FAIL**.

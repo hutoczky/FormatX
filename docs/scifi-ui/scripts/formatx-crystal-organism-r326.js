@@ -1106,15 +1106,7 @@
       // Prevent a moving native compositor layer behind the opaque Genesis.
       if(root.dataset.fxMagBirthLiveR533==='active' ||
          root.getAttribute('data-fx-mag-birth-live')==='active')
-        {
-          livingTimeline.pause();
-          // R2323: also pause the PRE-EXISTING CSSAnimation on this same
-          // native canvas. R2322 still failed 1/3 cold starts because the
-          // canonical CSS r488 heartbeat kept a compositor layer alive.
-          // PAUSE preserves its animation identity and current keyframe.
-          canvas.style.setProperty('animation-play-state','paused','important');
-          root.dataset.fxMagCssBirthHoldR2323='css-and-waapi-paused-during-film';
-        }
+        livingTimeline.pause();
       root.dataset.fxNativeMagDesktopLifeR1902='native-webgl-microbreath-no-opacity';
       root.dataset.fxNativeMagBreathR1930='transform-only-compositor-shader-life';
     }
@@ -3059,10 +3051,6 @@
         later(()=>{
           if(disposed||contextLost||!stage.isConnected)return;
           try{
-            // Remove ONLY the temporary inline override. The authoritative
-            // r488 animation rule and global PAUSE/RESUME owner survive.
-            canvas.style.removeProperty('animation-play-state');
-            root.dataset.fxMagCssBirthHoldR2323='css-owner-restored-post-exposure';
             if(!paused && root.dataset.fxReferenceMotionPaused!=='true'){
               livingTimeline.play();
               root.dataset.fxMagBirthBreathR2322='post-exposure-transform-resumed';

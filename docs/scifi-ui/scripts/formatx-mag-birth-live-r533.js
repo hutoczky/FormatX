@@ -1073,6 +1073,11 @@
 
   let nativeHandoffGateStartedR2254=0;
   let nativeHandoffFadeR2254=false;
+  // R2324: the real source CSS animated a .42-.72s fade, but the R2254
+  // controller cut it off after 120ms. Allow the exposed canonical WebGL
+  // layer a complete compositor transition BEFORE film DOM destruction.
+  // The physical 10s GENESIS frame timeline remains unchanged.
+  const NATIVE_CROSSFADE_MS_R2324=360;
   function safeTeardownOverlay(source) {
     if(!overlay.isConnected)return;
     // R2254: R2226 proved that the native DOM could be "ready" while its
@@ -1097,8 +1102,17 @@
       }else ROOT.dataset.fxMagHandoffGateR2254='gpu-finished-before-exposure';
       if(!nativeHandoffFadeR2254){
         nativeHandoffFadeR2254=true;
+        // R2324: expose the ready ORIGINAL native canvas under the still-
+        // present cinematic occluder before starting the gentle crossfade.
+        // R2322 had 2/3 reliable cold starts; R2323 CSS pause was 0/1.
+        // Never remove the cinematic layer in the same compositor task.
+        try{releaseStageStyle();}catch(_){}
+        overlay.style.setProperty('transition',
+          'opacity .26s ease, filter .26s ease','important');
         overlay.classList.add('is-leaving');
-        exitTimer=window.setTimeout(()=>safeTeardownOverlay(source),120);
+        ROOT.dataset.fxMagHandoffBlendR2324='pre-exposed-native-360ms-crossfade';
+        exitTimer=window.setTimeout(
+          ()=>safeTeardownOverlay(source),NATIVE_CROSSFADE_MS_R2324);
         return;
       }
     }
@@ -1192,7 +1206,7 @@
     // survive past the reference endpoint + exit allowance.
     window.setTimeout(()=>{
       if(overlay.isConnected) safeTeardownOverlay('forced-overlay-cleanup-r655');
-    },(REDUCED ? 20 : EXIT_MS)+140);
+    },(REDUCED ? 20 : EXIT_MS)+NATIVE_CROSSFADE_MS_R2324+100);
   }
 
   function queueRender(delay=0) {
@@ -1539,7 +1553,7 @@
           detail:{source:'absolute-dom-watchdog-r653',revision:'r653-independent-overlay-watchdog'}
         }));
       }catch(_){}
-    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+550));
+    },VALIDATED_SKIP_MODE ? 35000 : ((MOBILE && FORCE && AUTOMATION) ? 10800 : DURATION+820));
 
     // R652: the film itself remains exactly 10.0 s. The bounded fail-open is
     // deliberately close to the reference endpoint so a stalled GPU/import path
