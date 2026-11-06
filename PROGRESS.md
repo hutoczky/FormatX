@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2329 – MAG anyagvizsgálat a valódi pixelhez kötve (2026-11-06)
+
+- **Konkrét blokkoló:** a R2328 `d567a102` Canonical MAG job a `validate-mag-surface-energy-r484.cjs` scriptben a `mobile-390: final mobile crystal is too dim; computed=none` hibával leállt, mivel a 2026-os R2320 módosítás óta a WebGL MAG-on szándékosan `filter:none` van. Az elavult teszt CSS-fényességet mért, nem a valódi kompozitorkép fényességét.
+- **R2329 javítás:** a tiszta `filter:none` út csak akkor fogadható el, ha a közvetlen R2320 egyetlen canvas, a R2326 fizikai titán/iris shader és a R2327 eredeti négyágú geometria állapota mind az elvárt. A korábbi szűrős út számszerű ellenőrzése érintetlen.
+- **Valódi, szigorú pixelkapu változatlan:** az eredeti Chromium CDP `Page.captureScreenshot({fromSurface:true})` 64×64 mintáján az idle fényerő maximum `>60`, látható terület `>2%`, korai/késői tényleges felületi változás `>=8` minta, valamint térben mozgó fénycentrum marad a kötelező kapu. Nincs screenshot retry, új shader, fallback, gyengített küszöb vagy új vászon.
+- **Ugyanezen R2328 fejlesztői commiton:** grafikus Xvfb Chromium három első-képkockás indítása 3/3 PASS, headless 2/3 PASS; négy valós képernyőméretű MAG-dokkolás PASS. Desktop Lighthouse 84/92/88, mobil 88/88/90, tehát még nem kész. Nincs merge/deployment.
+
+
 ## R2328 – filmes DNS és sejt: biopolimer mikrodomborzat, szerves átmenet (2026-11-06)
 
 - **DNS térbeli szálai:** a procedurális 64×64 foszfátrost-textúra 128×128-ra növelt; továbbra is **egyetlen** közös, indításkor generált 64 KiB GPU-textúra, sem új vászon, sem új renderpass. A bump-pontosság `mobile .008→.011`, `desktop .012→.015`, a valódi hajlított Three.js DNS-geometrián.

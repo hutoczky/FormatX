@@ -264,6 +264,9 @@ async function verify(browser, name, viewport, mobile) {
         legacyCount: document.querySelectorAll('#hero .fx-three-frame, #hero .fx-core-mobile-v55-stage:not(.fx-crystal-organism-r326-stage)').length,
         overflow: Math.max(0, root.scrollWidth - innerWidth),
         filter: style.filter, opacity: Number(style.opacity),
+        nativeCompositor:root.dataset.fxMagCanvasCompositeR2320||'',
+        physicalStudio:root.dataset.fxNativeMagStudioR2326||'',
+        studioAnatomy:root.dataset.fxNativeMagAnatomyR2327||'',
         glError: gl.getError(), budget: root.dataset.fxMobileSurfaceBudgetR484,
         policy: root.dataset.fxCoreMobileIdlePolicyR426,
         shape: root.dataset.fxCoreShapeR337,
@@ -285,12 +288,34 @@ async function verify(browser, name, viewport, mobile) {
       };
       assert.ok(!/blur\((?!0(?:px)?\))/i.test(filter),
         `${name}: final mobile compositor reintroduced blur; computed=${filter}`);
-      assert.ok(numberOf('brightness') >= .95,
-        `${name}: final mobile crystal is too dim; computed=${filter}`);
-      assert.ok(numberOf('contrast') >= 1.05,
-        `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
-      assert.ok(numberOf('saturate') >= .94 && numberOf('saturate') <= 1.02,
-        `${name}: final R1795 smoky-bioglass saturation drift; computed=${filter}`);
+      // R2329: R2320 removed the CSS color-filter layer on the original
+      // physical MAG canvas so its first GL frame reaches the compositor.
+      // Do not assert an obsolete CSS-only gamma curve. Instead require the
+      // real R2326 WebGL optics and still enforce the *unmodified* CDP
+      // screenshot brightness/coverage plus moving highlight gates below.
+      if(filter==='none'){
+        assert.equal(report.dom.nativeCompositor,
+          'direct-unfiltered-opaque-preserved-webgl',
+          `${name}: no CSS filter but the physical GL compositor owner is missing`);
+        assert.equal(report.dom.physicalStudio,
+          'single-pass-reflection-coupled-titanium-microbevel-living-coral-stroma-refracted-iris',
+          `${name}: direct WebGL canvas without physical titanium/iris material`);
+        assert.equal(report.dom.studioAnatomy,
+          'compact-recessed-living-cortex-four-machined-arms-foreground',
+          `${name}: expected real four-arm MAG physical anatomy absent`);
+        assert.ok(report.dom.opacity>=.99,
+          `${name}: direct MAG canvas is faded even though the film ended`);
+        report.mobileExposureOwner='native-shader-and-real-compositor-pixel-proof';
+      }else{
+        // Keep legacy CSS-filter contracts for any older, filtered renderer.
+        assert.ok(numberOf('brightness') >= .95,
+          `${name}: final mobile crystal is too dim; computed=${filter}`);
+        assert.ok(numberOf('contrast') >= 1.05,
+          `${name}: final mobile crystal lacks facet contrast; computed=${filter}`);
+        assert.ok(numberOf('saturate') >= .94 && numberOf('saturate') <= 1.02,
+          `${name}: final R1795 smoky-bioglass saturation drift; computed=${filter}`);
+        report.mobileExposureOwner='legacy-css-filter-and-real-compositor-pixel-proof';
+      }
       assert.equal(report.dom.optics, 'calmer-luminance-feathered-mobile-silhouette');
       assert.equal(report.dom.budget, 'full-1160ms-sweep-then-zero-idle');
     }
@@ -304,6 +329,8 @@ async function verify(browser, name, viewport, mobile) {
     report.captures.late = await captureSurface(page, name, 'surface-late', .68);
     await page.evaluate(() => { delete window.__magCapturePhase; });
     await page.locator('#hero .fx-crystal-organism-r326-canvas').evaluate(canvas => canvas.getAnimations().forEach(animation => animation.play()));
+    // R2329: this is the ACTUAL Chromium compositor capture, not an
+    // assertion on style tokens or a screenshot substitute.
     assert.ok(report.captures.idle.maximum > 60 && report.captures.idle.coverage > .02, `${name}: resting MAG is too dim`);
     report.earlyChange = surfaceChange(report.captures.idle, report.captures.early);
     report.lateChange = surfaceChange(report.captures.idle, report.captures.late);
