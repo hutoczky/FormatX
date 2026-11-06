@@ -1573,6 +1573,19 @@
         studioSilver+=vec3(.34,.57,.63)*axialHairline*.13;
         studioSilver*=1.0-socketMask*.11;
         studioSilver+=vec3(.24,.36,.39)*socketMask*metalSpec*.30;
+        /* R2326: a physically bounded paired satin incision on the
+           existing four curved titanium lamellae. This derives entirely
+           from their body-space panel coordinates and the filtered panelAA.
+           Reflected softboxes reveal relief when the actual MAG turns;
+           it is NOT a flat white line, overlay, texture or extra pass.
+           Avoid new trigonometry, branches, textures and pixel aliasing. */
+        float microBevel=exp(-pow((panelEdge.y-.125)/
+          (.045+panelAA.y*.50),2.0))*panelEnvelope;
+        float grazingMachining=microBevel*(.23+.77*softboxC)*
+          (.35+.65*metalKey)*(1.0-.72*panelJoint);
+        studioSilver+=vec3(.32,.40,.44)*grazingMachining*.24;
+        studioSilver+=vec3(.055,.18,.20)*grazingMachining*
+          (1.0-softboxC)*.14;
         // R2275: only the original glass-mineral body is silver-washed.
         // The R2273 cortex and filaments were incorrectly receiving the
         // same bright metal plate color and looked like a perfect white ball.
@@ -1605,6 +1618,12 @@
           cortexMaterial+=vec3(.035,.24,.26)*vein*
             (.20+.38*uEnergy)*livingPulse;
           cortexMaterial+=vec3(.22,.070,.048)*coralNest*.12;
+          // R2326: keep the coral chemistry inside the concave living
+          // cortex, never on the titanium faces or transparent page.
+          // The already computed folds control hot and cold organelles.
+          float warmStroma=coralNest*(.38+.62*livingPulse);
+          cortexMaterial+=vec3(.15,.037,.024)*warmStroma*.18;
+          cortexMaterial+=vec3(.022,.11,.125)*vein*(1.0-warmStroma)*.12;
           cortexMaterial+=vec3(.040,.13,.16)*
             pow(1.0-facing,2.3)*.31;
           c=mix(c,cortexMaterial,livingCortex*.97);
@@ -1666,6 +1685,12 @@
         lensColor+=vec3(.055,.60,.62)*innerMembrane*(.18+.08*uEnergy);
         lensColor+=vec3(.16,.52,.56)*outerMembrane*(.24+.05*uEnergy);
         lensColor+=vec3(.84,.25,.17)*filamentMask*(.18+.08*uEnergy);
+        /* R2326: a thin folded cyan refraction on the EXISTING curved
+           glass iris. Reuse the same biological filament and membrane
+           fields; keep its optical center clear instead of whitewashing. */
+        float cellRefraction=innerMembrane*bioticFilament*
+          (.35+.65*softboxB)*tissueEnvelope;
+        lensColor+=vec3(.070,.30,.34)*cellRefraction*.16;
         // Keep broad photographic contrast instead of an all-white iris.
         lensColor*=1.0-.13*coralOrganelles*filamentMask;
         c=lensColor;
@@ -1707,6 +1732,7 @@
     root.dataset.fxNativeMagStudioR2270='asymmetric-living-sculpt-sinuous-titanium-lamellae-nacre-vascular-backscatter-single-pass';
     root.dataset.fxNativeMagStudioR2273='sculpted-deep-cortex-biological-filaments-canonical-single-draw';
     root.dataset.fxNativeMagStudioR2275='irregular-three-dimensional-smoked-bioglass-cortex-scoped-silver-living-vascular-organelle-studio';
+    root.dataset.fxNativeMagStudioR2326='single-pass-reflection-coupled-titanium-microbevel-living-coral-stroma-refracted-iris';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
       ? 'r1724-software-living-crystal-cyan-indigo-lite'

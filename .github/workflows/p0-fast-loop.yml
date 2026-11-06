@@ -146,6 +146,7 @@ jobs:
           node --check .github/scripts/validate-embryo-studio-balance-r2318.cjs
           node --check .github/scripts/validate-retired-cinematic-owner-r2319.cjs
           node --check .github/scripts/validate-mag-native-compositor-r2320.cjs
+          node --check .github/scripts/validate-mag-photographic-material-r2326.cjs
           node --check .github/scripts/validate-fixed-native-home-r2315.cjs
           node --check .github/scripts/validate-compositor-only-dock-r2316.cjs
           node --check .github/scripts/validate-desktop-dock-transform-r2302.cjs
@@ -174,6 +175,7 @@ jobs:
           node .github/scripts/validate-embryo-studio-balance-r2318.cjs
           node .github/scripts/validate-retired-cinematic-owner-r2319.cjs
           node .github/scripts/validate-mag-native-compositor-r2320.cjs
+          node .github/scripts/validate-mag-photographic-material-r2326.cjs
           node .github/scripts/validate-fixed-native-home-r2315.cjs
           node .github/scripts/validate-compositor-only-dock-r2316.cjs
           node .github/scripts/validate-desktop-dock-transform-r2302.cjs

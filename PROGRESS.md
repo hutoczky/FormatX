@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2326 – valódi natív MAG anyagminőség (2026-11-06)
+
+- **Bemenet:** a felhasználó által küldött négyágú ezüst/titán MAG, biológiai türkiz–korall sejtmagszövet, makrofotós DNS. Első prioritás a permanens MAG.
+- **R2325 szigorú 3× Chromium kontroll:** `f0f3487` / run `42142750785`: ugyanaz a natív MAG, ugyanaz a GPU-fence és ugyanaz az első teljes képernyőképes 40/12528 minimum. **Grafikus Chromium + Xvfb 3/3 PASS:** 1195/1196/1186 világos minta. A külön headless SwiftShader-teszt és a P0 filmrögzítés továbbra is FAIL; nem gyengítjük és nem állítjuk zöldnek. A grafikus mód még nem bizonyít valódi Android 60 FPS-t.
+- **R2326 natív shader fejlesztés:** a meglévő négy valódi titánág lamelláin finom, anti-aliased visszavert mikroélek (a már meglévő `panelCoord`, `panelAA`, `softboxC`, `metalKey` változókból). Az eredeti organikus cortex kapillárisaihoz visszafogott türkiz/korall mikrotér, és a tényleges, ívelt üvegszem belsejében rétegzett fénytörési villanás. Minden anyagrészlet **azonos WebGL VBO-ban/shaderben**, nincs új canvasa, új textúra, második renderer, új rAF vagy további matematikai függvény alapú díszítőréteg.
+- **R2326 acceptance:** forráskód és shader compile, eredeti 3D-geometria, 4 viewport, valódi grafikus + headless first-full-viewport screenshot, P0 és Lighthouse×3. A minőség és 60 FPS vizuális ellenőrzés előtt nincs studio PASS. PR #581 draft, nincs merge/deploy.
+
+
 ## R2325 – WebGL képernyőkép: headless és headed Chromium szétválasztása (2026-11-06)
 
 - **R2324 teljes P0 `42141679457` FAIL:** R656 film első teljes képernyős MAG képe **PASS**, de az R2226 három *független* hidegindítása **0/3** (mind 0/12528 világos minta). Mindhárom GPU fence `finished`, `gl.readPixels` luma 160/160/160, nem veszít contextet. A filmes crossfade javítása tehát nem biztosít determinisztikus headless megjelenítést. Az oldal továbbra sem élesíthető.
