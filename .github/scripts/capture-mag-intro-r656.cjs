@@ -9,6 +9,9 @@ const OUT=process.env.FORMATX_INTRO_KEYFRAME_DIR||'artifacts/r659-intro-keyframe
 const CHROME=process.env.CHROME_BIN||undefined;
 const SKIP_HANDOFF=process.env.FORMATX_SKIP_HANDOFF==='1';
 const MOBILE_ONLY=process.env.FORMATX_MOBILE_ONLY==='1';
+// R2334: an independent headed mobile compositor proves whether the MAG
+// truly drifts off-screen, without changing the original headless oracle.
+const HEADFUL_VISUAL_R2334=process.env.FORMATX_HEADFUL_VISUAL_R2334==='1';
 fs.mkdirSync(OUT,{recursive:true});
 
 const SHOTS=[
@@ -22,7 +25,7 @@ const SHOTS=[
 
 (async()=>{
   const launchBrowser=()=>chromium.launch({
-    headless:true,
+    headless:!HEADFUL_VISUAL_R2334,
     executablePath:CHROME,
     args:['--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--no-sandbox']
   });
@@ -105,6 +108,9 @@ const SHOTS=[
           parent:el.parentElement?.className||el.parentElement?.id||''};
       };
       return {pass:hits>=250&&centre>=.30&&centre<=.70,
+        failureClass:hits===0?'headless-compositor-black-not-physical-offset':
+          hits<250?'physical-surface-insufficiently-visible':
+          centre<.30||centre>.70?'actual-mag-centering-outside-30-70-percent':'visible-and-centered',
         brightSamples:hits,
         centroidX:centre===null?null:Number(centre.toFixed(4)),
         viewportWidth:cv.width,
@@ -207,6 +213,9 @@ const SHOTS=[
 
   const report=[];
   try{
+    if(HEADFUL_VISUAL_R2334)
+      console.log('R2334_GENUINE_MOBILE_HEADED_COMPOSITOR_PROOF: '
+        +'one Playwright 390x844 first viewport, same source and GPU');
     // Always capture the exact phone hero first. Even if an intro-keyframe
     // renderer later fails, the artifact still contains the user-facing MAG.
     await captureMobileNativePreflight();

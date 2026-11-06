@@ -222,6 +222,18 @@ jobs:
           FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
           FORMATX_INTRO_KEYFRAME_DIR: artifacts/r656-intro-keyframes
         run: node .github/scripts/capture-mag-intro-r656.cjs
+      - name: R2334 headed Chromium mobile native MAG first-viewport proof
+        if: always()
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_INTRO_KEYFRAME_DIR: artifacts/r2334-headed-mobile-native
+          FORMATX_MOBILE_ONLY: '1'
+          FORMATX_HEADFUL_VISUAL_R2334: '1'
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null
+          command -v xvfb-run
+          xvfb-run -a node .github/scripts/capture-mag-intro-r656.cjs
       - name: Upload current intro keyframes early
         uses: actions/upload-artifact@v4
         with:
@@ -331,6 +343,7 @@ jobs:
             artifacts/genesis-antialias-r2175/
             artifacts/mag-handoff-layout-r2181/
             artifacts/r656-intro-keyframes/
+            artifacts/r2334-headed-mobile-native/
             artifacts/r2226-handoff-coldstarts/
             artifacts/r2325-headed-coldstarts/
             artifacts/r2264-normal-visitor/

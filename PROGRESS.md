@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2334 – valódi 390px grafikus MAG-képkocka kontroll (2026-11-06)
+
+- **R2333 pontos `8254c2c5` P0 `42209415251`:** a forráskód-ellenőrzések PASS; a headless R656 mobil képkockán `brightSamples=0`, `centroidX=null`, miközben a mobil MAG canvas ténylegesen `x=0,width=390` és viewport `width=390`. A hibaüzenet tévesen *physically off-centre*-nak nevezte a nullpixeles kompozitorfelvételt. A külön Xvfb grafikus Chromium 3/3 MAG coldstart **PASS**. A teljes P0 tehát továbbra is RED.
+- **R2334:** a megbízható `capture-mag-intro-r656.cjs` eredeti valódi PNG-pixel és 30–70%-os centroid-kapuja **változatlan**, de a képhez diagnosztikai `failureClass` tartozik, amely elkülöníti a `0 bright` kompozitorhibát a valós elcsúszástól. Új `FORMATX_HEADFUL_VISUAL_R2334=1` csak kifejezett CI env alatt teszi headedre a Chromiumot.
+- **Független kontroll:** a P0-ban az eredeti headless R656 *után* `if:always()` Xvfb headed Chromium 390×844 natív MAG elsőképernyőképet és pixelelemzést készít `MOBILE_ONLY=1` módban, külön `artifacts/r2334-headed-mobile-native/` artifactként. Ez nem változtatja a headless black-frame PASS/FAIL döntést és nem leplez hibát: a teljes P0 továbbra is fail marad, ha a headless képkocka fekete.
+- **Studio acceptance:** a sejt referenciafényképtől eltérő sötét középső organellumát R2331 módosította; az új grafikus képen ellenőrizendő a 3D szövet minősége és a valódi MAG sziluett, majd Android Chrome és Lighthouse ×3. Nincs merge vagy deployment.
+
+
 ## R2331 – biológiai sejtmagszövet makrofotográfiai anyaga (2026-11-06)
 
 - **Vizuális bizonyíték:** a korábbi valódi 5,50s mobil GENESIS screenshoton a türkiz–korall sejthéj mögött kontrasztos, szinte fekete, tökéletes kör alakú organellum volt; az apró felszíni vesiculák túl csillogó gyöngysorokra hasonlítottak. A referencia térbeli, diffúz, sejtszöveti belsőt kíván.
