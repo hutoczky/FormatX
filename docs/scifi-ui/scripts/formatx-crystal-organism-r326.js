@@ -387,7 +387,10 @@
         (facet<2.0?(mobile?.985:(software?.94:.90)):
         (software?.95:(mobile?.985:(constrained?.972:.978))));
       const faceWeight=1-smoothWeight;
-      vertices.forEach((item, index) => {
+      // R2258: avoid one callback allocation per triangle during tessellation.
+      // Preserve exact vertex order, values and the existing normal math.
+      for(let index=0;index<3;index+=1){
+        const item=vertices[index];
         sphere.push(...item.sphere);
         crystal.push(...item.crystal);
         sphereNormals.push(...item.sphereNormal);
@@ -408,7 +411,7 @@
         uvs.push(...item.uv);
         barycentrics.push(...barycentric[index]);
         facets.push(facet);
-      });
+      }
     }
 
     /* R1931 — clean P0-derived body topology.
