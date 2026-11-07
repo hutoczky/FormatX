@@ -16,6 +16,8 @@ The current work stays on the Genesis introduction and the same living MAG's tra
 - Preserve the current master's release metadata exactly. The two newer master commits change only `docs/scifi-ui/data/current-release.json`.
 - Extend the existing seven-case browser oracle to inspect the actual retired scene branches and final draw budget; retain all original cases, assertions and deadlines.
 
+- R2220: settle the existing cinematic secondary softbox onto the permanent MAG shader's right-side studio direction in the same 7.25–8.10 second handoff window, preserving frontal irradiance and the existing light count.
+
 ## Local verification
 
 - Actual Three r185 mobile/desktop builders match the native .135/.135/.055 lens radii within 2e-8; bezel vertices/normals match the native profile within 1e-7. The exact parent fails the radial/axial anatomy assertion. Non-optical geometry and scene-object counts match the parent. These are source/mesh checks, not rendered quality, GPU performance or frame-rate acceptance.

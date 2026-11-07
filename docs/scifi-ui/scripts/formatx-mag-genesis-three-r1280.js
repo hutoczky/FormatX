@@ -3263,6 +3263,19 @@
         key.set(mix(x,key.x,handoffKey),mix(y,key.y,handoffKey),mix(z,key.z,handoffKey));
         const settledFrontal=key.dot(this.camera.position)/key.length();
         this.studioKey.intensity*=frontal/settledFrontal;
+
+        // R2220: the secondary softbox now lands on the permanent shader's
+        // right-side studio direction in the same continuous window. Keep its
+        // frontal contribution stable so the titanium shoulder does not flash
+        // or darken while ownership transfers to the native MAG.
+        const fill=this.studioFill.position,fillDistance=fill.length();
+        const fillX=fill.x,fillY=fill.y,fillZ=fill.z;
+        const fillFrontal=fill.dot(this.camera.position)/fillDistance;
+        fill.set(.72,.08,.69).normalize()
+          .applyQuaternion(this.camera.quaternion).multiplyScalar(fillDistance);
+        fill.set(mix(fillX,fill.x,handoffKey),mix(fillY,fill.y,handoffKey),mix(fillZ,fill.z,handoffKey));
+        const settledFillFrontal=fill.dot(this.camera.position)/fill.length();
+        this.studioFill.intensity*=fillFrontal/settledFillFrontal;
       }
       this.renderer.toneMappingExposure=
         1.075+dnaStudio*.035+embryoStudio*.045+assemblyStudio*.11+
@@ -3480,4 +3493,5 @@
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
   document.documentElement.dataset.fxMagCinematicSurfaceR2218='front-filtered-machined-silver-native-grazing';
   document.documentElement.dataset.fxMagCinematicPoseR2219='native-base-pose-continuous-handoff';
+  document.documentElement.dataset.fxMagCinematicFillR2220='native-side-light-continuous-handoff';
 })();

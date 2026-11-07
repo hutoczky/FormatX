@@ -1,3 +1,7 @@
+FormatX R2220 secondary-light handoff — 2026-11-07
+cache=20261107-r2220-native-fill-handoff
+The existing cinematic secondary softbox now settles continuously onto the permanent MAG shader's right-side studio direction from 7.25 to 8.10 seconds while preserving frontal irradiance. The R2219 body pose, fresh four-point silhouette, physical materials, living optic, camera, scale/position landing, story clock and renderer ownership remain. No added light, draw, program, pass, texture, geometry, context, canvas, RAF, timer, input or detection. This is one visible light-continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
+
 FormatX R2219 native body-pose handoff — 2026-11-06
 cache=20261106-r2219-native-body-pose
 The complete cinematic chassis now settles continuously into the permanent MAG's composed hardware-path rest pose before the crossfade. The mobile and desktop angles include the native shader base and resting body rotation, without a new per-frame state read. Geometry, four-point silhouette, material programs, physical studio lights, camera, scale/position landing, story clock and renderer ownership remain. No added draw, program, pass, texture, context, canvas, RAF, timer, input or detection. This is one visible pose/motion continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
