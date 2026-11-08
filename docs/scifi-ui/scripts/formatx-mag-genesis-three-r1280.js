@@ -365,7 +365,7 @@
       }
       const texture=new T.DataTexture(pixels,size,size,T.RGBAFormat);
       texture.wrapS=texture.wrapT=T.RepeatWrapping;
-      texture.repeat.set(5,3);
+      texture.repeat.set(4,2);
       texture.magFilter=T.LinearFilter;
       texture.minFilter=T.LinearMipmapLinearFilter;
       texture.generateMipmaps=true;
@@ -396,21 +396,21 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const phosphateTexture=this.makeDNAFiberTexture();
-      // R2337: deep sapphire/amethyst phosphate tissue, not pastel plastic.
+      // R2341: macro DNA uses satin hydrated phosphate, not polished plastic.
       // TRUE 3D helices reuse one already generated 128px phosphate fibre
-      // bump map. Restrained satin clearcoat and deeper microroughness reveal
+      // bump map. Lower clearcoat and denser microrelief reveal
       // the existing microfibrils without a new draw, texture or render pass.
       const ma=new T.MeshPhysicalMaterial({
-        color:0x7796c4,emissive:0x224267,emissiveIntensity:.54,
-        roughness:.355,metalness:.045,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.014:.020,
-        depthWrite:false,clearcoat:.72,clearcoatRoughness:.18
+        color:0x6683b0,emissive:0x18364f,emissiveIntensity:.37,
+        roughness:.51,metalness:.025,transparent:true,opacity:.97,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.023:.031,
+        depthWrite:false,clearcoat:.30,clearcoatRoughness:.42
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0x987cb8,emissive:0x523b77,emissiveIntensity:.53,
-        roughness:.37,metalness:.040,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.014:.020,
-        depthWrite:false,clearcoat:.70,clearcoatRoughness:.19
+        color:0x8974ac,emissive:0x422f65,emissiveIntensity:.37,
+        roughness:.53,metalness:.025,transparent:true,opacity:.97,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.023:.031,
+        depthWrite:false,clearcoat:.29,clearcoatRoughness:.44
       });
       const ga=new T.MeshBasicMaterial({
         color:0x65bad6,transparent:true,opacity:.055,depthWrite:false,
@@ -496,7 +496,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.93,.92,.095,.085,.91,.50,.46];
+      group.userData.baseOpacity=[.94,.93,.058,.052,.91,.50,.46];
       return group;
     }
 
@@ -3723,6 +3723,8 @@
   document.documentElement.dataset.fxGenesisStudioR2301='cellular-depth-first-tamed-additive-chromatin-real-3d-geometry';
   document.documentElement.dataset.fxMagStudioContinuityR2336=
     'native-four-arm-pose-and-two-studio-directions-preserved-irradiance';
+  document.documentElement.dataset.fxGenesisSatinMacroR2341=
+    'hydrated-phosphate-satin-stronger-shared-microfibril-no-new-pass';
   document.documentElement.dataset.fxGenesisBiopolymerR2337=
     'sapphire-amethyst-satin-microfibril-physical-helix';
   document.documentElement.dataset.fxGenesisTissueR2339=
