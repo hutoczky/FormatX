@@ -118,13 +118,13 @@ assert(archive.includes("root.dataset.fxArchiveFlipR2293='mobile-fixed-layout-co
   'R2294 live mobile native MAG cannot traverse a geometry-changing FLIP path');
 console.log('MAG_R2294_SINGLE_BOX_SCROLL_COMPOSITOR_SOURCE_PASS');
 for(const token of [
-  'R2289: a real cortex survives the titanium assembly',
+  'R2352: the true cell survives INSIDE the finished titanium MAG',
   'const handoffCortex=smooth((t-7.28)/1.43);',
   'const visible=grow*mix(fade,.82,handoffCortex);',
-  'const bodyScale=.001+.63*grow*mix(fade,.86,handoffCortex);',
-  'this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);',
+  'const bodyScale=.001+.63*grow*mix(fade,.56,handoffCortex);',
+  'this.organicLobeMaterial.opacity=mix(.15*visible,.19*grow,handoffCortex);',
   'this.silverMaterial.roughness=mix(.18,.17,finale);'
-]) assert(three.includes(token),'R2289 physical film-to-live cortex continuity missing: '+token);
+]) assert(three.includes(token),'R2352 physical film-to-live cortex continuity missing: '+token);
 assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2289 film bridge must use the freshly cached true Three.js asset');
 console.log('MAG_R2289_FILM_CORTEX_CONTINUITY_SOURCE_PASS');
@@ -136,8 +136,8 @@ assert(three.includes("const shellPosition=shell.geometry.getAttribute('position
   three.includes('shell.geometry.computeVertexNormals();') &&
   three.includes('vertexColors:true,'),
   'R2295 must deform the genuine 3D cortex and upload biological vertex colors with recomputed normals');
-assert(three.includes('this.organicGroup.position.z=-.54*handoffCortex;') &&
-  three.includes('this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);') &&
+assert(three.includes('this.organicGroup.position.z=-.62*handoffCortex;') &&
+  three.includes('this.organicShellMaterial.opacity=mix(.18*visible,.58*grow,handoffCortex);') &&
   three.includes('this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);'),
   'R2291 requires hydrated PBR cortex behind the real titanium chassis');
 assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
