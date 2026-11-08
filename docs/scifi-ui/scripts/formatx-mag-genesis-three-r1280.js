@@ -1402,13 +1402,13 @@
       // R2216: micro-organelles should read as tissue under a macro lens,
       // not floating toy beads. Keep true instancing and real depth.
       const vesicleGeometry=new T.IcosahedronGeometry(
-        this.mobileRender?.023:.028,1
+        this.mobileRender?.014:.018,1
       );
       const vesicleMaterial=new T.MeshPhysicalMaterial({
         // R2331: 3D vesicles are wet living tissue, not polished pearls.
-        color:0xffffff,metalness:0,roughness:.68,
-        clearcoat:.22,clearcoatRoughness:.34,
-        emissive:0x2b363a,emissiveIntensity:.12,
+        color:0xd8e5e3,metalness:0,roughness:.79,
+        clearcoat:.12,clearcoatRoughness:.49,
+        emissive:0x193b3e,emissiveIntensity:.08,
         transparent:true,opacity:0,depthWrite:false
       });
       const vesicles=new T.InstancedMesh(
@@ -1446,6 +1446,8 @@
       this.embryoVesicles=vesicles;
       this.embryoVesicleMaterial=vesicleMaterial;
       this.coreGroup.add(vesicles);
+      document.documentElement.dataset.fxGenesisCellMicroR2342=
+        'smaller-satin-cortex-organelles-quieter-chromatin-one-instanced-draw';
       document.documentElement.dataset.fxGenesisCellTissueR2331=
         'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles';
 
@@ -3021,7 +3023,7 @@
       // to retain actual internal organelles and the suspended chromatin.
       this.embryoMaterial.opacity=.89*visible;
       this.embryoNucleusMaterial.opacity=.82*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.11:.16)*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.075:.105)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
@@ -3034,8 +3036,8 @@
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoCapillaryMaterial.opacity=.10*visible;
-      this.embryoVesicleMaterial.opacity=.43*visible;
+      this.embryoCapillaryMaterial.opacity=.055*visible;
+      this.embryoVesicleMaterial.opacity=.29*visible;
       this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
