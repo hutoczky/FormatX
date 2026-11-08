@@ -5,13 +5,16 @@ const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.
 const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
 const p0=fs.readFileSync('.github/scripts/validate-native-mag-dock-entry-r2173.cjs','utf8');
 for(const token of [
- 'function prepareNativeHomeR2315(){',
+ 'function prepareNativeHomeR2315(usePreflightR2343c=false){',
  'if(disposed||reduced.matches||mobile()||archiveActive||!introDone||document.hidden)',
  "if(root.dataset.fxCrystalOrganismR326!=='ready')return",
- 'const original=target.getBoundingClientRect()',
- "root.dataset.fxMagNativeHomeR2315==='prepared'?",
+ 'const original=usePreflightR2343c',
+ "root.dataset.fxMagNativeHomeR2315==='prepared' && !usePreflightR2343c",
  "root.dataset.fxMagNativeHomeR2315='prepared'",
+ "document.addEventListener('formatx:magbirthprepare'",
  "document.addEventListener('formatx:magbirthcomplete'",
+ 'nativeHomePreflightR2343c?.target===target',
+ 'prepareNativeHomeR2315(true);',
  'prepareNativeHomeR2315();',
  "delete root.dataset.fxMagNativeHomeR2315"
 ])assert(js.includes(token),'R2315 true fixed native hero readiness missing: '+token);
