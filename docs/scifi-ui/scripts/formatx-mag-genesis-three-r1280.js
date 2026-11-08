@@ -3037,7 +3037,7 @@
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
       this.embryoCapillaryMaterial.opacity=.055*visible;
-      this.embryoVesicleMaterial.opacity=.29*visible;
+      this.embryoVesicleMaterial.opacity=.37*visible;
       this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
