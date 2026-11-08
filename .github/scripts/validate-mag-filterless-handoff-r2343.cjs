@@ -16,6 +16,14 @@ assert.match(fade,/overlay\.classList\.add\('is-leaving'\)/);
 assert.match(fade,/releaseStageStyle\(\)/);
 assert.match(fade,/overlay\.remove\(\)/);
 assert.match(fade,/formatx:magbirthcomplete/);
+// R2343b requires one temporary stage identity layer; it MUST restore
+// the original stage CSS, not override the canvas' living WAAPI transform.
+assert.match(native,/const exposeNativeStageLayerR2343=\(\)=>\{/);
+assert.match(native,/stage\.style\.setProperty\('transform','translate3d\(0,0,0\)','important'\)/);
+assert.match(native,/stage\.style\.removeProperty\('transform'\)/);
+assert.match(native,/\},860\);/);
+assert.match(native,/exposeNativeStageLayerR2343\(\);/);
+assert.doesNotMatch(native,/canvas\.style\.setProperty\('transform','translate3d/);
 assert.match(native,/preserveDrawingBuffer:true/);
 assert.match(native,/canvas\.style\.setProperty\('filter','none','important'\)/);
 assert.match(native,/canvas\.style\.setProperty\('opacity','1','important'\)/);
