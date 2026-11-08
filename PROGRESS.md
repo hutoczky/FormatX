@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2350 – MAG natív fragmentmunka csökkentése teljes optikai részletességgel (2026-11-08)
+
+- **Mért baseline:** R2349 Lighthouse 3× mobil Performance 78/83/86; TBT 521/401/293 ms, desktop Performance 92/87/91. Mind a 6 futásban Accessibility/Best Practices/SEO 100/100/100. Ez helyi staging, nem production vagy fizikai Android.
+- **MAG FIRST:** a meglévő R326 natív fragment shader fémes stúdióárnyékolása (fizikai mikrobevelek, anatómiai panelvarratok, titán-szatén reflexek) csak az eredeti **valóban fémmel/fémes ásvánnyal érintett** faceteken fut: `vFacet<1.0 || machinedArmor>.5`. Az összes eredeti fémfelületi képlet változatlan. A kortikális élő sejtanyag, biológiai fonalak és a R2349 mély üveglencse 3D pontjai kihagyják a rájuk eredetileg nulla tömegű `studioSilver` és `titanium` blendet.
+- **Minden facetben megmarad** a valódi `panelEnvelope` érték, mert a meglévő fizikailag futó interakciós fényimpulzus használja. Nincs geometry, textúra, WebGL-context, canvas, renderpass, RAF, anyagkép vagy FPS-cap csökkentés, és nem szerepel audit/agent alapú megkerülés.
+- **Teszt:** új `.github/scripts/validate-mag-facet-pruning-r2350.cjs` ellenőrzi az eredeti fém, szövet és optika shader-forrását, továbbá a `shellSilver` és `machinedArmor` maszk alapján 15 külön facetértéken védi a kihagyott ág nulla fémhozzájárulását. A változatlan P0 R656 valódi PNG, 3× headless/headed cold-start, R2173 filmnyugdíjazás és 3× mobil/asztali staging Lighthouse az új ágon is kötelező.
+- **Nyitott:** exact-head P0 és LHR eredmények, valódi GPU képi egyenértékűség, Android Chrome hardveres 60 FPS, stúdióminőség, 3× 100/100/100/100, production HTML/Worker/CSP/cache. DRAFT ONLY, nincs merge/deploy.
+
+
 ## R2349 – natív MAG optikai üvegkút és fotográfiai fénymélyítés (2026-11-08)
 
 - **Kiindulás:** R2348 pontos `b712f0e65531`, P0 fast-loop 42504692257 PASS; a 3/3 headless + 3/3 headed hidegindítás és az eredeti teljes viewport PNG-orákulum változatlanul kötelező.
