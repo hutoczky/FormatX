@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2344 – filmes MAG titánfelülete, kontrollált ezüst szatén (2026-11-08)
+
+- **Valós látványhiba:** a R2342 képkockák közül a 7,50 s MAG szürke, lapszerű, a 9,25 s erős kékeszöld megvilágítású. A négyágú 3D test már térbeli, de nem igazolt stúdióminőség.
+- **R2344 kísérleti fejlesztés:** ugyanazon Three.js MeshPhysicalMaterial három meglévő rétege az eredeti 10 másodperces filmszálon fokozatosan semlegesebb, világosabb titánszínt, kisebb fényáteresztést és finomabb roughness-t kap. Megmarad a 3D topológia, kamera, fizikai fényrig, egyetlen foszfát/mikrorost textúra, optika és folytonos MAG-handoff. Nincs új mesh, light, texture, shaderprogram, renderer, canvas, WebGL-context vagy RAF.
+- **Regresszió:** új R2344 forráskódból ténylegesen futtatott anyag-átmenet teszt 0/25/50/75/100% fázison, fizikai határértékekkel; eredeti P0 böngészős első viewport és 3× cold-start teszt változatlan.
+- **Elfogadási kapu:** valódi 7,50 és 9,25 másodperces PNG-k képi összevetése, 390/430/1440 viewport, gépi GL-hibamentesség, Lighthouse 3× és fizikai Android 60 FPS továbbra is nyitott. Piros screenshot/CI esetén nincs merge vagy élesítés. A PR a #582 fejlesztői ágára épül, nem production masterre.
+
 ## R2341 – DNS makrofotó szatén foszfát-anyag (2026-11-08)
 
 - **Képi bizonyíték:** a R2340 `b258825` GitHub CI artifact valódi 2,50 s DNS képkockáján a két makró-spirál túl fényes, tömör, plasztikcső-szerű. A 5,50 s sejt gömb alakú, biológiai referencia-minőség még nincs meg. A 06 első teljes viewport a native MAG-ot *és a felső navigációt is* elhagyja, miközben a 06b második képen mindkettő már jelen van: ez hideg headless compositor/commit versenyhelyzetet valószínűsít, de nem bizonyít böngészőhibát.
