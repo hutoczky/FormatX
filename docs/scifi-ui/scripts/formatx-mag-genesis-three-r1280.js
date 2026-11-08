@@ -3377,6 +3377,16 @@
         z=mix(4.28,4.40,smooth((t-9.10)/.60));
         y=.003;
       }
+      // R2340: after the intact first DNA establishing shot, move the SAME
+      // physical perspective camera through a close-up of the genuine 3D
+      // phosphate helices. Smoothly return this offset to zero by 3.30 s:
+      // the original cell and four-arm MAG framing remain unchanged.
+      // No meshes, renderer, blur overlay, canvas, frame or RAF allocated.
+      const dnaMacro=smooth((t-.88)/.70)*
+        (1-smooth((t-2.61)/.69));
+      z-=dnaMacro*(this.mobileRender?1.18:1.52);
+      x+=dnaMacro*(this.mobileRender?.05:.10);
+      y+=dnaMacro*(this.mobileRender?.025:.04);
       // R2172: one physical camera, one uninterrupted photographic take.
       // Gently dolly toward the moving titanium parts, then return to the
       // exact established final hero distance before the native R326 handoff.
@@ -3717,4 +3727,6 @@
     'sapphire-amethyst-satin-microfibril-physical-helix';
   document.documentElement.dataset.fxGenesisTissueR2339=
     'deterministic-chromatin-granules-physically-damped-membrane';
+  document.documentElement.dataset.fxGenesisMacroR2340=
+    'one-camera-dna-close-up-continuous-cell-return';
 })();
