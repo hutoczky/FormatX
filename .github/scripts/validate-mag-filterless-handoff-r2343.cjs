@@ -6,6 +6,7 @@ const fs=require('node:fs');
 const film=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js','utf8');
 const native=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 const strictCapture=fs.readFileSync('.github/scripts/capture-mag-intro-r656.cjs','utf8');
+const archive=fs.readFileSync('docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js','utf8');
 const fade=film.slice(film.indexOf('  function safeTeardownOverlay('),film.indexOf('  function finish('));
 assert(fade.length>1000,'Missing real source film handoff');
 assert.match(fade,/NATIVE_CROSSFADE_MS_R2324/);
@@ -29,4 +30,14 @@ assert.match(native,/canvas\.style\.setProperty\('filter','none','important'\)/)
 assert.match(native,/canvas\.style\.setProperty\('opacity','1','important'\)/);
 assert.match(strictCapture,/state\.handoffPixels\.bright<40/);
 assert.match(strictCapture,/R2209 full-viewport MAG is black/);
+const complete=archive.slice(archive.indexOf("document.addEventListener('formatx:magbirthcomplete'"),
+  archive.indexOf("addEventListener('formatx:languagechange'"));
+assert.match(archive,/function snapshotNativeHomeBeforeCompletionR2343c\(\)/);
+assert.match(archive,/formatx:magbirthprepare'/);
+assert.match(archive,/nativeHomePreflightR2343c\?\.target===target/);
+assert.match(archive,/function prepareNativeHomeR2315\(usePreflightR2343c=false\)/);
+assert.match(complete,/prepareNativeHomeR2315\(true\)/);
+assert.doesNotMatch(complete,/getBoundingClientRect/);
+assert.match(archive,/nativeHomePreflightR2343c=null/);
+
 console.log('R2343_FILTERLESS_HANDOFF_SOURCE_CONTRACT_PASS; full-viewport actual pixels are still required');
