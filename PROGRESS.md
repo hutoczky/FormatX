@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2353 – valódi szoftveres WebGL-környezet feladatterhelésének ütemezése (2026-11-09)
+
+- **Bázis:** R2352 PR #593, valódi R656 film 5.50/7.50/9.25s képi összehasonlítással és 31 lépéses P0 PASS (42533692060). A 9.25s MAG mögötti túlméretes körsejt összehúzva. Nem tekinthető teljes stúdióminőségűnek; a mobile staging Lighthouse 69/87/87 és TBT 943/272/254 ms piros.
+- **Okfeltárás:** az eredeti R2352 szoftveres GL P0 naplóban a meshépítés 22–36 ms, shader előkészítése körülbelül 9–10 ms, GPU-val kapcsolatos handoff 330–1788 ms. A staging LHR `long-tasks` a natív R326-hoz köti a legsúlyosabb 200–627 ms és a 100 ms feletti többszörös feladatokat. Ez nem igazolja, hogy a meshcsökkentés szükséges volna; az eredeti fotográfiai anyag maradjon meg.
+- **Javítás:** `softwareRenderer` az eredeti WebGL renderer stringből (`swiftshader|llvmpipe|software|softpipe|mesa offscreen`) számítódik, minden normál látogatásnál ugyanúgy. Ha valós szoftveres GL egy képkockája tartósan 28 ms fölé kerül, a burst a tényleges mért renderátlag alapján legfeljebb 200 ms, a kézzel indítható/felszíni életsöprés legfeljebb 112 ms szünetet kaphat. Ez nem változtatja meg a teljes animáció időtartamát, nem alakít át shaderkódszintet, modellrészletességet, pixel-felbontást, WebGL tulajdonost, R533 filmi időzítést, első natív draw/fence képkockát vagy kimeneti framebuffer-bufferbiztonságot.
+- **Hardveres GPU:** `burstDelay=0` és `sweepDelay=0`, teljes eredeti native RAF és 60+ FPS cél. Nem audit-mode, webdriver, user-agent, Lighthouse vagy tesztparaméter dönt a kódról.
+- **QA:** `.github/scripts/validate-mag-software-framebudget-r2353.cjs` valós kódból kiolvasott időzítési kifejezéseket futtatja 12 külön mért képkockaidővel, hardveres 0 szünet, bounded software fallback, eredeti GL-film/fence/RAF/single-canvas és hozzáférhetőség feltételekkel. Az eredeti teljes P0, a headless/headed PNG, valamint a mobil/desktop 3× Lighthouse az új ágon továbbra is kötelező.
+- **Nyitott:** konkrét R2353 P0 + LHR, 3× 100/100/100/100, valódi Samsung/Android Chrome 60 FPS, stúdió referencia-elfogadás, teljes SPA scroll/reduced-motion/PAUSE-RESUME ×5, Worker/CSP/cache és éles honlap ellenőrzés. **DRAFT ONLY, nincs merge/deploy; regressziós eredmény esetén elvetendő.**
+
+
 ## R2352 – valódi biológiai sejt → a MAG belső optikai magja (2026-11-08)
 
 ### R2352 valós böngészős képkocka-összevetés és mérések
