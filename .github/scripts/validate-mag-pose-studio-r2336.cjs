@@ -13,7 +13,7 @@ const {pathToFileURL}=require('node:url');
  assert(match,'Read the permanent MAG side light from the actual native shader');
  const T=await import(pathToFileURL(path.resolve('docs/scifi-ui/scripts/three-r185.module.js')).href);
  const target=new T.Vector3(...match.slice(1).map(Number)).normalize();
- const keyMatch=native.match(/vec3 keyDir=normalize\\(vec3\\(([-.\\d]+),([-.\\d]+),([-.\\d]+)\\)\\);/);
+ const keyMatch=native.match(/vec3 keyDir=normalize\(vec3\(([-.\d]+),([-.\d]+),([-.\d]+)\)\);/);
  assert(keyMatch,'Read the permanent MAG key light from the actual native shader');
  const keyTarget=new T.Vector3(...keyMatch.slice(1).map(Number)).normalize();
  const start=source.indexOf('  const clamp ='),end=source.indexOf('  function isSoftwareWebGL(){');
