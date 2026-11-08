@@ -3078,11 +3078,27 @@
     const exposeNativeStageLayerR2343=()=>{
       if(root.dataset.fxMagLayerPromotionR2343==='active')return;
       if(disposed||contextLost||!stage.isConnected)return;
+      // R2346: the compositor probe must never erase a previously authored
+      // inline transform, or overwrite a newer scroll/interaction owner.
+      // Compare the serialized CSSOM value, not the input spelling: browsers
+      // may normalize translate3d(0,0,0) to pixel units.
+      const previousTransform=stage.style.getPropertyValue('transform');
+      const previousPriority=stage.style.getPropertyPriority('transform');
       stage.style.setProperty('transform','translate3d(0,0,0)','important');
+      const exposureTransform=stage.style.getPropertyValue('transform');
+      const exposurePriority=stage.style.getPropertyPriority('transform');
       root.dataset.fxMagLayerPromotionR2343='active';
       later(()=>{
         if(disposed||!stage.isConnected)return;
-        stage.style.removeProperty('transform');
+        if(stage.style.getPropertyValue('transform')!==exposureTransform ||
+           stage.style.getPropertyPriority('transform')!==exposurePriority){
+          root.dataset.fxMagLayerPromotionR2343='yielded-to-newer-owner';
+          return;
+        }
+        if(previousTransform)
+          stage.style.setProperty('transform',previousTransform,previousPriority);
+        else
+          stage.style.removeProperty('transform');
         root.dataset.fxMagLayerPromotionR2343='restored';
       },860);
     };

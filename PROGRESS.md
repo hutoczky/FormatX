@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2346 – a natív MAG kompozitor-transzformációjának biztonságos tulajdonosa (2026-11-08)
+
+- **Kockázat:** az R2343 sikeres elsőképkockás `translate3d(0,0,0)` aktiválása 860 ms múlva vakon törölte a stage inline `transform` értékét. Ez felülírhatta a későbbi görgetés vagy interakció mozgásvezérlőjének érvényes transzformációját, és a korábbi inline állapotot sem állította helyre.
+- **Javítás:** a meglévő stage CSSOM transzformációját és prioritását elmentjük; a saját kompozitorpromóció normalizált CSSOM értékét rögzítjük. A régi 860 ms-os egyszeri cleanup csak akkor állítja vissza az eredetit, ha a transzformáció közben nem változott. Újabb tulajdonos esetén érintetlenül hagyja. Nincs új GPU/VBO/context, canvas, animáció, renderpass, RAF vagy időzítő.
+- **Ellenőrzés:** a tényleges R326 eljárást futtató R2346 regressziós teszt négy esetet véd: korábban nem létező transform, fontos inline transform, normál inline transform, időközben új tulajdonos. Az eredeti R656 első teljes PNG, három headless/headed coldstart és R2173 retired layout szigorú P0 kapuja érintetlen.
+- **Állapot:** fejlesztői/draft, a teljes R2346 pontos-commit CI, Android valós képi ellenőrzés, 60 FPS és Lighthouse×3 még külön szükséges. Nem élesítve.
+
+
 ## R2345 – MAG filmes titán-szatén összeillesztés a sikeres elsőképkockás ággal (2026-11-08)
 
 - **Bizonyított kiindulópont:** R2344 fix/r2344-precomplete-mag-home-geometry commit `2f6c5fb166c7`, eredeti teljes P0 fast-loop run 42487145929 PASS. A natív első teljes viewport és a független 3/3 headless + 3/3 headed hidegindítás zöld volt. A külön PR #584 P0 hibája a korábbi, R2344 nélküli film utáni geometriai hozzáférés volt.
