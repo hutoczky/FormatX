@@ -1459,12 +1459,24 @@
         /* R2200: the same biological cyan/coral nucleus stays alive inside
            the recessed MAG iris after the titanium arms finish seating.
            This is spatial shader photochemistry, not a flat overlay. */
-        float cellVein=sin(oq.x*23.0+sin(oq.y*19.0+uTime*.25)*2.1);
-        float cellCross=sin(oq.y*31.0-oq.x*8.0+uTime*.18);
-        float cellNoise=(cellVein*.55+cellCross*.45)*.5+.5;
-        float livingInterior=exp(-pow(od/.73,4.0))*front;
-        float coralSite=pow(max(0.0,cellNoise-.67)*3.0,2.6);
-        float aquaSites=pow(max(0.0,cellNoise-.33),3.1);
+        /* R2351: bound the original expensive living cell chemistry to its
+           REAL recessed aperture. At radius >=1.55, the envelope is at
+           most exp(-pow(1.55/.73,4)) < 1.5e-9, far below one display LSB.
+           All original sine/pow tissue equations run unchanged INSIDE
+           the visible aperture; titanium tips and rear glass skip only
+           an invisible contribution. The original single GPU shader/draw
+           and full biological detail are kept. */
+        float livingInterior=0.0;
+        float coralSite=0.0;
+        float aquaSites=0.0;
+        if(front>0.0 && od<1.55){
+          float cellVein=sin(oq.x*23.0+sin(oq.y*19.0+uTime*.25)*2.1);
+          float cellCross=sin(oq.y*31.0-oq.x*8.0+uTime*.18);
+          float cellNoise=(cellVein*.55+cellCross*.45)*.5+.5;
+          livingInterior=exp(-pow(od/.73,4.0))*front;
+          coralSite=pow(max(0.0,cellNoise-.67)*3.0,2.6);
+          aquaSites=pow(max(0.0,cellNoise-.33),3.1);
+        }
         c+=vec3(.05,.49,.51)*livingInterior*aquaSites*(.16+.10*uEnergy);
         c+=vec3(.89,.27,.20)*livingInterior*coralSite*(.23+.10*uEnergy);
 
