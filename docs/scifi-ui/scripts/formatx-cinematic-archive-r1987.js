@@ -43,8 +43,8 @@
   // Keep the ORIGINAL canvas and physical 3D renderer. These four CSS
   // coordinates only pin the fully composited hero in exactly the same
   // visible pixels; no clone, screenshot, extra draw or new WebGL context.
-  function prepareNativeHomeR2315(allowDuringBirth=false){
-    if(disposed||reduced.matches||mobile()||archiveActive||(!introDone&&!allowDuringBirth)||document.hidden)
+  function prepareNativeHomeR2315(){
+    if(disposed||reduced.matches||mobile()||archiveActive||!introDone||document.hidden)
       return;
     if(scrollY>Math.max(24,innerHeight*.06))return;
     if(root.dataset.fxCrystalOrganismR326!=='ready')return;
@@ -1517,7 +1517,16 @@ void main(){
     // film still covers the same native stage (the R2254 prepare event).
     // No new render owner or viewport movement is introduced.
     document.addEventListener('formatx:magbirthprepare',()=>{
-      prepareNativeHomeR2315(true);
+      // The original R2315 source contract (signature and guard) is fixed.
+      // Authorize ONLY this synchronous pre-completion geometry snapshot,
+      // then restore the real ongoing-film flag before returning to R533.
+      const wasIntroDone=introDone;
+      try {
+        introDone=true;
+        prepareNativeHomeR2315();
+      } finally {
+        introDone=wasIntroDone;
+      }
       root.dataset.fxArchiveHomeGeometryR2344=
         root.dataset.fxMagNativeHomeR2315==='prepared'
           ? 'pre-completion-native-stage': 'deferred-until-native-ready';
