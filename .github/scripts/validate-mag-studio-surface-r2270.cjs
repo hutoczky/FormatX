@@ -33,9 +33,9 @@ assert.equal((source.match(/createElement\('canvas'\)/g)||[]).length,1,
   'native MAG must retain exactly one original WebGL canvas allocation');
 const three=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
 for(const token of [
-  'R2337: deep sapphire/amethyst phosphate tissue, not pastel plastic',
-  'color:0x7796c4,emissive:0x224267,emissiveIntensity:.54',
-  'color:0x987cb8,emissive:0x523b77,emissiveIntensity:.53',
+  'R2341: macro DNA uses satin hydrated phosphate, not polished plastic',
+  'color:0x6683b0,emissive:0x18364f,emissiveIntensity:.37',
+  'color:0x8974ac,emissive:0x422f65,emissiveIntensity:.37',
   'R2271: both axes tile seamlessly on the curved cell',
   'const coral=Math.pow(clamp((coralCloud-.575)*4.25),1.4)',
   'bumpMap:this.embryoTexture,bumpScale:.023',
