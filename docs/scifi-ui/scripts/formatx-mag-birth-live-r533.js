@@ -1107,8 +1107,12 @@
         // R2322 had 2/3 reliable cold starts; R2323 CSS pause was 0/1.
         // Never remove the cinematic layer in the same compositor task.
         try{releaseStageStyle();}catch(_){}
-        overlay.style.setProperty('transition',
-          'opacity .26s ease, filter .26s ease','important');
+        // R2343: the fading cinematic filter creates an extra offscreen
+        // compositor render surface at the exact physical WebGL exposure.
+        // Keep the 260 ms alpha blend but release filter isolation before
+        // the old film is retired. No new canvas, renderer, RAF or GL work.
+        overlay.style.setProperty('filter','none','important');
+        overlay.style.setProperty('transition','opacity .26s ease','important');
         overlay.classList.add('is-leaving');
         ROOT.dataset.fxMagHandoffBlendR2324='pre-exposed-native-360ms-crossfade';
         exitTimer=window.setTimeout(
