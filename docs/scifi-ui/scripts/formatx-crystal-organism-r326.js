@@ -1469,6 +1469,17 @@
         c+=vec3(.89,.27,.20)*livingInterior*coralSite*(.23+.10*uEnergy);
 
 
+        /* R2350: keep the existing panel envelope for the *entire* original
+           organism (including the living sweep), but evaluate the expensive
+           metallic studio, filtered seams and brushed titanium only for
+           physical mineral skin (facet <1) and the true 3D arm/chassis
+           meshes (facet 5..6). Their original equations and pixel response
+           are preserved. Nucleus, tendrils and glass never receive this
+           metallic mix: both original blend masks are exactly zero there.
+           One fragment program, one draw; no fidelity/geometry reduction. */
+        float panelEnvelope=smoothstep(.21,.28,length(vAnatomy.xy))*
+          smoothstep(.015,.13,vAnatomy.z);
+        if(vFacet<1.0 || machinedArmor>.5){
         /* R2137: raised metal panels visually separate from smoked bioglass. */
         float metalKey=max(dot(n,normalize(vec3(-.46,.72,.52))),0.0);
         float metalRim=pow(1.0-facing,2.0);
@@ -1517,8 +1528,7 @@
           smoothstep(.018,.035+panelAA.y,panelEdge.y));
         float panelBevel=exp(-pow((panelEdge.x-.10)/(.045+panelAA.x),2.0))*.35
           +exp(-pow((panelEdge.y-.10)/(.045+panelAA.y),2.0))*.22;
-        float panelEnvelope=smoothstep(.21,.28,length(vAnatomy.xy))*
-          smoothstep(.015,.13,vAnatomy.z);
+
         /* R2207: each body-local plate has a subtle finish direction. Keep
            the machining below the raster Nyquist limit instead of adding
            screen-space noise or glitter to the selected four-arm body. */
@@ -1600,6 +1610,8 @@
         titanium=mix(titanium,studioSilver*.94,machinedArmor*.67);
         titanium*=1.0-panelJoint*panelEnvelope*.16;
         c=mix(c,titanium*.90,machinedArmor*.99);
+
+        }
 
         /* R2275: a shaded anatomical interior, never a silver-white
            perfect sphere. The genuine irregular cortical VBO has a dark
