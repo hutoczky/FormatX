@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2345 – MAG filmes titán-szatén összeillesztés a sikeres elsőképkockás ággal (2026-11-08)
+
+- **Bizonyított kiindulópont:** R2344 fix/r2344-precomplete-mag-home-geometry commit `2f6c5fb166c7`, eredeti teljes P0 fast-loop run 42487145929 PASS. A natív első teljes viewport és a független 3/3 headless + 3/3 headed hidegindítás zöld volt. A külön PR #584 P0 hibája a korábbi, R2344 nélküli film utáni geometriai hozzáférés volt.
+- **R2345 változás:** a filmes MAG három meglévő MeshPhysicalMaterial rétege kontrollált, semlegesebb ezüst/titán-szatén színt, kisebb fényáteresztést és precízebb roughness-t kap. Egyetlen eredeti négyágú 3D test, kamera, optika, WebGL canvas/context és RAF; a R2343+R2344 kompozitor/film-leállítási javítás érintetlen.
+- **Regressziós védelem:** az eredeti R2270 forrásőr a tényleges új roughness-re frissült; az R2345 anyagátmeneti oracle az aktuális Three-jelenet forrását futtatja 0/25/50/75/100% eseteken. A kötelező R656 valódi PNG screenshot, R2226 3× cold start, R2173 retired layout, mobil/desktop viewport/GL/handoff tesztek változatlanok.
+- **Még nyitott:** az R2345 pontos commitján teljes P0, valós képi összevetés 7,50 és 9,25s, 390/430/1440 viewport, Android Chrome 60 FPS, Lighthouse 3× 100/100/100/100, PAUSE/RESUME×5 és éles kiadás. Kiadás előtt a HTML/Worker asset cache/CSP egyeztetése szükséges. Ez fejlesztői ág, nincs merge és nincs production deploy.
+
+
 ## R2344 – Natív MAG otthoni geometria a filmes lezárás ELŐTT (2026-11-08)
 
 - **Pontos hiba:** a R2343b P0 `42485654514` tesztben a `validate-intro-retired-layout-r2173.cjs` az eredeti változatlan feltétel szerint FAIL: a `formatx:magbirthcomplete` esemény közben az archiváló `prepareNativeHomeR2315()` az eredeti MAG `getBoundingClientRect()` függvényét hívta. A teljes JavaScript-stack ezt egyértelműen igazolja; a visszatérő hibát nem takarjuk el.

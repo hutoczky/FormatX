@@ -7,7 +7,7 @@ on:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
     # Never deploy: these are local-source / local-Lighthouse checks only.
-    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure, fix/r2344-precomplete-mag-home-geometry]
+    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure, fix/r2344-precomplete-mag-home-geometry, fix/r2345-satin-after-p0-green]
     paths:
       - 'docs/styles.css'
       - 'docs/production-revision.txt'
@@ -156,6 +156,7 @@ jobs:
           node --check .github/scripts/validate-mag-photographic-material-r2326.cjs
           node --check .github/scripts/validate-mag-anatomy-r2327.cjs
           node --check .github/scripts/validate-mag-pose-studio-r2336.cjs
+          node --check .github/scripts/validate-mag-cinematic-satin-r2345.cjs
           node --check .github/scripts/validate-mag-filterless-handoff-r2343.cjs
           node --check .github/scripts/validate-genesis-microfibre-r2337.cjs
           node --check .github/scripts/validate-genesis-chromatin-r2339.cjs
@@ -193,6 +194,7 @@ jobs:
           node .github/scripts/validate-mag-photographic-material-r2326.cjs
           node .github/scripts/validate-mag-anatomy-r2327.cjs
           node .github/scripts/validate-mag-pose-studio-r2336.cjs
+          node .github/scripts/validate-mag-cinematic-satin-r2345.cjs
           node .github/scripts/validate-mag-filterless-handoff-r2343.cjs
           node .github/scripts/validate-genesis-microfibre-r2337.cjs
           node .github/scripts/validate-genesis-chromatin-r2339.cjs
