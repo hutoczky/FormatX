@@ -49,7 +49,7 @@ const tokens = [
   [birth, 'const count=this.mobileRender?6000:9600;'],
   [birth, "const embryo=build(this.mobileRender?1200:3100,'embryo');"],
   [birth, 'this.embryoMaterial.opacity=.89*visible;'],
-  [birth, 'this.embryoChromatinMaterial.opacity=(this.mobileRender?.11:.16)*visible;'],
+  [birth, 'this.embryoChromatinMaterial.opacity=(this.mobileRender?.075:.105)*visible;'],
   [birth, 'const metabolic=clamp(Math.pow(clamp('],
   [birth, 'this.updateDNA(t,time);'],
   [birth, 'this.updateCore(t,time);'],
@@ -59,12 +59,13 @@ const tokens = [
   [birth, 'col*=mix(1.78,1.38,metal);'],
   [birth, 'this.scene.environmentIntensity=this.mobileRender?.77:1.02;'],
   [birth, 'new T.InstancedMesh('],
-  // R2331: keep the same actual 42/84 instanced 3D organelles and
+  // R2342: keep the same actual 42/84 instanced 3D organelles and
   // physically accurate lower specular coat, not the former plastic beads.
-  [birth, 'this.embryoVesicleMaterial.opacity=.43*visible;'],
-  [birth, 'clearcoat:.22,clearcoatRoughness:.34,'],
+  [birth, 'this.embryoVesicleMaterial.opacity=.37*visible;'],
+  [birth, 'clearcoat:.12,clearcoatRoughness:.49,'],
   [birth, 'this.embryoNucleus.position.set(-.10,.06,.28);'],
   [birth, 'this.coreGroup.add(vesicles);'],
+  [birth, 'fxGenesisCellMicroR2342='],
   [birth, 'this.updateMechanical(t,time);'],
   [mag, 'const constrainedFragmentSource ='],
   [mag, 'float polishedRib='],
