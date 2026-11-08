@@ -2982,6 +2982,8 @@
           // completion. A successful fence alone is not canvas presentation.
           if(postFilmNeedsPresentR2283){
             postFilmNeedsPresentR2283=false;
+            // The film may already be removed while the GPU fence resolves.
+            exposeNativeStageLayerR2343();
             resize(); // reconcile actual viewport only AFTER fence release
             render(performance.now());
             gl.flush();
@@ -3068,6 +3070,22 @@
       });
     };
     listen(document,'formatx:magbirthprepare',prepareNativeFrameR2254,{passive:true});
+    // R2343b: the original film's filterless alpha handoff alone did not
+    // settle the FIRST headless full-viewport GPU screenshot. A stage-level
+    // identity transform changes only the compositor layer ownership after
+    // the actual overlay has left; canvas WAAPI, mesh and GL remain intact.
+    // Restore original CSS after this bounded one-shot exposure window.
+    const exposeNativeStageLayerR2343=()=>{
+      if(root.dataset.fxMagLayerPromotionR2343==='active')return;
+      if(disposed||contextLost||!stage.isConnected)return;
+      stage.style.setProperty('transform','translate3d(0,0,0)','important');
+      root.dataset.fxMagLayerPromotionR2343='active';
+      later(()=>{
+        if(disposed||!stage.isConnected)return;
+        stage.style.removeProperty('transform');
+        root.dataset.fxMagLayerPromotionR2343='restored';
+      },860);
+    };
     listen(document,'formatx:magbirthcomplete',()=>{
       // R2283: freeze the drawing buffer across Chromium's compositing
       // boundary, not for the entire lifetime of the living MAG.
@@ -3117,6 +3135,7 @@
              bounds.top>=innerHeight)return;
           visible=true;
           try{
+            exposeNativeStageLayerR2343();
             resize(); // exact stage dimensions after physical DOM teardown
             render(performance.now());
             gl.flush();

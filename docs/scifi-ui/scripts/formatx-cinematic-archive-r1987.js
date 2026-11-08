@@ -37,13 +37,30 @@
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
   const legacyHeroDisplay=new Map();
   let heroVisualState=null;
+  // R2343c: one pre-completion layout snapshot for the original native MAG.
+  // The completed R533 film must never trigger a fresh geometry read through
+  // a dependent archive listener after formatx:magbirthcomplete.
+  let nativeHomePreflightR2343c=null;
+  function snapshotNativeHomeBeforeCompletionR2343c(){
+    if(disposed||reduced.matches||mobile()||archiveActive||document.hidden)return;
+    if(root.dataset.fxCrystalOrganismR326!=='ready')return;
+    const target=window.FormatXLivingCore?.stage||
+      document.querySelector('#hero .hero-space > .fx-crystal-organism-r326-stage');
+    if(!(target instanceof HTMLElement)||!target.isConnected)return;
+    const rect=target.getBoundingClientRect();
+    if(rect.width<40||rect.height<40)return;
+    nativeHomePreflightR2343c={
+      target,rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}
+    };
+    root.dataset.fxMagNativeHomePreflightR2343c='measured-before-film-completion';
+  }
   // R2315: normal desktop hero must already use the same viewport-fixed
   // layout primitive as its archive mode. The original absolute->fixed
   // switch after a real 10s film contributed ~0.106 native-stage CLS.
   // Keep the ORIGINAL canvas and physical 3D renderer. These four CSS
   // coordinates only pin the fully composited hero in exactly the same
   // visible pixels; no clone, screenshot, extra draw or new WebGL context.
-  function prepareNativeHomeR2315(){
+  function prepareNativeHomeR2315(usePreflightR2343c=false){
     if(disposed||reduced.matches||mobile()||archiveActive||!introDone||document.hidden)
       return;
     if(scrollY>Math.max(24,innerHeight*.06))return;
@@ -53,12 +70,21 @@
     const host=document.querySelector('#hero .hero-space');
     if(!(target instanceof HTMLElement)||!target.isConnected||
        !(host instanceof HTMLElement))return;
-    const original=target.getBoundingClientRect();
-    if(original.width<40||original.height<40)return;
-    // When already prepared, the visible stage is fixed: the authentic
-    // desktop HTML hero-space remains the reserved layout anchor on resize.
-    const rect=root.dataset.fxMagNativeHomeR2315==='prepared'?
-      host.getBoundingClientRect():original;
+    // R2343c: completion must consume the exact PRE-completion geometry.
+    // Never read a DOM rect from inside the now-retired film's event stack.
+    const original=usePreflightR2343c
+      ? (nativeHomePreflightR2343c?.target===target
+        ? nativeHomePreflightR2343c.rect:null)
+      : target.getBoundingClientRect();
+    if(!original||original.width<40||original.height<40){
+      if(usePreflightR2343c)
+        root.dataset.fxMagNativeHomePreflightR2343c='unavailable-deferred';
+      return;
+    }
+    // Before a normal resize the already-pinned stage uses the host anchor.
+    // During completion use ONLY our cached original stage rectangle.
+    const rect=root.dataset.fxMagNativeHomeR2315==='prepared' && !usePreflightR2343c
+      ? host.getBoundingClientRect():original;
     for(const [name,value] of [
       ['--fx-native-home-left-r2315',rect.left],
       ['--fx-native-home-top-r2315',rect.top],
@@ -1474,6 +1500,7 @@ void main(){
     ])stage?.style.removeProperty(name);
     detach?.();detach=null;drawPass=null;
     registeredCanvas=null;registeredApi=null;
+    nativeHomePreflightR2343c=null;
     scenes.forEach(s=>{s.node.style.removeProperty('--fx-archive-progress');s.node.removeAttribute('data-fx-archive-active');});
     lastPanelNode=null;
     root.dataset.fxArchiveExperience='disposed';
@@ -1511,11 +1538,14 @@ void main(){
       prepareNativeHomeR2315();
       invalidate();
     },{passive:true});
+    // R2343c: the original R533 prepare event happens before DOM teardown.
+    // Collect an immutable stage box while geometry reads are still legal.
+    document.addEventListener('formatx:magbirthprepare',
+      snapshotNativeHomeBeforeCompletionR2343c,{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
-      // Before any normal scroll, preserve the hero viewport rectangle
-      // while switching only the layout primitive to fixed positioning.
-      prepareNativeHomeR2315();
+      // No getBoundingClientRect on any film-triggered completion path.
+      prepareNativeHomeR2315(true);
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
