@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2351 – MAG lencse biológiai shader-számítás csak a tényleges optikai nyílásban (2026-11-08)
+
+- **Kiindulás:** R2350 teljes 3× Lighthouse: mobil Performance 84/90/91; TBT 354/184/156 ms, az R2349 78/83/86; 521/401/293 ms alaphoz képest. A 150ms-os TBT cél és Performance 100 továbbra is nyitott. R2350 grafikus P0 a mérések alatt még futott, ezért ez külön fejlesztői kísérlet, nem állít P0-green státuszt.
+- **Valódi MAG-optika:** az eredeti R326 élő korall/türkiz mag összes `sin/pow` biokémiai képlete változatlanul fut `front>0.0 && od<1.55` esetén. Az ezen kívüli legnagyobb `exp(-pow(od/.73,4))` szövetburkolat 1,5×10⁻⁹ alatt van, így az elhagyott contribúció képi szempontból elhanyagolható. A megmaradt lencse, membrán, titanium és felszíni fénypulzus ugyanazon egyetlen WebGL shaderben marad; nincs extra texture/sample/mesh/canvas/RAF vagy minőségcsökkentés.
+- **Regresszió:** új `.github/scripts/validate-mag-aperture-chemistry-r2351.cjs` forrástoken/számításellenőrzés több radiális ponttal és időponttal, megköveteli a teljes élő belső eredeti egyenleteit, R2349 optikai mélységet és R2350 facet-ownershipet. Az eredeti, változatlan P0 screenshot/3× coldstart, magyar vezérlés, R2173, mobil/desktop/Skip/PAUSE és Lighthouse×3 kapuk külön szükségesek.
+- **Még nem kész:** pontos R2351 P0 és Lighthouse eredmény, fizikai Android 60 FPS, minőség/filmes referenciaképek, production Worker/cache/CSP és 3×100/100/100/100. DRAFT, nincs élesítés.
+
+
 ## R2350 – MAG natív fragmentmunka csökkentése teljes optikai részletességgel (2026-11-08)
 
 - **Mért baseline:** R2349 Lighthouse 3× mobil Performance 78/83/86; TBT 521/401/293 ms, desktop Performance 92/87/91. Mind a 6 futásban Accessibility/Best Practices/SEO 100/100/100. Ez helyi staging, nem production vagy fizikai Android.
