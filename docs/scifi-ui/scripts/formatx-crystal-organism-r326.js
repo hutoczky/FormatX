@@ -1697,6 +1697,19 @@
         lensColor+=vec3(.070,.30,.34)*cellRefraction*.16;
         // Keep broad photographic contrast instead of an all-white iris.
         lensColor*=1.0-.13*coralOrganelles*filamentMask;
+        /* R2349: the same curved physical glass now reads as a recessed
+           optical instrument instead of one flat cyan emissive button.
+           Reuse the existing 3D lens/softbox/biological fields: a cool
+           internal well, two angle-dependent mineral caustics, and the
+           same illuminated living tissue. No added sampling, texture,
+           pass, canvas, geometry or independent 2D overlay. */
+        float opticalWell=pow(lensHeart,3.0)*(1.0-.20*coralOrganelles);
+        lensColor*=1.0-.29*opticalWell;
+        float mineralCaustic=lensCaustic*(.26+.74*softboxC)*
+          (1.0-.24*coralOrganelles);
+        lensColor+=vec3(.35,.45,.49)*mineralCaustic*.25;
+        lensColor+=vec3(.22,.32,.35)*outerMembrane*softboxB*.16;
+        lensColor+=vec3(.10,.24,.29)*lensKey*cellRefraction*.14;
         c=lensColor;
         }
 
@@ -1737,6 +1750,7 @@
     root.dataset.fxNativeMagStudioR2273='sculpted-deep-cortex-biological-filaments-canonical-single-draw';
     root.dataset.fxNativeMagStudioR2275='irregular-three-dimensional-smoked-bioglass-cortex-scoped-silver-living-vascular-organelle-studio';
     root.dataset.fxNativeMagStudioR2326='single-pass-reflection-coupled-titanium-microbevel-living-coral-stroma-refracted-iris';
+    root.dataset.fxNativeMagOpticalWellR2349='recessed-mineral-caustic-and-biological-curved-glass-single-pass';
     root.dataset.fxNativeMagAnatomyR2327='compact-recessed-living-cortex-four-machined-arms-foreground';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer

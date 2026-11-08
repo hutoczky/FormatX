@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2349 – natív MAG optikai üvegkút és fotográfiai fénymélyítés (2026-11-08)
+
+- **Kiindulás:** R2348 pontos `b712f0e65531`, P0 fast-loop 42504692257 PASS; a 3/3 headless + 3/3 headed hidegindítás és az eredeti teljes viewport PNG-orákulum változatlanul kötelező.
+- **Valódi vizuális ellenőrzés:** a R2348 CI-archívum `07-native-hero-mag.png` képén a négyágú fémtest létezik, de a központi cian biolencse lapos, egyenletes fénykorongnak hat. A kész látvány még elmarad a felhasználó referencia-minimumától.
+- **Első prioritás MAG:** a létező R326 üvegrész shaderének egyetlen `opticalGlass` ágán a meglévő `lensHeart`, `lensCaustic`, `softboxC`, `outerMembrane`, `lensKey` és `cellRefraction` értékekből mélyebb üvegkút, finom visszaverődő ásványi fénysáv és testi optikai struktúra keletkezik. Nincs új textúramintavétel, 3D mesh, renderpass, canvas, context, CSS-overlay, RAF vagy autonóm animáció.
+- **Minőségbiztosítás:** a `.github/scripts/validate-mag-optical-well-r2349.cjs` őr megköveteli az eredeti fizikai üvegágat, a meglévő biológiai réteget, a reflektív minták koordinátakötését és az új GPU-sampler hiányát; a teljes, szigorú R656 böngészős PNG/3× coldstart P0 változatlan, és az exact-head push-kapuhoz bekötöttük.
+- **Nyitott:** pontos-R2349 P0, valódi előtte–utána képkocka-összehasonlítás, Android Chrome 60 FPS, DNS/mag teljes filmes referencia-elfogadás, Lighthouse desktop/mobil 3× 100/100/100/100, Worker/HTML/CSP/cache és fizikailag mért production parity. **DRAFT, semmi merge/deploy, nincs stúdióminőségi elfogadás.**
+
+
 ## R2348 – natív MAG első autonóm fényimpulzusának filmes tulajdonosi kapuja (2026-11-08)
 
 - **Mért okjelölt:** R2347 Lighthouse x3 mobil Perf 74/82/82, TBT 693/403/402ms, a valódi R326 WebGL MAG és R533 film főszálterhelése. A natív R326 első dekoratív automatikus surface sweep 13s-mal a rejtett MAG inicializálása után indulhat, és az intro/GPU kompozitor átadás utáni ablakban ütközhet más renderfeladatokkal.
