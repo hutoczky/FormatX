@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2339 – Sejtmagszövet: determinisztikus szemcsézettség és mattabb sejthártya (2026-11-08)
+
+- A felhasználói biológiai makroreferenciához képest a R2333 5,5 s-os valódi képkocka túl homogén és túl csillogó cellát mutatott. A R2339 meglévő `makeEmbryoTexture()` generátorába **új mintavétel nélkül** visszafogott chromatin/granulum kontraszt került: a már létező `mineral`, `cloud` és `hash` értékeket használja. Nem keletkezik új GPU-textúra vagy képfájl; mobil 384×192, desktop 512×256 változatlan.
+- A meglévő 3D membrán PBR anyag mattabb, az emisszió és üvegszerű clearcoat mérsékeltebb; a belső sejtmagnak és a magyar szövegnek nem változtak tulajdonságai.
+- Új valódi Three.js futtatásos `.github/scripts/validate-genesis-chromatin-r2339.cjs` szerződés ellenőrzi az összes eredeti textúraméretet, képpuffer determinisztikus azonosságát, az alfa-csatornát és a nemegyszínű szemcsézettséget mobil/desktop profilon. P0-ba bekötve. A R2338 csak **rögzíti** a hibás késői geometriai hozzáférés teljes JS-hívási láncát; az eredeti nulla late-read kapu változatlan.
+- **Még nyitott:** valós GPU és Android Chrome referenciaképi elfogadás, 60 FPS, headless compositor és Lighthouse×3 cél. Nem élesítve, PR #582 draft.
+
 ## R2337 – Valódi 3D DNS biopolimer, anyag- és mikrostruktúra (2026-11-08)
 
 - **Vizuális kontroll:** az előző, tényleges Chromium-képkockán a nyitó DNS túl pasztelles/sima csőnek hatott a megadott kék–ibolya, rostos referencia minimumhoz képest. A turkiz–korall 3D sejt további részletezése nyitott.
