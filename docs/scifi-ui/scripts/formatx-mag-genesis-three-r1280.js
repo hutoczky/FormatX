@@ -3056,30 +3056,32 @@
     updateOrganic(t,time){
       const grow=smooth((t-3.76)/.72);
       const fade=1-smooth((t-6.20)/1.15)*.96;
-      // R2289: a real cortex survives the titanium assembly and gently
-      // reforms by the final 9.25s shot. Previously it was almost gone
-      // (4%) before the film handed off to a prominent live R326 cortex.
-      // Reuse the existing textured 3D shell; allocate ZERO new meshes.
+      // R2352: the true cell survives INSIDE the finished titanium MAG,
+      // not as a second, oversized round object behind its four arms.
+      // In the 9.25s real film screenshot the R2289 .86 endpoint made a
+      // silhouette-wide ovum protrude behind the clean physical chassis.
+      // Preserve all original cortex meshes/materials and the full
+      // 5.50s embryo; smoothly contract ONLY the late, born optic cortex.
       const handoffCortex=smooth((t-7.28)/1.43);
       const visible=grow*mix(fade,.82,handoffCortex);
       this.organicGroup.visible=visible>.002;
-      // R2328: preserve large photobiological ovum in the cell chapter;
-      // after titanium seating its cortex retracts to R2327 native scale.
-      const bodyScale=.001+.63*grow*mix(fade,.86,handoffCortex);
+      // R2352: no discontinuous cut, no phantom/fake sprite. At 9.25s the
+      // original 3D live tissue fits behind the optical aperture and real
+      // machined shoulder instead of competing with the MAG silhouette.
+      const bodyScale=.001+.63*grow*mix(fade,.56,handoffCortex);
       this.organicGroup.scale.set(bodyScale*1.02,bodyScale*.98,bodyScale*.94);
-      // R2291: the hydrated cortex is PHYSICAL VOLUME behind the glass
-      // pupil and titanium shoulders; the 9.25s proof was previously only
-      // a metal emblem because the organ was dark purple and 10% opaque.
-      this.organicGroup.position.z=-.54*handoffCortex;
+      // Keep the cell's actual depth behind the beveled lens and shoulders.
+      // This recess is applied to the existing Three.js group, not its mesh.
+      this.organicGroup.position.z=-.62*handoffCortex;
       this.organicShellMaterial.color.copy(this.organicShellSourceColor)
         .lerp(this.organicShellBornColor,handoffCortex);
       this.organicLobeMaterial.color.copy(this.organicLobeSourceColor)
         .lerp(this.organicLobeBornColor,handoffCortex);
-      this.organicShellMaterial.opacity=mix(.18*visible,.68*grow,handoffCortex);
+      this.organicShellMaterial.opacity=mix(.18*visible,.58*grow,handoffCortex);
       this.organicShellMaterial.roughness=mix(.66,.33,handoffCortex);
       this.organicShellMaterial.clearcoat=mix(.11,.78,handoffCortex);
       this.organicShellMaterial.clearcoatRoughness=mix(.54,.18,handoffCortex);
-      this.organicLobeMaterial.opacity=mix(.15*visible,.23*grow,handoffCortex);
+      this.organicLobeMaterial.opacity=mix(.15*visible,.19*grow,handoffCortex);
       this.organicWireMaterial.opacity=.0003*visible;
       this.organicVeinMaterial.opacity=mix(.068*visible,.12*grow,handoffCortex);
       this.organicHoodMaterial.opacity=mix(.13*visible,.16*grow,handoffCortex);
