@@ -10,9 +10,14 @@ for(const token of [
   'emissive:0x256c71,emissiveMap:this.embryoTexture,emissiveIntensity:.42,',
   'new T.SphereGeometry(.22,32,24),this.embryoNucleusMaterial',
   'this.embryoNucleus.position.set(-.10,.06,.28);',
-  'clearcoat:.22,clearcoatRoughness:.34,',
-  'this.embryoVesicleMaterial.opacity=.43*visible;',
-  'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles'
+  'clearcoat:.12,clearcoatRoughness:.49,',
+  'this.embryoVesicleMaterial.opacity=.29*visible;',
+  'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles',
+  "fxGenesisCellMicroR2342=",
+  'this.mobileRender?.014:.018,1',
+  'roughness:.79',
+  'this.embryoChromatinMaterial.opacity=(this.mobileRender?.075:.105)*visible;',
+  'this.embryoCapillaryMaterial.opacity=.055*visible;'
 ])assert.ok(src.includes(token),'R2331 missing genuine 3D tissue '+token);
 assert.match(src,/this\.embryoTexture=this\.makeEmbryoTexture\(\);/);
 assert.match(src,/const vesicles=new T\.InstancedMesh\(/);
