@@ -3143,6 +3143,18 @@
       const landingScale=1-.26*smooth((t-8.55)/1.30);
       this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
 
+      // R2336: the cinematic chassis assumes the physical native MAG's
+      // composed rest pose BEFORE ownership passes to the single WebGL body.
+      // Only the existing Three group rotates: no new meshes or renderer.
+      const nativePose=smooth((t-7.25)/.85);
+      const nativePitch=this.mobileRender?-.160:-.140;
+      const nativeYaw=this.mobileRender?.135:.145;
+      this.mechanicalGroup.rotation.set(
+        nativePose*nativePitch,
+        nativePose*nativeYaw,
+        nativePose*(-.037)
+      );
+
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
@@ -3444,6 +3456,30 @@
         4.4-dnaStudio*.32-assemblyStudio*1.15,
         1.8+embryoStudio*.65+assemblyStudio*.50,5.2
       );
+      // R2336: key and fill finish in the permanent MAG shader's physical
+      // studio directions. Match view-space directions using the SAME film
+      // camera, and conserve frontal irradiance throughout the handoff.
+      // No lights, passes, canvases, textures or per-frame resources added.
+      const handoffKey=smooth((t-7.25)/.85);
+      if(handoffKey>0){
+        const key=this.studioKey.position,distance=key.length();
+        const x=key.x,y=key.y,z=key.z;
+        const frontal=key.dot(this.camera.position)/distance;
+        key.set(-.50,.78,.38).normalize()
+          .applyQuaternion(this.camera.quaternion).multiplyScalar(distance);
+        key.set(mix(x,key.x,handoffKey),mix(y,key.y,handoffKey),mix(z,key.z,handoffKey));
+        const settledFrontal=key.dot(this.camera.position)/key.length();
+        this.studioKey.intensity*=frontal/settledFrontal;
+
+        const fill=this.studioFill.position,fillDistance=fill.length();
+        const fillX=fill.x,fillY=fill.y,fillZ=fill.z;
+        const fillFrontal=fill.dot(this.camera.position)/fillDistance;
+        fill.set(.72,.08,.69).normalize()
+          .applyQuaternion(this.camera.quaternion).multiplyScalar(fillDistance);
+        fill.set(mix(fillX,fill.x,handoffKey),mix(fillY,fill.y,handoffKey),mix(fillZ,fill.z,handoffKey));
+        const settledFillFrontal=fill.dot(this.camera.position)/fill.length();
+        this.studioFill.intensity*=fillFrontal/settledFillFrontal;
+      }
       this.renderer.toneMappingExposure=
         1.075+dnaStudio*.035+embryoStudio*.045+assemblyStudio*.11+
         flash*.006+after*.002;
@@ -3669,4 +3705,6 @@
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
   document.documentElement.dataset.fxGenesisStudioR2300='polarized-softbox-sculpted-primary-nucleotides-aspheric-optic-single-physical-film';
   document.documentElement.dataset.fxGenesisStudioR2301='cellular-depth-first-tamed-additive-chromatin-real-3d-geometry';
+  document.documentElement.dataset.fxMagStudioContinuityR2336=
+    'native-four-arm-pose-and-two-studio-directions-preserved-irradiance';
 })();
