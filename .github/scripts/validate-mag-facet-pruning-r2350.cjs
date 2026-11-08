@@ -27,7 +27,7 @@ for(const token of [
   'float originalMineralMask=1.0-step(1.0,vFacet);',
   'float shellSilver=panelEnvelope*(1.0-machinedArmor)*.84*'
 ])assert(section.includes(token),'Full studio/surface detail must not be removed: '+token);
-const remainder=mag.slice(cortexStart,mag.indexOf('/* Interaction/surface sweep remains physical and brief.',cortexStart)+160);
+const remainder=mag.slice(cortexStart,mag.indexOf('${outputName}=vec4',cortexStart));
 for(const token of [
   'float livingCortex=step(1.10,vFacet)', 'float opticalGlass=step(6.0,vFacet);',
   'float warmStroma=coralNest', 'float opticalWell=pow(lensHeart,3.0)',
