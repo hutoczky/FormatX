@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2344 – Natív MAG otthoni geometria a filmes lezárás ELŐTT (2026-11-08)
+
+- **Pontos hiba:** a R2343b P0 `42485654514` tesztben a `validate-intro-retired-layout-r2173.cjs` az eredeti változatlan feltétel szerint FAIL: a `formatx:magbirthcomplete` esemény közben az archiváló `prepareNativeHomeR2315()` az eredeti MAG `getBoundingClientRect()` függvényét hívta. A teljes JavaScript-stack ezt egyértelműen igazolja; a visszatérő hibát nem takarjuk el.
+- **R2344 javítás:** az eredeti négy CSS home-koordináta már a korábbi `formatx:magbirthprepare` eseménynél készül, az **egyetlen meglévő** MAG színpadán. A `magbirthcomplete` eseményben nincs közvetlen `prepareNativeHomeR2315()` hívás; ha a fizikai natív motor korábban még nem lett `ready`, az archiváló tulajdonos saját `queueMicrotask` feladata utólag készíti elő. Mobilon, reduced-motion módban és rejtett oldalon a korábbi védelem megmarad.
+- **Regresszió:** `.github/scripts/validate-native-home-precomplete-r2344.cjs` a tényleges R2315 forrásfüggvényt VM-ben futtatja desktop/mobile/reduced/hidden profilban, ellenőrzi a korai olvasás tilalmát és a 4 valós CSS-koordinátát. Az eredeti valós Chromium R2173 teszt és a többi P0 változatlan.
+- **Továbbra is nyitott:** teljes pontos-SHA P0, első headless és headed MAG pixelscreenshot, 3× coldstart, Android 60 FPS, Lighthouse 3× 100/100/100/100, vizuális stúdióminőség és production release. **Csak fejlesztői ág, nincs merge/deploy.**
+
+
 ## R2341 – DNS makrofotó szatén foszfát-anyag (2026-11-08)
 
 - **Képi bizonyíték:** a R2340 `b258825` GitHub CI artifact valódi 2,50 s DNS képkockáján a két makró-spirál túl fényes, tömör, plasztikcső-szerű. A 5,50 s sejt gömb alakú, biológiai referencia-minőség még nincs meg. A 06 első teljes viewport a native MAG-ot *és a felső navigációt is* elhagyja, miközben a 06b második képen mindkettő már jelen van: ez hideg headless compositor/commit versenyhelyzetet valószínűsít, de nem bizonyít böngészőhibát.

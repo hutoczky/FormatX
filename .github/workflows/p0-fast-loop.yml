@@ -7,7 +7,7 @@ on:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
     # Never deploy: these are local-source / local-Lighthouse checks only.
-    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure]
+    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure, fix/r2344-precomplete-mag-home-geometry]
     paths:
       - 'docs/styles.css'
       - 'docs/production-revision.txt'
@@ -151,6 +151,7 @@ jobs:
           node --check .github/scripts/validate-genesis-smooth-cortex-r2317.cjs
           node --check .github/scripts/validate-embryo-studio-balance-r2318.cjs
           node --check .github/scripts/validate-retired-cinematic-owner-r2319.cjs
+          node --check .github/scripts/validate-native-home-precomplete-r2344.cjs
           node --check .github/scripts/validate-mag-native-compositor-r2320.cjs
           node --check .github/scripts/validate-mag-photographic-material-r2326.cjs
           node --check .github/scripts/validate-mag-anatomy-r2327.cjs
@@ -187,6 +188,7 @@ jobs:
           node .github/scripts/validate-genesis-smooth-cortex-r2317.cjs
           node .github/scripts/validate-embryo-studio-balance-r2318.cjs
           node .github/scripts/validate-retired-cinematic-owner-r2319.cjs
+          node .github/scripts/validate-native-home-precomplete-r2344.cjs
           node .github/scripts/validate-mag-native-compositor-r2320.cjs
           node .github/scripts/validate-mag-photographic-material-r2326.cjs
           node .github/scripts/validate-mag-anatomy-r2327.cjs
