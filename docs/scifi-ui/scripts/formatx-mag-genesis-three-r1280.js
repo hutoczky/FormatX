@@ -365,7 +365,7 @@
       }
       const texture=new T.DataTexture(pixels,size,size,T.RGBAFormat);
       texture.wrapS=texture.wrapT=T.RepeatWrapping;
-      texture.repeat.set(5,3);
+      texture.repeat.set(4,2);
       texture.magFilter=T.LinearFilter;
       texture.minFilter=T.LinearMipmapLinearFilter;
       texture.generateMipmaps=true;
@@ -396,20 +396,21 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const phosphateTexture=this.makeDNAFiberTexture();
-      // R2271: hydrated biopolymer, not emissive candy-light tubing.
-      // The existing true 3D double helix gains neutral photographic
-      // reflections over the original phosphate microrelief texture.
+      // R2341: macro DNA uses satin hydrated phosphate, not polished plastic.
+      // TRUE 3D helices reuse one already generated 128px phosphate fibre
+      // bump map. Lower clearcoat and denser microrelief reveal
+      // the existing microfibrils without a new draw, texture or render pass.
       const ma=new T.MeshPhysicalMaterial({
-        color:0xa7c8e2,emissive:0x224267,emissiveIntensity:.63,
-        roughness:.255,metalness:.065,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
-        depthWrite:false,clearcoat:.96,clearcoatRoughness:.075
+        color:0x6683b0,emissive:0x18364f,emissiveIntensity:.37,
+        roughness:.51,metalness:.025,transparent:true,opacity:.97,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.023:.031,
+        depthWrite:false,clearcoat:.30,clearcoatRoughness:.42
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0xc8b5dd,emissive:0x523b77,emissiveIntensity:.61,
-        roughness:.26,metalness:.062,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
-        depthWrite:false,clearcoat:.95,clearcoatRoughness:.08
+        color:0x8974ac,emissive:0x422f65,emissiveIntensity:.37,
+        roughness:.53,metalness:.025,transparent:true,opacity:.97,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.023:.031,
+        depthWrite:false,clearcoat:.29,clearcoatRoughness:.44
       });
       const ga=new T.MeshBasicMaterial({
         color:0x65bad6,transparent:true,opacity:.055,depthWrite:false,
@@ -495,7 +496,7 @@
       const pgb=new T.BufferGeometry();pgb.setAttribute('position',new T.Float32BufferAttribute(beadB,3));
       group.add(auraA,auraB,tubeA,tubeB,rungs,new T.Points(pga,mpa),new T.Points(pgb,mpb));
       group.userData.materials=[ma,mb,ga,gb,rungMat,mpa,mpb];
-      group.userData.baseOpacity=[.93,.92,.095,.085,.91,.50,.46];
+      group.userData.baseOpacity=[.94,.93,.058,.052,.91,.50,.46];
       return group;
     }
 
@@ -1247,17 +1248,21 @@
             +.44*noise(u,v,61);
           const coral=Math.pow(clamp((coralCloud-.575)*4.25),1.4);
           const mineral=noise(u,v,116);
-          const grain=(hash(x,y)-.5)*8;
+          // R2339: bounded microgranulation reuses the SAME existing hash.
+          const grain=(hash(x,y)-.5)*15;
           // R2201: microscopic clustered chromatin, not a uniform aqua blob.
         // A lower threshold produces many small coral organelle islands.
         const freckle=Math.pow(clamp((mineral-.62)*3.9),2);
+        // R2339: cellular chromatin granules follow existing mineral/cloud
+        // fields. No added noise sampling, texture or per-frame shader work.
+        const chromatin=clamp((mineral-.53)*3.2)*(.45+.55*cloud);
           const index=(y*width+x)*4;
           pixels[index]=Math.round(clamp(
-            (20+72*cloud+155*coral+58*freckle+grain)/255)*255);
+            (20+72*cloud+155*coral+58*freckle+12*chromatin+grain)/255)*255);
           pixels[index+1]=Math.round(clamp(
-            (87+165*cloud-36*coral+24*freckle+grain)/255)*255);
+            (87+165*cloud-36*coral+24*freckle+19*chromatin+grain)/255)*255);
           pixels[index+2]=Math.round(clamp(
-            (95+169*cloud-54*coral+18*freckle+grain)/255)*255);
+            (95+169*cloud-54*coral+18*freckle+20*chromatin+grain)/255)*255);
           pixels[index+3]=255;
           // R2212: deepen coral trabeculae within the teal metabolic matrix.
           // R2206: cluster coral metabolic islands within living teal
@@ -1317,9 +1322,10 @@
         color:0xf5ffff,map:this.embryoTexture,
         bumpMap:this.embryoTexture,bumpScale:.023,
         emissive:0x16676b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.28,
-        metalness:.015,roughness:.32,clearcoat:.90,clearcoatRoughness:.16,
-        transmission:.075,thickness:.19,ior:1.34,
+        emissiveIntensity:.25,
+        // R2339: physically damp the glass/pearl look of the macro cell.
+        metalness:.015,roughness:.43,clearcoat:.72,clearcoatRoughness:.26,
+        transmission:.065,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
@@ -1396,13 +1402,13 @@
       // R2216: micro-organelles should read as tissue under a macro lens,
       // not floating toy beads. Keep true instancing and real depth.
       const vesicleGeometry=new T.IcosahedronGeometry(
-        this.mobileRender?.023:.028,1
+        this.mobileRender?.014:.018,1
       );
       const vesicleMaterial=new T.MeshPhysicalMaterial({
         // R2331: 3D vesicles are wet living tissue, not polished pearls.
-        color:0xffffff,metalness:0,roughness:.68,
-        clearcoat:.22,clearcoatRoughness:.34,
-        emissive:0x2b363a,emissiveIntensity:.12,
+        color:0xd8e5e3,metalness:0,roughness:.79,
+        clearcoat:.12,clearcoatRoughness:.49,
+        emissive:0x193b3e,emissiveIntensity:.08,
         transparent:true,opacity:0,depthWrite:false
       });
       const vesicles=new T.InstancedMesh(
@@ -1440,6 +1446,8 @@
       this.embryoVesicles=vesicles;
       this.embryoVesicleMaterial=vesicleMaterial;
       this.coreGroup.add(vesicles);
+      document.documentElement.dataset.fxGenesisCellMicroR2342=
+        'smaller-satin-cortex-organelles-quieter-chromatin-one-instanced-draw';
       document.documentElement.dataset.fxGenesisCellTissueR2331=
         'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles';
 
@@ -3015,7 +3023,7 @@
       // to retain actual internal organelles and the suspended chromatin.
       this.embryoMaterial.opacity=.89*visible;
       this.embryoNucleusMaterial.opacity=.82*visible;
-      this.embryoChromatinMaterial.opacity=(this.mobileRender?.11:.16)*visible;
+      this.embryoChromatinMaterial.opacity=(this.mobileRender?.075:.105)*visible;
       this.embryoChromatin.rotation.y=Math.sin(time*.00024)*.16;
       this.embryoChromatin.rotation.x=Math.sin(time*.00018)*.085;
       const pulse=1+.025*Math.sin(time*.0021);
@@ -3028,8 +3036,8 @@
       this.embryoInnerMaterial.opacity=.34*visible;
       this.embryoOrganelle.rotation.y=Math.sin(time*.00036)*.15;
       this.embryoOrganelle.rotation.z=Math.sin(time*.00029)*.06;
-      this.embryoCapillaryMaterial.opacity=.10*visible;
-      this.embryoVesicleMaterial.opacity=.43*visible;
+      this.embryoCapillaryMaterial.opacity=.055*visible;
+      this.embryoVesicleMaterial.opacity=.37*visible;
       this.embryoVesicles.rotation.y=Math.sin(time*.00019)*.024;
       this.embryoCapillaries.rotation.y=time*.000043;
       this.embryoCapillaries.rotation.x=Math.sin(time*.00019)*.08;
@@ -3142,6 +3150,18 @@
       // into the upper hero viewport, eliminating the final size jump.
       const landingScale=1-.26*smooth((t-8.55)/1.30);
       this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
+
+      // R2336: the cinematic chassis assumes the physical native MAG's
+      // composed rest pose BEFORE ownership passes to the single WebGL body.
+      // Only the existing Three group rotates: no new meshes or renderer.
+      const nativePose=smooth((t-7.25)/.85);
+      const nativePitch=this.mobileRender?-.160:-.140;
+      const nativeYaw=this.mobileRender?.135:.145;
+      this.mechanicalGroup.rotation.set(
+        nativePose*nativePitch,
+        nativePose*nativeYaw,
+        nativePose*(-.037)
+      );
 
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
@@ -3359,6 +3379,16 @@
         z=mix(4.28,4.40,smooth((t-9.10)/.60));
         y=.003;
       }
+      // R2340: after the intact first DNA establishing shot, move the SAME
+      // physical perspective camera through a close-up of the genuine 3D
+      // phosphate helices. Smoothly return this offset to zero by 3.30 s:
+      // the original cell and four-arm MAG framing remain unchanged.
+      // No meshes, renderer, blur overlay, canvas, frame or RAF allocated.
+      const dnaMacro=smooth((t-.88)/.70)*
+        (1-smooth((t-2.61)/.69));
+      z-=dnaMacro*(this.mobileRender?1.18:1.52);
+      x+=dnaMacro*(this.mobileRender?.05:.10);
+      y+=dnaMacro*(this.mobileRender?.025:.04);
       // R2172: one physical camera, one uninterrupted photographic take.
       // Gently dolly toward the moving titanium parts, then return to the
       // exact established final hero distance before the native R326 handoff.
@@ -3444,6 +3474,30 @@
         4.4-dnaStudio*.32-assemblyStudio*1.15,
         1.8+embryoStudio*.65+assemblyStudio*.50,5.2
       );
+      // R2336: key and fill finish in the permanent MAG shader's physical
+      // studio directions. Match view-space directions using the SAME film
+      // camera, and conserve frontal irradiance throughout the handoff.
+      // No lights, passes, canvases, textures or per-frame resources added.
+      const handoffKey=smooth((t-7.25)/.85);
+      if(handoffKey>0){
+        const key=this.studioKey.position,distance=key.length();
+        const x=key.x,y=key.y,z=key.z;
+        const frontal=key.dot(this.camera.position)/distance;
+        key.set(-.50,.78,.38).normalize()
+          .applyQuaternion(this.camera.quaternion).multiplyScalar(distance);
+        key.set(mix(x,key.x,handoffKey),mix(y,key.y,handoffKey),mix(z,key.z,handoffKey));
+        const settledFrontal=key.dot(this.camera.position)/key.length();
+        this.studioKey.intensity*=frontal/settledFrontal;
+
+        const fill=this.studioFill.position,fillDistance=fill.length();
+        const fillX=fill.x,fillY=fill.y,fillZ=fill.z;
+        const fillFrontal=fill.dot(this.camera.position)/fillDistance;
+        fill.set(.72,.08,.69).normalize()
+          .applyQuaternion(this.camera.quaternion).multiplyScalar(fillDistance);
+        fill.set(mix(fillX,fill.x,handoffKey),mix(fillY,fill.y,handoffKey),mix(fillZ,fill.z,handoffKey));
+        const settledFillFrontal=fill.dot(this.camera.position)/fill.length();
+        this.studioFill.intensity*=fillFrontal/settledFillFrontal;
+      }
       this.renderer.toneMappingExposure=
         1.075+dnaStudio*.035+embryoStudio*.045+assemblyStudio*.11+
         flash*.006+after*.002;
@@ -3669,4 +3723,14 @@
   document.documentElement.dataset.fxMagSignatureR1945d='single-body-no-petals-restrained-optic-micro-ridges';
   document.documentElement.dataset.fxGenesisStudioR2300='polarized-softbox-sculpted-primary-nucleotides-aspheric-optic-single-physical-film';
   document.documentElement.dataset.fxGenesisStudioR2301='cellular-depth-first-tamed-additive-chromatin-real-3d-geometry';
+  document.documentElement.dataset.fxMagStudioContinuityR2336=
+    'native-four-arm-pose-and-two-studio-directions-preserved-irradiance';
+  document.documentElement.dataset.fxGenesisSatinMacroR2341=
+    'hydrated-phosphate-satin-stronger-shared-microfibril-no-new-pass';
+  document.documentElement.dataset.fxGenesisBiopolymerR2337=
+    'sapphire-amethyst-satin-microfibril-physical-helix';
+  document.documentElement.dataset.fxGenesisTissueR2339=
+    'deterministic-chromatin-granules-physically-damped-membrane';
+  document.documentElement.dataset.fxGenesisMacroR2340=
+    'one-camera-dna-close-up-continuous-cell-return';
 })();

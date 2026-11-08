@@ -1,5 +1,44 @@
 # FormatX – fejlesztési állapot
 
+## R2341 – DNS makrofotó szatén foszfát-anyag (2026-11-08)
+
+- **Képi bizonyíték:** a R2340 `b258825` GitHub CI artifact valódi 2,50 s DNS képkockáján a két makró-spirál túl fényes, tömör, plasztikcső-szerű. A 5,50 s sejt gömb alakú, biológiai referencia-minőség még nincs meg. A 06 első teljes viewport a native MAG-ot *és a felső navigációt is* elhagyja, miközben a 06b második képen mindkettő már jelen van: ez hideg headless compositor/commit versenyhelyzetet valószínűsít, de nem bizonyít böngészőhibát.
+- **R2341 valós módosítás:** az eredeti 3D TubeGeometry-k ugyanazzal az egyetlen 128×128 DataTexture-rel maradnak, a roughness szatén értékre nő, a clearcoat és az emisszió csökken, a bumpScale és UV-részlet láthatósága nő. A két aura alap-alpha visszafogott. Nem került be új Three objektum, GPU-textúra, canvas, renderpass, RAF vagy WebGL-környezet.
+- **Regressziós védelem:** a tényleges Three r185 scene builder és textúrapixel-teszt a megváltozott értékeket, nem egy gyengített küszöböt ellenőriz. A R2328 és R2270 örökölt forrásvédők az új anyagokhoz igazodtak.
+- **Blokkolók változatlanok:** MAG első teljes viewport headless screenshot, 3× független cold-start, grafikus és Android Chrome referencia szerinti vizuális elfogadás, mindkét képernyőméret valós fps, Lighthouse 3× 100/100/100/100, végleges DNS→sejt→MAG átadás, release/deploy parity. A korábbi R2340 futás P0-ja a képi kompozitoron piros. A R2341 forrás javítását új, pontos commiton kell futtatni, majd screenshot-pixeleket összevetni.
+- **Kiadás:** PR #582 DRAFT a #581 fölött. Nem került masterre; nincs production deploy. A 3 referenciaoldal nincs dokumentációba írva.
+
+
+## R2340 – DNS stúdió-közelkép egyetlen 3D kamerával (2026-11-08)
+
+- **Képkocka audit:** a R2337 valódi, 2,50 másodperces Chromium screenshotján a DNS még túl széles/távoli, laboranimáció-jellegű az átadott makró-fotós, kék–lila DNS minimálreferenciához képest. A R2337 anyagfinomítás önmagában nem elég a vizuális minimumhoz.
+- **Tényleges filmes javítás:** az első teljes DNS-beállítás (`t<0,88s`) sértetlen. Utána **az eredeti egyetlen Three.js PerspectiveCamera** simított (`smooth`) közelképre mozog; a plusz nagyítás 3,30 s előtt teljesen kifut, így a 3D sejt/négyágú MAG eredeti kamerája és teljes 10 s-os timeline megmarad. Mobilon a portrékivágás eltérő magnitúdót kap, extra camera, canvas, mesh, texture, RAF, renderpass nincs.
+- **Regresszió:** új `.github/scripts/validate-genesis-macro-camera-r2340.cjs` a tényleges Three r185 kamera-metódussal ellenőrzi a változatlan 0,5 s-os establishing shotot, a 2,5 s-os fizikai közelítést, a 2,70 és 3,30 s-os folytonosságot, valamint a 10,00 s-os eredeti MAG kameratávolságot mobil és desktop profilon. Kötelező P0 syntactic+runtime teszt.
+- **Nyitott:** friss pontos-SHA-n futó P0, fotorealisztikus összevetés, Android/desktop 60 FPS és Lighthouse×3. Jelen ág fejlesztői/draft, nincs release.
+
+## R2339 – Sejtmagszövet: determinisztikus szemcsézettség és mattabb sejthártya (2026-11-08)
+
+- A felhasználói biológiai makroreferenciához képest a R2333 5,5 s-os valódi képkocka túl homogén és túl csillogó cellát mutatott. A R2339 meglévő `makeEmbryoTexture()` generátorába **új mintavétel nélkül** visszafogott chromatin/granulum kontraszt került: a már létező `mineral`, `cloud` és `hash` értékeket használja. Nem keletkezik új GPU-textúra vagy képfájl; mobil 384×192, desktop 512×256 változatlan.
+- A meglévő 3D membrán PBR anyag mattabb, az emisszió és üvegszerű clearcoat mérsékeltebb; a belső sejtmagnak és a magyar szövegnek nem változtak tulajdonságai.
+- Új valódi Three.js futtatásos `.github/scripts/validate-genesis-chromatin-r2339.cjs` szerződés ellenőrzi az összes eredeti textúraméretet, képpuffer determinisztikus azonosságát, az alfa-csatornát és a nemegyszínű szemcsézettséget mobil/desktop profilon. P0-ba bekötve. A R2338 csak **rögzíti** a hibás késői geometriai hozzáférés teljes JS-hívási láncát; az eredeti nulla late-read kapu változatlan.
+- **Még nyitott:** valós GPU és Android Chrome referenciaképi elfogadás, 60 FPS, headless compositor és Lighthouse×3 cél. Nem élesítve, PR #582 draft.
+
+## R2337 – Valódi 3D DNS biopolimer, anyag- és mikrostruktúra (2026-11-08)
+
+- **Vizuális kontroll:** az előző, tényleges Chromium-képkockán a nyitó DNS túl pasztelles/sima csőnek hatott a megadott kék–ibolya, rostos referencia minimumhoz képest. A turkiz–korall 3D sejt további részletezése nyitott.
+- **Fejlesztés a MAG után:** a meglévő, valódi Three.js DNS-kettős spirál két fizikai gerincanyaga mélyebb szafír/ametiszt színt, mérsékeltebb saját fényt, mattabb szatén clearcoatot és erősebb, de közös 128×128 foszfátrost-domborzatot kapott. Egyetlen, már meglévő DataTexture marad; nincs új mesh, draw, renderpass, WebGL canvas vagy RAF.
+- **Védelem:** a R2328 régi exact-material assertion a **tényleges új** anyagértékekre frissült; a további R2337 oracle a bundled Three r185-tel valós 3D helixet épít mobil/desktop profilban, ellenőrzi a 7 eredeti child objektumot, a két fizikai szálat, közös GPU-textúrát, annak 64 KiB méretét, és a másodlagos donorok textúraújrahasznosítását. Kétlépcsős source+runtime ellenőrzés bekerült a P0-ba.
+- **Státusz:** a kód és CI-ellenőrzés felkerült a #582 fejlesztői ágra; a végső pontos SHA-jú GPU/Chromium és Lighthouse eredmények nélkül nem állítható stúdióminőségi PASS. Élesítés/merge nem történt.
+
+## R2336 – Filmes és végleges MAG 3D-pozíció/fény folytonossága (2026-11-08)
+
+- **Kiinduló ág:** PR #581 (R2335), `67a25c70a2ca377bd890a425ddfcae084b1480b8`. Ez nem a production master.
+- **Első prioritás: MAG.** A tényleges 3D filmes, négyágú titántest meglévő `mechanicalGroup` csoportja 7,25–8,10 s között fokozatosan felveszi a natív MAG mobil/desktop nyugalmi pitch/yaw/roll szögeit. A körbeforgás továbbra is egy valódi 3D csoport-transzformáció.
+- **Stúdióvilágítás:** ugyanebben az átadási ablakban a meglévő key és fill fények kamera-koordinátákban a végleges MAG shader `keyDir` és `sideDir` irányára állnak be. Az előrefelé vetített fényerő a mozgó fényekkel korrigált. Nincs új fényforrás, textúra, mesh, canvas, WebGL-context, renderer vagy RAF.
+- **Regresszió:** új `.github/scripts/validate-mag-pose-studio-r2336.cjs`: a csomagolt Three r185 matematikájával a kamera és fényforrás valós metódusait ellenőrzi mobil/desktop profilban; valamint végrehajtja a tényleges animációs pose-kódot és ellenőrzi a nyolc mintavételi időpontot. Bekötve a meglévő P0 gyorsellenőrzésbe.
+- **Állapot:** kód és regressziós kapu elhelyezve, de CI és valós grafikus képkocka-vizsgálat nélkül nem állítható PASS. A #581 headless fekete kompozitorhiba és Lighthouse 3× 100/100/100/100 követelmény változatlanul nyitott; a headless pixelfeltételeken nem lazítottunk.
+- **Kiadás előtti kapu:** eredeti mobil/desktop P0 + valós headed screenshot, 10 másodperces DNS→sejt→MAG film, PAUSE/RESUME ×5, Skip/reduced-motion, Android és desktop látvány-elfogadás, friss cache-verziók minden HTML/Worker betöltőben. **Nincs merge, deployment vagy stúdióminőségi elfogadás.**
+
 ## R2335 – APEX asztali optimalizálás funkcionális böngészőbizonyítéka (2026-11-06)
 
 - **R2330 változás:** a desktop `formatx-apex.js` kezdeti feladatai felosztva; Lighthouse egyik asztali runban APEX hosszú feladat 309→135ms, TBT 249→50ms, de a három teljes Perf run 93/88/87 és mobil 82/81/84, ezért **nem 100 és nem stabil**.
