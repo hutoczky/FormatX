@@ -157,6 +157,7 @@ jobs:
           node --check .github/scripts/validate-mag-pose-studio-r2336.cjs
           node --check .github/scripts/validate-genesis-microfibre-r2337.cjs
           node --check .github/scripts/validate-genesis-chromatin-r2339.cjs
+          node --check .github/scripts/validate-genesis-macro-camera-r2340.cjs
           node --check .github/scripts/validate-genesis-biopolymer-detail-r2328.cjs
           node --check .github/scripts/validate-fixed-native-home-r2315.cjs
           node --check .github/scripts/validate-compositor-only-dock-r2316.cjs
@@ -191,6 +192,7 @@ jobs:
           node .github/scripts/validate-mag-pose-studio-r2336.cjs
           node .github/scripts/validate-genesis-microfibre-r2337.cjs
           node .github/scripts/validate-genesis-chromatin-r2339.cjs
+          node .github/scripts/validate-genesis-macro-camera-r2340.cjs
           node .github/scripts/validate-genesis-biopolymer-detail-r2328.cjs
           node .github/scripts/validate-fixed-native-home-r2315.cjs
           node .github/scripts/validate-compositor-only-dock-r2316.cjs
