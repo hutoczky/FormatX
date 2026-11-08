@@ -1248,17 +1248,21 @@
             +.44*noise(u,v,61);
           const coral=Math.pow(clamp((coralCloud-.575)*4.25),1.4);
           const mineral=noise(u,v,116);
-          const grain=(hash(x,y)-.5)*8;
+          // R2339: bounded microgranulation reuses the SAME existing hash.
+          const grain=(hash(x,y)-.5)*15;
           // R2201: microscopic clustered chromatin, not a uniform aqua blob.
         // A lower threshold produces many small coral organelle islands.
         const freckle=Math.pow(clamp((mineral-.62)*3.9),2);
+        // R2339: cellular chromatin granules follow existing mineral/cloud
+        // fields. No added noise sampling, texture or per-frame shader work.
+        const chromatin=clamp((mineral-.53)*3.2)*(.45+.55*cloud);
           const index=(y*width+x)*4;
           pixels[index]=Math.round(clamp(
-            (20+72*cloud+155*coral+58*freckle+grain)/255)*255);
+            (20+72*cloud+155*coral+58*freckle+12*chromatin+grain)/255)*255);
           pixels[index+1]=Math.round(clamp(
-            (87+165*cloud-36*coral+24*freckle+grain)/255)*255);
+            (87+165*cloud-36*coral+24*freckle+19*chromatin+grain)/255)*255);
           pixels[index+2]=Math.round(clamp(
-            (95+169*cloud-54*coral+18*freckle+grain)/255)*255);
+            (95+169*cloud-54*coral+18*freckle+20*chromatin+grain)/255)*255);
           pixels[index+3]=255;
           // R2212: deepen coral trabeculae within the teal metabolic matrix.
           // R2206: cluster coral metabolic islands within living teal
@@ -1318,9 +1322,10 @@
         color:0xf5ffff,map:this.embryoTexture,
         bumpMap:this.embryoTexture,bumpScale:.023,
         emissive:0x16676b,emissiveMap:this.embryoTexture,
-        emissiveIntensity:.28,
-        metalness:.015,roughness:.32,clearcoat:.90,clearcoatRoughness:.16,
-        transmission:.075,thickness:.19,ior:1.34,
+        emissiveIntensity:.25,
+        // R2339: physically damp the glass/pearl look of the macro cell.
+        metalness:.015,roughness:.43,clearcoat:.72,clearcoatRoughness:.26,
+        transmission:.065,thickness:.19,ior:1.34,
         transparent:true,opacity:0,depthWrite:false
       });
       this.embryoShell=new T.Mesh(geometry,this.embryoMaterial);
@@ -3710,4 +3715,6 @@
     'native-four-arm-pose-and-two-studio-directions-preserved-irradiance';
   document.documentElement.dataset.fxGenesisBiopolymerR2337=
     'sapphire-amethyst-satin-microfibril-physical-helix';
+  document.documentElement.dataset.fxGenesisTissueR2339=
+    'deterministic-chromatin-granules-physically-damped-membrane';
 })();
