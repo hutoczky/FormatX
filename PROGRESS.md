@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2336 – Filmes és végleges MAG 3D-pozíció/fény folytonossága (2026-11-08)
+
+- **Kiinduló ág:** PR #581 (R2335), `67a25c70a2ca377bd890a425ddfcae084b1480b8`. Ez nem a production master.
+- **Első prioritás: MAG.** A tényleges 3D filmes, négyágú titántest meglévő `mechanicalGroup` csoportja 7,25–8,10 s között fokozatosan felveszi a natív MAG mobil/desktop nyugalmi pitch/yaw/roll szögeit. A körbeforgás továbbra is egy valódi 3D csoport-transzformáció.
+- **Stúdióvilágítás:** ugyanebben az átadási ablakban a meglévő key és fill fények kamera-koordinátákban a végleges MAG shader `keyDir` és `sideDir` irányára állnak be. Az előrefelé vetített fényerő a mozgó fényekkel korrigált. Nincs új fényforrás, textúra, mesh, canvas, WebGL-context, renderer vagy RAF.
+- **Regresszió:** új `.github/scripts/validate-mag-pose-studio-r2336.cjs`: a csomagolt Three r185 matematikájával a kamera és fényforrás valós metódusait ellenőrzi mobil/desktop profilban; valamint végrehajtja a tényleges animációs pose-kódot és ellenőrzi a nyolc mintavételi időpontot. Bekötve a meglévő P0 gyorsellenőrzésbe.
+- **Állapot:** kód és regressziós kapu elhelyezve, de CI és valós grafikus képkocka-vizsgálat nélkül nem állítható PASS. A #581 headless fekete kompozitorhiba és Lighthouse 3× 100/100/100/100 követelmény változatlanul nyitott; a headless pixelfeltételeken nem lazítottunk.
+- **Kiadás előtti kapu:** eredeti mobil/desktop P0 + valós headed screenshot, 10 másodperces DNS→sejt→MAG film, PAUSE/RESUME ×5, Skip/reduced-motion, Android és desktop látvány-elfogadás, friss cache-verziók minden HTML/Worker betöltőben. **Nincs merge, deployment vagy stúdióminőségi elfogadás.**
+
 ## R2335 – APEX asztali optimalizálás funkcionális böngészőbizonyítéka (2026-11-06)
 
 - **R2330 változás:** a desktop `formatx-apex.js` kezdeti feladatai felosztva; Lighthouse egyik asztali runban APEX hosszú feladat 309→135ms, TBT 249→50ms, de a három teljes Perf run 93/88/87 és mobil 82/81/84, ezért **nem 100 és nem stabil**.
