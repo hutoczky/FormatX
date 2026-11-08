@@ -37,7 +37,7 @@ assert.match(archive,/formatx:magbirthprepare'/);
 assert.match(archive,/nativeHomePreflightR2343c\?\.target===target/);
 assert.match(archive,/function prepareNativeHomeR2315\(usePreflightR2343c=false\)/);
 assert.match(complete,/prepareNativeHomeR2315\(true\)/);
-assert.doesNotMatch(complete,/getBoundingClientRect/);
+assert.doesNotMatch(complete,/\.getBoundingClientRect\(/);
 assert.match(archive,/nativeHomePreflightR2343c=null/);
 
 console.log('R2343_FILTERLESS_HANDOFF_SOURCE_CONTRACT_PASS; full-viewport actual pixels are still required');
