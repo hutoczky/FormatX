@@ -24,7 +24,11 @@ assert.equal(source.split('const phosphateTexture=this.makeDNAFiberTexture();').
 find('color:0xd6eeed,map:this.embryoTexture,');
 find('emissive:0x256c71,emissiveMap:this.embryoTexture,emissiveIntensity:.42,');
 find('metalness:.012,roughness:.44,transmission:.13,thickness:.17,ior:1.35');
-find('const bodyScale=.001+.63*grow*mix(fade,.86,handoffCortex);');
+// R2352 keeps the full DNA/embryo phase and requires the real cortex to
+// retract *inside* the existing optical socket by the final 9.25s shot.
+find('const bodyScale=.001+.63*grow*mix(fade,.56,handoffCortex);');
+find('this.organicGroup.position.z=-.62*handoffCortex;');
+find('this.organicShellMaterial.opacity=mix(.18*visible,.58*grow,handoffCortex);');
 find('const handoffCortex=smooth((t-7.28)/1.43);');
 find('const opticWake=smooth((t-7.44)/.78);');
 console.log('R2328_REAL_DNA_BIOPOLYMER_CELL_CORTEX_CONTINUITY_PASS');
