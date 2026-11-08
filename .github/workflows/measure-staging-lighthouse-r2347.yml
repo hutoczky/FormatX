@@ -1,0 +1,113 @@
+name: R2347 FormatX staging Lighthouse x3 no deployment
+on:
+  push:
+    branches: [fix/r2347-staging-lighthouse-3x]
+    paths:
+      - '.github/workflows/measure-staging-lighthouse-r2347.yml'
+      - 'docs/scifi-ui/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r2347-staging-lighthouse-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: true
+jobs:
+  lighthouse:
+    name: Staging Lighthouse ${{ matrix.profile }} x3
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [desktop, mobile]
+    env:
+      PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install CLI and locate Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install -g --no-audit --no-fund @lhci/cli@0.13.x
+          CHROME_PATH="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME_PATH"
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+          "$CHROME_PATH" --version
+      - name: Prepare exact SHA local static staging configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const p=process.env.PROFILE;
+          const src=p==='desktop'?'lighthouserc.json':'lighthouserc.mobile.json';
+          const c=JSON.parse(fs.readFileSync(src,'utf8'));
+          c.ci.collect.staticDistDir='./docs';
+          c.ci.collect.url=['./scifi-ui/index.html'];
+          c.ci.collect.numberOfRuns=3;
+          const a=c.ci.assert.assertions;
+          for(const k of ['performance','accessibility','best-practices','seo'])
+            a['categories:'+k]=['error',{minScore:1}];
+          a['largest-contentful-paint']=['error',{maxNumericValue:2000}];
+          a['total-blocking-time']=['error',{maxNumericValue:150}];
+          a['cumulative-layout-shift']=['error',{maxNumericValue:0.05}];
+          a['server-response-time']=['error',{maxNumericValue:500}];
+          fs.writeFileSync('lighthouserc.r2347.generated.json',JSON.stringify(c,null,2)+'\n');
+          NODE
+          mkdir -p "artifacts/r2347-lighthouse/$PROFILE"
+      - name: Capture all three Lighthouse runs
+        shell: bash
+        run: |
+          set -euo pipefail
+          lhci collect --config=lighthouserc.r2347.generated.json 2>&1 |
+            tee "artifacts/r2347-lighthouse/$PROFILE/collect.log"
+      - name: Summarize real category scores and web vitals
+        if: always()
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs'),dir='.lighthouseci',p=process.env.PROFILE;
+          const files=fs.existsSync(dir)?fs.readdirSync(dir).filter(f=>/^lhr-.*\.json$/.test(f)).sort():[];
+          const rows=files.map(file=>{
+            const l=JSON.parse(fs.readFileSync(dir+'/'+file,'utf8'));
+            const metric=k=>l.audits?.[k]?.numericValue??null;
+            return {file,requestedUrl:l.requestedUrl,finalUrl:l.finalUrl,
+              scores:Object.fromEntries(['performance','accessibility','best-practices','seo'].map(k=>[k,Math.round(100*(l.categories?.[k]?.score??0))])),
+              fcpMs:metric('first-contentful-paint'),lcpMs:metric('largest-contentful-paint'),
+              tbtMs:metric('total-blocking-time'),cls:metric('cumulative-layout-shift'),ttfbMs:metric('server-response-time'),
+              longTasks:(l.audits?.['long-tasks']?.details?.items||[]).slice(0,20).map(t=>({
+                url:t.url||null,startTime:t.startTime??null,duration:t.duration??null})),
+              scriptBootup:(l.audits?.['bootup-time']?.details?.items||[]).slice(0,15).map(t=>({
+                url:t.url||null,total:t.total??null,scripting:t.scripting??null,scriptParseCompile:t.scriptParseCompile??null}))};
+          });
+          const result={profile:p,sha:process.env.GITHUB_SHA,runCount:rows.length,localStaticStagingOnly:true,notProductionCloudflareTTFB:true,notAndroidHardwareFPS:true,rows};
+          const path='artifacts/r2347-lighthouse/'+p;
+          fs.mkdirSync(path,{recursive:true});
+          // Preserve the *actual* LHR JSON in a non-hidden artifact path.
+          // upload-artifact v4 excludes dot-directories by default.
+          for(const file of files)fs.copyFileSync(dir+'/'+file,path+'/'+file);
+          fs.writeFileSync(path+'/scores.json',JSON.stringify(result,null,2)+'\n');
+          console.log('FORMATX_STAGING_LIGHTHOUSE_R2347',JSON.stringify(result));
+          NODE
+      - name: Strict 3x 100-score acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const r=require('./artifacts/r2347-lighthouse/'+process.env.PROFILE+'/scores.json');if(r.runCount!==3)process.exit(1)"
+          lhci assert --config=lighthouserc.r2347.generated.json 2>&1 |
+            tee "artifacts/r2347-lighthouse/$PROFILE/assert.log"
+      - name: Archive all results even when threshold is red
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-lighthouse-${{ matrix.profile }}-${{ github.sha }}
+          path: |
+            artifacts/r2347-lighthouse/${{ matrix.profile }}/
+            lighthouserc.r2347.generated.json
+          if-no-files-found: warn
+          retention-days: 30

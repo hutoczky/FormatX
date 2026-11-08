@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2347 – staging Lighthouse 3× mérési kapu (2026-11-08)
+
+- A R2346 pontos fejlesztői SHA-jából készített, külön GitHub Actions workflow helyi statikus HTML-en 3 asztali + 3 mobil Lighthouse-mérést indít; nincs élesítés és nem módosítja az alap MAG renderert.
+- Küszöb: 100/100/100/100 mind a négy kategóriában, LCP ≤2000 ms, TBT ≤150 ms, CLS ≤0,05, lokális statikus server-response-time ≤500 ms. Hibánál a valódi nyers futások és scores.json megmaradnak.
+- Ez a mért lokális staging-forrás, nem igazolja a Cloudflare éles TTFB-t, az Android GPU 60 FPS-t, vagy a végső vizuális stúdióminőséget. DRAFT ág, nincs deploy.
+
+
 ## R2346 – a natív MAG kompozitor-transzformációjának biztonságos tulajdonosa (2026-11-08)
 
 - **Kockázat:** az R2343 sikeres elsőképkockás `translate3d(0,0,0)` aktiválása 860 ms múlva vakon törölte a stage inline `transform` értékét. Ez felülírhatta a későbbi görgetés vagy interakció mozgásvezérlőjének érvényes transzformációját, és a korábbi inline állapotot sem állította helyre.
