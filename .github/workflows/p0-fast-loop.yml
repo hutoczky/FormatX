@@ -7,7 +7,7 @@ on:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
     # Never deploy: these are local-source / local-Lighthouse checks only.
-    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity]
+    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure]
     paths:
       - 'docs/styles.css'
       - 'docs/production-revision.txt'
