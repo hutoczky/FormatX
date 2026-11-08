@@ -2312,6 +2312,18 @@
         root.dataset.fxCoreSurfaceSchedulerR484='suspended';
         return;
       }
+      // R2348: this AUTONOMOUS cosmetic sweep belongs to the visible MAG.
+      // Never start its 13s warm-up clock under the opaque GENESIS film:
+      // the first sweep can otherwise collide with the GPU handoff and
+      // saturated mobile main thread. Explicit touch/keyboard physiology
+      // remains immediate and uses the original single native WebGL owner.
+      const filmStillOwnsStageR2348=
+        root.dataset.fxMagBirthLiveR533==='active'||
+        root.getAttribute('data-fx-mag-birth-live')==='active';
+      if(filmStillOwnsStageR2348){
+        root.dataset.fxCoreSurfaceSchedulerR484='held-by-physical-genesis';
+        return;
+      }
       // R588: the first autonomous sweep is a post-interactive warm-up.
       // The CSS heartbeat and direct interaction remain immediate, while the
       // expensive native sweep no longer competes with first-load interactivity.
@@ -3070,6 +3082,12 @@
       });
     };
     listen(document,'formatx:magbirthprepare',prepareNativeFrameR2254,{passive:true});
+    // R2348: reset the one existing autonomous cosmetic clock only after
+    // the genuine cinematic overlay has retired. Do not start another
+    // timer, WebGL pass, RAF or fallback. R533 fires completion once.
+    listen(document,'formatx:magbirthcomplete',()=>{
+      scheduleSurfacePulse();
+    },{passive:true});
     // R2343b: the original film's filterless alpha handoff alone did not
     // settle the FIRST headless full-viewport GPU screenshot. A stage-level
     // identity transform changes only the compositor layer ownership after

@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2348 – natív MAG első autonóm fényimpulzusának filmes tulajdonosi kapuja (2026-11-08)
+
+- **Mért okjelölt:** R2347 Lighthouse x3 mobil Perf 74/82/82, TBT 693/403/402ms, a valódi R326 WebGL MAG és R533 film főszálterhelése. A natív R326 első dekoratív automatikus surface sweep 13s-mal a rejtett MAG inicializálása után indulhat, és az intro/GPU kompozitor átadás utáni ablakban ütközhet más renderfeladatokkal.
+- **Javítás:** az EREDETI egyetlen, 13 000ms-os autonóm időzítő csak a tényleges GENESIS overlay eltűnése után indul. Amíg R533 film aktív, az új kapu nem hoz létre időzítőt. A film befejezésének egyetlen valódi eseménye a meglévő scheduleSurfacePulse() eljárást hívja. Skip/no-intro továbbra is azonnal indítja az eredeti várakozást; a kézi touch/keyboard interakció, egyetlen WebGL canvas/context, 3D geometria, shader, fények, GPU source és 60 FPS cél érintetlen.
+- **Regresszió:** új forrásból végrehajtott R2348 guard teszteli az aktív filmes tiltást, a befejezésre egyetlen újraarmolást, a 13s időtartamot, a Skip és Pause/reduced/hidden működést és a kettős időzítők elkerülését. Az eredeti, változatlan R656 első képernyős valós PNG, R2226 3x headed/headless, R2173 retired-layout és dokkolási kapuk továbbra is kötelezőek.
+- **Még hiányzik:** R2348 pontos SHA teljes P0 és Lighthouse desktop/mobil x3 újramérés, benchmark grafikon és fizikai Android 60 FPS. A fejlesztői ág DRAFT, nincs merge vagy production deploy.
+
+
 ## R2347 – staging Lighthouse 3× mérési kapu (2026-11-08)
 
 - A R2346 pontos fejlesztői SHA-jából készített, külön GitHub Actions workflow helyi statikus HTML-en 3 asztali + 3 mobil Lighthouse-mérést indít; nincs élesítés és nem módosítja az alap MAG renderert.
