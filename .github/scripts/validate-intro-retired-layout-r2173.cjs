@@ -14,9 +14,15 @@ function observe(){
   const rect=Element.prototype.getBoundingClientRect;
   Element.prototype.getBoundingClientRect=function(){
     const start=performance.now(),result=Reflect.apply(rect,this,arguments);
+    // R2338: record the REAL late JS stack when the existing, unchanged
+    // zero-late-read assertion trips. A DOM event dispatched by R533 can
+    // retain R533 in the listener call stack even when another owner reads.
+    // Do not whitelist, retry or suppress any late geometry observation.
+    const stack=String(new Error().stack);
     if((this.classList?.contains('fx-crystal-organism-r326-stage')||this.classList?.contains('hero-space'))&&
-       String(new Error().stack).includes('formatx-mag-birth-live-r533.js')){
-      data.targetReads.push({start,end:performance.now(),afterCompletion:data.completed!==null,connected:this.isConnected,width:result.width,height:result.height});
+       stack.includes('formatx-mag-birth-live-r533.js')){
+      data.targetReads.push({start,end:performance.now(),afterCompletion:data.completed!==null,connected:this.isConnected,width:result.width,height:result.height,
+        ...(data.completed!==null?{stack}:null)});
     }
     return result;
   };
