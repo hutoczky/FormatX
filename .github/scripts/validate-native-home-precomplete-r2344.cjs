@@ -15,8 +15,10 @@ const preListener=src.slice(pre,complete);
 const nextListener=src.indexOf("addEventListener('formatx:languagechange'",complete);
 assert(nextListener>complete,'Completion listener boundary missing');
 const completion=src.slice(complete,nextListener);
-assert(preListener.includes('prepareNativeHomeR2315(true);'),
-  'The pre-completion handoff must snapshot real native stage geometry');
+assert(preListener.includes('prepareNativeHomeR2315();') &&
+  preListener.includes('const wasIntroDone=introDone;') &&
+  preListener.includes('introDone=wasIntroDone;'),
+  'The pre-completion handoff must snapshot native geometry and restore film state');
 assert(!completion.includes('      prepareNativeHomeR2315();'),
   'The completed film must not synchronously read native stage geometry');
 assert(completion.includes("queueMicrotask(()=>prepareNativeHomeR2315());"),
@@ -50,10 +52,14 @@ for(const profile of [
     document:{hidden:profile.hidden,querySelector:selector=>selector.includes('hero-space')?host:stage},
     window:{FormatXLivingCore:{stage}},scrollY:0,innerHeight:900,
     HTMLElement:Element,console};
-  const prepare=vm.runInNewContext('(function(){'+snippet+'return prepareNativeHomeR2315;})()',env);
-  prepare();
+  const owner=vm.runInNewContext('(function(){'+snippet+'return {prepareNativeHomeR2315,setIntroDone(v){introDone=v;}};})()',env);
+  owner.prepareNativeHomeR2315();
   assert.equal(reads.length,0,'No early native read without explicit film-preparation permission');
-  prepare(true);
+  // R533 pre-event grants authorization only for the duration of this
+  // synchronous call; ongoing film state is restored immediately afterward.
+  owner.setIntroDone(true);
+  owner.prepareNativeHomeR2315();
+  owner.setIntroDone(false);
   assert.equal(reads.length,profile.expected,profile.label+' stage read mismatch');
   if(profile.expected){
     assert.equal(state.dataset.fxMagNativeHomeR2315,'prepared');
