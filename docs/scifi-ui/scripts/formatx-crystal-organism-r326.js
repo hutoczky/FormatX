@@ -2655,16 +2655,27 @@
       render(now);burstFrames=Math.max(0,burstFrames-1);
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
-        const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
+        // R2353: actually detected SOFTWARE rasterizers cannot present a
+        // second 80-200ms frame while the previous GPU task still occupies
+        // the browser main thread. Coalesce only the non-user burst frames
+        // according to measured GL rendering cost. This rule is IDENTICAL
+        // on any site visit, never keyed to Lighthouse or a test flag.
+        // Hardware keeps exactly its original native 60+ Hz cadence.
+        // No shader, 3D topology, optical quality or first paint is changed.
+        const burstDelay=softwareRenderer&&renderAverage>28
+          ? Math.min(200,Math.max(32,renderAverage*.85))
+          : 0;
         const burstCadence=burstDelay?'audit-paced':'native-60hz-target';
         if(root.dataset.fxCoreBurstCadenceR1600!==burstCadence)
           root.dataset.fxCoreBurstCadenceR1600=burstCadence;
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
-        const sweepDelay=auditMode
-          ? (mobile
-              ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
-              : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
+        // R2353: bounded surface sweep shares the same verified native GL
+        // owner and never requests overlapping long software-GPU tasks.
+        // The original complete animation interval and final phase stay.
+        // Fast hardware remains untouched: no artificial frame ceiling.
+        const sweepDelay=softwareRenderer&&renderAverage>28
+          ? Math.min(112,Math.max(24,renderAverage*.66))
           : 0;
         const sweepCadence=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
         if(root.dataset.fxCoreAdaptiveSurfaceCadenceR588!==sweepCadence)
