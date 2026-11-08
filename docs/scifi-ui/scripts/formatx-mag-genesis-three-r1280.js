@@ -3166,33 +3166,37 @@
       /* R1945k — studio-smoked material convergence, not a flash.
          The final 2.5 s gradually become the same smoked-silver/cyan bioglass
          family as the permanent hero, so handoff reads as one continuous object. */
+      // R2345: machined neutral silver rather than the flat blue-grey slate
+      // in the 7.50 s real browser frame. Reuse the SAME physical 3D metal,
+      // one procedural microfibre texture and original studio environment.
+      // Converge colours continuously; no extra draw, shader or light.
       this.mechMaterial.color.setRGB(
-        mix(.105,.190,finale),
-        mix(.140,.230,finale),
-        mix(.170,.260,finale)
+        mix(.135,.265,finale),
+        mix(.155,.282,finale),
+        mix(.173,.302,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.130,.220,finale),
-        mix(.180,.270,finale),
-        mix(.210,.300,finale)
+        mix(.172,.294,finale),
+        mix(.189,.314,finale),
+        mix(.206,.337,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.480,.505,finale),
-        mix(.575,.575,finale),
-        mix(.565,.603,finale)
+        mix(.530,.620,finale),
+        mix(.595,.680,finale),
+        mix(.590,.705,finale)
       );
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression
       // while retaining an opaque, textured machined chassis.
-      this.mechMaterial.transmission=mix(.075,.045,finale);
-      this.mechMidMaterial.transmission=mix(.095,.065,finale);
-      this.silverMaterial.transmission=mix(.040,.020,finale);
+      this.mechMaterial.transmission=mix(.052,.028,finale);
+      this.mechMidMaterial.transmission=mix(.070,.040,finale);
+      this.silverMaterial.transmission=mix(.028,.015,finale);
       this.mechMaterial.metalness=mix(.50,.64,finale);
       this.mechMidMaterial.metalness=mix(.43,.54,finale);
       this.silverMaterial.metalness=mix(.70,.78,finale);
-      this.mechMaterial.roughness=mix(.26,.23,finale);
-      this.mechMidMaterial.roughness=mix(.24,.21,finale);
-      this.silverMaterial.roughness=mix(.18,.19,finale);
+      this.mechMaterial.roughness=mix(.24,.20,finale);
+      this.mechMidMaterial.roughness=mix(.22,.19,finale);
+      this.silverMaterial.roughness=mix(.18,.17,finale);
 
       this.mechMaterial.opacity=(.97+.018*finale)*grow;
       // R2119: reveal machined inserts as solid layers, not ghosted decals.
