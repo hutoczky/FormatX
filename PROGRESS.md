@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2340 – DNS stúdió-közelkép egyetlen 3D kamerával (2026-11-08)
+
+- **Képkocka audit:** a R2337 valódi, 2,50 másodperces Chromium screenshotján a DNS még túl széles/távoli, laboranimáció-jellegű az átadott makró-fotós, kék–lila DNS minimálreferenciához képest. A R2337 anyagfinomítás önmagában nem elég a vizuális minimumhoz.
+- **Tényleges filmes javítás:** az első teljes DNS-beállítás (`t<0,88s`) sértetlen. Utána **az eredeti egyetlen Three.js PerspectiveCamera** simított (`smooth`) közelképre mozog; a plusz nagyítás 3,30 s előtt teljesen kifut, így a 3D sejt/négyágú MAG eredeti kamerája és teljes 10 s-os timeline megmarad. Mobilon a portrékivágás eltérő magnitúdót kap, extra camera, canvas, mesh, texture, RAF, renderpass nincs.
+- **Regresszió:** új `.github/scripts/validate-genesis-macro-camera-r2340.cjs` a tényleges Three r185 kamera-metódussal ellenőrzi a változatlan 0,5 s-os establishing shotot, a 2,5 s-os fizikai közelítést, a 2,70 és 3,30 s-os folytonosságot, valamint a 10,00 s-os eredeti MAG kameratávolságot mobil és desktop profilon. Kötelező P0 syntactic+runtime teszt.
+- **Nyitott:** friss pontos-SHA-n futó P0, fotorealisztikus összevetés, Android/desktop 60 FPS és Lighthouse×3. Jelen ág fejlesztői/draft, nincs release.
+
 ## R2339 – Sejtmagszövet: determinisztikus szemcsézettség és mattabb sejthártya (2026-11-08)
 
 - A felhasználói biológiai makroreferenciához képest a R2333 5,5 s-os valódi képkocka túl homogén és túl csillogó cellát mutatott. A R2339 meglévő `makeEmbryoTexture()` generátorába **új mintavétel nélkül** visszafogott chromatin/granulum kontraszt került: a már létező `mineral`, `cloud` és `hash` értékeket használja. Nem keletkezik új GPU-textúra vagy képfájl; mobil 384×192, desktop 512×256 változatlan.
