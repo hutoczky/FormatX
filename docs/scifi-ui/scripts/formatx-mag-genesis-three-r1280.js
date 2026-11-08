@@ -396,20 +396,21 @@
       const curveA=new T.CatmullRomCurve3(aPts,false,'centripetal');
       const curveB=new T.CatmullRomCurve3(bPts,false,'centripetal');
       const phosphateTexture=this.makeDNAFiberTexture();
-      // R2271: hydrated biopolymer, not emissive candy-light tubing.
-      // The existing true 3D double helix gains neutral photographic
-      // reflections over the original phosphate microrelief texture.
+      // R2337: deep sapphire/amethyst phosphate tissue, not pastel plastic.
+      // TRUE 3D helices reuse one already generated 128px phosphate fibre
+      // bump map. Restrained satin clearcoat and deeper microroughness reveal
+      // the existing microfibrils without a new draw, texture or render pass.
       const ma=new T.MeshPhysicalMaterial({
-        color:0xa7c8e2,emissive:0x224267,emissiveIntensity:.63,
-        roughness:.255,metalness:.065,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
-        depthWrite:false,clearcoat:.96,clearcoatRoughness:.075
+        color:0x7796c4,emissive:0x224267,emissiveIntensity:.54,
+        roughness:.355,metalness:.045,transparent:true,opacity:.95,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.014:.020,
+        depthWrite:false,clearcoat:.72,clearcoatRoughness:.18
       });
       const mb=new T.MeshPhysicalMaterial({
-        color:0xc8b5dd,emissive:0x523b77,emissiveIntensity:.61,
-        roughness:.26,metalness:.062,transparent:true,opacity:.95,
-        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.011:.015,
-        depthWrite:false,clearcoat:.95,clearcoatRoughness:.08
+        color:0x987cb8,emissive:0x523b77,emissiveIntensity:.53,
+        roughness:.37,metalness:.040,transparent:true,opacity:.95,
+        bumpMap:phosphateTexture,bumpScale:this.mobileRender?.014:.020,
+        depthWrite:false,clearcoat:.70,clearcoatRoughness:.19
       });
       const ga=new T.MeshBasicMaterial({
         color:0x65bad6,transparent:true,opacity:.055,depthWrite:false,
@@ -3707,4 +3708,6 @@
   document.documentElement.dataset.fxGenesisStudioR2301='cellular-depth-first-tamed-additive-chromatin-real-3d-geometry';
   document.documentElement.dataset.fxMagStudioContinuityR2336=
     'native-four-arm-pose-and-two-studio-directions-preserved-irradiance';
+  document.documentElement.dataset.fxGenesisBiopolymerR2337=
+    'sapphire-amethyst-satin-microfibril-physical-helix';
 })();
