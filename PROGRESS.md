@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2337 – Valódi 3D DNS biopolimer, anyag- és mikrostruktúra (2026-11-08)
+
+- **Vizuális kontroll:** az előző, tényleges Chromium-képkockán a nyitó DNS túl pasztelles/sima csőnek hatott a megadott kék–ibolya, rostos referencia minimumhoz képest. A turkiz–korall 3D sejt további részletezése nyitott.
+- **Fejlesztés a MAG után:** a meglévő, valódi Three.js DNS-kettős spirál két fizikai gerincanyaga mélyebb szafír/ametiszt színt, mérsékeltebb saját fényt, mattabb szatén clearcoatot és erősebb, de közös 128×128 foszfátrost-domborzatot kapott. Egyetlen, már meglévő DataTexture marad; nincs új mesh, draw, renderpass, WebGL canvas vagy RAF.
+- **Védelem:** a R2328 régi exact-material assertion a **tényleges új** anyagértékekre frissült; a további R2337 oracle a bundled Three r185-tel valós 3D helixet épít mobil/desktop profilban, ellenőrzi a 7 eredeti child objektumot, a két fizikai szálat, közös GPU-textúrát, annak 64 KiB méretét, és a másodlagos donorok textúraújrahasznosítását. Kétlépcsős source+runtime ellenőrzés bekerült a P0-ba.
+- **Státusz:** a kód és CI-ellenőrzés felkerült a #582 fejlesztői ágra; a végső pontos SHA-jú GPU/Chromium és Lighthouse eredmények nélkül nem állítható stúdióminőségi PASS. Élesítés/merge nem történt.
+
 ## R2336 – Filmes és végleges MAG 3D-pozíció/fény folytonossága (2026-11-08)
 
 - **Kiinduló ág:** PR #581 (R2335), `67a25c70a2ca377bd890a425ddfcae084b1480b8`. Ez nem a production master.
