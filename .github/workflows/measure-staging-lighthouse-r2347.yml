@@ -79,11 +79,18 @@ jobs:
             return {file,requestedUrl:l.requestedUrl,finalUrl:l.finalUrl,
               scores:Object.fromEntries(['performance','accessibility','best-practices','seo'].map(k=>[k,Math.round(100*(l.categories?.[k]?.score??0))])),
               fcpMs:metric('first-contentful-paint'),lcpMs:metric('largest-contentful-paint'),
-              tbtMs:metric('total-blocking-time'),cls:metric('cumulative-layout-shift'),ttfbMs:metric('server-response-time')};
+              tbtMs:metric('total-blocking-time'),cls:metric('cumulative-layout-shift'),ttfbMs:metric('server-response-time'),
+              longTasks:(l.audits?.['long-tasks']?.details?.items||[]).slice(0,20).map(t=>({
+                url:t.url||null,startTime:t.startTime??null,duration:t.duration??null})),
+              scriptBootup:(l.audits?.['bootup-time']?.details?.items||[]).slice(0,15).map(t=>({
+                url:t.url||null,total:t.total??null,scripting:t.scripting??null,scriptParseCompile:t.scriptParseCompile??null}))};
           });
           const result={profile:p,sha:process.env.GITHUB_SHA,runCount:rows.length,localStaticStagingOnly:true,notProductionCloudflareTTFB:true,notAndroidHardwareFPS:true,rows};
           const path='artifacts/r2347-lighthouse/'+p;
           fs.mkdirSync(path,{recursive:true});
+          // Preserve the *actual* LHR JSON in a non-hidden artifact path.
+          // upload-artifact v4 excludes dot-directories by default.
+          for(const file of files)fs.copyFileSync(dir+'/'+file,path+'/'+file);
           fs.writeFileSync(path+'/scores.json',JSON.stringify(result,null,2)+'\n');
           console.log('FORMATX_STAGING_LIGHTHOUSE_R2347',JSON.stringify(result));
           NODE
@@ -101,7 +108,6 @@ jobs:
           name: staging-lighthouse-${{ matrix.profile }}-${{ github.sha }}
           path: |
             artifacts/r2347-lighthouse/${{ matrix.profile }}/
-            .lighthouseci/
             lighthouserc.r2347.generated.json
           if-no-files-found: warn
           retention-days: 30
