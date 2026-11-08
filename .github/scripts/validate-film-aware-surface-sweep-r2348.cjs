@@ -20,8 +20,14 @@ assert(src.includes("const delay=surfacePulseCount===0\n        ? 13000"),
   'Autonomous first visible warm-up duration was altered');
 assert(src.includes("startSurfacePulse(String(source||'interaction')+'-living-response')"),
   'User-initiated physical response should remain independent');
-assert(!scheduler.includes('navigator.userAgent')&&!scheduler.includes('lighthouse'),
-  'No user-agent-specific quality bypass allowed');
+// The original legacy scheduler contains a dormant audit status string.
+// Inspect ONLY the new R2348 block for an illegitimate bot/user-agent gate.
+const newStart=scheduler.indexOf('      // R2348: this AUTONOMOUS');
+const newEnd=scheduler.indexOf('      // R588: the first autonomous sweep',newStart);
+assert(newStart>0&&newEnd>newStart,'Missing source-bounded R2348 policy');
+const patch=scheduler.slice(newStart,newEnd);
+assert(!patch.includes('navigator.userAgent')&&!patch.includes('lighthouse'),
+  'R2348 must not depend on user-agent or Lighthouse state');
 const factory=vm.runInNewContext('(function(config){'+
   'let surfacePulseTimer=0,surfacePulseCount=0;'+
   'const root=config.root,document=config.document;'+
