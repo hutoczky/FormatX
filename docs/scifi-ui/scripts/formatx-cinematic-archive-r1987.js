@@ -43,8 +43,8 @@
   // Keep the ORIGINAL canvas and physical 3D renderer. These four CSS
   // coordinates only pin the fully composited hero in exactly the same
   // visible pixels; no clone, screenshot, extra draw or new WebGL context.
-  function prepareNativeHomeR2315(){
-    if(disposed||reduced.matches||mobile()||archiveActive||!introDone||document.hidden)
+  function prepareNativeHomeR2315(allowDuringBirth=false){
+    if(disposed||reduced.matches||mobile()||archiveActive||(!introDone&&!allowDuringBirth)||document.hidden)
       return;
     if(scrollY>Math.max(24,innerHeight*.06))return;
     if(root.dataset.fxCrystalOrganismR326!=='ready')return;
@@ -1511,11 +1511,24 @@ void main(){
       prepareNativeHomeR2315();
       invalidate();
     },{passive:true});
+    // R2344: R533 owns the retiring film. Its completion event must NOT
+    // synchronously read the old stage box after the retired-film cutoff.
+    // Precompute the original desktop fixed-home CSS coordinates while the
+    // film still covers the same native stage (the R2254 prepare event).
+    // No new render owner or viewport movement is introduced.
+    document.addEventListener('formatx:magbirthprepare',()=>{
+      prepareNativeHomeR2315(true);
+      root.dataset.fxArchiveHomeGeometryR2344=
+        root.dataset.fxMagNativeHomeR2315==='prepared'
+          ? 'pre-completion-native-stage': 'deferred-until-native-ready';
+    },{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
-      // Before any normal scroll, preserve the hero viewport rectangle
-      // while switching only the layout primitive to fixed positioning.
-      prepareNativeHomeR2315();
+      // Rare late-native initialization must be handled by the archive
+      // owner's microtask after R533 has fully returned, NOT on the
+      // retired film's synchronous completion dispatch stack.
+      if(root.dataset.fxMagNativeHomeR2315!=='prepared')
+        queueMicrotask(()=>prepareNativeHomeR2315());
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',invalidate,{passive:true});
