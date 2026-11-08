@@ -11,7 +11,7 @@ for(const token of [
   'new T.SphereGeometry(.22,32,24),this.embryoNucleusMaterial',
   'this.embryoNucleus.position.set(-.10,.06,.28);',
   'clearcoat:.12,clearcoatRoughness:.49,',
-  'this.embryoVesicleMaterial.opacity=.29*visible;',
+  'this.embryoVesicleMaterial.opacity=.37*visible;',
   'shared-photobiological-cyan-coral-3d-organelle-satin-vesicles',
   "fxGenesisCellMicroR2342=",
   'this.mobileRender?.014:.018,1',
