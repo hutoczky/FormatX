@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2341 – DNS makrofotó szatén foszfát-anyag (2026-11-08)
+
+- **Képi bizonyíték:** a R2340 `b258825` GitHub CI artifact valódi 2,50 s DNS képkockáján a két makró-spirál túl fényes, tömör, plasztikcső-szerű. A 5,50 s sejt gömb alakú, biológiai referencia-minőség még nincs meg. A 06 első teljes viewport a native MAG-ot *és a felső navigációt is* elhagyja, miközben a 06b második képen mindkettő már jelen van: ez hideg headless compositor/commit versenyhelyzetet valószínűsít, de nem bizonyít böngészőhibát.
+- **R2341 valós módosítás:** az eredeti 3D TubeGeometry-k ugyanazzal az egyetlen 128×128 DataTexture-rel maradnak, a roughness szatén értékre nő, a clearcoat és az emisszió csökken, a bumpScale és UV-részlet láthatósága nő. A két aura alap-alpha visszafogott. Nem került be új Three objektum, GPU-textúra, canvas, renderpass, RAF vagy WebGL-környezet.
+- **Regressziós védelem:** a tényleges Three r185 scene builder és textúrapixel-teszt a megváltozott értékeket, nem egy gyengített küszöböt ellenőriz. A R2328 és R2270 örökölt forrásvédők az új anyagokhoz igazodtak.
+- **Blokkolók változatlanok:** MAG első teljes viewport headless screenshot, 3× független cold-start, grafikus és Android Chrome referencia szerinti vizuális elfogadás, mindkét képernyőméret valós fps, Lighthouse 3× 100/100/100/100, végleges DNS→sejt→MAG átadás, release/deploy parity. A korábbi R2340 futás P0-ja a képi kompozitoron piros. A R2341 forrás javítását új, pontos commiton kell futtatni, majd screenshot-pixeleket összevetni.
+- **Kiadás:** PR #582 DRAFT a #581 fölött. Nem került masterre; nincs production deploy. A 3 referenciaoldal nincs dokumentációba írva.
+
+
 ## R2340 – DNS stúdió-közelkép egyetlen 3D kamerával (2026-11-08)
 
 - **Képkocka audit:** a R2337 valódi, 2,50 másodperces Chromium screenshotján a DNS még túl széles/távoli, laboranimáció-jellegű az átadott makró-fotós, kék–lila DNS minimálreferenciához képest. A R2337 anyagfinomítás önmagában nem elég a vizuális minimumhoz.
