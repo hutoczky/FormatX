@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2352 – valódi biológiai sejt → a MAG belső optikai magja (2026-11-08)
+
+- **Kiinduló ellenőrzés:** R2350 pontos `6d0a6f058969` P0 PASS (GitHub Actions 42519381493) és 3× mobil Lighthouse Performance 84/90/91, TBT 354/184/156 ms. R2351 (PR #592) P0 PASS, de mobil Performance 71/83/82, TBT 850/375/421 ms: elutasított, PR lezárva. További fejlesztés az R2350 alapból, nem a regressziós R2351 ágból történik.
+- **Vizuális bizonyíték:** az R2350 valódi CI-képkockája (`05-9.25s.png`) egy túl nagy, kerek sejtkortexet mutat a fémes négyágú filmes MAG mögött. A `03-5.50s.png` 3D türkiz–korall sejtje értékes; ezt változatlanul kell megtartani. A sejtkortexnek a film végén a már meglévő fizikai optikai foglalatba kell visszahúzódnia.
+- **R2352 javítás:** a létező `updateOrganic(t,time)` Three.js csoportjában a kései 3D cortex méret `.63*.86` végértékét `.63*.56`-ra fokozatosan csökkentjük; a recesszió `-.54` helyett `-.62`, a membrán late opacity `.68` helyett `.58`, a lebenyé `.23` helyett `.19`. Ugyanaz az eredeti, textúrázott élő 3D sejt, részletes vertexanyagok, membrán, szálak és fémes 4-arm összeállás marad. Nincs új mesh, textúra, renderer, canvas, videó, GPU-környezet vagy RAF.
+- **Folytatólagosság:** az eredeti `5.50s` sejtméret `0.631` és opacity `0.18`; a `9.25s` aktív, élő mag mérete `0.3538`, opacity `0.58`, pozíció `z=-0.62`. A numerikus próba legnagyobb 10 ms-os lépésközi méretváltozása 0.0067 alatt van, nincs végső cut.
+- **QA:** `.github/scripts/validate-genesis-organic-convergence-r2352.cjs` az eredeti `updateOrganic` függvény törzsét futtatja, ellenőrzi 5.50/7.50/9.25/9.90s fázisokban a méretet, optikai mélységet és opacity-t, valamint 300 köztes mintát. Az eredeti P0, R656 képek, 3× hidegindítás, filmlezárás, Lighthouse ×3 változatlan kapu. A teljes P0 és fotográfiai összehasonlítás nélkül NEM elfogadott.
+- **Nyitott blokkolók:** pontos R2352 teljes P0, szemmel ellenőrzött 9.25/10.0s film és natív MAG egyezés, telefonos 60 FPS, háromszoros mobil/desktop 100/100/100/100, PAUSE/RESUME×5, reduced-motion/Skip, production Worker/CSP/cache/verzió és valós oldal ellenőrzése. Csak DRAFT, nincs merge vagy deploy.
+
+
 ## R2350 – MAG natív fragmentmunka csökkentése teljes optikai részletességgel (2026-11-08)
 
 - **Mért baseline:** R2349 Lighthouse 3× mobil Performance 78/83/86; TBT 521/401/293 ms, desktop Performance 92/87/91. Mind a 6 futásban Accessibility/Best Practices/SEO 100/100/100. Ez helyi staging, nem production vagy fizikai Android.
