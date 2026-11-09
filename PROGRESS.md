@@ -1,5 +1,24 @@
 # FormatX – fejlesztési állapot
 
+## R2355 – MAG valódi, gravírozott 3D titánbetéteinek szerkezeti beágyazása (2026-11-09)
+
+- **Visszaállítási pont:** R2354 P0-green `8968e1acf12a834402b48dd2453300c75b21403f`; R2354b felület-fénytompítását (`0x788b91` anyag) nem emeltük át. Az R2354b P0 `42538983004` PASS, de Lighthouse mobil 73/83/81, TBT 759/372/435ms; nem bizonyított gyorsulást és szemmel sem szüntette meg a négy nagyméretű, síknak ható ovális betétet.
+- **Valódi összehasonlítás:** a R2354 és R2354b `05-9.25s.png` képek 1280×720 RGB képpontjai között csak 1,95% tér el legalább 20/255-tel (a 5.50s biológiai sejt képei bitre azonosak). A négy betét mindkét állapotban a MAG 4 ágának nagy részét elfedi; a végső natív `07-native-hero-mag.png` ezzel szemben több titánfelületet és mélyebb optikát mutat.
+- **R2355 tényleges 3D geometriakorrekció:** a régi `inlayGeometry` négy közösen használt gravírozott, fazettált Three.js Mesh-ének x/y mérete `.82/.84`-re csökkent. A korábban `z=.378` magasan lebegő betét a valódi titánhéj közelébe (`z=.270`) kerül, a közös eredeti `LineSegments` gravírozás ugyanazt az x/y méretet követi, `z=-.108` korrekcióval a fizikai felület felett kb. 0,011 world-unit magasságban marad. Az `armInlayMaterial` és az eredeti textúra **változatlan**, az új kiadásnak nincs extra mesh, pass, anyag, canvas, render engine vagy RAF.
+- **DNA→sejtmag→MAG szekvencia:** a `createHelix`, `updateDNA`, `updateCore`, `updateOrganic`, `updateMechanical`, molekuláris 5.50s sejt, 3D poros titánfelület, 3D teljes élő lencse változatlan. A négy kar eredeti érkezési pályája, `seat`, `inlayBirth` és anyag-átlátszóság animációja változatlan.
+- **Új regresszió:** `.github/scripts/validate-mag-physical-inlays-r2355.cjs` az eredeti inlay-konstrukciót futtatja minimalizált Three.js objekttel, ellenőrzi a 4 fizikailag osztott Mesh és vésett LineSegments párost, anyagtulajdonjogot, 3D mélységet és a gravírozás 0,011-unit térbeli kapcsolatát; a korábbi szigorú R656 első viewport PNG, 3× headed/headless cold-start, CLS/fókusz/PAUSE és staging Lighthouse ×3 szabályokat nem lazítottuk.
+- **Nyitott:** exact-source R2355 P0 + Lighthouse, új 9.25s jelenet valódi vizuális ellenőrzése, natív MAG-látvány egyezés, Android 60FPS, stúdióminőség, mobil/asztali 3× 100/100/100/100, Worker/CSP/cache és felhasználói szekcióátadás. NINCS élesítés, PR DRAFT.
+
+
+## R2354 – MAG filmes titánfelület összehangolása a natív fémmel (2026-11-09)
+
+- **Alap:** R2352 P0 GREEN 31/31 (42533692060), valódi R656 5.50/7.50/9.25s képi vizsgálat. A 9.25s képen a geometria már tisztább, de a filmes 3D MAG lemezei nagyon világos, egységes cian-fehér lapok, míg a valódi natív R326 MAG sötétebb, ezüstös, árnyalt mikrobeveles titán. A filmes és natív fény-/színátadás ezért vizuálisan még nem tökéletes.
+- **R2353 elkülönítve elutasítva:** PR #594 nem bizonyított érdemi sebességnyereséget: staging mobil Performance 71/86/85 és TBT 820/292/312 ms az R2352 69/87/87, 943/272/254 ms mellett. PR lezárva merge/deploy nélkül. R2354 **nem** tartalmazza az R2353 szoftveres renderelőütemezését.
+- **R2354 vizuális 3D PBR javítás:** kizárólag az eredeti R1280 Three.js `updateMechanical` késői `finale` anyagkeverésének optikai paraméterei változtak. Sötétebb, semlegesebb smoked-silver/fém lemezek, több fizikai metalness és finomabb satin roughness/clearcoat. Minden meglévő tényleges 3D fémmesh, mikrobarázdás bump map, 4 kar és 8 optikai záróelem, key/fill fény, elnyújtott kamera, DNS és turkoiz-korall sejt megmaradt. Eltérés az első biológiai fejezetben nincs, mert a `finale=smooth((t-7.20)/1.65)` 7.20s-ig nulla.
+- **QA:** `.github/scripts/validate-genesis-titanium-grade-r2354.cjs` ellenőrzi a meglevő fizikai PBR anyagok zárt értéktartományát, a `finale` folytonos fényátmenetét, változatlan DNS/sejt fázisokat és R2352 belső magot. R2270 eredeti tesztje R2354 új fémroughness-értékét kéri. A natív R326 shader, WebGL-vászon, renderpass és FPS ütemezés nem változott. A teljes P0 PNG és a 3× staging Lighthouse minden változatlan küszöbbel fut; képi javulást csak ezek ellenőrzése és valódi képkocka-összehasonlítás után fogadunk el.
+- **Nyitott:** exact-R2354 P0 és valódi 9.25s képi összehasonlítás, full 3× 100/100/100/100, hardveres Android 60FPS, referencia-minimum, PAGE SCROLL MAG→tartalom, PAUSE/RESUME×5, reduced-motion, P0 production Worker/HTML/CSP/cache és végleges kiadás. DRAFT / nincs merge / nincs deploy.
+
+
 ## R2352 – valódi biológiai sejt → a MAG belső optikai magja (2026-11-08)
 
 ### R2352 valós böngészős képkocka-összevetés és mérések
