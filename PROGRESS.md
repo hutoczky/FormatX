@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2354b – a filmes MAG négy fizikai titánbetétjének mélyítése (2026-11-09)
+
+- **Valódi R2354 képi bizonyíték:** a 9.25s előtte–utána Chromium PNG-kben a módosított fémfelület sötétebb (a teljes viewport 4,34%-ának RGB eltérése legalább 20/255), de a négy ovális 3D betét egyenletes pasztell-cian. A 5.50s sejt képe bitre azonos R2352-vel (RGB max eltérés 0). A cél a betét tényleges anyagának finomítása, nem egy sík 2D vizuális javítófedés.
+- **R2354b:** a korábbi teljes 3D `armInlayMaterial` megmaradt `MeshPhysicalMaterial`, az eredeti `inlayGeometry` és `LineSegments` gravírozással, az eredeti közös mikrobarázdás textúrával és R2294 fizikailag koordinált PBR shaderrel. Az anyag `color:0x788b91`, `metalness:.90`, `roughness:.285`, `clearcoat:.59`, `clearcoatRoughness:.19`, `bumpScale:.0055`. Nincs új mesh, textúra, pass, canvas, render ownership, ütemező vagy filmfázis.
+- **Teszt:** a `validate-genesis-titanium-grade-r2354.cjs` őr a konkrét anyagértékeket és az eredeti 3D gravírozást is ellenőrzi. Az R2354 régi világosítási irányra kódolt R2345 unit orákuluma az új tényleges fizikai fémes sötétedést és értéktartományt ellenőrzi. Az R656 első PNG, teljes 10s film, 3× hidegindítás és Lighthouse x3 küszöbei változatlanok.
+- **Mért R2354 előző kör:** staging mobil Performance 87/91/93 és TBT 221/134/0ms, desktop Performance 91/91/88; mind a hat Accessibility/Best Practices/SEO 100. Ez NEM teljes 3×100. Az R2354b eltérő shader-/anyagbeállításához külön, új CI és valós képkocka-összehasonlítás szükséges.
+- **Státusz:** R2354b fejlesztői PR #595, nyitott DRAFT. A teljes P0 és az új inlay vizuális bizonyítása még nem zöld; nincs merge vagy élesítve. Android 60FPS/stúdióminőség/PAUSE-RESUME x5/production CSP+cache továbbra is blokkolók.
+
+
 ## R2354 – MAG filmes titánfelület összehangolása a natív fémmel (2026-11-09)
 
 - **Alap:** R2352 P0 GREEN 31/31 (42533692060), valódi R656 5.50/7.50/9.25s képi vizsgálat. A 9.25s képen a geometria már tisztább, de a filmes 3D MAG lemezei nagyon világos, egységes cian-fehér lapok, míg a valódi natív R326 MAG sötétebb, ezüstös, árnyalt mikrobeveles titán. A filmes és natív fény-/színátadás ezért vizuálisan még nem tökéletes.
