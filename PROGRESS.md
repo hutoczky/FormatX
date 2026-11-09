@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2354 – MAG filmes titánfelület összehangolása a natív fémmel (2026-11-09)
+
+- **Alap:** R2352 P0 GREEN 31/31 (42533692060), valódi R656 5.50/7.50/9.25s képi vizsgálat. A 9.25s képen a geometria már tisztább, de a filmes 3D MAG lemezei nagyon világos, egységes cian-fehér lapok, míg a valódi natív R326 MAG sötétebb, ezüstös, árnyalt mikrobeveles titán. A filmes és natív fény-/színátadás ezért vizuálisan még nem tökéletes.
+- **R2353 elkülönítve elutasítva:** PR #594 nem bizonyított érdemi sebességnyereséget: staging mobil Performance 71/86/85 és TBT 820/292/312 ms az R2352 69/87/87, 943/272/254 ms mellett. PR lezárva merge/deploy nélkül. R2354 **nem** tartalmazza az R2353 szoftveres renderelőütemezését.
+- **R2354 vizuális 3D PBR javítás:** kizárólag az eredeti R1280 Three.js `updateMechanical` késői `finale` anyagkeverésének optikai paraméterei változtak. Sötétebb, semlegesebb smoked-silver/fém lemezek, több fizikai metalness és finomabb satin roughness/clearcoat. Minden meglévő tényleges 3D fémmesh, mikrobarázdás bump map, 4 kar és 8 optikai záróelem, key/fill fény, elnyújtott kamera, DNS és turkoiz-korall sejt megmaradt. Eltérés az első biológiai fejezetben nincs, mert a `finale=smooth((t-7.20)/1.65)` 7.20s-ig nulla.
+- **QA:** `.github/scripts/validate-genesis-titanium-grade-r2354.cjs` ellenőrzi a meglevő fizikai PBR anyagok zárt értéktartományát, a `finale` folytonos fényátmenetét, változatlan DNS/sejt fázisokat és R2352 belső magot. R2270 eredeti tesztje R2354 új fémroughness-értékét kéri. A natív R326 shader, WebGL-vászon, renderpass és FPS ütemezés nem változott. A teljes P0 PNG és a 3× staging Lighthouse minden változatlan küszöbbel fut; képi javulást csak ezek ellenőrzése és valódi képkocka-összehasonlítás után fogadunk el.
+- **Nyitott:** exact-R2354 P0 és valódi 9.25s képi összehasonlítás, full 3× 100/100/100/100, hardveres Android 60FPS, referencia-minimum, PAGE SCROLL MAG→tartalom, PAUSE/RESUME×5, reduced-motion, P0 production Worker/HTML/CSP/cache és végleges kiadás. DRAFT / nincs merge / nincs deploy.
+
+
 ## R2352 – valódi biológiai sejt → a MAG belső optikai magja (2026-11-08)
 
 ### R2352 valós böngészős képkocka-összevetés és mérések
