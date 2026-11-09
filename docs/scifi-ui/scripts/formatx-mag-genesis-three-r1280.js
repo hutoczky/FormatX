@@ -2383,7 +2383,7 @@
         arm.add(plate);
         const engraving=new T.LineSegments(etchGeometry,this.armEtchMaterial);
         engraving.scale.set(.82,.84,1);
-        // Track the authentic 12-millimetre-scale crown peak so the
+        // Track the authentic .012-world-unit crown peak so the
         // existing engraved 3D stroke remains 0.01 above the new ridge.
         engraving.position.set(0,.045,-.095);
         engraving.renderOrder=4;
