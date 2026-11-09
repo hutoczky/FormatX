@@ -2349,11 +2349,21 @@
       for(let axis=0;axis<4;axis++){
         const arm=new T.Group();
         arm.userData.axis=axis;
+        // R2355: real 9.25 s Chromium images showed four large oval
+        // inlays hovering above the titanium chassis. Recess each EXISTING
+        // bevelled 3D plate toward the actual extruded shell and reduce its
+        // silhouette footprint; reveal more genuine machined body below.
+        // Keep the matching original 3D etched metal line aligned to the
+        // resized plate, 0.010 units above its physical upper bevel.
+        // No added meshes, textures, shader passes, canvas or new renderer.
         const plate=new T.Mesh(inlayGeometry,this.armInlayMaterial);
-        plate.position.z=.378;
+        plate.scale.set(.82,.84,1);
+        plate.position.set(0,.045,.270);
         plate.renderOrder=3;
         arm.add(plate);
         const engraving=new T.LineSegments(etchGeometry,this.armEtchMaterial);
+        engraving.scale.set(.82,.84,1);
+        engraving.position.set(0,.045,-.108);
         engraving.renderOrder=4;
         arm.add(engraving);
         arm.visible=false;
