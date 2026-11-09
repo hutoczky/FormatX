@@ -2321,11 +2321,17 @@
       // The parts arrive on distinct tracks during the MAG birth sequence.
       // The geometry is shared by all four arms to bound GPU memory.
       this.armInlays=[];
+      // R2354b: the REAL 9.25s Chromium screenshot exposed four flat,
+      // pale oval inserts on the filmed MAG. Keep the very same beveled
+      // titanium inlay meshes, shared microfibre map and physically engraved
+      // recesses. A darker neutral satin microfacet grade makes the
+      // studio reflections read as machined metal instead of turquoise plastic.
+      // There is no additional geometry, texture, shader, GPU pass or draw.
       this.armInlayMaterial=new T.MeshPhysicalMaterial({
-        color:0xa9bdbe,metalness:.86,roughness:.23,
+        color:0x788b91,metalness:.90,roughness:.285,
         emissive:0x071b21,emissiveIntensity:.018,
-        clearcoat:.82,clearcoatRoughness:.09,
-        bumpMap:this.microFiberTexture,bumpScale:.0025,
+        clearcoat:.59,clearcoatRoughness:.19,
+        bumpMap:this.microFiberTexture,bumpScale:.0055,
         transparent:true,opacity:0,depthWrite:false
       });
       this.armEtchMaterial=new T.LineBasicMaterial({
