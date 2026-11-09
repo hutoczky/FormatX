@@ -123,7 +123,7 @@ for(const token of [
   'const visible=grow*mix(fade,.82,handoffCortex);',
   'const bodyScale=.001+.63*grow*mix(fade,.56,handoffCortex);',
   'this.organicLobeMaterial.opacity=mix(.15*visible,.19*grow,handoffCortex);',
-  'this.silverMaterial.roughness=mix(.18,.17,finale);'
+  'this.silverMaterial.roughness=mix(.18,.19,finale);'
 ]) assert(three.includes(token),'R2352 physical film-to-live cortex continuity missing: '+token);
 assert(birth.includes('20261101-r2295-vascular-cortex-microgeometry'),
   'R2289 film bridge must use the freshly cached true Three.js asset');
