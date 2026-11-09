@@ -3172,20 +3172,25 @@
       // in the 7.50 s real browser frame. Reuse the SAME physical 3D metal,
       // one procedural microfibre texture and original studio environment.
       // Converge colours continuously; no extra draw, shader or light.
+      // R2354: actual R2352 Chromium 9.25s material proof showed pale
+      // blue/white plates while the verified permanent native MAG is
+      // deeper brushed silver/titanium. Match its neutral smoked chassis
+      // using existing PBR materials, moving studio lights and bump map.
+      // Keep the original 5.50s cell and pre-seating material endpoints.
       this.mechMaterial.color.setRGB(
-        mix(.135,.265,finale),
-        mix(.155,.282,finale),
-        mix(.173,.302,finale)
+        mix(.135,.145,finale),
+        mix(.155,.164,finale),
+        mix(.173,.184,finale)
       );
       this.mechMidMaterial.color.setRGB(
-        mix(.172,.294,finale),
-        mix(.189,.314,finale),
-        mix(.206,.337,finale)
+        mix(.172,.205,finale),
+        mix(.189,.232,finale),
+        mix(.206,.249,finale)
       );
       this.silverMaterial.color.setRGB(
-        mix(.530,.620,finale),
-        mix(.595,.680,finale),
-        mix(.590,.705,finale)
+        mix(.530,.485,finale),
+        mix(.595,.538,finale),
+        mix(.590,.553,finale)
       );
       // R2118: previous per-frame animation silently reverted the physical
       // metal material settings on every render. Keep cinematic progression
@@ -3193,12 +3198,17 @@
       this.mechMaterial.transmission=mix(.052,.028,finale);
       this.mechMidMaterial.transmission=mix(.070,.040,finale);
       this.silverMaterial.transmission=mix(.028,.015,finale);
-      this.mechMaterial.metalness=mix(.50,.64,finale);
-      this.mechMidMaterial.metalness=mix(.43,.54,finale);
-      this.silverMaterial.metalness=mix(.70,.78,finale);
-      this.mechMaterial.roughness=mix(.24,.20,finale);
-      this.mechMidMaterial.roughness=mix(.22,.19,finale);
-      this.silverMaterial.roughness=mix(.18,.17,finale);
+      this.mechMaterial.metalness=mix(.50,.79,finale);
+      this.mechMidMaterial.metalness=mix(.43,.72,finale);
+      this.silverMaterial.metalness=mix(.70,.86,finale);
+      // Satin microfibre remains the original physical bump map; wider
+      // microfacet roughness removes the blue plastic sheen, not detail.
+      this.mechMaterial.roughness=mix(.24,.265,finale);
+      this.mechMidMaterial.roughness=mix(.22,.235,finale);
+      this.silverMaterial.roughness=mix(.18,.19,finale);
+      this.mechMaterial.clearcoat=mix(.98,.66,finale);
+      this.mechMidMaterial.clearcoat=mix(.98,.67,finale);
+      this.silverMaterial.clearcoat=mix(1.0,.86,finale);
 
       this.mechMaterial.opacity=(.97+.018*finale)*grow;
       // R2119: reveal machined inserts as solid layers, not ghosted decals.
