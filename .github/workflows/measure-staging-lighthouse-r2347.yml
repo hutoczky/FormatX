@@ -1,7 +1,7 @@
 name: R2347 FormatX staging Lighthouse x3 no deployment
 on:
   push:
-    branches: [fix/r2347-staging-lighthouse-3x, fix/r2348-film-aware-autonomous-surface-sweep, fix/r2349-physical-mag-optical-well, fix/r2350-facet-local-physical-shading, fix/r2352-organic-cortex-iris-convergence, fix/r2354-film-native-brushed-titanium-grade, fix/r2355-physical-recessed-mag-inlays]
+    branches: [fix/r2347-staging-lighthouse-3x, fix/r2348-film-aware-autonomous-surface-sweep, fix/r2349-physical-mag-optical-well, fix/r2350-facet-local-physical-shading, fix/r2352-organic-cortex-iris-convergence, fix/r2354-film-native-brushed-titanium-grade, fix/r2355-physical-recessed-mag-inlays, fix/r2356-machined-convex-inlay-crowns]
     paths:
       - '.github/workflows/measure-staging-lighthouse-r2347.yml'
       - 'docs/scifi-ui/**'

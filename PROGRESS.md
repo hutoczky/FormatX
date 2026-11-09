@@ -1,5 +1,14 @@
 # FormatX – fejlesztési állapot
 
+## R2356 – MAG fizikai domború 3D titánbetét-mikroprofil (2026-11-09)
+
+- **Biztos alap:** R2355 exact runtime source `094370994d8c` full P0 31/31 PASS, GitHub Actions 42616888283. A desktop 9.25s képen az inlay betétek geometriailag kisebbek és beágyazottabbak, 5.50s sejt bitre azonos, natív végleges MAG változatlan. Mobil Lighthouse a R2355 ágon 79/83/83, TBT 511/370/353ms – nem kész, nem elégséges 3×100.
+- **Valódi geometriai továbblépés:** az R1280 `inlayGeometry` eredeti egyetlen közös extrudált 3D objektum csúcspontjain a frontfelület `cz>.016` pontjai egy 0–0,012 world-unit mélységű axial-x keresztmetszetet kapnak; a gerinc középen domború, a széleken és a hátlapokon az eredeti határok változatlanok. `computeVertexNormals` és `computeBoundingSphere` egyszer fut inicializáláskor; a különböző stúdiófények a normálok alapján valódi 3D görbületen csillannak meg. Új textúra, rajzolási hívás, GPU pass, mesh, renderer, canvas, RAF vagy háromszög NINCS.
+- **Gravírozás:** eredeti `LineSegments` anyag és pályák változatlanok, a hozzájuk tartozó 3D z-helyzet `-.095`, így a 0,012-unit fizikai korona felett továbbra is kb. 0,012-unit mélységi hézag marad.
+- **QA:** `.github/scripts/validate-mag-convex-inlays-r2356.cjs` az eredeti forrásból kiemelt vertex-deformációt futtatja csúcsmintákkal, ellenőrzi a változatlan poligonszámot, a hátoldal és határprofil sértetlenségét, az egyszeri normál/bounding frissítést, a 4 valódi inlay/gravírozás párost; a korábbi R2355 teszt a magasabb fizikai koronát és etch-felületet is ellenőrzi. Az összes eredeti R656 valódi screenshot, 3× coldstart, 10s film, P0, Lighthouse desktop/mobil×3 küszöb változatlanul maradt.
+- **Nyitott elfogadás:** R2356 exact-source P0 és 9.25s valódi képi összehasonlítás, szoftveres/hardveres GPU idő, 3×100 Performance, 60FPS Android, mobil teljes optika, DNS→sejt→MAG stúdióminőség, PAUSE/RESUME×5 és production Worker/CSP/cache. **DRAFT / NO MERGE / NO DEPLOY**.
+
+
 ## R2355 – MAG valódi, gravírozott 3D titánbetéteinek szerkezeti beágyazása (2026-11-09)
 
 - **Visszaállítási pont:** R2354 P0-green `8968e1acf12a834402b48dd2453300c75b21403f`; R2354b felület-fénytompítását (`0x788b91` anyag) nem emeltük át. Az R2354b P0 `42538983004` PASS, de Lighthouse mobil 73/83/81, TBT 759/372/435ms; nem bizonyított gyorsulást és szemmel sem szüntette meg a négy nagyméretű, síknak ható ovális betétet.

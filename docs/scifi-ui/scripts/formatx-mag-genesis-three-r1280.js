@@ -2341,6 +2341,26 @@
         depth:.032,steps:1,bevelEnabled:true,bevelSegments:3,
         bevelSize:.009,bevelThickness:.012,curveSegments:12
       });
+      // R2356: micro-convex titanium crown, sculpted into the *same*
+      // shared actual extruded plate mesh. A shallow rounded axial ridge
+      // has a real changing surface normal, so the existing studio key/fill
+      // creates dimensional satin-metal highlights rather than a flat decal.
+      // No new triangles, texture, renderer, draw call or mesh.
+      const crownPosR2356=inlayGeometry.getAttribute('position');
+      for(let k=0;k<crownPosR2356.count;k++){
+        const cx=crownPosR2356.getX(k);
+        const cy=crownPosR2356.getY(k);
+        const cz=crownPosR2356.getZ(k);
+        if(cz<=.016)continue;
+        const cross=Math.max(0,1-Math.pow(Math.min(1,Math.abs(cx)/.14),2));
+        const axial=Math.max(0,Math.sin(Math.PI*Math.max(0,
+          Math.min(1,(cy-.20)/.70))));
+        const crown=.012*cross*axial;
+        crownPosR2356.setZ(k,cz+crown);
+      }
+      crownPosR2356.needsUpdate=true;
+      inlayGeometry.computeVertexNormals();
+      inlayGeometry.computeBoundingSphere();
       const etchGeometry=new T.BufferGeometry();
       etchGeometry.setAttribute('position',new T.Float32BufferAttribute([
         0,.35,.433,0,.47,.433,0,.47,.433,0,.67,.433,
@@ -2363,7 +2383,9 @@
         arm.add(plate);
         const engraving=new T.LineSegments(etchGeometry,this.armEtchMaterial);
         engraving.scale.set(.82,.84,1);
-        engraving.position.set(0,.045,-.108);
+        // Track the authentic .012-world-unit crown peak so the
+        // existing engraved 3D stroke remains 0.01 above the new ridge.
+        engraving.position.set(0,.045,-.095);
         engraving.renderOrder=4;
         arm.add(engraving);
         arm.visible=false;
