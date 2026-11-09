@@ -58,6 +58,18 @@ assert(src.includes('this.mechMaterial=new T.MeshPhysicalMaterial({'));
 assert(src.includes('bumpMap:this.microFiberTexture,bumpScale:.013,'));
 assert(src.includes('bumpMap:this.microFiberTexture,bumpScale:.010,'));
 assert(src.includes('bumpMap:this.microFiberTexture,bumpScale:.004,'));
+// R2354b: original four genuine three-dimensional titanium inlays are
+// still present with their original engraved LineSegments and one shared
+// 128px microfibre map; only the physical brushed finish was refined.
+for(const token of [
+ 'color:0x788b91,metalness:.90,roughness:.285,',
+ 'clearcoat:.59,clearcoatRoughness:.19,',
+ 'bumpMap:this.microFiberTexture,bumpScale:.0055,',
+ 'this.armInlays=[];',
+ 'const plate=new T.Mesh(inlayGeometry,this.armInlayMaterial);',
+ 'const engraving=new T.LineSegments(etchGeometry,this.armEtchMaterial);',
+ 'this.bindMachinedMagSurface(material);'
+])assert(src.includes(token),'Physical R2354b inlay fidelity lost: '+token);
 assert(src.includes('const bodyScale=.001+.63*grow*mix(fade,.56,handoffCortex);'),
  'R2352 physical living iris convergence must survive');
 console.log('MAG_R2354_PHYSICAL_SATIN_TITANIUM_SOURCE_PASS',
