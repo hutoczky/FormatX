@@ -1,5 +1,15 @@
 # FormatX – fejlesztési állapot
 
+## R2355 – MAG valódi, gravírozott 3D titánbetéteinek szerkezeti beágyazása (2026-11-09)
+
+- **Visszaállítási pont:** R2354 P0-green `8968e1acf12a834402b48dd2453300c75b21403f`; R2354b felület-fénytompítását (`0x788b91` anyag) nem emeltük át. Az R2354b P0 `42538983004` PASS, de Lighthouse mobil 73/83/81, TBT 759/372/435ms; nem bizonyított gyorsulást és szemmel sem szüntette meg a négy nagyméretű, síknak ható ovális betétet.
+- **Valódi összehasonlítás:** a R2354 és R2354b `05-9.25s.png` képek 1280×720 RGB képpontjai között csak 1,95% tér el legalább 20/255-tel (a 5.50s biológiai sejt képei bitre azonosak). A négy betét mindkét állapotban a MAG 4 ágának nagy részét elfedi; a végső natív `07-native-hero-mag.png` ezzel szemben több titánfelületet és mélyebb optikát mutat.
+- **R2355 tényleges 3D geometriakorrekció:** a régi `inlayGeometry` négy közösen használt gravírozott, fazettált Three.js Mesh-ének x/y mérete `.82/.84`-re csökkent. A korábban `z=.378` magasan lebegő betét a valódi titánhéj közelébe (`z=.270`) kerül, a közös eredeti `LineSegments` gravírozás ugyanazt az x/y méretet követi, `z=-.108` korrekcióval a fizikai felület felett kb. 0,011 world-unit magasságban marad. Az `armInlayMaterial` és az eredeti textúra **változatlan**, az új kiadásnak nincs extra mesh, pass, anyag, canvas, render engine vagy RAF.
+- **DNA→sejtmag→MAG szekvencia:** a `createHelix`, `updateDNA`, `updateCore`, `updateOrganic`, `updateMechanical`, molekuláris 5.50s sejt, 3D poros titánfelület, 3D teljes élő lencse változatlan. A négy kar eredeti érkezési pályája, `seat`, `inlayBirth` és anyag-átlátszóság animációja változatlan.
+- **Új regresszió:** `.github/scripts/validate-mag-physical-inlays-r2355.cjs` az eredeti inlay-konstrukciót futtatja minimalizált Three.js objekttel, ellenőrzi a 4 fizikailag osztott Mesh és vésett LineSegments párost, anyagtulajdonjogot, 3D mélységet és a gravírozás 0,011-unit térbeli kapcsolatát; a korábbi szigorú R656 első viewport PNG, 3× headed/headless cold-start, CLS/fókusz/PAUSE és staging Lighthouse ×3 szabályokat nem lazítottuk.
+- **Nyitott:** exact-source R2355 P0 + Lighthouse, új 9.25s jelenet valódi vizuális ellenőrzése, natív MAG-látvány egyezés, Android 60FPS, stúdióminőség, mobil/asztali 3× 100/100/100/100, Worker/CSP/cache és felhasználói szekcióátadás. NINCS élesítés, PR DRAFT.
+
+
 ## R2354 – MAG filmes titánfelület összehangolása a natív fémmel (2026-11-09)
 
 - **Alap:** R2352 P0 GREEN 31/31 (42533692060), valódi R656 5.50/7.50/9.25s képi vizsgálat. A 9.25s képen a geometria már tisztább, de a filmes 3D MAG lemezei nagyon világos, egységes cian-fehér lapok, míg a valódi natív R326 MAG sötétebb, ezüstös, árnyalt mikrobeveles titán. A filmes és natív fény-/színátadás ezért vizuálisan még nem tökéletes.
