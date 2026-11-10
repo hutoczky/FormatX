@@ -12,7 +12,7 @@ for(const token of [
   '(1.0-step(6.0,aFacet))',
   'R2270: continuous body-following, elongated sinuous titanium',
   'vec2 panelCoord=vec2(radial*17.0,lateral/panelWidth*2.4)',
-  'studioSilver*=1.0-panelJoint*.125*panelEnvelope',
+  'studioSilver*=1.0-panelJoint*.085*panelEnvelope',
   'R2270: photographic nacre and living vascular backscatter',
   'studioSilver+=vec3(.035,.155,.166)*narrowVein*',
   "fxNativeMagStudioR2270='asymmetric-living-sculpt"
