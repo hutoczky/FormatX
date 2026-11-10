@@ -639,6 +639,15 @@
       const turns=['-24deg','18deg','46deg','72deg','86deg'];
       dnaStage.style.setProperty('--fxb-dna-turn',turns[value]||'86deg');
     }
+    // R2365 experimental: the original desktop-only native GPU warmup
+    // was requested at 72% of the ten-second film. Its real first GPU draw
+    // arrived around 7.6s. Move only that one-shot request to the already
+    // existing phase-3 boundary (57.2%) while the film still fully masks
+    // the native stage. Do not touch mobile, reduced motion, scene frames,
+    // the 3D shaders, or any release/RAF/crossfade contract.
+    if(!MOBILE&&!REDUCED&&value===3){
+      requestCoreWarmup('r2365-desktop-film-phase-3');
+    }
     if(MOBILE){
       const values=[8,34,62,86,100];
       const statusIndex=[0,2,4,6,7][value]||0;

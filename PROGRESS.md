@@ -1,5 +1,16 @@
 # FormatX – fejlesztési állapot
 
+## R2365 – Asztali MAG korábbi natív GPU-előkészítésének kísérlete (2026-11-10)
+
+- **Mért laboreredmény (R2365):** eredeti R2364 hat hidegindításos profilozó újrafuttatva a változtatott R533 ágon [42853264487](https://github.com/hutoczky/FormatX/actions/runs/42853264487) **6/6 PASS**. Asztali első valós GL-rajzolás mediánja az alap 7,64 másodpercéről 6,03 másodpercre került; desktop GPU-fence medián 469,4→318,4 ms (független SwiftShader-futtatások között, **nem bizonyított éles GPU-gyorsulás**). Mobil első GL-rajzolás és natív modellek érintetlenek, minden próbában egyetlen eredeti WebGL context.
+- **R2365 szigorú 3× Lighthouse:** [42853203940](https://github.com/hutoczky/FormatX/actions/runs/42853203940) **RED**. Mobil Performance 77/84/83, TBT 529/359/361 ms, LCP 1530/1457/1446 ms; asztali Performance 86/91/89, TBT 16/0/0 ms, LCP 2348/1915/2144 ms. A11y/BP/SEO mind 100, CLS stabil. Ez **nem** bizonyítja az egész honlap gyorsulását.
+- **Valódi R656 képkockabizonyíték:** az eredeti R2359 (42805051039) és R2365 (42853196628) PNG artifactjai közt a 0.50/2.50/3.50/5.50/7.50/9.25s teljes 1280×720 filmképek **bitre azonosak**. A mobil biológiai sejtmag 5.50s képe szintén bitre azonos. A film utáni dinamika természetes eltérést mutathat; ezért a teljes P0 külön kötelező.
+
+- **Kiindulópont:** kizárólag az eredeti R2359 31/31 P0-GREEN változat, R2360/2361/2362/2363 elutasított kísérletek nélkül. R2364 változatlan R2359-en hat hidegindítással mért: mobil shader-medián 9,5 ms, geometria 23,9 ms, upload 1,3 ms, GPU-fence-visszaigazolás 293,5 ms; asztalin shader 9,7 ms, geometria 23,2 ms, upload 1,3 ms, GPU-fence 469,4 ms. A GPU-átadás bizonyítandó szűk keresztmetszet, ezek SwiftShader / Chromium adatok, nem fizikai Android FPS.
+- **R2365 kísérleti módosítás:** az eredeti R533 `applyPhase()` módszer 3. fázisában (`r>=0.572`, kb. 5,72s) csak a normál asztali filmnél egyetlen `requestCoreWarmup()` esemény indul. A korábbi asztali 0,72 progressziós tartalékidőzítés változatlanul megmarad, mert a meglévő latch garantálja az egyszeri végrehajtást. Mobil, reduced-motion, 10 s film, DNS, élő sejt, filmes MAG, permanens R326 WebGL, optikai irisz, 3D modellek, shader, anyag, 60fps governor és a 0,915 küszöbű látható crossfade változatlan.
+- **Szigorú bizonyítás:** új `validate-mag-desktop-warmup-r2365.cjs` ténylegesen végrehajtja a forrásban szereplő 3. fázis eseménykapuját minden mobile/reduced/phase kombinációval. A teljes változatlan P0 31 browser lépés és a 3× strict mobil+asztali Lighthouse kapu aktív. R2364 hat hidegindításos eredeti profilozója változtatás nélkül újrafut az R2365 ágon, így a GPU-fence és a várakozási eloszlás közvetlenül összevethető.
+- **Elfogadás:** valódi 0.50/5.50/7.50/9.25s Chromium PNG, headless és headed coldstart 3×, mobil elsőviewport, natív MAG képi folytonosság, 3×100/100/100/100 Lighthouse, TBT≤150ms, hardveres Android 60fps, felhasználói referencia, Worker/CSP/cache egyezés. Nem állítunk gyorsulást a mérések előtt. DRAFT / NO MERGE / NO DEPLOY.
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
