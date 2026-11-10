@@ -38,15 +38,16 @@ for(const mobileRender of [true,false]){
     Color:class{constructor(c){this.color=c}},
     MeshPhysicalMaterial:Material
   });
-  assert.equal(mat.anisotropy,mobileRender?.12:.28);
-  assert.equal(mat.anisotropyRotation,.12);
+  assert.equal(Object.hasOwn(mat,'anisotropy'),false,
+    'Keep original isotropic physical shader: anisotropy created checker tiles');
+  assert.equal(Object.hasOwn(mat,'anisotropyRotation'),false);
   assert.equal(mat.bumpScale,.004,'Original fine 3D texture must remain');
   assert.strictEqual(mat.bumpMap,owner.microFiberTexture);
   assert.equal(mat.clearcoat,1);
   assert.equal(mat.metalness,.78);
   assert.equal(mat.roughness,.16);
-  console.log('MAG_R2361_PBR_SATIN_SILVER_MATERIAL_PASS',JSON.stringify({
-    mobileRender,anisotropy:mat.anisotropy,rotation:mat.anisotropyRotation
+  console.log('MAG_R2361B_ISOTROPIC_PBR_SILVER_MATERIAL_PASS',JSON.stringify({
+    mobileRender,existingTextureOnly:true,noExtraShaderPermutation:true
   }));
 }
 for(const token of [
