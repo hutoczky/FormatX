@@ -2092,6 +2092,149 @@
       material.customProgramCacheKey=()=> 'r2358-continuous-satin-titanium-matched-native';
     }
 
+
+    // R2359: actual subdivided titanium surface, sculpted once at setup.
+    // Operates on the ORIGINAL four-point ExtrudeGeometry, not a second mesh.
+    // Two cap subdivisions on desktop, one on mobile: unchanged silhouette,
+    // GPU draws, original bevel, material, single renderer and RAF.
+    sculptMachinedChassisR2359(geometry){
+      const T=this.THREE;
+      const pos=geometry.getAttribute('position');
+      const uv=geometry.getAttribute('uv');
+      const normal=geometry.getAttribute('normal');
+      const sourceGroups=geometry.groups.map(g=>({...g}));
+      if(geometry.getIndex() || !pos || !uv || !normal ||
+         sourceGroups.length<2 || pos.count!==uv.count ||
+         pos.count!==normal.count){
+        throw new Error('R2359 needs the original non-indexed titanium ExtrudeGeometry');
+      }
+      const face=[];
+      for(const group of sourceGroups){
+        for(let i=group.start;i<group.start+group.count;i+=3){
+          if(normal.getZ(i)>.98 && normal.getZ(i+1)>.98 &&
+             normal.getZ(i+2)>.98 && pos.getZ(i)>.12){
+            face.push(i);
+          }
+        }
+      }
+      if(face.length<12){
+        throw new Error('R2359 original front titanium cap is missing');
+      }
+      const key=(x,y)=>x.toFixed(5)+','+y.toFixed(5);
+      const edges=new Map();
+      for(const i of face){
+        for(const [a,b] of [[i,i+1],[i+1,i+2],[i+2,i]]){
+          const ax=pos.getX(a),ay=pos.getY(a);
+          const bx=pos.getX(b),by=pos.getY(b);
+          const ka=key(ax,ay),kb=key(bx,by);
+          const id=ka<kb?ka+'|'+kb:kb+'|'+ka;
+          const current=edges.get(id);
+          if(current)current.count++;
+          else edges.set(id,{ax,ay,bx,by,count:1});
+        }
+      }
+      const border=[...edges.values()].filter(e=>e.count===1);
+      if(border.length<16){
+        throw new Error('R2359 cannot resolve the real front-cap bevel boundary');
+      }
+      const smooth01=x=>{
+        const t=Math.max(0,Math.min(1,x));
+        return t*t*(3-2*t);
+      };
+      const relief=(x,y)=>{
+        const axis=Math.max(Math.abs(x),Math.abs(y));
+        const arm=smooth01((axis-.265)/.125)*
+          (1-smooth01((axis-.875)/.135));
+        if(arm<.00001)return 0;
+        let closest=Infinity;
+        for(const e of border){
+          const vx=e.bx-e.ax,vy=e.by-e.ay;
+          const den=vx*vx+vy*vy;
+          const t=den>1e-12?Math.max(0,Math.min(1,
+            ((x-e.ax)*vx+(y-e.ay)*vy)/den)):0;
+          const dx=x-(e.ax+vx*t),dy=y-(e.ay+vy*t);
+          const d=dx*dx+dy*dy;
+          if(d<closest)closest=d;
+        }
+        const edgeFade=smooth01(Math.sqrt(closest)/.095);
+        const lateral=Math.min(Math.abs(x),Math.abs(y));
+        const ridge=.044*Math.exp(-Math.pow(lateral/.077,2));
+        const groove=.015*Math.exp(-Math.pow((lateral-.103)/.031,2));
+        const flank=.014*Math.exp(-Math.pow((lateral-.162)/.055,2));
+        const longitudinal=.92+.08*Math.cos(axis*19);
+        return Math.max(0,ridge-groove+flank)*arm*edgeFade*longitudinal;
+      };
+      const read=i=>[
+        pos.getX(i),pos.getY(i),pos.getZ(i),
+        uv.getX(i),uv.getY(i),
+        normal.getX(i),normal.getY(i),normal.getZ(i)
+      ];
+      const midpoint=(a,b)=>a.map((value,i)=>(value+b[i])*.5);
+      const subdivide=tri=>{
+        const [a,b,c]=tri;
+        const ab=midpoint(a,b),bc=midpoint(b,c),ca=midpoint(c,a);
+        return [[a,ab,ca],[ab,b,bc],[ca,bc,c],[ab,bc,ca]];
+      };
+      const outPositions=[],outUVs=[],outNormals=[],nextGroups=[];
+      let sculptedTriangles=0,peak=0;
+      const levels=this.mobileRender?1:2;
+      for(const group of sourceGroups){
+        const start=outPositions.length/3;
+        for(let i=group.start;i<group.start+group.count;i+=3){
+          const front=normal.getZ(i)>.98&&normal.getZ(i+1)>.98&&
+            normal.getZ(i+2)>.98&&pos.getZ(i)>.12;
+          let triangles=[[read(i),read(i+1),read(i+2)]];
+          if(front){
+            for(let level=0;level<levels;level++){
+              triangles=triangles.flatMap(subdivide);
+            }
+            sculptedTriangles+=triangles.length;
+          }
+          for(const triangle of triangles){
+            for(const v of triangle){
+              let z=v[2],nx=v[5],ny=v[6],nz=v[7];
+              if(front){
+                const h=relief(v[0],v[1]);
+                peak=Math.max(peak,h);
+                z+=h;
+                // Smooth real geometric normals for the studio key / fill.
+                const eps=.002;
+                const dzdx=(relief(v[0]+eps,v[1])-
+                  relief(v[0]-eps,v[1]))/(2*eps);
+                const dzdy=(relief(v[0],v[1]+eps)-
+                  relief(v[0],v[1]-eps))/(2*eps);
+                const length=Math.hypot(dzdx,dzdy,1);
+                nx=-dzdx/length;ny=-dzdy/length;nz=1/length;
+              }
+              outPositions.push(v[0],v[1],z);
+              outUVs.push(v[3],v[4]);
+              outNormals.push(nx,ny,nz);
+            }
+          }
+        }
+        nextGroups.push({
+          start,count:outPositions.length/3-start,
+          materialIndex:group.materialIndex
+        });
+      }
+      geometry.setAttribute('position',new T.Float32BufferAttribute(outPositions,3));
+      geometry.setAttribute('uv',new T.Float32BufferAttribute(outUVs,2));
+      geometry.setAttribute('normal',new T.Float32BufferAttribute(outNormals,3));
+      geometry.clearGroups();
+      for(const g of nextGroups)geometry.addGroup(g.start,g.count,g.materialIndex);
+      geometry.computeBoundingBox();
+      geometry.computeBoundingSphere();
+      this.chassisReliefR2359={
+        originalVertices:pos.count,sculptedVertices:outPositions.length/3,
+        subdividedFrontTriangles:sculptedTriangles,boundarySegments:border.length,
+        maximumRelief:peak,levels
+      };
+      if(peak<.005||peak>.0441){
+        throw new Error('R2359 physical titanium relief outside safe limits');
+      }
+    }
+
+
     makeMechanicalLayer(){
       const T=this.THREE;
 
@@ -2147,6 +2290,7 @@
         bevelSize:.060,bevelThickness:.078,curveSegments:28
       });
       baseGeo.center();
+      this.sculptMachinedChassisR2359(baseGeo);
       this.mechBody=new T.Mesh(baseGeo,this.mechMaterial);
       this.mechBody.scale.set(1.02,1.02,1.00);
       this.mechBody.position.z=-.03;
