@@ -2075,18 +2075,21 @@
             float joint=1.0-min(smoothstep(.018,.035+aa.x,edge.x),
               smoothstep(.018,.035+aa.y,edge.y));
             float envelope=smoothstep(.21,.28,length(vFxMagAnatomy.xy));
-            float plateFinish=.5+.5*sin(dot(floor(cell),vec2(1.71,2.39)));
+            // R2358: continuous anisotropic titanium finish; hard plate-ID jumps
+            // formed coarse square patches in real 9.25 s Chromium pixels.
+            // Keep the same original physical mesh, PBR and shader owner.
+            float plateFinish=.5+.5*sin(dot(cell,vec2(.44,.27)));
             float grainPhase=radial*360.0+lateral*24.0;
             float grainVisibility=1.0-smoothstep(.65,1.65,fwidth(grainPhase));
             float brushed=sin(grainPhase)*grainVisibility;
             return vec3(joint*envelope,plateFinish,brushed);
           }`)
           .replace('#include <color_fragment>',
-            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.125)*(1.0+.018*fxPlate.z);')
+            '#include <color_fragment>\nvec3 fxPlate=fxMagPlateFinish();\ndiffuseColor.rgb*=mix(.94,1.045,fxPlate.y)*(1.0-fxPlate.x*.085)*(1.0+.018*fxPlate.z);')
           .replace('#include <roughnessmap_fragment>',
             '#include <roughnessmap_fragment>\nroughnessFactor=clamp(roughnessFactor+fxPlate.x*.060+(fxPlate.y-.5)*.028,.10,.48);');
       };
-      material.customProgramCacheKey=()=> 'r2294-sinuous-studio-titanium-matched-native';
+      material.customProgramCacheKey=()=> 'r2358-continuous-satin-titanium-matched-native';
     }
 
     makeMechanicalLayer(){
