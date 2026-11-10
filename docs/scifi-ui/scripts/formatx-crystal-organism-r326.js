@@ -1532,8 +1532,10 @@
         /* R2207: each body-local plate has a subtle finish direction. Keep
            the machining below the raster Nyquist limit instead of adding
            screen-space noise or glitter to the selected four-arm body. */
-        vec2 plateId=floor(panelCoord);
-        float plateFinish=.5+.5*sin(dot(plateId,vec2(1.71,2.39)));
+        // R2358: make actual 3D titanium reflections continuous along
+        // the machined arm. Remove coarse plate-ID color steps but keep
+        // original geometric anatomy, physical lighting and one WebGL owner.
+        float plateFinish=.5+.5*sin(dot(panelCoord,vec2(.44,.27)));
         float grainPhase=radial*360.0+lateral*24.0;
         float grainVisibility=${derivativeSupport?'1.0-smoothstep(.65,1.65,fwidth(grainPhase))':'0.0'};
         float brushed=sin(grainPhase)*grainVisibility;
@@ -1547,7 +1549,7 @@
           +vec3(.94,.97,1.0)*silverKey*.90
           +vec3(.12,.25,.31)*metalSideSpec*.25;
         studioSilver*=mix(.94,1.045,plateFinish);
-        studioSilver*=1.0-panelJoint*.125*panelEnvelope;
+        studioSilver*=1.0-panelJoint*.085*panelEnvelope;
         studioSilver+=vec3(.38,.44,.49)*panelBevel*panelEnvelope*(.20+.43*metalKey);
         studioSilver*=1.0+.018*brushed;
         /* R2206 — a cool grazing studio strip keeps the curved titanium
