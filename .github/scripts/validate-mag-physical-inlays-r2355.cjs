@@ -56,12 +56,12 @@ for(const [axis,arm] of owner.armInlays.entries()){
    assert.equal(child.position.y,.045);
  }
  assert.equal(plate.position.z,.270,'Real titanium bevel must sit near the shell');
- assert.equal(engraving.position.z,-.095,'Etch must follow the R2356 raised physical crown');
+ assert.equal(engraving.position.z,-.101,'Etch must sit near the new sculpted ridge');
  assert.equal(plate.renderOrder,3);assert.equal(engraving.renderOrder,4);
  // Existing extruded plate: 0.032 body plus 0.012 bevel on the front.
  // The original etched z=.433 is expressed in arm-local coordinates.
  const physicalTop=plate.position.z+.032+.012+.012;
- const etchedTop=.433+engraving.position.z;
+ const etchedTop=.433+engraving.position.z; // .006 above the crowned 3D surface
  assert(etchedTop>physicalTop && etchedTop-physicalTop<.020,
    'The engraving must sit on the original physical bevel, not float');
  assert.equal(plate.position.z<.378,true,'R2354 hover offset must be corrected');
