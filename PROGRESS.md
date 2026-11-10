@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2357 – MAG négy valós titánbetétjének hegyes, megmunkált 3D profilja (2026-11-10)
+
+- **Elsőként MAG:** az R2356 önálló Draft ágon levő, valódi 3D domború betétek hosszúkás, ovális alakját az R2357 egy keskeny, enyhén ívelt, hegyes titánlándzsa-profilra cseréli. Ugyanaz az eredeti `T.Shape` öt rajzparancsa, egy közös `ExtrudeGeometry`, négy meglévő `T.Mesh`, eredeti fizikai anyag és megszületési pálya marad; nincs plusz anyag, rajzolási hívás, renderer, canvas, RAF vagy videó.
+- **Valódi fizikai fényprofil:** a meglévő R2356-os 0–0,012 egységnyi vertex-domborulat keresztmetszete az új, keskenyebb betéthez igazodik (`abs(x)/.10`). Az eredeti beégetett gravírozás z-helyzete `-.101`; a csúcs fölötti fizikai hézag kb. 0,006 egység. Nem 2D dekoráció.
+- **Regresszió:** `.github/scripts/validate-mag-spear-inlays-r2357.cjs` az **eredeti Shape-konstruktor** ívparancsaiból valós pontmintákat számol és ellenőrzi a geometria méretét, területét, öt parancsát, eredeti négy-arm és DNS/sejt/MAG életciklusát. Az R2355 és R2356 validátorokat a valós új geometriához igazítottuk. A **teljes eredeti P0** valamint a 3× staging Lighthouse mobil+desktop küszöbök változatlanul futnak; PR merge/deploy NINCS.
+- **Elfogadási kapu:** R656 tényleges 5.50/7.50/9.25s Chromium PNG összehasonlítás, P0 GREEN, semmit nem fedő mobil első viewport, natív MAG handoff és animáció, hardveres Android 60 FPS, 3×100 Lighthouse és TBT≤150ms, production Worker/CSP/cache egyezés. A kiadás ezek bizonyítása nélkül **DRAFT / NO MERGE / NO DEPLOY**.
+
 ## R2356 – MAG fizikai domború 3D titánbetét-mikroprofil (2026-11-09)
 
 - **Biztos alap:** R2355 exact runtime source `094370994d8c` full P0 31/31 PASS, GitHub Actions 42616888283. A desktop 9.25s képen az inlay betétek geometriailag kisebbek és beágyazottabbak, 5.50s sejt bitre azonos, natív végleges MAG változatlan. Mobil Lighthouse a R2355 ágon 79/83/83, TBT 511/370/353ms – nem kész, nem elégséges 3×100.
