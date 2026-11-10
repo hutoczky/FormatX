@@ -6,7 +6,7 @@ const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const source=fs.readFileSync(
   'docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
-const begin=source.indexOf('    sculptMachinedChassisR2359(geometry){');
+const begin=source.indexOf("    sculptMachinedChassisR2359(geometry,profile='chassis'){");
 const end=source.indexOf('\n    makeMechanicalLayer(){',begin);
 assert(begin>0&&end>begin,'R2359 physical surface constructor missing');
 const method=source.slice(begin,end);
