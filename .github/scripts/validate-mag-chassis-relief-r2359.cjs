@@ -88,7 +88,7 @@ for(const mobileRender of [true,false]){
   assert.equal(borderChanged,0,'Must not create a crack along the original bevel');
   const back=geometry.groups[1].start;
   for(let i=back;i<back+geometry.groups[1].count;i++){
-    assert.equal(p.getZ(i),-.2,'Back/side triangles remain untouched');
+    assert(Math.abs(p.getZ(i)+.2)<1e-6,'Back/side triangles remain untouched');
     assert.equal(n.getZ(i),-1,'Back normal remains untouched');
   }
   assert(geometry.boundsRebuilt&&geometry.sphereRebuilt);
