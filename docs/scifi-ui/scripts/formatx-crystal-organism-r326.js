@@ -361,6 +361,9 @@
     }
 
     function triangle(vertices, facet) {
+      // R2362: direct scalar pushes preserve exact typed vertex buffers while
+      // avoiding iterable/spread overhead in both mineral and optic faces.
+      // No vertex, normal, triangle, material or shader quality is changed.
       // R2232: same face normal and centroid mathematics, but no
       // transient vector arrays or callback for each of ~24k triangles.
       // Preserve operand order and the original normalize() exactly.
@@ -398,9 +401,9 @@
       const faceWeight=1-smoothWeight;
       for(let index=0;index<3;index+=1){
         const item=vertices[index];
-        sphere.push(...item.sphere);
-        crystal.push(...item.crystal);
-        sphereNormals.push(...item.sphereNormal);
+        sphere.push(item.sphere[0],item.sphere[1],item.sphere[2]);
+        crystal.push(item.crystal[0],item.crystal[1],item.crystal[2]);
+        sphereNormals.push(item.sphereNormal[0],item.sphereNormal[1],item.sphereNormal[2]);
         const smoothNormal=item.crystalNormal||crystalNormal;
         /* R1941f — the signature body keeps authored sharp silhouette geometry,
            but uses the analytical smooth normal exclusively. Auxiliary geometry
@@ -417,7 +420,7 @@
         const hz=smoothNormal[2]*smoothWeight+crystalNormal[2]*faceWeight;
         const hlen=Math.hypot(hx,hy,hz)||1;
         crystalNormals.push(hx/hlen,hy/hlen,hz/hlen);
-        uvs.push(...item.uv);
+        uvs.push(item.uv[0],item.uv[1]);
         if(index===0)barycentrics.push(1,0,0);
         else if(index===1)barycentrics.push(0,1,0);
         else barycentrics.push(0,0,1);
@@ -796,9 +799,9 @@
       // allocating 3 tiny barycentric arrays and a callback per lens face.
       for(let index=0;index<3;index+=1){
         const item=vertices[index];
-        sphere.push(...item.sphere);
-        crystal.push(...item.crystal);
-        sphereNormals.push(...item.sphereNormal);
+        sphere.push(item.sphere[0],item.sphere[1],item.sphere[2]);
+        crystal.push(item.crystal[0],item.crystal[1],item.crystal[2]);
+        sphereNormals.push(item.sphereNormal[0],item.sphereNormal[1],item.sphereNormal[2]);
         const smoothNormal=item.crystalNormal||faceNormal;
         const hybridNormal=normalize([
           smoothNormal[0]*.78+faceNormal[0]*.22,
@@ -806,7 +809,7 @@
           smoothNormal[2]*.78+faceNormal[2]*.22
         ]);
         crystalNormals.push(...hybridNormal);
-        uvs.push(...item.uv);
+        uvs.push(item.uv[0],item.uv[1]);
         if(index===0)barycentrics.push(1,0,0);
         else if(index===1)barycentrics.push(0,1,0);
         else barycentrics.push(0,0,1);
