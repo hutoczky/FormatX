@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2360 – MAG valóban látható első titánpáncéljainak domborítása (2026-11-10)
+
+- **Képi bizonyíték:** az R2359 valódi 9,25 másodperces Chromium-felvétele ~0,365% nagyobb (>20/255) képponteltérést mutat R2358-hoz képest, de a nagy, ezüstszínű elülső lapok továbbra is takarják az eredeti alaptest bordázatát. A DNS 0,50s és a teljes 5,50s sejt/kromatin képe bitre azonos.
+- **Fizikai javítás:** az R2359 valódi, egyszer végzett csúcspont-újraháromszögelési metódusa most az eredeti **öt látható elem** három már megosztott extrudált geometriáján is lefut: közös felső jobb/bal `topPlateGeo`, közös oldalsó jobb/bal `sideGeo`, alsó `lowerGeo` állkapocs. Az `'plate'` profil lokalizált 3D hosszanti gerincet, sekély barázdát és valódi elforduló vertexnormálokat készít. A `'chassis'` alaptest geometria változatlan; a külalak, UV, szegély, shader és anyagtulajdonosok megmaradnak. **Nem jött létre második renderpass, anyag, WebGL motor, Canvas, RAF, mesh vagy textúra.**
+- **QA:** `.github/scripts/validate-mag-front-panels-r2360.cjs` közvetlenül a valós metódust futtatja mintavételezett mobil/desktop 3D alakokon; ellenőrzi az UV/normál/határfelület és a valódi öt mesh kapcsolatát. Az örökölt R2359 forráshely-tesztet csak az új, opcionális `profile` paraméterre igazítottuk; az R656 böngészős képkockák, 31 lépéses P0 és a szigorú 3× Lighthouse változatlanok.
+- **Elfogadás:** tényleges 5.50/7.50/9.25s képek, kiemelkedő 3D anyag, a négyágú MAG natív WebGL-átadása, 3× P0 hidegindítás, 3×100 Lighthouse és mobil TBT≤150ms, 60 FPS valódi Android hardveren, Worker/CSP/cache. A fejlesztés csak akkor élesíthető, ha mindez bizonyított. **DRAFT / NO MERGE / NO DEPLOY.**
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
