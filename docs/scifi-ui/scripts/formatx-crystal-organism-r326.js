@@ -302,13 +302,19 @@
       return value - Math.floor(value);
     }
 
-    function vertex(latitudeIndex, longitudeIndex) {
+    function vertex(latitudeIndex, longitudeIndex, latitudeTrig=null, longitudeTrig=null) {
       const latitude=latitudeIndex/latitudeSegments;
       const longitude=longitudeIndex/longitudeSegments;
       const phi=latitude*Math.PI;
       const theta=longitude*Math.PI*2;
-      const sinPhi=Math.sin(phi);
-      const direction=[sinPhi*Math.cos(theta),Math.cos(phi),sinPhi*Math.sin(theta)];
+      // R2363: integer body lattice shares exact double-precision trig
+      // samples; fractional cortical fibers keep the untouched formula.
+      const sinPhi=latitudeTrig?latitudeTrig[0]:Math.sin(phi);
+      const direction=[
+        sinPhi*(longitudeTrig?longitudeTrig[0]:Math.cos(theta)),
+        latitudeTrig?latitudeTrig[1]:Math.cos(phi),
+        sinPhi*(longitudeTrig?longitudeTrig[1]:Math.sin(theta))
+      ];
       const spherePosition=direction.map(value=>value*.91);
 
       /* R1941c — source-locked Signature MAG.
@@ -433,11 +439,21 @@
        anisotropic superellipsoid vertices, including shared neighbours.
        This is mathematically the same non-indexed triangle stream, winding,
        facet IDs, UVs and material contract; memory stays O(longitude). */
+    // R2363: cache the original lat/lon angle values exactly once for the
+    // existing analytical body rows. No change to topology or shading.
+    const rowLatitudeTrig=Array.from({length:latitudeSegments+1},(_,lat)=>{
+      const phi=lat/latitudeSegments*Math.PI;
+      return [Math.sin(phi),Math.cos(phi)];
+    });
+    const rowLongitudeTrig=Array.from({length:longitudeSegments+1},(_,lon)=>{
+      const theta=lon/longitudeSegments*Math.PI*2;
+      return [Math.cos(theta),Math.sin(theta)];
+    });
     let upperRow=Array.from({length:longitudeSegments+1},
-      (_,lon)=>vertex(0,lon));
+      (_,lon)=>vertex(0,lon,rowLatitudeTrig[0],rowLongitudeTrig[lon]));
     for(let lat=0;lat<latitudeSegments;lat+=1){
       const lowerRow=Array.from({length:longitudeSegments+1},
-        (_,lon)=>vertex(lat+1,lon));
+        (_,lon)=>vertex(lat+1,lon,rowLatitudeTrig[lat+1],rowLongitudeTrig[lon]));
       for(let lon=0;lon<longitudeSegments;lon+=1){
         const a=upperRow[lon];
         const b=upperRow[lon+1];
