@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2364 – Független MAG CPU/GPU-képkocka diagnosztika, változatlan honlap (2026-11-10)
+
+- **Biztos alap:** R2359 31/31 P0 sikeres. R2362 lezárva, mert ugyan P0-zöld, de mobil TBT/Lighthouse nem javult. R2363 lezárva: minden GPU-adatpuffer hét profilban bájtazonos volt, de a valós headless mobil képkockateszt fekete MAG-ot mért, a Lighthouse mobil pedig 70/84/82 pont és 916/355/395 ms TBT. Egyiket sem kell merge-elni vagy élesíteni.
+- **Mért szűk keresztmetszet:** R2359 valós 3× P0 hidegindításnál a szoftveres natív MAG geometriaépítés ~31,9–33 ms, a GPU-buffer feltöltés ~1,4–1,7 ms, míg a GPU-frame/fence elfogadás ~502–535 ms volt. A mikrogeometria újabb apró CPU-optimálása nem valószínű, hogy önmagában megoldja a Lighthouse terhelést.
+- **Diagnosztikai fejlesztés:** új, dedikált `.github/scripts/measure-mag-native-budget-r2364.cjs` és `.github/workflows/mag-native-budget-r2364.yml`. Az eredeti R2359 natív R326 MAG-ot és filmes R533 intro-t 3 független asztali + 3 mobil Chromium-indítással méri, külön rögzítve a shader-készültséget, geometriát, CPU→GPU másolást, valódi első draw-t, GPU-fence várakozást, natív WebGL tulajdont és main-thread hosszú feladatokat. GitHub Actions JSON-artifact 14 nap megőrzés.
+- **Szigorú keret:** a mérés soha nem jelentheti az Android hardveres 60 FPS igazolását, és nem helyettesíti a Lighthouse-t vagy a felhasználó képi referencia-elfogadását. Csak diagnosztikai kód kerül a külön fejlesztési ágra. A `docs/scifi-ui` és Worker/CSP/cache fájlok változatlanok.
+- **Következő döntés:** a valós profilból kiválasztani a GPU-fence / korai shader indítás / film-mag átadás legnagyobb mérhető terhelését, és csak ahhoz készíteni külön kísérleti javítást. **NO MERGE / NO DEPLOY.**
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
