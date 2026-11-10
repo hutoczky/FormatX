@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2362 – Natív R326 MAG geometriabuffer-összeállítás gyorsítása (2026-11-10)
+
+- **Alap:** R2359 31/31 P0 GREEN; Lighthouse mobil Performance 86/89/90 és TBT 275/202/184 ms. Az R2361b P0 42820759213 a 24. lépésnél 15 másodperces introfázis-várakozási timeouttal zárult. Az R2360 és R2361a elutasított látványmódosításai nem részei az R2362-nek.
+- **CPU-optimalizálás:** a kanonikus natív R326 geometriaépítőben mindkét háromszög-feltöltő hurok iterable/spread-alapú array.push hívásait skalár argumentumos array.push hívásokra cseréltük (3D pozíció, normál, UV). Nem módosul egyetlen szemcse, 3D geometria, vertexsorrend, anyag, renderpass, shader, RAF, texture, WebGL context vagy canvas.
+- **Védelem:** validate-mag-native-buffer-parity-r2362.cjs az eredeti futó geometriaépítőt optimalizált és rekonstruált korábbi formájában is végrehajtja négy konfigurációval: desktop, mobil hardver, korlátozott mobil, mobil szoftver. Mind a HÉT Float32Array GPU-puffer teljes bájtazonossága kötelező; külön ellenőrzi a csúcsszámot, facets, tendrils, mikroszálakat, topológiaadatokat. Az ellenőrzés az eredeti teljes P0 workflow része.
+- **Kiadási kapu:** R656 valódi Chromium 0.5/5.5/7.5/9.25s PNG, 3x valódi hidegindítás, natív MAG handoff, CLS, PAUSE/RESUME, eredeti szigorú 3x Lighthouse 100/100/100/100, TBT legfeljebb 150 ms, LCP legfeljebb 2 s, Android valódi 60 FPS, végső stúdióminőség és Worker/CSP/cache egyezés. Teljesítményjavulást csak mért eredményből szabad állítani.
+- **Állapot:** DRAFT / NO MERGE / NO DEPLOY. A master és az éles honlap változatlan.
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
