@@ -2118,8 +2118,8 @@
           }
         }
       }
-      if(face.length<(plateProfile?4:12)){
-        throw new Error('R2359 original front titanium cap is missing');
+      if(face.length<(plateProfile?2:12)){
+        throw new Error('R2360 front titanium cap missing: '+profile+' / '+face.length+' triangles');
       }
       const key=(x,y)=>x.toFixed(5)+','+y.toFixed(5);
       const edges=new Map();
@@ -2135,7 +2135,7 @@
         }
       }
       const border=[...edges.values()].filter(e=>e.count===1);
-      if(border.length<(plateProfile?6:16)){
+      if(border.length<(plateProfile?4:16)){
         throw new Error('R2359 cannot resolve the real front-cap bevel boundary');
       }
       // R2360: normalize front panel dimensions independently of the
