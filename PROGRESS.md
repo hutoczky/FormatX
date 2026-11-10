@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2361 – MAG ezüst frontpáncéljainak finom, valódi 3D fazettái és szaténfény (2026-11-10)
+
+- **Biztos alap:** R2359 eredeti négykarú chassis Relief, P0 31/31 GREEN (GitHub Actions 42805051039). Az R2360 lezárt kísérlet öt frontlemez nagy felületű tesszellációja filmesen túl gyűrött fémet és mobil Performance 72/82/80, TBT 795/410/447 ms regressziót okozott; ennek sem kódját, sem teljesítményigényét **nem** emeljük át.
+- **Kíméletes fizikai javítás:** a létező upper L/R `topPlateGeo`, left/right `sideGeo`, lower `lowerGeo` `ExtrudeGeometry` valódi bevel mérete és mélysége kismértékben nő: top 0,033/0,053, side 0,028/0,046, lower 0,027/0,046 (bevelSize/bevelThickness). Az eredeti bevelSegments=3, curveSegments=8 és az összes mesh/draw megmarad: az öt lemezen **nincs felületi alosztás vagy R2360 hullámos deformáció**.
+- **Fizikai fény:** az eredeti négy nagy ezüstpáncél közös `MeshPhysicalMaterial` anisotropy mobil .12, desktop .28, 0,12 radián irányeltéréssel. Az eredeti 1× mikrotextúra, 3D modell, optikai szem, DNS/biológiai sejt, atmoszféra és átadási pálya változatlan. Egyetlen új GPU mesh, textúra, WebGL/canvas, RAF, light vagy renderpass sincs; az anisotropy-változat shaderköltségét tényleges böngészős mérés dönti el.
+- **Új bizonyítás:** `.github/scripts/validate-mag-armor-bevel-r2361.cjs` az eredeti három `ExtrudeGeometry` opciót és a valódi silver `MeshPhysicalMaterial` konstruktorát futtatja mobile/desktop módon. Tiltja az R2360 elutasított frontpanel-tesszellációját. A teljes eredeti 31 lépéses R656 P0, valós képkockák, hidegindítás/handoff, valamint a 3× mobil+desktop Lighthouse 100/100/100/100 és TBT≤150 ms küszöb változatlan.
+- **Kiadási feltétel:** tényleges 9.25s vizuális összehasonlítás és 5.50s élő sejt képi egyezése, P0 GREEN, mobil + desktop teszt és Android hardver 60FPS. **DRAFT / NO MERGE / NO DEPLOY**, semmilyen produkciós cache/CSP változtatás nincs.
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
