@@ -7,7 +7,7 @@ on:
     # Validate this stacked development branch even when its base advances
     # and the pull_request merge ref cannot be synthesized due to conflicts.
     # Never deploy: these are local-source / local-Lighthouse checks only.
-    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure, fix/r2344-precomplete-mag-home-geometry, fix/r2345-satin-after-p0-green, fix/r2346-compositor-stage-transform-ownership, fix/r2348-film-aware-autonomous-surface-sweep, fix/r2349-physical-mag-optical-well, fix/r2350-facet-local-physical-shading, fix/r2352-organic-cortex-iris-convergence, fix/r2354-film-native-brushed-titanium-grade, fix/r2355-physical-recessed-mag-inlays, fix/r2356-machined-convex-inlay-crowns, fix/r2357-sculpted-spear-titanium-mag-inlays, fix/r2358-continuous-satin-titanium-grain, fix/r2359-machined-chassis-relief]
+    branches: [master, fix/r2208-genesis-controls-nonblocking-css, fix/r2267-real-genesis-headless-parity, fix/r2336-mag-film-native-optical-continuity, fix/r2343-mag-first-compositor-exposure, fix/r2344-precomplete-mag-home-geometry, fix/r2345-satin-after-p0-green, fix/r2346-compositor-stage-transform-ownership, fix/r2348-film-aware-autonomous-surface-sweep, fix/r2349-physical-mag-optical-well, fix/r2350-facet-local-physical-shading, fix/r2352-organic-cortex-iris-convergence, fix/r2354-film-native-brushed-titanium-grade, fix/r2355-physical-recessed-mag-inlays, fix/r2356-machined-convex-inlay-crowns, fix/r2357-sculpted-spear-titanium-mag-inlays, fix/r2358-continuous-satin-titanium-grain, fix/r2359-machined-chassis-relief, fix/r2363-native-mag-trig-table]
     paths:
       - 'docs/styles.css'
       - 'docs/production-revision.txt'
@@ -163,6 +163,7 @@ jobs:
           node --check .github/scripts/validate-mag-spear-inlays-r2357.cjs
           node --check .github/scripts/validate-mag-continuous-grain-r2358.cjs
           node --check .github/scripts/validate-mag-chassis-relief-r2359.cjs
+          node --check .github/scripts/validate-mag-body-trig-parity-r2363.cjs
           node --check .github/scripts/validate-mag-anatomy-r2327.cjs
           node --check .github/scripts/validate-mag-pose-studio-r2336.cjs
           node --check .github/scripts/validate-mag-cinematic-satin-r2345.cjs
@@ -212,6 +213,7 @@ jobs:
           node .github/scripts/validate-mag-spear-inlays-r2357.cjs
           node .github/scripts/validate-mag-continuous-grain-r2358.cjs
           node .github/scripts/validate-mag-chassis-relief-r2359.cjs
+          node .github/scripts/validate-mag-body-trig-parity-r2363.cjs
           node .github/scripts/validate-mag-anatomy-r2327.cjs
           node .github/scripts/validate-mag-pose-studio-r2336.cjs
           node .github/scripts/validate-mag-cinematic-satin-r2345.cjs
