@@ -2262,9 +2262,9 @@
         emissive:0x0a252b,emissiveIntensity:.012,
         clearcoat:1.0,clearcoatRoughness:.042,
         specularIntensity:1.0,specularColor:new T.Color(0xe8f6f4),
-        // R2361: physically directional fine-grain metal across the four
-        // existing silver plates. No added mesh, bump texture, light or RAF.
-        anisotropy:this.mobileRender?.12:.28,anisotropyRotation:.12,
+        // R2361b: retain the proven original isotropic shader. Real
+        // Chromium 9.25s proved anisotropy introduced coarse checker tiles.
+        // Only physical bevel geometry is changed; no shader permutation.
         bumpMap:this.microFiberTexture,bumpScale:.004,
         transparent:true,opacity:0
       });
