@@ -2332,11 +2332,15 @@
         color:0x132c34,transparent:true,opacity:0,depthWrite:false
       });
       const inlayProfile=new T.Shape();
-      inlayProfile.moveTo(-.066,.28);
-      inlayProfile.bezierCurveTo(-.13,.42,-.106,.60,-.025,.88);
-      inlayProfile.lineTo(.025,.88);
-      inlayProfile.bezierCurveTo(.106,.60,.13,.42,.066,.28);
-      inlayProfile.bezierCurveTo(.035,.215,-.035,.215,-.066,.28);
+      // R2357: reshape the EXISTING four shared extruded titanium plates
+      // into machined tapered spear inlays, not broad floating oval badges.
+      // Preserve the same Shape path command count, bevel, four arms, one
+      // shared mesh geometry/material and original mechanical birth tracks.
+      inlayProfile.moveTo(-.045,.270);
+      inlayProfile.bezierCurveTo(-.083,.390,-.074,.645,-.008,.910);
+      inlayProfile.lineTo(.008,.910);
+      inlayProfile.bezierCurveTo(.074,.645,.083,.390,.045,.270);
+      inlayProfile.bezierCurveTo(.032,.237,-.032,.237,-.045,.270);
       const inlayGeometry=new T.ExtrudeGeometry(inlayProfile,{
         depth:.032,steps:1,bevelEnabled:true,bevelSegments:3,
         bevelSize:.009,bevelThickness:.012,curveSegments:12
@@ -2352,7 +2356,7 @@
         const cy=crownPosR2356.getY(k);
         const cz=crownPosR2356.getZ(k);
         if(cz<=.016)continue;
-        const cross=Math.max(0,1-Math.pow(Math.min(1,Math.abs(cx)/.14),2));
+        const cross=Math.max(0,1-Math.pow(Math.min(1,Math.abs(cx)/.10),2));
         const axial=Math.max(0,Math.sin(Math.PI*Math.max(0,
           Math.min(1,(cy-.20)/.70))));
         const crown=.012*cross*axial;
@@ -2384,8 +2388,8 @@
         const engraving=new T.LineSegments(etchGeometry,this.armEtchMaterial);
         engraving.scale.set(.82,.84,1);
         // Track the authentic .012-world-unit crown peak so the
-        // existing engraved 3D stroke remains 0.01 above the new ridge.
-        engraving.position.set(0,.045,-.095);
+        // original engraving lies just .006 world units above the ridge.
+        engraving.position.set(0,.045,-.101);
         engraving.renderOrder=4;
         arm.add(engraving);
         arm.visible=false;
