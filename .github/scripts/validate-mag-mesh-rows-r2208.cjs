@@ -22,9 +22,14 @@ assert(triangleSource.includes('const hlen=Math.hypot(hx,hy,hz)||1;') &&
        triangleSource.includes('crystalNormals.push(hx/hlen,hy/hlen,hz/hlen);') &&
        !triangleSource.includes('const hybridNormal=normalize(['),
   'R2234 native triangle normals must avoid transient arrays without changing normalization');
-assert(source.includes('sphere.push(...item.sphere);') &&
-       source.includes('crystal.push(...item.crystal);'),
-  'R2233 must keep byte-identical original sphere and crystal geometry');
+// R2362: the original hot-loop spread syntax is deliberately replaced with
+// scalar writes. Byte-identical GPU attributes are still verified below
+// against the original R2208/2250 fixtures for seven actual hardware paths.
+assert(source.includes('sphere.push(item.sphere[0],item.sphere[1],item.sphere[2]);') &&
+       source.includes('crystal.push(item.crystal[0],item.crystal[1],item.crystal[2]);') &&
+       source.includes('sphereNormals.push(item.sphereNormal[0],item.sphereNormal[1],item.sphereNormal[2]);') &&
+       source.includes('uvs.push(item.uv[0],item.uv[1]);'),
+  'R2362 native buffer scalar writes must preserve original 3D vertex fields');
 
 const a=source.indexOf('    /* R2208: keep only two adjacent latitude rows');
 const b=source.indexOf('\n    /* R1982 — real microfibril geometry.',a);
