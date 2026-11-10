@@ -14,7 +14,7 @@ function observe(){
   Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>4});
   Object.defineProperty(navigator,'deviceMemory',{get:()=>8});
   const state=window.__magBudgetR2364={
-    longTasks:[],firstNativeDraw:null,nativeContexts:0,
+    longTasks:[],firstNativeDraw:null,nativeContexts:0,nativeContextRequests:0,
     warmupAt:null,completionAt:null,beginAt:performance.now()
   };
   try{
@@ -33,11 +33,16 @@ function observe(){
   document.addEventListener('formatx:magbirthcomplete',
     ()=>{if(state.completionAt===null)state.completionAt=performance.now();},
     {capture:true});
+  const knownNativeContexts=new WeakSet();
   const originalGetContext=HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext=function(type){
     const gl=Reflect.apply(originalGetContext,this,arguments);
     if(gl&&/^webgl/.test(type)&&this.classList.contains('fx-crystal-organism-r326-canvas')){
-      state.nativeContexts+=1;
+      state.nativeContextRequests+=1;
+      if(!knownNativeContexts.has(gl)){
+        knownNativeContexts.add(gl);
+        state.nativeContexts+=1;
+      }
       window.__magBudgetNativeGL=gl;
     }
     return gl;
@@ -119,6 +124,7 @@ function observe(){
           firstDraw:diag.firstNativeDraw,
           warmupMs:diag.warmupAt,completionMs:diag.completionAt,
           nativeContexts:diag.nativeContexts,
+          nativeContextRequests:diag.nativeContextRequests,
           bootPhases,
           gpuFenceMs:Number(root.dataset.fxMagHandoffGpuMsR2226||NaN),
           gpuState:root.dataset.fxMagHandoffGpuR2226||null,
@@ -140,6 +146,7 @@ function observe(){
       Object.assign(item,{observation,errors,networkFailures,ok:true});
       assert.deepEqual(errors,[],'No runtime JS errors');
       assert.deepEqual(networkFailures,[],'No failed resource requests');
+      assert.equal(observation.nativeContexts,1,'Must preserve one original WebGL context owner');
       assert.equal(observation.glError,0,'Real native WebGL error');
       assert.equal(observation.contextLost,false,'Lost native context');
       assert.equal(observation.nativeFirstFrame,'painted','Real MAG first frame required');
