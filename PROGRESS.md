@@ -1,5 +1,13 @@
 # FormatX – fejlesztési állapot
 
+## R2363 – Natív MAG testháló trigonometrikus újrahasznosítása (2026-11-10)
+
+- **Megbízható alap:** az R2359 31/31 P0 GREEN verziója; az R2362 31/31 P0 GREEN, de mobil 76/82/83 Performance, 599/393/380 ms TBT Lighthouse miatt lezárt és nem került kiadásra. R2360/R2361 vizuális kudarcai nem részei az R2363-nak.
+- **Fizikai teljesítményjavítás jelölt:** a kanonikus R326 `buildOrganismGeometry()` meglévő analitikus testhálóján a szélességi/hosszúsági hálópontok eredeti `sin` és `cos` értékei egy rövid kettőspontosságú táblába kerülnek, minden rácspontban új számolás helyett. A szabad koordinátájú mikroszálak, élő szövet, optika és minden más vertex az eredeti képletet használja. Nem változik a test alakja, normálja, rajzolási sorrendje, anyaga, shaderje, minőségi profilja, textúrája, GPU tulajdonosa vagy a DNS→sejt→MAG jelenet.
+- **Erős regresszió:** `.github/scripts/validate-mag-body-trig-parity-r2363.cjs` a VALÓDI R326 geometria-konstruktorát futtatja hét desktop/mobil/audit/szoftver konfigurációban, a régi képlettel és a cache-elt változattal. A hét Float32Array GL-puffer összes bájtja, csúcspontszám, optikai és mikroszál topológia változatlan kell legyen. Diagnosztikai időtartamokat ír, de a gyorsulás bizonyítására valódi böngészős mérések szükségesek.
+- **Kibocsátási kapuk:** eredeti 31-step Chromium P0 és valódi R656 képkockák; 3× asztali+mobil Lighthouse 100/100/100/100, TBT≤150 ms, LCP≤2 s; hardveres Android 60 FPS; első viewport, PAUSE/RESUME, reduced motion, belső sejt és permanens MAG optikai átadás, production Worker/CSP/cache egyezés.
+- **Állapot:** DRAFT / NO MERGE / NO DEPLOY. A fejlesztési ág nem módosítja a mastert vagy az éles honlapot.
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
