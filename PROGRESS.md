@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2358 – MAG fizikai titánfelületének folyamatos szatén szemcsézése (2026-11-10)
+
+- **Bizonyított hiányosság:** R2357 valós Chromium 9.25s képen a nagy frontlemezek továbbra is négyzetes, színesen foltos anyagsávokból épülnek fel; a látható titánfelület nem referencia-minőségű. R2357 valódi geometriai képi változása 0.1368% a teljes viewporton (>20/255); a DNS és 5.50s sejt képe bitre azonos.
+- **Párosított 3D felületmódosítás:** az R1280 filmes Three.js `fxMagPlateFinish()` és az állandó R326 WebGL anyag ugyanazt a testhez rögzített, folytonos `sin(dot(anatomyCoord,vec2(.44,.27)))` szatén titánszemcsézést használja, nem egymástól független `floor(...)` színlapokat. Az eredeti anatómiai varrat, fizikai fém/textúra, kristálygeometria, fény, élettani cortex és optika megmarad. A felületi varrat sötétítése mindkét renderelőben `.125` helyett `.085`. Új GPU material, draw call, mesh, canvas, RAF, renderpass vagy shader-permutáció nincs.
+- **Regresszió:** `.github/scripts/validate-mag-continuous-grain-r2358.cjs` a tényleges film/native forráspárt és a színfüggvény határérték-folytonosságát ellenőrzi. R2270 anyagőr frissítve az új, közös értékre. Az eredeti R656 Chromium PNG, 3× hidegindítás, P0 és 3× mobil+desktop Lighthouse teljes szigorral változatlanul kötelező.
+- **Kibocsátás:** R2358 kísérleti fejlesztés. Csak valódi 9.25s film/native képi egyezés, sértetlen DNS/sejt, hibamentes P0, Android 60FPS és 3×100/100/100/100 Lighthouse + TBT≤150ms után jöhet szóba. **DRAFT / NO MERGE / NO DEPLOY.**
+
 ## R2357 – MAG négy valós titánbetétjének hegyes, megmunkált 3D profilja (2026-11-10)
 
 - **Elsőként MAG:** az R2356 önálló Draft ágon levő, valódi 3D domború betétek hosszúkás, ovális alakját az R2357 egy keskeny, enyhén ívelt, hegyes titánlándzsa-profilra cseréli. Ugyanaz az eredeti `T.Shape` öt rajzparancsa, egy közös `ExtrudeGeometry`, négy meglévő `T.Mesh`, eredeti fizikai anyag és megszületési pálya marad; nincs plusz anyag, rajzolási hívás, renderer, canvas, RAF vagy videó.
