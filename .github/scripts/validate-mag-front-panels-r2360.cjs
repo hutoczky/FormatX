@@ -48,6 +48,35 @@ function createCap(){
   append([-.22,-.33],[.22,-.33],[.22,.33],-.11,-1);
   return new Geometry(pos,tex,norm,capCount);
 }
+// The actual side armor is an asymmetric five-corner plate:
+// just 3 front triangles, unlike a densely meshed chassis.
+function fiveCornerCap(){
+  const pos=[],tex=[],norm=[];
+  const points=[[-.12,.09],[.24,.17],[.23,-.15],[.01,-.07],[-.09,-.02]];
+  function add(a,b,c,z,n){
+    for(const [x,y] of [a,b,c]){
+      pos.push(x,y,z);tex.push(x+.5,y+.5);norm.push(0,0,n);
+    }
+  }
+  for(const triangle of [[0,1,2],[0,2,3],[0,3,4]]){
+    add(...triangle.map(i=>points[i]),.11,1);
+  }
+  const capCount=pos.length/3;
+  add(points[0],points[2],points[4],-.11,-1);
+  return new Geometry(pos,tex,norm,capCount);
+}
+for(const mobileRender of [true,false]){
+  const tiny=fiveCornerCap(),p=new Probe();
+  p.THREE={Float32BufferAttribute:Attr};p.mobileRender=mobileRender;
+  p.sculptMachinedChassisR2359(tiny,'plate');
+  assert.equal(p.magPlateReliefR2360.length,1);
+  assert.equal(tiny.groups[1].count,3);
+  assert(tiny.getAttribute('position').count>12);
+  assert(p.magPlateReliefR2360[0].maximumRelief>.0001);
+  console.log('MAG_R2360_FIVE_CORNER_REAL_ARMOR_PASS',JSON.stringify({
+    mobileRender,capTriangles:3,peak:p.magPlateReliefR2360[0].maximumRelief
+  }));
+}
 for(const mobileRender of [true,false]){
   const geom=createCap(),oldCount=geom.getAttribute('position').count;
   const p=new Probe();
