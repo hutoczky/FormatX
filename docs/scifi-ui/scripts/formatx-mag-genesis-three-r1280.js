@@ -2262,6 +2262,9 @@
         emissive:0x0a252b,emissiveIntensity:.012,
         clearcoat:1.0,clearcoatRoughness:.042,
         specularIntensity:1.0,specularColor:new T.Color(0xe8f6f4),
+        // R2361: physically directional fine-grain metal across the four
+        // existing silver plates. No added mesh, bump texture, light or RAF.
+        anisotropy:this.mobileRender?.12:.28,anisotropyRotation:.12,
         bumpMap:this.microFiberTexture,bumpScale:.004,
         transparent:true,opacity:0
       });
@@ -2391,8 +2394,10 @@
       topPlateShape.lineTo(-.10,.58);
       topPlateShape.closePath();
       const topPlateGeo=new T.ExtrudeGeometry(topPlateShape,{
+        // R2361: original 3D upper armor, deeper machined edge radius.
+        // Preserve front cap triangles and construction order (unlike R2360).
         depth:.14,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.030,bevelThickness:.040,curveSegments:8
+        bevelSize:.033,bevelThickness:.053,curveSegments:8
       });
       topPlateGeo.center();
 
@@ -2421,8 +2426,10 @@
       sideShape.lineTo(-.04,.10);
       sideShape.closePath();
       const sideGeo=new T.ExtrudeGeometry(sideShape,{
+        // R2361: the SAME left/right extrusion acquires a wider smooth
+        // physical machined lip, with no surface subdivision.
         depth:.14,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.026,bevelThickness:.034,curveSegments:8
+        bevelSize:.028,bevelThickness:.046,curveSegments:8
       });
       sideGeo.center();
 
@@ -2452,8 +2459,9 @@
       lowerShape.lineTo(-.34,.04);
       lowerShape.closePath();
       const lowerGeo=new T.ExtrudeGeometry(lowerShape,{
+        // R2361: match lower titanium jaw's existing curved bevel.
         depth:.15,bevelEnabled:true,bevelSegments:3,steps:1,
-        bevelSize:.025,bevelThickness:.034,curveSegments:8
+        bevelSize:.027,bevelThickness:.046,curveSegments:8
       });
       lowerGeo.center();
       this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
