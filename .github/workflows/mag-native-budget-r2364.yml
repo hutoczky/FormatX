@@ -1,0 +1,58 @@
+name: R2364 MAG native frame budget diagnostic (no deploy)
+on:
+  push:
+    branches: [fix/r2364-native-frame-budget-audit]
+    paths:
+      - '.github/scripts/measure-mag-native-budget-r2364.cjs'
+      - '.github/workflows/mag-native-budget-r2364.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: formatx-native-budget-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  chromium-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install matching browser runtime
+        run: npm install --no-save --no-package-lock playwright@1.62.0 playwright-core@1.62.0
+      - name: Resolve real Chrome
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME_BIN"
+          echo "CHROME_BIN=$CHROME_BIN" >> "$GITHUB_ENV"
+          "$CHROME_BIN" --version
+      - name: Check diagnostic syntax
+        run: node --check .github/scripts/measure-mag-native-budget-r2364.cjs
+      - name: Start unmodified exact-source local website
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/r2364-http.log" 2>&1 &
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4178/scifi-ui/index.html >/dev/null 2>&1; then exit 0; fi
+            sleep .25
+          done
+          cat "$RUNNER_TEMP/r2364-http.log"
+          exit 1
+      - name: Profile 3 independent mobile and desktop native MAG cold starts
+        env:
+          FORMATX_TEST_URL: http://127.0.0.1:4178/scifi-ui/index.html
+          FORMATX_MAG_BUDGET_DIR: artifacts/r2364-mag-frame-budget
+        run: node .github/scripts/measure-mag-native-budget-r2364.cjs
+      - name: Publish inspectable raw diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mag-native-budget-r2364-${{ github.sha }}
+          path: artifacts/r2364-mag-frame-budget/report.json
+          if-no-files-found: warn
+          retention-days: 14
