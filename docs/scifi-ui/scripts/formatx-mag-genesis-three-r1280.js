@@ -2097,8 +2097,9 @@
     // Operates on the ORIGINAL four-point ExtrudeGeometry, not a second mesh.
     // Two cap subdivisions on desktop, one on mobile: unchanged silhouette,
     // GPU draws, original bevel, material, single renderer and RAF.
-    sculptMachinedChassisR2359(geometry){
+    sculptMachinedChassisR2359(geometry,profile='chassis'){
       const T=this.THREE;
+      const plateProfile=profile==='plate';
       const pos=geometry.getAttribute('position');
       const uv=geometry.getAttribute('uv');
       const normal=geometry.getAttribute('normal');
@@ -2112,12 +2113,12 @@
       for(const group of sourceGroups){
         for(let i=group.start;i<group.start+group.count;i+=3){
           if(normal.getZ(i)>.98 && normal.getZ(i+1)>.98 &&
-             normal.getZ(i+2)>.98 && pos.getZ(i)>.12){
+             normal.getZ(i+2)>.98 && pos.getZ(i)>0){
             face.push(i);
           }
         }
       }
-      if(face.length<12){
+      if(face.length<(plateProfile?4:12)){
         throw new Error('R2359 original front titanium cap is missing');
       }
       const key=(x,y)=>x.toFixed(5)+','+y.toFixed(5);
@@ -2134,16 +2135,29 @@
         }
       }
       const border=[...edges.values()].filter(e=>e.count===1);
-      if(border.length<16){
+      if(border.length<(plateProfile?6:16)){
         throw new Error('R2359 cannot resolve the real front-cap bevel boundary');
       }
+      // R2360: normalize front panel dimensions independently of the
+      // chassis so its actual broad bright plates receive sculpted normals.
+      const limits={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity};
+      for(const i of face)for(let k=i;k<i+3;k++){
+        limits.minX=Math.min(limits.minX,pos.getX(k));
+        limits.maxX=Math.max(limits.maxX,pos.getX(k));
+        limits.minY=Math.min(limits.minY,pos.getY(k));
+        limits.maxY=Math.max(limits.maxY,pos.getY(k));
+      }
+      const cx=(limits.minX+limits.maxX)*.5;
+      const halfX=Math.max(.0001,(limits.maxX-limits.minX)*.5);
+      const cy=(limits.minY+limits.maxY)*.5;
+      const halfY=Math.max(.0001,(limits.maxY-limits.minY)*.5);
       const smooth01=x=>{
         const t=Math.max(0,Math.min(1,x));
         return t*t*(3-2*t);
       };
       const relief=(x,y)=>{
         const axis=Math.max(Math.abs(x),Math.abs(y));
-        const arm=smooth01((axis-.265)/.125)*
+        const arm=plateProfile?1:smooth01((axis-.265)/.125)*
           (1-smooth01((axis-.875)/.135));
         if(arm<.00001)return 0;
         let closest=Infinity;
@@ -2156,7 +2170,16 @@
           const d=dx*dx+dy*dy;
           if(d<closest)closest=d;
         }
-        const edgeFade=smooth01(Math.sqrt(closest)/.095);
+        const edgeFade=smooth01(Math.sqrt(closest)/(plateProfile?.072:.095));
+        if(plateProfile){
+          const transverse=Math.abs((x-cx)/halfX);
+          const longitudinal=Math.abs((y-cy)/halfY);
+          const ridge=.048*Math.exp(-Math.pow(transverse/.35,2));
+          const groove=.015*Math.exp(-Math.pow((transverse-.52)/.16,2));
+          const shoulder=.012*Math.exp(-Math.pow((transverse-.77)/.17,2));
+          const axial=.78+.22*Math.cos(Math.PI*Math.min(1,longitudinal)*.5);
+          return Math.max(0,ridge-groove+shoulder)*edgeFade*axial;
+        }
         const lateral=Math.min(Math.abs(x),Math.abs(y));
         const ridge=.044*Math.exp(-Math.pow(lateral/.077,2));
         const groove=.015*Math.exp(-Math.pow((lateral-.103)/.031,2));
@@ -2182,7 +2205,7 @@
         const start=outPositions.length/3;
         for(let i=group.start;i<group.start+group.count;i+=3){
           const front=normal.getZ(i)>.98&&normal.getZ(i+1)>.98&&
-            normal.getZ(i+2)>.98&&pos.getZ(i)>.12;
+            normal.getZ(i+2)>.98&&pos.getZ(i)>0;
           let triangles=[[read(i),read(i+1),read(i+2)]];
           if(front){
             for(let level=0;level<levels;level++){
@@ -2224,13 +2247,18 @@
       for(const g of nextGroups)geometry.addGroup(g.start,g.count,g.materialIndex);
       geometry.computeBoundingBox();
       geometry.computeBoundingSphere();
-      this.chassisReliefR2359={
+      const stats={
         originalVertices:pos.count,sculptedVertices:outPositions.length/3,
         subdividedFrontTriangles:sculptedTriangles,boundarySegments:border.length,
         maximumRelief:peak,levels
       };
-      if(peak<.005||peak>.0441){
-        throw new Error('R2359 physical titanium relief outside safe limits');
+      if(plateProfile){
+        (this.magPlateReliefR2360 ||= []).push(stats);
+      }else{
+        this.chassisReliefR2359=stats;
+      }
+      if(peak<(plateProfile?.0001:.005)||peak>(plateProfile?.0481:.0441)){
+        throw new Error('R2360 physical titanium relief outside safe limits');
       }
     }
 
@@ -2395,6 +2423,7 @@
         bevelSize:.030,bevelThickness:.040,curveSegments:8
       });
       topPlateGeo.center();
+      this.sculptMachinedChassisR2359(topPlateGeo,'plate');
 
       const crownL=new T.Mesh(topPlateGeo,this.silverMaterial);
       crownL.scale.set(.56,.90,.76);
@@ -2425,6 +2454,7 @@
         bevelSize:.026,bevelThickness:.034,curveSegments:8
       });
       sideGeo.center();
+      this.sculptMachinedChassisR2359(sideGeo,'plate');
 
       const left=new T.Mesh(sideGeo,this.silverMaterial);
       left.scale.set(.66,.70,.74);
@@ -2456,6 +2486,7 @@
         bevelSize:.025,bevelThickness:.034,curveSegments:8
       });
       lowerGeo.center();
+      this.sculptMachinedChassisR2359(lowerGeo,'plate');
       this.jaw=new T.Mesh(lowerGeo,this.mechMaterial);
       this.jaw.scale.set(.84,.86,.76);
       this.jaw.position.set(0,-.39,.28);
