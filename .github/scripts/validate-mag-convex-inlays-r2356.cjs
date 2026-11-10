@@ -11,7 +11,7 @@ const block=src.slice(start,end);
 for(const key of [
  "inlayGeometry.getAttribute('position')",
  'if(cz<=.016)continue;',
- 'const cross=Math.max(0,1-Math.pow(Math.min(1,Math.abs(cx)/.14),2));',
+ 'const cross=Math.max(0,1-Math.pow(Math.min(1,Math.abs(cx)/.10),2));',
  'const axial=Math.max(0,Math.sin(Math.PI*Math.max(0,',
  'const crown=.012*cross*axial;',
  'crownPosR2356.setZ(k,cz+crown);',
@@ -51,7 +51,7 @@ for(const dx of changes)assert(dx>=-1e-12&&dx<=.012+1e-12,
 assert(src.includes("plate.scale.set(.82,.84,1);"));
 assert(src.includes("plate.position.set(0,.045,.270);"));
 assert(src.includes("engraving.scale.set(.82,.84,1);"));
-assert(src.includes("engraving.position.set(0,.045,-.095);"));
+assert(src.includes("engraving.position.set(0,.045,-.101);"));
 assert(src.includes("this.bindMachinedMagSurface(material);"));
 assert(src.includes("const bodyScale=.001+.63*grow*mix(fade,.56,handoffCortex);"));
 assert(src.includes("this.updateDNA(t,time);"));
