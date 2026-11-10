@@ -1,5 +1,12 @@
 # FormatX – fejlesztési állapot
 
+## R2365 – Asztali MAG korábbi natív GPU-előkészítésének kísérlete (2026-11-10)
+
+- **Kiindulópont:** kizárólag az eredeti R2359 31/31 P0-GREEN változat, R2360/2361/2362/2363 elutasított kísérletek nélkül. R2364 változatlan R2359-en hat hidegindítással mért: mobil shader-medián 9,5 ms, geometria 23,9 ms, upload 1,3 ms, GPU-fence-visszaigazolás 293,5 ms; asztalin shader 9,7 ms, geometria 23,2 ms, upload 1,3 ms, GPU-fence 469,4 ms. A GPU-átadás bizonyítandó szűk keresztmetszet, ezek SwiftShader / Chromium adatok, nem fizikai Android FPS.
+- **R2365 kísérleti módosítás:** az eredeti R533 `applyPhase()` módszer 3. fázisában (`r>=0.572`, kb. 5,72s) csak a normál asztali filmnél egyetlen `requestCoreWarmup()` esemény indul. A korábbi asztali 0,72 progressziós tartalékidőzítés változatlanul megmarad, mert a meglévő latch garantálja az egyszeri végrehajtást. Mobil, reduced-motion, 10 s film, DNS, élő sejt, filmes MAG, permanens R326 WebGL, optikai irisz, 3D modellek, shader, anyag, 60fps governor és a 0,915 küszöbű látható crossfade változatlan.
+- **Szigorú bizonyítás:** új `validate-mag-desktop-warmup-r2365.cjs` ténylegesen végrehajtja a forrásban szereplő 3. fázis eseménykapuját minden mobile/reduced/phase kombinációval. A teljes változatlan P0 31 browser lépés és a 3× strict mobil+asztali Lighthouse kapu aktív. R2364 hat hidegindításos eredeti profilozója változtatás nélkül újrafut az R2365 ágon, így a GPU-fence és a várakozási eloszlás közvetlenül összevethető.
+- **Elfogadás:** valódi 0.50/5.50/7.50/9.25s Chromium PNG, headless és headed coldstart 3×, mobil elsőviewport, natív MAG képi folytonosság, 3×100/100/100/100 Lighthouse, TBT≤150ms, hardveres Android 60fps, felhasználói referencia, Worker/CSP/cache egyezés. Nem állítunk gyorsulást a mérések előtt. DRAFT / NO MERGE / NO DEPLOY.
+
 ## R2359 – Valódi, háromszögelt titánbordázat a MAG eredeti négyágú testén (2026-11-10)
 
 - **A tényleges hiányosság:** az R2358 9,25 mp-es Chromium-filmjében a széles, fémes MAG-karok még nagyrészt sík geometriai lapok; a felület shaderes színezése önmagában nem elég stúdió-minőséghez.
