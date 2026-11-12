@@ -38,4 +38,24 @@ assert.match(css,/left:0;right:0;transform:none/);
 assert.match(js,/track\.scrollLeft = 0/);
 assert.match(js,/innerWidth <= 440/);
 assert.match(css,/@media \(min-width:360px\) and \(max-width:440px\)/);
-console.log('FormatX MAG scroll R2204 static contract PASS');
+
+const previewPath=path.join(root,'docs/scifi-ui/mag-scroll-preview.html');
+const previewJs=path.join(root,'docs/scifi-ui/scripts/formatx-mag-scroll-preview-r2210.js');
+const previewCss=path.join(root,'docs/scifi-ui/styles/formatx-mag-scroll-preview-r2210.css');
+const preview=fs.readFileSync(previewPath,'utf8');
+const previewCode=fs.readFileSync(previewJs,'utf8');
+const previewStyles=fs.readFileSync(previewCss,'utf8');
+const previewSyntax=spawnSync(process.execPath,['--check',previewJs],{encoding:'utf8'});
+assert.equal(previewSyntax.status,0,previewSyntax.stderr);
+assert.equal((preview.match(/<canvas\b/g)||[]).length,1,'Preview must have one visible canvas');
+assert.equal((preview.match(/class="fxp-chapter\b/g)||[]).length,7);
+assert.match(preview,/formatx-mag-genesis-three-r1280\.js/);
+assert.match(preview,/formatx-mag-reference-film-r649\.js/);
+assert.match(previewCode,/FormatXMagGenesisThreeR1280\.attach/);
+assert.match(previewCode,/FormatXMagReferenceFilmR649\.attach/);
+assert.match(previewCode,/requestAnimationFrame\(frame\)/);
+assert.match(previewCode,/addEventListener\('scroll',onScroll,\{passive:true\}\)/);
+assert.match(previewStyles,/prefers-reduced-motion:reduce/);
+assert.match(preview,/name="robots" content="noindex,nofollow"/);
+
+console.log('FormatX MAG scroll R2210 static contract PASS');
