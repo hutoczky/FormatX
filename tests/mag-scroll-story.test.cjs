@@ -15,6 +15,9 @@ assert.equal(syntax.status,0,syntax.stderr);
 assert.match(homepage,/formatx-mag-scroll-story-r2202\.js/);
 assert.match(homepage,/formatx-mag-scroll-story-r2202\.css/);
 assert.equal((homepage.match(/data-fx-mag-story-r2202="true"/g)||[]).length,2);
+assert.ok(homepage.includes('data-fx-mag-story-r2202="true" data-fx-r487-deferred-style="true"'));
+assert.match(js,/formatx:deferredcssready/);
+assert.ok(js.indexOf('const bounds = chapters.map') < js.indexOf('updates.forEach'), 'Layout reads must precede DOM writes');
 for(const id of ['hero','experience','capabilities','pricing','system','network','resources']){
   assert.ok(homepage.includes('id="'+id+'"'),id+' section missing');
   assert.ok(js.includes("['"+id+"'"),id+' timeline chapter missing');
