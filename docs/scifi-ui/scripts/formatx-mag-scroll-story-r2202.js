@@ -85,6 +85,10 @@
     if (destroyed) return;
     if (document.hidden) return;
     const vh = Math.max(1,innerHeight);
+    const footer = document.querySelector('footer.site-footer');
+    const footerRect = footer?.getBoundingClientRect();
+    // Keep the fixed mobile chapter rail away from the footer actions.
+    rail.hidden = Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
     const center = vh * .52;
     let nearest = 0, closest = Infinity;
     chapters.forEach((chapter,index) => {
