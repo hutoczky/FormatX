@@ -177,3 +177,34 @@ html[data-fx-mag-story-chapter="network"] #network::before{
   }
   .fx-mag-story-rail__counter {display:none}
 }
+
+/* R2208: narrative data reveal — composited travel, not layout jumps.
+   Existing interactive content, anchors and reduced-motion accessibility stay intact. */
+@media(min-width:901px) and (prefers-reduced-motion:no-preference){
+  html[data-fx-mag-story="r2202"] :is(
+    #experience .flow,
+    #capabilities .cards,
+    #pricing .pricing,
+    #system .system-grid,
+    #network .fx-net-grid,
+    #resources .release-layout
+  ){
+    translate:0 var(--fx-mag-story-offset,0px);
+    transition:translate 160ms ease-out;
+  }
+  html[data-fx-mag-story="r2202"] :is(
+    #capabilities .cards > .card,
+    #pricing .pricing > .price-card,
+    #system .system-grid > article
+  ){
+    translate:0 calc(var(--fx-mag-story-offset,0px) * .32);
+    transition:translate 180ms ease-out;
+  }
+}
+/* Full motion-free fallback leaves every section at its natural position. */
+@media(prefers-reduced-motion:reduce){
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter,
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter :is(.flow,.cards,.pricing,.system-grid,.fx-net-grid,.release-layout){
+    translate:none!important;
+  }
+}
