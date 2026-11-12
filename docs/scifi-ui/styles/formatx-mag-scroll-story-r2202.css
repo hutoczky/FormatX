@@ -89,3 +89,29 @@ html[data-fx-mag-story="r2202"] .fx-mag-story-chapter{
   .fx-mag-story-chapter{transform:none!important}
 }
 @media print{.fx-mag-story-rail{display:none!important}}
+
+/* R2203: restrained scene-specific lighting on the real page surface.
+   No generated images, canvas duplication, scroll interception or layout shift. */
+html[data-fx-mag-story="r2202"] #main-content{
+  isolation:isolate;
+}
+html[data-fx-mag-story="r2202"] .fx-mag-story-chapter::before{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  inset:0;opacity:.40;
+  background:radial-gradient(ellipse 52% 34% at 52% 39%,
+    rgba(37,128,154,.12),transparent 77%);
+}
+html[data-fx-mag-story-chapter="experience"] #experience::before,
+html[data-fx-mag-story-chapter="capabilities"] #capabilities::before{
+  background:radial-gradient(ellipse 48% 42% at 52% 36%,rgba(62,175,175,.16),transparent 78%);
+}
+html[data-fx-mag-story-chapter="system"] #system::before,
+html[data-fx-mag-story-chapter="network"] #network::before{
+  background:radial-gradient(ellipse 55% 43% at 60% 44%,rgba(79,109,182,.13),transparent 78%);
+}
+@media(max-width:900px),(pointer:coarse){
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter::before{opacity:.20}
+}
+@media(max-height:460px){
+  .fx-mag-story-rail{display:none}
+}
