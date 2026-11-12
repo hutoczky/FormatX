@@ -311,6 +311,9 @@
   }
   function drawLiteScene(ctx,r,time,target,radiusCap){
     const t=r*10,cx=640+(target?.x!=null?(target.x-640)*smooth((t-9.72)/.28):0),cy=360+(target?.y!=null?(target.y-360)*smooth((t-9.72)/.28):0);
+    const phase=t<2.58?'genome':t<5.58?'embryo':'assembly';
+    if(document.documentElement.dataset.fxMagFallbackChapterR2207!==phase)
+      document.documentElement.dataset.fxMagFallbackChapterR2207=phase;
     if(!MOBILE){ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);}
     const chamber=ctx.createRadialGradient(cx,cy,12,cx,cy,560);
     chamber.addColorStop(0,'rgba(88,154,169,.23)');
