@@ -86,5 +86,30 @@ const profiles = [
         console.log('MAG_SCROLL_BROWSER_PASS',JSON.stringify({profile:profile.name,initial,errors}));
       } finally {await context.close();}
     }
+    // The immersive preview must keep one canvas alive across all chapters.
+    const previewContext=await browser.newContext({
+      viewport:{width:1440,height:900},reducedMotion:'reduce',locale:'hu-HU'
+    });
+    try {
+      const preview=await previewContext.newPage();
+      const previewUrl=new URL('/scifi-ui/mag-scroll-preview.html',base).href;
+      await preview.goto(previewUrl,{waitUntil:'domcontentloaded',timeout:60000});
+      await preview.waitForFunction(()=>
+        typeof window.__FORMATX_MAG_SCROLL_PREVIEW__==='function' &&
+        document.documentElement.dataset.fxpRuntime!=='initialising',
+        null,{timeout:45000});
+      const before=await preview.evaluate(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__());
+      assert.equal(before.canvases,1,'Multiple canvas nodes on MAG preview');
+      assert.equal(before.chapters,7,'Incomplete immersive MAG chapters');
+      await preview.evaluate(()=>
+        document.getElementById('plan').scrollIntoView({behavior:'instant',block:'center'}));
+      await preview.waitForFunction(()=>
+        document.documentElement.dataset.fxpChapter==='plan',
+        null,{timeout:15000});
+      const after=await preview.evaluate(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__());
+      assert.equal(after.canvases,1,'MAG renderer was duplicated after scroll');
+      assert.equal(after.chapter,'plan','Camera chapter navigation did not advance');
+      console.log('MAG_SINGLE_WORLD_BROWSER_PASS',JSON.stringify({before,after}));
+    } finally {await previewContext.close();}
   } finally {await browser.close();}
 })().catch(error=>{console.error(error.stack||String(error));process.exitCode=1;});
