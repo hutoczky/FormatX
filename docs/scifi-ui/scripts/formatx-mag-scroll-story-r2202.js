@@ -122,8 +122,8 @@
         else chapter.link.removeAttribute('aria-current');
       });
       rail.querySelector('.fx-mag-story-rail__counter').textContent=chapters[nearest].num+' / '+String(chapters.length).padStart(2,'0');
-      if (innerWidth < 360) {
-        // At 320px all seven 44px targets fit; reset any stale horizontal offset.
+      if (innerWidth <= 440) {
+        // On narrow phones all seven 44px targets fit; clear residual scroll offsets.
         track.scrollLeft = 0;
       } else if (matchMedia('(max-width:900px),(pointer:coarse)').matches) {
         const link = chapters[nearest].link;
