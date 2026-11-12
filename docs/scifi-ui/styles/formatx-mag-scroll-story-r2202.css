@@ -141,7 +141,7 @@ html[data-fx-mag-story-chapter="network"] #network::before{
 @media(max-width:359px) and (pointer:coarse),
        (max-width:359px) and (max-width:900px){
   .fx-mag-story-rail{
-    left:0;right:0;bottom:max(0px,env(safe-area-inset-bottom));
+    left:0;right:0;transform:none;bottom:max(0px,env(safe-area-inset-bottom));
     width:100vw;max-width:100vw;
     padding:4px 5px;gap:0;
     border-left:0;border-right:0;border-radius:0;
