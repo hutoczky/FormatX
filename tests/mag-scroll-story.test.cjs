@@ -51,7 +51,8 @@ assert.equal((preview.match(/<canvas\b/g)||[]).length,1,'Preview must have one v
 assert.equal((preview.match(/class="fxp-chapter\b/g)||[]).length,7);
 assert.match(preview,/formatx-mag-genesis-three-r1280\.js/);
 assert.match(preview,/formatx-mag-reference-film-r649\.js/);
-assert.match(previewCode,/FormatXMagGenesisThreeR1280\.attach/);
+assert.match(previewCode,/const owner=window\.FormatXMagGenesisThreeR1280/);
+assert.match(previewCode,/renderer=await owner\.attach\(canvas,getTarget\)/);
 assert.match(previewCode,/FormatXMagReferenceFilmR649\.attach/);
 assert.match(previewCode,/requestAnimationFrame\(frame\)/);
 assert.match(previewCode,/addEventListener\('scroll',onScroll,\{passive:true\}\)/);
