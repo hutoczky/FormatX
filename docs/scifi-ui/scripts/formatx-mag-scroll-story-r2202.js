@@ -68,6 +68,7 @@
       const exit = clamp(r.bottom/(vh*.65));
       const visibility = reduced.matches ? 1 : Math.min(enter,exit);
       chapter.element.style.setProperty('--fx-mag-story-visibility',visibility.toFixed(3));
+      chapter.element.style.setProperty('--fx-mag-story-offset',(reduced.matches ? 0 : (1-visibility)*22).toFixed(1)+'px');
       chapter.element.style.setProperty('--fx-mag-story-local',clamp((center-r.top)/Math.max(1,r.height)).toFixed(3));
     });
     const first = chapters[0].element.getBoundingClientRect();
