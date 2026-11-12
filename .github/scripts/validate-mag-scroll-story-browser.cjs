@@ -106,7 +106,9 @@ const profiles = [
       await preview.waitForFunction(()=>
         document.documentElement.dataset.fxpChapter==='plan',
         null,{timeout:15000});
+      await preview.waitForFunction(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__().filmProgress>.9,null,{timeout:10000});
       const after=await preview.evaluate(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__());
+      assert.ok(after.filmProgress>.9,'MAG must be assembled by the system chapters');
       assert.equal(after.canvases,1,'MAG renderer was duplicated after scroll');
       assert.equal(after.chapter,'plan','Camera chapter navigation did not advance');
       console.log('MAG_SINGLE_WORLD_BROWSER_PASS',JSON.stringify({before,after}));
