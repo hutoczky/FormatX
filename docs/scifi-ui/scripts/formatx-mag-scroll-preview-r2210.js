@@ -13,6 +13,20 @@
   if (!(canvas instanceof HTMLCanvasElement) || sections.length!==7 || links.length!==7) return;
   root.dataset.fxpRuntime='initialising';
   const clamp=(value,min=0,max=1)=>Math.min(max,Math.max(min,value));
+  // Scroll is native and linear; the ONE existing Three.js film is
+  // sequenced non-linearly so the MAG is assembled by chapter 03.
+  const filmKeys=[[0,0],[.17,.42],[.34,.82],[.50,.93],[.67,.958],[.84,.978],[1,1]];
+  function filmProgress(scrollProgress){
+    const p=clamp(scrollProgress);
+    for(let i=1;i<filmKeys.length;i++){
+      if(p<=filmKeys[i][0]){
+        const a=filmKeys[i-1],b=filmKeys[i],u=clamp((p-a[0])/(b[0]-a[0]));
+        const eased=u*u*(3-2*u);
+        return a[1]+(b[1]-a[1])*eased;
+      }
+    }
+    return 1;
+  }
   const labels=['GENESIS','SEJT','MAG','ÉRZÉKELÉS','TERV','ELLENŐRZÉS','JELADÓ'];
   let renderer=null,kind='static',progress=0,target=0,previous=0,active=-1;
   let raf=0,ambientTimer=0,lastRender=0,lastNow=0,lastInput=0,disposed=false;
@@ -65,20 +79,24 @@
   function updateChapters(){
     const center=innerHeight*.52;
     let best=0,distance=Infinity;
-    for(let index=0;index<sections.length;index++){
-      const rect=sections[index].getBoundingClientRect();
+    const geometry=sections.map(section=>section.getBoundingClientRect());
+    const states=geometry.map((rect,index)=>{
       const d=center<rect.top?rect.top-center:center>rect.bottom?center-rect.bottom:0;
       if(d<distance){distance=d;best=index;}
       const exposure=clamp((innerHeight-rect.top)/(innerHeight*.75))*
         clamp(rect.bottom/(innerHeight*.75));
-      const copy=sections[index].querySelector('.fxp-copy');
-      if(copy){
-        copy.style.setProperty('--fxp-copy-opacity',
-          (reduced.matches?1:.80+.20*exposure).toFixed(3));
-        copy.style.setProperty('--fxp-copy-offset',
-          (reduced.matches?0:(1-exposure)*18).toFixed(1)+'px');
-      }
-    }
+      return {
+        opacity:(reduced.matches?1:.80+.20*exposure).toFixed(3),
+        offset:(reduced.matches?0:(1-exposure)*18).toFixed(1)+'px'
+      };
+    });
+    // Batch writes after reading the full geometry snapshot.
+    sections.forEach((section,index)=>{
+      const copy=section.querySelector('.fxp-copy');
+      if(!copy)return;
+      copy.style.setProperty('--fxp-copy-opacity',states[index].opacity);
+      copy.style.setProperty('--fxp-copy-offset',states[index].offset);
+    });
     if(active!==best){
       active=best;
       links.forEach((link,index)=>{
@@ -110,7 +128,7 @@
     if(renderer && now-lastRender>=interval){
       try{
         const start=performance.now();
-        renderer.draw(progress,now);
+        renderer.draw(filmProgress(progress),now);
         const cost=performance.now()-start;
         movingAverage=movingAverage ? movingAverage*.85+cost*.15 : cost;
         if(movingAverage>30)slowFrames=Math.min(30,slowFrames+1);
@@ -163,7 +181,7 @@
   addEventListener('pagehide',cleanup,{once:true});
   window.__FORMATX_MAG_SCROLL_PREVIEW__=()=>({
     version:'r2210',renderer:kind,state:root.dataset.fxpRuntime,
-    chapter:sections[active]?.id,progress,chapters:sections.length,canvases:document.querySelectorAll('#fxp-world').length
+    chapter:sections[active]?.id,progress,filmProgress:filmProgress(progress),chapters:sections.length,canvases:document.querySelectorAll('#fxp-world').length
   });
   updateChapters();
   attachRenderer();
