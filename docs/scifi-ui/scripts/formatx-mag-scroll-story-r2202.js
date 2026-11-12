@@ -39,6 +39,8 @@
 
   const clamp = (n,a=0,b=1) => Math.max(a,Math.min(b,n));
   const links = chapters.map(chapter => chapter.link);
+  const footer = document.querySelector('footer.site-footer');
+  const mobileLayout = matchMedia('(max-width:900px),(pointer:coarse)');
   let scheduled = false;
   let active = -1;
   let eased = 0;
@@ -85,27 +87,36 @@
     if (destroyed) return;
     if (document.hidden) return;
     const vh = Math.max(1,innerHeight);
-    const footer = document.querySelector('footer.site-footer');
+    // Geometry READ pass: one layout snapshot before any style writes.
     const footerRect = footer?.getBoundingClientRect();
-    // Keep the fixed mobile chapter rail away from the footer actions.
-    rail.hidden = Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
+    const bounds = chapters.map(chapter => chapter.element.getBoundingClientRect());
+    const first = bounds[0];
+    const last = bounds[bounds.length-1];
     const center = vh * .52;
     let nearest = 0, closest = Infinity;
-    chapters.forEach((chapter,index) => {
-      const r = chapter.element.getBoundingClientRect();
+    const updates = bounds.map((r,index) => {
       const distance = center < r.top ? r.top-center : center > r.bottom ? center-r.bottom : 0;
       if (distance < closest) {closest=distance;nearest=index;}
       const enter = clamp((vh-r.top)/(vh*.85));
       const exit = clamp(r.bottom/(vh*.65));
       const visibility = reduced.matches ? 1 : Math.min(enter,exit);
-      chapter.element.style.setProperty('--fx-mag-story-visibility',visibility.toFixed(3));
-      chapter.element.style.setProperty('--fx-mag-story-offset',(reduced.matches ? 0 : (1-visibility)*22).toFixed(1)+'px');
-      chapter.element.style.setProperty('--fx-mag-story-local',clamp((center-r.top)/Math.max(1,r.height)).toFixed(3));
+      return {
+        visibility:visibility.toFixed(3),
+        offset:(reduced.matches ? 0 : (1-visibility)*22).toFixed(1)+'px',
+        local:clamp((center-r.top)/Math.max(1,r.height)).toFixed(3)
+      };
     });
-    const first = chapters[0].element.getBoundingClientRect();
-    const last = chapters[chapters.length-1].element.getBoundingClientRect();
     const total = Math.max(1,(last.bottom-first.top)-vh);
     const target = clamp((-first.top)/total);
+    // Geometry WRITE pass: no subsequent getBoundingClientRect in this frame.
+    const hideRail = Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
+    if (rail.hidden !== hideRail) rail.hidden = hideRail;
+    updates.forEach((update,index) => {
+      const node = chapters[index].element;
+      node.style.setProperty('--fx-mag-story-visibility',update.visibility);
+      node.style.setProperty('--fx-mag-story-offset',update.offset);
+      node.style.setProperty('--fx-mag-story-local',update.local);
+    });
     driveCore(nearest,target,first);
     const elapsed = Math.min(64,Math.max(0,now-(lastFrame||now)));
     lastFrame=now;
@@ -125,7 +136,7 @@
       if (innerWidth <= 440) {
         // On narrow phones all seven 44px targets fit; clear residual scroll offsets.
         track.scrollLeft = 0;
-      } else if (matchMedia('(max-width:900px),(pointer:coarse)').matches) {
+      } else if (mobileLayout.matches) {
         const link = chapters[nearest].link;
         const wanted = link.offsetLeft + link.offsetWidth*.5 - track.clientWidth*.5;
         track.scrollLeft = Math.max(0,wanted);
