@@ -55,6 +55,7 @@ assert.match(previewCode,/const owner=window\.FormatXMagGenesisThreeR1280/);
 assert.match(previewCode,/renderer=await owner\.attach\(canvas,getTarget\)/);
 assert.match(previewCode,/FormatXMagReferenceFilmR649\.attach/);
 assert.match(previewCode,/requestAnimationFrame\(frame\)/);
+assert.match(previewCode,/filmKeys=\[\[0,0\],\[\.17,\.42\],\[\.34,\.82\]/);
 assert.match(previewCode,/addEventListener\('scroll',onScroll,\{passive:true\}\)/);
 assert.match(previewStyles,/prefers-reduced-motion:reduce/);
 assert.match(preview,/name="robots" content="noindex,nofollow"/);
