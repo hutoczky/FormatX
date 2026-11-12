@@ -111,7 +111,45 @@ const profiles = [
       assert.ok(after.filmProgress>.9,'MAG must be assembled by the system chapters');
       assert.equal(after.canvases,1,'MAG renderer was duplicated after scroll');
       assert.equal(after.chapter,'plan','Camera chapter navigation did not advance');
+      const safe=await preview.evaluate(()=>{
+        const text=document.querySelector('#cell .fxp-copy').getBoundingClientRect();
+        const nav=document.querySelector('.fxp-rail').getBoundingClientRect();
+        return {textRight:text.right,railLeft:nav.left};
+      });
+      assert.ok(safe.textRight+8<safe.railLeft,
+        'Desktop MAG chapter rail covers right-side editorial text: '+JSON.stringify(safe));
       console.log('MAG_SINGLE_WORLD_BROWSER_PASS',JSON.stringify({before,after}));
     } finally {await previewContext.close();}
+    // 320px portrait: one persistent canvas and seven accessible targets.
+    const phoneWorld=await browser.newContext({
+      viewport:{width:320,height:568},isMobile:true,hasTouch:true,
+      reducedMotion:'reduce',locale:'hu-HU'
+    });
+    try {
+      const phone=await phoneWorld.newPage();
+      await phone.goto(new URL('/scifi-ui/mag-scroll-preview.html',base).href,
+        {waitUntil:'domcontentloaded',timeout:60000});
+      await phone.waitForFunction(()=>document.documentElement.dataset.fxpRuntime!=='initialising',
+        null,{timeout:45000});
+      const touch=await phone.evaluate(()=>({
+        links:[...document.querySelectorAll('.fxp-rail a')].map(a=>{
+          const r=a.getBoundingClientRect();
+          return {left:r.left,right:r.right,width:r.width,height:r.height};
+        }),
+        canvases:document.querySelectorAll('#fxp-world').length
+      }));
+      assert.equal(touch.canvases,1,'Preview mobile renderer duplicated');
+      assert.equal(touch.links.length,7);
+      for(const [index,link] of touch.links.entries()){
+        assert.ok(link.width>=44&&link.height>=44&&link.left>=-1&&link.right<=321,
+          'Preview 320px target clipped: '+index+': '+JSON.stringify(link));
+      }
+      await phone.evaluate(()=>document.querySelector('#core').scrollIntoView({behavior:'instant',block:'center'}));
+      await phone.waitForFunction(()=>document.documentElement.dataset.fxpChapter==='core',
+        null,{timeout:15000});
+      await phone.waitForFunction(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__().filmProgress>.78,
+        null,{timeout:10000});
+      console.log('MAG_SINGLE_WORLD_MOBILE_PASS',JSON.stringify(touch));
+    } finally {await phoneWorld.close();}
   } finally {await browser.close();}
 })().catch(error=>{console.error(error.stack||String(error));process.exitCode=1;});
