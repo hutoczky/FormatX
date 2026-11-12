@@ -41,13 +41,19 @@
       let context=null;
       try{context=canvas.getContext('2d')}catch(_){}
       if(!context)replaceCanvas();
-      renderer=window.FormatXMagReferenceFilmR649.attach(canvas,getTarget);
+      try{renderer=window.FormatXMagReferenceFilmR649.attach(canvas,getTarget);}
+      catch(error){console.error('MAG scroll Canvas2D fallback:',error);renderer=null;}
       if(renderer)kind='canvas2d';
     }
+    if(disposed){try{renderer?.destroy?.()}catch(_){}return;}
     root.dataset.fxpRenderer=kind;
     root.dataset.fxpRuntime=renderer?'ready':'static-fallback';
     if(!renderer)canvas.style.background='radial-gradient(ellipse at 50% 46%,#15333d,#02080c 73%)';
     canvas.addEventListener('webglcontextlost',onContextLost,{passive:false});
+    canvas.addEventListener('webglcontextrestored',()=>{
+      try{renderer?.destroy?.()}catch(_){}
+      renderer=null;kind='static';replaceCanvas();attachRenderer();
+    },{once:true});
     schedule();
   }
   function onContextLost(event){
@@ -98,7 +104,9 @@
     const blend=reduced.matches?1:1-Math.exp(-dt/95);
     progress+= (target-progress)*blend;
     const activeMotion=now-lastInput<1100 || Math.abs(target-progress)>.0015;
-    const interval=mobile.matches?(activeMotion?1000/30:250):(activeMotion?1000/60:180);
+    const interval=mobile.matches?
+      (activeMotion?(slowFrames>10?1000/20:1000/30):250):
+      (activeMotion?(slowFrames>10?1000/30:1000/60):180);
     if(renderer && now-lastRender>=interval){
       try{
         const start=performance.now();
@@ -108,7 +116,8 @@
         if(movingAverage>30)slowFrames=Math.min(30,slowFrames+1);
         else slowFrames=Math.max(0,slowFrames-1);
         lastRender=now;
-        root.dataset.fxpQuality=slowFrames>10?'constrained':'adaptive';
+        const quality=slowFrames>10?'constrained':'adaptive';
+        if(root.dataset.fxpQuality!==quality)root.dataset.fxpQuality=quality;
       }catch(error){
         console.error('MAG scroll preview renderer:',error);
         root.dataset.fxpRuntime='render-failed';
