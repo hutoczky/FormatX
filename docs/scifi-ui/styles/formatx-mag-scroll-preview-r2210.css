@@ -104,3 +104,8 @@ a:focus-visible{outline:2px solid var(--fxp-cyan);outline-offset:5px}
  .fxp-copy{opacity:1!important;translate:none!important}
  html{scroll-behavior:auto}
 }
+
+/* Protect right-hand story text from the persistent spatial chapter rail. */
+@media(min-width:901px){
+  .fxp-chapter--right .fxp-copy{margin-right:clamp(90px,8vw,150px)}
+}
