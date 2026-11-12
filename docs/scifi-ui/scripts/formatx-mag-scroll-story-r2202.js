@@ -44,6 +44,33 @@
   let eased = 0;
   let lastFrame = 0;
   let destroyed = false;
+  let lastCoreTurn = 0;
+  let lastCoreScene = -1;
+  let lastCore = null;
+  const coreAvailable = () => {
+    const core = window.FormatXLivingCore || window.FormatXCoreMobileV69;
+    return core && typeof core.rotateBy === 'function' ? core : null;
+  };
+  function driveCore(sceneIndex, progress, heroRect) {
+    if (reduced.matches || document.hidden) return;
+    // Never wake an offscreen WebGL renderer.
+    if (heroRect.bottom <= 0 || heroRect.top >= innerHeight) return;
+    const core = coreAvailable();
+    if (!core) return;
+    if (lastCore !== core) {
+      lastCore = core;
+      lastCoreTurn = progress;
+      lastCoreScene = sceneIndex;
+    }
+    const difference = clamp(progress - lastCoreTurn, -.018, .018);
+    lastCoreTurn = progress;
+    if (Math.abs(difference) > .00008)
+      core.rotateBy(difference * 170, difference * -32, 'mag-scroll-r2203');
+    if (sceneIndex !== lastCoreScene) {
+      lastCoreScene = sceneIndex;
+      core.requestRender?.();
+    }
+  }
 
   function updateLabels() {
     const english = root.lang.toLowerCase().startsWith('en');
@@ -75,6 +102,7 @@
     const last = chapters[chapters.length-1].element.getBoundingClientRect();
     const total = Math.max(1,(last.bottom-first.top)-vh);
     const target = clamp((-first.top)/total);
+    driveCore(nearest,target,first);
     const elapsed = Math.min(64,Math.max(0,now-(lastFrame||now)));
     lastFrame=now;
     eased = reduced.matches ? target : eased+(target-eased)*(1-Math.exp(-elapsed/110));
@@ -108,6 +136,9 @@
   addEventListener('scroll',request,{passive:true});
   addEventListener('resize',request,{passive:true});
   addEventListener('pageshow',request);
+  addEventListener('formatx:loop',request,{passive:true});
+  addEventListener('formatx:loopgeometryrefresh',request,{passive:true});
+  addEventListener('formatx:real3dready',request,{passive:true});
   document.addEventListener('visibilitychange',request);
   reduced.addEventListener?.('change',request);
   updateLabels();
@@ -116,6 +147,7 @@
   // Exposed only for deterministic visual and interaction smoke tests.
   window.__FORMATX_MAG_STORY_STATUS__ = () => ({
     version:'r2202',active:chapters[active]?.id||null,progress:eased,
-    chapters:chapters.length,reducedMotion:reduced.matches,links:links.length
+    chapters:chapters.length,reducedMotion:reduced.matches,links:links.length,
+    coreConnected:Boolean(coreAvailable()),coreScrollOwner:'native-r326-api'
   });
 })();
