@@ -157,3 +157,23 @@ html[data-fx-mag-story-chapter="network"] #network::before{
   }
   .fx-mag-story-rail__counter{display:none}
 }
+
+/* R2206: 360–440px rail is fixed in place; all seven links remain in viewport.
+   No horizontal scrolling is needed at these sizes. */
+@media (min-width:360px) and (max-width:440px) {
+  .fx-mag-story-rail {
+    left:0;right:0;transform:none;
+    width:100vw;max-width:100vw;box-sizing:border-box;
+    padding:4px 8px;gap:0;
+    border-left:0;border-right:0;border-radius:0;
+  }
+  .fx-mag-story-rail__track {
+    flex:1 1 100%;width:100%;justify-content:space-between;
+    gap:0;overflow-x:visible;scroll-snap-type:none;
+  }
+  .fx-mag-story-rail a {
+    flex:0 0 44px;min-width:44px;min-height:44px;
+    width:44px;height:44px;
+  }
+  .fx-mag-story-rail__counter {display:none}
+}
