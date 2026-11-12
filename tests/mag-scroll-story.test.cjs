@@ -33,4 +33,6 @@ assert.match(css,/min-height:44px/);
 assert.match(css,/overflow-x:auto/);
 assert.match(css,/left:0;right:0;transform:none/);
 assert.match(js,/track\.scrollLeft = 0/);
+assert.match(js,/innerWidth <= 440/);
+assert.match(css,/@media \(min-width:360px\) and \(max-width:440px\)/);
 console.log('FormatX MAG scroll R2204 static contract PASS');
