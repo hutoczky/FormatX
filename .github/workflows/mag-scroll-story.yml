@@ -1,0 +1,23 @@
+name: FormatX MAG scroll contract
+on:
+  pull_request:
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-scroll-story-r2202.js'
+      - 'docs/scifi-ui/styles/formatx-mag-scroll-story-r2202.css'
+      - 'tests/mag-scroll-story.test.cjs'
+      - '.github/workflows/mag-scroll-story.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate MAG scroll integration and JavaScript syntax
+        run: node tests/mag-scroll-story.test.cjs
