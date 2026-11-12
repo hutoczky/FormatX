@@ -24,6 +24,9 @@
   rail.setAttribute('aria-label', 'MAG történet navigáció');
   rail.innerHTML = '<span class="fx-mag-story-rail__caption" aria-hidden="true">MAG / SYSTEM JOURNEY</span><div class="fx-mag-story-rail__track"></div><span class="fx-mag-story-rail__counter" aria-hidden="true"></span>';
   const track = rail.querySelector('.fx-mag-story-rail__track');
+  const styleLink = document.querySelector('link[data-fx-mag-story-r2202]');
+  const styleReady = () => !styleLink || (styleLink.media!=='print' && Boolean(styleLink.sheet));
+  rail.hidden = true;
   chapters.forEach(chapter => {
     chapter.element.classList.add('fx-mag-story-chapter');
     chapter.element.style.setProperty('--fx-mag-story-index', chapter.num);
@@ -109,7 +112,7 @@
     const total = Math.max(1,(last.bottom-first.top)-vh);
     const target = clamp((-first.top)/total);
     // Geometry WRITE pass: no subsequent getBoundingClientRect in this frame.
-    const hideRail = Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
+    const hideRail = !styleReady() || Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
     if (rail.hidden !== hideRail) rail.hidden = hideRail;
     updates.forEach((update,index) => {
       const node = chapters[index].element;
@@ -162,6 +165,8 @@
   addEventListener('formatx:loop',request,{passive:true});
   addEventListener('formatx:loopgeometryrefresh',request,{passive:true});
   addEventListener('formatx:real3dready',request,{passive:true});
+  addEventListener('formatx:deferredcssready',request,{passive:true});
+  styleLink?.addEventListener('load',request,{once:true});
   document.addEventListener('visibilitychange',request);
   reduced.addEventListener?.('change',request);
   updateLabels();
