@@ -29,6 +29,10 @@ const profiles = [
         await page.waitForFunction(
           () => typeof window.__FORMATX_MAG_STORY_STATUS__ === 'function',
           null,{timeout:30000});
+        await page.waitForFunction(() => {
+          const nav=document.querySelector('.fx-mag-story-rail');
+          return nav && !nav.hidden && getComputedStyle(nav).position==='fixed';
+        },null,{timeout:12000});
         const initial=await page.evaluate(()=>{
           const nav=document.querySelector('.fx-mag-story-rail');
           return {
