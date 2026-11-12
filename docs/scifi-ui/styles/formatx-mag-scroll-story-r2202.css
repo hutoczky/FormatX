@@ -118,3 +118,20 @@ html[data-fx-mag-story-chapter="network"] #network::before{
 
 /* Preserve footer actions and accessibility on compact viewports. */
 .fx-mag-story-rail[hidden]{display:none!important}
+
+/* R2204: WCAG-size navigation targets, horizontally scrollable at 320px. */
+@media(max-width:900px),(pointer:coarse){
+  .fx-mag-story-rail__track{
+    display:flex;flex:1 1 auto;min-width:0;max-width:100%;
+    overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+    overscroll-behavior-x:contain;scroll-snap-type:x proximity;
+    gap:2px;
+  }
+  .fx-mag-story-rail__track::-webkit-scrollbar{display:none}
+  .fx-mag-story-rail a{
+    flex:0 0 44px;min-width:44px;min-height:44px;
+    scroll-snap-align:center;
+  }
+  .fx-mag-story-rail__counter{flex:0 0 auto}
+  .fx-mag-story-rail{width:min(440px,calc(100vw - 24px));}
+}
