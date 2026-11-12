@@ -122,7 +122,10 @@
         else chapter.link.removeAttribute('aria-current');
       });
       rail.querySelector('.fx-mag-story-rail__counter').textContent=chapters[nearest].num+' / '+String(chapters.length).padStart(2,'0');
-      if (matchMedia('(max-width:900px),(pointer:coarse)').matches) {
+      if (innerWidth < 360) {
+        // At 320px all seven 44px targets fit; reset any stale horizontal offset.
+        track.scrollLeft = 0;
+      } else if (matchMedia('(max-width:900px),(pointer:coarse)').matches) {
         const link = chapters[nearest].link;
         const wanted = link.offsetLeft + link.offsetWidth*.5 - track.clientWidth*.5;
         track.scrollLeft = Math.max(0,wanted);
