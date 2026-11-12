@@ -29,4 +29,6 @@ assert.match(js,/footerRect\.top < vh/);
 assert.match(css,/\.fx-mag-story-rail\[hidden\]\{display:none!important\}/);
 assert.match(css,/@media\(max-width:900px\)/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
-console.log('FormatX MAG scroll R2203 static contract PASS');
+assert.match(css,/min-height:44px/);
+assert.match(css,/overflow-x:auto/);
+console.log('FormatX MAG scroll R2204 static contract PASS');
