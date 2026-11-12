@@ -115,3 +115,6 @@ html[data-fx-mag-story-chapter="network"] #network::before{
 @media(max-height:460px){
   .fx-mag-story-rail{display:none}
 }
+
+/* Preserve footer actions and accessibility on compact viewports. */
+.fx-mag-story-rail[hidden]{display:none!important}
