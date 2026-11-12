@@ -61,6 +61,7 @@ const CASES=[
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
             material:root.dataset.fxMagFallbackMaterialR2104||'',
+            chapter:root.dataset.fxMagFallbackChapterR2207||'',
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             width:innerWidth,height:innerHeight,
             canvasRect:{width:size?.width||0,height:size?.height||0},
@@ -86,8 +87,17 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
-        assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
-          'R2104 cinema material did not render in original phone canvas');
+        if (shot.second < 5.58) {
+          assert.equal(info.chapter,'embryo',
+            'Early film should retain its genuine cellular stage');
+          assert.equal(info.material,'',
+            'Permanent smoked metal must not replace the embryo prematurely');
+        } else {
+          assert.equal(info.chapter,'assembly',
+            'Final film should reach mechanical chassis assembly');
+          assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
+            'Final MAG should render real smoked-chrome material');
+        }
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
@@ -104,8 +114,11 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2113-layered-chassis'),
-          'The Android fallback is loading an obsolete renderer instead of R2113');
+        assert.ok(info.loader.includes('r2182-studio-depth-first-genome'),
+          'The Android fallback is not loading the current R2182 cinema');
+        assert.ok(fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js','utf8')
+          .includes('R2113: machined radial chassis'),
+          'Current renderer lost its physically layered R2113 chassis');
         records.push({shot,info});
       }finally{await context.close()}
     }
