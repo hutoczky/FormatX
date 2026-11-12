@@ -59,7 +59,7 @@ html[data-fx-mag-story="r2202"] .fx-mag-story-chapter{
   html[data-fx-mag-story="r2202"] .fx-mag-story-chapter:not(#hero) > header,
   html[data-fx-mag-story="r2202"] .fx-mag-story-chapter:not(#hero) > .section-header {
     opacity:calc(.72 + .28 * var(--fx-mag-story-visibility,1));
-    transform:translate3d(0,calc((1 - var(--fx-mag-story-visibility,1))*22px),0);
+    transform:translate3d(0,var(--fx-mag-story-offset,0px),0);
     transition:opacity .15s linear;will-change:transform;
   }
   html[data-fx-mag-story="r2202"] #hero .hero-space{
