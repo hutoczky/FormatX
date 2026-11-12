@@ -122,6 +122,11 @@
         else chapter.link.removeAttribute('aria-current');
       });
       rail.querySelector('.fx-mag-story-rail__counter').textContent=chapters[nearest].num+' / '+String(chapters.length).padStart(2,'0');
+      if (matchMedia('(max-width:900px),(pointer:coarse)').matches) {
+        const link = chapters[nearest].link;
+        const wanted = link.offsetLeft + link.offsetWidth*.5 - track.clientWidth*.5;
+        track.scrollLeft = Math.max(0,wanted);
+      }
       root.dataset.fxMagStoryChapter = chapters[nearest].id;
       dispatchEvent(new CustomEvent('formatx:mag-chapter',{detail:{id:chapters[nearest].id,index:nearest}}));
     }
