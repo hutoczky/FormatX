@@ -2074,7 +2074,16 @@
     return;
 
     function finishBoot(program) {
-    const geometry=buildOrganismGeometry(softwareRenderer);
+      const geometry=buildOrganismGeometry(softwareRenderer);
+      // R2214: allow a committed browser frame between CPU mesh construction
+      // and GPU buffer upload. Both paths use the exact same geometry buffers.
+      // Avoids one monolithic late-intro task without changing visual output.
+      requestAnimationFrame(() => {
+        if (!stage.isConnected) return;
+        finishBootAfterGeometry(program,geometry);
+      });
+    }
+    function finishBootAfterGeometry(program,geometry) {
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
