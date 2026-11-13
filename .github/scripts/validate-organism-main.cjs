@@ -130,7 +130,6 @@ async function validateDesktop() {
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
 
     await unsealPricing(page,false);
-    await unsealPricing(page,true);
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
     await pricingTrigger.click();
@@ -200,6 +199,7 @@ async function validateMobile() {
     const errors = [];
     diagnostics(page, errors);
     await enterSite(page, 'mobile');
+    await unsealPricing(page,true);
 
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
