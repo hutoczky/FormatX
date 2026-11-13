@@ -2043,6 +2043,7 @@
       ? 'software-cortical-tissue-membrane-cartilage-energy-organ'
       : 'hardware-photographic-material-preserved';
 
+    const shaderStartupAt=performance.now();
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
@@ -2074,13 +2075,19 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
+      root.dataset.fxCoreShaderLinkMsR2220=(performance.now()-shaderStartupAt).toFixed(2);
       finishBoot(program);
     }
     finishWhenReady();
     return;
 
     function finishBoot(program) {
+    // R2220: attribute the real startup cost to shader link, CPU geometry
+    // and GPU buffer upload separately. These are measured ONCE at boot
+    // and do not add any animation-frame tracking or telemetry network calls.
+    const meshStartedAt=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreMeshBuildMsR2220=(performance.now()-meshStartedAt).toFixed(2);
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -2103,7 +2110,9 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
+    const gpuUploadStartedAt=performance.now();
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    root.dataset.fxCoreGpuBufferUploadMsR2220=(performance.now()-gpuUploadStartedAt).toFixed(2);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
