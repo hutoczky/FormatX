@@ -53,6 +53,24 @@ async function evaluate(viewport,isMobile,browser){
     isMobile,hasTouch:isMobile,
     reducedMotion:'no-preference'
   });
+  // R2226: observe the WHOLE visit, including R533 film handoff and the
+  // late R326 software-WebGL first paint. Lighthouse TBT often stops before
+  // ~9.5s when the largest shader/draw tasks occur. This is measurement only.
+  await context.addInitScript(()=>{
+    window.__fxMagLongTasks=[];
+    window.__fxMagLongTaskSupported=Boolean(
+      window.PerformanceObserver?.supportedEntryTypes?.includes('longtask'));
+    if(!window.__fxMagLongTaskSupported)return;
+    new PerformanceObserver(list=>{
+      for(const entry of list.getEntries()){
+        if(window.__fxMagLongTasks.length>=512)break;
+        window.__fxMagLongTasks.push({
+          start:Number(entry.startTime.toFixed(1)),
+          duration:Number(entry.duration.toFixed(1))
+        });
+      }
+    }).observe({type:'longtask',buffered:true});
+  });
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
@@ -621,6 +639,26 @@ async function evaluate(viewport,isMobile,browser){
   });
   assert.equal(scrollMetrics.sampleCount,32,'Scroll input benchmark must exercise real synchronous composition');
   console.log('ARCHIVE_SCROLL_INPUT_PROFILE_R2053',JSON.stringify({mode:isMobile?'mobile':'desktop',...scrollMetrics}));
+  const longTaskProfile=await page.evaluate(()=>{
+    const entries=window.__fxMagLongTasks||[];
+    const afterFilm=entries.filter(t=>t.start>=8000&&t.start<=15000);
+    const sum=arr=>Number(arr.reduce((n,e)=>n+e.duration,0).toFixed(1));
+    const peak=arr=>Number(Math.max(0,...arr.map(e=>e.duration)).toFixed(1));
+    return {
+      observerSupported:Boolean(window.__fxMagLongTaskSupported),
+      count:entries.length,
+      totalBlockingMs:sum(entries),
+      longestMs:peak(entries),
+      postFilmCount:afterFilm.length,
+      postFilmBlockingMs:sum(afterFilm),
+      postFilmLongestMs:peak(afterFilm),
+      topTasks:entries.toSorted((a,b)=>b.duration-a.duration).slice(0,6)
+    };
+  });
+  console.log('MAG_R2226_FULL_VISIT_LONGTASKS',
+    JSON.stringify({mode:isMobile?'mobile':'desktop',...longTaskProfile}));
+  assert.ok(longTaskProfile.observerSupported,
+    'Browser lacks longtask PerformanceObserver; cannot check post-intro GPU stalls');
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }
