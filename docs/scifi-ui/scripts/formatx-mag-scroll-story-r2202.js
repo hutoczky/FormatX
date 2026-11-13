@@ -78,10 +78,16 @@
       lastCoreTurn = progress;
       lastCoreScene = sceneIndex;
     }
-    const difference = clamp(progress - lastCoreTurn, -.018, .018);
+    // R326 rotateBy accepts RADIANS, not degrees. A restrained 0.65-rad
+    // pitch and 1.5 yaw revolutions over the entire scroll are film-like,
+    // rather than snapping to the pitch limit after one normal wheel tick.
+    const difference = clamp(progress - lastCoreTurn, -.014, .014);
     lastCoreTurn = progress;
-    if (Math.abs(difference) > .00008)
-      core.rotateBy(difference * 170, difference * -32, 'mag-scroll-r2203');
+    if (Math.abs(difference) > .00008) {
+      core.rotateBy(difference * .65, difference * (-Math.PI * 3), 'mag-scroll-r2217');
+      const mode=archiveActive?'archive':'hero';
+      if (root.dataset.fxMagStoryCoreMode!==mode) root.dataset.fxMagStoryCoreMode=mode;
+    }
     if (sceneIndex !== lastCoreScene) {
       lastCoreScene = sceneIndex;
       core.requestRender?.();
