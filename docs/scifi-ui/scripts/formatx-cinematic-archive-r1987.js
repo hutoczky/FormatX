@@ -1192,7 +1192,10 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    // R2231: archive=off is a strict user/test choice, not just an init
+    // preference. The native real3dready event arrives asynchronously and
+    // must not resurrect the 8-folio WebGL archive after HTML fallback boot.
+    if(disposed||reduced.matches||requestedHtmlFallback||(!force&&(audit||isolatedMagCheck)))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG
