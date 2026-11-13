@@ -396,7 +396,7 @@ async function evaluate(viewport,isMobile,browser){
     source:document.documentElement.dataset.fxCoreRotationSource,
     archive:document.documentElement.dataset.fxArchiveCinema,
     dock:document.documentElement.dataset.fxArchiveDock,
-    realCanvas:window.FormatXLivingCore?.canvas||null
+    realCanvas:window.FormatXLivingCore?.canvas instanceof HTMLCanvasElement
   }));
   assert.equal(storyCore.mode,'archive',
     'MAG scroll controller stopped driving real 3D outside the hero');
@@ -404,7 +404,7 @@ async function evaluate(viewport,isMobile,browser){
     'Cinematic world scroll did not rotate the canonical WebGL MAG');
   assert.equal(storyCore.dock,'active',
     'MAG is not using the existing single archive GPU');
-  assert.ok(storyCore.realCanvas instanceof Object,
+  assert.equal(storyCore.realCanvas,true,
     'Archive animation lost the canonical native GPU canvas');
   console.log('MAG_SINGLE_CORE_FULLPAGE_SCROLL_PASS',
     JSON.stringify({mode:storyCore.mode,source:storyCore.source,dock:storyCore.dock}));
