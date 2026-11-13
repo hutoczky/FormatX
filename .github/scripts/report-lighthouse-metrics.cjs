@@ -43,6 +43,14 @@ const paintDetails=files.map((file,index)=>{
     lcpBreakdown:audits['lcp-breakdown-insight']?.details?.items?.slice(0,3)||[],
     lcpDiscovery:audits['lcp-discovery-insight']?.details?.items?.slice(0,2)||[],
     mainThread:audits['mainthread-work-breakdown']?.details?.items?.slice(0,8)||[],
+    // R2213: expose actual script/main-thread offenders rather than guessing
+    // from aggregate TBT. Lighthouse data already exists in these LHR files.
+    bootupScripts:(audits['bootup-time']?.details?.items||[])
+      .slice().sort((a,b)=>(b.total||0)-(a.total||0)).slice(0,12)
+      .map(x=>({url:x.url,total:x.total,scripting:x.scripting,scriptParseCompile:x.scriptParseCompile})),
+    longestTasks:(audits['long-tasks']?.details?.items||[])
+      .slice().sort((a,b)=>(b.duration||0)-(a.duration||0)).slice(0,12)
+      .map(x=>({url:x.url,duration:x.duration,startTime:x.startTime})),
     blockers:audits['render-blocking-resources']?.details?.items?.slice(0,12)
       .map(x=>({url:x.url,ms:x.wastedMs}))||[],
     visualProgress:audits['screenshot-thumbnails']?.details?.items?.slice(0,16)
