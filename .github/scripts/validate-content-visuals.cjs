@@ -360,8 +360,12 @@ async function capture(browser, name, viewport, options = {}) {
     if (options.lang) {
       await page.waitForFunction(lang => document.documentElement.lang === lang, options.lang, { timeout: 8000 });
     }
-    await assertCommon(page, options);
+    // R2232: the cinematic acceptance routine moves through the live intro
+    // handoff and returns to the original visible archive folio. Assert the
+    // final page layout AFTER that transition, not during a one-frame moment
+    // when the legacy hero lead has just been suppressed for the MAG.
     if (options.disclosure) await assertHeroDisclosure(page);
+    await assertCommon(page, options);
     if (typeof options.after === 'function') await options.after(page);
     assert(errors.length === 0, `${name} browser errors: ${errors.join(' | ')}`);
   } catch (error) {
