@@ -95,6 +95,9 @@ const archiveConnect=archiveRuntime.split('function connect(){')[1]
   ?.split('function refresh(')[0]||'';
 assert.ok(archiveConnect.includes('requestedHtmlFallback'),
   'archive=off may not re-enable the 8-folio renderer on real3dready');
+assert.ok(archiveRuntime.includes(
+  "root.dataset.fxArchiveExperience=requestedHtmlFallback?'reduced-html':'pending'"),
+  'Native HTML archive=off must be published before deferred init');
 const cinematicJourney=fs.readFileSync(
   path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
 assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
