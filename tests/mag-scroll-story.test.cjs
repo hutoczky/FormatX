@@ -43,6 +43,12 @@ assert.match(js,/fxArchiveDock === 'active'/);
 assert.match(js,/fxArchiveCinema === 'active'/);
 assert.match(js,/Math\.PI \* 3/);
 assert.match(js,/mag-scroll-r2217/);
+assert.match(js,/lastCoreTurn = clamp\(lastCoreTurn \+ difference\)/);
+assert.match(js,/Math\.abs\(progress-lastCoreTurn\)>\.001\) request\(\)/);
+assert.match(js,/if \(animateChapters\) updates\.forEach/);
+assert.match(js,/if \(!animateChapters\) return/);
+assert.match(js,/coreProgress:lastCoreTurn/);
+
 assert.doesNotMatch(js,/difference \* 170|difference \* -32/,
   'R326 expects radians; historic degree-scale scroll jumps are prohibited');
 
