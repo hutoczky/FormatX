@@ -43,6 +43,17 @@ assert.match(js,/fxArchiveDock === 'active'/);
 assert.match(js,/fxArchiveCinema === 'active'/);
 assert.match(js,/Math\.PI \* 3/);
 assert.match(js,/mag-scroll-r2217/);
+const cinematicJourney=fs.readFileSync(
+  path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
+assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
+assert.match(cinematicJourney,/root\.dataset\.fxMagStoryCoreMode==='archive'/);
+assert.match(cinematicJourney,/if \(!scrollOwnsCamera\)\s*api\.rotateBy\?/);
+assert.match(cinematicJourney,/api\.surfacePulse\?\.\('r536-'/);
+assert.match(js,/const mode=archiveActive\?'archive':'hero';/);
+assert.ok(js.indexOf("const mode=archiveActive?'archive':'hero';")
+   < js.indexOf('const difference = clamp(progress - lastCoreTurn'),
+   'Continuous MAG scroll owner must be published before any settled scene rotation');
+
 assert.match(js,/lastCoreTurn = clamp\(lastCoreTurn \+ difference\)/);
 assert.match(js,/Math\.abs\(progress-lastCoreTurn\)>\.001\) request\(\)/);
 assert.match(js,/if \(animateChapters\) updates\.forEach/);
