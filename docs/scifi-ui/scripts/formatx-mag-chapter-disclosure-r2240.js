@@ -36,6 +36,7 @@
   };
   const entries=new Map();
   const originalInert=new WeakMap();
+  const originalDisplay=new WeakMap();
   const english=()=>root.lang.toLowerCase().startsWith('en');
   let lastCinemaChapter='';
   let ready=false;
@@ -58,7 +59,21 @@
       (open?(english()?'close chapter':'fejezet bezárása'):(english()?'open chapter':'fejezet megnyitása'))));
     for(const node of childrenOf(entry.panel)){
       if(!originalInert.has(node))originalInert.set(node,node.inert);
+      if(!originalDisplay.has(node))originalDisplay.set(node,{
+        value:node.style.getPropertyValue('display'),
+        priority:node.style.getPropertyPriority('display')
+      });
       node.inert=open?originalInert.get(node):true;
+      if(open){
+        const initial=originalDisplay.get(node);
+        if(initial.value)node.style.setProperty('display',initial.value,initial.priority);
+        else node.style.removeProperty('display');
+      }else{
+        // R2244: source modules contain legacy stylesheet !important rules.
+        // Inline !important beats those rules without changing any source node,
+        // while open restores the exact original inline declaration/priority.
+        node.style.setProperty('display','none','important');
+      }
     }
     if(open&&motion&&!reduced.matches){
       // The canonical R326 GPU body opens the physical paper; never create
