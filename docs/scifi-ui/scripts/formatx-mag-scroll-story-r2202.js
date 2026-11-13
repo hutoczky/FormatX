@@ -140,7 +140,13 @@
     const bounds = chapters.map(chapter => chapter.element.getBoundingClientRect());
     const first = bounds[0];
     const last = bounds[bounds.length-1];
-    const center = vh * .52;
+    // R2241: folded headline chapters are 140–200px tall. Selecting the
+    // center of the viewport incorrectly highlights the NEXT chapter after
+    // a native #experience click. Read near the top of the reading lane;
+    // 8 cinematic 165dvh archive beats retain the original center logic.
+    const foldedHeadlineMode=root.dataset.fxMagDisclosure==='ready'
+      &&root.dataset.fxArchiveExperience!=='ready';
+    const center = vh * (foldedHeadlineMode ? .12 : .52);
     let nearest = 0, closest = Infinity;
     const animateChapters = !reduced.matches && innerWidth > 900;
     const updates = [];
