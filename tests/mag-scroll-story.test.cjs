@@ -55,6 +55,8 @@ assert.ok(js.indexOf("const mode=archiveActive?'archive':'hero';")
    'Continuous MAG scroll owner must be published before any settled scene rotation');
 
 assert.match(js,/lastCoreTurn = clamp\(lastCoreTurn \+ difference\)/);
+assert.match(js,/difference=clamp\(remaining\*\.35,-\.095,\.095\)/);
+assert.doesNotMatch(js,/clamp\(progress - lastCoreTurn, -\.008, \.008\)/);
 assert.match(js,/Math\.abs\(progress-lastCoreTurn\)>\.001\) request\(\)/);
 assert.match(js,/if \(animateChapters\) updates\.forEach/);
 assert.match(js,/if \(!animateChapters\) return/);
