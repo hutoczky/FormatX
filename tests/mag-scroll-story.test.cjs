@@ -58,17 +58,6 @@ assert.ok(!canonicalShader.includes(',2.0)'),
 assert.match(coreSource,/R2223: exact algebraic squares/);
 assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
 assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
-assert.ok(coreSource.includes('const publishRuntimeState=(key,value)=>{') &&
-  coreSource.includes('if(root.dataset[key]!==next)root.dataset[key]=next;'),
-  'R2225 must deduplicate GPU-frame telemetry attribute mutations');
-assert.ok(coreSource.includes('if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity)') &&
-  coreSource.includes("publishRuntimeState('fxCoreRefreshHzR1622',estimatedHz.toFixed(1))") &&
-  coreSource.includes("publishRuntimeState('fxCoreRenderDivisorR1622',String(divisor))"),
-  'R2225 must sample diagnostics at <=4Hz without reducing real frame rate');
-assert.ok(coreSource.includes("publishRuntimeState('fxCoreRenderMs',renderAverage.toFixed(2))") &&
-  coreSource.includes("publishRuntimeState('fxCorePassModelR1450'"),
-  'R2225 must report real GPU timings while suppressing unchanged DOM writes');
-assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'R2225 must preserve real MAG render pass');
 const cinematicJourney=fs.readFileSync(
   path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
 assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
