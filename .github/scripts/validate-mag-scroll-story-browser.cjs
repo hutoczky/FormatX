@@ -22,6 +22,10 @@ const profiles = [
       });
       try {
         const page=await context.newPage();
+        const navigations=[];
+        page.on('framenavigated',frame=>{
+          if(frame===page.mainFrame())navigations.push(frame.url());
+        });
         const errors=[];
         page.on('pageerror',error=>errors.push(error.message));
         // Isolate the 7 native HTML anchor chapters. R1987's 8-scene WebGL
@@ -103,10 +107,19 @@ const profiles = [
             return {active:s.active,progress:s.progress};
           });
           assert.equal(state.active,sectionId,profile.name+' scene '+sectionId);
-          const archiveState=await page.evaluate(()=>
-            document.documentElement.dataset.fxArchiveExperience);
-          assert.equal(archiveState,'reduced-html',
-            profile.name+': archive=off was resurrected by late real3dready');
+          const archiveState=await page.evaluate(()=>({
+            state:document.documentElement.dataset.fxArchiveExperience,
+            htmlFallback:document.documentElement.dataset.fxArchiveHtmlFallback,
+            url:location.href,search:location.search,
+            ready:document.readyState,
+            magBirth:document.documentElement.dataset.fxMagBirthLiveR533,
+            loading:[...document.querySelectorAll('script[src*="cinematic-archive-r1987"]')]
+              .map(x=>({src:x.src,async:x.async,defer:x.defer})),
+            navType:performance.getEntriesByType('navigation')?.[0]?.type||'unknown'
+          }));
+          assert.equal(archiveState.state,'reduced-html',
+            profile.name+': archive=off changed during anchor navigation: '+
+            JSON.stringify({archiveState,navigations}));
           assert.ok(state.progress>=0&&state.progress<=1,profile.name+' progress');
         }
         // Check all visible touch targets geometrically; do not count
