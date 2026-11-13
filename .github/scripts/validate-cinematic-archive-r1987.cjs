@@ -21,6 +21,10 @@ assert.match(r2057Invalidate,/if\(!domRaf\)/,
   'R2057 must coalesce repeated touch/wheel DOM transformations before next paint');
 assert.match(r2057Invalidate,/requestAnimationFrame\(\(\)=>/,
   'R2057 must compose native HTML before the following browser paint');
+assert.ok(r2057Invalidate.includes("if(nextCinemaKey!==lastCinemaKey)syncCinema()") &&
+    r2057Invalidate.indexOf('setPanelState();')<r2057Invalidate.indexOf("if(nextCinemaKey!==lastCinemaKey)syncCinema()") &&
+    r2057Invalidate.indexOf("if(nextCinemaKey!==lastCinemaKey)syncCinema()")<r2057Invalidate.indexOf('if(!domRaf)'),
+  'R2218 must publish authentic cinema folio identity immediately on chapter switch, before the coalesced RAF');
 assert.ok(r2057Invalidate.indexOf('setPanelState();')<r2057Invalidate.indexOf('if(!domRaf)'),
   'R2057 must keep source change and MAG selection synchronous for rapid reversing');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
