@@ -135,6 +135,11 @@
       if(panel&&panel.matches('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone'))
         ensure(panel,names,id);
     }
+    // The generated LIVE OS catalogue is a real standalone semantic section.
+    // In fallback mode it must be a title-only chapter as well, not a
+    // full product grid unexpectedly exposed between the MAG and section 02.
+    const catalogue=main.querySelector(':scope > section.fx-category-deck--standalone');
+    if(catalogue)ensure(catalogue,labels['live-os-overview'],'live-os-overview');
   }
   function refresh(){
     if(archiveReady())buildArchive();
