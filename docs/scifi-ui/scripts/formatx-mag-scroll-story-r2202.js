@@ -72,6 +72,10 @@
         (heroRect.bottom <= 0 || heroRect.top >= innerHeight)) return;
     const core = coreAvailable();
     if (!core) return;
+    // Publish exclusive camera ownership even if the current frame has no
+    // rotation delta, before R536's delayed scene-settle timer can fire.
+    const mode=archiveActive?'archive':'hero';
+    if (root.dataset.fxMagStoryCoreMode!==mode) root.dataset.fxMagStoryCoreMode=mode;
     if (lastCore !== core || lastCoreArchive !== archiveActive) {
       lastCore = core;
       lastCoreArchive = archiveActive;
@@ -88,8 +92,6 @@
     lastCoreTurn = clamp(lastCoreTurn + difference);
     if (Math.abs(difference) > .00008) {
       core.rotateBy(difference * .65, difference * (-Math.PI * 3), 'mag-scroll-r2217');
-      const mode=archiveActive?'archive':'hero';
-      if (root.dataset.fxMagStoryCoreMode!==mode) root.dataset.fxMagStoryCoreMode=mode;
     }
     if (Math.abs(progress-lastCoreTurn)>.001) request();
     if (sceneIndex !== lastCoreScene) {
