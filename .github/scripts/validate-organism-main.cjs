@@ -75,7 +75,24 @@ async function unsealPricing(page,mobile=false){
   await page.waitForFunction(()=>
     document.documentElement.dataset.fxMagDisclosure==='ready'&&
     document.querySelector('#pricing > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger'),
-    null,{timeout:20000});
+    null,{timeout:20000}).catch(async error=>{
+      const d=await page.evaluate(()=>{
+        const p=document.getElementById('pricing');
+        const link=document.querySelector('link[data-fx-mag-disclosure-r2240]');
+        return {ready:document.readyState,archive:document.documentElement.dataset.fxArchiveExperience,
+          disclosure:document.documentElement.dataset.fxMagDisclosure,
+          r487:document.documentElement.dataset.fxDeferredCssR487,
+          foldRuntime:window.__FORMATX_MAG_DISCLOSURE_R2240__||false,
+          foldStatus:window.__FORMATX_MAG_DISCLOSURE_STATUS__?.(),
+          link:link?{media:link.media,sheet:!!link.sheet,href:link.href}:null,
+          pricing:{parent:p?.parentElement?.id,parentTag:p?.parentElement?.tagName,
+            classes:p?.className,children:p?.children.length,
+            heading:!!p?.querySelector(':scope > .fx-mag-disclosure-heading')},
+          url:location.href
+        };
+      });
+      throw new Error('R2240 organism title failed to initialize: '+JSON.stringify(d)+' / '+String(error.message||error));
+    });
   const disclosure=page.locator('#pricing > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
   assert(await disclosure.getAttribute('aria-expanded')==='false',
     'Pricing must begin as a bold title only');
