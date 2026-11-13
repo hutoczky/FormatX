@@ -48,8 +48,10 @@ const profiles = [
         const initial=await page.evaluate(()=>{
           const nav=document.querySelector('.fx-mag-story-rail');
           return {
-            links:nav?.querySelectorAll('a[href^="#"]').length,
-            progress:window.__FORMATX_MAG_STORY_STATUS__().progress
+            links:nav?.querySelectorAll('a[data-chapter]').length,
+            progress:window.__FORMATX_MAG_STORY_STATUS__().progress,
+            documentOrigin:performance.timeOrigin, pathname:location.pathname,
+            search:location.search
           };
         });
         assert.equal(initial.links,7,profile.name+': chapter rail missing');
@@ -60,18 +62,29 @@ const profiles = [
           // retains the requested chapter during async content reflow and
           // validates the public 44px MAG rail, not just DOM coordinates.
           const navLink=page.locator('.fx-mag-story-rail a[data-chapter="'+sectionId+'"]');
-          assert.equal(await navLink.getAttribute('href'),'#'+sectionId,
-            profile.name+': MAG rail lost its accessible native fragment link');
+          const requestedHref=await navLink.getAttribute('href');
+          const nativeURL=new URL(requestedHref,await page.evaluate(()=>document.baseURI));
+          assert.equal(nativeURL.pathname,initial.pathname,
+            profile.name+': base href changed native MAG chapter document');
+          assert.equal(nativeURL.search,initial.search,
+            profile.name+': MAG chapter link dropped query state');
+          assert.equal(nativeURL.hash,'#'+sectionId,
+            profile.name+': MAG rail lost its semantic fragment');
           await navLink.click({timeout:20000});
           // Capture the actual URL outcome separately: another FormatX
           // navigation owner may consume the fragment while still performing
           // the correct scroll. The product contract is the visible selected
           // chapter, not a hash mutation at an exact millisecond.
           const clicked=await page.evaluate(id=>({
-            id,hash:location.hash,
+            id,hash:location.hash, pathname:location.pathname,
+            search:location.search, documentOrigin:performance.timeOrigin,
             chapter:document.documentElement.dataset.fxMagStoryChapter
           }),sectionId);
-          console.log('MAG_R2227_NATIVE_RAIL_CLICK',JSON.stringify({profile:profile.name,...clicked}));
+          assert.equal(clicked.documentOrigin,initial.documentOrigin,
+            profile.name+': MAG click caused full document reload through <base>');
+          assert.equal(clicked.pathname,initial.pathname);
+          assert.equal(clicked.search,initial.search);
+          console.log('MAG_R2234_NATIVE_RAIL_NO_RELOAD',JSON.stringify({profile:profile.name,...clicked}));
           await page.waitForFunction(id=>
             document.documentElement.dataset.fxMagStoryChapter===id,
             sectionId,{polling:200,timeout:20000}).catch(async error=>{
