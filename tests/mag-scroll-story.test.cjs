@@ -14,6 +14,32 @@ const syntax=spawnSync(process.execPath,['--check',jsPath],{encoding:'utf8'});
 assert.equal(syntax.status,0,syntax.stderr);
 assert.match(homepage,/formatx-mag-scroll-story-r2202\.js/);
 assert.match(homepage,/formatx-mag-scroll-story-r2202\.css/);
+// R2240: the landing page now presents only heavyweight chapter words.
+// The SAME original HTML and exactly one existing MAG opens on click.
+// Progressive enhancement must fail open if the deferred CSS never loads.
+const foldJsPath=path.join(root,'docs/scifi-ui/scripts/formatx-mag-chapter-disclosure-r2240.js');
+const foldCssPath=path.join(root,'docs/scifi-ui/styles/formatx-mag-chapter-disclosure-r2240.css');
+const foldJs=fs.readFileSync(foldJsPath,'utf8');
+const foldCss=fs.readFileSync(foldCssPath,'utf8');
+const foldSyntax=spawnSync(process.execPath,['--check',foldJsPath],{encoding:'utf8'});
+assert.equal(foldSyntax.status,0,foldSyntax.stderr);
+assert.equal((homepage.match(/data-fx-mag-disclosure-r2240="true"/g)||[]).length,2);
+assert.ok(homepage.includes('formatx-mag-chapter-disclosure-r2240.css'));
+assert.ok(homepage.includes('formatx-mag-chapter-disclosure-r2240.js'));
+assert.match(homepage,/data-fx-mag-disclosure-r2240="true" data-fx-r487-deferred-style="true"/);
+assert.match(foldJs,/entry\.button\.setAttribute\('aria-expanded'/);
+assert.match(foldJs,/node\.inert=open\?originalInert\.get\(node\):true/);
+assert.match(foldJs,/window\.FormatXLivingCore\|\|window\.FormatXCoreMobileV69/);
+assert.match(foldJs,/core\.rotateBy\(-\.11,\.27,'mag-chapter-open-r2240'\)/);
+assert.ok(foldJs.includes("root.dataset.fxMagDisclosure='ready'"));
+assert.ok(foldJs.includes('const styleReady=()=>Boolean(style&&style.media!=='));
+assert.match(foldCss,/data-fx-mag-open="false"/);
+assert.match(foldCss,/display:none!important/);
+assert.match(foldCss,/@keyframes fx-mag-paper-unseal-r2240/);
+assert.match(foldCss,/@media\(prefers-reduced-motion:reduce\)/);
+assert.doesNotMatch(foldJs,/createElement\(['"]canvas['"]\)|getContext\(|new\s+WebGL|cloneNode\(/,
+  'The chapter interaction must never create another canvas or duplicate originals');
+
 assert.equal((homepage.match(/data-fx-mag-story-r2202="true"/g)||[]).length,2);
 const dnaCritical='data-fx-dna-first-frame-r2181="true"';
 const audioChrome='data-fx-genesis-studio-r2160="true"';
