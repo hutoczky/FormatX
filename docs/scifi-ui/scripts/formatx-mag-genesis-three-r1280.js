@@ -2967,6 +2967,11 @@
       // convergence so the mechanical MAG is born from the helix on screen.
       const grow=smooth((t-5.88)/1.18);
       const finale=smooth((t-7.20)/1.65);
+      // R2223: retire the cinematic chassis' small independent wobble before
+      // the permanent renderer begins its ownership crossfade. The authored
+      // resting pose, living optic and film clock remain active; only the
+      // overlapping metal layers stop diverging from one another at 9.15 s.
+      const nativeChassisSettle=1-smooth((t-8.45)/.70);
       this.mechanicalGroup.visible=grow>.002;
       // R2175: match the physical size of the native R326 MAG as it settles
       // into the upper hero viewport, eliminating the final size jump.
@@ -3058,14 +3063,14 @@
       if(this.mechLight)this.mechLight.intensity=(.92+.18*finale)*opticWake*opticPulse;
 
       if(this.mechBody){
-        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow;
-        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow;
+        this.mechBody.rotation.y=Math.sin(time*.00018)*.008*grow*nativeChassisSettle;
+        this.mechBody.rotation.x=Math.sin(time*.00015)*.005*grow*nativeChassisSettle;
       }
-      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow;
+      if(this.mechCradle)this.mechCradle.rotation.z=Math.sin(time*.00016)*.006*grow*nativeChassisSettle;
       if(this.innerPrism){
         this.innerPrismMaterial.opacity=(.10+.16*finale)*grow;
-        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow;
-        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow;
+        this.innerPrism.rotation.z=Math.sin(time*.00013)*.012*grow*nativeChassisSettle;
+        this.innerPrism.rotation.y=Math.sin(time*.00011)*.010*grow*nativeChassisSettle;
       }
       // R2127: sequentially seat machined silver elements into the
       // four-armed chassis. Capture each mesh's authored final transform
@@ -3091,7 +3096,8 @@
           base.position.z+(1-seat)*.22
         );
         p.scale.copy(base.scale).multiplyScalar(.78+.22*seat);
-        p.rotation.y=base.rotationY+(1-seat)*.17+Math.sin(time*.00015+i)*.006*grow;
+        p.rotation.y=base.rotationY+(1-seat)*.17+
+          Math.sin(time*.00015+i)*.006*grow*nativeChassisSettle;
       });
       // R2180: titanium inlays mechanically seat after the supporting DNA
       // reaches each arm. Shared geometry, deterministic authored end pose.
@@ -3510,4 +3516,5 @@
   document.documentElement.dataset.fxMagCinematicFillR2220='native-side-light-continuous-handoff';
   document.documentElement.dataset.fxMagCinematicBioticR2221='cell-fill-retired-before-native-metal';
   document.documentElement.dataset.fxMagCinematicOpticEnergyR2222='native-idle-energy-continuous-handoff';
+  document.documentElement.dataset.fxMagCinematicChassisSettleR2223='authored-rest-pose-before-native-crossfade';
 })();

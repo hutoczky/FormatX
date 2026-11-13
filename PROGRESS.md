@@ -1,3 +1,4 @@
+- R2223: the cinematic MAG now damps only its independent chassis micro-wobble from 8.45–9.15 s, reaching the authored native rest pose before the existing ownership crossfade while the living optic and real film clock continue; the viewport-specific R2222 optic energy is now checked as mobile 0.50 / desktop 0.43.
 # Intro and MAG progress — 2026-11-04
 
 The current work stays on the Genesis introduction and the same living MAG's transition into the page. The requested visual reference quality and smooth hardware motion are not complete.

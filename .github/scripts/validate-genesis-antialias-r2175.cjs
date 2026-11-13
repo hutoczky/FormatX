@@ -250,7 +250,8 @@ const nativeDepthOffset=Number(nativeLensMatch[1])-Number(nativeSocketMatch[1]);
       assert(Math.abs(value-target)<4e-8,'The actual socket/rim bounds must match native optical anatomy');
      for(const name of ['mechEyeCore','mechOpticSocket','mechOpticRim','mechOpticShutters'])assert(anatomy.draws[name]>0,'The actual optical component must draw: '+name);
      assert(state.opticOpacity>.9,'The existing physical lens must wake after arm seating');
-     assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.physicalEmission&&program.time>0&&program.energy>.45&&program.energy<=.5),
+     const nativeIdleEnergy=mobile?.50:.43;
+     assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.physicalEmission&&program.time>0&&Math.abs(program.energy-nativeIdleEnergy)<1e-4),
       'The actual linked Three.js living-cell lens program must draw with the original real film clock');
      assert(state.livingOptic.some(program=>program.linked&&program.draws>0&&program.filteredCell),
       'The actual physical lens draw must use the shared pixel-footprint cell filter');
