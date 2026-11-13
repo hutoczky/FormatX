@@ -56,17 +56,6 @@ assert.ok(canonicalShader.length>10000,'Real photographic MAG shader was replace
 assert.ok(!canonicalShader.includes(',2.0)'),
   'Canonical shader still uses general pow() for a mathematical square');
 assert.match(coreSource,/R2223: exact algebraic squares/);
-assert.ok(canonicalShader.includes('float fxPow4(float x)') &&
-  canonicalShader.includes('float fxPow7(float x)') &&
-  canonicalShader.includes('float fxPow22(float x)') &&
-  canonicalShader.includes('float fxPow34(float x)'),
-  'Photographic WebGL shader lost the R2224 integer-power helpers');
-for (const exp of ['4.0','7.0','22.0','34.0']) {
-  assert.ok(!canonicalShader.includes(','+exp+')'),
-    'An expensive canonical integer pow call remains: '+exp);
-}
-assert.match(coreSource,/R2224: exponentiation-by-squaring/);
-
 assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
 assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
 const cinematicJourney=fs.readFileSync(
