@@ -83,10 +83,15 @@
     elements.sort((a,b)=>a.depth-b.depth);
     ctx.lineCap='round';
     ctx.lineJoin='round';
+    // R2229: one Canvas state stack frame for this DNA. Each sorted
+    // strand keeps the same depth, alpha, stroke, 3D bridge and glow,
+    // without ~230 save()/restore() pairs per cinematic frame.
+    ctx.globalAlpha=alpha;
     for(const item of elements){
       const front=clamp(.5+.5*item.depth/A);
-      ctx.save();
-      ctx.globalAlpha=alpha;
+      // Clear the previous foreground glow before the next depth slice.
+      // The old per-segment restore() did the same thing at higher CPU cost.
+      ctx.shadowBlur=0;
       ctx.beginPath();
       ctx.moveTo(item.a.x,item.a.y);
       ctx.lineTo(item.b.x,item.b.y);
@@ -94,7 +99,6 @@
         ctx.strokeStyle='rgba(147,198,211,'+(.26+.39*front).toFixed(3)+')';
         ctx.lineWidth=.90+front*1.25;
         ctx.stroke();
-        ctx.restore();
         continue;
       }
       const cool=item.lane===0;
@@ -117,8 +121,8 @@
         ctx.shadowBlur=front*7;
         ctx.stroke();
       }
-      ctx.restore();
     }
+    ctx.shadowBlur=0;
     // Few physical nucleotides: soft glass beads at the camera-front turns.
     for(let k=5;k<N;k+=8){
       for(let lane=0;lane<2;lane++){
