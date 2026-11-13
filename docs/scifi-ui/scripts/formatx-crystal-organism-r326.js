@@ -2154,6 +2154,8 @@
     // Operational telemetry needs four updates/second, not 60 DOM
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
+    // R2228: compositor/refresh telemetry is diagnostic, never per-frame DOM work.
+    let lastRefreshTelemetryAt=-Infinity;
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
@@ -2483,7 +2485,8 @@
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
       }
-      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
+      if(root.dataset.fxCorePassModelR1450!=='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719')
+        root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
@@ -2613,9 +2616,18 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
-        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
-        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        // R2228: same real 60Hz-divisor decisions; publish DOM telemetry at
+        // most four times/second, and only on change. Repeated dataset writes
+        // trigger third-party MutationObservers despite an unchanged value.
+        if(now-lastRefreshTelemetryAt>=250){
+          lastRefreshTelemetryAt=now;
+          const hzText=estimatedHz.toFixed(1);
+          const divisorText=String(divisor);
+          if(root.dataset.fxCoreRefreshHzR1622!==hzText)root.dataset.fxCoreRefreshHzR1622=hzText;
+          if(root.dataset.fxCoreRenderDivisorR1622!==divisorText)root.dataset.fxCoreRenderDivisorR1622=divisorText;
+          if(root.dataset.fxCoreRenderCeilingR1620!=='superseded-by-r1622-minimum-60fps-divisor')
+            root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        }
         if(divisor>1 && schedulerTick!==0){
           raf=requestAnimationFrame(frame);
           return;
