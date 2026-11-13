@@ -2154,14 +2154,6 @@
     // Operational telemetry needs four updates/second, not 60 DOM
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
-    let lastRefreshTelemetryAt=-Infinity;
-    // R2225: Keep the DOM as an observable state surface, not an animation
-    // scratchpad. Identical dataset assignments still trigger MutationObserver
-    // callbacks / style invalidation in Chromium, so publish only changes.
-    const publishRuntimeState=(key,value)=>{
-      const next=String(value);
-      if(root.dataset[key]!==next)root.dataset[key]=next;
-    };
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
@@ -2491,7 +2483,7 @@
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
       }
-      publishRuntimeState('fxCorePassModelR1450','healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719');
+      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
@@ -2499,12 +2491,12 @@
       framePeak=Math.max(dt,framePeak*.90);
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
-        publishRuntimeState('fxCoreAdaptiveOpticsR588',mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution');
-        publishRuntimeState('fxCoreSurfaceCadenceR1392',mobile?'bounded-slow-renderer-full-window':'desktop-bounded');
-        publishRuntimeState('fxCoreSurfaceCadenceR1403',mobile?'full-window-fast-cadence':'desktop-bounded');
-        publishRuntimeState('fxCoreSurfaceCadenceR1441',mobile?'midpoint-safe-68ms-cap':'desktop-bounded');
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
+        root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
+        root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
+        root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
       }else if(!slowRenderer){
-        publishRuntimeState('fxCoreAdaptiveOpticsR588',mobile?'single-pass-mobile-capable':'single-pass-60fps-capable');
+        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
       }
 
       if(!auditMode){
@@ -2564,25 +2556,25 @@
 
       if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity){
         lastRuntimeTelemetryAt=now;
-      publishRuntimeState('fxCoreRenderMs',renderAverage.toFixed(2));
-      publishRuntimeState('fxCoreFrameMs',dt.toFixed(2));
-      publishRuntimeState('fxCoreFrameIntervalR1602',frameIntervalAverage.toFixed(2));
-      publishRuntimeState('fxCoreRenderPeakR1626',renderPeak.toFixed(2));
-      publishRuntimeState('fxCoreFramePeakR1626',framePeak.toFixed(2));
-      publishRuntimeState('fxCoreReal3dTargetFps','60fps-hard-budget-quality-first-r1626');
-      publishRuntimeState('fxCoreReal3dTargetFpsR1642','60fps-preemptive-headroom-quality-before-cadence');
-      publishRuntimeState('fxNativeMagPerformanceR1642','lower-start-resolution-fast-shedding-slow-recovery-zero-idle');
-      publishRuntimeState('fxNativeMagPerformanceR1660','panic-lod-single-frame-spike-guard-minimum-60fps-target');
-      publishRuntimeState('fxNativeMagPerformanceR1670','lower-initial-resolution-recovery-only-after-sustained-60fps-headroom');
-      publishRuntimeState('fxNativeMagPerformanceR1671','software-crisp-start-constrained-shader-governor-sheds-on-pressure');
-      publishRuntimeState('fxNativeMagPerformanceR1676','preemptive-60fps-headroom-lighter-geometry-slow-recovery');
-      publishRuntimeState('fxNativeMagPerformanceR1694','renderer-capability-first-software-lite-hardware-photoreal-60fps-target');
-      publishRuntimeState('fxNativeMagPerformanceR1701','software-static-habitat-native-mag-frame-budget-priority');
-      publishRuntimeState('fxNativeMagPerformanceR1710','preemptive-60fps-mobile-lite-zero-idle-frame-budget');
-      publishRuntimeState('fxNativeMagDesktopInteractionR1944','absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf');
-      publishRuntimeState('fxNativeMagPerformanceR1696','software-readable-resolution-floor-with-bounded-pixel-budget');
-      publishRuntimeState('fxCoreQualityScaleR1600',qualityScale.toFixed(2));
-      publishRuntimeState('fxCoreReal3dFps',String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage)))));
+      root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
+      root.dataset.fxCoreFrameMs=dt.toFixed(2);
+      root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
+      root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
+      root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
+      root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
+      root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
+      root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
+      root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
+      root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
+      root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
+      root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
+      root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
+      root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
+      root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
+      root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
+      root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
+      root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
+      root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
       }
     }
 
@@ -2621,14 +2613,9 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        // Sampling telemetry at 4Hz does not change the real refresh divisor
-        // or the rAF scheduling frequency. It only avoids 60 DOM writes/sec.
-        if(now-lastRefreshTelemetryAt>=250 || lastRefreshTelemetryAt===-Infinity){
-          lastRefreshTelemetryAt=now;
-          publishRuntimeState('fxCoreRefreshHzR1622',estimatedHz.toFixed(1));
-          publishRuntimeState('fxCoreRenderDivisorR1622',String(divisor));
-          publishRuntimeState('fxCoreRenderCeilingR1620','superseded-by-r1622-minimum-60fps-divisor');
-        }
+        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
+        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
+        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
         if(divisor>1 && schedulerTick!==0){
           raf=requestAnimationFrame(frame);
           return;
@@ -2638,7 +2625,7 @@
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        publishRuntimeState('fxCoreBurstCadenceR1600',burstDelay?'audit-paced':'native-60hz-target');
+        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=auditMode
@@ -2646,9 +2633,9 @@
               ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
               : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
           : 0;
-        publishRuntimeState('fxCoreAdaptiveSurfaceCadenceR588',sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf');
-        publishRuntimeState('fxCoreSurfaceCadenceR643',mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle');
-        publishRuntimeState('fxCoreAnimationCadenceR1600','production-native-60hz-target-audit-contract-preserved');
+        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
+        root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
+        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
         queueFrame(sweepDelay);
       }else settleAfterBurst();
     }
