@@ -3035,7 +3035,13 @@
         this.mechEyeCore.material.opacity=.92*opticWake;
         this.mechEyeCore.material.emissiveIntensity=.045+opticWake*.17;
         this.livingMagOpticUniforms.uTime.value=time*.001;
-        this.livingMagOpticUniforms.uEnergy.value=.18+.32*opticWake;
+        // R2222: land the cinematic living optic on the permanent MAG's
+        // genuine idle energy for the same viewport class. Mobile already
+        // ended at .50; desktop now settles to its native .43 instead of
+        // retaining the brighter phone grade through the ownership crossfade.
+        const nativeOpticEnergy=this.mobileRender?.50:.43;
+        this.livingMagOpticUniforms.uEnergy.value=
+          mix(.18,nativeOpticEnergy,opticWake);
       }
       // The iris seats only after the armour closes; no premature luminous
       // HUD or arbitrary late flash in the DNA/embryo chapters.
@@ -3503,4 +3509,5 @@
   document.documentElement.dataset.fxMagCinematicPoseR2219='native-base-pose-continuous-handoff';
   document.documentElement.dataset.fxMagCinematicFillR2220='native-side-light-continuous-handoff';
   document.documentElement.dataset.fxMagCinematicBioticR2221='cell-fill-retired-before-native-metal';
+  document.documentElement.dataset.fxMagCinematicOpticEnergyR2222='native-idle-energy-continuous-handoff';
 })();

@@ -58,7 +58,8 @@ assert(birth.includes('this.bindLivingMagOptic(this.mechEyeCore.material);'),
 assert(birth.includes('totalEmissiveRadiance+=fxCellRadiance*1.35;'),
   'The living cell must contribute to the physical lens emission path');
 assert(birth.includes('this.livingMagOpticUniforms.uTime.value=time*.001;') &&
-  birth.includes('this.livingMagOpticUniforms.uEnergy.value=.18+.32*opticWake;'),
+  birth.includes('const nativeOpticEnergy=this.mobileRender?.50:.43;') &&
+  birth.includes('mix(.18,nativeOpticEnergy,opticWake);'),
   'The lens must use the original film clock and delayed optical ignition');
 assert(birth.includes('this.mechEyeCore.material.opacity=.92*opticWake;') &&
   birth.includes('const opticWake=smooth((t-7.44)/.78);'),
@@ -71,7 +72,7 @@ assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
   'Worker must authorize the exact R2206 inline bootstrap');
 assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
-const revision = '20261112-r2221-biotic-metal-retire';
+const revision = '20261113-r2222-native-optic-energy';
 for (const [name, source] of Object.entries({ html, worker, intro, rescue, current, runtime, scheduler }))
   assert(source.includes(revision), name + ' must reference the R2206 cache generation');
 assert(html.includes('data-fx-dna-first-frame-r2181'),

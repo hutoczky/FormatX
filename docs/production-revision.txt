@@ -1,5 +1,8 @@
+FormatX R2222 native optic-energy handoff — 2026-11-13
+cache=20261113-r2222-native-optic-energy
+The existing cinematic living optic now settles continuously onto the permanent MAG's genuine viewport-class idle energy from 7.44 to 8.22 seconds. Mobile remains at its existing .50 final energy; desktop lands at the native .43 instead of retaining the brighter phone grade through ownership transfer. Living-cell chemistry, optical geometry, material program, R2221 biological-light retirement, both studio directions, pose, silhouette, camera, story clock and renderer ownership remain. No added draw, program, pass, texture, geometry, light, context, canvas, RAF, timer, input or detection. This is one visible optic-continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
+
 FormatX R2221 biological-light retirement — 2026-11-12
-cache=20261112-r2221-biotic-metal-retire
 The existing cyan biological PointLight remains at 5.8 through the living-cell chapter, then retires continuously from 5.75 to 7.25 seconds as neutral titanium seats. The living optic, restrained rim, both studio directions, R2220 light handoff, R2219 pose, fresh four-point silhouette, camera, story clock and renderer ownership remain. No added light, draw, program, pass, texture, geometry, context, canvas, RAF, timer, input or detection. This is one visible chapter-to-metal correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
 
 FormatX R2220 secondary-light handoff — 2026-11-07

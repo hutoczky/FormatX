@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261112-r2221-biotic-metal-retire';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261113-r2222-native-optic-energy';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;

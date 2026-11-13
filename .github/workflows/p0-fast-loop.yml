@@ -123,6 +123,7 @@ jobs:
           node .github/scripts/validate-mag-studio-key-r2212.cjs
           node .github/scripts/validate-mag-fill-continuity-r2220.cjs
           node .github/scripts/validate-mag-biotic-retirement-r2221.cjs
+          node .github/scripts/validate-mag-optic-energy-r2222.cjs
           node .github/scripts/validate-genesis-chapter-retirement-r2214.cjs
           node .github/scripts/validate-mag-key-continuity-r2215.cjs
           node .github/scripts/validate-mag-cell-filter-r2216.cjs
