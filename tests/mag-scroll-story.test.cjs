@@ -38,6 +38,14 @@ assert.match(js,/addEventListener\('scroll',request,\{passive:true\}\)/);
 assert.match(js,/requestAnimationFrame\(render\)/);
 assert.match(js,/prefers-reduced-motion: reduce/);
 assert.match(js,/core\.rotateBy\(/);
+assert.match(js,/archiveOwnsStage = \(\) =>/);
+assert.match(js,/fxArchiveDock === 'active'/);
+assert.match(js,/fxArchiveCinema === 'active'/);
+assert.match(js,/Math\.PI \* 3/);
+assert.match(js,/mag-scroll-r2217/);
+assert.doesNotMatch(js,/difference \* 170|difference \* -32/,
+  'R326 expects radians; historic degree-scale scroll jumps are prohibited');
+
 assert.match(js,/heroRect\.bottom <= 0/);
 assert.doesNotMatch(js,/new WebGLRenderer|createElement\('canvas'\)|preventDefault\(/);
 assert.match(js,/footerRect\.top < vh/);
