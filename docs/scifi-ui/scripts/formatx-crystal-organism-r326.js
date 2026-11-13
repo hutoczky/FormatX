@@ -290,6 +290,9 @@
     const uvs = [];
     const barycentrics = [];
     const facets = [];
+    // R2220: immutable barycentric attributes shared by every authored
+    // triangle instead of allocating three identical arrays per face.
+    const triangleBarycentrics = [[1,0,0],[0,1,0],[0,0,1]];
 
     function random(x, y) {
       const value = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
@@ -370,13 +373,20 @@
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
-      const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
       const bodySeamOverlap=0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
+      // R2220: the visual blend depends only on this face's facet code and
+      // environment, never on the vertex index. Preserve EXACT math while
+      // executing all material branches only once per triangle.
+      const metalFacet=facet>=5.0&&facet<6.0;
+      const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
+        (facet<2.0?(mobile?.985:(software?.94:.90)):
+        (software?.95:(mobile?.985:(constrained?.972:.978))));
+      const faceWeight=1-smoothWeight;
       vertices.forEach((item, index) => {
         if(bodySeamOverlap){
           const k=1+bodySeamOverlap;
@@ -402,12 +412,8 @@
         // R2144: the machined raised armour is truly bevelled. A controlled
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
-        const metalFacet=facet>=5.0&&facet<6.0;
-        // R2177: avoid jagged per-triangle metal shading on the phone.
-        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
-          (facet<2.0?(mobile?.985:(software?.94:.90)):
-          (software?.95:(mobile?.985:(constrained?.972:.978))));
-        const faceWeight=1-smoothWeight;
+        // R2177: the exact R2177 smooth/face weight pair is precomputed
+        // above for this triangle; vertex normals remain independent.
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
           smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
@@ -415,7 +421,7 @@
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
-        barycentrics.push(...barycentric[index]);
+        barycentrics.push(...triangleBarycentrics[index]);
         facets.push(facet);
       });
     }
