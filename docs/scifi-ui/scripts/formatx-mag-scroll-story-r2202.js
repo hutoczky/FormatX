@@ -42,6 +42,9 @@
 
   const clamp = (n,a=0,b=1) => Math.max(a,Math.min(b,n));
   const links = chapters.map(chapter => chapter.link);
+  // R2216: keep each chapter's last compositor state.
+  // Native scrolling should update CSS only when a visible value changes.
+  const lastChapterStyles = chapters.map(() => ({visibility:null,offset:null,local:null}));
   const footer = document.querySelector('footer.site-footer');
   const mobileLayout = matchMedia('(max-width:900px),(pointer:coarse)');
   let scheduled = false;
@@ -119,9 +122,19 @@
     if (rail.hidden !== hideRail) rail.hidden = hideRail;
     updates.forEach((update,index) => {
       const node = chapters[index].element;
-      node.style.setProperty('--fx-mag-story-visibility',update.visibility);
-      node.style.setProperty('--fx-mag-story-offset',update.offset);
-      node.style.setProperty('--fx-mag-story-local',update.local);
+      const prior = lastChapterStyles[index];
+      if (prior.visibility!==update.visibility) {
+        node.style.setProperty('--fx-mag-story-visibility',update.visibility);
+        prior.visibility=update.visibility;
+      }
+      if (prior.offset!==update.offset) {
+        node.style.setProperty('--fx-mag-story-offset',update.offset);
+        prior.offset=update.offset;
+      }
+      if (prior.local!==update.local) {
+        node.style.setProperty('--fx-mag-story-local',update.local);
+        prior.local=update.local;
+      }
     });
     driveCore(nearest,target,first);
     const elapsed = Math.min(64,Math.max(0,now-(lastFrame||now)));
