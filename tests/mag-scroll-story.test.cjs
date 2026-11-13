@@ -25,6 +25,11 @@ assert.equal((homepage.match(/data-fx-dna-first-frame-r2181="true"/g)||[]).lengt
 assert.ok(homepage.includes('data-fx-mag-story-r2202="true" data-fx-r487-deferred-style="true"'));
 assert.match(js,/formatx:deferredcssready/);
 assert.ok(js.indexOf('const bounds = chapters.map') < js.indexOf('updates.forEach'), 'Layout reads must precede DOM writes');
+assert.match(js,/const lastChapterStyles = chapters\.map/);
+assert.match(js,/prior\.visibility!==update\.visibility/);
+assert.match(js,/prior\.offset!==update\.offset/);
+assert.doesNotMatch(js,/setProperty\('--fx-mag-story-local'/,
+  'Unused per-frame chapter local variable must not be mutated');
 for(const id of ['hero','experience','capabilities','pricing','system','network','resources']){
   assert.ok(homepage.includes('id="'+id+'"'),id+' section missing');
   assert.ok(js.includes("['"+id+"'"),id+' timeline chapter missing');
