@@ -147,7 +147,11 @@
   const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
   const veryLowPower=mobile()&&Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
-  root.dataset.fxArchiveExperience='pending';
+  // R2233: reserve the requested native HTML mode immediately, before
+  // deferred DOMContentLoaded boot. A link navigation/reloaded module must
+  // never briefly publish 'pending' and let another WebGL owner take over.
+  root.dataset.fxArchiveExperience=requestedHtmlFallback?'reduced-html':'pending';
+  if(requestedHtmlFallback)root.dataset.fxArchiveHtmlFallback='user-requested';
   function ensureAIScrollStation(){
     if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
     const original=document.querySelector('#capabilities .cards .card:last-child');
