@@ -43,6 +43,21 @@ assert.match(js,/fxArchiveDock === 'active'/);
 assert.match(js,/fxArchiveCinema === 'active'/);
 assert.match(js,/Math\.PI \* 3/);
 assert.match(js,/mag-scroll-r2217/);
+// R2223: the canonical photographic GPU program remains identical except
+// for algebraic x*x substitutions. Never switch to the unused simplified
+// software shader, alter optics, or remove the real full-quality WebGL model.
+const corePath=path.join(root,'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const coreSource=fs.readFileSync(corePath,'utf8');
+const coreSyntax=spawnSync(process.execPath,['--check',corePath],{encoding:'utf8'});
+assert.equal(coreSyntax.status,0,coreSyntax.stderr);
+const canonicalShader=coreSource.split('const constrainedFragmentSource = `')[1]
+  ?.split('const softwareFragmentSource = `')[0]||'';
+assert.ok(canonicalShader.length>10000,'Real photographic MAG shader was replaced');
+assert.doesNotMatch(canonicalShader,/pow\\([^;]*,2\\.0\\)/,
+  'Canonical shader still uses slow general power for a mathematical square');
+assert.match(coreSource,/R2223: exact algebraic squares/);
+assert.match(coreSource,/gl\\.drawArrays\\(gl\\.TRIANGLES,0,geometry\\.count\\)/);
+assert.match(coreSource,/root\\.dataset\\.fxCoreMeshBuildMsR2220/);
 const cinematicJourney=fs.readFileSync(
   path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
 assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
