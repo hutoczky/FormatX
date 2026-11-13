@@ -85,10 +85,13 @@
     // R326 rotateBy accepts RADIANS, not degrees. A restrained 0.65-rad
     // pitch and 1.5 yaw revolutions over the entire scroll are film-like,
     // rather than snapping to the pitch limit after one normal wheel tick.
-    // Follow the entire scroll displacement, not just the first clipped
-    // delta after anchor jumps. This makes the camera reversible and path-
-    // independent while keeping each GPU rotation increment below 0.076 rad.
-    const difference = clamp(progress - lastCoreTurn, -.008, .008);
+    // R2222: proportional, bounded convergence for anchor jumps. A fixed
+    // .008 progress step required >100 GPU-driven RAF turns on a long skip
+    // and could never settle on low-end software WebGL within the 12s
+    // cinematic test budget. The MAG still eases its actual orientation
+    // inside R326; this only advances its canonical target efficiently.
+    const remaining=progress-lastCoreTurn;
+    const difference=clamp(remaining*.35,-.095,.095);
     lastCoreTurn = clamp(lastCoreTurn + difference);
     if (Math.abs(difference) > .00008) {
       core.rotateBy(difference * .65, difference * (-Math.PI * 3), 'mag-scroll-r2217');
