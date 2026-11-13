@@ -53,12 +53,22 @@ const profiles = [
           await page.waitForFunction(id=>
             document.documentElement.dataset.fxMagStoryChapter===id,
             sectionId,{timeout:15000}).catch(async error=>{
-              const state=await page.evaluate(()=>({
+              const state=await page.evaluate(targetId=>({
+                targetId,
                 active:document.documentElement.dataset.fxMagStoryChapter,
                 archive:document.documentElement.dataset.fxArchiveExperience,
                 status:window.__FORMATX_MAG_STORY_STATUS__?.(),
-                scrollY,viewport:innerHeight
-              }));
+                scrollY,viewport:innerHeight,hash:location.hash,
+                maxScroll:document.documentElement.scrollHeight-innerHeight,
+                chapters:['hero','experience','capabilities','pricing','system','network','resources']
+                  .map(id=>{
+                    const node=document.getElementById(id);
+                    const rect=node?.getBoundingClientRect(),style=node&&getComputedStyle(node);
+                    return {id,top:Math.round(rect?.top||0),bottom:Math.round(rect?.bottom||0),
+                      height:Math.round(rect?.height||0),display:style?.display,
+                      position:style?.position,transform:style?.transform};
+                  })
+              }),sectionId);
               throw new Error(profile.name+': chapter '+sectionId+
                 ' did not activate: '+JSON.stringify(state)+' / '+String(error.message||error));
             });
