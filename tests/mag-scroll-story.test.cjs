@@ -56,8 +56,8 @@ assert.ok(canonicalShader.length>10000,'Real photographic MAG shader was replace
 assert.doesNotMatch(canonicalShader,/pow\\([^;]*,2\\.0\\)/,
   'Canonical shader still uses slow general power for a mathematical square');
 assert.match(coreSource,/R2223: exact algebraic squares/);
-assert.match(coreSource,/gl\\.drawArrays\\(gl\\.TRIANGLES,0,geometry\\.count\\)/);
-assert.match(coreSource,/root\\.dataset\\.fxCoreMeshBuildMsR2220/);
+assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
+assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
 const cinematicJourney=fs.readFileSync(
   path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
 assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
