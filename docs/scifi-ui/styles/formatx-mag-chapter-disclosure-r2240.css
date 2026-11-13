@@ -1,0 +1,205 @@
+/* FormatX R2240 — visible bold titles; real content unfolds from the single MAG.
+   This layer applies only after the runtime has created native accessible buttons.
+   Unenhanced/failed-JS pages keep the complete original HTML fully readable. */
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-panel{
+  --fx-mag-unseal:rgba(132,228,235,.75);
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-heading{
+  position:relative!important;
+  z-index:5!important;
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  padding:0!important;
+  margin:0!important;
+  text-align:left!important;
+  isolation:isolate;
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger{
+  appearance:none;
+  -webkit-appearance:none;
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  gap:clamp(14px,3vw,38px);
+  position:relative;
+  width:100%;
+  min-width:0;
+  min-height:clamp(86px,14dvh,152px);
+  margin:0;
+  padding:clamp(14px,3.2vw,46px) clamp(16px,4vw,52px);
+  color:#eaf9fb;
+  background:linear-gradient(104deg,rgba(7,22,36,.86),rgba(9,27,43,.40) 60%,rgba(9,28,36,.72));
+  border:1px solid rgba(164,224,232,.18);
+  border-left:3px solid rgba(168,236,244,.72);
+  border-radius:5px 24px 24px 5px;
+  box-shadow:inset 0 1px 0 rgba(236,251,255,.12),0 18px 60px rgba(1,9,18,.28);
+  text-align:left;
+  font-family:inherit;
+  cursor:pointer;
+  overflow:hidden;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:border-color .34s ease,background .34s ease,box-shadow .34s ease;
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger:hover,
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger[aria-expanded="true"]{
+  border-color:rgba(173,242,247,.60);
+  border-left-color:#ddfdff;
+  background:linear-gradient(105deg,rgba(13,43,57,.90),rgba(7,23,37,.72) 66%,rgba(8,30,39,.82));
+  box-shadow:inset 0 1px 0 rgba(240,255,255,.16),0 0 36px rgba(83,201,226,.09);
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger:focus-visible{
+  outline:3px solid #bef5ff!important;
+  outline-offset:4px!important;
+}
+.fx-mag-disclosure-index{
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;border:0!important;
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-word{
+  position:relative;
+  z-index:2;
+  display:block;
+  min-width:0;
+  font-size:clamp(26px,5.2vw,74px);
+  line-height:1.07;
+  font-weight:850;
+  letter-spacing:-.055em;
+  color:#f0faff;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+  text-shadow:0 2px 24px rgba(62,159,192,.18);
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-mechanism{
+  flex:0 0 clamp(42px,6vw,74px);
+  position:relative;
+  height:clamp(42px,6vw,74px);
+  border:1px solid rgba(168,230,242,.24);
+  border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(116,223,232,.20) 0 9%,rgba(6,24,33,.86) 13% 42%,rgba(109,182,194,.18) 65%,rgba(3,15,25,.70) 67%);
+  box-shadow:inset 0 0 16px rgba(107,208,234,.13),0 0 16px rgba(81,158,189,.08);
+  transform-style:preserve-3d;
+  perspective:600px;
+  transition:transform .72s cubic-bezier(.2,.75,.1,1),box-shadow .6s;
+}
+.fx-mag-disclosure-mechanism::before,.fx-mag-disclosure-mechanism::after{
+  content:"";
+  position:absolute;
+  top:15%;bottom:15%;
+  width:40%;
+  background:linear-gradient(115deg,rgba(221,241,243,.86),rgba(91,146,159,.36) 40%,rgba(10,34,48,.96) 90%);
+  border:1px solid rgba(197,251,255,.30);
+  box-shadow:inset 0 1px 3px rgba(250,255,255,.33);
+  backface-visibility:hidden;
+  transition:transform .7s cubic-bezier(.17,.7,.15,1),opacity .5s;
+}
+.fx-mag-disclosure-mechanism::before{
+  left:9%;border-radius:60% 9% 9% 60%;
+  transform-origin:left center;
+}
+.fx-mag-disclosure-mechanism::after{
+  right:9%;border-radius:9% 60% 60% 9%;
+  transform-origin:right center;
+}
+.fx-mag-disclosure-trigger[aria-expanded="true"] .fx-mag-disclosure-mechanism{
+  transform:rotate(90deg) scale(1.06);
+  box-shadow:inset 0 0 18px rgba(138,241,247,.28),0 0 28px rgba(92,215,239,.23);
+}
+.fx-mag-disclosure-trigger[aria-expanded="true"] .fx-mag-disclosure-mechanism::before{
+  transform:rotateY(-72deg) translateX(-7px);
+}
+.fx-mag-disclosure-trigger[aria-expanded="true"] .fx-mag-disclosure-mechanism::after{
+  transform:rotateY(72deg) translateX(7px);
+}
+.fx-mag-disclosure-trigger::after{
+  content:"";position:absolute;z-index:1;pointer-events:none;
+  height:1px;bottom:0;left:50%;width:0;
+  background:linear-gradient(90deg,transparent,#baf7f8,transparent);
+  box-shadow:0 0 18px #7cf0f4;
+  transition:left .74s ease,width .74s ease;
+}
+.fx-mag-disclosure-trigger[aria-expanded="true"]::after{
+  left:0;width:100%;
+}
+/* The panel, not a cloned content card, controls accessibility and display.
+   Original forms, cards, links, section IDs and event listeners remain in place. */
+html:root:root:root:root:root:root[data-fx-mag-disclosure="ready"]
+body.living-architecture .fx-mag-disclosure-panel[data-fx-mag-open="false"]
+> :not(.fx-mag-disclosure-heading){
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html:root:root:root:root:root:root[data-fx-mag-disclosure="ready"]
+body.living-architecture .fx-mag-disclosure-panel[data-fx-mag-open="true"]
+> :is(header.section-heading,header.fx-net-head){
+  display:none!important;
+}
+/* The non-cinematic page is a line of large headings until a click.
+   No minimum-height is imposed on archived anchors (R1987 owns 165dvh). */
+html[data-fx-mag-disclosure="ready"] main#main-content
+> section.fx-mag-disclosure-panel:not(.fx-archive-cinema-folio-r2030){
+  overflow:visible;
+}
+html[data-fx-mag-disclosure="ready"] main#main-content
+> section.fx-mag-disclosure-panel[data-fx-mag-open="false"]{
+  min-height:clamp(180px,34dvh,340px)!important;
+}
+html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-panel.fx-mag-disclosure-unsealing[data-fx-mag-open="true"]
+> :not(.fx-mag-disclosure-heading):not(.fx-mag-folio-origin-r2041){
+  animation:fx-mag-paper-unseal-r2240 .72s cubic-bezier(.19,.8,.2,1) both;
+  transform-origin:50% 0%;
+}
+@keyframes fx-mag-paper-unseal-r2240{
+  0%{opacity:0;clip-path:inset(0 49% 0 49% round 20px);filter:blur(7px)}
+  43%{opacity:.55;clip-path:inset(0 19% 0 19% round 12px);filter:blur(2px)}
+  100%{opacity:1;clip-path:inset(0 0 0 0 round 0);filter:blur(0)}
+}
+/* The existing film's fixed, clickable folio keeps its physical geometry.
+   The visitor sees only the bold chapter word before opening the same paper. */
+html[data-fx-mag-disclosure="ready"][data-fx-archive-cinema="active"]
+.fx-archive-cinema-folio-r2030.fx-mag-disclosure-panel{
+  scroll-behavior:smooth;
+}
+html[data-fx-mag-disclosure="ready"][data-fx-archive-cinema="active"]
+.fx-archive-cinema-folio-r2030.fx-mag-disclosure-panel .fx-mag-disclosure-trigger{
+  min-height:clamp(72px,12dvh,130px);
+  padding:clamp(12px,2.5vw,26px);
+}
+@media(max-width:900px){
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger{
+    min-height:78px;
+    gap:12px;
+    padding:16px 17px;
+    border-radius:5px 17px 17px 5px;
+  }
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-word{
+    font-size:clamp(24px,6.6vw,44px);
+    letter-spacing:-.045em;
+  }
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-mechanism{
+    flex-basis:44px;height:44px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger,
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-mechanism,
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-mechanism::before,
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-mechanism::after,
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-trigger::after{
+    transition:none!important;
+  }
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-panel.fx-mag-disclosure-unsealing>*{
+    animation:none!important;filter:none!important;clip-path:none!important;
+  }
+}
+@media print{
+  html[data-fx-mag-disclosure="ready"] .fx-mag-disclosure-panel> :not(.fx-mag-disclosure-heading){
+    display:revert!important;visibility:visible!important;
+  }
+  .fx-mag-disclosure-heading{display:none!important}
+}
