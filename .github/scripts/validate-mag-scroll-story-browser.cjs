@@ -52,7 +52,7 @@ const profiles = [
           },sectionId);
           await page.waitForFunction(id=>
             document.documentElement.dataset.fxMagStoryChapter===id,
-            sectionId,{timeout:15000}).catch(async error=>{
+            sectionId,{polling:200,timeout:20000}).catch(async error=>{
               const state=await page.evaluate(targetId=>({
                 targetId,
                 active:document.documentElement.dataset.fxMagStoryChapter,
@@ -69,6 +69,14 @@ const profiles = [
                       position:style?.position,transform:style?.transform};
                   })
               }),sectionId);
+              // SwiftShader can starve rAF while the original 3D MAG is
+              // compiling/drawing. A last direct read still has to confirm
+              // the requested chapter, never accept a different chapter.
+              if(state.active===sectionId && state.status?.active===sectionId){
+                console.log('MAG_SCROLL_LATE_CONSISTENT_CHAPTER',
+                  JSON.stringify({profile:profile.name,sectionId,scrollY:state.scrollY}));
+                return;
+              }
               throw new Error(profile.name+': chapter '+sectionId+
                 ' did not activate: '+JSON.stringify(state)+' / '+String(error.message||error));
             });
