@@ -788,6 +788,11 @@
         ? (innerWidth<900?.58:.56)
         : (innerWidth<900?.92:.78);
     let renderAverage=0,lastQualityAdjust=0,panicSamples=0;
+    // R2230: diagnostic DOM properties do not need animation-frame cadence.
+    let lastTelemetryAt=-Infinity;
+    const setTelemetry=(key,value)=>{
+      if(document.documentElement.dataset[key]!==value)document.documentElement.dataset[key]=value;
+    };
     function resize(){
       sw=innerWidth;sh=innerHeight;
       const baseDpr=proofFrame
@@ -821,10 +826,8 @@
       const radiusCap=MOBILE
         ? Math.max(38,Math.min(sw*.36,sh*.35)/Math.max(.001,scale))
         : 192;
-      document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
-        'four-point-bevelled-metal-glass-iris';
-      document.documentElement.dataset.fxMagFallbackDiameterR2103=
-        String(Math.round(radiusCap*2*scale));
+      setTelemetry('fxMagFallbackSilhouetteR2103','four-point-bevelled-metal-glass-iris');
+      setTelemetry('fxMagFallbackDiameterR2103',String(Math.round(radiusCap*2*scale)));
       drawLiteScene(ctx,r,time,target,radiusCap);
       ctx.restore();
 
@@ -867,13 +870,18 @@
           resize();
         }
       }
-      document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
-      document.documentElement.dataset.fxMagFallbackBudgetR1727=runtimeConstrained
-        ? 'measured-constrained-low-dpr-fast-panic-recovery'
-        : 'full-photographic-adaptive';
-      document.documentElement.dataset.fxMagFallbackFramePanicR1727=String(panicSamples);
-      document.documentElement.dataset.fxMagFallbackRenderMsR1601=renderAverage.toFixed(2);
-      document.documentElement.dataset.fxMagFallbackQualityScaleR1601=qualityScale.toFixed(2);
+      // The 2D canvas still draws at its existing phase/RAF schedule.
+      // Only performance labels are sampled at 4 Hz, never every draw.
+      if(time-lastTelemetryAt>=250){
+        lastTelemetryAt=time;
+        setTelemetry('fxMagFallbackTargetFpsR1601','60');
+        setTelemetry('fxMagFallbackBudgetR1727',runtimeConstrained
+          ? 'measured-constrained-low-dpr-fast-panic-recovery'
+          : 'full-photographic-adaptive');
+        setTelemetry('fxMagFallbackFramePanicR1727',String(panicSamples));
+        setTelemetry('fxMagFallbackRenderMsR1601',renderAverage.toFixed(2));
+        setTelemetry('fxMagFallbackQualityScaleR1601',qualityScale.toFixed(2));
+      }
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
