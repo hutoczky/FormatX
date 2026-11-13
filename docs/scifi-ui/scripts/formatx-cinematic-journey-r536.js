@@ -177,7 +177,14 @@
     const api = coreApi();
     if (!api) return;
     try {
-      api.rotateBy?.((scene.index%2?1:-1)*.018,.026 + scene.index*.002,'r536-camera');
+      // R2221: R2217 owns continuous camera rotation while R1987 is the
+      // full-page 3D archive. Prevent two camera controllers from fighting
+      // over the same R326 core. R536 still applies scene-specific energy
+      // pulses and keeps its original camera handoff outside archive mode.
+      const scrollOwnsCamera = root.dataset.fxArchiveDock==='active'
+        && root.dataset.fxMagStoryCoreMode==='archive';
+      if (!scrollOwnsCamera)
+        api.rotateBy?.((scene.index%2?1:-1)*.018,.026 + scene.index*.002,'r536-camera');
       api.surfacePulse?.('r536-'+scene.def.key);
       api.requestRender?.(3);
       root.dataset.fxCinematicCoreBudgetR1643='settled-scene-single-organism-three-render';
