@@ -412,6 +412,22 @@ async function evaluate(viewport,isMobile,browser){
     'Archive animation lost the canonical native GPU canvas');
   console.log('MAG_SINGLE_CORE_FULLPAGE_SCROLL_PASS',
     JSON.stringify({mode:storyCore.mode,source:storyCore.source,dock:storyCore.dock}));
+  const coreStartup=await page.evaluate(()=>{
+    const d=document.documentElement.dataset;
+    return {
+      shaderMs:Number(d.fxCoreShaderLinkMsR2220),
+      meshMs:Number(d.fxCoreMeshBuildMsR2220),
+      uploadMs:Number(d.fxCoreGpuBufferUploadMsR2220),
+      vertices:window.FormatXLivingCore?.vertexCount||0
+    };
+  });
+  assert.ok(coreStartup.vertices>0
+    && Number.isFinite(coreStartup.shaderMs)&&coreStartup.shaderMs>=0
+    && Number.isFinite(coreStartup.meshMs)&&coreStartup.meshMs>=0
+    && Number.isFinite(coreStartup.uploadMs)&&coreStartup.uploadMs>=0,
+    'MAG did not record separate shader, mesh and GPU-upload boot costs: '+JSON.stringify(coreStartup));
+  console.log('MAG_R2220_REAL_CORE_BOOT_TIMINGS',JSON.stringify(coreStartup));
+
   // R2219: native scroll jumps must arrive at the same 3D orientation as
   // continuous wheel scrolling. Let the bounded renderer consume its
   // outstanding deltas, rather than accepting a one-frame fake rotation.
