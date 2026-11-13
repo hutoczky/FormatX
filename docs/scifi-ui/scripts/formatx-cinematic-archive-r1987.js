@@ -1151,6 +1151,14 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
+        // R2218: one scene transition must publish its ORIGINAL native HTML
+        // source and active folio synchronously. On low-power phones the next
+        // GPU/DOM rAF can arrive after accessibility and source assertions;
+        // leaving the previous active panel visible is a real UX bug.
+        // Do this only when the chapter key changes — same-chapter scroll
+        // keeps the inexpensive coalesced rAF composition below.
+        const nextCinemaKey=active&&current?current.s.key:'';
+        if(nextCinemaKey!==lastCinemaKey)syncCinema();
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
         // animation frame, so wheel/touch bursts cannot repeatedly recompute
