@@ -1,5 +1,8 @@
+FormatX R2221 biological-light retirement — 2026-11-12
+cache=20261112-r2221-biotic-metal-retire
+The existing cyan biological PointLight remains at 5.8 through the living-cell chapter, then retires continuously from 5.75 to 7.25 seconds as neutral titanium seats. The living optic, restrained rim, both studio directions, R2220 light handoff, R2219 pose, fresh four-point silhouette, camera, story clock and renderer ownership remain. No added light, draw, program, pass, texture, geometry, context, canvas, RAF, timer, input or detection. This is one visible chapter-to-metal correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
+
 FormatX R2220 secondary-light handoff — 2026-11-07
-cache=20261107-r2220-native-fill-handoff
 The existing cinematic secondary softbox now settles continuously onto the permanent MAG shader's right-side studio direction from 7.25 to 8.10 seconds while preserving frontal irradiance. The R2219 body pose, fresh four-point silhouette, physical materials, living optic, camera, scale/position landing, story clock and renderer ownership remain. No added light, draw, program, pass, texture, geometry, context, canvas, RAF, timer, input or detection. This is one visible light-continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
 
 FormatX R2219 native body-pose handoff — 2026-11-06

@@ -42,3 +42,5 @@ The current work stays on the Genesis introduction and the same living MAG's tra
 ## Next verification
 
 Inspect the published candidate's original WebGL images, actual draw counts, handoff/reduced/fallback/zero-idle regressions and all applicable CI jobs/steps. Continue the remaining visual and motion work before claiming final quality or release acceptance.
+
+- R2221 (2026-11-12): retired the existing biological point fill continuously during titanium assembly, preserving the living-cell chapter while preventing a cyan whole-body wash on the completed cinematic MAG. The living optic and authored studio lights remain; resource ownership and WebGL lifecycle are unchanged.

@@ -139,6 +139,7 @@
       const bioticFill=new T.PointLight(0x385866,5.8,11,2);
       bioticFill.position.set(-2.8,-.4,3.4);
       this.scene.add(bioticFill);
+      this.bioticFill=bioticFill;
       this.coreLight=new T.PointLight(0x78e6e8,0,7.2,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
@@ -3239,6 +3240,13 @@
       const embryoStudio=smooth((t-3.48)/.62)*(1-smooth((t-5.10)/.72));
       this.studioKey.intensity=1.62+dnaStudio*.35+embryoStudio*.20+assemblyStudio*.70;
       this.studioFill.intensity=.42+dnaStudio*.16+embryoStudio*.34+assemblyStudio*.38;
+      // R2221: the biological point fill belongs to the living-cell chapter.
+      // Retire that existing source as the titanium seats, so it cannot wash
+      // the completed neutral metal blue immediately before the native MAG
+      // takes ownership. The living optic, cool rim and both studio strips
+      // remain; this changes no light count, draw, program or render owner.
+      const bioticMetalRetire=1-smooth((t-5.75)/1.50);
+      this.bioticFill.intensity=5.8*bioticMetalRetire;
       // The DNA key and embryonic fill converge back to the authored
       // neutral studio positions before the first titanium plate seats.
       this.studioKey.position.set(
@@ -3494,4 +3502,5 @@
   document.documentElement.dataset.fxMagCinematicSurfaceR2218='front-filtered-machined-silver-native-grazing';
   document.documentElement.dataset.fxMagCinematicPoseR2219='native-base-pose-continuous-handoff';
   document.documentElement.dataset.fxMagCinematicFillR2220='native-side-light-continuous-handoff';
+  document.documentElement.dataset.fxMagCinematicBioticR2221='cell-fill-retired-before-native-metal';
 })();
