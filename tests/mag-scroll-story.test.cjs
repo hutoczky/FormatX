@@ -15,6 +15,13 @@ assert.equal(syntax.status,0,syntax.stderr);
 assert.match(homepage,/formatx-mag-scroll-story-r2202\.js/);
 assert.match(homepage,/formatx-mag-scroll-story-r2202\.css/);
 assert.equal((homepage.match(/data-fx-mag-story-r2202="true"/g)||[]).length,2);
+const dnaCritical='data-fx-dna-first-frame-r2181="true"';
+const audioChrome='data-fx-genesis-studio-r2160="true"';
+assert.ok(homepage.indexOf(dnaCritical)>0);
+assert.ok(homepage.indexOf(dnaCritical)<homepage.indexOf(audioChrome),
+  'DNA first-frame sheet must start downloading before intro audio chrome');
+assert.match(homepage,/formatx-genesis-studio-r2160\.css[^>]*data-fx-r487-deferred-style="true"/);
+assert.equal((homepage.match(/data-fx-dna-first-frame-r2181="true"/g)||[]).length,1);
 assert.ok(homepage.includes('data-fx-mag-story-r2202="true" data-fx-r487-deferred-style="true"'));
 assert.match(js,/formatx:deferredcssready/);
 assert.ok(js.indexOf('const bounds = chapters.map') < js.indexOf('updates.forEach'), 'Layout reads must precede DOM writes');
