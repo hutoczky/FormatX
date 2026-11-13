@@ -2156,6 +2156,8 @@
     let lastRuntimeTelemetryAt=-Infinity;
     // R2228: compositor/refresh telemetry is diagnostic, never per-frame DOM work.
     let lastRefreshTelemetryAt=-Infinity;
+    // Dynamic scene status must not notify document MutationObservers when unchanged.
+    const publishRuntimeState=(key,value)=>{if(root.dataset[key]!==value)root.dataset[key]=value;};
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
@@ -2494,12 +2496,12 @@
       framePeak=Math.max(dt,framePeak*.90);
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
-        root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
-        root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
-        root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
+        publishRuntimeState('fxCoreAdaptiveOpticsR588',mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution');
+        publishRuntimeState('fxCoreSurfaceCadenceR1392',mobile?'bounded-slow-renderer-full-window':'desktop-bounded');
+        publishRuntimeState('fxCoreSurfaceCadenceR1403',mobile?'full-window-fast-cadence':'desktop-bounded');
+        publishRuntimeState('fxCoreSurfaceCadenceR1441',mobile?'midpoint-safe-68ms-cap':'desktop-bounded');
       }else if(!slowRenderer){
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
+        publishRuntimeState('fxCoreAdaptiveOpticsR588',mobile?'single-pass-mobile-capable':'single-pass-60fps-capable');
       }
 
       if(!auditMode){
@@ -2637,7 +2639,7 @@
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
+        publishRuntimeState('fxCoreBurstCadenceR1600',burstDelay?'audit-paced':'native-60hz-target');
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=auditMode
@@ -2645,9 +2647,9 @@
               ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
               : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
           : 0;
-        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
-        root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
-        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
+        publishRuntimeState('fxCoreAdaptiveSurfaceCadenceR588',sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf');
+        publishRuntimeState('fxCoreSurfaceCadenceR643',mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle');
+        publishRuntimeState('fxCoreAnimationCadenceR1600','production-native-60hz-target-audit-contract-preserved');
         queueFrame(sweepDelay);
       }else settleAfterBurst();
     }
