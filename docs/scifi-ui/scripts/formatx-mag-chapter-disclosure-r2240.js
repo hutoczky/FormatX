@@ -57,7 +57,11 @@
       // The canonical R326 GPU body opens the physical paper; never create
       // another scene, canvas or continuous render loop.
       const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
-      if(typeof core?.rotateBy==='function')core.rotateBy(-.11,.27,'mag-chapter-open-r2240');
+      if(typeof core?.rotateBy==='function'){
+        core.rotateBy(-.11,.27,'mag-chapter-open-r2240');
+        root.dataset.fxMagDisclosureCoreAction='native-r326-rotateby';
+        root.dataset.fxMagDisclosureCoreOpened=entry.id;
+      }
       core?.requestRender?.();
       entry.panel.classList.remove('fx-mag-disclosure-unsealing');
       void entry.button.offsetWidth; // one deliberate click-time animation restart
