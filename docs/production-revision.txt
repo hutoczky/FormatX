@@ -1,3 +1,7 @@
+FormatX R2224 shared living-clock handoff — 2026-11-14
+cache=20261114-r2224-shared-life-clock
+The cinematic and permanent WebGL MAGs now share the browser's real monotonic performance clock while both are visible. Their byte-identical cyan/coral living-optic shader therefore keeps one metabolic phase through the crossfade, and the cinematic four-arm body lands on the permanent shader's exact time-dependent pitch, yaw and roll. After intro completion the native renderer continues from that phase with its existing frame-delta clock. No fake clock, added timer, draw, program, pass, texture, geometry, light, renderer, context, canvas, RAF, input or detection. This is a visible optic/body motion-continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
+
 FormatX R2223 native chassis-settle handoff — 2026-11-13
 cache=20261113-r2223-native-chassis-settle
 The cinematic MAG's independent metal-body, cradle, prism and seated silver-part micro-wobble now settles continuously from 8.45 to 9.15 seconds, reaching the authored permanent rest pose before the existing native ownership crossfade. The living optic, real film clock, viewport-specific .50/.43 energy, fresh four-point silhouette, studio lights, camera, geometry and renderer lifecycle remain. No added draw, program, pass, texture, geometry, light, context, canvas, RAF, timer, input or detection. This is one visible motion-continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.

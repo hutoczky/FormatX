@@ -55,10 +55,10 @@ assert(engine.includes('const count=this.mobileRender?6000:9600;'),
   'GPU nucleotide morph must remain 6000/9600 instances');
 // R2201: recovery/canonical boot load R533 while R533/edge load R1280.
 for(const [label,src,revision] of [
-  ['R533',birth,'20261113-r2223-native-chassis-settle'],
-  ['rescue',rescue,'20261113-r2223-native-chassis-settle'],
-  ['HTML',html,'20261113-r2223-native-chassis-settle'],
-  ['Worker',worker,'20261113-r2223-native-chassis-settle']
+  ['R533',birth,'20261114-r2224-shared-life-clock'],
+  ['rescue',rescue,'20261114-r2224-shared-life-clock'],
+  ['HTML',html,'20261114-r2224-shared-life-clock'],
+  ['Worker',worker,'20261114-r2224-shared-life-clock']
 ]){
   assert(src.includes(revision),'Stale '+label+' cinematic delivery cache: '+revision);
 }

@@ -2983,12 +2983,19 @@
       // native shader base and its hardware-path rest rotation, so lighting
       // and silhouette do not jump when the permanent renderer is revealed.
       const nativePose=smooth((t-7.25)/.85);
-      const nativePitch=this.mobileRender?-.160:-.140;
-      const nativeYaw=this.mobileRender?.135:.145;
+      // R2224: the permanent shader adds a slow whole-body life motion from
+      // the same real performance clock used by this film. Include that exact
+      // phase in the landing pose, so the optic and the complete four-arm body
+      // remain one living object while both WebGL canvases crossfade.
+      const nativeLifeTime=time*.001;
+      const nativePitch=(this.mobileRender?-.160:-.140)+
+        .006*Math.sin(nativeLifeTime*.19);
+      const nativeYaw=(this.mobileRender?.135:.145)+nativeLifeTime*.007;
+      const nativeRoll=-.037+.005*Math.sin(nativeLifeTime*.23);
       this.mechanicalGroup.rotation.set(
         nativePose*nativePitch,
         nativePose*nativeYaw,
-        nativePose*(-.037)
+        nativePose*nativeRoll
       );
 
       // R2211: the animated metal albedo stays neutral silver, so the studio
@@ -3517,4 +3524,5 @@
   document.documentElement.dataset.fxMagCinematicBioticR2221='cell-fill-retired-before-native-metal';
   document.documentElement.dataset.fxMagCinematicOpticEnergyR2222='native-idle-energy-continuous-handoff';
   document.documentElement.dataset.fxMagCinematicChassisSettleR2223='authored-rest-pose-before-native-crossfade';
+  document.documentElement.dataset.fxMagLifeClockR2224='shared-real-clock-optic-and-body-handoff';
 })();

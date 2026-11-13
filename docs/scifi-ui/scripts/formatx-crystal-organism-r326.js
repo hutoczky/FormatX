@@ -1812,7 +1812,25 @@
     let pointerTiltX=0,pointerTiltY=0,targetPointerTiltX=0,targetPointerTiltY=0;
     let ambientPointerFrame=0,pendingAmbientPointer=null;
     let siteProgress=0,targetSiteProgress=0;
-    let last=performance.now(),simulationTime=0,renderAverage=0,frameIntervalAverage=1000/60;
+    /* R2224 — the cinematic and permanent MAG renderers share the browser's
+       real monotonic clock while both are visible. The living cyan/coral optic
+       therefore keeps one metabolic phase through the ownership crossfade,
+       even though the native renderer was mounted early for GPU warm-up. Once
+       the film completes, the native renderer continues from that exact phase
+       with its existing frame-delta clock. No timer or extra render work. */
+    let birthClockShared=root.dataset.fxMagBirthLiveR533==='active'||
+      root.getAttribute('data-fx-mag-birth-live')==='active';
+    let last=performance.now(),simulationTime=birthClockShared?last*.001:0,
+      renderAverage=0,frameIntervalAverage=1000/60;
+    root.dataset.fxNativeMagLifeClockR2224=birthClockShared
+      ? 'shared-performance-clock-during-intro'
+      : 'native-frame-clock';
+    listen(document,'formatx:magbirthcomplete',()=>{
+      if(!birthClockShared)return;
+      birthClockShared=false;
+      last=performance.now();
+      root.dataset.fxNativeMagLifeClockR2224='continuous-native-clock-after-intro';
+    },{once:true});
     // Operational telemetry needs four updates/second, not 60 DOM
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
@@ -2080,7 +2098,9 @@
       const dt=Math.min(48,Math.max(1,now-last));last=now;
       if(dt<=34)frameIntervalAverage=frameIntervalAverage*.86+dt*.14;
       else frameIntervalAverage=frameIntervalAverage*.92+34*.08;
-      if(!reduced.matches)simulationTime+=dt*.001;
+      if(!reduced.matches){
+        simulationTime=birthClockShared?now*.001:simulationTime+dt*.001;
+      }
       const pointerEase=1-Math.exp(-dt*.018);
       const rotationEase=1-Math.exp(-dt*.011);
       px+=(tx-px)*pointerEase;py+=(ty-py)*pointerEase;
