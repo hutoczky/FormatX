@@ -89,6 +89,9 @@
     scheduled = false;
     if (destroyed) return;
     if (document.hidden) return;
+    // Avoid expensive full-page geometry reads during the critical first paint.
+    // R487 will notify this controller once its deferred CSS has applied.
+    if (!styleReady()) return;
     const vh = Math.max(1,innerHeight);
     // Geometry READ pass: one layout snapshot before any style writes.
     const footerRect = footer?.getBoundingClientRect();
