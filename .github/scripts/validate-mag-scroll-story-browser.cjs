@@ -24,7 +24,9 @@ const profiles = [
         const page=await context.newPage();
         const errors=[];
         page.on('pageerror',error=>errors.push(error.message));
-        await page.goto(base+'?intro=0&storybrowser=1',
+        // Isolate the 7 native HTML anchor chapters. R1987's 8-scene WebGL
+        // archive is checked independently by validate-cinematic-archive.
+        await page.goto(base+'?intro=0&archive=off&storybrowser=1',
           {waitUntil:'domcontentloaded',timeout:60000});
         await page.waitForFunction(
           () => typeof window.__FORMATX_MAG_STORY_STATUS__ === 'function',
@@ -50,7 +52,16 @@ const profiles = [
           },sectionId);
           await page.waitForFunction(id=>
             document.documentElement.dataset.fxMagStoryChapter===id,
-            sectionId,{timeout:15000});
+            sectionId,{timeout:15000}).catch(async error=>{
+              const state=await page.evaluate(()=>({
+                active:document.documentElement.dataset.fxMagStoryChapter,
+                archive:document.documentElement.dataset.fxArchiveExperience,
+                status:window.__FORMATX_MAG_STORY_STATUS__?.(),
+                scrollY,viewport:innerHeight
+              }));
+              throw new Error(profile.name+': chapter '+sectionId+
+                ' did not activate: '+JSON.stringify(state)+' / '+String(error.message||error));
+            });
           const state=await page.evaluate(()=>{
             const s=window.__FORMATX_MAG_STORY_STATUS__();
             return {active:s.active,progress:s.progress};
