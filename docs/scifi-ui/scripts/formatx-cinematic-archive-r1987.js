@@ -1158,7 +1158,16 @@ void main(){
         // Do this only when the chapter key changes — same-chapter scroll
         // keeps the inexpensive coalesced rAF composition below.
         const nextCinemaKey=active&&current?current.s.key:'';
-        if(nextCinemaKey!==lastCinemaKey)syncCinema();
+        if(nextCinemaKey!==lastCinemaKey){
+          // R2226: the physical paper headline/excerpt must switch with
+          // the ORIGINAL native folio in the same scroll event. Previously
+          // its update lived only in domRaf, allowing a stale chapter title
+          // to survive after the source folio had already changed.
+          // Restrict this synchronous text operation to chapter transitions;
+          // same-chapter paper bending stays rAF-coalesced below.
+          updateHandoff();
+          syncCinema();
+        }
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
         // animation frame, so wheel/touch bursts cannot repeatedly recompute
