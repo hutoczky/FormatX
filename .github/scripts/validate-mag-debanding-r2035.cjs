@@ -39,7 +39,6 @@ for(const token of [
   'const opticPoint=(radius,angle,depth)=>',
   'for(let j=0;j<48;j++)',
   'for(let j=0;j<8;j++)',
-  'float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0)',
   'return axisZ*Math.pow(remaining,1/exponent)',
   'float machinedArmor=step(5.0,vFacet)',
   'c=mix(c,titanium,machinedArmor*.99)',
@@ -49,6 +48,17 @@ for(const token of [
 ]){
   assert.ok(core.includes(token),'R2137 permanent MAG geometry/material regression: '+token);
 }
+// R2236: the original positive-domain titanium gloss and side reflection
+// retain their exact integer exponents after exponentiation by squaring.
+// Guard the real GLSL implementation, not just a removed pow() source string.
+assert.ok(core.includes('float metalSpec=fxPower22(max(dot(n,normalize(keyDir+view)),0.0))'),
+  'Permanent 22nd-power titanium studio gloss is missing');
+assert.ok(core.includes('float metalSideSpec=fxPower34(max(dot(n,normalize(sideDir+view)),0.0))'),
+  'Permanent 34th-power titanium secondary gloss is missing');
+assert.ok(core.includes('float fxPower22(float x){float q=x*x;float t=q*q;float e=t*t;return e*e*t*q;}'),
+  'Titanium power helper must equal the original 22nd power');
+assert.ok(core.includes('float fxPower34(float x){float q=x*x;float t=q*q;float e=t*t;float v=e*e;return v*v*q;}'),
+  'Titanium secondary power helper must equal the original 34th power');
 // R2178: reject the genuine root cause of visible titanium pepper-speckles:
  // the former R2141 double-lane armour overlaid the newer R2153 one-piece
  // arm hulls at almost identical projected depth. Exactly four arm hulls.
@@ -122,8 +132,9 @@ assert.ok(!body.includes('sin(vLocal.y*11.0+vLocal.x*1.8-vLocal.z*1.4)'),
   'Legacy procedural MAG scanlines are present');
 assert.ok(body.includes('ribbonB*.052'),
   'PC and phone cannot reintroduce the thin high-intensity studio stripe');
-assert.ok(body.includes('pow(abs(cos(polar*4.0)),4.0)'),
-  'Thin fourfold faceting streaks must be optically widened');
+assert.ok(body.includes('fxPower4(abs(cos(polar*4.0)))') &&
+  core.includes('float fxPower4(float x){float q=x*x;return q*q;}'),
+  'Fourfold faceting must retain the original fourth-power optical falloff');
 assert.ok(core.includes('float microFold=sin(aUv.x*22.0+aUv.y*15.4)*.00028*cortexEnvelope'),
   'Thin vertex-fold ripples would reintroduce temporal aliasing');
 assert.ok(archive.includes('opticalDepth*d,d'),
