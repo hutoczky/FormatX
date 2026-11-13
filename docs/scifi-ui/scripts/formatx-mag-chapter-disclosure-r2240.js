@@ -9,6 +9,9 @@
   const main=document.getElementById('main-content');
   if(!main)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  // R2242: the canonical organism fallback may own the startup lifecycle
+  // before R1987 publishes its final runtime state. archive=off is definitive.
+  const forcedHtmlFallback=new URLSearchParams(location.search).get('archive')==='off';
   const style=document.querySelector('link[data-fx-mag-disclosure-r2240]');
   const styleReady=()=>Boolean(style&&style.media!=='print'&&style.sheet);
   const labels={
@@ -143,7 +146,8 @@
   }
   function refresh(){
     if(archiveReady())buildArchive();
-    else if(['reduced-html','audit-html','isolated-mag-test','no-scenes'].includes(root.dataset.fxArchiveExperience))
+    else if(forcedHtmlFallback||
+      ['reduced-html','audit-html','isolated-mag-test','no-scenes'].includes(root.dataset.fxArchiveExperience))
       buildNative();
     if(entries.size&&styleReady()&&!ready){
       root.dataset.fxMagDisclosure='ready';
