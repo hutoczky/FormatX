@@ -55,18 +55,26 @@
   let lastCoreTurn = 0;
   let lastCoreScene = -1;
   let lastCore = null;
+  let lastCoreArchive = false;
+  const archiveOwnsStage = () =>
+    root.dataset.fxArchiveExperience === 'ready' &&
+    root.dataset.fxArchiveDock === 'active' &&
+    root.dataset.fxArchiveCinema === 'active';
   const coreAvailable = () => {
     const core = window.FormatXLivingCore || window.FormatXCoreMobileV69;
     return core && typeof core.rotateBy === 'function' ? core : null;
   };
-  function driveCore(sceneIndex, progress, heroRect) {
+  function driveCore(sceneIndex, progress, heroRect, archiveActive) {
     if (reduced.matches || document.hidden) return;
-    // Never wake an offscreen WebGL renderer.
-    if (heroRect.bottom <= 0 || heroRect.top >= innerHeight) return;
+    // The same R326 stage is visible either in the hero OR in the existing
+    // full-page R1987 cinematic archive. Never wake any other offscreen GPU.
+    if (!archiveActive &&
+        (heroRect.bottom <= 0 || heroRect.top >= innerHeight)) return;
     const core = coreAvailable();
     if (!core) return;
-    if (lastCore !== core) {
+    if (lastCore !== core || lastCoreArchive !== archiveActive) {
       lastCore = core;
+      lastCoreArchive = archiveActive;
       lastCoreTurn = progress;
       lastCoreScene = sceneIndex;
     }
@@ -115,7 +123,12 @@
       };
     });
     const total = Math.max(1,(last.bottom-first.top)-vh);
-    const target = clamp((-first.top)/total);
+    const archiveActive = archiveOwnsStage();
+    // In cinematic mode the old hero may be hidden/fixed. Use the document
+    // scroll track, which remains continuous and reversible across 8 folios.
+    const target = archiveActive
+      ? clamp(scrollY/Math.max(1,document.documentElement.scrollHeight-vh))
+      : clamp((-first.top)/total);
     // Geometry WRITE pass: no subsequent getBoundingClientRect in this frame.
     const hideRail = !styleReady() || Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
     if (rail.hidden !== hideRail) rail.hidden = hideRail;
@@ -131,7 +144,7 @@
         prior.offset=update.offset;
       }
     });
-    driveCore(nearest,target,first);
+    driveCore(nearest,target,first,archiveActive);
     const elapsed = Math.min(64,Math.max(0,now-(lastFrame||now)));
     lastFrame=now;
     eased = reduced.matches ? target : eased+(target-eased)*(1-Math.exp(-elapsed/110));
