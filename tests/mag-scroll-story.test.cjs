@@ -56,6 +56,15 @@ assert.ok(canonicalShader.length>10000,'Real photographic MAG shader was replace
 assert.ok(!canonicalShader.includes(',2.0)'),
   'Canonical shader still uses general pow() for a mathematical square');
 assert.match(coreSource,/R2223: exact algebraic squares/);
+// R2228: refresh divisor remains truly dynamic, but diagnostic DOM writes
+// must never fire on each WebGL animation frame.
+assert.match(coreSource,/R2228: same real 60Hz-divisor decisions/);
+assert.match(coreSource,/if\(now-lastRefreshTelemetryAt>=250\)/);
+assert.match(coreSource,/if\(root\.dataset\.fxCoreRefreshHzR1622!==hzText\)/);
+assert.match(coreSource,/if\(root\.dataset\.fxCoreRenderDivisorR1622!==divisorText\)/);
+assert.match(coreSource,/if\(root\.dataset\.fxCorePassModelR1450!==/);
+assert.match(coreSource,/render\(now\);burstFrames=Math\.max\(0,burstFrames-1\)/);
+
 assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
 assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
 const cinematicJourney=fs.readFileSync(
