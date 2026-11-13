@@ -21,6 +21,11 @@ assert.match(r2057Invalidate,/if\(!domRaf\)/,
   'R2057 must coalesce repeated touch/wheel DOM transformations before next paint');
 assert.match(r2057Invalidate,/requestAnimationFrame\(\(\)=>/,
   'R2057 must compose native HTML before the following browser paint');
+assert.ok(r2057Invalidate.includes("if(nextCinemaKey!==lastCinemaKey){") &&
+    r2057Invalidate.indexOf('setPanelState();')<r2057Invalidate.indexOf('updateHandoff();') &&
+    r2057Invalidate.indexOf('updateHandoff();')<r2057Invalidate.indexOf('syncCinema();') &&
+    r2057Invalidate.indexOf('syncCinema();')<r2057Invalidate.indexOf('if(!domRaf)'),
+  'R2226 must publish the ORIGINAL physical paper title and cinema folio in the same native scroll event before RAF');
 assert.ok(r2057Invalidate.indexOf('setPanelState();')<r2057Invalidate.indexOf('if(!domRaf)'),
   'R2057 must keep source change and MAG selection synchronous for rapid reversing');
 const rafUpdate=jsSource.split('function update(){')[1]?.split('function invalidate(){')[0]||'';
@@ -48,6 +53,24 @@ async function evaluate(viewport,isMobile,browser){
     viewport,deviceScaleFactor:isMobile?2:1,
     isMobile,hasTouch:isMobile,
     reducedMotion:'no-preference'
+  });
+  // R2226: observe the WHOLE visit, including R533 film handoff and the
+  // late R326 software-WebGL first paint. Lighthouse TBT often stops before
+  // ~9.5s when the largest shader/draw tasks occur. This is measurement only.
+  await context.addInitScript(()=>{
+    window.__fxMagLongTasks=[];
+    window.__fxMagLongTaskSupported=Boolean(
+      window.PerformanceObserver?.supportedEntryTypes?.includes('longtask'));
+    if(!window.__fxMagLongTaskSupported)return;
+    new PerformanceObserver(list=>{
+      for(const entry of list.getEntries()){
+        if(window.__fxMagLongTasks.length>=512)break;
+        window.__fxMagLongTasks.push({
+          start:Number(entry.startTime.toFixed(1)),
+          duration:Number(entry.duration.toFixed(1))
+        });
+      }
+    }).observe({type:'longtask',buffered:true});
   });
   const page=await context.newPage();
   const errors=[];
@@ -218,6 +241,42 @@ async function evaluate(viewport,isMobile,browser){
     },selector);
     console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
+      // R2240: the user first sees only the bold MAG archive title.
+      // The ORIGINAL functional folio is inaccessible until a real click
+      // opens its two physical iris leaves and the shared R326 scene.
+      await page.waitForFunction(()=>document.documentElement.dataset.fxMagDisclosure==='ready',
+        null,{timeout:15000});
+      const revealSelector='main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030 > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger';
+      const closed=await page.evaluate(()=>{
+        const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+        const trigger=p?.querySelector(':scope > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+        const native=[...p?.children||[]].filter(n=>!n.classList.contains('fx-mag-disclosure-heading')&&!n.classList.contains('fx-mag-folio-origin-r2041'));
+        const rect=trigger?.getBoundingClientRect();
+        return {ready:document.documentElement.dataset.fxMagDisclosure,open:p?.dataset.fxMagOpen,
+          expanded:trigger?.getAttribute('aria-expanded'),hasButton:!!trigger,
+          visibleButton:!!rect&&rect.width>=100&&rect.height>=44,
+          collapsed:native.length>0&&native.every(n=>getComputedStyle(n).display==='none'&&n.inert),
+          canvases:document.querySelectorAll('#hero canvas.fx-crystal-organism-r326-canvas').length};
+      });
+      assert.ok(closed.ready==='ready'&&closed.open==='false'&&closed.expanded==='false'
+        &&closed.visibleButton&&closed.collapsed&&closed.canvases===1,
+        'R2240 title-only chapter failed before user click: '+JSON.stringify({scene:scene.key,closed}));
+      await page.locator(revealSelector).click({timeout:20000});
+      const opened=await page.evaluate(()=>{
+        const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+        const trigger=p?.querySelector(':scope > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+        const native=[...p?.children||[]].filter(n=>!n.classList.contains('fx-mag-disclosure-heading')&&!n.classList.contains('fx-mag-folio-origin-r2041'));
+        return {open:p?.dataset.fxMagOpen,expanded:trigger?.getAttribute('aria-expanded'),
+          originalVisible:native.some(n=>getComputedStyle(n).display!=='none'&&!n.inert),
+          canvases:document.querySelectorAll('#hero canvas.fx-crystal-organism-r326-canvas').length,
+          coreAction:document.documentElement.dataset.fxMagDisclosureCoreAction||'',
+          coreOpened:document.documentElement.dataset.fxMagDisclosureCoreOpened||''};
+      });
+      assert.ok(opened.open==='true'&&opened.expanded==='true'&&opened.originalVisible
+        &&opened.canvases===1&&opened.coreAction==='native-r326-rotateby'
+        &&opened.coreOpened===scene.key,
+        'R2240 original folio did not unseal from the physical MAG: '+JSON.stringify({scene:scene.key,opened}));
+      console.log('MAG_R2240_TITLE_ONLY_REVEAL_PASS',JSON.stringify({scene:scene.key,closed,opened}));
 
       // R2026: a status label alone cannot satisfy the requested cinematic
       // archival handoff. The active folio must use actual section copy, and
@@ -374,6 +433,15 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
         &&chapterHandoff.marker.includes('/ 08'),
         'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
+      // An explicit second click closes the current paper. The following
+      // native scroll chapter must likewise start with just its bold title.
+      await page.locator(revealSelector).click({timeout:20000});
+      const shut=await page.evaluate(()=>{
+        const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+        const a=p?.querySelector(':scope > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+        return p?.dataset.fxMagOpen==='false'&&a?.getAttribute('aria-expanded')==='false';
+      });
+      assert.ok(shut,'R2240 native MAG paper did not close on second click: '+scene.key);
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
@@ -384,6 +452,64 @@ async function evaluate(viewport,isMobile,browser){
     }
   }
   assert.equal(passed,scenes.length,'Every real archive scene must activate: '+JSON.stringify({passed,total:scenes.length,coverage}));
+
+  // R2217: archive narrative must rotate the ORIGINAL permanent R326
+  // renderer after the hero has scrolled away. The R1987 renderer already
+  // owns this single WebGL context; a second canvas is never acceptable.
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxMagStoryCoreMode==='archive',
+    null,{timeout:8000});
+  const storyCore=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.fxMagStoryCoreMode,
+    source:document.documentElement.dataset.fxCoreRotationSource,
+    archive:document.documentElement.dataset.fxArchiveCinema,
+    dock:document.documentElement.dataset.fxArchiveDock,
+    realCanvas:window.FormatXLivingCore?.canvas instanceof HTMLCanvasElement
+  }));
+  assert.equal(storyCore.mode,'archive',
+    'MAG scroll controller stopped driving real 3D outside the hero');
+  assert.equal(storyCore.source,'mag-scroll-r2217',
+    'Cinematic world scroll did not rotate the canonical WebGL MAG');
+  assert.equal(storyCore.dock,'active',
+    'MAG is not using the existing single archive GPU');
+  assert.equal(storyCore.realCanvas,true,
+    'Archive animation lost the canonical native GPU canvas');
+  console.log('MAG_SINGLE_CORE_FULLPAGE_SCROLL_PASS',
+    JSON.stringify({mode:storyCore.mode,source:storyCore.source,dock:storyCore.dock}));
+  const coreStartup=await page.evaluate(()=>{
+    const d=document.documentElement.dataset;
+    return {
+      shaderMs:Number(d.fxCoreShaderLinkMsR2220),
+      meshMs:Number(d.fxCoreMeshBuildMsR2220),
+      uploadMs:Number(d.fxCoreGpuBufferUploadMsR2220),
+      vertices:window.FormatXLivingCore?.vertexCount||0
+    };
+  });
+  assert.ok(coreStartup.vertices>0
+    && Number.isFinite(coreStartup.shaderMs)&&coreStartup.shaderMs>=0
+    && Number.isFinite(coreStartup.meshMs)&&coreStartup.meshMs>=0
+    && Number.isFinite(coreStartup.uploadMs)&&coreStartup.uploadMs>=0,
+    'MAG did not record separate shader, mesh and GPU-upload boot costs: '+JSON.stringify(coreStartup));
+  console.log('MAG_R2220_REAL_CORE_BOOT_TIMINGS',JSON.stringify(coreStartup));
+
+  // R2219: native scroll jumps must arrive at the same 3D orientation as
+  // continuous wheel scrolling. Let the bounded renderer consume its
+  // outstanding deltas, rather than accepting a one-frame fake rotation.
+  await page.waitForFunction(()=>{
+    const state=window.__FORMATX_MAG_STORY_STATUS__?.();
+    return state?.coreMode==='archive'
+      && Math.abs(state.progress-state.coreProgress)<.025;
+  },null,{timeout:12000}).catch(async error=>{
+    const last=await page.evaluate(()=>window.__FORMATX_MAG_STORY_STATUS__?.());
+    throw new Error('MAG camera did not converge: '+JSON.stringify(last)
+      +' / '+String(error.message||error));
+  });
+  const caughtUp=await page.evaluate(()=>window.__FORMATX_MAG_STORY_STATUS__());
+  assert.ok(Math.abs(caughtUp.progress-caughtUp.coreProgress)<.025,
+    'Real MAG camera failed to track final 3D scroll position: '+JSON.stringify(caughtUp));
+  console.log('MAG_ABSOLUTE_SCROLL_CATCHUP_PASS',
+    JSON.stringify({progress:caughtUp.progress,coreProgress:caughtUp.coreProgress}));
+
   const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
   const selector=/^[#.]/.test(one.id)?one.id:'#'+one.id;
   await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
@@ -559,6 +685,26 @@ async function evaluate(viewport,isMobile,browser){
   });
   assert.equal(scrollMetrics.sampleCount,32,'Scroll input benchmark must exercise real synchronous composition');
   console.log('ARCHIVE_SCROLL_INPUT_PROFILE_R2053',JSON.stringify({mode:isMobile?'mobile':'desktop',...scrollMetrics}));
+  const longTaskProfile=await page.evaluate(()=>{
+    const entries=window.__fxMagLongTasks||[];
+    const afterFilm=entries.filter(t=>t.start>=8000&&t.start<=15000);
+    const sum=arr=>Number(arr.reduce((n,e)=>n+e.duration,0).toFixed(1));
+    const peak=arr=>Number(Math.max(0,...arr.map(e=>e.duration)).toFixed(1));
+    return {
+      observerSupported:Boolean(window.__fxMagLongTaskSupported),
+      count:entries.length,
+      totalBlockingMs:sum(entries),
+      longestMs:peak(entries),
+      postFilmCount:afterFilm.length,
+      postFilmBlockingMs:sum(afterFilm),
+      postFilmLongestMs:peak(afterFilm),
+      topTasks:entries.toSorted((a,b)=>b.duration-a.duration).slice(0,6)
+    };
+  });
+  console.log('MAG_R2226_FULL_VISIT_LONGTASKS',
+    JSON.stringify({mode:isMobile?'mobile':'desktop',...longTaskProfile}));
+  assert.ok(longTaskProfile.observerSupported,
+    'Browser lacks longtask PerformanceObserver; cannot check post-intro GPU stalls');
   console.log('ARCHIVE_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',init,passed,coverage,native,restored}));
   await context.close();
 }

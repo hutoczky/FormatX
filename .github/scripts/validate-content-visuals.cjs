@@ -326,11 +326,46 @@ async function capture(browser, name, viewport, options = {}) {
       waitUntil: 'domcontentloaded', timeout: 30000
     });
     await waitForProductShell(page);
+    // R2225: the ten-second DNA → cell → MAG introduction may still own
+    // the hero when the controls and lead first become visible. Never
+    // treat its intentionally hidden #hero-title as a permanent layout
+    // regression; inspect the real post-intro product shell. If the title
+    // does not recover, preserve the failure with actual runtime state.
+    if (!options.mobile && !options.disclosure) {
+      await page.waitForFunction(()=>{
+        const root=document.documentElement;
+        if(root.dataset.fxArchiveCinema==='active')return true;
+        const title=document.querySelector('#hero-title');
+        if(!title)return false;
+        const r=title.getBoundingClientRect(),css=getComputedStyle(title);
+        return r.width>100&&r.height>20&&css.display!=='none'&&css.visibility!=='hidden';
+      },null,{timeout:18000}).catch(async error=>{
+        const state=await page.evaluate(()=>{
+          const title=document.querySelector('#hero-title');
+          const copy=document.querySelector('#hero .hero-copy');
+          const m=node=>{
+            if(!node)return null;
+            const r=node.getBoundingClientRect(),c=getComputedStyle(node);
+            return {width:r.width,height:r.height,display:c.display,visibility:c.visibility};
+          };
+          return {intro:document.documentElement.dataset.fxMagBirthLiveR533,
+            archive:document.documentElement.dataset.fxArchiveCinema,
+            journey:document.documentElement.dataset.fxCinematicJourneyR536,
+            title:m(title),copy:m(copy)};
+        });
+        throw new Error('Post-intro desktop hero title never recovered: '+JSON.stringify(state)+
+          ' / '+String(error.message||error));
+      });
+    }
     if (options.lang) {
       await page.waitForFunction(lang => document.documentElement.lang === lang, options.lang, { timeout: 8000 });
     }
-    await assertCommon(page, options);
+    // R2232: the cinematic acceptance routine moves through the live intro
+    // handoff and returns to the original visible archive folio. Assert the
+    // final page layout AFTER that transition, not during a one-frame moment
+    // when the legacy hero lead has just been suppressed for the MAG.
     if (options.disclosure) await assertHeroDisclosure(page);
+    await assertCommon(page, options);
     if (typeof options.after === 'function') await options.after(page);
     assert(errors.length === 0, `${name} browser errors: ${errors.join(' | ')}`);
   } catch (error) {

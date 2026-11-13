@@ -290,6 +290,9 @@
     const uvs = [];
     const barycentrics = [];
     const facets = [];
+    // R2220: immutable barycentric attributes shared by every authored
+    // triangle instead of allocating three identical arrays per face.
+    const triangleBarycentrics = [[1,0,0],[0,1,0],[0,0,1]];
 
     function random(x, y) {
       const value = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
@@ -370,13 +373,20 @@
         [vertices[1], vertices[2]] = [vertices[2], vertices[1]];
         crystalNormal = crystalNormal.map(value => -value);
       }
-      const barycentric = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
       /* R1941e — two-sided closed shell no longer needs per-triangle expansion.
          Removing overlap also removes software/mobile z-fighting speckles. */
       const bodySeamOverlap=0;
       const sphereCentre=bodySeamOverlap?[0,1,2].map(axis=>
         (vertices[0].sphere[axis]+vertices[1].sphere[axis]+vertices[2].sphere[axis])/3
       ):null;
+      // R2220: the visual blend depends only on this face's facet code and
+      // environment, never on the vertex index. Preserve EXACT math while
+      // executing all material branches only once per triangle.
+      const metalFacet=facet>=5.0&&facet<6.0;
+      const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
+        (facet<2.0?(mobile?.985:(software?.94:.90)):
+        (software?.95:(mobile?.985:(constrained?.972:.978))));
+      const faceWeight=1-smoothWeight;
       vertices.forEach((item, index) => {
         if(bodySeamOverlap){
           const k=1+bodySeamOverlap;
@@ -402,12 +412,8 @@
         // R2144: the machined raised armour is truly bevelled. A controlled
         // contribution from its 3D face normal reveals the roof planes without
         // the fully flat, per-triangle checkerboarding of earlier builds.
-        const metalFacet=facet>=5.0&&facet<6.0;
-        // R2177: avoid jagged per-triangle metal shading on the phone.
-        const smoothWeight=metalFacet?(facet>=5.65?(mobile?.81:.67):(mobile?.88:.77)):
-          (facet<2.0?(mobile?.985:(software?.94:.90)):
-          (software?.95:(mobile?.985:(constrained?.972:.978))));
-        const faceWeight=1-smoothWeight;
+        // R2177: the exact R2177 smooth/face weight pair is precomputed
+        // above for this triangle; vertex normals remain independent.
         const hybridNormal=normalize([
           smoothNormal[0]*smoothWeight+crystalNormal[0]*faceWeight,
           smoothNormal[1]*smoothWeight+crystalNormal[1]*faceWeight,
@@ -415,20 +421,26 @@
         ]);
         crystalNormals.push(...hybridNormal);
         uvs.push(...item.uv);
-        barycentrics.push(...barycentric[index]);
+        barycentrics.push(...triangleBarycentrics[index]);
         facets.push(facet);
       });
     }
 
+    /* R2214: memoize the same analytical surface vertices once per grid
+       coordinate. Adjacent cells previously recalculated the identical
+       trig/power functions four times. Geometry, UV seams, facet randomness,
+       topology and GPU buffer contents remain exactly the same. */
+    const bodyLattice=Array.from({length:latitudeSegments+1},(_,lat)=>
+      Array.from({length:longitudeSegments+1},(_,lon)=>vertex(lat,lon)));
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
     for(let lat=0;lat<latitudeSegments;lat+=1){
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=bodyLattice[lat][lon];
+        const b=bodyLattice[lat][lon+1];
+        const c=bodyLattice[lat+1][lon];
+        const d=bodyLattice[lat+1][lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
@@ -1513,6 +1525,8 @@
        One clean material, no procedural dirt/speckles, no black button optic.
        The four-point silhouette carries the identity; the shader only gives it
        physical depth, broad softbox reflections and restrained living energy. */
+    /* R2223: exact algebraic squares in the real photographic MAG shader;
+       no render-path switching, no color changes, no mesh/LOD changes. */
     const constrainedFragmentSource = `${versionLine}precision highp float;
       uniform float uTime,uEnergy,uBreath,uLayer,uMorph,uSiteProgress,uSurfacePulse;
       uniform vec2 uPointer;
@@ -1525,6 +1539,12 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      // R2236: positive-domain integer gloss exponents, same authored optics.
+      // Multiplication tree avoids generalized fragment pow on each pixel.
+      float fxPower4(float x){float q=x*x;return q*q;}
+      float fxPower7(float x){float q=x*x;return (q*q)*(q*x);}
+      float fxPower22(float x){float q=x*x;float t=q*q;float e=t*t;return e*e*t*q;}
+      float fxPower34(float x){float q=x*x;float t=q*q;float e=t*t;float v=e*e;return v*v*q;}
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
@@ -1540,10 +1560,10 @@
         float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
 
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
-        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.13)/.29,2.0)-pow((refl.y-.10)/.82,2.0))*smoothstep(-.10,.72,refl.z);
-        float ribbonB=exp(-pow((refl.x-.31)/.25,2.0)-pow((refl.y+.10)/.70,2.0))*smoothstep(-.10,.70,refl.z);
+        float softboxA=exp(-(((refl.x+.26)/.22)*((refl.x+.26)/.22))-(((refl.y-.30)/.50)*((refl.y-.30)/.50)))*smoothstep(-.20,.62,refl.z);
+        float softboxB=exp(-(((refl.x-.42)/.27)*((refl.x-.42)/.27))-(((refl.y+.02)/.54)*((refl.y+.02)/.54)))*smoothstep(-.26,.62,refl.z);
+        float ribbonA=exp(-(((refl.x+.13)/.29)*((refl.x+.13)/.29))-(((refl.y-.10)/.82)*((refl.y-.10)/.82)))*smoothstep(-.10,.72,refl.z);
+        float ribbonB=exp(-(((refl.x-.31)/.25)*((refl.x-.31)/.25))-(((refl.y+.10)/.70)*((refl.y+.10)/.70)))*smoothstep(-.10,.70,refl.z);
 
         float frontDepth=smoothstep(-.46,.58,vLocal.z);
         float backDepth=1.0-frontDepth;
@@ -1552,7 +1572,7 @@
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
         /* Broadband depth density replaces periodic high-contrast scanlines. */
         float strata=smoothstep(-.68,.72,vLocal.y*.82+vLocal.x*.16-vLocal.z*.19);
-        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        float centreHaze=exp(-((vLocal.x/.50)*(vLocal.x/.50))-((vLocal.y/.60)*(vLocal.y/.60)))*frontDepth;
 
         if(uLayer>.5){
           ${outputName}=vec4(0.0,0.0,0.0,0.0);
@@ -1585,11 +1605,11 @@
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.395':'.295'};
-        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
+        float softboxC=exp(-(((refl.x-.18)/.31)*((refl.x-.18)/.31))-(((refl.y-.56)/.30)*((refl.y-.56)/.30)))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
-        float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
+        float glassBlade=exp(-(((vLocal.x+.24+vLocal.y*.060)/.150)*((vLocal.x+.24+vLocal.y*.060)/.150)))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
 
@@ -1604,7 +1624,7 @@
           (1.0-smoothstep(.44,.72,radialXY))*
           frontDepth;
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
-        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
+        float diagonalValley=fxPower7(abs(sin(polar*2.0)))*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
         c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
@@ -1612,7 +1632,7 @@
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
-        float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
+        float innerPane=exp(-(((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085)*((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085)))
           *smoothstep(.04,.52,frontDepth);
         c+=vec3(.082,.190,.198)*innerPane*.044;
 
@@ -1620,8 +1640,8 @@
            These echo the layered crystalline anatomy from the selected historic
            MAG without adding geometry or a second render pass. */
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.125,2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/.16,2.0))*frontDepth;
+        float prismShellA=exp(-(((l1Prism-.315)/.125)*((l1Prism-.315)/.125)))*frontDepth;
+        float prismShellB=exp(-(((l1Prism-.475)/.16)*((l1Prism-.475)/.16)))*frontDepth;
         c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.048':'.060'}+${mobile?'.017':'.023'}*softboxB);
         c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.035':'.043'}+${mobile?'.014':'.019'}*fresnel);
         c*=1.0-.020*prismShellB;
@@ -1635,7 +1655,7 @@
           frontDepth;
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
+        float foldSecondary=fxPower4(abs(cos(polar*4.0)))*foldEnvelope;
         c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
         c*=1.0-${mobile?'.027':'.037'}*foldValley;
@@ -1661,11 +1681,11 @@
         c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.060,2.0))*front;
+        float rim=exp(-(((od-.74)/.060)*((od-.74)/.060)))*front;
         float iris=exp(-od*od*4.8)*front;
         float core=exp(-od*od*18.5)*front;
         float hot=exp(-od*od*74.0)*front;
-        float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
+        float glint=exp(-(((oq.x+.30)/.13)*((oq.x+.30)/.13))-(((oq.y-.30)/.12)*((oq.y-.30)/.12)))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
         c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
@@ -1673,7 +1693,7 @@
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
-        float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
+        float opticCaustic=exp(-(((od-.40)/.17)*((od-.40)/.17)))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
         /* R2200: the same biological cyan/coral nucleus stays alive inside
            the recessed MAG iris after the titanium arms finish seating.
@@ -1681,7 +1701,7 @@
         float cellVein=sin(oq.x*23.0+sin(oq.y*19.0+uTime*.25)*2.1);
         float cellCross=sin(oq.y*31.0-oq.x*8.0+uTime*.18);
         float cellNoise=(cellVein*.55+cellCross*.45)*.5+.5;
-        float livingInterior=exp(-pow(od/.73,4.0))*front;
+        float livingInterior=exp(-fxPower4(od/.73))*front;
         float coralSite=pow(max(0.0,cellNoise-.67)*3.0,2.6);
         float aquaSites=pow(max(0.0,cellNoise-.33),3.1);
         c+=vec3(.05,.49,.51)*livingInterior*aquaSites*(.16+.10*uEnergy);
@@ -1690,11 +1710,11 @@
 
         /* R2137: raised metal panels visually separate from smoked bioglass. */
         float metalKey=max(dot(n,normalize(vec3(-.46,.72,.52))),0.0);
-        float metalRim=pow(1.0-facing,2.0);
+        float metalRim=((1.0-facing)*(1.0-facing));
         // R2141: real polished titanium response (broad key, cool rim,
         // narrow specular lines) rather than flat gray plastic channels.
-        float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0);
-        float metalSideSpec=pow(max(dot(n,normalize(sideDir+view)),0.0),34.0);
+        float metalSpec=fxPower22(max(dot(n,normalize(keyDir+view)),0.0));
+        float metalSideSpec=fxPower34(max(dot(n,normalize(sideDir+view)),0.0));
         // R2153: deeper smoked-metal ground with narrower studio glints.
         // The R2151 grey-white plate wash obscured sculptural metal depth.
         vec3 titanium=vec3(.052,.072,.078);
@@ -1722,7 +1742,7 @@
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=exp(-(((coordinate-head)/.072)*((coordinate-head)/.072)))*(.24+.76*fresnel);
         }
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
@@ -2031,6 +2051,7 @@
       ? 'software-cortical-tissue-membrane-cartilage-energy-organ'
       : 'hardware-photographic-material-preserved';
 
+    const shaderStartupAt=performance.now();
     let pendingProgram;
     try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
     catch(error){
@@ -2062,13 +2083,19 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
+      root.dataset.fxCoreShaderLinkMsR2220=(performance.now()-shaderStartupAt).toFixed(2);
       finishBoot(program);
     }
     finishWhenReady();
     return;
 
     function finishBoot(program) {
+    // R2220: attribute the real startup cost to shader link, CPU geometry
+    // and GPU buffer upload separately. These are measured ONCE at boot
+    // and do not add any animation-frame tracking or telemetry network calls.
+    const meshStartedAt=performance.now();
     const geometry=buildOrganismGeometry(softwareRenderer);
+    root.dataset.fxCoreMeshBuildMsR2220=(performance.now()-meshStartedAt).toFixed(2);
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -2091,7 +2118,9 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
+    const gpuUploadStartedAt=performance.now();
     buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    root.dataset.fxCoreGpuBufferUploadMsR2220=(performance.now()-gpuUploadStartedAt).toFixed(2);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
@@ -2131,6 +2160,10 @@
     // Operational telemetry needs four updates/second, not 60 DOM
     // attribute mutations/second per field. Shader simulation stays 60Hz.
     let lastRuntimeTelemetryAt=-Infinity;
+    // R2228: compositor/refresh telemetry is diagnostic, never per-frame DOM work.
+    let lastRefreshTelemetryAt=-Infinity;
+    // Dynamic scene status must not notify document MutationObservers when unchanged.
+    const publishRuntimeState=(key,value)=>{if(root.dataset[key]!==value)root.dataset[key]=value;};
     let schedulerLastFrame=0,schedulerRefreshMs=1000/60,schedulerTick=0;
     /* R1694 — renderer capability outranks audit mode. A software GPU must never
        be forced to full-resolution merely because a verifier is attached; that
@@ -2460,7 +2493,8 @@
         root.dataset.fxCoreFirstFrameR1913='painted';
         stage.dataset.firstFrame='painted';
       }
-      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
+      if(root.dataset.fxCorePassModelR1450!=='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719')
+        root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
@@ -2468,12 +2502,12 @@
       framePeak=Math.max(dt,framePeak*.90);
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
-        root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
-        root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
-        root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
+        publishRuntimeState('fxCoreAdaptiveOpticsR588',mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution');
+        publishRuntimeState('fxCoreSurfaceCadenceR1392',mobile?'bounded-slow-renderer-full-window':'desktop-bounded');
+        publishRuntimeState('fxCoreSurfaceCadenceR1403',mobile?'full-window-fast-cadence':'desktop-bounded');
+        publishRuntimeState('fxCoreSurfaceCadenceR1441',mobile?'midpoint-safe-68ms-cap':'desktop-bounded');
       }else if(!slowRenderer){
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
+        publishRuntimeState('fxCoreAdaptiveOpticsR588',mobile?'single-pass-mobile-capable':'single-pass-60fps-capable');
       }
 
       if(!auditMode){
@@ -2590,9 +2624,18 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
-        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
-        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        // R2228: same real 60Hz-divisor decisions; publish DOM telemetry at
+        // most four times/second, and only on change. Repeated dataset writes
+        // trigger third-party MutationObservers despite an unchanged value.
+        if(now-lastRefreshTelemetryAt>=250){
+          lastRefreshTelemetryAt=now;
+          const hzText=estimatedHz.toFixed(1);
+          const divisorText=String(divisor);
+          if(root.dataset.fxCoreRefreshHzR1622!==hzText)root.dataset.fxCoreRefreshHzR1622=hzText;
+          if(root.dataset.fxCoreRenderDivisorR1622!==divisorText)root.dataset.fxCoreRenderDivisorR1622=divisorText;
+          if(root.dataset.fxCoreRenderCeilingR1620!=='superseded-by-r1622-minimum-60fps-divisor')
+            root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        }
         if(divisor>1 && schedulerTick!==0){
           raf=requestAnimationFrame(frame);
           return;
@@ -2602,7 +2645,7 @@
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
+        publishRuntimeState('fxCoreBurstCadenceR1600',burstDelay?'audit-paced':'native-60hz-target');
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=auditMode
@@ -2610,9 +2653,9 @@
               ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
               : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
           : 0;
-        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
-        root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
-        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
+        publishRuntimeState('fxCoreAdaptiveSurfaceCadenceR588',sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf');
+        publishRuntimeState('fxCoreSurfaceCadenceR643',mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle');
+        publishRuntimeState('fxCoreAnimationCadenceR1600','production-native-60hz-target-audit-contract-preserved');
         queueFrame(sweepDelay);
       }else settleAfterBurst();
     }

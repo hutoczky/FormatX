@@ -1,0 +1,55 @@
+name: FormatX MAG scroll contract
+on:
+  pull_request:
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-scroll-story-r2202.js'
+      - 'docs/scifi-ui/styles/formatx-mag-scroll-story-r2202.css'
+      - 'tests/mag-scroll-story.test.cjs'
+      - '.github/scripts/validate-mag-scroll-story-browser.cjs'
+      - '.github/workflows/mag-scroll-story.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate MAG scroll integration and JavaScript syntax
+        run: node tests/mag-scroll-story.test.cjs
+
+  browser-story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: static-contract
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium test environment
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/formatx-mag" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-mag/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Validate 320px, 390px and desktop scroll chapters in real Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4178 --directory docs > "$RUNNER_TEMP/formatx-mag-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for i in {1..60}; do
+            if curl --silent --fail http://127.0.0.1:4178/scifi-ui/index.html > /dev/null; then READY=1; break; fi
+            sleep 0.5
+          done
+          if [ "$READY" -ne 1 ]; then cat "$RUNNER_TEMP/formatx-mag-http.log"; exit 1; fi
+          NODE_PATH="$RUNNER_TEMP/formatx-mag/node_modules" \
+            FORMATX_TEST_URL="http://127.0.0.1:4178/scifi-ui/index.html" \
+            node .github/scripts/validate-mag-scroll-story-browser.cjs

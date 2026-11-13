@@ -147,7 +147,11 @@
   const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
   const veryLowPower=mobile()&&Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
-  root.dataset.fxArchiveExperience='pending';
+  // R2233: reserve the requested native HTML mode immediately, before
+  // deferred DOMContentLoaded boot. A link navigation/reloaded module must
+  // never briefly publish 'pending' and let another WebGL owner take over.
+  root.dataset.fxArchiveExperience=requestedHtmlFallback?'reduced-html':'pending';
+  if(requestedHtmlFallback)root.dataset.fxArchiveHtmlFallback='user-requested';
   function ensureAIScrollStation(){
     if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
     const original=document.querySelector('#capabilities .cards .card:last-child');
@@ -1151,6 +1155,23 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
+        // R2218: one scene transition must publish its ORIGINAL native HTML
+        // source and active folio synchronously. On low-power phones the next
+        // GPU/DOM rAF can arrive after accessibility and source assertions;
+        // leaving the previous active panel visible is a real UX bug.
+        // Do this only when the chapter key changes — same-chapter scroll
+        // keeps the inexpensive coalesced rAF composition below.
+        const nextCinemaKey=active&&current?current.s.key:'';
+        if(nextCinemaKey!==lastCinemaKey){
+          // R2226: the physical paper headline/excerpt must switch with
+          // the ORIGINAL native folio in the same scroll event. Previously
+          // its update lived only in domRaf, allowing a stale chapter title
+          // to survive after the source folio had already changed.
+          // Restrict this synchronous text operation to chapter transitions;
+          // same-chapter paper bending stays rAF-coalesced below.
+          updateHandoff();
+          syncCinema();
+        }
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
         // animation frame, so wheel/touch bursts cannot repeatedly recompute
@@ -1175,7 +1196,10 @@ void main(){
     });
   }
   function connect(){
-    if(disposed||reduced.matches||(!force&&(audit||isolatedMagCheck)))return;
+    // R2231: archive=off is a strict user/test choice, not just an init
+    // preference. The native real3dready event arrives asynchronously and
+    // must not resurrect the 8-folio WebGL archive after HTML fallback boot.
+    if(disposed||reduced.matches||requestedHtmlFallback||(!force&&(audit||isolatedMagCheck)))return;
     const api=window.FormatXLivingCore;
     if(!api?.registerScenePass||!api.sharedWebGL2||!api.canvas||!api.stage)return;
     // `formatx:real3dready` may fire again for the same canonical MAG

@@ -1,0 +1,206 @@
+/* FormatX MAG scroll story contract checks — no external dependencies. */
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {spawnSync}=require('node:child_process');
+const root=path.resolve(__dirname,'..');
+const homepage=fs.readFileSync(path.join(root,'docs/scifi-ui/index.html'),'utf8');
+const jsPath=path.join(root,'docs/scifi-ui/scripts/formatx-mag-scroll-story-r2202.js');
+const cssPath=path.join(root,'docs/scifi-ui/styles/formatx-mag-scroll-story-r2202.css');
+const js=fs.readFileSync(jsPath,'utf8');
+const css=fs.readFileSync(cssPath,'utf8');
+const syntax=spawnSync(process.execPath,['--check',jsPath],{encoding:'utf8'});
+assert.equal(syntax.status,0,syntax.stderr);
+assert.match(homepage,/formatx-mag-scroll-story-r2202\.js/);
+assert.match(homepage,/formatx-mag-scroll-story-r2202\.css/);
+// R2240: the landing page now presents only heavyweight chapter words.
+// The SAME original HTML and exactly one existing MAG opens on click.
+// Progressive enhancement must fail open if the deferred CSS never loads.
+const foldJsPath=path.join(root,'docs/scifi-ui/scripts/formatx-mag-chapter-disclosure-r2240.js');
+const foldCssPath=path.join(root,'docs/scifi-ui/styles/formatx-mag-chapter-disclosure-r2240.css');
+const foldJs=fs.readFileSync(foldJsPath,'utf8');
+const foldCss=fs.readFileSync(foldCssPath,'utf8');
+const foldSyntax=spawnSync(process.execPath,['--check',foldJsPath],{encoding:'utf8'});
+assert.equal(foldSyntax.status,0,foldSyntax.stderr);
+assert.equal((homepage.match(/data-fx-mag-disclosure-r2240="true"/g)||[]).length,2);
+assert.ok(homepage.includes('formatx-mag-chapter-disclosure-r2240.css'));
+assert.ok(homepage.includes('formatx-mag-chapter-disclosure-r2240.js'));
+assert.match(homepage,/data-fx-mag-disclosure-r2240="true" data-fx-r487-deferred-style="true"/);
+assert.match(foldJs,/entry\.button\.setAttribute\('aria-expanded'/);
+assert.match(foldJs,/node\.inert=open\?originalInert\.get\(node\):true/);
+assert.match(foldJs,/window\.FormatXLivingCore\|\|window\.FormatXCoreMobileV69/);
+assert.match(foldJs,/core\.rotateBy\(-\.11,\.27,'mag-chapter-open-r2240'\)/);
+assert.ok(foldJs.includes("root.dataset.fxMagDisclosure='ready'"));
+assert.ok(foldJs.includes('const styleReady=()=>Boolean(style&&style.media!=='));
+assert.match(foldCss,/data-fx-mag-open="false"/);
+assert.match(foldCss,/display:none!important/);
+assert.match(foldCss,/@keyframes fx-mag-paper-unseal-r2240/);
+assert.match(foldCss,/@media\(prefers-reduced-motion:reduce\)/);
+assert.doesNotMatch(foldJs,/createElement\(['"]canvas['"]\)|getContext\(|new\s+WebGL|cloneNode\(/,
+  'The chapter interaction must never create another canvas or duplicate originals');
+
+assert.equal((homepage.match(/data-fx-mag-story-r2202="true"/g)||[]).length,2);
+const dnaCritical='data-fx-dna-first-frame-r2181="true"';
+const audioChrome='data-fx-genesis-studio-r2160="true"';
+assert.ok(homepage.indexOf(dnaCritical)>0);
+assert.ok(homepage.indexOf(dnaCritical)<homepage.indexOf(audioChrome),
+  'DNA first-frame sheet must start downloading before intro audio chrome');
+// R2237: start downloading reference geometry earlier but do NOT defer
+// applying it. The r2236 CSS-defer experiment caused CLS 0.153, so the
+// canonical r244 desktop stylesheet must retain its original media/cascade.
+const originalReferenceCss='./styles/formatx-reference-production-r244.css?v=20261007-r1972-first-frame-stability';
+const referenceTag=homepage.match(/<link[^>]*data-fx-reference-production-r244="true"[^>]*>/)?.[0]||'';
+const preloadTag=homepage.match(/<link[^>]*data-fx-r2237-reference-preload="true"[^>]*>/)?.[0]||'';
+assert.ok(preloadTag.includes('rel="preload"') && preloadTag.includes('as="style"'));
+assert.ok(preloadTag.includes('media="(min-width: 901px)"'));
+assert.ok(preloadTag.includes(originalReferenceCss));
+assert.ok(referenceTag.includes('media="(min-width: 901px)"'));
+assert.ok(referenceTag.includes(originalReferenceCss));
+assert.ok(!referenceTag.includes('data-fx-r487-deferred-style'));
+assert.ok(homepage.indexOf(preloadTag)<homepage.indexOf(referenceTag));
+
+assert.match(homepage,/formatx-genesis-studio-r2160\.css[^>]*data-fx-r487-deferred-style="true"/);
+assert.equal((homepage.match(/data-fx-dna-first-frame-r2181="true"/g)||[]).length,1);
+assert.ok(homepage.includes('data-fx-mag-story-r2202="true" data-fx-r487-deferred-style="true"'));
+assert.match(js,/formatx:deferredcssready/);
+assert.ok(js.indexOf('const bounds = chapters.map') < js.indexOf('updates.forEach'), 'Layout reads must precede DOM writes');
+assert.match(js,/const lastChapterStyles = chapters\.map/);
+assert.match(js,/prior\.visibility!==update\.visibility/);
+assert.match(js,/prior\.offset!==update\.offset/);
+assert.doesNotMatch(js,/setProperty\('--fx-mag-story-local'/,
+  'Unused per-frame chapter local variable must not be mutated');
+for(const id of ['hero','experience','capabilities','pricing','system','network','resources']){
+  assert.ok(homepage.includes('id="'+id+'"'),id+' section missing');
+  assert.ok(js.includes("['"+id+"'"),id+' timeline chapter missing');
+}
+assert.match(js,/addEventListener\('scroll',request,\{passive:true\}\)/);
+// R2234: <base href="/scifi-ui/"> changes the meaning of "#id" anchors.
+// All seven MAG rail links must be same-document, preserve search params
+// and use the browser's native fragment navigation (no preventDefault).
+assert.ok(homepage.includes('<base href="/scifi-ui/">'));
+assert.ok(js.includes("const chapterHref=id=>location.pathname+location.search+'#'+id;"));
+assert.ok(js.includes("link.href = chapterHref(chapter.id);"));
+assert.ok(js.includes("track.addEventListener('click',event=>{"));
+assert.ok(!js.includes("link.href = '#' + chapter.id;"));
+
+assert.match(js,/requestAnimationFrame\(render\)/);
+assert.match(js,/prefers-reduced-motion: reduce/);
+assert.match(js,/core\.rotateBy\(/);
+assert.match(js,/archiveOwnsStage = \(\) =>/);
+assert.match(js,/fxArchiveDock === 'active'/);
+assert.match(js,/fxArchiveCinema === 'active'/);
+assert.match(js,/Math\.PI \* 3/);
+assert.match(js,/mag-scroll-r2217/);
+// R2223: the canonical photographic GPU program remains identical except
+// for algebraic x*x substitutions. Never switch to the unused simplified
+// software shader, alter optics, or remove the real full-quality WebGL model.
+const corePath=path.join(root,'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js');
+const coreSource=fs.readFileSync(corePath,'utf8');
+const coreSyntax=spawnSync(process.execPath,['--check',corePath],{encoding:'utf8'});
+assert.equal(coreSyntax.status,0,coreSyntax.stderr);
+const canonicalShader=coreSource.split('const constrainedFragmentSource = `')[1]
+  ?.split('const softwareFragmentSource = `')[0]||'';
+assert.ok(canonicalShader.length>10000,'Real photographic MAG shader was replaced');
+assert.ok(!canonicalShader.includes(',2.0)'),
+  'Canonical shader still uses general pow() for a mathematical square');
+assert.match(coreSource,/R2223: exact algebraic squares/);
+// R2228: refresh divisor remains truly dynamic, but diagnostic DOM writes
+// must never fire on each WebGL animation frame.
+assert.match(coreSource,/R2228: same real 60Hz-divisor decisions/);
+assert.match(coreSource,/if\(now-lastRefreshTelemetryAt>=250\)/);
+assert.match(coreSource,/if\(root\.dataset\.fxCoreRefreshHzR1622!==hzText\)/);
+assert.match(coreSource,/if\(root\.dataset\.fxCoreRenderDivisorR1622!==divisorText\)/);
+assert.match(coreSource,/if\(root\.dataset\.fxCorePassModelR1450!==/);
+assert.match(coreSource,/render\(now\);burstFrames=Math\.max\(0,burstFrames-1\)/);
+
+assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
+assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
+// R2229–R2230: mobile 2D fallback preserves the real depth-sorted DNA
+// while replacing per-strand Canvas stack mutations with an explicit reset.
+const referenceFilm=fs.readFileSync(
+  path.join(root,'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'),'utf8');
+const referenceSyntax=spawnSync(process.execPath,['--check',
+  path.join(root,'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js')],
+  {encoding:'utf8'});
+assert.equal(referenceSyntax.status,0,referenceSyntax.stderr);
+const dnaFallback=referenceFilm.split('function drawDNA(')[1]
+  ?.split('function orbRadius(')[0]||'';
+assert.ok(dnaFallback.includes('elements.sort((a,b)=>a.depth-b.depth)'),
+  'Real double-helix 3D depth sorting lost');
+assert.ok(dnaFallback.includes("ctx.globalAlpha=alpha;") &&
+  dnaFallback.includes('ctx.shadowBlur=0;'),
+  'Fallback DNA must keep identical layered alpha/glow with one canvas state');
+assert.ok(!dnaFallback.includes('for(const item of elements){\\n      ctx.save();'),
+  'Per-DNA-segment Canvas state stack churn returned');
+assert.ok(referenceFilm.includes("let lastTelemetryAt=-Infinity;") &&
+  referenceFilm.includes("if(time-lastTelemetryAt>=250)"),
+  'Fallback film telemetry should not mutate document attributes every drawn frame');
+
+// R2231: the optional native-HTML mode must survive late WebGL readiness.
+const archiveRuntime=fs.readFileSync(
+  path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'),'utf8');
+const archiveConnect=archiveRuntime.split('function connect(){')[1]
+  ?.split('function refresh(')[0]||'';
+assert.ok(archiveConnect.includes('requestedHtmlFallback'),
+  'archive=off may not re-enable the 8-folio renderer on real3dready');
+assert.ok(archiveRuntime.includes(
+  "root.dataset.fxArchiveExperience=requestedHtmlFallback?'reduced-html':'pending'"),
+  'Native HTML archive=off must be published before deferred init');
+const cinematicJourney=fs.readFileSync(
+  path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
+assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
+assert.match(cinematicJourney,/root\.dataset\.fxMagStoryCoreMode==='archive'/);
+assert.match(cinematicJourney,/if \(!scrollOwnsCamera\)\s*api\.rotateBy\?/);
+assert.match(cinematicJourney,/api\.surfacePulse\?\.\('r536-'/);
+assert.match(js,/const mode=archiveActive\?'archive':'hero';/);
+assert.ok(js.indexOf("const mode=archiveActive?'archive':'hero';")
+   < js.indexOf('const difference=clamp(remaining*.35'),
+   'Continuous MAG scroll owner must be published before any settled scene rotation');
+
+assert.match(js,/lastCoreTurn = clamp\(lastCoreTurn \+ difference\)/);
+assert.match(js,/difference=clamp\(remaining\*\.35,-\.095,\.095\)/);
+assert.doesNotMatch(js,/clamp\(progress - lastCoreTurn, -\.008, \.008\)/);
+assert.match(js,/Math\.abs\(progress-lastCoreTurn\)>\.001\) request\(\)/);
+assert.match(js,/if \(animateChapters\) updates\.forEach/);
+assert.match(js,/if \(!animateChapters\) return/);
+assert.match(js,/coreProgress:lastCoreTurn/);
+
+assert.doesNotMatch(js,/difference \* 170|difference \* -32/,
+  'R326 expects radians; historic degree-scale scroll jumps are prohibited');
+
+assert.match(js,/heroRect\.bottom <= 0/);
+assert.doesNotMatch(js,/new WebGLRenderer|createElement\('canvas'\)|preventDefault\(/);
+assert.match(js,/footerRect\.top < vh/);
+assert.match(css,/\.fx-mag-story-rail\[hidden\]\{display:none!important\}/);
+assert.match(css,/@media\(max-width:900px\)/);
+assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
+assert.match(css,/min-height:44px/);
+assert.match(css,/overflow-x:auto/);
+assert.match(css,/left:0;right:0;transform:none/);
+assert.match(js,/track\.scrollLeft = 0/);
+assert.match(js,/innerWidth <= 440/);
+assert.match(css,/@media \(min-width:360px\) and \(max-width:440px\)/);
+
+const previewPath=path.join(root,'docs/scifi-ui/mag-scroll-preview.html');
+const previewJs=path.join(root,'docs/scifi-ui/scripts/formatx-mag-scroll-preview-r2210.js');
+const previewCss=path.join(root,'docs/scifi-ui/styles/formatx-mag-scroll-preview-r2210.css');
+const preview=fs.readFileSync(previewPath,'utf8');
+const previewCode=fs.readFileSync(previewJs,'utf8');
+const previewStyles=fs.readFileSync(previewCss,'utf8');
+const previewSyntax=spawnSync(process.execPath,['--check',previewJs],{encoding:'utf8'});
+assert.equal(previewSyntax.status,0,previewSyntax.stderr);
+assert.equal((preview.match(/<canvas\b/g)||[]).length,1,'Preview must have one visible canvas');
+assert.equal((preview.match(/class="fxp-chapter\b/g)||[]).length,7);
+assert.match(preview,/formatx-mag-genesis-three-r1280\.js/);
+assert.match(preview,/formatx-mag-reference-film-r649\.js/);
+assert.match(previewCode,/const owner=window\.FormatXMagGenesisThreeR1280/);
+assert.match(previewCode,/renderer=await owner\.attach\(canvas,getTarget\)/);
+assert.match(previewCode,/FormatXMagReferenceFilmR649\.attach/);
+assert.match(previewCode,/requestAnimationFrame\(frame\)/);
+assert.match(previewCode,/filmKeys=\[\[0,0\],\[\.17,\.42\],\[\.34,\.82\]/);
+assert.match(previewCode,/addEventListener\('scroll',onScroll,\{passive:true\}\)/);
+assert.match(previewStyles,/prefers-reduced-motion:reduce/);
+assert.match(preview,/name="robots" content="noindex,nofollow"/);
+
+console.log('FormatX MAG scroll R2210 static contract PASS');

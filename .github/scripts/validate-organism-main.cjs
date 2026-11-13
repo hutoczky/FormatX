@@ -68,6 +68,45 @@ async function enterSite(page, label) {
   mark(label + ': site-ready');
 }
 
+// R2240: the original commerce controls are intentionally behind the new
+// visible MAG headline. Exercise the actual chapter button before legacy
+// pricing controls so this suite validates their continued functionality.
+async function unsealPricing(page,mobile=false){
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxMagDisclosure==='ready'&&
+    document.querySelector('#pricing > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger'),
+    null,{timeout:20000}).catch(async error=>{
+      const d=await page.evaluate(()=>{
+        const p=document.getElementById('pricing');
+        const link=document.querySelector('link[data-fx-mag-disclosure-r2240]');
+        return {ready:document.readyState,archive:document.documentElement.dataset.fxArchiveExperience,
+          disclosure:document.documentElement.dataset.fxMagDisclosure,
+          r487:document.documentElement.dataset.fxDeferredCssR487,
+          foldRuntime:window.__FORMATX_MAG_DISCLOSURE_R2240__||false,
+          foldStatus:window.__FORMATX_MAG_DISCLOSURE_STATUS__?.(),
+          link:link?{media:link.media,sheet:!!link.sheet,href:link.href}:null,
+          pricing:{parent:p?.parentElement?.id,parentTag:p?.parentElement?.tagName,
+            classes:p?.className,children:p?.children.length,
+            heading:!!p?.querySelector(':scope > .fx-mag-disclosure-heading')},
+          url:location.href
+        };
+      });
+      throw new Error('R2240 organism title failed to initialize: '+JSON.stringify(d)+' / '+String(error.message||error));
+    });
+  const disclosure=page.locator('#pricing > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+  assert(await disclosure.getAttribute('aria-expanded')==='false',
+    'Pricing must begin as a bold title only');
+  if(mobile)await disclosure.tap({timeout:20000});
+  else await disclosure.click({timeout:20000});
+  await page.waitForFunction(()=> {
+    const panel=document.getElementById('pricing');
+    const trigger=panel?.querySelector(':scope > [data-organism-open="pricing"]');
+    return panel?.dataset.fxMagOpen==='true'
+      &&panel.querySelector('.fx-mag-disclosure-trigger')?.getAttribute('aria-expanded')==='true'
+      &&!!trigger&&!trigger.inert&&getComputedStyle(trigger).display!=='none';
+  },null,{timeout:15000});
+}
+
 async function state(page) {
   return page.evaluate(() => ({
     ready: document.documentElement.dataset.fxOrganismInterface,
@@ -107,6 +146,7 @@ async function validateDesktop() {
     assert(current.footerInResources, 'footer must be inside the release/support console');
     assert(current.overflow <= 1, 'desktop horizontal overflow: ' + current.overflow);
 
+    await unsealPricing(page,false);
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();
     await pricingTrigger.click();
@@ -176,6 +216,7 @@ async function validateMobile() {
     const errors = [];
     diagnostics(page, errors);
     await enterSite(page, 'mobile');
+    await unsealPricing(page,true);
 
     const pricingTrigger = page.locator('[data-organism-open="pricing"]');
     await pricingTrigger.scrollIntoViewIfNeeded();

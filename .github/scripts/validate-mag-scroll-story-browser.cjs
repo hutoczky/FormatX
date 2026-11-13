@@ -1,0 +1,289 @@
+'use strict';
+/* Behavioral smoke for the actual seven-scene MAG homepage. */
+const assert = require('node:assert/strict');
+const {chromium} = require('playwright');
+const base = process.env.FORMATX_TEST_URL || 'http://127.0.0.1:4178/scifi-ui/index.html';
+const profiles = [
+  {name:'narrow-320',width:320,height:568,mobile:true},
+  {name:'phone-390',width:390,height:844,mobile:true},
+  {name:'desktop-1440',width:1440,height:900,mobile:false}
+];
+(async () => {
+  const browser=await chromium.launch({headless:true,args:[
+    '--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader',
+    '--enable-unsafe-swiftshader'
+  ]});
+  try {
+    for(const profile of profiles) {
+      const context=await browser.newContext({
+        viewport:{width:profile.width,height:profile.height},
+        isMobile:profile.mobile,hasTouch:profile.mobile,
+        reducedMotion:'no-preference',locale:'hu-HU'
+      });
+      try {
+        const page=await context.newPage();
+        const navigations=[];
+        page.on('framenavigated',frame=>{
+          if(frame===page.mainFrame())navigations.push(frame.url());
+        });
+        const errors=[];
+        page.on('pageerror',error=>errors.push(error.message));
+        // Isolate the 7 native HTML anchor chapters. R1987's 8-scene WebGL
+        // archive is checked independently by validate-cinematic-archive.
+        await page.goto(base+'?intro=0&archive=off&storybrowser=1',
+          {waitUntil:'domcontentloaded',timeout:60000});
+        await page.waitForFunction(
+          () => typeof window.__FORMATX_MAG_STORY_STATUS__ === 'function',
+          null,{timeout:30000});
+        // R2231: explicitly isolated native-HTML chapter proof. The
+        // asynchronous MAG WebGL ready event must NEVER reactivate R1987
+        // after ?archive=off, even once the film has fully completed.
+        await page.waitForFunction(()=>
+          document.documentElement.dataset.fxArchiveExperience==='reduced-html',
+          null,{polling:200,timeout:20000});
+        await page.waitForFunction(() => {
+          const nav=document.querySelector('.fx-mag-story-rail');
+          return nav && !nav.hidden && getComputedStyle(nav).position==='fixed';
+        },null,{timeout:12000});
+        const initial=await page.evaluate(()=>{
+          const nav=document.querySelector('.fx-mag-story-rail');
+          return {
+            links:nav?.querySelectorAll('a[data-chapter]').length,
+            progress:window.__FORMATX_MAG_STORY_STATUS__().progress,
+            documentOrigin:performance.timeOrigin, pathname:location.pathname,
+            search:location.search
+          };
+        });
+        assert.equal(initial.links,7,profile.name+': chapter rail missing');
+        // R2240: native fallback also starts with only bold chapter titles.
+        await page.waitForFunction(()=>
+          document.documentElement.dataset.fxMagDisclosure==='ready'&&
+          document.querySelectorAll('main#main-content > section.fx-mag-disclosure-panel').length>=6,
+          null,{timeout:20000});
+        assert.ok(Number.isFinite(initial.progress));
+        for(const sectionId of ['experience','capabilities','pricing']){
+          // R2227: exercise the REAL user-facing native anchor link rather
+          // than an artificial scrollIntoView. Native fragment navigation
+          // retains the requested chapter during async content reflow and
+          // validates the public 44px MAG rail, not just DOM coordinates.
+          const navLink=page.locator('.fx-mag-story-rail a[data-chapter="'+sectionId+'"]');
+          const requestedHref=await navLink.getAttribute('href');
+          const nativeURL=new URL(requestedHref,await page.evaluate(()=>document.baseURI));
+          assert.equal(nativeURL.pathname,initial.pathname,
+            profile.name+': base href changed native MAG chapter document');
+          assert.equal(nativeURL.search,initial.search,
+            profile.name+': MAG chapter link dropped query state');
+          assert.equal(nativeURL.hash,'#'+sectionId,
+            profile.name+': MAG rail lost its semantic fragment');
+          await navLink.click({timeout:20000});
+          // Capture the actual URL outcome separately: another FormatX
+          // navigation owner may consume the fragment while still performing
+          // the correct scroll. The product contract is the visible selected
+          // chapter, not a hash mutation at an exact millisecond.
+          const clicked=await page.evaluate(id=>({
+            id,hash:location.hash, pathname:location.pathname,
+            search:location.search, documentOrigin:performance.timeOrigin,
+            chapter:document.documentElement.dataset.fxMagStoryChapter
+          }),sectionId);
+          assert.equal(clicked.documentOrigin,initial.documentOrigin,
+            profile.name+': MAG click caused full document reload through <base>');
+          assert.equal(clicked.pathname,initial.pathname);
+          assert.equal(clicked.search,initial.search);
+          console.log('MAG_R2234_NATIVE_RAIL_NO_RELOAD',JSON.stringify({profile:profile.name,...clicked}));
+          await page.waitForFunction(id=>
+            document.documentElement.dataset.fxMagStoryChapter===id,
+            sectionId,{polling:200,timeout:20000}).catch(async error=>{
+              const state=await page.evaluate(targetId=>({
+                targetId,
+                active:document.documentElement.dataset.fxMagStoryChapter,
+                archive:document.documentElement.dataset.fxArchiveExperience,
+                status:window.__FORMATX_MAG_STORY_STATUS__?.(),
+                scrollY,viewport:innerHeight,hash:location.hash,
+                maxScroll:document.documentElement.scrollHeight-innerHeight,
+                chapters:['hero','experience','capabilities','pricing','system','network','resources']
+                  .map(id=>{
+                    const node=document.getElementById(id);
+                    const rect=node?.getBoundingClientRect(),style=node&&getComputedStyle(node);
+                    return {id,top:Math.round(rect?.top||0),bottom:Math.round(rect?.bottom||0),
+                      height:Math.round(rect?.height||0),display:style?.display,
+                      position:style?.position,transform:style?.transform};
+                  })
+              }),sectionId);
+              // SwiftShader can starve rAF while the original 3D MAG is
+              // compiling/drawing. A last direct read still has to confirm
+              // the requested chapter, never accept a different chapter.
+              if(state.active===sectionId && state.status?.active===sectionId){
+                console.log('MAG_SCROLL_LATE_CONSISTENT_CHAPTER',
+                  JSON.stringify({profile:profile.name,sectionId,scrollY:state.scrollY}));
+                return;
+              }
+              throw new Error(profile.name+': chapter '+sectionId+
+                ' did not activate: '+JSON.stringify(state)+' / '+String(error.message||error));
+            });
+          const state=await page.evaluate(()=>{
+            const s=window.__FORMATX_MAG_STORY_STATUS__();
+            return {active:s.active,progress:s.progress};
+          });
+          assert.equal(state.active,sectionId,profile.name+' scene '+sectionId);
+          const archiveState=await page.evaluate(()=>({
+            state:document.documentElement.dataset.fxArchiveExperience,
+            htmlFallback:document.documentElement.dataset.fxArchiveHtmlFallback,
+            url:location.href,search:location.search,
+            ready:document.readyState,
+            magBirth:document.documentElement.dataset.fxMagBirthLiveR533,
+            loading:[...document.querySelectorAll('script[src*="cinematic-archive-r1987"]')]
+              .map(x=>({src:x.src,async:x.async,defer:x.defer})),
+            navType:performance.getEntriesByType('navigation')?.[0]?.type||'unknown'
+          }));
+          assert.equal(archiveState.state,'reduced-html',
+            profile.name+': archive=off changed during anchor navigation: '+
+            JSON.stringify({archiveState,navigations}));
+          assert.ok(state.progress>=0&&state.progress<=1,profile.name+' progress');
+          const fold=page.locator('#'+sectionId+' > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+          const closed=await page.evaluate(id=>{
+            const host=document.getElementById(id);
+            const actual=[...host.children].filter(n=>!n.classList.contains('fx-mag-disclosure-heading'));
+            return {title:host.querySelector('.fx-mag-disclosure-word')?.textContent,
+              expanded:host.querySelector('.fx-mag-disclosure-trigger')?.getAttribute('aria-expanded'),
+              collapsed:actual.length>0&&actual.every(n=>getComputedStyle(n).display==='none'&&n.inert)};
+          },sectionId);
+          assert.ok(closed.title?.length>5&&closed.expanded==='false'&&closed.collapsed,
+            profile.name+': native chapter reveals content before MAG click: '+JSON.stringify(closed));
+          await fold.click({timeout:20000});
+          const open=await page.evaluate(id=>{
+            const host=document.getElementById(id);
+            const actual=[...host.children].filter(n=>!n.classList.contains('fx-mag-disclosure-heading'));
+            return {expanded:host.querySelector('.fx-mag-disclosure-trigger')?.getAttribute('aria-expanded'),
+              original:actual.some(n=>getComputedStyle(n).display!=='none'&&!n.inert)};
+          },sectionId);
+          assert.ok(open.expanded==='true'&&open.original,
+            profile.name+': real content did not open: '+JSON.stringify(open));
+          await fold.click({timeout:20000});
+          assert.equal(await fold.getAttribute('aria-expanded'),'false',
+            profile.name+': MAG disclosure did not close again');
+        }
+        // Check all visible touch targets geometrically; do not count
+        // scrollable off-viewport links as touchable.
+        if(profile.mobile) {
+          await page.evaluate(()=>document.querySelector('.fx-mag-story-rail').scrollIntoView({block:'nearest'}));
+          const rail=await page.evaluate(()=>{
+            const nav=document.querySelector('.fx-mag-story-rail');
+            return [...nav.querySelectorAll('a')].map(link=>{
+              const r=link.getBoundingClientRect();
+              return {left:r.left,right:r.right,width:r.width,height:r.height};
+            });
+          });
+          for(const [i,link] of rail.entries()) {
+            assert.ok(link.width>=44&&link.height>=44,
+              profile.name+': undersized touch target '+i);
+            if(profile.width<=440){
+              assert.ok(link.left>=-1&&link.right<=profile.width+1,
+                profile.name+': clipped chapter '+i+': '+JSON.stringify(link));
+            }
+          }
+        }
+        // R2235: validate the actual HU/EN user control and its pub/sub
+        // translation workflow, not an isolated html.lang attribute mutation
+        // which the live language owner may legitimately restore.
+        // The actual header language control is in normal document chrome,
+        // not a fixed overlay. Return to the top as a real visitor would
+        // before exercising it; Playwright cannot click an offscreen header.
+        await page.evaluate(()=>scrollTo({top:0,left:0,behavior:'instant'}));
+        await page.waitForFunction(()=>{
+          const button=document.querySelector('.fx-language-toggle');
+          const r=button?.getBoundingClientRect();
+          return !!r&&r.width>0&&r.height>0&&r.top>=-2&&r.bottom<=innerHeight+2;
+        },null,{polling:200,timeout:12000});
+        await page.locator('.fx-language-toggle').click({timeout:15000});
+        await page.waitForFunction(()=>
+          document.documentElement.lang==='en' &&
+          document.querySelector('.fx-mag-story-rail a[data-chapter="experience"]')
+            ?.getAttribute('aria-label')==='NERVOUS SYSTEM',
+          null,{polling:200,timeout:12000}).catch(async error=>{
+            const state=await page.evaluate(()=>({
+              lang:document.documentElement.lang,
+              button:document.querySelector('.fx-language-toggle')?.textContent,
+              label:document.querySelector('.fx-mag-story-rail a[data-chapter="experience"]')
+                ?.getAttribute('aria-label'),
+              owner:document.documentElement.dataset.fxSingleLanguageToggle,
+              search:location.search
+            }));
+            throw new Error(profile.name+': actual language button did not translate MAG rail: '+
+              JSON.stringify(state)+' / '+String(error.message||error));
+          });
+        // The existing HU/EN control must translate the bold disclosure too.
+        const translated=await page.evaluate(()=>
+          document.querySelector('#experience .fx-mag-disclosure-word')?.textContent);
+        assert.equal(translated,'NERVOUS SYSTEM',
+          profile.name+': bold MAG chapter title was not translated by live control');
+        assert.deepEqual(errors,[],profile.name+': uncaught browser errors');
+        console.log('MAG_SCROLL_BROWSER_PASS',JSON.stringify({profile:profile.name,initial,errors}));
+      } finally {await context.close();}
+    }
+    // The immersive preview must keep one canvas alive across all chapters.
+    const previewContext=await browser.newContext({
+      viewport:{width:1440,height:900},reducedMotion:'reduce',locale:'hu-HU'
+    });
+    try {
+      const preview=await previewContext.newPage();
+      const previewUrl=new URL('/scifi-ui/mag-scroll-preview.html',base).href;
+      await preview.goto(previewUrl,{waitUntil:'domcontentloaded',timeout:60000});
+      await preview.waitForFunction(()=>
+        typeof window.__FORMATX_MAG_SCROLL_PREVIEW__==='function' &&
+        document.documentElement.dataset.fxpRuntime!=='initialising',
+        null,{timeout:45000});
+      const before=await preview.evaluate(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__());
+      assert.equal(before.canvases,1,'Multiple canvas nodes on MAG preview');
+      assert.equal(before.chapters,7,'Incomplete immersive MAG chapters');
+      await preview.evaluate(()=>
+        document.getElementById('plan').scrollIntoView({behavior:'instant',block:'center'}));
+      await preview.waitForFunction(()=>
+        document.documentElement.dataset.fxpChapter==='plan',
+        null,{timeout:15000});
+      await preview.waitForFunction(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__().filmProgress>.9,null,{timeout:10000});
+      const after=await preview.evaluate(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__());
+      assert.ok(after.filmProgress>.9,'MAG must be assembled by the system chapters');
+      assert.equal(after.canvases,1,'MAG renderer was duplicated after scroll');
+      assert.equal(after.chapter,'plan','Camera chapter navigation did not advance');
+      const safe=await preview.evaluate(()=>{
+        const text=document.querySelector('#cell .fxp-copy').getBoundingClientRect();
+        const nav=document.querySelector('.fxp-rail').getBoundingClientRect();
+        return {textRight:text.right,railLeft:nav.left};
+      });
+      assert.ok(safe.textRight+8<safe.railLeft,
+        'Desktop MAG chapter rail covers right-side editorial text: '+JSON.stringify(safe));
+      console.log('MAG_SINGLE_WORLD_BROWSER_PASS',JSON.stringify({before,after}));
+    } finally {await previewContext.close();}
+    // 320px portrait: one persistent canvas and seven accessible targets.
+    const phoneWorld=await browser.newContext({
+      viewport:{width:320,height:568},isMobile:true,hasTouch:true,
+      reducedMotion:'reduce',locale:'hu-HU'
+    });
+    try {
+      const phone=await phoneWorld.newPage();
+      await phone.goto(new URL('/scifi-ui/mag-scroll-preview.html',base).href,
+        {waitUntil:'domcontentloaded',timeout:60000});
+      await phone.waitForFunction(()=>document.documentElement.dataset.fxpRuntime!=='initialising',
+        null,{timeout:45000});
+      const touch=await phone.evaluate(()=>({
+        links:[...document.querySelectorAll('.fxp-rail a')].map(a=>{
+          const r=a.getBoundingClientRect();
+          return {left:r.left,right:r.right,width:r.width,height:r.height};
+        }),
+        canvases:document.querySelectorAll('#fxp-world').length
+      }));
+      assert.equal(touch.canvases,1,'Preview mobile renderer duplicated');
+      assert.equal(touch.links.length,7);
+      for(const [index,link] of touch.links.entries()){
+        assert.ok(link.width>=44&&link.height>=44&&link.left>=-1&&link.right<=321,
+          'Preview 320px target clipped: '+index+': '+JSON.stringify(link));
+      }
+      await phone.evaluate(()=>document.querySelector('#core').scrollIntoView({behavior:'instant',block:'center'}));
+      await phone.waitForFunction(()=>document.documentElement.dataset.fxpChapter==='core',
+        null,{timeout:15000});
+      await phone.waitForFunction(()=>window.__FORMATX_MAG_SCROLL_PREVIEW__().filmProgress>.78,
+        null,{timeout:10000});
+      console.log('MAG_SINGLE_WORLD_MOBILE_PASS',JSON.stringify(touch));
+    } finally {await phoneWorld.close();}
+  } finally {await browser.close();}
+})().catch(error=>{console.error(error.stack||String(error));process.exitCode=1;});

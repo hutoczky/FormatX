@@ -1,0 +1,210 @@
+/* FormatX MAG scroll story R2202: one continuous organism, no extra WebGL renderer. */
+html[data-fx-mag-story="r2202"] {
+  --fx-mag-story-progress:0;
+  --fx-mag-story-camera:0;
+  --fx-mag-story-accent:rgba(139,221,224,.75);
+}
+.fx-mag-story-rail {
+  position:fixed;
+  z-index:70;
+  left:clamp(12px,2vw,32px);
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  max-width:180px;
+  padding:15px 12px;
+  border:1px solid rgba(157,208,215,.14);
+  border-radius:18px;
+  background:rgba(3,11,17,.60);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  color:#def4f5;
+  font:500 10px/1.4 system-ui,sans-serif;
+  letter-spacing:.13em;
+  opacity:.85;
+  transition:opacity .2s ease;
+}
+.fx-mag-story-rail:focus-within,.fx-mag-story-rail:hover{opacity:1}
+.fx-mag-story-rail__caption{font-size:8px;color:#a9cbcf;white-space:nowrap}
+.fx-mag-story-rail__track{display:grid;gap:7px;position:relative}
+.fx-mag-story-rail__track::before,.fx-mag-story-rail__track::after{
+  content:"";position:absolute;left:5px;top:13px;bottom:13px;width:1px;pointer-events:none
+}
+.fx-mag-story-rail__track::before{background:rgba(150,210,220,.22)}
+.fx-mag-story-rail__track::after{
+  background:#95edf0;transform-origin:top;transform:scaleY(var(--fx-mag-story-progress,0))
+}
+.fx-mag-story-rail a{
+  display:flex;align-items:center;gap:12px;min-height:30px;
+  color:#a4b6bc;text-decoration:none;transition:color .2s ease;
+  white-space:nowrap
+}
+.fx-mag-story-rail a:hover,.fx-mag-story-rail a.is-active{color:#f1ffff}
+.fx-mag-story-rail a:focus-visible{outline:2px solid #baf4ff;outline-offset:4px;border-radius:4px}
+.fx-mag-story-rail__dot{
+  flex:0 0 11px;width:11px;height:11px;border:1px solid #647f85;
+  border-radius:50%;background:#09181d;z-index:1;transition:background .2s,box-shadow .2s
+}
+.fx-mag-story-rail .is-active .fx-mag-story-rail__dot{
+  background:#abf5ef;box-shadow:0 0 13px rgba(114,227,231,.52);border-color:#e4ffff
+}
+.fx-mag-story-rail__counter{color:#a9d2d5;font-variant-numeric:tabular-nums}
+html[data-fx-mag-story="r2202"] .fx-mag-story-chapter{
+  --fx-mag-story-visibility:1;--fx-mag-story-local:0;
+  position:relative;
+}
+@media (prefers-reduced-motion:no-preference) and (min-width:901px) {
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter:not(#hero) > header,
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter:not(#hero) > .section-header {
+    opacity:calc(.72 + .28 * var(--fx-mag-story-visibility,1));
+    transform:translate3d(0,var(--fx-mag-story-offset,0px),0);
+    transition:opacity .15s linear;will-change:transform;
+  }
+  html[data-fx-mag-story="r2202"] #hero .hero-space{
+    transform:translate3d(0,calc(var(--fx-mag-story-camera,0) * -14px),0);
+  }
+}
+@media(max-width:1250px){
+  .fx-mag-story-rail{left:8px;padding:10px 7px;gap:8px}
+  .fx-mag-story-rail__caption,.fx-mag-story-rail__name{display:none}
+  .fx-mag-story-rail a{min-width:24px;min-height:30px}
+}
+@media(max-width:900px),(pointer:coarse){
+  .fx-mag-story-rail{
+    left:50%;top:auto;bottom:max(8px,env(safe-area-inset-bottom));
+    transform:translateX(-50%);flex-direction:row;align-items:center;
+    padding:6px 12px;border-radius:999px;gap:12px;
+    max-width:calc(100vw - 32px);pointer-events:auto;
+  }
+  .fx-mag-story-rail__track{display:flex;align-items:center;gap:8px}
+  .fx-mag-story-rail__track::before,.fx-mag-story-rail__track::after{display:none}
+  .fx-mag-story-rail a{min-width:24px;min-height:32px;justify-content:center}
+  .fx-mag-story-rail__caption,.fx-mag-story-rail__name{display:none}
+  .fx-mag-story-rail__counter{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .fx-mag-story-rail *{transition:none!important}
+  .fx-mag-story-chapter{transform:none!important}
+}
+@media print{.fx-mag-story-rail{display:none!important}}
+
+/* R2203: restrained scene-specific lighting on the real page surface.
+   No generated images, canvas duplication, scroll interception or layout shift. */
+html[data-fx-mag-story="r2202"] #main-content{
+  isolation:isolate;
+}
+html[data-fx-mag-story="r2202"] .fx-mag-story-chapter::before{
+  content:"";position:absolute;z-index:0;pointer-events:none;
+  inset:0;opacity:.40;
+  background:radial-gradient(ellipse 52% 34% at 52% 39%,
+    rgba(37,128,154,.12),transparent 77%);
+}
+html[data-fx-mag-story-chapter="experience"] #experience::before,
+html[data-fx-mag-story-chapter="capabilities"] #capabilities::before{
+  background:radial-gradient(ellipse 48% 42% at 52% 36%,rgba(62,175,175,.16),transparent 78%);
+}
+html[data-fx-mag-story-chapter="system"] #system::before,
+html[data-fx-mag-story-chapter="network"] #network::before{
+  background:radial-gradient(ellipse 55% 43% at 60% 44%,rgba(79,109,182,.13),transparent 78%);
+}
+@media(max-width:900px),(pointer:coarse){
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter::before{opacity:.20}
+}
+@media(max-height:460px){
+  .fx-mag-story-rail{display:none}
+}
+
+/* Preserve footer actions and accessibility on compact viewports. */
+.fx-mag-story-rail[hidden]{display:none!important}
+
+/* R2204: WCAG-size navigation targets, horizontally scrollable at 320px. */
+@media(max-width:900px),(pointer:coarse){
+  .fx-mag-story-rail__track{
+    display:flex;flex:1 1 auto;min-width:0;max-width:100%;
+    overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+    overscroll-behavior-x:contain;scroll-snap-type:x proximity;
+    gap:2px;
+  }
+  .fx-mag-story-rail__track::-webkit-scrollbar{display:none}
+  .fx-mag-story-rail a{
+    flex:0 0 44px;min-width:44px;min-height:44px;
+    scroll-snap-align:center;
+  }
+  .fx-mag-story-rail__counter{flex:0 0 auto}
+  .fx-mag-story-rail{width:min(440px,calc(100vw - 24px));}
+}
+
+/* R2205: seven full-size chapter targets fit at 320px without clipping.
+   All seven remain accessible; the numerical counter yields only on narrow phones. */
+@media(max-width:359px) and (pointer:coarse),
+       (max-width:359px) and (max-width:900px){
+  .fx-mag-story-rail{
+    left:0;right:0;transform:none;bottom:max(0px,env(safe-area-inset-bottom));
+    width:100vw;max-width:100vw;
+    padding:4px 5px;gap:0;
+    border-left:0;border-right:0;border-radius:0;
+    box-sizing:border-box;
+  }
+  .fx-mag-story-rail__track{
+    flex:1 1 100%;width:100%;justify-content:space-between;
+    gap:0;overflow-x:visible;scroll-snap-type:none;
+  }
+  .fx-mag-story-rail a{
+    flex:0 0 44px;min-width:44px;min-height:44px;
+    width:44px;height:44px;
+  }
+  .fx-mag-story-rail__counter{display:none}
+}
+
+/* R2206: 360–440px rail is fixed in place; all seven links remain in viewport.
+   No horizontal scrolling is needed at these sizes. */
+@media (min-width:360px) and (max-width:440px) {
+  .fx-mag-story-rail {
+    left:0;right:0;transform:none;
+    width:100vw;max-width:100vw;box-sizing:border-box;
+    padding:4px 8px;gap:0;
+    border-left:0;border-right:0;border-radius:0;
+  }
+  .fx-mag-story-rail__track {
+    flex:1 1 100%;width:100%;justify-content:space-between;
+    gap:0;overflow-x:visible;scroll-snap-type:none;
+  }
+  .fx-mag-story-rail a {
+    flex:0 0 44px;min-width:44px;min-height:44px;
+    width:44px;height:44px;
+  }
+  .fx-mag-story-rail__counter {display:none}
+}
+
+/* R2208: narrative data reveal — composited travel, not layout jumps.
+   Existing interactive content, anchors and reduced-motion accessibility stay intact. */
+@media(min-width:901px) and (prefers-reduced-motion:no-preference){
+  html[data-fx-mag-story="r2202"] :is(
+    #experience .flow,
+    #capabilities .cards,
+    #pricing .pricing,
+    #system .system-grid,
+    #network .fx-net-grid,
+    #resources .release-layout
+  ){
+    translate:0 var(--fx-mag-story-offset,0px);
+    transition:translate 160ms ease-out;
+  }
+  html[data-fx-mag-story="r2202"] :is(
+    #capabilities .cards > .card,
+    #pricing .pricing > .price-card,
+    #system .system-grid > article
+  ){
+    translate:0 calc(var(--fx-mag-story-offset,0px) * .32);
+    transition:translate 180ms ease-out;
+  }
+}
+/* Full motion-free fallback leaves every section at its natural position. */
+@media(prefers-reduced-motion:reduce){
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter,
+  html[data-fx-mag-story="r2202"] .fx-mag-story-chapter :is(.flow,.cards,.pricing,.system-grid,.fx-net-grid,.release-layout){
+    translate:none!important;
+  }
+}

@@ -83,10 +83,15 @@
     elements.sort((a,b)=>a.depth-b.depth);
     ctx.lineCap='round';
     ctx.lineJoin='round';
+    // R2229: one Canvas state stack frame for this DNA. Each sorted
+    // strand keeps the same depth, alpha, stroke, 3D bridge and glow,
+    // without ~230 save()/restore() pairs per cinematic frame.
+    ctx.globalAlpha=alpha;
     for(const item of elements){
       const front=clamp(.5+.5*item.depth/A);
-      ctx.save();
-      ctx.globalAlpha=alpha;
+      // Clear the previous foreground glow before the next depth slice.
+      // The old per-segment restore() did the same thing at higher CPU cost.
+      ctx.shadowBlur=0;
       ctx.beginPath();
       ctx.moveTo(item.a.x,item.a.y);
       ctx.lineTo(item.b.x,item.b.y);
@@ -94,7 +99,6 @@
         ctx.strokeStyle='rgba(147,198,211,'+(.26+.39*front).toFixed(3)+')';
         ctx.lineWidth=.90+front*1.25;
         ctx.stroke();
-        ctx.restore();
         continue;
       }
       const cool=item.lane===0;
@@ -117,8 +121,8 @@
         ctx.shadowBlur=front*7;
         ctx.stroke();
       }
-      ctx.restore();
     }
+    ctx.shadowBlur=0;
     // Few physical nucleotides: soft glass beads at the camera-front turns.
     for(let k=5;k<N;k+=8){
       for(let lane=0;lane<2;lane++){
@@ -311,6 +315,9 @@
   }
   function drawLiteScene(ctx,r,time,target,radiusCap){
     const t=r*10,cx=640+(target?.x!=null?(target.x-640)*smooth((t-9.72)/.28):0),cy=360+(target?.y!=null?(target.y-360)*smooth((t-9.72)/.28):0);
+    const phase=t<2.58?'genome':t<5.58?'embryo':'assembly';
+    if(document.documentElement.dataset.fxMagFallbackChapterR2207!==phase)
+      document.documentElement.dataset.fxMagFallbackChapterR2207=phase;
     if(!MOBILE){ctx.fillStyle='#02070d';ctx.fillRect(0,0,W,H);}
     const chamber=ctx.createRadialGradient(cx,cy,12,cx,cy,560);
     chamber.addColorStop(0,'rgba(88,154,169,.23)');
@@ -781,6 +788,11 @@
         ? (innerWidth<900?.58:.56)
         : (innerWidth<900?.92:.78);
     let renderAverage=0,lastQualityAdjust=0,panicSamples=0;
+    // R2230: diagnostic DOM properties do not need animation-frame cadence.
+    let lastTelemetryAt=-Infinity;
+    const setTelemetry=(key,value)=>{
+      if(document.documentElement.dataset[key]!==value)document.documentElement.dataset[key]=value;
+    };
     function resize(){
       sw=innerWidth;sh=innerHeight;
       const baseDpr=proofFrame
@@ -814,10 +826,8 @@
       const radiusCap=MOBILE
         ? Math.max(38,Math.min(sw*.36,sh*.35)/Math.max(.001,scale))
         : 192;
-      document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
-        'four-point-bevelled-metal-glass-iris';
-      document.documentElement.dataset.fxMagFallbackDiameterR2103=
-        String(Math.round(radiusCap*2*scale));
+      setTelemetry('fxMagFallbackSilhouetteR2103','four-point-bevelled-metal-glass-iris');
+      setTelemetry('fxMagFallbackDiameterR2103',String(Math.round(radiusCap*2*scale)));
       drawLiteScene(ctx,r,time,target,radiusCap);
       ctx.restore();
 
@@ -860,13 +870,18 @@
           resize();
         }
       }
-      document.documentElement.dataset.fxMagFallbackTargetFpsR1601='60';
-      document.documentElement.dataset.fxMagFallbackBudgetR1727=runtimeConstrained
-        ? 'measured-constrained-low-dpr-fast-panic-recovery'
-        : 'full-photographic-adaptive';
-      document.documentElement.dataset.fxMagFallbackFramePanicR1727=String(panicSamples);
-      document.documentElement.dataset.fxMagFallbackRenderMsR1601=renderAverage.toFixed(2);
-      document.documentElement.dataset.fxMagFallbackQualityScaleR1601=qualityScale.toFixed(2);
+      // The 2D canvas still draws at its existing phase/RAF schedule.
+      // Only performance labels are sampled at 4 Hz, never every draw.
+      if(time-lastTelemetryAt>=250){
+        lastTelemetryAt=time;
+        setTelemetry('fxMagFallbackTargetFpsR1601','60');
+        setTelemetry('fxMagFallbackBudgetR1727',runtimeConstrained
+          ? 'measured-constrained-low-dpr-fast-panic-recovery'
+          : 'full-photographic-adaptive');
+        setTelemetry('fxMagFallbackFramePanicR1727',String(panicSamples));
+        setTelemetry('fxMagFallbackRenderMsR1601',renderAverage.toFixed(2));
+        setTelemetry('fxMagFallbackQualityScaleR1601',qualityScale.toFixed(2));
+      }
     }
     resize();return{
       resize,draw,minimumFrameMs:16.67,targetFps:60,
