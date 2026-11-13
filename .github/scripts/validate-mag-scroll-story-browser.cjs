@@ -55,6 +55,11 @@ const profiles = [
           };
         });
         assert.equal(initial.links,7,profile.name+': chapter rail missing');
+        // R2240: native fallback also starts with only bold chapter titles.
+        await page.waitForFunction(()=>
+          document.documentElement.dataset.fxMagDisclosure==='ready'&&
+          document.querySelectorAll('main#main-content > section.fx-mag-disclosure-panel').length>=6,
+          null,{timeout:20000});
         assert.ok(Number.isFinite(initial.progress));
         for(const sectionId of ['experience','capabilities','pricing']){
           // R2227: exercise the REAL user-facing native anchor link rather
@@ -134,6 +139,28 @@ const profiles = [
             profile.name+': archive=off changed during anchor navigation: '+
             JSON.stringify({archiveState,navigations}));
           assert.ok(state.progress>=0&&state.progress<=1,profile.name+' progress');
+          const fold=page.locator('#'+sectionId+' > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+          const closed=await page.evaluate(id=>{
+            const host=document.getElementById(id);
+            const actual=[...host.children].filter(n=>!n.classList.contains('fx-mag-disclosure-heading'));
+            return {title:host.querySelector('.fx-mag-disclosure-word')?.textContent,
+              expanded:host.querySelector('.fx-mag-disclosure-trigger')?.getAttribute('aria-expanded'),
+              collapsed:actual.length>0&&actual.every(n=>getComputedStyle(n).display==='none'&&n.inert)};
+          },sectionId);
+          assert.ok(closed.title?.length>5&&closed.expanded==='false'&&closed.collapsed,
+            profile.name+': native chapter reveals content before MAG click: '+JSON.stringify(closed));
+          await fold.click({timeout:20000});
+          const open=await page.evaluate(id=>{
+            const host=document.getElementById(id);
+            const actual=[...host.children].filter(n=>!n.classList.contains('fx-mag-disclosure-heading'));
+            return {expanded:host.querySelector('.fx-mag-disclosure-trigger')?.getAttribute('aria-expanded'),
+              original:actual.some(n=>getComputedStyle(n).display!=='none'&&!n.inert)};
+          },sectionId);
+          assert.ok(open.expanded==='true'&&open.original,
+            profile.name+': real content did not open: '+JSON.stringify(open));
+          await fold.click({timeout:20000});
+          assert.equal(await fold.getAttribute('aria-expanded'),'false',
+            profile.name+': MAG disclosure did not close again');
         }
         // Check all visible touch targets geometrically; do not count
         // scrollable off-viewport links as touchable.
@@ -184,6 +211,11 @@ const profiles = [
             throw new Error(profile.name+': actual language button did not translate MAG rail: '+
               JSON.stringify(state)+' / '+String(error.message||error));
           });
+        // The existing HU/EN control must translate the bold disclosure too.
+        const translated=await page.evaluate(()=>
+          document.querySelector('#experience .fx-mag-disclosure-word')?.textContent);
+        assert.equal(translated,'NERVOUS SYSTEM',
+          profile.name+': bold MAG chapter title was not translated by live control');
         assert.deepEqual(errors,[],profile.name+': uncaught browser errors');
         console.log('MAG_SCROLL_BROWSER_PASS',JSON.stringify({profile:profile.name,initial,errors}));
       } finally {await context.close();}
