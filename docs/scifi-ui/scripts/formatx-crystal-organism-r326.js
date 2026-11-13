@@ -1539,6 +1539,12 @@
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
+      // R2236: positive-domain integer gloss exponents, same authored optics.
+      // Multiplication tree avoids generalized fragment pow on each pixel.
+      float fxPower4(float x){float q=x*x;return q*q;}
+      float fxPower7(float x){float q=x*x;return (q*q)*(q*x);}
+      float fxPower22(float x){float q=x*x;float t=q*q;float e=t*t;return e*e*t*q;}
+      float fxPower34(float x){float q=x*x;float t=q*q;float e=t*t;float v=e*e;return v*v*q;}
       void main(){
         vec3 n=normalize(vNormal);
         vec3 view=normalize(vec3(-vLocal.xy,2.86-vLocal.z));
@@ -1618,7 +1624,7 @@
           (1.0-smoothstep(.44,.72,radialXY))*
           frontDepth;
         float axisRidge=pow(abs(cos(polar*2.0)),5.6)*prismEnvelope;
-        float diagonalValley=pow(abs(sin(polar*2.0)),7.0)*prismEnvelope;
+        float diagonalValley=fxPower7(abs(sin(polar*2.0)))*prismEnvelope;
         float prismSweep=.5+.5*sin(radialXY*14.0-vLocal.z*4.0+polar*1.25);
         c+=vec3(.120,.270,.278)*axisRidge*(.070+.028*prismSweep);
         c+=vec3(.42,.47,.44)*axisRidge*softboxB*.055;
@@ -1649,7 +1655,7 @@
           frontDepth;
         float foldRidge=pow(abs(cos(polar*2.0)),3.5)*foldEnvelope;
         float foldValley=pow(abs(sin(polar*2.0)),3.5)*foldEnvelope;
-        float foldSecondary=pow(abs(cos(polar*4.0)),4.0)*foldEnvelope;
+        float foldSecondary=fxPower4(abs(cos(polar*4.0)))*foldEnvelope;
         c+=vec3(.30,.46,.45)*foldRidge*${mobile?'.044':'.055'};
         c+=vec3(.055,.205,.220)*foldSecondary*${mobile?'.016':'.024'};
         c*=1.0-${mobile?'.027':'.037'}*foldValley;
@@ -1695,7 +1701,7 @@
         float cellVein=sin(oq.x*23.0+sin(oq.y*19.0+uTime*.25)*2.1);
         float cellCross=sin(oq.y*31.0-oq.x*8.0+uTime*.18);
         float cellNoise=(cellVein*.55+cellCross*.45)*.5+.5;
-        float livingInterior=exp(-pow(od/.73,4.0))*front;
+        float livingInterior=exp(-fxPower4(od/.73))*front;
         float coralSite=pow(max(0.0,cellNoise-.67)*3.0,2.6);
         float aquaSites=pow(max(0.0,cellNoise-.33),3.1);
         c+=vec3(.05,.49,.51)*livingInterior*aquaSites*(.16+.10*uEnergy);
@@ -1707,8 +1713,8 @@
         float metalRim=((1.0-facing)*(1.0-facing));
         // R2141: real polished titanium response (broad key, cool rim,
         // narrow specular lines) rather than flat gray plastic channels.
-        float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0);
-        float metalSideSpec=pow(max(dot(n,normalize(sideDir+view)),0.0),34.0);
+        float metalSpec=fxPower22(max(dot(n,normalize(keyDir+view)),0.0));
+        float metalSideSpec=fxPower34(max(dot(n,normalize(sideDir+view)),0.0));
         // R2153: deeper smoked-metal ground with narrower studio glints.
         // The R2151 grey-white plate wash obscured sculptural metal depth.
         vec3 titanium=vec3(.052,.072,.078);
