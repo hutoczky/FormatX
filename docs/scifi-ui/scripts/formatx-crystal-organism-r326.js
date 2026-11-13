@@ -420,15 +420,21 @@
       });
     }
 
+    /* R2214: memoize the same analytical surface vertices once per grid
+       coordinate. Adjacent cells previously recalculated the identical
+       trig/power functions four times. Geometry, UV seams, facet randomness,
+       topology and GPU buffer contents remain exactly the same. */
+    const bodyLattice=Array.from({length:latitudeSegments+1},(_,lat)=>
+      Array.from({length:longitudeSegments+1},(_,lon)=>vertex(lat,lon)));
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
     for(let lat=0;lat<latitudeSegments;lat+=1){
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=bodyLattice[lat][lon];
+        const b=bodyLattice[lat][lon+1];
+        const c=bodyLattice[lat+1][lon];
+        const d=bodyLattice[lat+1][lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
