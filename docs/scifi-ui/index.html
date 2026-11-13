@@ -55,6 +55,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <!-- production-r2039-phone-critical-css-preload: same hrefs as actual stylesheets; keep cascade unchanged -->
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="./styles/formatx-menu-owner-r1956.css?v=20261013-r2056-critical-single-proof">
+  <!-- R2237: download the existing desktop reference geometry early without
+       changing its original blocking stylesheet/media/cascade activation. -->
+  <link rel="preload" as="style" data-fx-r2237-reference-preload="true" fetchpriority="high" media="(min-width: 901px)" href="./styles/formatx-reference-production-r244.css?v=20261007-r1972-first-frame-stability">
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261010-r2039-verified-accessibility-firstpaint">
   <link rel="preload" as="style" fetchpriority="high" media="all" href="./styles/formatx-mobile-brand-dedupe-r1952.css?v=20261026-r2197-one-fx-logo-desktop-mobile">
   <meta name="robots" content="index,follow,max-image-preview:large">
