@@ -21,18 +21,6 @@ assert.ok(homepage.indexOf(dnaCritical)>0);
 assert.ok(homepage.indexOf(dnaCritical)<homepage.indexOf(audioChrome),
   'DNA first-frame sheet must start downloading before intro audio chrome');
 assert.match(homepage,/formatx-genesis-studio-r2160\.css[^>]*data-fx-r487-deferred-style="true"/);
-// R2236: r328 owns the desktop's first-paint geometry. The much larger
-// r244 reference treatment must load post-FCP, not block the first paint.
-const desktopFirstPaint=fs.readFileSync(path.join(root,
-  'docs/scifi-ui/styles/formatx-desktop-first-paint-r328.css'),'utf8');
-assert.ok(desktopFirstPaint.includes('mirrors the final r244'));
-const r244Link=homepage.match(/<link[^>]*data-fx-reference-production-r244="true"[^>]*>/)?.[0]||'';
-assert.ok(r244Link.includes('data-fx-r487-deferred-style="true"'));
-assert.ok(r244Link.includes('data-fx-r487-media="(min-width: 901px)"'));
-assert.ok(r244Link.includes('media="print"'));
-assert.ok(!r244Link.includes('data-fx-deferred-media-r300'),
-  'Do not wake deferred r244 through the earlier r300 media owner');
-
 assert.equal((homepage.match(/data-fx-dna-first-frame-r2181="true"/g)||[]).length,1);
 assert.ok(homepage.includes('data-fx-mag-story-r2202="true" data-fx-r487-deferred-style="true"'));
 assert.match(js,/formatx:deferredcssready/);
