@@ -269,10 +269,12 @@ async function evaluate(viewport,isMobile,browser){
         return {open:p?.dataset.fxMagOpen,expanded:trigger?.getAttribute('aria-expanded'),
           originalVisible:native.some(n=>getComputedStyle(n).display!=='none'&&!n.inert),
           canvases:document.querySelectorAll('#hero canvas.fx-crystal-organism-r326-canvas').length,
-          camera:document.documentElement.dataset.fxCoreRotationSource||''};
+          coreAction:document.documentElement.dataset.fxMagDisclosureCoreAction||'',
+          coreOpened:document.documentElement.dataset.fxMagDisclosureCoreOpened||''};
       });
       assert.ok(opened.open==='true'&&opened.expanded==='true'&&opened.originalVisible
-        &&opened.canvases===1&&opened.camera==='mag-chapter-open-r2240',
+        &&opened.canvases===1&&opened.coreAction==='native-r326-rotateby'
+        &&opened.coreOpened===scene.key,
         'R2240 original folio did not unseal from the physical MAG: '+JSON.stringify({scene:scene.key,opened}));
       console.log('MAG_R2240_TITLE_ONLY_REVEAL_PASS',JSON.stringify({scene:scene.key,closed,opened}));
 
