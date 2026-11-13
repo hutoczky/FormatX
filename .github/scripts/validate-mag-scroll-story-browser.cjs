@@ -45,11 +45,14 @@ const profiles = [
         assert.equal(initial.links,7,profile.name+': chapter rail missing');
         assert.ok(Number.isFinite(initial.progress));
         for(const sectionId of ['experience','capabilities','pricing']){
-          await page.evaluate(id=>{
-            const element=document.getElementById(id);
-            if(!element)throw new Error('Missing section '+id);
-            element.scrollIntoView({behavior:'instant',block:'center'});
-          },sectionId);
+          // R2227: exercise the REAL user-facing native anchor link rather
+          // than an artificial scrollIntoView. Native fragment navigation
+          // retains the requested chapter during async content reflow and
+          // validates the public 44px MAG rail, not just DOM coordinates.
+          await page.locator('.fx-mag-story-rail a[data-chapter="'+sectionId+'"]')
+            .click({timeout:20000});
+          await page.waitForFunction(id=>location.hash==='#'+id,
+            sectionId,{polling:200,timeout:7000});
           await page.waitForFunction(id=>
             document.documentElement.dataset.fxMagStoryChapter===id,
             sectionId,{polling:200,timeout:20000}).catch(async error=>{
