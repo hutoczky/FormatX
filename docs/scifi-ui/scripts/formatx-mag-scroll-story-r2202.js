@@ -81,13 +81,17 @@
     // R326 rotateBy accepts RADIANS, not degrees. A restrained 0.65-rad
     // pitch and 1.5 yaw revolutions over the entire scroll are film-like,
     // rather than snapping to the pitch limit after one normal wheel tick.
-    const difference = clamp(progress - lastCoreTurn, -.014, .014);
-    lastCoreTurn = progress;
+    // Follow the entire scroll displacement, not just the first clipped
+    // delta after anchor jumps. This makes the camera reversible and path-
+    // independent while keeping each GPU rotation increment below 0.076 rad.
+    const difference = clamp(progress - lastCoreTurn, -.008, .008);
+    lastCoreTurn = clamp(lastCoreTurn + difference);
     if (Math.abs(difference) > .00008) {
       core.rotateBy(difference * .65, difference * (-Math.PI * 3), 'mag-scroll-r2217');
       const mode=archiveActive?'archive':'hero';
       if (root.dataset.fxMagStoryCoreMode!==mode) root.dataset.fxMagStoryCoreMode=mode;
     }
+    if (Math.abs(progress-lastCoreTurn)>.001) request();
     if (sceneIndex !== lastCoreScene) {
       lastCoreScene = sceneIndex;
       core.requestRender?.();
@@ -117,15 +121,20 @@
     const last = bounds[bounds.length-1];
     const center = vh * .52;
     let nearest = 0, closest = Infinity;
-    const updates = bounds.map((r,index) => {
+    const animateChapters = !reduced.matches && innerWidth > 900;
+    const updates = [];
+    bounds.forEach((r,index) => {
       const distance = center < r.top ? r.top-center : center > r.bottom ? center-r.bottom : 0;
       if (distance < closest) {closest=distance;nearest=index;}
+      // Mobile rail selection and real WebGL continue to work, but mobile
+      // content does not consume these desktop-only animation variables.
+      if (!animateChapters) return;
       const enter = clamp((vh-r.top)/(vh*.85));
       const exit = clamp(r.bottom/(vh*.65));
-      const visibility = reduced.matches ? 1 : Math.min(enter,exit);
-      return {
+      const visibility = Math.min(enter,exit);
+      updates[index] = {
         visibility:visibility.toFixed(3),
-        offset:(reduced.matches ? 0 : (1-visibility)*22).toFixed(1)+'px'
+        offset:((1-visibility)*22).toFixed(1)+'px'
       };
     });
     const total = Math.max(1,(last.bottom-first.top)-vh);
@@ -138,7 +147,7 @@
     // Geometry WRITE pass: no subsequent getBoundingClientRect in this frame.
     const hideRail = !styleReady() || Boolean(footerRect && footerRect.top < vh && footerRect.bottom > 0);
     if (rail.hidden !== hideRail) rail.hidden = hideRail;
-    updates.forEach((update,index) => {
+    if (animateChapters) updates.forEach((update,index) => {
       const node = chapters[index].element;
       const prior = lastChapterStyles[index];
       if (prior.visibility!==update.visibility) {
@@ -206,6 +215,7 @@
   window.__FORMATX_MAG_STORY_STATUS__ = () => ({
     version:'r2202',active:chapters[active]?.id||null,progress:eased,
     chapters:chapters.length,reducedMotion:reduced.matches,links:links.length,
-    coreConnected:Boolean(coreAvailable()),coreScrollOwner:'native-r326-api'
+    coreConnected:Boolean(coreAvailable()),coreScrollOwner:'native-r326-api',
+    coreProgress:lastCoreTurn,coreMode:lastCoreArchive?'archive':'hero'
   });
 })();
