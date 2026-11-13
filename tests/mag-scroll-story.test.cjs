@@ -51,7 +51,7 @@ assert.match(cinematicJourney,/if \(!scrollOwnsCamera\)\s*api\.rotateBy\?/);
 assert.match(cinematicJourney,/api\.surfacePulse\?\.\('r536-'/);
 assert.match(js,/const mode=archiveActive\?'archive':'hero';/);
 assert.ok(js.indexOf("const mode=archiveActive?'archive':'hero';")
-   < js.indexOf('const difference = clamp(progress - lastCoreTurn'),
+   < js.indexOf('const difference=clamp(remaining*.35'),
    'Continuous MAG scroll owner must be published before any settled scene rotation');
 
 assert.match(js,/lastCoreTurn = clamp\(lastCoreTurn \+ difference\)/);
