@@ -88,6 +88,13 @@ assert.ok(referenceFilm.includes("let lastTelemetryAt=-Infinity;") &&
   referenceFilm.includes("if(time-lastTelemetryAt>=250)"),
   'Fallback film telemetry should not mutate document attributes every drawn frame');
 
+// R2231: the optional native-HTML mode must survive late WebGL readiness.
+const archiveRuntime=fs.readFileSync(
+  path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'),'utf8');
+const archiveConnect=archiveRuntime.split('function connect(){')[1]
+  ?.split('function refresh(')[0]||'';
+assert.ok(archiveConnect.includes('requestedHtmlFallback'),
+  'archive=off may not re-enable the 8-folio renderer on real3dready');
 const cinematicJourney=fs.readFileSync(
   path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
 assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
