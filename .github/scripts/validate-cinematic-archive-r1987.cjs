@@ -241,6 +241,40 @@ async function evaluate(viewport,isMobile,browser){
     },selector);
     console.log('ARCHIVE_SCENE_PROBE',JSON.stringify({expected:scene.key,actual:state.scene,active:state.active,progress:state.progress,postRefresh,diagnostics}));
     if(state.scene===scene.key&&state.active){
+      // R2240: the user first sees only the bold MAG archive title.
+      // The ORIGINAL functional folio is inaccessible until a real click
+      // opens its two physical iris leaves and the shared R326 scene.
+      await page.waitForFunction(()=>document.documentElement.dataset.fxMagDisclosure==='ready',
+        null,{timeout:15000});
+      const revealSelector='main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030 > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger';
+      const closed=await page.evaluate(()=>{
+        const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+        const trigger=p?.querySelector(':scope > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+        const native=[...p?.children||[]].filter(n=>!n.classList.contains('fx-mag-disclosure-heading')&&!n.classList.contains('fx-mag-folio-origin-r2041'));
+        const rect=trigger?.getBoundingClientRect();
+        return {ready:document.documentElement.dataset.fxMagDisclosure,open:p?.dataset.fxMagOpen,
+          expanded:trigger?.getAttribute('aria-expanded'),hasButton:!!trigger,
+          visibleButton:!!rect&&rect.width>=100&&rect.height>=44,
+          collapsed:native.length>0&&native.every(n=>getComputedStyle(n).display==='none'&&n.inert),
+          canvases:document.querySelectorAll('#hero canvas.fx-crystal-organism-r326-canvas').length};
+      });
+      assert.ok(closed.ready==='ready'&&closed.open==='false'&&closed.expanded==='false'
+        &&closed.visibleButton&&closed.collapsed&&closed.canvases===1,
+        'R2240 title-only chapter failed before user click: '+JSON.stringify({scene:scene.key,closed}));
+      await page.locator(revealSelector).click({timeout:20000});
+      const opened=await page.evaluate(()=>{
+        const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+        const trigger=p?.querySelector(':scope > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+        const native=[...p?.children||[]].filter(n=>!n.classList.contains('fx-mag-disclosure-heading')&&!n.classList.contains('fx-mag-folio-origin-r2041'));
+        return {open:p?.dataset.fxMagOpen,expanded:trigger?.getAttribute('aria-expanded'),
+          originalVisible:native.some(n=>getComputedStyle(n).display!=='none'&&!n.inert),
+          canvases:document.querySelectorAll('#hero canvas.fx-crystal-organism-r326-canvas').length,
+          camera:document.documentElement.dataset.fxCoreRotationSource||''};
+      });
+      assert.ok(opened.open==='true'&&opened.expanded==='true'&&opened.originalVisible
+        &&opened.canvases===1&&opened.camera==='mag-chapter-open-r2240',
+        'R2240 original folio did not unseal from the physical MAG: '+JSON.stringify({scene:scene.key,opened}));
+      console.log('MAG_R2240_TITLE_ONLY_REVEAL_PASS',JSON.stringify({scene:scene.key,closed,opened}));
 
       // R2026: a status label alone cannot satisfy the requested cinematic
       // archival handoff. The active folio must use actual section copy, and
@@ -397,6 +431,15 @@ async function evaluate(viewport,isMobile,browser){
       assert.ok(chapterHandoff.markerVisible&&chapterHandoff.marker.startsWith('MAG // ')
         &&chapterHandoff.marker.includes('/ 08'),
         'The genuine folio must identify its source without a second overlay: '+JSON.stringify(chapterHandoff));
+      // An explicit second click closes the current paper. The following
+      // native scroll chapter must likewise start with just its bold title.
+      await page.locator(revealSelector).click({timeout:20000});
+      const shut=await page.evaluate(()=>{
+        const p=document.querySelector('main#main-content > [data-fx-cinema-host-active="true"] > .fx-archive-cinema-folio-r2030');
+        const a=p?.querySelector(':scope > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+        return p?.dataset.fxMagOpen==='false'&&a?.getAttribute('aria-expanded')==='false';
+      });
+      assert.ok(shut,'R2240 native MAG paper did not close on second click: '+scene.key);
       passed++;
       coverage.push({key:scene.key,progress:state.progress,frames:state.frames});
       const inside=await page.locator(selector).first().evaluate(n=>{
