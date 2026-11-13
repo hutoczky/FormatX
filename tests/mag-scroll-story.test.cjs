@@ -53,8 +53,8 @@ assert.equal(coreSyntax.status,0,coreSyntax.stderr);
 const canonicalShader=coreSource.split('const constrainedFragmentSource = `')[1]
   ?.split('const softwareFragmentSource = `')[0]||'';
 assert.ok(canonicalShader.length>10000,'Real photographic MAG shader was replaced');
-assert.doesNotMatch(canonicalShader,/pow\\([^;]*,2\\.0\\)/,
-  'Canonical shader still uses slow general power for a mathematical square');
+assert.ok(!canonicalShader.includes(',2.0)'),
+  'Canonical shader still uses general pow() for a mathematical square');
 assert.match(coreSource,/R2223: exact algebraic squares/);
 assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
 assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
