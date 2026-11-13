@@ -435,7 +435,11 @@ async function evaluate(viewport,isMobile,browser){
     const state=window.__FORMATX_MAG_STORY_STATUS__?.();
     return state?.coreMode==='archive'
       && Math.abs(state.progress-state.coreProgress)<.025;
-  },null,{timeout:12000});
+  },null,{timeout:12000}).catch(async error=>{
+    const last=await page.evaluate(()=>window.__FORMATX_MAG_STORY_STATUS__?.());
+    throw new Error('MAG camera did not converge: '+JSON.stringify(last)
+      +' / '+String(error.message||error));
+  });
   const caughtUp=await page.evaluate(()=>window.__FORMATX_MAG_STORY_STATUS__());
   assert.ok(Math.abs(caughtUp.progress-caughtUp.coreProgress)<.025,
     'Real MAG camera failed to track final 3D scroll position: '+JSON.stringify(caughtUp));
