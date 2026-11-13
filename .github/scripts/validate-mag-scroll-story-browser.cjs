@@ -155,10 +155,26 @@ const profiles = [
             }
           }
         }
-        await page.evaluate(()=>document.documentElement.lang='en');
+        // R2235: validate the actual HU/EN user control and its pub/sub
+        // translation workflow, not an isolated html.lang attribute mutation
+        // which the live language owner may legitimately restore.
+        await page.locator('.fx-language-toggle').click({timeout:15000});
         await page.waitForFunction(()=>
+          document.documentElement.lang==='en' &&
           document.querySelector('.fx-mag-story-rail a[data-chapter="experience"]')
-            ?.getAttribute('aria-label')==='NERVOUS SYSTEM',null,{timeout:5000});
+            ?.getAttribute('aria-label')==='NERVOUS SYSTEM',
+          null,{polling:200,timeout:12000}).catch(async error=>{
+            const state=await page.evaluate(()=>({
+              lang:document.documentElement.lang,
+              button:document.querySelector('.fx-language-toggle')?.textContent,
+              label:document.querySelector('.fx-mag-story-rail a[data-chapter="experience"]')
+                ?.getAttribute('aria-label'),
+              owner:document.documentElement.dataset.fxSingleLanguageToggle,
+              search:location.search
+            }));
+            throw new Error(profile.name+': actual language button did not translate MAG rail: '+
+              JSON.stringify(state)+' / '+String(error.message||error));
+          });
         assert.deepEqual(errors,[],profile.name+': uncaught browser errors');
         console.log('MAG_SCROLL_BROWSER_PASS',JSON.stringify({profile:profile.name,initial,errors}));
       } finally {await context.close();}
