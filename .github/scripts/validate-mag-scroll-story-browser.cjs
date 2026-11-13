@@ -158,6 +158,15 @@ const profiles = [
         // R2235: validate the actual HU/EN user control and its pub/sub
         // translation workflow, not an isolated html.lang attribute mutation
         // which the live language owner may legitimately restore.
+        // The actual header language control is in normal document chrome,
+        // not a fixed overlay. Return to the top as a real visitor would
+        // before exercising it; Playwright cannot click an offscreen header.
+        await page.evaluate(()=>scrollTo({top:0,left:0,behavior:'instant'}));
+        await page.waitForFunction(()=>{
+          const button=document.querySelector('.fx-language-toggle');
+          const r=button?.getBoundingClientRect();
+          return !!r&&r.width>0&&r.height>0&&r.top>=-2&&r.bottom<=innerHeight+2;
+        },null,{polling:200,timeout:12000});
         await page.locator('.fx-language-toggle').click({timeout:15000});
         await page.waitForFunction(()=>
           document.documentElement.lang==='en' &&
