@@ -39,6 +39,10 @@
   const english=()=>root.lang.toLowerCase().startsWith('en');
   let lastCinemaChapter='';
   let ready=false;
+  // R2243: legacy organism-interface moves original section nodes into its
+  // canonical console at DOMContentLoaded. Never insert a MAG trigger before
+  // that move, or the console would carry away our title button too.
+  let domReady=document.readyState==='complete';
   function childrenOf(panel){
     return Array.from(panel.children).filter(node=>
       !node.classList.contains('fx-mag-disclosure-heading')
@@ -145,6 +149,7 @@
     if(catalogue)ensure(catalogue,labels['live-os-overview'],'live-os-overview');
   }
   function refresh(){
+    if(!domReady)return;
     if(archiveReady())buildArchive();
     else if(forcedHtmlFallback||
       ['reduced-html','audit-html','isolated-mag-test','no-scenes'].includes(root.dataset.fxArchiveExperience))
@@ -169,6 +174,10 @@
   addEventListener('formatx:real3dready',refresh,{passive:true});
   addEventListener('formatx:livingready',refresh,{passive:true});
   style?.addEventListener('load',refresh,{passive:true});
+  if(!domReady)document.addEventListener('DOMContentLoaded',()=>{
+    domReady=true;
+    refresh();
+  },{once:true});
   refresh();
   window.__FORMATX_MAG_DISCLOSURE_STATUS__=()=>({
     version:'r2240',ready,panels:entries.size,
