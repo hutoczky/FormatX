@@ -412,6 +412,19 @@ async function evaluate(viewport,isMobile,browser){
     'Archive animation lost the canonical native GPU canvas');
   console.log('MAG_SINGLE_CORE_FULLPAGE_SCROLL_PASS',
     JSON.stringify({mode:storyCore.mode,source:storyCore.source,dock:storyCore.dock}));
+  // R2219: native scroll jumps must arrive at the same 3D orientation as
+  // continuous wheel scrolling. Let the bounded renderer consume its
+  // outstanding deltas, rather than accepting a one-frame fake rotation.
+  await page.waitForFunction(()=>{
+    const state=window.__FORMATX_MAG_STORY_STATUS__?.();
+    return state?.coreMode==='archive'
+      && Math.abs(state.progress-state.coreProgress)<.025;
+  },null,{timeout:12000});
+  const caughtUp=await page.evaluate(()=>window.__FORMATX_MAG_STORY_STATUS__());
+  assert.ok(Math.abs(caughtUp.progress-caughtUp.coreProgress)<.025,
+    'Real MAG camera failed to track final 3D scroll position: '+JSON.stringify(caughtUp));
+  console.log('MAG_ABSOLUTE_SCROLL_CATCHUP_PASS',
+    JSON.stringify({progress:caughtUp.progress,coreProgress:caughtUp.coreProgress}));
 
   const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
   const selector=/^[#.]/.test(one.id)?one.id:'#'+one.id;
