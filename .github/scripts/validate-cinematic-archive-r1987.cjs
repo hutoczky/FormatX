@@ -384,6 +384,31 @@ async function evaluate(viewport,isMobile,browser){
     }
   }
   assert.equal(passed,scenes.length,'Every real archive scene must activate: '+JSON.stringify({passed,total:scenes.length,coverage}));
+
+  // R2217: archive narrative must rotate the ORIGINAL permanent R326
+  // renderer after the hero has scrolled away. The R1987 renderer already
+  // owns this single WebGL context; a second canvas is never acceptable.
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxMagStoryCoreMode==='archive',
+    null,{timeout:8000});
+  const storyCore=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.fxMagStoryCoreMode,
+    source:document.documentElement.dataset.fxCoreRotationSource,
+    archive:document.documentElement.dataset.fxArchiveCinema,
+    dock:document.documentElement.dataset.fxArchiveDock,
+    realCanvas:window.FormatXLivingCore?.canvas||null
+  }));
+  assert.equal(storyCore.mode,'archive',
+    'MAG scroll controller stopped driving real 3D outside the hero');
+  assert.equal(storyCore.source,'mag-scroll-r2217',
+    'Cinematic world scroll did not rotate the canonical WebGL MAG');
+  assert.equal(storyCore.dock,'active',
+    'MAG is not using the existing single archive GPU');
+  assert.ok(storyCore.realCanvas instanceof Object,
+    'Archive animation lost the canonical native GPU canvas');
+  console.log('MAG_SINGLE_CORE_FULLPAGE_SCROLL_PASS',
+    JSON.stringify({mode:storyCore.mode,source:storyCore.source,dock:storyCore.dock}));
+
   const one=scenes.find(s=>s.key==='capabilities')||scenes[0];
   const selector=/^[#.]/.test(one.id)?one.id:'#'+one.id;
   await page.locator(selector).first().evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
