@@ -44,7 +44,7 @@
   const links = chapters.map(chapter => chapter.link);
   // R2216: keep each chapter's last compositor state.
   // Native scrolling should update CSS only when a visible value changes.
-  const lastChapterStyles = chapters.map(() => ({visibility:null,offset:null,local:null}));
+  const lastChapterStyles = chapters.map(() => ({visibility:null,offset:null}));
   const footer = document.querySelector('footer.site-footer');
   const mobileLayout = matchMedia('(max-width:900px),(pointer:coarse)');
   let scheduled = false;
@@ -111,8 +111,7 @@
       const visibility = reduced.matches ? 1 : Math.min(enter,exit);
       return {
         visibility:visibility.toFixed(3),
-        offset:(reduced.matches ? 0 : (1-visibility)*22).toFixed(1)+'px',
-        local:clamp((center-r.top)/Math.max(1,r.height)).toFixed(3)
+        offset:(reduced.matches ? 0 : (1-visibility)*22).toFixed(1)+'px'
       };
     });
     const total = Math.max(1,(last.bottom-first.top)-vh);
@@ -130,10 +129,6 @@
       if (prior.offset!==update.offset) {
         node.style.setProperty('--fx-mag-story-offset',update.offset);
         prior.offset=update.offset;
-      }
-      if (prior.local!==update.local) {
-        node.style.setProperty('--fx-mag-story-local',update.local);
-        prior.local=update.local;
       }
     });
     driveCore(nearest,target,first);
