@@ -2156,14 +2156,19 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    /* R2215: on genuinely software-rendered WebGL (SwiftShader/llvmpipe),
+       start at a sustainable backing resolution instead of forcing a
+       700k+ pixel first frame through the CPU. The existing frame-pressure
+       governor can raise it later if there is real headroom. Hardware AMD,
+       Adreno and other native GPUs retain their full studio resolution. */
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.80:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
       ? (mobile?1.00:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.70:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
