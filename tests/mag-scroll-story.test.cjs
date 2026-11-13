@@ -20,6 +20,20 @@ const audioChrome='data-fx-genesis-studio-r2160="true"';
 assert.ok(homepage.indexOf(dnaCritical)>0);
 assert.ok(homepage.indexOf(dnaCritical)<homepage.indexOf(audioChrome),
   'DNA first-frame sheet must start downloading before intro audio chrome');
+// R2237: start downloading reference geometry earlier but do NOT defer
+// applying it. The r2236 CSS-defer experiment caused CLS 0.153, so the
+// canonical r244 desktop stylesheet must retain its original media/cascade.
+const originalReferenceCss='./styles/formatx-reference-production-r244.css?v=20261007-r1972-first-frame-stability';
+const referenceTag=homepage.match(/<link[^>]*data-fx-reference-production-r244="true"[^>]*>/)?.[0]||'';
+const preloadTag=homepage.match(/<link[^>]*data-fx-r2237-reference-preload="true"[^>]*>/)?.[0]||'';
+assert.ok(preloadTag.includes('rel="preload"') && preloadTag.includes('as="style"'));
+assert.ok(preloadTag.includes('media="(min-width: 901px)"'));
+assert.ok(preloadTag.includes(originalReferenceCss));
+assert.ok(referenceTag.includes('media="(min-width: 901px)"'));
+assert.ok(referenceTag.includes(originalReferenceCss));
+assert.ok(!referenceTag.includes('data-fx-r487-deferred-style'));
+assert.ok(homepage.indexOf(preloadTag)<homepage.indexOf(referenceTag));
+
 assert.match(homepage,/formatx-genesis-studio-r2160\.css[^>]*data-fx-r487-deferred-style="true"/);
 assert.equal((homepage.match(/data-fx-dna-first-frame-r2181="true"/g)||[]).length,1);
 assert.ok(homepage.includes('data-fx-mag-story-r2202="true" data-fx-r487-deferred-style="true"'));
