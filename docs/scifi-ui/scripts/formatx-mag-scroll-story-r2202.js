@@ -24,6 +24,11 @@
   rail.setAttribute('aria-label', 'MAG történet navigáció');
   rail.innerHTML = '<span class="fx-mag-story-rail__caption" aria-hidden="true">MAG / SYSTEM JOURNEY</span><div class="fx-mag-story-rail__track"></div><span class="fx-mag-story-rail__counter" aria-hidden="true"></span>';
   const track = rail.querySelector('.fx-mag-story-rail__track');
+  // R2234: the site has <base href="/scifi-ui/">, so a bare "#chapter"
+  // resolves against /scifi-ui/ and silently navigates away from
+  // /scifi-ui/index.html?archive=off (losing the live MAG session). Preserve
+  // pathname and all query options while keeping *native* fragment scrolling.
+  const chapterHref=id=>location.pathname+location.search+'#'+id;
   const styleLink = document.querySelector('link[data-fx-mag-story-r2202]');
   const styleReady = () => !styleLink || (styleLink.media!=='print' && Boolean(styleLink.sheet));
   rail.hidden = true;
@@ -31,7 +36,7 @@
     chapter.element.classList.add('fx-mag-story-chapter');
     chapter.element.style.setProperty('--fx-mag-story-index', chapter.num);
     const link = document.createElement('a');
-    link.href = '#' + chapter.id;
+    link.href = chapterHref(chapter.id);
     link.dataset.chapter = chapter.id;
     link.setAttribute('aria-label', chapter.hu);
     link.innerHTML = '<span class="fx-mag-story-rail__dot" aria-hidden="true"></span><span class="fx-mag-story-rail__name"></span>';
@@ -39,6 +44,14 @@
     chapter.link = link;
   });
   document.body.appendChild(rail);
+  // A language switch may update location.search without a reload. Refresh
+  // the clicked URL before its native browser default action, not via a
+  // synthetic scroll or a page-navigation interception.
+  track.addEventListener('click',event=>{
+    const link=event.target instanceof Element
+      ? event.target.closest('a[data-chapter]') : null;
+    if(link)link.setAttribute('href',chapterHref(link.dataset.chapter));
+  },{capture:true});
 
   const clamp = (n,a=0,b=1) => Math.max(a,Math.min(b,n));
   const links = chapters.map(chapter => chapter.link);
@@ -108,6 +121,9 @@
     rail.setAttribute('aria-label',english?'MAG story navigation':'MAG történet navigáció');
     chapters.forEach(chapter => {
       chapter.link.setAttribute('aria-label',english?chapter.en:chapter.hu);
+      const intendedHref=chapterHref(chapter.id);
+      if(chapter.link.getAttribute('href')!==intendedHref)
+        chapter.link.setAttribute('href',intendedHref);
       chapter.link.querySelector('.fx-mag-story-rail__name').textContent = english?chapter.en:chapter.hu;
     });
   }
