@@ -67,6 +67,27 @@ assert.match(coreSource,/render\(now\);burstFrames=Math\.max\(0,burstFrames-1\)/
 
 assert.ok(coreSource.includes('gl.drawArrays(gl.TRIANGLES,0,geometry.count)'), 'Canonical native MAG draw lost');
 assert.ok(coreSource.includes('root.dataset.fxCoreMeshBuildMsR2220'), 'CPU geometry timing lost');
+// R2229–R2230: mobile 2D fallback preserves the real depth-sorted DNA
+// while replacing per-strand Canvas stack mutations with an explicit reset.
+const referenceFilm=fs.readFileSync(
+  path.join(root,'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js'),'utf8');
+const referenceSyntax=spawnSync(process.execPath,['--check',
+  path.join(root,'docs/scifi-ui/scripts/formatx-mag-reference-film-r649.js')],
+  {encoding:'utf8'});
+assert.equal(referenceSyntax.status,0,referenceSyntax.stderr);
+const dnaFallback=referenceFilm.split('function drawDNA(')[1]
+  ?.split('function orbRadius(')[0]||'';
+assert.ok(dnaFallback.includes('elements.sort((a,b)=>a.depth-b.depth)'),
+  'Real double-helix 3D depth sorting lost');
+assert.ok(dnaFallback.includes("ctx.globalAlpha=alpha;") &&
+  dnaFallback.includes('ctx.shadowBlur=0;'),
+  'Fallback DNA must keep identical layered alpha/glow with one canvas state');
+assert.ok(!dnaFallback.includes('for(const item of elements){\\n      ctx.save();'),
+  'Per-DNA-segment Canvas state stack churn returned');
+assert.ok(referenceFilm.includes("let lastTelemetryAt=-Infinity;") &&
+  referenceFilm.includes("if(time-lastTelemetryAt>=250)"),
+  'Fallback film telemetry should not mutate document attributes every drawn frame');
+
 const cinematicJourney=fs.readFileSync(
   path.join(root,'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'),'utf8');
 assert.match(cinematicJourney,/const scrollOwnsCamera = root\.dataset\.fxArchiveDock==='active'/);
