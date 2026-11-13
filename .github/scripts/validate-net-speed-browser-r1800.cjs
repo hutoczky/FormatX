@@ -56,7 +56,17 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   assert.equal(apiRequests,0,'NET test must not generate traffic before explicit user action');
   assert.equal(await page.locator('#network').getAttribute('data-fx-net-state'),'idle');
 
-  await page.locator('#network').scrollIntoViewIfNeeded();
+  // R2240: network diagnostics are deliberately collapsed behind the
+  // prominent HÁLÓZAT chapter title. The real NET action must still work.
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxMagDisclosure==='ready'&&
+    document.querySelector('#network > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger'),
+    null,{timeout:20000});
+  const title=page.locator('#network > .fx-mag-disclosure-heading > .fx-mag-disclosure-trigger');
+  assert.equal(await title.getAttribute('aria-expanded'),'false');
+  assert.equal(apiRequests,0,'A closed MAG chapter must not trigger a network test');
+  await title.click({timeout:15000});
+  assert.equal(await title.getAttribute('aria-expanded'),'true');
   await page.locator('[data-net-start]').click();
 
   await page.waitForFunction(()=>{
