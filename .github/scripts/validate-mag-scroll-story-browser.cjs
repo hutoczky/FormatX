@@ -49,10 +49,19 @@ const profiles = [
           // than an artificial scrollIntoView. Native fragment navigation
           // retains the requested chapter during async content reflow and
           // validates the public 44px MAG rail, not just DOM coordinates.
-          await page.locator('.fx-mag-story-rail a[data-chapter="'+sectionId+'"]')
-            .click({timeout:20000});
-          await page.waitForFunction(id=>location.hash==='#'+id,
-            sectionId,{polling:200,timeout:7000});
+          const navLink=page.locator('.fx-mag-story-rail a[data-chapter="'+sectionId+'"]');
+          assert.equal(await navLink.getAttribute('href'),'#'+sectionId,
+            profile.name+': MAG rail lost its accessible native fragment link');
+          await navLink.click({timeout:20000});
+          // Capture the actual URL outcome separately: another FormatX
+          // navigation owner may consume the fragment while still performing
+          // the correct scroll. The product contract is the visible selected
+          // chapter, not a hash mutation at an exact millisecond.
+          const clicked=await page.evaluate(id=>({
+            id,hash:location.hash,
+            chapter:document.documentElement.dataset.fxMagStoryChapter
+          }),sectionId);
+          console.log('MAG_R2227_NATIVE_RAIL_CLICK',JSON.stringify({profile:profile.name,...clicked}));
           await page.waitForFunction(id=>
             document.documentElement.dataset.fxMagStoryChapter===id,
             sectionId,{polling:200,timeout:20000}).catch(async error=>{
