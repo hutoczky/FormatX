@@ -31,6 +31,12 @@ const profiles = [
         await page.waitForFunction(
           () => typeof window.__FORMATX_MAG_STORY_STATUS__ === 'function',
           null,{timeout:30000});
+        // R2231: explicitly isolated native-HTML chapter proof. The
+        // asynchronous MAG WebGL ready event must NEVER reactivate R1987
+        // after ?archive=off, even once the film has fully completed.
+        await page.waitForFunction(()=>
+          document.documentElement.dataset.fxArchiveExperience==='reduced-html',
+          null,{polling:200,timeout:20000});
         await page.waitForFunction(() => {
           const nav=document.querySelector('.fx-mag-story-rail');
           return nav && !nav.hidden && getComputedStyle(nav).position==='fixed';
@@ -97,6 +103,10 @@ const profiles = [
             return {active:s.active,progress:s.progress};
           });
           assert.equal(state.active,sectionId,profile.name+' scene '+sectionId);
+          const archiveState=await page.evaluate(()=>
+            document.documentElement.dataset.fxArchiveExperience);
+          assert.equal(archiveState,'reduced-html',
+            profile.name+': archive=off was resurrected by late real3dready');
           assert.ok(state.progress>=0&&state.progress<=1,profile.name+' progress');
         }
         // Check all visible touch targets geometrically; do not count
