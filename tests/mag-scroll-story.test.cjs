@@ -35,6 +35,15 @@ for(const id of ['hero','experience','capabilities','pricing','system','network'
   assert.ok(js.includes("['"+id+"'"),id+' timeline chapter missing');
 }
 assert.match(js,/addEventListener\('scroll',request,\{passive:true\}\)/);
+// R2234: <base href="/scifi-ui/"> changes the meaning of "#id" anchors.
+// All seven MAG rail links must be same-document, preserve search params
+// and use the browser's native fragment navigation (no preventDefault).
+assert.ok(homepage.includes('<base href="/scifi-ui/">'));
+assert.ok(js.includes("const chapterHref=id=>location.pathname+location.search+'#'+id;"));
+assert.ok(js.includes("link.href = chapterHref(chapter.id);"));
+assert.ok(js.includes("track.addEventListener('click',event=>{"));
+assert.ok(!js.includes("link.href = '#' + chapter.id;"));
+
 assert.match(js,/requestAnimationFrame\(render\)/);
 assert.match(js,/prefers-reduced-motion: reduce/);
 assert.match(js,/core\.rotateBy\(/);
