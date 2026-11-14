@@ -88,13 +88,7 @@
       button.setAttribute('aria-expanded','false');
       if(previous&&!reduced){
         section.dataset.fxMagPhase='closing';
-        entry.timer=window.setTimeout(()=>{
-          entry.timer=0;
-          section.dataset.fxExpanded='false';
-          section.dataset.fxMagPhase='closed';
-          if(subtitle)subtitle.hidden=true;
-          notify(section,false,origin);
-        },340);
+        entry.timer=window.setTimeout(()=>finishClose(entry,origin),340);
       }else{
         // Explicit, reduced-motion and interrupted closes complete at once.
         // finishClose is idempotent when another chapter already closed it.
@@ -161,7 +155,7 @@
     // aria-controls accepts a whitespace-separated list of IDs. Associate
     // each native content subtree without moving or wrapping it.
     const content=Array.from(section.querySelectorAll('[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route])'))
-      .filter(node=>node instanceof HTMLElement);
+      .filter(node=>node instanceof HTMLElement && !['META','SCRIPT','TEMPLATE'].includes(node.tagName));
     const base=section.id||('chapter-'+registry.size);
     content.forEach((node,index)=>{
       if(!node.id)node.id='fx-mag-body-'+base+'-'+index;
