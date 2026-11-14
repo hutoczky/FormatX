@@ -291,7 +291,7 @@ async function verifyMagChapters(browser, spec) {
     // Real wheel intent activates the chapter layer; scripted scroll must not.
     await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2205' &&
+      document.documentElement.dataset.fxMagChapters === 'r2206' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
