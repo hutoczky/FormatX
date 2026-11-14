@@ -289,7 +289,7 @@ async function verifyMagChapters(browser, spec) {
     });
     await clearIntro(page);
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2201' &&
+      document.documentElement.dataset.fxMagChapters === 'r2203' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
