@@ -288,14 +288,10 @@ async function verifyMagChapters(browser, spec) {
       timeout: 60000
     });
     await clearIntro(page);
-    // A real first scroll now activates the chapter layer; no hero-time mutation.
-    await page.evaluate(() => window.scrollTo({
-      top: Math.max(180, Math.round(innerHeight * .38)),
-      left: 0,
-      behavior: 'instant'
-    }));
+    // Real wheel intent activates the chapter layer; scripted scroll must not.
+    await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2204' &&
+      document.documentElement.dataset.fxMagChapters === 'r2205' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
