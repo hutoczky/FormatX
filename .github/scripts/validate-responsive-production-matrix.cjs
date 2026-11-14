@@ -225,7 +225,7 @@ async function verifyViewport(browser, spec) {
   });
 
   try {
-    await page.goto(`${TEST_URL}${TEST_URL.includes('?') ? '&' : '?'}responsive-matrix=${spec.name}`, {
+    await page.goto(`${TEST_URL}${TEST_URL.includes('?') ? '&' : '?'}responsive-matrix=${spec.name}&magchapters=off`, {
       waitUntil: 'domcontentloaded',
       timeout: 60000,
     });
@@ -263,6 +263,79 @@ async function verifyViewport(browser, spec) {
   }
 }
 
+
+/* R2201: verify the production MAG chapter aperture on desktop and touch.
+   The legacy geometry tests above intentionally use ?magchapters=off. */
+async function verifyMagChapters(browser, spec) {
+  const context = await browser.newContext({
+    viewport: { width: spec.width, height: spec.height },
+    locale: 'hu-HU',
+    deviceScaleFactor: 1,
+    isMobile: spec.mobile,
+    hasTouch: spec.mobile,
+    reducedMotion: 'reduce'
+  });
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('formatx:intro-seen-v1', '1');
+      sessionStorage.setItem('formatx:mag-birth-live-r533-seen', '1');
+    } catch (_) {}
+  });
+  const page = await context.newPage();
+  try {
+    await page.goto(TEST_URL + (TEST_URL.includes('?') ? '&' : '?') + 'mag-aperture-matrix=' + spec.name, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000
+    });
+    await clearIntro(page);
+    await page.waitForFunction(() => (
+      document.documentElement.dataset.fxMagChapters === 'r2201' &&
+      Number(document.documentElement.dataset.fxMagChapterCount) >= 8
+    ), null, {timeout:30000});
+    const baseline = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll('main#main-content > section.fx-mag-chapter'));
+      return {
+        count:rows.length,
+        buttons:rows.filter(s=>!!s.querySelector('h2 .fx-mag-chapter-title')).length,
+        closed:rows.filter(s=>s.dataset.fxExpanded==='false').length,
+        experienceFlow:getComputedStyle(document.querySelector('#experience .flow')).display,
+        chromeWidth:document.documentElement.scrollWidth,
+        viewportWidth:document.documentElement.clientWidth,
+        magCanvas:!!document.querySelector('#hero canvas')
+      };
+    });
+    assert(baseline.count >= 8, spec.name + ': injected/static section folding incomplete '+JSON.stringify(baseline));
+    assert(baseline.buttons === baseline.count, spec.name + ': missing title triggers '+JSON.stringify(baseline));
+    assert(baseline.closed === baseline.count, spec.name + ': section unexpectedly open '+JSON.stringify(baseline));
+    assert(baseline.experienceFlow === 'none', spec.name + ': hidden chapter content visible');
+    assert(baseline.chromeWidth <= baseline.viewportWidth+2, spec.name + ': folded horizontal overflow '+JSON.stringify(baseline));
+    const experience = page.locator('#experience .fx-mag-chapter-title');
+    await experience.scrollIntoViewIfNeeded();
+    await experience.click();
+    await page.waitForFunction(() => document.getElementById('experience').dataset.fxMagPhase === 'open');
+    assert(await experience.getAttribute('aria-expanded') === 'true', spec.name + ': experience button not expanded');
+    assert(await page.locator('#experience .fx-mag-iris i').count() === 4, spec.name + ': four-arm iris missing');
+    const flowVisible=await page.locator('#experience .flow').evaluate(el=>getComputedStyle(el).display!=='none');
+    assert(flowVisible, spec.name + ': expanded chapter body remains hidden');
+    const capabilities=page.locator('#capabilities .fx-mag-chapter-title');
+    await capabilities.scrollIntoViewIfNeeded();
+    await capabilities.click();
+    await page.waitForFunction(() => (
+      document.getElementById('experience').dataset.fxExpanded === 'false' &&
+      document.getElementById('capabilities').dataset.fxExpanded === 'true'
+    ));
+    assert(await experience.getAttribute('aria-expanded')==='false', spec.name+': accordion prior chapter not closed');
+    await capabilities.click();
+    await page.waitForFunction(() => document.getElementById('capabilities').dataset.fxExpanded==='false');
+    assert(await capabilities.getAttribute('aria-expanded')==='false', spec.name+': section does not close');
+    const audit=await page.evaluate(()=>window.FormatXMagChapters?.audit());
+    assert(audit && audit.missingTriggers===0, spec.name+': disconnected headings '+JSON.stringify(audit));
+    console.log('MAG aperture smoke PASS '+spec.name+' '+JSON.stringify({baseline,audit}));
+  } finally {
+    await context.close();
+  }
+}
+
 (async () => {
   const browser = await chromium.launch({
     headless: true,
@@ -275,6 +348,8 @@ async function verifyViewport(browser, spec) {
   });
   try {
     for (const spec of VIEWPORTS) await verifyViewport(browser, spec);
+    await verifyMagChapters(browser,{name:'mobile-touch',width:390,height:844,mobile:true});
+    await verifyMagChapters(browser,{name:'desktop',width:1366,height:768,mobile:false});
   } finally {
     await browser.close();
   }
