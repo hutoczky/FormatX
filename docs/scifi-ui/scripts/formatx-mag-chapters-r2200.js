@@ -4,7 +4,7 @@
 (()=>{'use strict';
   const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2201')return;
+  if(!main || root.dataset.fxMagChapters==='r2201' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -31,6 +31,16 @@
     entry.timer=0;
     const previous=section.dataset.fxExpanded==='true';
     if(expand){
+      // Synchronise with the existing native 3D MAG when its renderer is active.
+      // The section iris remains usable when WebGL is unavailable or offscreen.
+      if(origin==='button'){
+        const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+        try{
+          core?.surfacePulse?.('mag-chapter-'+(section.id||'disclosure'));
+          core?.rotateBy?.(.032,.014,'mag-chapter-aperture');
+          core?.requestRender?.(3);
+        }catch(_){ /* Runtime-independent disclosure. */ }
+      }
       // The MAG reveals one chapter at a time; other headings remain available.
       for(const other of registry.values()){
         if(other!==entry&&other.section.dataset.fxExpanded==='true'){
