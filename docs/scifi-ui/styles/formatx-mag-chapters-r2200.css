@@ -93,6 +93,27 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
   color:#fff!important;
   border-bottom-color:rgba(159,242,255,.85)!important;
 }
+/* A short optical signal travels toward the existing four-arm MAG iris. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title::before{
+  content:"";
+  position:absolute;
+  z-index:1;
+  left:0;bottom:-1px;
+  height:2px;width:100%;
+  background:linear-gradient(90deg,transparent 5%,rgba(144,247,255,.93) 60%,transparent 100%);
+  box-shadow:0 0 18px rgba(92,207,255,.42);
+  transform:scaleX(0);
+  transform-origin:left center;
+  pointer-events:none;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title::before{
+  animation:fx-mag-optical-signal .95s cubic-bezier(.17,.67,.18,1) both;
+}
+@keyframes fx-mag-optical-signal{
+  0%{opacity:0;transform:scaleX(0)}
+  50%{opacity:1;transform:scaleX(.7)}
+  100%{opacity:.38;transform:scaleX(1)}
+}
 html.fx-mag-chapters-ready .fx-mag-title-copy{
   position:relative;
   z-index:2;
@@ -218,8 +239,18 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
    gap:10px!important;
    touch-action:manipulation!important;
  }
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+ [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
+   animation-name:fx-mag-section-unseal-mobile!important;
+   animation-duration:.4s!important;
+ }
+
  html.fx-mag-chapters-ready .fx-mag-iris{width:60px;height:60px}
  html.fx-mag-chapters-ready .fx-mag-chapter-title [data-fx-mag-subtitle]{left:18px;bottom:4px;font-size:.66rem}
+}
+@keyframes fx-mag-section-unseal-mobile{
+  from{opacity:0;transform:translate3d(0,12px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
 }
 @media(prefers-reduced-motion:reduce){
  html.fx-mag-chapters-ready .fx-mag-chapter-title,
