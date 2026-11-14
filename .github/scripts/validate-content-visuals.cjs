@@ -171,7 +171,34 @@ async function assertCommon(page, { mobile = false, reduced = false } = {}) {
       `Mobile hero copy must follow the MAG stage in normal flow: ${JSON.stringify({ copy, heroSpace })}`);
     } // Cinematic mode docks the canonical controls independently of the MAG stage.
   } else if(!archiveActive) {
-    const title = await visibleBox(page, '#hero-title');
+    const title = await visibleBox(page, '#hero-title', false);
+    if(!title){
+      const diagnostics=await page.evaluate(()=>{
+        const root=document.documentElement;
+        const el=document.getElementById('hero-title');
+        const ancestor=[];
+        for(let n=el,k=0;n&&k<7;n=n.parentElement,k++){
+          const cs=getComputedStyle(n),box=n.getBoundingClientRect();
+          ancestor.push({
+            tag:n.tagName,id:n.id,cls:String(n.className).slice(0,95),
+            display:cs.display,visibility:cs.visibility,opacity:cs.opacity,
+            position:cs.position,overflow:cs.overflow,transform:cs.transform,
+            clipPath:cs.clipPath,contentVisibility:cs.contentVisibility,
+            width:box.width,height:box.height,x:box.x,y:box.y
+          });
+        }
+        return {
+          scrollY,anchor:location.hash,rootClasses:root.className,
+          archive:root.dataset.fxArchiveCinema,
+          magChapters:root.dataset.fxMagChapters,
+          intro:root.dataset.fxIntro,
+          cinematic:root.dataset.fxCinematicSceneR536,
+          fxHero:document.getElementById('hero')?.outerHTML.slice(0,150),
+          ancestor
+        };
+      });
+      throw new Error('Hero headline collapsed: '+JSON.stringify(diagnostics));
+    }
     const cta = await visibleBox(page, '#hero-download');
     const copy = await visibleBox(page, '#hero .hero-copy');
     const heroSpace = await visibleBox(page, '#hero .hero-space', false);
