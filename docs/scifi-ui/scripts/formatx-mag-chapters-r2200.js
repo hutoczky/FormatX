@@ -1,57 +1,183 @@
-/* FormatX MAG chapter aperture r2200. No changes to MAG renderer or scroll ownership. */
+/* FormatX MAG chapter aperture — r2201 structural repair.
+   The live Cloudflare worker injects additional sections. Never move original
+   module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
- const root=document.documentElement;
- const main=document.getElementById('main-content');
- if(!main||root.dataset.fxMagChapters==='r2200')return;
- const sections=Array.from(main.querySelectorAll(':scope > section.scene:not(#hero)'));
- let count=0;
- sections.forEach(section=>{
-  const headingId=section.getAttribute('aria-labelledby');
-  const h2=headingId&&document.getElementById(headingId);
-  if(!h2||!section.contains(h2))return;
-  const container=h2.parentElement;
-  if(!container)return;
-  // Title is the only visible chapter entry. All existing nodes remain in the DOM.
-  const button=document.createElement('button');
-  button.type='button';
-  button.className='fx-mag-chapter-title';
-  button.setAttribute('aria-expanded','false');
-  const contentId='fx-mag-panel-'+section.id;
-  button.setAttribute('aria-controls',contentId);
-  while(h2.firstChild)button.appendChild(h2.firstChild);
-  h2.appendChild(button);
-  const panel=document.createElement('div');
-  panel.className='fx-mag-chapter-content';
-  panel.id=contentId;
-  panel.hidden=true;
-  // Move only the chapter body nodes, not its heading or its MAG/3D scene.
-  if(container===section||container.classList.contains('section-heading')||container.classList.contains('fx-net-head')){
-   const siblings=Array.from(section.children).filter(child=>child!==container);
-   // Some sections keep metadata in the heading container.
-   siblings.forEach(el=>panel.appendChild(el));
-   section.appendChild(panel);
-   Array.from(container.children).filter(el=>el!==h2).forEach(el=>{if(el.classList.contains('section-index'))el.hidden=true;});
-  }else{
-   // Resources heading lives inside release-layout. Keep the heading visible;
-   // move the remaining release contents into a sibling fold panel.
-   const outer=container.parentElement;
-   if(!outer)return;
-   Array.from(container.children).filter(el=>el!==h2).forEach(el=>panel.appendChild(el));
-   Array.from(outer.children).filter(el=>el!==container).forEach(el=>panel.appendChild(el));
-   outer.appendChild(panel);
-   Array.from(section.children).filter(el=>el!==outer).forEach(el=>panel.appendChild(el));
+  const root=document.documentElement;
+  const main=document.getElementById('main-content');
+  if(!main || root.dataset.fxMagChapters==='r2201')return;
+  const registry=new Map();
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
+  let pending=0;
+  const findHeading=(section)=>{
+    const id=section.getAttribute('aria-labelledby');
+    let h=id?document.getElementById(id):null;
+    if(!h||h.tagName!=='H2'||!section.contains(h)){
+      h=Array.from(section.querySelectorAll('h2')).find(x=>x.closest('section')===section)||null;
+    }
+    return h;
+  };
+  const notify=(section,open,origin)=>{
+    section.dispatchEvent(new CustomEvent('formatx:mag-chapter-toggle',{
+      bubbles:true,detail:{chapter:section.id||'',open,origin}
+    }));
+    window.dispatchEvent(new CustomEvent('formatx:loopgeometryrefresh',{
+      detail:{source:'mag-chapter-aperture-r2201'}
+    }));
+  };
+  function toggle(entry,expand,origin='button'){
+    const {section,button,subtitle}=entry;
+    clearTimeout(entry.timer);
+    entry.timer=0;
+    const previous=section.dataset.fxExpanded==='true';
+    if(expand){
+      // The MAG reveals one chapter at a time; other headings remain available.
+      for(const other of registry.values()){
+        if(other!==entry&&other.section.dataset.fxExpanded==='true'){
+          toggle(other,false,'another-chapter');
+        }
+      }
+      section.dataset.fxMagPhase='opening';
+      section.dataset.fxExpanded='true';
+      button.setAttribute('aria-expanded','true');
+      if(subtitle)subtitle.hidden=false;
+      requestAnimationFrame(()=>{if(section.isConnected&&section.dataset.fxMagPhase==='opening')section.dataset.fxMagPhase='open';});
+      notify(section,true,origin);
+    }else{
+      button.setAttribute('aria-expanded','false');
+      if(previous&&!reduced){
+        section.dataset.fxMagPhase='closing';
+        entry.timer=window.setTimeout(()=>{
+          entry.timer=0;
+          section.dataset.fxExpanded='false';
+          section.dataset.fxMagPhase='closed';
+          if(subtitle)subtitle.hidden=true;
+          notify(section,false,origin);
+        },340);
+      }else{
+        section.dataset.fxExpanded='false';
+        section.dataset.fxMagPhase='closed';
+        if(subtitle)subtitle.hidden=true;
+        notify(section,false,origin);
+      }
+    }
   }
-  section.classList.add('fx-mag-chapter');
-  section.dataset.fxExpanded='false';
-  button.addEventListener('click',()=>{
-   const expand=section.dataset.fxExpanded!=='true';
-   // Preserve a stable document scroll flow; no scroll locks or synthetic wheel.
-   panel.hidden=!expand;
-   button.setAttribute('aria-expanded',String(expand));
-   section.dataset.fxExpanded=String(expand);
-   section.dispatchEvent(new CustomEvent('formatx:mag-chapter-toggle',{bubbles:true,detail:{chapter:section.id,open:expand}}));
+  function mount(section){
+    if(registry.has(section)||!section.isConnected)return;
+    const heading=findHeading(section);
+    if(!heading)return;
+    // Preserve the original heading for SEO and existing section navigation.
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='fx-mag-chapter-title';
+    button.setAttribute('aria-expanded','false');
+    button.setAttribute('aria-label','Részletek megnyitása');
+    const label=document.createElement('span');
+    label.className='fx-mag-title-copy';
+    // The bilingual and category runtimes write textContent to these attributes.
+    // Move them to the leaf span, never let a translation overwrite the button.
+    for(const attr of ['data-hu','data-en','data-fx-category-title']){
+      if(heading.hasAttribute(attr)){
+        label.setAttribute(attr,heading.getAttribute(attr));
+        heading.removeAttribute(attr);
+      }
+    }
+    let subtitle=null;
+    while(heading.firstChild){
+      const node=heading.firstChild;
+      if(node.nodeType===1&&node.tagName==='EM'&&!subtitle){
+        subtitle=node;
+        subtitle.setAttribute('data-fx-mag-subtitle','');
+        subtitle.hidden=true;
+      }else label.appendChild(node);
+    }
+    if(!label.textContent.trim()&&!label.hasAttribute('data-fx-category-title')){
+      label.textContent='FORMATX';
+    }
+    const iris=document.createElement('span');
+    iris.className='fx-mag-iris';
+    iris.setAttribute('aria-hidden','true');
+    for(let i=0;i<4;i++)iris.appendChild(document.createElement('i'));
+    button.append(label,iris);
+    if(subtitle)button.appendChild(subtitle);
+    heading.appendChild(button);
+    // Mark the unique route from the section to its heading. CSS hides all
+    // siblings, including components injected *after* this script runs.
+    let node=heading;
+    while(node&&node!==main){
+      node.setAttribute('data-fx-mag-route','');
+      if(node===section)break;
+      node=node.parentElement;
+    }
+    section.classList.add('fx-mag-chapter');
+    section.dataset.fxExpanded='false';
+    section.dataset.fxMagPhase='closed';
+    button.removeAttribute('aria-label');
+    const entry={section,button,subtitle,timer:0};
+    registry.set(section,entry);
+    button.addEventListener('click',()=>{
+      const expanding=section.dataset.fxExpanded!=='true'||section.dataset.fxMagPhase==='closing';
+      toggle(entry,expanding);
+    });
+    if('IntersectionObserver' in window&&!reduced){
+      reveal.observe(button);
+    }else button.dataset.fxMagSeen='true';
+  }
+  const reveal=typeof IntersectionObserver!=='undefined'
+    ?new IntersectionObserver(entries=>{
+      for(const item of entries){
+        if(item.isIntersecting){
+          item.target.dataset.fxMagSeen='true';
+          reveal.unobserve(item.target);
+        }
+      }
+    },{threshold:0.12,rootMargin:'0px 0px 80px 0px'}):null;
+  function reconcile(){
+    pending=0;
+    for(const section of main.querySelectorAll(sectionsSelector)){
+      if(section instanceof HTMLElement)mount(section);
+    }
+    for(const [node,entry] of registry){
+      if(!node.isConnected){clearTimeout(entry.timer);registry.delete(node);}
+    }
+    if(registry.size){
+      root.classList.add('fx-mag-chapters-ready');
+      root.dataset.fxMagChapters='r2201';
+      root.dataset.fxMagChapterCount=String(registry.size);
+    }
+  }
+  function schedule(){
+    if(!pending)pending=requestAnimationFrame(reconcile);
+  }
+  function revealAnchor(id){
+    if(!id)return;
+    const target=document.getElementById(id);
+    const section=target?.closest('section.fx-mag-chapter');
+    if(section&&registry.has(section))toggle(registry.get(section),true,'anchor');
+  }
+  reconcile();
+  new MutationObserver(schedule).observe(main,{childList:true});
+  document.addEventListener('click',event=>{
+    const link=event.target instanceof Element?event.target.closest('a[href^="#"]'):null;
+    if(!link)return;
+    const id=decodeURIComponent(link.getAttribute('href').slice(1));
+    revealAnchor(id);
+  },true);
+  window.addEventListener('hashchange',()=>{
+    revealAnchor(decodeURIComponent(location.hash.slice(1)));
   });
-  count++;
- });
- if(count){root.classList.add('fx-mag-chapters-ready');root.dataset.fxMagChapters='r2200';}
+  if(location.hash)revealAnchor(decodeURIComponent(location.hash.slice(1)));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
+  else schedule();
+  window.FormatXMagChapters=Object.freeze({
+    version:'r2201',
+    audit:()=>({
+      total:registry.size,
+      closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
+      open:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='true').map(x=>x.section.id||x.section.className),
+      missingTriggers:Array.from(registry.values()).filter(x=>!x.button.isConnected).length
+    }),
+    open:(id)=>revealAnchor(id),
+    closeAll:()=>{for(const entry of registry.values())toggle(entry,false,'api');}
+  });
 })();
