@@ -14,7 +14,7 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
   padding-block:clamp(30px,6vw,100px)!important;
   margin-block:0!important;
 }
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter [data-fx-mag-route]{
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] [data-fx-mag-route]{
   content-visibility:visible!important;
   contain-intrinsic-size:none!important;
   visibility:visible!important;
