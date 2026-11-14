@@ -1,10 +1,15 @@
-/* FormatX MAG chapter aperture — r2201 structural repair.
+/* FormatX MAG chapter aperture — r2203 nonblocking visual enhancement.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
-  const root=document.documentElement;
+  const style=document.querySelector('link[data-fx-mag-chapters-style]');
+  let initialised=false;
+  function initialize(){
+    if(initialised)return;
+    initialised=true;
+    const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2201' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2203' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -152,7 +157,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2201';
+      root.dataset.fxMagChapters='r2203';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -180,7 +185,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2201',
+    version:'r2203',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
@@ -190,4 +195,27 @@
     open:(id)=>revealAnchor(id),
     closeAll:()=>{for(const entry of registry.values())toggle(entry,false,'api');}
   });
+  }
+  if(!style){initialize();return;}
+  let styleReady=false;
+  const activate=()=>{
+    if(styleReady)return;
+    styleReady=true;
+    style.media='all';
+    initialize();
+  };
+  style.addEventListener('load',activate,{once:true});
+  style.addEventListener('error',()=>{
+    document.documentElement.dataset.fxMagChapters='style-error';
+  },{once:true});
+  const afterFirstPaint=()=>{
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(styleReady)return;
+      style.media='all';
+      if(style.sheet)activate();
+    }));
+  };
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',afterFirstPaint,{once:true});
+  }else afterFirstPaint();
 })();
