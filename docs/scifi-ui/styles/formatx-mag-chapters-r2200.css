@@ -27,6 +27,12 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
   min-height:0!important;
   height:auto!important;
 }
+/* Keep the accessible trigger visible while older reveal owners retime scenes. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+[data-fx-mag-route]:not(section){
+  visibility:visible!important;
+  opacity:1!important;
+}
 /* Release/NET/proof layouts often use multi-column grids. Collapsed headings
    take the full line instead of leaving an empty second column. */
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]
@@ -254,6 +260,7 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
 }
 @media(prefers-reduced-motion:reduce){
  html.fx-mag-chapters-ready .fx-mag-chapter-title,
+ html.fx-mag-chapters-ready .fx-mag-chapter-title::before,
  html.fx-mag-chapters-ready .fx-mag-iris,
  html.fx-mag-chapters-ready .fx-mag-iris i{
    transition:none!important;animation:none!important;
