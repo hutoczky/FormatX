@@ -40,24 +40,24 @@ jobs:
           SOURCE='docs/scifi-ui/index.html'
           JS='docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
           CSS='docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
-          JS_REF="$(grep -oE '/scifi-ui/scripts/formatx-mag-chapters-r2200.js\\?v=[^"]+' "$SOURCE" | head -n1)"
-          CSS_REF="$(grep -oE '/scifi-ui/styles/formatx-mag-chapters-r2200.css\\?v=[^"]+' "$SOURCE" | head -n1)"
+          JS_REF="$(grep -oE '/scifi-ui/scripts/formatx-mag-chapters-r2200.js\?v=[^"]+' "$SOURCE" | head -n1)"
+          CSS_REF="$(grep -oE '/scifi-ui/styles/formatx-mag-chapters-r2200.css\?v=[^"]+' "$SOURCE" | head -n1)"
           test -n "$JS_REF"
           test -n "$CSS_REF"
-          printf 'Expected production assets: %s and %s\\n' "$JS_REF" "$CSS_REF"
+          printf 'Expected production assets: %s and %s\n' "$JS_REF" "$CSS_REF"
           verified=0
           for attempt in $(seq 1 25); do
-            printf 'Live deployment check %s/25\\n' "$attempt"
+            printf 'Live deployment check %s/25\n' "$attempt"
             rm -f live-probe/home.html live-probe/chapter.js live-probe/chapter.css live-probe/net-ping.json
-            if curl -fsSL --connect-timeout 8 --max-time 25 -H 'Cache-Control: no-cache' -o live-probe/home.html "$BASE/scifi-ui/?magprobe=$GITHUB_SHA-$attempt" \\
-              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/chapter.js "$BASE$JS_REF" \\
-              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/chapter.css "$BASE$CSS_REF" \\
-              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/net-ping.json "$BASE/api/net/ping?r=$GITHUB_SHA-$attempt" \\
-              && grep -Fq "$JS_REF" live-probe/home.html \\
-              && grep -Fq "$CSS_REF" live-probe/home.html \\
-              && grep -Fq 'data-fx-mag-chapters-style="true"' live-probe/home.html \\
-              && cmp -s "$JS" live-probe/chapter.js \\
-              && cmp -s "$CSS" live-probe/chapter.css \\
+            if curl -fsSL --connect-timeout 8 --max-time 25 -H 'Cache-Control: no-cache' -o live-probe/home.html "$BASE/scifi-ui/?magprobe=$GITHUB_SHA-$attempt" \
+              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/chapter.js "$BASE$JS_REF" \
+              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/chapter.css "$BASE$CSS_REF" \
+              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/net-ping.json "$BASE/api/net/ping?r=$GITHUB_SHA-$attempt" \
+              && grep -Fq "$JS_REF" live-probe/home.html \
+              && grep -Fq "$CSS_REF" live-probe/home.html \
+              && grep -Fq 'data-fx-mag-chapters-style="true"' live-probe/home.html \
+              && cmp -s "$JS" live-probe/chapter.js \
+              && cmp -s "$CSS" live-probe/chapter.css \
               && grep -Eq '"ok"[[:space:]]*:[[:space:]]*true' live-probe/net-ping.json; then
               verified=1
               break
@@ -94,8 +94,8 @@ jobs:
             state='failure'
             description='Live MAG chapter deployment is missing or mismatched'
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \\
-            -f state="$state" \\
-            -f context='FormatX live production probe' \\
-            -f description="$description" \\
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX live production probe' \
+            -f description="$description" \
             -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
