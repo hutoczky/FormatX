@@ -27,6 +27,16 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
   min-height:0!important;
   height:auto!important;
 }
+/* Release/NET/proof layouts often use multi-column grids. Collapsed headings
+   take the full line instead of leaving an empty second column. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]
+[data-fx-mag-route]:not(section):not(h2){
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+}
 /* Hide every non-heading subtree, even if another runtime injects it later.
    Do not move DOM nodes: payment, NET, proof and Live OS keep their owners. */
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]
