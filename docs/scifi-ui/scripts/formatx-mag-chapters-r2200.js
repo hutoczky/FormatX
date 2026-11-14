@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2204 intent-activated cinematic disclosure.
+/* FormatX MAG chapter aperture — r2205 intent-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2204' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2205' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -157,7 +157,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2204';
+      root.dataset.fxMagChapters='r2205';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -185,7 +185,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2204',
+    version:'r2205',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
