@@ -1,0 +1,91 @@
+/* FormatX MAG chapter aperture r2200 — progressive enhancement only */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter:not(#hero) {
+  min-height: 0 !important;
+  height: auto !important;
+  scroll-snap-align: none !important;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: clamp(20px,3vw,38px) clamp(20px,4vw,48px);
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid rgba(132,214,248,.24);
+  border-radius: 22px;
+  background: radial-gradient(circle at 9% 50%,rgba(79,190,245,.13),transparent 38%),rgba(3,11,23,.72);
+  isolation: isolate;
+  overflow: hidden;
+  transition: border-color .35s ease, box-shadow .35s ease, background .35s ease;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title:is(:hover,:focus-visible),
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title {
+  border-color: rgba(138,226,255,.72);
+  box-shadow: 0 0 30px rgba(41,153,235,.16),inset 0 0 26px rgba(63,159,247,.08);
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title:focus-visible {outline: 3px solid #9defff;outline-offset:4px}
+html.fx-mag-chapters-ready .fx-mag-chapter-title::before {
+  content:"";
+  position:absolute;
+  width: min(18vw,88px);aspect-ratio:1;
+  left: 0;top:50%;
+  border: 2px solid rgba(135,238,255,.74);
+  border-radius: 50%;
+  background: radial-gradient(circle,rgba(171,242,255,.32),rgba(62,154,252,.08) 40%,transparent 72%);
+  box-shadow: 0 0 22px rgba(105,210,255,.4),inset 0 0 18px rgba(90,216,255,.22);
+  transform:translate(-35%,-50%) scale(.62);
+  opacity:.65;
+  pointer-events:none;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title::after {
+  content:"＋";
+  position:absolute;
+  right:clamp(16px,3vw,36px);top:50%;
+  transform:translateY(-50%);
+  font:700 clamp(22px,3vw,36px)/1 system-ui,sans-serif;
+  color:#9feaff;
+  transition:transform .5s ease;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title::after {
+  transform:translateY(-50%) rotate(45deg);
+}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title::before {
+  animation:fx-mag-aperture-pulse .85s ease-out both;
+}
+@keyframes fx-mag-aperture-pulse {
+  0% {transform:translate(-35%,-50%) scale(.6);filter:brightness(2)}
+  65% {transform:translate(-35%,-50%) scale(2.2);opacity:.9}
+  100% {transform:translate(-35%,-50%) scale(1);opacity:.7;filter:brightness(1)}
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title > span,
+html.fx-mag-chapters-ready .fx-mag-chapter-title > em {
+  position:relative;z-index:1;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title {padding-right:clamp(56px,7vw,92px)}
+html.fx-mag-chapters-ready .fx-mag-chapter .fx-mag-chapter-content[hidden] {display:none !important}
+html.fx-mag-chapters-ready .fx-mag-chapter .fx-mag-chapter-content:not([hidden]) {
+  animation:fx-mag-content-unseal .65s cubic-bezier(.2,.7,.2,1) both;
+  transform-origin:top center;
+}
+@keyframes fx-mag-content-unseal {
+  from {opacity:0;clip-path:inset(0 0 100% 0);transform:translateY(-18px) scale(.98);filter:blur(5px)}
+  to {opacity:1;clip-path:inset(0 0 0 0);transform:translateY(0) scale(1);filter:blur(0)}
+}
+html.fx-mag-chapters-ready .fx-mag-chapter {padding-block:clamp(20px,4vw,56px) !important}
+html.fx-mag-chapters-ready .fx-mag-chapter:not([data-fx-expanded="true"]) {margin-block:0 !important}
+html.fx-mag-chapters-ready .fx-mag-chapter h2 {max-width:100%}
+@media(max-width:900px){
+ html.fx-mag-chapters-ready .fx-mag-chapter-title {font-size:clamp(1.25rem,5vw,2rem);padding:22px 58px 22px 25px}
+ html.fx-mag-chapters-ready .fx-mag-chapter .fx-mag-chapter-content:not([hidden]) {animation-duration:.45s}
+}
+@media(prefers-reduced-motion:reduce){
+ html.fx-mag-chapters-ready .fx-mag-chapter-title,
+ html.fx-mag-chapters-ready .fx-mag-chapter-title::after {transition:none!important}
+ html.fx-mag-chapters-ready .fx-mag-chapter .fx-mag-chapter-content:not([hidden]),
+ html.fx-mag-chapters-ready .fx-mag-chapter-title::before {animation:none!important}
+}
