@@ -1,4 +1,4 @@
-/* FORMATX // MAG CHAPTER IRIS — r2201
+/* FORMATX // MAG CHAPTER IRIS — r2207
    Original modular DOM stays intact. No canvas duplication, no scroll hijack. */
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter{
   min-height:0!important;
@@ -211,14 +211,14 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ma
   will-change:auto;
 }
 @keyframes fx-mag-section-unseal{
-  from{opacity:0;transform:translate3d(0,28px,0) scale(.985);filter:blur(8px);clip-path:inset(0 0 35% 0)}
-  to{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0);clip-path:inset(0 0 0 0)}
+  from{opacity:0;transform:translate3d(0,20px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
 }
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="closing"]
 [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
   animation:fx-mag-section-close .34s ease both;
 }
-@keyframes fx-mag-section-close{to{opacity:0;transform:translateY(-16px);filter:blur(4px)}}
+@keyframes fx-mag-section-close{to{opacity:0;transform:translate3d(0,-10px,0)}}
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"] [data-reveal]{
   opacity:1!important;
   visibility:visible!important;
