@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2203 nonblocking visual enhancement.
+/* FormatX MAG chapter aperture — r2204 intent-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2203' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2204' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -157,7 +157,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2203';
+      root.dataset.fxMagChapters='r2204';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -185,7 +185,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2203',
+    version:'r2204',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
@@ -196,26 +196,43 @@
     closeAll:()=>{for(const entry of registry.values())toggle(entry,false,'api');}
   });
   }
-  if(!style){initialize();return;}
-  let styleReady=false;
+  // Do not modify the hero during initial rendering. The visual chapter
+  // system activates on the visitor's first real navigation/scroll intent.
+  // Print-media prefetch keeps CSS outside the render-blocking critical path.
+  if(!style){document.documentElement.dataset.fxMagChapters='style-missing';return;}
+  let requested=false;
+  let loaded=Boolean(style.sheet);
   const activate=()=>{
-    if(styleReady)return;
-    styleReady=true;
+    if(!requested || initialised)return;
+    if(!loaded && !style.sheet)return;
     style.media='all';
     initialize();
   };
-  style.addEventListener('load',activate,{once:true});
+  style.addEventListener('load',()=>{
+    loaded=true;
+    activate();
+  },{once:true});
   style.addEventListener('error',()=>{
     document.documentElement.dataset.fxMagChapters='style-error';
   },{once:true});
-  const afterFirstPaint=()=>{
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      if(styleReady)return;
-      style.media='all';
-      if(style.sheet)activate();
-    }));
+  const request=()=>{
+    if(requested)return;
+    requested=true;
+    style.media='all';
+    activate();
   };
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',afterFirstPaint,{once:true});
-  }else afterFirstPaint();
+  window.addEventListener('wheel',request,{passive:true,once:true});
+  window.addEventListener('scroll',request,{passive:true,once:true});
+  window.addEventListener('touchmove',request,{passive:true,once:true});
+  document.addEventListener('keydown',event=>{
+    if(['ArrowDown','PageDown','End',' ','Spacebar'].includes(event.key))request();
+  },{passive:true});
+  document.addEventListener('click',event=>{
+    const link=event.target instanceof Element?event.target.closest('a[href^="#"]'):null;
+    if(link&&link.getAttribute('href')!=='#top')request();
+  },{capture:true,passive:true});
+  window.addEventListener('hashchange',()=>{
+    if(location.hash&&location.hash!=='#top')request();
+  },{passive:true});
+  if(location.hash&&location.hash!=='#top')request();
 })();
