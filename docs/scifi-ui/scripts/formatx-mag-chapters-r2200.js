@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2206 intent-activated cinematic disclosure.
+/* FormatX MAG chapter aperture — r2207 intent-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2206' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2207' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -30,6 +30,20 @@
       detail:{source:'mag-chapter-aperture-r2201'}
     }));
   };
+  function finishClose(entry,reason='close'){
+    const {section,button,subtitle}=entry;
+    clearTimeout(entry.timer);
+    entry.timer=0;
+    if(section.dataset.fxExpanded==='false')return;
+    if(section.contains(document.activeElement) && document.activeElement!==button){
+      button.focus({preventScroll:true});
+    }
+    section.dataset.fxExpanded='false';
+    section.dataset.fxMagPhase='closed';
+    button.setAttribute('aria-expanded','false');
+    if(subtitle)subtitle.hidden=true;
+    notify(section,false,reason);
+  }
   function toggle(entry,expand,origin='button'){
     const {section,button,subtitle}=entry;
     clearTimeout(entry.timer);
@@ -46,10 +60,22 @@
           core?.requestRender?.(3);
         }catch(_){ /* Runtime-independent disclosure. */ }
       }
-      // The MAG reveals one chapter at a time; other headings remain available.
+      // Keep the tapped heading stationary when a taller earlier chapter
+      // closes. A synchronous collapse prevents 340ms of delayed scroll jump.
+      const before=button.getBoundingClientRect().top;
+      let closedEarlier=false;
       for(const other of registry.values()){
         if(other!==entry&&other.section.dataset.fxExpanded==='true'){
-          toggle(other,false,'another-chapter');
+          if(other.section.compareDocumentPosition(section)&Node.DOCUMENT_POSITION_FOLLOWING){
+            closedEarlier=true;
+          }
+          finishClose(other,'another-chapter');
+        }
+      }
+      if(closedEarlier&&!root.classList.contains('fx-seamless-loop-transfer')){
+        const delta=button.getBoundingClientRect().top-before;
+        if(Number.isFinite(delta)&&Math.abs(delta)>1){
+          window.scrollBy({top:delta,left:0,behavior:'instant'});
         }
       }
       section.dataset.fxMagPhase='opening';
@@ -70,10 +96,14 @@
           notify(section,false,origin);
         },340);
       }else{
-        section.dataset.fxExpanded='false';
-        section.dataset.fxMagPhase='closed';
-        if(subtitle)subtitle.hidden=true;
-        notify(section,false,origin);
+        // Explicit, reduced-motion and interrupted closes complete at once.
+        // finishClose is idempotent when another chapter already closed it.
+        if(previous)finishClose(entry,origin);
+        else{
+          section.dataset.fxExpanded='false';
+          section.dataset.fxMagPhase='closed';
+          if(subtitle)subtitle.hidden=true;
+        }
       }
     }
   }
@@ -128,6 +158,16 @@
     section.dataset.fxExpanded='false';
     section.dataset.fxMagPhase='closed';
     button.removeAttribute('aria-label');
+    // aria-controls accepts a whitespace-separated list of IDs. Associate
+    // each native content subtree without moving or wrapping it.
+    const content=Array.from(section.querySelectorAll('[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route])'))
+      .filter(node=>node instanceof HTMLElement);
+    const base=section.id||('chapter-'+registry.size);
+    content.forEach((node,index)=>{
+      if(!node.id)node.id='fx-mag-body-'+base+'-'+index;
+    });
+    const ids=content.map(node=>node.id);
+    if(ids.length)button.setAttribute('aria-controls',ids.join(' '));
     const entry={section,button,subtitle,timer:0};
     registry.set(section,entry);
     button.addEventListener('click',()=>{
@@ -157,7 +197,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2206';
+      root.dataset.fxMagChapters='r2207';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -185,7 +225,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2206',
+    version:'r2207',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
