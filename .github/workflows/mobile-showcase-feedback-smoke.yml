@@ -16,6 +16,9 @@ on:
       - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/wrangler.jsonc'
       - '.github/scripts/validate-mobile-showcase-feedback.cjs'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
       - '.github/scripts/validate-responsive-production-matrix.cjs'
       - '.github/workflows/mobile-showcase-feedback-smoke.yml'
   push:
@@ -33,6 +36,9 @@ on:
       - 'billing-worker/src/production-content-base.js'
       - 'billing-worker/wrangler.jsonc'
       - '.github/scripts/validate-mobile-showcase-feedback.cjs'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
       - '.github/scripts/validate-responsive-production-matrix.cjs'
       - '.github/workflows/mobile-showcase-feedback-smoke.yml'
   workflow_dispatch:
@@ -59,6 +65,7 @@ jobs:
         run: |
           node --check docs/scifi-ui/scripts/formatx-feedback.js
           node --check .github/scripts/validate-mobile-showcase-feedback.cjs
+          node --check docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js
           node --check .github/scripts/validate-responsive-production-matrix.cjs
           node .github/scripts/validate-mobile-showcase-feedback.cjs
       - name: Validate production Worker bundle
