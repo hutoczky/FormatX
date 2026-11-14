@@ -229,8 +229,9 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
 }
 @media(prefers-reduced-motion:no-preference){
  html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title:not([data-fx-mag-seen="true"]){
-   opacity:0!important;
-   transform:translate3d(0,34px,0)!important;
+   /* No black/empty chapter even if IntersectionObserver is delayed. */
+   opacity:.94!important;
+   transform:translate3d(0,10px,0)!important;
  }
 }
 @media(max-width:900px),(pointer:coarse){
