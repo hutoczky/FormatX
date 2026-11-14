@@ -288,10 +288,23 @@ async function verifyMagChapters(browser, spec) {
       timeout: 60000
     });
     await clearIntro(page);
+    // No heading rewrite or reflow before the visitor's first interaction.
+    const firstPaint=await page.evaluate(()=>{
+      const title=document.getElementById('hero-title');
+      const bounds=title?.getBoundingClientRect();
+      return {
+        mounted:!!document.querySelector('#experience .fx-mag-chapter-title'),
+        heroWidth:bounds?.width||0,
+        heroHeight:bounds?.height||0
+      };
+    });
+    assert(!firstPaint.mounted, spec.name+': chapters activated before interaction '+JSON.stringify(firstPaint));
+    assert(firstPaint.heroWidth>100 && firstPaint.heroHeight>10,
+      spec.name+': hero headline collapsed before interaction '+JSON.stringify(firstPaint));
     // Real wheel intent activates the chapter layer; scripted scroll must not.
     await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2206' &&
+      document.documentElement.dataset.fxMagChapters === 'r2207' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
@@ -316,12 +329,25 @@ async function verifyMagChapters(browser, spec) {
     await experience.click();
     await page.waitForFunction(() => document.getElementById('experience').dataset.fxMagPhase === 'open');
     assert(await experience.getAttribute('aria-expanded') === 'true', spec.name + ': experience button not expanded');
+    const relation=await experience.evaluate(button=>{
+      const ids=(button.getAttribute('aria-controls')||'').split(/\\s+/).filter(Boolean);
+      return {
+        count:ids.length,
+        allWithin:ids.every(id=>document.getElementById(id)?.closest('section')===button.closest('section'))
+      };
+    });
+    assert(relation.count>0 && relation.allWithin,
+      spec.name+': aria-controls missing or points outside section '+JSON.stringify(relation));
     assert(await page.locator('#experience .fx-mag-iris i').count() === 4, spec.name + ': four-arm iris missing');
     const flowVisible=await page.locator('#experience .flow').evaluate(el=>getComputedStyle(el).display!=='none');
     assert(flowVisible, spec.name + ': expanded chapter body remains hidden');
     const capabilities=page.locator('#capabilities .fx-mag-chapter-title');
     await capabilities.scrollIntoViewIfNeeded();
-    await capabilities.click();
+    const beforeY=await capabilities.evaluate(el=>el.getBoundingClientRect().top);
+    if(spec.mobile)await capabilities.tap();else await capabilities.click();
+    const afterY=await capabilities.evaluate(el=>el.getBoundingClientRect().top);
+    assert(Math.abs(afterY-beforeY)<=16,
+      spec.name+': switching accordion chapters jumps the viewport '+JSON.stringify({beforeY,afterY}));
     await page.waitForFunction(() => (
       document.getElementById('experience').dataset.fxExpanded === 'false' &&
       document.getElementById('capabilities').dataset.fxExpanded === 'true'
@@ -330,6 +356,28 @@ async function verifyMagChapters(browser, spec) {
     await capabilities.click();
     await page.waitForFunction(() => document.getElementById('capabilities').dataset.fxExpanded==='false');
     assert(await capabilities.getAttribute('aria-expanded')==='false', spec.name+': section does not close');
+    await capabilities.focus();
+    await capabilities.press('Enter');
+    await page.waitForFunction(() => document.getElementById('capabilities').dataset.fxExpanded==='true');
+    await capabilities.press('Space');
+    await page.waitForFunction(() => document.getElementById('capabilities').dataset.fxExpanded==='false');
+    // New sections injected by first-party modules must share the same rule.
+    await page.evaluate(()=>{
+      const section=document.createElement('section');
+      section.className='scene';
+      section.id='fx-mag-smoke-injected';
+      section.setAttribute('aria-labelledby','fx-mag-smoke-title');
+      section.innerHTML='<header><h2 id="fx-mag-smoke-title">INJECTED TEST</h2></header><div id="fx-mag-smoke-body">Hidden on initial view</div>';
+      document.getElementById('main-content').appendChild(section);
+    });
+    const injected=page.locator('#fx-mag-smoke-injected .fx-mag-chapter-title');
+    await injected.waitFor({state:'attached',timeout:10000});
+    assert(await page.locator('#fx-mag-smoke-body').evaluate(el=>getComputedStyle(el).display)==='none',
+      spec.name+': lazy inserted section content visible while closed');
+    if(spec.mobile)await injected.tap();else await injected.click();
+    await page.waitForFunction(()=>document.getElementById('fx-mag-smoke-injected').dataset.fxExpanded==='true');
+    assert(await page.locator('#fx-mag-smoke-body').evaluate(el=>getComputedStyle(el).display)!=='none',
+      spec.name+': lazy injected section did not open');
     const audit=await page.evaluate(()=>window.FormatXMagChapters?.audit());
     assert(audit && audit.missingTriggers===0, spec.name+': disconnected headings '+JSON.stringify(audit));
     console.log('MAG aperture smoke PASS '+spec.name+' '+JSON.stringify({baseline,audit}));
