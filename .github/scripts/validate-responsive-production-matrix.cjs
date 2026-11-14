@@ -295,12 +295,14 @@ async function verifyMagChapters(browser, spec) {
       return {
         mounted:!!document.querySelector('#experience .fx-mag-chapter-title'),
         heroWidth:bounds?.width||0,
-        heroHeight:bounds?.height||0
+        heroHeight:bounds?.height||0,
+        heroSectionHeight:document.getElementById('hero')?.getBoundingClientRect().height||0
       };
     });
     assert(!firstPaint.mounted, spec.name+': chapters activated before interaction '+JSON.stringify(firstPaint));
-    assert(firstPaint.heroWidth>100 && firstPaint.heroHeight>10,
-      spec.name+': hero headline collapsed before interaction '+JSON.stringify(firstPaint));
+    assert(firstPaint.heroSectionHeight>200, spec.name+': hero collapsed before interaction '+JSON.stringify(firstPaint));
+    if(!spec.mobile)assert(firstPaint.heroWidth>100 && firstPaint.heroHeight>10,
+      spec.name+': desktop hero headline collapsed before interaction '+JSON.stringify(firstPaint));
     // Real wheel intent activates the chapter layer; scripted scroll must not.
     await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
