@@ -222,7 +222,11 @@
     activate();
   };
   window.addEventListener('wheel',request,{passive:true,once:true});
-  window.addEventListener('scroll',request,{passive:true,once:true});
+  // A script-triggered scroll (intro/loop geometry) is NOT visitor intent.
+  // Mouse scrollbar dragging is supported without reacting to autoplay resets.
+  window.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='mouse'&&event.clientX>=document.documentElement.clientWidth-20)request();
+  },{passive:true});
   window.addEventListener('touchmove',request,{passive:true,once:true});
   document.addEventListener('keydown',event=>{
     if(['ArrowDown','PageDown','End',' ','Spacebar'].includes(event.key))request();
