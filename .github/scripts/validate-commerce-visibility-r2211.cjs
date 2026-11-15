@@ -70,6 +70,15 @@ async function observe(page){
       primaryCheckout:visible(section?.querySelector('#preview-checkout-link')),
       primaryHref:section?.querySelector('#preview-checkout-link')?.getAttribute('href')||'',
       qr:visible(section?.querySelector('#formatx-plan-qr-dock')),
+      salesStatus:(()=>{
+        const badge=section?.querySelector('#formatx-sales-readiness');
+        return {
+          state:badge?.dataset.fxSalesState||'missing',
+          visible:visible(badge),
+          text:badge?.textContent.trim()||'',
+          liveRole:badge?.getAttribute('role')||''
+        };
+      })(),
       horizontalOverflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-
         document.documentElement.clientWidth,
       horizontalPagePan:(()=>{
@@ -142,7 +151,16 @@ async function runCase(browser,spec){
       }));
       await page.waitForTimeout(650);
     }
+    await page.waitForFunction(()=>{
+      const node=document.getElementById('formatx-sales-readiness');
+      return node&&node.dataset.fxSalesState!=='checking'&&
+        node.dataset.fxSalesState!=='undefined';
+    },null,{timeout:15000});
     const state=await observe(page);
+    assert(['blocked','ready'].includes(state.salesStatus.state)&&
+      state.salesStatus.visible&&state.salesStatus.text.length>28&&
+      state.salesStatus.liveRole==='status',
+      spec.name+' missing verified public sales status: '+JSON.stringify(state.salesStatus));
     assert.equal(state.chapterOpen,'true',spec.name+' pricing is closed: '+JSON.stringify(state));
     assert.equal(state.commerceFlag,'true',spec.name+' pricing flag missing');
     assert(state.chapterVisible,spec.name+' section invisible: '+JSON.stringify(state));
