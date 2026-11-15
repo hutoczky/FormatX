@@ -1,4 +1,4 @@
-/* FORMATX // MAG CHAPTER IRIS — r2209
+/* FORMATX // MAG CHAPTER IRIS — r2210
    Original modular DOM stays intact. No canvas duplication, no scroll hijack. */
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter{
   min-height:0!important;
@@ -313,4 +313,50 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
  html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
    animation:none!important;
  }
+}
+
+
+/* R2210 COMMERCE SAFETY — pricing is never an accordion payload.
+   Three plan cards, the payment console and QR access MUST remain visible.
+   This is intentionally more specific than the chapter-closure selectors. */
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]{
+  min-height:max-content!important;
+  height:auto!important;
+  overflow:visible!important;
+  visibility:visible!important;
+  opacity:1!important;
+  content-visibility:visible!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .pricing,
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .payment{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+  content-visibility:visible!important;
+  contain:none!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > #formatx-plan-qr-dock{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+  content-visibility:visible!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+:is(.price-card,.payment-console,.fx-plan-qr-card,#preview-checkout-link,.price-card > a){
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+:is(.price-card,.payment-console,.payment,.fx-plan-qr-card){
+  animation:none!important;
+}
+@media(max-width:900px){
+  html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .pricing,
+  html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .payment{
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;
+  }
 }
