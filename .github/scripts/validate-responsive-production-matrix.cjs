@@ -1,6 +1,8 @@
 'use strict';
 
 const { chromium } = require('playwright');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const TEST_URL = process.env.FORMATX_TEST_URL || 'https://www.formatxsuite.com/';
 const VIEWPORTS = [
@@ -318,14 +320,34 @@ async function verifyMagChapters(browser, spec) {
         experienceFlow:getComputedStyle(document.querySelector('#experience .flow')).display,
         chromeWidth:document.documentElement.scrollWidth,
         viewportWidth:document.documentElement.clientWidth,
-        magCanvas:!!document.querySelector('#hero canvas')
+        magCanvas:!!document.querySelector('#hero canvas'),
+        titleVisibility:rows.map(section=>{
+          const trigger=section.querySelector('h2 .fx-mag-chapter-title');
+          const box=trigger?.getBoundingClientRect();
+          const css=trigger?getComputedStyle(trigger):null;
+          const visible=!!trigger && box.width>120 && box.height>44 &&
+            css.display!=='none' && css.visibility!=='hidden' && Number(css.opacity)>.6;
+          return {section:section.id||section.className,visible,width:box?.width||0,height:box?.height||0};
+        }),
+        hiddenBodies:rows.every(section=>Array.from(section.querySelectorAll(
+          '[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route])'
+        )).filter(node=>node instanceof HTMLElement).every(node=>getComputedStyle(node).display==='none'))
       };
     });
     assert(baseline.count >= 8, spec.name + ': injected/static section folding incomplete '+JSON.stringify(baseline));
     assert(baseline.buttons === baseline.count, spec.name + ': missing title triggers '+JSON.stringify(baseline));
     assert(baseline.closed === baseline.count, spec.name + ': section unexpectedly open '+JSON.stringify(baseline));
     assert(baseline.experienceFlow === 'none', spec.name + ': hidden chapter content visible');
+    assert(baseline.titleVisibility.every(entry=>entry.visible),
+      spec.name+': one or more collapsed chapter headings missing '+JSON.stringify(baseline.titleVisibility));
+    assert(baseline.hiddenBodies, spec.name+': at least one collapsed section leaks content');
     assert(baseline.chromeWidth <= baseline.viewportWidth+2, spec.name + ': folded horizontal overflow '+JSON.stringify(baseline));
+    const screenshotDir=process.env.FORMATX_MAG_SCREENSHOT_DIR;
+    if(screenshotDir){
+      fs.mkdirSync(screenshotDir,{recursive:true});
+      await page.screenshot({path:path.join(screenshotDir,spec.name+'-headings.jpg'),
+        type:'jpeg',quality:70,fullPage:true,timeout:30000});
+    }
     const experience = page.locator('#experience .fx-mag-chapter-title');
     await experience.scrollIntoViewIfNeeded();
     await experience.click();
@@ -343,6 +365,10 @@ async function verifyMagChapters(browser, spec) {
     assert(await page.locator('#experience .fx-mag-iris i').count() === 4, spec.name + ': four-arm iris missing');
     const flowVisible=await page.locator('#experience .flow').evaluate(el=>getComputedStyle(el).display!=='none');
     assert(flowVisible, spec.name + ': expanded chapter body remains hidden');
+    if(screenshotDir){
+      await page.screenshot({path:path.join(screenshotDir,spec.name+'-opened.jpg'),
+        type:'jpeg',quality:70,fullPage:true,timeout:30000});
+    }
     const capabilities=page.locator('#capabilities .fx-mag-chapter-title');
     await capabilities.scrollIntoViewIfNeeded();
     const beforeY=await capabilities.evaluate(el=>el.getBoundingClientRect().top);
