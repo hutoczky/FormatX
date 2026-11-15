@@ -43,6 +43,23 @@ async function observe(page){
       commerceFlag:section?.dataset.fxCommerceVisible||'',
       chapterVisible:visible(section),
       folio:section?.querySelector('.fx-archive-cinema-folio-r2030')?.dataset.fxCinemaPanelActive||'',
+      licensingHeadline:(()=>{
+        const panel=section?.querySelector(':scope > .fx-archive-cinema-folio-r2030');
+        const button=panel?.querySelector('.fx-mag-chapter-title');
+        if(!panel||!button)return {present:false};
+        const r=button.getBoundingClientRect(),p=panel.getBoundingClientRect();
+        const label=button.querySelector('.fx-mag-title-copy');
+        const iris=button.querySelector('.fx-mag-iris');
+        const i=iris?.getBoundingClientRect();
+        return {
+          present:true,label:label?.textContent.trim()||'',
+          x:Math.round(r.left),right:Math.round(r.right),
+          panelX:Math.round(p.left),panelRight:Math.round(p.right),
+          inside:r.left>=p.left-8&&r.right<=p.right+8,
+          irisInside:!!i&&i.left>=p.left-8&&i.right<=p.right+8,
+          boxSizing:getComputedStyle(button).boxSizing
+        };
+      })(),
       cards:cards.map(card=>{
         const link=card.querySelector('a[href*="checkout.html"]');
         return {plan:card.dataset.planId,visible:visible(card),
@@ -129,6 +146,13 @@ async function runCase(browser,spec){
     assert.equal(state.chapterOpen,'true',spec.name+' pricing is closed: '+JSON.stringify(state));
     assert.equal(state.commerceFlag,'true',spec.name+' pricing flag missing');
     assert(state.chapterVisible,spec.name+' section invisible: '+JSON.stringify(state));
+    if(spec.archive==='1'){
+      assert(state.licensingHeadline.present&&
+        state.licensingHeadline.inside&&state.licensingHeadline.irisInside&&
+        state.licensingHeadline.label.length>0,
+        spec.name+' licensing MAG headline is clipped by cinematic folio: '+
+        JSON.stringify(state.licensingHeadline));
+    }
     assert.equal(state.cards.length,3,spec.name+' missing plan cards: '+JSON.stringify(state));
     for(const plan of PLANS){
       const card=state.cards.find(x=>x.plan===plan);
