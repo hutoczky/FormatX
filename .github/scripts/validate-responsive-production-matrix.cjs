@@ -308,7 +308,7 @@ async function verifyMagChapters(browser, spec) {
     // Real wheel intent activates the chapter layer; scripted scroll must not.
     await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2209' &&
+      document.documentElement.dataset.fxMagChapters === 'r2210' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
@@ -317,6 +317,7 @@ async function verifyMagChapters(browser, spec) {
         count:rows.length,
         buttons:rows.filter(s=>!!s.querySelector('h2 .fx-mag-chapter-title')).length,
         closed:rows.filter(s=>s.dataset.fxExpanded==='false').length,
+        commerceOpen:document.getElementById('pricing')?.dataset.fxExpanded==='true',
         experienceFlow:getComputedStyle(document.querySelector('#experience .flow')).display,
         chromeWidth:document.documentElement.scrollWidth,
         viewportWidth:document.documentElement.clientWidth,
@@ -329,14 +330,14 @@ async function verifyMagChapters(browser, spec) {
             css.display!=='none' && css.visibility!=='hidden' && Number(css.opacity)>.6;
           return {section:section.id||section.className,visible,width:box?.width||0,height:box?.height||0};
         }),
-        hiddenBodies:rows.every(section=>Array.from(section.querySelectorAll(
+        hiddenBodies:rows.filter(section=>section.id!=='pricing').every(section=>Array.from(section.querySelectorAll(
           '[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route])'
         )).filter(node=>node instanceof HTMLElement).every(node=>getComputedStyle(node).display==='none'))
       };
     });
     assert(baseline.count >= 8, spec.name + ': injected/static section folding incomplete '+JSON.stringify(baseline));
     assert(baseline.buttons === baseline.count, spec.name + ': missing title triggers '+JSON.stringify(baseline));
-    assert(baseline.closed === baseline.count, spec.name + ': section unexpectedly open '+JSON.stringify(baseline));
+    assert(baseline.closed === baseline.count-1 && baseline.commerceOpen, spec.name + ': only checkout is allowed open by default '+JSON.stringify(baseline));
     assert(baseline.experienceFlow === 'none', spec.name + ': hidden chapter content visible');
     const titles=await page.evaluate(()=>({
       experience:document.querySelector('#experience .fx-mag-title-copy')?.textContent.trim()||'',
@@ -347,12 +348,48 @@ async function verifyMagChapters(browser, spec) {
     }));
     assert(titles.experience==='MAG' && titles.capabilities==='KÉPESSÉGEK' &&
       titles.pricing==='CSOMAGOK',spec.name+': headings are not short keywords '+JSON.stringify(titles));
-    assert(titles.experienceEditorialHidden && titles.pricingEditorialHidden,
+    assert(titles.experienceEditorialHidden && !titles.pricingEditorialHidden,
       spec.name+': editorial text leaked while chapters closed '+JSON.stringify(titles));
 
     assert(baseline.titleVisibility.every(entry=>entry.visible),
       spec.name+': one or more collapsed chapter headings missing '+JSON.stringify(baseline.titleVisibility));
     assert(baseline.hiddenBodies, spec.name+': at least one collapsed section leaks content');
+
+    const commerce=await page.evaluate(()=>{
+      const sec=document.getElementById('pricing');
+      const isVisible=el=>{
+        if(!(el instanceof HTMLElement))return false;
+        const cs=getComputedStyle(el),box=el.getBoundingClientRect();
+        return box.width>30 && box.height>20 && cs.display!=='none' &&
+          cs.visibility!=='hidden' && Number(cs.opacity)>.1;
+      };
+      const cards=Array.from(sec?.querySelectorAll('.price-card')||[]);
+      const links=cards.map(card=>card.querySelector('a[href*="checkout"]'));
+      const payment=sec?.querySelector('.payment');
+      const console=sec?.querySelector('.payment-console');
+      const primary=sec?.querySelector('#preview-checkout-link');
+      const qr=sec?.querySelector('#formatx-plan-qr-dock');
+      return {
+        sectionOpen:sec?.dataset.fxExpanded==='true',
+        commerceFlag:sec?.dataset.fxCommerceVisible,
+        cards:cards.map(isVisible),
+        links:links.map(link=>({visible:isVisible(link),href:link?.getAttribute('href')})),
+        paymentVisible:isVisible(payment),consoleVisible:isVisible(console),
+        primaryVisible:isVisible(primary),
+        primaryHref:primary?.getAttribute('href'),
+        qrVisible:isVisible(qr)
+      };
+    });
+    assert(commerce.sectionOpen && commerce.commerceFlag==='true',
+      spec.name+': payment is not permanently open '+JSON.stringify(commerce));
+    assert(commerce.cards.length===3 && commerce.cards.every(Boolean),
+      spec.name+': paid plans hidden '+JSON.stringify(commerce));
+    assert(commerce.links.length===3 && commerce.links.every(x=>x.visible && x.href?.includes('checkout.html')),
+      spec.name+': checkout links hidden or invalid '+JSON.stringify(commerce));
+    assert(commerce.paymentVisible && commerce.consoleVisible && commerce.primaryVisible &&
+      commerce.primaryHref?.includes('checkout.html') && commerce.qrVisible,
+      spec.name+': payment console or QR unavailable '+JSON.stringify(commerce));
+
     const rootLeak=await page.evaluate(()=>Array.from(document.querySelectorAll(
       'main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] > :not([data-fx-mag-route])'
     )).filter(node=>node instanceof HTMLElement && getComputedStyle(node).display!=='none')
@@ -372,7 +409,7 @@ async function verifyMagChapters(browser, spec) {
     await page.waitForFunction(() => document.getElementById('experience').dataset.fxMagPhase === 'open');
     assert(await experience.getAttribute('aria-expanded') === 'true', spec.name + ': experience button not expanded');
     const relation=await experience.evaluate(button=>{
-      const ids=(button.getAttribute('aria-controls')||'').split(/\\s+/).filter(Boolean);
+      const ids=(button.getAttribute('aria-controls')||'').split(/\s+/).filter(Boolean);
       return {
         count:ids.length,
         allWithin:ids.every(id=>document.getElementById(id)?.closest('section')===button.closest('section'))
@@ -406,6 +443,8 @@ async function verifyMagChapters(browser, spec) {
       document.getElementById('capabilities').dataset.fxExpanded === 'true'
     ));
     assert(await experience.getAttribute('aria-expanded')==='false', spec.name+': accordion prior chapter not closed');
+    assert(await page.locator('#pricing').getAttribute('data-fx-expanded')==='true',
+      spec.name+': pricing closed when another chapter opened');
     await capabilities.click();
     await page.waitForFunction(() => document.getElementById('capabilities').dataset.fxExpanded==='false');
     assert(await capabilities.getAttribute('aria-expanded')==='false', spec.name+': section does not close');
