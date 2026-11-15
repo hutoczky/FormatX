@@ -337,6 +337,27 @@ async function verifyMagChapters(browser, spec) {
     });
     assert(baseline.count >= 8, spec.name + ': injected/static section folding incomplete '+JSON.stringify(baseline));
     assert(baseline.buttons === baseline.count, spec.name + ': missing title triggers '+JSON.stringify(baseline));
+
+    const portals=await page.evaluate(()=>Array.from(document.querySelectorAll(
+      'main#main-content > section.fx-mag-chapter'
+    )).map(section=>{
+      const title=section.querySelector('.fx-mag-chapter-title');
+      const portal=title?.querySelector('.fx-mag-chapter-portal-r2217');
+      const leaves=portal?.querySelectorAll(':scope > i');
+      const style=portal?getComputedStyle(portal):null;
+      return {
+        chapter:section.id||section.className,
+        portal:!!portal,leaves:leaves?.length||0,
+        isDecorative:portal?.getAttribute('aria-hidden')==='true',
+        noPointerCapture:style?.pointerEvents==='none',
+        noDuplicateCanvas:portal?.querySelectorAll('canvas').length===0
+      };
+    }));
+    assert(portals.length===baseline.count&&portals.every(p=>
+      p.portal&&p.leaves===4&&p.isDecorative&&
+      p.noPointerCapture&&p.noDuplicateCanvas
+    ),spec.name+': 4-leaf MAG physics layer missing/interactive '+JSON.stringify(portals));
+
     assert(baseline.closed === baseline.count-1 && baseline.commerceOpen, spec.name + ': only checkout is allowed open by default '+JSON.stringify(baseline));
     assert(baseline.experienceFlow === 'none', spec.name + ': hidden chapter content visible');
     const titles=await page.evaluate(()=>({
