@@ -308,7 +308,7 @@ async function verifyMagChapters(browser, spec) {
     // Real wheel intent activates the chapter layer; scripted scroll must not.
     await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2207' &&
+      document.documentElement.dataset.fxMagChapters === 'r2208' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
@@ -325,7 +325,7 @@ async function verifyMagChapters(browser, spec) {
           const trigger=section.querySelector('h2 .fx-mag-chapter-title');
           const box=trigger?.getBoundingClientRect();
           const css=trigger?getComputedStyle(trigger):null;
-          const visible=!!trigger && box.width>120 && box.height>44 &&
+          const visible=!!trigger && trigger.textContent.trim().length>3 && box.width>120 && box.height>44 &&
             css.display!=='none' && css.visibility!=='hidden' && Number(css.opacity)>.6;
           return {section:section.id||section.className,visible,width:box?.width||0,height:box?.height||0};
         }),
