@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2209 intent-activated cinematic disclosure.
+/* FormatX MAG chapter aperture — r2210 commerce-visibility fix-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2209' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2210' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -27,11 +27,13 @@
       bubbles:true,detail:{chapter:section.id||'',open,origin}
     }));
     window.dispatchEvent(new CustomEvent('formatx:loopgeometryrefresh',{
-      detail:{source:'mag-chapter-aperture-r2201'}
+      detail:{source:'mag-chapter-aperture-r2210'}
     }));
   };
   function finishClose(entry,reason='close'){
     const {section,button,subtitle}=entry;
+    // Never hide pricing, checkout actions or payment QR codes.
+    if(section.id==='pricing')return;
     clearTimeout(entry.timer);
     entry.timer=0;
     if(section.dataset.fxExpanded==='false')return;
@@ -49,6 +51,18 @@
     clearTimeout(entry.timer);
     entry.timer=0;
     const previous=section.dataset.fxExpanded==='true';
+    if(section.id==='pricing'){
+      section.dataset.fxExpanded='true';
+      section.dataset.fxMagPhase='open';
+      button.setAttribute('aria-expanded','true');
+      if(subtitle)subtitle.hidden=false;
+      const checkout=section.querySelector('#preview-checkout-link');
+      // The headline remains interactive, but does not close the purchase flow.
+      if(origin==='button'&&checkout instanceof HTMLElement){
+        checkout.scrollIntoView({block:'nearest',behavior:reduced?'instant':'smooth'});
+      }
+      return;
+    }
     if(expand){
       // Synchronise with the existing native 3D MAG when its renderer is active.
       // The section iris remains usable when WebGL is unavailable or offscreen.
@@ -65,7 +79,7 @@
       const before=button.getBoundingClientRect().top;
       let closedEarlier=false;
       for(const other of registry.values()){
-        if(other!==entry&&other.section.dataset.fxExpanded==='true'){
+        if(other!==entry&&other.section.id!=='pricing'&&other.section.dataset.fxExpanded==='true'){
           if(other.section.compareDocumentPosition(section)&Node.DOCUMENT_POSITION_FOLLOWING){
             closedEarlier=true;
           }
@@ -169,8 +183,14 @@
       node=node.parentElement;
     }
     section.classList.add('fx-mag-chapter');
-    section.dataset.fxExpanded='false';
-    section.dataset.fxMagPhase='closed';
+    const commerce=section.id==='pricing';
+    section.dataset.fxExpanded=commerce?'true':'false';
+    section.dataset.fxMagPhase=commerce?'open':'closed';
+    if(commerce){
+      section.dataset.fxCommerceVisible='true';
+      button.setAttribute('aria-expanded','true');
+      subtitle.hidden=false;
+    }
     button.removeAttribute('aria-label');
     // aria-controls accepts a whitespace-separated list of IDs. Associate
     // each native content subtree without moving or wrapping it.
@@ -188,7 +208,8 @@
       const expanding=section.dataset.fxExpanded!=='true'||section.dataset.fxMagPhase==='closing';
       toggle(entry,expanding);
     });
-    if('IntersectionObserver' in window&&!reduced){
+    if(commerce)button.dataset.fxMagSeen='true';
+    else if('IntersectionObserver' in window&&!reduced){
       reveal.observe(button);
     }else button.dataset.fxMagSeen='true';
   }
@@ -206,12 +227,19 @@
     for(const section of main.querySelectorAll(sectionsSelector)){
       if(section instanceof HTMLElement)mount(section);
     }
+    // Payment must never vanish because of dynamic runtime changes.
+    const pricing=document.getElementById('pricing');
+    if(pricing?.classList.contains('fx-mag-chapter')&&pricing.dataset.fxExpanded!=='true'){
+      pricing.dataset.fxExpanded='true';
+      pricing.dataset.fxMagPhase='open';
+      pricing.querySelector('.fx-mag-chapter-title')?.setAttribute('aria-expanded','true');
+    }
     for(const [node,entry] of registry){
       if(!node.isConnected){clearTimeout(entry.timer);registry.delete(node);}
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2209';
+      root.dataset.fxMagChapters='r2210';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -239,7 +267,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2209',
+    version:'r2210',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
