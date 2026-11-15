@@ -1,0 +1,50 @@
+name: Diagnose real MAG hero CLS R2219
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/diagnose-mag-first-paint-cls-r2219.cjs'
+      - '.github/workflows/diagnose-mag-cls-r2219.yml'
+      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
+      - 'docs/scifi-ui/styles/formatx-first-frame-stability-r283.css'
+      - 'docs/scifi-ui/index.html'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formatx-cls-diagnosis-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Verify audit script
+        run: node --check .github/scripts/diagnose-mag-first-paint-cls-r2219.cjs
+      - name: Install isolated Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/fx-cls" --no-fund --no-audit playwright@1.62.0
+          "$RUNNER_TEMP/fx-cls/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Capture production CLS attribution for mobile and desktop
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-cls/node_modules
+          FORMATX_CLS_URL: https://www.formatxsuite.com/scifi-ui/
+        run: |
+          set -o pipefail
+          node .github/scripts/diagnose-mag-first-paint-cls-r2219.cjs 2>&1 | tee formatx-cls-diagnostic.txt
+      - name: Keep diagnostics for three days
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: formatx-cls-r2219
+          path: formatx-cls-diagnostic.txt
+          if-no-files-found: warn
+          retention-days: 3
