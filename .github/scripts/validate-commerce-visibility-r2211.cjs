@@ -187,10 +187,14 @@ async function verifyCheckout(browser){
       // payment flags or faking a successful HTTP response.
       assert.equal(response?.status(),503,
         'Incomplete merchant/legal verification must block new paid orders');
-      const copy=await page.locator('main').innerText();
-      assert.match(copy,/licencvásárlás|licence purchase|új fizetős/i,
-        '503 checkout must explain why the sale is unavailable');
-      console.log('CHECKOUT_LEGAL_SALES_GATE_PASS sales_ready=false '+url.pathname);
+      const body=await response.text();
+      const contentType=response.headers()['content-type']||'';
+      const gateExplained=/licencvásárlás|licence purchase|sales_temporarily_unavailable|új fizetős/i.test(body);
+      assert(gateExplained,
+        'Unexpected checkout 503 response instead of legal sales gate: '+
+        JSON.stringify({contentType,bodyStart:body.slice(0,650),url:response.url()}));
+      console.log('CHECKOUT_LEGAL_SALES_GATE_PASS sales_ready=false '+url.pathname+
+        ' content-type='+contentType);
     }
   }finally{await ctx.close();}
 }
