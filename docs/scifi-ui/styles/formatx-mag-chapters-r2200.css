@@ -161,6 +161,43 @@ html.fx-mag-chapters-ready .fx-mag-chapter-title [data-fx-mag-subtitle]{
 html.fx-mag-chapters-ready .fx-mag-chapter-title [data-fx-mag-subtitle][hidden]{
   display:none!important;
 }
+/* Editorial subheading: not visible until the title is clicked.
+   The semantic source headline remains in DOM, ready for localization. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+h2[data-fx-mag-route] > .fx-mag-editorial-heading{
+  display:block;
+  position:relative;
+  margin:0;
+  padding:clamp(16px,2vw,30px) clamp(22px,5vw,88px);
+  max-width:100%;
+  color:#9cb9c9;
+  font:500 clamp(.95rem,1.45vw,1.32rem)/1.5 system-ui,sans-serif!important;
+  letter-spacing:normal!important;
+  text-transform:none!important;
+  text-align:left!important;
+  text-wrap:pretty;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+h2[data-fx-mag-route] > .fx-mag-editorial-heading *{
+  font:inherit!important;
+  color:inherit!important;
+  letter-spacing:inherit!important;
+  text-transform:none!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+h2[data-fx-mag-route] > .fx-mag-editorial-heading[hidden]{
+  display:none!important;
+}
+@media(prefers-reduced-motion:no-preference){
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="opening"]
+ h2[data-fx-mag-route] > .fx-mag-editorial-heading{
+   animation:fx-mag-editorial-reveal .48s cubic-bezier(.2,.8,.2,1) both;
+ }
+}
+@keyframes fx-mag-editorial-reveal{
+ from{opacity:0;transform:translate3d(0,-10px,0)}
+ to{opacity:1;transform:translate3d(0,0,0)}
+}
 /* The 4 metal leaves evoke MAG's four-arm aperture; not an image or second WebGL context. */
 html.fx-mag-chapters-ready .fx-mag-iris{
   display:grid!important;
