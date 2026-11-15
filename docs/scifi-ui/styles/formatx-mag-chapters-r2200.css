@@ -1,4 +1,4 @@
-/* FORMATX // MAG CHAPTER IRIS — r2207
+/* FORMATX // MAG CHAPTER IRIS — r2209
    Original modular DOM stays intact. No canvas duplication, no scroll hijack. */
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter{
   min-height:0!important;
@@ -43,6 +43,13 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
   grid-template-columns:none!important;
   grid-template-rows:none!important;
 }
+/* R2209: CRITICAL — fold the SECTION ROOT'S direct siblings too.
+   The previous descendant-only selector hid header copy but leaked .flow,
+   .cards, .pricing, .system-grid and other top-level chapter bodies. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] > :not([data-fx-mag-route]){
+  display:none!important;
+}
+
 /* Hide every non-heading subtree, even if another runtime injects it later.
    Do not move DOM nodes: payment, NET, proof and Live OS keep their owners. */
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]
