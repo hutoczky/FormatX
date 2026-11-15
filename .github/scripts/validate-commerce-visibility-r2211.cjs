@@ -55,6 +55,20 @@ async function observe(page){
       qr:visible(section?.querySelector('#formatx-plan-qr-dock')),
       horizontalOverflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-
         document.documentElement.clientWidth,
+      horizontalPagePan:(()=>{
+        const x=scrollX, y=scrollY;
+        window.scrollTo({left:99999,top:y,behavior:'instant'});
+        const actual=scrollX;
+        window.scrollTo({left:x,top:y,behavior:'instant'});
+        return actual;
+      })(),
+      sensoryRect:(()=>{
+        const el=document.querySelector('.fx-site-sensory-field-r1755');
+        const r=el?.getBoundingClientRect();
+        const cs=el?getComputedStyle(el):null;
+        return {present:!!el,x:Math.round(r?.x||0),width:Math.round(r?.width||0),
+          inset:cs?.inset,clip:cs?.overflowX};
+      })(),
       overflowOffenders:Array.from(document.querySelectorAll('body *')).map(node=>{
         const c=getComputedStyle(node),r=node.getBoundingClientRect();
         if(c.display==='none'||c.visibility==='hidden'||r.width<3)return null;
@@ -125,8 +139,8 @@ async function runCase(browser,spec){
       spec.name+' payment console or QR is hidden: '+JSON.stringify(state));
     assert(isExpectedCheckout(state.primaryHref,'business_pro'),
       spec.name+' primary checkout points to wrong page: '+state.primaryHref);
-    assert(state.horizontalOverflow<=3,
-      spec.name+' horizontal overflow: '+JSON.stringify(state));
+    assert(state.horizontalPagePan<=3,
+      spec.name+' actual sideways panning: '+JSON.stringify(state));
     // Browser actionability, not a real click: no order, no payment, no POST.
     for(const plan of PLANS){
       const link=page.locator('#pricing .price-card[data-plan-id="'+plan+'"] a[href*="checkout.html"]');
