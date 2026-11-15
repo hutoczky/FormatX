@@ -1,0 +1,104 @@
+name: FormatX commerce and checkout visibility R2211
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/checkout.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - '.github/scripts/validate-commerce-visibility-r2211.cjs'
+      - '.github/workflows/commerce-visibility-r2211.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-commerce-readonly-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-commerce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Verify browser-test source is valid
+        run: node --check .github/scripts/validate-commerce-visibility-r2211.cjs
+
+      - name: Wait for current MAG payment code to reach the live domain
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .commerce-artifacts
+          EXPECTED_SCRIPT='docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+          EXPECTED_STYLE='docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
+          BASE='https://www.formatxsuite.com/scifi-ui'
+          found=0
+          for attempt in $(seq 1 25); do
+            if curl -fsSL --max-time 25 -o /tmp/fx-commerce-home.html "$BASE/?commerce-probe=$GITHUB_SHA-$attempt" \
+              && curl -fsSL --max-time 25 -o /tmp/fx-commerce-mag.js "$BASE/scripts/formatx-mag-chapters-r2200.js?v=r2210" \
+              && curl -fsSL --max-time 25 -o /tmp/fx-commerce-mag.css "$BASE/styles/formatx-mag-chapters-r2200.css?v=r2210" \
+              && grep -Fq 'formatx-mag-chapters-r2200.js?v=r2210' /tmp/fx-commerce-home.html \
+              && grep -Fq 'formatx-mag-chapters-r2200.css?v=r2210' /tmp/fx-commerce-home.html \
+              && cmp -s "$EXPECTED_SCRIPT" /tmp/fx-commerce-mag.js \
+              && cmp -s "$EXPECTED_STYLE" /tmp/fx-commerce-mag.css; then
+              found=1
+              break
+            fi
+            sleep 10
+          done
+          [[ "$found" == '1' ]] || {
+            echo 'Production is not serving the repository MAG checkout fix' >&2
+            exit 1
+          }
+          echo 'Live MAG pricing assets match the repository'
+
+      - name: Install isolated Chromium
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --prefix "$RUNNER_TEMP/formatx-commerce-browser" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/formatx-commerce-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Verify 3 prices, 3 checkout CTAs, payment console, QR and archive
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-commerce-browser/node_modules
+          FORMATX_COMMERCE_BASE: https://www.formatxsuite.com/scifi-ui/
+          FORMATX_COMMERCE_PROOF: .commerce-artifacts
+        run: node .github/scripts/validate-commerce-visibility-r2211.cjs
+
+      - name: Upload short-lived screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-commerce-visibility-r2211
+          path: .commerce-artifacts
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: Publish real checkout visibility status
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          if [[ "$JOB_STATUS" == 'success' ]]; then
+            state=success
+            description='Real desktop and mobile pricing/checkout/QR visibility passed'
+          else
+            state=failure
+            description='Real commerce visibility browser verification failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX commerce checkout visibility' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
