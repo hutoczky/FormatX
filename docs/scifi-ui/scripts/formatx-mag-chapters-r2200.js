@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2210 commerce-visibility fix-activated cinematic disclosure.
+/* FormatX MAG chapter aperture — r2217 commerce-visibility fix-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2210' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2217' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -27,7 +27,7 @@
       bubbles:true,detail:{chapter:section.id||'',open,origin}
     }));
     window.dispatchEvent(new CustomEvent('formatx:loopgeometryrefresh',{
-      detail:{source:'mag-chapter-aperture-r2210'}
+      detail:{source:'mag-chapter-aperture-r2217'}
     }));
   };
   function finishClose(entry,reason='close'){
@@ -66,13 +66,21 @@
     if(expand){
       // Synchronise with the existing native 3D MAG when its renderer is active.
       // The section iris remains usable when WebGL is unavailable or offscreen.
-      if(origin==='button'){
+      if(origin==='button'&&!reduced&&!document.hidden){
+        // One shared native WebGL organism: a meaningful biomechanical
+        // activation instead of creating an imitation 3D canvas.
         const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
         try{
-          core?.surfacePulse?.('mag-chapter-'+(section.id||'disclosure'));
-          core?.rotateBy?.(.032,.014,'mag-chapter-aperture');
+          if(typeof core?.physiology==='function'){
+            core.physiology('activation','direct-interaction-mag-aperture-r2217');
+          }else{
+            core?.surfacePulse?.('direct-interaction-mag-aperture-r2217');
+          }
+          const direction=section.dataset.fxMagGateSide==='left'?-1:1;
+          core?.rotateBy?.(.05*direction,.068,'direct-interaction-mag-aperture-r2217');
           core?.requestRender?.(3);
-        }catch(_){ /* Runtime-independent disclosure. */ }
+          section.dataset.fxMagNativeResponse='requested';
+        }catch(_){ /* DOM disclosure works without WebGL. */ }
       }
       // Keep the tapped heading stationary when a taller earlier chapter
       // closes. A synchronous collapse prevents 340ms of delayed scroll jump.
@@ -100,6 +108,13 @@
       notify(section,true,origin);
     }else{
       button.setAttribute('aria-expanded','false');
+      if(origin==='button'&&previous&&!reduced&&!document.hidden){
+        try{
+          const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
+          core?.physiology?.('stability','direct-interaction-mag-aperture-close-r2217');
+          core?.rotateBy?.(-.028,-.038,'direct-interaction-mag-aperture-close-r2217');
+        }catch(_){ /* no renderer required to close content */ }
+      }
       if(previous&&!reduced){
         section.dataset.fxMagPhase='closing';
         entry.timer=window.setTimeout(()=>finishClose(entry,origin),340);
@@ -171,7 +186,13 @@
     iris.className='fx-mag-iris';
     iris.setAttribute('aria-hidden','true');
     for(let i=0;i<4;i++)iris.appendChild(document.createElement('i'));
-    button.append(label,iris);
+    // Four slim material shutters connect the native MAG interaction to the
+    // editorial title. They never own clicks, scroll or a rendering context.
+    const portal=document.createElement('span');
+    portal.className='fx-mag-chapter-portal-r2217';
+    portal.setAttribute('aria-hidden','true');
+    for(let i=0;i<4;i++)portal.appendChild(document.createElement('i'));
+    button.append(portal,label,iris);
     button.setAttribute('aria-describedby',subtitle.id);
     heading.append(button,subtitle);
     // Mark the unique route from the section to its heading. CSS hides all
@@ -183,6 +204,9 @@
       node=node.parentElement;
     }
     section.classList.add('fx-mag-chapter');
+    const chapterOrdinal=Array.from(main.children).indexOf(section);
+    section.dataset.fxMagGateSide=(chapterOrdinal%2?'left':'right');
+    section.dataset.fxMagPortal='r2217-four-leaf-real-organism';
     const commerce=section.id==='pricing';
     section.dataset.fxExpanded=commerce?'true':'false';
     section.dataset.fxMagPhase=commerce?'open':'closed';
@@ -239,7 +263,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2210';
+      root.dataset.fxMagChapters='r2217';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -267,7 +291,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2210',
+    version:'r2217',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
