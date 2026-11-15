@@ -11,6 +11,7 @@ on:
       - 'billing-worker/src/sales-gate.js'
       - '.github/scripts/validate-sales-gate-body-r2214.cjs'
       - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/scripts/formatx-sales-readiness-r2216.js'
       - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - '.github/scripts/validate-commerce-visibility-r2211.cjs'
@@ -34,6 +35,7 @@ jobs:
 
       - name: Verify browser-test source is valid
         run: |
+          node --check docs/scifi-ui/scripts/formatx-sales-readiness-r2216.js
           node --check .github/scripts/validate-commerce-visibility-r2211.cjs
           node --check .github/scripts/validate-sales-gate-body-r2214.cjs
           node .github/scripts/validate-sales-gate-body-r2214.cjs
