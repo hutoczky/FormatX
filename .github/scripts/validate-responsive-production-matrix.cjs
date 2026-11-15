@@ -308,7 +308,7 @@ async function verifyMagChapters(browser, spec) {
     // Real wheel intent activates the chapter layer; scripted scroll must not.
     await page.mouse.wheel(0, Math.max(200, Math.round(spec.height * .38)));
     await page.waitForFunction(() => (
-      document.documentElement.dataset.fxMagChapters === 'r2208' &&
+      document.documentElement.dataset.fxMagChapters === 'r2209' &&
       Number(document.documentElement.dataset.fxMagChapterCount) >= 8
     ), null, {timeout:30000});
     const baseline = await page.evaluate(() => {
@@ -338,9 +338,27 @@ async function verifyMagChapters(browser, spec) {
     assert(baseline.buttons === baseline.count, spec.name + ': missing title triggers '+JSON.stringify(baseline));
     assert(baseline.closed === baseline.count, spec.name + ': section unexpectedly open '+JSON.stringify(baseline));
     assert(baseline.experienceFlow === 'none', spec.name + ': hidden chapter content visible');
+    const titles=await page.evaluate(()=>({
+      experience:document.querySelector('#experience .fx-mag-title-copy')?.textContent.trim()||'',
+      capabilities:document.querySelector('#capabilities .fx-mag-title-copy')?.textContent.trim()||'',
+      pricing:document.querySelector('#pricing .fx-mag-title-copy')?.textContent.trim()||'',
+      experienceEditorialHidden:document.querySelector('#experience .fx-mag-editorial-heading')?.hidden,
+      pricingEditorialHidden:document.querySelector('#pricing .fx-mag-editorial-heading')?.hidden
+    }));
+    assert(titles.experience==='MAG' && titles.capabilities==='KÉPESSÉGEK' &&
+      titles.pricing==='CSOMAGOK',spec.name+': headings are not short keywords '+JSON.stringify(titles));
+    assert(titles.experienceEditorialHidden && titles.pricingEditorialHidden,
+      spec.name+': editorial text leaked while chapters closed '+JSON.stringify(titles));
+
     assert(baseline.titleVisibility.every(entry=>entry.visible),
       spec.name+': one or more collapsed chapter headings missing '+JSON.stringify(baseline.titleVisibility));
     assert(baseline.hiddenBodies, spec.name+': at least one collapsed section leaks content');
+    const rootLeak=await page.evaluate(()=>Array.from(document.querySelectorAll(
+      'main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] > :not([data-fx-mag-route])'
+    )).filter(node=>node instanceof HTMLElement && getComputedStyle(node).display!=='none')
+      .map(node=>({chapter:node.parentElement.id,tag:node.tagName,className:node.className})).slice(0,15));
+    assert(rootLeak.length===0,spec.name+': top-level chapter body leaked '+JSON.stringify(rootLeak));
+
     assert(baseline.chromeWidth <= baseline.viewportWidth+2, spec.name + ': folded horizontal overflow '+JSON.stringify(baseline));
     const screenshotDir=process.env.FORMATX_MAG_SCREENSHOT_DIR;
     if(screenshotDir){
@@ -365,6 +383,13 @@ async function verifyMagChapters(browser, spec) {
     assert(await page.locator('#experience .fx-mag-iris i').count() === 4, spec.name + ': four-arm iris missing');
     const flowVisible=await page.locator('#experience .flow').evaluate(el=>getComputedStyle(el).display!=='none');
     assert(flowVisible, spec.name + ': expanded chapter body remains hidden');
+    const editorial=await page.locator('#experience .fx-mag-editorial-heading').evaluate(el=>({
+      visible:!el.hidden && getComputedStyle(el).display!=='none',
+      text:(el.textContent||'').trim()
+    }));
+    assert(editorial.visible && editorial.text.length>10,
+      spec.name+': full original editorial heading not revealed '+JSON.stringify(editorial));
+
     if(screenshotDir){
       await page.screenshot({path:path.join(screenshotDir,spec.name+'-opened.jpg'),
         type:'jpeg',quality:70,fullPage:true,timeout:30000});
