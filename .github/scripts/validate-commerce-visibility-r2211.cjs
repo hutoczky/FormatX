@@ -15,7 +15,8 @@ const CASES=[
 ];
 function isExpectedCheckout(href,plan){
   const url=new URL(href,ORIGIN);
-  return url.origin===new URL(ORIGIN).origin &&
+  return ['formatxsuite.com','www.formatxsuite.com'].includes(url.hostname) &&
+    url.protocol==='https:' &&
     url.pathname==='/scifi-ui/checkout.html' &&
     url.searchParams.get('plan')===plan;
 }
@@ -53,7 +54,15 @@ async function observe(page){
       primaryHref:section?.querySelector('#preview-checkout-link')?.getAttribute('href')||'',
       qr:visible(section?.querySelector('#formatx-plan-qr-dock')),
       horizontalOverflow:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-
-        document.documentElement.clientWidth
+        document.documentElement.clientWidth,
+      overflowOffenders:Array.from(document.querySelectorAll('body *')).map(node=>{
+        const c=getComputedStyle(node),r=node.getBoundingClientRect();
+        if(c.display==='none'||c.visibility==='hidden'||r.width<3)return null;
+        if(r.right<=document.documentElement.clientWidth+3&&r.left>=-3)return null;
+        return {tag:node.tagName,id:node.id,cls:String(node.className||'').slice(0,95),
+          left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width),
+          position:c.position,overflow:c.overflow};
+      }).filter(Boolean).slice(0,22)
     };
   });
 }
