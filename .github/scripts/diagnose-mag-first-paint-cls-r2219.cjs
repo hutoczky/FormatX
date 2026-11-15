@@ -2,7 +2,7 @@
 /* Read-only R2219 geometry audit. Chrome's layout-shift attribution
    identifies the actual moving node, including late WebGL stage placement. */
 const {chromium}=require('playwright');
-const URL=process.env.FORMATX_CLS_URL||'https://www.formatxsuite.com/scifi-ui/';
+const BASE_URL=process.env.FORMATX_CLS_URL||'https://www.formatxsuite.com/scifi-ui/';
 const profiles=[
   {name:'desktop',width:1366,height:768,mobile:false},
   {name:'mobile',width:390,height:844,mobile:true}
@@ -70,7 +70,7 @@ async function probe(browser,spec,run){
    addEventListener('formatx:deferredcssready',()=>window.__fxClsAudit.capture('css-ready'));
  });
  try{
-   const url=new URL(URL);url.searchParams.set('cls-diagnosis','r2219-'+spec.name+'-'+run);
+   const url=new URL(BASE_URL);url.searchParams.set('cls-diagnosis','r2219-'+spec.name+'-'+run);
    url.searchParams.set('intro','0');
    const response=await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:60000});
    await page.waitForTimeout(3200);
