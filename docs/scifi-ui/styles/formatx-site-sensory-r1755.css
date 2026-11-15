@@ -1,3 +1,9 @@
+/* FormatX R2212 — viewport-clipped sensory field, no sideways page panning.
+   overflow-x:clip preserves native vertical scroll and sticky positioning. */
+html:has(> body .fx-site-sensory-field-r1755),
+html:has(> body .fx-site-sensory-field-r1755) > body{
+  overflow-x:clip!important;
+}
 /* FormatX R2211 — viewport-clipped sitewide sensory field.
    One compositor-friendly visual layer reacts to input without adding a WebGL
    context or a continuous JavaScript animation loop. */
