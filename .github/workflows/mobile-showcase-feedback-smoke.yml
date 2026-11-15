@@ -146,10 +146,19 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-responsive/node_modules
           FORMATX_TEST_URL: https://www.formatxsuite.com/
+          FORMATX_MAG_SCREENSHOT_DIR: artifacts/mag-chapters
         shell: bash
         run: |
           set -o pipefail
           node .github/scripts/validate-responsive-production-matrix.cjs 2>&1 | tee responsive-production-matrix.txt
+      - name: Upload temporary MAG visual verification screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-mag-aperture-visual-r2207
+          path: artifacts/mag-chapters
+          if-no-files-found: warn
+          retention-days: 3
       - name: Upload responsive matrix report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
