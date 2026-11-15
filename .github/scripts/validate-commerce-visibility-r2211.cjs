@@ -130,7 +130,7 @@ async function runCase(browser,spec){
     // Trigger the deferred chapter stylesheet through a genuine input event.
     await page.mouse.wheel(0,360);
     await page.waitForFunction(()=>
-      document.documentElement.dataset.fxMagChapters==='r2210',
+      document.documentElement.dataset.fxMagChapters==='r2217',
       null,{timeout:30000});
     await page.evaluate(()=>{
       const section=document.getElementById('pricing');
