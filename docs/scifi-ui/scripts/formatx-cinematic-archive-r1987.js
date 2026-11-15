@@ -467,7 +467,7 @@
       ecosystem:[':scope > .section-heading',':scope > .flow .flow-chapters > article'],
       diagnostics:[':scope > .section-heading',':scope > .cards > .card:not(:last-child)'],
       intelligence:[':scope'],
-      licensing:[':scope > .section-heading',':scope > .pricing > .price-card'],
+      licensing:[':scope > .section-heading',':scope > .pricing > .price-card',':scope > .payment',':scope > #formatx-plan-qr-dock'],
       security:[':scope > .section-heading',':scope > .system-grid > article'],
       network:[':scope > .fx-net-head',':scope > .fx-net-grid > .fx-net-console'],
       final:[':scope > .release-layout']
