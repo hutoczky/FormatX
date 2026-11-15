@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          mkdir -p .commerce-artifacts
+          mkdir -p artifacts/commerce-visible
           EXPECTED_SCRIPT='docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
           EXPECTED_STYLE='docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
           JS_REF="$(grep -oE '/scifi-ui/scripts/formatx-mag-chapters-r2200\.js\?v=[^"]+' docs/scifi-ui/index.html | head -n 1)"
@@ -75,7 +75,7 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-commerce-browser/node_modules
           FORMATX_COMMERCE_BASE: https://www.formatxsuite.com/scifi-ui/
-          FORMATX_COMMERCE_PROOF: .commerce-artifacts
+          FORMATX_COMMERCE_PROOF: artifacts/commerce-visible
         run: node .github/scripts/validate-commerce-visibility-r2211.cjs
 
       - name: Upload short-lived screenshots
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: formatx-commerce-visibility-r2211
-          path: .commerce-artifacts
+          path: artifacts/commerce-visible
           if-no-files-found: warn
           retention-days: 3
 
