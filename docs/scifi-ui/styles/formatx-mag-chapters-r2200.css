@@ -407,3 +407,84 @@ body.living-architecture main#main-content > section#pricing.fx-mag-chapter[data
   visibility:visible!important;
   pointer-events:auto!important;
 }
+
+
+/* R2215 — the real licensing folio is a 51vw desktop/92vw mobile instrument.
+   Its headline formerly inherited a 905px native heading width and extended
+   >150px beyond the viewport. Keep the keyword and four-leaf iris INSIDE
+   the active panel, preserving every original checkout control. */
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.section-heading{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  margin-inline:0!important;
+  padding-inline:0!important;
+  overflow-wrap:anywhere;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+h2[data-fx-mag-route]{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-chapter-title{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-height:76px!important;
+  gap:clamp(6px,1.25vw,15px)!important;
+  padding:12px clamp(4px,1vw,14px)!important;
+  font-size:clamp(1.2rem,2.75vw,2.65rem)!important;
+  letter-spacing:-.035em!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-title-copy{
+  min-width:0!important;
+  flex:1 1 auto!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  text-wrap:balance!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-iris{
+  flex:0 0 clamp(44px,4.5vw,68px)!important;
+  width:clamp(44px,4.5vw,68px)!important;
+  height:clamp(44px,4.5vw,68px)!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-editorial-heading{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-wrap:anywhere!important;
+  padding:12px 4px!important;
+}
+@media(max-width:900px){
+  html[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+  > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+  .fx-mag-chapter-title{
+    font-size:clamp(1.12rem,5.6vw,1.9rem)!important;
+    min-height:66px!important;
+    padding:10px 2px!important;
+  }
+}
