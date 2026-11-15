@@ -39,14 +39,18 @@ jobs:
           mkdir -p .commerce-artifacts
           EXPECTED_SCRIPT='docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
           EXPECTED_STYLE='docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
-          BASE='https://www.formatxsuite.com/scifi-ui'
+          JS_REF="$(grep -oE '/scifi-ui/scripts/formatx-mag-chapters-r2200\.js\?v=[^"]+' docs/scifi-ui/index.html | head -n 1)"
+          CSS_REF="$(grep -oE '/scifi-ui/styles/formatx-mag-chapters-r2200\.css\?v=[^"]+' docs/scifi-ui/index.html | head -n 1)"
+          test -n "$JS_REF"
+          test -n "$CSS_REF"
+          BASE='https://www.formatxsuite.com'
           found=0
           for attempt in $(seq 1 25); do
-            if curl -fsSL --max-time 25 -o /tmp/fx-commerce-home.html "$BASE/?commerce-probe=$GITHUB_SHA-$attempt" \
-              && curl -fsSL --max-time 25 -o /tmp/fx-commerce-mag.js "$BASE/scripts/formatx-mag-chapters-r2200.js?v=r2210" \
-              && curl -fsSL --max-time 25 -o /tmp/fx-commerce-mag.css "$BASE/styles/formatx-mag-chapters-r2200.css?v=r2210" \
-              && grep -Fq 'formatx-mag-chapters-r2200.js?v=r2210' /tmp/fx-commerce-home.html \
-              && grep -Fq 'formatx-mag-chapters-r2200.css?v=r2210' /tmp/fx-commerce-home.html \
+            if curl -fsSL --max-time 25 -o /tmp/fx-commerce-home.html "$BASE/scifi-ui/?commerce-probe=$GITHUB_SHA-$attempt" \
+              && curl -fsSL --max-time 25 -o /tmp/fx-commerce-mag.js "$BASE$JS_REF" \
+              && curl -fsSL --max-time 25 -o /tmp/fx-commerce-mag.css "$BASE$CSS_REF" \
+              && grep -Fq "$JS_REF" /tmp/fx-commerce-home.html \
+              && grep -Fq "$CSS_REF" /tmp/fx-commerce-home.html \
               && cmp -s "$EXPECTED_SCRIPT" /tmp/fx-commerce-mag.js \
               && cmp -s "$EXPECTED_STYLE" /tmp/fx-commerce-mag.css; then
               found=1
