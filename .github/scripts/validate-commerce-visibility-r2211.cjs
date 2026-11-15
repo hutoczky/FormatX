@@ -164,13 +164,34 @@ async function verifyCheckout(browser){
   const ctx=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   try{
     const page=await ctx.newPage();
+    const readinessUrl=new URL('/api/checkout-readiness',ORIGIN);
+    const readinessResponse=await ctx.request.get(readinessUrl.toString(),{
+      headers:{Accept:'application/json'},timeout:25000
+    });
+    assert.equal(readinessResponse.status(),200,'Read-only checkout readiness endpoint unavailable');
+    const readiness=await readinessResponse.json();
+    assert.equal(readiness.provider,'bank_transfer','Payment provider policy changed');
+    assert.equal(readiness.business_checkout_only,true,'Checkout must remain business-only');
+    assert.equal(readiness.legal_acceptance_required,true,'Legal acceptance must remain mandatory');
     const url=new URL('checkout.html?plan=business_pro&cycle=monthly&currency=HUF',ORIGIN);
     const response=await page.goto(url.toString(),{waitUntil:'domcontentloaded',timeout:60000});
-    assert.equal(response?.status(),200,'Checkout page HTTP status');
-    await page.locator('.checkout-summary').waitFor({state:'visible',timeout:15000});
-    assert.match(await page.locator('#summary-plan').innerText(),/Business Pro/i,
-      'Selected plan missing from checkout summary');
-    console.log('CHECKOUT_READ_ONLY_PASS '+url.pathname);
+    const ready=readiness.sales_ready===true&&readiness.live_ready===true;
+    if(ready){
+      assert.equal(response?.status(),200,'Legally approved checkout should be publicly available');
+      await page.locator('.checkout-summary').waitFor({state:'visible',timeout:15000});
+      assert.match(await page.locator('#summary-plan').innerText(),/Business Pro/i,
+        'Selected plan missing from checkout summary');
+      console.log('CHECKOUT_READ_ONLY_PASS sales_ready=true '+url.pathname);
+    }else{
+      // This is a deliberate legal/sales gate, never bypass it by changing
+      // payment flags or faking a successful HTTP response.
+      assert.equal(response?.status(),503,
+        'Incomplete merchant/legal verification must block new paid orders');
+      const copy=await page.locator('main').innerText();
+      assert.match(copy,/licencvásárlás|licence purchase|új fizetős/i,
+        '503 checkout must explain why the sale is unavailable');
+      console.log('CHECKOUT_LEGAL_SALES_GATE_PASS sales_ready=false '+url.pathname);
+    }
   }finally{await ctx.close();}
 }
 (async()=>{
