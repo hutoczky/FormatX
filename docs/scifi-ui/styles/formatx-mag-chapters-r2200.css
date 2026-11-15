@@ -360,3 +360,24 @@ html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-c
     width:100%!important;
   }
 }
+
+/* Archive mode wraps original pricing content in a native cinematic folio.
+   Protect genuine commerce nodes there too without exposing inactive folios. */
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+ .fx-archive-cinema-folio-r2030 :is(.pricing,.payment){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  content-visibility:visible!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+ .fx-archive-cinema-folio-r2030 #formatx-plan-qr-dock{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain;
+}
