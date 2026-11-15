@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2207 intent-activated cinematic disclosure.
+/* FormatX MAG chapter aperture — r2208 intent-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2207' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2208' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -130,7 +130,9 @@
         subtitle.hidden=true;
       }else label.appendChild(node);
     }
-    if(!label.textContent.trim()&&!label.hasAttribute('data-fx-category-title')){
+    // Keep the editorial headline readable even if the category translation
+    // runtime is still loading; that owner may replace this fallback later.
+    if(!label.textContent.trim()){
       label.textContent='FORMATX';
     }
     const iris=document.createElement('span');
@@ -191,7 +193,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2207';
+      root.dataset.fxMagChapters='r2208';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -219,7 +221,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2207',
+    version:'r2208',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
