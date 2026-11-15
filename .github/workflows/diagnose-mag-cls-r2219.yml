@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: formatx-cls-diagnosis-${{ github.ref }}
@@ -48,3 +49,23 @@ jobs:
           path: formatx-cls-diagnostic.txt
           if-no-files-found: warn
           retention-days: 3
+
+      - name: Publish diagnostic evidence link
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [[ "$JOB_STATUS" = 'success' ]]; then
+            state=success
+            description='Desktop and mobile CLS attribution captured'
+          else
+            state=failure
+            description='Desktop/mobile CLS attribution could not be captured'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R2219 real CLS diagnosis' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
