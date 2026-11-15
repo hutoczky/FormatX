@@ -1,4 +1,4 @@
-/* FormatX MAG chapter aperture — r2208 intent-activated cinematic disclosure.
+/* FormatX MAG chapter aperture — r2209 intent-activated cinematic disclosure.
    The live Cloudflare worker injects additional sections. Never move original
    module nodes: hiding them at the CSS route keeps module owners and selectors intact. */
 (()=>{'use strict';
@@ -9,7 +9,7 @@
     initialised=true;
     const root=document.documentElement;
   const main=document.getElementById('main-content');
-  if(!main || root.dataset.fxMagChapters==='r2208' || new URLSearchParams(location.search).get('magchapters')==='off')return;
+  if(!main || root.dataset.fxMagChapters==='r2209' || new URLSearchParams(location.search).get('magchapters')==='off')return;
   const registry=new Map();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
@@ -111,37 +111,55 @@
     button.className='fx-mag-chapter-title';
     button.setAttribute('aria-expanded','false');
     button.setAttribute('aria-label','Részletek megnyitása');
-    const label=document.createElement('span');
+    // Render just the ONE emphatic keyword. Preserve the original editorial
+    // heading separately, revealed only when the MAG aperture is open.
+    const COPY={
+      'live-os-overview':['ÉLŐ RENDSZER','LIVE OS'],
+      'experience':['MAG','MAG'],
+      'capabilities':['KÉPESSÉGEK','CAPABILITIES'],
+      'product-showcase':['BEMUTATÓ','SHOWCASE'],
+      'pricing':['CSOMAGOK','PLANS'],
+      'system':['ARCHITEKTÚRA','ARCHITECTURE'],
+      'network':['HÁLÓZAT','NETWORK'],
+      'user-feedback':['VÉLEMÉNYEK','REVIEWS'],
+      'resources':['LETÖLTÉSEK','DOWNLOADS']
+    };
+    const slug=section.id||(section.classList.contains('fx-award-proof')?'fx-award-proof':
+      section.classList.contains('fx-category-deck')?'fx-category-deck':'');
+    const words=COPY[slug]||(
+      slug==='fx-award-proof'?['BIZONYÍTÉKOK','EVIDENCE']:
+      slug==='fx-category-deck'?['MEGOLDÁSOK','SOLUTIONS']:
+      null
+    );
+    const originalText=(heading.textContent||'').trim();
+    const fallback=(originalText.split(/\s+/).filter(Boolean).slice(0,3).join(' ')||'FORMATX');
+    const label=document.createElement('strong');
     label.className='fx-mag-title-copy';
-    // The bilingual and category runtimes write textContent to these attributes.
-    // Move them to the leaf span, never let a translation overwrite the button.
-    for(const attr of ['data-hu','data-en','data-fx-category-title']){
+    label.dataset.hu=words?.[0]||fallback;
+    label.dataset.en=words?.[1]||fallback;
+    label.textContent=root.lang==='en'?label.dataset.en:label.dataset.hu;
+    const subtitle=document.createElement('span');
+    subtitle.className='fx-mag-editorial-heading';
+    subtitle.setAttribute('data-fx-mag-subtitle','');
+    subtitle.id='fx-mag-editorial-'+(slug.replace(/[^a-zA-Z0-9_-]/g,'')||String(registry.size));
+    subtitle.hidden=true;
+    // Language and dynamically-rendered titles retain their original owner.
+    // A source runtime can still update [data-fx-category-title] or
+    // [data-showcase-title] without destroying the button or iris.
+    for(const attr of ['data-hu','data-en','data-fx-category-title','data-showcase-title']){
       if(heading.hasAttribute(attr)){
-        label.setAttribute(attr,heading.getAttribute(attr));
+        subtitle.setAttribute(attr,heading.getAttribute(attr));
         heading.removeAttribute(attr);
       }
     }
-    let subtitle=null;
-    while(heading.firstChild){
-      const node=heading.firstChild;
-      if(node.nodeType===1&&node.tagName==='EM'&&!subtitle){
-        subtitle=node;
-        subtitle.setAttribute('data-fx-mag-subtitle','');
-        subtitle.hidden=true;
-      }else label.appendChild(node);
-    }
-    // Keep the editorial headline readable even if the category translation
-    // runtime is still loading; that owner may replace this fallback later.
-    if(!label.textContent.trim()){
-      label.textContent='FORMATX';
-    }
+    while(heading.firstChild)subtitle.appendChild(heading.firstChild);
     const iris=document.createElement('span');
     iris.className='fx-mag-iris';
     iris.setAttribute('aria-hidden','true');
     for(let i=0;i<4;i++)iris.appendChild(document.createElement('i'));
     button.append(label,iris);
-    if(subtitle)button.appendChild(subtitle);
-    heading.appendChild(button);
+    button.setAttribute('aria-describedby',subtitle.id);
+    heading.append(button,subtitle);
     // Mark the unique route from the section to its heading. CSS hides all
     // siblings, including components injected *after* this script runs.
     let node=heading;
@@ -193,7 +211,7 @@
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2208';
+      root.dataset.fxMagChapters='r2209';
       root.dataset.fxMagChapterCount=String(registry.size);
     }
   }
@@ -221,7 +239,7 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
-    version:'r2208',
+    version:'r2209',
     audit:()=>({
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
