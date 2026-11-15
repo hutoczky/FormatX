@@ -381,3 +381,29 @@ html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-c
   overflow-y:auto!important;
   overscroll-behavior-y:contain;
 }
+
+
+/* R2213 CINEMATIC CHECKOUT — critical specificity correction.
+   The older archive blanket-hide selector ends with :not(#hero), which adds
+   an ID to specificity. Its [data-fx-cinema-host-active] override has only
+   a class, so the LICENSING host remained visibility:hidden despite active
+   panel state. Override only the ACTIVE pricing scene, not other chapters. */
+html:root:root:root:root:root[data-fx-archive-cinema="active"]
+body.living-architecture main#main-content > section#pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  content-visibility:visible!important;
+  pointer-events:none!important;
+  contain:none!important;
+  clip-path:none!important;
+  overflow:visible!important;
+}
+html:root:root:root:root:root[data-fx-archive-cinema="active"]
+body.living-architecture main#main-content > section#pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
