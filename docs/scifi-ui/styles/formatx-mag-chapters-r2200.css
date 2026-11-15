@@ -488,3 +488,45 @@ main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
     padding:10px 2px!important;
   }
 }
+
+
+/* R2216: compact legal-sales availability signal; never cover checkout CTAs. */
+#pricing .fx-sales-status-r2216{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%;
+  max-width:62ch;
+  margin:clamp(14px,2vw,24px) 0 0!important;
+  padding:12px clamp(12px,1.5vw,20px)!important;
+  border:1px solid rgba(144,210,229,.22);
+  border-left:3px solid rgba(144,210,229,.5);
+  border-radius:6px 16px 16px 6px;
+  background:rgba(7,23,35,.66);
+  color:#c8dce7!important;
+  font:500 clamp(.8rem,1.05vw,1rem)/1.55 system-ui,sans-serif!important;
+  letter-spacing:normal!important;
+  text-transform:none!important;
+  text-wrap:pretty;
+  overflow-wrap:anywhere;
+  visibility:visible!important;
+  opacity:1!important;
+  animation:none!important;
+}
+#pricing .fx-sales-status-r2216[data-fx-sales-state="blocked"]{
+  border-left-color:#f0bd6a;
+  color:#f5dfc1!important;
+}
+#pricing .fx-sales-status-r2216[data-fx-sales-state="ready"]{
+  border-left-color:#86d9ba;
+  color:#d6f4e6!important;
+}
+#pricing .fx-sales-status-r2216[data-fx-sales-state="unknown"]{
+  border-left-color:#c7c2a6;
+}
+@media(max-width:900px){
+ #pricing .fx-sales-status-r2216{
+   font-size:.88rem!important;
+   line-height:1.45!important;
+   margin-top:14px!important;
+ }
+}
