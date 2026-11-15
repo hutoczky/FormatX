@@ -7,6 +7,9 @@ on:
     paths:
       - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/checkout.html'
+      - 'billing-worker/src/production-entry.js'
+      - 'billing-worker/src/sales-gate.js'
+      - '.github/scripts/validate-sales-gate-body-r2214.cjs'
       - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
       - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
@@ -30,7 +33,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Verify browser-test source is valid
-        run: node --check .github/scripts/validate-commerce-visibility-r2211.cjs
+        run: |
+          node --check .github/scripts/validate-commerce-visibility-r2211.cjs
+          node --check .github/scripts/validate-sales-gate-body-r2214.cjs
+          node .github/scripts/validate-sales-gate-body-r2214.cjs
 
       - name: Wait for current MAG payment code to reach the live domain
         shell: bash
