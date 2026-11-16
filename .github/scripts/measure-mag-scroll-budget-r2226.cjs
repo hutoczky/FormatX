@@ -55,10 +55,14 @@ async function measure(browser,spec,trial){
       return {
         ms:Math.round(performance.now()),
         longtasks:audit.longtasks.slice(0,80),
+        idleTaskTotalMs:audit.longtasks.reduce((sum,x)=>sum+x.duration,0),
+        idleLongestTaskMs:Math.max(0,...audit.longtasks.map(x=>x.duration)),
         cls:audit.shifts.reduce((a,b)=>a+b.value,0),
         nativeCanvasCount:document.querySelectorAll('#hero canvas').length,
         paperFolios:document.querySelectorAll('.fx-archive-cinema-folio-r2030').length,
         anchorHeightOverrides:document.querySelectorAll('[data-fx-cinema-anchor-height]').length,
+        layoutBatch:document.documentElement.dataset.fxArchiveLayoutBatchR2230||'',
+        layoutReadCount:Number(document.documentElement.dataset.fxArchiveLayoutReadCountR2230)||0,
         magReady:!!core?.canvas,
         archiveState:archive?.state||null,
         archiveExperience:document.documentElement.dataset.fxArchiveExperience||'',
@@ -72,6 +76,12 @@ async function measure(browser,spec,trial){
     console.log('FX_SCROLL_IDLE_R2226 '+JSON.stringify({profile:spec.name,trial,...idle}));
     assert.equal(idle.archiveEngagement,'awaiting-visitor',
       spec.name+' archive started without gesture');
+    if(idle.paperFolios>0){
+      assert.equal(idle.layoutBatch,'read-before-write',
+        spec.name+' archiver did not batch native layout reads');
+      assert(idle.layoutReadCount>=1&&idle.layoutReadCount<=idle.paperFolios,
+        spec.name+' duplicate section geometry measurement '+JSON.stringify(idle));
+    }
     const started=await page.evaluate(()=>{
       window.__fxScrollAudit.scrollStart=performance.now();
       window.__fxScrollAudit.frameTimes=[];
