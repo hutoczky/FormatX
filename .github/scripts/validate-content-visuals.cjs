@@ -274,7 +274,16 @@ async function assertHeroDisclosure(page) {
   /* R2005: content-visibility:auto can make scrollIntoView a no-op before a
      2–3kpx lazy section is materialized. Test native document scrolling as the
      visitor does, then require the REAL non-core scene transition. */
+  // R2220 requires trusted user intent before enabling the 3D archive.
+  // Scripted scrollIntoView is not that intent. Test a genuine wheel input
+  // first so the production gate remains protective against CLS on load.
+  const preGesture=await page.evaluate(()=>document.documentElement.dataset.fxArchiveEngagementR2220);
+  assert(preGesture==='awaiting-visitor'||preGesture==='deep-link',
+    'R2220 must not activate the cinematic archive during an idle first paint: '+preGesture);
   const beforeScroll = await page.evaluate(() => scrollY);
+  await page.mouse.wheel(0, Math.max(300,Math.round((page.viewportSize()?.height||768)*.65)));
+  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveEngagementR2220?.startsWith('visitor-'),
+    null,{timeout:10000});
   await page.locator('#experience').scrollIntoViewIfNeeded();
   await page.evaluate(() => {
     const section = document.querySelector('#experience');
