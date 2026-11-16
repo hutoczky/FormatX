@@ -116,6 +116,7 @@ async function measure(browser,spec){
         rendererClass:root.dataset.fxCoreRendererClassR1541||'',
         qualityPolicy:root.dataset.fxArchiveQualityPolicyR2227||'',
         drawCalls:Number(root.dataset.fxArchiveDrawCalls)||0,
+        attributeSetups:Number(root.dataset.fxArchiveAttributeSwitchesR2228)||0,
         archiveState:window.FormatXArchiveExperience?.state||null,
         chapters:window.FormatXMagChapters?.audit()||null,
         pricingOpen:document.getElementById('pricing')?.dataset.fxExpanded||null,
@@ -139,6 +140,10 @@ async function measure(browser,spec){
       assert.equal(result.qualityPolicy,'hardware-photographic-full',
         'Do not downgrade the genuine GPU-backed desktop MAG');
     }
+    assert(result.drawCalls>0&&result.attributeSetups>0,
+      spec.name+' R2228 shared native WebGL VAO pass did not draw');
+    assert(result.attributeSetups<result.drawCalls*Math.max(1,result.archiveState?.frames||1),
+      spec.name+' redundant WebGL2 vertex attribute setup exceeded draw budget');
     assert(result.pricingOpen==='true',spec.name+' checkout folded after scroll');
     assert(result.chapters?.total>=8,spec.name+' editorial chapter UI missing');
   }finally{await context.close();}
