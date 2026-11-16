@@ -255,13 +255,27 @@
      Every original section remains in the document as a scroll anchor.
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
+    // R2230: measure every unique native section BEFORE moving even one
+    // child. Interleaving host.getBoundingClientRect() with prior
+    // appendChild()/height writes forced 7 expensive layout flushes.
+    // One read phase + one write phase retains all original DOM nodes.
+    const originalHeights=new Map();
+    for(const scene of scenes){
+      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      if(!(host instanceof HTMLElement)||originalHeights.has(host))continue;
+      if(!host.querySelector(':scope > .fx-archive-cinema-folio-r2030')){
+        originalHeights.set(host,Math.max(520,host.getBoundingClientRect().height||host.offsetHeight));
+      }
+    }
+    root.dataset.fxArchiveLayoutBatchR2230='read-before-write';
+    root.dataset.fxArchiveLayoutReadCountR2230=String(originalHeights.size);
     for(const scene of scenes){
       const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
       if(!(host instanceof HTMLElement))continue;
       scene.cinemaHost=host;
       let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(!panel){
-        const oldHeight=Math.max(520,host.getBoundingClientRect().height||host.offsetHeight);
+        const oldHeight=originalHeights.get(host)||520;
         panel=document.createElement('div');
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
