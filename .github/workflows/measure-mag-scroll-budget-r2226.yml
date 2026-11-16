@@ -8,6 +8,7 @@ on:
       - '.github/scripts/measure-mag-scroll-budget-r2226.cjs'
       - '.github/workflows/measure-mag-scroll-budget-r2226.yml'
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - 'docs/scifi-ui/index.html'
       - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
       - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
 
@@ -27,6 +28,23 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check benchmark source
         run: node --check .github/scripts/measure-mag-scroll-budget-r2226.cjs
+      - name: Wait for the exact live MAG archive source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          BASE='https://www.formatxsuite.com/scifi-ui'
+          ok=0
+          for attempt in $(seq 1 24); do
+            if curl -fsSL --max-time 25 -o /tmp/fx-mag-live.html "$BASE/?scroll-budget=$GITHUB_SHA-$attempt" \
+              && curl -fsSL --max-time 25 -o /tmp/fx-mag-live.js "$BASE/scripts/formatx-cinematic-archive-r1987.js?audit=$GITHUB_SHA-$attempt" \
+              && grep -Fq 'formatx-cinematic-archive-r1987.js?v=20261116-r2058-r2227-adaptive-software-mag' /tmp/fx-mag-live.html \
+              && cmp -s docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js /tmp/fx-mag-live.js; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          [[ "$ok" == 1 ]] || { echo "Live MAG archive has not converged" >&2; exit 1; }
       - name: Install isolated Chromium
         shell: bash
         run: |
