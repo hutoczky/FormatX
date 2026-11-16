@@ -94,8 +94,24 @@ async function probe(browser,spec,run){
      window.__fxClsAudit.capture('3200ms');
      const a=window.__fxClsAudit;
      const total=a.shifts.reduce((sum,e)=>sum+e.value,0);
-     return {total,shifts:a.shifts.sort((x,y)=>y.value-x.value).slice(0,14),
-       paint:a.paint,snapshots:a.snapshots,errors:a.errors};
+     const first=a.snapshots.find(s=>s.label==='dom-ready')||a.snapshots[0];
+     const last=a.snapshots.at(-1);
+     const original=first?.box?.[2],settled=last?.box?.[2];
+     const p0=document.querySelector('link[data-fx-p0-first-paint-r503]');
+     return {
+       total,
+       copyBoxDelta:{
+         top:original&&settled?settled.y-original.y:null,
+         height:original&&settled?settled.h-original.h:null,
+         initialHeight:original?.h,
+         finalHeight:settled?.h
+       },
+       criticalCssVersion:p0?.getAttribute('href')||null,
+       firstPaintArchiveEngagement:first?.states?.engaged||null,
+       finalArchiveEngagement:last?.states?.engaged||null,
+       shifts:a.shifts.sort((x,y)=>y.value-x.value).slice(0,14),
+       paint:a.paint,snapshots:a.snapshots,errors:a.errors
+     };
    });
    console.log('FX_CLS_R2219 '+JSON.stringify({profile:spec.name,run,
      status:response?.status(),...result}));
