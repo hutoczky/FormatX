@@ -153,6 +153,10 @@
   const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
   const veryLowPower=mobile()&&Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
+  // R2227: reuse the ONLY living MAG renderer's already-computed
+  // hardware/software classification; no second GPU probe or fingerprint.
+  // Keep premium high-detail material on genuine GPU-backed desktops.
+  const softwareMagRenderer=()=>root.dataset.fxCoreRendererClassR1541==='software-adaptive';
   root.dataset.fxArchiveExperience='pending';
   function ensureAIScrollStation(){
     if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
@@ -579,7 +583,7 @@
     static frameInterval(){
       // Allow for fractional rAF timestamps: using 16.7ms on a 60Hz
       // display can miss every 16.667ms paint and accidentally cap at 30Hz.
-      if(!mobile())return 15.5;
+      if(!mobile())return softwareMagRenderer()?32:15.5;
       if(veryLowPower)return 48;
       return quality==='low'?32:15.5;
     }
@@ -597,7 +601,7 @@
       this.emaMs=this.samples?this.emaMs*.86+ms*.14:ms;
       this.samples++;
       if(this.samples%8===0)root.dataset.fxArchiveCpuSubmitMs=this.emaMs.toFixed(2);
-      if(!mobile()||mobilePerf||this.samples<20)return;
+      if(softwareMagRenderer()||!mobile()||mobilePerf||this.samples<20)return;
       // Hysteresis: neither first shader compilation nor one GC pause
       // can permanently reduce MAG's native filament quality.
       if(quality==='high'){
@@ -1200,6 +1204,13 @@ void main(){
       registeredCanvas=null;registeredApi=null;
     }
     stage=api.stage;heroHost=document.querySelector('#hero .hero-space');
+    // The canonical organism already identifies software fallback. Its
+    // 3D paper shares that renderer and must use a matching lightweight
+    // mesh/rail/filament budget, not desktop-high draw calls on SwiftShader.
+    if(softwareMagRenderer())quality='low';
+    root.dataset.fxArchiveQualityPolicyR2227=softwareMagRenderer()
+      ?'software-lite-single-webgl2'
+      :'hardware-photographic-full';
     try{
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
       api.canvas.addEventListener('webglcontextlost',()=>{
