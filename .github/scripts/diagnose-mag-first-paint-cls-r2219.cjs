@@ -107,6 +107,7 @@ async function probe(browser,spec,run){
        brandGeometry:{
          initialX:brandBefore?.x??null,settledX:brandAfter?.x??null,
          initialY:brandBefore?.y??null,settledY:brandAfter?.y??null,
+         initialTopCss:brandBefore?.top??null,settledTopCss:brandAfter?.top??null,
          initialPosition:brandBefore?.position??null,
          settledPosition:brandAfter?.position??null
        },
@@ -145,7 +146,7 @@ async function probe(browser,spec,run){
      assert(brand.initialPosition==='absolute'&&brand.settledPosition==='absolute'&&
        Math.abs(brand.initialX-14)<=1&&
        Math.abs(brand.settledX-brand.initialX)<=1&&
-       Math.abs(brand.settledY-brand.initialY)<=1,
+       brand.initialTopCss==='13px'&&brand.settledTopCss===brand.initialTopCss,
        'Mobile brand moved after first paint: '+JSON.stringify(brand));
    }
    if(!spec.mobile){
