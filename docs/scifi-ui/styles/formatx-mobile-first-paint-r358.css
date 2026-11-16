@@ -1094,12 +1094,12 @@
   }
 }
 
-/* R2231 — 320px-class phones: the sticky 70px header covered up to 40%
+/* R2232 — 320–430px phones: the sticky 70px header covered up to 97%
    of the real H1/lead during native scrolling (no-occlusion browser proof).
    Let the real navigation occupy its initial row, then scroll away. This
    changes NO markup, MAG/WebGL canvas, payment form or larger breakpoint.
    The high-specificity first-paint rule also prevents a late sticky snap. */
-@media(max-width:359px){
+@media(max-width:430px){
   html:root:root:root:root:root:root:root:root:root
   body.living-architecture header.topbar{
     position:relative!important;
