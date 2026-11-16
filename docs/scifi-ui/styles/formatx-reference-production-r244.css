@@ -1491,7 +1491,8 @@
     max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
   }
   html:root:root[data-fx-reference-production-r244] body.living-architecture #hero>.hero-grid>.hero-copy{
-    min-height:575px!important;
+    /* R2222: never shrink the 607px first-paint copy on native MAG readiness. */
+    min-height:607px!important;
   }
 }
 /* production-r1710-final-hero-geometry-lock */
