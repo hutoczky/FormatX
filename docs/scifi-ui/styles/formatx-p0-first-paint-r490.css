@@ -1498,7 +1498,7 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
   html body.living-architecture #hero>.hero-grid>.hero-copy{
     grid-area:copy!important;position:relative!important;display:block!important;align-self:center!important;
-    width:100%!important;min-width:0!important;max-width:580px!important;min-height:575px!important;
+    width:100%!important;min-width:0!important;max-width:580px!important;min-height:607px!important;
     margin:0!important;padding:0!important;opacity:1!important;visibility:visible!important;
     transform:none!important;filter:none!important;overflow:visible!important;
   }
