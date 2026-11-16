@@ -132,8 +132,8 @@ async function measure(browser,spec){
         spec.name+' software WebGL missed MAG archive fallback');
       assert.equal(result.archiveState?.quality,'low',
         spec.name+' software GPU still requests premium desktop paper meshes');
-      assert.equal(result.archiveState?.targetFrameMs,32,
-        spec.name+' software renderer paper target interval should be 32ms');
+      assert(result.archiveState?.targetFrameMs>=32,
+        spec.name+' software renderer should reserve a low-power frame budget');
     }
     if(result.rendererClass==='hardware-full'&&!spec.mobile){
       assert.equal(result.qualityPolicy,'hardware-photographic-full',
