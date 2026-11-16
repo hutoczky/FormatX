@@ -249,10 +249,14 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
     max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
   }
   html:root:root body.living-architecture #hero>.hero-grid>.hero-copy{
-    min-height:575px!important;
+    /* R2221: real desktop CLS trace shows the 607px readable copy
+       collapses to 575px when R326 native WebGL mounts at 2.4s.
+       Reserve the initial copy box, not only the smaller settled box. */
+    min-height:607px!important;
   }
 }
 /* production-r1710-desktop-hero-geometry-lock */
+/* production-r2221-intrinsic-desktop-copy-stability */
 
 
 /* R1732 — ASK dialogue critical surface merged into the existing P0 request.
