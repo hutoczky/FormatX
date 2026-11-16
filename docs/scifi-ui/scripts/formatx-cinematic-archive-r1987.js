@@ -688,6 +688,10 @@
       }
       this.vao=gl.createVertexArray();
       if(!this.vao)throw new Error('VAO unavailable');
+      // R2228: WebGL2 VAOs retain vertex attribute pointers. Two meshes
+      // share this pass; only rebind when switching between them.
+      this.boundMesh=null;
+      this.attributeSetups=0;
       this.drawCalls=0;
     }
     programFor(gl){
@@ -818,13 +822,18 @@ void main(){
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
     mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false){
       const gl=this.gl,u=this.uniform;
-      gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
-      gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
-      gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
-      gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
+      if(this.boundMesh!==mesh){
+        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
+        gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
+        gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
+        gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
+        gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
+        this.boundMesh=mesh;
+        this.attributeSetups++;
+      }
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
-      gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
-      gl.uniform1f(u.uOpacity,alpha);gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
+      gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
+      gl.uniform1f(u.uOpacity,alpha);
       gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);
       gl.uniform1f(u.uShadow,shadow?1:0);
       gl.drawArrays(gl.TRIANGLES,0,mesh.count);
@@ -849,6 +858,8 @@ void main(){
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
+      // Camera is identical for every primitive in this scene frame.
+      gl.uniform3fv(this.uniform.uCamera,cam);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
@@ -996,6 +1007,8 @@ void main(){
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
       root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
+      if(root.dataset.fxArchiveAttributeSwitchesR2228!==String(this.attributeSetups))
+        root.dataset.fxArchiveAttributeSwitchesR2228=String(this.attributeSetups);
       if(root.dataset.fxArchiveDepthPolicyR2035!=='canonical-mag-front-deep-shelves-behind')
         root.dataset.fxArchiveDepthPolicyR2035='canonical-mag-front-deep-shelves-behind';
       if(root.dataset.fxArchiveNativePass!=='shared-webgl2')
