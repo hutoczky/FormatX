@@ -22,16 +22,29 @@ async function probe(browser,spec,run){
        [...element.classList].slice(0,4).join('.'),
        x:Math.round(r.x),y:Math.round(r.y),
        w:Math.round(r.width),h:Math.round(r.height),
-       position:s.position,display:s.display,visibility:s.visibility};
+       position:s.position,display:s.display,visibility:s.visibility,
+       top:s.top,bottom:s.bottom,marginTop:s.marginTop,
+       paddingTop:s.paddingTop,transform:s.transform,
+       alignSelf:s.alignSelf,gridArea:s.gridArea,boxSizing:s.boxSizing};
    };
    window.__fxClsAudit={
      shifts:[],paint:[],snapshots:[],errors:[],
      capture(label){
-       const sel=['#hero','#hero>.hero-grid','#hero .hero-space',
+       const sel=['#hero','#hero>.hero-grid','#hero .hero-copy','#hero .hero-space',
          '#hero .fx-mag-first-paint-r1756','#hero .fx-core-mobile-v55-stage',
          '#hero .fx-crystal-organism-r326-stage','#hero-title'];
+       const root=document.documentElement;
        this.snapshots.push({t:performance.now(),label,box:sel.map(s=>sample(
-         document.querySelector(s))),r487:document.documentElement.dataset.fxDeferredCssR487});
+         document.querySelector(s))),r487:root.dataset.fxDeferredCssR487,
+         states:{
+           archive:root.dataset.fxArchiveCinema,
+           dock:root.dataset.fxArchiveDock,
+           engaged:root.dataset.fxArchiveEngagementR2220,
+           desktop:root.dataset.fxDesktopApexR181,
+           mobile:root.dataset.fxMobileReferenceLayout,
+           crystal:root.dataset.fxCrystalOrganismR326,
+           core:root.dataset.fxCoreFirstFrameR1913
+         }});
      }
    };
    try{new PerformanceObserver(list=>{
@@ -66,6 +79,9 @@ async function probe(browser,spec,run){
        window.__fxClsAudit.capture('raf1');
        requestAnimationFrame(()=>window.__fxClsAudit.capture('raf2'));
      });
+     for(const delay of [950,1450,1900,2200,2400,2600,2850]){
+       setTimeout(()=>window.__fxClsAudit.capture('t'+delay),delay);
+     }
    },{once:true});
    addEventListener('formatx:deferredcssready',()=>window.__fxClsAudit.capture('css-ready'));
  });
