@@ -2,6 +2,7 @@
 /* Read-only R2219 geometry audit. Chrome's layout-shift attribution
    identifies the actual moving node, including late WebGL stage placement. */
 const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
 const BASE_URL=process.env.FORMATX_CLS_URL||'https://www.formatxsuite.com/scifi-ui/';
 const profiles=[
   {name:'desktop',width:1366,height:768,mobile:false},
@@ -115,6 +116,29 @@ async function probe(browser,spec,run){
    });
    console.log('FX_CLS_R2219 '+JSON.stringify({profile:spec.name,run,
      status:response?.status(),...result}));
+   // R2224: turn the previously informational trace into a real quality gate.
+   // This tests the initial idle page; trusted visitor input is tested
+   // separately by validate-content-visuals.cjs.
+   assert.equal(response?.status(),200,spec.name+' production page unavailable');
+   assert.equal(result.errors.length,0,spec.name+' performance observers failed');
+   assert.equal(result.firstPaintArchiveEngagement,'awaiting-visitor',
+     spec.name+' cinematic archive shifted before user intent');
+   assert.equal(result.finalArchiveEngagement,'awaiting-visitor',
+     spec.name+' cinematic archive auto-started without user intent');
+   assert(Number.isFinite(result.total)&&result.total<0.05,
+     spec.name+' failed 0.05 CLS quality gate: '+JSON.stringify({
+       total:result.total,sources:result.shifts.slice(0,3),
+       loadedCss:result.criticalCssVersion
+     }));
+   if(!spec.mobile){
+     assert(result.copyBoxDelta?.initialHeight>500,
+       'Desktop hero-copy geometry not measurable');
+     assert(Math.abs(result.copyBoxDelta.top)<=1&&Math.abs(result.copyBoxDelta.height)<=1,
+       'Desktop MAG shifted its readable headline during 3D startup: '+
+       JSON.stringify(result.copyBoxDelta));
+   }
+   console.log('FX_CLS_QUALITY_PASS '+spec.name+' run='+run+
+     ' cls='+result.total.toFixed(5));
  }finally{await ctx.close();}
 }
 (async()=>{
