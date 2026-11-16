@@ -62,6 +62,8 @@ async function measure(browser,spec){
         magReady:!!core?.canvas,
         archiveState:archive?.state||null,
         archiveExperience:document.documentElement.dataset.fxArchiveExperience||'',
+        rendererClass:document.documentElement.dataset.fxCoreRendererClassR1541||'',
+        qualityPolicy:document.documentElement.dataset.fxArchiveQualityPolicyR2227||'',
         archiveEngagement:document.documentElement.dataset.fxArchiveEngagementR2220||'',
         chapterCount:document.documentElement.dataset.fxMagChapterCount||'',
         sectionCount:document.querySelectorAll('main#main-content > section').length
@@ -111,6 +113,9 @@ async function measure(browser,spec){
         archiveEngagement:root.dataset.fxArchiveEngagementR2220||'',
         archiveCinema:root.dataset.fxArchiveCinema||'',
         archiveError:root.dataset.fxArchiveError||'',
+        rendererClass:root.dataset.fxCoreRendererClassR1541||'',
+        qualityPolicy:root.dataset.fxArchiveQualityPolicyR2227||'',
+        drawCalls:Number(root.dataset.fxArchiveDrawCalls)||0,
         archiveState:window.FormatXArchiveExperience?.state||null,
         chapters:window.FormatXMagChapters?.audit()||null,
         pricingOpen:document.getElementById('pricing')?.dataset.fxExpanded||null,
@@ -122,6 +127,18 @@ async function measure(browser,spec){
     assert(result.scrollY>200,spec.name+' wheel did not advance native page scroll');
     assert(result.archiveEngagement.startsWith('visitor-'),
       spec.name+' genuine scroll did not activate cinematic navigation');
+    if(result.rendererClass==='software-adaptive'){
+      assert.equal(result.qualityPolicy,'software-lite-single-webgl2',
+        spec.name+' software WebGL missed MAG archive fallback');
+      assert.equal(result.archiveState?.quality,'low',
+        spec.name+' software GPU still requests premium desktop paper meshes');
+      assert.equal(result.archiveState?.targetFrameMs,32,
+        spec.name+' software renderer paper target interval should be 32ms');
+    }
+    if(result.rendererClass==='hardware-full'&&!spec.mobile){
+      assert.equal(result.qualityPolicy,'hardware-photographic-full',
+        'Do not downgrade the genuine GPU-backed desktop MAG');
+    }
     assert(result.pricingOpen==='true',spec.name+' checkout folded after scroll');
     assert(result.chapters?.total>=8,spec.name+' editorial chapter UI missing');
   }finally{await context.close();}
