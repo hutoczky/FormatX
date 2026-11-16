@@ -35,6 +35,9 @@
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let lastPanelNode=null;
   let raf=0,domRaf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
+  // R2235: the idle home scene has no readable 3D archive chapter. Its
+  // initial DOM/ARIA synchronization only needs one composed frame.
+  let idleComposed=false,idleFastPathSkips=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
@@ -1190,6 +1193,15 @@ void main(){
     }
   }
   function invalidate(){
+    // The first cinematic home render must establish all original folios,
+    // inert attributes and legal checkout visibility. Subsequent resize-
+    // observer bursts before visitor intent must not trigger the same
+    // seven-host style walk plus an empty GPU request every time.
+    if(!journeyArmed&&!archiveActive&&!force&&idleComposed&&
+       cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'){
+      idleFastPathSkips++;
+      return;
+    }
     if(!disposed&&!document.hidden&&!reduced.matches){
       try{
         // R2022: synchronize the visible archive layer and chapter identity
@@ -1213,6 +1225,10 @@ void main(){
               updateHandoff();
               domComposes++;
               root.dataset.fxArchiveDomComposes=String(domComposes);
+              if(!journeyArmed&&!archiveActive&&cinemaPrepared){
+                idleComposed=true;
+                root.dataset.fxArchiveIdleFirstSyncR2235='complete';
+              }
             }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
           });
         }
@@ -1345,6 +1361,7 @@ void main(){
         'ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' ','Spacebar'
       ].includes(event.key))return;
       journeyArmed=true;
+      idleComposed=false;
       root.dataset.fxArchiveEngagementR2220='visitor-'+(event?.type||'navigation');
       invalidate();
     };
@@ -1374,16 +1391,25 @@ void main(){
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
-    addEventListener('resize',invalidate,{passive:true});
+    addEventListener('resize',()=>{idleComposed=false;invalidate();},{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
-    addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
+    addEventListener('formatx:livingready',()=>{
+      idleComposed=false;
+      discover();invalidate();
+    },{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      idleComposed=false;
       invalidate();
     },{passive:true});
-    addEventListener('formatx:languagechange',invalidate,{passive:true});
-    addEventListener('pageshow',invalidate,{passive:true});
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
+    addEventListener('formatx:languagechange',()=>{
+      idleComposed=false;
+      invalidate();
+    },{passive:true});
+    addEventListener('pageshow',()=>{idleComposed=false;invalidate();},{passive:true});
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden){idleComposed=false;invalidate();}
+    },{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
     addEventListener('pagehide',stop,{once:true});
     invalidate();
@@ -1392,6 +1418,7 @@ void main(){
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
+      idleFastPathSkips,idleComposed,
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples,domComposes};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
