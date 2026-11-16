@@ -65,6 +65,7 @@ async function measure(browser,spec,trial){
         layoutReadCount:Number(document.documentElement.dataset.fxArchiveLayoutReadCountR2230)||0,
         magReady:!!core?.canvas,
         archiveState:archive?.state||null,
+        idleSync:document.documentElement.dataset.fxArchiveIdleFirstSyncR2235||'',
         archiveExperience:document.documentElement.dataset.fxArchiveExperience||'',
         rendererClass:document.documentElement.dataset.fxCoreRendererClassR1541||'',
         qualityPolicy:document.documentElement.dataset.fxArchiveQualityPolicyR2227||'',
@@ -77,6 +78,12 @@ async function measure(browser,spec,trial){
     assert.equal(idle.archiveEngagement,'awaiting-visitor',
       spec.name+' archive started without gesture');
     if(idle.paperFolios>0){
+      assert.equal(idle.idleSync,'complete',
+        spec.name+' native home scene never completed first idle synchronization');
+      assert(idle.archiveState?.idleComposed===true,
+        spec.name+' idle archive remains in repeated DOM compose mode');
+      assert(idle.archiveState?.domComposes<=5,
+        spec.name+' repeated idle DOM compositions: '+idle.archiveState?.domComposes);
       assert.equal(idle.layoutBatch,'read-before-write',
         spec.name+' archiver did not batch native layout reads');
       assert(idle.layoutReadCount>=1&&idle.layoutReadCount<=idle.paperFolios,
