@@ -100,8 +100,16 @@ async function probe(browser,spec,run){
      const last=a.snapshots.at(-1);
      const original=first?.box?.[2],settled=last?.box?.[2];
      const p0=document.querySelector('link[data-fx-p0-first-paint-r503]');
+     const brandBefore=first?.box?.find(node=>node?.name==='a.brand');
+     const brandAfter=last?.box?.find(node=>node?.name==='a.brand');
      return {
        total,
+       brandGeometry:{
+         initialX:brandBefore?.x??null,settledX:brandAfter?.x??null,
+         initialY:brandBefore?.y??null,settledY:brandAfter?.y??null,
+         initialPosition:brandBefore?.position??null,
+         settledPosition:brandAfter?.position??null
+       },
        copyBoxDelta:{
          top:original&&settled?settled.y-original.y:null,
          height:original&&settled?settled.h-original.h:null,
@@ -131,6 +139,15 @@ async function probe(browser,spec,run){
        total:result.total,sources:result.shifts.slice(0,3),
        loadedCss:result.criticalCssVersion
      }));
+   if(spec.mobile){
+     const brand=result.brandGeometry;
+     // R2225: the first frame and settled brand must share one 14px slot.
+     assert(brand.initialPosition==='absolute'&&brand.settledPosition==='absolute'&&
+       Math.abs(brand.initialX-14)<=1&&
+       Math.abs(brand.settledX-brand.initialX)<=1&&
+       Math.abs(brand.settledY-brand.initialY)<=1,
+       'Mobile brand moved after first paint: '+JSON.stringify(brand));
+   }
    if(!spec.mobile){
      assert(result.copyBoxDelta?.initialHeight>500,
        'Desktop hero-copy geometry not measurable');
