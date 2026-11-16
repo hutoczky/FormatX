@@ -24,7 +24,7 @@ async function probe(browser,spec,run){
        x:Math.round(r.x),y:Math.round(r.y),
        w:Math.round(r.width),h:Math.round(r.height),
        position:s.position,display:s.display,visibility:s.visibility,
-       top:s.top,bottom:s.bottom,marginTop:s.marginTop,
+       top:s.top,right:s.right,left:s.left,bottom:s.bottom,marginTop:s.marginTop,
        paddingTop:s.paddingTop,transform:s.transform,
        alignSelf:s.alignSelf,gridArea:s.gridArea,boxSizing:s.boxSizing};
    };
@@ -32,6 +32,7 @@ async function probe(browser,spec,run){
      shifts:[],paint:[],snapshots:[],errors:[],
      capture(label){
        const sel=['#hero','#hero>.hero-grid','#hero .hero-copy','#hero .hero-space',
+         '.topbar > a.brand',
          '#hero .fx-mag-first-paint-r1756','#hero .fx-core-mobile-v55-stage',
          '#hero .fx-crystal-organism-r326-stage','#hero-title'];
        const root=document.documentElement;
