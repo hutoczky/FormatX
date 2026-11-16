@@ -10,6 +10,12 @@
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
+  // R2220: do not jump the hero into archive dock automatically when the
+  // native shader becomes ready several seconds after first paint.
+  // Explicit archive URLs and deep links keep their existing semantics.
+  let journeyArmed=force || Boolean(location.hash&&
+    location.hash!=='#hero'&&location.hash!=='#top') || scrollY>32;
+  root.dataset.fxArchiveEngagementR2220=journeyArmed?'deep-link':'awaiting-visitor';
   const requestedHtmlFallback=params.get('archive')==='off';
   const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
@@ -1106,6 +1112,13 @@ void main(){
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
   function selectLiveChapter(){
+    // Loading WebGL is not a user request to rearrange an already painted
+    // document. The native MAG remains a usable hero until a real gesture.
+    if(!journeyArmed){
+      current=null;
+      root.dataset.fxArchiveCurrent='none';
+      return false;
+    }
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
     // From the moment the intro ends, the MAG owns the page. Do not leave the
@@ -1281,6 +1294,32 @@ void main(){
       return;
     }
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    // Real user intent activates the cinematic world without a delayed,
+    // unsolicited 3D stage relocation (measured CLS 0.17/0.99 at 2-4s).
+    // The first scroll still initiates the Igloo-style scene journey.
+    const startJourney=event=>{
+      if(journeyArmed||(event&&!event.isTrusted))return;
+      if(event?.type==='keydown'&&![
+        'ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' ','Spacebar'
+      ].includes(event.key))return;
+      journeyArmed=true;
+      root.dataset.fxArchiveEngagementR2220='visitor-'+(event?.type||'navigation');
+      invalidate();
+    };
+    if(!journeyArmed){
+      addEventListener('wheel',startJourney,{passive:true});
+      addEventListener('touchmove',startJourney,{passive:true});
+      addEventListener('keydown',startJourney,{passive:true});
+      addEventListener('pointerdown',event=>{
+        if(event.isTrusted &&
+           (event.target instanceof Element &&
+             (event.target.closest('button,a')||
+              event.clientX>=document.documentElement.clientWidth-20)))
+          startJourney(event);
+      },{passive:true});
+      addEventListener('hashchange',()=>startJourney(null),{passive:true});
+      addEventListener('formatx:mag-chapter-toggle',()=>startJourney(null),{passive:true});
+    }
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,
