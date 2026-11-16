@@ -8,7 +8,7 @@ const specs=[
   {name:'desktop',width:1366,height:768,mobile:false},
   {name:'mobile',width:390,height:844,mobile:true}
 ];
-async function measure(browser,spec){
+async function measure(browser,spec,trial){
   const context=await browser.newContext({
     viewport:{width:spec.width,height:spec.height},isMobile:spec.mobile,
     hasTouch:spec.mobile,deviceScaleFactor:1,locale:'hu-HU',
@@ -43,7 +43,7 @@ async function measure(browser,spec){
   page.on('pageerror',e=>errors.push(String(e)));
   try{
     const url=new URL(origin);
-    url.searchParams.set('scroll-budget','r2226-'+spec.name);
+    url.searchParams.set('scroll-budget','r2229-'+spec.name+'-'+trial);
     url.searchParams.set('intro','0');
     const response=await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:60000});
     assert.equal(response?.status(),200,spec.name+' production HTML unavailable');
@@ -69,7 +69,7 @@ async function measure(browser,spec){
         sectionCount:document.querySelectorAll('main#main-content > section').length
       };
     });
-    console.log('FX_SCROLL_IDLE_R2226 '+JSON.stringify({profile:spec.name,...idle}));
+    console.log('FX_SCROLL_IDLE_R2226 '+JSON.stringify({profile:spec.name,trial,...idle}));
     assert.equal(idle.archiveEngagement,'awaiting-visitor',
       spec.name+' archive started without gesture');
     const started=await page.evaluate(()=>{
@@ -123,7 +123,7 @@ async function measure(browser,spec){
         pageErrors:a.errors
       };
     },started);
-    console.log('FX_SCROLL_INPUT_R2226 '+JSON.stringify({profile:spec.name,...result,errors}));
+    console.log('FX_SCROLL_INPUT_R2226 '+JSON.stringify({profile:spec.name,trial,...result,errors}));
     assert.equal(errors.length,0,'Runtime errors '+spec.name+': '+errors.join(','));
     assert(result.scrollY>200,spec.name+' wheel did not advance native page scroll');
     assert(result.archiveEngagement.startsWith('visitor-'),
@@ -135,6 +135,10 @@ async function measure(browser,spec){
         spec.name+' software GPU still requests premium desktop paper meshes');
       assert(result.archiveState?.targetFrameMs>=32,
         spec.name+' software renderer should reserve a low-power frame budget');
+    }
+    if(result.rendererClass==='software-adaptive'&&!spec.mobile){
+      assert(result.drawCalls<=26,
+        spec.name+' low-power archive still draws auxiliary desktop struts: '+result.drawCalls);
     }
     if(result.rendererClass==='hardware-full'&&!spec.mobile){
       assert.equal(result.qualityPolicy,'hardware-photographic-full',
@@ -153,6 +157,6 @@ async function measure(browser,spec){
     '--no-sandbox','--disable-dev-shm-usage','--enable-unsafe-swiftshader',
     '--ignore-gpu-blocklist','--enable-webgl'
   ]});
-  try{for(const spec of specs)await measure(browser,spec);}
+  try{for(const spec of specs)for(let trial=1;trial<=2;trial++)await measure(browser,spec,trial);}
   finally{await browser.close();}
 })().catch(e=>{console.error('FX_SCROLL_MEASURE_FAIL '+String(e.stack||e));process.exit(1);});
