@@ -1,0 +1,67 @@
+name: FormatX Chromium critical CSS coverage R2233
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/measure-critical-css-coverage-r2233.cjs'
+      - '.github/workflows/measure-critical-css-coverage-r2233.yml'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-critical-css-cover-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Validate CSS audit syntax
+        run: node --check .github/scripts/measure-critical-css-coverage-r2233.cjs
+      - name: Install isolated Chrome
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --prefix "$RUNNER_TEMP/fx-css-cover" --no-fund --no-audit playwright@1.62.0
+          "$RUNNER_TEMP/fx-css-cover/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Measure first-render and MAG-activated CSS coverage
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-css-cover/node_modules
+          FORMATX_CSS_BASE: https://www.formatxsuite.com/scifi-ui/
+        shell: bash
+        run: |
+          set -o pipefail
+          node .github/scripts/measure-critical-css-coverage-r2233.cjs 2>&1 | tee formatx-css-coverage-r2233.txt
+      - name: Keep textual CSS coverage for three days
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-css-coverage-r2233
+          path: formatx-css-coverage-r2233.txt
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Publish browser CSS coverage status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [[ "$JOB_STATUS" == 'success' ]]; then
+            state=success
+            description='Mobile/desktop CSS rule coverage measured'
+          else
+            state=failure
+            description='CSS coverage measurement failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R2233 critical CSS coverage' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
