@@ -901,7 +901,11 @@ void main(){
         const active=rack===index;
         const rc=scenes[rack].color;
         box(rx,ry,rz,.90,.042,.18,active?rc:metal,0,active?.53:.19);
-        if(!mobile()){
+        // R2229: all eight actual source bays remain visible on every
+        // renderer. Thin auxiliary struts cost eight extra GL draw calls
+        // on SwiftShader but add almost no readable detail there. Keep
+        // every strut on hardware-quality desktop MAG.
+        if(!mobile()&&quality==='high'){
           box(rx+side*.45,ry-.14,rz-.08,.032,.46,.10,active?rc:edge,0,active?.45:.13);
         }
       }
