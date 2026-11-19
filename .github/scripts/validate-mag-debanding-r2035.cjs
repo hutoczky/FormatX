@@ -171,7 +171,7 @@ assert.ok(scheduler.includes("start('mag-birth-r605')") &&
 assert.ok(productionWorker.includes("'sha256-8qSjNr6DkgiwsYo9/qL1DASerqq7oAy4Jrfzc09qUYc='"),
   'Production CSP must authorize the exact non-blocking first-frame DNA CSS');
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261120-r2241'),
+  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261120-r2246-vertex-row-cache-and-software-shader'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
 assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261120-r2241'),
