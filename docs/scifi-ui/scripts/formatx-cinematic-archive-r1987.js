@@ -1406,6 +1406,17 @@ void main(){
       idleComposed=false;
       invalidate();
     },{passive:true});
+    // R2244: the native section heading can become a one-word MAG chapter
+    // after the archive has already copied its prior editorial heading.
+    // Refresh the original source-derived paper immediately on that change.
+    addEventListener('formatx:mag-chapter-mounted',event=>{
+      if(!event.detail?.section?.isConnected||!handoff?.isConnected)return;
+      handoffKey='';
+      if(current?.s.node&&(event.detail.section===current.s.node
+        ||event.detail.section.contains(current.s.node))){
+        updateHandoff();
+      }
+    },{passive:true});
     addEventListener('pageshow',()=>{idleComposed=false;invalidate();},{passive:true});
     document.addEventListener('visibilitychange',()=>{
       if(!document.hidden){idleComposed=false;invalidate();}
