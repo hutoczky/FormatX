@@ -92,15 +92,15 @@ for(const token of [
 // brittle transport filename.
 const crypto=require('node:crypto');
 const dnaCss=read('docs/scifi-ui/styles/formatx-dna-first-frame-r2181.css')
-  .replace(/^\\/\\*[\\s\\S]*?\\*\\/\\s*/,'').trim();
-const dnaInline=home.match(/<style data-fx-dna-first-frame-r2181="true" data-fx-critical-inline-r2240="true">([\\s\\S]*?)<\\/style>/);
+  .replace(/^\/\*[\s\S]*?\*\/\s*/,'').trim();
+const dnaInline=home.match(/<style data-fx-dna-first-frame-r2181="true" data-fx-critical-inline-r2240="true">([\s\S]*?)<\/style>/);
 assert.ok(dnaInline,'First-byte DNA must use nonblocking inline critical CSS');
 assert.equal(dnaInline[1],dnaCss,
   'Inline first-frame DNA CSS must equal the canonical wider cinematic design');
 const dnaHash=crypto.createHash('sha256').update(dnaCss).digest('base64');
 assert.ok(home.includes("'sha256-"+dnaHash+"'"),
   'Critical DNA CSS must remain explicitly authorised by the CSP');
-assert.ok(!/<link[^>]*rel="stylesheet"[^>]*formatx-dna-first-frame-r2181\\.css/.test(home),
+assert.ok(!/<link[^>]*rel="stylesheet"[^>]*formatx-dna-first-frame-r2181\.css/.test(home),
   'The first-frame DNA stylesheet must not become render blocking again');
 assert.ok(!engine.includes('u*Math.PI*15.5+strand*Math.PI'),
   'Do not overlay an unrelated twice-coiled DNA particle geometry');
