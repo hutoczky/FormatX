@@ -423,16 +423,26 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    // R2246: each shared grid vertex used to be recalculated in four adjacent
+    // quads, including expensive noninteger pow() and normalisation. Keep two
+    // rows of immutable analytic vertices, preserving the EXACT original
+    // triangle order, normals, UVs, facets and four-arm sculpt. This reduces
+    // body vertex evaluations about 4x with only O(longitude) temporary data.
+    const makeBodyRow=lat=>Array.from({length:longitudeSegments+1},
+      (_,lon)=>vertex(lat,lon));
+    let upperBodyRow=makeBodyRow(0);
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const lowerBodyRow=makeBodyRow(lat+1);
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=upperBodyRow[lon];
+        const b=upperBodyRow[lon+1];
+        const c=lowerBodyRow[lon];
+        const d=lowerBodyRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+      upperBodyRow=lowerBodyRow;
     }
 
     /* R1982 — real microfibril geometry.
