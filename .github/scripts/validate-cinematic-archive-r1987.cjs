@@ -614,11 +614,28 @@ async function verifyNormalEntry(browser,isMobile){
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  // R2220 deliberately waits for REAL user intent. The former test
+  // expected an unsolicited archive takeover on page load (a CLS regression).
+  // Prove the home shell stays native before scrolling, then enter with a
+  // trusted Playwright wheel gesture and the original native anchor.
+  await page.waitForFunction(()=>
+    document.documentElement.dataset.fxArchiveExperience==='ready',
+    null,{timeout:65000});
+  const before=await page.evaluate(()=>({
+    cinema:document.documentElement.dataset.fxArchiveCinema||'home',
+    engagement:document.documentElement.dataset.fxArchiveEngagementR2220||''
+  }));
+  assert.notEqual(before.cinema,'active',
+    'R2220 unexpected auto-takeover before visitor scroll: '+JSON.stringify(before));
+  await page.mouse.wheel(0,680);
+  await page.evaluate(()=>document.querySelector('#experience')?.scrollIntoView({
+    block:'center',behavior:'instant'
+  }));
   await page.waitForFunction(()=>{
     const root=document.documentElement;
     return root.dataset.fxArchiveExperience==='ready'
       && root.dataset.fxArchiveCinema==='active';
-  },null,{timeout:65000});
+  },null,{timeout:40000});
   const result=await page.evaluate(()=>{
     const root=document.documentElement;
     const folio=document.querySelector('[data-fx-cinema-panel-active="true"]');
