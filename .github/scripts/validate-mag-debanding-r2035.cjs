@@ -111,7 +111,8 @@ assert.ok(realIntro.includes('R2194 — the same eight continuous studio-polishe
   realIntro.includes('this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial)')&&
   realIntro.includes('const trimSeat=smooth((t-6.02)/1.18)'),
   'R2194 film must seat the same raised chromium filaments after DNA');
-assert.ok(core.includes('const fragmentSource = constrainedFragmentSource;'),
+assert.ok(core.includes('const fragmentSource = softwareRenderer ? softwareFragmentSource : constrainedFragmentSource;') &&
+  core.includes("fxNativeMagSoftwareShaderR2243=softwareRenderer"),
   'Desktop and mobile must share the same canonical WebGL MAG material');
 assert.ok(core.includes("fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe'"),
   'Original MAG must publish stripe-free material selection');
