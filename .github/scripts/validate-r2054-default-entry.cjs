@@ -24,12 +24,23 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
     const page=await context.newPage();
     const faults=[];
     page.on('pageerror',e=>faults.push(String(e)));
-    // The real normal site: no forced archive, no artificial scroll, no
-    // Lighthouse bypass. Returning visitors must see the first original
-    // native HTML chapter as soon as the living core finishes loading.
+    // R2236: the ordinary public URL must NOT hijack first paint. R2220
+    // arms the archive only after a genuine visitor gesture, preventing CLS.
     await page.goto(ROOT+'?r2054-normal-entry='+c.label,{
       waitUntil:'domcontentloaded',timeout:60000
     });
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveExperience==='ready',
+      null,{timeout:48000});
+    const beforeIntent=await page.evaluate(()=>({
+      archive:document.documentElement.dataset.fxArchiveCinema||'home',
+      intent:document.documentElement.dataset.fxArchiveEngagementR2220||''
+    }));
+    assert.notEqual(beforeIntent.archive,'active',
+      'MAG unexpectedly displaced the first native hero: '+JSON.stringify(beforeIntent));
+    await page.mouse.wheel(0,650);
+    await page.evaluate(()=>document.querySelector('#experience')?.scrollIntoView({
+      block:'center',behavior:'instant'
+    }));
     await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
       null,{timeout:48000});
     await page.waitForTimeout(500);
