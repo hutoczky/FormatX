@@ -11,7 +11,15 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   });
   const page=await context.newPage();
   const errors=[];
+  const failedUrls=[];
   let apiRequests=0;
+  // Show EXACT failing URL rather than treating an unrelated 404 as a
+  // generic speed-test regression. Never conceal API/network failures.
+  page.on('response',response=>{
+    if(response.status()>=400)failedUrls.push({
+      status:response.status(),url:response.url()
+    });
+  });
 
   page.on('pageerror',error=>errors.push(String(error)));
   page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
@@ -75,7 +83,8 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   assert.match((await page.locator('[data-net-edge]').textContent()||''),/TEST/);
 
   const meaningful=errors.filter(x=>!/favicon|WebGL|WebGPU|GPU|Permissions policy/i.test(x));
-  assert.deepEqual(meaningful,[]);
+  assert.deepEqual(meaningful,[],
+    'Unhandled browser error(s); failing URLs: '+JSON.stringify(failedUrls));
 
   await context.close();
   await browser.close();
