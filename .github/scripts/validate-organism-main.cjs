@@ -122,7 +122,31 @@ async function validateDesktop() {
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
     mark('desktop: currency-updated', { checkoutHref });
-
+    const closeProbe=await page.evaluate(()=>{
+      const b=document.querySelector('.fx-organism-console-close');
+      const root=document.getElementById('fx-organism-console');
+      const shell=b?.closest('.fx-organism-console-shell');
+      const box=b?.getBoundingClientRect();
+      const cs=b?getComputedStyle(b):null;
+      const shellCss=shell?getComputedStyle(shell):null;
+      const x=box?box.left+box.width/2:0,y=box?box.top+box.height/2:0;
+      const hit=document.elementFromPoint(x,y);
+      return {rootHidden:root?.hidden,
+        archive:document.documentElement.dataset.fxArchiveCinema||'home',
+        archiveChapter:document.documentElement.dataset.fxArchiveCinemaChapter||'',
+        cinemaPrepared:document.documentElement.dataset.fxArchiveCinemaPrepared||'',
+        bodyPanelOpen:document.body.classList.contains('fx-organism-panel-open'),
+        activeElement:document.activeElement?.className||'',
+        rect:box?.toJSON(),hit:hit?.className||hit?.tagName,
+        containsHit:!!b&&!!hit&&(b===hit||b.contains(hit)),
+        inert:b?.inert,ancestorInert:b?.closest('[inert]')?.className||'',
+        visibility:cs?.visibility,display:cs?.display,opacity:cs?.opacity,
+        shellTransform:shellCss?.transform,shellAnimation:shellCss?.animationName,
+        bodyTransform:getComputedStyle(document.body).transform,
+        modalZ:getComputedStyle(root).zIndex,
+        readOnly:true};
+    });
+    mark('desktop: close-readiness',closeProbe);
     await page.locator('.fx-organism-console-close').click();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     await page.waitForTimeout(550);
