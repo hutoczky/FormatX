@@ -1892,9 +1892,15 @@
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
     const mobilePhysical = mobile || constrainedMobile || auditMode;
-    /* R1930 visual parity: one authored studio shader on desktop, mobile and
-       software proof. This removes the hardware/CI split that hid ugly live paths. */
-    const fragmentSource = constrainedFragmentSource;
+    /* R2243: the native software shader was authored but never selected.
+       SwiftShader/llvmpipe therefore ran the expensive hardware fragment code
+       on CPU, producing 200ms render tasks. Preserve the original geometry,
+       four-arm optic and full hardware material; only real software WebGL
+       selects its dedicated lightweight native GLSL material. */
+    const fragmentSource = softwareRenderer ? softwareFragmentSource : constrainedFragmentSource;
+    root.dataset.fxNativeMagSoftwareShaderR2243=softwareRenderer
+      ? 'dedicated-software-native-studio-glsl'
+      : 'unchanged-hardware-photographic-glsl';
     root.dataset.fxNativeMagVisualR2200='organic-coral-cytoplasm-retained-in-four-arm-titanium-optic';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
@@ -3174,7 +3180,9 @@
     root.dataset.fxCoreFirstFrameR1913='pending';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
-    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';
+    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer
+      ? (mobile?'340k-r2237-adaptive-surface-budget':'560k-r2237-desktop-adaptive-budget')
+      : 'hardware-budget-unchanged';
 
     publishShape('initial');
     schedule(1);
