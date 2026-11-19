@@ -82,9 +82,9 @@ for(const token of [
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194-polished-four-arm-mag'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2241-software-capability-intent'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194-polished-four-arm-mag'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2241-software-capability-intent'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
@@ -150,15 +150,23 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
+// R2241 renderer scheduling is capability-based; never hide native MAG only
+// for a benchmark. Software-only mobile browsers can still use first gesture.
+assert.ok(scheduler.includes('allowMobileIdleWebGLR2241') &&
+  scheduler.includes('software-awaiting-user-intent-r2241') &&
+  scheduler.includes("user-${event?.type||'intent'}"),
+  'Native MAG software-fallback must remain available on real user intent');
+assert.ok(productionWorker.includes("'sha256-8qSjNr6DkgiwsYo9/qL1DASerqq7oAy4Jrfzc09qUYc='"),
+  'Production CSP must authorize the exact non-blocking first-frame DNA CSS');
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('20261026-r2194'),
+  assert.ok(loader.includes('20261120-r2241'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261026-r2194'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261120-r2241'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261026-r2194'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2241'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261026-r2194'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2241'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
