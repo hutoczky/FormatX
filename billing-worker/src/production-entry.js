@@ -224,7 +224,11 @@ async function applyStartupSafety(request, url, response) {
   }
 
   if (!LANGUAGE_PAGE_PATHS.has(url.pathname)) return response;
-  if (request.method === 'HEAD' || !response.ok) return withNoStore(response, true);
+  // R2214: HEAD has no body. A real GET error response MUST retain its
+  // explanatory HTML/JSON, especially the legally required checkout 503 page.
+  // The old combined predicate accidentally erased ALL non-2xx GET bodies.
+  if (request.method === 'HEAD') return withNoStore(response, true);
+  if (!response.ok) return withNoStore(response, false);
 
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) return response;
@@ -289,6 +293,8 @@ function withNoStore(response, withoutBody) {
   headers.set('Cache-Control', 'no-store, max-age=0');
   headers.set('Pragma', 'no-cache');
   headers.delete('ETag');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
 
   return new Response(withoutBody ? null : response.body, {
     status: response.status,

@@ -27,7 +27,7 @@
    cleanup();
    root.dataset.fxSensoryLoaderR2000='loading';
    const script=document.createElement('script');
-   script.src='/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20261008-r2000-lazy-sensory';
+   script.src='/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20261115-r2212-no-sideways-panning';
    script.async=true;
    script.dataset.fxSiteSensoryR1755='true';
    script.addEventListener('load',()=>{

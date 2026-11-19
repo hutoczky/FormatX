@@ -249,10 +249,14 @@ html body.living-architecture #hero .fx-hero-product-state .fx-platform-status-b
     max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
   }
   html:root:root body.living-architecture #hero>.hero-grid>.hero-copy{
-    min-height:575px!important;
+    /* R2221: real desktop CLS trace shows the 607px readable copy
+       collapses to 575px when R326 native WebGL mounts at 2.4s.
+       Reserve the initial copy box, not only the smaller settled box. */
+    min-height:607px!important;
   }
 }
 /* production-r1710-desktop-hero-geometry-lock */
+/* production-r2221-intrinsic-desktop-copy-stability */
 
 
 /* R1732 — ASK dialogue critical surface merged into the existing P0 request.
@@ -1494,7 +1498,7 @@ html:root:root:root body.living-architecture #hero .fx-category-definition {
   }
   html body.living-architecture #hero>.hero-grid>.hero-copy{
     grid-area:copy!important;position:relative!important;display:block!important;align-self:center!important;
-    width:100%!important;min-width:0!important;max-width:580px!important;min-height:575px!important;
+    width:100%!important;min-width:0!important;max-width:580px!important;min-height:607px!important;
     margin:0!important;padding:0!important;opacity:1!important;visibility:visible!important;
     transform:none!important;filter:none!important;overflow:visible!important;
   }
@@ -1610,4 +1614,47 @@ html:has([data-fx-award-proof]) .fx-loop-reference-proof{display:none!important}
 html body .fx-thought-genome-layer {
   z-index:4!important;
   pointer-events:none!important;
+}
+
+
+/* R2223 desktop hero action geometry — settle four actual CTAs before MAG
+   readiness. R244's [data-fx-reference-production-r244="desktop"] used to
+   switch a four-row 164px stack to two 48px rows at ~2.4s, displacing every
+   preceding hero child by 28px (measured 0.0720 CLS). Match the live R244
+   flex bases already in the render-blocking first-paint request. */
+@media (min-width:1200px) and (pointer:fine) {
+  html:root:root body.living-architecture #hero .hero-actions {
+    display:flex!important;
+    flex-wrap:wrap!important;
+    align-items:center!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    height:106px!important;
+    min-height:106px!important;
+    max-height:106px!important;
+    margin:22px 0 0!important;
+    gap:10px!important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions .button {
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex:1 1 180px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:auto!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:48px!important;
+    min-height:48px!important;
+    max-height:48px!important;
+    margin:0!important;
+    padding:0 18px!important;
+    white-space:normal!important;
+    text-align:center!important;
+    line-height:1.25!important;
+  }
+  html:root:root body.living-architecture #hero .hero-actions #hero-download {
+    flex:1 1 250px!important;
+  }
 }

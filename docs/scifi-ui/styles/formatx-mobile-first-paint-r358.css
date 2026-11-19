@@ -1060,3 +1060,50 @@
   }
 }
 /* production-r2039-release-link-touch-44px */
+
+
+/* R2225 — one immutable 70px mobile header from parser paint to native MAG.
+   Chrome CLS audit measured a 95→70px header contraction and a 0→14px
+   brand relocation when post-FCP owner CSS finished loading. Reserve
+   the settled geometry in the mobile FIRST-PAINT layer, not a late sheet. */
+@media (max-width:900px), (pointer:coarse), (max-aspect-ratio:27/25) {
+  html:root:root:root:root:root:root:root body.living-architecture header.topbar {
+    position:sticky!important;
+    top:0!important;
+    box-sizing:border-box!important;
+    height:70px!important;
+    min-height:70px!important;
+    max-height:70px!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  html:root:root:root:root:root:root:root body.living-architecture header.topbar > a.brand {
+    position:absolute!important;
+    left:14px!important;
+    top:13px!important;
+    right:auto!important;
+    bottom:auto!important;
+    height:44px!important;
+    min-height:44px!important;
+    max-height:44px!important;
+    margin:0!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    transform:none!important;
+    translate:none!important;
+  }
+}
+
+/* R2234 — responsive phones/tablets: the sticky 70px header covered up to 97%
+   of the real H1/lead during native scrolling (no-occlusion browser proof).
+   Let the real navigation occupy its initial row, then scroll away. This
+   changes NO markup, MAG/WebGL canvas, payment form or larger breakpoint.
+   The high-specificity first-paint rule also prevents a late sticky snap. */
+@media(max-width:900px){
+  html:root:root:root:root:root:root:root:root:root
+  body.living-architecture header.topbar{
+    position:relative!important;
+    top:auto!important;
+    bottom:auto!important;
+  }
+}

@@ -1,0 +1,88 @@
+name: FormatX native MAG scroll budget R2226
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/measure-mag-scroll-budget-r2226.cjs'
+      - '.github/workflows/measure-mag-scroll-budget-r2226.yml'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
+      - 'docs/scifi-ui/index.html'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js'
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: formatx-native-scroll-budget-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check benchmark source
+        run: node --check .github/scripts/measure-mag-scroll-budget-r2226.cjs
+      - name: Wait for the exact live MAG archive source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          BASE='https://www.formatxsuite.com/scifi-ui'
+          ok=0
+          for attempt in $(seq 1 24); do
+            if curl -fsSL --max-time 25 -o /tmp/fx-mag-live.html "$BASE/?scroll-budget=$GITHUB_SHA-$attempt" \
+              && curl -fsSL --max-time 25 -o /tmp/fx-mag-live.js "$BASE/scripts/formatx-cinematic-archive-r1987.js?audit=$GITHUB_SHA-$attempt" \
+              && grep -Fq 'formatx-cinematic-archive-r1987.js?v=20261116-r2058-r2235-idle-single-sync' /tmp/fx-mag-live.html \
+              && cmp -s docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js /tmp/fx-mag-live.js; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          [[ "$ok" == 1 ]] || { echo "Live MAG archive has not converged" >&2; exit 1; }
+      - name: Install isolated Chromium
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --prefix "$RUNNER_TEMP/fx-scroll-audit" --no-audit --no-fund playwright@1.62.0
+          "$RUNNER_TEMP/fx-scroll-audit/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Measure native MAG interaction cost in desktop and mobile Chrome
+        shell: bash
+        env:
+          NODE_PATH: ${{ runner.temp }}/fx-scroll-audit/node_modules
+          FORMATX_SCROLL_AUDIT_URL: https://www.formatxsuite.com/scifi-ui/
+        run: |
+          set -o pipefail
+          node .github/scripts/measure-mag-scroll-budget-r2226.cjs 2>&1 | tee formatx-mag-scroll-r2226.txt
+      - name: Keep benchmark text for three days
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: formatx-mag-scroll-budget-r2226
+          path: formatx-mag-scroll-r2226.txt
+          if-no-files-found: warn
+          retention-days: 3
+      - name: Publish native MAG scroll audit status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          if [[ "$JOB_STATUS" == 'success' ]]; then
+            state=success
+            description='Real desktop/mobile MAG scroll interaction audit captured'
+          else
+            state=failure
+            description='MAG scroll interaction smoke failed'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX R2226 native scroll budget' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

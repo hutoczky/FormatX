@@ -6,14 +6,11 @@ on:
     branches: [master]
     paths:
       - 'docs/scifi-ui/index.html'
-      - 'docs/scifi-ui/styles/formatx-p0-first-paint-r490.css'
-      - 'docs/scifi-ui/scripts/formatx-mag-birth-live-r533.js'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
       - 'docs/scifi-ui/scripts/formatx-crystal-organism-r326.js'
-      - 'docs/scifi-ui/styles/formatx-living-habitat-r1530.css'
-      - 'docs/scifi-ui/scripts/formatx-site-sensory-r1755.js'
       - 'docs/scifi-ui/scripts/formatx-net-speed-r1800.js'
-      - 'docs/scifi-ui/styles/formatx-net-speed-r1800.css'
       - 'billing-worker/src/production-content-entry.js'
       - '.github/workflows/probe-live-formatx.yml'
 
@@ -30,85 +27,61 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 9
     steps:
-      - name: Wait for Cloudflare Git deployment and verify APEX assets
+      - name: Checkout current source of truth
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Verify the deployed MAG aperture and actual assets
         id: probe
         shell: bash
         run: |
-          set +e
+          set -Eeuo pipefail
           mkdir -p live-probe
-          found_new=0
-          for attempt in $(seq 1 48); do
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/home.html 'https://formatxsuite.com/scifi-ui/?lang=hu'
-            home_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/p0.css 'https://formatxsuite.com/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20260927-r1773-compositor-biocrystal'
-            css_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/mag-birth.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade'
-            js_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/site-sensory.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint'
-            sensory_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/current-mag.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-current-mag-loader-r422.js?v=20260928-r1795-mobile-smoky-bioglass-airy'
-            current_mag_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/crystal-organism.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy'
-            renderer_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.css 'https://formatxsuite.com/scifi-ui/styles/formatx-net-speed-r1800.css?v=20261004-r1902-touch-target'
-            net_css_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net.js 'https://formatxsuite.com/scifi-ui/scripts/formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream'
-            net_js_status=$?
-            curl -sS --connect-timeout 10 --max-time 30 -H 'Cache-Control: no-cache' -o live-probe/net-ping.json "https://formatxsuite.com/api/net/ping?r=$GITHUB_SHA-$attempt"
-            net_ping_status=$?
-            if [ "$home_status" = '0' ] \
-               && [ "$css_status" = '0' ] \
-               && [ "$js_status" = '0' ] \
-               && [ "$sensory_status" = '0' ] \
-               && [ "$current_mag_status" = '0' ] \
-               && [ "$renderer_status" = '0' ] \
-               && [ "$net_css_status" = '0' ] \
-               && [ "$net_js_status" = '0' ] \
-               && [ "$net_ping_status" = '0' ] \
-               && grep -Fq 'formatx-p0-first-paint-r490.css?v=20260927-r1773-compositor-biocrystal' live-probe/home.html \
-               && grep -Fq 'formatx-p0-motion-scheduler-r490.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/home.html \
-               && grep -Fq 'formatx-mag-birth-live-r533.js?v=20260928-r1776-photoreal-visual-upgrade' live-probe/home.html \
-               && grep -Fq 'formatx-site-sensory-r1755.js?v=20260927-r1756-zero-first-paint' live-probe/home.html \
-               && grep -Fq 'formatx-net-speed-r1800.css?v=20261004-r1902-touch-target' live-probe/home.html \
-               && grep -Fq 'formatx-net-speed-r1800.js?v=20260929-r1810-gigabit-multistream' live-probe/home.html \
-               && grep -Fq 'production-r1773-compositor-promoted-biocrystal-proxy' live-probe/p0.css \
-               && grep -Fq 'retired-no-runtime-text-lcp-candidate' live-probe/mag-birth.js \
-               && grep -Fq 'lazy-intent-single-coalesced-raf-zero-idle' live-probe/site-sensory.js \
-               && grep -Fq 'formatx-crystal-organism-r326.js?v=20260928-r1795-mobile-smoky-bioglass-airy' live-probe/current-mag.js \
-               && grep -Fq "fxNativeMagVisualR1795='smoky-bioglass-transmission-rim-airy-mobile-composition'" live-probe/crystal-organism.js \
-               && grep -Fq "fxNativeMagMobileR1795='smaller-airier-readable-bioglass-no-control-crowding'" live-probe/crystal-organism.js \
-               && grep -Fq 'production-r1800-network-sensor-user-initiated-no-idle-traffic' live-probe/net.css \
-               && grep -Fq 'user-initiated-same-origin-multistream-gigabit-no-idle-network-r1810' live-probe/net.js \
-               && grep -Eq '"ok"[[:space:]]*:[[:space:]]*true' live-probe/net-ping.json \
-               && ! grep -Eq 'formatx-igloo|reference-commerce|professional-sections|pricing-sync' live-probe/home.html; then
-              found_new=1
+          BASE='https://formatxsuite.com'
+          SOURCE='docs/scifi-ui/index.html'
+          JS='docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+          CSS='docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
+          JS_REF="$(grep -oE '/scifi-ui/scripts/formatx-mag-chapters-r2200.js\?v=[^"]+' "$SOURCE" | head -n1)"
+          CSS_REF="$(grep -oE '/scifi-ui/styles/formatx-mag-chapters-r2200.css\?v=[^"]+' "$SOURCE" | head -n1)"
+          test -n "$JS_REF"
+          test -n "$CSS_REF"
+          printf 'Expected production assets: %s and %s\n' "$JS_REF" "$CSS_REF"
+          verified=0
+          for attempt in $(seq 1 25); do
+            printf 'Live deployment check %s/25\n' "$attempt"
+            rm -f live-probe/home.html live-probe/chapter.js live-probe/chapter.css live-probe/net-ping.json
+            if curl -fsSL --connect-timeout 8 --max-time 25 -H 'Cache-Control: no-cache' -o live-probe/home.html "$BASE/scifi-ui/?magprobe=$GITHUB_SHA-$attempt" \
+              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/chapter.js "$BASE$JS_REF" \
+              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/chapter.css "$BASE$CSS_REF" \
+              && curl -fsSL --connect-timeout 8 --max-time 25 -o live-probe/net-ping.json "$BASE/api/net/ping?r=$GITHUB_SHA-$attempt" \
+              && grep -Fq "$JS_REF" live-probe/home.html \
+              && grep -Fq "$CSS_REF" live-probe/home.html \
+              && grep -Fq 'data-fx-mag-chapters-style="true"' live-probe/home.html \
+              && cmp -s "$JS" live-probe/chapter.js \
+              && cmp -s "$CSS" live-probe/chapter.css \
+              && grep -Eq '"ok"[[:space:]]*:[[:space:]]*true' live-probe/net-ping.json; then
+              verified=1
               break
             fi
             sleep 10
           done
-          {
-            echo "home_curl_status=$home_status"
-            echo "css_curl_status=$css_status"
-            echo "js_curl_status=$js_status"
-            echo "sensory_curl_status=$sensory_status"
-            echo "current_mag_curl_status=$current_mag_status"
-            echo "renderer_curl_status=$renderer_status"
-            echo "net_css_curl_status=$net_css_status"
-            echo "net_js_curl_status=$net_js_status"
-            echo "net_ping_curl_status=$net_ping_status"
-            echo "new_build=$found_new"
-          } | tee live-probe/result.txt
-          echo "new_build=$found_new" >> "$GITHUB_OUTPUT"
-          exit 0
+          echo "mag_aperture_live_verified=$verified" | tee live-probe/result.txt
+          echo "new_build=$verified" >> "$GITHUB_OUTPUT"
+          if [[ "$verified" != '1' ]]; then
+            echo 'The live homepage and served MAG assets do not match the current repository revision.' >&2
+            exit 1
+          fi
 
-      - name: Upload live probe
+      - name: Upload independent live evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: formatx-live-production-probe
           path: live-probe
           retention-days: 3
+          if-no-files-found: warn
 
-      - name: Publish probe status
+      - name: Publish verified production status
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           NEW_BUILD: ${{ steps.probe.outputs.new_build }}
@@ -116,10 +89,10 @@ jobs:
         run: |
           if [ "$NEW_BUILD" = '1' ]; then
             state='success'
-            description='Live domain serves R1795 MAG plus R1800 NET'
+            description='Live MAG chapter HTML, JS and CSS match current Git revision'
           else
             state='failure'
-            description='Live domain is not yet serving the current R1795/R1800 build'
+            description='Live MAG chapter deployment is missing or mismatched'
           fi
           gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -f state="$state" \

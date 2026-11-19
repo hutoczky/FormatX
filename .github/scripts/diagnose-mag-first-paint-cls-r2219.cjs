@@ -1,0 +1,170 @@
+'use strict';
+/* Read-only R2219 geometry audit. Chrome's layout-shift attribution
+   identifies the actual moving node, including late WebGL stage placement. */
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+const BASE_URL=process.env.FORMATX_CLS_URL||'https://www.formatxsuite.com/scifi-ui/';
+const profiles=[
+  {name:'desktop',width:1366,height:768,mobile:false},
+  {name:'mobile',width:390,height:844,mobile:true}
+];
+async function probe(browser,spec,run){
+ const ctx=await browser.newContext({
+   viewport:{width:spec.width,height:spec.height},
+   isMobile:spec.mobile,hasTouch:spec.mobile,
+   deviceScaleFactor:1,reducedMotion:'no-preference',locale:'hu-HU'
+ });
+ const page=await ctx.newPage();
+ await page.addInitScript(()=>{
+   const sample=element=>{
+     if(!(element instanceof Element))return null;
+     const r=element.getBoundingClientRect(),s=getComputedStyle(element);
+     return {name:element.id?'#'+element.id:element.tagName.toLowerCase()+'.'+
+       [...element.classList].slice(0,4).join('.'),
+       x:Math.round(r.x),y:Math.round(r.y),
+       w:Math.round(r.width),h:Math.round(r.height),
+       position:s.position,display:s.display,visibility:s.visibility,
+       top:s.top,right:s.right,left:s.left,bottom:s.bottom,marginTop:s.marginTop,
+       paddingTop:s.paddingTop,transform:s.transform,
+       alignSelf:s.alignSelf,gridArea:s.gridArea,boxSizing:s.boxSizing};
+   };
+   window.__fxClsAudit={
+     shifts:[],paint:[],snapshots:[],errors:[],
+     capture(label){
+       const sel=['#hero','#hero>.hero-grid','#hero .hero-copy','#hero .hero-space',
+         '.topbar > a.brand',
+         '#hero .fx-mag-first-paint-r1756','#hero .fx-core-mobile-v55-stage',
+         '#hero .fx-crystal-organism-r326-stage','#hero-title'];
+       const root=document.documentElement;
+       this.snapshots.push({t:performance.now(),label,box:sel.map(s=>sample(
+         document.querySelector(s))),r487:root.dataset.fxDeferredCssR487,
+         states:{
+           archive:root.dataset.fxArchiveCinema,
+           dock:root.dataset.fxArchiveDock,
+           engaged:root.dataset.fxArchiveEngagementR2220,
+           desktop:root.dataset.fxDesktopApexR181,
+           mobile:root.dataset.fxMobileReferenceLayout,
+           crystal:root.dataset.fxCrystalOrganismR326,
+           core:root.dataset.fxCoreFirstFrameR1913
+         }});
+     }
+   };
+   try{new PerformanceObserver(list=>{
+     for(const e of list.getEntries()){
+       if(e.hadRecentInput)continue;
+       window.__fxClsAudit.shifts.push({
+         at:Math.round(e.startTime),value:e.value,
+         sources:e.sources.map(k=>({
+           node:sample(k.node),
+           previous:k.previousRect?{
+             x:Math.round(k.previousRect.x),y:Math.round(k.previousRect.y),
+             w:Math.round(k.previousRect.width),h:Math.round(k.previousRect.height)}:null,
+           next:k.currentRect?{
+             x:Math.round(k.currentRect.x),y:Math.round(k.currentRect.y),
+             w:Math.round(k.currentRect.width),h:Math.round(k.currentRect.height)}:null
+         }))
+       });
+     }
+   }).observe({type:'layout-shift',buffered:true})}catch(e){
+     window.__fxClsAudit.errors.push(String(e));
+   }
+   try{new PerformanceObserver(list=>{
+     for(const e of list.getEntries())window.__fxClsAudit.paint.push({
+       name:e.name,t:e.startTime
+     });
+   }).observe({type:'paint',buffered:true})}catch(e){
+     window.__fxClsAudit.errors.push(String(e));
+   }
+   document.addEventListener('DOMContentLoaded',()=>{
+     window.__fxClsAudit.capture('dom-ready');
+     requestAnimationFrame(()=>{
+       window.__fxClsAudit.capture('raf1');
+       requestAnimationFrame(()=>window.__fxClsAudit.capture('raf2'));
+     });
+     for(const delay of [950,1450,1900,2200,2400,2600,2850]){
+       setTimeout(()=>window.__fxClsAudit.capture('t'+delay),delay);
+     }
+   },{once:true});
+   addEventListener('formatx:deferredcssready',()=>window.__fxClsAudit.capture('css-ready'));
+ });
+ try{
+   const url=new URL(BASE_URL);url.searchParams.set('cls-diagnosis','r2219-'+spec.name+'-'+run);
+   url.searchParams.set('intro','0');
+   const response=await page.goto(url.href,{waitUntil:'domcontentloaded',timeout:60000});
+   await page.waitForTimeout(3200);
+   const result=await page.evaluate(()=>{
+     window.__fxClsAudit.capture('3200ms');
+     const a=window.__fxClsAudit;
+     const total=a.shifts.reduce((sum,e)=>sum+e.value,0);
+     const first=a.snapshots.find(s=>s.label==='dom-ready')||a.snapshots[0];
+     const last=a.snapshots.at(-1);
+     const original=first?.box?.[2],settled=last?.box?.[2];
+     const p0=document.querySelector('link[data-fx-p0-first-paint-r503]');
+     const brandBefore=first?.box?.find(node=>node?.name==='a.brand');
+     const brandAfter=last?.box?.find(node=>node?.name==='a.brand');
+     return {
+       total,
+       brandGeometry:{
+         initialX:brandBefore?.x??null,settledX:brandAfter?.x??null,
+         initialY:brandBefore?.y??null,settledY:brandAfter?.y??null,
+         initialTopCss:brandBefore?.top??null,settledTopCss:brandAfter?.top??null,
+         initialPosition:brandBefore?.position??null,
+         settledPosition:brandAfter?.position??null
+       },
+       copyBoxDelta:{
+         top:original&&settled?settled.y-original.y:null,
+         height:original&&settled?settled.h-original.h:null,
+         initialHeight:original?.h,
+         finalHeight:settled?.h
+       },
+       criticalCssVersion:p0?.getAttribute('href')||null,
+       firstPaintArchiveEngagement:first?.states?.engaged||null,
+       finalArchiveEngagement:last?.states?.engaged||null,
+       shifts:a.shifts.sort((x,y)=>y.value-x.value).slice(0,14),
+       paint:a.paint,snapshots:a.snapshots,errors:a.errors
+     };
+   });
+   console.log('FX_CLS_R2219 '+JSON.stringify({profile:spec.name,run,
+     status:response?.status(),...result}));
+   // R2224: turn the previously informational trace into a real quality gate.
+   // This tests the initial idle page; trusted visitor input is tested
+   // separately by validate-content-visuals.cjs.
+   assert.equal(response?.status(),200,spec.name+' production page unavailable');
+   assert.equal(result.errors.length,0,spec.name+' performance observers failed');
+   assert.equal(result.firstPaintArchiveEngagement,'awaiting-visitor',
+     spec.name+' cinematic archive shifted before user intent');
+   assert.equal(result.finalArchiveEngagement,'awaiting-visitor',
+     spec.name+' cinematic archive auto-started without user intent');
+   assert(Number.isFinite(result.total)&&result.total<0.05,
+     spec.name+' failed 0.05 CLS quality gate: '+JSON.stringify({
+       total:result.total,sources:result.shifts.slice(0,3),
+       loadedCss:result.criticalCssVersion
+     }));
+   if(spec.mobile){
+     const brand=result.brandGeometry;
+     // R2225: the first frame and settled brand must share one 14px slot.
+     assert(brand.initialPosition==='absolute'&&brand.settledPosition==='absolute'&&
+       Math.abs(brand.initialX-14)<=1&&
+       Math.abs(brand.settledX-brand.initialX)<=1&&
+       brand.initialTopCss==='13px'&&brand.settledTopCss===brand.initialTopCss,
+       'Mobile brand moved after first paint: '+JSON.stringify(brand));
+   }
+   if(!spec.mobile){
+     assert(result.copyBoxDelta?.initialHeight>500,
+       'Desktop hero-copy geometry not measurable');
+     assert(Math.abs(result.copyBoxDelta.top)<=1&&Math.abs(result.copyBoxDelta.height)<=1,
+       'Desktop MAG shifted its readable headline during 3D startup: '+
+       JSON.stringify(result.copyBoxDelta));
+   }
+   console.log('FX_CLS_QUALITY_PASS '+spec.name+' run='+run+
+     ' cls='+result.total.toFixed(5));
+ }finally{await ctx.close();}
+}
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:[
+   '--no-sandbox','--disable-dev-shm-usage','--enable-unsafe-swiftshader',
+   '--ignore-gpu-blocklist','--enable-webgl'
+ ]});
+ try{for(const spec of profiles)for(let run=1;run<=2;run++)await probe(browser,spec,run);}
+ finally{await browser.close();}
+})().catch(e=>{console.error(e.stack||e);process.exit(1)});

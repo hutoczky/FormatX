@@ -1,4 +1,10 @@
-/* FormatX R1755 — sitewide sensory field.
+/* FormatX R2212 — viewport-clipped sensory field, no sideways page panning.
+   overflow-x:clip preserves native vertical scroll and sticky positioning. */
+html:has(> body .fx-site-sensory-field-r1755),
+html:has(> body .fx-site-sensory-field-r1755) > body{
+  overflow-x:clip!important;
+}
+/* FormatX R2211 — viewport-clipped sitewide sensory field.
    One compositor-friendly visual layer reacts to input without adding a WebGL
    context or a continuous JavaScript animation loop. */
 .fx-site-sensory-field-r1755{
@@ -11,13 +17,15 @@
   --fx-sense-energy:.18;
   --fx-sense-press:0;
   position:fixed;
-  inset:-12vh -10vw;
+  /* R2211: viewport-sized clipping surface. The old -10vw bleed increased
+     document scrollWidth by 150px and displaced checkout on desktop. */
+  inset:0;
   z-index:-18;
   pointer-events:none;
   contain:strict;
+  overflow:clip;
   opacity:calc(.20 + var(--fx-sense-energy) * .28);
-  transform:translate3d(var(--fx-sense-dx),var(--fx-sense-dy),0)
-    scale(calc(1 + var(--fx-sense-energy) * .008));
+  transform:none;
   transform-origin:center;
   background:
     radial-gradient(42rem 34rem at 50% 38%,
@@ -36,6 +44,10 @@
   position:absolute;
   inset:0;
   pointer-events:none;
+  transform:translate3d(var(--fx-sense-dx),var(--fx-sense-dy),0)
+    scale(calc(1 + var(--fx-sense-energy) * .008));
+  transition:transform 160ms cubic-bezier(.2,.8,.2,1);
+  will-change:transform;
 }
 .fx-site-sensory-field-r1755::before{
   opacity:calc(.12 + var(--fx-sense-energy) * .16);
@@ -83,7 +95,7 @@ html body.living-architecture :is(
 }
 @media (max-width:900px),(pointer:coarse){
   .fx-site-sensory-field-r1755{
-    inset:-8vh -24vw;
+    inset:0;
     opacity:calc(.14 + var(--fx-sense-energy) * .20);
     background:
       radial-gradient(30rem 26rem at 50% 38%,
@@ -97,6 +109,11 @@ html body.living-architecture :is(
 @media (prefers-reduced-motion:reduce){
   .fx-site-sensory-field-r1755{
     opacity:.14!important;
+    transform:none!important;
+    transition:none!important;
+  }
+  .fx-site-sensory-field-r1755::before,
+  .fx-site-sensory-field-r1755::after{
     transform:none!important;
     transition:none!important;
   }

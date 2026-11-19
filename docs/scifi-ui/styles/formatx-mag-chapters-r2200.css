@@ -1,0 +1,628 @@
+/* FORMATX // MAG CHAPTER IRIS — r2210
+   Original modular DOM stays intact. No canvas duplication, no scroll hijack. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter{
+  min-height:0!important;
+  height:auto!important;
+  contain:none!important;
+  content-visibility:visible!important;
+  contain-intrinsic-size:none!important;
+  overflow:visible!important;
+  scroll-snap-align:none!important;
+  scroll-snap-stop:normal!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]{
+  padding-block:clamp(30px,6vw,100px)!important;
+  margin-block:0!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] [data-fx-mag-route]{
+  content-visibility:visible!important;
+  contain-intrinsic-size:none!important;
+  visibility:visible!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  translate:none!important;
+  clip-path:none!important;
+  overflow:visible!important;
+  min-height:0!important;
+  height:auto!important;
+}
+/* Keep the accessible trigger visible while older reveal owners retime scenes. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+[data-fx-mag-route]:not(section){
+  visibility:visible!important;
+  opacity:1!important;
+}
+/* Release/NET/proof layouts often use multi-column grids. Collapsed headings
+   take the full line instead of leaving an empty second column. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]
+[data-fx-mag-route]:not(section):not(h2){
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+}
+/* R2209: CRITICAL — fold the SECTION ROOT'S direct siblings too.
+   The previous descendant-only selector hid header copy but leaked .flow,
+   .cards, .pricing, .system-grid and other top-level chapter bodies. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] > :not([data-fx-mag-route]){
+  display:none!important;
+}
+
+/* Hide every non-heading subtree, even if another runtime injects it later.
+   Do not move DOM nodes: payment, NET, proof and Live OS keep their owners. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]
+[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
+  display:none!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter h2[data-fx-mag-route]{
+  position:relative!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+  text-align:left!important;
+  z-index:5!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:clamp(24px,6vw,82px)!important;
+  position:relative!important;
+  width:100%!important;
+  min-height:clamp(110px,20vh,250px)!important;
+  padding:clamp(28px,4vw,64px) clamp(22px,5vw,88px)!important;
+  margin:0!important;
+  border:0!important;
+  border-bottom:1px solid rgba(158,217,249,.23)!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  color:#e9f3fc!important;
+  text-align:left!important;
+  text-transform:uppercase;
+  font-family:inherit!important;
+  font-size:clamp(2rem,6.6vw,7.2rem)!important;
+  font-weight:850!important;
+  line-height:.97!important;
+  letter-spacing:-.055em!important;
+  text-wrap:balance;
+  isolation:isolate;
+  overflow:visible!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  transition:color .45s ease,border-color .45s ease,opacity .6s ease,transform .7s cubic-bezier(.2,.75,.22,1)!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title:focus-visible{
+  outline:2px solid #a8efff!important;
+  outline-offset:6px!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title:is(:hover,:focus-visible),
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title{
+  color:#fff!important;
+  border-bottom-color:rgba(159,242,255,.85)!important;
+}
+/* A short optical signal travels toward the existing four-arm MAG iris. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title::before{
+  content:"";
+  position:absolute;
+  z-index:1;
+  left:0;bottom:-1px;
+  height:2px;width:100%;
+  background:linear-gradient(90deg,transparent 5%,rgba(144,247,255,.93) 60%,transparent 100%);
+  box-shadow:0 0 18px rgba(92,207,255,.42);
+  transform:scaleX(0);
+  transform-origin:left center;
+  pointer-events:none;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title::before{
+  animation:fx-mag-optical-signal .95s cubic-bezier(.17,.67,.18,1) both;
+}
+@keyframes fx-mag-optical-signal{
+  0%{opacity:0;transform:scaleX(0)}
+  50%{opacity:1;transform:scaleX(.7)}
+  100%{opacity:.38;transform:scaleX(1)}
+}
+html.fx-mag-chapters-ready .fx-mag-title-copy{
+  position:relative;
+  z-index:2;
+  display:block;
+  width:min(100%,18ch);
+  font:inherit!important;
+  color:inherit!important;
+  opacity:1!important;
+  transform:none!important;
+  filter:none!important;
+  visibility:visible!important;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title .fx-mag-title-copy > span,
+html.fx-mag-chapters-ready .fx-mag-chapter-title .fx-mag-title-copy > strong{
+  font:inherit!important;
+  color:inherit!important;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title .fx-mag-title-copy > em{
+  display:none!important;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title [data-fx-mag-subtitle]{
+  position:absolute;
+  left:clamp(22px,5vw,88px);
+  bottom:clamp(7px,1.5vw,20px);
+  max-width:calc(100% - 110px);
+  font:500 clamp(.72rem,1.1vw,.92rem)/1.4 system-ui,sans-serif!important;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:#89b5c7;
+  opacity:.8;
+}
+html.fx-mag-chapters-ready .fx-mag-chapter-title [data-fx-mag-subtitle][hidden]{
+  display:none!important;
+}
+/* Editorial subheading: not visible until the title is clicked.
+   The semantic source headline remains in DOM, ready for localization. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+h2[data-fx-mag-route] > .fx-mag-editorial-heading{
+  display:block;
+  position:relative;
+  margin:0;
+  padding:clamp(16px,2vw,30px) clamp(22px,5vw,88px);
+  max-width:100%;
+  color:#9cb9c9;
+  font:500 clamp(.95rem,1.45vw,1.32rem)/1.5 system-ui,sans-serif!important;
+  letter-spacing:normal!important;
+  text-transform:none!important;
+  text-align:left!important;
+  text-wrap:pretty;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+h2[data-fx-mag-route] > .fx-mag-editorial-heading *{
+  font:inherit!important;
+  color:inherit!important;
+  letter-spacing:inherit!important;
+  text-transform:none!important;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+h2[data-fx-mag-route] > .fx-mag-editorial-heading[hidden]{
+  display:none!important;
+}
+@media(prefers-reduced-motion:no-preference){
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="opening"]
+ h2[data-fx-mag-route] > .fx-mag-editorial-heading{
+   animation:fx-mag-editorial-reveal .48s cubic-bezier(.2,.8,.2,1) both;
+ }
+}
+@keyframes fx-mag-editorial-reveal{
+ from{opacity:0;transform:translate3d(0,-10px,0)}
+ to{opacity:1;transform:translate3d(0,0,0)}
+}
+/* The 4 metal leaves evoke MAG's four-arm aperture; not an image or second WebGL context. */
+html.fx-mag-chapters-ready .fx-mag-iris{
+  display:grid!important;
+  place-items:center;
+  flex:0 0 auto;
+  position:relative;
+  width:clamp(64px,10vw,142px);
+  height:clamp(64px,10vw,142px);
+  border:1px solid rgba(198,233,248,.42);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(166,230,246,.37) 0 3%,rgba(59,132,167,.11) 4% 21%,rgba(5,15,26,.52) 47%,transparent 72%);
+  box-shadow:inset 0 0 13px rgba(168,228,250,.19),0 0 28px rgba(73,188,237,.10);
+  transform:rotate(45deg) scale(.89);
+  transition:transform .75s cubic-bezier(.14,.85,.25,1),box-shadow .6s ease;
+  pointer-events:none;
+  z-index:3;
+  overflow:hidden;
+}
+html.fx-mag-chapters-ready .fx-mag-iris::before{
+  content:"";
+  position:absolute;
+  inset:33%;
+  border:1px solid rgba(183,243,255,.8);
+  border-radius:50%;
+  box-shadow:0 0 10px rgba(86,231,255,.45),inset 0 0 8px rgba(164,241,255,.42);
+}
+html.fx-mag-chapters-ready .fx-mag-iris i{
+  position:absolute;
+  width:35%;
+  height:35%;
+  border:1px solid rgba(207,240,255,.76);
+  background:linear-gradient(135deg,rgba(235,248,255,.36),rgba(63,114,149,.40) 50%,rgba(7,31,47,.78));
+  clip-path:polygon(18% 0,100% 20%,80% 100%,0 82%);
+  transform-origin:50% 50%;
+  transition:transform .8s cubic-bezier(.16,1,.25,1),opacity .6s ease,filter .6s ease;
+}
+html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(1){transform:translate(-49%,-49%) rotate(0deg)}
+html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(2){transform:translate(49%,-49%) rotate(90deg)}
+html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(3){transform:translate(49%,49%) rotate(180deg)}
+html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(4){transform:translate(-49%,49%) rotate(270deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris{
+  transform:rotate(225deg) scale(1.06);
+  box-shadow:0 0 45px rgba(132,235,255,.38),inset 0 0 20px rgba(203,248,255,.38);
+}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(1){transform:translate(-114%,-114%) rotate(-48deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(2){transform:translate(114%,-114%) rotate(138deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(3){transform:translate(114%,114%) rotate(228deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(4){transform:translate(-114%,114%) rotate(318deg)}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="open"]
+[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]),
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="opening"]
+[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
+  animation:fx-mag-section-unseal .72s cubic-bezier(.14,.7,.2,1) both;
+  transform-origin:50% 0;
+  will-change:auto;
+}
+@keyframes fx-mag-section-unseal{
+  from{opacity:0;transform:translate3d(0,20px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="closing"]
+[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
+  animation:fx-mag-section-close .34s ease both;
+}
+@keyframes fx-mag-section-close{to{opacity:0;transform:translate3d(0,-10px,0)}}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"] [data-reveal]{
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+  translate:none!important;
+  filter:none!important;
+  clip-path:none!important;
+}
+@media(prefers-reduced-motion:no-preference){
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title:not([data-fx-mag-seen="true"]){
+   /* No black/empty chapter even if IntersectionObserver is delayed. */
+   opacity:.94!important;
+   transform:translate3d(0,10px,0)!important;
+ }
+}
+@media(max-width:900px),(pointer:coarse){
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="false"]{
+   padding-block:15px!important;
+ }
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-chapter-title{
+   min-height:115px!important;
+   padding:24px 18px!important;
+   font-size:clamp(1.55rem,7.2vw,3.2rem)!important;
+   letter-spacing:-.035em!important;
+   gap:10px!important;
+   touch-action:manipulation!important;
+ }
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+ [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
+   animation-name:fx-mag-section-unseal-mobile!important;
+   animation-duration:.4s!important;
+ }
+
+ html.fx-mag-chapters-ready .fx-mag-iris{width:60px;height:60px}
+ html.fx-mag-chapters-ready .fx-mag-chapter-title [data-fx-mag-subtitle]{left:18px;bottom:4px;font-size:.66rem}
+}
+@keyframes fx-mag-section-unseal-mobile{
+  from{opacity:0;transform:translate3d(0,12px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@media(prefers-reduced-motion:reduce){
+ html.fx-mag-chapters-ready .fx-mag-chapter-title,
+ html.fx-mag-chapters-ready .fx-mag-chapter-title::before,
+ html.fx-mag-chapters-ready .fx-mag-iris,
+ html.fx-mag-chapters-ready .fx-mag-iris i{
+   transition:none!important;animation:none!important;
+ }
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
+   animation:none!important;
+ }
+}
+
+
+/* R2210 COMMERCE SAFETY — pricing is never an accordion payload.
+   Three plan cards, the payment console and QR access MUST remain visible.
+   This is intentionally more specific than the chapter-closure selectors. */
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]{
+  min-height:max-content!important;
+  height:auto!important;
+  overflow:visible!important;
+  visibility:visible!important;
+  opacity:1!important;
+  content-visibility:visible!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .pricing,
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .payment{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+  content-visibility:visible!important;
+  contain:none!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > #formatx-plan-qr-dock{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+  content-visibility:visible!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+:is(.price-card,.payment-console,.fx-plan-qr-card,#preview-checkout-link,.price-card > a){
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+:is(.price-card,.payment-console,.payment,.fx-plan-qr-card){
+  animation:none!important;
+}
+@media(max-width:900px){
+  html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .pricing,
+  html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"] > .payment{
+    grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;
+  }
+}
+
+/* Archive mode wraps original pricing content in a native cinematic folio.
+   Protect genuine commerce nodes there too without exposing inactive folios. */
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+ .fx-archive-cinema-folio-r2030 :is(.pricing,.payment){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  content-visibility:visible!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+ .fx-archive-cinema-folio-r2030 #formatx-plan-qr-dock{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+html.fx-mag-chapters-ready main#main-content > #pricing.fx-mag-chapter[data-fx-commerce-visible="true"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain;
+}
+
+
+/* R2213 CINEMATIC CHECKOUT — critical specificity correction.
+   The older archive blanket-hide selector ends with :not(#hero), which adds
+   an ID to specificity. Its [data-fx-cinema-host-active] override has only
+   a class, so the LICENSING host remained visibility:hidden despite active
+   panel state. Override only the ACTIVE pricing scene, not other chapters. */
+html:root:root:root:root:root[data-fx-archive-cinema="active"]
+body.living-architecture main#main-content > section#pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  content-visibility:visible!important;
+  pointer-events:none!important;
+  contain:none!important;
+  clip-path:none!important;
+  overflow:visible!important;
+}
+html:root:root:root:root:root[data-fx-archive-cinema="active"]
+body.living-architecture main#main-content > section#pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+
+/* R2215 — the real licensing folio is a 51vw desktop/92vw mobile instrument.
+   Its headline formerly inherited a 905px native heading width and extended
+   >150px beyond the viewport. Keep the keyword and four-leaf iris INSIDE
+   the active panel, preserving every original checkout control. */
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.section-heading{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  margin-inline:0!important;
+  padding-inline:0!important;
+  overflow-wrap:anywhere;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+h2[data-fx-mag-route]{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-chapter-title{
+  box-sizing:border-box!important;
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-height:76px!important;
+  gap:clamp(6px,1.25vw,15px)!important;
+  padding:12px clamp(4px,1vw,14px)!important;
+  font-size:clamp(1.2rem,2.75vw,2.65rem)!important;
+  letter-spacing:-.035em!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-title-copy{
+  min-width:0!important;
+  flex:1 1 auto!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  text-wrap:balance!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-iris{
+  flex:0 0 clamp(44px,4.5vw,68px)!important;
+  width:clamp(44px,4.5vw,68px)!important;
+  height:clamp(44px,4.5vw,68px)!important;
+}
+html[data-fx-archive-cinema="active"] body.living-architecture
+main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+> .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+.fx-mag-editorial-heading{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-wrap:anywhere!important;
+  padding:12px 4px!important;
+}
+@media(max-width:900px){
+  html[data-fx-archive-cinema="active"] body.living-architecture
+  main#main-content > #pricing.fx-mag-chapter[data-fx-cinema-host-active="true"]
+  > .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]
+  .fx-mag-chapter-title{
+    font-size:clamp(1.12rem,5.6vw,1.9rem)!important;
+    min-height:66px!important;
+    padding:10px 2px!important;
+  }
+}
+
+
+/* R2216: compact legal-sales availability signal; never cover checkout CTAs. */
+#pricing .fx-sales-status-r2216{
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%;
+  max-width:62ch;
+  margin:clamp(14px,2vw,24px) 0 0!important;
+  padding:12px clamp(12px,1.5vw,20px)!important;
+  border:1px solid rgba(144,210,229,.22);
+  border-left:3px solid rgba(144,210,229,.5);
+  border-radius:6px 16px 16px 6px;
+  background:rgba(7,23,35,.66);
+  color:#c8dce7!important;
+  font:500 clamp(.8rem,1.05vw,1rem)/1.55 system-ui,sans-serif!important;
+  letter-spacing:normal!important;
+  text-transform:none!important;
+  text-wrap:pretty;
+  overflow-wrap:anywhere;
+  visibility:visible!important;
+  opacity:1!important;
+  animation:none!important;
+}
+#pricing .fx-sales-status-r2216[data-fx-sales-state="blocked"]{
+  border-left-color:#f0bd6a;
+  color:#f5dfc1!important;
+}
+#pricing .fx-sales-status-r2216[data-fx-sales-state="ready"]{
+  border-left-color:#86d9ba;
+  color:#d6f4e6!important;
+}
+#pricing .fx-sales-status-r2216[data-fx-sales-state="unknown"]{
+  border-left-color:#c7c2a6;
+}
+@media(max-width:900px){
+ #pricing .fx-sales-status-r2216{
+   font-size:.88rem!important;
+   line-height:1.45!important;
+   margin-top:14px!important;
+ }
+}
+
+
+/* R2217 // MAG MATERIAL APERTURE
+   Four titanium-glass shutters share the real R536 scroll lighting.
+   No duplicate renderer, scene graph, image, scroll hijack or audio. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-title .fx-mag-chapter-portal-r2217{
+  position:absolute!important;inset:1px!important;
+  display:block!important;z-index:1!important;
+  pointer-events:none!important;overflow:hidden!important;
+  border-radius:inherit;opacity:.9;isolation:isolate;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-portal-r2217 > i{
+  display:block;position:absolute;width:43%;height:45%;
+  pointer-events:none;opacity:.22;
+  background:linear-gradient(140deg,rgba(var(--fx-c536-a,96,228,255),.065),transparent 70%),
+  linear-gradient(22deg,rgba(8,35,53,.38),rgba(13,46,65,.035) 70%);
+  border:1px solid rgba(var(--fx-c536-a,96,228,255),.21);
+  box-shadow:inset 0 0 22px rgba(var(--fx-c536-a,96,228,255),.018);
+  backface-visibility:hidden;
+  transition:transform .84s cubic-bezier(.18,.86,.22,1),
+             opacity .45s cubic-bezier(.24,.7,.2,1);
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-portal-r2217 > i:nth-child(1){
+  left:7%;top:2%;clip-path:polygon(0 0,100% 0,80% 100%,0 78%);
+  transform:translate3d(0,0,0) rotate(-1deg);
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-portal-r2217 > i:nth-child(2){
+  right:7%;top:2%;clip-path:polygon(0 0,100% 0,100% 78%,20% 100%);
+  transform:translate3d(0,0,0) rotate(1deg);
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-portal-r2217 > i:nth-child(3){
+  left:7%;bottom:2%;clip-path:polygon(0 20%,80% 0,100% 100%,0 100%);
+  transform:translate3d(0,0,0) rotate(1deg);
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-portal-r2217 > i:nth-child(4){
+  right:7%;bottom:2%;clip-path:polygon(20% 0,100% 20%,100% 100%,0 100%);
+  transform:translate3d(0,0,0) rotate(-1deg);
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+.fx-mag-chapter-portal-r2217 > i:nth-child(1){
+  transform:translate3d(-14%,-100%,0) rotate(-8deg);opacity:0;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+.fx-mag-chapter-portal-r2217 > i:nth-child(2){
+  transform:translate3d(14%,-100%,0) rotate(8deg);opacity:0;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+.fx-mag-chapter-portal-r2217 > i:nth-child(3){
+  transform:translate3d(-14%,100%,0) rotate(8deg);opacity:0;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+.fx-mag-chapter-portal-r2217 > i:nth-child(4){
+  transform:translate3d(14%,100%,0) rotate(-8deg);opacity:0;
+}
+/* Optical incision is keyed to the one living MAG's scene accent. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-title::after{
+  content:"";position:absolute;pointer-events:none;z-index:1;
+  left:0;right:0;bottom:0;height:1px;opacity:.53;
+  background:linear-gradient(90deg,transparent 3%,
+    rgba(var(--fx-c536-a,96,228,255),.09) 13%,
+    rgba(var(--fx-c536-a,96,228,255),.78) 74%,transparent 98%);
+  transform-origin:75% center;transform:scaleX(.32);
+  transition:transform .75s cubic-bezier(.16,.82,.18,1),opacity .5s;
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-title:is(:hover,:focus-visible)::after{transform:scaleX(.78);opacity:.9}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+.fx-mag-chapter-title::after{transform:scaleX(1);opacity:.85}
+@media(prefers-reduced-motion:no-preference) and (min-width:901px) and (pointer:fine){
+ html[data-fx-cinematic-journey-r536="ready"].fx-mag-chapters-ready
+ main#main-content > section.fx-mag-chapter[data-fx-expanded="false"] .fx-mag-title-copy{
+   transform:translate3d(calc(-8px + var(--fx-c536-scene-local,.5) * 16px),0,0)!important;
+ }
+}
+@media(max-width:900px),(pointer:coarse){
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+ .fx-mag-chapter-portal-r2217 > i{opacity:.13}
+}
+@media(prefers-reduced-motion:reduce){
+ html.fx-mag-chapters-ready .fx-mag-chapter-portal-r2217,
+ html.fx-mag-chapters-ready .fx-mag-chapter-portal-r2217 > i,
+ html.fx-mag-chapters-ready .fx-mag-chapter-title::after{
+   transition:none!important;animation:none!important
+ }
+}
+@media(forced-colors:active){
+ html.fx-mag-chapters-ready .fx-mag-chapter-portal-r2217{display:none!important}
+ html.fx-mag-chapters-ready .fx-mag-chapter-title::after{display:none!important}
+}

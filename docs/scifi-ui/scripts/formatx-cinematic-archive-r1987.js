@@ -4,12 +4,18 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2181-native-handoff-layout';
+  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const force=params.get('archive')==='1';
+  // R2220: do not jump the hero into archive dock automatically when the
+  // native shader becomes ready several seconds after first paint.
+  // Explicit archive URLs and deep links keep their existing semantics.
+  let journeyArmed=force || Boolean(location.hash&&
+    location.hash!=='#hero'&&location.hash!=='#top') || scrollY>32;
+  root.dataset.fxArchiveEngagementR2220=journeyArmed?'deep-link':'awaiting-visitor';
   const requestedHtmlFallback=params.get('archive')==='off';
   const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
@@ -29,6 +35,9 @@
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let lastPanelNode=null;
   let raf=0,domRaf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
+  // R2235: the idle home scene has no readable 3D archive chapter. Its
+  // initial DOM/ARIA synchronization only needs one composed frame.
+  let idleComposed=false,idleFastPathSkips=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
@@ -147,6 +156,10 @@
   const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
   const veryLowPower=mobile()&&Boolean((memoryGB>0&&memoryGB<=2)||(cores>0&&cores<=2));
   let quality=mobilePerf?'low':'high';
+  // R2227: reuse the ONLY living MAG renderer's already-computed
+  // hardware/software classification; no second GPU probe or fingerprint.
+  // Keep premium high-detail material on genuine GPU-backed desktops.
+  const softwareMagRenderer=()=>root.dataset.fxCoreRendererClassR1541==='software-adaptive';
   root.dataset.fxArchiveExperience='pending';
   function ensureAIScrollStation(){
     if(document.getElementById('fx-mag-ai-scroll-station-r2030'))return;
@@ -245,26 +258,27 @@
      Every original section remains in the document as a scroll anchor.
      No clones, dummy tiles, canvas text, videos or second 3D renderer. */
   function prepareCinemaHosts(){
-    // Read every original anchor before moving any live child. Interleaving
-    // these reads with the folio transfers forced a fresh document layout for
-    // each chapter while the same native MAG was preparing its first frame.
-    const prepared=new Map();
-    const entries=scenes.map(scene=>{
+    // R2230: measure every unique native section BEFORE moving even one
+    // child. Interleaving host.getBoundingClientRect() with prior
+    // appendChild()/height writes forced 7 expensive layout flushes.
+    // One read phase + one write phase retains all original DOM nodes.
+    const originalHeights=new Map();
+    for(const scene of scenes){
       const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
-      if(!(host instanceof HTMLElement))return null;
-      let entry=prepared.get(host);
-      if(!entry){
-        const panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
-        entry={host,panel,oldHeight:panel?null:Math.max(520,host.getBoundingClientRect().height||host.offsetHeight)};
-        prepared.set(host,entry);
+      if(!(host instanceof HTMLElement)||originalHeights.has(host))continue;
+      if(!host.querySelector(':scope > .fx-archive-cinema-folio-r2030')){
+        originalHeights.set(host,Math.max(520,host.getBoundingClientRect().height||host.offsetHeight));
       }
-      return {scene,entry};
-    }).filter(Boolean);
-    for(const {scene,entry} of entries){
-      const {host,oldHeight}=entry;
+    }
+    root.dataset.fxArchiveLayoutBatchR2230='read-before-write';
+    root.dataset.fxArchiveLayoutReadCountR2230=String(originalHeights.size);
+    for(const scene of scenes){
+      const host=scene.node.closest('main#main-content > section.scene,main#main-content > section.fx-category-deck--standalone');
+      if(!(host instanceof HTMLElement))continue;
       scene.cinemaHost=host;
-      let panel=entry.panel;
+      let panel=host.querySelector(':scope > .fx-archive-cinema-folio-r2030');
       if(!panel){
+        const oldHeight=originalHeights.get(host)||520;
         panel=document.createElement('div');
         panel.className='fx-archive-cinema-folio-r2030';
         panel.setAttribute('role','region');
@@ -293,7 +307,6 @@
         host.style.setProperty('height','165dvh','important');
         host.style.setProperty('max-height','165dvh','important');
         host.dataset.fxCinemaAnchorHeight=String(Math.round(oldHeight));
-        entry.panel=panel;
       }
       if(!cinemaHosts.includes(host))cinemaHosts.push(host);
       scene.cinemaPanel=panel;
@@ -481,7 +494,7 @@
       ecosystem:[':scope > .section-heading',':scope > .flow .flow-chapters > article'],
       diagnostics:[':scope > .section-heading',':scope > .cards > .card:not(:last-child)'],
       intelligence:[':scope'],
-      licensing:[':scope > .section-heading',':scope > .pricing > .price-card'],
+      licensing:[':scope > .section-heading',':scope > .pricing > .price-card',':scope > .payment',':scope > #formatx-plan-qr-dock'],
       security:[':scope > .section-heading',':scope > .system-grid > article'],
       network:[':scope > .fx-net-head',':scope > .fx-net-grid > .fx-net-console'],
       final:[':scope > .release-layout']
@@ -587,7 +600,7 @@
     static frameInterval(){
       // Allow for fractional rAF timestamps: using 16.7ms on a 60Hz
       // display can miss every 16.667ms paint and accidentally cap at 30Hz.
-      if(!mobile())return 15.5;
+      if(!mobile())return softwareMagRenderer()?32:15.5;
       if(veryLowPower)return 48;
       return quality==='low'?32:15.5;
     }
@@ -605,7 +618,7 @@
       this.emaMs=this.samples?this.emaMs*.86+ms*.14:ms;
       this.samples++;
       if(this.samples%8===0)root.dataset.fxArchiveCpuSubmitMs=this.emaMs.toFixed(2);
-      if(!mobile()||mobilePerf||this.samples<20)return;
+      if(softwareMagRenderer()||!mobile()||mobilePerf||this.samples<20)return;
       // Hysteresis: neither first shader compilation nor one GC pause
       // can permanently reduce MAG's native filament quality.
       if(quality==='high'){
@@ -692,6 +705,10 @@
       }
       this.vao=gl.createVertexArray();
       if(!this.vao)throw new Error('VAO unavailable');
+      // R2228: WebGL2 VAOs retain vertex attribute pointers. Two meshes
+      // share this pass; only rebind when switching between them.
+      this.boundMesh=null;
+      this.attributeSetups=0;
       this.drawCalls=0;
     }
     programFor(gl){
@@ -822,13 +839,18 @@ void main(){
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
     mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false){
       const gl=this.gl,u=this.uniform;
-      gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
-      gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
-      gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
-      gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
+      if(this.boundMesh!==mesh){
+        gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
+        gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,32,0);
+        gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,32,12);
+        gl.enableVertexAttribArray(2);gl.vertexAttribPointer(2,2,gl.FLOAT,false,32,24);
+        gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
+        this.boundMesh=mesh;
+        this.attributeSetups++;
+      }
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
-      gl.uniform3fv(u.uCamera,cam);gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
-      gl.uniform1f(u.uOpacity,alpha);gl.uniform1f(u.uPanel,mesh===this.panel?1:0);
+      gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
+      gl.uniform1f(u.uOpacity,alpha);
       gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);
       gl.uniform1f(u.uShadow,shadow?1:0);
       gl.drawArrays(gl.TRIANGLES,0,mesh.count);
@@ -853,6 +875,8 @@ void main(){
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
+      // Camera is identical for every primitive in this scene frame.
+      gl.uniform3fv(this.uniform.uCamera,cam);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
@@ -894,7 +918,11 @@ void main(){
         const active=rack===index;
         const rc=scenes[rack].color;
         box(rx,ry,rz,.90,.042,.18,active?rc:metal,0,active?.53:.19);
-        if(!mobile()){
+        // R2229: all eight actual source bays remain visible on every
+        // renderer. Thin auxiliary struts cost eight extra GL draw calls
+        // on SwiftShader but add almost no readable detail there. Keep
+        // every strut on hardware-quality desktop MAG.
+        if(!mobile()&&quality==='high'){
           box(rx+side*.45,ry-.14,rz-.08,.032,.46,.10,active?rc:edge,0,active?.45:.13);
         }
       }
@@ -1000,6 +1028,8 @@ void main(){
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
       root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
+      if(root.dataset.fxArchiveAttributeSwitchesR2228!==String(this.attributeSetups))
+        root.dataset.fxArchiveAttributeSwitchesR2228=String(this.attributeSetups);
       if(root.dataset.fxArchiveDepthPolicyR2035!=='canonical-mag-front-deep-shelves-behind')
         root.dataset.fxArchiveDepthPolicyR2035='canonical-mag-front-deep-shelves-behind';
       if(root.dataset.fxArchiveNativePass!=='shared-webgl2')
@@ -1120,6 +1150,13 @@ void main(){
      still requestAnimationFrame-budgeted. This prevents stale chapters when
      content-visibility, infinite-scroll or a slow software GPU delays RAF. */
   function selectLiveChapter(){
+    // Loading WebGL is not a user request to rearrange an already painted
+    // document. The native MAG remains a usable hero until a real gesture.
+    if(!journeyArmed){
+      current=null;
+      root.dataset.fxArchiveCurrent='none';
+      return false;
+    }
     if(!scenes.length)discover();
     const next=ScrollTimelineController.get();
     // From the moment the intro ends, the MAG owns the page. Do not leave the
@@ -1156,6 +1193,15 @@ void main(){
     }
   }
   function invalidate(){
+    // The first cinematic home render must establish all original folios,
+    // inert attributes and legal checkout visibility. Subsequent resize-
+    // observer bursts before visitor intent must not trigger the same
+    // seven-host style walk plus an empty GPU request every time.
+    if(!journeyArmed&&!archiveActive&&!force&&idleComposed&&
+       cinemaPrepared&&root.dataset.fxArchiveExperience==='ready'){
+      idleFastPathSkips++;
+      return;
+    }
     if(!disposed&&!document.hidden&&!reduced.matches){
       try{
         // R2022: synchronize the visible archive layer and chapter identity
@@ -1179,6 +1225,10 @@ void main(){
               updateHandoff();
               domComposes++;
               root.dataset.fxArchiveDomComposes=String(domComposes);
+              if(!journeyArmed&&!archiveActive&&cinemaPrepared){
+                idleComposed=true;
+                root.dataset.fxArchiveIdleFirstSyncR2235='complete';
+              }
             }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
           });
         }
@@ -1201,6 +1251,13 @@ void main(){
       registeredCanvas=null;registeredApi=null;
     }
     stage=api.stage;heroHost=document.querySelector('#hero .hero-space');
+    // The canonical organism already identifies software fallback. Its
+    // 3D paper shares that renderer and must use a matching lightweight
+    // mesh/rail/filament budget, not desktop-high draw calls on SwiftShader.
+    if(softwareMagRenderer())quality='low';
+    root.dataset.fxArchiveQualityPolicyR2227=softwareMagRenderer()
+      ?'software-lite-single-webgl2'
+      :'hardware-photographic-full';
     try{
       const nativeScene=new MAGScene(api.canvas.getContext('webgl2'));
       api.canvas.addEventListener('webglcontextlost',()=>{
@@ -1295,6 +1352,33 @@ void main(){
       return;
     }
     if(!force&&(audit||isolatedMagCheck)){root.dataset.fxArchiveExperience=isolatedMagCheck?'isolated-mag-test':'audit-html';return;}
+    // Real user intent activates the cinematic world without a delayed,
+    // unsolicited 3D stage relocation (measured CLS 0.17/0.99 at 2-4s).
+    // The first scroll still initiates the Igloo-style scene journey.
+    const startJourney=event=>{
+      if(journeyArmed||(event&&!event.isTrusted))return;
+      if(event?.type==='keydown'&&![
+        'ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' ','Spacebar'
+      ].includes(event.key))return;
+      journeyArmed=true;
+      idleComposed=false;
+      root.dataset.fxArchiveEngagementR2220='visitor-'+(event?.type||'navigation');
+      invalidate();
+    };
+    if(!journeyArmed){
+      addEventListener('wheel',startJourney,{passive:true});
+      addEventListener('touchmove',startJourney,{passive:true});
+      addEventListener('keydown',startJourney,{passive:true});
+      addEventListener('pointerdown',event=>{
+        if(event.isTrusted &&
+           (event.target instanceof Element &&
+             (event.target.closest('button,a')||
+              event.clientX>=document.documentElement.clientWidth-20)))
+          startJourney(event);
+      },{passive:true});
+      addEventListener('hashchange',()=>startJourney(null),{passive:true});
+      addEventListener('formatx:mag-chapter-toggle',()=>startJourney(null),{passive:true});
+    }
     sceneObserver=new ResizeObserver(()=>invalidate());
     createHandoff();
     // If the introductory film completed before this deferred module loaded,
@@ -1307,16 +1391,25 @@ void main(){
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
-    addEventListener('resize',invalidate,{passive:true});
+    addEventListener('resize',()=>{idleComposed=false;invalidate();},{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
-    addEventListener('formatx:livingready',()=>{discover();invalidate();},{passive:true});
+    addEventListener('formatx:livingready',()=>{
+      idleComposed=false;
+      discover();invalidate();
+    },{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      idleComposed=false;
       invalidate();
     },{passive:true});
-    addEventListener('formatx:languagechange',invalidate,{passive:true});
-    addEventListener('pageshow',invalidate,{passive:true});
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden)invalidate();},{passive:true});
+    addEventListener('formatx:languagechange',()=>{
+      idleComposed=false;
+      invalidate();
+    },{passive:true});
+    addEventListener('pageshow',()=>{idleComposed=false;invalidate();},{passive:true});
+    document.addEventListener('visibilitychange',()=>{
+      if(!document.hidden){idleComposed=false;invalidate();}
+    },{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
     addEventListener('pagehide',stop,{once:true});
     invalidate();
@@ -1325,6 +1418,7 @@ void main(){
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
+      idleFastPathSkips,idleComposed,
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples,domComposes};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)

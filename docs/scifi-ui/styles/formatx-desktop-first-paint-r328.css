@@ -363,7 +363,7 @@
     max-height:calc(clamp(520px,42vw,620px) + 288px)!important;
   }
   html:root:root body.living-architecture #hero>.hero-grid>.hero-copy{
-    min-height:575px!important;
+    min-height:607px!important;
   }
 }
 /* production-r1710-desktop-hero-geometry-lock */
