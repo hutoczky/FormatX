@@ -165,3 +165,25 @@ html[data-fx-proof-singleton="present"] .fx-loop-reference-proof {
  visibility:hidden!important;pointer-events:none!important;
 }
 /* production-r2056-singleton-first-frame-no-blocking-remote-css */
+
+/* R2247 — compact desktop navigation must not inherit the retired
+   full-screen drawer's 60px link type and animated hover padding.
+   That combination wraps Hungarian labels inside the authoritative 360px
+   menu and makes the actual click target move repeatedly under the pointer.
+   Retain colour/opacity entrance choreography, but keep a stationary hit box. */
+@media (min-width:901px) and (pointer:fine){
+  html:root body.living-architecture #main-nav.fx-organism-system-menu.open a {
+    box-sizing:border-box!important;
+    min-height:48px!important;
+    font-size:clamp(14px,1.05vw,16px)!important;
+    line-height:1.35!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    padding:11px 14px!important;
+    transition:color .18s ease,border-color .18s ease,opacity .20s ease,transform .26s ease!important;
+  }
+  html:root body.living-architecture #main-nav.fx-organism-system-menu.open a:is(:hover,:focus-visible,.active){
+    padding-left:14px!important;
+  }
+}
