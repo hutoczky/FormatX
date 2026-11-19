@@ -626,3 +626,42 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
  html.fx-mag-chapters-ready .fx-mag-chapter-portal-r2217{display:none!important}
  html.fx-mag-chapters-ready .fx-mag-chapter-title::after{display:none!important}
 }
+
+/* R2236 — optical presence on a REAL semantic chapter button.
+   Pointer-tethered lighting uses the same native scene accent. No second
+   canvas, long-running CSS animation or extra GPU scheduling. */
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+.fx-mag-chapter-title > .fx-mag-presence-r2236{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  border-radius:inherit;
+  opacity:0;
+  background:radial-gradient(
+    circle clamp(120px,19vw,350px)
+    at var(--fx-mag-light-x,50%) var(--fx-mag-light-y,50%),
+    rgba(var(--fx-c536-a,96,228,255),.17) 0%,
+    rgba(var(--fx-c536-a,96,228,255),.06) 43%,
+    transparent 76%);
+  box-shadow:inset 0 1px 0 rgba(201,240,255,.095);
+  transition:opacity .28s ease!important;
+}
+@media(hover:hover) and (pointer:fine){
+  html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+  .fx-mag-chapter-title:is(:hover,:focus-visible) > .fx-mag-presence-r2236{
+    opacity:1;
+  }
+}
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+.fx-mag-chapter-title > .fx-mag-presence-r2236{
+  opacity:.8;
+}
+@media(prefers-reduced-motion:reduce),(forced-colors:active){
+  html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
+  .fx-mag-chapter-title > .fx-mag-presence-r2236{
+    transition:none!important;
+    opacity:0!important;
+  }
+}
