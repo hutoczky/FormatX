@@ -2150,14 +2150,18 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    // R2237: software WebGL must NOT rasterize near-retina mobile surfaces.
+    // The Lighthouse trace measured 16 SwiftShader long tasks (>560ms excess)
+    // from this one canvas. Bound only the software fallback's pixel fill-rate;
+    // every genuine GPU-backed mobile/desktop keeps its current full detail.
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.84:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
+      ? (mobile?.92:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.62:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
@@ -2172,14 +2176,18 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
+        ? (mobile?1.25:1.28)
         : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
+        ? (mobile?340000:560000)
         : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
+      if(softwareRenderer){
+        const policy=mobile?'mobile-software-fillrate-bound-r2237':'desktop-software-existing';
+        if(root.dataset.fxCoreSoftwareFillrateR2237!==policy)root.dataset.fxCoreSoftwareFillrateR2237=policy;
+      }
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
