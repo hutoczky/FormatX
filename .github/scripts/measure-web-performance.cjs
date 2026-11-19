@@ -13,7 +13,7 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await context.addInitScript(() => {
     try { localStorage.setItem('formatx:intro-seen-v1', '1'); } catch (_) {}
-    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], geometryTimelineR1968c: [] };
+    window.__fxPerf = { lcp: null, cls: 0, longTaskMs: 0, introComplete: null, shifts: [], geometryTimelineR1968c: [], heroPaintTimelineR2238: [], lcpCandidatesR2238: [] };
     try {
       let lastKey='', frames=0;
       const tick = now => {
@@ -48,11 +48,37 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       };
       requestAnimationFrame(tick);
     } catch (_) {}
+    // R2238: sample exact first-paint title state without altering production.
+    // The previous Lighthouse filmstrip showed the heading at 750ms, but
+    // reported its last candidate paint at 1.83s; diagnose re-rasterization.
+    const captureHero=()=>{
+      const el=document.querySelector('#hero .hero-title-main');
+      if(!el)return;
+      const cs=getComputedStyle(el),r=el.getBoundingClientRect();
+      const copy=el.closest('.hero-copy'),pcs=copy?getComputedStyle(copy):null;
+      window.__fxPerf.heroPaintTimelineR2238.push({
+        at:Math.round(performance.now()),rect:{x:r.x,y:r.y,w:r.width,h:r.height},
+        opacity:cs.opacity,visibility:cs.visibility,display:cs.display,
+        font:cs.font,fontLoaded:document.fonts.status,
+        transform:cs.transform,textFill:cs.getPropertyValue('-webkit-text-fill-color'),
+        parentOpacity:pcs?.opacity,parentTransform:pcs?.transform,
+        sheets:document.styleSheets.length,
+        archive:document.documentElement.dataset.fxArchiveCinema||'home'
+      });
+    };
+    for(const delay of [250,450,700,1000,1400,1800,2200,2800])
+      setTimeout(captureHero,delay);
     try {
       new PerformanceObserver(list => {
-        const entries = list.getEntries();
-        const last = entries[entries.length - 1];
-        if (last) window.__fxPerf.lcp = last.startTime;
+        for(const entry of list.getEntries()){
+          window.__fxPerf.lcp=entry.startTime;
+          window.__fxPerf.lcpCandidatesR2238.push({
+            at:Math.round(entry.startTime),render:Math.round(entry.renderTime||0),
+            size:Math.round(entry.size||0),
+            tag:entry.element?.tagName||'',id:entry.element?.id||'',
+            cls:entry.element?.className||''
+          });
+        }
       }).observe({ type: 'largest-contentful-paint', buffered: true });
     } catch (_) {}
     try {
@@ -263,6 +289,8 @@ const output = process.env.FORMATX_PERF_FILE || 'artifacts/performance/ci-chromi
       } : null,
       firstContentfulPaint: paint['first-contentful-paint'] ?? null,
       largestContentfulPaint: window.__fxPerf.lcp,
+      heroPaintTimelineR2238: window.__fxPerf.heroPaintTimelineR2238,
+      lcpCandidatesR2238: window.__fxPerf.lcpCandidatesR2238,
       cumulativeLayoutShift: window.__fxPerf.cls,
       layoutShifts: window.__fxPerf.shifts,
       totalLongTaskMs: window.__fxPerf.longTaskMs,
