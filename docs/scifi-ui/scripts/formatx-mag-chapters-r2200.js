@@ -248,6 +248,12 @@
     const entry={section,button,subtitle,contentNodes:content,timer:0};
     setContentInert(entry,!commerce);
     registry.set(section,entry);
+    // R2244: original editorial heading changed into a living MAG aperture.
+    // Notify the one native archive so its source-derived label never remains
+    // a chapter behind during scroll or language switches.
+    window.dispatchEvent(new CustomEvent('formatx:mag-chapter-mounted',{
+      detail:{section}
+    }));
     button.addEventListener('click',()=>{
       const expanding=section.dataset.fxExpanded!=='true'||section.dataset.fxMagPhase==='closing';
       toggle(entry,expanding);
