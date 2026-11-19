@@ -30,6 +30,14 @@
       detail:{source:'mag-chapter-aperture-r2217'}
     }));
   };
+  // R2236: CSS alone cannot guarantee that offscreen original checkout-free
+  // chapter controls leave the keyboard/screen-reader interaction tree.
+  // Preserve the actual native DOM and restore it on every aperture opening.
+  const setContentInert=(entry,closed)=>{
+    for(const node of entry.contentNodes||[]){
+      if(node.isConnected&&node.inert!==closed)node.inert=closed;
+    }
+  };
   function finishClose(entry,reason='close'){
     const {section,button,subtitle}=entry;
     // Never hide pricing, checkout actions or payment QR codes.
@@ -40,6 +48,7 @@
     if(section.contains(document.activeElement) && document.activeElement!==button){
       button.focus({preventScroll:true});
     }
+    setContentInert(entry,true);
     section.dataset.fxExpanded='false';
     section.dataset.fxMagPhase='closed';
     button.setAttribute('aria-expanded','false');
@@ -64,6 +73,7 @@
       return;
     }
     if(expand){
+      setContentInert(entry,false);
       // Synchronise with the existing native 3D MAG when its renderer is active.
       // The section iris remains usable when WebGL is unavailable or offscreen.
       if(origin==='button'&&!reduced&&!document.hidden){
@@ -108,6 +118,10 @@
       notify(section,true,origin);
     }else{
       button.setAttribute('aria-expanded','false');
+      if(section.contains(document.activeElement)&&document.activeElement!==button){
+        button.focus({preventScroll:true});
+      }
+      setContentInert(entry,true);
       if(origin==='button'&&previous&&!reduced&&!document.hidden){
         try{
           const core=window.FormatXLivingCore||window.FormatXCoreMobileV69;
@@ -192,7 +206,12 @@
     portal.className='fx-mag-chapter-portal-r2217';
     portal.setAttribute('aria-hidden','true');
     for(let i=0;i<4;i++)portal.appendChild(document.createElement('i'));
-    button.append(portal,label,iris);
+    // Light tracks the pointer only while the visitor actually explores a
+    // headline. The existing single MAG WebGL renderer stays untouched.
+    const presence=document.createElement('span');
+    presence.className='fx-mag-presence-r2236';
+    presence.setAttribute('aria-hidden','true');
+    button.append(portal,presence,label,iris);
     button.setAttribute('aria-describedby',subtitle.id);
     heading.append(button,subtitle);
     // Mark the unique route from the section to its heading. CSS hides all
@@ -226,12 +245,36 @@
     });
     const ids=content.map(node=>node.id);
     if(ids.length)button.setAttribute('aria-controls',ids.join(' '));
-    const entry={section,button,subtitle,timer:0};
+    const entry={section,button,subtitle,contentNodes:content,timer:0};
+    setContentInert(entry,!commerce);
     registry.set(section,entry);
     button.addEventListener('click',()=>{
       const expanding=section.dataset.fxExpanded!=='true'||section.dataset.fxMagPhase==='closing';
       toggle(entry,expanding);
     });
+    // Read one bounding box per pointer event, then coalesce its paint writes
+    // to one rAF. No idle loop, WebGL request or cursor-driven layout.
+    if(!reduced&&matchMedia('(hover:hover) and (pointer:fine)').matches){
+      let lightRaf=0,lightX=50,lightY=50;
+      const paintLight=()=>{
+        lightRaf=0;
+        if(!button.isConnected)return;
+        button.style.setProperty('--fx-mag-light-x',lightX.toFixed(1)+'%');
+        button.style.setProperty('--fx-mag-light-y',lightY.toFixed(1)+'%');
+      };
+      button.addEventListener('pointermove',event=>{
+        if(event.pointerType!=='mouse'&&event.pointerType!=='pen')return;
+        const rect=button.getBoundingClientRect();
+        if(rect.width<1||rect.height<1)return;
+        lightX=Math.max(0,Math.min(100,(event.clientX-rect.left)*100/rect.width));
+        lightY=Math.max(0,Math.min(100,(event.clientY-rect.top)*100/rect.height));
+        if(!lightRaf)lightRaf=requestAnimationFrame(paintLight);
+      },{passive:true});
+      button.addEventListener('pointerleave',()=>{
+        lightX=50;lightY=50;
+        if(!lightRaf)lightRaf=requestAnimationFrame(paintLight);
+      },{passive:true});
+    }
     if(commerce)button.dataset.fxMagSeen='true';
     else if('IntersectionObserver' in window&&!reduced){
       reveal.observe(button);
@@ -265,6 +308,7 @@
       root.classList.add('fx-mag-chapters-ready');
       root.dataset.fxMagChapters='r2217';
       root.dataset.fxMagChapterCount=String(registry.size);
+      root.dataset.fxMagChaptersInteractionR2236='inert-native-optical';
     }
   }
   function schedule(){
@@ -296,7 +340,9 @@
       total:registry.size,
       closed:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='false').length,
       open:Array.from(registry.values()).filter(x=>x.section.dataset.fxExpanded==='true').map(x=>x.section.id||x.section.className),
-      missingTriggers:Array.from(registry.values()).filter(x=>!x.button.isConnected).length
+      missingTriggers:Array.from(registry.values()).filter(x=>!x.button.isConnected).length,
+      closedInteractiveLeaks:Array.from(registry.values()).filter(x=>x.section.id!=='pricing'&&
+        x.section.dataset.fxExpanded==='false'&&x.contentNodes.some(node=>node.isConnected&&!node.inert)).length
     }),
     open:(id)=>revealAnchor(id),
     closeAll:()=>{for(const entry of registry.values())toggle(entry,false,'api');}
