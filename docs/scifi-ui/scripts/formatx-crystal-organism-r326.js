@@ -2181,7 +2181,7 @@
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?190000:560000)
+        ? (mobile?340000:560000)
         : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
       if(softwareRenderer){
