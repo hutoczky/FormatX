@@ -12,6 +12,9 @@ on:
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
+      - '.github/scripts/validate-mag-chapter-disclosure-r2236.cjs'
       - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
       - 'docs/scifi-ui/styles/formatx-mag-birth-live-r533.css'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
@@ -30,6 +33,9 @@ on:
       - 'docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'
       - 'docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css'
       - 'docs/scifi-ui/styles/formatx-mag-mobile-optics-r480.css'
+      - 'docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js'
+      - 'docs/scifi-ui/styles/formatx-mag-chapters-r2200.css'
+      - '.github/scripts/validate-mag-chapter-disclosure-r2236.cjs'
       - 'docs/scifi-ui/styles/formatx-core-real3d-v20.css'
       - 'docs/scifi-ui/styles/formatx-mag-birth-live-r533.css'
       - 'docs/scifi-ui/scripts/formatx-current-mag-loader-r422.js'
@@ -61,6 +67,8 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js
           node .github/scripts/validate-r2051-deferred-loop-css.cjs
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
+          node --check docs/scifi-ui/scripts/formatx-mag-chapters-r2200.js
+          node --check .github/scripts/validate-mag-chapter-disclosure-r2236.cjs
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node --check .github/scripts/validate-cinematic-archive-r1987.cjs
           node --check .github/scripts/validate-mag-debanding-r2035.cjs
@@ -78,6 +86,10 @@ jobs:
           done
           cat "$RUNNER_TEMP/archive-server.log"
           exit 1
+      - name: Test native MAG aperture interaction, keyboard safety and permanent commerce
+        env:
+          NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
+        run: node .github/scripts/validate-mag-chapter-disclosure-r2236.cjs
       - name: Test desktop, phone, reversibility, accessibility fallback
         env:
           NODE_PATH: ${{ runner.temp }}/formatx-archive/node_modules
