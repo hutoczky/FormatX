@@ -81,6 +81,16 @@ for(const token of [
 ])assert.ok(introThree.includes(token),'R2157 DNA base-pair bridge missing: '+token);
 assert.ok(core.includes('software ? 28 : constrainedMobile ? 30 : mobile ? 40'),
   'R2157 adaptive mobile/simulation four-arm mesh resolution regressed');
+// R2246: the exact four-point topology and triangle winding are unchanged.
+// Shared analytic vertices must be evaluated once per latitude row, instead
+// of repeating four expensive pow() and normal calculations per quad.
+assert.ok(core.includes('const makeBodyRow=lat=>Array.from({length:longitudeSegments+1}') &&
+  core.includes('let upperBodyRow=makeBodyRow(0)') &&
+  core.includes('const lowerBodyRow=makeBodyRow(lat+1)') &&
+  core.includes('upperBodyRow=lowerBodyRow') &&
+  core.includes('if(lat>0)triangle([a,b,c],facet)') &&
+  core.includes('if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004)'),
+  'R2246 must preserve original MAG silhouette with shared analytic body rows');
 
 assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2241-software-capability-intent'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
