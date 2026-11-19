@@ -156,6 +156,20 @@ async function validateDesktop() {
     await menuToggle.click();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     const pricingNav=page.locator('#main-nav a[href="#pricing"]');
+    // R2247: the old fullscreen menu typography inherited 60px letters
+    // inside the production 360px drawer. Hover padding then changed line
+    // wrapping and moved the real click target indefinitely on desktop.
+    const navTypography=await pricingNav.evaluate(el=>{
+      const css=getComputedStyle(el),rect=el.getBoundingClientRect();
+      return {fontSize:parseFloat(css.fontSize),whiteSpace:css.whiteSpace,
+        paddingLeft:css.paddingLeft,transition:css.transitionProperty,
+        width:rect.width,height:rect.height,
+        menuWidth:el.closest('#main-nav')?.getBoundingClientRect().width||0};
+    });
+    mark('desktop: navigation-hitbox-r2247',navTypography);
+    assert(navTypography.fontSize<=18&&navTypography.whiteSpace==='nowrap'
+      &&navTypography.width>=200&&navTypography.menuWidth<=400,
+      'Desktop menu inherited unstable fullscreen typography: '+JSON.stringify(navTypography));
     await pricingNav.click();
     await page.waitForFunction(() => {
       const nav=document.getElementById('main-nav');
