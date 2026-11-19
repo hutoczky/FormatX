@@ -50,7 +50,10 @@ const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
 // R2139: mount the real four-arm hero shortly after first paint, not after
 // an invisible 5.5s+3.5s idle window. Keep mobile and audit protections.
-const AUTO_DELAY_MS=matchMedia('(max-width:900px),(pointer:coarse)').matches?2600:1450;
+// R2238: the desktop native MAG becomes ready shortly after its static first
+// paint rather than triggering the FORMATX heading's final repaint at ~1.83 s.
+// Preserve the proven mobile/film path and all explicit interaction triggers.
+const AUTO_DELAY_MS=matchMedia('(max-width:900px),(pointer:coarse)').matches?2600:850;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
