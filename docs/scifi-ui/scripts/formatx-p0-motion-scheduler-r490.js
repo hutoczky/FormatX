@@ -60,6 +60,38 @@ let started=false;
 let idleId=0;
 let timer=0;
 let pendingCanonicalAsk=false;
+let idleWebglCapabilityR2241=null;
+// R2241: do not auto-start a second, expensive software WebGL timeline on
+// stationary mobile visitors. The native renderer is still available on the
+// very first trusted touch/wheel/keyboard input; actual mobile GPU paths keep
+// their automatic living-MAG start. This applies to every visitor, not audits.
+function allowMobileIdleWebGLR2241(){
+  if(!matchMedia('(max-width:900px),(pointer:coarse)').matches)return true;
+  if(idleWebglCapabilityR2241!==null)return idleWebglCapabilityR2241;
+  let canvas=null,gl=null,allowed=false,renderer='unknown';
+  try{
+    canvas=document.createElement('canvas');
+    canvas.width=1;canvas.height=1;
+    gl=canvas.getContext('webgl2',{
+      antialias:false,depth:false,stencil:false,
+      failIfMajorPerformanceCaveat:true,preserveDrawingBuffer:false
+    });
+    if(gl){
+      const debug=gl.getExtension('WEBGL_debug_renderer_info');
+      renderer=String(debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)
+        :gl.getParameter(gl.RENDERER)||'unidentified');
+      allowed=!/swiftshader|llvmpipe|softpipe|software|mesa offscreen/i.test(renderer);
+    }
+  }catch(_){allowed=false;}
+  finally{
+    try{gl?.getExtension('WEBGL_lose_context')?.loseContext();}catch(_){}
+    if(canvas){canvas.width=0;canvas.height=0;}
+  }
+  idleWebglCapabilityR2241=allowed;
+  root.dataset.fxP0IdleWebGLR2241=allowed?'hardware-auto-allowed'
+    :'software-or-caveat-user-intent-only';
+  return allowed;
+}
 
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
@@ -122,6 +154,13 @@ function runLateAuto(){
   }
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){
     root.dataset.fxP0MotionSchedulerR490='reduced-motion-static-r493';
+    return;
+  }
+  // A slow/SwiftShader mobile GPU must never monopolize the input thread
+  // merely because the visitor left the landing page open. First real intent
+  // still uses start() immediately; no renderer is permanently disabled.
+  if(!allowMobileIdleWebGLR2241()){
+    root.dataset.fxP0MotionSchedulerR490='software-awaiting-user-intent-r2241';
     return;
   }
   const launch=()=>start('late-auto-r1971-stable-window');
