@@ -58,6 +58,24 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
     await route.fulfill({status:404,contentType:'application/json',body:'{"ok":false}'});
   });
 
+  // The static CI server is intentionally not the billing Worker. Provide
+  // a conservative READ-ONLY "sales blocked" fixture to prevent an unrelated
+  // checkout-readiness 404 from polluting NET telemetry. Do not mock purchase
+  // success, payment or order creation.
+  let readinessRequests=0;
+  await page.route('**/api/checkout-readiness',async route=>{
+    const req=route.request();
+    assert.equal(req.method(),'GET','Readiness must never mutate orders');
+    readinessRequests++;
+    await route.fulfill({
+      status:200,
+      contentType:'application/json',
+      body:JSON.stringify({
+        ok:false,provider:'bank_transfer',sales_ready:false,live_ready:false
+      })
+    });
+  });
+
   await page.goto(TEST_URL+'?lighthouse=1&net-test=r1800',{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForSelector('[data-fx-net-speed-r1800="true"]',{state:'attached',timeout:15000});
 
@@ -85,6 +103,8 @@ const TEST_URL=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/ind
   const meaningful=errors.filter(x=>!/favicon|WebGL|WebGPU|GPU|Permissions policy/i.test(x));
   assert.deepEqual(meaningful,[],
     'Unhandled browser error(s); failing URLs: '+JSON.stringify(failedUrls));
+  assert.equal(failedUrls.filter(x=>x.url.includes('/api/checkout-readiness')).length,0,
+    'Static readiness fixture did not intercept the billing probe');
 
   await context.close();
   await browser.close();
