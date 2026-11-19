@@ -150,12 +150,13 @@ assert.ok(!intro.includes('background-size: 4px 4px'),
   'The 4px intro grid was not removed');
 // R2153 must bust the R2035 browser cache while RETAINING every strict
 // R2035 geometric/material anti-banding invariant verified above.
-// R2241 renderer scheduling is capability-based; never hide native MAG only
-// for a benchmark. Software-only mobile browsers can still use first gesture.
-assert.ok(scheduler.includes('allowMobileIdleWebGLR2241') &&
-  scheduler.includes('software-awaiting-user-intent-r2241') &&
-  scheduler.includes("user-${event?.type||'intent'}"),
-  'Native MAG software-fallback must remain available on real user intent');
+// R2242: preserve the real automatic WebGL MAG even on software renderers.
+// A previous software-idle gate prevented the living system from mounting and
+// broke the default-entry cinematic checks, so keep the canonical path live.
+assert.ok(scheduler.includes("start('mag-birth-r605')") &&
+  scheduler.includes("start('late-auto-r1971-stable-window')") &&
+  !scheduler.includes('software-awaiting-user-intent-r2241'),
+  'Native MAG must automatically initialise on real software/hardware WebGL');
 assert.ok(productionWorker.includes("'sha256-8qSjNr6DkgiwsYo9/qL1DASerqq7oAy4Jrfzc09qUYc='"),
   'Production CSP must authorize the exact non-blocking first-frame DNA CSS');
 for(const loader of [desk,mobile,motion]){
