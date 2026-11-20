@@ -92,9 +92,9 @@ assert.ok(core.includes('const makeBodyRow=lat=>Array.from({length:longitudeSegm
   core.includes('if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004)'),
   'R2246 must preserve original MAG silhouette with shared analytic body rows');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2250-software-mag-visible-studio'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2251-software-mag-no-noise'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2250-software-mag-visible-studio'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2251-software-mag-no-noise'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
@@ -121,6 +121,12 @@ assert.ok(realIntro.includes('R2194 — the same eight continuous studio-polishe
   realIntro.includes('this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial)')&&
   realIntro.includes('const trimSeat=smooth((t-6.02)/1.18)'),
   'R2194 film must seat the same raised chromium filaments after DNA');
+// R2251: remove tiny software-only sine/pow noise without changing any
+// physical geometry or hardware shader instructions.
+assert.ok(core.includes('float grain=.5; // R2251') &&
+  core.includes('float fissure=0.0; // R2251') &&
+  core.includes('fxNativeMagSoftwareNoiseR2251'),
+  'R2251 must eliminate software-only invisible CPU pixel noise');
 // R2250: software renderer must retain photographic rim contrast and
 // original hardware material. The software studio is a constant-only change.
 assert.ok(core.includes('vec3 col=mix(vec3(.007,.013,.017),vec3(.104,.133,.144)') &&
@@ -185,14 +191,14 @@ assert.ok(scheduler.includes("start('mag-birth-r605')") &&
 assert.ok(productionWorker.includes("'sha256-8qSjNr6DkgiwsYo9/qL1DASerqq7oAy4Jrfzc09qUYc='"),
   'Production CSP must authorize the exact non-blocking first-frame DNA CSS');
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261120-r2250-software-mag-visible-studio'),
+  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261120-r2251-software-mag-no-noise'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261120-r2250'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261120-r2251'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2250'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2251'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2250'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2251'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',

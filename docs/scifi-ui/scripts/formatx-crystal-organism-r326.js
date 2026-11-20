@@ -1798,8 +1798,8 @@
         float warmPlane=max(dot(n,normalize(vec3(.54,-.28,.79))),0.0);
         float coolPlane=max(dot(n,normalize(vec3(-.62,.18,.76))),0.0);
         float capShade=1.0-.050*smoothstep(.46,.96,vLocal.y);
-        float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
-        float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
+        float grain=.5; // R2251: no imperceptible per-fragment software grain noise
+        float fissure=0.0; // R2251: no tiny CPU-bound software microfissure
         float absorption=.84+.16*facing;
         vec3 col=mix(vec3(.007,.013,.017),vec3(.104,.133,.144),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
@@ -1927,6 +1927,8 @@
     // R2250: match the luminous smoked-chrome intro on software WebGL, too.
     // Constant-only studio changes preserve the same shader instruction count,
     // original 3D shape and hardware photographic material.
+    root.dataset.fxNativeMagSoftwareNoiseR2251=softwareRenderer
+      ? 'subpixel-grain-and-fissure-math-removed' : 'hardware-original';
     root.dataset.fxNativeMagSoftwareStudioR2250=softwareRenderer
       ? 'studio-readable-smoky-silver-midtones' : 'hardware-optics-unchanged';
     root.dataset.fxNativeMagSoftwareShaderR2243=softwareRenderer
