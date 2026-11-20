@@ -814,6 +814,13 @@
       const radiusCap=MOBILE
         ? Math.max(38,Math.min(sw*.36,sh*.35)/Math.max(.001,scale))
         : 192;
+      // R2236: a screenshot at 4.4 s is the ORGANIC EMBRYO, not
+      // a finished metal MAG. Expose a transition-only physical film phase,
+      // so CI checks the correct actual geometry at each storyboard frame.
+      const filmPhase=r<.258?'dna':r<.558?'embryo':r<.738?'assembly':'four-arm-mag';
+      if(document.documentElement.dataset.fxMagFallbackPhaseR2236!==filmPhase){
+        document.documentElement.dataset.fxMagFallbackPhaseR2236=filmPhase;
+      }
       document.documentElement.dataset.fxMagFallbackSilhouetteR2103=
         'four-point-bevelled-metal-glass-iris';
       document.documentElement.dataset.fxMagFallbackDiameterR2103=

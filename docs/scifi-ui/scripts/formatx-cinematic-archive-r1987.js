@@ -1211,6 +1211,18 @@ void main(){
         if(active&&stage)ResponsiveExperience.dock();
         else if(archiveActive)ResponsiveExperience.restore();
         setPanelState();
+        // R2245: chapter selection is already synchronous, but the real
+        // single-paper visibility/source was still deferred to an unrelated
+        // animation frame. Under slow WebGL this could leave the PREVIOUS
+        // scene's paper active after the chapter had changed, confusing both
+        // keyboard users and the physical MAG shelf transition. Do the full
+        // semantic swap exactly once on a scene boundary; all intermediate
+        // scroll beats still use the single coalesced rAF below.
+        const chapterKey=current?.s.key||'home';
+        if(cinemaPrepared&&root.dataset.fxArchiveCinemaChapter!==chapterKey){
+          syncCinema();
+          root.dataset.fxArchiveSceneCommitR2245=chapterKey;
+        }
         // R2057: keep chapter identity and canonical MAG docking synchronous.
         // Expensive native-document transformations share one pre-paint
         // animation frame, so wheel/touch bursts cannot repeatedly recompute
@@ -1405,6 +1417,17 @@ void main(){
     addEventListener('formatx:languagechange',()=>{
       idleComposed=false;
       invalidate();
+    },{passive:true});
+    // R2244: the native section heading can become a one-word MAG chapter
+    // after the archive has already copied its prior editorial heading.
+    // Refresh the original source-derived paper immediately on that change.
+    addEventListener('formatx:mag-chapter-mounted',event=>{
+      if(!event.detail?.section?.isConnected||!handoff?.isConnected)return;
+      handoffKey='';
+      if(current?.s.node&&(event.detail.section===current.s.node
+        ||event.detail.section.contains(current.s.node))){
+        updateHandoff();
+      }
     },{passive:true});
     addEventListener('pageshow',()=>{idleComposed=false;invalidate();},{passive:true});
     document.addEventListener('visibilitychange',()=>{

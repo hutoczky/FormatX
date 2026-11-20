@@ -44,13 +44,16 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261026-r2194-polished-four-arm-mag';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261120-r2248-cooperative-webgl-native';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
 // R2139: mount the real four-arm hero shortly after first paint, not after
 // an invisible 5.5s+3.5s idle window. Keep mobile and audit protections.
-const AUTO_DELAY_MS=matchMedia('(max-width:900px),(pointer:coarse)').matches?2600:1450;
+// R2239: don't compile a large shader just as a real checkout/technical
+// dialog opens. Scroll/keyboard MAG intent still boots instantly; quiet idle
+// desktop startup waits until the modal's interaction path is clear.
+const AUTO_DELAY_MS=matchMedia('(max-width:900px),(pointer:coarse)').matches?2600:3200;
 root.dataset.fxP0WebdriverR1729=WEBDRIVER?'validation-runtime-enabled':'normal-browser';
 if(AUDIT)root.dataset.fxP0AuditModeR1728='static-first-paint-no-late-webgl';
 let started=false;
@@ -65,7 +68,15 @@ function clearPending(){
 
 function start(reason){
   if(started)return;
+  if(document.body.classList.contains('fx-organism-panel-open')){
+    root.dataset.fxP0MotionSchedulerR490='modal-yield-r2239';
+    clearPending();
+    timer=setTimeout(runLateAuto,650);
+    return;
+  }
   started=true;
+  for(const type of ['pointerdown','touchstart','keydown','wheel'])
+    removeEventListener(type,onIntent);
   clearPending();
   root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
   if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
@@ -96,6 +107,12 @@ function runLateAuto(){
   if(started)return;
   if(AUDIT){
     root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
+    return;
+  }
+  // Never steal the input/render budget while an organism modal is open.
+  if(document.body.classList.contains('fx-organism-panel-open')){
+    root.dataset.fxP0MotionSchedulerR490='modal-idle-deferred-r2239';
+    timer=setTimeout(runLateAuto,650);
     return;
   }
   if(document.visibilityState!=='visible'){
@@ -146,6 +163,13 @@ function armStartup(){
 function onIntent(event){
   if(event&&event.isTrusted===false)return;
   const target=event?.target instanceof Element?event.target:null;
+  // The first press on a pricing console must not begin expensive native MAG
+  // shader compilation ahead of the resulting user-visible dialog.
+  if(document.body.classList.contains('fx-organism-panel-open')||
+     target?.closest('[data-organism-open],[data-organism-tab],[data-organism-close],.fx-organism-console')){
+    root.dataset.fxP0MotionSchedulerR490='dialogue-intent-yield-r2239';
+    return;
+  }
   if(target?.closest('#hero .fx-reference-ask')){
     pendingCanonicalAsk=true;
     root.dataset.fxP0CanonicalAskR1669='pending-runtime-mount';
@@ -157,7 +181,7 @@ function onIntent(event){
    browser startup/restoration and were the source of R492's 0.5–1.0 s random
    WebGL boot. These events represent explicit user action instead. */
 for(const type of ['pointerdown','touchstart','keydown','wheel']){
-  addEventListener(type,onIntent,{once:true,passive:true});
+  addEventListener(type,onIntent,{passive:true});
 }
 
 if(document.readyState==='loading'){

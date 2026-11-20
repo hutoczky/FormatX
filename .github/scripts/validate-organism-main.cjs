@@ -122,7 +122,31 @@ async function validateDesktop() {
     const checkoutHref = await page.locator('#preview-checkout-link').getAttribute('href');
     assert(String(checkoutHref).includes('currency=EUR'), 'EUR checkout did not update');
     mark('desktop: currency-updated', { checkoutHref });
-
+    const closeProbe=await page.evaluate(()=>{
+      const b=document.querySelector('.fx-organism-console-close');
+      const root=document.getElementById('fx-organism-console');
+      const shell=b?.closest('.fx-organism-console-shell');
+      const box=b?.getBoundingClientRect();
+      const cs=b?getComputedStyle(b):null;
+      const shellCss=shell?getComputedStyle(shell):null;
+      const x=box?box.left+box.width/2:0,y=box?box.top+box.height/2:0;
+      const hit=document.elementFromPoint(x,y);
+      return {rootHidden:root?.hidden,
+        archive:document.documentElement.dataset.fxArchiveCinema||'home',
+        archiveChapter:document.documentElement.dataset.fxArchiveCinemaChapter||'',
+        cinemaPrepared:document.documentElement.dataset.fxArchiveCinemaPrepared||'',
+        bodyPanelOpen:document.body.classList.contains('fx-organism-panel-open'),
+        activeElement:document.activeElement?.className||'',
+        rect:box?.toJSON(),hit:hit?.className||hit?.tagName,
+        containsHit:!!b&&!!hit&&(b===hit||b.contains(hit)),
+        inert:b?.inert,ancestorInert:b?.closest('[inert]')?.className||'',
+        visibility:cs?.visibility,display:cs?.display,opacity:cs?.opacity,
+        shellTransform:shellCss?.transform,shellAnimation:shellCss?.animationName,
+        bodyTransform:getComputedStyle(document.body).transform,
+        modalZ:getComputedStyle(root).zIndex,
+        readOnly:true};
+    });
+    mark('desktop: close-readiness',closeProbe);
     await page.locator('.fx-organism-console-close').click();
     await page.waitForFunction(() => document.getElementById('fx-organism-console').hidden);
     await page.waitForTimeout(550);
@@ -132,6 +156,20 @@ async function validateDesktop() {
     await menuToggle.click();
     await page.waitForFunction(() => document.getElementById('main-nav')?.classList.contains('open'));
     const pricingNav=page.locator('#main-nav a[href="#pricing"]');
+    // R2247: the old fullscreen menu typography inherited 60px letters
+    // inside the production 360px drawer. Hover padding then changed line
+    // wrapping and moved the real click target indefinitely on desktop.
+    const navTypography=await pricingNav.evaluate(el=>{
+      const css=getComputedStyle(el),rect=el.getBoundingClientRect();
+      return {fontSize:parseFloat(css.fontSize),whiteSpace:css.whiteSpace,
+        paddingLeft:css.paddingLeft,transition:css.transitionProperty,
+        width:rect.width,height:rect.height,
+        menuWidth:el.closest('#main-nav')?.getBoundingClientRect().width||0};
+    });
+    mark('desktop: navigation-hitbox-r2247',navTypography);
+    assert(navTypography.fontSize<=18&&navTypography.whiteSpace==='nowrap'
+      &&navTypography.width>=200&&navTypography.menuWidth<=400,
+      'Desktop menu inherited unstable fullscreen typography: '+JSON.stringify(navTypography));
     await pricingNav.click();
     await page.waitForFunction(() => {
       const nav=document.getElementById('main-nav');

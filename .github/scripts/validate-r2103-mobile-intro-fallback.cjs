@@ -61,6 +61,7 @@ const CASES=[
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
             material:root.dataset.fxMagFallbackMaterialR2104||'',
+            phase:root.dataset.fxMagFallbackPhaseR2236||'',
             diameter:Number(root.dataset.fxMagFallbackDiameterR2103),
             width:innerWidth,height:innerHeight,
             canvasRect:{width:size?.width||0,height:size?.height||0},
@@ -86,8 +87,16 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
-        assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
-          'R2104 cinema material did not render in original phone canvas');
+        const completedMAG=shot.second>=7.38;
+        assert.equal(info.phase,completedMAG?'four-arm-mag':'embryo',
+          'R2236 storyboard phase is not physically synchronized with actual frame');
+        if(completedMAG){
+          assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
+            'Completed R2104 titanium MAG must paint genuine material');
+        }else{
+          assert.equal(info.material,'',
+            'The biological embryo must not prematurely become a metal MAG');
+        }
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
@@ -104,8 +113,9 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2113-layered-chassis'),
-          'The Android fallback is loading an obsolete renderer instead of R2113');
+        assert.ok(info.loader.includes('formatx-mag-reference-film-r649.js')
+          &&info.loader.includes('r2182-studio-depth-first-genome'),
+          'The public page is not loading the accepted R2182 DNA-to-embryo cinema');
         records.push({shot,info});
       }finally{await context.close()}
     }

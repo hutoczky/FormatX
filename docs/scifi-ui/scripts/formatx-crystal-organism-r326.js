@@ -202,26 +202,33 @@
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
-  function beginProgram(gl, vertexSource, fragmentSource) {
+  function beginProgram(gl, vertexSource, fragmentSource, cooperative=false) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
     const program = gl.createProgram();
     const vertex = gl.createShader(gl.VERTEX_SHADER);
     const fragment = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(vertex, vertexSource);
     gl.shaderSource(fragment, fragmentSource);
+    // R2248: split software-only shader compilation and linking into browser
+    // tasks so one GL bootstrap no longer monopolises input for 150ms+.
+    // Genuine hardware GL retains the unchanged immediate compilation path.
     gl.compileShader(vertex);
-    gl.compileShader(fragment);
-    gl.attachShader(program, vertex);
-    gl.attachShader(program, fragment);
-    gl.bindAttribLocation(program, 0, 'aSphere');
-    gl.bindAttribLocation(program, 1, 'aCrystal');
-    gl.bindAttribLocation(program, 2, 'aSphereNormal');
-    gl.bindAttribLocation(program, 3, 'aCrystalNormal');
-    gl.bindAttribLocation(program, 4, 'aUv');
-    gl.bindAttribLocation(program, 5, 'aBary');
-    gl.bindAttribLocation(program, 6, 'aFacet');
-    gl.linkProgram(program);
-    return { program, vertex, fragment, parallel };
+    const compileFragment=()=>gl.compileShader(fragment);
+    const linkShaders=()=>{
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.bindAttribLocation(program, 0, 'aSphere');
+      gl.bindAttribLocation(program, 1, 'aCrystal');
+      gl.bindAttribLocation(program, 2, 'aSphereNormal');
+      gl.bindAttribLocation(program, 3, 'aCrystalNormal');
+      gl.bindAttribLocation(program, 4, 'aUv');
+      gl.bindAttribLocation(program, 5, 'aBary');
+      gl.bindAttribLocation(program, 6, 'aFacet');
+      gl.linkProgram(program);
+    };
+    if(!cooperative){compileFragment();linkShaders();}
+    return {program,vertex,fragment,parallel,
+      cooperativeStages:cooperative?[compileFragment,linkShaders]:[]};
   }
 
   function finishProgram(gl, pending) {
@@ -269,7 +276,10 @@
   /* One closed topology owns both endpoints. r442 uses a lighter phone mesh:
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
-  function buildOrganismGeometry(software=false) {
+  async function buildOrganismGeometry(software=false) {
+    // R2248: yield only on software WebGL. The actual geometry is IDENTICAL
+    // and the GPU-backed path still computes every vertex without delay.
+    const yieldSoftwareTask=()=>new Promise(resolve=>setTimeout(resolve,0));
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
@@ -423,16 +433,27 @@
     /* R1931 — clean P0-derived body topology.
        Low, even facet density is intentional: the silhouette is authored by the
        continuous anisotropic field above, not by dozens of hand-pushed rings. */
+    // R2246: each shared grid vertex used to be recalculated in four adjacent
+    // quads, including expensive noninteger pow() and normalisation. Keep two
+    // rows of immutable analytic vertices, preserving the EXACT original
+    // triangle order, normals, UVs, facets and four-arm sculpt. This reduces
+    // body vertex evaluations about 4x with only O(longitude) temporary data.
+    const makeBodyRow=lat=>Array.from({length:longitudeSegments+1},
+      (_,lon)=>vertex(lat,lon));
+    let upperBodyRow=makeBodyRow(0);
     for(let lat=0;lat<latitudeSegments;lat+=1){
+      const lowerBodyRow=makeBodyRow(lat+1);
       for(let lon=0;lon<longitudeSegments;lon+=1){
-        const a=vertex(lat,lon);
-        const b=vertex(lat,lon+1);
-        const c=vertex(lat+1,lon);
-        const d=vertex(lat+1,lon+1);
+        const a=upperBodyRow[lon];
+        const b=upperBodyRow[lon+1];
+        const c=lowerBodyRow[lon];
+        const d=lowerBodyRow[lon+1];
         const facet=.12+.28*random(lon+lat*17,lat*31+lon);
         if(lat>0)triangle([a,b,c],facet);
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
+      upperBodyRow=lowerBodyRow;
+      if(software&&(lat+1)%4===0)await yieldSoftwareTask();
     }
 
     /* R1982 — real microfibril geometry.
@@ -662,6 +683,8 @@
       armorTri(last.left,last.crown,last.right,5.31);
       armorQuad(last.left,last.right,last.underRight,last.underLeft,5.72);
     }
+    if(software)await yieldSoftwareTask();
+
     /* R2194 — continuous polished titanium vein inlays. Two tapered
        optically raised strips are machined into EACH of the four actual
        arm hulls. Their depth is derived from the SAME R2153 mathematical
@@ -693,6 +716,8 @@
         }
       }
     }
+    if(software)await yieldSoftwareTask();
+
     /* The centre is not a painted circle. A shallow, machined 48-facet
        silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
     const opticPoint=(radius,angle,depth)=>[
@@ -950,6 +975,7 @@
       }
     }
 
+    if(software)await yieldSoftwareTask();
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
@@ -1892,9 +1918,15 @@
        GPUs use the medium physical shader and the normal mobile topology.
        Dynamic resolution still yields before the 16.67 ms cadence. */
     const mobilePhysical = mobile || constrainedMobile || auditMode;
-    /* R1930 visual parity: one authored studio shader on desktop, mobile and
-       software proof. This removes the hardware/CI split that hid ugly live paths. */
-    const fragmentSource = constrainedFragmentSource;
+    /* R2243: the native software shader was authored but never selected.
+       SwiftShader/llvmpipe therefore ran the expensive hardware fragment code
+       on CPU, producing 200ms render tasks. Preserve the original geometry,
+       four-arm optic and full hardware material; only real software WebGL
+       selects its dedicated lightweight native GLSL material. */
+    const fragmentSource = softwareRenderer ? softwareFragmentSource : constrainedFragmentSource;
+    root.dataset.fxNativeMagSoftwareShaderR2243=softwareRenderer
+      ? 'dedicated-software-native-studio-glsl'
+      : 'unchanged-hardware-photographic-glsl';
     root.dataset.fxNativeMagVisualR2200='organic-coral-cytoplasm-retained-in-four-arm-titanium-optic';
     root.dataset.fxCoreOpticsR2035='debanded-single-body-broad-softboxes-subpixel-safe';
     root.dataset.fxCoreShaderProfileR1605=softwareRenderer
@@ -2032,7 +2064,7 @@
       : 'hardware-photographic-material-preserved';
 
     let pendingProgram;
-    try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
+    try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource,softwareRenderer); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
       stage.remove();
@@ -2052,6 +2084,17 @@
     }
     function finishWhenReady() {
       if(!stage.isConnected)return;
+      // Each software shader stage is a real separate macrotask, not a
+      // microtask that would still block paint/input until compilation ends.
+      if(pendingProgram.cooperativeStages.length){
+        const step=pendingProgram.cooperativeStages.shift();
+        setTimeout(()=>{
+          if(!stage.isConnected)return;
+          try{step();}catch(error){failShader(error);return;}
+          setTimeout(finishWhenReady,0);
+        },0);
+        return;
+      }
       let program;
       try { program=finishProgram(gl,pendingProgram); }
       catch(error){ failShader(error); return; }
@@ -2062,13 +2105,16 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
-      finishBoot(program);
+      void finishBoot(program).catch(failShader);
     }
     finishWhenReady();
     return;
 
-    function finishBoot(program) {
-    const geometry=buildOrganismGeometry(softwareRenderer);
+    async function finishBoot(program) {
+    const geometry=await buildOrganismGeometry(softwareRenderer);
+    if(!stage.isConnected){gl.deleteProgram(program);return;}
+    root.dataset.fxCoreCooperativeBootstrapR2248=softwareRenderer
+      ? 'chunked-mesh-and-shader-native-webgl' : 'hardware-unchanged';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -2091,7 +2137,11 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
-    buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    for(let index=0;index<buffers.length;index++){
+      upload(buffers[index],geometry.arrays[index],attributes[index],geometry.sizes[index]);
+      if(softwareRenderer&&index%2===1)await new Promise(resolve=>setTimeout(resolve,0));
+    }
+    if(!stage.isConnected){gl.deleteProgram(program);return;}
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
@@ -2150,14 +2200,18 @@
        and produced visible stair-stepping on the silhouette even with MSAA.
        Desktop now starts close to native CSS resolution and only sheds quality
        after measured frame pressure. Mobile keeps its existing contract. */
+    // R2237: software WebGL must NOT rasterize near-retina mobile surfaces.
+    // The Lighthouse trace measured 16 SwiftShader long tasks (>560ms excess)
+    // from this one canvas. Bound only the software fallback's pixel fill-rate;
+    // every genuine GPU-backed mobile/desktop keeps its current full detail.
     let qualityScale=softwareRenderer
-      ? (mobile?.94:.72)
+      ? (mobile?.84:.72)
       : (mobile ? 1.00 : (auditMode ? .90 : (constrained ? .84 : 1.00)));
     const qualityCeiling=softwareRenderer
-      ? (mobile?1.00:.86)
+      ? (mobile?.92:.86)
       : (mobile?1.08:(auditMode?.98:(constrained?.96:1.08)));
     const qualityFloor=softwareRenderer
-      ? (mobile?.80:.48)
+      ? (mobile?.62:.48)
       : (mobile?.80:(constrained?.62:.74));
     let lastQualityAdjust=0,qualityResizeTimer=0;
     let renderPeak=0,framePeak=1000/60,stableBudgetFrames=0,panicFrames=0;
@@ -2172,14 +2226,18 @@
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
-        ? (mobile?1.58:1.28)
+        ? (mobile?1.25:1.28)
         : (auditMode ? 1.34 : constrainedMobile?1.72:mobile?2.00:constrained?1.68:2.10);
       const cap=baseCap*qualityScale;
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
-        ? (mobile?920000:560000)
+        ? (mobile?340000:560000)
         : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
       const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
+      if(softwareRenderer){
+        const policy=mobile?'mobile-software-fillrate-bound-r2237':'desktop-software-existing';
+        if(root.dataset.fxCoreSoftwareFillrateR2237!==policy)root.dataset.fxCoreSoftwareFillrateR2237=policy;
+      }
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
@@ -3166,7 +3224,9 @@
     root.dataset.fxCoreFirstFrameR1913='pending';
     root.dataset.fxCoreRenderMs='0';
     root.dataset.fxCoreReal3dFps='60';
-    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer?'190k-r1671-crisp-start-governor-can-shed':'hardware-budget-unchanged';
+    root.dataset.fxCoreSoftwareBudgetR1545=softwareRenderer
+      ? (mobile?'340k-r2237-adaptive-surface-budget':'560k-r2237-desktop-adaptive-budget')
+      : 'hardware-budget-unchanged';
 
     publishShape('initial');
     schedule(1);
