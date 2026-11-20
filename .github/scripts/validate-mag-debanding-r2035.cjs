@@ -92,9 +92,9 @@ assert.ok(core.includes('const makeBodyRow=lat=>Array.from({length:longitudeSegm
   core.includes('if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004)'),
   'R2246 must preserve original MAG silhouette with shared analytic body rows');
 
-assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2241-software-capability-intent'),
+assert.ok(productionWorker.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2248-cooperative-webgl-native'),
   'Cloudflare Worker must not pin the previous P0 MAG scheduler cache');
-assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2241-software-capability-intent'),
+assert.ok(productionWorker.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2248-cooperative-webgl-native'),
   'Cloudflare Worker must not rewrite the scheduler to R1950');
 assert.ok(productionWorker.includes('formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema'),
   'Cloudflare Worker must serve the R2143 canonical Three.js source from the correct route');
@@ -121,6 +121,14 @@ assert.ok(realIntro.includes('R2194 — the same eight continuous studio-polishe
   realIntro.includes('this.armTrim=new T.Mesh(ribGeometry,this.armTrimMaterial)')&&
   realIntro.includes('const trimSeat=smooth((t-6.02)/1.18)'),
   'R2194 film must seat the same raised chromium filaments after DNA');
+// R2248: cooperative yielding is a true browser-task handoff on
+// software-only WebGL, with identical original 3D triangle order.
+assert.ok(core.includes('async function buildOrganismGeometry(software=false)') &&
+  core.includes('if(software&&(lat+1)%4===0)await yieldSoftwareTask()') &&
+  core.includes('cooperativeStages:cooperative?[compileFragment,linkShaders]:[]') &&
+  core.includes('async function finishBoot(program)') &&
+  core.includes('fxCoreCooperativeBootstrapR2248'),
+  'Native MAG software WebGL must compile and build without blocking one long task');
 assert.ok(core.includes('const fragmentSource = softwareRenderer ? softwareFragmentSource : constrainedFragmentSource;') &&
   core.includes("fxNativeMagSoftwareShaderR2243=softwareRenderer"),
   'Desktop and mobile must share the same canonical WebGL MAG material');
@@ -171,14 +179,14 @@ assert.ok(scheduler.includes("start('mag-birth-r605')") &&
 assert.ok(productionWorker.includes("'sha256-8qSjNr6DkgiwsYo9/qL1DASerqq7oAy4Jrfzc09qUYc='"),
   'Production CSP must authorize the exact non-blocking first-frame DNA CSS');
 for(const loader of [desk,mobile,motion]){
-  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261120-r2246-vertex-row-cache-and-software-shader'),
+  assert.ok(loader.includes('formatx-crystal-organism-r326.js?v=20261120-r2248-cooperative-webgl-native'),
     'R2153 connected-arm MAG renderer loader is stale and may serve the old WebGL timing');
 }
-assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261120-r2241'),
+assert.ok(motion.includes('formatx-current-mag-loader-r422.js?v=20261120-r2248'),
   'Motion owner may boot the old cached MAG runtime');
-assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2241'),
+assert.ok(scheduler.includes('formatx-motion-runtime-loader-r239.js?v=20261120-r2248'),
   'Desktop startup scheduler may cache the old renderer loader');
-assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2241'),
+assert.ok(html.includes('formatx-p0-motion-scheduler-r490.js?v=20261120-r2248'),
   'Canonical HTML must load the R2153 scheduler');
 for(const resource of [
  'formatx-core-real3d-v20.css?v=20261011-r2035-no-scanlines',
