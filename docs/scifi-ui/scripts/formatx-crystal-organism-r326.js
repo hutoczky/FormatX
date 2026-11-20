@@ -202,26 +202,33 @@
   root.dataset.fxNativeMagPerformanceR1703 = 'higher-mobile-start-resolution-with-fast-quality-shed-before-cadence';
   root.dataset.fxNativeMagAuditR1391 = auditMode ? 'reduced-shader-no-autonomous-sweep' : 'normal';
 
-  function beginProgram(gl, vertexSource, fragmentSource) {
+  function beginProgram(gl, vertexSource, fragmentSource, cooperative=false) {
     const parallel = gl.getExtension('KHR_parallel_shader_compile');
     const program = gl.createProgram();
     const vertex = gl.createShader(gl.VERTEX_SHADER);
     const fragment = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(vertex, vertexSource);
     gl.shaderSource(fragment, fragmentSource);
+    // R2248: split software-only shader compilation and linking into browser
+    // tasks so one GL bootstrap no longer monopolises input for 150ms+.
+    // Genuine hardware GL retains the unchanged immediate compilation path.
     gl.compileShader(vertex);
-    gl.compileShader(fragment);
-    gl.attachShader(program, vertex);
-    gl.attachShader(program, fragment);
-    gl.bindAttribLocation(program, 0, 'aSphere');
-    gl.bindAttribLocation(program, 1, 'aCrystal');
-    gl.bindAttribLocation(program, 2, 'aSphereNormal');
-    gl.bindAttribLocation(program, 3, 'aCrystalNormal');
-    gl.bindAttribLocation(program, 4, 'aUv');
-    gl.bindAttribLocation(program, 5, 'aBary');
-    gl.bindAttribLocation(program, 6, 'aFacet');
-    gl.linkProgram(program);
-    return { program, vertex, fragment, parallel };
+    const compileFragment=()=>gl.compileShader(fragment);
+    const linkShaders=()=>{
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.bindAttribLocation(program, 0, 'aSphere');
+      gl.bindAttribLocation(program, 1, 'aCrystal');
+      gl.bindAttribLocation(program, 2, 'aSphereNormal');
+      gl.bindAttribLocation(program, 3, 'aCrystalNormal');
+      gl.bindAttribLocation(program, 4, 'aUv');
+      gl.bindAttribLocation(program, 5, 'aBary');
+      gl.bindAttribLocation(program, 6, 'aFacet');
+      gl.linkProgram(program);
+    };
+    if(!cooperative){compileFragment();linkShaders();}
+    return {program,vertex,fragment,parallel,
+      cooperativeStages:cooperative?[compileFragment,linkShaders]:[]};
   }
 
   function finishProgram(gl, pending) {
@@ -269,7 +276,10 @@
   /* One closed topology owns both endpoints. r442 uses a lighter phone mesh:
      the silhouette and morph remain fully 3D, but the larger native facets need
      fewer fragment invocations and also avoid the razor-fine edge impression. */
-  function buildOrganismGeometry(software=false) {
+  async function buildOrganismGeometry(software=false) {
+    // R2248: yield only on software WebGL. The actual geometry is IDENTICAL
+    // and the GPU-backed path still computes every vertex without delay.
+    const yieldSoftwareTask=()=>new Promise(resolve=>setTimeout(resolve,0));
     /* R1950 — desktop silhouette tessellation.
        The sharpened Signature MAG exposes contour faceting at 44x88, so desktop
        gets a denser body mesh. Mobile topology remains unchanged. */
@@ -443,6 +453,7 @@
         if(lat<latitudeSegments-1)triangle([b,d,c],facet+.004);
       }
       upperBodyRow=lowerBodyRow;
+      if(software&&(lat+1)%4===0)await yieldSoftwareTask();
     }
 
     /* R1982 — real microfibril geometry.
@@ -672,6 +683,8 @@
       armorTri(last.left,last.crown,last.right,5.31);
       armorQuad(last.left,last.right,last.underRight,last.underLeft,5.72);
     }
+    if(software)await yieldSoftwareTask();
+
     /* R2194 — continuous polished titanium vein inlays. Two tapered
        optically raised strips are machined into EACH of the four actual
        arm hulls. Their depth is derived from the SAME R2153 mathematical
@@ -703,6 +716,8 @@
         }
       }
     }
+    if(software)await yieldSoftwareTask();
+
     /* The centre is not a painted circle. A shallow, machined 48-facet
        silver bezel and eight optical iris vanes occupy the same WebGL mesh. */
     const opticPoint=(radius,angle,depth)=>[
@@ -960,6 +975,7 @@
       }
     }
 
+    if(software)await yieldSoftwareTask();
     return {
       arrays: [sphere, crystal, sphereNormals, crystalNormals, uvs, barycentrics, facets]
         .map(values => new Float32Array(values)),
@@ -2048,7 +2064,7 @@
       : 'hardware-photographic-material-preserved';
 
     let pendingProgram;
-    try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource); }
+    try { pendingProgram=beginProgram(gl,vertexSource,fragmentSource,softwareRenderer); }
     catch(error){
       console.warn('FormatX crystal organism unavailable:',error);
       stage.remove();
@@ -2068,6 +2084,17 @@
     }
     function finishWhenReady() {
       if(!stage.isConnected)return;
+      // Each software shader stage is a real separate macrotask, not a
+      // microtask that would still block paint/input until compilation ends.
+      if(pendingProgram.cooperativeStages.length){
+        const step=pendingProgram.cooperativeStages.shift();
+        setTimeout(()=>{
+          if(!stage.isConnected)return;
+          try{step();}catch(error){failShader(error);return;}
+          setTimeout(finishWhenReady,0);
+        },0);
+        return;
+      }
       let program;
       try { program=finishProgram(gl,pendingProgram); }
       catch(error){ failShader(error); return; }
@@ -2078,13 +2105,16 @@
         return;
       }
       root.dataset.fxCoreShaderCompileR600 = pendingProgram.parallel ? 'parallel-ready' : 'sync-ready';
-      finishBoot(program);
+      void finishBoot(program).catch(failShader);
     }
     finishWhenReady();
     return;
 
-    function finishBoot(program) {
-    const geometry=buildOrganismGeometry(softwareRenderer);
+    async function finishBoot(program) {
+    const geometry=await buildOrganismGeometry(softwareRenderer);
+    if(!stage.isConnected){gl.deleteProgram(program);return;}
+    root.dataset.fxCoreCooperativeBootstrapR2248=softwareRenderer
+      ? 'chunked-mesh-and-shader-native-webgl' : 'hardware-unchanged';
     root.dataset.fxCoreGeometryProfileR1603=softwareRenderer
       ? 'software-lite-photographic'
       : (mobile?'mobile-normal-photographic':'hardware-full-photographic');
@@ -2107,7 +2137,11 @@
       gl.vertexAttribPointer(index,size,gl.FLOAT,false,0,0);
     }
     gl.useProgram(program);
-    buffers.forEach((buffer,index)=>upload(buffer,geometry.arrays[index],attributes[index],geometry.sizes[index]));
+    for(let index=0;index<buffers.length;index++){
+      upload(buffers[index],geometry.arrays[index],attributes[index],geometry.sizes[index]);
+      if(softwareRenderer&&index%2===1)await new Promise(resolve=>setTimeout(resolve,0));
+    }
+    if(!stage.isConnected){gl.deleteProgram(program);return;}
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.BLEND);
