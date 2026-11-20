@@ -53,6 +53,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <!-- production-r2039-phone-critical-css-preload: same hrefs as actual stylesheets; keep cascade unchanged -->
+  <!-- R2249: fetch only actually-needed desktop critical CSS before the large
+       inline DNA first-frame markup. Preload does not apply or reorder CSS;
+       the original author-order stylesheets remain authoritative below. -->
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261116-r2223-stable-action-layout">
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="./styles/formatx-desktop-first-paint-r328.css?v=20261116-r2222-stable-hero-copy">
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="./styles/formatx-menu-owner-r1956.css?v=20261120-r2247-compact-stable-menu">
+  <link rel="preload" as="style" fetchpriority="high" media="(min-width:901px)" href="./styles/formatx-reference-production-r244.css?v=20261116-r2222-stable-hero-copy">
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="./styles/formatx-menu-owner-r1956.css?v=20261120-r2247-compact-stable-menu">
   <link rel="preload" as="style" fetchpriority="high" media="(max-width:900px)" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261116-r2234-mobile-tablet-nonsticky-header">
   <link rel="preload" as="style" fetchpriority="high" media="all" href="./styles/formatx-mobile-brand-dedupe-r1952.css?v=20261026-r2197-one-fx-logo-desktop-mobile">
