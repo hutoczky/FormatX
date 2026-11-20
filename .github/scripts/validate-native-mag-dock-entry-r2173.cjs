@@ -69,6 +69,9 @@ function observe({normal}){
         page.on('pageerror',e=>errors.push(e.message));
         page.on('requestfailed',r=>failedRequests.push({url:r.url(),error:r.failure()?.errorText}));
         await page.goto(home,{waitUntil:'domcontentloaded',timeout:30000});
+        // Portrait continues directly from the intro. Desktop deliberately
+        // enters the archive on a genuine scroll gesture (R2220 contract).
+        if(!config.mobile)await page.mouse.wheel(0,Math.round(config.height*.64));
         await page.waitForFunction(()=>window.__dockEntry?.cinema&&window.__dockEntry?.firstDraw,null,{timeout:45000});
         await page.waitForTimeout(350);
         const result=await page.evaluate(()=>{

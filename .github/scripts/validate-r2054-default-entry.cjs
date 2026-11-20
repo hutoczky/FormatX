@@ -30,6 +30,7 @@ const ROOT=process.env.FORMATX_TEST_URL||'http://127.0.0.1:4178/scifi-ui/index.h
     await page.goto(ROOT+'?r2054-normal-entry='+c.label,{
       waitUntil:'domcontentloaded',timeout:60000
     });
+    if(!c.mobile)await page.mouse.wheel(0,Math.round(c.h*.64));
     await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveCinema==='active',
       null,{timeout:48000});
     await page.waitForTimeout(500);
