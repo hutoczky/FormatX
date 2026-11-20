@@ -1801,9 +1801,9 @@
         float grain=.5+.5*sin(vLocal.x*31.0-vLocal.y*23.0+vLocal.z*27.0);
         float fissure=pow(.5+.5*sin(vLocal.x*18.0+vLocal.y*13.0-vLocal.z*21.0),20.0)*bodyMask;
         float absorption=.84+.16*facing;
-        vec3 col=mix(vec3(.003,.007,.010),vec3(.066,.086,.090),lift)*facetTone*capShade*absorption;
+        vec3 col=mix(vec3(.007,.013,.017),vec3(.104,.133,.144),lift)*facetTone*capShade*absorption;
         col*=.994+.012*grain;
-        col+=vec3(1.00,1.00,.99)*keySpec*.135;
+        col+=vec3(1.00,1.00,.99)*keySpec*.178;
         col+=vec3(.26,.54,.59)*sideSpec*.105;
         col+=vec3(.020,.125,.150)*fresnel*.185;
         col+=vec3(.135,.070,.034)*warmPlane*.050;
@@ -1910,7 +1910,7 @@
         if(uLayer>.5){${outputName}=vec4(vec3(.004,.009,.011),.16);return;}
         float alpha=1.0-tendrilMask*.34-isGlassFin*.66;
         alpha=mix(alpha,.97,isLensMesh);
-        ${outputName}=vec4(tone(col*2.10),clamp(alpha,.99,1.0));
+        ${outputName}=vec4(tone(col*3.00+vec3(.008,.011,.014)*bodyMask),clamp(alpha,.99,1.0));
       }`;
 
     /* R1716 — preserve photographic mobile geometry.
@@ -1924,6 +1924,11 @@
        four-arm optic and full hardware material; only real software WebGL
        selects its dedicated lightweight native GLSL material. */
     const fragmentSource = softwareRenderer ? softwareFragmentSource : constrainedFragmentSource;
+    // R2250: match the luminous smoked-chrome intro on software WebGL, too.
+    // Constant-only studio changes preserve the same shader instruction count,
+    // original 3D shape and hardware photographic material.
+    root.dataset.fxNativeMagSoftwareStudioR2250=softwareRenderer
+      ? 'studio-readable-smoky-silver-midtones' : 'hardware-optics-unchanged';
     root.dataset.fxNativeMagSoftwareShaderR2243=softwareRenderer
       ? 'dedicated-software-native-studio-glsl'
       : 'unchanged-hardware-photographic-glsl';
