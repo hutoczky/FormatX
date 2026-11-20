@@ -16,7 +16,7 @@ const modulePath='/scifi-ui/scripts/three-r185.module.js';
 // the earlier gate missed a duplicate const inside its genome loop.
 assert.doesNotThrow(()=>new Function(engine),
   'The production DNA-to-MAG Three.js cinematic contains invalid JavaScript');
-const revision='formatx-mag-genesis-three-r1280.js?v=20261114-r2224-shared-life-clock';
+const revision='formatx-mag-genesis-three-r1280.js?v=20261120-r2238-exact-mobile-projection';
 assert.ok(fs.statSync('docs'+modulePath).size>1000,'Real bundled Three.js module absent');
 assert.ok(engine.includes("new URL('/scifi-ui/scripts/three-r185.module.js', location.origin).href"),
   '3D cinematic must resolve bundled Three.js against the canonical origin');
@@ -134,7 +134,10 @@ for(const [seconds,expected] of [[1.6,0],[4.2,0],[6.8,0],[7.6,0],[8.3,0],[9.5,nu
 }
 // R2175: verify the actual landing choreography, not just the phase labels.
 assert.ok(engine.includes('const endMove=smooth((t-8.45)/1.35)') &&
-  engine.includes('const landingScale=1-.26*smooth((t-8.55)/1.30)') &&
+  engine.includes('const landing=smooth((t-8.55)/1.30)') &&
+  engine.includes('const landingScaleX=1-(this.mobileRender?.49:.26)*landing;') &&
+  engine.includes('const landingScaleY=1-(this.mobileRender?.42:.26)*landing;') &&
+  engine.includes('const landingScaleZ=1-(this.mobileRender?.44:.26)*landing;') &&
   birth.includes('const nativeReveal=smoothstep((r-.915)/.08)') &&
   birth.includes('const nativeCadence=r>=.90?40:'),
   'R2175 must move and scale the cinematic MAG into its actual hero before native crossfade');
@@ -156,7 +159,7 @@ assert.ok(birth.includes("stage.dataset.fxBirthConcealedR2174='true'") &&
   critical.includes('transition:none!important;'),
   'R2174 DNA-first cinematic must instantly conceal native MAG until assembly seats');
 
-const revisedFilm='formatx-mag-birth-live-r533.js?v=20261114-r2224-shared-life-clock';
+const revisedFilm='formatx-mag-birth-live-r533.js?v=20261120-r2238-exact-mobile-projection';
 assert.ok(home.includes(revisedFilm) && rescue.includes(revisedFilm),
   'R2173 canonical first-paint and recovery bootstrap must load the same nonstale film');
 assert.ok(worker.includes("'sha256-89Q+2UqrJK39vRAvJtBVjITm0d+HYPXX4ISFytBx0ps='"),

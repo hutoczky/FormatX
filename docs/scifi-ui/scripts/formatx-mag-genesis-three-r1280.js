@@ -2836,13 +2836,18 @@
       const endMove=smooth((t-8.45)/1.35);
       const target=this.targetWorld();
       const tx=target.x*endMove,ty=target.y*endMove;
+      // R2238: the permanent phone canvas is the shorter reserved hero stage,
+      // while this film fills the viewport. Seat the final chassis on the
+      // permanent stage's measured optical centre instead of leaving it on the
+      // film target's 47% construction line. Desktop already aligns.
+      const nativeLandingY=this.mobileRender?-.038*endMove:0;
       const cellular=smooth((t-2.58)/.54)*(1-smooth((t-9.52)/.30));
       const surfaceZ=cellular*1.10;
 
       this.coreGroup.position.set(tx,ty,surfaceZ);
       this.organicGroup.position.set(tx,ty,0);
       this.cellGroup.position.set(tx,ty,0);
-      this.mechanicalGroup.position.set(tx,ty,.02);
+      this.mechanicalGroup.position.set(tx,ty+nativeLandingY,.02);
       this.tentacleGroup.position.set(tx,ty,-.04);
 
       this.coreGroup.scale.setScalar(sc*mix(1,.86,endMove));
@@ -2975,8 +2980,19 @@
       this.mechanicalGroup.visible=grow>.002;
       // R2175: match the physical size of the native R326 MAG as it settles
       // into the upper hero viewport, eliminating the final size jump.
-      const landingScale=1-.26*smooth((t-8.55)/1.30);
-      this.mechanicalGroup.scale.set((.001+grow*1.04)*landingScale,(.001+grow*1.04)*landingScale,(.001+grow*1.02)*landingScale);
+      const landing=smooth((t-8.55)/1.30);
+      // R2238: derive the phone landing axes from the actual R326 stage and
+      // body projection. The final 390/430 px silhouette now differs by less
+      // than one percent in both dimensions. Preserve the established desktop
+      // landing and all authored construction geometry.
+      const landingScaleX=1-(this.mobileRender?.49:.26)*landing;
+      const landingScaleY=1-(this.mobileRender?.42:.26)*landing;
+      const landingScaleZ=1-(this.mobileRender?.44:.26)*landing;
+      this.mechanicalGroup.scale.set(
+        (.001+grow*1.04)*landingScaleX,
+        (.001+grow*1.04)*landingScaleY,
+        (.001+grow*1.02)*landingScaleZ
+      );
 
       // R2219: land the complete cinematic chassis in the permanent MAG's
       // composed resting pose before the crossfade. These angles include the
@@ -3525,4 +3541,5 @@
   document.documentElement.dataset.fxMagCinematicOpticEnergyR2222='native-idle-energy-continuous-handoff';
   document.documentElement.dataset.fxMagCinematicChassisSettleR2223='authored-rest-pose-before-native-crossfade';
   document.documentElement.dataset.fxMagLifeClockR2224='shared-real-clock-optic-and-body-handoff';
+  document.documentElement.dataset.fxMagProjectionR2238='mobile-stage-measured-final-silhouette-handoff';
 })();

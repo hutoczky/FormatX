@@ -1,3 +1,7 @@
+FormatX R2238 measured mobile MAG projection handoff — 2026-11-20
+cache=20261120-r2238-exact-mobile-projection
+The final cinematic MAG now lands on the permanent R326 mobile stage's measured optical centre and projected silhouette. Actual 390 px and 430 px film/native geometry bounds differ by less than one percent per axis after the correction; the desktop landing, authored geometry, camera, WebGL renderer/context, clocks, lighting and interaction remain unchanged. This is a source-geometry continuity result, not hardware FPS, studio-quality or visual-acceptance evidence.
+
 FormatX R2224 shared living-clock handoff — 2026-11-14
 cache=20261114-r2224-shared-life-clock
 The cinematic and permanent WebGL MAGs now share the browser's real monotonic performance clock while both are visible. Their byte-identical cyan/coral living-optic shader therefore keeps one metabolic phase through the crossfade, and the cinematic four-arm body lands on the permanent shader's exact time-dependent pitch, yaw and roll. After intro completion the native renderer continues from that phase with its existing frame-delta clock. No fake clock, added timer, draw, program, pass, texture, geometry, light, renderer, context, canvas, RAF, input or detection. This is a visible optic/body motion-continuity correction; no hardware smoothness, FPS, Lighthouse, studio-quality or visual-acceptance claim.
