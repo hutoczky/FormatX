@@ -2557,8 +2557,24 @@
     listen(window,'formatx:referencepause',onPause,{passive:true});
     listen(reduced,'change',onReducedMotionChange,{passive:true});
     listen(window,'scroll',onScroll,{passive:true});
-    listen(window,'resize',()=>{resize();boost(.30,mobile?1:2);startSurfacePulse('resize');},{passive:true});
-    listen(window,'orientationchange',()=>{resize();boost(.52,mobile?2:3);startSurfacePulse('orientation');},{passive:true});
+    /* R2239 — viewport changes are layout signals, not direct organism input.
+       Mobile browser chrome, the software keyboard and orientation settling can
+       emit several resize events without a visible user gesture. Each event used
+       to open a full 1160 ms surface sweep, keeping the native WebGL MAG hot long
+       after its resized frame was already correct. Resize and orientation now
+       retain the same physical energy response, but the existing burst scheduler
+       coalesces them into bounded frames. Pointer, keyboard and explicit organism
+       interactions still own the authored continuous surface sweep. */
+    listen(window,'resize',()=>{
+      resize();
+      root.dataset.fxCoreViewportReactionR2239='bounded-resize-burst';
+      boost(.30,mobile?1:2);
+    },{passive:true});
+    listen(window,'orientationchange',()=>{
+      resize();
+      root.dataset.fxCoreViewportReactionR2239='bounded-orientation-burst';
+      boost(.52,mobile?2:3);
+    },{passive:true});
     listen(window,'formatx:organismpanelopen',()=>signalPhysiology('attention','organism-listening'),{passive:true});
     listen(window,'formatx:organismresponse',()=>signalPhysiology('response','organism-response'),{passive:true});
     listen(window,'formatx:open-live-os',()=>signalPhysiology('system-attention','live-os-open'),{passive:true});

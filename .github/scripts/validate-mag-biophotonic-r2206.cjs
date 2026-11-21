@@ -72,9 +72,16 @@ assert(worker.includes('const INLINE_R2206_BOOT_HASH = "' + hash + '";'),
   'Worker must authorize the exact R2206 inline bootstrap');
 assert((worker.match(/\$\{INLINE_R2206_BOOT_HASH\}/g) || []).length === 2,
   'Both Worker CSPs must authorize R2206');
-const revision = '20261120-r2238-exact-mobile-projection';
-for (const [name, source] of Object.entries({ html, worker, intro, rescue, current, runtime, scheduler }))
-  assert(source.includes(revision), name + ' must reference the R2206 cache generation');
+const introRevision = '20261120-r2238-exact-mobile-projection';
+const nativeRevision = '20261121-r2239-native-viewport-burst';
+for (const [name, source] of Object.entries({ intro, rescue }))
+  assert(source.includes(introRevision), name + ' must retain the tested R2238 intro cache generation');
+for (const [name, source] of Object.entries({ current, runtime, scheduler }))
+  assert(source.includes(nativeRevision), name + ' must reference the R2239 native MAG cache generation');
+for (const [name, source] of Object.entries({ html, worker })) {
+  assert(source.includes(introRevision), name + ' must retain the tested R2238 intro cache generation');
+  assert(source.includes(nativeRevision), name + ' must reference the R2239 native MAG cache generation');
+}
 assert(html.includes('data-fx-dna-first-frame-r2181'),
   'Do not replace the first-frame DNA poster with an empty loading screen');
 assert(intro.includes('const THREE_OWNER_SRC ='),

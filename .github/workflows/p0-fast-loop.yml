@@ -109,6 +109,7 @@ jobs:
           node --check docs/scifi-ui/scripts/formatx-cinematic-journey-r536.js
           node --check .github/scripts/validate-r533-r536-handoff.cjs
           node --check .github/scripts/validate-mag-projection-continuity-r2238.cjs
+          node --check .github/scripts/validate-mag-viewport-burst-r2239.cjs
           node --check .github/scripts/capture-mag-intro-r656.cjs
           node --check docs/scifi-ui/scripts/formatx-mobile-render-governor-r426.js
           node --check docs/scifi-ui/scripts/formatx-core-touch-pulse-r99.js
@@ -134,6 +135,7 @@ jobs:
           node .github/scripts/validate-mag-front-response-r2218.cjs
           node .github/scripts/validate-mag-body-pose-r2219.cjs
           node .github/scripts/validate-mag-projection-continuity-r2238.cjs
+          node .github/scripts/validate-mag-viewport-burst-r2239.cjs
           node .github/scripts/validate-mag-pause-owner-r485.cjs
           node .github/scripts/validate-wda-100-r198.cjs
       - name: Start exact source site

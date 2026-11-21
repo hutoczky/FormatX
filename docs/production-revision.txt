@@ -1,5 +1,5 @@
 FormatX R2238 measured mobile MAG projection handoff — 2026-11-20
-cache=20261120-r2238-exact-mobile-projection
+cache=20261121-r2239-native-viewport-burst
 The final cinematic MAG now lands on the permanent R326 mobile stage's measured optical centre and projected silhouette. Actual 390 px and 430 px film/native geometry bounds differ by less than one percent per axis after the correction; the desktop landing, authored geometry, camera, WebGL renderer/context, clocks, lighting and interaction remain unchanged. This is a source-geometry continuity result, not hardware FPS, studio-quality or visual-acceptance evidence.
 
 FormatX R2224 shared living-clock handoff — 2026-11-14
