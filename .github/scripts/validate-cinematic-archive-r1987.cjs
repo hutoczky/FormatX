@@ -614,6 +614,7 @@ async function verifyNormalEntry(browser,isMobile){
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e.message)));
   await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  if(!isMobile)await page.mouse.wheel(0,Math.round(900*.64));
   await page.waitForFunction(()=>{
     const root=document.documentElement;
     return root.dataset.fxArchiveExperience==='ready'

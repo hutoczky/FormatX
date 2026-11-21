@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
+  const VERSION='cinematic-archive-r2237-stable-living-mag-handoff';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -33,6 +33,10 @@
     {selector:'#resources',key:'final',hu:'FORMATX ERŐFORRÁSOK',en:'FORMATX RESOURCES',source:'assembled',color:[.82,.91,1]}
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
+  // Keep the chapter selected by the visitor's last real scroll coordinate.
+  // Activating its fixed native folio changes containment and intrinsic layout;
+  // ResizeObserver callbacks at the SAME scrollY must not swap in a neighbour.
+  let selectedScrollY=Number.NaN;
   let lastPanelNode=null;
   let raf=0,domRaf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
   // R2235: the idle home scene has no readable 3D archive chapter. Its
@@ -150,6 +154,12 @@
   }
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
+  // Portrait keeps the living MAG as one uninterrupted product after the film.
+  // Desktop retains the visitor-scroll entry introduced in R2220.
+  if(!journeyArmed&&mobile()&&introDone){
+    journeyArmed=true;
+    root.dataset.fxArchiveEngagementR2220='mobile-native-handoff';
+  }
   const paperLast=new WeakMap();
   const memoryGB=Number(navigator.deviceMemory||0);
   const cores=Number(navigator.hardwareConcurrency||0);
@@ -1158,12 +1168,18 @@ void main(){
       return false;
     }
     if(!scenes.length)discover();
+    if(current&&Math.abs(scrollY-selectedScrollY)<.5){
+      root.dataset.fxArchiveCurrent=current.s.key;
+      root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
+      return true;
+    }
     const next=ScrollTimelineController.get();
     // From the moment the intro ends, the MAG owns the page. Do not leave the
     // old landing page visible for a whole first viewport of scrolling.
     // The same native scrolling and eight source anchors remain intact.
     const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
+    selectedScrollY=scrollY;
     root.dataset.fxArchiveCurrent=current?.s.key||'none';
     if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
     return inArchive;
@@ -1391,18 +1407,24 @@ void main(){
     connect();
     addEventListener('formatx:real3dready',()=>{connect();},{passive:true});
     addEventListener('scroll',invalidate,{passive:true});
-    addEventListener('resize',()=>{idleComposed=false;invalidate();},{passive:true});
+    addEventListener('resize',()=>{selectedScrollY=Number.NaN;idleComposed=false;invalidate();},{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{
+      selectedScrollY=Number.NaN;
       idleComposed=false;
       discover();invalidate();
     },{passive:true});
     document.addEventListener('formatx:magbirthcomplete',()=>{
       introDone=true;
+      if(!journeyArmed&&mobile()){
+        journeyArmed=true;
+        root.dataset.fxArchiveEngagementR2220='mobile-native-handoff';
+      }
       idleComposed=false;
       invalidate();
     },{passive:true});
     addEventListener('formatx:languagechange',()=>{
+      selectedScrollY=Number.NaN;
       idleComposed=false;
       invalidate();
     },{passive:true});

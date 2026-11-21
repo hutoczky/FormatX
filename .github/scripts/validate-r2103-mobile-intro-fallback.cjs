@@ -7,9 +7,11 @@ const HOME=process.env.FORMATX_TEST_URL||
   'http://127.0.0.1:4178/scifi-ui/index.html';
 const OUT='artifacts/r2103-real-mobile-fallback';
 const CASES=[
-  {name:'phone-390-midfilm',width:390,height:844,second:4.40},
-  {name:'phone-390-identity',width:390,height:844,second:8.50},
-  {name:'phone-360-midfilm',width:360,height:780,second:4.40}
+  {name:'phone-390-dna',width:390,height:844,second:1.60,phase:'0'},
+  {name:'phone-390-midfilm',width:390,height:844,second:4.40,phase:'2'},
+  {name:'phone-390-identity',width:390,height:844,second:8.50,phase:'3'},
+  {name:'phone-360-midfilm',width:360,height:780,second:4.40,phase:'2'},
+  {name:'phone-360-identity',width:360,height:780,second:8.50,phase:'3'}
 ];
 (async()=>{
   fs.mkdirSync(OUT,{recursive:true});
@@ -56,8 +58,22 @@ const CASES=[
             Math.max(0,Math.floor((canvas?.width||2)*.5)),
             Math.max(0,Math.floor((canvas?.height||2)*.5)),1,1
           ).data;
+          let subjectPixels=0,highlightPixels=0;
+          if(img&&canvas){
+            const pixels=img.getImageData(0,0,canvas.width,canvas.height).data;
+            const step=Math.max(1,Math.floor(Math.min(canvas.width,canvas.height)/230));
+            for(let y=Math.floor(canvas.height*.13);y<canvas.height*.87;y+=step){
+              for(let x=Math.floor(canvas.width*.22);x<canvas.width*.78;x+=step){
+                const i=(y*canvas.width+x)*4;
+                const r=pixels[i],g=pixels[i+1],b=pixels[i+2],a=pixels[i+3];
+                if(a>15&&b>r*1.1&&g>r*1.1&&g+b>80)subjectPixels++;
+                if(a>30&&g>95&&b>110)highlightPixels++;
+              }
+            }
+          }
           return {
             renderer:root.dataset.fxMagBirthRendererR1360,
+            phase:root.dataset.fxMagBirthPhase,
             progress:root.dataset.fxMagBirthVisualFrameSeconds,
             silhouette:root.dataset.fxMagFallbackSilhouetteR2103,
             material:root.dataset.fxMagFallbackMaterialR2104||'',
@@ -66,6 +82,7 @@ const CASES=[
             canvasRect:{width:size?.width||0,height:size?.height||0},
             buffer:{width:canvas?.width||0,height:canvas?.height||0},
             pixel:[...(sampled||[])],
+            subjectPixels,highlightPixels,
             skip:skip?.textContent?.trim()||'',
             skipOpacity:Number(css?.opacity||0),
             skipColor:css?.color,
@@ -86,8 +103,16 @@ const CASES=[
         console.log('R2103_REAL_FALLBACK',JSON.stringify({shot:shot.name,...info}));
         assert.deepEqual(errors,[],'Fallback produces browser runtime errors');
         assert.equal(info.silhouette,'four-point-bevelled-metal-glass-iris');
-        assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
-          'R2104 cinema material did not render in original phone canvas');
+        assert.equal(info.phase,shot.phase,'DNA, living embryo and assembled MAG must keep their actual story order');
+        if(shot.phase==='3'){
+          assert.equal(info.material,'moving-softbox-smoked-chrome-sapphire-facets',
+            'R2104 cinema material did not render on the completed MAG in the original phone canvas');
+        }else{
+          assert.equal(info.material,'',
+            'The finished metal MAG must not replace the earlier DNA or living embryo chapter');
+        }
+        assert.ok(info.subjectPixels>1000&&info.highlightPixels>100,
+          'The actual DNA/embryo/MAG framebuffer has no centered illuminated subject: '+JSON.stringify(info));
         assert.ok(
           info.renderer==='native-canvas-reference-film',
           'Expected actual painted 2D R649 fallback: '+JSON.stringify(info)
@@ -104,8 +129,8 @@ const CASES=[
           'Unreadable or untappable Skip button: '+JSON.stringify(info));
         assert.ok(!info.legacyEggVisible,
           'Legacy CSS egg is obscuring the new machined MAG movie');
-        assert.ok(info.loader.includes('r2113-layered-chassis'),
-          'The Android fallback is loading an obsolete renderer instead of R2113');
+        assert.ok(info.loader.includes('formatx-mag-reference-film-r649.js?v=20261025-r2182-studio-depth-first-genome'),
+          'The Android fallback is not loading the canonical DNA-to-embryo-to-MAG reference film');
         records.push({shot,info});
       }finally{await context.close()}
     }

@@ -702,7 +702,8 @@ html[data-fx-archive-dock="active"] .fx-archive-telemetry-r2022[data-active="tru
      no diagnostics content needs to be hidden or duplicated. */
 }
 @media (max-width:900px) and (prefers-reduced-motion:no-preference){
-  html:root:root:root:root:root:root[data-fx-archive-cinema="active"] body.living-architecture
+  /* The synchronous native dock already owns the settled mobile lane. */
+  html:root:root:root:root:root:root:is([data-fx-archive-cinema="active"],[data-fx-archive-dock="active"]) body.living-architecture
   #hero .hero-space > .fx-crystal-organism-r326-stage.fx-archive-native-docked{
     inset:2dvh 0 auto 0!important;
     left:0!important;
@@ -1034,7 +1035,10 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    background:transparent!important;
    pointer-events:none!important;
  }
- html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ /* Docking is synchronous; cinema panels compose in the next existing RAF.
+    Use the final MAG lane from the first docked paint instead of briefly
+    exposing the older full-viewport stage while those panels compose. */
+ html:root:root:root:root:root:root:is([data-fx-archive-cinema="active"],[data-fx-archive-dock="active"])
  body.living-architecture #hero .hero-space
  > .fx-crystal-organism-r326-stage.fx-archive-native-docked {
    position:fixed!important;
@@ -1056,7 +1060,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    transform:none!important;
    mask-image:none!important;
  }
- html:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ html:root:root:root:root:root:root:is([data-fx-archive-cinema="active"],[data-fx-archive-dock="active"])
  body.living-architecture #hero .hero-space
  > .fx-crystal-organism-r326-stage.fx-archive-native-docked
  > canvas.fx-crystal-organism-r326-canvas {
@@ -1122,7 +1126,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
 @media(max-width:900px) and (prefers-reduced-motion:no-preference){
  html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
  body.living-architecture #hero {z-index:55!important;pointer-events:none!important;}
- html:root:root:root:root:root:root:root[data-fx-archive-cinema="active"]
+ html:root:root:root:root:root:root:root:is([data-fx-archive-cinema="active"],[data-fx-archive-dock="active"])
  body.living-architecture #hero .hero-space
  > .fx-crystal-organism-r326-stage.fx-archive-native-docked
  > canvas.fx-crystal-organism-r326-canvas {
