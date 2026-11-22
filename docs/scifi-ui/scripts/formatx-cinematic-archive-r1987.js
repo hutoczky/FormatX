@@ -1193,6 +1193,15 @@ void main(){
     }
   }
   function invalidate(){
+    // R2236: early module/intro/ResizeObserver readiness events do not own
+    // an archive document yet. They were scheduling empty DOM/GPU frames
+    // before connect() had built the seven real folios (6 idle commits).
+    // The successful native WebGL connect() always invokes invalidate()
+    // AFTER prepareCinemaHosts(), so the first real sync is preserved.
+    if(!force&&!journeyArmed&&!cinemaPrepared){
+      root.dataset.fxArchiveIdlePhaseR2236='awaiting-native-folios';
+      return;
+    }
     // The first cinematic home render must establish all original folios,
     // inert attributes and legal checkout visibility. Subsequent resize-
     // observer bursts before visitor intent must not trigger the same
