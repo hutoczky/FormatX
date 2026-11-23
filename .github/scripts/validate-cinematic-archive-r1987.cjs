@@ -760,6 +760,112 @@ async function missingGpuFallback(browser){
   console.log('ARCHIVE_NO_WEBGL_FALLBACK_PASS',JSON.stringify(state));
   await context.close();
 }
+async function auditHtmlContinuity(browser){
+  // Lighthouse/late-styles loading must not leave an unpainted screen. Inspect
+  // actual native interfaces, whether the runtime chose classic HTML, full
+  // MAG cinema, or could not initialize WebGL on this specific device.
+  const context=await browser.newContext({
+    viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  const page=await context.newPage();
+  const address=new (require('node:url').URL)(URL);
+  // The suite's base URL forces archive=1 and the R486 isolated renderer.
+  // A real Lighthouse/fallback visit contains NEITHER override. Without
+  // stripping these, we would test a forced cinema instead of public HTML.
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','visualintro'])
+    address.searchParams.delete(key);
+  address.searchParams.set('lighthouse','1');
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForTimeout(13300);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement;
+    const read=node=>{
+      if(!(node instanceof HTMLElement))return null;
+      const cs=getComputedStyle(node),b=node.getBoundingClientRect();
+      const x=Math.max(2,Math.min(innerWidth-2,b.left+b.width/2));
+      const y=Math.max(2,Math.min(innerHeight-2,b.top+Math.min(140,b.height/2)));
+      const hit=document.elementFromPoint(x,y);
+      return {display:cs.display,visibility:cs.visibility,opacity:Number(cs.opacity),
+        contentVisibility:cs.contentVisibility,inert:node.inert,
+        box:{x:b.x,y:b.y,w:b.width,h:b.height},onScreen:b.width>100&&b.height>60
+          &&b.bottom>0&&b.top<innerHeight&&b.right>0&&b.left<innerWidth,
+        hit:hit?.tagName,hitClass:String(hit?.className||'').slice(0,120),
+        hitInside:node===hit||node.contains(hit)};
+    };
+    return {
+      mode:root.dataset.fxArchiveExperience||'unset',
+      cinema:root.dataset.fxArchiveCinema||'home',
+      intro:root.dataset.fxMagBirthOwnerR533||'unknown',
+      introState:root.dataset.fxMagBirthLiveR533||'unknown',
+      rootError:root.dataset.fxArchiveError||null,
+      rootClass:root.className,bodyClass:document.body.className,
+      viewport:{w:innerWidth,h:innerHeight},
+      hero:read(document.querySelector('#hero .hero-grid > .hero-copy')),
+      title:read(document.getElementById('hero-title')),
+      folio:read(document.querySelector('[data-fx-cinema-panel-active="true"]')),
+      folioCount:document.querySelectorAll('[data-fx-cinema-panel-active="true"]').length,
+      semanticTitle:document.getElementById('hero-title')?.textContent?.trim().slice(0,72)
+    };
+  });
+  const visible=box=>box&&box.display!=='none'&&box.visibility==='visible'
+    &&box.opacity>.55&&box.onScreen;
+  const genuineHtml=visible(state.hero)&&visible(state.title);
+  const genuineCinema=state.cinema==='active'&&visible(state.folio)&&state.folioCount===1;
+  assert.ok(genuineHtml||genuineCinema,
+    'Mobile viewport genuinely blank after 13s of late CSS / intro: '+JSON.stringify(state));
+  console.log('ARCHIVE_PROGRESSIVE_HTML_CONTINUITY_PASS',JSON.stringify({genuineHtml,genuineCinema,...state}));
+  await context.close();
+}
+async function lighthousePhoneRealThrottling(browser){
+  // Match Lighthouse's real 412x823 / DPR 1.75 / 4x CPU throttle, rather than
+  // trusting a faster generic 390px phone. This previously rendered an empty
+  // reading lane after the MAG autonomous wake-up at ~13 seconds.
+  const context=await browser.newContext({
+    viewport:{width:412,height:823},deviceScaleFactor:1.75,
+    isMobile:true,hasTouch:true,reducedMotion:'no-preference'
+  });
+  const page=await context.newPage();
+  const cdp=await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
+  const address=new (require('node:url').URL)(URL);
+  for(const key of ['archive','r486-optics-energy-check','mobileproof','visualintro'])
+    address.searchParams.delete(key);
+  address.searchParams.set('lighthouse','1');
+  await page.goto(address.href,{waitUntil:'domcontentloaded',timeout:85000});
+  await page.waitForTimeout(18500);
+  const state=await page.evaluate(()=>{
+    const root=document.documentElement,hero=document.querySelector('#hero .hero-copy');
+    const title=document.getElementById('hero-title');
+    const panel=document.querySelector('[data-fx-cinema-panel-active="true"]');
+    const box=el=>{
+      if(!el)return null;
+      const b=el.getBoundingClientRect(),cs=getComputedStyle(el);
+      const x=Math.max(2,Math.min(innerWidth-2,b.left+b.width/2));
+      const y=Math.max(2,Math.min(innerHeight-2,b.top+Math.min(b.height/2,100)));
+      return {display:cs.display,visibility:cs.visibility,opacity:Number(cs.opacity),
+        rect:[b.x,b.y,b.width,b.height],onScreen:b.width>100&&b.height>60
+          &&b.bottom>0&&b.top<innerHeight,
+        hitInside:el.contains(document.elementFromPoint(x,y))};
+    };
+    return {mode:root.dataset.fxArchiveExperience,
+      cinema:root.dataset.fxArchiveCinema||'home',
+      scrollY,viewport:{w:innerWidth,h:innerHeight},
+      owner:root.dataset.fxMagBirthOwnerR533,
+      hero:box(hero),title:box(title),paper:box(panel),
+      rootClass:root.className,
+      rootError:root.dataset.fxArchiveError||null};
+  });
+  const visible=p=>p&&p.display!=='none'&&p.visibility==='visible'
+    &&p.opacity>.55&&p.onScreen;
+  assert.ok((visible(state.hero)&&visible(state.title))
+    ||(state.cinema==='active'&&visible(state.paper)&&state.paper.hitInside),
+    '412px 4x CPU-throttled Lighthouse viewport blank after 18s: '+JSON.stringify(state));
+  assert.ok(state.scrollY<=3,
+    'Lighthouse visit must not hijack/auto-scroll the original page: '+JSON.stringify(state));
+  console.log('ARCHIVE_LIGHTHOUSE_PHONE_4X_CONTINUITY_PASS',JSON.stringify(state));
+  await cdp.detach();
+  await context.close();
+}
 async function fallback(browser){
   const ctx=await browser.newContext({viewport:{width:1024,height:768},reducedMotion:'reduce'});
   const page=await ctx.newPage();
@@ -788,6 +894,8 @@ async function fallback(browser){
     await verifyFirstVisitIntroHandoff(browser);
     await verifyMobileLivingPulse(browser);
     await missingGpuFallback(browser);
+    await auditHtmlContinuity(browser);
+    await lighthousePhoneRealThrottling(browser);
     await fallback(browser);
   }finally{await browser.close();}
 })().catch(e=>{console.error('ARCHIVE_FAIL',e.stack||String(e));process.exitCode=1;});

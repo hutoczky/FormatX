@@ -13,3 +13,34 @@ html[data-fx-proof-singleton="present"] .fx-loop-reference-proof{
  html[data-fx-proof-singleton="present"] .fx-award-proof{opacity:1!important}
 }
 /* production-r2033-canonical-proof-singleton-hotfix */
+
+/* R2055: real progressive-HTML fallback must remain READABLE for the lifetime
+   of the page. It is incorrect to hide the original content before the MAG
+   successfully owns one functional native papyrus. This also covers reduced
+   motion, inaccessible WebGL and the automatic no-WebGL/audit path. */
+html:root:root:root:root[data-fx-archive-experience]:not([data-fx-archive-experience="ready"]):not([data-fx-mag-birth-owner-r533="active"])
+body.living-architecture:not(.fx-organism-panel-open) section#hero,
+html:root:root:root:root[data-fx-archive-experience]:not([data-fx-archive-experience="ready"]):not([data-fx-mag-birth-owner-r533="active"])
+body.living-architecture:not(.fx-organism-panel-open) #hero > .hero-grid,
+html:root:root:root:root[data-fx-archive-experience]:not([data-fx-archive-experience="ready"]):not([data-fx-mag-birth-owner-r533="active"])
+body.living-architecture:not(.fx-organism-panel-open) #hero .hero-grid > .hero-copy {
+  visibility:visible!important;
+  opacity:1!important;
+  content-visibility:visible!important;
+  clip-path:none!important;
+}
+html:root:root:root:root[data-fx-archive-experience]:not([data-fx-archive-experience="ready"]):not([data-fx-mag-birth-owner-r533="active"])
+body.living-architecture:not(.fx-organism-panel-open) #hero .hero-grid > .hero-copy {
+  display:flex!important;
+  flex-direction:column!important;
+  position:relative!important;
+  transform:none!important;
+}
+@media(max-width:900px) {
+  html:root:root:root:root[data-fx-archive-experience]:not([data-fx-archive-experience="ready"]):not([data-fx-mag-birth-owner-r533="active"])
+  body.living-architecture:not(.fx-organism-panel-open) #hero > .hero-grid {
+    display:flex!important;
+    flex-direction:column!important;
+  }
+}
+/* production-r2055-no-blank-progressive-html-after-mag-settles */
