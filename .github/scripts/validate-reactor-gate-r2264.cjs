@@ -29,7 +29,7 @@ for(let i=0;i<=100;i++){
   previous=transfer.settle;
   const gate=reactorEntry(entry,p);
   if(gate)assert(gate.alpha>=0&&gate.alpha<=1&&gate.z<=1.05);
-  else assert(p>=.62);
+  else assert(p>=.78);
   assert.equal(reactorHandoff({cinemaHost:{},key:'diagnostics'},p).settle,1);
   assert.equal(reactorHandoff({cinemaHost:host,key:'licensing'},p).settle,1);
 }
@@ -166,3 +166,18 @@ assert.equal(needs(null,false),false);
 assert(src.includes('if(active&&softwareMagRenderer()&&transitNeedsFrame(current,lastRenderedGate))'));
 assert(src.includes('lastRenderedGate=Boolean(ingress&&ingress.alpha>.001)'));
 console.log('R2272_EARLY_TRANSIT_CLEAR_PASS '+JSON.stringify({cases:5,softwareCapMs:240}));
+
+assert(reactorEntry(entry,.68).alpha>.8,'late entry should still have a visible gate');
+assert.equal(reactorEntry(entry,.78),null);
+assert(reactorEntry(entry,.77999).alpha<.00001);
+assert.equal(reactorHandoff(entry,.68).settle,1,'extended gate must not delay content');
+let beforeCount=0,afterCount=0;
+for(let i=0;i<1000;i++){
+ const p=i/1000;
+ if(p<.62)beforeCount++;
+ if(reactorEntry(entry,p))afterCount++;
+}
+assert.equal(beforeCount,620);assert.equal(afterCount,780);
+assert.equal(needs({s:entry,progress:.70},false),true);
+assert.equal(needs({s:entry,progress:.78},false),false);
+console.log('R2273_EXTENDED_PASSAGE_PASS '+JSON.stringify({oldWindow:beforeCount,newWindow:afterCount,relativeIncrease:afterCount/beforeCount-1,contentHandoffUnchanged:true}));

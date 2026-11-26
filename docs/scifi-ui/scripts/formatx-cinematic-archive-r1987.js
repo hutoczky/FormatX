@@ -771,8 +771,11 @@
     return new Float32Array(data);
   }
   function reactorEntry(scene,p){
-    if(!entryReactorHost||scene.cinemaHost!==entryReactorHost||p>=.62)return null;
-    const t=clamp(p/.62);
+    // Extend the physical passage to the end of the entry beat, without
+    // holding back the native document (its handoff still ends at .62).
+    // This gives large touch-wheel steps a wider chance to render a gate.
+    if(!entryReactorHost||scene.cinemaHost!==entryReactorHost||p>=.78)return null;
+    const t=clamp(p/.78);
     // Reversible scroll track. Near bulkhead expands toward the visitor,
     // the two rear bulkheads follow in depth; preserve MAG's front lane.
     return {progress:t,z:mix(-1.5,1.05,smooth(t)),alpha:(.42+.58*smooth(t/.25))*(1-smooth((t-.92)/.08))};
