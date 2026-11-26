@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/scripts/formatx-auto-repair-r2246.cjs'
       - '.github/scripts/formatx-quality-gates-r2248.cjs'
+      - '.github/scripts/validate-mag-visitor-intent-r2253.cjs'
       - '.github/workflows/formatx-auto-supervisor-r2246.yml'
 permissions:
   contents: read
@@ -34,6 +35,7 @@ jobs:
           node .github/scripts/validate-dna-first-frame-r2181.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
           node .github/scripts/formatx-quality-gates-r2248.cjs --self-test
+          node .github/scripts/validate-mag-visitor-intent-r2253.cjs
           git diff --binary > "$RUNNER_TEMP/formatx-repair.patch"
       - name: Collect current revision quality gates
         if: always()
