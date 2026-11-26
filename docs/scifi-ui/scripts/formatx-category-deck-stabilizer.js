@@ -27,7 +27,7 @@
 
   function ensureReadabilityFloor() {
     if (reducedMotion.matches) {
-      root.dataset.fxEarlyReadabilityFloor = 'critical-r236';
+      if (root.dataset.fxEarlyReadabilityFloor !== 'critical-r236') root.dataset.fxEarlyReadabilityFloor = 'critical-r236';
       return;
     }
     if (document.querySelector('link[data-fx-early-readability-floor]')) return;
@@ -75,7 +75,7 @@
       if (launcher.title !== label + ' · Ctrl/⌘ K') launcher.title = label + ' · Ctrl/⌘ K';
     }
 
-    root.dataset.fxEarlyAccessibility = 'ready-v3';
+    if (root.dataset.fxEarlyAccessibility !== 'ready-v3') root.dataset.fxEarlyAccessibility = 'ready-v3';
   }
 
   function scheduleAccessibility() {
@@ -87,8 +87,8 @@
   function syncNavigation() {
     document.querySelectorAll('.main-nav a').forEach((anchor, index) => {
       if (!NAVIGATION.hu[index] || !NAVIGATION.en[index]) return;
-      anchor.dataset.hu = NAVIGATION.hu[index];
-      anchor.dataset.en = NAVIGATION.en[index];
+      if (anchor.dataset.hu !== NAVIGATION.hu[index]) anchor.dataset.hu = NAVIGATION.hu[index];
+      if (anchor.dataset.en !== NAVIGATION.en[index]) anchor.dataset.en = NAVIGATION.en[index];
       const text = NAVIGATION[language()][index];
       if (anchor.textContent !== text) anchor.textContent = text;
     });
@@ -121,8 +121,8 @@
   }
 
   function announceReady() {
-    root.dataset.fxCategoryDeckState = 'ready';
-    root.dataset.fxCategoryLayer = 'ready';
+    if (root.dataset.fxCategoryDeckState !== 'ready') root.dataset.fxCategoryDeckState = 'ready';
+    if (root.dataset.fxCategoryLayer !== 'ready') root.dataset.fxCategoryLayer = 'ready';
     syncNavigation();
     scheduleAccessibility();
     stopBootObserver();
@@ -147,6 +147,7 @@
   function boot() {
     ensureReadabilityFloor();
     syncAccessibility();
+    observeStructure();
     if (ensure()) return;
 
     const target = document.getElementById('main-content') || document.body || document.documentElement;
@@ -158,8 +159,31 @@
     }, 4500);
   }
 
-  for (const name of ['pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop']) {
+  // A render-loop notification is not a DOM lifecycle event. Once the
+  // semantic deck exists, rechecking it on every animation loop scans
+  // the entire document unnecessarily. Explicit readiness, language and
+  // actual structural insertions remain the owners of reconciliation.
+  const relevantStructure = '.fx-category-deck,.main-nav,.topbar,.fx-immersive-launch,[data-organ-node="0"],.fx-plan-qr-link,[data-fx-live-os-launcher]';
+  let structureObserver = null;
+  function observeStructure() {
+    if (structureObserver || !document.body) return;
+    structureObserver = new MutationObserver(records => {
+      for (const record of records) {
+        for (const node of [...record.addedNodes, ...record.removedNodes]) {
+          if (!(node instanceof Element)) continue;
+          if (node.matches(relevantStructure) || node.querySelector(relevantStructure)) {
+            scheduleEnsure();
+            scheduleAccessibility();
+            return;
+          }
+        }
+      }
+    });
+    structureObserver.observe(document.body, { childList: true, subtree: true });
+  }
+  for (const name of ['pageshow', 'formatx:livingready', 'formatx:threeready']) {
     addEventListener(name, () => {
+      observeStructure();
       scheduleEnsure();
       scheduleAccessibility();
     }, { passive: true });
@@ -168,7 +192,11 @@
     syncNavigation();
     syncAccessibility();
   }));
-  addEventListener('pagehide', stopBootObserver, { once: true });
+  addEventListener('pagehide', () => {
+    stopBootObserver();
+    structureObserver?.disconnect();
+    structureObserver = null;
+  });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
   else boot();

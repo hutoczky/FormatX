@@ -340,3 +340,21 @@ assert(src.includes('if(uBend!=0.0)'));
 assert(!src.includes('uReactorProgress'));
 console.log('R2281_RING_UNIFORM_PASS '+JSON.stringify({samples,maxError,ringTransformsPerGate:3,previousMaxVertexEvaluations:2880}));
 }
+
+// R2282: animation-loop events must not trigger semantic deck scans.
+{
+const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-category-deck-stabilizer.js','utf8');
+let scans=0,mutations=0,observer;const events={},microtasks=[];
+class Element{constructor(relevant=false){this.relevant=relevant;}matches(){return this.relevant;}querySelector(){return null;}}
+const root={lang:'hu',dataset:{}},deck=new Element(true);deck.closest=()=>null;
+const document={documentElement:root,body:new Element(),readyState:'complete',querySelector:()=>null,querySelectorAll:selector=>{scans++;return selector==='.fx-category-deck'?[deck]:[];},head:{appendChild:()=>{}},createElement:()=>({dataset:{}})};
+class Observer{constructor(cb){this.cb=cb;observer=this;}observe(){mutations++;}disconnect(){}}
+new Function('document','matchMedia','Element','HTMLButtonElement','HTMLAnchorElement','MutationObserver','addEventListener','queueMicrotask','setTimeout','clearTimeout',source)(document,()=>({matches:true}),Element,Element,Element,Observer,(name,fn)=>{events[name]=fn;},fn=>microtasks.push(fn),()=>1,()=>{});
+const drain=()=>{while(microtasks.length)microtasks.shift()();};drain();const initial=scans;
+for(let i=0;i<1000;i++)events['formatx:loop']?.();drain();assert.equal(scans,initial);
+observer.cb([{addedNodes:[new Element(false)],removedNodes:[]}]);drain();assert.equal(scans,initial);
+observer.cb([{addedNodes:[new Element(true)],removedNodes:[]}]);drain();assert(scans>initial);
+const after=scans;events['formatx:languagechange']();drain();assert(scans>after);
+events.pagehide();events.pageshow();drain();assert.equal(mutations,2);
+console.log('R2282_STRUCTURAL_RECONCILE_PASS '+JSON.stringify({ignoredLoopEvents:1000,structuralReconcile:true,languageReconcile:true}));
+}
