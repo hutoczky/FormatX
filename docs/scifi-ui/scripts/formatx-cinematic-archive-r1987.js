@@ -453,11 +453,16 @@
           const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
           const english=root.lang==='en';
           const sourceName=(sourceNames[selected.source]||[selected.source,selected.source])[english?1:0];
+          const transfer=reactorHandoff(selected,current.progress);
           if(marker){
-            const entering=reactorEntry(selected,current.progress);
-            const expected=entering&&entering.progress<.72
+            const destination='MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
+            const expected=transfer.phase==='approach'
               ?(english?'MAG // ENTER THE CORE':'MAG // BELÉPÉS A MAG TÉRBE')
-              :'MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
+              :transfer.phase==='traverse'
+                ?(english?'MAG // REACTOR TRANSIT':'MAG // REAKTOR ÁTJÁRÓ')
+                :transfer.phase==='arrival'
+                  ?(english?'MAG // SYSTEM ONLINE':'MAG // RENDSZER AKTÍV')
+                  :destination;
             if(marker.textContent!==expected)marker.textContent=expected;
           }
           root.dataset.fxArchiveVisibleInterface='single-native-folio';
@@ -465,7 +470,7 @@
           // R2038: deliver the REAL interactive folio throughout the scroll beat.
           // Previously opacity zero hid all actual content while a small
           // decorative status card remained visible in production screenshots.
-          const entry=smooth((p-.035)/.28),exit=smooth((p-.94)/.06);
+          const entry=smooth((p-.035)/.28)*transfer.settle,exit=smooth((p-.94)/.06);
           const materialize=(.83+.17*entry)*(1-.09*exit);
           setMotionStyle(panel,'--fx-cinema-materialize',materialize.toFixed(4));
           setMotionStyle(panel,'--fx-cinema-orbit',(1-materialize).toFixed(4));
@@ -480,7 +485,7 @@
             'inner-chamber':0,assembled:1
           }[selected.source]||0;
           const paperExit=smooth((p-.94)/.06);
-          const paperArrival=smooth((p-.08)/.38);
+          const paperArrival=smooth((p-.08)/.38)*transfer.settle;
           const unresolved=1-paperArrival;
           const phone=mobile();
           const lateral=phone?0:sourceAxis*(unresolved*14-paperExit*9);
@@ -742,6 +747,17 @@
     // the two rear bulkheads follow in depth; preserve MAG's front lane.
     return {progress:t,z:mix(-1.5,1.05,smooth(t)),alpha:(.42+.58*smooth(t/.25))*(1-smooth((t-.92)/.08))};
   }
+  // One reversible cue for the actual native document, not a duplicated
+  // loading panel. Keep all checkout and other chapters on their old path.
+  function reactorHandoff(scene,p){
+    if(!entryReactorHost||scene.cinemaHost!==entryReactorHost||scene.key==='licensing')
+      return {settle:1,phase:'clear'};
+    const t=clamp(p/.62);
+    return {
+      settle:.58+.42*smooth((t-.35)/.65),
+      phase:t<.34?'approach':t<.82?'traverse':t<1?'arrival':'clear'
+    };
+  }
   function panelGeometry(detail){
     const u=detail?20:10,v=detail?16:9,data=[];
     for(let y=0;y<v;y++)for(let x=0;x<u;x++){
@@ -963,6 +979,7 @@ void main(){
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
       const ingress=reactorEntry(scene,pro);
+      const transfer=reactorHandoff(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
       // Shared renderer: never assume uniforms survived another pass/frame.
@@ -1078,7 +1095,7 @@ void main(){
       const z=mix(.18,2.30,align);
       const bend=mix(.44,.006,smooth((pro-.46)/.30));
       const rotation=(1-align)*(side*.74)+align*.02;
-      const alpha=reveal*(1-release);
+      const alpha=reveal*(1-release)*transfer.settle;
       if(root.dataset.fxArchiveOptics!=='ggx-curved-normal-analytic-contact-aerial-fwidth')
         root.dataset.fxArchiveOptics='ggx-curved-normal-analytic-contact-aerial-fwidth';
       root.dataset.fxArchiveSheetMotion=pro<.16?'anticipation':
