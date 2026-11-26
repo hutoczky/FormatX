@@ -3,11 +3,55 @@
    frame-rate benchmark: RAF intervals reflect browser main-thread cadence. */
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const origin=process.env.FORMATX_SCROLL_AUDIT_URL||'https://www.formatxsuite.com/scifi-ui/';
 const specs=[
   {name:'desktop',width:1366,height:768,mobile:false},
   {name:'mobile',width:390,height:844,mobile:true}
 ];
+// This separate, post-benchmark check intentionally seeks exact native
+// scroll coordinates. It does not contribute to the interaction FPS sample.
+async function proveReactor(page,spec){
+  const out=process.env.FORMATX_REACTOR_PROOF_DIR||'formatx-reactor-proof';
+  fs.mkdirSync(out,{recursive:true});
+  for(const kind of ['entry','corridor']){
+    const before=await page.evaluate(kind=>{
+      const a=window.FormatXArchiveExperience;
+      const hosts=Array.from(document.querySelectorAll('main#main-content > [data-fx-cinema-anchor-height]'))
+        .filter(n=>n.getBoundingClientRect().height>0);
+      const host=hosts[kind==='entry'?0:1];
+      if(!host||!a?.state?.reactorProof)throw Error('Missing native reactor chapter');
+      const p=kind==='entry'?.25:.43;
+      const targetTop=innerHeight*(.88-1.15*p);
+      const previous=a.state.reactorProof[kind==='entry'?'entryFrames':'corridorFrames'];
+      window.scrollBy({top:host.getBoundingClientRect().top-targetTop,left:0,behavior:'instant'});
+      return {previous,host:host.id||host.className};
+    },kind);
+    await page.waitForFunction(({kind,previous})=>{
+      const s=window.FormatXArchiveExperience?.state;
+      const root=document.documentElement.dataset;
+      return s?.reactorProof?.[kind==='entry'?'entryFrames':'corridorFrames']>previous &&
+        (kind==='entry'?root.fxArchiveReactorEntryR2261==='ingress':
+          Boolean(root.fxArchiveCorridorR2265&&root.fxArchiveCorridorR2265!=='clear'));
+    },{kind,previous:before.previous},{timeout:20000});
+    const result=await page.evaluate(()=>{
+      const s=window.FormatXArchiveExperience.state;
+      const root=document.documentElement.dataset;
+      const canvas=window.FormatXLivingCore?.canvas;
+      const r=canvas?.getBoundingClientRect();
+      return {scene:s.scene,progress:s.progress,reactorProof:s.reactorProof,
+        gate:root.fxArchiveReactorEntryR2261,corridor:root.fxArchiveCorridorR2265,
+        canvasVisible:Boolean(r&&r.width>0&&r.height>0),
+        pricingOpen:document.getElementById('pricing')?.dataset.fxExpanded,
+        error:s.error};
+    });
+    assert(result.canvasVisible&&!result.error,spec.name+' reactor canvas unavailable');
+    assert.equal(result.pricingOpen,'true',spec.name+' checkout collapsed in reactor proof');
+    await page.screenshot({path:path.join(out,spec.name+'-'+kind+'.png'),fullPage:false,timeout:20000});
+    console.log('FX_REACTOR_VISUAL_PROOF_R2270 '+JSON.stringify({profile:spec.name,kind,...before,...result}));
+  }
+}
 async function measure(browser,spec,trial){
   const context=await browser.newContext({
     viewport:{width:spec.width,height:spec.height},isMobile:spec.mobile,
@@ -180,6 +224,7 @@ async function measure(browser,spec,trial){
       spec.name+' redundant WebGL2 vertex attribute setup exceeded draw budget');
     assert(result.pricingOpen==='true',spec.name+' checkout folded after scroll');
     assert(result.chapters?.total>=8,spec.name+' editorial chapter UI missing');
+    if(trial===1)await proveReactor(page,spec);
   }finally{await context.close();}
 }
 (async()=>{

@@ -59,12 +59,14 @@ jobs:
         run: |
           set -o pipefail
           node .github/scripts/measure-mag-scroll-budget-r2226.cjs 2>&1 | tee formatx-mag-scroll-r2226.txt
-      - name: Keep benchmark text for three days
+      - name: Keep benchmark and reactor viewport evidence for three days
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: formatx-mag-scroll-budget-r2226
-          path: formatx-mag-scroll-r2226.txt
+          path: |
+            formatx-mag-scroll-r2226.txt
+            formatx-reactor-proof/*.png
           if-no-files-found: warn
           retention-days: 3
       - name: Publish native MAG scroll audit status
