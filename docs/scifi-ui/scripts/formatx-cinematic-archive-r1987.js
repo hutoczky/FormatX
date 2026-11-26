@@ -731,10 +731,17 @@
       for(let edge=0;edge<8;edge++){
         const angle=(edge+.5)*Math.PI/4,ca=Math.cos(angle),sa=Math.sin(angle);
         const length=2*radius*Math.tan(Math.PI/8);
-        for(let i=0;i<cube.length;i+=8){
-          const x=cube[i]*.125+radius,y=cube[i+1]*length;
-          data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*.16+z,
-            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],edge/7,2+ring);
+        // Two separate real solids in the same batched mesh: titanium
+        // housing and a narrow luminous guide on the entry face.
+        for(const [width,span,depth,radial,front,material] of [
+          [.19,length,.23,0,0,.25],
+          [.035,length*.88,.034,-.045,.13,.85]
+        ]){
+          for(let i=0;i<cube.length;i+=8){
+            const x=cube[i]*width+radius+radial,y=cube[i+1]*span;
+            data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*depth+z+front,
+              cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],material,2+ring);
+          }
         }
       }
     }
@@ -923,8 +930,13 @@ void main(){
  // Restrict the optical boost to the gate; ordinary racks and MAG sheets
  // retain their exact material response. No full-screen flash or bloom.
  if(vUv.y>1.5){
-   col=mix(col,uColor*(.78+.22*facing),.40);
-   a*=vReactorVisibility;
+   // Face the viewer with material contrast rather than making the entire
+   // chamber glow. Constant per-primitive material tags, no extra texture.
+   float guide=step(.6,vUv.x);
+   vec3 titanium=mix(col,vec3(.12,.22,.29)*(0.35+.65*ndl)+specular*.42,.65);
+   vec3 emitter=uColor*(.80+.20*facing);
+   col=mix(titanium,emitter,guide);
+   a=mix(a*.96,a,guide)*vReactorVisibility;
  }
  outColor=vec4(col,clamp(a,0.0,1.0));
 }`;
