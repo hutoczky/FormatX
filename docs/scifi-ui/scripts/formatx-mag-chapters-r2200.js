@@ -14,6 +14,8 @@
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
   let pending=0;
+  let pendingAnchor='';
+  let pendingAnchorUntil=0;
   const OPEN_MS=950, CLOSE_MS=340;
   const findHeading=(section)=>{
     const id=section.getAttribute('aria-labelledby');
@@ -50,7 +52,7 @@
   function toggle(entry,expand,origin='button'){
     const {section,button,subtitle}=entry;
     const previous=section.dataset.fxExpanded==='true';
-    if(section.id!=='pricing'&&expand&&previous&&section.dataset.fxMagPhase!=='closing')return;
+    if(section.id!=='pricing'&&((expand&&previous&&section.dataset.fxMagPhase!=='closing')||(!expand&&section.dataset.fxMagPhase==='closing')))return;
     clearTimeout(entry.timer);
     entry.timer=0;
     if(section.id==='pricing'){
@@ -255,18 +257,25 @@
     }
     // Payment must never vanish because of dynamic runtime changes.
     const pricing=document.getElementById('pricing');
-    if(pricing?.classList.contains('fx-mag-chapter')&&pricing.dataset.fxExpanded!=='true'){
-      pricing.dataset.fxExpanded='true';
-      pricing.dataset.fxMagPhase='open';
-      pricing.querySelector('.fx-mag-chapter-title')?.setAttribute('aria-expanded','true');
+    if(pricing?.classList.contains('fx-mag-chapter')){
+      if(pricing.dataset.fxExpanded!=='true')pricing.dataset.fxExpanded='true';
+      if(pricing.dataset.fxMagPhase!=='open')pricing.dataset.fxMagPhase='open';
+      const commerce=registry.get(pricing);
+      if(commerce?.subtitle?.hidden)commerce.subtitle.hidden=false;
+      if(commerce?.button.getAttribute('aria-expanded')!=='true')commerce?.button.setAttribute('aria-expanded','true');
     }
     for(const [node,entry] of registry){
       if(!node.isConnected){clearTimeout(entry.timer);reveal?.unobserve(entry.button);registry.delete(node);}
     }
     if(registry.size){
-      root.classList.add('fx-mag-chapters-ready');
-      root.dataset.fxMagChapters='r2217';
-      root.dataset.fxMagChapterCount=String(registry.size);
+      if(!root.classList.contains('fx-mag-chapters-ready'))root.classList.add('fx-mag-chapters-ready');
+      if(root.dataset.fxMagChapters!=='r2217')root.dataset.fxMagChapters='r2217';
+      const count=String(registry.size);
+      if(root.dataset.fxMagChapterCount!==count)root.dataset.fxMagChapterCount=count;
+    }
+    if(pendingAnchor){
+      if(performance.now()>pendingAnchorUntil)pendingAnchor='';
+      else revealAnchor(pendingAnchor,false);
     }
   }
   function schedule(){
@@ -276,20 +285,35 @@
     const raw=String(value||'').replace(/^#/,'');
     try{return decodeURIComponent(raw);}catch(_){return raw;}
   }
-  function revealAnchor(id){
-    if(!id)return;
+  function revealAnchor(id,remember=true){
+    if(remember){pendingAnchor='';pendingAnchorUntil=0;}
+    if(!id)return false;
     const target=document.getElementById(id);
     const section=target?.closest('section.fx-mag-chapter');
-    if(!section||!registry.has(section))return;
+    if(!section||!registry.has(section)){
+      // A late worker/runtime section may not exist when the link is clicked.
+      // Keep only the most recent destination for a bounded replay window.
+      if(remember&&(!target||target.closest('main#main-content > section:not(#hero)'))){
+        pendingAnchor=id;pendingAnchorUntil=performance.now()+8000;
+      }
+      return false;
+    }
+    pendingAnchor='';pendingAnchorUntil=0;
     // A click followed by hashchange must not restart an already open aperture.
-    if(section.dataset.fxExpanded==='true'&&section.dataset.fxMagPhase!=='closing')return;
-    toggle(registry.get(section),true,'anchor');
+    if(section.dataset.fxExpanded!=='true'||section.dataset.fxMagPhase==='closing')
+      toggle(registry.get(section),true,'anchor');
+    return true;
   }
   reconcile();
-  new MutationObserver(schedule).observe(main,{childList:true});
+  new MutationObserver(records=>{
+    // Direct sections always matter. Observe nested late insertions only
+    // while a requested destination is outstanding, not ordinary DOM churn.
+    if(records.some(record=>record.target===main)||
+      (pendingAnchor&&performance.now()<=pendingAnchorUntil&&document.getElementById(pendingAnchor)))schedule();
+  }).observe(main,{childList:true,subtree:true});
   document.addEventListener('click',event=>{
     const link=event.target instanceof Element?event.target.closest('a[href^="#"]'):null;
-    if(!link)return;
+    if(!link||event.button>0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
     const id=decodeAnchor(link.getAttribute('href'));
     revealAnchor(id);
   },true);
