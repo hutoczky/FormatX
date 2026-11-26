@@ -21,7 +21,8 @@
   const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
   const mix=(a,b,t)=>a+(b-a)*t;
   const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
-  const mobile=()=>matchMedia('(max-width: 900px)').matches;
+  const mobileQuery=matchMedia('(max-width: 900px)');
+  const mobile=()=>mobileQuery.matches;
   const blueprint=[
     {selector:'#experience',key:'ecosystem',hu:'FORMATX ÖKOSZISZTÉMA',en:'FORMATX ECOSYSTEM',source:'left-shelf',color:[.50,.81,.94]},
     {selector:'#live-os-overview, .fx-category-deck--standalone',key:'systems',hu:'LIVE OS / RENDSZERKATEGÓRIÁK',en:'LIVE OS / SYSTEM CATEGORIES',source:'rotor',color:[.65,.78,.99]},
@@ -710,6 +711,15 @@
       this.boundMesh=null;
       this.attributeSetups=0;
       this.drawCalls=0;
+      this.scalarCache=new Map();
+      this.scalarWrites=0;
+      this.scalarSkips=0;
+    }
+    scalar(name,value){
+      if(this.scalarCache.get(name)===value){this.scalarSkips++;return;}
+      this.gl.uniform1f(this.uniform[name],value);
+      this.scalarCache.set(name,value);
+      this.scalarWrites++;
     }
     programFor(gl){
       const vert=`#version 300 es
@@ -849,10 +859,10 @@ void main(){
         this.attributeSetups++;
       }
       gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
-      gl.uniform1f(u.uRotation,rot);gl.uniform1f(u.uTilt,tilt);
-      gl.uniform1f(u.uOpacity,alpha);
-      gl.uniform1f(u.uFiber,fiber?1:0);gl.uniform1f(u.uBend,bend);
-      gl.uniform1f(u.uShadow,shadow?1:0);
+      this.scalar('uRotation',rot);this.scalar('uTilt',tilt);
+      this.scalar('uOpacity',alpha);
+      this.scalar('uFiber',fiber?1:0);this.scalar('uBend',bend);
+      this.scalar('uShadow',shadow?1:0);
       gl.drawArrays(gl.TRIANGLES,0,mesh.count);
       this.drawCalls++;
     }
@@ -870,11 +880,15 @@ void main(){
         this.panel.count=vertices.length/8;
         this.panelDetail=detail;
       }
-      root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
+      if(root.dataset.fxArchivePanelTriangles!==String(this.panel.count/3))
+        root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
+      // Shared renderer: never assume uniforms survived another pass/frame.
+      // Within this pass only, identical scalar values need no driver call.
+      this.scalarCache.clear();this.scalarWrites=0;this.scalarSkips=0;
       // Camera is identical for every primitive in this scene frame.
       gl.uniform3fv(this.uniform.uCamera,cam);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
@@ -1027,7 +1041,9 @@ void main(){
       gl.disable(gl.BLEND);
       gl.enable(gl.DEPTH_TEST);
       gl.depthFunc(gl.LEQUAL);
-      root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
+      if(root.dataset.fxArchiveDrawCalls!==String(this.drawCalls))root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
+      if(root.dataset.fxArchiveScalarWritesR2239!==String(this.scalarWrites))root.dataset.fxArchiveScalarWritesR2239=String(this.scalarWrites);
+      if(root.dataset.fxArchiveScalarSkipsR2239!==String(this.scalarSkips))root.dataset.fxArchiveScalarSkipsR2239=String(this.scalarSkips);
       if(root.dataset.fxArchiveAttributeSwitchesR2228!==String(this.attributeSetups))
         root.dataset.fxArchiveAttributeSwitchesR2228=String(this.attributeSetups);
       if(root.dataset.fxArchiveDepthPolicyR2035!=='canonical-mag-front-deep-shelves-behind')
