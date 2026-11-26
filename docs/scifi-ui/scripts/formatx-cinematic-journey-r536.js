@@ -615,19 +615,21 @@
      Forced cinema/validation paths stay immediate; normal visitors activate
      the journey on real intent or after the full MAG birth handoff. */
   let bootStarted=false;
+  const intentTypes=['wheel','pointerdown','touchstart','keydown'];
   const startBoot=source=>{
     if(bootStarted)return;
     bootStarted=true;
     root.dataset.fxCinematicJourneyStartR1737=source;
+    for(const type of intentTypes)removeEventListener(type,intentBoot,true);
+    removeEventListener('hashchange',hashBoot);
     boot();
-    for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
-      removeEventListener(type,intentBoot,true);
-    }
   };
   const intentBoot=event=>{
-    if(event?.type==='keydown' && event.repeat)return;
-    startBoot('intent-'+(event?.type||'unknown'));
+    if(!event?.isTrusted || (event.type==='keydown' && event.repeat))return;
+    startBoot('intent-'+event.type);
   };
+  const deepLink=()=>Boolean(location.hash&&location.hash!=='#hero'&&location.hash!=='#top');
+  const hashBoot=()=>{if(deepLink())startBoot('explicit-hash');};
 
   if(FORCE){
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>startBoot('forced'),{once:true});
@@ -635,10 +637,14 @@
   }else{
     root.dataset.fxCinematicJourneyR536='deferred-first-paint-r1737';
     root.dataset.fxCinematicJourneyPerformanceR1737='post-intent-zero-first-paint-layout-mutation';
-    for(const type of ['scroll','wheel','pointerdown','touchstart','keydown']){
-      addEventListener(type,intentBoot,{once:false,capture:true,passive:type!=='keydown'});
+    // Native scroll events also occur during layout anchoring and browser
+    // restoration. They are not a visitor request to mount a cinematic stage.
+    for(const type of intentTypes){
+      addEventListener(type,intentBoot,{capture:true,passive:type!=='keydown'});
     }
-    document.addEventListener('formatx:magbirthcomplete',()=>startBoot('mag-birth-handoff'),{once:true,passive:true});
+    addEventListener('hashchange',hashBoot,{passive:true});
+    if(deepLink())hashBoot();
+    else document.addEventListener('formatx:magbirthcomplete',()=>startBoot('mag-birth-handoff'),{once:true,passive:true});
   }
 
   addEventListener('pagehide',()=>{
