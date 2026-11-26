@@ -458,14 +458,10 @@
           const transfer=reactorHandoff(selected,current.progress);
           if(marker){
             const destination='MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
-            const expected=transfer.phase==='approach'
-              ?(english?'MAG // ENTER THE CORE':'MAG // BELÉPÉS A MAG TÉRBE')
-              :transfer.phase==='traverse'
-                ?(english?'MAG // REACTOR TRANSIT':'MAG // REAKTOR ÁTJÁRÓ')
-                :transfer.phase==='arrival'
-                  ?(english?'MAG // SYSTEM ONLINE':'MAG // RENDSZER AKTÍV')
-                  :destination;
+            const arrival=systemArrivalPhase(selected,current.progress,current.travel,mobile()&&softwareMagRenderer());
+            const expected=systemArrivalLabel(arrival,english,destination);
             if(marker.textContent!==expected)marker.textContent=expected;
+            setData(marker,'fxArrivalPhaseR2290',arrival);
           }
           setData(root,'fxArchiveVisibleInterface','single-native-folio');
           const p=clamp(current.progress);
@@ -860,6 +856,30 @@
   // R2289: reversible, C1-continuous camera excursion during each real gate.
   // Start after the contiguous chapter-selection boundary (~.313), and
   // return to the baseline before the reading beat. No added draw calls.
+  // R2290: describe the same physical track used by the native gate.
+  // Never gate focus, visibility or payment behind this presentation cue.
+  function systemArrivalPhase(scene,p,travel=0,limited=false){
+    if(!entryReactorHost||!scene.cinemaHost||scene.key==='licensing')return 'clear';
+    const first=scene.cinemaHost===entryReactorHost;
+    const physical=first?entryTransitProgress(p,travel,limited):corridorTransitProgress(scene,p,travel,limited);
+    const start=first?0:.30,end=first?.78:.64;
+    if(physical<start||physical>=end)return 'clear';
+    const t=clamp((physical-start)/(end-start));
+    if(t<.18)return first?'approach':'system-approach';
+    if(t<.65)return 'traverse';
+    if(t<.88)return 'arrival';
+    return 'handoff';
+  }
+  function systemArrivalLabel(phase,english,destination){
+    const labels={
+      approach:['BELÉPÉS A MAG TÉRBE','ENTER THE CORE'],
+      'system-approach':['BELÉPÉS A RENDSZERTÉRBE','ENTER SYSTEM SPACE'],
+      traverse:['REAKTOR ÁTJÁRÓ','REACTOR TRANSIT'],
+      arrival:['RENDSZER AKTÍV','SYSTEM ONLINE'],
+      handoff:['RENDSZERÁTVÉTEL','SYSTEM HANDOFF']
+    };
+    return labels[phase]?'MAG // '+labels[phase][english?1:0]:destination;
+  }
   function passageFlight(scene,p,portrait){
     const first=Boolean(entryReactorHost&&scene.cinemaHost===entryReactorHost);
     if(!scene.cinemaHost||scene.key==='licensing')return {x:0,y:0,z:0};

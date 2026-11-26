@@ -495,3 +495,37 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('dolly+mix(-.035,.085,approach)+flight.z+passage.z'));
  console.log('R2289_PHYSICAL_PASSAGE_PASS '+JSON.stringify({samples,desktopPeak:peak,mobilePeak,checkoutUnchanged:true,extraDrawCalls:0}));
  }
+
+ // R2290: every non-commerce arrival follows the same physical gate
+ // progression, including the extended mobile software window.
+ {
+ const a=src.indexOf('  function systemArrivalPhase('),b=src.indexOf('  function passageFlight(',a);
+ const {phase,label}=new Function('clamp','entryReactorHost','entryTransitProgress','corridorTransitProgress',src.slice(a,b)+'return {phase:systemArrivalPhase,label:systemArrivalLabel};')(clamp,host,entryTransitProgress,corridorTransitProgress);
+ const first={key:'ecosystem',cinemaHost:host},next={key:'systems',cinemaHost:{}},checkout={key:'licensing',cinemaHost:{}};
+ const order={'approach':0,'system-approach':0,traverse:1,arrival:2,handoff:3,clear:4};
+ let samples=0;
+ for(const scene of [first,next]){
+   for(const limited of [false,true]){
+     const seen=new Set();let last=-1;
+     const start=scene===first?0:.30;
+     for(let i=0;i<=1000;i++){
+       const p=start+(.78-start)*i/1000;
+       const s=phase(scene,p,0,limited);
+       assert(order[s]>=last,'arrival phase reversed during forward scroll');
+       last=order[s];seen.add(s);samples++;
+       assert.equal(phase(checkout,p,0,limited),'clear');
+     }
+     if(limited)for(let i=0;i<=100;i++){
+       const s=phase(scene,.78,i/100,limited);
+       assert(order[s]>=last);last=order[s];seen.add(s);samples++;
+     }
+     assert(seen.has('traverse')&&seen.has('arrival')&&seen.has('handoff')&&seen.has('clear'));
+   }
+ }
+ assert.equal(label('handoff',false,'destination'),'MAG // RENDSZERÁTVÉTEL');
+ assert.equal(label('handoff',true,'destination'),'MAG // SYSTEM HANDOFF');
+ assert.equal(label('clear',false,'destination'),'destination');
+ assert.equal(reactorHandoff(next,.42).settle,1);
+ assert.equal(reactorHandoff(checkout,.42).settle,1);
+ console.log('R2290_SYSTEM_ARRIVAL_PASS '+JSON.stringify({samples,bilingual:true,checkoutUnchanged:true,contentNotRetimed:true,extraDrawCalls:0}));
+ }
