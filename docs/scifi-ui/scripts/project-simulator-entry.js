@@ -23,6 +23,7 @@
 
   let retryTimer = 0;
   let attempts = 0;
+  let renderQueued = false;
 
   function language() {
     return root.lang === 'en' ? 'en' : 'hu';
@@ -79,19 +80,26 @@
   function render() {
     removeCloneEntries();
     const copy = COPY[language()];
+    const targetHref = href();
     document.querySelectorAll('a[data-fx-simulator-entry]').forEach(link => {
-      link.href = href();
-      link.setAttribute('aria-label', copy.aria);
+      if (link.getAttribute('href') !== targetHref) link.setAttribute('href', targetHref);
+      if (link.getAttribute('aria-label') !== copy.aria) link.setAttribute('aria-label', copy.aria);
       if (link.dataset.fxSimulatorEntry === 'hero') {
         const label = link.querySelector('span');
-        if (label) label.textContent = copy.hero;
+        if (label && label.textContent !== copy.hero) label.textContent = copy.hero;
       } else if (link.dataset.fxSimulatorEntry === 'header') {
-        link.textContent = copy.header;
+        if (link.textContent !== copy.header) link.textContent = copy.header;
       } else if (link.dataset.fxSimulatorEntry === 'footer') {
-        link.textContent = copy.footer;
+        if (link.textContent !== copy.footer) link.textContent = copy.footer;
       }
     });
-    root.dataset.fxSimulatorEntryState = 'ready';
+    if (root.dataset.fxSimulatorEntryState !== 'ready') root.dataset.fxSimulatorEntryState = 'ready';
+  }
+
+  function queueRender() {
+    if (renderQueued) return;
+    renderQueued = true;
+    queueMicrotask(() => { renderQueued = false; render(); });
   }
 
   function ensure() {
@@ -120,7 +128,7 @@
   ['DOMContentLoaded', 'pageshow', 'formatx:livingready', 'formatx:threeready', 'formatx:loop'].forEach(name => {
     addEventListener(name, ensure);
   });
-  addEventListener('formatx:languagechange', () => queueMicrotask(render));
+  addEventListener('formatx:languagechange', queueRender);
 
   const observer = new MutationObserver(entries => {
     const languageChanged = entries.some(entry => entry.type === 'attributes' && entry.attributeName === 'lang');
@@ -128,12 +136,14 @@
       return node instanceof Element && (node.matches('[data-fx-loop-bridge="true"]')
         || Boolean(node.querySelector('[data-fx-loop-bridge="true"]')));
     }));
-    if (languageChanged || cloneAdded) queueMicrotask(render);
+    if (languageChanged || cloneAdded) queueRender();
   });
   observer.observe(root, { attributes: true, attributeFilter: ['lang'], childList: true, subtree: true });
 
-  addEventListener('pagehide', () => {
+  addEventListener('pagehide', event => {
+    // A cached page returns with its original controller and observers.
+    if (event.persisted) return;
     clearInterval(retryTimer);
     observer.disconnect();
-  }, { once: true });
+  });
 }());
