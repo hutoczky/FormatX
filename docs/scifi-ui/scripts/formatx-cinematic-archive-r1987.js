@@ -467,7 +467,7 @@
                   :destination;
             if(marker.textContent!==expected)marker.textContent=expected;
           }
-          root.dataset.fxArchiveVisibleInterface='single-native-folio';
+          setData(root,'fxArchiveVisibleInterface','single-native-folio');
           const p=clamp(current.progress);
           // R2038: deliver the REAL interactive folio throughout the scroll beat.
           // Previously opacity zero hid all actual content while a small
@@ -504,7 +504,7 @@
           setMotionStyle(panel,'--fx-cinema-handoff-scale',scale.toFixed(4));
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
-          root.dataset.fxArchiveNativeHandoff='scroll-coupled-real-3d-paper';
+          setData(root,'fxArchiveNativeHandoff','scroll-coupled-real-3d-paper');
           positionCinemaFolio(panel);
         }
       }
@@ -1361,21 +1361,25 @@ void main(){
     const actualTitle=String(actualHeading.textContent||scene[english?'en':'hu']).trim().slice(0,140);
     const liveTitle=handoff.querySelector('.fx-archive-telemetry-r2022__title');
     if(liveTitle.textContent!==actualTitle)liveTitle.textContent=actualTitle;
-    // The membrane unfolds from its unique archive location and approaches
-    // the reader. After the handoff, the *actual* HTML headings/cards continue
-    // the same motion as a native, functional interactive display.
     const p=current.progress;
-    const push=smooth((p-.06)/.38);
-    const settle=smooth((p-.44)/.31);
-    const dir=mobile()?0:(scene.index%2===0?-1:1);
-    setMotionStyle(handoff,'--fx-folio-translate-x',(dir*(1-push)*95+settle*dir*14).toFixed(1)+'px');
-    setMotionStyle(handoff,'--fx-folio-translate-y',((1-push)*42+settle*14).toFixed(1)+'px');
-    setMotionStyle(handoff,'--fx-folio-rotate-y',(dir*(1-push)*-24).toFixed(1)+'deg');
-    setMotionStyle(handoff,'--fx-folio-rotate-x',((1-push)*12).toFixed(1)+'deg');
-    setMotionStyle(handoff,'--fx-folio-scale',(0.82+push*.18-settle*.035).toFixed(3));
-    setMotionStyle(handoff,'--fx-folio-bend',(1-push).toFixed(3));
+    // R2041 hides this duplicate diagnostic panel in the exclusive native
+    // folio. Retain its metadata but don't animate a display:none element.
+    if(root.dataset.fxArchiveCinema!=='active'||!document.body.classList.contains('living-architecture')){
+      // The membrane unfolds from its unique archive location and approaches
+      // the reader. After the handoff, the *actual* HTML headings/cards continue
+      // the same motion as a native, functional interactive display.
+      const push=smooth((p-.06)/.38);
+      const settle=smooth((p-.44)/.31);
+      const dir=mobile()?0:(scene.index%2===0?-1:1);
+      setMotionStyle(handoff,'--fx-folio-translate-x',(dir*(1-push)*95+settle*dir*14).toFixed(1)+'px');
+      setMotionStyle(handoff,'--fx-folio-translate-y',((1-push)*42+settle*14).toFixed(1)+'px');
+      setMotionStyle(handoff,'--fx-folio-rotate-y',(dir*(1-push)*-24).toFixed(1)+'deg');
+      setMotionStyle(handoff,'--fx-folio-rotate-x',((1-push)*12).toFixed(1)+'deg');
+      setMotionStyle(handoff,'--fx-folio-scale',(0.82+push*.18-settle*.035).toFixed(3));
+      setMotionStyle(handoff,'--fx-folio-bend',(1-push).toFixed(3));
+    }
     setData(handoff,'phase',p<.24?'extracting':p<.52?'transferring':'presented');
-    root.dataset.fxArchiveVisibleHandoff='physical-paper-active';
+    setData(root,'fxArchiveVisibleHandoff','physical-paper-active');
   }
 
   function setPanelState(){

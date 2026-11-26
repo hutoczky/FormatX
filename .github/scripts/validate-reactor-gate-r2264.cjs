@@ -250,3 +250,24 @@ update();assert.equal(reads,1);assert.equal(writes,5);
 assert(nodes.every(node=>Object.keys(node.dataset).length===0));
 console.log('R2277_REDUNDANT_PAPER_LAYOUT_PASS '+JSON.stringify({skippedFolioNodes:24,legacyMeasurements:reads,legacyStyleWrites:writes}));
 }
+
+// R2278: hidden duplicate telemetry must remain accurate without motion writes.
+{
+const begin=src.indexOf('  function updateHandoff(){'),end=src.indexOf('  function setPanelState(){',begin);
+assert(begin>=0&&end>begin);
+const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css','utf8');
+assert(/body\.living-architecture > \.fx-archive-physical-paper-r2026\s*\{\s*display:none!important;\s*visibility:hidden!important;/.test(css));
+function simulate(active){
+ let motion=0,data=0;
+ const title={textContent:'Native title'},handoff={isConnected:true,querySelector:()=>title,dataset:{},style:{setProperty:()=>{}}};
+ const scene={key:'ecosystem',index:0,source:'left-shelf',node:{querySelector:()=>title}};
+ const current={s:scene,progress:.4},root={lang:'hu',dataset:{fxArchiveCinema:active?'active':'home'}};
+ const update=new Function('handoff','handoffKey','current','archiveActive','reduced','document','root','sourceNames','scenes','smooth','mobile','setData','setMotionStyle',src.slice(begin,end)+'return updateHandoff;')(handoff,'ecosystem:hu',current,true,{matches:false},{body:{classList:{contains:name=>name==='living-architecture'}}},root,{},[scene],smooth,()=>false,(node,key,value)=>{if(node.dataset[key]!==value){node.dataset[key]=value;data++;}},()=>{motion++;});
+ for(let i=0;i<100;i++){current.progress=i/100;update();}
+ return {motion,data,phase:handoff.dataset.phase,active:handoff.dataset.active,screen:handoff.dataset.fxArchiveScreenVisible};
+}
+const visible=simulate(false),hidden=simulate(true);
+assert.equal(visible.motion,600);assert.equal(hidden.motion,0);
+assert.equal(hidden.phase,visible.phase);assert.equal(hidden.data,visible.data);assert.equal(hidden.active,'true');assert.equal(hidden.screen,'false');
+console.log('R2278_HIDDEN_HANDOFF_BUDGET_PASS '+JSON.stringify({visibleMotionWrites:visible.motion,hiddenMotionWrites:hidden.motion,metadataPreserved:true}));
+}
