@@ -44,3 +44,11 @@ assert.equal(menu.length,1,'Expected one inline critical menu style');
 assert.equal(menu[0][2],fs.readFileSync('docs/scifi-ui/styles/formatx-menu-owner-r1956.css','utf8'),'Inline menu must match canonical CSS byte-for-byte');
 assert(!/<link\b[^>]*href="[^"]*formatx-menu-owner-r1956\.css/.test(html),'Redundant menu stylesheet request');
 console.log('R2250_INLINE_MENU_AND_STYLE_CSP_PASS');
+
+// R2285: exact desktop-only first-paint CSS at its original cascade slot.
+const desktop=styles.filter(m=>m[1].includes('data-fx-desktop-first-paint-r1600="true"'));
+assert.equal(desktop.length,1);
+assert(desktop[0][1].includes('media="(min-width: 901px)"'));
+assert.equal(desktop[0][2],fs.readFileSync('docs/scifi-ui/styles/formatx-desktop-first-paint-r328.css','utf8'));
+assert(!/<link\b[^>]*href="[^"]*formatx-desktop-first-paint-r328\.css/.test(html),'Redundant desktop first paint stylesheet');
+console.log('R2285_INLINE_DESKTOP_CSS_PASS');
