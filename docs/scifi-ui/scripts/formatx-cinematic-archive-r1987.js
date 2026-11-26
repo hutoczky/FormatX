@@ -13,8 +13,15 @@
   // R2220: do not jump the hero into archive dock automatically when the
   // native shader becomes ready several seconds after first paint.
   // Explicit archive URLs and deep links keep their existing semantics.
-  let journeyArmed=force || Boolean(location.hash&&
-    location.hash!=='#hero'&&location.hash!=='#top') || scrollY>32;
+  // Layout anchoring during boot can move scrollY without any user action.
+  // Only an explicit deep link, requested archive, or genuine restored
+  // history navigation may arm the archive before trusted visitor input.
+  const navigationType=performance.getEntriesByType?.('navigation')?.[0]?.type;
+  function initialJourney(force,hash,scroll,navigation){
+    return force || Boolean(hash&&hash!=='#hero'&&hash!=='#top') ||
+      (scroll>32 && navigation==='back_forward');
+  }
+  let journeyArmed=initialJourney(force,location.hash,scrollY,navigationType);
   root.dataset.fxArchiveEngagementR2220=journeyArmed?'deep-link':'awaiting-visitor';
   const requestedHtmlFallback=params.get('archive')==='off';
   const isolatedMagCheck=params.has('r486-optics-energy-check')||params.has('mobileproof');
