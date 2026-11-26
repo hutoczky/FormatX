@@ -42,7 +42,7 @@
   ];
   let scenes=[],current=null,drawPass=null,detach=null,stage=null,heroHost=null;
   let lastPanelNode=null;
-  let raf=0,domRaf=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
+  let raf=0,domRaf=0,gpuTailTimer=0,lastGpu=0,lastScene=-1,disposed=false,painted=0,archiveActive=false,updates=0,domComposes=0;
   // R2235: the idle home scene has no readable 3D archive chapter. Its
   // initial DOM/ARIA synchronization only needs one composed frame.
   let idleComposed=false,idleFastPathSkips=0;
@@ -588,16 +588,19 @@
       if(!scenes.length)return null;
       // Absolute layout only, never alter document scroll position.
       let closest=null,score=Infinity;
-      const anchor=innerHeight*.52;
+      const vh=innerHeight,anchor=vh*.52;
+      const measured=new Map();
       for(const s of scenes){
-        const r=(s.scrollAnchor||s.node).getBoundingClientRect();
+        const node=s.scrollAnchor||s.node;
+        let r=measured.get(node);
+        if(!r){r=node.getBoundingClientRect();measured.set(node,r);}
         if(r.height<1||r.width<1)continue;
         const contains=r.top<=anchor&&r.bottom>=anchor;
         const distance=contains ? Math.abs((r.top+r.bottom)*.5-anchor)/Math.max(1,r.height)
           : r.top>anchor ? r.top-anchor : anchor-r.bottom;
         // Prefer the real visible section containing the viewport's reading line.
         // Tall sections must never lose to a neighbour's off-screen quarter point.
-        const delta=contains?(distance*.01+Math.min(r.height,innerHeight*5)*.0000003):10+distance;
+        const delta=contains?(distance*.01+Math.min(r.height,vh*5)*.0000003):10+distance;
         if(delta<score){score=delta;closest={s,rect:r};}
       }
       if(!closest)return null;
@@ -606,10 +609,10 @@
       // section was still on screen. release=1 then made the panel invisible.
       // Hold the physically flattened membrane through the reading interval
       // and only release once the section actually exits the viewport.
-      const entering=clamp((innerHeight*.88-r.top)/Math.max(1,innerHeight*1.15));
+      const entering=clamp((vh*.88-r.top)/Math.max(1,vh*1.15));
       // R2032: the old sheet MUST finish its physical return before the
       // reading line advances to the next shelf, not after leaving the screen.
-      const exiting=clamp((innerHeight*.94-r.bottom)/Math.max(1,innerHeight*.44));
+      const exiting=clamp((vh*.94-r.bottom)/Math.max(1,vh*.44));
       const p=Math.min(.78,entering)+.22*exiting;
       return {...closest,progress:clamp(p)};
     }
@@ -1193,7 +1196,7 @@ void main(){
     // document. The native MAG remains a usable hero until a real gesture.
     if(!journeyArmed){
       current=null;
-      root.dataset.fxArchiveCurrent='none';
+      setData(root,'fxArchiveCurrent','none');
       return false;
     }
     if(!scenes.length)discover();
@@ -1203,8 +1206,8 @@ void main(){
     // The same native scrolling and eight source anchors remain intact.
     const inArchive=Boolean(introDone&&root.dataset.fxArchiveExperience==='ready'&&next);
     current=inArchive?next:null;
-    root.dataset.fxArchiveCurrent=current?.s.key||'none';
-    if(current)root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
+    setData(root,'fxArchiveCurrent',current?.s.key||'none');
+    if(current)setData(root,'fxArchivePhase',String(Math.min(9,Math.floor(current.progress*10))));
     return inArchive;
   }
   function update(){
@@ -1219,19 +1222,28 @@ void main(){
     // This frame owns only renderer scheduling and semantic scene events.
     if(current){
       const nextIndex=current.s.index;
-      root.dataset.fxArchiveCurrent=current.s.key;
-      root.dataset.fxArchivePhase=String(Math.min(9,Math.floor(current.progress*10)));
+      // Chapter identity was committed synchronously by selectLiveChapter().
       if(nextIndex!==lastScene){
         lastScene=nextIndex;
         dispatchEvent(new CustomEvent('formatx:archivechapter',{detail:{key:current.s.key,index:nextIndex,source:current.s.source}}));
       }
-    }else{root.dataset.fxArchiveCurrent='none';lastScene=-1;}
-    const now=performance.now();
-    if(archiveActive&&now-lastGpu>=PerformanceManager.frameInterval()){
-      lastGpu=now;window.FormatXLivingCore?.requestRender?.(1);
+    }else{lastScene=-1;}
+    requestArchiveFrame();
+  }
+  function requestArchiveFrame(){
+    if(gpuTailTimer){clearTimeout(gpuTailTimer);gpuTailTimer=0;}
+    if(disposed||document.hidden||reduced.matches||!archiveActive)return;
+    const now=performance.now(),remaining=PerformanceManager.frameInterval()-(now-lastGpu);
+    if(remaining>0){
+      // A final scroll event may arrive within the throttle interval.
+      // Guarantee one trailing render without restarting a continuous loop.
+      gpuTailTimer=setTimeout(()=>{gpuTailTimer=0;requestArchiveFrame();},Math.ceil(remaining));
+      return;
     }
+    lastGpu=now;window.FormatXLivingCore?.requestRender?.(1);
   }
   function invalidate(){
+    if(disposed)return;
     // R2236: early module/intro/ResizeObserver readiness events do not own
     // an archive document yet. They were scheduling empty DOM/GPU frames
     // before connect() had built the seven real folios (6 idle commits).
@@ -1346,7 +1358,8 @@ void main(){
     root.dataset.fxArchiveStopReason='lifecycle-stop';
     if(raf)cancelAnimationFrame(raf);
     if(domRaf)cancelAnimationFrame(domRaf);
-    domRaf=0;
+    if(gpuTailTimer)clearTimeout(gpuTailTimer);
+    raf=domRaf=gpuTailTimer=0;
     sceneObserver?.disconnect();
     sceneObserver=null;
     handoff?.remove();handoff=null;
@@ -1442,6 +1455,7 @@ void main(){
     addEventListener('resize',()=>{idleComposed=false;invalidate();},{passive:true});
     addEventListener('formatx:cinematicscene',invalidate,{passive:true});
     addEventListener('formatx:livingready',()=>{
+      if(disposed)return;
       idleComposed=false;
       discover();invalidate();
     },{passive:true});
@@ -1469,7 +1483,7 @@ void main(){
       idleFastPathSkips,idleComposed,styleWrites,styleSkips,
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples,domComposes};},
-    refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
+    refresh:()=>{if(!disposed){discover();invalidate();}},setQuality:value=>{if(!disposed)PerformanceManager.setQuality(value);}
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
