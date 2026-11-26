@@ -27,6 +27,7 @@
   };
   let state='checking';
   let started=false;
+  const READINESS_TIMEOUT_MS=6000;
   function paint(){
     const copy=messages[state]||messages.unknown;
     status.dataset.fxSalesState=state;
@@ -39,20 +40,24 @@
   async function load(){
     if(started)return;
     started=true;
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),READINESS_TIMEOUT_MS);
     try{
       const response=await fetch('/api/checkout-readiness',{
         method:'GET',headers:{Accept:'application/json'},
-        credentials:'same-origin',cache:'no-store'
+        credentials:'same-origin',cache:'no-store',signal:controller.signal
       });
       if(!response.ok)throw new Error('sales-readiness-http');
       const payload=await response.json();
-      if(payload.provider!=='bank_transfer' ||
+      if(!payload||typeof payload!=='object'||payload.provider!=='bank_transfer' ||
          typeof payload.sales_ready!=='boolean' ||
          typeof payload.live_ready!=='boolean')throw new Error('sales-readiness-schema');
       state=(payload.sales_ready===true&&payload.live_ready===true&&
         payload.ok===true)?'ready':'blocked';
     }catch(_){
       state='unknown';
+    }finally{
+      clearTimeout(timeout);
     }
     paint();
   }
