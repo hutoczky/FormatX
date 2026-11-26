@@ -135,14 +135,15 @@ const simulate=new Function('softwareRenderer',`
  let schedulerLastFrame=0,schedulerRefreshMs=16.67,schedulerTick=0;
  const auditMode=true,mobile=false,renderAverage=0,surfacePulseStart=-Infinity,SURFACE_PULSE_WINDOW_MS=0;
  const root={dataset:{}},delayed=new Set(),pending=new Map();
- const performance={now:()=>now},blocked=()=>false;
+ let blockedState=false;
+ const performance={now:()=>now},blocked=()=>blockedState;
  const requestAnimationFrame=fn=>{pending.set(++seq,fn);return seq;};
  const cancelAnimationFrame=id=>pending.delete(id);
  const setTimeout=()=>++seq,clearTimeout=()=>{},later=setTimeout;
  const render=()=>rendered++,settleAfterBurst=()=>{};
  ${scheduler}${hold}${frame}
  const step=t=>{now=t;const jobs=[...pending];pending.clear();for(const [,fn] of jobs)fn(now);};
- return {holdSoftwareScroll,requestTransitRender,schedule,step,get count(){return rendered},get pending(){return pending.size}};
+ return {holdSoftwareScroll,requestTransitRender,schedule,step,setBlocked:v=>{blockedState=v;},cancelPending:()=>{pending.clear();raf=0;},get count(){return rendered},get pending(){return pending.size}};
 `);
 const software=simulate(true);
 software.holdSoftwareScroll();software.schedule(1);assert.equal(software.pending,0);
@@ -410,4 +411,20 @@ for(const type of ['wheel','touchmove','keydown']){
  l.fn({type,isTrusted:true,key:'PageDown'});assert.equal(x.updates,1);
 }
 console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,syntheticRejected:true,passiveCapture:true,onceOnly:true}));
+}
+
+// R2287: a blocked or externally cancelled frame never strands its permit.
+{
+ const interrupted=simulate(true);
+ interrupted.holdSoftwareScroll();interrupted.requestTransitRender();
+ assert.equal(interrupted.pending,1);
+ interrupted.setBlocked(true);interrupted.step(10);assert.equal(interrupted.count,0);
+ interrupted.setBlocked(false);interrupted.requestTransitRender();assert.equal(interrupted.pending,1);
+ interrupted.step(20);assert.equal(interrupted.count,1);
+ interrupted.requestTransitRender();assert.equal(interrupted.pending,0);
+ interrupted.step(270);interrupted.requestTransitRender();assert.equal(interrupted.pending,1);
+ interrupted.cancelPending();interrupted.requestTransitRender();assert.equal(interrupted.pending,1);
+ interrupted.step(280);assert.equal(interrupted.count,2);
+ assert.equal(interrupted.pending,0);
+ console.log('R2287_TRANSIT_PERMIT_RECOVERY_PASS '+JSON.stringify({blockedFrameRecovered:true,cancelledFrameRecovered:true,rateLimitPreserved:true,actualFrames:interrupted.count}));
 }

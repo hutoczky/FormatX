@@ -2216,9 +2216,11 @@
     // An explicit archive transit may borrow ONE frame during software
     // scroll, at most once per 240ms. Ordinary animation remains suspended.
     function requestTransitRender(){
-      if(blocked())return;
+      if(blocked()){scrollTransitPermit=false;return;}
       if(!softwareRenderer||!scrollSettleTimer){schedule(1);return;}
-      if(scrollTransitPermit||performance.now()-lastScrollTransit<240)return;
+      // A permit is only outstanding while its RAF is actually queued.
+      // An interrupted frame must not permanently suppress later transits.
+      if((scrollTransitPermit&&raf)||performance.now()-lastScrollTransit<240)return;
       scrollTransitPermit=true;
       burstFrames=1;
       queueFrame(0);
@@ -2352,6 +2354,7 @@
           {const value=String('discarded-after-final-frame');if(root.dataset.fxCoreSweepQualityResizeR2052!==value)root.dataset.fxCoreSweepQualityResizeR2052='discarded-after-final-frame';}
         }
         if(raf){cancelAnimationFrame(raf);raf=0;}
+        scrollTransitPermit=false;
         settleAfterBurst();
         {const value=String('idle');if(root.dataset.fxCoreSurfacePulseR454!==value)root.dataset.fxCoreSurfacePulseR454='idle';}
         {const value=String('hard-zero-frame-after-sweep');if(root.dataset.fxCoreIdleBoundaryR1710!==value)root.dataset.fxCoreIdleBoundaryR1710='hard-zero-frame-after-sweep';}
@@ -2586,7 +2589,9 @@
     }
 
     function frame(now){
-      raf=0;if(blocked()||(softwareRenderer&&scrollSettleTimer&&!scrollTransitPermit))return;
+      raf=0;
+      if(blocked()){scrollTransitPermit=false;return;}
+      if(softwareRenderer&&scrollSettleTimer&&!scrollTransitPermit)return;
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
@@ -2699,10 +2704,11 @@
       // Software GL rasterization competes directly with native browser
       // scrolling. Keep the last complete MAG frame and accumulate the
       // latest interaction state, then redraw once when input settles.
+      if(!raf)scrollTransitPermit=false;
       if(raf&&!scrollTransitPermit){cancelAnimationFrame(raf);raf=0;}
       burstFrames=Math.min(1,burstFrames);
       clearTimeout(scrollSettleTimer);
-      scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},180);
+      scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;scrollTransitPermit=false;schedule(1);},180);
     }
     function onScroll(){
       holdSoftwareScroll();
@@ -2920,7 +2926,7 @@
       if(event.target instanceof Element&&event.target.matches('a,button,input,select,textarea,[tabindex]'))signalPhysiology('attention','focus');
     },{passive:true});
     listen(canvas,'webglcontextlost',event=>{
-      event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;
+      event.preventDefault();contextLost=true;if(raf)cancelAnimationFrame(raf);raf=0;scrollTransitPermit=false;
       scheduleSurfacePulse();
       root.dataset.fxCoreReal3d='context-lost';root.dataset.fxCrystalOrganismR326='context-lost';
     });
@@ -2932,7 +2938,7 @@
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
       visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
-      if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;}
+      if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;scrollTransitPermit=false;}
       scheduleSurfacePulse();
     },{threshold:[0,.04]});
     io.observe(stage);
@@ -2954,6 +2960,7 @@
       mobileBreathPreference?.removeEventListener?.('change',syncMobileBreathOpacity);
       clearTimeout(heartbeatTimer);clearTimeout(surfacePulseTimer);clearTimeout(autonomousTimer);clearTimeout(scrollSettleTimer);delayed.forEach(clearTimeout);delayed.clear();
       if(raf)cancelAnimationFrame(raf);if(scrollFrame)cancelAnimationFrame(scrollFrame);
+      raf=0;scrollTransitPermit=false;
       if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);ambientPointerFrame=0;pendingAmbientPointer=null;
       controller.abort();ro.disconnect();io.disconnect();organObserver.disconnect();
       if(!contextLost){buffers.forEach(buffer=>gl.deleteBuffer(buffer));gl.deleteProgram(program);}
