@@ -9,7 +9,7 @@ const SHAPESHIFTER_URL='/scifi-ui/scripts/formatx-core-shapeshifter-r337.js?v=20
 if(root.dataset.fxControlOwnerR268==='ready')return;
 root.dataset.fxControlOwnerR268='booting';root.dataset.fxControlOwnerR264='booting';
 const mobileQuery=matchMedia('(max-width:900px)');
-let menu=null,queued=false,bootObserver=null,bootTimer=0,controlObserver=null,controlObserverTarget=null,audioObserver=null,lastMobile=null,applying=false;
+let menu=null,queued=false,queuedForce=false,bootObserver=null,bootTimer=0,controlObserver=null,controlObserverTarget=null,audioObserver=null,lastMobile=null,applying=false;
 const language=()=>root.lang==='en'?'en':'hu';
 const isMobile=()=>mobileQuery.matches;
 function ensureReferenceStyle(){let link=document.querySelector('link[data-fx-native-orb-reference-r250]');if(!(link instanceof HTMLLinkElement)){link=document.createElement('link');link.rel='stylesheet';link.href=REFERENCE_STYLE;link.dataset.fxNativeOrbReferenceR250='true';document.head.appendChild(link);}else if(link.parentElement!==document.head)document.head.appendChild(link);root.dataset.fxNativeOrbReferenceStyleR250='ready-static-order-r340';}
@@ -33,7 +33,7 @@ function healthy(hero,mobile){const topbar=canonicalTopbar(),currentMenu=documen
 function bindControlObserver(hero){const controls=hero.querySelector('.fx-reference-controls-r204.fx-reference-controls-r264');if(!(controls instanceof HTMLElement)||controlObserverTarget===controls&&controlObserver)return;controlObserver?.disconnect();controlObserverTarget=controls;controlObserver=new MutationObserver(records=>{if(applying)return;if(records.some(record=>record.type==='childList'))schedule(true);});controlObserver.observe(controls,{childList:true});root.dataset.fxControlStabilityR321='direct-structure-observer-no-feedback';}
 function bindAudioObserver(){if(audioObserver)return;audioObserver=new MutationObserver(records=>{if(records.some(record=>record.attributeName==='data-fx-audio-owner'||record.attributeName==='data-fx-audio-state'))schedule(true);});audioObserver.observe(root,{attributes:true,attributeFilter:['data-fx-audio-owner','data-fx-audio-state']});root.dataset.fxAudioControlHandoffR321='state-only-no-level-feedback-r340';}
 function reconcile(force=false){queued=false;if(applying)return false;const hero=document.getElementById('hero');if(!(hero instanceof HTMLElement))return false;const mobile=isMobile();if(!force&&root.dataset.fxControlOwnerR268==='ready'&&mobile===lastMobile&&healthy(hero,mobile)){retireLegacyMenus();retireLegacyTopbars(canonicalTopbar());return true;}ensureReferenceStyle();ensureShapeshifter();applying=true;try{const headerReady=canonicalHeader(),controlsReady=canonicalControls(hero);if(headerReady&&controlsReady&&healthy(hero,mobile)){lastMobile=mobile;root.dataset.fxControlOwnerR264='ready';root.dataset.fxControlOwnerR268='ready';root.dataset.fxManualMagPauseR528='retired-product-contract';bindControlObserver(hero);bootObserver?.disconnect();bootObserver=null;if(bootTimer)clearTimeout(bootTimer);bootTimer=0;dispatchEvent(new CustomEvent('formatx:controlownerready',{detail:{mobile,revision:'r528-living-core-no-manual-pause'}}));return true;}return false;}finally{applying=false;}}
-function schedule(force=false){if(queued)return;queued=true;requestAnimationFrame(()=>reconcile(force));}
+function schedule(force=false){queuedForce=queuedForce||force;if(queued)return;queued=true;requestAnimationFrame(()=>{const requestedForce=queuedForce;queuedForce=false;reconcile(requestedForce);});}
 function boot(){ensureShapeshifter();bindAudioObserver();if(reconcile(true))return;if(bootObserver)return;const target=document.body||document.documentElement;bootObserver=new MutationObserver(()=>schedule(true));bootObserver.observe(target,{subtree:true,childList:true});bootTimer=setTimeout(()=>{bootObserver?.disconnect();bootObserver=null;bootTimer=0;reconcile(true);},4000);}
 let sectionLandingTimer=0,sectionLandingToken=0;
 const SECTION_LANDING_DELAYS=[0,90,180,320,520,780,1100];
@@ -41,13 +41,16 @@ function landCanonicalSection(section,hash,pass=0,token=sectionLandingToken){if(
 function navigateCanonicalSection(link,event){if(!(link instanceof HTMLAnchorElement))return false;const hash=link.hash;if(!hash||hash==='#')return false;let section=null;try{section=document.getElementById(decodeURIComponent(hash.slice(1)));}catch(_){return false;}if(!(section instanceof HTMLElement))return false;event.preventDefault();event.stopImmediatePropagation();setMenuOpen(false);root.classList.add('fx-section-navigation-active');root.dataset.fxSectionNavigationIsolationR1724='active';const token=++sectionLandingToken;clearTimeout(sectionLandingTimer);try{history.replaceState(history.state,'',location.pathname+location.search+hash);}catch(_){}landCanonicalSection(section,hash,0,token);dispatchEvent(new CustomEvent('formatx:sectionnavigation',{detail:{hash,source:'control-owner-r268',revision:'r1724-loop-isolated'}}));return true;}
 function cancelSectionLanding(source){
   const wasActive=root.classList.contains('fx-section-navigation-active')||Boolean(sectionLandingTimer);
+  // Ordinary scrolling is not cancellation. Do not invalidate root CSS
+  // selectors or bump navigation state for every wheel/touch event.
+  if(!wasActive)return;
   sectionLandingToken+=1;
   if(sectionLandingTimer)clearTimeout(sectionLandingTimer);
   sectionLandingTimer=0;
   root.classList.remove('fx-section-navigation-active');
   root.dataset.fxSectionNavigationR581='cancelled-'+source;
   root.dataset.fxSectionNavigationIsolationR1742='released-'+source;
-  if(wasActive)dispatchEvent(new CustomEvent('formatx:sectionnavigationcancelled',{detail:{source,revision:'r1742-release-loop-guard'}}));
+  dispatchEvent(new CustomEvent('formatx:sectionnavigationcancelled',{detail:{source,revision:'r1742-release-loop-guard'}}));
 }
 addEventListener('wheel',()=>cancelSectionLanding('wheel'),{passive:true});
 addEventListener('touchstart',()=>cancelSectionLanding('touch'),{passive:true});
