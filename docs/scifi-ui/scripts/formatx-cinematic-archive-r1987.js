@@ -47,6 +47,7 @@
   // initial DOM/ARIA synchronization only needs one composed frame.
   let idleComposed=false,idleFastPathSkips=0;
   const reactorProof={entryFrames:0,corridorFrames:0,chapters:new Set(),peakAlpha:0};
+  let lastRenderedGate=false;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',entryReactorHost=null;
@@ -1103,6 +1104,7 @@ void main(){
       }
       // Exchange one decorative rail for the batched gate, rather than
       // increasing the number of submitted draw calls on low-power devices.
+      lastRenderedGate=Boolean(ingress&&ingress.alpha>.001);
       if(ingress&&ingress.alpha>.001){
         this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],firstIngress?[.36,.73,.86]:hue,0,ingress.alpha,0,cam,true);
         // Count actual submitted gate geometry, not merely selected chapters.
@@ -1406,6 +1408,12 @@ void main(){
     }else{lastScene=-1;}
     requestArchiveFrame();
   }
+  // A gate leaving the screen is as important as one appearing: software
+  // scroll must not hold its last visible frame over the next reading beat.
+  function transitNeedsFrame(selection,previousGate){
+    const gate=selection&&(reactorEntry(selection.s,selection.progress)||corridorEntry(selection.s,selection.progress));
+    return Boolean(previousGate||(gate&&gate.alpha>.001));
+  }
   function requestArchiveFrame(){
     if(gpuTailTimer){clearTimeout(gpuTailTimer);gpuTailTimer=0;}
     if(disposed||document.hidden||reduced.matches||!archiveActive)return;
@@ -1418,8 +1426,7 @@ void main(){
     }
     lastGpu=now;
     const api=window.FormatXLivingCore;
-    const gate=current&&(reactorEntry(current.s,current.progress)||corridorEntry(current.s,current.progress));
-    if(gate&&gate.alpha>.001&&typeof api?.requestTransitRender==='function')api.requestTransitRender();
+    if(transitNeedsFrame(current,lastRenderedGate)&&typeof api?.requestTransitRender==='function')api.requestTransitRender();
     else api?.requestRender?.(1);
   }
   function invalidate(){
@@ -1472,6 +1479,11 @@ void main(){
             }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
           });
         }
+        // Request a bounded native frame now, before the next archive RAF.
+        // On slower software renderers an extra RAF hop can miss the whole
+        // narrow entry interval. The native API still enforces its 240ms cap.
+        if(active&&softwareMagRenderer()&&transitNeedsFrame(current,lastRenderedGate))
+          window.FormatXLivingCore?.requestTransitRender?.();
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
@@ -1572,7 +1584,7 @@ void main(){
       setArchiveAnchorNeutral(host,false);
     }
     restoreOriginalAI();
-    cinemaHosts=[];cinemaPrepared=false;entryReactorHost=null;
+    cinemaHosts=[];cinemaPrepared=false;entryReactorHost=null;lastRenderedGate=false;
     delete root.dataset.fxArchiveReactorEntryR2261;
     delete root.dataset.fxArchiveReactorPhaseR2262;
     delete root.dataset.fxArchiveCorridorR2265;

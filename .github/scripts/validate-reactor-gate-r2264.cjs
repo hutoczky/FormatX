@@ -153,3 +153,16 @@ software.requestTransitRender();software.step(250);software.requestTransitRender
 assert.equal(software.count,2);assert.equal(software.pending,0);
 const hardware=simulate(false);hardware.requestTransitRender();hardware.step(16);assert.equal(hardware.count,1);
 console.log('R2271_BOUNDED_TRANSIT_PASS '+JSON.stringify({softwareFrames:software.count,hardwareFrames:hardware.count}));
+
+// R2272: both entry and clearing a previously drawn gate need native frames.
+const needStart=src.indexOf('  function transitNeedsFrame('),needEnd=src.indexOf('  function requestArchiveFrame(',needStart);
+assert(needStart>=0&&needEnd>needStart);
+const needs=new Function('reactorEntry','corridorEntry',src.slice(needStart,needEnd)+'return transitNeedsFrame;')(reactorEntry,corridorEntry);
+assert.equal(needs({s:entry,progress:.25},false),true);
+assert.equal(needs({s:next,progress:.43},false),true);
+assert.equal(needs({s:next,progress:.78},true),true);
+assert.equal(needs({s:next,progress:.78},false),false);
+assert.equal(needs(null,false),false);
+assert(src.includes('if(active&&softwareMagRenderer()&&transitNeedsFrame(current,lastRenderedGate))'));
+assert(src.includes('lastRenderedGate=Boolean(ingress&&ingress.alpha>.001)'));
+console.log('R2272_EARLY_TRANSIT_CLEAR_PASS '+JSON.stringify({cases:5,softwareCapMs:240}));
