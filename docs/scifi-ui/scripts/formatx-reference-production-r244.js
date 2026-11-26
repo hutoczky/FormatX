@@ -47,6 +47,12 @@
     return '<span class="fx-wda-sound-icon" data-fx-wda-sound-label="true" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.4h3.2L11 6.3v11.4l-3.8-3.1H4z"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg></span>';
   }
 
+  // Reconciliation is event driven, not a reason to rewrite unchanged DOM.
+  function setText(node,value){if(node&&node.textContent!==value)node.textContent=value;}
+  function setAttr(node,name,value){if(node&&node.getAttribute(name)!==value)node.setAttribute(name,value);}
+  function setData(node,name,value){if(node&&node.dataset[name]!==value)node.dataset[name]=value;}
+  function addClass(node,name){if(node&&!node.classList.contains(name))node.classList.add(name);}
+
   function ensureHeaderControls() {
     const bar = document.querySelector('.topbar');
     if (!(bar instanceof HTMLElement)) return {};
@@ -70,8 +76,8 @@
     }
     // r268 uses document-level capture ownership, therefore this node can be
     // declared canonical immediately without cloning/replacing it later.
-    menu.dataset.fxControlOwnerR268 = 'true';
-    menu.dataset.fxControlOwnerR264 = 'true';
+    setData(menu,'fxControlOwnerR268','true');
+    setData(menu,'fxControlOwnerR264','true');
 
     const language = document.querySelector('.fx-language-toggle');
     if (language instanceof HTMLElement && language.parentElement !== bar) bar.appendChild(language);
@@ -80,8 +86,8 @@
 
     const magText = root.lang === 'en' ? 'CORE' : 'MAG';
     if (mag.textContent !== magText) mag.textContent = magText;
-    mag.setAttribute('aria-label', root.lang === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
-    menu.setAttribute('aria-label', root.lang === 'en' ? 'Menu' : 'Menü');
+    setAttr(mag,'aria-label',root.lang === 'en' ? 'Focus the living core' : 'Az élő mag fókuszálása');
+    setAttr(menu,'aria-label',root.lang === 'en' ? 'Menu' : 'Menü');
 
     return { bar, mag, language, menu };
   }
@@ -92,13 +98,13 @@
     const headings = Array.from(hero.querySelectorAll('.fx-reference-heading'));
     const heading = headings.shift() || document.createElement('div');
     headings.forEach(node => node.remove());
-    heading.className = 'fx-reference-heading';
+    if(heading.className!=='fx-reference-heading')heading.className='fx-reference-heading';
     if (heading.textContent !== strings.heading) heading.textContent = strings.heading;
 
     const proofs = Array.from(hero.querySelectorAll('.fx-reference-proof'));
     const proof = proofs.shift() || document.createElement('article');
     proofs.forEach(node => node.remove());
-    proof.className = 'fx-reference-proof';
+    if(proof.className!=='fx-reference-proof')proof.className='fx-reference-proof';
     if (!proof.querySelector('.fx-reference-proof-kicker, h2, p, .fx-reference-liveos')) {
       proof.innerHTML = '<span class="fx-reference-proof-kicker">PUBLIC PROOF LAYER</span><h2></h2><p></p><a class="fx-reference-liveos" data-fx-live-os-launcher="true" href="#experience">Live OS</a>';
     }
@@ -111,11 +117,11 @@
     if (title && title.textContent !== strings.title) title.textContent = strings.title;
     if (body && body.textContent !== strings.body) body.textContent = strings.body;
     if (live instanceof HTMLAnchorElement) {
-      live.textContent = 'Live OS';
-      live.href = '#experience';
-      live.dataset.fxLiveOsLauncher = 'true';
-      live.dataset.fxLiveOsSurfaceR643 = 'canonical-hero-command-surface';
-      live.setAttribute('aria-label', root.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
+      setText(live,'Live OS');
+      setAttr(live,'href','#experience');
+      setData(live,'fxLiveOsLauncher','true');
+      setData(live,'fxLiveOsSurfaceR643','canonical-hero-command-surface');
+      setAttr(live,'aria-label',root.lang === 'en' ? 'Open Live OS' : 'Live OS megnyitása');
     }
 
     let controls = hero.querySelector('.fx-reference-controls-r204');
@@ -124,7 +130,7 @@
       controls.className = 'fx-reference-controls-r204 fx-reference-controls-r264';
       controls.setAttribute('aria-label', root.lang === 'en' ? 'Hero controls' : 'Hero vezérlők');
     } else {
-      controls.classList.add('fx-reference-controls-r264');
+      addClass(controls,'fx-reference-controls-r264');
     }
 
     let sound = document.querySelector('.fx-three-sound');
@@ -144,7 +150,7 @@
       rail.className = 'fx-reference-rail fx-reference-rail-r264';
       rail.innerHTML = '<button class="fx-reference-ask" type="button" aria-label="Kérdezz"><i aria-hidden="true"></i><span>KÉRDEZZ</span></button><button class="fx-reference-pause" type="button" aria-label="Animáció szüneteltetése" data-paused="false">Ⅱ</button>';
     } else {
-      rail.classList.add('fx-reference-rail-r264');
+      addClass(rail,'fx-reference-rail-r264');
     }
 
     const askLabel = rail.querySelector('.fx-reference-ask span');
@@ -164,10 +170,10 @@
   // position/display/size here; repeated real3d/mobile events must be idempotent.
   function applyControlLayout(nodes, mobile) {
     void mobile;
-    nodes.controls?.classList.add('fx-reference-controls-r264');
-    nodes.rail?.classList.add('fx-reference-rail-r264');
-    nodes.sound?.classList.add('fx-control-owner-r264');
-    root.dataset.fxReferenceGeometrySchedulerR304 = 'css-canonical-r408-no-inline-geometry';
+    addClass(nodes.controls,'fx-reference-controls-r264');
+    addClass(nodes.rail,'fx-reference-rail-r264');
+    addClass(nodes.sound,'fx-control-owner-r264');
+    setData(root,'fxReferenceGeometrySchedulerR304','css-canonical-r408-no-inline-geometry');
   }
 
   function reconcile() {
@@ -180,13 +186,13 @@
     ensureStyleLast();
     const mobile = isMobile();
     if (mobile) {
-      root.dataset.fxMobileLayoutOwner = 'r207-normal-flow';
-      root.dataset.fxReferenceProductionR244 = 'ready';
-      root.dataset.fxReferenceComposition = 'reference-frame-r244';
+      setData(root,'fxMobileLayoutOwner','r207-normal-flow');
+      setData(root,'fxReferenceProductionR244','ready');
+      setData(root,'fxReferenceComposition','reference-frame-r244');
     } else {
       if (root.dataset.fxMobileLayoutOwner === VERSION || root.dataset.fxMobileLayoutOwner === 'r207-normal-flow') delete root.dataset.fxMobileLayoutOwner;
-      root.dataset.fxReferenceProductionR244 = 'desktop';
-      root.dataset.fxReferenceComposition = 'desktop-reference-r244';
+      setData(root,'fxReferenceProductionR244','desktop');
+      setData(root,'fxReferenceComposition','desktop-reference-r244');
     }
 
     ensureHeaderControls();
@@ -195,10 +201,10 @@
     if (nodes.controls.parentElement !== expectedControlOwner) expectedControlOwner.appendChild(nodes.controls);
     applyControlLayout(nodes, mobile);
 
-    document.querySelectorAll('.fx-loop-hero-clone').forEach(node => node.setAttribute('aria-hidden', 'true'));
-    root.dataset.fxReferenceRuntimeR254 = mobile
+    document.querySelectorAll('.fx-loop-hero-clone').forEach(node => setAttr(node,'aria-hidden','true'));
+    setData(root,'fxReferenceRuntimeR254',mobile
       ? 'event-driven-r207-owner-r260'
-      : 'event-driven-standalone-r260';
+      : 'event-driven-standalone-r260');
     return true;
   }
 

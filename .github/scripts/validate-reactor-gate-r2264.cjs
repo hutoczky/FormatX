@@ -358,3 +358,18 @@ const after=scans;events['formatx:languagechange']();drain();assert(scans>after)
 events.pagehide();events.pageshow();drain();assert.equal(mutations,2);
 console.log('R2282_STRUCTURAL_RECONCILE_PASS '+JSON.stringify({ignoredLoopEvents:1000,structuralReconcile:true,languageReconcile:true}));
 }
+
+// R2283: unchanged Hero control state must never invalidate DOM layout.
+{
+const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-reference-production-r244.js','utf8');
+const a=source.indexOf('  function setText('),b=source.indexOf('  function ensureHeaderControls(',a);
+assert(a>=0&&b>a);
+const {setText,setAttr,setData,addClass}=new Function(source.slice(a,b)+'return {setText,setAttr,setData,addClass};')();
+let writes=0,text='';const attrs=new Map(),classes=new Set();
+const node={get textContent(){return text;},set textContent(v){writes++;text=v;},getAttribute:k=>attrs.get(k)??null,setAttribute:(k,v)=>{writes++;attrs.set(k,v);},dataset:new Proxy({}, {set(o,k,v){writes++;o[k]=v;return true;}}),classList:{contains:k=>classes.has(k),add:k=>{writes++;classes.add(k);}}};
+function reconcile(){setText(node,'Live OS');setAttr(node,'href','#experience');setData(node,'fxLiveOsLauncher','true');addClass(node,'fx-reference-controls-r264');}
+reconcile();assert.equal(writes,4);for(let i=0;i<1000;i++)reconcile();assert.equal(writes,4);
+setAttr(node,'aria-label','Live OS megnyitása');setAttr(node,'aria-label','Open Live OS');assert.equal(writes,6);assert.equal(node.getAttribute('aria-label'),'Open Live OS');
+assert(source.includes("setText(live,'Live OS')"));assert(source.includes("setAttr(live,'href','#experience')"));
+console.log('R2283_IDEMPOTENT_HERO_PASS '+JSON.stringify({unchangedReconciles:1000,repeatWrites:0,languageUpdates:2}));
+}
