@@ -641,3 +641,27 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
    animation:fx-mag-section-close .34s ease both;
  }
 }
+
+/* R2260: the section itself owns direct module content. Animate these
+   sibling bodies too, without touching archive-owned folios or checkout.
+   No persistent will-change, layout animation or new rendering context. */
+@media(prefers-reduced-motion:no-preference){
+ html:not([data-fx-archive-cinema="active"]).fx-mag-chapters-ready main#main-content
+ > section.fx-mag-chapter:not(#pricing)[data-fx-mag-phase="opening"]
+ > :not([data-fx-mag-route]):not(script):not(template):not(.fx-archive-cinema-folio-r2030){
+   animation:fx-mag-section-unseal .72s cubic-bezier(.14,.7,.2,1) both;
+ }
+ html:not([data-fx-archive-cinema="active"]).fx-mag-chapters-ready main#main-content
+ > section.fx-mag-chapter:not(#pricing)[data-fx-mag-phase="closing"]
+ > :not([data-fx-mag-route]):not(script):not(template):not(.fx-archive-cinema-folio-r2030){
+   animation:fx-mag-section-close .34s ease both;
+ }
+}
+@media(prefers-reduced-motion:no-preference) and (max-width:900px),
+       (prefers-reduced-motion:no-preference) and (pointer:coarse){
+ html:not([data-fx-archive-cinema="active"]).fx-mag-chapters-ready main#main-content
+ > section.fx-mag-chapter:not(#pricing)[data-fx-mag-phase="opening"]
+ > :not([data-fx-mag-route]):not(script):not(template):not(.fx-archive-cinema-folio-r2030){
+   animation:fx-mag-section-unseal-mobile .4s cubic-bezier(.14,.7,.2,1) both;
+ }
+}

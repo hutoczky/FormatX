@@ -341,6 +341,14 @@
   if(!style){document.documentElement.dataset.fxMagChapters='style-missing';return;}
   let requested=false;
   let loaded=Boolean(style.sheet);
+  const cleanupIntent=()=>{
+    window.removeEventListener('wheel',onGesture);
+    window.removeEventListener('touchmove',onGesture);
+    window.removeEventListener('pointerdown',onScrollbar);
+    document.removeEventListener('keydown',onKey);
+    document.removeEventListener('click',onLink,true);
+    window.removeEventListener('hashchange',onHash);
+  };
   const activate=()=>{
     if(!requested || initialised)return;
     if(!loaded && !style.sheet)return;
@@ -352,30 +360,37 @@
     activate();
   },{once:true});
   style.addEventListener('error',()=>{
+    cleanupIntent();
     document.documentElement.dataset.fxMagChapters='style-error';
   },{once:true});
   const request=()=>{
     if(requested)return;
     requested=true;
-    style.media='all';
+    cleanupIntent();
+    if(style.media!=='all')style.media='all';
     activate();
   };
-  window.addEventListener('wheel',request,{passive:true,once:true});
-  // A script-triggered scroll (intro/loop geometry) is NOT visitor intent.
-  // Mouse scrollbar dragging is supported without reacting to autoplay resets.
-  window.addEventListener('pointerdown',event=>{
-    if(event.pointerType==='mouse'&&event.clientX>=document.documentElement.clientWidth-20)request();
-  },{passive:true});
-  window.addEventListener('touchmove',request,{passive:true,once:true});
-  document.addEventListener('keydown',event=>{
-    if(['ArrowDown','PageDown','End',' ','Spacebar'].includes(event.key))request();
-  },{passive:true});
-  document.addEventListener('click',event=>{
+  function onGesture(event){if(event.isTrusted)request();}
+  function onScrollbar(event){
+    if(event.isTrusted&&event.pointerType==='mouse'&&event.clientX>=document.documentElement.clientWidth-20)request();
+  }
+  function onKey(event){
+    if(!event.isTrusted||event.repeat||event.defaultPrevented||event.ctrlKey||event.metaKey||event.altKey)return;
+    const target=event.target;
+    if(target instanceof Element&&target.closest('input,textarea,select,button,[contenteditable="true"]'))return;
+    if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' ','Spacebar'].includes(event.key))request();
+  }
+  function onLink(event){
+    if(!event.isTrusted||event.button>0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
     const link=event.target instanceof Element?event.target.closest('a[href^="#"]'):null;
     if(link&&link.getAttribute('href')!=='#top')request();
-  },{capture:true,passive:true});
-  window.addEventListener('hashchange',()=>{
-    if(location.hash&&location.hash!=='#top')request();
-  },{passive:true});
-  if(location.hash&&location.hash!=='#top')request();
+  }
+  function onHash(){if(location.hash&&location.hash!=='#top')request();}
+  window.addEventListener('wheel',onGesture,{passive:true});
+  window.addEventListener('touchmove',onGesture,{passive:true});
+  window.addEventListener('pointerdown',onScrollbar,{passive:true});
+  document.addEventListener('keydown',onKey,{passive:true});
+  document.addEventListener('click',onLink,{capture:true,passive:true});
+  window.addEventListener('hashchange',onHash,{passive:true});
+  onHash();
 })();
