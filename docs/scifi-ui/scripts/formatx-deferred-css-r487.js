@@ -9,6 +9,7 @@
   let activated = false;
   let frame = 0;
   let fallback = 0;
+  let activationTask = 0;
   let observer = null;
   const observedStyles = new WeakSet();
   function recoverStyle(link, reason) {
@@ -42,7 +43,11 @@
     activated = true;
     if (frame) cancelAnimationFrame(frame);
     if (fallback) clearTimeout(fallback);
+    if (activationTask) clearTimeout(activationTask);
+    frame = fallback = activationTask = 0;
     observer?.disconnect?.();
+    observer = null;
+    removeEventListener('visibilitychange', onVisibility);
 
     observeStyleLinks();
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
@@ -51,14 +56,14 @@
     for (const link of links) {
       if (!(link instanceof HTMLLinkElement)) continue;
       if (audit && link.hasAttribute('data-fx-critical-core-r227')) {
-        link.media = 'print';
+        if (link.media !== 'print') link.media = 'print';
         link.dataset.fxR1970AuditDeferred = 'critical-core-skipped';
         auditSkippedCount += 1;
         continue;
       }
       const targetMedia = link.dataset.fxR487Media || 'all';
       if (link.media !== targetMedia) link.media = targetMedia;
-      link.removeAttribute('fetchpriority');
+      if (link.hasAttribute('fetchpriority')) link.removeAttribute('fetchpriority');
       activatedCount += 1;
     }
 
@@ -82,10 +87,14 @@
   }
 
   function activateAfterCommittedFrame(reason) {
-    if (activated || frame) return;
+    if (activated || frame || activationTask) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
-      setTimeout(() => activate(reason), 0);
+      if (activated) return;
+      activationTask = setTimeout(() => {
+        activationTask = 0;
+        activate(reason);
+      }, 0);
     });
   }
 
@@ -121,10 +130,11 @@
     else addEventListener('load', afterLoad, { once: true });
   }
 
-  addEventListener('visibilitychange', () => {
+  function onVisibility() {
     if (activated || document.visibilityState !== 'visible') return;
     if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
-  }, { passive: true });
+  }
+  addEventListener('visibilitychange', onVisibility, { passive: true });
 
   // R2022 visible-tab fail-open: certain clients report no buffered FCP and
   // lose the PerformanceObserver event. Without a watchdog every cinematic
