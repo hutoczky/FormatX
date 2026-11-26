@@ -780,6 +780,15 @@
     }
     return new Float32Array(data);
   }
+  // Ring 2 fades first, then ring 1, then ring 0. They occupy contiguous
+  // vertex ranges in reverse disappearance order. Never submit the rings
+  // whose shader visibility has reached exactly zero; retain a small FP32
+  // boundary margin to avoid removing even a subpixel visible fragment.
+  function reactorVisibleVertices(progress,total){
+    let rings=3;
+    while(rings>0&&progress>=.68+(3-rings)*.16+.00001)rings--;
+    return total*rings/3;
+  }
   // Mobile software GL needs a wider sampling window. Continue the
   // physical gate into the first part of the existing reading interval.
   // Never delay the real content handoff, even on a constrained renderer.
@@ -1057,7 +1066,7 @@ void main(){
       return p;
     }
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
-    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false){
+    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false,vertexCount=mesh.count){
       const gl=this.gl,u=this.uniform;
       if(this.boundMesh!==mesh){
         gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
@@ -1073,7 +1082,7 @@ void main(){
       this.scalar('uOpacity',alpha);
       this.scalar('uFiber',fiber?1:0);this.scalar('uBend',bend);
       this.scalar('uShadow',shadow?1:0);
-      gl.drawArrays(gl.TRIANGLES,0,mesh.count);
+      gl.drawArrays(gl.TRIANGLES,0,vertexCount);
       this.drawCalls++;
     }
     render(frame){
@@ -1098,7 +1107,9 @@ void main(){
       const limitedTransit=mobile()&&softwareMagRenderer();
       const firstIngress=reactorEntry(scene,entryTransitProgress(pro,current.travel,limitedTransit));
       const corridor=firstIngress?null:corridorEntry(scene,corridorTransitProgress(scene,pro,current.travel,limitedTransit));
-      const ingress=firstIngress||corridor;
+      const candidateIngress=firstIngress||corridor;
+      const gateVertices=candidateIngress?reactorVisibleVertices(candidateIngress.progress,this.reactor.count):0;
+      const ingress=gateVertices>0?candidateIngress:null;
       const transfer=reactorHandoff(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
@@ -1136,7 +1147,7 @@ void main(){
       // increasing the number of submitted draw calls on low-power devices.
       lastRenderedGate=Boolean(ingress&&ingress.alpha>.001);
       if(ingress&&ingress.alpha>.001){
-        this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],firstIngress?[.36,.73,.86]:hue,0,ingress.alpha,0,cam,true);
+        this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],firstIngress?[.36,.73,.86]:hue,0,ingress.alpha,0,cam,true,0,false,gateVertices);
         // Count actual submitted gate geometry, not merely selected chapters.
         if(firstIngress)reactorProof.entryFrames++;
         else{reactorProof.corridorFrames++;reactorProof.chapters.add(scene.key);}
@@ -1174,6 +1185,7 @@ void main(){
         }
       }
       setData(root,'fxArchiveReadingTravelR2266',travel.toFixed(3));
+      setData(root,'fxArchiveReactorSubmittedTrianglesR2279',String(lastRenderedGate?gateVertices/3:0));
       if(root.dataset.fxArchivePersistentRackCount!==String(rackCount))
         root.dataset.fxArchivePersistentRackCount=String(rackCount);
       if(root.dataset.fxArchiveWorldContinuity!=='persistent-one-world-r2044')

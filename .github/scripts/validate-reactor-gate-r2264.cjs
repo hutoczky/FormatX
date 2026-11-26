@@ -8,8 +8,8 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress};')(clamp,mix,smooth,host);
+const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress,reactorVisibleVertices}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress,reactorVisibleVertices};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
 assert.equal(v.length,960*3*8);
 for(let i=0;i<v.length;i+=8){
@@ -270,4 +270,23 @@ const visible=simulate(false),hidden=simulate(true);
 assert.equal(visible.motion,600);assert.equal(hidden.motion,0);
 assert.equal(hidden.phase,visible.phase);assert.equal(hidden.data,visible.data);assert.equal(hidden.active,'true');assert.equal(hidden.screen,'false');
 console.log('R2278_HIDDEN_HANDOFF_BUDGET_PASS '+JSON.stringify({visibleMotionWrites:visible.motion,hiddenMotionWrites:hidden.motion,metadataPreserved:true}));
+}
+
+// R2279: cull only complete, fully transparent trailing rings.
+{
+let baseline=0,submitted=0,previous=v.length/8;
+for(let i=0;i<=10000;i++){
+ const p=i/10000,count=reactorVisibleVertices(p,v.length/8);
+ assert(count<=previous&&count%960===0);previous=count;
+ for(let ring=count/960;ring<3;ring++){
+  const phase=clamp((p-(2-ring)*.16)/.68);
+  assert.equal(1-smooth((phase-.72)/.28),0);
+ }
+ baseline+=v.length/8;submitted+=count;
+}
+assert.equal(reactorVisibleVertices(.5,2880),2880);
+assert.equal(reactorVisibleVertices(.75,2880),1920);
+assert.equal(reactorVisibleVertices(.95,2880),960);
+assert(src.includes('gl.drawArrays(gl.TRIANGLES,0,vertexCount)'));
+console.log('R2279_FADED_RING_CULL_PASS '+JSON.stringify({samples:10001,baseline,submitted,reduction:1-submitted/baseline,visibleGeometryUnchanged:true}));
 }
