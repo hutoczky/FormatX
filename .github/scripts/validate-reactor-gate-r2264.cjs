@@ -8,8 +8,8 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry};')(clamp,mix,smooth,host);
+const {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
 assert.equal(v.length,576*3*8);
 for(let i=0;i<v.length;i+=8){
@@ -57,3 +57,28 @@ for(let i=0;i<100;i++){
 }
 assert(corridorEntry(next,.29999).alpha<.00001);
 console.log('R2265_SYSTEM_CORRIDOR_PASS '+JSON.stringify({samples:100,checkoutIntensityLimit:.38,firstEntryUnchanged:true}));
+
+for(const vh of [390,768,844,1080]){
+  const height=1.65*vh,from=-.017*vh,to=.94*vh-height;
+  let previous=-1,lit=0;
+  for(let i=0;i<=100;i++){
+    const t=i/100,rect={height,top:from+(to-from)*t};
+    const travel=readingTravel(rect,vh),flight=readingFlight(travel);
+    assert(Math.abs(travel-t)<1e-10&&travel>=previous);
+    previous=travel;
+    assert(Math.abs(flight.x)<=.16&&Math.abs(flight.y)<=.045&&Math.abs(flight.z)<=.30);
+    for(let rack=0;rack<8;rack++){
+      const energy=readingEnergy(travel,rack,8);
+      assert(energy>=0&&energy<=1);
+      if(energy>.1)lit++;
+    }
+  }
+  assert(lit>0);
+  assert.equal(readingTravel({height:vh*.7,top:0},vh),0);
+}
+for(const t of [0,1]){
+  const f=readingFlight(t);
+  assert(Math.hypot(f.x,f.y,f.z)<1e-10,'camera must return to the original trajectory');
+  for(let r=0;r<8;r++)assert(readingEnergy(t,r,8)<1e-10);
+}
+console.log('R2266_CONTINUOUS_READING_FLIGHT_PASS '+JSON.stringify({viewports:4,scrollSamples:404,extraDrawCalls:0}));

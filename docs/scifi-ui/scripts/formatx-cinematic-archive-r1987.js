@@ -625,7 +625,9 @@
       // reading line advances to the next shelf, not after leaving the screen.
       const exiting=clamp((vh*.94-r.bottom)/Math.max(1,vh*.44));
       const p=Math.min(.78,entering)+.22*exiting;
-      return {...closest,progress:clamp(p)};
+      // Independent, continuous physical travel through the held reading beat.
+      // Do not change the established content disclosure or release progress.
+      return {...closest,progress:clamp(p),travel:readingTravel(r,vh)};
     }
   }
   class PerformanceManager {
@@ -694,7 +696,7 @@
     }
   }
   class CameraDirector {
-    static forScene(scene,p){
+    static forScene(scene,p,travel=0){
       // The camera lives in ONE archive, so chapter changes must not teleport
       // it. Absolute native document scroll makes the track reversible.
       const distance=scrollY/Math.max(1,innerHeight);
@@ -704,8 +706,9 @@
       const orbit=Math.sin(distance*.18)*.085+Math.sin(distance*.37)*.026;
       const dolly=Math.sin(distance*.13)*.11;
       const lift=Math.sin(distance*.12)*.035;
-      return [orbit,lift+mix(-.025,.027,approach),
-        dolly+mix(-.035,.085,approach)];
+      const flight=readingFlight(travel);
+      return [orbit+flight.x,lift+mix(-.025,.027,approach)+flight.y,
+        dolly+mix(-.035,.085,approach)+flight.z];
     }
   }
   function cubeGeometry(){
@@ -772,6 +775,25 @@
     const t=clamp(p/.30);
     const alpha=(scene.key==='licensing'?.38:.66)*smooth(t/.15)*(1-smooth((t-.65)/.35));
     return {progress:.12+.88*t,z:mix(-1.35,.72,smooth(t)),alpha};
+  }
+  // At 165dvh the document's retrieval value remains .78 for about
+  // .69 viewport heights. Use the already-measured rectangle to traverse
+  // this interval without touching the actual interactive reading panel.
+  function readingTravel(rect,vh){
+    const from=-.017*vh,to=.94*vh-rect.height;
+    const span=from-to;
+    return span>1?clamp((from-rect.top)/span):0;
+  }
+  function readingFlight(t){
+    t=clamp(t);
+    const envelope=Math.sin(Math.PI*t)**2;
+    return {x:Math.sin(2*Math.PI*t)*.16*envelope,y:.045*envelope,z:-.30*envelope};
+  }
+  function readingEnergy(t,rack,count){
+    t=clamp(t);
+    const envelope=Math.sin(Math.PI*t)**2;
+    const distance=Math.abs(t*(count+1)-(rack+1));
+    return envelope*(1-smooth(distance/1.35));
   }
   function panelGeometry(detail){
     const u=detail?20:10,v=detail?16:9,data=[];
@@ -997,7 +1019,8 @@ void main(){
       if(root.dataset.fxArchivePanelTriangles!==String(this.panel.count/3))
         root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
-      const cam=CameraDirector.forScene(scene,pro);
+      const travel=current.travel||0;
+      const cam=CameraDirector.forScene(scene,pro,travel);
       const firstIngress=reactorEntry(scene,pro);
       const corridor=firstIngress?null:corridorEntry(scene,pro);
       const ingress=firstIngress||corridor;
@@ -1059,7 +1082,9 @@ void main(){
         const rx=side*2.78,ry=1.05-level*.68,rz=-.88-level*.10;
         const active=rack===index;
         const rc=scenes[rack].color;
-        box(rx,ry,rz,.90,.042,.18,active?rc:metal,0,active?.53:.19);
+        const pulse=readingEnergy(travel,rack,rackCount);
+        const rackColor=active?rc:[mix(metal[0],rc[0],pulse),mix(metal[1],rc[1],pulse),mix(metal[2],rc[2],pulse)];
+        box(rx,ry,rz,.90,.042,.18,rackColor,0,(active?.53:.19)+pulse*.29);
         // R2229: all eight actual source bays remain visible on every
         // renderer. Thin auxiliary struts cost eight extra GL draw calls
         // on SwiftShader but add almost no readable detail there. Keep
@@ -1068,6 +1093,7 @@ void main(){
           box(rx+side*.45,ry-.14,rz-.08,.032,.46,.10,active?rc:edge,0,active?.45:.13);
         }
       }
+      setData(root,'fxArchiveReadingTravelR2266',travel.toFixed(3));
       if(root.dataset.fxArchivePersistentRackCount!==String(rackCount))
         root.dataset.fxArchivePersistentRackCount=String(rackCount);
       if(root.dataset.fxArchiveWorldContinuity!=='persistent-one-world-r2044')
@@ -1498,6 +1524,7 @@ void main(){
     delete root.dataset.fxArchiveReactorEntryR2261;
     delete root.dataset.fxArchiveReactorPhaseR2262;
     delete root.dataset.fxArchiveCorridorR2265;
+    delete root.dataset.fxArchiveReadingTravelR2266;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');
