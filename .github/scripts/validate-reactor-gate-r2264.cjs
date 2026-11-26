@@ -8,8 +8,8 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress,reactorVisibleVertices}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress,reactorVisibleVertices};')(clamp,mix,smooth,host);
+const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress,reactorVisibleVertices,reactorRingState}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress,reactorVisibleVertices,reactorRingState};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
 assert.equal(v.length,960*3*8);
 for(let i=0;i<v.length;i+=8){
@@ -318,4 +318,25 @@ for(let i=0;i<=10;i++)for(let j=0;j<=10;j++)for(let k=0;k<=10;k++)for(let l=0;l<
 }
 assert(maxError<1e-12);
 console.log('R2280_MATERIAL_FAST_PATH_PASS '+JSON.stringify({samples,guideTriangles,maxError,shadowEarlyReturn:true}));
+}
+
+// R2281: the source's ring precomputation must match the former GLSL trajectory.
+{
+let maxError=0,samples=0;
+for(let i=0;i<=10000;i++){
+ const p=i/10000,a=reactorRingState(p);
+ for(let r=0;r<3;r++){
+  const phase=clamp((p-(2-r)*.16)/.68),angle=p*6.2831853-r*.76;
+  const smoothstep=(lo,hi,x)=>{const q=clamp((x-lo)/(hi-lo));return q*q*(3-2*q);};
+  const expected=[.82+(3.10-.82)*smoothstep(0,1,phase),1-smoothstep(.72,1,phase),Math.cos(angle),Math.sin(angle)];
+  const actual=[a.scale[r],a.visibility[r],a.axisX[r],a.axisY[r]];
+  maxError=Math.max(maxError,...actual.map((x,j)=>Math.abs(x-expected[j])));samples++;
+ }
+}
+assert(maxError<1e-12);
+assert(src.includes('gl.uniform3fv(this.uniform.uReactorRingScale,rings.scale)'));
+assert(src.includes('ringScale=uReactorRingScale[ring]'));
+assert(src.includes('if(uBend!=0.0)'));
+assert(!src.includes('uReactorProgress'));
+console.log('R2281_RING_UNIFORM_PASS '+JSON.stringify({samples,maxError,ringTransformsPerGate:3,previousMaxVertexEvaluations:2880}));
 }

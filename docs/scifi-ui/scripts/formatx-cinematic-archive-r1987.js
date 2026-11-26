@@ -789,6 +789,19 @@
     while(rings>0&&progress>=.68+(3-rings)*.16+.00001)rings--;
     return total*rings/3;
   }
+  // Three ring transforms are invariant across each ring's vertices.
+  // Compute them once per submitted gate, not thousands of times in GLSL.
+  function reactorRingState(progress){
+    const scale=[],visibility=[],axisX=[],axisY=[];
+    for(let ring=0;ring<3;ring++){
+      const phase=clamp((progress-(2-ring)*.16)/.68);
+      const angle=progress*6.2831853-ring*.76;
+      scale.push(mix(.82,3.10,smooth(phase)));
+      visibility.push(1-smooth((phase-.72)/.28));
+      axisX.push(Math.cos(angle));axisY.push(Math.sin(angle));
+    }
+    return {scale,visibility,axisX,axisY};
+  }
   // Mobile software GL needs a wider sampling window. Continue the
   // physical gate into the first part of the existing reading interval.
   // Never delay the real content handoff, even on a constrained renderer.
@@ -874,7 +887,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorProgress']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -898,7 +911,9 @@
       const vert=`#version 300 es
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
-uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile,uReactorProgress;
+uniform vec3 uOffset,uScale,uCamera;
+uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY;
+uniform float uRotation,uTilt,uBend,uAspect,uMobile;
 out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;
 void main(){
  vec3 p=aPosition*uScale;
@@ -909,20 +924,21 @@ void main(){
  vReactorLight=0.0;
  float ringScale=1.0;
  if(reactor){
-   float ring=aUv.y-2.0;
-   float phase=clamp((uReactorProgress-(2.0-ring)*.16)/.68,0.0,1.0);
-   float travel=smoothstep(0.0,1.0,phase);
-   // Broad light front moves along the actual ring instead of flickering.
-   float angle=uReactorProgress*6.2831853-ring*.76;
-   vec2 axis=vec2(cos(angle),sin(angle));
+   int ring=int(aUv.y-2.0);
+   vec2 axis=vec2(uReactorAxisX[ring],uReactorAxisY[ring]);
    vReactorLight=smoothstep(.15,.96,dot(normalize(aPosition.xy),axis));
-   ringScale=mix(.82,3.10,travel);
+   ringScale=uReactorRingScale[ring];
    p.xy*=ringScale;
-   vReactorVisibility=1.0-smoothstep(.72,1.0,phase);
+   vReactorVisibility=uReactorRingVisibility[ring];
  }
- float bendX=2.0*aUv.x-1.0;
- float sinY=sin(3.14159265*aUv.y);
- p.z+=uBend*bendX*bendX*sinY;
+ // Planar geometry has no bend: avoid the trigonometric calculation.
+ float bendX=0.0;
+ float sinY=0.0;
+ if(uBend!=0.0){
+   bendX=2.0*aUv.x-1.0;
+   sinY=sin(3.14159265*aUv.y);
+   p.z+=uBend*bendX*bendX*sinY;
+ }
  // Analytic differential normal of the *actual* curved glass membrane:
  // previous lighting used the flat sheet normal after bending vertices.
  // Derivatives divide by physical mesh width/height, so reflections stay
@@ -1129,7 +1145,13 @@ void main(){
       gl.uniform3fv(this.uniform.uCamera,cam);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
-      if(ingress)gl.uniform1f(this.uniform.uReactorProgress,ingress.progress);
+      if(ingress){
+        const rings=reactorRingState(ingress.progress);
+        gl.uniform3fv(this.uniform.uReactorRingScale,rings.scale);
+        gl.uniform3fv(this.uniform.uReactorRingVisibility,rings.visibility);
+        gl.uniform3fv(this.uniform.uReactorAxisX,rings.axisX);
+        gl.uniform3fv(this.uniform.uReactorAxisY,rings.axisY);
+      }
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
       this.drawCalls=0;
