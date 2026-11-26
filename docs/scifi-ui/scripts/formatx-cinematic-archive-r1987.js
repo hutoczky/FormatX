@@ -1416,7 +1416,11 @@ void main(){
       gpuTailTimer=setTimeout(()=>{gpuTailTimer=0;requestArchiveFrame();},Math.ceil(remaining));
       return;
     }
-    lastGpu=now;window.FormatXLivingCore?.requestRender?.(1);
+    lastGpu=now;
+    const api=window.FormatXLivingCore;
+    const gate=current&&(reactorEntry(current.s,current.progress)||corridorEntry(current.s,current.progress));
+    if(gate&&gate.alpha>.001&&typeof api?.requestTransitRender==='function')api.requestTransitRender();
+    else api?.requestRender?.(1);
   }
   function invalidate(){
     if(disposed)return;

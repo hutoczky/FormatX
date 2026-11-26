@@ -122,3 +122,34 @@ assert(src.includes('vec3(0.0,0.0,6.2)-p'));
 assert(src.includes('specular/(vec3(1.0)+specular)'));
 assert(src.includes('out vec3 vReactorView')&&src.includes('in vec3 vReactorView'));
 console.log('R2269_REACTOR_VIEW_OPTICS_PASS '+JSON.stringify({normalSamples:101,extraDrawCalls:0}));
+
+// R2271 exercise the actual native scheduler with a deterministic clock.
+const native=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
+const section=(begin,end)=>{const a=native.indexOf(begin),b=native.indexOf(end,a+begin.length);assert(a>=0&&b>a);return native.slice(a,b);};
+const scheduler=section('    function queueFrame(delay=0){','    function boost(');
+const hold=section('    function holdSoftwareScroll(){','    function onScroll(){');
+const frame=section('    function frame(now){','    function point(event){');
+const simulate=new Function('softwareRenderer',`
+ let now=0,raf=0,burstFrames=0,scrollSettleTimer=0,surfaceFrameTimer=0,last=0;
+ let scrollTransitPermit=false,lastScrollTransit=-Infinity,rendered=0,seq=0;
+ let schedulerLastFrame=0,schedulerRefreshMs=16.67,schedulerTick=0;
+ const auditMode=true,mobile=false,renderAverage=0,surfacePulseStart=-Infinity,SURFACE_PULSE_WINDOW_MS=0;
+ const root={dataset:{}},delayed=new Set(),pending=new Map();
+ const performance={now:()=>now},blocked=()=>false;
+ const requestAnimationFrame=fn=>{pending.set(++seq,fn);return seq;};
+ const cancelAnimationFrame=id=>pending.delete(id);
+ const setTimeout=()=>++seq,clearTimeout=()=>{},later=setTimeout;
+ const render=()=>rendered++,settleAfterBurst=()=>{};
+ ${scheduler}${hold}${frame}
+ const step=t=>{now=t;const jobs=[...pending];pending.clear();for(const [,fn] of jobs)fn(now);};
+ return {holdSoftwareScroll,requestTransitRender,schedule,step,get count(){return rendered},get pending(){return pending.size}};
+`);
+const software=simulate(true);
+software.holdSoftwareScroll();software.schedule(1);assert.equal(software.pending,0);
+software.requestTransitRender();software.holdSoftwareScroll();assert.equal(software.pending,1);
+software.step(10);assert.equal(software.count,1);
+software.requestTransitRender();software.step(100);assert.equal(software.count,1);
+software.requestTransitRender();software.step(250);software.requestTransitRender();software.holdSoftwareScroll();software.step(260);
+assert.equal(software.count,2);assert.equal(software.pending,0);
+const hardware=simulate(false);hardware.requestTransitRender();hardware.step(16);assert.equal(hardware.count,1);
+console.log('R2271_BOUNDED_TRANSIT_PASS '+JSON.stringify({softwareFrames:software.count,hardwareFrames:hardware.count}));

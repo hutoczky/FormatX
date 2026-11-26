@@ -2196,7 +2196,7 @@
       return disposed||contextLost||document.hidden||(!visible&&!archiveLive)||paused||root.dataset.fxReferenceMotionPaused==='true';
     }
     function queueFrame(delay=0){
-      if(blocked()||raf||(softwareRenderer&&scrollSettleTimer))return;
+      if(blocked()||raf||(softwareRenderer&&scrollSettleTimer&&!scrollTransitPermit))return;
       if(delay<=0){
         if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
         last=performance.now();raf=requestAnimationFrame(frame);return;
@@ -2211,6 +2211,16 @@
       if(blocked())return;
       const frameCap=(auditMode||(softwareRenderer&&scrollSettleTimer))?1:(mobile?4:24);
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
+      queueFrame(0);
+    }
+    // An explicit archive transit may borrow ONE frame during software
+    // scroll, at most once per 240ms. Ordinary animation remains suspended.
+    function requestTransitRender(){
+      if(blocked())return;
+      if(!softwareRenderer||!scrollSettleTimer){schedule(1);return;}
+      if(scrollTransitPermit||performance.now()-lastScrollTransit<240)return;
+      scrollTransitPermit=true;
+      burstFrames=1;
       queueFrame(0);
     }
     function boost(value=.84,frames=8){
@@ -2576,7 +2586,7 @@
     }
 
     function frame(now){
-      raf=0;if(blocked()||(softwareRenderer&&scrollSettleTimer))return;
+      raf=0;if(blocked()||(softwareRenderer&&scrollSettleTimer&&!scrollTransitPermit))return;
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
@@ -2598,7 +2608,11 @@
           return;
         }
       }
+      const transitDuringScroll=softwareRenderer&&Boolean(scrollSettleTimer);
+      scrollTransitPermit=false;
+      if(transitDuringScroll)lastScrollTransit=now;
       render(now);burstFrames=Math.max(0,burstFrames-1);
+      if(transitDuringScroll){burstFrames=0;return;}
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
@@ -2679,12 +2693,13 @@
       schedule(1);
     }
     let previousScrollY=scrollY;
+    let scrollTransitPermit=false,lastScrollTransit=-Infinity;
     function holdSoftwareScroll(){
       if(!softwareRenderer)return;
       // Software GL rasterization competes directly with native browser
       // scrolling. Keep the last complete MAG frame and accumulate the
       // latest interaction state, then redraw once when input settles.
-      if(raf){cancelAnimationFrame(raf);raf=0;}
+      if(raf&&!scrollTransitPermit){cancelAnimationFrame(raf);raf=0;}
       burstFrames=Math.min(1,burstFrames);
       clearTimeout(scrollSettleTimer);
       scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},180);
@@ -2986,6 +3001,7 @@
       toggleShape:source=>toggleShape(source||'api-toggle'),
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       requestRender:schedule,
+      requestTransitRender,
       registerScenePass:(pass)=>{
         if(!webgl2||typeof pass!=='function'||disposed)return()=>{};
         scenePasses.add(pass);schedule(1);
