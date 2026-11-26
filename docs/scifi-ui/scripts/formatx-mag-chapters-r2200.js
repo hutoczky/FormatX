@@ -259,7 +259,7 @@
       pricing.querySelector('.fx-mag-chapter-title')?.setAttribute('aria-expanded','true');
     }
     for(const [node,entry] of registry){
-      if(!node.isConnected){clearTimeout(entry.timer);registry.delete(node);}
+      if(!node.isConnected){clearTimeout(entry.timer);reveal?.unobserve(entry.button);registry.delete(node);}
     }
     if(registry.size){
       root.classList.add('fx-mag-chapters-ready');
@@ -270,24 +270,31 @@
   function schedule(){
     if(!pending)pending=requestAnimationFrame(reconcile);
   }
+  function decodeAnchor(value){
+    const raw=String(value||'').replace(/^#/,'');
+    try{return decodeURIComponent(raw);}catch(_){return raw;}
+  }
   function revealAnchor(id){
     if(!id)return;
     const target=document.getElementById(id);
     const section=target?.closest('section.fx-mag-chapter');
-    if(section&&registry.has(section))toggle(registry.get(section),true,'anchor');
+    if(!section||!registry.has(section))return;
+    // A click followed by hashchange must not restart an already open aperture.
+    if(section.dataset.fxExpanded==='true'&&section.dataset.fxMagPhase!=='closing')return;
+    toggle(registry.get(section),true,'anchor');
   }
   reconcile();
   new MutationObserver(schedule).observe(main,{childList:true});
   document.addEventListener('click',event=>{
     const link=event.target instanceof Element?event.target.closest('a[href^="#"]'):null;
     if(!link)return;
-    const id=decodeURIComponent(link.getAttribute('href').slice(1));
+    const id=decodeAnchor(link.getAttribute('href'));
     revealAnchor(id);
   },true);
   window.addEventListener('hashchange',()=>{
-    revealAnchor(decodeURIComponent(location.hash.slice(1)));
+    revealAnchor(decodeAnchor(location.hash));
   });
-  if(location.hash)revealAnchor(decodeURIComponent(location.hash.slice(1)));
+  if(location.hash)revealAnchor(decodeAnchor(location.hash));
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});
   else schedule();
   window.FormatXMagChapters=Object.freeze({
