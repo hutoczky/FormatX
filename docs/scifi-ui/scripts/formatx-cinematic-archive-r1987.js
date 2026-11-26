@@ -596,6 +596,10 @@
     return null;
   }
 
+  // Measure the stable document-flow chapter, never its fixed moving folio.
+  function physicalScrollAnchor(scene){
+    return scene.cinemaHost||scene.scrollAnchor||scene.node;
+  }
   class ScrollTimelineController {
     static get(){
       if(!scenes.length)return null;
@@ -604,7 +608,7 @@
       const vh=innerHeight,anchor=vh*.52;
       const measured=new Map();
       for(const s of scenes){
-        const node=s.scrollAnchor||s.node;
+        const node=physicalScrollAnchor(s);
         let r=measured.get(node);
         if(!r){r=node.getBoundingClientRect();measured.set(node,r);}
         if(r.height<1||r.width<1)continue;

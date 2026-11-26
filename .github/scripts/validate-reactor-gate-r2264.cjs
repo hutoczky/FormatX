@@ -194,3 +194,17 @@ assert.equal(needs({s:entry,progress:.78,travel:.1},false,false),false);
 assert.equal(reactorHandoff(entry,.78).settle,1);
 for(let i=0;i<100;i++){const p=.78*i/100;assert(entryTransitProgress(p,0,true)<=entryTransitProgress(p+.0078,0,true)+1e-10);}
 console.log('R2274_ADAPTIVE_ENTRY_WINDOW_PASS');
+
+const anchorStart=src.indexOf('  function physicalScrollAnchor('),anchorEnd=src.indexOf('  class ScrollTimelineController',anchorStart);
+assert(anchorStart>=0&&anchorEnd>anchorStart);
+const physical=new Function(src.slice(anchorStart,anchorEnd)+'return physicalScrollAnchor;')();
+const stableHost={},movingFolio={},sourceNode={};
+assert.equal(physical({cinemaHost:stableHost,scrollAnchor:movingFolio,node:sourceNode}),stableHost);
+assert.equal(physical({scrollAnchor:movingFolio,node:sourceNode}),movingFolio);
+assert.equal(physical({node:sourceNode}),sourceNode);
+assert(src.includes('const node=physicalScrollAnchor(s);'));
+for(const p of [.38,.43]){
+ const top=.88-1.15*p;
+ assert(top<.52&&top+1.65>.52,'proof target must contain the reading line');
+}
+console.log('R2275_STABLE_PHYSICAL_ANCHOR_PASS');

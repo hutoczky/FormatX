@@ -22,19 +22,50 @@ async function proveReactor(page,spec){
         .filter(n=>n.getBoundingClientRect().height>0);
       const host=hosts[kind==='entry'?0:1];
       if(!host||!a?.state?.reactorProof)throw Error('Missing native reactor chapter');
-      const p=kind==='entry'?.25:.43;
-      const targetTop=innerHeight*(.88-1.15*p);
+      // Both positions must lie INSIDE the active host's .52vh reading line.
+      // .25 puts the target above that line and is ambiguous near boundaries.
+      const p=kind==='entry'?.38:.43;
       const previous=a.state.reactorProof[kind==='entry'?'entryFrames':'corridorFrames'];
-      window.scrollBy({top:host.getBoundingClientRect().top-targetTop,left:0,behavior:'instant'});
-      return {previous,host:host.id||host.className};
+      return {previous,host:host.id||host.className,p};
     },kind);
-    await page.waitForFunction(({kind,previous})=>{
-      const s=window.FormatXArchiveExperience?.state;
-      const root=document.documentElement.dataset;
-      return s?.reactorProof?.[kind==='entry'?'entryFrames':'corridorFrames']>previous &&
-        (kind==='entry'?root.fxArchiveReactorEntryR2261==='ingress':
-          Boolean(root.fxArchiveCorridorR2265&&root.fxArchiveCorridorR2265!=='clear'));
-    },{kind,previous:before.previous},{timeout:20000});
+    let sampled=false,lastPosition=null;
+    for(let attempt=0;attempt<3&&!sampled;attempt++){
+      lastPosition=await page.evaluate(({kind,p})=>{
+        const hosts=Array.from(document.querySelectorAll('main#main-content > [data-fx-cinema-anchor-height]'))
+          .filter(n=>n.getBoundingClientRect().height>0);
+        const host=hosts[kind==='entry'?0:1];
+        if(!host)throw Error('Missing proof host');
+        const targetTop=innerHeight*(.88-1.15*p),r=host.getBoundingClientRect();
+        // Re-read after native layout changes instead of scrolling against
+        // a stale mobile viewport. Do not call a forced render API.
+        if(Math.abs(r.top-targetTop)>2)
+          window.scrollBy({top:r.top-targetTop,left:0,behavior:'instant'});
+        return {top:r.top,targetTop,scrollY,host:host.id||host.className};
+      },{kind,p:before.p});
+      try{
+        await page.waitForFunction(({kind,previous})=>{
+          const s=window.FormatXArchiveExperience?.state;
+          const root=document.documentElement.dataset;
+          const hosts=Array.from(document.querySelectorAll('main#main-content > [data-fx-cinema-anchor-height]'))
+            .filter(n=>n.getBoundingClientRect().height>0);
+          const host=hosts[kind==='entry'?0:1];
+          return host?.dataset.fxCinemaHostActive==='true' &&
+            s?.reactorProof?.[kind==='entry'?'entryFrames':'corridorFrames']>previous &&
+            (kind==='entry'?root.fxArchiveReactorEntryR2261==='ingress':
+              Boolean(root.fxArchiveCorridorR2265&&root.fxArchiveCorridorR2265!=='clear'));
+        },{kind,previous:before.previous},{timeout:6500});
+        sampled=true;
+      }catch(e){
+        if(e.name!=='TimeoutError')throw e;
+        const diagnostic=await page.evaluate(()=>({scrollY,viewport:innerHeight,
+          scene:window.FormatXArchiveExperience?.state,
+          gate:document.documentElement.dataset.fxArchiveReactorEntryR2261,
+          corridor:document.documentElement.dataset.fxArchiveCorridorR2265,
+          hosts:Array.from(document.querySelectorAll('main#main-content > [data-fx-cinema-anchor-height]')).map(n=>({id:n.id,top:n.getBoundingClientRect().top,active:n.dataset.fxCinemaHostActive}))}));
+        console.warn('FX_REACTOR_PROOF_RETRY_R2275 '+JSON.stringify({profile:spec.name,kind,attempt:attempt+1,lastPosition,diagnostic}));
+      }
+    }
+    assert(sampled,spec.name+' '+kind+' did not render in the actual active chapter after three native seeks');
     const result=await page.evaluate(()=>{
       const s=window.FormatXArchiveExperience.state;
       const root=document.documentElement.dataset;
