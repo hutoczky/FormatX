@@ -256,11 +256,38 @@
     renderProof(copy);
     setContent(document.querySelector('.site-footer .footer-brand p'), copy.footer);
     syncCheckoutLinks();
-    root.dataset.fxCategoryLanguage = lang;
+    if (root.dataset.fxCategoryLanguage !== lang) root.dataset.fxCategoryLanguage = lang;
   }
 
   let observer = null;
   let enhancementStarted = false;
+  let renderQueued = false;
+  let lastRenderedLanguage = null;
+  let pendingForce = false;
+
+  // Explicit language events and lang mutations can describe the same state.
+  function scheduleRender(force = false) {
+    pendingForce = pendingForce || force;
+    if (renderQueued) return;
+    renderQueued = true;
+    queueMicrotask(() => {
+      renderQueued = false;
+      const forced = pendingForce;
+      pendingForce = false;
+      const lang = language();
+      if (!forced && lang === lastRenderedLanguage) return;
+      render();
+      lastRenderedLanguage = lang;
+    });
+  }
+
+  function observeLanguage() {
+    if (observer) return;
+    observer = new MutationObserver(entries => {
+      if (entries.some(entry => entry.attributeName === 'lang')) scheduleRender();
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
+  }
 
   function startSemanticContent() {
     if (enhancementStarted) return;
@@ -268,12 +295,13 @@
     buildDeck();
     buildProof();
     render();
-    addEventListener('formatx:languagechange', () => queueMicrotask(render));
-    observer = new MutationObserver(entries => {
-      if (entries.some(entry => entry.attributeName === 'lang')) queueMicrotask(render);
+    lastRenderedLanguage = language();
+    addEventListener('formatx:languagechange', () => scheduleRender());
+    observeLanguage();
+    addEventListener('pageshow', event => {
+      observeLanguage();
+      scheduleRender(event.persisted === true);
     });
-    observer.observe(root, { attributes: true, attributeFilter: ['lang'] });
-    addEventListener('pageshow', render);
     root.dataset.fxCategoryFirstPaint = 'semantic-immediate-r243';
   }
 
@@ -284,5 +312,5 @@
   */
   startSemanticContent();
 
-  addEventListener('pagehide', () => observer?.disconnect(), { once: true });
+  addEventListener('pagehide', () => { observer?.disconnect(); observer = null; });
 }());

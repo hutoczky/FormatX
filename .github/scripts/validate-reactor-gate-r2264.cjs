@@ -373,3 +373,21 @@ setAttr(node,'aria-label','Live OS megnyitása');setAttr(node,'aria-label','Open
 assert(source.includes("setText(live,'Live OS')"));assert(source.includes("setAttr(live,'href','#experience')"));
 console.log('R2283_IDEMPOTENT_HERO_PASS '+JSON.stringify({unchangedReconciles:1000,repeatWrites:0,languageUpdates:2}));
 }
+
+// R2284: coalesce locale events and retain BFCache reconciliation.
+{
+const source=fs.readFileSync('docs/scifi-ui/scripts/formatx-category-positioning.js','utf8');
+const begin=source.indexOf('  let renderQueued = false;'),end=source.indexOf('  function observeLanguage()',begin);
+assert(begin>=0&&end>begin);
+const queue=[],commits=[];let lang='hu';
+const scheduler=new Function('queueMicrotask','language','render',source.slice(begin,end)+'lastRenderedLanguage=language();return scheduleRender;')(fn=>queue.push(fn),()=>lang,()=>commits.push(lang));
+const drain=()=>{while(queue.length)queue.shift()();};
+for(let i=0;i<1000;i++)scheduler();drain();assert.equal(commits.length,0);
+lang='en';scheduler();scheduler();drain();assert.equal(commits.join(','),'en');
+scheduler();drain();assert.equal(commits.length,1);
+lang='hu';scheduler();lang='en';scheduler();lang='hu';scheduler();drain();assert.equal(commits.join(','),'en,hu');
+scheduler(true);scheduler();drain();assert.equal(commits.join(','),'en,hu,hu');
+assert(source.includes('scheduleRender(event.persisted === true)'));
+assert(source.includes('observer?.disconnect(); observer = null;'));
+console.log('R2284_COALESCED_SEMANTIC_RENDER_PASS '+JSON.stringify({ignoredUnchangedSignals:1000,languageCommits:2,forcedRestoreCommits:1}));
+}
