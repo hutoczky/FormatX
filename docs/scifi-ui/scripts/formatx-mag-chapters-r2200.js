@@ -14,6 +14,7 @@
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sectionsSelector=':scope > section:not(#hero):not(.fx-noscript-proof)';
   let pending=0;
+  const OPEN_MS=950, CLOSE_MS=340;
   const findHeading=(section)=>{
     const id=section.getAttribute('aria-labelledby');
     let h=id?document.getElementById(id):null;
@@ -48,9 +49,10 @@
   }
   function toggle(entry,expand,origin='button'){
     const {section,button,subtitle}=entry;
+    const previous=section.dataset.fxExpanded==='true';
+    if(section.id!=='pricing'&&expand&&previous&&section.dataset.fxMagPhase!=='closing')return;
     clearTimeout(entry.timer);
     entry.timer=0;
-    const previous=section.dataset.fxExpanded==='true';
     if(section.id==='pricing'){
       section.dataset.fxExpanded='true';
       section.dataset.fxMagPhase='open';
@@ -84,27 +86,27 @@
       }
       // Keep the tapped heading stationary when a taller earlier chapter
       // closes. A synchronous collapse prevents 340ms of delayed scroll jump.
-      const before=button.getBoundingClientRect().top;
-      let closedEarlier=false;
-      for(const other of registry.values()){
-        if(other!==entry&&other.section.id!=='pricing'&&other.section.dataset.fxExpanded==='true'){
-          if(other.section.compareDocumentPosition(section)&Node.DOCUMENT_POSITION_FOLLOWING){
-            closedEarlier=true;
-          }
-          finishClose(other,'another-chapter');
-        }
-      }
-      if(closedEarlier&&!root.classList.contains('fx-seamless-loop-transfer')){
+      const others=Array.from(registry.values()).filter(other=>other!==entry&&other.section.id!=='pricing'&&other.section.dataset.fxExpanded==='true');
+      const closedEarlier=others.some(other=>Boolean(other.section.compareDocumentPosition(section)&Node.DOCUMENT_POSITION_FOLLOWING));
+      const compensate=closedEarlier&&!root.classList.contains('fx-seamless-loop-transfer');
+      const before=compensate?button.getBoundingClientRect().top:0;
+      for(const other of others)finishClose(other,'another-chapter');
+      if(compensate){
         const delta=button.getBoundingClientRect().top-before;
         if(Number.isFinite(delta)&&Math.abs(delta)>1){
           window.scrollBy({top:delta,left:0,behavior:'instant'});
         }
       }
-      section.dataset.fxMagPhase='opening';
+      section.dataset.fxMagPhase=reduced?'open':'opening';
       section.dataset.fxExpanded='true';
       button.setAttribute('aria-expanded','true');
       if(subtitle)subtitle.hidden=false;
-      requestAnimationFrame(()=>{if(section.isConnected&&section.dataset.fxMagPhase==='opening')section.dataset.fxMagPhase='open';});
+      if(!reduced){
+        entry.timer=window.setTimeout(()=>{
+          entry.timer=0;
+          if(section.isConnected&&section.dataset.fxMagPhase==='opening')section.dataset.fxMagPhase='open';
+        },OPEN_MS);
+      }
       notify(section,true,origin);
     }else{
       button.setAttribute('aria-expanded','false');
@@ -117,7 +119,7 @@
       }
       if(previous&&!reduced){
         section.dataset.fxMagPhase='closing';
-        entry.timer=window.setTimeout(()=>finishClose(entry,origin),340);
+        entry.timer=window.setTimeout(()=>finishClose(entry,origin),CLOSE_MS);
       }else{
         // Explicit, reduced-motion and interrupted closes complete at once.
         // finishClose is idempotent when another chapter already closed it.

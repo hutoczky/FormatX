@@ -119,7 +119,7 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter .fx-mag-ch
   transform-origin:left center;
   pointer-events:none;
 }
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"] .fx-mag-chapter-title::before{
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"]) .fx-mag-chapter-title::before{
   animation:fx-mag-optical-signal .95s cubic-bezier(.17,.67,.18,1) both;
 }
 @keyframes fx-mag-optical-signal{
@@ -238,16 +238,14 @@ html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(1){transform:translate(-49%,
 html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(2){transform:translate(49%,-49%) rotate(90deg)}
 html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(3){transform:translate(49%,49%) rotate(180deg)}
 html.fx-mag-chapters-ready .fx-mag-iris i:nth-child(4){transform:translate(-49%,49%) rotate(270deg)}
-html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris{
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"]) .fx-mag-iris{
   transform:rotate(225deg) scale(1.06);
   box-shadow:0 0 45px rgba(132,235,255,.38),inset 0 0 20px rgba(203,248,255,.38);
 }
-html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(1){transform:translate(-114%,-114%) rotate(-48deg)}
-html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(2){transform:translate(114%,-114%) rotate(138deg)}
-html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(3){transform:translate(114%,114%) rotate(228deg)}
-html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"] .fx-mag-iris i:nth-child(4){transform:translate(-114%,114%) rotate(318deg)}
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="open"]
-[data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]),
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"]) .fx-mag-iris i:nth-child(1){transform:translate(-114%,-114%) rotate(-48deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"]) .fx-mag-iris i:nth-child(2){transform:translate(114%,-114%) rotate(138deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"]) .fx-mag-iris i:nth-child(3){transform:translate(114%,114%) rotate(228deg)}
+html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"]) .fx-mag-iris i:nth-child(4){transform:translate(-114%,114%) rotate(318deg)}
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="opening"]
 [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
   animation:fx-mag-section-unseal .72s cubic-bezier(.14,.7,.2,1) both;
@@ -290,7 +288,7 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
    gap:10px!important;
    touch-action:manipulation!important;
  }
- html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="opening"]
  [data-fx-mag-route]:not(h2) > :not([data-fx-mag-route]){
    animation-name:fx-mag-section-unseal-mobile!important;
    animation-duration:.4s!important;
@@ -574,19 +572,19 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
   right:7%;bottom:2%;clip-path:polygon(20% 0,100% 20%,100% 100%,0 100%);
   transform:translate3d(0,0,0) rotate(-1deg);
 }
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"])
 .fx-mag-chapter-portal-r2217 > i:nth-child(1){
   transform:translate3d(-14%,-100%,0) rotate(-8deg);opacity:0;
 }
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"])
 .fx-mag-chapter-portal-r2217 > i:nth-child(2){
   transform:translate3d(14%,-100%,0) rotate(8deg);opacity:0;
 }
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"])
 .fx-mag-chapter-portal-r2217 > i:nth-child(3){
   transform:translate3d(-14%,100%,0) rotate(8deg);opacity:0;
 }
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"])
 .fx-mag-chapter-portal-r2217 > i:nth-child(4){
   transform:translate3d(14%,100%,0) rotate(-8deg);opacity:0;
 }
@@ -603,7 +601,7 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
 }
 html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter
 .fx-mag-chapter-title:is(:hover,:focus-visible)::after{transform:scaleX(.78);opacity:.9}
-html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]
+html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-expanded="true"]:not([data-fx-mag-phase="closing"])
 .fx-mag-chapter-title::after{transform:scaleX(1);opacity:.85}
 @media(prefers-reduced-motion:no-preference) and (min-width:901px) and (pointer:fine){
  html[data-fx-cinematic-journey-r536="ready"].fx-mag-chapters-ready
@@ -625,4 +623,21 @@ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-ex
 @media(forced-colors:active){
  html.fx-mag-chapters-ready .fx-mag-chapter-portal-r2217{display:none!important}
  html.fx-mag-chapters-ready .fx-mag-chapter-title::after{display:none!important}
+}
+
+/* R2258: synchronized studio aperture — a single 950ms opening cue and
+   a 340ms return, aligned with the chapter controller. No extra canvas,
+   scrolling layer, animation loop or payment overlay. */
+@media(prefers-reduced-motion:no-preference){
+ html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-mag-phase="closing"] .fx-mag-iris,
+ html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-mag-phase="closing"] .fx-mag-iris i,
+ html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-mag-phase="closing"] .fx-mag-chapter-portal-r2217 > i,
+ html.fx-mag-chapters-ready .fx-mag-chapter[data-fx-mag-phase="closing"] .fx-mag-chapter-title::after{
+   transition-duration:.34s!important;
+   transition-timing-function:cubic-bezier(.36,.02,.28,1)!important;
+ }
+ html.fx-mag-chapters-ready main#main-content > section.fx-mag-chapter[data-fx-mag-phase="closing"]
+ h2[data-fx-mag-route] > .fx-mag-editorial-heading{
+   animation:fx-mag-section-close .34s ease both;
+ }
 }
