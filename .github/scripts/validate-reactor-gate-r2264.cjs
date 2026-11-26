@@ -391,3 +391,23 @@ assert(source.includes('scheduleRender(event.persisted === true)'));
 assert(source.includes('observer?.disconnect(); observer = null;'));
 console.log('R2284_COALESCED_SEMANTIC_RENDER_PASS '+JSON.stringify({ignoredUnchangedSignals:1000,languageCommits:2,forcedRestoreCommits:1}));
 }
+
+// R2286: capture genuine gestures even when a nested control stops bubbling.
+{
+const a=src.indexOf('    const startJourney=event=>{'),b=src.indexOf('    sceneObserver=new ResizeObserver',a);
+assert(a>=0&&b>a);
+const make=()=>{
+ const listeners=new Map(),root={dataset:{}};let updates=0;
+ const api=new Function('root','addEventListener','invalidate','let journeyArmed=false,idleComposed=true;'+src.slice(a,b)+'return {get armed(){return journeyArmed;}};')(root,(name,fn,opts)=>listeners.set(name,{fn,opts}),()=>updates++);
+ return {api,listeners,root,get updates(){return updates;}};
+};
+for(const type of ['wheel','touchmove','keydown']){
+ const x=make(),l=x.listeners.get(type);assert(l.opts.capture&&l.opts.passive);
+ l.fn({type,isTrusted:false,key:'PageDown'});assert.equal(x.api.armed,false);
+ if(type==='keydown'){l.fn({type,isTrusted:true,key:'a'});assert.equal(x.api.armed,false);}
+ l.fn({type,isTrusted:true,key:'PageDown'});assert.equal(x.api.armed,true);
+ assert.equal(x.root.dataset.fxArchiveEngagementR2220,'visitor-'+type);
+ l.fn({type,isTrusted:true,key:'PageDown'});assert.equal(x.updates,1);
+}
+console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,syntheticRejected:true,passiveCapture:true,onceOnly:true}));
+}

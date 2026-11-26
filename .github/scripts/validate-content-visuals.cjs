@@ -281,9 +281,23 @@ async function assertHeroDisclosure(page) {
   assert(preGesture==='awaiting-visitor'||preGesture==='deep-link',
     'R2220 must not activate the cinematic archive during an idle first paint: '+preGesture);
   const beforeScroll = await page.evaluate(() => scrollY);
-  await page.mouse.wheel(0, Math.max(300,Math.round((page.viewportSize()?.height||768)*.65)));
-  await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveEngagementR2220?.startsWith('visitor-'),
-    null,{timeout:10000});
+  // Send native wheel input inside the viewport, not at the default (0,0).
+  const viewport=page.viewportSize()||{width:1440,height:900};
+  await page.mouse.move(Math.round(viewport.width*.45),Math.round(viewport.height*.65));
+  await page.mouse.wheel(0,Math.max(300,Math.round(viewport.height*.65)));
+  try {
+    await page.waitForFunction(()=>document.documentElement.dataset.fxArchiveEngagementR2220?.startsWith('visitor-'),
+      null,{timeout:10000});
+  } catch(error) {
+    const state=await page.evaluate(()=>({
+      engagement:document.documentElement.dataset.fxArchiveEngagementR2220,
+      archive:document.documentElement.dataset.fxArchiveExperience,
+      intro:document.documentElement.dataset.fxMagBirthOwnerR533,
+      scrollY,hidden:document.hidden,
+      runtime:window.FormatXArchiveExperience?.state||null
+    }));
+    throw new Error('Trusted wheel did not arm archive: '+JSON.stringify(state),{cause:error});
+  }
   await page.locator('#experience').scrollIntoViewIfNeeded();
   await page.evaluate(() => {
     const section = document.querySelector('#experience');

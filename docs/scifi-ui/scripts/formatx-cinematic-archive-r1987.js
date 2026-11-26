@@ -1696,9 +1696,11 @@ void main(){
       invalidate();
     };
     if(!journeyArmed){
-      addEventListener('wheel',startJourney,{passive:true});
-      addEventListener('touchmove',startJourney,{passive:true});
-      addEventListener('keydown',startJourney,{passive:true});
+      // Observe genuine visitor gestures before descendant controls can stop
+      // propagation. Passive capture neither cancels nor redirects scrolling.
+      addEventListener('wheel',startJourney,{passive:true,capture:true});
+      addEventListener('touchmove',startJourney,{passive:true,capture:true});
+      addEventListener('keydown',startJourney,{passive:true,capture:true});
       addEventListener('pointerdown',event=>{
         if(event.isTrusted &&
            (event.target instanceof Element &&
