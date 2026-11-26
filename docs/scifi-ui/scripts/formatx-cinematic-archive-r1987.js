@@ -969,6 +969,15 @@ in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;i
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
+ if(uShadow>.5){
+   // Soft analytical contact penumbra underneath the moving archive drawer.
+   // No second depth buffer, post-process or fake bloom. Cost: one shared
+   // panel mesh. This is a planar approximation, not shadow-map tracing.
+   vec2 q=(vUv-vec2(.5))*vec2(2.1,2.5);
+   float shadow=exp(-3.8*dot(q,q))*(1.0-smoothstep(.76,1.20,length(q)));
+   outColor=vec4(vec3(.003,.010,.018),uOpacity*shadow*.65);
+   return;
+ }
  vec3 N=normalize(vNormal+vec3(.0001));
  bool reactor=vUv.y>1.5;
  vec3 V=normalize(reactor?vReactorView:vec3(.10,-.07,1.0));
@@ -976,6 +985,15 @@ void main(){
  vec3 H=normalize(L+V);
  float ndl=max(.06,dot(N,L));
  float facing=clamp(dot(N,V),0.0,1.0);
+ // The reactor guide is emissive, not a reflective metal surface.
+ // This exactly preserves the final guide color and alpha from the full
+ // material path, while bypassing unused GGX, Fresnel and atmosphere work.
+ if(reactor&&vUv.x>=.6){
+   vec3 emitter=uColor*(.56+.18*facing+.26*vReactorLight);
+   float guideAlpha=uOpacity*.80*(.54+.36*ndl)*vReactorVisibility;
+   outColor=vec4(emitter,clamp(guideAlpha,0.0,1.0));
+   return;
+ }
  float fresnel=pow(1.0-facing,5.0);
  // Normalized GGX microfacet reflection and Fresnel-Schlick form a
  // single physically coherent lighting response for the archival glass.
@@ -994,15 +1012,6 @@ void main(){
  float spec=clamp(dot(specular,vec3(.33)),0.0,1.0);
  vec3 base=mix(vec3(.025,.047,.060),uColor,uPanel>.5?.23:.18);
  vec3 col=base*(.27+.68*ndl)*(1.0-max(F.r,max(F.g,F.b)))+specular*.65+uColor*fresnel*.12;
- if(uShadow>.5){
-   // Soft analytical contact penumbra underneath the moving archive drawer.
-   // No second depth buffer, post-process or fake bloom. Cost: one shared
-   // panel mesh. This is a planar approximation, not shadow-map tracing.
-   vec2 q=(vUv-vec2(.5))*vec2(2.1,2.5);
-   float shadow=exp(-3.8*dot(q,q))*(1.0-smoothstep(.76,1.20,length(q)));
-   outColor=vec4(vec3(.003,.010,.018),uOpacity*shadow*.65);
-   return;
- }
  float a=uOpacity*(uPanel>.5?.68:.80);
  if(uPanel>.5){
    // Smooth glass-membrane edge, directional internal light guides and

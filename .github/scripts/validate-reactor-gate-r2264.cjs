@@ -290,3 +290,32 @@ assert.equal(reactorVisibleVertices(.95,2880),960);
 assert(src.includes('gl.drawArrays(gl.TRIANGLES,0,vertexCount)'));
 console.log('R2279_FADED_RING_CULL_PASS '+JSON.stringify({samples:10001,baseline,submitted,reduction:1-submitted/baseline,visibleGeometryUnchanged:true}));
 }
+
+// R2280: the emissive inlay and analytical shadow bypass unused BRDF work.
+{
+const fragment=src.slice(src.indexOf('      const frag=`'),src.indexOf('      const shader='));
+assert(fragment.indexOf('if(uShadow>.5)')<fragment.indexOf('vec3 N=normalize'));
+assert(fragment.indexOf('if(reactor&&vUv.x>=.6)')<fragment.indexOf('float roughness='));
+assert(fragment.includes('float guideAlpha=uOpacity*.80*(.54+.36*ndl)*vReactorVisibility;'));
+// Exact material-tag contract: the guide occupies full triangles with
+// constant UV.x=.85, never an interpolation across the .6 branch boundary.
+let guideTriangles=0;
+for(let i=0;i<v.length;i+=24){
+ const tags=[v[i+6],v[i+14],v[i+22]];
+ assert(tags.every(x=>x===tags[0]));
+ if(tags[0]>=.6)guideTriangles++;
+}
+assert.equal(guideTriangles,288);
+let maxError=0,samples=0;
+for(let i=0;i<=10;i++)for(let j=0;j<=10;j++)for(let k=0;k<=10;k++)for(let l=0;l<=10;l++){
+ const opacity=i/10,ndl=.06+.94*j/10,facing=k/10,visibility=l/10,light=(i+j+k+l)/40;
+ const alpha=opacity*.80*(.54+.36*ndl);
+ const previous=clamp(mix(alpha*.96,alpha,1)*visibility);
+ const optimized=clamp(opacity*.80*(.54+.36*ndl)*visibility);
+ const emitter=[.36,.73,.86].map(c=>c*(.56+.18*facing+.26*light));
+ const oldColor=emitter.map(c=>mix(.1,c,1));
+ maxError=Math.max(maxError,Math.abs(previous-optimized),...emitter.map((c,m)=>Math.abs(c-oldColor[m])));samples++;
+}
+assert(maxError<1e-12);
+console.log('R2280_MATERIAL_FAST_PATH_PASS '+JSON.stringify({samples,guideTriangles,maxError,shadowEarlyReturn:true}));
+}
