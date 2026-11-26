@@ -15,7 +15,12 @@ assert(prepaint[0].includes('fxb-first-frame-strands-r2181'),'DNA lacks the oppo
 const pairs=(prepaint[0].match(/<line x1=/g)||[]).length;
 const nodes=(prepaint[0].match(/<circle class=/g)||[]).length;
 assert(pairs>=28&&nodes>=38,'Opening DNA geometry is too sparse');
-assert(/data-fx-dna-first-frame-r2181="true"/.test(html),'Critical preload stylesheet link missing');
+const inline=html.match(/<style\b[^>]*data-fx-dna-first-frame-r2181="true"[^>]*>([\s\S]*?)<\/style>/);
+assert(inline&&inline[1]===css,'First-frame CSS must be byte-identical to the canonical stylesheet and inline before first paint');
+const hash="'sha256-"+require('node:crypto').createHash('sha256').update(inline[1],'utf8').digest('base64')+"'";
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+assert(html.includes(hash)&&worker.split(hash).length===3,'Inline DNA stylesheet CSP hash must match HTML and both production Worker policies');
+assert(!/<link\b[^>]*href="[^"]*formatx-dna-first-frame-r2181\.css/.test(html),'Do not retain a redundant render-blocking DNA stylesheet request');
 assert(css.includes('data-fx-intro-prepaint-r1611="show"'),'Cold frame hidden on initial HTML');
 assert(css.includes('prefers-reduced-motion:reduce'),'Reduced motion must remain accessible');
 assert(birth.includes('const firstFrameDnaR2181=overlay.querySelector'),'R533 does not adopt DNA shell');

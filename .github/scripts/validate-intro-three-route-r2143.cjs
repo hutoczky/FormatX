@@ -86,8 +86,9 @@ for(const token of [
 ]){
   assert.ok(engine.includes(token),'R2185 visible DNA/embryo film contract: '+token);
 }
-assert.ok(home.includes('formatx-dna-first-frame-r2181.css?v=20261025-r2185-wide-studio-dna'),
-  'First-byte SVG DNA must load the new wider cinematic CSS');
+const firstFrameStyle=home.match(/<style\b[^>]*data-fx-dna-first-frame-r2181="true"[^>]*>([\s\S]*?)<\/style>/);
+assert.ok(firstFrameStyle&&firstFrameStyle[1]===read('docs/scifi-ui/styles/formatx-dna-first-frame-r2181.css'),
+  'First-byte SVG DNA must inline the complete wider cinematic CSS without a network dependency');
 assert.ok(!engine.includes('u*Math.PI*15.5+strand*Math.PI'),
   'Do not overlay an unrelated twice-coiled DNA particle geometry');
 
