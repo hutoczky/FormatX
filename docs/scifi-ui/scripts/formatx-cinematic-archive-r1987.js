@@ -152,6 +152,22 @@
   // Do not displace the original MAG while the first-visit ten-second film owns it.
   let introDone=!(root.dataset.fxMagBirthOwnerR533==='active'||document.getElementById('fx-mag-birth-prepaint-r1606'));
   const paperLast=new WeakMap();
+  // Compare actual inline values, not a stale shadow cache: other owners may
+  // legitimately change a shared DOM node between two archive frames.
+  let styleWrites=0,styleSkips=0;
+  function setMotionStyle(node,name,value){
+    if(node.style.getPropertyValue(name)===value&&!node.style.getPropertyPriority(name)){
+      styleSkips++;return;
+    }
+    node.style.setProperty(name,value);
+    styleWrites++;
+  }
+  function setData(node,name,value){
+    if(node.dataset[name]!==value)node.dataset[name]=value;
+  }
+  function clearMotionStyle(node,name){
+    if(node.style.getPropertyValue(name))node.style.removeProperty(name);
+  }
   const memoryGB=Number(navigator.deviceMemory||0);
   const cores=Number(navigator.hardwareConcurrency||0);
   const mobilePerf=mobile()&&Boolean((memoryGB>0&&memoryGB<=4)||(cores>0&&cores<=4));
@@ -375,9 +391,9 @@
       const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
       // No per-scroll cumulative coordinates: this is genuinely viewport-
       // fixed once the source chapter no longer creates a containing block.
-      panel.style.removeProperty('translate');
-      panel.style.removeProperty('--fx-cinema-screen-x');
-      panel.style.removeProperty('--fx-cinema-screen-y');
+      clearMotionStyle(panel,'translate');
+      clearMotionStyle(panel,'--fx-cinema-screen-x');
+      clearMotionStyle(panel,'--fx-cinema-screen-y');
       const screenTop=viewportTop.toFixed(2);
       if(panel.dataset.fxMobileScreenTop!==screenTop){
         panel.style.setProperty('top',screenTop+'px','important');
@@ -438,9 +454,9 @@
           // decorative status card remained visible in production screenshots.
           const entry=smooth((p-.035)/.28),exit=smooth((p-.94)/.06);
           const materialize=(.83+.17*entry)*(1-.09*exit);
-          panel.style.setProperty('--fx-cinema-materialize',materialize.toFixed(4));
-          panel.style.setProperty('--fx-cinema-orbit',(1-materialize).toFixed(4));
-          panel.style.setProperty('--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
+          setMotionStyle(panel,'--fx-cinema-materialize',materialize.toFixed(4));
+          setMotionStyle(panel,'--fx-cinema-orbit',(1-materialize).toFixed(4));
+          setMotionStyle(panel,'--fx-cinema-depth',Math.round((1-materialize)*-95)+'px');
           // Each original native HTML module physically settles out of the
           // existing source's 3D retrieval trajectory. The small travel range
           // stays INSIDE its reading lane; unlike old hero animation it can
@@ -460,14 +476,14 @@
           const pitch=phone?unresolved*3.5-paperExit*2:unresolved*1.5-paperExit;
           const depth=-(phone?25:48)*unresolved-25*paperExit;
           const scale=1-.025*unresolved-.018*paperExit;
-          panel.style.setProperty('--fx-cinema-handoff-x',lateral.toFixed(2)+'px');
-          panel.style.setProperty('--fx-cinema-handoff-y',vertical.toFixed(2)+'px');
-          panel.style.setProperty('--fx-cinema-handoff-z',depth.toFixed(2)+'px');
-          panel.style.setProperty('--fx-cinema-handoff-yaw',yaw.toFixed(3)+'deg');
-          panel.style.setProperty('--fx-cinema-handoff-pitch',pitch.toFixed(3)+'deg');
-          panel.style.setProperty('--fx-cinema-handoff-scale',scale.toFixed(4));
-          panel.dataset.fxCinemaSource=selected.source;
-          panel.dataset.fxCinemaHandoff=paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving';
+          setMotionStyle(panel,'--fx-cinema-handoff-x',lateral.toFixed(2)+'px');
+          setMotionStyle(panel,'--fx-cinema-handoff-y',vertical.toFixed(2)+'px');
+          setMotionStyle(panel,'--fx-cinema-handoff-z',depth.toFixed(2)+'px');
+          setMotionStyle(panel,'--fx-cinema-handoff-yaw',yaw.toFixed(3)+'deg');
+          setMotionStyle(panel,'--fx-cinema-handoff-pitch',pitch.toFixed(3)+'deg');
+          setMotionStyle(panel,'--fx-cinema-handoff-scale',scale.toFixed(4));
+          setData(panel,'fxCinemaSource',selected.source);
+          setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
           root.dataset.fxArchiveNativeHandoff='scroll-coupled-real-3d-paper';
           positionCinemaFolio(panel);
         }
@@ -1094,10 +1110,10 @@ void main(){
   function updateHandoff(){
     if(!handoff?.isConnected)return;
     const showing=Boolean(current&&archiveActive&&!reduced.matches&&!document.body.classList.contains('fx-organism-panel-open'));
-    handoff.dataset.active=showing?'true':'false';
+    setData(handoff,'active',showing?'true':'false');
     // Legacy R2022 telemetry remains available to nonvisual diagnostics but
     // must never compete with the only ORIGINAL working HTML folio.
-    handoff.dataset.fxArchiveScreenVisible='false';
+    setData(handoff,'fxArchiveScreenVisible','false');
     if(!showing){handoffKey='';return;}
     const english=root.lang==='en',scene=current.s;
     const key=scene.key+':'+(english?'en':'hu');
@@ -1134,13 +1150,13 @@ void main(){
     const push=smooth((p-.06)/.38);
     const settle=smooth((p-.44)/.31);
     const dir=mobile()?0:(scene.index%2===0?-1:1);
-    handoff.style.setProperty('--fx-folio-translate-x',(dir*(1-push)*95+settle*dir*14).toFixed(1)+'px');
-    handoff.style.setProperty('--fx-folio-translate-y',((1-push)*42+settle*14).toFixed(1)+'px');
-    handoff.style.setProperty('--fx-folio-rotate-y',(dir*(1-push)*-24).toFixed(1)+'deg');
-    handoff.style.setProperty('--fx-folio-rotate-x',((1-push)*12).toFixed(1)+'deg');
-    handoff.style.setProperty('--fx-folio-scale',(0.82+push*.18-settle*.035).toFixed(3));
-    handoff.style.setProperty('--fx-folio-bend',(1-push).toFixed(3));
-    handoff.dataset.phase=p<.24?'extracting':p<.52?'transferring':'presented';
+    setMotionStyle(handoff,'--fx-folio-translate-x',(dir*(1-push)*95+settle*dir*14).toFixed(1)+'px');
+    setMotionStyle(handoff,'--fx-folio-translate-y',((1-push)*42+settle*14).toFixed(1)+'px');
+    setMotionStyle(handoff,'--fx-folio-rotate-y',(dir*(1-push)*-24).toFixed(1)+'deg');
+    setMotionStyle(handoff,'--fx-folio-rotate-x',((1-push)*12).toFixed(1)+'deg');
+    setMotionStyle(handoff,'--fx-folio-scale',(0.82+push*.18-settle*.035).toFixed(3));
+    setMotionStyle(handoff,'--fx-folio-bend',(1-push).toFixed(3));
+    setData(handoff,'phase',p<.24?'extracting':p<.52?'transferring':'presented');
     root.dataset.fxArchiveVisibleHandoff='physical-paper-active';
   }
 
@@ -1443,7 +1459,7 @@ void main(){
     version:VERSION,get scenes(){return scenes.map(s=>({key:s.key,source:s.source,id:s.scrollAnchor?.id||s.node.id||s.selector}));},
     get state(){return{active:archiveActive,scene:current?.s.key||null,progress:current?.progress??0,frames:painted,quality,updates,disposed,raf,scrollY,lastUpdateScroll:root.dataset.fxArchiveUpdateScroll||null,error:root.dataset.fxArchiveError||null,
       targetFrameMs:PerformanceManager.frameInterval(),
-      idleFastPathSkips,idleComposed,
+      idleFastPathSkips,idleComposed,styleWrites,styleSkips,
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
       cpuSamples:PerformanceManager.samples,domComposes};},
     refresh:()=>{discover();invalidate();},setQuality:value=>PerformanceManager.setQuality(value)
