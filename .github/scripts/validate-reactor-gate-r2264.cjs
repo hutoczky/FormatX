@@ -465,3 +465,33 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(native.includes("listen(window,'pagehide',onPageHide,{passive:true})"));
  console.log('R2288_BFCACHE_RESUME_PASS '+JSON.stringify({cycles:2,permanentDisposal:true,staleFramesCleared:true}));
  }
+
+ // R2289: the physical gate camera shares the existing native scene.
+ // Bound the excursion and verify zero velocity at both joins.
+ {
+ const a=src.indexOf('  function passageFlight('),b=src.indexOf('  function readingTravel(',a);
+ const flight=new Function('clamp','smooth','entryReactorHost',src.slice(a,b)+'return passageFlight;')(clamp,smooth,host);
+ const first={key:'ecosystem',cinemaHost:host,index:0},second={key:'systems',cinemaHost:{},index:1};
+ const checkout={key:'licensing',cinemaHost:{},index:5};
+ let peak=0,mobilePeak=0,samples=0;
+ for(const scene of [first,second,checkout]){
+   for(const portrait of [false,true]){
+     const start=scene===first?.315:.325,end=scene===first?.78:.64;
+     for(let i=0;i<=1000;i++){
+       const p=i/1000,f=flight(scene,p,portrait);
+       assert(Number.isFinite(f.x)&&Number.isFinite(f.y)&&Number.isFinite(f.z));
+       assert(Math.abs(f.x)<=(portrait?.07:.23)&&Math.abs(f.y)<=(portrait?.035:.09)&&Math.abs(f.z)<=(portrait?.43:.76));
+       if(scene===checkout||p<=start||p>=end)assert(Math.hypot(f.x,f.y,f.z)<1e-10);
+       if(portrait)mobilePeak=Math.max(mobilePeak,-f.z);else peak=Math.max(peak,-f.z);
+       samples++;
+     }
+     for(const edge of [start,end]){
+       const f=flight(scene,edge+(edge===start?1e-5:-1e-5),portrait);
+       assert(Math.hypot(f.x,f.y,f.z)<1e-7,'camera join must be differentiable');
+     }
+   }
+ }
+ assert(peak>.7&&mobilePeak>.4);
+ assert(src.includes('dolly+mix(-.035,.085,approach)+flight.z+passage.z'));
+ console.log('R2289_PHYSICAL_PASSAGE_PASS '+JSON.stringify({samples,desktopPeak:peak,mobilePeak,checkoutUnchanged:true,extraDrawCalls:0}));
+ }

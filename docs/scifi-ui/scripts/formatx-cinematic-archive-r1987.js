@@ -719,8 +719,11 @@
       const dolly=Math.sin(distance*.13)*.11;
       const lift=Math.sin(distance*.12)*.035;
       const flight=readingFlight(travel);
-      return [orbit+flight.x,lift+mix(-.025,.027,approach)+flight.y,
-        dolly+mix(-.035,.085,approach)+flight.z];
+      // R2289: travel THROUGH the bulkhead, rather than only scaling it.
+      // Native HTML progress and the checkout are not moved or retimed.
+      const passage=passageFlight(scene,p,mobile());
+      return [orbit+flight.x+passage.x,lift+mix(-.025,.027,approach)+flight.y+passage.y,
+        dolly+mix(-.035,.085,approach)+flight.z+passage.z];
     }
   }
   function cubeGeometry(){
@@ -854,6 +857,22 @@
   // At 165dvh the document's retrieval value remains .78 for about
   // .69 viewport heights. Use the already-measured rectangle to traverse
   // this interval without touching the actual interactive reading panel.
+  // R2289: reversible, C1-continuous camera excursion during each real gate.
+  // Start after the contiguous chapter-selection boundary (~.313), and
+  // return to the baseline before the reading beat. No added draw calls.
+  function passageFlight(scene,p,portrait){
+    const first=Boolean(entryReactorHost&&scene.cinemaHost===entryReactorHost);
+    if(!scene.cinemaHost||scene.key==='licensing')return {x:0,y:0,z:0};
+    const start=first?.315:.325,end=first?.78:.64;
+    const t=clamp((p-start)/(end-start));
+    // Ease in, pass the near plane, then settle without a camera cut.
+    const envelope=smooth(t/.46)*(1-smooth((t-.52)/.48));
+    const direction=scene.index%2===0?1:-1;
+    const lateral=portrait?.07:.23,depth=portrait?.43:.76;
+    return {x:direction*lateral*Math.sin(Math.PI*t)*envelope,
+      y:(portrait?.035:.09)*envelope,
+      z:-depth*envelope};
+  }
   function readingTravel(rect,vh){
     const from=-.017*vh,to=.94*vh-rect.height;
     const span=from-to;
@@ -1216,6 +1235,7 @@ void main(){
         }
       }
       setData(root,'fxArchiveReadingTravelR2266',travel.toFixed(3));
+      setData(root,'fxArchivePassageFlightR2289',scene.key==='licensing'?'checkout-static':'reversible-dolly');
       setData(root,'fxArchiveReactorSubmittedTrianglesR2279',String(lastRenderedGate?gateVertices/3:0));
       if(root.dataset.fxArchivePersistentRackCount!==String(rackCount))
         root.dataset.fxArchivePersistentRackCount=String(rackCount);
