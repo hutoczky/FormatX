@@ -8,8 +8,8 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorGeometry,reactorEntry,reactorHandoff}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorGeometry,reactorEntry,reactorHandoff};')(clamp,mix,smooth,host);
+const {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
 assert.equal(v.length,576*3*8);
 for(let i=0;i<v.length;i+=8){
@@ -39,3 +39,21 @@ assert(src.includes('this.mesh(this.reactor,'));
 assert(src.includes("gl.deleteBuffer(this.reactor.buffer)"));
 assert(src.includes("if(ingress&&ingress.alpha>.001&&k===1)continue;"),'reactor adds a draw call');
 console.log('R2264_REACTOR_GEOMETRY_PASS '+JSON.stringify({triangles:v.length/24,materials:counts,scrollSamples:101,oneBatchedDraw:true}));
+
+const next={cinemaHost:{},key:'diagnostics'};
+const checkout={cinemaHost:{},key:'licensing'};
+assert.equal(corridorEntry(entry,.1),null);
+assert.equal(corridorEntry({key:'missing'},.1),null);
+assert.equal(corridorEntry(next,0).alpha,0);
+assert.equal(corridorEntry(next,.30),null);
+let lastZ=-Infinity,lastProgress=-Infinity;
+for(let i=0;i<100;i++){
+  const p=.30*i/100,a=corridorEntry(next,p),b=corridorEntry(checkout,p);
+  assert(a.alpha>=0&&a.alpha<=.66&&b.alpha>=0&&b.alpha<=.38);
+  assert(a.z>=lastZ&&a.progress>=lastProgress);
+  lastZ=a.z;lastProgress=a.progress;
+  assert.equal(reactorHandoff(next,p).settle,1);
+  assert.equal(reactorHandoff(checkout,p).settle,1);
+}
+assert(corridorEntry(next,.29999).alpha<.00001);
+console.log('R2265_SYSTEM_CORRIDOR_PASS '+JSON.stringify({samples:100,checkoutIntensityLimit:.38,firstEntryUnchanged:true}));

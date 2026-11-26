@@ -765,6 +765,14 @@
       phase:t<.34?'approach':t<.82?'traverse':t<1?'arrival':'clear'
     };
   }
+  // Short, lower-intensity bulkhead passage at the entrance of every
+  // subsequent system. No new document sections, geometry or draw budget.
+  function corridorEntry(scene,p){
+    if(!entryReactorHost||!scene.cinemaHost||scene.cinemaHost===entryReactorHost||p>=.30)return null;
+    const t=clamp(p/.30);
+    const alpha=(scene.key==='licensing'?.38:.66)*smooth(t/.15)*(1-smooth((t-.65)/.35));
+    return {progress:.12+.88*t,z:mix(-1.35,.72,smooth(t)),alpha};
+  }
   function panelGeometry(detail){
     const u=detail?20:10,v=detail?16:9,data=[];
     for(let y=0;y<v;y++)for(let x=0;x<u;x++){
@@ -990,7 +998,9 @@ void main(){
         root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
-      const ingress=reactorEntry(scene,pro);
+      const firstIngress=reactorEntry(scene,pro);
+      const corridor=firstIngress?null:corridorEntry(scene,pro);
+      const ingress=firstIngress||corridor;
       const transfer=reactorHandoff(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
@@ -1027,10 +1037,11 @@ void main(){
       // Exchange one decorative rail for the batched gate, rather than
       // increasing the number of submitted draw calls on low-power devices.
       if(ingress&&ingress.alpha>.001){
-        this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],[.36,.73,.86],0,ingress.alpha,0,cam,true);
+        this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],firstIngress?[.36,.73,.86]:hue,0,ingress.alpha,0,cam,true);
       }
-      setData(root,'fxArchiveReactorEntryR2261',ingress?'ingress':'clear');
-      setData(root,'fxArchiveReactorPhaseR2262',ingress?(ingress.progress<.34?'approach':ingress.progress<.82?'traverse':'arrival'):'clear');
+      setData(root,'fxArchiveReactorEntryR2261',firstIngress?'ingress':'clear');
+      setData(root,'fxArchiveReactorPhaseR2262',firstIngress?(firstIngress.progress<.34?'approach':firstIngress.progress<.82?'traverse':'arrival'):'clear');
+      setData(root,'fxArchiveCorridorR2265',corridor&&corridor.alpha>.001?scene.key:'clear');
       for(let k=0;k<3;k++){
         if(ingress&&ingress.alpha>.001&&k===1)continue;
         const y=-.95+k*.91;
@@ -1486,6 +1497,7 @@ void main(){
     cinemaHosts=[];cinemaPrepared=false;entryReactorHost=null;
     delete root.dataset.fxArchiveReactorEntryR2261;
     delete root.dataset.fxArchiveReactorPhaseR2262;
+    delete root.dataset.fxArchiveCorridorR2265;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');
