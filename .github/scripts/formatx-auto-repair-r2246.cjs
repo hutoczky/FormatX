@@ -7,10 +7,11 @@ const assert=require('node:assert/strict');
 const HTML='docs/scifi-ui/index.html';
 const ARCHIVE='.github/workflows/measure-mag-scroll-budget-r2226.yml';
 const WORKER='billing-worker/src/production-content-entry.js';
+const GATE='.github/scripts/validate-mag-debanding-r2035.cjs';
 const scripts='docs/scifi-ui/scripts/';
 const files=[HTML,ARCHIVE,WORKER,scripts+'formatx-p0-motion-scheduler-r490.js',
   scripts+'formatx-motion-runtime-loader-r239.js',scripts+'formatx-current-mag-loader-r422.js',
-  scripts+'formatx-core-mobile-v55.js'];
+  scripts+'formatx-core-mobile-v55.js',GATE];
 function revision(text,name){
   const re=new RegExp(name.replace(/\./g,'\\.')+'\\?v=(\\d{8}-r\\d{4}(?:-r\\d{4})?-[a-z0-9-]+)','g');
   const matches=[...text.matchAll(re)].map(m=>m[1]);
@@ -36,6 +37,15 @@ function plan(input){
     'formatx-crystal-organism-r326.js',scheduler,1);
   out[files[5]]=align(input[files[5]],'formatx-crystal-organism-r326.js',scheduler,1);
   out[files[6]]=align(input[files[6]],'formatx-crystal-organism-r326.js',scheduler,1);
+  // The strict gate must assert the same exact cache key as the complete
+  // runtime chain. Only these six known literal references may be rewritten.
+  out[GATE]=input[GATE];
+  for(const [name,count] of [
+    ['formatx-p0-motion-scheduler-r490.js',2],
+    ['formatx-motion-runtime-loader-r239.js',2],
+    ['formatx-current-mag-loader-r422.js',1],
+    ['formatx-crystal-organism-r326.js',1]
+  ])out[GATE]=align(out[GATE],name,scheduler,count);
   return out;
 }
 function selfTest(){
@@ -48,7 +58,10 @@ function selfTest(){
     [files[3]]:ref('formatx-motion-runtime-loader-r239',old),
     [files[4]]:ref('formatx-current-mag-loader-r422',old)+' '+ref('formatx-crystal-organism-r326',old),
     [files[5]]:ref('formatx-crystal-organism-r326',old),
-    [files[6]]:ref('formatx-crystal-organism-r326',old)
+    [files[6]]:ref('formatx-crystal-organism-r326',old),
+    [GATE]:[ref('formatx-p0-motion-scheduler-r490',old),ref('formatx-p0-motion-scheduler-r490',old),
+      ref('formatx-motion-runtime-loader-r239',old),ref('formatx-motion-runtime-loader-r239',old),
+      ref('formatx-current-mag-loader-r422',old),ref('formatx-crystal-organism-r326',old)].join('\n')
   };
   const repaired=plan(input);
   assert(repaired[ARCHIVE].includes(archive));
@@ -57,6 +70,8 @@ function selfTest(){
   assert.equal(repaired[HTML],input[HTML],'Canonical owner must not be changed');
   assert.throws(()=>plan({...input,[HTML]:input[HTML]+' '+input[HTML]}),/Ambiguous/);
   assert.throws(()=>plan({...input,[files[6]]:'missing'}),/Unexpected reference count/);
+  assert.throws(()=>plan({...input,[GATE]:input[GATE]+'\n'+input[GATE]}),/Unexpected reference count/);
+  assert.equal(repaired[GATE].split(rev).length-1,6,'All six exact gate references must align');
   return 'R2246_AUTO_REPAIR_SELF_TEST_PASS';
 }
 function main(){
