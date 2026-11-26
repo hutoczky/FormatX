@@ -572,6 +572,12 @@
     }
     for(const node of nearby){
       if(!node.isConnected)continue;
+      // R2277: R2030/R2040 already animate the entire real native folio.
+      // Its descendants have transform/opacity/animation explicitly reset
+      // by the cinematic CSS. Reading their boxes defeats content-visibility
+      // for hidden adjacent chapters and writes visually redundant styles.
+      // Preserve the legacy path for genuine non-folio sheets.
+      if(node.closest('.fx-archive-cinema-folio-r2030'))continue;
       const bounds=node.getBoundingClientRect();
       const entry=clamp((vh*.89-bounds.top)/Math.max(160,vh*.37));
       const last=paperLast.get(node);
@@ -589,7 +595,7 @@
       node.style.setProperty('--fx-archive-paper-opacity',(.66+settled*.34).toFixed(3));
       node.dataset.fxArchivePaperPhase=entry>=.99?'presented':'being-handed';
     }
-    root.dataset.fxArchiveRealContent='native-paper-handoff';
+    setData(root,'fxArchiveRealContent','native-paper-handoff');
   }
   function sceneForElement(node){
     for(const s of scenes)if((s.paperNodes||[]).includes(node))return s;

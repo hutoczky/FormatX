@@ -234,3 +234,19 @@ assert(mobileSamples>baselineSamples*1.35);
 assert.equal(reactorHandoff(next,.78).settle,1);
 console.log('R2276_MOBILE_CORRIDOR_PASS '+JSON.stringify({baselineSamples,mobileSamples,relativeIncrease:mobileSamples/baselineSamples-1,checkoutUnchanged:true,hardwareUnchanged:true}));
 }
+
+// R2277: the actual update must not measure or mutate cinematic descendants.
+{
+const begin=src.indexOf('  function updateRealContentSheets(){'),end=src.indexOf('  function sceneForElement(',begin);
+assert(begin>=0&&end>begin);
+const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css','utf8');
+assert(/\.fx-archive-cinema-folio-r2030 :is\(\[data-reveal\],\.fx-archive-live-sheet-r2026\)\s*\{[^}]*opacity:1!important;[^}]*translate:none!important;[^}]*rotate:none!important;[^}]*scale:1!important;[^}]*animation:none!important;[^}]*transform:none!important;/.test(css),'folio override contract changed');
+let reads=0,writes=0;
+const makeNode=inside=>({isConnected:true,closest:()=>inside?{}:null,getBoundingClientRect:()=>{reads++;return {top:300};},style:{setProperty:()=>writes++},dataset:{}});
+const nodes=Array.from({length:24},()=>makeNode(true)),outside=makeNode(false);
+const scenes=[{index:0,paperNodes:[...nodes,outside]}];
+const update=new Function('archiveActive','reduced','innerHeight','mobile','current','scenes','paperLast','clamp','smooth','sceneForElement','root','setData',src.slice(begin,end)+'return updateRealContentSheets;')(true,{matches:false},844,()=>true,{s:scenes[0]},scenes,new WeakMap(),clamp,smooth,()=>scenes[0],{dataset:{}},(node,key,value)=>{node.dataset[key]=value;});
+update();assert.equal(reads,1);assert.equal(writes,5);
+assert(nodes.every(node=>Object.keys(node.dataset).length===0));
+console.log('R2277_REDUNDANT_PAPER_LAYOUT_PASS '+JSON.stringify({skippedFolioNodes:24,legacyMeasurements:reads,legacyStyleWrites:writes}));
+}
