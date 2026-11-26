@@ -2185,9 +2185,9 @@
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
       width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
-      root.dataset.fxCoreReal3dResolution=`${w}x${h}`;
-      root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);
-      root.dataset.fxCoreViewportAspect=aspect.toFixed(4);
+      {const value=String(`${w}x${h}`);if(root.dataset.fxCoreReal3dResolution!==value)root.dataset.fxCoreReal3dResolution=`${w}x${h}`;}
+      {const value=String((w/Math.max(1,rect.width)).toFixed(2));if(root.dataset.fxCoreReal3dScale!==value)root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);}
+      {const value=String(aspect.toFixed(4));if(root.dataset.fxCoreViewportAspect!==value)root.dataset.fxCoreViewportAspect=aspect.toFixed(4);}
       return true;
     }
 
@@ -2220,22 +2220,22 @@
     }
     function shapeName(){return 'organism';}
     function publishShape(source='renderer'){
-      root.dataset.fxCoreShapeR337='organism';
-      root.dataset.fxCoreTargetShape='organism';
-      root.dataset.fxCoreShape='organism';
-      root.dataset.fxCoreMorph='0.000';
-      root.dataset.fxCoreMorphSource=source;
-      root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1723';
-      root.dataset.fxCoreLivingFormR1711='single-organism';
-      root.dataset.fxCoreLivingFormR1723='canonical-organism';
-      stage.dataset.shape='organism';
+      {const value=String('organism');if(root.dataset.fxCoreShapeR337!==value)root.dataset.fxCoreShapeR337='organism';}
+      {const value=String('organism');if(root.dataset.fxCoreTargetShape!==value)root.dataset.fxCoreTargetShape='organism';}
+      {const value=String('organism');if(root.dataset.fxCoreShape!==value)root.dataset.fxCoreShape='organism';}
+      {const value=String('0.000');if(root.dataset.fxCoreMorph!==value)root.dataset.fxCoreMorph='0.000';}
+      {const value=String(source);if(root.dataset.fxCoreMorphSource!==value)root.dataset.fxCoreMorphSource=source;}
+      {const value=String('single-living-organism-fixed-topology-r1723');if(root.dataset.fxCoreMorphEngine!==value)root.dataset.fxCoreMorphEngine='single-living-organism-fixed-topology-r1723';}
+      {const value=String('single-organism');if(root.dataset.fxCoreLivingFormR1711!==value)root.dataset.fxCoreLivingFormR1711='single-organism';}
+      {const value=String('canonical-organism');if(root.dataset.fxCoreLivingFormR1723!==value)root.dataset.fxCoreLivingFormR1723='canonical-organism';}
+      {const value=String('organism');if(stage.dataset.shape!==value)stage.dataset.shape='organism';}
     }
     function setMorph(value,source='api-morph',announce=true){
       const requested=clamp(Number(value)||0,0,1);
       targetMorph=0;
       morph=0;
-      root.dataset.fxCoreRequestedMorphR1711=requested.toFixed(3);
-      root.dataset.fxCoreLegacyShapeRequestR1723=requested>.5?'sphere':'crystal';
+      {const value=String(requested.toFixed(3));if(root.dataset.fxCoreRequestedMorphR1711!==value)root.dataset.fxCoreRequestedMorphR1711=requested.toFixed(3);}
+      {const value=String(requested>.5?'sphere':'crystal');if(root.dataset.fxCoreLegacyShapeRequestR1723!==value)root.dataset.fxCoreLegacyShapeRequestR1723=requested>.5?'sphere':'crystal';}
       publishShape(source);
       const cinematicBirth=/^r533-/.test(source);
       boost(requested>.5?.88:.72,cinematicBirth?1:(mobile?3:5));
@@ -2268,7 +2268,7 @@
     function rotateBy(x,y,source='api-rotate'){
       targetRotationX=clamp(targetRotationX+x,-1.02,1.02);
       targetRotationY+=y;
-      root.dataset.fxCoreRotationSource=source;
+      {const value=String(source);if(root.dataset.fxCoreRotationSource!==value)root.dataset.fxCoreRotationSource=source;}
       boost(.84,mobile?5:8);
     }
 
@@ -2278,7 +2278,7 @@
        Between sweeps the renderer returns to zero idle frames. */
     function scheduleHeartbeat(){
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
-      root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';
+      {const value=String('disabled-no-continuous-rendering');if(root.dataset.fxCoreIdleHeartbeatR441!==value)root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';}
     }
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
@@ -2298,9 +2298,9 @@
       const pulseId=surfacePulseCount;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.24);
       targetBreath=Math.max(targetBreath,.42);
-      root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;
-      root.dataset.fxCoreEnergyBoltR455=`surface-sweep-${source}-${surfacePulseCount}`;
-      root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);
+      {const value=String(`sweep-${surfacePulseCount}-${source}`);if(root.dataset.fxCoreSurfacePulseR454!==value)root.dataset.fxCoreSurfacePulseR454=`sweep-${surfacePulseCount}-${source}`;}
+      {const value=String(`surface-sweep-${source}-${surfacePulseCount}`);if(root.dataset.fxCoreEnergyBoltR455!==value)root.dataset.fxCoreEnergyBoltR455=`surface-sweep-${source}-${surfacePulseCount}`;}
+      {const value=String(String(surfacePulseCount));if(root.dataset.fxCoreSurfaceCountR484!==value)root.dataset.fxCoreSurfaceCountR484=String(surfacePulseCount);}
       // surfacePulseActive keeps RAF alive for the bounded duration. Do not
       // leave a second frame quota behind it on slower desktop renderers.
       if(!blocked())schedule(1);
@@ -2321,13 +2321,13 @@
             delayed.delete(qualityResizeTimer);
             qualityResizeTimer=0;
             resize();
-            root.dataset.fxCoreSweepQualityResizeR2052='coalesced-in-final-frame';
+            {const value=String('coalesced-in-final-frame');if(root.dataset.fxCoreSweepQualityResizeR2052!==value)root.dataset.fxCoreSweepQualityResizeR2052='coalesced-in-final-frame';}
           }
           const finish=Math.min(performance.now(),surfacePulseStart+SURFACE_PULSE_WINDOW_MS-1);
           if(finish>surfacePulseStart)render(finish);
-          root.dataset.fxCoreSweepEndpointR2050='rendered-native-final-phase';
+          {const value=String('rendered-native-final-phase');if(root.dataset.fxCoreSweepEndpointR2050!==value)root.dataset.fxCoreSweepEndpointR2050='rendered-native-final-phase';}
         }else{
-          root.dataset.fxCoreSweepEndpointR2050='suspended-when-invisible-or-paused';
+          {const value=String('suspended-when-invisible-or-paused');if(root.dataset.fxCoreSweepEndpointR2050!==value)root.dataset.fxCoreSweepEndpointR2050='suspended-when-invisible-or-paused';}
         }
         surfacePulseStart=-Infinity;
         burstFrames=0;
@@ -2339,12 +2339,12 @@
           clearTimeout(qualityResizeTimer);
           delayed.delete(qualityResizeTimer);
           qualityResizeTimer=0;
-          root.dataset.fxCoreSweepQualityResizeR2052='discarded-after-final-frame';
+          {const value=String('discarded-after-final-frame');if(root.dataset.fxCoreSweepQualityResizeR2052!==value)root.dataset.fxCoreSweepQualityResizeR2052='discarded-after-final-frame';}
         }
         if(raf){cancelAnimationFrame(raf);raf=0;}
         settleAfterBurst();
-        root.dataset.fxCoreSurfacePulseR454='idle';
-        root.dataset.fxCoreIdleBoundaryR1710='hard-zero-frame-after-sweep';
+        {const value=String('idle');if(root.dataset.fxCoreSurfacePulseR454!==value)root.dataset.fxCoreSurfacePulseR454='idle';}
+        {const value=String('hard-zero-frame-after-sweep');if(root.dataset.fxCoreIdleBoundaryR1710!==value)root.dataset.fxCoreIdleBoundaryR1710='hard-zero-frame-after-sweep';}
         dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
           detail:{phase:'end',source,duration:SURFACE_PULSE_WINDOW_MS}
         }));
@@ -2359,12 +2359,12 @@
     function scheduleSurfacePulse(){
       clearTimeout(surfacePulseTimer);surfacePulseTimer=0;
       if(auditMode){
-        root.dataset.fxCoreSurfaceSchedulerR484='lighthouse-audit-disabled';
+        {const value=String('lighthouse-audit-disabled');if(root.dataset.fxCoreSurfaceSchedulerR484!==value)root.dataset.fxCoreSurfaceSchedulerR484='lighthouse-audit-disabled';}
         return;
       }
       if(disposed||contextLost||reduced.matches||document.hidden||!visible||paused
         ||document.querySelector('.fx-reference-pause')?.dataset.paused==='true'){
-        root.dataset.fxCoreSurfaceSchedulerR484='suspended';
+        {const value=String('suspended');if(root.dataset.fxCoreSurfaceSchedulerR484!==value)root.dataset.fxCoreSurfaceSchedulerR484='suspended';}
         return;
       }
       // R588: the first autonomous sweep is a post-interactive warm-up.
@@ -2375,9 +2375,9 @@
         : mobile
           ? 5400+(surfacePulseCount%3)*520
           : 4100+(surfacePulseCount%3)*360;
-      root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';
+      {const value=String('armed-single-native-timer');if(root.dataset.fxCoreSurfaceSchedulerR484!==value)root.dataset.fxCoreSurfaceSchedulerR484='armed-single-native-timer';}
       const dueAt=performance.now()+delay;
-      root.dataset.fxCoreSurfaceScheduledDelayR2055=String(Math.round(delay));
+      {const value=String(String(Math.round(delay)));if(root.dataset.fxCoreSurfaceScheduledDelayR2055!==value)root.dataset.fxCoreSurfaceScheduledDelayR2055=String(Math.round(delay));}
       surfacePulseTimer=setTimeout(()=>{
         surfacePulseTimer=0;
         root.dataset.fxCoreSurfaceTimerLagR2055=String(Math.round(Math.max(0,performance.now()-dueAt)));
@@ -2387,7 +2387,7 @@
     }
     function scheduleAutonomousMorph(){
       clearTimeout(autonomousTimer);autonomousTimer=0;
-      root.dataset.fxCoreAutonomousMorphR441='disabled-until-explicit-interaction';
+      {const value=String('disabled-until-explicit-interaction');if(root.dataset.fxCoreAutonomousMorphR441!==value)root.dataset.fxCoreAutonomousMorphR441='disabled-until-explicit-interaction';}
     }
 
     function render(now){
@@ -2457,10 +2457,10 @@
         catch(error){scenePasses.delete(pass);console.warn('FormatX scene pass disabled:',error);}
       }
       if(root.dataset.fxCoreFirstFrameR1913!=='painted'){
-        root.dataset.fxCoreFirstFrameR1913='painted';
-        stage.dataset.firstFrame='painted';
+        {const value=String('painted');if(root.dataset.fxCoreFirstFrameR1913!==value)root.dataset.fxCoreFirstFrameR1913='painted';}
+        {const value=String('painted');if(stage.dataset.firstFrame!==value)stage.dataset.firstFrame='painted';}
       }
-      root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';
+      {const value=String('healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719');if(root.dataset.fxCorePassModelR1450!==value)root.dataset.fxCorePassModelR1450='healthy-smooth-biomechanical-body-energy-heart-living-tendrils-r1719';}
 
       const ms=performance.now()-begin;
       renderAverage=renderAverage?renderAverage*.82+ms*.18:ms;
@@ -2468,12 +2468,12 @@
       framePeak=Math.max(dt,framePeak*.90);
       if(renderAverage>(mobile?15.5:15.8)){
         slowRenderer=true;
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';
-        root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';
-        root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';
-        root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';
+        {const value=String(mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution');if(root.dataset.fxCoreAdaptiveOpticsR588!==value)root.dataset.fxCoreAdaptiveOpticsR588=mobile?'one-pass-mobile-slow-renderer':'single-pass-adaptive-resolution';}
+        {const value=String(mobile?'bounded-slow-renderer-full-window':'desktop-bounded');if(root.dataset.fxCoreSurfaceCadenceR1392!==value)root.dataset.fxCoreSurfaceCadenceR1392=mobile?'bounded-slow-renderer-full-window':'desktop-bounded';}
+        {const value=String(mobile?'full-window-fast-cadence':'desktop-bounded');if(root.dataset.fxCoreSurfaceCadenceR1403!==value)root.dataset.fxCoreSurfaceCadenceR1403=mobile?'full-window-fast-cadence':'desktop-bounded';}
+        {const value=String(mobile?'midpoint-safe-68ms-cap':'desktop-bounded');if(root.dataset.fxCoreSurfaceCadenceR1441!==value)root.dataset.fxCoreSurfaceCadenceR1441=mobile?'midpoint-safe-68ms-cap':'desktop-bounded';}
       }else if(!slowRenderer){
-        root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';
+        {const value=String(mobile?'single-pass-mobile-capable':'single-pass-60fps-capable');if(root.dataset.fxCoreAdaptiveOpticsR588!==value)root.dataset.fxCoreAdaptiveOpticsR588=mobile?'single-pass-mobile-capable':'single-pass-60fps-capable';}
       }
 
       if(!auditMode){
@@ -2485,7 +2485,7 @@
           stableBudgetFrames=0;
           if(Math.abs(previous-qualityScale)>.001){
             lastQualityAdjust=now;
-            root.dataset.fxCoreGovernorR1660='panic-lod-one-frame-spike';
+            {const value=String('panic-lod-one-frame-spike');if(root.dataset.fxCoreGovernorR1660!==value)root.dataset.fxCoreGovernorR1660='panic-lod-one-frame-spike';}
             if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
             qualityResizeTimer=later(()=>{
               qualityResizeTimer=0;
@@ -2520,8 +2520,8 @@
 
           if(Math.abs(previous-qualityScale)>.001){
             lastQualityAdjust=now;
-            root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';
-            root.dataset.fxCoreGovernorR1660=qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';
+            {const value=String(qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery');if(root.dataset.fxCoreGovernorR1626!==value)root.dataset.fxCoreGovernorR1626=qualityScale<previous?'hard-60fps-quality-first':'slow-quality-recovery';}
+            {const value=String(qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery');if(root.dataset.fxCoreGovernorR1660!==value)root.dataset.fxCoreGovernorR1660=qualityScale<previous?'preemptive-frame-budget-shed':'guarded-quality-recovery';}
             if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
             qualityResizeTimer=later(()=>{
               qualityResizeTimer=0;
@@ -2533,25 +2533,25 @@
 
       if(now-lastRuntimeTelemetryAt>=250 || lastRuntimeTelemetryAt===-Infinity){
         lastRuntimeTelemetryAt=now;
-      root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);
-      root.dataset.fxCoreFrameMs=dt.toFixed(2);
-      root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);
-      root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);
-      root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);
-      root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';
-      root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';
-      root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';
-      root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';
-      root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';
-      root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';
-      root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';
-      root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';
-      root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';
-      root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';
-      root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';
-      root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';
-      root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);
-      root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));
+      {const value=String(renderAverage.toFixed(2));if(root.dataset.fxCoreRenderMs!==value)root.dataset.fxCoreRenderMs=renderAverage.toFixed(2);}
+      {const value=String(dt.toFixed(2));if(root.dataset.fxCoreFrameMs!==value)root.dataset.fxCoreFrameMs=dt.toFixed(2);}
+      {const value=String(frameIntervalAverage.toFixed(2));if(root.dataset.fxCoreFrameIntervalR1602!==value)root.dataset.fxCoreFrameIntervalR1602=frameIntervalAverage.toFixed(2);}
+      {const value=String(renderPeak.toFixed(2));if(root.dataset.fxCoreRenderPeakR1626!==value)root.dataset.fxCoreRenderPeakR1626=renderPeak.toFixed(2);}
+      {const value=String(framePeak.toFixed(2));if(root.dataset.fxCoreFramePeakR1626!==value)root.dataset.fxCoreFramePeakR1626=framePeak.toFixed(2);}
+      {const value=String('60fps-hard-budget-quality-first-r1626');if(root.dataset.fxCoreReal3dTargetFps!==value)root.dataset.fxCoreReal3dTargetFps='60fps-hard-budget-quality-first-r1626';}
+      {const value=String('60fps-preemptive-headroom-quality-before-cadence');if(root.dataset.fxCoreReal3dTargetFpsR1642!==value)root.dataset.fxCoreReal3dTargetFpsR1642='60fps-preemptive-headroom-quality-before-cadence';}
+      {const value=String('lower-start-resolution-fast-shedding-slow-recovery-zero-idle');if(root.dataset.fxNativeMagPerformanceR1642!==value)root.dataset.fxNativeMagPerformanceR1642='lower-start-resolution-fast-shedding-slow-recovery-zero-idle';}
+      {const value=String('panic-lod-single-frame-spike-guard-minimum-60fps-target');if(root.dataset.fxNativeMagPerformanceR1660!==value)root.dataset.fxNativeMagPerformanceR1660='panic-lod-single-frame-spike-guard-minimum-60fps-target';}
+      {const value=String('lower-initial-resolution-recovery-only-after-sustained-60fps-headroom');if(root.dataset.fxNativeMagPerformanceR1670!==value)root.dataset.fxNativeMagPerformanceR1670='lower-initial-resolution-recovery-only-after-sustained-60fps-headroom';}
+      {const value=String('software-crisp-start-constrained-shader-governor-sheds-on-pressure');if(root.dataset.fxNativeMagPerformanceR1671!==value)root.dataset.fxNativeMagPerformanceR1671='software-crisp-start-constrained-shader-governor-sheds-on-pressure';}
+      {const value=String('preemptive-60fps-headroom-lighter-geometry-slow-recovery');if(root.dataset.fxNativeMagPerformanceR1676!==value)root.dataset.fxNativeMagPerformanceR1676='preemptive-60fps-headroom-lighter-geometry-slow-recovery';}
+      {const value=String('renderer-capability-first-software-lite-hardware-photoreal-60fps-target');if(root.dataset.fxNativeMagPerformanceR1694!==value)root.dataset.fxNativeMagPerformanceR1694='renderer-capability-first-software-lite-hardware-photoreal-60fps-target';}
+      {const value=String('software-static-habitat-native-mag-frame-budget-priority');if(root.dataset.fxNativeMagPerformanceR1701!==value)root.dataset.fxNativeMagPerformanceR1701='software-static-habitat-native-mag-frame-budget-priority';}
+      {const value=String('preemptive-60fps-mobile-lite-zero-idle-frame-budget');if(root.dataset.fxNativeMagPerformanceR1710!==value)root.dataset.fxNativeMagPerformanceR1710='preemptive-60fps-mobile-lite-zero-idle-frame-budget';}
+      {const value=String('absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf');if(root.dataset.fxNativeMagDesktopInteractionR1944!==value)root.dataset.fxNativeMagDesktopInteractionR1944='absolute-pointer-tilt-coalesced-polling-rate-independent-bounded-raf';}
+      {const value=String('software-readable-resolution-floor-with-bounded-pixel-budget');if(root.dataset.fxNativeMagPerformanceR1696!==value)root.dataset.fxNativeMagPerformanceR1696='software-readable-resolution-floor-with-bounded-pixel-budget';}
+      {const value=String(qualityScale.toFixed(2));if(root.dataset.fxCoreQualityScaleR1600!==value)root.dataset.fxCoreQualityScaleR1600=qualityScale.toFixed(2);}
+      {const value=String(String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage)))));if(root.dataset.fxCoreReal3dFps!==value)root.dataset.fxCoreReal3dFps=String(Math.min(60,Math.round(1000/Math.max(16.67,frameIntervalAverage))));}
       }
     }
 
@@ -2572,7 +2572,7 @@
       cinematic.rotation=[rotationX,rotationY,rotationZ];
       cinematic.siteProgress=siteProgress;
       publishShape('burst-settle-r442');
-      root.dataset.fxCoreIdleRenderR441='zero-frame';
+      {const value=String('zero-frame');if(root.dataset.fxCoreIdleRenderR441!==value)root.dataset.fxCoreIdleRenderR441='zero-frame';}
     }
 
     function frame(now){
@@ -2590,9 +2590,9 @@
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
         const divisor=Math.max(1,Math.floor(estimatedHz/60));
         schedulerTick=(schedulerTick+1)%divisor;
-        root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);
-        root.dataset.fxCoreRenderDivisorR1622=String(divisor);
-        root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';
+        {const value=String(estimatedHz.toFixed(1));if(root.dataset.fxCoreRefreshHzR1622!==value)root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);}
+        {const value=String(String(divisor));if(root.dataset.fxCoreRenderDivisorR1622!==value)root.dataset.fxCoreRenderDivisorR1622=String(divisor);}
+        {const value=String('superseded-by-r1622-minimum-60fps-divisor');if(root.dataset.fxCoreRenderCeilingR1620!==value)root.dataset.fxCoreRenderCeilingR1620='superseded-by-r1622-minimum-60fps-divisor';}
         if(divisor>1 && schedulerTick!==0){
           raf=requestAnimationFrame(frame);
           return;
@@ -2602,7 +2602,7 @@
       const surfacePulseActive=now-surfacePulseStart>=0&&now-surfacePulseStart<=SURFACE_PULSE_WINDOW_MS;
       if(burstFrames>0){
         const burstDelay=auditMode&&renderAverage>42?Math.min(260,Math.max(80,renderAverage*2.2)):0;
-        root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';
+        {const value=String(burstDelay?'audit-paced':'native-60hz-target');if(root.dataset.fxCoreBurstCadenceR1600!==value)root.dataset.fxCoreBurstCadenceR1600=burstDelay?'audit-paced':'native-60hz-target';}
         queueFrame(burstDelay);
       }else if(surfacePulseActive){
         const sweepDelay=auditMode
@@ -2610,9 +2610,9 @@
               ? (renderAverage>34?Math.min(68,Math.max(24,renderAverage*.34)):0)
               : (renderAverage>60?Math.min(96,Math.max(32,renderAverage*.35)):0))
           : 0;
-        root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';
-        root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';
-        root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';
+        {const value=String(sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf');if(root.dataset.fxCoreAdaptiveSurfaceCadenceR588!==value)root.dataset.fxCoreAdaptiveSurfaceCadenceR588=sweepDelay?('paced-'+Math.round(sweepDelay)+'ms'):'native-raf';}
+        {const value=String(mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle');if(root.dataset.fxCoreSurfaceCadenceR643!==value)root.dataset.fxCoreSurfaceCadenceR643=mobile?'mobile-budget-preserved':'desktop-midpoint-safe-bounded-no-idle';}
+        {const value=String('production-native-60hz-target-audit-contract-preserved');if(root.dataset.fxCoreAnimationCadenceR1600!==value)root.dataset.fxCoreAnimationCadenceR1600='production-native-60hz-target-audit-contract-preserved';}
         queueFrame(sweepDelay);
       }else settleAfterBurst();
     }
