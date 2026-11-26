@@ -28,3 +28,19 @@ for (const [index, match] of scripts.entries()) {
   console.log(`Inline bootstrap #${index + 1} allowed by HTML + Worker CSP: ${hash}`);
 }
 console.log(`Validated ${scripts.length} exact inline bootstrap hashes in all production CSP policies.`);
+
+ // R2250: apply the exact CSP contract to all inline styles, not just scripts.
+const styles=[...html.matchAll(/<style\b([^>]*)>([\s\S]*?)<\/style>/gi)];
+assert(styles.length>0,'Missing inline critical styles');
+for(const [index,match] of styles.entries()){
+  const hash="'sha256-"+crypto.createHash('sha256').update(match[2],'utf8').digest('base64')+"'";
+  const stylePolicy=policy=>policy.match(/style-src\s+[^;"]+/)?.[0]||'';
+  assert(stylePolicy(meta[1]).includes(hash),'HTML style hash mismatch #'+(index+1));
+  assert(stylePolicy(workerMeta[1]).includes(hash),'Worker META style hash mismatch #'+(index+1));
+  assert(stylePolicy(workerHeader[1]).includes(hash),'Worker HEADER style hash mismatch #'+(index+1));
+}
+const menu=styles.filter(m=>m[1].includes('data-fx-menu-owner-r1956="true"'));
+assert.equal(menu.length,1,'Expected one inline critical menu style');
+assert.equal(menu[0][2],fs.readFileSync('docs/scifi-ui/styles/formatx-menu-owner-r1956.css','utf8'),'Inline menu must match canonical CSS byte-for-byte');
+assert(!/<link\b[^>]*href="[^"]*formatx-menu-owner-r1956\.css/.test(html),'Redundant menu stylesheet request');
+console.log('R2250_INLINE_MENU_AND_STYLE_CSP_PASS');
