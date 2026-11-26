@@ -34,11 +34,34 @@ function activateStyles(){
 }
 
 const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261026-r2201-genesis-replay-cell';
-let retryCount=0,retryTimer=0;
+let retryCount=0,retryTimer=0,startupTimer=0,abandoned=false;
+const STARTUP_LIMIT_MS=4500;
 const RETRY_LIMIT=3;
-const runtimeReady=()=>document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+const runtimeReady=()=>r.getAttribute('data-fx-mag-birth-live')==='active'&&document.querySelector('.fx-mag-birth-r533') instanceof HTMLElement;
+function failOpen(reason){
+  if(abandoned||runtimeReady())return;
+  abandoned=true;
+  clearTimeout(retryTimer);clearTimeout(startupTimer);
+  // Block a delayed duplicate runtime from reopening an already dismissed intro.
+  window.__formatxMagBirthR533Owner=true;
+  document.querySelectorAll('script[data-fx-mag-birth-live-r533="true"]').forEach(node=>node.remove());
+  document.getElementById('fx-mag-birth-prepaint-r1606')?.remove();
+  document.querySelector('.fx-mag-birth-r533')?.remove();
+  r.removeAttribute('data-fx-mag-birth-live');
+  r.removeAttribute('data-fx-mag-birth-phase');
+  r.dataset.fxIntroPrepaintR1611='skip';
+  r.dataset.fxIntroPrepaintOwnerR1611=reason;
+  r.dataset.fxMagBirthOwnerR533=reason;
+  r.dataset.fxMagBirthLiveR533=reason;
+  r.dataset.fxIntroBootstrapRescueR1755=reason;
+  document.dispatchEvent(new CustomEvent('formatx:magbirthcomplete',{
+    detail:{source:reason,revision:'r2237-bounded-startup'}
+  }));
+}
 function requestRuntime(reason='rescue'){
+  if(abandoned)return;
   if(runtimeReady()){
+    clearTimeout(startupTimer);
     r.dataset.fxIntroBootstrapRescueR1755='runtime-ready';
     return;
   }
@@ -57,10 +80,11 @@ function requestRuntime(reason='rescue'){
   }
   let verified=false;
   const verify=()=>{
-    if(verified)return;
+    if(verified||abandoned)return;
     verified=true;
     clearTimeout(retryTimer);
     if(runtimeReady()){
+      clearTimeout(startupTimer);
       r.dataset.fxIntroBootstrapRescueR1755='loaded-and-running';
       return;
     }
@@ -71,7 +95,7 @@ function requestRuntime(reason='rescue'){
       return;
     }
     if(retryCount>=RETRY_LIMIT){
-      r.dataset.fxIntroBootstrapRescueR1755='retry-exhausted';
+      failOpen('intro-retry-exhausted-r2237');
       return;
     }
     if(e.isConnected)e.remove();
@@ -94,6 +118,9 @@ function b(){
   r.dataset.fxIntroBootstrapVisualR1775='photoreal-intro-core';
   r.dataset.fxIntroBootstrapVisualR1776='cinematic-irregular-crystal-depth';
   r.dataset.fxIntroBootstrapRecoveryR1813='verified-runtime-retry';
+  // A normal completed film must not be mistaken for a failed startup.
+  document.addEventListener('formatx:magbirthcomplete',()=>clearTimeout(startupTimer),{once:true});
+  startupTimer=setTimeout(()=>failOpen('intro-startup-timeout-r2237'),STARTUP_LIMIT_MS);
   requestRuntime('startup');
 }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',b,{once:true}):b();
