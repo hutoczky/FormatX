@@ -727,6 +727,24 @@
   }
   // Three physical octagonal reactor bulkheads, one immutable vertex buffer.
   // Build once, reuse the native archive shader, depth and WebGL context.
+  // A true chamfered prism: eight side faces and two closed end caps.
+  // Local X/Z bevels produce genuine specular highlights, not texture strips.
+  function reactorHousing(width,span,depth,bevel){
+    const x=width*.5,z=depth*.5,y=span*.5,b=Math.min(bevel,x*.8,z*.8);
+    const corners=[[-x+b,-z],[x-b,-z],[x,-z+b],[x,z-b],[x-b,z],[-x+b,z],[-x,z-b],[-x,-z+b]];
+    const data=[];
+    const vertex=(i,yy,n)=>{const [xx,zz]=corners[i];data.push(xx,yy,zz,...n,0,0);};
+    for(let i=0;i<8;i++){
+      const j=(i+1)%8,dx=corners[j][0]-corners[i][0],dz=corners[j][1]-corners[i][1];
+      const length=Math.hypot(dx,dz),n=[dz/length,0,-dx/length];
+      for(const [k,yy] of [[i,-y],[j,y],[j,-y],[i,-y],[i,y],[j,y]])vertex(k,yy,n);
+    }
+    for(let i=1;i<7;i++){
+      for(const k of [0,i+1,i])vertex(k,y,[0,1,0]);
+      for(const k of [0,i,i+1])vertex(k,-y,[0,-1,0]);
+    }
+    return data;
+  }
   function reactorGeometry(){
     const cube=cubeGeometry(),data=[];
     for(let ring=0;ring<3;ring++){
@@ -734,17 +752,17 @@
       for(let edge=0;edge<8;edge++){
         const angle=(edge+.5)*Math.PI/4,ca=Math.cos(angle),sa=Math.sin(angle);
         const length=2*radius*Math.tan(Math.PI/8);
-        // Two separate real solids in the same batched mesh: titanium
-        // housing and a narrow luminous guide on the entry face.
-        for(const [width,span,depth,radial,front,material] of [
-          [.19,length,.23,0,0,.25],
-          [.035,length*.88,.034,-.045,.13,.85]
-        ]){
-          for(let i=0;i<cube.length;i+=8){
-            const x=cube[i]*width+radius+radial,y=cube[i+1]*span;
-            data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*depth+z+front,
-              cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],material,2+ring);
-          }
+        const housing=reactorHousing(.19,length,.23,.035);
+        for(let i=0;i<housing.length;i+=8){
+          const x=housing[i]+radius,y=housing[i+1];
+          data.push(x*ca-y*sa,x*sa+y*ca,housing[i+2]+z,
+            housing[i+3]*ca-housing[i+4]*sa,housing[i+3]*sa+housing[i+4]*ca,housing[i+5],.25,2+ring);
+        }
+        // Separate emissive inlay, above the entry face of the solid metal.
+        for(let i=0;i<cube.length;i+=8){
+          const x=cube[i]*.035+radius-.045,y=cube[i+1]*length*.88;
+          data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*.034+z+.13,
+            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],.85,2+ring);
         }
       }
     }
@@ -837,17 +855,22 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile,uReactorProgress;
-out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;
 void main(){
  vec3 p=aPosition*uScale;
  // R2262: UV.y above 1 is reserved for the three real reactor bulkheads.
  // The nearest frame passes first, followed by two independently timed frames.
  bool reactor=aUv.y>1.5;
  vReactorVisibility=1.0;
+ vReactorLight=0.0;
  if(reactor){
    float ring=aUv.y-2.0;
    float phase=clamp((uReactorProgress-(2.0-ring)*.16)/.68,0.0,1.0);
    float travel=smoothstep(0.0,1.0,phase);
+   // Broad light front moves along the actual ring instead of flickering.
+   float angle=uReactorProgress*6.2831853-ring*.76;
+   vec2 axis=vec2(cos(angle),sin(angle));
+   vReactorLight=smoothstep(.15,.96,dot(normalize(aPosition.xy),axis));
    p.xy*=mix(.82,3.10,travel);
    vReactorVisibility=1.0-smoothstep(.72,1.0,phase);
  }
@@ -890,7 +913,7 @@ void main(){
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
@@ -963,9 +986,14 @@ void main(){
    // Face the viewer with material contrast rather than making the entire
    // chamber glow. Constant per-primitive material tags, no extra texture.
    float guide=step(.6,vUv.x);
-   vec3 titanium=mix(col,vec3(.12,.22,.29)*(0.35+.65*ndl)+specular*.42,.65);
-   vec3 emitter=uColor*(.80+.20*facing);
-   col=mix(titanium,emitter,guide);
+   // Controlled cool key and warm rim on the true bevel normals.
+   float rimKey=max(0.0,dot(N,normalize(vec3(.72,-.31,.48))));
+   float aerial=clamp((vViewDistance-4.0)*.048,0.0,.22);
+   vec3 titanium=vec3(.10,.15,.19)*(.42+.58*ndl)+specular*.52;
+   titanium+=vec3(.18,.15,.10)*rimKey*.30+uColor*fresnel*.14;
+   titanium+=uColor*vReactorLight*.038;
+   vec3 emitter=uColor*(.56+.18*facing+.26*vReactorLight);
+   col=mix(mix(titanium,vec3(.013,.029,.044),aerial),emitter,guide);
    a=mix(a*.96,a,guide)*vReactorVisibility;
  }
  outColor=vec4(col,clamp(a,0.0,1.0));

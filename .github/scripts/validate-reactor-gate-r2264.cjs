@@ -8,10 +8,10 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy};')(clamp,mix,smooth,host);
+const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
-assert.equal(v.length,576*3*8);
+assert.equal(v.length,960*3*8);
 for(let i=0;i<v.length;i+=8){
   for(let j=0;j<8;j++)assert(Number.isFinite(v[i+j]),'nonfinite vertex');
   assert(Math.abs(Math.hypot(v[i+3],v[i+4],v[i+5])-1)<1e-5,'invalid normal');
@@ -20,7 +20,7 @@ for(let i=0;i<v.length;i+=8){
   const key=v[i+7]+':'+material;
   counts[key]=(counts[key]||0)+1;
 }
-for(const ring of [2,3,4])for(const material of ['guide','metal'])assert.equal(counts[ring+':'+material],288);
+for(const ring of [2,3,4])for(const material of ['guide','metal'])assert.equal(counts[ring+':'+material],material==='metal'?672:288);
 const entry={cinemaHost:host,key:'systems'};
 let previous=0;
 for(let i=0;i<=100;i++){
@@ -82,3 +82,20 @@ for(const t of [0,1]){
   for(let r=0;r<8;r++)assert(readingEnergy(t,r,8)<1e-10);
 }
 console.log('R2266_CONTINUOUS_READING_FLIGHT_PASS '+JSON.stringify({viewports:4,scrollSamples:404,extraDrawCalls:0}));
+
+const housing=reactorHousing(.19,1.8,.23,.035);
+assert.equal(housing.length,28*3*8);
+const faces=new Set();
+for(let i=0;i<housing.length;i+=24){
+  const a=housing.slice(i,i+3),b=housing.slice(i+8,i+11),c=housing.slice(i+16,i+19);
+  const u=b.map((x,j)=>x-a[j]),q=c.map((x,j)=>x-a[j]);
+  const cross=[u[1]*q[2]-u[2]*q[1],u[2]*q[0]-u[0]*q[2],u[0]*q[1]-u[1]*q[0]];
+  assert(Math.hypot(...cross)>1e-8,'degenerate bevel triangle');
+  const n=housing.slice(i+3,i+6);
+  assert(Math.abs(Math.hypot(...n)-1)<1e-8);
+  assert(cross.reduce((sum,x,j)=>sum+x*n[j],0)>0,'incorrect face winding');
+  faces.add(n.map(x=>x.toFixed(5)).join(','));
+}
+assert.equal(faces.size,10);
+assert(src.includes('out float vReactorLight')&&src.includes('in float vReactorLight'));
+console.log('R2267_STUDIO_BEVEL_PASS '+JSON.stringify({triangles:v.length/24,normalDirections:faces.size,extraDrawCalls:0}));
