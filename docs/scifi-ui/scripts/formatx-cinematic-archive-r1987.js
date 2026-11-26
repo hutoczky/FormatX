@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2058-curvature-accurate-reflections';
+  const VERSION='cinematic-archive-r2293-native-depth-room-release';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -944,8 +944,8 @@
         quad([a[0],a[1],back],[b[0],b[1],back],[b[0],b[1],front],[a[0],a[1],front],[nx,ny,0],.14);
         // Recessed structural panel, solid bulkhead rib, flush light rail.
         solid([mx+nx*.036,my+ny*.036,(back+front)*.5],[length*.84,.055,1.50],angle,.25);
-        solid([mx+nx*.115,my+ny*.115,front-.10],[length+.04,.25,.23],angle,.42);
-        if(edge%2===0)solid([mx+nx*.090,my+ny*.090,(back+front)*.5],[.085,.045,1.36],angle,.85);
+        solid([mx+nx*.115,my+ny*.115,front-.10],[length+.04,.34,.30],angle,.42);
+        if(edge%2===0)solid([mx+nx*.125,my+ny*.125,(back+front)*.5],[.085,.045,1.36],angle,.85);
       }
     }
     return new Float32Array(data);
