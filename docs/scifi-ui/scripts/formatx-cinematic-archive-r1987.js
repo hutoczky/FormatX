@@ -48,7 +48,7 @@
   let idleComposed=false,idleFastPathSkips=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
-  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='';
+  let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',entryReactorHost=null;
   let aiCardHome=null; // the real sixth module, never a cloned/placeholder AI scene
 
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
@@ -336,6 +336,9 @@
       scene.cinemaPanel=panel;
     }
     if(cinemaHosts.length){
+      // Actual document order, not the blueprint's editorial source order.
+      entryReactorHost=cinemaHosts.reduce((first,host)=>
+        !first||(host.compareDocumentPosition(first)&Node.DOCUMENT_POSITION_FOLLOWING)?host:first,null);
       cinemaPrepared=true;
       root.dataset.fxArchiveCinemaPrepared=String(cinemaHosts.length);
       attachExistingFinalCta();
@@ -451,7 +454,10 @@
           const english=root.lang==='en';
           const sourceName=(sourceNames[selected.source]||[selected.source,selected.source])[english?1:0];
           if(marker){
-            const expected='MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
+            const entering=reactorEntry(selected,current.progress);
+            const expected=entering&&entering.progress<.72
+              ?(english?'MAG // ENTER THE CORE':'MAG // BELÉPÉS A MAG TÉRBE')
+              :'MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
             if(marker.textContent!==expected)marker.textContent=expected;
           }
           root.dataset.fxArchiveVisibleInterface='single-native-folio';
@@ -711,6 +717,31 @@
     }
     return new Float32Array(v);
   }
+  // Three physical octagonal reactor bulkheads, one immutable vertex buffer.
+  // Build once, reuse the native archive shader, depth and WebGL context.
+  function reactorGeometry(){
+    const cube=cubeGeometry(),data=[];
+    for(let ring=0;ring<3;ring++){
+      const radius=2.26+ring*.12,z=-2.3+ring*1.05;
+      for(let edge=0;edge<8;edge++){
+        const angle=(edge+.5)*Math.PI/4,ca=Math.cos(angle),sa=Math.sin(angle);
+        const length=2*radius*Math.tan(Math.PI/8);
+        for(let i=0;i<cube.length;i+=8){
+          const x=cube[i]*.125+radius,y=cube[i+1]*length;
+          data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*.16+z,
+            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],0,0);
+        }
+      }
+    }
+    return new Float32Array(data);
+  }
+  function reactorEntry(scene,p){
+    if(!entryReactorHost||scene.cinemaHost!==entryReactorHost||p>=.62)return null;
+    const t=clamp(p/.62);
+    // Reversible scroll track. Near bulkhead expands toward the visitor,
+    // the two rear bulkheads follow in depth; preserve MAG's front lane.
+    return {progress:t,z:mix(-1.5,1.05,smooth(t)),alpha:(.42+.58*smooth(t/.25))*(1-smooth((t-.72)/.28))};
+  }
   function panelGeometry(detail){
     const u=detail?20:10,v=detail?16:9,data=[];
     for(let y=0;y<v;y++)for(let x=0;x<u;x++){
@@ -724,6 +755,7 @@
       this.gl=gl;
       this.program=this.programFor(gl);
       this.box=this.buffer(cubeGeometry());
+      this.reactor=this.buffer(reactorGeometry());
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
@@ -910,6 +942,7 @@ void main(){
         root.dataset.fxArchivePanelTriangles=String(this.panel.count/3);
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const cam=CameraDirector.forScene(scene,pro);
+      const ingress=reactorEntry(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
       gl.useProgram(this.program);gl.bindVertexArray(this.vao);
       // Shared renderer: never assume uniforms survived another pass/frame.
@@ -941,7 +974,14 @@ void main(){
         box(x,-1.60,-1.45,.042,2.65,.035,[.14,.23,.28],0,.24);
         box(x,1.34,-1.45,1.18,.045,.10,[.15,.31,.38],0,.19);
       }
+      // Exchange one decorative rail for the batched gate, rather than
+      // increasing the number of submitted draw calls on low-power devices.
+      if(ingress&&ingress.alpha>.001){
+        this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],[.36,.73,.86],0,ingress.alpha,0,cam,true);
+      }
+      setData(root,'fxArchiveReactorEntryR2261',ingress?'ingress':'clear');
       for(let k=0;k<3;k++){
+        if(ingress&&ingress.alpha>.001&&k===1)continue;
         const y=-.95+k*.91;
         box(0,y,-1.15,7.2,.028,.065,[.18,.31,.38],0,.17);
       }
@@ -1082,7 +1122,7 @@ void main(){
     }
     dispose(){
       const gl=this.gl;
-      gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);
+      gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);gl.deleteBuffer(this.reactor.buffer);
       gl.deleteVertexArray(this.vao);gl.deleteProgram(this.program);
     }
   }
@@ -1392,7 +1432,8 @@ void main(){
       setArchiveAnchorNeutral(host,false);
     }
     restoreOriginalAI();
-    cinemaHosts=[];cinemaPrepared=false;
+    cinemaHosts=[];cinemaPrepared=false;entryReactorHost=null;
+    delete root.dataset.fxArchiveReactorEntryR2261;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');
