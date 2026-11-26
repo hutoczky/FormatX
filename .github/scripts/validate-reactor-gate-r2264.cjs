@@ -8,8 +8,8 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress};')(clamp,mix,smooth,host);
+const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress,corridorTransitProgress};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
 assert.equal(v.length,960*3*8);
 for(let i=0;i<v.length;i+=8){
@@ -157,7 +157,7 @@ console.log('R2271_BOUNDED_TRANSIT_PASS '+JSON.stringify({softwareFrames:softwar
 // R2272: both entry and clearing a previously drawn gate need native frames.
 const needStart=src.indexOf('  function transitNeedsFrame('),needEnd=src.indexOf('  function requestArchiveFrame(',needStart);
 assert(needStart>=0&&needEnd>needStart);
-const needs=new Function('reactorEntry','corridorEntry','entryTransitProgress',src.slice(needStart,needEnd)+'return transitNeedsFrame;')(reactorEntry,corridorEntry,entryTransitProgress);
+const needs=new Function('reactorEntry','corridorEntry','entryTransitProgress','corridorTransitProgress',src.slice(needStart,needEnd)+'return transitNeedsFrame;')(reactorEntry,corridorEntry,entryTransitProgress,corridorTransitProgress);
 assert.equal(needs({s:entry,progress:.25},false),true);
 assert.equal(needs({s:next,progress:.43},false),true);
 assert.equal(needs({s:next,progress:.78},true),true);
@@ -189,7 +189,7 @@ assert.equal(entryTransitProgress(.81,.8,true),.81);
 assert.equal(entryTransitProgress(.25,.5,false),.25);
 assert.equal(needs({s:entry,progress:.78,travel:.1},false,true),true);
 assert.equal(needs({s:entry,progress:.78,travel:.5},false,true),false);
-assert.equal(needs({s:next,progress:.78,travel:.1},false,true),false);
+assert.equal(needs({s:next,progress:.78,travel:.1},false,true),true);
 assert.equal(needs({s:entry,progress:.78,travel:.1},false,false),false);
 assert.equal(reactorHandoff(entry,.78).settle,1);
 for(let i=0;i<100;i++){const p=.78*i/100;assert(entryTransitProgress(p,0,true)<=entryTransitProgress(p+.0078,0,true)+1e-10);}
@@ -208,3 +208,29 @@ for(const p of [.38,.43]){
  assert(top<.52&&top+1.65>.52,'proof target must contain the reading line');
 }
 console.log('R2275_STABLE_PHYSICAL_ANCHOR_PASS');
+
+// R2276: widened mobile corridor uses only physical gate progress, not the native content timeline.
+{
+const checkoutScene={...next,key:'licensing'};
+assert.equal(corridorTransitProgress(next,.43,0,true),.43);
+assert.equal(corridorTransitProgress(next,.78,0,true),.52);
+assert(Math.abs(corridorTransitProgress(next,.78,.35,true)-.64)<1e-10);
+assert.equal(corridorTransitProgress(next,.81,.8,true),.81);
+assert.equal(needs({s:next,progress:.78,travel:.1},false,true),true);
+assert.equal(needs({s:next,progress:.78,travel:.5},false,true),false);
+assert.equal(needs({s:next,progress:.78,travel:.1},false,false),false);
+assert.equal(corridorTransitProgress(checkoutScene,.78,.1,true),.78);
+assert.equal(needs({s:checkoutScene,progress:.78,travel:.1},false,true),false);
+let baselineSamples=0,mobileSamples=0,previous=-1;
+for(let i=0;i<1000;i++){
+ const p=i/1000,adapted=corridorTransitProgress(next,p,0,true);
+ assert(adapted>=previous-1e-10);previous=adapted;
+ assert.equal(corridorTransitProgress(next,p,0,false),p);
+ assert.equal(corridorTransitProgress(checkoutScene,p,0,true),p);
+ if(corridorEntry(next,p)?.alpha>.001)baselineSamples++;
+ if(corridorEntry(next,adapted)?.alpha>.001)mobileSamples++;
+}
+assert(mobileSamples>baselineSamples*1.35);
+assert.equal(reactorHandoff(next,.78).settle,1);
+console.log('R2276_MOBILE_CORRIDOR_PASS '+JSON.stringify({baselineSamples,mobileSamples,relativeIncrease:mobileSamples/baselineSamples-1,checkoutUnchanged:true,hardwareUnchanged:true}));
+}

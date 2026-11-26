@@ -805,6 +805,14 @@
   }
   // Short, lower-intensity bulkhead passage at the entrance of every
   // subsequent system. No new document sections, geometry or draw budget.
+  // Preserve the full-quality trajectory, but give constrained mobile
+  // rasterizers a longer physical sampling interval. The document's
+  // reading progress and checkout are deliberately not retimed.
+  function corridorTransitProgress(scene,p,travel,limited){
+    if(!limited||scene.key==='licensing'||p<=.43||p>.78)return p;
+    if(p<.78)return .43+.09*clamp((p-.43)/.35);
+    return .52+.12*clamp((travel||0)/.35);
+  }
   function corridorEntry(scene,p){
     // The reading line selects a contiguous incoming chapter around
     // (.88-.52)/1.15 = .313. The old 0.. .30 interval had already ended.
@@ -1081,8 +1089,9 @@ void main(){
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const travel=current.travel||0;
       const cam=CameraDirector.forScene(scene,pro,travel);
-      const firstIngress=reactorEntry(scene,entryTransitProgress(pro,current.travel,mobile()&&softwareMagRenderer()));
-      const corridor=firstIngress?null:corridorEntry(scene,pro);
+      const limitedTransit=mobile()&&softwareMagRenderer();
+      const firstIngress=reactorEntry(scene,entryTransitProgress(pro,current.travel,limitedTransit));
+      const corridor=firstIngress?null:corridorEntry(scene,corridorTransitProgress(scene,pro,current.travel,limitedTransit));
       const ingress=firstIngress||corridor;
       const transfer=reactorHandoff(scene,pro);
       const hue=scene.color,metal=[.23,.32,.39],edge=[.56,.71,.77];
@@ -1426,7 +1435,8 @@ void main(){
   // A gate leaving the screen is as important as one appearing: software
   // scroll must not hold its last visible frame over the next reading beat.
   function transitNeedsFrame(selection,previousGate,limited=false){
-    const gate=selection&&(reactorEntry(selection.s,entryTransitProgress(selection.progress,selection.travel,limited))||corridorEntry(selection.s,selection.progress));
+    const gate=selection&&(reactorEntry(selection.s,entryTransitProgress(selection.progress,selection.travel,limited))||
+      corridorEntry(selection.s,corridorTransitProgress(selection.s,selection.progress,selection.travel,limited)));
     return Boolean(previousGate||(gate&&gate.alpha>.001));
   }
   function requestArchiveFrame(){
