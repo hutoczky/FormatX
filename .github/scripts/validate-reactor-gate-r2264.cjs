@@ -529,3 +529,31 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert.equal(reactorHandoff(checkout,.42).settle,1);
  console.log('R2290_SYSTEM_ARRIVAL_PASS '+JSON.stringify({samples,bilingual:true,checkoutUnchanged:true,contentNotRetimed:true,extraDrawCalls:0}));
  }
+
+ // R2291: directional studio reflections are bounded, view dependent,
+ // and attenuate with physical distance. Guide/shadow early returns stay intact.
+ {
+ const fragment=src.slice(src.indexOf('      const frag=`'),src.indexOf('      const shader='));
+ const studio=fragment.indexOf('vec3 reflected=reflect(-V,N);');
+ assert(studio>fragment.indexOf('if(vUv.y>1.5)'));
+ assert(studio>fragment.indexOf('if(reactor&&vUv.x>=.6)'));
+ assert(fragment.includes('studio/(vec3(1.0)+studio)'));
+ assert(fragment.includes('(.32+.68*fresnel)*(.48+.52*distanceFade)'));
+ const step=(a,b,x)=>smooth((x-a)/(b-a));
+ const evaluate=(d1,d2,fresnel,distance)=>{
+   const strip=step(.55,.98,d1),fill=step(.60,.99,d2),fade=1-step(5.2,9.5,distance);
+   return [.24,.38,.48].map((c,i)=>{
+     const raw=(c*strip+[.42,.27,.15][i]*fill)*(.32+.68*fresnel)*(.48+.52*fade);
+     return raw/(1+raw);
+   });
+ };
+ let samples=0,peak=0;
+ for(let a=0;a<=40;a++)for(let b=0;b<=40;b++)for(let f=0;f<=10;f++){
+   const near=evaluate(-1+a/20,-1+b/20,f/10,5.2),far=evaluate(-1+a/20,-1+b/20,f/10,9.5);
+   for(let c=0;c<3;c++){assert(Number.isFinite(near[c])&&near[c]>=0&&near[c]<.41);assert(far[c]<=near[c]+1e-12);peak=Math.max(peak,near[c]);}
+   samples++;
+ }
+ assert(evaluate(1,0,1,5.2)[2]>evaluate(0,1,1,5.2)[2]);
+ assert(evaluate(0,1,1,5.2)[0]>evaluate(1,0,1,5.2)[0]);
+ console.log('R2291_STUDIO_OPTICS_PASS '+JSON.stringify({samples,peakReflectionContribution:peak,depthAttenuation:true,guideUnchanged:true,extraDrawCalls:0}));
+ }

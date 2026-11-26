@@ -1111,6 +1111,16 @@ void main(){
    vec3 titanium=vec3(.10,.15,.19)*(.42+.58*ndl)+reflection*.52;
    titanium+=vec3(.18,.15,.10)*rimKey*.30+uColor*fresnel*.14;
    titanium+=uColor*vReactorLight*.038;
+    // R2291: analytic studio strip reflections on the actual chamfer normals.
+    // Two broad reflection lobes, one cool and one warm, with a soft shoulder.
+    // Unlike screen-space glow, the highlight travels with the metal and eye.
+    vec3 reflected=reflect(-V,N);
+    float strip=smoothstep(.55,.98,dot(reflected,vec3(-.6,.8,0.0)));
+    float fill=smoothstep(.60,.99,dot(reflected,vec3(.8,0.0,.6)));
+    float distanceFade=1.0-smoothstep(5.2,9.5,vViewDistance);
+    vec3 studio=(vec3(.24,.38,.48)*strip+vec3(.42,.27,.15)*fill)
+      *(.32+.68*fresnel)*(.48+.52*distanceFade);
+    titanium+=studio/(vec3(1.0)+studio);
    vec3 emitter=uColor*(.56+.18*facing+.26*vReactorLight);
    col=mix(mix(titanium,vec3(.013,.029,.044),aerial),emitter,guide);
    a=mix(a*.96,a,guide)*vReactorVisibility;
@@ -1256,6 +1266,7 @@ void main(){
       }
       setData(root,'fxArchiveReadingTravelR2266',travel.toFixed(3));
       setData(root,'fxArchivePassageFlightR2289',scene.key==='licensing'?'checkout-static':'reversible-dolly');
+      setData(root,'fxArchiveGateOpticsR2291','view-dependent-chamfer-studio-reflection');
       setData(root,'fxArchiveReactorSubmittedTrianglesR2279',String(lastRenderedGate?gateVertices/3:0));
       if(root.dataset.fxArchivePersistentRackCount!==String(rackCount))
         root.dataset.fxArchivePersistentRackCount=String(rackCount);
