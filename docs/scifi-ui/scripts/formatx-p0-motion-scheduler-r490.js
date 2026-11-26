@@ -44,7 +44,7 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261126-r2249-native-telemetry-dedupe';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261126-r2254-trusted-motion-launch';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
@@ -57,6 +57,8 @@ let started=false;
 let idleId=0;
 let timer=0;
 let pendingCanonicalAsk=false;
+const intentTypes=['pointerdown','touchstart','keydown','wheel'];
+function disarmIntent(){for(const type of intentTypes)removeEventListener(type,onIntent);}
 
 function clearPending(){
   if(timer){clearTimeout(timer);timer=0;}
@@ -67,6 +69,7 @@ function start(reason){
   if(started)return;
   started=true;
   clearPending();
+  disarmIntent();
   root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
   if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]')){
     root.dataset.fxP0MotionSchedulerR490='runtime-already-present';
@@ -109,7 +112,7 @@ function runLateAuto(){
   }
   const launch=()=>start('late-auto-r1971-stable-window');
   if('requestIdleCallback' in window){
-    idleId=requestIdleCallback(launch,{timeout:1350});
+    idleId=requestIdleCallback(()=>{idleId=0;launch();},{timeout:1350});
   }else{
     timer=setTimeout(launch,900);
   }
@@ -117,6 +120,7 @@ function runLateAuto(){
 
 function armLateFallback(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(started)return;
     root.dataset.fxP0FirstPaintR490='committed-r493';
     timer=setTimeout(runLateAuto,AUTO_DELAY_MS);
   }));
@@ -131,6 +135,7 @@ function magBirthActive(){
 }
 
 function armStartup(){
+  if(started)return;
   if(AUDIT){
     root.dataset.fxP0MotionSchedulerR490='audit-static-r1728';
     return;
@@ -144,7 +149,7 @@ function armStartup(){
 }
 
 function onIntent(event){
-  if(event&&event.isTrusted===false)return;
+  if(started||!event?.isTrusted)return;
   const target=event?.target instanceof Element?event.target:null;
   if(target?.closest('#hero .fx-reference-ask')){
     pendingCanonicalAsk=true;
@@ -156,8 +161,10 @@ function onIntent(event){
 /* Deliberately exclude pointermove and scroll. Those can be emitted during
    browser startup/restoration and were the source of R492's 0.5–1.0 s random
    WebGL boot. These events represent explicit user action instead. */
-for(const type of ['pointerdown','touchstart','keydown','wheel']){
-  addEventListener(type,onIntent,{once:true,passive:true});
+for(const type of intentTypes){
+  // Synthetic input must not consume the real visitor's one launch chance.
+  // Remove every listener only after start() has claimed the runtime.
+  addEventListener(type,onIntent,{passive:true});
 }
 
 if(document.readyState==='loading'){
