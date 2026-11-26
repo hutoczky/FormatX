@@ -1739,12 +1739,29 @@ void main(){
       idleComposed=false;
       invalidate();
     },{passive:true});
-    addEventListener('pageshow',()=>{idleComposed=false;invalidate();},{passive:true});
+    // R2288: preserve original folios, controls and native scene pass
+    // when the document is put into the browser back/forward cache.
+    function onPageHide(event){
+      if(!event.persisted){stop();return;}
+      if(raf)cancelAnimationFrame(raf);
+      if(domRaf)cancelAnimationFrame(domRaf);
+      if(gpuTailTimer)clearTimeout(gpuTailTimer);
+      raf=domRaf=gpuTailTimer=0;
+      root.dataset.fxArchiveLifecycleR2288='suspended';
+    }
+    function onPageShow(event){
+      if(event.persisted){
+        lastGpu=0;
+        root.dataset.fxArchiveLifecycleR2288='restored';
+      }
+      idleComposed=false;invalidate();
+    }
+    addEventListener('pageshow',onPageShow,{passive:true});
     document.addEventListener('visibilitychange',()=>{
       if(!document.hidden){idleComposed=false;invalidate();}
     },{passive:true});
     reduced.addEventListener('change',()=>{if(reduced.matches)stop();},{passive:true});
-    addEventListener('pagehide',stop,{once:true});
+    addEventListener('pagehide',onPageHide,{passive:true});
     invalidate();
   }
   window.FormatXArchiveExperience={

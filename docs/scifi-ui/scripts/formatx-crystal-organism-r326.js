@@ -2909,7 +2909,25 @@
       targetBreath=Math.max(targetBreath,.15);
       schedule(mobile?2:5);
     },{passive:true});
-    listen(window,'pageshow',()=>{boost(.36,mobile?1:2);schedule(1);},{passive:true});
+    // R2288: BFCache is a suspension, not a renderer destruction.
+    function onPageShow(event){
+      if(event.persisted){
+        schedulerLastFrame=0;schedulerTick=0;lastScrollTransit=-Infinity;
+        root.dataset.fxMagLifecycleR2288='restored';
+      }
+      boost(.36,mobile?1:2);schedule(1);
+      if(event.persisted)scheduleSurfacePulse();
+    }
+    function onPageHide(event){
+      if(!event.persisted){destroy();return;}
+      if(raf)cancelAnimationFrame(raf);
+      if(scrollFrame)cancelAnimationFrame(scrollFrame);
+      clearTimeout(scrollSettleTimer);
+      raf=scrollFrame=scrollSettleTimer=0;
+      scrollTransitPermit=false;burstFrames=0;
+      root.dataset.fxMagLifecycleR2288='suspended';
+    }
+    listen(window,'pageshow',onPageShow,{passive:true});
     listen(document,'visibilitychange',()=>{
       if(!document.hidden)schedule(1);
       scheduleSurfacePulse();
@@ -3214,7 +3232,7 @@
       version:'r413',renderer:VERSION,revision:REVISION,context:webgl2?'webgl2':'webgl1',
       geometry:'single-fixed-living-3d-volume',morph:'disabled-single-organism-r1711',interactive:true,organism:true,legacyFallback:false
     }}));
-    listen(window,'pagehide',destroy,{once:true});
+    listen(window,'pagehide',onPageHide,{passive:true});
     }
   }
 

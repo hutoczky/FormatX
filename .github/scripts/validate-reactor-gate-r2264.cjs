@@ -428,3 +428,40 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert.equal(interrupted.pending,0);
  console.log('R2287_TRANSIT_PERMIT_RECOVERY_PASS '+JSON.stringify({blockedFrameRecovered:true,cancelledFrameRecovered:true,rateLimitPreserved:true,actualFrames:interrupted.count}));
 }
+
+ // R2288: execute actual page lifecycle handlers against two consecutive
+ // BFCache cycles and a permanent navigation. No duplicate scene/canvas.
+ {
+ const a=src.slice(src.indexOf('    function onPageHide(event){'),src.indexOf("    addEventListener('pageshow',onPageShow"));
+ const n=native.slice(native.indexOf('    function onPageShow(event){'),native.indexOf("    listen(window,'pageshow',onPageShow"));
+ assert(a.includes('function onPageShow')&&n.includes('function onPageHide'));
+ const simulate=handlers=>new Function(`
+ let raf=1,domRaf=2,gpuTailTimer=3,scrollFrame=4,scrollSettleTimer=5;
+ let scrollTransitPermit=true,burstFrames=4,idleComposed=true,lastGpu=123;
+ let schedulerLastFrame=123,schedulerTick=2,lastScrollTransit=123;
+ let stops=0,invalidates=0,draws=0,pulses=0;
+ const root={dataset:{}},mobile=false,cancelAnimationFrame=()=>{},clearTimeout=()=>{};
+ const stop=()=>stops++,destroy=stop,invalidate=()=>invalidates++;
+ const boost=()=>{},schedule=()=>draws++,scheduleSurfacePulse=()=>pulses++;
+ ${handlers}
+ return {hide:p=>onPageHide({persisted:p}),show:p=>onPageShow({persisted:p}),
+ state:()=>({raf,domRaf,gpuTailTimer,scrollFrame,scrollSettleTimer,scrollTransitPermit,burstFrames,idleComposed,lastGpu,schedulerLastFrame,schedulerTick,lastScrollTransit,stops,invalidates,draws,pulses,dataset:root.dataset})};
+ `)();
+ const archive=simulate(a),renderer=simulate(n);
+ for(let i=0;i<2;i++){
+   archive.hide(true);renderer.hide(true);
+   assert.equal(archive.state().stops,0);assert.equal(renderer.state().stops,0);
+   assert.equal(archive.state().raf,0);assert.equal(archive.state().domRaf,0);assert.equal(archive.state().gpuTailTimer,0);
+   assert.equal(renderer.state().raf,0);assert.equal(renderer.state().scrollFrame,0);assert.equal(renderer.state().scrollSettleTimer,0);
+   assert.equal(renderer.state().scrollTransitPermit,false);
+   archive.show(true);renderer.show(true);
+   assert.equal(archive.state().lastGpu,0);assert.equal(renderer.state().schedulerLastFrame,0);
+   assert.equal(renderer.state().lastScrollTransit,-Infinity);
+   assert.equal(archive.state().invalidates,i+1);assert.equal(renderer.state().draws,i+1);
+ }
+ archive.hide(false);renderer.hide(false);
+ assert.equal(archive.state().stops,1);assert.equal(renderer.state().stops,1);
+ assert(src.includes("addEventListener('pagehide',onPageHide,{passive:true})"));
+ assert(native.includes("listen(window,'pagehide',onPageHide,{passive:true})"));
+ console.log('R2288_BFCACHE_RESUME_PASS '+JSON.stringify({cycles:2,permanentDisposal:true,staleFramesCleared:true}));
+ }
