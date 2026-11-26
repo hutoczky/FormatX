@@ -729,7 +729,7 @@
         for(let i=0;i<cube.length;i+=8){
           const x=cube[i]*.125+radius,y=cube[i+1]*length;
           data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*.16+z,
-            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],0,0);
+            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],edge/7,2+ring);
         }
       }
     }
@@ -740,7 +740,7 @@
     const t=clamp(p/.62);
     // Reversible scroll track. Near bulkhead expands toward the visitor,
     // the two rear bulkheads follow in depth; preserve MAG's front lane.
-    return {progress:t,z:mix(-1.5,1.05,smooth(t)),alpha:(.42+.58*smooth(t/.25))*(1-smooth((t-.72)/.28))};
+    return {progress:t,z:mix(-1.5,1.05,smooth(t)),alpha:(.42+.58*smooth(t/.25))*(1-smooth((t-.92)/.08))};
   }
   function panelGeometry(detail){
     const u=detail?20:10,v=detail?16:9,data=[];
@@ -759,7 +759,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorProgress']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -783,10 +783,21 @@
       const vert=`#version 300 es
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
-uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile;
-out vec3 vNormal;out vec2 vUv;out float vViewDistance;
+uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile,uReactorProgress;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;
 void main(){
  vec3 p=aPosition*uScale;
+ // R2262: UV.y above 1 is reserved for the three real reactor bulkheads.
+ // The nearest frame passes first, followed by two independently timed frames.
+ bool reactor=aUv.y>1.5;
+ vReactorVisibility=1.0;
+ if(reactor){
+   float ring=aUv.y-2.0;
+   float phase=clamp((uReactorProgress-(2.0-ring)*.16)/.68,0.0,1.0);
+   float travel=smoothstep(0.0,1.0,phase);
+   p.xy*=mix(.82,3.10,travel);
+   vReactorVisibility=1.0-smoothstep(.72,1.0,phase);
+ }
  float bendX=2.0*aUv.x-1.0;
  float sinY=sin(3.14159265*aUv.y);
  p.z+=uBend*bendX*bendX*sinY;
@@ -807,7 +818,10 @@ void main(){
  p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+uOffset-uCamera;
  // Portrait atlas projection: make every physical shelf AND the flexible
  // panel visible in the mobile archive instead of clipping at the sides.
- if(uMobile>.5){p.x*=.34;p.y=p.y*.63-.18;}
+ if(uMobile>.5){
+   if(reactor){p.x*=.58;p.y=p.y*.80-.18;}
+   else{p.x*=.34;p.y=p.y*.63-.18;}
+ }
  float d=max(2.4,6.2-p.z);
  vViewDistance=d;
  // R2035: canonical MAG uses NDC depth close to zero. The old background
@@ -823,7 +837,7 @@ void main(){
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;in float vViewDistance;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
@@ -890,6 +904,12 @@ void main(){
    float aerial=clamp((vViewDistance-5.4)*.095,0.0,.25);
    col=mix(col,vec3(.013,.029,.044),aerial);
  }
+ // Restrict the optical boost to the gate; ordinary racks and MAG sheets
+ // retain their exact material response. No full-screen flash or bloom.
+ if(vUv.y>1.5){
+   col=mix(col,uColor*(.78+.22*facing),.40);
+   a*=vReactorVisibility;
+ }
  outColor=vec4(col,clamp(a,0.0,1.0));
 }`;
       const shader=(type,source)=>{
@@ -952,6 +972,7 @@ void main(){
       gl.uniform3fv(this.uniform.uCamera,cam);
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
+      if(ingress)gl.uniform1f(this.uniform.uReactorProgress,ingress.progress);
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
       this.drawCalls=0;
@@ -980,6 +1001,7 @@ void main(){
         this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],[.36,.73,.86],0,ingress.alpha,0,cam,true);
       }
       setData(root,'fxArchiveReactorEntryR2261',ingress?'ingress':'clear');
+      setData(root,'fxArchiveReactorPhaseR2262',ingress?(ingress.progress<.34?'approach':ingress.progress<.82?'traverse':'arrival'):'clear');
       for(let k=0;k<3;k++){
         if(ingress&&ingress.alpha>.001&&k===1)continue;
         const y=-.95+k*.91;
@@ -1434,6 +1456,7 @@ void main(){
     restoreOriginalAI();
     cinemaHosts=[];cinemaPrepared=false;entryReactorHost=null;
     delete root.dataset.fxArchiveReactorEntryR2261;
+    delete root.dataset.fxArchiveReactorPhaseR2262;
     for(const node of paperNodes){
       node.classList.remove('fx-archive-live-sheet-r2026');
       node.removeAttribute('data-fx-archive-paper-source');

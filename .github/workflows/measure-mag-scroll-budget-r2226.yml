@@ -37,7 +37,7 @@ jobs:
           for attempt in $(seq 1 24); do
             if curl -fsSL --max-time 25 -o /tmp/fx-mag-live.html "$BASE/?scroll-budget=$GITHUB_SHA-$attempt" \
               && curl -fsSL --max-time 25 -o /tmp/fx-mag-live.js "$BASE/scripts/formatx-cinematic-archive-r1987.js?audit=$GITHUB_SHA-$attempt" \
-              && grep -Fq 'formatx-cinematic-archive-r1987.js?v=20261126-r2058-r2261-reactor-entry' /tmp/fx-mag-live.html \
+              && grep -Fq 'formatx-cinematic-archive-r1987.js?v=20261126-r2058-r2262-sequential-reactor-transit' /tmp/fx-mag-live.html \
               && cmp -s docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js /tmp/fx-mag-live.js; then
               ok=1
               break
