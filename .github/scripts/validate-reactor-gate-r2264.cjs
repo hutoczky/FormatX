@@ -8,8 +8,8 @@ const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 const mix=(a,b,t)=>a+(b-a)*t;
 const host={};
-const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy}=new Function('clamp','mix','smooth','entryReactorHost',
-  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy};')(clamp,mix,smooth,host);
+const {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress}=new Function('clamp','mix','smooth','entryReactorHost',
+  src.slice(start,end)+'return {reactorHousing,reactorGeometry,reactorEntry,reactorHandoff,corridorEntry,readingTravel,readingFlight,readingEnergy,entryTransitProgress};')(clamp,mix,smooth,host);
 const v=reactorGeometry(),counts={};
 assert.equal(v.length,960*3*8);
 for(let i=0;i<v.length;i+=8){
@@ -157,13 +157,14 @@ console.log('R2271_BOUNDED_TRANSIT_PASS '+JSON.stringify({softwareFrames:softwar
 // R2272: both entry and clearing a previously drawn gate need native frames.
 const needStart=src.indexOf('  function transitNeedsFrame('),needEnd=src.indexOf('  function requestArchiveFrame(',needStart);
 assert(needStart>=0&&needEnd>needStart);
-const needs=new Function('reactorEntry','corridorEntry',src.slice(needStart,needEnd)+'return transitNeedsFrame;')(reactorEntry,corridorEntry);
+const needs=new Function('reactorEntry','corridorEntry','entryTransitProgress',src.slice(needStart,needEnd)+'return transitNeedsFrame;')(reactorEntry,corridorEntry,entryTransitProgress);
 assert.equal(needs({s:entry,progress:.25},false),true);
 assert.equal(needs({s:next,progress:.43},false),true);
 assert.equal(needs({s:next,progress:.78},true),true);
 assert.equal(needs({s:next,progress:.78},false),false);
 assert.equal(needs(null,false),false);
-assert(src.includes('if(active&&softwareMagRenderer()&&transitNeedsFrame(current,lastRenderedGate))'));
+assert(!src.includes('if(active&&softwareMagRenderer()&&transitNeedsFrame(current,lastRenderedGate))'));
+assert(src.includes('transitNeedsFrame(current,lastRenderedGate,mobile()&&softwareMagRenderer())'));
 assert(src.includes('lastRenderedGate=Boolean(ingress&&ingress.alpha>.001)'));
 console.log('R2272_EARLY_TRANSIT_CLEAR_PASS '+JSON.stringify({cases:5,softwareCapMs:240}));
 
@@ -181,3 +182,15 @@ assert.equal(beforeCount,620);assert.equal(afterCount,780);
 assert.equal(needs({s:entry,progress:.70},false),true);
 assert.equal(needs({s:entry,progress:.78},false),false);
 console.log('R2273_EXTENDED_PASSAGE_PASS '+JSON.stringify({oldWindow:beforeCount,newWindow:afterCount,relativeIncrease:afterCount/beforeCount-1,contentHandoffUnchanged:true}));
+
+assert.equal(entryTransitProgress(.78,0,true),.65);
+assert(Math.abs(entryTransitProgress(.78,.35,true)-.78)<1e-10);
+assert.equal(entryTransitProgress(.81,.8,true),.81);
+assert.equal(entryTransitProgress(.25,.5,false),.25);
+assert.equal(needs({s:entry,progress:.78,travel:.1},false,true),true);
+assert.equal(needs({s:entry,progress:.78,travel:.5},false,true),false);
+assert.equal(needs({s:next,progress:.78,travel:.1},false,true),false);
+assert.equal(needs({s:entry,progress:.78,travel:.1},false,false),false);
+assert.equal(reactorHandoff(entry,.78).settle,1);
+for(let i=0;i<100;i++){const p=.78*i/100;assert(entryTransitProgress(p,0,true)<=entryTransitProgress(p+.0078,0,true)+1e-10);}
+console.log('R2274_ADAPTIVE_ENTRY_WINDOW_PASS');

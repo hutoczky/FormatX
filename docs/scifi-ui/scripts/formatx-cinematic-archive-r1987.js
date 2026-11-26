@@ -770,6 +770,14 @@
     }
     return new Float32Array(data);
   }
+  // Mobile software GL needs a wider sampling window. Continue the
+  // physical gate into the first part of the existing reading interval.
+  // Never delay the real content handoff, even on a constrained renderer.
+  function entryTransitProgress(p,travel,limited){
+    if(!limited||p>.78)return p;
+    if(p<.78)return p*.65/.78;
+    return .65+.13*clamp((travel||0)/.35);
+  }
   function reactorEntry(scene,p){
     // Extend the physical passage to the end of the entry beat, without
     // holding back the native document (its handoff still ends at .62).
@@ -1069,7 +1077,7 @@ void main(){
       const pro=clamp(p),reveal=smooth((pro-.16)/.35),align=smooth((pro-.48)/.31),release=smooth((pro-.84)/.15);
       const travel=current.travel||0;
       const cam=CameraDirector.forScene(scene,pro,travel);
-      const firstIngress=reactorEntry(scene,pro);
+      const firstIngress=reactorEntry(scene,entryTransitProgress(pro,current.travel,mobile()&&softwareMagRenderer()));
       const corridor=firstIngress?null:corridorEntry(scene,pro);
       const ingress=firstIngress||corridor;
       const transfer=reactorHandoff(scene,pro);
@@ -1413,8 +1421,8 @@ void main(){
   }
   // A gate leaving the screen is as important as one appearing: software
   // scroll must not hold its last visible frame over the next reading beat.
-  function transitNeedsFrame(selection,previousGate){
-    const gate=selection&&(reactorEntry(selection.s,selection.progress)||corridorEntry(selection.s,selection.progress));
+  function transitNeedsFrame(selection,previousGate,limited=false){
+    const gate=selection&&(reactorEntry(selection.s,entryTransitProgress(selection.progress,selection.travel,limited))||corridorEntry(selection.s,selection.progress));
     return Boolean(previousGate||(gate&&gate.alpha>.001));
   }
   function requestArchiveFrame(){
@@ -1429,7 +1437,7 @@ void main(){
     }
     lastGpu=now;
     const api=window.FormatXLivingCore;
-    if(transitNeedsFrame(current,lastRenderedGate)&&typeof api?.requestTransitRender==='function')api.requestTransitRender();
+    if(transitNeedsFrame(current,lastRenderedGate,mobile()&&softwareMagRenderer())&&typeof api?.requestTransitRender==='function')api.requestTransitRender();
     else api?.requestRender?.(1);
   }
   function invalidate(){
@@ -1482,11 +1490,6 @@ void main(){
             }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
           });
         }
-        // Request a bounded native frame now, before the next archive RAF.
-        // On slower software renderers an extra RAF hop can miss the whole
-        // narrow entry interval. The native API still enforces its 240ms cap.
-        if(active&&softwareMagRenderer()&&transitNeedsFrame(current,lastRenderedGate))
-          window.FormatXLivingCore?.requestTransitRender?.();
       }catch(e){root.dataset.fxArchiveError=String(e?.message||e);}
     }
     if(!raf&&!disposed)raf=requestAnimationFrame(()=>{
