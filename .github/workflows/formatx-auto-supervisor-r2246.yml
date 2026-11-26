@@ -7,10 +7,11 @@ on:
     branches: [master]
     paths:
       - '.github/scripts/formatx-auto-repair-r2246.cjs'
+      - '.github/scripts/formatx-quality-gates-r2248.cjs'
       - '.github/workflows/formatx-auto-supervisor-r2246.yml'
 permissions:
   contents: read
-  statuses: read
+  statuses: write
 concurrency:
   group: formatx-auto-supervisor
   cancel-in-progress: false
@@ -27,12 +28,13 @@ jobs:
           node .github/scripts/formatx-auto-repair-r2246.cjs --apply
           node .github/scripts/formatx-auto-repair-r2246.cjs --check
           git diff --check
-          git diff --binary > "$RUNNER_TEMP/formatx-repair.patch"
           node --check docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js
           node --check docs/scifi-ui/scripts/formatx-crystal-organism-r326.js
           node .github/scripts/validate-inline-csp-hashes-r2136.cjs
           node .github/scripts/validate-dna-first-frame-r2181.cjs
           node .github/scripts/validate-mag-debanding-r2035.cjs
+          node .github/scripts/formatx-quality-gates-r2248.cjs --self-test
+          git diff --binary > "$RUNNER_TEMP/formatx-repair.patch"
       - name: Collect current revision quality gates
         if: always()
         env:
@@ -41,7 +43,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/status" > "$RUNNER_TEMP/formatx-status.json"
-          node -e 'const fs=require("node:fs");const d=JSON.parse(fs.readFileSync(process.argv[1]));console.log(JSON.stringify({sha:d.sha,state:d.state,failed:d.statuses.filter(s=>s.state==="failure"||s.state==="error").map(s=>({context:s.context,url:s.target_url})),pending:d.statuses.filter(s=>s.state==="pending").map(s=>s.context)},null,2))' "$RUNNER_TEMP/formatx-status.json" | tee "$RUNNER_TEMP/formatx-supervisor.json"
+          node .github/scripts/formatx-quality-gates-r2248.cjs "$RUNNER_TEMP/formatx-status.json" | tee "$RUNNER_TEMP/formatx-supervisor.json"
           cat "$RUNNER_TEMP/formatx-supervisor.json" >> "$GITHUB_STEP_SUMMARY"
       - name: Retain verified candidate and evidence for autonomous review
         if: always()
@@ -53,3 +55,26 @@ jobs:
             ${{ runner.temp }}/formatx-supervisor.json
           retention-days: 3
           if-no-files-found: warn
+      - name: Publish supervisor candidate validation status
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [[ "$JOB_STATUS" != success ]]; then
+            state=failure
+            description='Supervisor candidate validation failed'
+          elif [[ -s "$RUNNER_TEMP/formatx-repair.patch" ]]; then
+            state=pending
+            description='Verified candidate patch requires supervised publication'
+          else
+            state=success
+            description='Deterministic repair checks passed; no source drift'
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$state" \
+            -f context='FormatX automatic repair supervisor' \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
