@@ -44,18 +44,23 @@ const next={cinemaHost:{},key:'diagnostics'};
 const checkout={cinemaHost:{},key:'licensing'};
 assert.equal(corridorEntry(entry,.1),null);
 assert.equal(corridorEntry({key:'missing'},.1),null);
-assert.equal(corridorEntry(next,0).alpha,0);
-assert.equal(corridorEntry(next,.30),null);
+assert.equal(corridorEntry(next,0),null);
+assert.equal(corridorEntry(next,.30).alpha,0);
+assert.equal(corridorEntry(next,.64),null);
 let lastZ=-Infinity,lastProgress=-Infinity;
 for(let i=0;i<100;i++){
-  const p=.30*i/100,a=corridorEntry(next,p),b=corridorEntry(checkout,p);
+  const p=.30+.34*i/100,a=corridorEntry(next,p),b=corridorEntry(checkout,p);
   assert(a.alpha>=0&&a.alpha<=.66&&b.alpha>=0&&b.alpha<=.38);
   assert(a.z>=lastZ&&a.progress>=lastProgress);
   lastZ=a.z;lastProgress=a.progress;
   assert.equal(reactorHandoff(next,p).settle,1);
   assert.equal(reactorHandoff(checkout,p).settle,1);
 }
-assert(corridorEntry(next,.29999).alpha<.00001);
+assert(corridorEntry(next,.63999).alpha<.00001);
+const selectionProgress=(.88-.52)/1.15;
+assert(corridorEntry(next,selectionProgress).alpha>0,'gate must be visible at contiguous chapter entry');
+assert(corridorEntry(next,.42).alpha>.60,'gate must reach full intensity after selection');
+assert(corridorEntry(checkout,.42).alpha<=.38);
 console.log('R2265_SYSTEM_CORRIDOR_PASS '+JSON.stringify({samples:100,checkoutIntensityLimit:.38,firstEntryUnchanged:true}));
 
 for(const vh of [390,768,844,1080]){
@@ -99,3 +104,5 @@ for(let i=0;i<housing.length;i+=24){
 assert.equal(faces.size,10);
 assert(src.includes('out float vReactorLight')&&src.includes('in float vReactorLight'));
 console.log('R2267_STUDIO_BEVEL_PASS '+JSON.stringify({triangles:v.length/24,normalDirections:faces.size,extraDrawCalls:0}));
+
+console.log('R2268_VISIBLE_CORRIDOR_PASS '+JSON.stringify({selectionProgress,window:[.30,.64],peakAlpha:corridorEntry(next,.42).alpha}));

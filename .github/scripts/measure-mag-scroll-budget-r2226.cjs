@@ -170,6 +170,10 @@ async function measure(browser,spec,trial){
       assert.equal(result.qualityPolicy,'hardware-photographic-full',
         'Do not downgrade the genuine GPU-backed desktop MAG');
     }
+    const reactor=result.archiveState?.reactorProof;
+    assert(reactor&&Number.isInteger(reactor.entryFrames)&&Number.isInteger(reactor.corridorFrames),'missing reactor render telemetry');
+    console.log('FX_REACTOR_RENDER_PROOF_R2268 '+JSON.stringify({profile:spec.name,trial,...reactor}));
+    if(reactor.entryFrames+reactor.corridorFrames===0)console.warn('FX_REACTOR_TRANSIT_NOT_SAMPLED '+spec.name+' '+trial);
     assert(result.drawCalls>0&&result.attributeSetups>0,
       spec.name+' R2228 shared native WebGL VAO pass did not draw');
     assert(result.attributeSetups<result.drawCalls*Math.max(1,result.archiveState?.frames||1),

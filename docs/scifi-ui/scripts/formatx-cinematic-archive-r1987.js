@@ -46,6 +46,7 @@
   // R2235: the idle home scene has no readable 3D archive chapter. Its
   // initial DOM/ARIA synchronization only needs one composed frame.
   let idleComposed=false,idleFastPathSkips=0;
+  const reactorProof={entryFrames:0,corridorFrames:0,chapters:new Set(),peakAlpha:0};
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',entryReactorHost=null;
@@ -789,9 +790,13 @@
   // Short, lower-intensity bulkhead passage at the entrance of every
   // subsequent system. No new document sections, geometry or draw budget.
   function corridorEntry(scene,p){
-    if(!entryReactorHost||!scene.cinemaHost||scene.cinemaHost===entryReactorHost||p>=.30)return null;
-    const t=clamp(p/.30);
-    const alpha=(scene.key==='licensing'?.38:.66)*smooth(t/.15)*(1-smooth((t-.65)/.35));
+    // The reading line selects a contiguous incoming chapter around
+    // (.88-.52)/1.15 = .313. The old 0.. .30 interval had already ended.
+    // Allow the bulkhead to arrive AFTER the actual chapter becomes active.
+    const start=.30,end=.64;
+    if(!entryReactorHost||!scene.cinemaHost||scene.cinemaHost===entryReactorHost||p<start||p>=end)return null;
+    const t=clamp((p-start)/(end-start));
+    const alpha=(scene.key==='licensing'?.38:.66)*smooth(t/.18)*(1-smooth((t-.65)/.35));
     return {progress:.12+.88*t,z:mix(-1.35,.72,smooth(t)),alpha};
   }
   // At 165dvh the document's retrieval value remains .78 for about
@@ -1089,6 +1094,10 @@ void main(){
       // increasing the number of submitted draw calls on low-power devices.
       if(ingress&&ingress.alpha>.001){
         this.mesh(this.reactor,[0,0,ingress.z],[1,1,1],firstIngress?[.36,.73,.86]:hue,0,ingress.alpha,0,cam,true);
+        // Count actual submitted gate geometry, not merely selected chapters.
+        if(firstIngress)reactorProof.entryFrames++;
+        else{reactorProof.corridorFrames++;reactorProof.chapters.add(scene.key);}
+        reactorProof.peakAlpha=Math.max(reactorProof.peakAlpha,ingress.alpha);
       }
       setData(root,'fxArchiveReactorEntryR2261',firstIngress?'ingress':'clear');
       setData(root,'fxArchiveReactorPhaseR2262',firstIngress?(firstIngress.progress<.34?'approach':firstIngress.progress<.82?'traverse':'arrival'):'clear');
@@ -1642,7 +1651,8 @@ void main(){
       targetFrameMs:PerformanceManager.frameInterval(),
       idleFastPathSkips,idleComposed,styleWrites,styleSkips,
       cpuSubmitMs:PerformanceManager.samples?Number(PerformanceManager.emaMs.toFixed(2)):null,
-      cpuSamples:PerformanceManager.samples,domComposes};},
+      cpuSamples:PerformanceManager.samples,domComposes,
+      reactorProof:{entryFrames:reactorProof.entryFrames,corridorFrames:reactorProof.corridorFrames,chapters:Array.from(reactorProof.chapters),peakAlpha:reactorProof.peakAlpha}};},
     refresh:()=>{if(!disposed){discover();invalidate();}},setQuality:value=>{if(!disposed)PerformanceManager.setQuality(value);}
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
