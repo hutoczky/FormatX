@@ -557,3 +557,30 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(evaluate(0,1,1,5.2)[0]>evaluate(1,0,1,5.2)[0]);
  console.log('R2291_STUDIO_OPTICS_PASS '+JSON.stringify({samples,peakReflectionContribution:peak,depthAttenuation:true,guideUnchanged:true,extraDrawCalls:0}));
  }
+
+ // R2292: check the real immutable room mesh, physical depth and material
+ // separation. The shared context is retained, no full-screen quad.
+ {
+ const a=src.indexOf('  function cubeGeometry()'),b=src.indexOf('  function panelGeometry(',a);
+ const geometry=new Function(src.slice(a,b)+'return corridorRoomGeometry;')()();
+ assert(geometry instanceof Float32Array&&geometry.length%24===0);
+ let near=-Infinity,far=Infinity;const tags=new Set();
+ for(let i=0;i<geometry.length;i+=8){
+   for(let j=0;j<8;j++)assert(Number.isFinite(geometry[i+j]));
+   const norm=Math.hypot(geometry[i+3],geometry[i+4],geometry[i+5]);
+   assert(Math.abs(norm-1)<1e-6);
+   near=Math.max(near,geometry[i+2]);far=Math.min(far,geometry[i+2]);
+   assert.equal(geometry[i+7],-1);tags.add(geometry[i+6].toFixed(2));
+ }
+ assert(near>-2&&far<=-13&&near-far>11);
+ assert(tags.size>=5);assert(geometry.length/24<2200);
+ const project=(x,z,aspect,portrait)=>x*(portrait?.58:1)*3.3/Math.max(.6,aspect)/Math.max(2.4,6.2-z);
+ for(const aspect of [.65,1,1.77,2.4])for(const portrait of [false,true]){
+   assert(Math.abs(project(3.65,near,aspect,portrait))>2*Math.abs(project(3.65,far,aspect,portrait)));
+ }
+ assert(src.includes("if(scene.key!=='licensing'){"));
+ assert(src.includes('gl.disable(gl.BLEND);gl.depthMask(true);'));
+ assert(src.includes('this.mesh(this.room,[0,0,0],[1,1,1],hue,0,1,0,cam);'));
+ assert(src.includes('gl.deleteBuffer(this.room.buffer)'));
+ console.log('R2292_NATIVE_ROOM_PASS '+JSON.stringify({triangles:geometry.length/24,depthSpan:near-far,materialTags:tags.size,roomDrawCalls:1,commerceOriginal:true}));
+ }

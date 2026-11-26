@@ -909,6 +909,47 @@
     const distance=Math.abs(t*(count+1)-(rack+1));
     return envelope*(1-smooth(distance/1.35));
   }
+  // R2292: a permanent, genuinely three-dimensional architectural shell.
+  // Eight-sided interior, six deep bays, recessed plates and physical ribs.
+  // Material tags use negative UV.y, disjoint from the gate and folio tags.
+  // One immutable vertex buffer; no extra context or post-processing.
+  function corridorRoomGeometry(){
+    const data=[],cube=cubeGeometry();
+    const corners=[[-3.65,-1.62],[-2.65,-2.62],[2.65,-2.62],[3.65,-1.62],
+      [3.65,1.62],[2.65,2.62],[-2.65,2.62],[-3.65,1.62]];
+    const quad=(a,b,c,d,n,material)=>{
+      for(const v of [a,b,c,a,c,d])data.push(...v,...n,material,-1);
+    };
+    const solid=(center,size,angle,material)=>{
+      const ca=Math.cos(angle),sa=Math.sin(angle);
+      for(let i=0;i<cube.length;i+=8){
+        const x=cube[i]*size[0],y=cube[i+1]*size[1];
+        const nx=cube[i+3]/size[0],ny=cube[i+4]/size[1],nz=cube[i+5]/size[2];
+        const len=Math.hypot(nx,ny,nz);
+        data.push(center[0]+x*ca-y*sa,center[1]+x*sa+y*ca,center[2]+cube[i+2]*size[2],
+          (nx*ca-ny*sa)/len,(nx*sa+ny*ca)/len,nz/len,material,-1);
+      }
+    };
+    // Back wall leaves no flat, disconnected screen-space background.
+    for(let edge=0;edge<8;edge++){
+      const a=corners[edge],b=corners[(edge+1)%8];
+      quad([0,0,-13],[a[0],a[1],-13],[b[0],b[1],-13],[0,0,-13],[0,0,1],.12);
+    }
+    for(let bay=0;bay<6;bay++){
+      const back=-13+bay*1.88,front=back+1.88;
+      for(let edge=0;edge<8;edge++){
+        const a=corners[edge],b=corners[(edge+1)%8],dx=b[0]-a[0],dy=b[1]-a[1];
+        const length=Math.hypot(dx,dy),nx=-dy/length,ny=dx/length;
+        const mx=(a[0]+b[0])*.5,my=(a[1]+b[1])*.5,angle=Math.atan2(dy,dx);
+        quad([a[0],a[1],back],[b[0],b[1],back],[b[0],b[1],front],[a[0],a[1],front],[nx,ny,0],.14);
+        // Recessed structural panel, solid bulkhead rib, flush light rail.
+        solid([mx+nx*.036,my+ny*.036,(back+front)*.5],[length*.84,.055,1.50],angle,.25);
+        solid([mx+nx*.115,my+ny*.115,front-.10],[length+.04,.25,.23],angle,.42);
+        if(edge%2===0)solid([mx+nx*.090,my+ny*.090,(back+front)*.5],[.085,.045,1.36],angle,.85);
+      }
+    }
+    return new Float32Array(data);
+  }
   function panelGeometry(detail){
     const u=detail?20:10,v=detail?16:9,data=[];
     for(let y=0;y<v;y++)for(let x=0;x<u;x++){
@@ -923,6 +964,7 @@
       this.program=this.programFor(gl);
       this.box=this.buffer(cubeGeometry());
       this.reactor=this.buffer(reactorGeometry());
+      this.room=this.buffer(corridorRoomGeometry());
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
@@ -959,6 +1001,7 @@ void main(){
  // R2262: UV.y above 1 is reserved for the three real reactor bulkheads.
  // The nearest frame passes first, followed by two independently timed frames.
  bool reactor=aUv.y>1.5;
+ bool room=aUv.y<-.5;
  vReactorVisibility=1.0;
  vReactorLight=0.0;
  float ringScale=1.0;
@@ -1002,7 +1045,8 @@ void main(){
  // Portrait atlas projection: make every physical shelf AND the flexible
  // panel visible in the mobile archive instead of clipping at the sides.
  if(uMobile>.5){
-   if(reactor){p.x*=.58;p.y=p.y*.80-.18;}
+   if(room){p.x*=.58;p.y=p.y*.80-.18;}
+    else if(reactor){p.x*=.58;p.y=p.y*.80-.18;}
    else{p.x*=.34;p.y=p.y*.63-.18;}
  }
  float d=max(2.4,6.2-p.z);
@@ -1012,7 +1056,7 @@ void main(){
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
  // Keep shelves behind the existing 3D core, while the retrieved sheet alone
  // can approach the audience. No renderer/canvas/geometry replacement.
- float opticalDepth=clamp(.33-.15*p.z,-.16,.86);
+ float opticalDepth=room?(.60+.33*clamp((-p.z-1.6)/12.5,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
  vec3 n=vec3(localNormal.x,ct*localNormal.y-st*localNormal.z,st*localNormal.y+ct*localNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
@@ -1034,6 +1078,19 @@ void main(){
    return;
  }
  vec3 N=normalize(vNormal+vec3(.0001));
+  // R2292: opaque architectural materials behind the canonical MAG.
+  // Depth cues are from the physical vertices and view distance, not CSS.
+  if(vUv.y<-.5){
+    float distanceFog=smoothstep(7.5,19.5,vViewDistance);
+    float key=.30+.70*max(0.0,dot(N,normalize(vec3(-.44,.68,.59))));
+    float rib=step(.35,vUv.x);
+    vec3 graphite=mix(vec3(.045,.065,.090),vec3(.16,.23,.29),rib)*key;
+    vec3 tint=mix(graphite,graphite+uColor*.085,1.0-distanceFog);
+    vec3 lamp=uColor*(.55+.25*(1.0-distanceFog));
+    vec3 material=mix(tint,lamp,step(.70,vUv.x));
+    outColor=vec4(mix(material,vec3(.013,.029,.045),distanceFog*.76),1.0);
+    return;
+  }
  bool reactor=vUv.y>1.5;
  vec3 V=normalize(reactor?vReactorView:vec3(.10,-.07,1.0));
  vec3 L=normalize(vec3(-.38,.68,1.0));
@@ -1214,11 +1271,23 @@ void main(){
         this.mesh(this.panel,[x,y,z],[w,h,1],c,rot,a*sourceOpacity,bend,cam);
       const side=index%2?-1:1;
       const sx=side*2.4,sy=.12*Math.sin(index),sz=-.3;
+      // One opaque, depth-tested room draw replaces the disconnected rails.
+      // Keep commerce on its original rendering path, preserve MAG depth.
+      if(scene.key!=='licensing'){
+        gl.disable(gl.BLEND);gl.depthMask(true);
+        this.mesh(this.room,[0,0,0],[1,1,1],hue,0,1,0,cam);
+        gl.depthMask(false);gl.enable(gl.BLEND);
+        setData(root,'fxArchiveRoomR2292','six-bay-eight-sided-native-depth-shell');
+        setData(root,'fxArchiveRoomTrianglesR2292',String(this.room.count/3));
+      }else{
+        setData(root,'fxArchiveRoomR2292','commerce-original');
+        setData(root,'fxArchiveRoomTrianglesR2292','0');
+      }
       // One modest-depth contact penumbra connects drawer/shelf to archive.
       this.mesh(this.panel,[sx,sy-.74,-.72],[1.52,.37,1],[.06,.10,.14],
         0,.66,0,cam,false,0,true);
       // Shared deep archive architectural rails. Fixed in one world, not separate scene backgrounds.
-      for(let k=-2;k<=2;k+=(quality==='low'?2:1)){
+      if(scene.key==='licensing')for(let k=-2;k<=2;k+=(quality==='low'?2:1)){
         const x=k*1.48;
         box(x,-1.60,-1.45,.042,2.65,.035,[.14,.23,.28],0,.24);
         box(x,1.34,-1.45,1.18,.045,.10,[.15,.31,.38],0,.19);
@@ -1236,7 +1305,7 @@ void main(){
       setData(root,'fxArchiveReactorEntryR2261',firstIngress?'ingress':'clear');
       setData(root,'fxArchiveReactorPhaseR2262',firstIngress?(firstIngress.progress<.34?'approach':firstIngress.progress<.82?'traverse':'arrival'):'clear');
       setData(root,'fxArchiveCorridorR2265',corridor&&corridor.alpha>.001?scene.key:'clear');
-      for(let k=0;k<3;k++){
+      if(scene.key==='licensing')for(let k=0;k<3;k++){
         if(ingress&&ingress.alpha>.001&&k===1)continue;
         const y=-.95+k*.91;
         box(0,y,-1.15,7.2,.028,.065,[.18,.31,.38],0,.17);
@@ -1384,7 +1453,7 @@ void main(){
     }
     dispose(){
       const gl=this.gl;
-      gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);gl.deleteBuffer(this.reactor.buffer);
+      gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);gl.deleteBuffer(this.reactor.buffer);gl.deleteBuffer(this.room.buffer);
       gl.deleteVertexArray(this.vao);gl.deleteProgram(this.program);
     }
   }
