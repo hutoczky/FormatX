@@ -2196,7 +2196,7 @@
       return disposed||contextLost||document.hidden||(!visible&&!archiveLive)||paused||root.dataset.fxReferenceMotionPaused==='true';
     }
     function queueFrame(delay=0){
-      if(blocked()||raf)return;
+      if(blocked()||raf||(softwareRenderer&&scrollSettleTimer))return;
       if(delay<=0){
         if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
         last=performance.now();raf=requestAnimationFrame(frame);return;
@@ -2209,7 +2209,7 @@
     }
     function schedule(frames=1){
       if(blocked())return;
-      const frameCap=auditMode?1:(mobile?4:24);
+      const frameCap=(auditMode||(softwareRenderer&&scrollSettleTimer))?1:(mobile?4:24);
       burstFrames=Math.max(burstFrames,Math.min(frameCap,Math.max(1,frames)));
       queueFrame(0);
     }
@@ -2576,7 +2576,7 @@
     }
 
     function frame(now){
-      raf=0;if(blocked())return;
+      raf=0;if(blocked()||(softwareRenderer&&scrollSettleTimer))return;
       /* R1622 — refresh-divisor scheduler.
          Use a stable display divisor that never intentionally targets below
          60 FPS: 60->60, 120->60, 144->72, 165->82.5, 180->60, 240->60.
@@ -2679,7 +2679,18 @@
       schedule(1);
     }
     let previousScrollY=scrollY;
+    function holdSoftwareScroll(){
+      if(!softwareRenderer)return;
+      // Software GL rasterization competes directly with native browser
+      // scrolling. Keep the last complete MAG frame and accumulate the
+      // latest interaction state, then redraw once when input settles.
+      if(raf){cancelAnimationFrame(raf);raf=0;}
+      burstFrames=Math.min(1,burstFrames);
+      clearTimeout(scrollSettleTimer);
+      scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},180);
+    }
     function onScroll(){
+      holdSoftwareScroll();
       if(scrollFrame)return;
       scrollFrame=requestAnimationFrame(()=>{
         scrollFrame=0;
@@ -2694,8 +2705,10 @@
         targetRotationX=clamp(targetRotationX-velocity*.006,-1.02,1.02);
         /* R1755d — native compositor owns the hot scroll path. Keep the
            organism state live, but defer shader redraw until the gesture settles. */
-        clearTimeout(scrollSettleTimer);
-        scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        if(!softwareRenderer){
+          clearTimeout(scrollSettleTimer);
+          scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;schedule(1);},88);
+        }
       });
     }
 
@@ -2757,6 +2770,7 @@
       schedule(mobile?2:3);
     }
     function onAmbientWheel(event){
+      holdSoftwareScroll();
       const impulse=clamp(event.deltaY/180,-1,1);
       targetRotationY+=impulse*.018;
       targetEnergy=Math.max(targetEnergy,IDLE_ENERGY+.12);

@@ -92,12 +92,12 @@ async function measure(browser,spec,trial){
     const started=await page.evaluate(()=>{
       window.__fxScrollAudit.scrollStart=performance.now();
       window.__fxScrollAudit.frameTimes=[];
-      const finishAt=performance.now()+3300;
+      window.__fxScrollAudit.sampleActive=true;
       function step(t){
         const a=window.__fxScrollAudit;
         if(!a)return;
         a.frameTimes.push(t);
-        if(t<finishAt)requestAnimationFrame(step);
+        if(a.sampleActive)requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
       return window.__fxScrollAudit.scrollStart;
@@ -111,15 +111,19 @@ async function measure(browser,spec,trial){
     await page.waitForTimeout(1900);
     const result=await page.evaluate(started=>{
       const a=window.__fxScrollAudit,now=performance.now();
+      a.sampleActive=false;
       const frames=a.frameTimes.filter(t=>t>=started&&t<=now);
       const gaps=frames.slice(1).map((t,i)=>t-frames[i]);
       const sorted=gaps.slice().sort((a,b)=>a-b);
-      const p95=sorted[Math.floor(sorted.length*.95)]||null;
+      const p95=sorted.length?sorted[Math.ceil(sorted.length*.95)-1]:null;
       const late=a.longtasks.filter(x=>x.start>=started);
       const root=document.documentElement;
       return {
         scrollY:Math.round(scrollY),
         frames:frames.length,
+        observationMs:+(now-started).toFixed(2),
+        raf60TargetMet:p95!==null&&p95<=20,
+        rafSampleRateHz:frames.length>1?+((frames.length-1)*1000/(frames.at(-1)-frames[0])).toFixed(2):null,
         p95FrameGapMs:p95===null?null:+p95.toFixed(2),
         worstFrameGapMs:sorted.length?+sorted.at(-1).toFixed(2):null,
         gapsOver50Ms:gaps.filter(n=>n>50).length,
@@ -133,6 +137,8 @@ async function measure(browser,spec,trial){
         rendererClass:root.dataset.fxCoreRendererClassR1541||'',
         qualityPolicy:root.dataset.fxArchiveQualityPolicyR2227||'',
         drawCalls:Number(root.dataset.fxArchiveDrawCalls)||0,
+        scalarWrites:Number(root.dataset.fxArchiveScalarWritesR2239)||0,
+        scalarSkips:Number(root.dataset.fxArchiveScalarSkipsR2239)||0,
         attributeSetups:Number(root.dataset.fxArchiveAttributeSwitchesR2228)||0,
         archiveState:window.FormatXArchiveExperience?.state||null,
         chapters:window.FormatXMagChapters?.audit()||null,
@@ -142,6 +148,9 @@ async function measure(browser,spec,trial){
     },started);
     console.log('FX_SCROLL_INPUT_R2226 '+JSON.stringify({profile:spec.name,trial,...result,errors}));
     assert.equal(errors.length,0,'Runtime errors '+spec.name+': '+errors.join(','));
+    assert(result.frames>=2&&result.p95FrameGapMs!==null,spec.name+' insufficient RAF samples');
+    if(!result.raf60TargetMet)console.warn('FX_SCROLL_60HZ_TARGET_MISSED '+JSON.stringify({profile:spec.name,trial,p95:result.p95FrameGapMs,renderer:result.rendererClass}));
+    if(process.env.FORMATX_ENFORCE_60HZ==='1')assert(result.raf60TargetMet,spec.name+' missed 60Hz cadence budget');
     assert(result.scrollY>200,spec.name+' wheel did not advance native page scroll');
     assert(result.archiveEngagement.startsWith('visitor-'),
       spec.name+' genuine scroll did not activate cinematic navigation');
