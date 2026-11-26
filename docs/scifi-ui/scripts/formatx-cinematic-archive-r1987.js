@@ -860,7 +860,7 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera;uniform float uRotation,uTilt,uBend,uAspect,uMobile,uReactorProgress;
-out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;
 void main(){
  vec3 p=aPosition*uScale;
  // R2262: UV.y above 1 is reserved for the three real reactor bulkheads.
@@ -868,6 +868,7 @@ void main(){
  bool reactor=aUv.y>1.5;
  vReactorVisibility=1.0;
  vReactorLight=0.0;
+ float ringScale=1.0;
  if(reactor){
    float ring=aUv.y-2.0;
    float phase=clamp((uReactorProgress-(2.0-ring)*.16)/.68,0.0,1.0);
@@ -876,7 +877,8 @@ void main(){
    float angle=uReactorProgress*6.2831853-ring*.76;
    vec2 axis=vec2(cos(angle),sin(angle));
    vReactorLight=smoothstep(.15,.96,dot(normalize(aPosition.xy),axis));
-   p.xy*=mix(.82,3.10,travel);
+   ringScale=mix(.82,3.10,travel);
+   p.xy*=ringScale;
    vReactorVisibility=1.0-smoothstep(.72,1.0,phase);
  }
  float bendX=2.0*aUv.x-1.0;
@@ -887,6 +889,9 @@ void main(){
  // Derivatives divide by physical mesh width/height, so reflections stay
  // stable through the eight different extraction and flattening paths.
  vec3 localNormal=aNormal;
+ // Inverse transpose of the expanding gate's nonuniform world scale.
+ // Bevels must not keep the unexpanded face normal as they fly past.
+ if(reactor)localNormal=normalize(vec3(aNormal.xy/ringScale,aNormal.z));
  if(abs(uBend)>.00001){
    float dzdx=4.0*uBend*bendX*sinY/max(.001,1.55*uScale.x);
    float dzdy=3.14159265*uBend*bendX*bendX*cos(3.14159265*aUv.y)
@@ -897,6 +902,9 @@ void main(){
  p=vec3(p.x,ct*p.y-st*p.z,st*p.y+ct*p.z);
  float s=sin(uRotation),c=cos(uRotation);
  p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+uOffset-uCamera;
+ // The projection's eye sits at z=6.2 in this camera-relative space.
+ // Capture the physical view ray before the portrait framing adjustment.
+ vReactorView=reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0);
  // Portrait atlas projection: make every physical shelf AND the flexible
  // panel visible in the mobile archive instead of clipping at the sides.
  if(uMobile>.5){
@@ -918,12 +926,13 @@ void main(){
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;
 uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
 out vec4 outColor;
 void main(){
  vec3 N=normalize(vNormal+vec3(.0001));
- vec3 V=normalize(vec3(.10,-.07,1.0));
+ bool reactor=vUv.y>1.5;
+ vec3 V=normalize(reactor?vReactorView:vec3(.10,-.07,1.0));
  vec3 L=normalize(vec3(-.38,.68,1.0));
  vec3 H=normalize(L+V);
  float ndl=max(.06,dot(N,L));
@@ -931,7 +940,7 @@ void main(){
  float fresnel=pow(1.0-facing,5.0);
  // Normalized GGX microfacet reflection and Fresnel-Schlick form a
  // single physically coherent lighting response for the archival glass.
- float roughness=uPanel>.5?.20:.44;
+ float roughness=reactor?.32:(uPanel>.5?.20:.44);
  float a2=roughness*roughness; a2*=a2;
  float ndh=max(.001,dot(N,H));
  float ndv=max(.001,dot(N,V));
@@ -940,7 +949,7 @@ void main(){
  float k=pow(roughness+1.0,2.0)*.125;
  float G=(ndl/(ndl*(1.0-k)+k))*(ndv/(ndv*(1.0-k)+k));
  float vh=max(0.0,dot(V,H));
- vec3 F0=mix(vec3(.038),uColor*.22,uPanel>.5?.24:.08);
+ vec3 F0=reactor?vec3(.48,.53,.58):mix(vec3(.038),uColor*.22,uPanel>.5?.24:.08);
  vec3 F=F0+(1.0-F0)*pow(1.0-vh,5.0);
  vec3 specular=(D*G*F)/max(.02,4.0*ndl*ndv);
  float spec=clamp(dot(specular,vec3(.33)),0.0,1.0);
@@ -994,7 +1003,9 @@ void main(){
    // Controlled cool key and warm rim on the true bevel normals.
    float rimKey=max(0.0,dot(N,normalize(vec3(.72,-.31,.48))));
    float aerial=clamp((vViewDistance-4.0)*.048,0.0,.22);
-   vec3 titanium=vec3(.10,.15,.19)*(.42+.58*ndl)+specular*.52;
+   // Soft shoulder keeps moving metallic highlights from clipping.
+   vec3 reflection=specular/(vec3(1.0)+specular);
+   vec3 titanium=vec3(.10,.15,.19)*(.42+.58*ndl)+reflection*.52;
    titanium+=vec3(.18,.15,.10)*rimKey*.30+uColor*fresnel*.14;
    titanium+=uColor*vReactorLight*.038;
    vec3 emitter=uColor*(.56+.18*facing+.26*vReactorLight);

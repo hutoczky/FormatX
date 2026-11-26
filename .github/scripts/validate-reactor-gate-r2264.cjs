@@ -106,3 +106,19 @@ assert(src.includes('out float vReactorLight')&&src.includes('in float vReactorL
 console.log('R2267_STUDIO_BEVEL_PASS '+JSON.stringify({triangles:v.length/24,normalDirections:faces.size,extraDrawCalls:0}));
 
 console.log('R2268_VISIBLE_CORRIDOR_PASS '+JSON.stringify({selectionProgress,window:[.30,.64],peakAlpha:corridorEntry(next,.42).alpha}));
+
+for(let i=0;i<=100;i++){
+  const scale=mix(.82,3.10,smooth(i/100));
+  const n=[1/Math.sqrt(2),0,1/Math.sqrt(2)];
+  const normal=[n[0]/scale,0,n[2]];
+  const tangent=[scale*n[2],0,-n[0]];
+  assert(Math.abs(normal.reduce((sum,x,j)=>sum+x*tangent[j],0))<1e-10);
+  const position=[2.5*scale,.5*scale,1.1];
+  const view=[-position[0],-position[1],6.2-position[2]];
+  assert(view.every(Number.isFinite)&&view[2]>0);
+}
+assert(src.includes('aNormal.xy/ringScale'));
+assert(src.includes('vec3(0.0,0.0,6.2)-p'));
+assert(src.includes('specular/(vec3(1.0)+specular)'));
+assert(src.includes('out vec3 vReactorView')&&src.includes('in vec3 vReactorView'));
+console.log('R2269_REACTOR_VIEW_OPTICS_PASS '+JSON.stringify({normalSamples:101,extraDrawCalls:0}));
