@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2303-living-reactor';
+  const VERSION='cinematic-archive-r2304-counterrotating-reactor';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -997,6 +997,9 @@
       const angle=(edge+.5)*Math.PI/4,ca=Math.cos(angle),sa=Math.sin(angle);
       const radius=1.36,span=2*radius*Math.tan(Math.PI/8);
       solid([ca*radius,sa*radius,-15.65],[span+.04,.25,.48],angle+Math.PI/2,.64);
+      // R2304: independent outer rotor behind the first ring.
+      const outer=1.86;
+      solid([ca*outer,sa*outer,-16.50],[2*outer*Math.tan(Math.PI/8)*.89,.18,.27],angle+Math.PI/2,.67);
       const p=[Math.cos(edge*Math.PI/4)*.69,Math.sin(edge*Math.PI/4)*.69,-16.05];
       const q=[Math.cos(next*Math.PI/4)*.69,Math.sin(next*Math.PI/4)*.69,-16.05];
       for(const tip of [[0,0,-15.32],[0,0,-16.78]]){
@@ -1087,6 +1090,7 @@ void main(){
  bool reactor=aUv.y>1.5;
  bool room=aUv.y<-.5;
  bool core=room&&aUv.x>.90;
+ bool rotor=room&&aUv.x>.63&&aUv.x<.69;
  vec3 coreNormal=aNormal;
  if(core){
    // R2303: rotate the actual faceted mesh around its own center and
@@ -1095,6 +1099,14 @@ void main(){
    vec3 q=(p-vec3(0.0,0.0,-16.05))*(1.0+.12*uRoomCoreState.y);
    p=vec3(c*q.x+s*q.z,q.y,-s*q.x+c*q.z)+vec3(0.0,0.0,-16.05);
    coreNormal=vec3(c*aNormal.x+s*aNormal.z,aNormal.y,-s*aNormal.x+c*aNormal.z);
+ }
+ if(rotor){
+   // Counter-rotating physical rings, sharing the same immutable room VBO.
+   bool outer=aUv.x>.66;
+   float a=uRoomCoreState.x*(outer?-1.40:1.75);
+   float c=cos(a),s=sin(a);
+   p.xy=mat2(c,s,-s,c)*p.xy;
+   coreNormal.xy=mat2(c,s,-s,c)*aNormal.xy;
  }
  vReactorVisibility=1.0;
  vReactorLight=0.0;
@@ -1145,6 +1157,7 @@ void main(){
  // Capture the physical view ray before the portrait framing adjustment.
  vReactorView=room?aPosition:(reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0));
  if(core)vReactorView=p-uOffset+uCamera;
+ if(rotor)vReactorView=p-uOffset+uCamera;
  // Rotate the room/gate geometry about the physical optical center.
  // World-space normals and light rays remain unrotated, so highlights
  // stay attached to the materials rather than moving with the camera.
@@ -1255,6 +1268,13 @@ void main(){
     if(vUv.x>.60&&vUv.x<.70){
       float rim=1.0-abs(dot(N,V));
       material=vec3(.055,.085,.12)*key+uColor*(.12+.23*rim*rim);
+      if(vUv.x>.63&&vUv.x<.69){
+        // Illumination travels around the machined rotor as charge builds.
+        vec2 axis=vec2(cos(uRoomCoreState.x*3.0),sin(uRoomCoreState.x*3.0));
+        float sweep=smoothstep(.15,.96,dot(normalize(local.xy),axis));
+        float hot=uRoomCoreState.y*sweep;
+        material+=mix(uColor,vec3(.64,.86,1.0),.35)*(.12+.48*hot);
+      }
     }
     if(vUv.x>.90){
       float facet=.48+.52*abs(dot(N,normalize(vec3(.32,.68,.66))));
@@ -1447,6 +1467,7 @@ void main(){
       const coreState=roomCoreState(scene,pro,travel);
       gl.uniform2fv(this.uniform.uRoomCoreState,coreState);
       setData(root,'fxArchiveLivingReactorR2303',coreState.map(x=>x.toFixed(3)).join(','));
+      setData(root,'fxArchiveRotorsR2304',scene.key==='licensing'?'commerce-original':'two-counterrotating-physical-rings');
       setData(root,'fxArchiveEnergyR2300',energyTrack.map(x=>x.toFixed(3)).join(','));
       setData(root,'fxArchiveReactiveVolumeR2301',scene.key==='licensing'?'commerce-original':'energy-coupled-finite-scattering');
       setData(root,'fxArchiveCameraR2299',orientation.map(x=>x.toFixed(4)).join(','));

@@ -629,7 +629,7 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
    assert(area>1e-8,'degenerate room triangle');minArea=Math.min(minArea,area);
    for(const j of [2,10,18]){near=Math.max(near,geometry[i+j]);far=Math.min(far,geometry[i+j]);}
  }
- assert(geometry.length/24===2280);
+ assert(geometry.length/24===2376);
  assert(near>.15&&Math.abs(far+18.4)<1e-5);
  const depth=z=>.56+.37*clamp((4-z)/24.5);
  for(const offset of [0,1.12,2.05])for(const cam of [-1.4,0,.4]){
@@ -866,4 +866,39 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('gl.uniform2fv(this.uniform.uRoomCoreState,coreState);'));
  assert(src.includes('if(core)vReactorView=p-uOffset+uCamera;'));
  console.log('R2303_LIVING_REACTOR_PASS '+JSON.stringify({samples,peakCharge:peak,peakRotation:rotation,correctedWallNormals:walls,extraDrawCalls:0}));
+ }
+
+ // R2304: sixteen physical rotor segments, rigid counterrotation, bounded
+ // energy highlights and no additional rendering pass.
+ {
+ const a=src.indexOf('  function cubeGeometry()'),b=src.indexOf('  function panelGeometry(',a);
+ const geometry=new Function(src.slice(a,b)+'return corridorRoomGeometry;')()();
+ const groups=[[],[]];
+ for(let i=0;i<geometry.length;i+=8){
+   const tag=geometry[i+6];
+   if(Math.abs(tag-.64)<1e-5)groups[0].push(Array.from(geometry.slice(i,i+8)));
+   if(Math.abs(tag-.67)<1e-5)groups[1].push(Array.from(geometry.slice(i,i+8)));
+ }
+ assert.equal(groups[0].length,288);assert.equal(groups[1].length,288);
+ for(const group of groups)for(const v of group){
+   assert(Math.hypot(v[0],v[1])>1.1);
+   assert(Math.abs(Math.hypot(...v.slice(3,6))-1)<1e-6);
+ }
+ const rotate=(x,y,a)=>[Math.cos(a)*x-Math.sin(a)*y,Math.sin(a)*x+Math.cos(a)*y];
+ let samples=0;
+ for(let i=0;i<=1000;i++){
+   const a=.831044*i/1000;
+   for(let r=0;r<2;r++){
+     const angle=a*(r?-1.40:1.75);
+     for(const v of groups[r].filter((_,j)=>j%36===0)){
+       const q=rotate(v[0],v[1],angle),n=rotate(v[3],v[4],angle);
+       assert(Math.abs(Math.hypot(...q)-Math.hypot(v[0],v[1]))<1e-10);
+       assert(Math.abs(Math.hypot(...n,v[5])-1)<1e-6);
+       samples++;
+     }
+   }
+ }
+ assert(src.includes('uRoomCoreState.x*(outer?-1.40:1.75)'));
+ assert(src.includes('if(rotor)vReactorView=p-uOffset+uCamera;'));
+ console.log('R2304_COUNTERROTATING_REACTOR_PASS '+JSON.stringify({samples,rotors:2,segments:16,triangles:geometry.length/24,extraDrawCalls:0}));
  }
