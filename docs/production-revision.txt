@@ -28,7 +28,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261026-r2194
+mag_cache=20261126-r2288
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -165,3 +165,6 @@ R2195_required_evidence=Production source/CSP and Worker tests; two-domain exact
 R2195_quality_limit=Photographic or awards-quality aesthetic not certified by automated checks; human and physical-device review still needed.
 
 r2202_desktop_proof_fix=Re-run the R2201 production cinematic with the corrected real WebGL READY sampling (6718ac4a93); do not reload a frame already confirmed ready; retain all four chromatic genome/cell/MAG pixel and timing assertions and strict CSP.
+
+transport_revision=20261127-http3-edge-negotiation-r2288
+transport_scope=Remove legacy Alt-Svc clear; Cloudflare owns HTTP/3 advertisement. Align MAG cache marker with the actual R2288 scheduler and renderer loader without changing geometry.
