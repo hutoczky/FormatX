@@ -186,3 +186,6 @@ charset_scope=Move canonical homepage charset declaration into first 512 bytes a
 
 layout_revision=20261127-r2294-first-paint-layout
 layout_scope=Keep desktop 76px header in flow; reserve mobile H1 typography in blocking CSS with local system fonts, excluding active archive cinema. Existing visual and accessibility checks remain required; LCP and CLS improvements not yet measured.
+
+scroll_start_revision=20261127-r2295-native-initial-scroll
+scroll_start_scope=Preserve native initial scroll, anchors and restoration instead of repeated forced hero scrolls; retain existing seamless loop landing geometry. New LCP/CLS measurements required.

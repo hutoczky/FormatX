@@ -168,26 +168,12 @@
       return;
     }
     initialHeroGuardApplied = true;
-    try { history.scrollRestoration = 'manual'; } catch (_) {}
-
-    if (location.hash === '#top') {
-      history.replaceState({}, '', location.pathname + location.search + '#hero');
-    }
-
-    forceHeroStart('initial');
-    requestAnimationFrame(() => {
-      forceHeroStart('frame-1');
-      requestAnimationFrame(() => forceHeroStart('frame-2'));
-    });
-
-    document.addEventListener('formatx:introcomplete', () => {
-      const top = heroTop();
-      if (Math.abs(scrollY - top) > 96) {
-        root.dataset.fxInitialHeroGuard = 'user-scroll-preserved';
-        return;
-      }
-      requestAnimationFrame(() => forceHeroStart('intro-complete'));
-    }, { once: true });
+    // R2295: the browser owns a fresh navigation's initial scroll position,
+    // hash anchors and reload restoration. Do not scroll through the header
+    // on startup or schedule another scroll after the cinematic completes.
+    // The seamless loop still measures its own hero-relative landing origin.
+    root.dataset.fxInitialHeroGuard = 'native-navigation-r2295';
+    root.dataset.fxInitialHeroTop = String(Math.round(heroTop()));
   }
 
   function repairFooterCopy(footer) {
