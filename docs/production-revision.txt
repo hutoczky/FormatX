@@ -216,3 +216,6 @@ resize_observer_scope=Suppress identical native MAG resize observer redraws, avo
 
 living_scene_revision=20261127-r2312-idempotent-scene
 living_scene_scope=Reuse locale/currency number formatters and avoid unchanged scene status DOM writes. Pricing, currency values, checkout links and QR delivery unchanged. Live performance not yet measured.
+
+mobile_category_revision=20261127-r2313-category-first-paint
+mobile_category_scope=Make the measured mobile category definition use settled readable typography at first paint, align canonical source preload and stylesheet media with production Worker. Exclude active archive and retain original semantic content. Live LCP must be measured.

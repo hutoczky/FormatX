@@ -1149,3 +1149,48 @@
     white-space:nowrap!important;
   }
 }
+
+/* R2313: the mobile category definition is the measured LCP candidate.
+   Match settled typography at the first visible frame, independent of late
+   optical CSS. Archive materialization remains the owner after activation. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-copy > .fx-category-definition{
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-height:131px!important;
+    margin:0 0 22px!important;
+    padding:0!important;
+    font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(15px,4.1vw,18px)!important;
+    font-weight:400!important;
+    line-height:1.5!important;
+    overflow-wrap:anywhere!important;
+    color:#c9dbe5!important;
+    content-visibility:visible!important;
+    opacity:1!important;
+    visibility:visible!important;
+    filter:none!important;
+    transform:none!important;
+    animation:none!important;
+    transition:none!important;
+    text-shadow:none!important;
+  }
+  html:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-copy > .fx-category-definition > strong{
+    display:block!important;
+    margin:0 0 10px!important;
+    font-family:inherit!important;
+    font-size:clamp(13px,3.7vw,16px)!important;
+    line-height:1.3!important;
+    font-weight:700!important;
+    color:#e9fbff!important;
+    text-transform:uppercase!important;
+    animation:none!important;
+    transition:none!important;
+  }
+}
