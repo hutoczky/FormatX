@@ -243,3 +243,6 @@ quality_resize_scope=Use existing change-only resize path for both adaptive reso
 
 scroll_audit_revision=20261127-r2321-exact-release
 scroll_audit_scope=Run native scroll audit after successful production workflow, pin audited SHA, compare exact production marker and both versioned native renderer and archive sources before measuring, reject changed production marker after measurement. No test threshold relaxed.
+
+surface_pulse_revision=20261127-r2322-archive-pulse-owner
+surface_pulse_scope=End hero surface pulses without cancelling active archive transit permits, RAF or quality resize callbacks. Preserve original hero-only hard idle behavior and software scroll scheduling limits. Browser effect not yet verified.

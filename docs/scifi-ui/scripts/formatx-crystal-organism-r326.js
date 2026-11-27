@@ -2308,6 +2308,23 @@
       clearTimeout(heartbeatTimer);heartbeatTimer=0;
       {const value=String('disabled-no-continuous-rendering');if(root.dataset.fxCoreIdleHeartbeatR441!==value)root.dataset.fxCoreIdleHeartbeatR441='disabled-no-continuous-rendering';}
     }
+    // R2322: an archive scene owns the current shared-canvas frame.
+    // Ending a hero pulse must not cancel its transit permit or queued RAF.
+    function finishArchiveSurfacePulse(source){
+      if(root.dataset.fxArchiveDock!=='active')return false;
+      surfacePulseStart=-Infinity;
+      root.dataset.fxCoreSurfacePulseR454='idle';
+      root.dataset.fxCoreSweepEndpointR2050='archive-frame-owner';
+      root.dataset.fxCoreIdleBoundaryR1710='archive-frame-preserved';
+      // Normal scheduling respects the software scroll hold; the existing
+      // settle timer and archive tail own any still-pending transit.
+      schedule(1);
+      dispatchEvent(new CustomEvent('formatx:coresurfacesweep',{
+        detail:{phase:'end',source,duration:SURFACE_PULSE_WINDOW_MS}
+      }));
+      if(source==='autonomous')scheduleSurfacePulse();
+      return true;
+    }
     function startSurfacePulse(source='autonomous'){
       const now=performance.now();
       const explicitInteraction=/interaction|direct|shape|tap|keyboard|r538|r619/i.test(String(source||''));
@@ -2334,6 +2351,7 @@
       if(!blocked())schedule(1);
       later(()=>{
         if(pulseId!==surfacePulseCount)return;
+        if(finishArchiveSurfacePulse(source))return;
         // R2050: Chromium can pause intermediate rAF callbacks while native
         // CSS/compositor work is busy. The end timer must then submit the
         // physically FINAL surface-pulse frame before restoring idle, rather
