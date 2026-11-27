@@ -67,6 +67,12 @@
         powerPreference:'high-performance',
         preserveDrawingBuffer:false
       });
+      const gl=this.renderer.getContext();
+      const debug=gl.getExtension('WEBGL_debug_renderer_info');
+      const gpu=String(debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER)||'').toLowerCase();
+      this.studioHardware=!this.mobileRender&&!/swiftshader|llvmpipe|software|softpipe|mesa offscreen/.test(gpu)
+        && Number(navigator.hardwareConcurrency||8)>4 && Number(navigator.deviceMemory||8)>4;
+      this.maxRenderSize=Math.min(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE)||4096,gl.getParameter(gl.MAX_TEXTURE_SIZE)||4096);
       this.renderer.setClearColor(0x02070b,1);
       this.renderer.outputColorSpace=THREE.SRGBColorSpace;
       this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -152,7 +158,7 @@
       // broad softbox reflections, not extra CSS overlays or neon bloom.
       const T=this.THREE;
       const canvas=document.createElement('canvas');
-      const w=this.mobileRender?256:512;
+      const w=this.mobileRender?256:(this.studioHardware?1024:512);
       canvas.width=w;canvas.height=w/2;
       const ctx=canvas.getContext('2d',{alpha:false});
       if(!ctx)return;
@@ -185,7 +191,7 @@
         pmrem=new T.PMREMGenerator(this.renderer);
         this.studioEnvTarget=pmrem.fromEquirectangular(texture);
         this.scene.environment=this.studioEnvTarget.texture;
-        this.scene.environmentIntensity=this.mobileRender?.64:.84;
+        this.scene.environmentIntensity=this.mobileRender?.64:(this.studioHardware?.92:.84);
         this.studioEnvironmentTexture=texture;
       }catch(error){
         this.studioEnvTarget?.dispose?.();
@@ -2407,10 +2413,17 @@
       }
     }
 
+    // R2324: fit real display pixels within a UHD pixel ceiling.
+    // Preserve viewport aspect and hardware limits; never stretch to 16:9.
+    studioPixelRatio(w,h,dpr){
+      const base=Math.min(dpr||1,this.mobileRender?1.15:2.0);
+      if(!this.studioHardware)return base;
+      return Math.min(base,Math.sqrt(8294400/(w*h)),this.maxRenderSize/w,this.maxRenderSize/h);
+    }
     resize(){
       if(this.disposed)return;
       const width=Math.max(1,innerWidth),height=Math.max(1,innerHeight);
-      const dpr=Math.min(devicePixelRatio||1,this.mobileRender?1.15:2.0);
+      const dpr=this.studioPixelRatio(width,height,devicePixelRatio||1);
       // The first resize is always applied; repeated events with the same
       // logical dimensions and DPR must not reset the drawing buffer.
       if(this.lastResizeDpr===dpr&&this.width===width&&this.height===height)return;
@@ -2419,6 +2432,9 @@
       this.lastResizeDpr=dpr;
       if(this.renderer.getPixelRatio()!==dpr)this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(width,height,false);
+      const gl=this.renderer.getContext();
+      document.documentElement.dataset.fxGenesisResolutionR2324=gl.drawingBufferWidth+'x'+gl.drawingBufferHeight;
+      document.documentElement.dataset.fxGenesisStudioR2324=this.studioHardware?'uhd-native-studio':'standard-device-profile';
       this.camera.aspect=this.width/this.height;
       const portrait=this.camera.aspect<1;
       this.camera.fov=portrait?51:42;

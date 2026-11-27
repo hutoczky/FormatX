@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema-r2323-light-budget';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema-r2323-light-budget-r2324-studio-uhd';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;

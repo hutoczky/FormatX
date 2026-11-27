@@ -1524,6 +1524,7 @@
       ${fragmentIn} float vMorph;
       ${webgl2 ? "out vec4 outColor;" : ""}
       float sat(float v){return clamp(v,0.,1.);}
+      float sq(float x){return x*x;}
       vec3 tone(vec3 c){return c/(vec3(1.0)+max(c,vec3(0.0)));}
       void main(){
         vec3 n=normalize(vNormal);
@@ -1540,10 +1541,10 @@
         float top=sat(dot(n,normalize(vec3(-.10,.96,.28))));
 
         vec3 refl=reflect(-view,n);
-        float softboxA=exp(-pow((refl.x+.26)/.22,2.0)-pow((refl.y-.30)/.50,2.0))*smoothstep(-.20,.62,refl.z);
-        float softboxB=exp(-pow((refl.x-.42)/.27,2.0)-pow((refl.y+.02)/.54,2.0))*smoothstep(-.26,.62,refl.z);
-        float ribbonA=exp(-pow((refl.x+.13)/.29,2.0)-pow((refl.y-.10)/.82,2.0))*smoothstep(-.10,.72,refl.z);
-        float ribbonB=exp(-pow((refl.x-.31)/.25,2.0)-pow((refl.y+.10)/.70,2.0))*smoothstep(-.10,.70,refl.z);
+        float softboxA=exp(-sq((refl.x+.26)/.22)-sq((refl.y-.30)/.50))*smoothstep(-.20,.62,refl.z);
+        float softboxB=exp(-sq((refl.x-.42)/.27)-sq((refl.y+.02)/.54))*smoothstep(-.26,.62,refl.z);
+        float ribbonA=exp(-sq((refl.x+.13)/.29)-sq((refl.y-.10)/.82))*smoothstep(-.10,.72,refl.z);
+        float ribbonB=exp(-sq((refl.x-.31)/.25)-sq((refl.y+.10)/.70))*smoothstep(-.10,.70,refl.z);
 
         float frontDepth=smoothstep(-.46,.58,vLocal.z);
         float backDepth=1.0-frontDepth;
@@ -1552,7 +1553,7 @@
         float volume=.5+.5*sin(vLocal.y*5.0+vLocal.x*2.4-vLocal.z*2.8);
         /* Broadband depth density replaces periodic high-contrast scanlines. */
         float strata=smoothstep(-.68,.72,vLocal.y*.82+vLocal.x*.16-vLocal.z*.19);
-        float centreHaze=exp(-pow(vLocal.x/.50,2.0)-pow(vLocal.y/.60,2.0))*frontDepth;
+        float centreHaze=exp(-sq(vLocal.x/.50)-sq(vLocal.y/.60))*frontDepth;
 
         if(uLayer>.5){
           ${outputName}=vec4(0.0,0.0,0.0,0.0);
@@ -1585,11 +1586,14 @@
         /* Large photographic light sources. */
         c+=vec3(.98,1.00,.97)*softboxA*.006;
         c+=vec3(.40,.66,.66)*softboxB*${mobile?'.395':'.295'};
-        float softboxC=exp(-pow((refl.x-.18)/.31,2.0)-pow((refl.y-.56)/.30,2.0))*smoothstep(-.18,.68,refl.z);
+        float softboxC=exp(-sq((refl.x-.18)/.31)-sq((refl.y-.56)/.30))*smoothstep(-.18,.68,refl.z);
         c+=vec3(.80,.90,.86)*softboxC*${mobile?'.235':'.190'};
         c+=vec3(.92,.98,.96)*ribbonA*.012;
         c+=vec3(.18,.47,.50)*ribbonB*.052;
-        float glassBlade=exp(-pow((vLocal.x+.24+vLocal.y*.060)/.150,2.0))*frontDepth
+        // R2324: continuous dielectric clearcoat, broad studio reflection.
+        float coatF=.04+.96*pow(1.0-facing,5.0);
+        c+=vec3(.66,.83,.85)*coatF*(softboxB*.095+softboxC*.070);
+        float glassBlade=exp(-sq((vLocal.x+.24+vLocal.y*.060)/.150))*frontDepth
           *smoothstep(-.72,.72,vLocal.y);
         c+=vec3(.76,.88,.86)*glassBlade*.004;
 
@@ -1612,7 +1616,7 @@
         c+=vec3(.020,.080,.092)*diagonalValley*fresnel*.060;
 
         /* A second, deeper pane creates parallax-like density behind the skin. */
-        float innerPane=exp(-pow((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085,2.0))
+        float innerPane=exp(-sq((abs(vLocal.x)-(.16+.16*abs(vLocal.y)))/.085))
           *smoothstep(.04,.52,frontDepth);
         c+=vec3(.082,.190,.198)*innerPane*.044;
 
@@ -1620,8 +1624,8 @@
            These echo the layered crystalline anatomy from the selected historic
            MAG without adding geometry or a second render pass. */
         float l1Prism=abs(vLocal.x)*.90+abs(vLocal.y)*.72;
-        float prismShellA=exp(-pow((l1Prism-.315)/.125,2.0))*frontDepth;
-        float prismShellB=exp(-pow((l1Prism-.475)/.16,2.0))*frontDepth;
+        float prismShellA=exp(-sq((l1Prism-.315)/.125))*frontDepth;
+        float prismShellB=exp(-sq((l1Prism-.475)/.16))*frontDepth;
         c+=vec3(.42,.56,.53)*prismShellA*(${mobile?'.048':'.060'}+${mobile?'.017':'.023'}*softboxB);
         c+=vec3(.050,.190,.205)*prismShellB*(${mobile?'.035':'.043'}+${mobile?'.014':'.019'}*fresnel);
         c*=1.0-.020*prismShellB;
@@ -1661,11 +1665,11 @@
         c=mix(c,vec3(.004,.017,.022)+c*.40,cavity*.12);
         c+=vec3(.020,.080,.092)*cavityCore*.055;
         float lens=(1.0-smoothstep(.84,1.02,od))*front;
-        float rim=exp(-pow((od-.74)/.060,2.0))*front;
+        float rim=exp(-sq((od-.74)/.060))*front;
         float iris=exp(-od*od*4.8)*front;
         float core=exp(-od*od*18.5)*front;
         float hot=exp(-od*od*74.0)*front;
-        float glint=exp(-pow((oq.x+.30)/.13,2.0)-pow((oq.y-.30)/.12,2.0))*front;
+        float glint=exp(-sq((oq.x+.30)/.13)-sq((oq.y-.30)/.12))*front;
         vec3 opticBase=vec3(.006,.040,.050)+vec3(.015,.105,.125)*iris;
         c=mix(c,opticBase+c*.42,lens*.22);
         c+=vec3(.78,.88,.84)*rim*${mobile?'.125':'.165'};
@@ -1673,7 +1677,7 @@
         c+=vec3(.26,.92,.94)*core*(${mobile?'.34':'.40'}+${mobile?'.17':'.18'}*uEnergy);
         c+=vec3(.98,1.00,.99)*hot*(${mobile?'.64':'.72'}+${mobile?'.12':'.13'}*uEnergy);
         c+=vec3(1.00,1.00,.98)*glint*.24;
-        float opticCaustic=exp(-pow((od-.40)/.17,2.0))*front;
+        float opticCaustic=exp(-sq((od-.40)/.17))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
         /* R2200: the same biological cyan/coral nucleus stays alive inside
            the recessed MAG iris after the titanium arms finish seating.
@@ -1690,7 +1694,7 @@
 
         /* R2137: raised metal panels visually separate from smoked bioglass. */
         float metalKey=max(dot(n,normalize(vec3(-.46,.72,.52))),0.0);
-        float metalRim=pow(1.0-facing,2.0);
+        float metalRim=sq(1.0-facing);
         // R2141: real polished titanium response (broad key, cool rim,
         // narrow specular lines) rather than flat gray plastic channels.
         float metalSpec=pow(max(dot(n,normalize(keyDir+view)),0.0),22.0);
@@ -1714,6 +1718,9 @@
           +vec3(.53,.67,.68)*softboxB*.64
           +vec3(.75,.90,.88)*metalSpec*.48
           +vec3(.14,.37,.41)*metalSideSpec*.24;
+        // Broad satin shoulder plus a narrow polished inlay response.
+        float satinShoulder=pow(max(dot(n,normalize(fillDir+view)),0.0),8.0);
+        titanium+=vec3(.24,.32,.34)*satinShoulder*.13;
         titanium=mix(titanium,machinedSilver,polishedRib*.90);
         c=mix(c,titanium,machinedArmor*.99);
 
@@ -1722,7 +1729,7 @@
         if(uSurfacePulse>=0.0){
           float coordinate=.5+(vLocal.y*.61+vLocal.x*.14+vLocal.z*.16)*.5;
           float head=-.16+1.32*sat(uSurfacePulse);
-          sweep=exp(-pow((coordinate-head)/.072,2.0))*(.24+.76*fresnel);
+          sweep=exp(-sq((coordinate-head)/.072))*(.24+.76*fresnel);
         }
         c+=vec3(.08,.30,.34)*sweep*.24;
         c+=vec3(.70,.78,.74)*sweep*softboxA*.08;
@@ -2178,8 +2185,9 @@
       const dpr=Math.min(devicePixelRatio||1,cap);
       const baseBudget=softwareRenderer
         ? (mobile?920000:560000)
-        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:3400000);
-      const budget=Math.max(112000,Math.round(baseBudget*qualityScale*qualityScale));
+        : (auditMode ? 980000 : constrainedMobile?1280000:mobile?1900000:constrained?1450000:8294400);
+      // R2324: native 4K pixel ceiling; quality may yield under load.
+      const budget=Math.max(112000,Math.min(8294400,Math.round(baseBudget*qualityScale*qualityScale)));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}

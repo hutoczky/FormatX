@@ -249,3 +249,6 @@ surface_pulse_scope=End hero surface pulses without cancelling active archive tr
 
 intro_light_revision=20261127-r2323-light-budget
 intro_light_scope=Remove unreachable zero-intensity duplicate scene point light from the actual R1280 GENESIS renderer, preserve active optic light and film geometry, skip identical resize events. Visual performance requires live browser evidence.
+
+studio_revision=20261127-r2324-studio-uhd
+studio_scope=Native desktop MAG UHD pixel ceiling 8294400, continuous clearcoat and titanium satin light response, defined GLSL signed-square math; canonical Three.js GENESIS native display UHD budget and hardware studio reflection environment 1024 pixels. Exact inline bootstrap CSP hash updated. Real GPU performance, shader compilation and visual acceptance remain subject to browser checks.

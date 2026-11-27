@@ -1,0 +1,35 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const core=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
+const intro=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js','utf8');
+const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+const a=core.indexOf('    function resize(onlyChanged=false){'),b=core.indexOf('    function blocked(){',a);
+assert.ok(a>=0&&b>a);
+const sim=new Function('w','h','devicePixelRatio','softwareRenderer','mobile','qualityScale',`
+ let width=0,height=0,aspect=1;
+ const stage={getBoundingClientRect:()=>({width:w,height:h})},canvas={width:0,height:0},gl={viewport(){}},root={dataset:{}};
+ const auditMode=false,constrainedMobile=false,constrained=false;
+ ${core.slice(a,b)}
+ resize();return [canvas.width,canvas.height];
+`);
+assert.deepEqual(sim(1920,1080,1,false,false,1),[1920,1080]);
+assert.deepEqual(sim(3840,2160,1,false,false,1),[3840,2160]);
+assert.deepEqual(sim(1920,1080,2,false,false,1),[3840,2160]);
+const down=sim(3840,2160,1,false,false,.74);assert.ok(down[0]*down[1]<8294400);
+const soft=sim(3840,2160,1,true,false,1);assert.ok(soft[0]*soft[1]<=562000);
+const i=intro.indexOf('    studioPixelRatio('),j=intro.indexOf('    resize(){',i);
+assert.ok(i>=0&&j>i);
+const ratio=new Function('return ({'+intro.slice(i,j)+'}).studioPixelRatio')();
+const hw={studioHardware:true,mobileRender:false,maxRenderSize:8192};
+assert.equal(ratio.call(hw,3840,2160,1),1);
+assert.equal(ratio.call(hw,1920,1080,2),2);
+assert.equal(ratio.call(hw,3840,2160,2),1);
+assert.equal(ratio.call({...hw,maxRenderSize:2048},4096,2160,1),.5);
+assert.equal(ratio.call({studioHardware:false,mobileRender:true},390,844,3),1.15);
+assert.ok(core.includes('float sq(float x){return x*x;}')&&core.includes('float coatF=')&&core.includes('float satinShoulder='));
+assert.ok(intro.includes('this.studioHardware?1024:512'));
+const bootstrap=html.match(/<script data-fx-intro-bootstrap-r1629="true">([\s\S]*?)<\/script>/)[1];
+const hash='sha256-'+crypto.createHash('sha256').update(bootstrap,'utf8').digest('base64');
+assert.ok(html.includes("'"+hash+"'")&&worker.includes("'"+hash+"'"));
+console.log('R2324 studio UHD resolution and shader/CSP source contract: PASS');
