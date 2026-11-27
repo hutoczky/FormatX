@@ -108,6 +108,7 @@ jobs:
           node .github/scripts/validate-planar-efficiency-r2335.cjs
           node .github/scripts/validate-optical-conduits-r2336.cjs
           node .github/scripts/validate-instanced-energy-r2337.cjs
+          node .github/scripts/validate-production-cascade-r2339.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

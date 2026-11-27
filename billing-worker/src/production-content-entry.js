@@ -295,16 +295,30 @@ function injectReferenceModeBoot(html) {
   return source.replace('</head>', `  ${REFERENCE_MODE_BOOT_SCRIPT}\n</head>`);
 }
 function injectCriticalFirstPaint(html) {
-  let source = String(html || '');
-  source = source.replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
+  // R2339: preserve the authored cascade and early discovery order. Moving
+  // all four canonical links to the end of head changed the production
+  // first-paint geometry relative to the validated source document.
+  const canonical = new Map([
+    ['mobile', FIRST_PAINT_LINK],
+    ['frame', FIRST_FRAME_STABILITY_LINK],
+    ['desktop', P0_FIRST_PAINT_LINK],
+    ['optical', P0_MOBILE_OPTICAL_LINK],
+  ]);
+  let source = String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
-    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') return '';
-    if (pathname === '/scifi-ui/styles/formatx-p0-first-paint-r490.css') return '';
-    if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) return '';
-    return tag;
+    let role;
+    if (pathname === '/scifi-ui/styles/formatx-first-frame-stability-r283.css') role = 'frame';
+    else if (pathname === '/scifi-ui/styles/formatx-p0-first-paint-r490.css') {
+      role = /data-fx-p0-first-paint-r503/i.test(tag) ? 'desktop' : 'optical';
+    } else if (pathname === '/scifi-ui/styles/formatx-mobile-first-paint-r358.css' && /data-fx-production-first-paint-r370/i.test(tag)) role = 'mobile';
+    if (!role) return tag;
+    const replacement = canonical.get(role);
+    canonical.delete(role);
+    return replacement || '';
   });
-  const critical = `  ${FIRST_PAINT_LINK}\n  ${FIRST_FRAME_STABILITY_LINK}\n  ${P0_FIRST_PAINT_LINK}\n  ${P0_MOBILE_OPTICAL_LINK}\n`;
-  return source.replace('</head>', `${critical}</head>`);
+  // Recovery path only for old/minimal HTML. Existing tags never move.
+  if (canonical.size) source = source.replace('</head>', [...canonical.values()].map(tag => '  ' + tag).join('\n') + '\n</head>');
+  return source;
 }
 function normalizeMobileStylesheetMedia(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
@@ -362,6 +376,10 @@ function deferNonCriticalStyles(html) {
   return String(html || '').replace(/<link\b[^>]*\brel=["']stylesheet["'][^>]*>/gi, tag => {
     const pathname = stylesheetPath(tag);
     if (!pathname || !DEFERRED_STYLE_PATHS.has(pathname)) return tag;
+    // R2339: preserve the original target media of already deferred links.
+    if (/\bdata-fx-r487-deferred-style=["']true["']/i.test(tag) &&
+        /\bdata-fx-r487-media=["'][^"']+["']/i.test(tag) &&
+        /\smedia=["']print["']/i.test(tag)) return tag;
     const mediaMatch = tag.match(/\smedia=(["'])(.*?)\1/i);
     const originalMedia = mediaMatch ? mediaMatch[2] : 'all';
     let next = mediaMatch ? tag.replace(mediaMatch[0], '') : tag;
