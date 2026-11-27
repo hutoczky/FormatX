@@ -207,3 +207,6 @@ cadence_divisor_scope=Correct floating-point boundary at nominal 120/180/240 Hz 
 
 pointer_edge_revision=20261127-r2301-pointer-edge
 pointer_edge_scope=Preserve zero-coordinate pointer samples, align exact canonical MAG cache chain and restore actual frame clock in reactor scheduler test. No test threshold relaxation.
+
+lifecycle_regression_revision=20261127-r2310-bfcache-fixture
+lifecycle_regression_scope=Exercise actual native page lifecycle with pending pointer/RAF/timer state across two restore cycles; preserve all reactor assertions. Full reactor source suite executed in isolated JavaScript before publication.
