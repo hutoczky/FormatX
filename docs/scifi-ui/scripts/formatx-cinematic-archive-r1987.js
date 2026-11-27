@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2300-energy-transmission';
+  const VERSION='cinematic-archive-r2301-reactive-volume';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1180,7 +1180,9 @@ void main(){
     float packet=uRoomEnergy.y*(1.0-smoothstep(.22,1.45,abs(local.z-uRoomEnergy.x)));
     vec3 bounce=uColor*(.045+.15*pool+.19*packet)*(.48+.52*abs(N.y));
     // Broad reflection response on structural metal; no thin aliasing grids.
-    vec3 V=normalize(vec3(-local.xy,vViewDistance));
+    // R2301: use the same physical eye for reflections and scattering.
+    vec3 eye=uCamera-uOffset+vec3(0.0,0.0,6.2);
+    vec3 V=normalize(eye-local);
     float grazing=1.0-abs(dot(N,V));
     vec3 metal=vec3(.09,.13,.17)*rib*grazing*grazing;
     vec3 tint=graphite+(bounce+metal)*(1.0-distanceFog*.75);
@@ -1205,14 +1207,22 @@ void main(){
     vec3 material=mix(tint,lamp,step(.70,vUv.x));
     // Beer-Lambert transmission through two finite, elongated light pools.
     // These are analytic single-scattering approximations, not a path tracer.
-    vec3 eye=uCamera-uOffset+vec3(0.0,0.0,6.2);
+    // R2301: a pair of finite fog lobes follow the same object-space
+    // energy packet as the physical conduits. At rest they return smoothly
+    // to the original stationary pools. No extra ray intersection.
     vec3 ray=local-eye;
-    float path=roomVolumeLength(eye,ray,vec3(-1.72,.80,-3.6),vec3(1.45,.52,.65));
-    if(uMobile<.5)path+=.80*roomVolumeLength(eye,ray,vec3(1.85,.85,-7.2),vec3(1.55,.50,.60));
+    float energy=clamp(uRoomEnergy.y,0.0,1.0);
+    float waveZ=clamp(uRoomEnergy.x,-12.7,-.4);
+    vec3 primaryCenter=vec3(-1.72,.80,mix(-3.6,waveZ,energy));
+    vec3 secondaryCenter=vec3(1.85,.85,mix(-7.2,clamp(waveZ-1.10,-12.7,-.4),energy));
+    float path=roomVolumeLength(eye,ray,primaryCenter,vec3(1.45,.52,.65));
+    if(uMobile<.5)path+=.80*roomVolumeLength(eye,ray,secondaryCenter,vec3(1.55,.50,.60));
     float scatter=1.0-exp(-.20*path);
     vec3 surface=mix(material,vec3(.013,.029,.045),distanceFog*.76);
     vec3 fogLight=mix(vec3(.18,.29,.38),uColor,.42);
-    outColor=vec4(mix(surface,fogLight,scatter*.62),1.0);
+    vec3 activeLight=mix(uColor,vec3(.54,.79,.96),.55);
+    fogLight=mix(fogLight,activeLight,energy*.52);
+    outColor=vec4(mix(surface,fogLight,scatter*(.62+.14*energy)),1.0);
     return;
   }
  bool reactor=vUv.y>1.5;
@@ -1378,6 +1388,7 @@ void main(){
       const energyTrack=roomEnergyTrack(scene,pro,travel);
       gl.uniform2fv(this.uniform.uRoomEnergy,energyTrack);
       setData(root,'fxArchiveEnergyR2300',energyTrack.map(x=>x.toFixed(3)).join(','));
+      setData(root,'fxArchiveReactiveVolumeR2301',scene.key==='licensing'?'commerce-original':'energy-coupled-finite-scattering');
       setData(root,'fxArchiveCameraR2299',orientation.map(x=>x.toFixed(4)).join(','));
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);

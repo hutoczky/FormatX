@@ -790,3 +790,29 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('abs(local.z-uRoomEnergy.x)'));
  console.log('R2300_ENERGY_TRANSMISSION_PASS '+JSON.stringify({samples,litBays:lit.size,peak,extraDrawCalls:0,commerceOriginal:true}));
  }
+
+ // R2301: bounded energy-coupled scattering and physically consistent view ray.
+ {
+ const a=src.indexOf('  function roomEnergyTrack('),b=src.indexOf('  function corridorRoomGeometry(',a);
+ const track=new Function('clamp','mix','smooth',src.slice(a,b)+'return roomEnergyTrack;')(clamp,mix,smooth);
+ const scene={key:'systems'},checkout={key:'licensing'};
+ const centers=([z,e])=>[mix(-3.6,clamp(z,-12.7,-.4),e),mix(-7.2,clamp(z-1.10,-12.7,-.4),e)];
+ let samples=0,min=-.4,max=-12.7;
+ for(let i=0;i<=2000;i++){
+   const t=i/2000,p=t<=.65?.315+.465*t/.65:.78,travel=t<=.65?0:(t-.65)/.35;
+   const state=track(scene,p,travel),c=centers(state);
+   for(const z of c){assert(Number.isFinite(z)&&z>=-12.70000001&&z<=-.39999999);min=Math.min(min,z);max=Math.max(max,z);}
+   assert(centers(track(checkout,p,travel)).every((z,j)=>z===[-3.6,-7.2][j]));
+   for(let j=0;j<=10;j++){
+     const scatter=1-Math.exp(-.20*j),blend=scatter*(.62+.14*state[1]);
+     assert(blend>=0&&blend<.76);samples++;
+   }
+ }
+ assert.equal(centers(track(scene,0,0))[0],-3.6);
+ assert(Math.abs(centers(track(scene,.78,1))[1]+7.2)<1e-10);
+ assert(src.includes('vec3 V=normalize(eye-local);'));
+ assert(src.includes('mix(-3.6,waveZ,energy)'));
+ assert(src.includes('scatter*(.62+.14*energy)'));
+ assert(min<-11&&max>-3);
+ console.log('R2301_REACTIVE_VOLUME_PASS '+JSON.stringify({samples,minimumCenterZ:min,maximumCenterZ:max,extraRayIntersections:0,extraDrawCalls:0,commerceOriginal:true}));
+ }
