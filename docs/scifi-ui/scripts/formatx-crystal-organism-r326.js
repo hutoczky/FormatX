@@ -2752,9 +2752,11 @@
     }
 
     function globalPoint(event){
+      // R2301: zero is a valid screen edge, not a missing pointer sample.
+      const x=event?.clientX,y=event?.clientY;
       return {
-        x:clamp((((Number(event?.clientX)||innerWidth*.5)/Math.max(1,innerWidth))-.5)*2,-1,1),
-        y:clamp(-((((Number(event?.clientY)||innerHeight*.5)/Math.max(1,innerHeight))-.5)*2),-1,1)
+        x:clamp(((Number.isFinite(x)?x:innerWidth*.5)/Math.max(1,innerWidth)-.5)*2,-1,1),
+        y:clamp(-((Number.isFinite(y)?y:innerHeight*.5)/Math.max(1,innerHeight)-.5)*2,-1,1)
       };
     }
     function applyAmbientPointer(event){

@@ -204,3 +204,6 @@ cadence_governor_scope=Use display cadence and refresh divisor to distinguish mi
 
 cadence_divisor_revision=20261127-r2300-shared-refresh-divisor
 cadence_divisor_scope=Correct floating-point boundary at nominal 120/180/240 Hz with shared divisor calculation and 0.5 Hz tolerance. Preserve strict regression and add boundary jitter coverage.
+
+pointer_edge_revision=20261127-r2301-pointer-edge
+pointer_edge_scope=Preserve zero-coordinate pointer samples, align exact canonical MAG cache chain and restore actual frame clock in reactor scheduler test. No test threshold relaxation.

@@ -127,7 +127,7 @@ console.log('R2269_REACTOR_VIEW_OPTICS_PASS '+JSON.stringify({normalSamples:101,
 // R2271 exercise the actual native scheduler with a deterministic clock.
 const native=fs.readFileSync('docs/scifi-ui/scripts/formatx-crystal-organism-r326.js','utf8');
 const section=(begin,end)=>{const a=native.indexOf(begin),b=native.indexOf(end,a+begin.length);assert(a>=0&&b>a);return native.slice(a,b);};
-const scheduler=section('    function queueFrame(delay=0){','    function boost(');
+const scheduler=section('    function prepareFrameClock(){','    function boost(');
 const hold=section('    function holdSoftwareScroll(){','    function onScroll(){');
 const frame=section('    function frame(now){','    function point(event){');
 const simulate=new Function('softwareRenderer',`
