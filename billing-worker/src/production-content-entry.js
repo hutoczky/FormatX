@@ -266,7 +266,7 @@ function robotsResponse(request) {
     'Cache-Control': 'no-store, max-age=0',
     'X-Content-Type-Options': 'nosniff',
     'X-FormatX-Robots-Owner': 'worker-r499',
-    'Alt-Svc': 'clear',
+    // HTTP/3 advertisement is managed by the Cloudflare edge.
     'X-FormatX-Transport-Stability': 'r514-critical-core-post-first-paint',
   });
   return new Response(request.method === 'HEAD' ? null : ROBOTS, { status: 200, headers });
@@ -408,7 +408,8 @@ async function stabilizePublicResponse(request, url, response) {
   const isGenesis = url.pathname === '/genesis/' || url.pathname === '/genesis/index.html';
   const isGenesisStudio = GENESIS_STUDIO_PATHS.has(url.pathname);
   headers.set('Content-Security-Policy', isGenesisStudio ? GENESIS_STUDIO_CSP : (isGenesis ? GENESIS_CSP : HEADER_CSP));
-  headers.set('Alt-Svc', 'clear');
+  // Do not clear the browser's HTTP/3 alternative-service cache.
+  headers.delete('Alt-Svc');
   headers.set('X-FormatX-Transport-Stability', 'r514-critical-core-post-first-paint');
   headers.set('X-FormatX-Edge-Stability', `r514-critical-core:${STARTUP_REVISION}`);
   headers.set('X-FormatX-CSS-Scheduler', 'r514-critical-core-r487-post-first-paint-r504-prepaint');
