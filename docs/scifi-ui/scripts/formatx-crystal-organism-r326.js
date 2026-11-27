@@ -2409,6 +2409,12 @@
       {const value=String('disabled-until-explicit-interaction');if(root.dataset.fxCoreAutonomousMorphR441!==value)root.dataset.fxCoreAutonomousMorphR441='disabled-until-explicit-interaction';}
     }
 
+    // R2299: distinguish actual missed presentation deadlines from normal
+    // display cadence. A healthy 60Hz frame is 16.67ms, not <16.08ms.
+    function presentationBudget(refreshMs){
+      const hz=Math.max(30,Math.min(360,1000/Math.max(2.7,refreshMs)));
+      return Math.min(1000/60,Math.max(2.7,refreshMs)*Math.max(1,Math.floor(hz/60)));
+    }
     function render(now){
       const begin=performance.now();
       const dt=Math.min(48,Math.max(1,now-last));last=now;
@@ -2496,7 +2502,8 @@
       }
 
       if(!auditMode){
-        const panicFrame=dt>16.75 || ms>6.4;
+        const expectedFrame=presentationBudget(schedulerRefreshMs);
+        const panicFrame=dt>expectedFrame*1.25 || ms>6.4;
         if(panicFrame && now-lastQualityAdjust>18){
           const previous=qualityScale;
           qualityScale=Math.max(qualityFloor,qualityScale-(mobile?(dt>20||ms>9?.10:.06):(dt>20||ms>9?.22:.12)));
@@ -2518,8 +2525,8 @@
              until the renderer has sustained real headroom for long enough. */
           const renderPressure=renderAverage>4.4 || renderPeak>5.8;
           const severeRenderPressure=renderAverage>5.8 || renderPeak>7.4;
-          const framePressure=frameIntervalAverage>16.08 || framePeak>16.55;
-          const severeFramePressure=frameIntervalAverage>16.42 || framePeak>17.05;
+          const framePressure=frameIntervalAverage>expectedFrame*1.10 || framePeak>expectedFrame*1.20;
+          const severeFramePressure=frameIntervalAverage>expectedFrame*1.20 || framePeak>expectedFrame*1.40;
 
           if(severeFramePressure||severeRenderPressure){
             qualityScale=Math.max(qualityFloor,qualityScale-(mobile?.08:.20));
@@ -2531,7 +2538,7 @@
           }else{
             if(panicFrames>0)panicFrames-=1;
             else stableBudgetFrames+=1;
-            if(stableBudgetFrames>360 && frameIntervalAverage<15.92 && renderAverage<3.4 && renderPeak<4.8){
+            if(stableBudgetFrames>360 && frameIntervalAverage<=expectedFrame*1.04 && renderAverage<3.4 && renderPeak<4.8){
               qualityScale=Math.min(qualityCeiling,qualityScale+.0015);
               stableBudgetFrames=0;
             }

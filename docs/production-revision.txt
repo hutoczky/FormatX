@@ -198,3 +198,6 @@ license_dom_scope=Coalesce overlapping licence mutation roots, ignore irrelevant
 
 copy_runtime_revision=20261127-r2298-idempotent-copy
 copy_runtime_scope=Avoid unchanged bilingual copy DOM writes and coalesce repeated copy reconciliation events. Preserve licence/payment text and BFCache refresh. Performance gain requires live measurement.
+
+cadence_governor_revision=20261127-r2299-cadence-governor
+cadence_governor_scope=Use display cadence and refresh divisor to distinguish missed deadlines from normal 60Hz frames; permit quality recovery on healthy 60Hz cadence; retain CPU render pressure limits and geometry. Live FPS and optical quality must be measured.
