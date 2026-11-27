@@ -18,7 +18,7 @@ const LANGUAGE_PAGE_PATHS = new Set([
   '/scifi-ui/payment/success.html',
   '/scifi-ui/payment/cancel.html',
 ]);
-const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260819-award-r216">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260819-language-r217"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20260729-local-licence-2"></script>\n';
+const LANGUAGE_ASSETS = '  <link rel="stylesheet" data-fx-single-language-style="true" href="/scifi-ui/styles/single-language-toggle.css?v=20260819-award-r216">\n  <script defer src="/scifi-ui/scripts/single-language-toggle.js?v=20260819-language-r217"></script>\n  <script defer src="/scifi-ui/scripts/formatx-license-links.js?v=20261127-r2297-license-dom-coalescing"></script>\n';
 const COPY_ASSETS = '  <link rel="stylesheet" data-fx-copy-polish-style="true" href="/scifi-ui/styles/formatx-copy-polish.css?v=20260729-copy-polish-1">\n  <script defer src="/scifi-ui/scripts/formatx-copy-polish.js?v=20260729-copy-polish-1"></script>\n';
 const STATUS_ASSETS = '  <link rel="stylesheet" data-fx-platform-status-style="true" href="/scifi-ui/styles/platform-status.css?v=20260730-platform-status-2">\n  <script defer src="/scifi-ui/scripts/platform-status.js?v=20260730-platform-status-2"></script>\n';
 const SOCIAL_IMAGE = 'https://formatxsuite.com/scifi-ui/assets/images/formatx-technician-console.png';

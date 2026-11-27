@@ -192,3 +192,6 @@ scroll_start_scope=Preserve native initial scroll, anchors and restoration inste
 
 return_startup_revision=20261127-r2296-single-startup
 return_startup_scope=Avoid redundant synthetic resize and scrollend on ordinary navigation; retain actual history recovery and align mobile recovery cache validation.
+
+license_dom_revision=20261127-r2297-license-dom-coalescing
+license_dom_scope=Coalesce overlapping licence mutation roots, ignore irrelevant subtree additions, avoid redundant DOM writes and reconnect licence observation on BFCache restore. Preserve bilingual local licence URLs.

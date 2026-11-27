@@ -233,7 +233,7 @@
     './scripts/release-metadata.js?v=20260807-full-release-1',
     './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70',
     './scripts/platform-status.js?v=20260807-full-release-1',
-    './scripts/formatx-license-links.js?v=20260729-local-licence-2',
+    './scripts/formatx-license-links.js?v=20261127-r2297-license-dom-coalescing',
     './scripts/organism-console-state.js?v=20260729-console-state-1',
     './scripts/organism-core-controller.js?v=20260824-menu-race-r251',
     './scripts/organism-voice.js?v=20260925-r1728-single-dialogue-owner',

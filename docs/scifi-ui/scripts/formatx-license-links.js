@@ -53,9 +53,9 @@
     )) return;
 
     if (link.getAttribute('href') !== localUrl) link.href = localUrl;
-    link.removeAttribute('target');
-    link.removeAttribute('rel');
-    link.dataset.internalLink = 'true';
+    if (link.hasAttribute('target')) link.removeAttribute('target');
+    if (link.hasAttribute('rel')) link.removeAttribute('rel');
+    if (link.dataset.internalLink !== 'true') link.dataset.internalLink = 'true';
     if (link.dataset.fxLocalLicence === 'true') {
       const label = language() === 'en' ? 'Licence' : 'Licenc';
       if (link.textContent !== label) link.textContent = label;
@@ -74,12 +74,19 @@
     ensureFooterLink();
     const roots = Array.from(pendingRoots);
     pendingRoots.clear();
-    if (!roots.length) roots.push(document);
-    roots.forEach(scan);
+    roots.forEach(scope => { if (scope === document || scope.isConnected || scope instanceof DocumentFragment) scan(scope); });
     ROOT.dataset.fxLicenceLinks = 'ready-v3';
   }
 
   function schedule(scope = document) {
+    // R2297: collapse overlapping mutation roots before the next scan.
+    if (scope !== document && !(scope instanceof DocumentFragment)
+        && !(scope instanceof HTMLAnchorElement)
+        && !(scope instanceof Element && scope.querySelector('a'))) return;
+    for (const queued of pendingRoots) {
+      if (queued === scope || queued.contains?.(scope)) return;
+      if (scope.contains?.(queued)) pendingRoots.delete(queued);
+    }
     pendingRoots.add(scope);
     if (frame) return;
     frame = requestAnimationFrame(flush);
@@ -89,7 +96,7 @@
   scan(document);
   ROOT.dataset.fxLicenceLinks = 'ready-v3';
 
-  document.addEventListener('DOMContentLoaded', () => schedule(document), { once: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => schedule(document), { once: true });
   addEventListener('formatx:languagechange', () => schedule(document));
   addEventListener('formatx:organisminterfaceready', () => schedule(document));
   addEventListener('formatx:organismpanelopen', event => schedule(event.target instanceof Element ? event.target : document));
@@ -108,5 +115,10 @@
     if (frame) cancelAnimationFrame(frame);
     frame = 0;
     pendingRoots.clear();
-  }, { once: true });
+  });
+  addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    observer.observe(document.body || document.documentElement, { subtree: true, childList: true });
+    schedule(document);
+  });
 }());
