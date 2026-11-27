@@ -180,3 +180,6 @@ frame_clock_scope=Keep elapsed simulation time across continuous RAF rendering; 
 
 qa_revision=20261127-r2292-diagnostic-completeness
 qa_scope=Preserve strict Lighthouse gates; emit all three runs and failing audit diagnostics even on failure. Verify dormant R185 absence in production before isolated compatibility exercise; no legacy runtime restored on startup.
+
+charset_revision=20261127-r2293-first-byte-utf8
+charset_scope=Move canonical homepage charset declaration into first 512 bytes and explicitly declare UTF-8 on transformed HTML GET and HEAD responses. Preserve binary and API content types, CSP hashes and cinematic runtime.

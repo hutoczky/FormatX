@@ -138,6 +138,10 @@ export default {
     if (!isSafeMethod(request) || !PUBLIC_HOSTS.has(url.hostname)) return response;
 
     const headers = r529Headers(response.headers);
+    // R2293: all public HTML is decoded and re-encoded as UTF-8 by this Worker.
+    if (/^text\/html(?:\s*;|$)/i.test(headers.get('Content-Type') || '')) {
+      headers.set('Content-Type', 'text/html; charset=utf-8');
+    }
     if (request.method === 'HEAD') {
       headers.delete('Content-Length');
       return new Response(null, { status: response.status, statusText: response.statusText, headers });

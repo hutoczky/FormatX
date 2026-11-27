@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+const tags=[...html.matchAll(/<meta\s+charset=["']utf-8["']\s*\/?>/gi)];
+assert.equal(tags.length,1,'Expected one UTF-8 meta declaration');
+assert.ok(Buffer.byteLength(html.slice(0,tags[0].index+tags[0][0].length),'utf8')<=1024,'UTF-8 declaration must finish in the first 1024 bytes');
+const worker=fs.readFileSync('billing-worker/src/production-content-entry-r529.js','utf8');
+assert.ok(worker.includes("headers.set('Content-Type', 'text/html; charset=utf-8');"),'Missing explicit UTF-8 response header');
+assert.ok(worker.indexOf("headers.set('Content-Type', 'text/html; charset=utf-8');")<worker.lastIndexOf("if (request.method === 'HEAD')"),'HEAD and GET must agree');
+console.log('R2293 UTF-8 source contract: PASS');
