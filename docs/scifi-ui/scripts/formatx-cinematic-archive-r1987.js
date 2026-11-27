@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2294-corridor-parallax-lighting';
+  const VERSION='cinematic-archive-r2295-foreground-architecture';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -914,7 +914,7 @@
     return envelope*(1-smooth(distance/1.35));
   }
   // R2292: a permanent, genuinely three-dimensional architectural shell.
-  // Eight-sided interior, six deep bays, recessed plates and physical ribs.
+  // Eight-sided interior, seven deep bays, recessed plates and physical ribs.
   // Material tags use negative UV.y, disjoint from the gate and folio tags.
   // One immutable vertex buffer; no extra context or post-processing.
   // R2294: independent depth excursion of the architectural environment.
@@ -945,9 +945,9 @@
     // Back wall leaves no flat, disconnected screen-space background.
     for(let edge=0;edge<8;edge++){
       const a=corners[edge],b=corners[(edge+1)%8];
-      quad([0,0,-13],[a[0],a[1],-13],[b[0],b[1],-13],[0,0,-13],[0,0,1],.12);
+      for(const v of [[0,0,-13],[a[0],a[1],-13],[b[0],b[1],-13]])data.push(...v,0,0,1,.12,-1);
     }
-    for(let bay=0;bay<6;bay++){
+    for(let bay=0;bay<7;bay++){
       const back=-13+bay*1.88,front=back+1.88;
       for(let edge=0;edge<8;edge++){
         const a=corners[edge],b=corners[(edge+1)%8],dx=b[0]-a[0],dy=b[1]-a[1];
@@ -1068,7 +1068,7 @@ void main(){
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
  // Keep shelves behind the existing 3D core, while the retrieved sheet alone
  // can approach the audience. No renderer/canvas/geometry replacement.
- float opticalDepth=room?(.56+.37*clamp((3.0-p.z)/18.5,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
+ float opticalDepth=room?(.56+.37*clamp((4.0-p.z)/20.0,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
  vec3 n=vec3(localNormal.x,ct*localNormal.y-st*localNormal.z,st*localNormal.y+ct*localNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
@@ -1304,7 +1304,7 @@ void main(){
         this.mesh(this.room,[0,0,roomZ],[1,1,1],hue,0,1,0,cam);
         setData(root,'fxArchiveRoomDollyR2294',roomZ.toFixed(3));
         gl.depthMask(false);gl.enable(gl.BLEND);
-        setData(root,'fxArchiveRoomR2292','six-bay-eight-sided-native-depth-shell');
+        setData(root,'fxArchiveRoomR2292','seven-bay-eight-sided-native-depth-shell');
         setData(root,'fxArchiveRoomTrianglesR2292',String(this.room.count/3));
       }else{
         setData(root,'fxArchiveRoomR2292','commerce-original');

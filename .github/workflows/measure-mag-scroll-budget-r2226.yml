@@ -33,11 +33,14 @@ jobs:
         run: |
           set -Eeuo pipefail
           BASE='https://www.formatxsuite.com/scifi-ui'
+          expected=$(node -e 'const s=require("node:fs").readFileSync("docs/scifi-ui/index.html","utf8"); const m=s.match(/formatx-cinematic-archive-r1987\.js\?v=[^"\s<>]+/g); if(!m||m.length!==1)process.exit(1); process.stdout.write(m[0]);')
+          [[ -n "$expected" ]]
+          trap 'rm -f /tmp/fx-mag-live.html /tmp/fx-mag-live.js' EXIT
           ok=0
           for attempt in $(seq 1 24); do
             if curl -fsSL --max-time 25 -o /tmp/fx-mag-live.html "$BASE/?scroll-budget=$GITHUB_SHA-$attempt" \
               && curl -fsSL --max-time 25 -o /tmp/fx-mag-live.js "$BASE/scripts/formatx-cinematic-archive-r1987.js?audit=$GITHUB_SHA-$attempt" \
-              && grep -Fq 'formatx-cinematic-archive-r1987.js?v=20261126-r2293-native-depth-room-release' /tmp/fx-mag-live.html \
+              && grep -Fq -- "$expected" /tmp/fx-mag-live.html \
               && cmp -s docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js /tmp/fx-mag-live.js; then
               ok=1
               break

@@ -597,8 +597,8 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
    if(p<=.315||p>=.78)assert(z<1e-10);
    if(portrait)mobilePeak=Math.max(mobilePeak,z);else peak=Math.max(peak,z);
    for(const cam of [-1.4,0,.4]){
-     const near=-1.6+z-cam,far=-13+z-cam;
-     const depth=v=>.56+.37*clamp((3-v)/18.5);
+     const near=.21+z-cam,far=-13+z-cam;
+     const depth=v=>.56+.37*clamp((4-v)/20);
      assert(depth(near)<depth(far));
      assert(depth(near)>=.56&&depth(far)<=.93);
      const projected=v=>3.3/Math.max(2.4,6.2-v);
@@ -612,4 +612,28 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('float bay=fract((local.z+13.0)/1.88);'));
  assert(src.includes('graphite+(bounce+metal)'));
  console.log('R2294_CORRIDOR_PARALLAX_PASS '+JSON.stringify({samples,desktopPeak:peak,mobilePeak,minDepth,objectSpaceLighting:true,extraDrawCalls:0}));
+ }
+
+ // R2295: the front bay provides physical foreground parallax, and the back
+ // cap contains no degenerate triangles. The full room stays behind MAG.
+ {
+ const a=src.indexOf('  function cubeGeometry()'),b=src.indexOf('  function panelGeometry(',a);
+ const geometry=new Function(src.slice(a,b)+'return corridorRoomGeometry;')()();
+ let near=-Infinity,far=Infinity,minArea=Infinity;
+ for(let i=0;i<geometry.length;i+=24){
+   const x=[geometry[i],geometry[i+1],geometry[i+2]];
+   const u=[geometry[i+8]-x[0],geometry[i+9]-x[1],geometry[i+10]-x[2]];
+   const v=[geometry[i+16]-x[0],geometry[i+17]-x[1],geometry[i+18]-x[2]];
+   const area=.5*Math.hypot(u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]);
+   assert(area>1e-8,'degenerate room triangle');minArea=Math.min(minArea,area);
+   for(const j of [2,10,18]){near=Math.max(near,geometry[i+j]);far=Math.min(far,geometry[i+j]);}
+ }
+ assert(geometry.length/24===1800);
+ assert(near>.15&&far===-13);
+ const depth=z=>.56+.37*clamp((4-z)/20);
+ for(const offset of [0,1.12,2.05])for(const cam of [-1.4,0,.4]){
+   assert(depth(near+offset-cam)<depth(far+offset-cam));
+   assert(near+offset-cam<3.8);
+ }
+ console.log('R2295_FOREGROUND_ARCHITECTURE_PASS '+JSON.stringify({triangles:geometry.length/24,near,far,minArea,extraDrawCalls:0}));
  }
