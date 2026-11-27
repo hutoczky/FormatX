@@ -51,13 +51,22 @@
     return document.querySelector('[data-currency][aria-pressed="true"]')?.dataset.currency === 'EUR' ? 'EUR' : 'HUF';
   }
 
+  // R2312: only four locale/currency combinations exist; reuse formatters.
+  const moneyFormatters = new Map();
   function money(value, selectedCurrency) {
-    return new Intl.NumberFormat(language() === 'hu' ? 'hu-HU' : 'en-GB', {
-      style: 'currency',
-      currency: selectedCurrency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+    const locale = language() === 'hu' ? 'hu-HU' : 'en-GB';
+    const key = locale + ':' + selectedCurrency;
+    let formatter = moneyFormatters.get(key);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: selectedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+      moneyFormatters.set(key, formatter);
+    }
+    return formatter.format(value);
   }
 
   function checkoutHref(planId, selectedCurrency) {
@@ -194,14 +203,18 @@
     const raw = Number(ROOT.dataset.fxScene || 0);
     const index = Math.max(0, Math.min(SCENES.length - 1, Number.isFinite(raw) ? raw : 0));
     const scene = SCENES[index];
-    ROOT.style.setProperty('--organism-progress', Math.round(scene.progress * 100) + '%');
-    if (statusIndex) statusIndex.textContent = String(index + 1).padStart(2, '0') + ' / 06';
-    if (statusName) statusName.textContent = scene[language()];
+    const progress = Math.round(scene.progress * 100) + '%';
+    const label = String(index + 1).padStart(2, '0') + ' / 06';
+    const name = scene[language()];
+    if (ROOT.style.getPropertyValue('--organism-progress') !== progress)
+      ROOT.style.setProperty('--organism-progress', progress);
+    if (statusIndex && statusIndex.textContent !== label) statusIndex.textContent = label;
+    if (statusName && statusName.textContent !== name) statusName.textContent = name;
     nodes.forEach((node, nodeIndex) => {
       const active = nodeIndex === index;
-      node.classList.toggle('active', active);
-      if (active) node.setAttribute('aria-current', 'step');
-      else node.removeAttribute('aria-current');
+      if (node.classList.contains('active') !== active) node.classList.toggle('active', active);
+      if (active && node.getAttribute('aria-current') !== 'step') node.setAttribute('aria-current', 'step');
+      else if (!active && node.hasAttribute('aria-current')) node.removeAttribute('aria-current');
     });
   }
 

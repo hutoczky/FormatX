@@ -213,3 +213,6 @@ lifecycle_regression_scope=Exercise actual native page lifecycle with pending po
 
 resize_observer_revision=20261127-r2311-resize-noop
 resize_observer_scope=Suppress identical native MAG resize observer redraws, avoid redundant canvas dimension writes, preserve actual pixel size and aspect updates and explicit render paths. No quality floor changes.
+
+living_scene_revision=20261127-r2312-idempotent-scene
+living_scene_scope=Reuse locale/currency number formatters and avoid unchanged scene status DOM writes. Pricing, currency values, checkout links and QR delivery unchanged. Live performance not yet measured.
