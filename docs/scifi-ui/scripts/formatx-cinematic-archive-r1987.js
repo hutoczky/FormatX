@@ -1597,7 +1597,7 @@ void main(){
     // This frame owns only renderer scheduling and semantic scene events.
     if(current){
       const nextIndex=current.s.index;
-      // Chapter identity was committed synchronously by selectLiveChapter().
+      // Chapter identity was committed during synchronous chapter selection.
       if(nextIndex!==lastScene){
         lastScene=nextIndex;
         dispatchEvent(new CustomEvent('formatx:archivechapter',{detail:{key:current.s.key,index:nextIndex,source:current.s.source}}));
