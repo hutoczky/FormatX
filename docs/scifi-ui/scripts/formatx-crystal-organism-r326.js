@@ -2530,7 +2530,7 @@
             if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
             qualityResizeTimer=later(()=>{
               qualityResizeTimer=0;
-              if(!disposed&&!contextLost&&resize())schedule(1);
+              if(!disposed&&!contextLost&&resize(true))schedule(1);
             },0);
           }
         }else if(now-lastQualityAdjust>120){
@@ -2566,7 +2566,7 @@
             if(qualityResizeTimer){clearTimeout(qualityResizeTimer);delayed.delete(qualityResizeTimer);}
             qualityResizeTimer=later(()=>{
               qualityResizeTimer=0;
-              if(!disposed&&!contextLost&&resize())schedule(1);
+              if(!disposed&&!contextLost&&resize(true))schedule(1);
             },0);
           }
         }

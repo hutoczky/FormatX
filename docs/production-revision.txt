@@ -237,3 +237,6 @@ sound_handoff_scope=Early capture releases subsequent trusted clicks to installe
 
 transit_tail_revision=20261127-r2319-cooldown-tail
 transit_tail_scope=Report native software transit cooldown and coalesce the denied latest gate request into the existing archive tail timer; preserve 240ms limit, blocked-state behavior and lifecycle cancellation. Live corridor recovery remains unverified.
+
+quality_resize_revision=20261127-r2320-quality-resize
+quality_resize_scope=Use existing change-only resize path for both adaptive resolution callbacks; preserve native quality limits and actual pixel/aspect changes. Avoid extra viewport submissions and redraws when effective dimensions are unchanged. No live FPS improvement claimed.

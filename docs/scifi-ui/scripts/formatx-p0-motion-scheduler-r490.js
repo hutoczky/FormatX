@@ -44,7 +44,7 @@ root.dataset.fxP0MotionCacheR1923='crease-free-glass-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1925='clear-ice-flush-optic-fast-real-webgl-handoff';
 root.dataset.fxP0MotionCacheR1914='flush-aperture-dark-ice-first-frame-safe';
 root.dataset.fxP0MotionCacheR1914b='software-visible-flush-aperture';
-const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail';
+const SRC='/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize';
 const PARAMS=new URLSearchParams(location.search);
 const WEBDRIVER=navigator.webdriver===true;
 const AUDIT=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||PARAMS.get('lighthouse')==='1';
