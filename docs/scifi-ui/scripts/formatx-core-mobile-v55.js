@@ -10,7 +10,7 @@
   root.dataset.fxCoreCrystalRevision = 'r615-armored-biomechanical-genesis-mag';
   root.dataset.fxCoreMobileOpticsRevision = 'r454-visible-electric-native-webgl';
 
-  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd-r2328-native-recovery';
+  const PRIMARY_RENDERER = '/scifi-ui/scripts/formatx-crystal-organism-r326.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd-r2328-native-recovery-r2329-optical-finish';
   const CONTROL_STABILITY_STYLE = '/scifi-ui/styles/formatx-mobile-control-stability-r320.css?v=20260824-native-orb-r250';
   const FINAL_HEADER_STYLE = '/scifi-ui/styles/formatx-mobile-header-final-r418.css?v=20260828-r418-final-owner';
   const LANGUAGE_OWNER_SCRIPT = '/scifi-ui/scripts/formatx-mobile-language-owner-r423.js?v=20260829-r423-direct-topbar-language';

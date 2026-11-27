@@ -1679,6 +1679,15 @@
         c+=vec3(1.00,1.00,.98)*glint*.24;
         float opticCaustic=exp(-sq((od-.40)/.17))*front;
         c+=vec3(.025,.18,.21)*opticCaustic*(.045+.035*uEnergy);
+        ${webgl2&&!mobile&&!softwareRenderer&&!constrained&&!auditMode?`
+        // R2329: fine annular lens relief remains inside the recessed optic.
+        // Derivative filtering fades it before it can alias at lower resolution.
+        float opticPhase=od*68.0+oq.x*4.0-oq.y*2.0;
+        float opticDetailVisibility=1.0-smoothstep(.55,2.4,fwidth(opticPhase));
+        float opticCoating=cos(opticPhase)*opticDetailVisibility*
+          smoothstep(.20,.39,od)*(1.0-smoothstep(.64,.82,od))*front;
+        c+=vec3(.07,.17,.18)*opticCoating*(.045+.065*softboxB);
+        `:''}
         /* R2200: the same biological cyan/coral nucleus stays alive inside
            the recessed MAG iris after the titanium arms finish seating.
            This is spatial shader photochemistry, not a flat overlay. */
@@ -1721,6 +1730,23 @@
         // Broad satin shoulder plus a narrow polished inlay response.
         float satinShoulder=pow(max(dot(n,normalize(fillDir+view)),0.0),8.0);
         titanium+=vec3(.24,.32,.34)*satinShoulder*.13;
+        // R2329: restrained, spatially filtered machining detail. Native
+        // WebGL2 desktop only; no texture allocation, pass or geometry overlap.
+        ${webgl2&&!mobile&&!softwareRenderer&&!constrained&&!auditMode?`
+        float machiningPhase=(min(abs(vLocal.x),abs(vLocal.y))*196.0+
+          max(abs(vLocal.x),abs(vLocal.y))*14.0+vLocal.z*9.0);
+        float machiningFootprint=fwidth(machiningPhase);
+        float machiningVisibility=1.0-smoothstep(.55,2.4,machiningFootprint);
+        float machiningMicro=cos(machiningPhase)*machiningVisibility;
+        vec3 machiningTangent=normalize(vec3(abs(vLocal.x)>abs(vLocal.y)?1.0:0.0,
+          abs(vLocal.x)>abs(vLocal.y)?0.0:1.0,.12));
+        float machiningAniso=1.0-abs(dot(normalize(keyDir+view),machiningTangent));
+        float machiningHighlight=machiningAniso*machiningAniso*
+          (.28*metalSpec+.45*softboxB+.15*satinShoulder);
+        titanium+=vec3(.17,.20,.21)*machiningHighlight;
+        machinedSilver+=vec3(.22,.25,.25)*machiningMicro*
+          (.035+.075*machiningHighlight);
+        `:''}
         titanium=mix(titanium,machinedSilver,polishedRib*.90);
         c=mix(c,titanium,machinedArmor*.99);
 
