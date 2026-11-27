@@ -637,3 +637,41 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  }
  console.log('R2295_FOREGROUND_ARCHITECTURE_PASS '+JSON.stringify({triangles:geometry.length/24,near,far,minArea,extraDrawCalls:0}));
  }
+
+ // R2296: finite ray/ellipsoid intervals, including misses, clipped endpoints,
+ // inside-origin and tangent rays. Check the actual shader contract.
+ {
+ const fragment=src.slice(src.indexOf('      const frag=`'),src.indexOf('      const shader='));
+ assert(fragment.includes('float roomVolumeLength('));
+ assert(fragment.includes('float leave=min(1.0,(-b+h)/a);'));
+ assert(fragment.includes('float enter=max(0.0,(-b-h)/a);'));
+ assert(fragment.includes('vec3 eye=uCamera-uOffset+vec3(0.0,0.0,6.2);'));
+ assert(fragment.includes('if(uMobile<.5)path+=.80*roomVolumeLength'));
+ assert(fragment.includes('float scatter=1.0-exp(-.20*path);'));
+ const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
+ const length=(origin,ray,center,inv)=>{
+   const o=origin.map((v,i)=>(v-center[i])*inv[i]),d=ray.map((v,i)=>v*inv[i]);
+   const a=Math.max(dot(d,d),.000001),b=dot(o,d),c=dot(o,o)-1,disc=b*b-a*c;
+   if(disc<=0)return 0;
+   const h=Math.sqrt(disc);
+   return Math.max(0,Math.min(1,(-b+h)/a)-Math.max(0,(-b-h)/a))*Math.hypot(...ray);
+ };
+ const sphere=[0,0,0],unit=[1,1,1];
+ assert(Math.abs(length([-2,0,0],[4,0,0],sphere,unit)-2)<1e-10);
+ assert.equal(length([-2,2,0],[4,0,0],sphere,unit),0);
+ assert.equal(length([-2,1,0],[4,0,0],sphere,unit),0);
+ assert.equal(length([-2,0,0],[.5,0,0],sphere,unit),0);
+ assert(Math.abs(length([-2,0,0],[2,0,0],sphere,unit)-1)<1e-10);
+ assert(Math.abs(length([0,0,0],[2,0,0],sphere,unit)-1)<1e-10);
+ let samples=0,peak=0,lit=0;
+ for(const mobile of [false,true])for(let x=-30;x<=30;x++)for(let y=-20;y<=20;y++){
+   const eye=[0,0,6.2],ray=[x/10,y/10,-19.2];
+   const p=length(eye,ray,[-1.72,.80,-3.6],[1.45,.52,.65])+
+     (mobile?0:.80*length(eye,ray,[1.85,.85,-7.2],[1.55,.50,.60]));
+   const scatter=1-Math.exp(-.20*p);
+   assert(Number.isFinite(scatter)&&scatter>=0&&scatter<1);
+   if(scatter>.05)lit++;peak=Math.max(peak,scatter);samples++;
+ }
+ assert(lit>0&&peak>.15);
+ console.log('R2296_ANALYTIC_VOLUME_PASS '+JSON.stringify({samples,lit,peak,extraDrawCalls:0,depthClipped:true}));
+ }

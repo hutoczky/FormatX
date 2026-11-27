@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2295-foreground-architecture';
+  const VERSION='cinematic-archive-r2296-analytic-volume-light';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1077,8 +1077,25 @@ void main(){
       const frag=`#version 300 es
 precision highp float;
 in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;
-uniform vec3 uColor;uniform float uOpacity,uPanel,uFiber,uShadow;
+uniform vec3 uColor,uCamera,uOffset;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
 out vec4 outColor;
+// R2296: integrate finite illuminated fog volumes along the camera ray.
+// The intersection stops at the room surface; no screen-space overlay,
+// ray-marching loop, extra framebuffer or extra draw. The native MAG
+// retains its original foreground depth and material.
+float roomVolumeLength(vec3 origin,vec3 ray,vec3 center,vec3 invRadius){
+  vec3 o=(origin-center)*invRadius;
+  vec3 d=ray*invRadius;
+  float a=max(dot(d,d),.000001);
+  float b=dot(o,d);
+  float c=dot(o,o)-1.0;
+  float disc=b*b-a*c;
+  if(disc<=0.0)return 0.0;
+  float h=sqrt(disc);
+  float enter=max(0.0,(-b-h)/a);
+  float leave=min(1.0,(-b+h)/a);
+  return max(0.0,leave-enter)*length(ray);
+}
 void main(){
  if(uShadow>.5){
    // Soft analytical contact penumbra underneath the moving archive drawer.
@@ -1113,7 +1130,16 @@ void main(){
     vec3 tint=graphite+(bounce+metal)*(1.0-distanceFog*.75);
     vec3 lamp=uColor*(.65+.30*(1.0-distanceFog));
     vec3 material=mix(tint,lamp,step(.70,vUv.x));
-    outColor=vec4(mix(material,vec3(.013,.029,.045),distanceFog*.76),1.0);
+    // Beer-Lambert transmission through two finite, elongated light pools.
+    // These are analytic single-scattering approximations, not a path tracer.
+    vec3 eye=uCamera-uOffset+vec3(0.0,0.0,6.2);
+    vec3 ray=local-eye;
+    float path=roomVolumeLength(eye,ray,vec3(-1.72,.80,-3.6),vec3(1.45,.52,.65));
+    if(uMobile<.5)path+=.80*roomVolumeLength(eye,ray,vec3(1.85,.85,-7.2),vec3(1.55,.50,.60));
+    float scatter=1.0-exp(-.20*path);
+    vec3 surface=mix(material,vec3(.013,.029,.045),distanceFog*.76);
+    vec3 fogLight=mix(vec3(.18,.29,.38),uColor,.42);
+    outColor=vec4(mix(surface,fogLight,scatter*.62),1.0);
     return;
   }
  bool reactor=vUv.y>1.5;
@@ -1303,6 +1329,7 @@ void main(){
         const roomZ=roomDolly(scene,pro,mobile());
         this.mesh(this.room,[0,0,roomZ],[1,1,1],hue,0,1,0,cam);
         setData(root,'fxArchiveRoomDollyR2294',roomZ.toFixed(3));
+        setData(root,'fxArchiveVolumeR2296',mobile()?'one-analytic-light-volume':'two-analytic-light-volumes');
         gl.depthMask(false);gl.enable(gl.BLEND);
         setData(root,'fxArchiveRoomR2292','seven-bay-eight-sided-native-depth-shell');
         setData(root,'fxArchiveRoomTrianglesR2292',String(this.room.count/3));
@@ -1310,6 +1337,7 @@ void main(){
         setData(root,'fxArchiveRoomR2292','commerce-original');
         setData(root,'fxArchiveRoomTrianglesR2292','0');
         setData(root,'fxArchiveRoomDollyR2294','0.000');
+        setData(root,'fxArchiveVolumeR2296','commerce-original');
       }
       // One modest-depth contact penumbra connects drawer/shelf to archive.
       this.mesh(this.panel,[sx,sy-.74,-.72],[1.52,.37,1],[.06,.10,.14],
