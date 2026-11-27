@@ -730,3 +730,33 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('p.z-=.32*delayed'));
  console.log('R2298_MECHANICAL_GATE_PASS '+JSON.stringify({segments:segments.size,samples,peak,triangles:v.length/24,extraDrawCalls:0,commerceOriginal:true}));
  }
+
+ // R2299: actual eye-centered camera rotation, reversible and bounded.
+ {
+ const a=src.indexOf('  function passageOrientation('),b=src.indexOf('  function readingTravel(',a);
+ const angles=new Function('clamp','entryReactorHost',src.slice(a,b)+'return passageOrientation;')(clamp,host);
+ const rotate=(v,[y,p,r])=>{
+   const cy=Math.cos(y),sy=Math.sin(y),cp=Math.cos(p),sp=Math.sin(p),cr=Math.cos(r),sr=Math.sin(r);
+   v=[cy*v[0]+sy*v[2],v[1],-sy*v[0]+cy*v[2]];
+   v=[v[0],cp*v[1]-sp*v[2],sp*v[1]+cp*v[2]];
+   return [cr*v[0]-sr*v[1],sr*v[0]+cr*v[1],v[2]];
+ };
+ let samples=0,peak=0;
+ for(const portrait of [false,true])for(const scene of [{key:'systems',cinemaHost:host,index:0},{key:'diagnostics',cinemaHost:{},index:1},{key:'licensing',cinemaHost:{},index:2}]){
+   for(let i=0;i<=1000;i++){
+     const t=i/1000,ori=angles(scene,t,portrait);
+     assert(ori.every(Number.isFinite));
+     assert(Math.abs(ori[0])<=(portrait?.027:.078)&&Math.abs(ori[1])<=(portrait?.018:.043)&&Math.abs(ori[2])<=(portrait?.012:.031));
+     if(scene.key==='licensing'||t<=.315||t>=.78)assert(Math.hypot(...ori)<1e-10);
+     const v=[2.6,-1.7,-8.4],w=rotate(v,ori);
+     assert(Math.abs(Math.hypot(...v)-Math.hypot(...w))<1e-10);
+     assert(Math.abs(w[2])>7.5);
+     peak=Math.max(peak,Math.hypot(...ori));samples++;
+   }
+ }
+ assert(peak>.04);
+ assert(src.includes('p=archiveCameraRotate(p-eye)+eye;'));
+ assert(src.includes('if(room||reactor){'));
+ assert(src.includes('gl.uniform3fv(this.uniform.uArchiveCameraAngles,orientation);'));
+ console.log('R2299_CAMERA_ORIENTATION_PASS '+JSON.stringify({samples,peakRadians:peak,commerceOriginal:true,extraDrawCalls:0}));
+ }

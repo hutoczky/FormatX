@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2298-mechanical-gate';
+  const VERSION='cinematic-archive-r2299-cinematic-camera';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -898,6 +898,20 @@
       y:(portrait?.035:.09)*envelope,
       z:-depth*envelope};
   }
+  // R2299: smooth camera orientation along the same reversible gate track.
+  // Keep the native HTML and original MAG framing independent. Rotate the
+  // room and gate about the actual eye, not the model or screen center.
+  function passageOrientation(scene,p,portrait){
+    if(!scene.cinemaHost||scene.key==='licensing')return [0,0,0];
+    const first=Boolean(entryReactorHost&&scene.cinemaHost===entryReactorHost);
+    const start=first?.315:.325,end=first?.78:.64;
+    const t=clamp((p-start)/(end-start));
+    const envelope=Math.sin(Math.PI*t)**2;
+    const side=scene.index%2===0?1:-1;
+    return [side*(portrait?.027:.078)*Math.sin(2*Math.PI*t)*envelope,
+      (portrait?.018:.043)*envelope,
+      -side*(portrait?.012:.031)*Math.sin(2*Math.PI*t)*envelope];
+  }
   function readingTravel(rect,vh){
     const from=-.017*vh,to=.94*vh-rect.height;
     const span=from-to;
@@ -987,7 +1001,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -1011,10 +1025,18 @@
       const vert=`#version 300 es
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
-uniform vec3 uOffset,uScale,uCamera;
+uniform vec3 uOffset,uScale,uCamera,uArchiveCameraAngles;
 uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY,uReactorOpening;
 uniform float uRotation,uTilt,uBend,uAspect,uMobile;
 out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;
+vec3 archiveCameraRotate(vec3 v){
+  float cy=cos(uArchiveCameraAngles.x),sy=sin(uArchiveCameraAngles.x);
+  float cp=cos(uArchiveCameraAngles.y),sp=sin(uArchiveCameraAngles.y);
+  float cr=cos(uArchiveCameraAngles.z),sr=sin(uArchiveCameraAngles.z);
+  v=vec3(cy*v.x+sy*v.z,v.y,-sy*v.x+cy*v.z);
+  v=vec3(v.x,cp*v.y-sp*v.z,sp*v.y+cp*v.z);
+  return vec3(cr*v.x-sr*v.y,sr*v.x+cr*v.y,v.z);
+}
 void main(){
  vec3 p=aPosition*uScale;
  // R2262: UV.y above 1 is reserved for the three real reactor bulkheads.
@@ -1069,6 +1091,13 @@ void main(){
  // The projection's eye sits at z=6.2 in this camera-relative space.
  // Capture the physical view ray before the portrait framing adjustment.
  vReactorView=room?aPosition:(reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0));
+ // Rotate the room/gate geometry about the physical optical center.
+ // World-space normals and light rays remain unrotated, so highlights
+ // stay attached to the materials rather than moving with the camera.
+ if(room||reactor){
+   vec3 eye=vec3(0.0,0.0,6.2);
+   p=archiveCameraRotate(p-eye)+eye;
+ }
  // Portrait atlas projection: make every physical shelf AND the flexible
  // panel visible in the mobile archive instead of clipping at the sides.
  if(uMobile>.5){
@@ -1332,6 +1361,9 @@ void main(){
       this.scalarCache.clear();this.scalarWrites=0;this.scalarSkips=0;
       // Camera is identical for every primitive in this scene frame.
       gl.uniform3fv(this.uniform.uCamera,cam);
+      const orientation=passageOrientation(scene,pro,mobile());
+      gl.uniform3fv(this.uniform.uArchiveCameraAngles,orientation);
+      setData(root,'fxArchiveCameraR2299',orientation.map(x=>x.toFixed(4)).join(','));
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);
       if(ingress){
