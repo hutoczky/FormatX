@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2301-reactive-volume';
+  const VERSION='cinematic-archive-r2302-reactor-chamber';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -966,10 +966,35 @@
           (nx*ca-ny*sa)/len,(nx*sa+ny*ca)/len,nz/len,material,-1);
       }
     };
-    // Back wall leaves no flat, disconnected screen-space background.
+    // R2302: a recessed reactor chamber replaces the flat rear closure.
+    // The widened intermediate cross-section is joined to a narrower rear
+    // bulkhead. All surfaces and the reactor share the original room VBO.
+    const sections=[[-13,1],[-15.1,1.12],[-18.4,.78]];
+    const point=(edge,section)=>{
+      const [z,s]=sections[section],p=corners[edge];
+      return [p[0]*s,p[1]*s,z];
+    };
+    const normal=(a,b,c)=>{
+      const u=b.map((x,i)=>x-a[i]),v=c.map((x,i)=>x-a[i]);
+      const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot(...n);
+      return n.map(x=>x/l);
+    };
     for(let edge=0;edge<8;edge++){
-      const a=corners[edge],b=corners[(edge+1)%8];
-      for(const v of [[0,0,-13],[a[0],a[1],-13],[b[0],b[1],-13]])data.push(...v,0,0,1,.12,-1);
+      const next=(edge+1)%8;
+      for(let section=0;section<2;section++){
+        const a=point(edge,section),b=point(next,section),c=point(next,section+1),d=point(edge,section+1);
+        quad(a,b,c,d,normal(a,b,c).map(x=>-x),.61);
+      }
+      for(const v of [[0,0,-18.4],point(edge,2),point(next,2)])data.push(...v,0,0,1,.12,-1);
+      const angle=(edge+.5)*Math.PI/4,ca=Math.cos(angle),sa=Math.sin(angle);
+      const radius=1.36,span=2*radius*Math.tan(Math.PI/8);
+      solid([ca*radius,sa*radius,-15.65],[span+.04,.25,.48],angle+Math.PI/2,.64);
+      const p=[Math.cos(edge*Math.PI/4)*.69,Math.sin(edge*Math.PI/4)*.69,-16.05];
+      const q=[Math.cos(next*Math.PI/4)*.69,Math.sin(next*Math.PI/4)*.69,-16.05];
+      for(const tip of [[0,0,-15.32],[0,0,-16.78]]){
+        const n=normal(p,q,tip);
+        for(const v of [p,q,tip])data.push(...v,...(tip[2]>-16.05?n:n.map(x=>-x)),.93,-1);
+      }
     }
     for(let bay=0;bay<7;bay++){
       const back=-13+bay*1.88,front=back+1.88;
@@ -1121,7 +1146,7 @@ void main(){
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
  // Keep shelves behind the existing 3D core, while the retrieved sheet alone
  // can approach the audience. No renderer/canvas/geometry replacement.
- float opticalDepth=room?(.56+.37*clamp((4.0-p.z)/20.0,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
+ float opticalDepth=room?(.56+.37*clamp((4.0-p.z)/24.5,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
  vec3 n=vec3(localNormal.x,ct*localNormal.y-st*localNormal.z,st*localNormal.y+ct*localNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
@@ -1205,6 +1230,16 @@ void main(){
     }
     vec3 lamp=mix(uColor*(.65+.30*(1.0-distanceFog)),mix(uColor,vec3(.76,.92,1.0),.48),packet*.85);
     vec3 material=mix(tint,lamp,step(.70,vUv.x));
+    // The terminal chamber has a separate alloy and a faceted luminous
+    // receiver. Its light is depth-tested, not a floating HUD element.
+    if(vUv.x>.60&&vUv.x<.70){
+      float rim=1.0-abs(dot(N,V));
+      material=vec3(.055,.085,.12)*key+uColor*(.12+.23*rim*rim);
+    }
+    if(vUv.x>.90){
+      float facet=.48+.52*abs(dot(N,normalize(vec3(.32,.68,.66))));
+      material=mix(uColor,vec3(.76,.92,1.0),.55)*facet;
+    }
     // Beer-Lambert transmission through two finite, elongated light pools.
     // These are analytic single-scattering approximations, not a path tracer.
     // R2301: a pair of finite fog lobes follow the same object-space
@@ -1420,6 +1455,7 @@ void main(){
         const roomZ=roomDolly(scene,pro,mobile());
         this.mesh(this.room,[0,0,roomZ],[1,1,1],hue,0,1,0,cam);
         setData(root,'fxArchiveRoomDollyR2294',roomZ.toFixed(3));
+        setData(root,'fxArchiveChamberR2302','recessed-faceted-energy-receiver');
         setData(root,'fxArchiveAlloyR2297','machined-panels-armored-conduits');
         setData(root,'fxArchiveVolumeR2296',mobile()?'one-analytic-light-volume':'two-analytic-light-volumes');
         gl.depthMask(false);gl.enable(gl.BLEND);
@@ -1429,6 +1465,7 @@ void main(){
         setData(root,'fxArchiveRoomR2292','commerce-original');
         setData(root,'fxArchiveRoomTrianglesR2292','0');
         setData(root,'fxArchiveRoomDollyR2294','0.000');
+        setData(root,'fxArchiveChamberR2302','commerce-original');
         setData(root,'fxArchiveAlloyR2297','commerce-original');
         setData(root,'fxArchiveVolumeR2296','commerce-original');
       }

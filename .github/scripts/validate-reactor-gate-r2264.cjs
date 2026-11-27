@@ -574,7 +574,7 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
    assert.equal(geometry[i+7],-1);tags.add(geometry[i+6].toFixed(2));
  }
  assert(near>-2&&far<=-13&&near-far>11);
- assert(tags.size>=5);assert(geometry.length/24<2200);
+ assert(tags.size>=5);assert(geometry.length/24<2400);
  const project=(x,z,aspect,portrait)=>x*(portrait?.58:1)*3.3/Math.max(.6,aspect)/Math.max(2.4,6.2-z);
  for(const aspect of [.65,1,1.77,2.4])for(const portrait of [false,true]){
    assert(Math.abs(project(3.65,near,aspect,portrait))>2*Math.abs(project(3.65,far,aspect,portrait)));
@@ -599,7 +599,7 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
    if(portrait)mobilePeak=Math.max(mobilePeak,z);else peak=Math.max(peak,z);
    for(const cam of [-1.4,0,.4]){
      const near=.21+z-cam,far=-13+z-cam;
-     const depth=v=>.56+.37*clamp((4-v)/20);
+     const depth=v=>.56+.37*clamp((4-v)/24.5);
      assert(depth(near)<depth(far));
      assert(depth(near)>=.56&&depth(far)<=.93);
      const projected=v=>3.3/Math.max(2.4,6.2-v);
@@ -629,9 +629,9 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
    assert(area>1e-8,'degenerate room triangle');minArea=Math.min(minArea,area);
    for(const j of [2,10,18]){near=Math.max(near,geometry[i+j]);far=Math.min(far,geometry[i+j]);}
  }
- assert(geometry.length/24===2136);
- assert(near>.15&&far===-13);
- const depth=z=>.56+.37*clamp((4-z)/20);
+ assert(geometry.length/24===2280);
+ assert(near>.15&&Math.abs(far+18.4)<1e-5);
+ const depth=z=>.56+.37*clamp((4-z)/24.5);
  for(const offset of [0,1.12,2.05])for(const cam of [-1.4,0,.4]){
    assert(depth(near+offset-cam)<depth(far+offset-cam));
    assert(near+offset-cam<3.8);
@@ -815,4 +815,25 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('scatter*(.62+.14*energy)'));
  assert(min<-11&&max>-3);
  console.log('R2301_REACTIVE_VOLUME_PASS '+JSON.stringify({samples,minimumCenterZ:min,maximumCenterZ:max,extraRayIntersections:0,extraDrawCalls:0,commerceOriginal:true}));
+ }
+ // R2302: terminal chamber, real faceted receiver and monotonic depth.
+ {
+ const a=src.indexOf('  function cubeGeometry()'),b=src.indexOf('  function panelGeometry(',a);
+ const geometry=new Function(src.slice(a,b)+'return corridorRoomGeometry;')()();
+ const counts={};
+ for(let i=0;i<geometry.length;i+=8){
+   const tag=geometry[i+6].toFixed(2);
+   counts[tag]=(counts[tag]||0)+1;
+ }
+ assert.equal(counts['0.61'],96);
+ assert.equal(counts['0.64'],288);
+ assert.equal(counts['0.93'],48);
+ const depth=z=>.56+.37*clamp((4-z)/24.5);
+ for(const shift of [0,1.12,2.05])for(const cam of [-1.4,0,.4]){
+   assert(depth(-13+shift-cam)<depth(-15.65+shift-cam));
+   assert(depth(-15.65+shift-cam)<depth(-18.4+shift-cam));
+ }
+ assert(src.includes('if(vUv.x>.90)'));
+ assert(src.includes('recessed-faceted-energy-receiver'));
+ console.log('R2302_REACTOR_CHAMBER_PASS '+JSON.stringify({triangles:geometry.length/24,addedTriangles:144,depth:18.4,coreFacets:16,extraDrawCalls:0}));
  }
