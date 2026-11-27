@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2296-analytic-volume-light';
+  const VERSION='cinematic-archive-r2297-mechanical-alloy';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -957,7 +957,13 @@
         // Recessed structural panel, solid bulkhead rib, flush light rail.
         solid([mx+nx*.036,my+ny*.036,(back+front)*.5],[length*.84,.055,1.50],angle,.25);
         solid([mx+nx*.115,my+ny*.115,front-.10],[length+.04,.34,.30],angle,.42);
-        if(edge%2===0)solid([mx+nx*.125,my+ny*.125,(back+front)*.5],[.085,.045,1.36],angle,.85);
+        if(edge%2===0){
+          solid([mx+nx*.125,my+ny*.125,(back+front)*.5],[.085,.045,1.36],angle,.85);
+          // R2297: physical armored conduits staggered across adjacent bays.
+          const side=bay%2===0?1:-1,shift=length*.28*side;
+          solid([mx+nx*.155+dx/length*shift,my+ny*.155+dy/length*shift,(back+front)*.5],
+            [.24,.21,1.48],angle,.53);
+        }
       }
     }
     return new Float32Array(data);
@@ -1128,6 +1134,23 @@ void main(){
     float grazing=1.0-abs(dot(N,V));
     vec3 metal=vec3(.09,.13,.17)*rib*grazing*grazing;
     vec3 tint=graphite+(bounce+metal)*(1.0-distanceFog*.75);
+    // R2297: machined panel seams with derivative-based detail attenuation.
+    if(vUv.x>.20&&vUv.x<.30){
+      float tangent=dot(local.xy,vec2(-N.y,N.x));
+      float grooveCoord=tangent*1.35;
+      float groove=abs(fract(grooveCoord+.5)-.5);
+      float aa=max(fwidth(grooveCoord),.008);
+      float detail=1.0-smoothstep(.04,.22,aa);
+      float cut=(1.0-smoothstep(.018,.018+aa,groove))*detail;
+      float machinedEdge=(1.0-smoothstep(.035,.035+aa,abs(groove-.065)))*detail;
+      tint=tint*(1.0-.28*cut)+vec3(.055,.078,.095)*machinedEdge*key;
+    }
+    if(vUv.x>.50&&vUv.x<.60){
+      vec3 alloyRay=reflect(-V,N);
+      float strip=smoothstep(.40,.97,dot(alloyRay,vec3(-.6,.8,0.0)));
+      tint=vec3(.075,.104,.128)*(.55+.45*key)+bounce*.75
+        +vec3(.22,.31,.38)*strip*(1.0-distanceFog*.65);
+    }
     vec3 lamp=uColor*(.65+.30*(1.0-distanceFog));
     vec3 material=mix(tint,lamp,step(.70,vUv.x));
     // Beer-Lambert transmission through two finite, elongated light pools.
@@ -1329,6 +1352,7 @@ void main(){
         const roomZ=roomDolly(scene,pro,mobile());
         this.mesh(this.room,[0,0,roomZ],[1,1,1],hue,0,1,0,cam);
         setData(root,'fxArchiveRoomDollyR2294',roomZ.toFixed(3));
+        setData(root,'fxArchiveAlloyR2297','machined-panels-armored-conduits');
         setData(root,'fxArchiveVolumeR2296',mobile()?'one-analytic-light-volume':'two-analytic-light-volumes');
         gl.depthMask(false);gl.enable(gl.BLEND);
         setData(root,'fxArchiveRoomR2292','seven-bay-eight-sided-native-depth-shell');
@@ -1337,6 +1361,7 @@ void main(){
         setData(root,'fxArchiveRoomR2292','commerce-original');
         setData(root,'fxArchiveRoomTrianglesR2292','0');
         setData(root,'fxArchiveRoomDollyR2294','0.000');
+        setData(root,'fxArchiveAlloyR2297','commerce-original');
         setData(root,'fxArchiveVolumeR2296','commerce-original');
       }
       // One modest-depth contact penumbra connects drawer/shelf to archive.

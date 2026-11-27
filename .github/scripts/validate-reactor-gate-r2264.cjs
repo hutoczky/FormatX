@@ -628,7 +628,7 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
    assert(area>1e-8,'degenerate room triangle');minArea=Math.min(minArea,area);
    for(const j of [2,10,18]){near=Math.max(near,geometry[i+j]);far=Math.min(far,geometry[i+j]);}
  }
- assert(geometry.length/24===1800);
+ assert(geometry.length/24===2136);
  assert(near>.15&&far===-13);
  const depth=z=>.56+.37*clamp((4-z)/20);
  for(const offset of [0,1.12,2.05])for(const cam of [-1.4,0,.4]){
@@ -674,4 +674,23 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  }
  assert(lit>0&&peak>.15);
  console.log('R2296_ANALYTIC_VOLUME_PASS '+JSON.stringify({samples,lit,peak,extraDrawCalls:0,depthClipped:true}));
+ }
+
+ // R2297: verify real solid conduits in all seven physical bays.
+ {
+ const a=src.indexOf('  function cubeGeometry()'),b=src.indexOf('  function panelGeometry(',a);
+ const geometry=new Function(src.slice(a,b)+'return corridorRoomGeometry;')()();
+ const conduits=[];
+ for(let i=0;i<geometry.length;i+=8)if(Math.abs(geometry[i+6]-.53)<1e-5)conduits.push(Array.from(geometry.slice(i,i+8)));
+ assert.equal(conduits.length,28*36);
+ const bays=new Set(conduits.map(v=>Math.floor((v[2]+13)/1.88)));
+ assert.equal(bays.size,7);
+ const normals=new Set(conduits.map(v=>v.slice(3,6).map(x=>x.toFixed(2)).join(',')));
+ assert(normals.size>=6);
+ assert(src.includes('float aa=max(fwidth(grooveCoord),.008);'));
+ assert(src.includes('float detail=1.0-smoothstep(.04,.22,aa);'));
+ const aaFade=x=>1-smooth((x-.04)/.18);
+ for(let i=0;i<=200;i++)assert(aaFade(i/1000)>=aaFade((i+1)/1000));
+ assert.equal(aaFade(.24),0);
+ console.log('R2297_MECHANICAL_ALLOY_PASS '+JSON.stringify({conduits:28,triangles:geometry.length/24,bays:bays.size,aliasFade:true,extraDrawCalls:0}));
  }
