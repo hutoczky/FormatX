@@ -2168,7 +2168,7 @@
     cinematic.version=REVISION;
     cinematic.corePosition=[0,0,.52];
 
-    function resize(){
+    function resize(onlyChanged=false){
       const rect=stage.getBoundingClientRect();
       if(rect.width<2||rect.height<2)return false;
       const baseCap=softwareRenderer
@@ -2183,8 +2183,14 @@
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
       if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
-      if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
-      width=w;height=h;aspect=rect.width/Math.max(1,rect.height);gl.viewport(0,0,w,h);
+      const nextAspect=rect.width/Math.max(1,rect.height);
+      const sizeChanged=width!==w||height!==h||canvas.width!==w||canvas.height!==h;
+      const aspectChanged=aspect!==nextAspect;
+      // R2311: repeated observer reports must not wake a settled GPU frame.
+      if(onlyChanged&&!sizeChanged&&!aspectChanged)return false;
+      if(canvas.width!==w)canvas.width=w;
+      if(canvas.height!==h)canvas.height=h;
+      width=w;height=h;aspect=nextAspect;gl.viewport(0,0,w,h);
       {const value=String(`${w}x${h}`);if(root.dataset.fxCoreReal3dResolution!==value)root.dataset.fxCoreReal3dResolution=`${w}x${h}`;}
       {const value=String((w/Math.max(1,rect.width)).toFixed(2));if(root.dataset.fxCoreReal3dScale!==value)root.dataset.fxCoreReal3dScale=(w/Math.max(1,rect.width)).toFixed(2);}
       {const value=String(aspect.toFixed(4));if(root.dataset.fxCoreViewportAspect!==value)root.dataset.fxCoreViewportAspect=aspect.toFixed(4);}
@@ -2975,7 +2981,7 @@
       root.dataset.fxCrystalOrganismR326='restoring';destroy();requestAnimationFrame(()=>boot());
     });
 
-    const ro=new ResizeObserver(()=>{if(resize())schedule(1);});
+    const ro=new ResizeObserver(()=>{if(!disposed&&!contextLost&&resize(true))schedule(1);});
     ro.observe(stage);
     const io=new IntersectionObserver(entries=>{
       visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
