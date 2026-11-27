@@ -292,6 +292,14 @@ function stylesheetPath(tag) {
 function injectReferenceModeBoot(html) {
   const source = String(html || '');
   if (source.includes('data-fx-reference-mode-boot-r504="true"') || /formatx-reference-mode-boot-r334\.js/i.test(source)) return source;
+  // R2340: the authored, CSP-authorized inline bootstrap already sets both
+  // reference-mode fields before any body layout. An additional synchronous
+  // network script at the end of head can block parsing behind the critical
+  // CSS. Retain the old recovery script for minimal/legacy source only.
+  const bootstrap = source.match(/<script\b[^>]*\bdata-fx-intro-bootstrap-r1629=["']true["'][^>]*>([\s\S]*?)<\/script>/i)?.[1];
+  if (bootstrap && bootstrap.includes('r.dataset.fxReferenceProductionR244=') &&
+      bootstrap.includes('r.dataset.fxReferenceComposition=') &&
+      bootstrap.includes('r.dataset.fxReferencePrepaintR1620=')) return source;
   return source.replace('</head>', `  ${REFERENCE_MODE_BOOT_SCRIPT}\n</head>`);
 }
 function injectCriticalFirstPaint(html) {
