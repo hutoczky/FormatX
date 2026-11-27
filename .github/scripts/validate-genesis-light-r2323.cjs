@@ -4,13 +4,14 @@ const s=fs.readFileSync('docs/scifi-ui/scripts/formatx-mag-genesis-three-r1280.j
 assert.equal((s.match(/this\.mechLight=new T\.PointLight\(/g)||[]).length,1);
 assert.ok(s.includes('this.mechanicalGroup.add(this.mechLight);'));
 assert.ok(s.includes('this.mechLight.intensity=(.92+.18*finale)*opticWake*opticPulse;'));
-const a=s.indexOf('    resize(){'),b=s.indexOf('    targetWorld(){',a);
+const a=s.indexOf('    studioPixelRatio('),b=s.indexOf('    targetWorld(){',a);
 assert.ok(a>=0&&b>a);
 const simulate=new Function(`
  let innerWidth=1366,innerHeight=768,devicePixelRatio=1,sets=0,pixelSets=0,projections=0,ratio=1;
+ const document={documentElement:{dataset:{}}};
  class Engine{${s.slice(a,b)}}
- const e=new Engine();e.width=e.height=1;e.mobileRender=false;
- e.renderer={getPixelRatio:()=>ratio,setPixelRatio:v=>{ratio=v;pixelSets++;},setSize:()=>sets++};
+ const e=new Engine();e.width=e.height=1;e.mobileRender=false;e.studioHardware=true;e.maxRenderSize=8192;
+ e.renderer={getPixelRatio:()=>ratio,setPixelRatio:v=>{ratio=v;pixelSets++;},setSize:()=>sets++,getContext:()=>({drawingBufferWidth:Math.floor(innerWidth*ratio),drawingBufferHeight:Math.floor(innerHeight*ratio)})};
  e.camera={updateProjectionMatrix:()=>projections++};
  return {resize:()=>e.resize(),viewport:(w,h,d)=>{innerWidth=w;innerHeight=h;devicePixelRatio=d;},dispose:()=>e.disposed=true,stats:()=>({sets,pixelSets,projections,aspect:e.camera.aspect})};
 `)();

@@ -18,8 +18,13 @@ assert(match,'Inline parser-owned GENESIS bootstrap missing');
 const hash="'sha256-"+crypto.createHash('sha256').update(match[1]).digest('base64')+"'";
 const meta=html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
 assert(meta?.[1]?.includes(hash),'The exact new GENESIS inline hash must appear in HTML CSP');
-assert(worker.includes('const INLINE_R2201_BOOT_HASH = "'+hash+'"'),'Worker must allow the exact parser-owned hash');
-assert(worker.includes('${INLINE_R2201_BOOT_HASH}'),'Worker meta/header CSP must include the new hash');
+const binding=[...worker.matchAll(/const (INLINE_[A-Z0-9_]+)\s*=\s*"([^"]+)";/g)].find(m=>m[2]===hash);
+assert(binding,'Worker must define the exact parser-owned hash');
+const interpolation='${'+binding[1]+'}';
+const metaPolicy=worker.match(/const META_CSP = `([^`]+)`/);
+const headerPolicy=worker.split('\n').find(line=>line.trim().startsWith('`script-src '));
+assert(metaPolicy?.[1]?.includes(interpolation)&&headerPolicy?.includes(interpolation),
+  'Both Worker meta and header CSP must authorize the exact current hash');
 assert(match[1].includes("const v=f||(!a&&p.get('intro')!=='0')"),
   'Every normal full navigation must play GENESIS; explicit ?intro=0 may skip');
 assert(match[1].includes('fresh-navigation-genesis'),'Must identify the new repeatable film bootstrap');
