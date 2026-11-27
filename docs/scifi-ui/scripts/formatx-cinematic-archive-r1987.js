@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2299-cinematic-camera';
+  const VERSION='cinematic-archive-r2300-energy-transmission';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -940,6 +940,15 @@
     const t=clamp((p-.315)/.465);
     return (portrait?1.12:2.05)*Math.sin(Math.PI*t)**2;
   }
+  // R2300: a bounded energy packet travels from the nearest bay to the
+  // distant reactor, then settles during the existing native reading beat.
+  // Driven only by document progress; reversing scroll reverses the wave.
+  function roomEnergyTrack(scene,p,travel){
+    if(scene.key==='licensing')return [-.4,0];
+    const t=.65*clamp((p-.315)/.465)+.35*clamp(travel||0);
+    const amplitude=smooth(t/.12)*(1-smooth((t-.86)/.14));
+    return [mix(-.4,-12.7,t),amplitude];
+  }
   function corridorRoomGeometry(){
     const data=[],cube=cubeGeometry();
     const corners=[[-3.65,-1.62],[-2.65,-2.62],[2.65,-2.62],[3.65,-1.62],
@@ -1001,7 +1010,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -1121,7 +1130,7 @@ void main(){
       const frag=`#version 300 es
 precision highp float;
 in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;
-uniform vec3 uColor,uCamera,uOffset;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
+uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
 out vec4 outColor;
 // R2296: integrate finite illuminated fog volumes along the camera ray.
 // The intersection stops at the room surface; no screen-space overlay,
@@ -1166,7 +1175,10 @@ void main(){
     float key=.30+.70*max(0.0,dot(N,normalize(vec3(-.44,.68,.59))));
     float rib=step(.35,vUv.x);
     vec3 graphite=mix(vec3(.045,.065,.090),vec3(.16,.23,.29),rib)*key*contact;
-    vec3 bounce=uColor*(.045+.15*pool)*(.48+.52*abs(N.y));
+    // R2300: the moving packet illuminates the actual physical panels,
+    // conduits and inlaid light strips, with smooth spatial falloff.
+    float packet=uRoomEnergy.y*(1.0-smoothstep(.22,1.45,abs(local.z-uRoomEnergy.x)));
+    vec3 bounce=uColor*(.045+.15*pool+.19*packet)*(.48+.52*abs(N.y));
     // Broad reflection response on structural metal; no thin aliasing grids.
     vec3 V=normalize(vec3(-local.xy,vViewDistance));
     float grazing=1.0-abs(dot(N,V));
@@ -1189,7 +1201,7 @@ void main(){
       tint=vec3(.075,.104,.128)*(.55+.45*key)+bounce*.75
         +vec3(.22,.31,.38)*strip*(1.0-distanceFog*.65);
     }
-    vec3 lamp=uColor*(.65+.30*(1.0-distanceFog));
+    vec3 lamp=mix(uColor*(.65+.30*(1.0-distanceFog)),mix(uColor,vec3(.76,.92,1.0),.48),packet*.85);
     vec3 material=mix(tint,lamp,step(.70,vUv.x));
     // Beer-Lambert transmission through two finite, elongated light pools.
     // These are analytic single-scattering approximations, not a path tracer.
@@ -1363,6 +1375,9 @@ void main(){
       gl.uniform3fv(this.uniform.uCamera,cam);
       const orientation=passageOrientation(scene,pro,mobile());
       gl.uniform3fv(this.uniform.uArchiveCameraAngles,orientation);
+      const energyTrack=roomEnergyTrack(scene,pro,travel);
+      gl.uniform2fv(this.uniform.uRoomEnergy,energyTrack);
+      setData(root,'fxArchiveEnergyR2300',energyTrack.map(x=>x.toFixed(3)).join(','));
       setData(root,'fxArchiveCameraR2299',orientation.map(x=>x.toFixed(4)).join(','));
       gl.uniform1f(this.uniform.uAspect,frame.aspect);
       gl.uniform1f(this.uniform.uMobile,mobile()?1:0);

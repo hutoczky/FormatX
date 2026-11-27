@@ -760,3 +760,33 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('gl.uniform3fv(this.uniform.uArchiveCameraAngles,orientation);'));
  console.log('R2299_CAMERA_ORIENTATION_PASS '+JSON.stringify({samples,peakRadians:peak,commerceOriginal:true,extraDrawCalls:0}));
  }
+
+ // R2300: verify the continuous, reversible object-space energy packet.
+ {
+ const a=src.indexOf('  function roomEnergyTrack('),b=src.indexOf('  function corridorRoomGeometry(',a);
+ const track=new Function('clamp','mix','smooth',src.slice(a,b)+'return roomEnergyTrack;')(clamp,mix,smooth);
+ const scene={key:'systems'},checkout={key:'licensing'};
+ let samples=0,previous=Infinity,peak=0;const lit=new Set();
+ const packet=(z,state)=>state[1]*(1-smooth((Math.abs(z-state[0])-.22)/1.23));
+ for(let i=0;i<=2000;i++){
+   const t=i/2000;
+   const p=t<=.65?.315+.465*t/.65:.78;
+   const travel=t<=.65?0:(t-.65)/.35;
+   const state=track(scene,p,travel);
+   assert(state[0]<=previous+1e-10&&state[0]>=-12.70000001);
+   assert(state[1]>=0&&state[1]<=1);
+   previous=state[0];peak=Math.max(peak,state[1]);
+   assert.equal(track(checkout,p,travel)[1],0);
+   for(let bay=0;bay<7;bay++){
+     const z=-13+(bay+.5)*1.88,w=packet(z,state);
+     assert(Number.isFinite(w)&&w>=0&&w<=1);
+     if(w>.20)lit.add(bay);samples++;
+   }
+ }
+ assert.equal(track(scene,0,0)[1],0);
+ assert(track(scene,.78,1)[1]<1e-10);
+ assert(peak>.99&&lit.size===7);
+ assert(src.includes('gl.uniform2fv(this.uniform.uRoomEnergy,energyTrack)'));
+ assert(src.includes('abs(local.z-uRoomEnergy.x)'));
+ console.log('R2300_ENERGY_TRANSMISSION_PASS '+JSON.stringify({samples,litBays:lit.size,peak,extraDrawCalls:0,commerceOriginal:true}));
+ }
