@@ -53,7 +53,8 @@
     if (block.innerHTML !== definition) block.innerHTML = definition;
 
     const lead = heroCopy.querySelector('.hero-lead');
-    if (lead) lead.dataset.fxFirstPaintCopyR411 = 'static-canonical-no-first-load-rewrite';
+    if (lead && lead.dataset.fxFirstPaintCopyR411 !== 'static-canonical-no-first-load-rewrite')
+      lead.dataset.fxFirstPaintCopyR411 = 'static-canonical-no-first-load-rewrite';
 
     let method = heroCopy.querySelector('.fx-method-inline');
     if (!method) {
@@ -149,8 +150,9 @@
       const label = fact.querySelector('small');
       if (value && value.textContent !== values[index][0]) value.textContent = values[index][0];
       if (label && label.textContent !== values[index][1]) label.textContent = values[index][1];
-      fact.classList.add('fx-proof-metric');
-      fact.dataset.state = values[index][0] === '—' ? 'unavailable' : 'available';
+      if (!fact.classList.contains('fx-proof-metric')) fact.classList.add('fx-proof-metric');
+      const state = values[index][0] === '—' ? 'unavailable' : 'available';
+      if (fact.dataset.state !== state) fact.dataset.state = state;
     });
 
     const labels = document.querySelectorAll('#hero .hero-label');
@@ -207,19 +209,24 @@
         <a class="fx-trust-card" href="/scifi-ui/known-issues.html"><strong data-card="issues"></strong><small data-card-copy="issues"></small><span>↗</span></a>
       </div>`;
 
+    // Populate the detached section before attaching it to the live layout.
+    translateTrustStrip(section);
     if (resource) resource.before(section);
     else main.appendChild(section);
-    translateTrustStrip(section);
   }
 
   function translateTrustStrip(section) {
     const en = language() === 'en';
-    section.querySelector('#fx-trust-title').textContent = en
+    const title = section.querySelector('#fx-trust-title');
+    const lead = section.querySelector('[data-fx-trust-lead]');
+    const titleText = en
       ? 'Claims become useful only when they can be opened and checked.'
       : 'Az állítás akkor hasznos, ha megnyitható és ellenőrizhető.';
-    section.querySelector('[data-fx-trust-lead]').textContent = en
+    const leadText = en
       ? 'The public evidence layer separates released, tested, limited, planned and still-unverified work.'
       : 'A nyilvános bizonyítéki réteg elkülöníti a kiadott, tesztelt, korlátozott, tervezett és még nem igazolt részeket.';
+    if (title && title.textContent !== titleText) title.textContent = titleText;
+    if (lead && lead.textContent !== leadText) lead.textContent = leadText;
 
     const copy = {
       method: [
@@ -296,9 +303,9 @@
     ensureCategoryDefinition();
     updateNavigation();
     updateDownloadSemantics();
-    ensureTrustStrip();
     const strip = document.querySelector('.fx-trust-strip');
     if (strip) translateTrustStrip(strip);
+    else ensureTrustStrip();
     ensureIndependentOrigin();
     ROOT.dataset.fxContentStandard = 'ready-v2';
   }

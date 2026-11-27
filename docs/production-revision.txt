@@ -222,3 +222,6 @@ mobile_category_scope=Make the measured mobile category definition use settled r
 
 living_bfcache_revision=20261127-r2314-bfcache-qr
 living_bfcache_scope=Restore scene and deferred QR observation after repeated BFCache navigation; skip duplicate normal-navigation commerce updates; guard non-Element click targets. Pricing and checkout contract unchanged.
+
+content_evidence_revision=20261127-r2315-idempotent-evidence
+content_evidence_scope=Populate new evidence section before attaching, avoid duplicated translation and unchanged evidence heading and telemetry writes. Preserve released content and verification links. No measured LCP gain claimed.

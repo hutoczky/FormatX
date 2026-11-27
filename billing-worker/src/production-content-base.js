@@ -45,7 +45,7 @@ const CONTENT_ASSETS = [
   '<link rel="stylesheet" data-fx-content-standard-style="true" href="/scifi-ui/styles/formatx-content-standard.css?v=20260812-quality-r1">',
   '<script defer src="/scifi-ui/scripts/release-metadata.js?v=20260807-full-release-1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-public-shell.js?v=20260731-public-shell-1"></script>',
-  '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1"></script>',
+  '<script defer src="/scifi-ui/scripts/formatx-content-standard.js?v=20260731-content-1-r2315-idempotent-evidence"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-seo.js?v=20260812-final-polish-r1"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-content-finalizer.js?v=20260813-single-mag-root-r70"></script>',
   '<script defer src="/scifi-ui/scripts/formatx-platform-surface-finalizer.js?v=20260731-platform-final-1"></script>',

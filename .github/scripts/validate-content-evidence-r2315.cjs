@@ -1,0 +1,17 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const s=fs.readFileSync('docs/scifi-ui/scripts/formatx-content-standard.js','utf8');
+const a=s.indexOf('  function translateTrustStrip('),b=s.indexOf('  function ensureIndependentOrigin(',a);
+assert(a>=0&&b>a);
+let lang='hu',writes=0;
+const nodes=new Map();
+const section={querySelector:key=>{if(!nodes.has(key)){let value='';nodes.set(key,{get textContent(){return value},set textContent(v){value=v;writes++}});}return nodes.get(key);}};
+const translate=new Function('language',s.slice(a,b)+'return translateTrustStrip;')(()=>lang);
+translate(section);assert.equal(writes,10);
+for(let i=0;i<1000;i++)translate(section);
+assert.equal(writes,10);
+lang='en';translate(section);assert.equal(writes,20);
+assert.equal(nodes.get('#fx-trust-title').textContent,'Claims become useful only when they can be opened and checked.');
+assert(s.includes('translateTrustStrip(section);\n    if (resource) resource.before(section);'));
+assert(s.includes('if (strip) translateTrustStrip(strip);\n    else ensureTrustStrip();'));
+console.log('R2315 evidence translation PASS: 1000 repeat reconciliations, zero redundant writes; bilingual content preserved');
