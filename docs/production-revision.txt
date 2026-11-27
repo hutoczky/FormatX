@@ -228,3 +228,6 @@ content_evidence_scope=Populate new evidence section before attaching, avoid dup
 
 interaction_revision=20261127-r2316-escape-scope
 interaction_scope=Only close an actually open MAG console on Escape; delayed fallback becomes a no-op after closure and preserves history state. Skip redundant important inline style writes. Refresh canonical runtime cache references.
+
+archive_visibility_revision=20261127-r2317-archive-visibility
+archive_visibility_scope=Keep pending native archive renders and transit permits on offscreen hero intersection reports; retain offscreen idle cancellation outside archive. Live mobile corridor recovery requires browser proof.

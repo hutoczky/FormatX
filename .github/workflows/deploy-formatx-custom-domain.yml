@@ -89,6 +89,7 @@ jobs:
           node .github/scripts/validate-living-bfcache-r2314.cjs
           node .github/scripts/validate-content-evidence-r2315.cjs
           node .github/scripts/validate-interaction-scope-r2316.cjs
+          node .github/scripts/validate-archive-visibility-r2317.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

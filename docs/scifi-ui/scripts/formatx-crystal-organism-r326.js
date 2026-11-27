@@ -2983,11 +2983,17 @@
 
     const ro=new ResizeObserver(()=>{if(!disposed&&!contextLost&&resize(true))schedule(1);});
     ro.observe(stage);
-    const io=new IntersectionObserver(entries=>{
+    function onStageIntersection(entries){
       visible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>.04);
-      if(visible)schedule(1);else if(raf){cancelAnimationFrame(raf);raf=0;scrollTransitPermit=false;}
+      // The archive uses the canonical canvas outside its hero intersection.
+      // Match blocked(): a stale/offscreen hero observation must not cancel
+      // the queued physical gate or the final settled archive render.
+      const archiveLive=root.dataset.fxArchiveDock==='active';
+      if(visible)schedule(1);
+      else if(!archiveLive&&raf){cancelAnimationFrame(raf);raf=0;scrollTransitPermit=false;}
       scheduleSurfacePulse();
-    },{threshold:[0,.04]});
+    }
+    const io=new IntersectionObserver(onStageIntersection,{threshold:[0,.04]});
     io.observe(stage);
     const sectionPhysiology={
       hero:'homeostasis',experience:'attention',capabilities:'activation',
