@@ -1107,3 +1107,45 @@
     bottom:auto!important;
   }
 }
+
+/* R2294 — the measured LCP text has its settled metrics at parser paint.
+   The same rule survives deferred stylesheet activation. No webfont fetch
+   or late font swap is needed for the two large title lines. */
+@media(max-width:900px),(pointer:coarse),(max-aspect-ratio:27/25){
+  html:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero .hero-copy > #hero-title{
+    display:grid!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0 0 20px!important;
+    line-height:1!important;
+  }
+  html:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero #hero-title > .hero-title-main{
+    display:block!important;
+    max-width:100%!important;
+    font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(36px,11.2vw,48px)!important;
+    font-weight:900!important;
+    line-height:.94!important;
+    letter-spacing:-.035em!important;
+    white-space:nowrap!important;
+    color:#f2fbff!important;
+    -webkit-text-fill-color:currentColor!important;
+    background:none!important;
+    text-shadow:none!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  html:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture #hero #hero-title > .hero-title-sub{
+    display:block!important;
+    margin:8px 0 0!important;
+    font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:clamp(17px,5.4vw,24px)!important;
+    font-weight:700!important;
+    line-height:1.08!important;
+    letter-spacing:.07em!important;
+    white-space:nowrap!important;
+  }
+}

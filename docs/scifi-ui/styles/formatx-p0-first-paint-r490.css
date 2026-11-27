@@ -1658,3 +1658,19 @@ html body .fx-thought-genome-layer {
     flex:1 1 250px!important;
   }
 }
+
+/* R2294 — preserve the 76px header flow slot from first paint to runtime.
+   Do not override the dedicated cinematic archive presentation. */
+@media (min-width:901px) and (pointer:fine) and (prefers-reduced-motion:no-preference) and (min-aspect-ratio:27/25){
+  html:root:root:root:root:root:root:not([data-fx-archive-cinema="active"])
+  body.living-architecture header.topbar{
+    position:relative!important;
+    inset:auto!important;
+    box-sizing:border-box!important;
+    height:76px!important;
+    min-height:76px!important;
+    max-height:76px!important;
+    margin:0!important;
+    padding:0!important;
+  }
+}
