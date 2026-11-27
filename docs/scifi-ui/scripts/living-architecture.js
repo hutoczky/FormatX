@@ -187,7 +187,7 @@
   function prepareQrDock() {
     const dock = document.getElementById('formatx-plan-qr-dock');
     revealQrDock();
-    if (!dock) return;
+    if (!dock || qrDockActivated || qrDockObserver) return;
     if (!('IntersectionObserver' in window)) {
       activateQrDock();
       return;
@@ -313,9 +313,10 @@
       if (sceneChanged || languageChanged) syncScene();
       if (languageChanged) updateCommerce();
     });
-    observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
+    const observeState = () => observer.observe(ROOT, { attributes: true, attributeFilter: ['data-fx-scene', 'lang'] });
+    observeState();
     document.addEventListener('click', event => {
-      if (!event.target.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) return;
+      if (!(event.target instanceof Element) || !event.target.closest('[data-currency], .fx-language-toggle, [data-language], [data-language-choice]')) return;
       setTimeout(() => {
         syncScene();
         updateCommerce();
@@ -325,15 +326,20 @@
       syncScene();
       updateCommerce();
     });
-    addEventListener('pageshow', () => {
-      revealQrDock();
+    // R2314: reattach observers on each actual BFCache restoration.
+    // Initial navigation already performed the commerce reconciliation.
+    addEventListener('pageshow', event => {
+      if (!event.persisted) return;
+      observeState();
+      syncScene();
+      prepareQrDock();
       updateCommerce();
     });
     addEventListener('pagehide', () => {
       observer.disconnect();
       qrDockObserver?.disconnect();
       qrDockObserver = null;
-    }, { once: true });
+    });
   }
 
   function initialise() {

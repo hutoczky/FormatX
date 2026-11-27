@@ -86,6 +86,7 @@ jobs:
           node .github/scripts/validate-resize-observer-r2311.cjs
           node .github/scripts/validate-living-scene-r2312.cjs
           node .github/scripts/validate-mobile-category-r2313.cjs
+          node .github/scripts/validate-living-bfcache-r2314.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

@@ -219,3 +219,6 @@ living_scene_scope=Reuse locale/currency number formatters and avoid unchanged s
 
 mobile_category_revision=20261127-r2313-category-first-paint
 mobile_category_scope=Make the measured mobile category definition use settled readable typography at first paint, align canonical source preload and stylesheet media with production Worker. Exclude active archive and retain original semantic content. Live LCP must be measured.
+
+living_bfcache_revision=20261127-r2314-bfcache-qr
+living_bfcache_scope=Restore scene and deferred QR observation after repeated BFCache navigation; skip duplicate normal-navigation commerce updates; guard non-Element click targets. Pricing and checkout contract unchanged.
