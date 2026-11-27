@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -434,7 +434,11 @@
     const t=clamp((physical-start)/(end-start));
     // Reading/interaction must never wait for the GPU or a timer.
     const reading=smooth((p-.58)/.12);
-    return [Math.max(reading,smooth((t-.05)/.48)),Math.max(reading,smooth((t-.28)/.56)),Math.max(reading,smooth((t-.42)/.58))];
+    // R2331: a smooth union instead of max() avoids a velocity cusp when
+    // the reading deadline overtakes the physical title/body/detail reveal.
+    // Exactly the same progress drives both the native text and WebGL folio.
+    const merge=phase=>reading+(1-reading)*phase;
+    return [merge(smooth((t-.05)/.48)),merge(smooth((t-.28)/.56)),merge(smooth((t-.42)/.58))];
   }
   // R2307: the native text has its own restrained, physical perspective
   // inside the moving folio. No character splitting or extra animation clock.
@@ -460,7 +464,10 @@
   function holographicAssembly(scene,transmission,phone){
     if(scene.key==='licensing')return [1,1,0,0];
     const p=clamp(transmission[0]),pulse=clamp(transmission[1]);
-    const horizontal=smooth(p/.72),vertical=smooth((p-.14)/.78);
+    // R2331: zero velocity AND acceleration at the two glass assembly
+    // endpoints. Reverse scrolling follows the same deterministic path.
+    const settle=value=>{const t=clamp(value);return t*t*t*(t*(t*6.0-15.0)+10.0);};
+    const horizontal=settle(p/.72),vertical=settle((p-.14)/.78);
     return [1-(phone?.08:.18)*(1-horizontal),
       1-(phone?.06:.14)*(1-vertical),pulse,.24+.76*horizontal];
   }
