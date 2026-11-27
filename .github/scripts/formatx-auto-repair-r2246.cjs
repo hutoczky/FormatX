@@ -26,12 +26,26 @@ function align(text,name,value,count){
   assert.equal(matches.length,count,'Unexpected reference count for '+name);
   return text.replace(re,(_,prefix)=>prefix+value);
 }
+function alignArchiveWorkflow(text,value){
+  const name='formatx-cinematic-archive-r1987.js';
+  const re=new RegExp('('+name.replace(/\./g,'\\.')+'\\?v=)(\\d{8}-r\\d{3,4}(?:-r\\d{3,4})?-[a-z0-9-]+)','g');
+  const matches=[...text.matchAll(re)];
+  if(matches.length===1)return text.replace(re,(_,prefix)=>prefix+value);
+  assert.equal(matches.length,0,'Unexpected reference count for '+name);
+  // R2295 derives the one exact revision from canonical HTML at runtime.
+  // Preserve that stronger check instead of inserting a second cache owner.
+  assert(text.includes('expected=$(node -e'), 'Missing derived archive revision owner');
+  assert(text.includes('formatx-cinematic-archive-r1987\\.js\\?v='), 'Missing exact archive revision parser');
+  assert(text.includes('grep -Fq -- "$expected"'), 'Missing derived archive revision assertion');
+  assert(text.includes('cmp -s docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js'), 'Missing byte-exact archive comparison');
+  return text;
+}
 function plan(input){
   const out={...input};
   const archive=revision(input[HTML],'formatx-cinematic-archive-r1987.js');
   const scheduler=revision(input[HTML],'formatx-p0-motion-scheduler-r490.js');
   const deferredCss=revision(input[HTML],'formatx-deferred-css-r487.js');
-  out[ARCHIVE]=align(input[ARCHIVE],'formatx-cinematic-archive-r1987.js',archive,1);
+  out[ARCHIVE]=alignArchiveWorkflow(input[ARCHIVE],archive);
   // R2242 canonical runtime release chain deliberately uses a single cache key.
   out[WORKER]=align(align(input[WORKER],'formatx-p0-motion-scheduler-r490.js',scheduler,1),
     'formatx-motion-runtime-loader-r239.js',scheduler,1);
@@ -83,6 +97,11 @@ function selfTest(){
   assert.ok(repaired[WORKER].includes(deferredCss));
   assert.ok(repaired[ACTIVE_WORKER].includes(deferredCss));
   assert.ok(repaired[JOURNEY].includes(deferredCss));
+  const derived=input[ARCHIVE].replace(ref('formatx-cinematic-archive-r1987',old),
+    'expected=$(node -e \'const m=s.match(/formatx-cinematic-archive-r1987\\.js\\?v=[^"\\s<>]+/g)\')\n'+
+    'grep -Fq -- "$expected" index.html\ncmp -s docs/scifi-ui/scripts/formatx-cinematic-archive-r1987.js /tmp/live.js');
+  const derivedInput={...input,[ARCHIVE]:derived};
+  assert.equal(plan(derivedInput)[ARCHIVE],derived,'Derived canonical revision workflow must remain unchanged');
   return 'R2246_AUTO_REPAIR_SELF_TEST_PASS';
 }
 function main(){

@@ -1396,24 +1396,30 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
 }
 /* production-r2049-inactive-original-folio-layout-isolation */
 
-/* R2305 — synchronized native typographic handoff. No clipping, text
+/* R2306 — synchronized native typographic handoff. No clipping, text
    duplication, layout-height changes, timers or interaction suppression.
    The original headings and paragraphs settle in the physical folio lane. */
 @media (prefers-reduced-motion:no-preference){
  html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
- .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2305="materializing"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]
  :is(h2,h3):not(:has(a,button,input,select,textarea)){
    opacity:var(--fx-type-title-opacity,1)!important;
    translate:0 var(--fx-type-title-y,0px)!important;
  }
  html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
- .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2305="materializing"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]
  :is(.section-heading > p,.section-heading > .eyebrow,p.lead):not(:has(a,button,input,select,textarea)){
    opacity:var(--fx-type-body-opacity,1)!important;
    translate:0 var(--fx-type-body-y,0px)!important;
  }
+ html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]
+ :is(article > p,.release-layout > div > p):not(.section-index):not(:has(a,button,input,select,textarea)){
+   opacity:var(--fx-type-detail-opacity,1)!important;
+   translate:0 var(--fx-type-detail-y,0px)!important;
+ }
  html[data-fx-archive-cinema="active"]
- .fx-archive-cinema-folio-r2030[data-fx-typography-r2305="materializing"] > .fx-mag-folio-origin-r2041::after{
+ .fx-archive-cinema-folio-r2030[data-fx-typography-r2306="materializing"] > .fx-mag-folio-origin-r2041::after{
    content:"";
    display:block;
    position:absolute;
@@ -1426,8 +1432,8 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
  /* Immediate fail-open for reading, keyboard interaction and controls. */
  html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
- .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2305="materializing"]:focus-within
- :is(h2,h3,.section-heading > p,.section-heading > .eyebrow,p.lead){
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]:focus-within
+ :is(h2,h3,.section-heading > p,.section-heading > .eyebrow,p.lead,article > p,.release-layout > div > p){
    opacity:1!important;
    translate:none!important;
  }
