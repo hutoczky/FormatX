@@ -102,6 +102,7 @@ jobs:
           node .github/scripts/validate-native-optics-r2329.cjs
           node .github/scripts/validate-archive-optics-r2330.cjs
           node .github/scripts/validate-type-continuity-r2331.cjs
+          node .github/scripts/validate-reading-lane-r2332.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -376,52 +376,44 @@
     root.dataset.fxArchiveAnchorTransitions=String(
       (Number(root.dataset.fxArchiveAnchorTransitions)||0)+1);
   }
+  // R2332: fixed reading lane geometry and optical animation have distinct
+  // owners. The desktop stylesheet already disables independent translate;
+  // measuring the animated bounding box and accumulating a correction was
+  // ineffective and could force synchronous layout on every scroll sample.
   function positionCinemaFolio(panel){
     if(!panel||!panel.isConnected)return;
-    // The canonical site contains ancestor perspective/transform contexts,
-    // which change the containing block of a fixed child. Solve in viewport
-    // coordinates instead of resetting those ancestors (doing so breaks
-    // the living MAG renderer and the native pricing/menu consoles).
-    const w=innerWidth,h=innerHeight,phone=mobile();
-    // A transformed chapter captures position:fixed descendants. Neutralize
-    // only the active cinematic scroll anchor (its original HTML has already
-    // been transferred into the folio), preserving the original parent state
-    // for the accessible HTML fallback and the existing MAG hero renderer.
-    // The selected scroll anchor is already neutralized by syncCinema().
-    // Do not mutate the same nine ancestor properties again per frame.
-    // On portrait devices the folio has a strict fixed top/bottom lane in CSS.
-    // Compensating viewport offsets on every scroll caused cumulative Y drift
-    // (-394px) and the genuine native paper overlapped the MAG stage.
-    // Never apply legacy transform-ancestor compensation on a phone.
-    if(phone){
-      // CSS fixed positioned descendants can still be captured by transformed
-      // chapter ancestors. Correct their ACTUAL screen box, once per scrub.
-      // Use a bounded, absolute-in-screen translation, not an accumulating
-      // transform offset from a previous scroll chapter.
-      const stage=document.querySelector('#hero .fx-crystal-organism-r326-stage.fx-archive-native-docked');
-      const magBottom=stage?.getBoundingClientRect().bottom||h*.45;
-      const viewportTop=Math.max(h*.51,magBottom+Math.min(24,h*.034));
-      // No per-scroll cumulative coordinates: this is genuinely viewport-
-      // fixed once the source chapter no longer creates a containing block.
+    const h=Math.max(1,innerHeight);
+    if(!mobile()){
+      // Restore only the inline properties previously owned by mobile.
+      if(panel.dataset.fxMobileScreenTop!==undefined){
+        panel.style.removeProperty('top');
+        panel.style.removeProperty('max-height');
+        delete panel.dataset.fxMobileScreenTop;
+        delete panel.dataset.fxMobileScreenHeightR2332;
+      }
       clearMotionStyle(panel,'translate');
       clearMotionStyle(panel,'--fx-cinema-screen-x');
       clearMotionStyle(panel,'--fx-cinema-screen-y');
-      const screenTop=viewportTop.toFixed(2);
-      if(panel.dataset.fxMobileScreenTop!==screenTop){
-        panel.style.setProperty('top',screenTop+'px','important');
-        panel.dataset.fxMobileScreenTop=screenTop;
-      }
       return;
     }
-    const desiredWidth=Math.min(w*(phone?.92:.51),phone?w:920);
-    const x=phone?w*.04:w-w*.027-desiredWidth;
-    const y=phone?h*.48:h*.11;
-    const r=panel.getBoundingClientRect();
-    const previousX=parseFloat(panel.style.getPropertyValue('--fx-cinema-screen-x'))||0;
-    const previousY=parseFloat(panel.style.getPropertyValue('--fx-cinema-screen-y'))||0;
-    const dx=x-r.left,dy=y-r.top;
-    if(Math.abs(dx)>1)panel.style.setProperty('--fx-cinema-screen-x',(previousX+dx).toFixed(2)+'px');
-    if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
+    const dock=stage?.classList.contains('fx-archive-native-docked')?stage:null;
+    const bottom=dock?.getBoundingClientRect().bottom||h*.45;
+    const top=Math.max(h*.51,bottom+Math.min(24,h*.034));
+    // Reserve a bottom safe margin even on short/narrow displays. Keep
+    // the original scrollable content, including the native checkout.
+    const maxHeight=Math.max(0,h-top-h*.03);
+    clearMotionStyle(panel,'translate');
+    clearMotionStyle(panel,'--fx-cinema-screen-x');
+    clearMotionStyle(panel,'--fx-cinema-screen-y');
+    const screenTop=top.toFixed(2),screenHeight=maxHeight.toFixed(2);
+    if(panel.dataset.fxMobileScreenTop!==screenTop){
+      panel.style.setProperty('top',screenTop+'px','important');
+      panel.dataset.fxMobileScreenTop=screenTop;
+    }
+    if(panel.dataset.fxMobileScreenHeightR2332!==screenHeight){
+      panel.style.setProperty('max-height',screenHeight+'px','important');
+      panel.dataset.fxMobileScreenHeightR2332=screenHeight;
+    }
   }
 
   // R2306: native title, lead and detail copy materialize in the gate transit.
@@ -513,6 +505,8 @@
             setData(marker,'fxArrivalPhaseR2290',arrival);
           }
           setData(root,'fxArchiveVisibleInterface','single-native-folio');
+          // Read the fixed MAG aperture before changing the optical transforms.
+          positionCinemaFolio(panel);
           const p=clamp(current.progress);
           // R2038: deliver the REAL interactive folio throughout the scroll beat.
           // Previously opacity zero hid all actual content while a small
@@ -576,7 +570,6 @@
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
           setData(root,'fxArchiveNativeHandoff','scroll-coupled-real-3d-paper');
-          positionCinemaFolio(panel);
         }
       }
     }
