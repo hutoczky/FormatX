@@ -201,3 +201,6 @@ copy_runtime_scope=Avoid unchanged bilingual copy DOM writes and coalesce repeat
 
 cadence_governor_revision=20261127-r2299-cadence-governor
 cadence_governor_scope=Use display cadence and refresh divisor to distinguish missed deadlines from normal 60Hz frames; permit quality recovery on healthy 60Hz cadence; retain CPU render pressure limits and geometry. Live FPS and optical quality must be measured.
+
+cadence_divisor_revision=20261127-r2300-shared-refresh-divisor
+cadence_divisor_scope=Correct floating-point boundary at nominal 120/180/240 Hz with shared divisor calculation and 0.5 Hz tolerance. Preserve strict regression and add boundary jitter coverage.

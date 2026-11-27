@@ -2411,9 +2411,14 @@
 
     // R2299: distinguish actual missed presentation deadlines from normal
     // display cadence. A healthy 60Hz frame is 16.67ms, not <16.08ms.
+    function refreshDivisor(hz){
+      // A nominal 120/180/240Hz interval can round slightly below its boundary.
+      // Share the same tolerance between RAF scheduling and the governor.
+      return Math.max(1,Math.floor((hz+.5)/60));
+    }
     function presentationBudget(refreshMs){
       const hz=Math.max(30,Math.min(360,1000/Math.max(2.7,refreshMs)));
-      return Math.min(1000/60,Math.max(2.7,refreshMs)*Math.max(1,Math.floor(hz/60)));
+      return Math.min(1000/60,Math.max(2.7,refreshMs)*refreshDivisor(hz));
     }
     function render(now){
       const begin=performance.now();
@@ -2616,7 +2621,7 @@
         }
         schedulerLastFrame=now;
         const estimatedHz=Math.max(30,Math.min(360,1000/Math.max(2.7,schedulerRefreshMs)));
-        const divisor=Math.max(1,Math.floor(estimatedHz/60));
+        const divisor=refreshDivisor(estimatedHz);
         schedulerTick=(schedulerTick+1)%divisor;
         {const value=String(estimatedHz.toFixed(1));if(root.dataset.fxCoreRefreshHzR1622!==value)root.dataset.fxCoreRefreshHzR1622=estimatedHz.toFixed(1);}
         {const value=String(String(divisor));if(root.dataset.fxCoreRenderDivisorR1622!==value)root.dataset.fxCoreRenderDivisorR1622=String(divisor);}
