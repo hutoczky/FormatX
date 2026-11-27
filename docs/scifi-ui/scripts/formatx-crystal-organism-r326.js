@@ -2190,7 +2190,15 @@
       const budget=Math.max(112000,Math.min(8294400,Math.round(baseBudget*qualityScale*qualityScale)));
       let w=Math.max(2,Math.round(rect.width*dpr));
       let h=Math.max(2,Math.round(rect.height*dpr));
-      if(w*h>budget){const k=Math.sqrt(budget/(w*h));w=Math.round(w*k);h=Math.round(h*k);}
+      // R2328: cache real hardware dimensions; area alone cannot bound ultrawide buffers.
+      if(!resize.hardwareLimits){
+        const viewport=gl.getParameter?.(gl.MAX_VIEWPORT_DIMS);
+        const buffer=Number(gl.getParameter?.(gl.MAX_RENDERBUFFER_SIZE))||4096;
+        resize.hardwareLimits=[Math.min(buffer,Number(viewport?.[0])||buffer),Math.min(buffer,Number(viewport?.[1])||buffer)];
+      }
+      const [maxW,maxH]=resize.hardwareLimits;
+      const fit=Math.min(1,Math.sqrt(budget/(w*h)),maxW/w,maxH/h);
+      if(fit<1){w=Math.max(2,Math.floor(w*fit));h=Math.max(2,Math.floor(h*fit));}
       const nextAspect=rect.width/Math.max(1,rect.height);
       const sizeChanged=width!==w||height!==h||canvas.width!==w||canvas.height!==h;
       const aspectChanged=aspect!==nextAspect;
@@ -2579,8 +2587,10 @@
           }else{
             if(panicFrames>0)panicFrames-=1;
             else stableBudgetFrames+=1;
-            if(stableBudgetFrames>360 && frameIntervalAverage<=expectedFrame*1.04 && renderAverage<3.4 && renderPeak<4.8){
-              qualityScale=Math.min(qualityCeiling,qualityScale+.0015);
+            // R2328: restore desktop UHD detail without minutes of unnecessary blur.
+            const studioRecovery=!mobile&&!softwareRenderer&&!constrained;
+            if(stableBudgetFrames>(studioRecovery?60:360) && frameIntervalAverage<=expectedFrame*1.04 && renderAverage<3.4 && renderPeak<4.8){
+              qualityScale=Math.min(qualityCeiling,qualityScale+(studioRecovery?.035:.0015));
               stableBudgetFrames=0;
             }
           }

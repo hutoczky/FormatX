@@ -47,7 +47,7 @@ const FIRST_FRAME_STABILITY_LINK = '<link rel="stylesheet" fetchpriority="high" 
 const P0_FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(min-width:901px)" data-fx-p0-first-paint-r503="true" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261127-r2294-header-flow-lock">';
 const P0_MOBILE_OPTICAL_LINK = '<link rel="stylesheet" data-fx-r487-deferred-style="true" data-fx-r487-media="(max-width:900px)" media="print" href="/scifi-ui/styles/formatx-p0-first-paint-r490.css?v=20261127-r2294-header-flow-lock">';
 const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)" data-fx-mobile-first-paint-r358="true" data-fx-production-first-paint-r370="true" href="/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261127-r2294-mobile-title-first-paint-r2313-category">';
-const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd';
+const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd-r2328-native-recovery';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261126-r2257-single-activation-task"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
 const INLINE_R2324_BOOT_HASH = "'sha256-+8mb+iuzlxodqAF1cUwm6G6DD5m+kiZd0S6v+slLr9A='";
@@ -231,7 +231,7 @@ const DEFERRED_STYLE_PATHS = new Set([
 const R502_ASSET_REWRITES = new Map([
   ['/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js', {
     marker: 'scheduler-to-loader-r1950-desktop-edge-aa',
-    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd']],
+    rewrites: [[/formatx-motion-runtime-loader-r239\.js\?v=[^"']+/g, 'formatx-motion-runtime-loader-r239.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd-r2328-native-recovery']],
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
