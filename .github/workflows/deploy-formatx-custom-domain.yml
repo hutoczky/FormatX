@@ -96,6 +96,7 @@ jobs:
           node .github/scripts/validate-archive-pulse-r2322.cjs
           node .github/scripts/validate-genesis-light-r2323.cjs
           node .github/scripts/validate-studio-uhd-r2324.cjs
+          node .github/scripts/validate-genesis-optical-r2326.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

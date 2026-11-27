@@ -580,9 +580,12 @@
     }
 
     makeIrisTexture(){
+      if(this.irisTexture)return this.irisTexture;
       const c=document.createElement('canvas');
-      c.width=c.height=256;
+      const size=this.studioHardware?512:256;
+      c.width=c.height=size;
       const x=c.getContext('2d');
+      x.scale(size/256,size/256);
       x.translate(128,128);
 
       const halo=x.createRadialGradient(0,0,14,0,0,118);
@@ -609,6 +612,19 @@
         x.stroke();
       }
 
+      // R2326: substructure in the optical coating at UHD sampling density.
+      if(this.studioHardware){
+        for(let i=0;i<112;i++){
+          const a=(i+.5)/112*Math.PI*2;
+          const inner=35+(i%7)*.4,outer=46+(i%11)*1.3;
+          x.strokeStyle='rgba(153,219,232,'+(.008+(i%5)*.004).toFixed(3)+')';
+          x.lineWidth=.25;
+          x.beginPath();
+          x.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);
+          x.lineTo(Math.cos(a+.012)*outer,Math.sin(a+.012)*outer);
+          x.stroke();
+        }
+      }
       x.globalCompositeOperation='source-over';
       const iris=x.createRadialGradient(0,0,12,0,0,63);
       iris.addColorStop(0,'rgba(0,3,8,1)');
@@ -623,6 +639,7 @@
 
       const tex=new this.THREE.CanvasTexture(c);
       tex.colorSpace=this.THREE.SRGBColorSpace;
+      this.irisTexture=tex;
       return tex;
     }
 
@@ -1118,8 +1135,8 @@
       // Turquoise cytoplasm, coral metabolic hot spots and micrograin
       // are generated deterministically once, never loaded as an image.
       const T=this.THREE;
-      const width=this.mobileRender?384:512;
-      const height=this.mobileRender?192:256;
+      const width=this.mobileRender?384:(this.studioHardware?1024:512);
+      const height=width/2;
       const pixels=new Uint8Array(width*height*4);
       const hash=(x,y)=>{
         let k=(Math.imul(x,374761393)+Math.imul(y,668265263))|0;
@@ -1147,16 +1164,17 @@
           const coral=clamp((coralCloud-.545)*5.1);
           const mineral=noise(u,v,116);
           const grain=(hash(x,y)-.5)*13;
+          const detail=this.studioHardware?(noise(u,v,192)-.5)*7:0;
           // R2201: microscopic clustered chromatin, not a uniform aqua blob.
         // A lower threshold produces many small coral organelle islands.
         const freckle=Math.pow(clamp((mineral-.62)*3.9),2);
           const index=(y*width+x)*4;
           pixels[index]=Math.round(clamp(
-            (20+72*cloud+202*coral+62*freckle+grain)/255)*255);
+            (20+72*cloud+202*coral+62*freckle+grain+detail)/255)*255);
           pixels[index+1]=Math.round(clamp(
-            (87+165*cloud-61*coral+24*freckle+grain)/255)*255);
+            (87+165*cloud-61*coral+24*freckle+grain+detail)/255)*255);
           pixels[index+2]=Math.round(clamp(
-            (95+169*cloud-82*coral+18*freckle+grain)/255)*255);
+            (95+169*cloud-82*coral+18*freckle+grain+detail)/255)*255);
           pixels[index+3]=255;
         }
       }
@@ -1166,7 +1184,7 @@
       texture.minFilter=T.LinearMipmapLinearFilter;
       texture.generateMipmaps=true;
       texture.colorSpace=T.SRGBColorSpace;
-      texture.anisotropy=Math.min(4,this.renderer.capabilities.getMaxAnisotropy());
+      texture.anisotropy=Math.min(this.studioHardware?8:4,this.renderer.capabilities.getMaxAnisotropy());
       texture.needsUpdate=true;
       return texture;
     }
@@ -1176,7 +1194,7 @@
       // not the old metallic diamond with an illuminated MAG eye.
       const T=this.THREE;
       this.coreGroup.children.forEach(part=>{part.visible=false;});
-      const geometry=new T.SphereGeometry(.98,this.mobileRender?28:42,this.mobileRender?20:30);
+      const geometry=new T.SphereGeometry(.98,this.mobileRender?28:(this.studioHardware?64:42),this.mobileRender?20:(this.studioHardware?48:30));
       const positions=geometry.attributes.position;
       for(let i=0;i<positions.count;i++){
         const x=positions.getX(i),y=positions.getY(i),z=positions.getZ(i);
@@ -3194,6 +3212,7 @@
         else m?.dispose?.();
       });
       this.embryoTexture?.dispose?.();
+      this.irisTexture?.dispose?.();
       this.microFiberTexture?.dispose?.();
       this.studioEnvironmentTexture?.dispose?.();
       this.studioEnvTarget?.dispose?.();
