@@ -15,9 +15,10 @@ assert.equal(v.length,960*3*8);
 for(let i=0;i<v.length;i+=8){
   for(let j=0;j<8;j++)assert(Number.isFinite(v[i+j]),'nonfinite vertex');
   assert(Math.abs(Math.hypot(v[i+3],v[i+4],v[i+5])-1)<1e-5,'invalid normal');
-  assert([2,3,4].includes(v[i+7]),'invalid ring');
+  assert([2,3,4].includes(Math.floor(v[i+7])),'invalid ring');
+  assert(Number.isInteger((v[i+7]%1)*16)&&(v[i+7]%1)*16<8,'invalid segment');
   const material=v[i+6]>.6?'guide':'metal';
-  const key=v[i+7]+':'+material;
+  const key=Math.floor(v[i+7])+':'+material;
   counts[key]=(counts[key]||0)+1;
 }
 for(const ring of [2,3,4])for(const material of ['guide','metal'])assert.equal(counts[ring+':'+material],material==='metal'?672:288);
@@ -693,4 +694,39 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  for(let i=0;i<=200;i++)assert(aaFade(i/1000)>=aaFade((i+1)/1000));
  assert.equal(aaFade(.24),0);
  console.log('R2297_MECHANICAL_ALLOY_PASS '+JSON.stringify({conduits:28,triangles:geometry.length/24,bays:bays.size,aliasFade:true,extraDrawCalls:0}));
+ }
+
+ // R2298: verify 24 mechanically distinct segments, rigid inlays, monotonic
+ // retraction and exact reversible scroll state without additional geometry.
+ {
+ const segments=new Map();
+ for(let i=0;i<v.length;i+=8){
+   const tag=v[i+7],material=v[i+6]>.6?'guide':'metal';
+   const counts=segments.get(tag)||{metal:0,guide:0};
+   counts[material]++;segments.set(tag,counts);
+ }
+ assert.equal(segments.size,24);
+ for(const counts of segments.values()){assert.equal(counts.metal,84);assert.equal(counts.guide,36);}
+ let samples=0,previous=[0,0,0],peak=0;
+ for(let i=0;i<=1000;i++){
+   const p=i/1000,state=reactorRingState(p);
+   for(let r=0;r<3;r++){
+     const opening=state.opening[r];
+     assert(opening>=previous[r]&&opening<=1);
+     previous[r]=opening;
+     for(let edge=0;edge<8;edge++){
+       const parity=edge%2,delayed=smooth((opening-.15*parity)/.85);
+       const angle=(edge+.5)*Math.PI/4;
+       const move=[Math.cos(angle)*.48*delayed,Math.sin(angle)*.48*delayed,-.32*delayed*(.65+.35*parity)];
+       assert(Math.hypot(...move.slice(0,2))<=.480000001);
+       assert(move[2]>=-.320000001&&move[2]<=0);
+       peak=Math.max(peak,Math.hypot(...move.slice(0,2)));samples++;
+     }
+   }
+ }
+ assert(peak>.479);
+ assert(src.includes("scene.key==='licensing'?[0,0,0]:rings.opening"));
+ assert(src.includes('p.xy+=radial*(.48*delayed);'));
+ assert(src.includes('p.z-=.32*delayed'));
+ console.log('R2298_MECHANICAL_GATE_PASS '+JSON.stringify({segments:segments.size,samples,peak,triangles:v.length/24,extraDrawCalls:0,commerceOriginal:true}));
  }

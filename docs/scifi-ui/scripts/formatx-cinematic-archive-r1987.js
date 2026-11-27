@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2297-mechanical-alloy';
+  const VERSION='cinematic-archive-r2298-mechanical-gate';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -769,13 +769,13 @@
         for(let i=0;i<housing.length;i+=8){
           const x=housing[i]+radius,y=housing[i+1];
           data.push(x*ca-y*sa,x*sa+y*ca,housing[i+2]+z,
-            housing[i+3]*ca-housing[i+4]*sa,housing[i+3]*sa+housing[i+4]*ca,housing[i+5],.25,2+ring);
+            housing[i+3]*ca-housing[i+4]*sa,housing[i+3]*sa+housing[i+4]*ca,housing[i+5],.25,2+ring+edge/16);
         }
         // Separate emissive inlay, above the entry face of the solid metal.
         for(let i=0;i<cube.length;i+=8){
           const x=cube[i]*.035+radius-.045,y=cube[i+1]*length*.88;
           data.push(x*ca-y*sa,x*sa+y*ca,cube[i+2]*.034+z+.13,
-            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],.85,2+ring);
+            cube[i+3]*ca-cube[i+4]*sa,cube[i+3]*sa+cube[i+4]*ca,cube[i+5],.85,2+ring+edge/16);
         }
       }
     }
@@ -793,15 +793,16 @@
   // Three ring transforms are invariant across each ring's vertices.
   // Compute them once per submitted gate, not thousands of times in GLSL.
   function reactorRingState(progress){
-    const scale=[],visibility=[],axisX=[],axisY=[];
+    const scale=[],visibility=[],axisX=[],axisY=[],opening=[];
     for(let ring=0;ring<3;ring++){
       const phase=clamp((progress-(2-ring)*.16)/.68);
       const angle=progress*6.2831853-ring*.76;
       scale.push(mix(.82,3.10,smooth(phase)));
       visibility.push(1-smooth((phase-.72)/.28));
       axisX.push(Math.cos(angle));axisY.push(Math.sin(angle));
+      opening.push(smooth((phase-.035)/.33));
     }
-    return {scale,visibility,axisX,axisY};
+    return {scale,visibility,axisX,axisY,opening};
   }
   // Mobile software GL needs a wider sampling window. Continue the
   // physical gate into the first part of the existing reading interval.
@@ -986,7 +987,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -1011,7 +1012,7 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera;
-uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY;
+uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY,uReactorOpening;
 uniform float uRotation,uTilt,uBend,uAspect,uMobile;
 out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;
 void main(){
@@ -1029,6 +1030,14 @@ void main(){
    vReactorLight=smoothstep(.15,.96,dot(normalize(aPosition.xy),axis));
    ringScale=uReactorRingScale[ring];
    p.xy*=ringScale;
+   // R2298: each machined segment and its guide are rigidly translated
+   // together. The fractional ring tag stores a constant edge identity.
+   float edge=floor(fract(aUv.y)*16.0+.5);
+   float angle=(edge+.5)*.7853981634;
+   vec2 radial=vec2(cos(angle),sin(angle));
+   float delayed=smoothstep(.15*mod(edge,2.0),.85+.15*mod(edge,2.0),uReactorOpening[ring]);
+   p.xy+=radial*(.48*delayed);
+   p.z-=.32*delayed*(.65+.35*mod(edge,2.0));
    vReactorVisibility=uReactorRingVisibility[ring];
  }
  // Planar geometry has no bend: avoid the trigonometric calculation.
@@ -1331,6 +1340,7 @@ void main(){
         gl.uniform3fv(this.uniform.uReactorRingVisibility,rings.visibility);
         gl.uniform3fv(this.uniform.uReactorAxisX,rings.axisX);
         gl.uniform3fv(this.uniform.uReactorAxisY,rings.axisY);
+        gl.uniform3fv(this.uniform.uReactorOpening,scene.key==='licensing'?[0,0,0]:rings.opening);
       }
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(false);gl.disable(gl.CULL_FACE);
@@ -1417,6 +1427,7 @@ void main(){
       setData(root,'fxArchiveReadingTravelR2266',travel.toFixed(3));
       setData(root,'fxArchivePassageFlightR2289',scene.key==='licensing'?'checkout-static':'reversible-dolly');
       setData(root,'fxArchiveGateOpticsR2291','view-dependent-chamfer-studio-reflection');
+      setData(root,'fxArchiveGateMechanicsR2298',ingress&&scene.key!=='licensing'?'24-rigid-retracting-segments':'clear');
       setData(root,'fxArchiveReactorSubmittedTrianglesR2279',String(lastRenderedGate?gateVertices/3:0));
       if(root.dataset.fxArchivePersistentRackCount!==String(rackCount))
         root.dataset.fxArchivePersistentRackCount=String(rackCount);
