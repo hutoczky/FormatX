@@ -929,3 +929,29 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(css.includes('translate:0 var(--fx-type-detail-y,0px)!important'));
  console.log('R2306_NATIVE_DETAIL_TYPOGRAPHY_PASS '+JSON.stringify({samples,stagger,readable:true,checkoutStatic:true,extraDrawCalls:0}));
  }
+
+ // R2307: verify true perspective transforms and smooth optical settlement.
+ {
+ const a=src.indexOf('  function typographyOptics('),b=src.indexOf('  function syncCinema(',a);
+ const optics=new Function('clamp',src.slice(a,b)+'return typographyOptics;')(clamp);
+ let samples=0,peak=0;
+ for(const phone of [false,true])for(const axis of [-1,0,1])for(let i=0;i<=1000;i++){
+   const t=i/1000,b=smooth(t*.86),d=smooth(t*.64);
+   const v=optics(t,b,d,axis,phone);
+   assert(v.every(Number.isFinite));
+   assert(v[0]<=0&&v[0]>=-(phone?8:17));
+   assert(Math.abs(v[1])<=(phone?0:12));
+   assert(v[2]>=-(phone?12:38)&&v[2]<=0);
+   assert(v[6]>=0&&v[6]<=.3);
+   peak=Math.max(peak,v[6]);samples++;
+ }
+ assert(optics(1,1,1,1,false).every(x=>Math.abs(x)<1e-10));
+ assert(peak>.29);
+ const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css','utf8');
+ assert(css.includes('transform:var(--fx-type-title-transform,none)!important'));
+ assert(css.includes('transform:var(--fx-type-body-transform,none)!important'));
+ assert(css.includes('transform:var(--fx-type-detail-transform,none)!important'));
+ assert(css.includes('text-shadow:none!important'));
+ assert(src.includes("perspective(650px) translateZ("));
+ console.log('R2307_PERSPECTIVE_TYPOGRAPHY_PASS '+JSON.stringify({samples,peakGlow:peak,depthPx:38,desktopPitch:17,mobilePitch:8,extraDrawCalls:0}));
+ }

@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2306-native-detail-handoff';
+  const VERSION='cinematic-archive-r2307-perspective-typography';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -436,6 +436,18 @@
     const reading=smooth((p-.58)/.12);
     return [Math.max(reading,smooth((t-.05)/.48)),Math.max(reading,smooth((t-.28)/.56)),Math.max(reading,smooth((t-.42)/.58))];
   }
+  // R2307: the native text has its own restrained, physical perspective
+  // inside the moving folio. No character splitting or extra animation clock.
+  function typographyOptics(title,body,detail,axis,phone){
+    const t=1-clamp(title),b=1-clamp(body),d=1-clamp(detail);
+    const side=clamp(axis,-1,1);
+    const signal=Math.sin(Math.PI*clamp(title))**2;
+    return [
+      -t*(phone?8:17),side*t*(phone?0:12),-t*(phone?12:38),
+      -b*(phone?4:8),-b*(phone?5:15),-d*(phone?3:6),
+      .30*signal
+    ];
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -520,6 +532,13 @@
            setMotionStyle(panel,'--fx-type-body-y',((1-bodyReveal)*(phone?8:16)).toFixed(2)+'px');
            setMotionStyle(panel,'--fx-type-detail-y',((1-detailReveal)*(phone?6:12)).toFixed(2)+'px');
            setMotionStyle(panel,'--fx-type-signal',titleReveal.toFixed(3));
+           const optics=typographyOptics(titleReveal,bodyReveal,detailReveal,sourceAxis,phone);
+           // Quantize the single active folio's transform strings. Existing
+           // setMotionStyle skips redundant values; no layout reads added.
+           setMotionStyle(panel,'--fx-type-title-transform','perspective(650px) translateZ('+optics[2].toFixed(1)+'px) rotateY('+optics[1].toFixed(2)+'deg) rotateX('+optics[0].toFixed(2)+'deg)');
+           setMotionStyle(panel,'--fx-type-body-transform','perspective(700px) translateZ('+optics[4].toFixed(1)+'px) rotateX('+optics[3].toFixed(2)+'deg)');
+           setMotionStyle(panel,'--fx-type-detail-transform','perspective(750px) rotateX('+optics[5].toFixed(2)+'deg)');
+           setMotionStyle(panel,'--fx-type-glow',optics[6].toFixed(3));
            setData(panel,'fxTypographyR2306',selected.key==='licensing'?'static':detailReveal>.999?'settled':'materializing');
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');

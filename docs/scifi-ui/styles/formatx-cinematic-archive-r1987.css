@@ -1438,3 +1438,34 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    translate:none!important;
  }
 }
+
+/* R2307 — the real, accessible text arrives from optical depth. These
+   transforms never apply to interactive descendants or to the checkout.
+   No masking, line splitting, filters, layout changes or persistent layers. */
+@media (prefers-reduced-motion:no-preference){
+ html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]
+ :is(h2,h3):not(:has(a,button,input,select,textarea,[tabindex],[contenteditable])){
+   transform:var(--fx-type-title-transform,none)!important;
+   transform-origin:0 50%;
+   text-shadow:0 0 16px rgba(110,220,255,var(--fx-type-glow,0)),0 0 5px rgba(195,239,255,var(--fx-type-glow,0));
+ }
+ html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]
+ :is(.section-heading > p,.section-heading > .eyebrow,p.lead):not(:has(a,button,input,select,textarea,[tabindex],[contenteditable])){
+   transform:var(--fx-type-body-transform,none)!important;
+   transform-origin:0 50%;
+ }
+ html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]
+ :is(article > p,.release-layout > div > p):not(.section-index):not(:has(a,button,input,select,textarea,[tabindex],[contenteditable])){
+   transform:var(--fx-type-detail-transform,none)!important;
+   transform-origin:0 50%;
+ }
+ html:root:root:root:root[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]:focus-within
+ :is(h2,h3,.section-heading > p,.section-heading > .eyebrow,p.lead,article > p,.release-layout > div > p){
+   transform:none!important;
+   text-shadow:none!important;
+ }
+}
