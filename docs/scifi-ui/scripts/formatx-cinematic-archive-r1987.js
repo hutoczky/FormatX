@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1128,6 +1128,33 @@
         opacity:alpha*(.18+.19*Math.sin(Math.PI*t)+.42*transmission[1]*(1-smooth(Math.abs(t-transmission[0])/.34)))};
     });
   }
+  // R2336: one immutable, closed optical conduit with smooth radial
+  // normals. Local Z is the segment axis; radius is one half unit.
+  function filamentTubeGeometry(sides=8){
+    const data=[];
+    const ring=(i,z,cap=0)=>{
+      const a=2*Math.PI*(i%sides)/sides,x=Math.cos(a),y=Math.sin(a);
+      return [x*.5,y*.5,z,cap?0:x,cap?0:y,cap,0,0];
+    };
+    const center=z=>[0,0,z,0,0,Math.sign(z),0,0];
+    for(let i=0;i<sides;i++){
+      const a=ring(i,-.5),b=ring(i+1,-.5),c=ring(i+1,.5),d=ring(i,.5);
+      data.push(...a,...b,...c,...a,...c,...d);
+      data.push(...center(-.5),...ring(i+1,-.5,-1),...ring(i,-.5,-1));
+      data.push(...center(.5),...ring(i,.5,1),...ring(i+1,.5,1));
+    }
+    return new Float32Array(data);
+  }
+  function filamentPose(prev,point,thickness){
+    const dx=point[0]-prev[0],dy=point[1]-prev[1],dz=point[2]-prev[2];
+    const dist=Math.hypot(dx,dy,dz);
+    // Tiny seam overlap, bounded by both diameter and segment length.
+    const overlap=Math.min(thickness*.60,dist*.10);
+    return {midpoint:prev.map((v,i)=>(v+point[i])*.5),
+      length:Math.max(dist+overlap,.012),
+      rotation:Math.atan2(dx,dz),tilt:-Math.atan2(dy,Math.hypot(dx,dz))};
+  }
+  function filamentStrandOffset(strand,strands){return (strand-(strands-1)*.5)*.073;}
   class MAGScene {
     constructor(gl){
       this.gl=gl;
@@ -1138,6 +1165,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.shadowPanel=this.buffer(panelGeometry(false,true));
+      this.filament=this.buffer(filamentTubeGeometry());
       this.uniform={};
       for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState','uTypeTransfer']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
@@ -1782,21 +1810,17 @@ void main(){
           };
           const samples=filamentSamples(from,to,side,segments,alpha,transmission);
           for(let strand=0;strand<strands;strand++){
-            const dy=(strand-1)*.073;
+            const dy=filamentStrandOffset(strand,strands);
             let prev=null;
             for(let k=0;k<=segments;k++){
               const sample=samples[k],t=sample.t;
               const point=[sample.x,
                 bezier(from[1]+dy,from[1]+dy+.27,to[1]+dy+.31,to[1]+dy,t),sample.z];
               if(prev){
-                const dx=point[0]-prev[0],dy3=point[1]-prev[1],dz=point[2]-prev[2];
-                const dist=Math.hypot(dx,dy3,dz);
-                 const tilt=-Math.atan2(dy3,Math.hypot(dx,dz));
-                const midpoint=[(point[0]+prev[0])*.5,(point[1]+prev[1])*.5,(point[2]+prev[2])*.5];
                 const thickness=.010+strand*.001;
-                // The box's long Z axis follows the filament path in XZ.
-                box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
-                  Math.max(dist,.012),hue,Math.atan2(dx,dz),sample.opacity,true,tilt);
+                const pose=filamentPose(prev,point,thickness);
+                this.mesh(this.filament,pose.midpoint,[thickness,thickness,pose.length],
+                  hue,pose.rotation,sample.opacity,0,cam,true,pose.tilt);
                 filamentCount++;
               }
               prev=point;
@@ -1809,6 +1833,7 @@ void main(){
         setData(root,'fxArchiveAssemblyR2309','1.000,1.000,0.000,0.000');
       }
       root.dataset.fxArchiveFilamentCount=String(filamentCount);
+      setData(root,'fxArchiveFilamentGeometryR2336',filamentCount?'radial-optical-conduits':'clear');
       gl.bindVertexArray(null);
       gl.depthMask(true);
       gl.disable(gl.BLEND);
@@ -1833,6 +1858,7 @@ void main(){
       const gl=this.gl;
       gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);gl.deleteBuffer(this.reactor.buffer);gl.deleteBuffer(this.room.buffer);
       gl.deleteBuffer(this.shadowPanel.buffer);
+      gl.deleteBuffer(this.filament.buffer);
       gl.deleteVertexArray(this.vao);gl.deleteProgram(this.program);
     }
   }
