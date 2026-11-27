@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2304-counterrotating-reactor';
+  const VERSION='cinematic-archive-r2305-typographic-handoff';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -424,6 +424,18 @@
     if(Math.abs(dy)>1)panel.style.setProperty('--fx-cinema-screen-y',(previousY+dy).toFixed(2)+'px');
   }
 
+  // R2305: type materializes in the same physical transit as the gate.
+  // Never clone, split or replace native words, links or form controls.
+  function typographyHandoff(scene,p,travel=0,limited=false){
+    if(scene.key==='licensing'||!scene.cinemaHost||!entryReactorHost)return [1,1];
+    const first=scene.cinemaHost===entryReactorHost;
+    const physical=first?entryTransitProgress(p,travel,limited):corridorTransitProgress(scene,p,travel,limited);
+    const start=first?.30:.30,end=first?.78:.64;
+    const t=clamp((physical-start)/(end-start));
+    // Reading/interaction must never wait for the GPU or a timer.
+    const reading=smooth((p-.58)/.12);
+    return [Math.max(reading,smooth((t-.05)/.48)),Math.max(reading,smooth((t-.28)/.56))];
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -500,6 +512,13 @@
           setMotionStyle(panel,'--fx-cinema-handoff-yaw',yaw.toFixed(3)+'deg');
           setMotionStyle(panel,'--fx-cinema-handoff-pitch',pitch.toFixed(3)+'deg');
           setMotionStyle(panel,'--fx-cinema-handoff-scale',scale.toFixed(4));
+           const [titleReveal,bodyReveal]=typographyHandoff(selected,p,current.travel,phone&&softwareMagRenderer());
+           setMotionStyle(panel,'--fx-type-title-opacity',(.66+.34*titleReveal).toFixed(3));
+           setMotionStyle(panel,'--fx-type-body-opacity',(.73+.27*bodyReveal).toFixed(3));
+           setMotionStyle(panel,'--fx-type-title-y',((1-titleReveal)*(phone?11:22)).toFixed(2)+'px');
+           setMotionStyle(panel,'--fx-type-body-y',((1-bodyReveal)*(phone?8:16)).toFixed(2)+'px');
+           setMotionStyle(panel,'--fx-type-signal',titleReveal.toFixed(3));
+           setData(panel,'fxTypographyR2305',selected.key==='licensing'?'static':bodyReveal>.999?'settled':'materializing');
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
           setData(root,'fxArchiveNativeHandoff','scroll-coupled-real-3d-paper');

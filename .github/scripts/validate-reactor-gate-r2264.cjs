@@ -902,3 +902,28 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('if(rotor)vReactorView=p-uOffset+uCamera;'));
  console.log('R2304_COUNTERROTATING_REACTOR_PASS '+JSON.stringify({samples,rotors:2,segments:16,triangles:geometry.length/24,extraDrawCalls:0}));
  }
+
+ // R2305: source text is native and safely readable during physical transit.
+ {
+ const a=src.indexOf('  function typographyHandoff('),b=src.indexOf('  function syncCinema(',a);
+ const reveal=new Function('clamp','smooth','entryReactorHost','entryTransitProgress','corridorTransitProgress',src.slice(a,b)+'return typographyHandoff;')(clamp,smooth,host,entryTransitProgress,corridorTransitProgress);
+ let samples=0,stagger=0;
+ for(const limited of [false,true])for(const scene of [{key:'systems',cinemaHost:host},{key:'diagnostics',cinemaHost:{}},{key:'licensing',cinemaHost:{}}]){
+   for(let i=0;i<=1000;i++){
+     const p=i/1000,[title,body]=reveal(scene,p,0,limited);
+     assert(title>=0&&title<=1&&body>=0&&body<=1);
+     assert(title+1e-10>=body);
+     if(title>body+.15)stagger++;
+     if(p>=.70||scene.key==='licensing')assert(title===1&&body===1);
+     samples++;
+   }
+ }
+ assert(stagger>0);
+ const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css','utf8');
+ assert(css.includes('data-fx-typography-r2305="materializing"'));
+ assert(css.includes(':focus-within'));
+ assert(css.includes('translate:0 var(--fx-type-title-y,0px)!important'));
+ assert(src.includes('(.66+.34*titleReveal)'));
+ assert(src.includes('(.73+.27*bodyReveal)'));
+ console.log('R2305_NATIVE_TYPOGRAPHY_PASS '+JSON.stringify({samples,stagger,readable:true,checkoutStatic:true,extraDrawCalls:0}));
+ }
