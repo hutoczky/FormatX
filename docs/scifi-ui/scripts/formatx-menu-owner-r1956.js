@@ -86,7 +86,8 @@ window.addEventListener('click',event=>{
   if(event.isTrusted===false)return;
   const target=event.target instanceof Element?event.target.closest('.fx-three-sound'):null;
   if(!(target instanceof HTMLButtonElement))return;
-  if(root.dataset.fxAudioOwner==='professional-v6')return;
+  // R2318: once WDA is installed, let its capture listener consume clicks.
+  if(root.dataset.fxAudioOwner==='professional-v6'||root.dataset.fxWdaHardening==='r263')return;
   event.preventDefault();
   event.stopImmediatePropagation();
   target.dataset.fxAudioState='pending';
@@ -96,10 +97,17 @@ window.addEventListener('click',event=>{
   let loader=document.querySelector('script[src*="formatx-wda-controls-r198.js"]');
   if(!(loader instanceof HTMLScriptElement)){
     loader=document.createElement('script');
-    loader.src='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20261007-r1963-early-sound-handoff';
+    loader.src='/scifi-ui/scripts/formatx-wda-controls-r198.js?v=20261007-r1963-early-sound-handoff-r2318';
     loader.async=true;
     loader.dataset.fxAwardRuntimeControlsR206='true';
     loader.dataset.fxWdaHardeningR198='true';
+    loader.addEventListener('error',()=>{
+      loader.remove();
+      if(root.dataset.fxWdaHardening==='r263'||root.dataset.fxAudioOwner==='professional-v6')return;
+      root.dataset.fxSoundEarlyOwnerR1963='load-failed';
+      root.dataset.fxAudioState='blocked';
+      if(target.isConnected)target.dataset.fxAudioState='blocked';
+    },{once:true});
     (document.head||document.documentElement).appendChild(loader);
   }
 },true);

@@ -256,7 +256,9 @@
     script.addEventListener('error', () => {
       loadingAudio = false;
       pendingToggleAfterLoad = false;
+      script.remove();
       root.dataset.fxWdaSound = 'engine-load-failed';
+      root.dataset.fxAudioState = 'blocked';
       const button = ensureButton();
       button.dataset.fxAudioState = 'blocked';
       sync(button);

@@ -231,3 +231,6 @@ interaction_scope=Only close an actually open MAG console on Escape; delayed fal
 
 archive_visibility_revision=20261127-r2317-archive-visibility
 archive_visibility_scope=Keep pending native archive renders and transit permits on offscreen hero intersection reports; retain offscreen idle cancellation outside archive. Live mobile corridor recovery requires browser proof.
+
+sound_handoff_revision=20261127-r2318-retry-owner
+sound_handoff_scope=Early capture releases subsequent trusted clicks to installed WDA owner; remove failed loader/engine script for user-initiated retry. Preserve muted default and no autoplay. Browser audio signal not yet verified.
