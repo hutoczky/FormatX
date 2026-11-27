@@ -580,7 +580,36 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  }
  assert(src.includes("if(scene.key!=='licensing'){"));
  assert(src.includes('gl.disable(gl.BLEND);gl.depthMask(true);'));
- assert(src.includes('this.mesh(this.room,[0,0,0],[1,1,1],hue,0,1,0,cam);'));
+ assert(src.includes('this.mesh(this.room,[0,0,roomZ],[1,1,1],hue,0,1,0,cam);'));
  assert(src.includes('gl.deleteBuffer(this.room.buffer)'));
  console.log('R2292_NATIVE_ROOM_PASS '+JSON.stringify({triangles:geometry.length/24,depthSpan:near-far,materialTags:tags.size,roomDrawCalls:1,commerceOriginal:true}));
+ }
+
+ // R2294: perspective travel must not flatten depth or affect commerce.
+ {
+ const a=src.indexOf('  function roomDolly('),b=src.indexOf('  function corridorRoomGeometry(',a);
+ const dolly=new Function('clamp',src.slice(a,b)+'return roomDolly;')(clamp);
+ let peak=0,mobilePeak=0,minDepth=1,samples=0;
+ for(const portrait of [false,true])for(let i=0;i<=1000;i++){
+   const p=i/1000,z=dolly({key:'systems'},p,portrait);
+   assert(z>=0&&z<=(portrait?1.12:2.05));
+   assert.equal(dolly({key:'licensing'},p,portrait),0);
+   if(p<=.315||p>=.78)assert(z<1e-10);
+   if(portrait)mobilePeak=Math.max(mobilePeak,z);else peak=Math.max(peak,z);
+   for(const cam of [-1.4,0,.4]){
+     const near=-1.6+z-cam,far=-13+z-cam;
+     const depth=v=>.56+.37*clamp((3-v)/18.5);
+     assert(depth(near)<depth(far));
+     assert(depth(near)>=.56&&depth(far)<=.93);
+     const projected=v=>3.3/Math.max(2.4,6.2-v);
+     assert(projected(near)>projected(far));
+     minDepth=Math.min(minDepth,depth(near));
+   }
+   samples++;
+ }
+ assert(peak>2&&mobilePeak>1.1);
+ assert(src.includes('vReactorView=room?aPosition:'));
+ assert(src.includes('float bay=fract((local.z+13.0)/1.88);'));
+ assert(src.includes('graphite+(bounce+metal)'));
+ console.log('R2294_CORRIDOR_PARALLAX_PASS '+JSON.stringify({samples,desktopPeak:peak,mobilePeak,minDepth,objectSpaceLighting:true,extraDrawCalls:0}));
  }

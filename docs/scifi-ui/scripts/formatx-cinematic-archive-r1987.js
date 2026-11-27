@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2293-native-depth-room-release';
+  const VERSION='cinematic-archive-r2294-corridor-parallax-lighting';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -917,6 +917,14 @@
   // Eight-sided interior, six deep bays, recessed plates and physical ribs.
   // Material tags use negative UV.y, disjoint from the gate and folio tags.
   // One immutable vertex buffer; no extra context or post-processing.
+  // R2294: independent depth excursion of the architectural environment.
+  // Native panels, MAG and checkout retain their existing framing.
+  // Equivalent to moving the camera along the room axis; no scaling trick.
+  function roomDolly(scene,p,portrait){
+    if(scene.key==='licensing')return 0;
+    const t=clamp((p-.315)/.465);
+    return (portrait?1.12:2.05)*Math.sin(Math.PI*t)**2;
+  }
   function corridorRoomGeometry(){
     const data=[],cube=cubeGeometry();
     const corners=[[-3.65,-1.62],[-2.65,-2.62],[2.65,-2.62],[3.65,-1.62],
@@ -1045,7 +1053,7 @@ void main(){
  p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+uOffset-uCamera;
  // The projection's eye sits at z=6.2 in this camera-relative space.
  // Capture the physical view ray before the portrait framing adjustment.
- vReactorView=reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0);
+ vReactorView=room?aPosition:(reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0));
  // Portrait atlas projection: make every physical shelf AND the flexible
  // panel visible in the mobile archive instead of clipping at the sides.
  if(uMobile>.5){
@@ -1060,7 +1068,7 @@ void main(){
  // long horizontal strips in FRONT of the original MAG on desktop and mobile.
  // Keep shelves behind the existing 3D core, while the retrieved sheet alone
  // can approach the audience. No renderer/canvas/geometry replacement.
- float opticalDepth=room?(.60+.33*clamp((-p.z-1.6)/12.5,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
+ float opticalDepth=room?(.56+.37*clamp((3.0-p.z)/18.5,0.0,1.0)):clamp(.33-.15*p.z,-.16,.86);
  gl_Position=vec4(p.x*3.3/max(0.6,uAspect),p.y*3.3,opticalDepth*d,d);
  vec3 n=vec3(localNormal.x,ct*localNormal.y-st*localNormal.z,st*localNormal.y+ct*localNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
@@ -1085,12 +1093,25 @@ void main(){
   // R2292: opaque architectural materials behind the canonical MAG.
   // Depth cues are from the physical vertices and view distance, not CSS.
   if(vUv.y<-.5){
+    // R2294: each physical bay has a pool of light and a contact-shadow
+    // envelope near its structural ribs. The lighting is object-space, not
+    // a screen overlay, so it remains attached to the architecture.
+    vec3 local=vReactorView;
+    float bay=fract((local.z+13.0)/1.88);
+    float seam=min(bay,1.0-bay);
+    float contact=mix(.52,1.0,smoothstep(.04,.25,seam));
+    float pool=1.0-smoothstep(.10,.49,abs(bay-.5));
     float distanceFog=smoothstep(7.5,19.5,vViewDistance);
     float key=.30+.70*max(0.0,dot(N,normalize(vec3(-.44,.68,.59))));
     float rib=step(.35,vUv.x);
-    vec3 graphite=mix(vec3(.045,.065,.090),vec3(.16,.23,.29),rib)*key;
-    vec3 tint=mix(graphite,graphite+uColor*.085,1.0-distanceFog);
-    vec3 lamp=uColor*(.55+.25*(1.0-distanceFog));
+    vec3 graphite=mix(vec3(.045,.065,.090),vec3(.16,.23,.29),rib)*key*contact;
+    vec3 bounce=uColor*(.045+.15*pool)*(.48+.52*abs(N.y));
+    // Broad reflection response on structural metal; no thin aliasing grids.
+    vec3 V=normalize(vec3(-local.xy,vViewDistance));
+    float grazing=1.0-abs(dot(N,V));
+    vec3 metal=vec3(.09,.13,.17)*rib*grazing*grazing;
+    vec3 tint=graphite+(bounce+metal)*(1.0-distanceFog*.75);
+    vec3 lamp=uColor*(.65+.30*(1.0-distanceFog));
     vec3 material=mix(tint,lamp,step(.70,vUv.x));
     outColor=vec4(mix(material,vec3(.013,.029,.045),distanceFog*.76),1.0);
     return;
@@ -1279,13 +1300,16 @@ void main(){
       // Keep commerce on its original rendering path, preserve MAG depth.
       if(scene.key!=='licensing'){
         gl.disable(gl.BLEND);gl.depthMask(true);
-        this.mesh(this.room,[0,0,0],[1,1,1],hue,0,1,0,cam);
+        const roomZ=roomDolly(scene,pro,mobile());
+        this.mesh(this.room,[0,0,roomZ],[1,1,1],hue,0,1,0,cam);
+        setData(root,'fxArchiveRoomDollyR2294',roomZ.toFixed(3));
         gl.depthMask(false);gl.enable(gl.BLEND);
         setData(root,'fxArchiveRoomR2292','six-bay-eight-sided-native-depth-shell');
         setData(root,'fxArchiveRoomTrianglesR2292',String(this.room.count/3));
       }else{
         setData(root,'fxArchiveRoomR2292','commerce-original');
         setData(root,'fxArchiveRoomTrianglesR2292','0');
+        setData(root,'fxArchiveRoomDollyR2294','0.000');
       }
       // One modest-depth contact penumbra connects drawer/shelf to archive.
       this.mesh(this.panel,[sx,sy-.74,-.72],[1.52,.37,1],[.06,.10,.14],
