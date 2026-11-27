@@ -31,9 +31,10 @@
 
   function setBilingual(element, hu, en) {
     if (!(element instanceof Element)) return;
-    element.dataset.hu = hu;
-    element.dataset.en = en;
-    element.textContent = language() === 'en' ? en : hu;
+    if (element.dataset.hu !== hu) element.dataset.hu = hu;
+    if (element.dataset.en !== en) element.dataset.en = en;
+    const next = language() === 'en' ? en : hu;
+    if (element.textContent !== next) element.textContent = next;
   }
 
   function setAll(selector, hu, en) {
@@ -42,7 +43,8 @@
 
   function setAria(element, hu, en) {
     if (!(element instanceof Element)) return;
-    element.setAttribute('aria-label', language() === 'en' ? en : hu);
+    const next = language() === 'en' ? en : hu;
+    if (element.getAttribute('aria-label') !== next) element.setAttribute('aria-label', next);
   }
 
   function createCopy(tag, className, hu, en) {
@@ -134,9 +136,9 @@
 
   function updateMeta() {
     const lang = language();
-    document.title = COPY.title[lang];
+    if (document.title !== COPY.title[lang]) document.title = COPY.title[lang];
     const description = document.querySelector('meta[name="description"]');
-    if (description) description.content = COPY.description[lang];
+    if (description && description.content !== COPY.description[lang]) description.content = COPY.description[lang];
     const ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription) {
       ogDescription.content = lang === 'en'
@@ -233,7 +235,7 @@
       setAll('[data-organism-open="' + id + '"] .fx-organism-chapter-title', copy.hu, copy.en);
       setAll('[data-organism-tab="' + id + '"]', copy.hu, copy.en);
       document.querySelectorAll('[data-organism-open="' + id + '"] .fx-organism-chapter-index')
-        .forEach(element => { element.textContent = language() === 'en' ? copy.indexEn : copy.indexHu; });
+        .forEach(element => { const next = language() === 'en' ? copy.indexEn : copy.indexHu; if (element.textContent !== next) element.textContent = next; });
     });
 
     setAll('[data-organism-open="pricing"] .fx-organism-chapter-summary',
@@ -270,11 +272,18 @@
     root.dataset.fxCopyPolish = 'ready-v1';
   }
 
-  document.addEventListener('DOMContentLoaded', applyCopy, { once: true });
-  addEventListener('formatx:languagechange', () => requestAnimationFrame(applyCopy));
-  addEventListener('formatx:organisminterfaceready', () => requestAnimationFrame(applyCopy));
-  addEventListener('formatx:organismpanelopen', () => requestAnimationFrame(applyCopy));
-  addEventListener('pageshow', applyCopy);
+  // R2298: one reconciliation per frame; unchanged copy never mutates DOM.
+  let copyFrame = 0;
+  function scheduleCopy() {
+    if (copyFrame) return;
+    copyFrame = requestAnimationFrame(() => { copyFrame = 0; applyCopy(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scheduleCopy, { once: true });
+  addEventListener('formatx:languagechange', scheduleCopy);
+  addEventListener('formatx:organisminterfaceready', scheduleCopy);
+  addEventListener('formatx:organismpanelopen', scheduleCopy);
+  addEventListener('pageshow', event => { if (event.persisted) scheduleCopy(); });
+  addEventListener('pagehide', () => { if (copyFrame) cancelAnimationFrame(copyFrame); copyFrame = 0; });
   document.addEventListener('click', event => {
     if (event.target instanceof Element && event.target.closest('[data-currency]')) {
       setTimeout(updateSecondaryPriceLabel, 0);

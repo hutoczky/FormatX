@@ -195,3 +195,6 @@ return_startup_scope=Avoid redundant synthetic resize and scrollend on ordinary 
 
 license_dom_revision=20261127-r2297-license-dom-coalescing
 license_dom_scope=Coalesce overlapping licence mutation roots, ignore irrelevant subtree additions, avoid redundant DOM writes and reconnect licence observation on BFCache restore. Preserve bilingual local licence URLs.
+
+copy_runtime_revision=20261127-r2298-idempotent-copy
+copy_runtime_scope=Avoid unchanged bilingual copy DOM writes and coalesce repeated copy reconciliation events. Preserve licence/payment text and BFCache refresh. Performance gain requires live measurement.
