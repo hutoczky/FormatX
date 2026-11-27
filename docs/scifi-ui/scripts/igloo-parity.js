@@ -231,7 +231,7 @@
     './scripts/single-language-toggle.js?v=20260729-single-language-2',
     './scripts/formatx-copy-polish.js?v=20260820-r248-footer-licence-r2298-idempotent-copy',
     './scripts/release-metadata.js?v=20260807-full-release-1',
-    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70',
+    './scripts/interaction-genome-export-stability.js?v=20260807-audio-slot-2-reference-r70-r2316',
     './scripts/platform-status.js?v=20260807-full-release-1',
     './scripts/formatx-license-links.js?v=20261127-r2297-license-dom-coalescing',
     './scripts/organism-console-state.js?v=20260729-console-state-1',

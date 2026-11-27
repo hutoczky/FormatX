@@ -18,7 +18,9 @@
   }
 
   function setImportant(element, property, value) {
-    if (element instanceof HTMLElement) {
+    if (element instanceof HTMLElement &&
+        (element.style.getPropertyValue(property) !== value ||
+         element.style.getPropertyPriority(property) !== 'important')) {
       element.style.setProperty(property, value, 'important');
     }
   }
@@ -226,7 +228,17 @@
     document.querySelector('[data-scene-link="0"]')?.setAttribute('aria-current', 'page');
   }
 
+  function hasOpenOrganism() {
+    const shell = document.getElementById('fx-organism-console');
+    return Boolean(shell && !shell.hidden && (
+      shell.classList.contains('is-authorised-open') ||
+      document.body?.classList.contains('fx-organism-panel-open')
+    ));
+  }
+
   function forceCloseOrganism() {
+    // Escape outside the open console must not change the active chapter.
+    if (!hasOpenOrganism()) return;
     const shell = document.getElementById('fx-organism-console');
     if (shell) {
       shell.hidden = true;
@@ -247,7 +259,7 @@
     root.dataset.fxOrganismState = 'core';
     root.classList.add('fx-organism-core-active');
     document.getElementById('hero')?.classList.add('is-core-active');
-    history.replaceState({}, '', location.pathname + location.search + '#hero');
+    history.replaceState(history.state, '', location.pathname + location.search + '#hero');
     schedulePublicState();
   }
 
@@ -404,7 +416,7 @@
   window.FormatXExportInteractionGenome = createExport;
   document.addEventListener('click', exportFromClick, true);
   addEventListener('keydown', event => {
-    if (event.key !== 'Escape') return;
+    if (event.key !== 'Escape' || event.repeat || !hasOpenOrganism()) return;
     requestAnimationFrame(forceCloseOrganism);
     setTimeout(forceCloseOrganism, 60);
   }, true);

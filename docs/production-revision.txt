@@ -225,3 +225,6 @@ living_bfcache_scope=Restore scene and deferred QR observation after repeated BF
 
 content_evidence_revision=20261127-r2315-idempotent-evidence
 content_evidence_scope=Populate new evidence section before attaching, avoid duplicated translation and unchanged evidence heading and telemetry writes. Preserve released content and verification links. No measured LCP gain claimed.
+
+interaction_revision=20261127-r2316-escape-scope
+interaction_scope=Only close an actually open MAG console on Escape; delayed fallback becomes a no-op after closure and preserves history state. Skip redundant important inline style writes. Refresh canonical runtime cache references.
