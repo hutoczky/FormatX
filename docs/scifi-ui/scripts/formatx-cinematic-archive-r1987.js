@@ -455,6 +455,8 @@
           const marker=panel.querySelector(':scope > .fx-mag-folio-origin-r2041');
           const english=root.lang==='en';
           const sourceName=(sourceNames[selected.source]||[selected.source,selected.source])[english?1:0];
+          const accessibleSource='FormatX MAG: '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;
+          if(panel.getAttribute('aria-label')!==accessibleSource)panel.setAttribute('aria-label',accessibleSource);
           const transfer=reactorHandoff(selected,current.progress);
           if(marker){
             const destination='MAG // '+String(selected.index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0')+' · '+sourceName;

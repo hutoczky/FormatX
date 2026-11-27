@@ -617,6 +617,19 @@ async function verifyNormalEntry(browser,isMobile){
   await page.waitForFunction(()=>{
     const root=document.documentElement;
     return root.dataset.fxArchiveExperience==='ready'
+      && root.dataset.fxArchiveCinema==='home';
+  },null,{timeout:65000});
+  const beforeIntent=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.fxArchiveCinema,
+    engagement:document.documentElement.dataset.fxArchiveEngagementR2220,
+    scene:document.documentElement.dataset.fxArchiveCurrent
+  }));
+  assert.equal(beforeIntent.mode,'home','Plain cold entry must not jump into the archive: '+JSON.stringify(beforeIntent));
+  assert.equal(beforeIntent.engagement,'awaiting-visitor','Cold entry must wait for genuine visitor intent: '+JSON.stringify(beforeIntent));
+  await page.mouse.wheel(0,isMobile?120:80);
+  await page.waitForFunction(()=>{
+    const root=document.documentElement;
+    return root.dataset.fxArchiveExperience==='ready'
       && root.dataset.fxArchiveCinema==='active';
   },null,{timeout:65000});
   const result=await page.evaluate(()=>{
@@ -635,6 +648,7 @@ async function verifyNormalEntry(browser,isMobile){
       legacyVisible:!!hero&&getComputedStyle(hero).display!=='none'
         &&getComputedStyle(hero).visibility!=='hidden'&&hero.getClientRects().length>0,
       originalMAG:!!canvas,
+      accessibleSource:folio?.getAttribute('aria-label')||'',
       nativeLinkCount:folio?.querySelectorAll('a[href],button').length||0,
       source:location.search
     };
@@ -642,6 +656,8 @@ async function verifyNormalEntry(browser,isMobile){
   assert.equal(result.mode,'active','Plain public URL must enter exclusive MAG archive: '+JSON.stringify(result));
   assert.ok(result.activeFolio&&!result.legacyVisible&&result.originalMAG,
     'Normal returning visitor must see the real MAG and ONE interactive original papyrus, not the old UI: '+JSON.stringify(result));
+  assert.ok(/^FormatX MAG: \d{2} \/ 08 · .+/.test(result.accessibleSource),
+    'Active native folio must expose its physical source to assistive technology: '+JSON.stringify(result));
   assert.equal(errors.length,0,'Uncaught normal-entry errors '+errors.join(' | '));
   console.log('ARCHIVE_NORMAL_ENTRY_PASS',JSON.stringify({mode:isMobile?'mobile':'desktop',...result}));
   if(isMobile){
