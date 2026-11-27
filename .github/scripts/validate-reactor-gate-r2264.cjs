@@ -955,3 +955,32 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes("perspective(650px) translateZ("));
  console.log('R2307_PERSPECTIVE_TYPOGRAPHY_PASS '+JSON.stringify({samples,peakGlow:peak,depthPx:38,desktopPitch:17,mobilePitch:8,extraDrawCalls:0}));
  }
+
+ // R2308: one photonic transfer envelope drives DOM and the actual GL sheet.
+ {
+ const a=src.indexOf('  function typographyTransfer('),b=src.indexOf('  function syncCinema(',a);
+ const transfer=new Function('clamp',src.slice(a,b)+'return typographyTransfer;')(clamp);
+ let peak=0,samples=0,previous=0;
+ for(let i=0;i<=2000;i++){
+   const t=i/2000;
+   const [position,pulse]=transfer(smooth(t/.55),smooth((t-.18)/.64),smooth((t-.35)/.65));
+   assert(position>=previous&&position<=1);
+   assert(pulse>=0&&pulse<=1);
+   for(let j=0;j<=6;j++){
+     const x=j/6,alpha=.18+.19*Math.sin(Math.PI*x)+.42*pulse*(1-smooth(Math.abs(x-position)/.34));
+     assert(alpha>=.18&&alpha<=.79);
+     samples++;
+   }
+   previous=position;peak=Math.max(peak,pulse);
+ }
+ assert(transfer(0,0,0).every(x=>x===0));
+ assert(transfer(1,1,1)[1]<1e-10);
+ assert(peak>.99);
+ assert(src.includes('typographyTransfer(...typographyHandoff(scene,pro,travel,limitedTransit))'));
+ assert(src.includes('gl.uniform2fv(this.uniform.uTypeTransfer,transmission)'));
+ assert(src.includes('abs(vUv.y-uTypeTransfer.x)'));
+ const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css','utf8');
+ assert(css.includes('--fx-type-transfer-position'));
+ assert(css.includes('--fx-type-transfer-intensity'));
+ console.log('R2308_PHOTONIC_TEXT_TRANSFER_PASS '+JSON.stringify({samples,peak,sharedEnvelope:true,extraDrawCalls:0}));
+ }

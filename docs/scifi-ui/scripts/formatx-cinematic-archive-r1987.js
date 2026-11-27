@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2307-perspective-typography';
+  const VERSION='cinematic-archive-r2308-photonic-text-transfer';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -448,6 +448,13 @@
       .30*signal
     ];
   }
+  // R2308: the native text, glass membrane and physical filament share
+  // one reversible data-delivery pulse. No independent clock or new mesh.
+  function typographyTransfer(title,body,detail){
+    const t=clamp(title),b=clamp(body),d=clamp(detail);
+    const progress=.42*t+.34*b+.24*d;
+    return [progress,Math.sin(Math.PI*progress)**2];
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -539,6 +546,12 @@
            setMotionStyle(panel,'--fx-type-body-transform','perspective(700px) translateZ('+optics[4].toFixed(1)+'px) rotateX('+optics[3].toFixed(2)+'deg)');
            setMotionStyle(panel,'--fx-type-detail-transform','perspective(750px) rotateX('+optics[5].toFixed(2)+'deg)');
            setMotionStyle(panel,'--fx-type-glow',optics[6].toFixed(3));
+           const transmission=typographyTransfer(titleReveal,bodyReveal,detailReveal);
+           const signalRGB=selected.color.map(x=>Math.round(clamp(x)*255)).join(',');
+           setMotionStyle(panel,'--fx-type-transfer-position',(transmission[0]*100).toFixed(2)+'%');
+           setMotionStyle(panel,'--fx-type-transfer-intensity',(transmission[1]*.72).toFixed(3));
+           setMotionStyle(panel,'--fx-type-transfer-rgb',signalRGB);
+           setData(panel,'fxTypeTransferR2308',transmission.map(x=>x.toFixed(3)).join(','));
            setData(panel,'fxTypographyR2306',selected.key==='licensing'?'static':detailReveal>.999?'settled':'materializing');
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
@@ -1086,7 +1099,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState','uTypeTransfer']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -1228,7 +1241,7 @@ void main(){
       const frag=`#version 300 es
 precision highp float;
 in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;
-uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy,uRoomCoreState;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
+uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy,uRoomCoreState,uTypeTransfer;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
 out vec4 outColor;
 // R2296: integrate finite illuminated fog volumes along the camera ray.
 // The intersection stops at the room surface; no screen-space overlay,
@@ -1390,6 +1403,13 @@ void main(){
    float guide=(1.0-smoothstep(.015,.015+railAA,rail))
              *smoothstep(.07,.13,vUv.x)*(1.0-smoothstep(.87,.93,vUv.x));
    col+=uColor*(rim*.31+guide*.060+micro*.037);
+   // A broad photonic front travels across the actual curved membrane.
+   // Only the retrieved sheet receives the nonzero transfer uniform.
+   if(uTypeTransfer.y>.001){
+     float front=1.0-smoothstep(.035,.22,abs(vUv.y-uTypeTransfer.x));
+     col+=mix(uColor,vec3(.70,.91,1.0),.40)*front*uTypeTransfer.y*(.14+.24*guide);
+     a+=front*uTypeTransfer.y*.06;
+   }
    col+=vec3(1.0,.98,.91)*spec*.11;
    a=mix(a,.91,rim);
    a+=fresnel*.045;
@@ -1500,6 +1520,7 @@ void main(){
       this.scalarCache.clear();this.scalarWrites=0;this.scalarSkips=0;
       // Camera is identical for every primitive in this scene frame.
       gl.uniform3fv(this.uniform.uCamera,cam);
+      gl.uniform2f(this.uniform.uTypeTransfer,0,0);
       const orientation=passageOrientation(scene,pro,mobile());
       gl.uniform3fv(this.uniform.uArchiveCameraAngles,orientation);
       const energyTrack=roomEnergyTrack(scene,pro,travel);
@@ -1667,7 +1688,11 @@ void main(){
         pro<.48?'retrieval':pro<.78?'delivery':pro<.88?'held':'archiving';
       let filamentCount=0;
       if(alpha>.001){
+        const transmission=typographyTransfer(...typographyHandoff(scene,pro,travel,limitedTransit));
+        gl.uniform2fv(this.uniform.uTypeTransfer,transmission);
         plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
+        gl.uniform2f(this.uniform.uTypeTransfer,0,0);
+        setData(root,'fxArchiveTypeTransferR2308',transmission.map(x=>x.toFixed(3)).join(','));
         // Every hardware tier keeps an actual 3D energy filament attached
         // to the SAME MAG. Low-end phones use 2 Bezier segments, not zero
         // filament geometry; higher tiers get subpixel-stable refinement.
@@ -1697,7 +1722,8 @@ void main(){
                 const thickness=.010+strand*.001;
                 // The box's long Z axis follows the filament path in XZ.
                 box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
-                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)),true,tilt);
+                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)
+                    +.42*transmission[1]*(1-smooth(Math.abs(t-transmission[0])/.34))),true,tilt);
                 filamentCount++;
               }
               prev=point;
@@ -1705,6 +1731,7 @@ void main(){
           }
         }
       }
+      if(!filamentCount)setData(root,'fxArchiveTypeTransferR2308','0.000,0.000');
       root.dataset.fxArchiveFilamentCount=String(filamentCount);
       gl.bindVertexArray(null);
       gl.depthMask(true);

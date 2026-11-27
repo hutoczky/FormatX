@@ -1469,3 +1469,27 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    text-shadow:none!important;
  }
 }
+
+/* R2308: the native source marker receives the same colored energy packet
+   as the existing 3D glass membrane. It is decorative, not a second text. */
+@media (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-typography-r2306="materializing"] > .fx-mag-folio-origin-r2041::after{
+   background:linear-gradient(90deg,transparent 0%,rgba(var(--fx-type-transfer-rgb,158,234,255),.20) 100%);
+   transform:none;
+   opacity:var(--fx-type-transfer-intensity,0);
+ }
+ html[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-typography-r2306="materializing"] > .fx-mag-folio-origin-r2041::before{
+   content:"";
+   display:block;
+   position:absolute;
+   inset:auto auto 0 var(--fx-type-transfer-position,0%);
+   width:clamp(12px,4vw,36px);
+   height:2px;
+   transform:translateX(-100%);
+   background:linear-gradient(90deg,transparent,rgb(var(--fx-type-transfer-rgb,158,234,255)));
+   opacity:var(--fx-type-transfer-intensity,0);
+   pointer-events:none;
+ }
+}
