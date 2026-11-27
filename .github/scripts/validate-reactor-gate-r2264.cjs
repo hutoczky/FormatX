@@ -837,3 +837,33 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(src.includes('recessed-faceted-energy-receiver'));
  console.log('R2302_REACTOR_CHAMBER_PASS '+JSON.stringify({triangles:geometry.length/24,addedTriangles:144,depth:18.4,coreFacets:16,extraDrawCalls:0}));
  }
+
+ // R2303: independently moving terminal core, corrected inward chamber
+ // normals and bounded charging. No idle animation or extra draw.
+ {
+ const a=src.indexOf('  function roomCoreState('),b=src.indexOf('  function corridorRoomGeometry(',a);
+ const state=new Function('clamp','smooth',src.slice(a,b)+'return roomCoreState;')(clamp,smooth);
+ let peak=0,rotation=0,samples=0;
+ for(let i=0;i<=2000;i++){
+   const t=i/2000,p=t<=.65?.315+.465*t/.65:.78,travel=t<=.65?0:(t-.65)/.35;
+   const [angle,charge]=state({key:'systems'},p,travel);
+   assert(angle>=0&&angle<=1.32&&charge>=0&&charge<=1);
+   assert(state({key:'licensing'},p,travel).every(x=>x===0));
+   const c=Math.cos(angle),s=Math.sin(angle),q=[.69,0,.73];
+   const r=[c*q[0]+s*q[2],q[1],-s*q[0]+c*q[2]];
+   assert(Math.abs(Math.hypot(...q)-Math.hypot(...r))<1e-10);
+   peak=Math.max(peak,charge);rotation=Math.max(rotation,angle);samples++;
+ }
+ assert(peak>.99&&rotation>.5);
+ assert(state({key:'systems'},0,0).every(x=>x===0));
+ assert(state({key:'systems'},.78,1).every(x=>Math.abs(x)<1e-10));
+ const geometry=new Function(src.slice(src.indexOf('  function cubeGeometry()'),src.indexOf('  function panelGeometry('))+'return corridorRoomGeometry;')()();
+ let walls=0;
+ for(let i=0;i<geometry.length;i+=8)if(Math.abs(geometry[i+6]-.61)<1e-5){
+   assert(geometry[i]*geometry[i+3]+geometry[i+1]*geometry[i+4]<0,'chamber normal must point inside');walls++;
+ }
+ assert.equal(walls,96);
+ assert(src.includes('gl.uniform2fv(this.uniform.uRoomCoreState,coreState);'));
+ assert(src.includes('if(core)vReactorView=p-uOffset+uCamera;'));
+ console.log('R2303_LIVING_REACTOR_PASS '+JSON.stringify({samples,peakCharge:peak,peakRotation:rotation,correctedWallNormals:walls,extraDrawCalls:0}));
+ }

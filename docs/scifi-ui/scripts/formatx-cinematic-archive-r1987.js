@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2302-reactor-chamber';
+  const VERSION='cinematic-archive-r2303-living-reactor';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -949,6 +949,14 @@
     const amplitude=smooth(t/.12)*(1-smooth((t-.86)/.14));
     return [mix(-.4,-12.7,t),amplitude];
   }
+  // R2303: arrival at the terminal reactor triggers a reversible mechanical
+  // charge cycle. No independent animation clock or idle frame requests.
+  function roomCoreState(scene,p,travel){
+    if(scene.key==='licensing')return [0,0];
+    const t=.65*clamp((p-.315)/.465)+.35*clamp(travel||0);
+    const charge=smooth((t-.48)/.34)*(1-smooth((t-.91)/.09));
+    return [1.32*charge*Math.sin(Math.PI*t),charge];
+  }
   function corridorRoomGeometry(){
     const data=[],cube=cubeGeometry();
     const corners=[[-3.65,-1.62],[-2.65,-2.62],[2.65,-2.62],[3.65,-1.62],
@@ -983,7 +991,7 @@
       const next=(edge+1)%8;
       for(let section=0;section<2;section++){
         const a=point(edge,section),b=point(next,section),c=point(next,section+1),d=point(edge,section+1);
-        quad(a,b,c,d,normal(a,b,c).map(x=>-x),.61);
+        quad(a,b,c,d,normal(a,b,c),.61);
       }
       for(const v of [[0,0,-18.4],point(edge,2),point(next,2)])data.push(...v,0,0,1,.12,-1);
       const angle=(edge+.5)*Math.PI/4,ca=Math.cos(angle),sa=Math.sin(angle);
@@ -1035,7 +1043,7 @@
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -1060,6 +1068,7 @@
 precision highp float;
 in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera,uArchiveCameraAngles;
+uniform vec2 uRoomCoreState;
 uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY,uReactorOpening;
 uniform float uRotation,uTilt,uBend,uAspect,uMobile;
 out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;
@@ -1077,6 +1086,16 @@ void main(){
  // The nearest frame passes first, followed by two independently timed frames.
  bool reactor=aUv.y>1.5;
  bool room=aUv.y<-.5;
+ bool core=room&&aUv.x>.90;
+ vec3 coreNormal=aNormal;
+ if(core){
+   // R2303: rotate the actual faceted mesh around its own center and
+   // apply a small uniform expansion. Normals follow the same rotation.
+   float c=cos(uRoomCoreState.x),s=sin(uRoomCoreState.x);
+   vec3 q=(p-vec3(0.0,0.0,-16.05))*(1.0+.12*uRoomCoreState.y);
+   p=vec3(c*q.x+s*q.z,q.y,-s*q.x+c*q.z)+vec3(0.0,0.0,-16.05);
+   coreNormal=vec3(c*aNormal.x+s*aNormal.z,aNormal.y,-s*aNormal.x+c*aNormal.z);
+ }
  vReactorVisibility=1.0;
  vReactorLight=0.0;
  float ringScale=1.0;
@@ -1108,7 +1127,7 @@ void main(){
  // previous lighting used the flat sheet normal after bending vertices.
  // Derivatives divide by physical mesh width/height, so reflections stay
  // stable through the eight different extraction and flattening paths.
- vec3 localNormal=aNormal;
+ vec3 localNormal=coreNormal;
  // Inverse transpose of the expanding gate's nonuniform world scale.
  // Bevels must not keep the unexpanded face normal as they fly past.
  if(reactor)localNormal=normalize(vec3(aNormal.xy/ringScale,aNormal.z));
@@ -1125,6 +1144,7 @@ void main(){
  // The projection's eye sits at z=6.2 in this camera-relative space.
  // Capture the physical view ray before the portrait framing adjustment.
  vReactorView=room?aPosition:(reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0));
+ if(core)vReactorView=p-uOffset+uCamera;
  // Rotate the room/gate geometry about the physical optical center.
  // World-space normals and light rays remain unrotated, so highlights
  // stay attached to the materials rather than moving with the camera.
@@ -1155,7 +1175,7 @@ void main(){
       const frag=`#version 300 es
 precision highp float;
 in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;
-uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
+uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy,uRoomCoreState;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
 out vec4 outColor;
 // R2296: integrate finite illuminated fog volumes along the camera ray.
 // The intersection stops at the room surface; no screen-space overlay,
@@ -1238,7 +1258,7 @@ void main(){
     }
     if(vUv.x>.90){
       float facet=.48+.52*abs(dot(N,normalize(vec3(.32,.68,.66))));
-      material=mix(uColor,vec3(.76,.92,1.0),.55)*facet;
+      material=mix(uColor,vec3(.76,.92,1.0),.55)*facet*(1.0+.52*uRoomCoreState.y);
     }
     // Beer-Lambert transmission through two finite, elongated light pools.
     // These are analytic single-scattering approximations, not a path tracer.
@@ -1253,7 +1273,9 @@ void main(){
     float path=roomVolumeLength(eye,ray,primaryCenter,vec3(1.45,.52,.65));
     if(uMobile<.5)path+=.80*roomVolumeLength(eye,ray,secondaryCenter,vec3(1.55,.50,.60));
     float scatter=1.0-exp(-.20*path);
-    vec3 surface=mix(material,vec3(.013,.029,.045),distanceFog*.76);
+    float fogMix=distanceFog*(vUv.x>.90?mix(.42,.18,uRoomCoreState.y):.76);
+    vec3 surface=mix(material,vec3(.013,.029,.045),fogMix);
+    surface=surface/(vec3(1.0)+max(vec3(0.0),surface-vec3(1.0)));
     vec3 fogLight=mix(vec3(.18,.29,.38),uColor,.42);
     vec3 activeLight=mix(uColor,vec3(.54,.79,.96),.55);
     fogLight=mix(fogLight,activeLight,energy*.52);
@@ -1422,6 +1444,9 @@ void main(){
       gl.uniform3fv(this.uniform.uArchiveCameraAngles,orientation);
       const energyTrack=roomEnergyTrack(scene,pro,travel);
       gl.uniform2fv(this.uniform.uRoomEnergy,energyTrack);
+      const coreState=roomCoreState(scene,pro,travel);
+      gl.uniform2fv(this.uniform.uRoomCoreState,coreState);
+      setData(root,'fxArchiveLivingReactorR2303',coreState.map(x=>x.toFixed(3)).join(','));
       setData(root,'fxArchiveEnergyR2300',energyTrack.map(x=>x.toFixed(3)).join(','));
       setData(root,'fxArchiveReactiveVolumeR2301',scene.key==='licensing'?'commerce-original':'energy-coupled-finite-scattering');
       setData(root,'fxArchiveCameraR2299',orientation.map(x=>x.toFixed(4)).join(','));
