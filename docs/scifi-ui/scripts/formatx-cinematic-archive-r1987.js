@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1105,13 +1105,28 @@
     }
     return new Float32Array(data);
   }
-  function panelGeometry(detail){
-    const u=detail?20:10,v=detail?16:9,data=[];
+  function panelGeometry(detail,flat=false){
+    // R2335: the analytical planar shadow only needs its four UV corners.
+    const u=flat?1:detail?20:10,v=flat?1:detail?16:9,data=[];
     for(let y=0;y<v;y++)for(let x=0;x<u;x++){
       const point=(xx,yy)=>{const px=xx/u,py=yy/v;return [(px-.5)*1.55,(py-.5)*1.06,0,0,0,1,px,py];};
       for(const p of [point(x,y),point(x+1,y),point(x+1,y+1),point(x,y),point(x+1,y+1),point(x,y+1)])data.push(...p);
     }
     return new Float32Array(data);
+  }
+  // R2335: strand offsets only affect Y. Share X/Z and the identical
+  // photonic envelope across all parallel strands, preserving draw order.
+  function filamentSamples(from,to,side,segments,alpha,transmission){
+    const bezier=(a,b,d,e,t)=>{
+      const q=1-t;
+      return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
+    };
+    return Array.from({length:segments+1},(_,k)=>{
+      const t=k/segments;
+      return {t,x:bezier(from[0],from[0]+side*.38,to[0]-side*.32,to[0],t),
+        z:bezier(from[2],from[2]+.33,to[2]-.39,to[2],t),
+        opacity:alpha*(.18+.19*Math.sin(Math.PI*t)+.42*transmission[1]*(1-smooth(Math.abs(t-transmission[0])/.34)))};
+    });
   }
   class MAGScene {
     constructor(gl){
@@ -1122,6 +1137,7 @@
       this.room=this.buffer(corridorRoomGeometry());
       this.panelDetail=quality==='high';
       this.panel=this.buffer(panelGeometry(this.panelDetail));
+      this.shadowPanel=this.buffer(panelGeometry(false,true));
       this.uniform={};
       for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState','uTypeTransfer']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
@@ -1635,7 +1651,7 @@ void main(){
         setData(root,'fxArchiveVolumeR2296','commerce-original');
       }
       // One modest-depth contact penumbra connects drawer/shelf to archive.
-      this.mesh(this.panel,[sx,sy-.74,-.72],[1.52,.37,1],[.06,.10,.14],
+      this.mesh(this.shadowPanel,[sx,sy-.74,-.72],[1.52,.37,1],[.06,.10,.14],
         0,.66,0,cam,false,0,true);
       // Shared deep archive architectural rails. Fixed in one world, not separate scene backgrounds.
       if(scene.key==='licensing')for(let k=-2;k<=2;k+=(quality==='low'?2:1)){
@@ -1764,16 +1780,14 @@ void main(){
             const q=1-t;
             return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
           };
+          const samples=filamentSamples(from,to,side,segments,alpha,transmission);
           for(let strand=0;strand<strands;strand++){
             const dy=(strand-1)*.073;
             let prev=null;
             for(let k=0;k<=segments;k++){
-              const t=k/segments;
-              const point=[
-                bezier(from[0],from[0]+(side*.38),to[0]-(side*.32),to[0],t),
-                bezier(from[1]+dy,from[1]+dy+.27,to[1]+dy+.31,to[1]+dy,t),
-                bezier(from[2],from[2]+.33,to[2]-.39,to[2],t)
-              ];
+              const sample=samples[k],t=sample.t;
+              const point=[sample.x,
+                bezier(from[1]+dy,from[1]+dy+.27,to[1]+dy+.31,to[1]+dy,t),sample.z];
               if(prev){
                 const dx=point[0]-prev[0],dy3=point[1]-prev[1],dz=point[2]-prev[2];
                 const dist=Math.hypot(dx,dy3,dz);
@@ -1782,8 +1796,7 @@ void main(){
                 const thickness=.010+strand*.001;
                 // The box's long Z axis follows the filament path in XZ.
                 box(midpoint[0],midpoint[1],midpoint[2],thickness,thickness,
-                  Math.max(dist,.012),hue,Math.atan2(dx,dz),alpha*(.18+.19*Math.sin(Math.PI*t)
-                    +.42*transmission[1]*(1-smooth(Math.abs(t-transmission[0])/.34))),true,tilt);
+                  Math.max(dist,.012),hue,Math.atan2(dx,dz),sample.opacity,true,tilt);
                 filamentCount++;
               }
               prev=point;
@@ -1819,6 +1832,7 @@ void main(){
     dispose(){
       const gl=this.gl;
       gl.deleteBuffer(this.box.buffer);gl.deleteBuffer(this.panel.buffer);gl.deleteBuffer(this.reactor.buffer);gl.deleteBuffer(this.room.buffer);
+      gl.deleteBuffer(this.shadowPanel.buffer);
       gl.deleteVertexArray(this.vao);gl.deleteProgram(this.program);
     }
   }

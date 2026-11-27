@@ -105,6 +105,7 @@ jobs:
           node .github/scripts/validate-reading-lane-r2332.cjs
           node .github/scripts/validate-active-folio-r2333.cjs
           node .github/scripts/validate-vector-uniforms-r2334.cjs
+          node .github/scripts/validate-planar-efficiency-r2335.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs
