@@ -2195,16 +2195,22 @@
       const archiveLive=root.dataset.fxArchiveDock==='active';
       return disposed||contextLost||document.hidden||(!visible&&!archiveLive)||paused||root.dataset.fxReferenceMotionPaused==='true';
     }
+    // R2291: preserve elapsed simulation time between consecutive rendered frames.
+    // Reset only after real idle, not after every render or high-refresh divisor.
+    function prepareFrameClock(){
+      const now=performance.now();
+      if(now-last>100){last=now;schedulerLastFrame=0;schedulerTick=0;}
+    }
     function queueFrame(delay=0){
       if(blocked()||raf||(softwareRenderer&&scrollSettleTimer&&!scrollTransitPermit))return;
       if(delay<=0){
         if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
-        last=performance.now();raf=requestAnimationFrame(frame);return;
+        prepareFrameClock();raf=requestAnimationFrame(frame);return;
       }
       if(surfaceFrameTimer)return;
       surfaceFrameTimer=later(()=>{
         surfaceFrameTimer=0;
-        if(!blocked()&&!raf){last=performance.now();raf=requestAnimationFrame(frame);}
+        if(!blocked()&&!raf){prepareFrameClock();raf=requestAnimationFrame(frame);}
       },delay);
     }
     function schedule(frames=1){
@@ -2912,7 +2918,7 @@
     // R2288: BFCache is a suspension, not a renderer destruction.
     function onPageShow(event){
       if(event.persisted){
-        schedulerLastFrame=0;schedulerTick=0;lastScrollTransit=-Infinity;
+        schedulerLastFrame=0;schedulerTick=0;lastScrollTransit=-Infinity;last=performance.now();
         root.dataset.fxMagLifecycleR2288='restored';
       }
       boost(.36,mobile?1:2);schedule(1);
@@ -2923,6 +2929,9 @@
       if(raf)cancelAnimationFrame(raf);
       if(scrollFrame)cancelAnimationFrame(scrollFrame);
       clearTimeout(scrollSettleTimer);
+      if(ambientPointerFrame)cancelAnimationFrame(ambientPointerFrame);
+      ambientPointerFrame=0;pendingAmbientPointer=null;
+      if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
       raf=scrollFrame=scrollSettleTimer=0;
       scrollTransitPermit=false;burstFrames=0;
       root.dataset.fxMagLifecycleR2288='suspended';

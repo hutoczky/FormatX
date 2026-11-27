@@ -28,7 +28,7 @@ validation=Run production source/CSP/build gates and real 1440x900 desktop GPU s
 production_verification=Both formatxsuite.com and www.formatxsuite.com must serve this exact revision marker and pass the live homepage cinematic and permanent MAG checks before this release can be called deployed.
 limits=Passing production and Chromium visual contracts does not demonstrate award-level photorealism or identical visual results on every Android GPU; true photographic comparison requires real device inspection.
 mag_geometry=R2153
-mag_cache=20261126-r2288
+mag_cache=20261127-r2291
 
 genesis=Standalone 9600 point DNA double helix to 3D luminous cell nucleus, Three.js GSAP EffectComposer UnrealBloomPass OrbitControls and opt-in Web Audio.
 genesis_route=/genesis/index.html; main hero and MAG archive provide direct launch, independent strict SHA256 content security policy; desktop and mobile live browser validation required.
@@ -174,3 +174,6 @@ motion_recovery_scope=Retry a failed MAG scheduler script once after 800ms; pres
 
 motion_intent_revision=20261127-r2290-retry-preserves-trusted-intent
 motion_intent_scope=Restore the original scheduler launch reason before retry execution, so runtime bootstrap can consume the trusted user intent; keep bounded retry and single renderer unchanged.
+
+frame_clock_revision=20261127-r2291-frame-clock
+frame_clock_scope=Keep elapsed simulation time across continuous RAF rendering; clear pending pointer and surface frames on BFCache suspension; maintain geometry, HTTP3 and prior bounded retry contracts. Actual device FPS requires measurement.
