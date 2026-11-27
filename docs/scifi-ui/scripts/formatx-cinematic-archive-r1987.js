@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1134,6 +1134,8 @@
       this.attributeSetups=0;
       this.drawCalls=0;
       this.scalarCache=new Map();
+      this.vectorCache=new Map();
+      this.vectorWrites=0;this.vectorSkips=0;
       this.scalarWrites=0;
       this.scalarSkips=0;
     }
@@ -1142,6 +1144,18 @@
       this.gl.uniform1f(this.uniform[name],value);
       this.scalarCache.set(name,value);
       this.scalarWrites++;
+    }
+    // R2334: exact component comparisons, not array identity. The cache
+    // owns copies, so a mutated caller array cannot hide a real update.
+    vector3(name,value){
+      const previous=this.vectorCache.get(name);
+      if(previous&&previous[0]===value[0]&&previous[1]===value[1]&&previous[2]===value[2]){
+        this.vectorSkips++;return;
+      }
+      this.gl.uniform3fv(this.uniform[name],value);
+      if(previous){previous[0]=value[0];previous[1]=value[1];previous[2]=value[2];}
+      else this.vectorCache.set(name,[value[0],value[1],value[2]]);
+      this.vectorWrites++;
     }
     programFor(gl){
       const vert=`#version 300 es
@@ -1522,7 +1536,7 @@ void main(){
         this.boundMesh=mesh;
         this.attributeSetups++;
       }
-      gl.uniform3fv(u.uOffset,pos);gl.uniform3fv(u.uScale,size);gl.uniform3fv(u.uColor,color);
+      this.vector3('uOffset',pos);this.vector3('uScale',size);this.vector3('uColor',color);
       this.scalar('uRotation',rot);this.scalar('uTilt',tilt);
       this.scalar('uOpacity',alpha);
       this.scalar('uFiber',fiber?1:0);this.scalar('uBend',bend);
@@ -1561,6 +1575,7 @@ void main(){
       // Shared renderer: never assume uniforms survived another pass/frame.
       // Within this pass only, identical scalar values need no driver call.
       this.scalarCache.clear();this.scalarWrites=0;this.scalarSkips=0;
+      this.vectorCache.clear();this.vectorWrites=0;this.vectorSkips=0;
       // Camera is identical for every primitive in this scene frame.
       gl.uniform3fv(this.uniform.uCamera,cam);
       gl.uniform2f(this.uniform.uTypeTransfer,0,0);
@@ -1789,6 +1804,8 @@ void main(){
       if(root.dataset.fxArchiveDrawCalls!==String(this.drawCalls))root.dataset.fxArchiveDrawCalls=String(this.drawCalls);
       if(root.dataset.fxArchiveScalarWritesR2239!==String(this.scalarWrites))root.dataset.fxArchiveScalarWritesR2239=String(this.scalarWrites);
       if(root.dataset.fxArchiveScalarSkipsR2239!==String(this.scalarSkips))root.dataset.fxArchiveScalarSkipsR2239=String(this.scalarSkips);
+      setData(root,'fxArchiveVectorWritesR2334',String(this.vectorWrites));
+      setData(root,'fxArchiveVectorSkipsR2334',String(this.vectorSkips));
       if(root.dataset.fxArchiveAttributeSwitchesR2228!==String(this.attributeSetups))
         root.dataset.fxArchiveAttributeSwitchesR2228=String(this.attributeSetups);
       if(root.dataset.fxArchiveDepthPolicyR2035!=='canonical-mag-front-deep-shelves-behind')
