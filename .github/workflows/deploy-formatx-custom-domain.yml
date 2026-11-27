@@ -77,6 +77,7 @@ jobs:
           node .github/scripts/validate-charset-r2293.cjs
           node .github/scripts/validate-layout-r2294.cjs
           node .github/scripts/validate-native-initial-scroll-r2295.cjs
+          node .github/scripts/validate-return-startup-r2296.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

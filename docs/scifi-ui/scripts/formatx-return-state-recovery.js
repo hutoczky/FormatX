@@ -158,14 +158,17 @@
   addEventListener('pageshow', event => {
     const restored = event.persisted || navigationType() === 'back_forward';
     if (restored) recoverRestoredDocument(event.persisted ? 'bfcache-return-recovered' : 'history-return-recovered');
-    else {
-      ensureSeamlessRuntime();
-      wakeScrollRuntime();
-    }
+    else ensureInitialRuntime();
   }, { passive: true });
 
-  addEventListener('load', () => {
+  // R2296: load and pageshow both fire during a normal visit. The loop
+  // already initializes itself; do not synthesize resize/scrollend twice.
+  // Recovery still wakes the runtime on actual history/BFCache restoration.
+  let initialRuntimeChecked = false;
+  function ensureInitialRuntime() {
+    if (initialRuntimeChecked) return;
+    initialRuntimeChecked = true;
     ensureSeamlessRuntime();
-    wakeScrollRuntime();
-  }, { once: true, passive: true });
+  }
+  addEventListener('load', ensureInitialRuntime, { once: true, passive: true });
 }());

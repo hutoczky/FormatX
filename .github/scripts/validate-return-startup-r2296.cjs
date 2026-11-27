@@ -1,0 +1,18 @@
+'use strict';
+const fs=require('node:fs');
+const vm=require('node:vm');
+const assert=require('node:assert/strict');
+const script=fs.readFileSync('docs/scifi-ui/scripts/formatx-return-state-recovery.js','utf8');
+const start=script.indexOf('  let initialRuntimeChecked = false;');
+assert.ok(start>0);
+const code=script.slice(start,script.lastIndexOf('}());'));
+let calls=0;
+const listeners={};
+const ctx=vm.createContext({ensureSeamlessRuntime:()=>{calls++;},addEventListener:(name,fn)=>{listeners[name]=fn;}});
+vm.runInContext(code+'\nensureInitialRuntime();',ctx);
+listeners.load();
+assert.equal(calls,1,'normal navigation checks runtime only once');
+assert.match(script,/if \(restored\) recoverRestoredDocument/);
+assert.match(script,/function recoverRestoredDocument\(reason\) \{[\s\S]*?wakeScrollRuntime\(\);/);
+assert.ok(fs.readFileSync('docs/scifi-ui/scripts/formatx-mobile-unified.js','utf8').includes('formatx-return-state-recovery.js?v=20261127-r2296-single-startup'));
+console.log('R2296 return-state startup contract: PASS');

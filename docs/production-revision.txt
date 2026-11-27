@@ -189,3 +189,6 @@ layout_scope=Keep desktop 76px header in flow; reserve mobile H1 typography in b
 
 scroll_start_revision=20261127-r2295-native-initial-scroll
 scroll_start_scope=Preserve native initial scroll, anchors and restoration instead of repeated forced hero scrolls; retain existing seamless loop landing geometry. New LCP/CLS measurements required.
+
+return_startup_revision=20261127-r2296-single-startup
+return_startup_scope=Avoid redundant synthetic resize and scrollend on ordinary navigation; retain actual history recovery and align mobile recovery cache validation.
