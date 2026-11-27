@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2308-photonic-text-transfer';
+  const VERSION='cinematic-archive-r2309-holographic-assembly';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -455,6 +455,15 @@
     const progress=.42*t+.34*b+.24*d;
     return [progress,Math.sin(Math.PI*progress)**2];
   }
+  // R2309: two-axis assembly of the original glass and native reading
+  // surface. Text stays in its native flow; the frame is noninteractive.
+  function holographicAssembly(scene,transmission,phone){
+    if(scene.key==='licensing')return [1,1,0,0];
+    const p=clamp(transmission[0]),pulse=clamp(transmission[1]);
+    const horizontal=smooth(p/.72),vertical=smooth((p-.14)/.78);
+    return [1-(phone?.08:.18)*(1-horizontal),
+      1-(phone?.06:.14)*(1-vertical),pulse,.24+.76*horizontal];
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -552,6 +561,10 @@
            setMotionStyle(panel,'--fx-type-transfer-intensity',(transmission[1]*.72).toFixed(3));
            setMotionStyle(panel,'--fx-type-transfer-rgb',signalRGB);
            setData(panel,'fxTypeTransferR2308',transmission.map(x=>x.toFixed(3)).join(','));
+           const assembly=holographicAssembly(selected,transmission,phone);
+           setMotionStyle(panel,'--fx-assembly-extent',(assembly[3]*100).toFixed(2)+'%');
+           setMotionStyle(panel,'--fx-assembly-light',(assembly[2]*.74).toFixed(3));
+           setData(panel,'fxHolographicAssemblyR2309',assembly.map(x=>x.toFixed(3)).join(','));
            setData(panel,'fxTypographyR2306',selected.key==='licensing'?'static':detailReveal>.999?'settled':'materializing');
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
@@ -1409,6 +1422,11 @@ void main(){
      float front=1.0-smoothstep(.035,.22,abs(vUv.y-uTypeTransfer.x));
      col+=mix(uColor,vec3(.70,.91,1.0),.40)*front*uTypeTransfer.y*(.14+.24*guide);
      a+=front*uTypeTransfer.y*.06;
+     // Eight broad, staggered cell bands assemble behind the optical front.
+     // A smooth threshold avoids noisy subpixel flicker and never masks text.
+     float band=floor(clamp(vUv.y,0.0,.9999)*8.0)/8.0;
+     float assembled=smoothstep(band-.08,band+.15,uTypeTransfer.x);
+     col+=uColor*assembled*uTypeTransfer.y*(.045+.085*rim);
    }
    col+=vec3(1.0,.98,.91)*spec*.11;
    a=mix(a,.91,rim);
@@ -1690,7 +1708,9 @@ void main(){
       if(alpha>.001){
         const transmission=typographyTransfer(...typographyHandoff(scene,pro,travel,limitedTransit));
         gl.uniform2fv(this.uniform.uTypeTransfer,transmission);
-        plate(x,y,z,.88+align*.40,.78+align*.42,hue,rotation,alpha,bend);
+        const assembly=holographicAssembly(scene,transmission,mobile());
+        plate(x,y,z,(.88+align*.40)*assembly[0],(.78+align*.42)*assembly[1],hue,rotation,alpha,bend);
+        setData(root,'fxArchiveAssemblyR2309',assembly.map(x=>x.toFixed(3)).join(','));
         gl.uniform2f(this.uniform.uTypeTransfer,0,0);
         setData(root,'fxArchiveTypeTransferR2308',transmission.map(x=>x.toFixed(3)).join(','));
         // Every hardware tier keeps an actual 3D energy filament attached
@@ -1731,7 +1751,10 @@ void main(){
           }
         }
       }
-      if(!filamentCount)setData(root,'fxArchiveTypeTransferR2308','0.000,0.000');
+      if(!filamentCount){
+        setData(root,'fxArchiveTypeTransferR2308','0.000,0.000');
+        setData(root,'fxArchiveAssemblyR2309','1.000,1.000,0.000,0.000');
+      }
       root.dataset.fxArchiveFilamentCount=String(filamentCount);
       gl.bindVertexArray(null);
       gl.depthMask(true);

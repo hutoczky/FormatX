@@ -984,3 +984,30 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  assert(css.includes('--fx-type-transfer-intensity'));
  console.log('R2308_PHOTONIC_TEXT_TRANSFER_PASS '+JSON.stringify({samples,peak,sharedEnvelope:true,extraDrawCalls:0}));
  }
+
+ // R2309: geometry assembly and native perimeter are driven by one packet.
+ {
+ const a=src.indexOf('  function holographicAssembly('),b=src.indexOf('  function syncCinema(',a);
+ const assembly=new Function('clamp','smooth',src.slice(a,b)+'return holographicAssembly;')(clamp,smooth);
+ let samples=0;
+ for(const phone of [false,true]){
+   let previous=[0,0,0,0];
+   for(let i=0;i<=2000;i++){
+     const p=i/2000,v=assembly({key:'systems'},[p,Math.sin(Math.PI*p)**2],phone);
+     assert(v.every(Number.isFinite));
+     assert(v[0]>=(phone?.92:.82)-1e-10&&v[0]<=1);
+     assert(v[1]>=(phone?.94:.86)-1e-10&&v[1]<=1);
+     assert(v[0]>=previous[0]&&v[1]>=previous[1]&&v[3]>=previous[3]);
+     assert(v[2]>=0&&v[2]<=1&&v[3]>=.24&&v[3]<=1);
+     assert(assembly({key:'licensing'},[p,v[2]],phone).every((x,j)=>x===[1,1,0,0][j]));
+     previous=v;samples++;
+   }
+   assert(Math.abs(previous[0]-1)<1e-10&&Math.abs(previous[1]-1)<1e-10);
+ }
+ assert(src.includes('(.88+align*.40)*assembly[0]'));
+ assert(src.includes('float assembled=smoothstep(band-.08,band+.15,uTypeTransfer.x);'));
+ const css=fs.readFileSync('docs/scifi-ui/styles/formatx-cinematic-archive-r1987.css','utf8');
+ assert(css.includes('--fx-assembly-extent'));
+ assert(css.includes('--fx-assembly-light'));
+ console.log('R2309_HOLOGRAPHIC_ASSEMBLY_PASS '+JSON.stringify({samples,desktopWidthFactor:.82,mobileWidthFactor:.92,checkoutStatic:true,extraDrawCalls:0}));
+ }

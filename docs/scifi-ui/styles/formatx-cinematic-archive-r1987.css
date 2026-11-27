@@ -1493,3 +1493,26 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    pointer-events:none;
  }
 }
+
+/* R2309: noninteractive optical perimeter, assembled with the same
+   transfer envelope as the actual WebGL membrane. Never cover the copy. */
+@media (prefers-reduced-motion:no-preference){
+ html[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]::after{
+   content:"";
+   position:absolute;
+   inset:6px;
+   border-radius:inherit;
+   background:
+     linear-gradient(90deg,rgba(var(--fx-type-transfer-rgb,158,234,255),.8),transparent) top left / var(--fx-assembly-extent,24%) 1px no-repeat,
+     linear-gradient(270deg,rgba(var(--fx-type-transfer-rgb,158,234,255),.8),transparent) bottom right / var(--fx-assembly-extent,24%) 1px no-repeat,
+     linear-gradient(180deg,rgba(var(--fx-type-transfer-rgb,158,234,255),.7),transparent) top right / 1px var(--fx-assembly-extent,24%) no-repeat,
+     linear-gradient(0deg,rgba(var(--fx-type-transfer-rgb,158,234,255),.7),transparent) bottom left / 1px var(--fx-assembly-extent,24%) no-repeat;
+   opacity:var(--fx-assembly-light,0);
+   pointer-events:none!important;
+ }
+ html[data-fx-archive-cinema="active"]
+ .fx-archive-cinema-folio-r2030[data-fx-typography-r2306="materializing"]:focus-within::after{
+   opacity:0!important;
+ }
+}
