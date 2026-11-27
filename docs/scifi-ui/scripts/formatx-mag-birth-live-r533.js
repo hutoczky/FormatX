@@ -583,7 +583,7 @@
   let threeWaitStartedAt = 0;
   let threeWaitTimer = 0;
   let threeOwnerRequested = false;
-  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema-r2323-light-budget-r2324-studio-uhd-r2326-optical-detail';
+  const THREE_OWNER_SRC = '/scifi-ui/scripts/formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema-r2323-light-budget-r2324-studio-uhd-r2326-optical-detail-r2327-display-cadence';
   let particles = [];
   let raf = 0;
   let schedulerLastFrame = 0;
@@ -1166,9 +1166,9 @@
     const phaseDrivenFallback=Boolean(filmRenderer)
       && softwareFallbackActive
       && !HAS_VISUAL_FRAME;
-    const particleCadence=filmRenderer
-      ? (softwareFallbackActive?125:16.67)
-      : 16.67;
+    // R2327: the display-divisor scheduler already selects presentation frames.
+    // A second 16.67 ms gate drops valid 60/72/82.5 Hz frames.
+    const particleCadence=softwareFallbackActive?125:0;
     const finalFrameDue=r>=1 && !finalParticleFrameDrawn;
     const shouldDraw=phaseDrivenFallback
       ? (lastSoftwareFallbackPhase!==visiblePhase || finalFrameDue)

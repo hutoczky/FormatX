@@ -50,7 +50,7 @@ const FIRST_PAINT_LINK = '<link rel="stylesheet" fetchpriority="high" media="(ma
 const P0_MOTION_SCHEDULER = '/scifi-ui/scripts/formatx-p0-motion-scheduler-r490.js?v=20261127-r2291-frame-clock-r2299-cadence-governor-r2300-divisor-r2289-recovery-r2290-intent-r2301-pointer-r2311-resize-r2317-archive-visibility-r2319-tail-r2320-quality-resize-r2322-pulse-owner-r2324-studio-uhd';
 const DEFERRED_CSS_SCRIPT = '<script defer data-fx-deferred-css-r487="true" src="/scifi-ui/scripts/formatx-deferred-css-r487.js?v=20261126-r2257-single-activation-task"></script>';
 const MOBILE_MEDIA = '(max-width: 900px), (pointer: coarse), (max-aspect-ratio: 27/25)';
-const INLINE_R2324_BOOT_HASH = "'sha256-1fVELiu75fzJHX2YBwiM244mB8V+du8CObJvpwj9+vo='";
+const INLINE_R2324_BOOT_HASH = "'sha256-+8mb+iuzlxodqAF1cUwm6G6DD5m+kiZd0S6v+slLr9A='";
 const META_CSP = `default-src 'self';base-uri 'self';object-src 'none';script-src 'self' ${INLINE_INTRO_BOOTSTRAP_HASH} ${INLINE_LANGUAGE_PREPAINT_HASH} ${INLINE_CANONICAL_BOOT_HASH} ${INLINE_LIVE_BOOT_HASH} ${INLINE_R2135_BOOT_HASH} ${INLINE_R2160_BOOT_HASH} ${INLINE_R2167_BOOT_HASH} ${INLINE_R2173_BOOT_HASH} ${INLINE_R2180_BOOT_HASH} ${INLINE_R2182_BOOT_HASH} ${INLINE_R2185_BOOT_HASH} ${INLINE_R2186_BOOT_HASH} ${INLINE_R2199_BOOT_HASH} ${INLINE_R2200_BOOT_HASH} ${INLINE_R2201_BOOT_HASH} ${INLINE_R2324_BOOT_HASH} https://static.cloudflareinsights.com;style-src 'self' 'sha256-7rBs0DG3JKiyRfhDmfxpOZ+oAz3c/ADQoufKFW6Kd68=' 'sha256-VW86NykZsAHaOvWIRKb5euZNHK82Dta9pYnmNwonxBI=' 'sha256-iEzO0JMZH1fjjdJ9M6IamlAN70cgQkpmArUAWddJZ9w=' 'sha256-jKb5tAno1JQlCqoVWCL+JDrpU1FmsG7LvZ6PtxCXzzQ=' 'sha256-i4rXIypZEo5lwtZBM/7cHuZWbUBvzLu9AQcDKOGb2U0=';img-src 'self' data: https://quickchart.io;connect-src 'self' https://api.github.com https://cloudflareinsights.com https://static.cloudflareinsights.com;form-action 'self'`;
 const HEADER_CSP = [
   "default-src 'self'",
@@ -235,7 +235,7 @@ const R502_ASSET_REWRITES = new Map([
   }],
   ['/scifi-ui/scripts/formatx-mag-birth-live-r533.js', {
     marker: 'intro-to-genesis-r1950c-studio-intro',
-    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema-r2323-light-budget-r2324-studio-uhd-r2326-optical-detail']],
+    rewrites: [[/formatx-mag-genesis-three-r1280\.js\?v=[^"']+/g, 'formatx-mag-genesis-three-r1280.js?v=20261026-r2201-coral-cell-cinema-r2323-light-budget-r2324-studio-uhd-r2326-optical-detail-r2327-display-cadence']],
   }],
   ['/scifi-ui/scripts/formatx-motion-runtime-loader-r239.js', {
     marker: 'loader-to-mag-shape-sync-r1723',

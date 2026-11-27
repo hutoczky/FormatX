@@ -2436,7 +2436,7 @@
     studioPixelRatio(w,h,dpr){
       const base=Math.min(dpr||1,this.mobileRender?1.15:2.0);
       if(!this.studioHardware)return base;
-      return Math.min(base,Math.sqrt(8294400/(w*h)),this.maxRenderSize/w,this.maxRenderSize/h);
+      return Math.min(base,Math.sqrt(8294400/(w*h)),this.maxRenderSize/w,this.maxRenderSize/h)*(this.studioScale??1);
     }
     resize(){
       if(this.disposed)return;
@@ -2457,6 +2457,36 @@
       const portrait=this.camera.aspect<1;
       this.camera.fov=portrait?51:42;
       this.camera.updateProjectionMatrix();
+    }
+
+    // R2327: retain full UHD when frame cadence allows it. Reduce only
+    // resolution under sustained pressure, never alter story or geometry.
+    updateStudioCadence(time){
+      if(!this.studioHardware||this.proofReadback||navigator.webdriver||document.hidden)return;
+      const previous=this.studioFrameTime;
+      this.studioFrameTime=time;
+      if(!Number.isFinite(previous))return;
+      const dt=time-previous;
+      if(dt<=0||dt>250){this.studioSlowFrames=0;this.studioFastFrames=0;return;}
+      this.studioSlowFrames=dt>22?(this.studioSlowFrames||0)+1:0;
+      this.studioFastFrames=dt<19?(this.studioFastFrames||0)+1:0;
+      const w=Math.max(1,this.width),h=Math.max(1,this.height);
+      const scale=this.studioScale??1;
+      const nativeRatio=this.studioPixelRatio(w,h,devicePixelRatio||1)/scale;
+      const floor=Math.min(1,Math.sqrt(2073600/(w*h*nativeRatio*nativeRatio)));
+      let next=scale;
+      if(this.studioSlowFrames>=4){
+        next=Math.max(floor,scale*.88);
+        this.studioSlowFrames=0;
+      }else if(this.studioFastFrames>=45){
+        next=Math.min(1,scale+.04);
+        this.studioFastFrames=0;
+      }
+      if(Math.abs(next-scale)>.005){
+        this.studioScale=next;
+        this.studioSlowFrames=0;this.studioFastFrames=0;
+        this.resize();
+      }
     }
 
     targetWorld(){
@@ -3019,6 +3049,7 @@
 
     render(r,time){
       if(this.disposed)return;
+      this.updateStudioCadence(time);
       const t=clamp(r)*10;
       this.updateCamera(t,time);
       this.updateCosmicAtmosphere(t,time);
