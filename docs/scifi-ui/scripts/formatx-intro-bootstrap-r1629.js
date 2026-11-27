@@ -33,7 +33,7 @@ function activateStyles(){
   }
 }
 
-const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261026-r2201-genesis-replay-cell';
+const RUNTIME_SRC='/scifi-ui/scripts/formatx-mag-birth-live-r533.js?v=20261026-r2201-genesis-replay-cell-r2323';
 let retryCount=0,retryTimer=0,startupTimer=0,abandoned=false;
 const STARTUP_LIMIT_MS=4500;
 const RETRY_LIMIT=3;

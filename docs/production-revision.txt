@@ -246,3 +246,6 @@ scroll_audit_scope=Run native scroll audit after successful production workflow,
 
 surface_pulse_revision=20261127-r2322-archive-pulse-owner
 surface_pulse_scope=End hero surface pulses without cancelling active archive transit permits, RAF or quality resize callbacks. Preserve original hero-only hard idle behavior and software scroll scheduling limits. Browser effect not yet verified.
+
+intro_light_revision=20261127-r2323-light-budget
+intro_light_scope=Remove unreachable zero-intensity duplicate scene point light from the actual R1280 GENESIS renderer, preserve active optic light and film geometry, skip identical resize events. Visual performance requires live browser evidence.

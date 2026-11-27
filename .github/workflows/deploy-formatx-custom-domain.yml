@@ -94,6 +94,7 @@ jobs:
           node .github/scripts/validate-transit-tail-r2319.cjs
           node .github/scripts/validate-quality-resize-r2320.cjs
           node .github/scripts/validate-archive-pulse-r2322.cjs
+          node .github/scripts/validate-genesis-light-r2323.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs

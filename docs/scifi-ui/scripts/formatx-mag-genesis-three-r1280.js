@@ -140,9 +140,9 @@
       this.coreLight=new T.PointLight(0x78e6e8,0,7.2,2);
       this.coreLight.position.set(0,0,2.0);
       this.scene.add(this.coreLight);
-      this.mechLight=new T.PointLight(0xcde7e4,0,7.6,2);
-      this.mechLight.position.set(-2.6,3.0,4.4);
-      this.scene.add(this.mechLight);
+      // R2323: the actual mechanical optic owns its point light in
+      // makeMechanicalLayer(). Do not leave an unused zero-intensity
+      // point light in the scene's per-fragment lighting list.
     }
 
     makeStudioEnvironment(){
@@ -2409,11 +2409,16 @@
 
     resize(){
       if(this.disposed)return;
-      this.width=Math.max(1,innerWidth);
-      this.height=Math.max(1,innerHeight);
+      const width=Math.max(1,innerWidth),height=Math.max(1,innerHeight);
       const dpr=Math.min(devicePixelRatio||1,this.mobileRender?1.15:2.0);
-      this.renderer.setPixelRatio(dpr);
-      this.renderer.setSize(this.width,this.height,false);
+      // The first resize is always applied; repeated events with the same
+      // logical dimensions and DPR must not reset the drawing buffer.
+      if(this.lastResizeDpr===dpr&&this.width===width&&this.height===height)return;
+      this.width=width;
+      this.height=height;
+      this.lastResizeDpr=dpr;
+      if(this.renderer.getPixelRatio()!==dpr)this.renderer.setPixelRatio(dpr);
+      this.renderer.setSize(width,height,false);
       this.camera.aspect=this.width/this.height;
       const portrait=this.camera.aspect<1;
       this.camera.fov=portrait?51:42;
