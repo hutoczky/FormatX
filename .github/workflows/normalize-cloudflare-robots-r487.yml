@@ -5,6 +5,10 @@ on:
     workflows: ['Prepare or deploy FormatX production']
     types: [completed]
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/normalize-cloudflare-robots-r487.yml'
 
 permissions:
   contents: read
@@ -18,21 +22,29 @@ jobs:
   normalize-robots:
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
       (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'master' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
        contains(github.event.workflow_run.head_commit.message, '[deploy-production]'))
     runs-on: ubuntu-latest
     timeout-minutes: 8
+    environment:
+      name: production
+      url: https://formatxsuite.com/
     env:
       AUDITED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
     steps:
       - name: Disable managed robots prepend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.FORMATX_CLOUDFLARE_ROBOTS_TOKEN || secrets.CLOUDFLARE_API_TOKEN || secrets.FORMATX_CLOUDFLARE_API_TOKEN || secrets.CLOUDFLARE_WORKERS_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
-            echo "Cloudflare API token is not configured for this workflow run."
-            echo "Skipping the optional mutation step; the next step still verifies the canonical live robots.txt."
+            echo "::warning title=Cloudflare credential missing::Set FORMATX_CLOUDFLARE_ROBOTS_TOKEN in the production GitHub environment (zone-scoped Zone Read and Bot Management Read/Write)."
+            echo "No authenticated mutation attempted. Public verification still runs."
             exit 0
           fi
 
@@ -50,21 +62,32 @@ jobs:
           python3 -c 'import json,sys; p=json.load(sys.stdin); assert p.get("success") is True, p; r=p.get("result") or {}; assert r.get("is_robots_txt_managed") is False, r; assert ("bot_preference_sync_enabled" not in r or r.get("bot_preference_sync_enabled") is False), r; assert ("cf_robots_variant" not in r or r.get("cf_robots_variant") == "off"), r; print("PASS: Cloudflare managed robots prepend disabled.")' <<<"$update"
 
       - name: Verify canonical live robots.txt
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
+          canonical() {
+            local body="$1"
+            ! grep -Eiq '^[[:space:]]*content-signal[[:space:]]*:' <<<"$body" &&
+              grep -Eiq '^[[:space:]]*user-agent:[[:space:]]*\*[[:space:]]*$' <<<"$body" &&
+              grep -Eiq '^[[:space:]]*disallow:[[:space:]]*/api/[[:space:]]*$' <<<"$body" &&
+              grep -Eiq '^[[:space:]]*disallow:[[:space:]]*/scifi-ui/payment/[[:space:]]*$' <<<"$body" &&
+              grep -Eiq '^[[:space:]]*sitemap:[[:space:]]*https://formatxsuite\.com/sitemap\.xml[[:space:]]*$' <<<"$body"
+          }
           for attempt in $(seq 1 12); do
-            body="$(curl -fsS -H 'Cache-Control: no-cache' "https://formatxsuite.com/robots.txt?r487=$GITHUB_RUN_ID-$attempt")"
-            if ! grep -Fq 'Content-Signal:' <<<"$body" \
-              && grep -Fq 'User-agent: *' <<<"$body" \
-              && grep -Fq 'Sitemap: https://formatxsuite.com/sitemap.xml' <<<"$body"; then
-              printf '%s\n' "$body"
-              echo 'PASS: canonical live robots.txt has no managed Content-Signal directive.'
-              exit 0
-            fi
+            ok=1
+            for host in formatxsuite.com www.formatxsuite.com; do
+              if body="$(curl -fsSL --proto '=https' --proto-redir '=https' --max-redirs 4 --max-time 15 -H 'Cache-Control: no-cache' "https://$host/robots.txt?r2341=$GITHUB_RUN_ID-$attempt")" && canonical "$body"; then
+                echo "PASS: $host canonical robots.txt"
+              else
+                echo "FAIL: $host still serves an unexpected robots policy or is unavailable."
+                ok=0
+              fi
+            done
+            if [ "$ok" = 1 ]; then exit 0; fi
             sleep 5
           done
-          echo 'Cloudflare still prepends Content-Signal after R487 normalization.' >&2
+          echo '::error title=Cloudflare robots policy unresolved::Both domains must serve canonical robots.txt without Content-Signal. Check Bot Preference Sync and the zone-scoped credential.'
           exit 1
 
       - name: Publish robots policy status
