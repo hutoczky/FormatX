@@ -177,3 +177,6 @@ motion_intent_scope=Restore the original scheduler launch reason before retry ex
 
 frame_clock_revision=20261127-r2291-frame-clock
 frame_clock_scope=Keep elapsed simulation time across continuous RAF rendering; clear pending pointer and surface frames on BFCache suspension; maintain geometry, HTTP3 and prior bounded retry contracts. Actual device FPS requires measurement.
+
+qa_revision=20261127-r2292-diagnostic-completeness
+qa_scope=Preserve strict Lighthouse gates; emit all three runs and failing audit diagnostics even on failure. Verify dormant R185 absence in production before isolated compatibility exercise; no legacy runtime restored on startup.

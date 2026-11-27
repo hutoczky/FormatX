@@ -71,12 +71,18 @@ jobs:
           async function inspect(page,label){
             page.setDefaultTimeout(120000);
             await page.goto(`${origin}/?verify=r325-${label}-${Date.now()}`,{waitUntil:'domcontentloaded',timeout:120000});
+            // The R461+ production bootstrap deliberately keeps legacy R185 dormant.
+            await page.waitForFunction(()=>[...document.querySelectorAll('#hero canvas')].some(c=>{const r=c.getBoundingClientRect();return r.width>40&&r.height>40;}),null,{timeout:90000,polling:250});
+            assert.equal(await page.evaluate(()=>Boolean(window.FormatXSignatureArchitecture)),false,'legacy runtime must stay dormant on normal visit');
+            assert.equal(await page.locator('.fx-signature-core-trigger,.fx-signature-architecture,.fx-signature-close').count(),0,'retired hit layer or ghost overlay must not exist');
+            // Isolated compatibility exercise, not a production bootstrap dependency.
+            await page.addScriptTag({url:origin+'/scifi-ui/scripts/formatx-signature-system-r185.js'});
             await page.waitForFunction(()=>{
               const d=document.documentElement.dataset;
               return d.fxSignatureSystem==='r325-inert-hidden-architecture'
                 && d.fxSignatureTrigger==='retired-r320-no-core-hitlayer'
                 && Boolean(window.FormatXSignatureArchitecture);
-            },null,{timeout:90000});
+            },null,{timeout:90000,polling:250});
             await page.waitForTimeout(500);
 
             const base=await page.evaluate(()=>{

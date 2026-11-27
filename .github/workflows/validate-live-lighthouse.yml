@@ -85,8 +85,11 @@ jobs:
           lhci collect --config="$LH_CONFIG" 2>&1 | tee "lighthouse-live-$profile-output.txt"
           mkdir -p "lighthouse-live-results/$profile"
           cp -a .lighthouseci/. "lighthouse-live-results/$profile/"
-          lhci assert --config="$LH_CONFIG" 2>&1 | tee -a "lighthouse-live-$profile-output.txt"
-          PROFILE="$profile" node .github/scripts/summarize-p0-lighthouse.cjs "lighthouse-live-results/$profile" | tee -a "lighthouse-live-$profile-output.txt"
+          assert_status=0
+          summary_status=0
+          lhci assert --config="$LH_CONFIG" 2>&1 | tee -a "lighthouse-live-$profile-output.txt" || assert_status=$?
+          PROFILE="$profile" node .github/scripts/summarize-p0-lighthouse.cjs "lighthouse-live-results/$profile" | tee -a "lighthouse-live-$profile-output.txt" || summary_status=$?
+          if (( assert_status != 0 || summary_status != 0 )); then exit 1; fi
 
       - name: Upload Lighthouse evidence
         if: always()
