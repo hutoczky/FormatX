@@ -878,7 +878,9 @@
       arrival:['RENDSZER AKTÍV','SYSTEM ONLINE'],
       handoff:['RENDSZERÁTVÉTEL','SYSTEM HANDOFF']
     };
-    return labels[phase]?'MAG // '+labels[phase][english?1:0]:destination;
+    if(!labels[phase])return destination;
+    const phaseLabel='MAG // '+labels[phase][english?1:0];
+    return destination.startsWith('MAG // ')?phaseLabel+' · '+destination.slice(7):phaseLabel;
   }
   function passageFlight(scene,p,portrait){
     const first=Boolean(entryReactorHost&&scene.cinemaHost===entryReactorHost);
