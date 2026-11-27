@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1140,7 +1140,7 @@ uniform vec3 uOffset,uScale,uCamera,uArchiveCameraAngles;
 uniform vec2 uRoomCoreState;
 uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY,uReactorOpening;
 uniform float uRotation,uTilt,uBend,uAspect,uMobile;
-out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;
+out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;out vec3 vMaterialPosition;
 vec3 archiveCameraRotate(vec3 v){
   float cy=cos(uArchiveCameraAngles.x),sy=sin(uArchiveCameraAngles.x);
   float cp=cos(uArchiveCameraAngles.y),sp=sin(uArchiveCameraAngles.y);
@@ -1250,10 +1250,11 @@ void main(){
  vec3 n=vec3(localNormal.x,ct*localNormal.y-st*localNormal.z,st*localNormal.y+ct*localNormal.z);
  vNormal=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);
  vUv=aUv;
+ vMaterialPosition=aPosition;
 }`;
       const frag=`#version 300 es
 precision highp float;
-in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;
+in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;in vec3 vMaterialPosition;
 uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy,uRoomCoreState,uTypeTransfer;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
 out vec4 outColor;
 // R2296: integrate finite illuminated fog volumes along the camera ray.
@@ -1410,10 +1411,10 @@ void main(){
    float rim=smoothstep(.972-edgeWidth,.972+edgeWidth,edge);
    float strand=abs(fract(vUv.x*68.0)-.5);
    float aa=max(fwidth(vUv.x*68.0)*.75,.028);
-   float micro=1.0-smoothstep(.012,.012+aa,strand);
+   float micro=(1.0-smoothstep(.012,.012+aa,strand))*(1.0-smoothstep(.12,.48,aa));
    float rail=abs(fract(vUv.y*13.0)-.5);
    float railAA=max(fwidth(vUv.y*13.0)*.6,.035);
-   float guide=(1.0-smoothstep(.015,.015+railAA,rail))
+   float guide=(1.0-smoothstep(.015,.015+railAA,rail))*(1.0-smoothstep(.12,.48,railAA))
              *smoothstep(.07,.13,vUv.x)*(1.0-smoothstep(.87,.93,vUv.x));
    col+=uColor*(rim*.31+guide*.060+micro*.037);
    // A broad photonic front travels across the actual curved membrane.
@@ -1467,6 +1468,19 @@ void main(){
     vec3 studio=(vec3(.24,.38,.48)*strip+vec3(.42,.27,.15)*fill)
       *(.32+.68*fresnel)*(.48+.52*distanceFade);
     titanium+=studio/(vec3(1.0)+studio);
+    // R2330: material-space satin finish on the physical gate bevel.
+    // The footprint suppresses machining detail before it becomes subpixel.
+    // No new geometry, render target, texture or screen-space overlay.
+    if(uMobile<.5){
+      float phase=dot(vMaterialPosition,vec3(43.0,61.0,17.0));
+      float detail=1.0-smoothstep(.55,2.4,fwidth(phase));
+      float satin=.5+.5*cos(phase);
+      float bevelSheen=(.25+.75*rimKey)*(.15+.50*strip+.35*fill);
+      titanium+=vec3(.11,.15,.17)*satin*detail*bevelSheen*.18;
+      // Second broad reflection shoulder separates the chamfer from the face.
+      float shoulder=pow(max(0.0,dot(N,normalize(vec3(.32,.54,.78)+V))),8.0);
+      titanium+=vec3(.12,.17,.19)*shoulder*(.32+.68*fresnel);
+    }
    vec3 emitter=uColor*(.56+.18*facing+.26*vReactorLight);
    col=mix(mix(titanium,vec3(.013,.029,.044),aerial),emitter,guide);
    a=mix(a*.96,a,guide)*vReactorVisibility;
