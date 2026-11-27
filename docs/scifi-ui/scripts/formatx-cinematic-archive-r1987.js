@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -51,6 +51,7 @@
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',entryReactorHost=null;
+  let lastSyncedCinemaHost=undefined;
   let aiCardHome=null; // the real sixth module, never a cloned/placeholder AI scene
 
   let cinemaControlHome=null,finalCtaHome=null,uniqueProofHome=null;
@@ -232,6 +233,7 @@
     delete root.dataset.fxArchiveAiOriginal;
   }
   function discover(){
+    lastSyncedCinemaHost=undefined;
     const previous=scenes.map(x=>x.node);
     const retained=new Map(scenes.map(s=>[s.key,s]));
     scenes=blueprint.map(def=>{
@@ -463,6 +465,12 @@
     return [1-(phone?.08:.18)*(1-horizontal),
       1-(phone?.06:.14)*(1-vertical),pulse,.24+.76*horizontal];
   }
+  // R2333: all original regions are synchronized on scene changes. During
+  // a continuous scrub only the active region needs optical updates.
+  function cinemaHostsForSync(hosts,previous,active){
+    if(previous!==active)return hosts;
+    return active?[active]:[];
+  }
   function syncCinema(){
     if(!cinemaPrepared)return;
     // Technical dialogs retain the same living MAG stage; only the native
@@ -476,7 +484,9 @@
     const selected=enabled?current.s:null;
     const key=selected?.key||'home';
     if(root.dataset.fxArchiveCinemaChapter!==key)root.dataset.fxArchiveCinemaChapter=key;
-    for(const host of cinemaHosts){
+    const activeHost=selected?.cinemaHost||null;
+    const hostsToSync=cinemaHostsForSync(cinemaHosts,lastSyncedCinemaHost,activeHost);
+    for(const host of hostsToSync){
       const active=Boolean(selected&&selected.cinemaHost===host);
       const hostState=active?'true':'false';
       if(host.dataset.fxCinemaHostActive!==hostState){
@@ -573,6 +583,7 @@
         }
       }
     }
+    lastSyncedCinemaHost=activeHost;
     if(enabled&&key!==lastCinemaKey){
       const panel=selected.cinemaPanel;
       if(panel)panel.scrollTop=0;
@@ -2122,6 +2133,7 @@ void main(){
     }
     restoreOriginalAI();
     cinemaHosts=[];cinemaPrepared=false;entryReactorHost=null;lastRenderedGate=false;
+    lastSyncedCinemaHost=undefined;
     delete root.dataset.fxArchiveReactorEntryR2261;
     delete root.dataset.fxArchiveReactorPhaseR2262;
     delete root.dataset.fxArchiveCorridorR2265;
@@ -2215,6 +2227,7 @@ void main(){
     }
     function onPageShow(event){
       if(event.persisted){
+        lastSyncedCinemaHost=undefined;
         lastGpu=0;
         root.dataset.fxArchiveLifecycleR2288='restored';
       }
