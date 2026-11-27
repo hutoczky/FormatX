@@ -43,6 +43,9 @@ function fixture(){
  assert.equal(f.root.dataset.fxP0MotionSchedulerR490,'retry-pending-r2289');
  assert.equal(f.timers.length,1);assert.equal(f.timers[0].delay,800);
  f.timers.shift().fn();assert.equal(f.scripts.length,1);assert.match(f.scripts[0].src,/&retry=1$/);
+ // Runtime executes synchronously before its script load event.
+ assert.equal(f.root.dataset.fxP0MotionSchedulerR490,'starting:user-pointerdown-r493');
+ assert.match(f.root.dataset.fxP0MotionSchedulerR490,/^(?:starting|loaded):user-(?:click|keydown|pointerdown|touchstart|wheel)-/);
  f.scripts[0].emit('load');assert.equal(f.clicks(),1);assert.equal(f.timers.length,0);
  assert.match(f.root.dataset.fxP0MotionSchedulerR490,/^loaded:/);
 }

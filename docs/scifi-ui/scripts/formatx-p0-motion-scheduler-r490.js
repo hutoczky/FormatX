@@ -82,6 +82,9 @@ function start(reason){
 // One bounded retry only; never race a second live runtime or renderer.
 function loadRuntime(reason,attempt){
   if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]'))return;
+  // Restore the trusted launch reason before the downloaded script executes.
+  // Its synchronous bootstrap consumes this latch before the load event.
+  root.dataset.fxP0MotionSchedulerR490=`starting:${reason}`;
   const script=document.createElement('script');
   script.src=attempt?`${SRC}&retry=1`:SRC;
   script.async=true;

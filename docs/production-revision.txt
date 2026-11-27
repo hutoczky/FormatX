@@ -171,3 +171,6 @@ transport_scope=Remove legacy Alt-Svc clear; Cloudflare owns HTTP/3 advertisemen
 
 motion_recovery_revision=20261127-r2289-bounded-network-retry
 motion_recovery_scope=Retry a failed MAG scheduler script once after 800ms; preserve static fallback, existing MAG geometry and loader cache identity; verify single-runtime ownership and no unbounded retries.
+
+motion_intent_revision=20261127-r2290-retry-preserves-trusted-intent
+motion_intent_scope=Restore the original scheduler launch reason before retry execution, so runtime bootstrap can consume the trusted user intent; keep bounded retry and single renderer unchanged.
