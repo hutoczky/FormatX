@@ -1494,11 +1494,12 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
  }
 }
 
-/* R2309: noninteractive optical perimeter, assembled with the same
-   transfer envelope as the actual WebGL membrane. Never cover the copy. */
+/* R2338: noninteractive optical perimeter, assembled with the same transfer
+   envelope as the actual WebGL membrane. The completed folio retains a
+   restrained studio rim and never covers the copy. */
 @media (prefers-reduced-motion:no-preference){
  html[data-fx-archive-experience="ready"][data-fx-archive-cinema="active"]
- .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"][data-fx-typography-r2306="materializing"]::after{
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]::after{
    content:"";
    position:absolute;
    inset:6px;
@@ -1512,7 +1513,7 @@ html[data-fx-archive-cinema="active"] .fx-archive-canonical-proof-r2033 a{
    pointer-events:none!important;
  }
  html[data-fx-archive-cinema="active"]
- .fx-archive-cinema-folio-r2030[data-fx-typography-r2306="materializing"]:focus-within::after{
+ .fx-archive-cinema-folio-r2030[data-fx-cinema-panel-active="true"]:focus-within::after{
    opacity:0!important;
  }
 }

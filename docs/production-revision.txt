@@ -252,3 +252,6 @@ intro_light_scope=Remove unreachable zero-intensity duplicate scene point light 
 
 studio_revision=20261127-r2324-studio-uhd
 studio_scope=Native desktop MAG UHD pixel ceiling 8294400, continuous clearcoat and titanium satin light response, defined GLSL signed-square math; canonical Three.js GENESIS native display UHD budget and hardware studio reflection environment 1024 pixels. Exact inline bootstrap CSP hash updated. Real GPU performance, shader compilation and visual acceptance remain subject to browser checks.
+
+archive_perimeter_revision=20261127-r2338-settled-perimeter
+archive_perimeter_scope=Retain a restrained settled studio rim after the MAG folio assembly completes so the intro-to-page object keeps one lighting character. Preserve licensing and payment states, geometry, camera, WebGL ownership and render cadence.

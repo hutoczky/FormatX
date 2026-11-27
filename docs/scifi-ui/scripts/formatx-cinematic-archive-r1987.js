@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy-r2338-settled-perimeter';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -453,17 +453,20 @@
     const progress=.42*t+.34*b+.24*d;
     return [progress,Math.sin(Math.PI*progress)**2];
   }
-  // R2309: two-axis assembly of the original glass and native reading
-  // surface. Text stays in its native flow; the frame is noninteractive.
+  // R2338: two-axis assembly of the original glass and native reading
+  // surface. Retain a restrained studio rim after the transfer pulse so the
+  // completed MAG keeps the same lighting character in the page state.
   function holographicAssembly(scene,transmission,phone){
-    if(scene.key==='licensing')return [1,1,0,0];
+    if(scene.key==='licensing')return [1,1,0,0,0];
     const p=clamp(transmission[0]),pulse=clamp(transmission[1]);
     // R2331: zero velocity AND acceleration at the two glass assembly
     // endpoints. Reverse scrolling follows the same deterministic path.
     const settle=value=>{const t=clamp(value);return t*t*t*(t*(t*6.0-15.0)+10.0);};
     const horizontal=settle(p/.72),vertical=settle((p-.14)/.78);
+    const settled=.14*horizontal*vertical;
     return [1-(phone?.08:.18)*(1-horizontal),
-      1-(phone?.06:.14)*(1-vertical),pulse,.24+.76*horizontal];
+      1-(phone?.06:.14)*(1-vertical),pulse,.24+.76*horizontal,
+      Math.max(.74*pulse,settled)];
   }
   // R2333: all original regions are synchronized on scene changes. During
   // a continuous scrub only the active region needs optical updates.
@@ -574,8 +577,8 @@
            setData(panel,'fxTypeTransferR2308',transmission.map(x=>x.toFixed(3)).join(','));
            const assembly=holographicAssembly(selected,transmission,phone);
            setMotionStyle(panel,'--fx-assembly-extent',(assembly[3]*100).toFixed(2)+'%');
-           setMotionStyle(panel,'--fx-assembly-light',(assembly[2]*.74).toFixed(3));
-           setData(panel,'fxHolographicAssemblyR2309',assembly.map(x=>x.toFixed(3)).join(','));
+           setMotionStyle(panel,'--fx-assembly-light',assembly[4].toFixed(3));
+           setData(panel,'fxHolographicAssemblyR2338',assembly.map(x=>x.toFixed(3)).join(','));
            setData(panel,'fxTypographyR2306',selected.key==='licensing'?'static':detailReveal>.999?'settled':'materializing');
           setData(panel,'fxCinemaSource',selected.source);
           setData(panel,'fxCinemaHandoff',paperArrival>.99?(paperExit>.02?'archiving':'presented'):'retrieving');
