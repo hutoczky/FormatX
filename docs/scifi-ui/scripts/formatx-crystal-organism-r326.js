@@ -2232,7 +2232,11 @@
       if(!softwareRenderer||!scrollSettleTimer){schedule(1);return;}
       // A permit is only outstanding while its RAF is actually queued.
       // An interrupted frame must not permanently suppress later transits.
-      if((scrollTransitPermit&&raf)||performance.now()-lastScrollTransit<240)return;
+      if(scrollTransitPermit&&raf)return;
+      // R2319: report the unexpired cooldown to the archive owner.
+      // It can coalesce a trailing frame instead of losing the last gate.
+      const remaining=240-(performance.now()-lastScrollTransit);
+      if(remaining>0)return Math.ceil(remaining);
       scrollTransitPermit=true;
       burstFrames=1;
       queueFrame(0);

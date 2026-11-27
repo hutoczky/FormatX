@@ -1947,8 +1947,15 @@ void main(){
     }
     lastGpu=now;
     const api=window.FormatXLivingCore;
-    if(transitNeedsFrame(current,lastRenderedGate,mobile()&&softwareMagRenderer())&&typeof api?.requestTransitRender==='function')api.requestTransitRender();
-    else api?.requestRender?.(1);
+    if(transitNeedsFrame(current,lastRenderedGate,mobile()&&softwareMagRenderer())&&typeof api?.requestTransitRender==='function'){
+      const retry=api.requestTransitRender();
+      // Only a positive cooldown is retryable. Paused/hidden/accepted
+      // requests never create a polling loop. Use the existing tail timer
+      // so newer scroll samples replace this request and pagehide cancels it.
+      if(Number.isFinite(retry)&&retry>0){
+        gpuTailTimer=setTimeout(()=>{gpuTailTimer=0;requestArchiveFrame();},Math.max(1,retry));
+      }
+    }else api?.requestRender?.(1);
   }
   function invalidate(){
     if(disposed)return;

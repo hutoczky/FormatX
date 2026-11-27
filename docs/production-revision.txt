@@ -234,3 +234,6 @@ archive_visibility_scope=Keep pending native archive renders and transit permits
 
 sound_handoff_revision=20261127-r2318-retry-owner
 sound_handoff_scope=Early capture releases subsequent trusted clicks to installed WDA owner; remove failed loader/engine script for user-initiated retry. Preserve muted default and no autoplay. Browser audio signal not yet verified.
+
+transit_tail_revision=20261127-r2319-cooldown-tail
+transit_tail_scope=Report native software transit cooldown and coalesce the denied latest gate request into the existing archive tail timer; preserve 240ms limit, blocked-state behavior and lifecycle cancellation. Live corridor recovery remains unverified.
