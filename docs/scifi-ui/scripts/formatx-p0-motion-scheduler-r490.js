@@ -75,8 +75,15 @@ function start(reason){
     root.dataset.fxP0MotionSchedulerR490='runtime-already-present';
     return;
   }
+  loadRuntime(reason,0);
+}
+
+// A transient transport failure must not permanently strand the static MAG.
+// One bounded retry only; never race a second live runtime or renderer.
+function loadRuntime(reason,attempt){
+  if(document.querySelector('script[src*="formatx-motion-runtime-loader-r239.js"]'))return;
   const script=document.createElement('script');
-  script.src=SRC;
+  script.src=attempt?`${SRC}&retry=1`:SRC;
   script.async=true;
   script.dataset.fxMotionRuntimeLoaderR239='true';
   script.dataset.fxP0PostPaintR490='true';
@@ -91,7 +98,19 @@ function start(reason){
       }
     }
   },{once:true});
-  script.addEventListener('error',()=>{root.dataset.fxP0MotionSchedulerR490='load-failed';},{once:true});
+  script.addEventListener('error',()=>{
+    script.remove();
+    if(attempt===0){
+      root.dataset.fxP0MotionSchedulerR490='retry-pending-r2289';
+      timer=setTimeout(()=>{
+        timer=0;
+        loadRuntime(reason,1);
+      },800);
+    }else{
+      root.dataset.fxP0MotionSchedulerR490='load-failed';
+      pendingCanonicalAsk=false;
+    }
+  },{once:true});
   document.head.appendChild(script);
 }
 

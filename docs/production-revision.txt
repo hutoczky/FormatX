@@ -168,3 +168,6 @@ r2202_desktop_proof_fix=Re-run the R2201 production cinematic with the corrected
 
 transport_revision=20261127-http3-edge-negotiation-r2288
 transport_scope=Remove legacy Alt-Svc clear; Cloudflare owns HTTP/3 advertisement. Align MAG cache marker with the actual R2288 scheduler and renderer loader without changing geometry.
+
+motion_recovery_revision=20261127-r2289-bounded-network-retry
+motion_recovery_scope=Retry a failed MAG scheduler script once after 800ms; preserve static fallback, existing MAG geometry and loader cache identity; verify single-runtime ownership and no unbounded retries.
