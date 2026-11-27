@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -1166,8 +1166,10 @@
       this.panel=this.buffer(panelGeometry(this.panelDetail));
       this.shadowPanel=this.buffer(panelGeometry(false,true));
       this.filament=this.buffer(filamentTubeGeometry());
+      this.filamentPositions=new Float32Array(18*4);
+      this.filamentTransforms=new Float32Array(18*4);
       this.uniform={};
-      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState','uTypeTransfer']){
+      for(const name of ['uOffset','uScale','uColor','uCamera','uRotation','uTilt','uBend','uOpacity','uPanel','uFiber','uAspect','uMobile','uShadow','uReactorRingScale','uReactorRingVisibility','uReactorAxisX','uReactorAxisY','uReactorOpening','uArchiveCameraAngles','uRoomEnergy','uRoomCoreState','uTypeTransfer','uInstanced','uFilamentPositions[0]','uFilamentTransforms[0]']){
         this.uniform[name]=gl.getUniformLocation(this.program,name);
       }
       this.vao=gl.createVertexArray();
@@ -1208,7 +1210,9 @@ in vec3 aPosition;in vec3 aNormal;in vec2 aUv;
 uniform vec3 uOffset,uScale,uCamera,uArchiveCameraAngles;
 uniform vec2 uRoomCoreState;
 uniform vec3 uReactorRingScale,uReactorRingVisibility,uReactorAxisX,uReactorAxisY,uReactorOpening;
-uniform float uRotation,uTilt,uBend,uAspect,uMobile;
+uniform float uRotation,uTilt,uBend,uAspect,uMobile,uInstanced;
+uniform vec4 uFilamentPositions[18],uFilamentTransforms[18];
+flat out float vInstanceOpacity;
 out vec3 vNormal;out vec2 vUv;out float vViewDistance;out float vReactorVisibility;out float vReactorLight;out vec3 vReactorView;out vec3 vMaterialPosition;
 vec3 archiveCameraRotate(vec3 v){
   float cy=cos(uArchiveCameraAngles.x),sy=sin(uArchiveCameraAngles.x);
@@ -1220,6 +1224,15 @@ vec3 archiveCameraRotate(vec3 v){
 }
 void main(){
  vec3 p=aPosition*uScale;
+ vec3 instanceOffset=uOffset;
+ float instanceRotation=uRotation,instanceTilt=uTilt;
+ vInstanceOpacity=1.0;
+ if(uInstanced>.5){
+   vec4 position=uFilamentPositions[gl_InstanceID],transform=uFilamentTransforms[gl_InstanceID];
+   p=aPosition*vec3(transform.x,transform.x,transform.y);
+   instanceOffset=position.xyz;instanceRotation=transform.z;instanceTilt=transform.w;
+   vInstanceOpacity=position.w;
+ }
  // R2262: UV.y above 1 is reserved for the three real reactor bulkheads.
  // The nearest frame passes first, followed by two independently timed frames.
  bool reactor=aUv.y>1.5;
@@ -1284,10 +1297,10 @@ void main(){
               /max(.001,1.06*uScale.y);
    localNormal=normalize(vec3(-dzdx,-dzdy,1.0));
  }
- float st=sin(uTilt),ct=cos(uTilt);
+ float st=sin(instanceTilt),ct=cos(instanceTilt);
  p=vec3(p.x,ct*p.y-st*p.z,st*p.y+ct*p.z);
- float s=sin(uRotation),c=cos(uRotation);
- p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+uOffset-uCamera;
+ float s=sin(instanceRotation),c=cos(instanceRotation);
+ p=vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z)+instanceOffset-uCamera;
  // The projection's eye sits at z=6.2 in this camera-relative space.
  // Capture the physical view ray before the portrait framing adjustment.
  vReactorView=room?aPosition:(reactor?vec3(0.0,0.0,6.2)-p:vec3(.10,-.07,1.0));
@@ -1325,6 +1338,7 @@ void main(){
 precision highp float;
 in vec3 vNormal;in vec2 vUv;in float vViewDistance;in float vReactorVisibility;in float vReactorLight;in vec3 vReactorView;in vec3 vMaterialPosition;
 uniform vec3 uColor,uCamera,uOffset;uniform vec2 uRoomEnergy,uRoomCoreState,uTypeTransfer;uniform float uOpacity,uPanel,uFiber,uShadow,uMobile;
+flat in float vInstanceOpacity;
 out vec4 outColor;
 // R2296: integrate finite illuminated fog volumes along the camera ray.
 // The intersection stops at the room surface; no screen-space overlay,
@@ -1554,7 +1568,7 @@ void main(){
    col=mix(mix(titanium,vec3(.013,.029,.044),aerial),emitter,guide);
    a=mix(a*.96,a,guide)*vReactorVisibility;
  }
- outColor=vec4(col,clamp(a,0.0,1.0));
+ outColor=vec4(col,clamp(a*vInstanceOpacity,0.0,1.0));
 }`;
       const shader=(type,source)=>{
         const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);
@@ -1569,7 +1583,7 @@ void main(){
       return p;
     }
     buffer(data){const gl=this.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return{buffer:b,count:data.length/8};}
-    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false,vertexCount=mesh.count){
+    mesh(mesh,pos,size,color,rot=0,alpha=1,bend=0,cam=[0,0,0],fiber=false,tilt=0,shadow=false,vertexCount=mesh.count,instances=0){
       const gl=this.gl,u=this.uniform;
       if(this.boundMesh!==mesh){
         gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);
@@ -1585,8 +1599,25 @@ void main(){
       this.scalar('uOpacity',alpha);
       this.scalar('uFiber',fiber?1:0);this.scalar('uBend',bend);
       this.scalar('uShadow',shadow?1:0);
-      gl.drawArrays(gl.TRIANGLES,0,vertexCount);
+      this.scalar('uInstanced',instances>0?1:0);
+      if(instances>0)gl.drawArraysInstanced(gl.TRIANGLES,0,vertexCount,instances);
+      else gl.drawArrays(gl.TRIANGLES,0,vertexCount);
       this.drawCalls++;
+    }
+    // R2337: one submission for up to 18 original closed optical segments.
+    // Instance order is the original strand/segment order; alpha is flat
+    // per instance, exactly like the previous uniform-controlled draw.
+    packFilament(index,pose,thickness,opacity){
+      const o=index*4,p=this.filamentPositions,t=this.filamentTransforms;
+      p[o]=pose.midpoint[0];p[o+1]=pose.midpoint[1];p[o+2]=pose.midpoint[2];p[o+3]=opacity;
+      t[o]=thickness;t[o+1]=pose.length;t[o+2]=pose.rotation;t[o+3]=pose.tilt;
+    }
+    drawFilaments(count,hue,cam){
+      if(!count)return;
+      const gl=this.gl;
+      gl.uniform4fv(this.uniform['uFilamentPositions[0]'],this.filamentPositions);
+      gl.uniform4fv(this.uniform['uFilamentTransforms[0]'],this.filamentTransforms);
+      this.mesh(this.filament,[0,0,0],[1,1,1],hue,0,1,0,cam,true,0,false,this.filament.count,count);
     }
     render(frame){
       if(!current||!archiveActive||document.hidden)return;
@@ -1809,6 +1840,7 @@ void main(){
             return q*q*q*a+3*q*q*t*b+3*q*t*t*d+t*t*t*e;
           };
           const samples=filamentSamples(from,to,side,segments,alpha,transmission);
+          const batched=typeof gl.drawArraysInstanced==='function'&&segments*strands<=18;
           for(let strand=0;strand<strands;strand++){
             const dy=filamentStrandOffset(strand,strands);
             let prev=null;
@@ -1819,16 +1851,20 @@ void main(){
               if(prev){
                 const thickness=.010+strand*.001;
                 const pose=filamentPose(prev,point,thickness);
-                this.mesh(this.filament,pose.midpoint,[thickness,thickness,pose.length],
+                if(batched)this.packFilament(filamentCount,pose,thickness,sample.opacity);
+                else this.mesh(this.filament,pose.midpoint,[thickness,thickness,pose.length],
                   hue,pose.rotation,sample.opacity,0,cam,true,pose.tilt);
                 filamentCount++;
               }
               prev=point;
             }
           }
+          if(batched)this.drawFilaments(filamentCount,hue,cam);
+          setData(root,'fxArchiveFilamentDrawsR2337',String(batched?1:filamentCount));
         }
       }
       if(!filamentCount){
+        setData(root,'fxArchiveFilamentDrawsR2337','0');
         setData(root,'fxArchiveTypeTransferR2308','0.000,0.000');
         setData(root,'fxArchiveAssemblyR2309','1.000,1.000,0.000,0.000');
       }
