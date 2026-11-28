@@ -258,3 +258,6 @@ archive_perimeter_scope=Retain a restrained settled studio rim after the MAG fol
 
 production_delivery_revision=20261128-r2347-copy-anchor-mobile-recovery
 production_delivery_scope=R2339 canonical critical CSS ordering, R2340 single reference bootstrap, R2341 dual-domain robots verification, R2342 canonical deferred core media, R2343 idempotent idle scroll geometry and R2344 per-release browser validation isolation. R2346 stable desktop copy anchor and R2347 canonical mobile CSS recovery are included. Each production push must change this marker before release convergence can be asserted. Live Lighthouse and hardware UHD frame cadence remain unverified.
+
+archive_transit_delivery_revision=20261128-r2348-transit-ack
+archive_transit_delivery_scope=Bounded software-rendered gate acknowledgement retry, lifecycle cancellation and explicit native-content fail-open on throwing scene pass. Live scroll and Lighthouse verification remain required.

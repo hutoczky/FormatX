@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy-r2338-settled-perimeter';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy-r2338-settled-perimeter-r2348-transit-ack';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
@@ -48,6 +48,7 @@
   let idleComposed=false,idleFastPathSkips=0;
   const reactorProof={entryFrames:0,corridorFrames:0,chapters:new Set(),peakAlpha:0};
   let lastRenderedGate=false;
+  let lastPaintedSelection=null,transitAckTimer=0;
   let sceneObserver=null,handoff=null,handoffKey='',paperNodes=[];
   let registeredCanvas=null,registeredApi=null;
   let cinemaHosts=[],cinemaPrepared=false,lastCinemaKey='',entryReactorHost=null;
@@ -1891,6 +1892,7 @@ void main(){
         root.dataset.fxArchiveNativePass='shared-webgl2';
        if(filamentCount>0)root.dataset.fxArchiveFilamentOrientation='full-3d-bezier-r2007';
       painted++;
+      lastPaintedSelection=current;
       PerformanceManager.observeSubmission(performance.now()-start);
     }
     dispose(){
@@ -2029,6 +2031,34 @@ void main(){
     if(current)setData(root,'fxArchivePhase',String(Math.min(9,Math.floor(current.progress*10))));
     return inArchive;
   }
+  // R2348: accepted scheduling is not proof of a painted gate. A software
+  // renderer can lose its queued frame while native scroll settles.
+  function samePaintedSelection(a,b){
+    return Boolean(a&&b&&a.s.key===b.s.key&&a.progress===b.progress&&a.travel===b.travel);
+  }
+  function cancelTransitAck(){
+    if(transitAckTimer)clearTimeout(transitAckTimer);
+    transitAckTimer=0;
+  }
+  function armTransitAck(){
+    cancelTransitAck();
+    if(!softwareMagRenderer()||!archiveActive||!current||
+       !transitNeedsFrame(current,lastRenderedGate,mobile()))return;
+    const requested=current;
+    let attempts=0;
+    const check=()=>{
+      transitAckTimer=0;
+      if(disposed||document.hidden||reduced.matches||!archiveActive||
+         root.dataset.fxReferenceMotionPaused==='true'||root.dataset.fxArchiveError||
+         !samePaintedSelection(requested,current)||samePaintedSelection(requested,lastPaintedSelection))return;
+      if(attempts>=2)return;
+      attempts++;
+      setData(root,'fxArchiveTransitAckR2348','retry-'+attempts);
+      requestArchiveFrame();
+      transitAckTimer=setTimeout(check,400);
+    };
+    transitAckTimer=setTimeout(check,400);
+  }
   function update(){
     raf=0;if(disposed||document.hidden||reduced.matches)return;
     updates++;
@@ -2048,6 +2078,7 @@ void main(){
       }
     }else{lastScene=-1;}
     requestArchiveFrame();
+    armTransitAck();
   }
   // A gate leaving the screen is as important as one appearing: software
   // scroll must not hold its last visible frame over the next reading beat.
@@ -2169,7 +2200,17 @@ void main(){
         // A lost WebGL renderer must never strand content inside 3D panels.
         queueMicrotask(()=>stop());
       },{once:true});
-      drawPass=frame=>nativeScene.render(frame);
+      drawPass=frame=>{
+        try{nativeScene.render(frame);}
+        catch(error){
+          setData(root,'fxArchiveError',String(error?.message||error));
+          cancelTransitAck();
+          // The core removes a throwing pass. Restore original native HTML
+          // instead of leaving a stale cinematic panel with no renderer.
+          queueMicrotask(()=>stop());
+          throw error;
+        }
+      };
       drawPass.dispose=()=>nativeScene.dispose();
       detach=api.registerScenePass(drawPass);
       registeredCanvas=api.canvas;
@@ -2195,6 +2236,7 @@ void main(){
     if(raf)cancelAnimationFrame(raf);
     if(domRaf)cancelAnimationFrame(domRaf);
     if(gpuTailTimer)clearTimeout(gpuTailTimer);
+    cancelTransitAck();lastPaintedSelection=null;
     raf=domRaf=gpuTailTimer=0;
     sceneObserver?.disconnect();
     sceneObserver=null;
@@ -2318,6 +2360,7 @@ void main(){
       if(raf)cancelAnimationFrame(raf);
       if(domRaf)cancelAnimationFrame(domRaf);
       if(gpuTailTimer)clearTimeout(gpuTailTimer);
+      cancelTransitAck();lastPaintedSelection=null;
       raf=domRaf=gpuTailTimer=0;
       root.dataset.fxArchiveLifecycleR2288='suspended';
     }
