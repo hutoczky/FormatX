@@ -5,14 +5,16 @@ const root=document.documentElement;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const stub=document.querySelector('link[data-fx-critical-reduced-r228]');
 const FULL_URL='./styles/formatx-critical-reduced-full-r298.css?v=20260822-r299-reduced-only';
-const MOBILE_FIRST_PAINT_URL='./styles/formatx-mobile-first-paint-r358.css?v=20260830-r455-csp-safe-geometry-seed';
+const MOBILE_FIRST_PAINT_URL='/scifi-ui/styles/formatx-mobile-first-paint-r358.css?v=20261127-r2294-mobile-title-first-paint-r2313-category';
 
 function seedMobileGeometry(){
   let firstPaint=document.querySelector('link[data-fx-mobile-first-paint-r358]');
   if(!(firstPaint instanceof HTMLLinkElement)){
     firstPaint=document.createElement('link');
     firstPaint.rel='stylesheet';
-    firstPaint.href=MOBILE_FIRST_PAINT_URL;
+    // R2347: reuse the parser's exact preloaded asset, including its cache key.
+    const preload=document.querySelector('link[rel="preload"][as="style"][href*="formatx-mobile-first-paint-r358.css"]');
+    firstPaint.href=preload?.href||MOBILE_FIRST_PAINT_URL;
     firstPaint.media='all';
     firstPaint.fetchPriority='high';
     firstPaint.dataset.fxMobileFirstPaintR358='true';
@@ -30,7 +32,17 @@ function seedMobileGeometry(){
     root.dataset.fxMobileFirstPaintR358='loading';
   }else{
     root.dataset.fxMobileFirstPaintR358=firstPaint.sheet?'ready':'loading';
-    root.dataset.fxMobileGeometrySeedR453='ready-external-css-csp-safe';
+    root.dataset.fxMobileGeometrySeedR453=firstPaint.sheet?'ready-external-css-csp-safe':'loading-external-css';
+    if(!firstPaint.sheet){
+      firstPaint.addEventListener('load',()=>{
+        root.dataset.fxMobileFirstPaintR358='ready';
+        root.dataset.fxMobileGeometrySeedR453='ready-external-css-csp-safe';
+      },{once:true});
+      firstPaint.addEventListener('error',()=>{
+        root.dataset.fxMobileFirstPaintR358='load-failed';
+        root.dataset.fxMobileGeometrySeedR453='external-css-load-failed';
+      },{once:true});
+    }
   }
 }
 
