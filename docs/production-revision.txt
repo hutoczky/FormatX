@@ -264,3 +264,6 @@ archive_transit_delivery_scope=Bounded software-rendered gate acknowledgement re
 
 archive_regression_revision=20261128-r2349-transit-lifecycle-proof
 archive_regression_scope=Exercise actual transit acknowledgement cancellation in the existing BFCache lifecycle regression, including two cycles, timer identity and painted selection reset. No production runtime or graphics changes from R2348.
+
+archive_cache_delivery_revision=20261128-r2350-delivery
+archive_cache_delivery_scope=Correct R2348 cache suffix on the actual native archive JavaScript script element, validate runtime version parity and Worker rewrite. No change to shaders, checkout, intro or quality gates. Live browser verification required.

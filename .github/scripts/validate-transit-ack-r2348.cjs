@@ -27,3 +27,18 @@ assert.ok(s.includes('cancelTransitAck();lastPaintedSelection=null;'));
 assert.ok(s.includes('queueMicrotask(()=>stop());'));
 assert.ok(fs.readFileSync('docs/production-revision.txt','utf8').includes('archive_transit_delivery_revision=20261128-r2348-transit-ack'));
 console.log('R2348 bounded transit acknowledgement, cancellation and renderer failure recovery: PASS');
+
+ // R2350: validate the actual script src, not a suffix anywhere in HTML.
+ const html=fs.readFileSync('docs/scifi-ui/index.html','utf8');
+ const workerSource=fs.readFileSync('billing-worker/src/production-content-entry.js','utf8');
+ const archiveTags=x=>[...x.matchAll(/<script\b[^>]*\bsrc="[^"]*formatx-cinematic-archive-r1987\.js\?v=([^"]+)"[^>]*>/g)];
+ const revision=s.match(/const VERSION='([^']+)'/)[1];
+ const required=revision.slice(revision.lastIndexOf('-r2348-')+1);
+ assert.equal(required,'r2348-transit-ack-r2350-delivery');
+ const verify=x=>{const tags=archiveTags(x);assert.equal(tags.length,1);assert.ok(tags[0][1].endsWith(required),'archive script cache key must match runtime');};
+ verify(html);
+ const begin=workerSource.indexOf('function cacheBustR502Runtime(html)'),end=workerSource.indexOf('function escapeAttribute',begin);
+ assert.ok(begin>=0&&end>begin);
+ const rewrite=new Function(workerSource.slice(begin,end)+'return cacheBustR502Runtime;')();
+ verify(rewrite(html));
+ console.log('R2350 exact archive script cache identity and Worker rewrite: PASS');

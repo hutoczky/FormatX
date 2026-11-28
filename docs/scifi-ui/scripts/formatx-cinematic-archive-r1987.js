@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const root=document.documentElement;
-  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy-r2338-settled-perimeter-r2348-transit-ack';
+  const VERSION='cinematic-archive-r2309-holographic-assembly-r2330-studio-transit-r2331-continuous-type-r2332-reading-lane-r2333-active-folio-r2334-uniform-cache-r2335-planar-efficiency-r2336-optical-conduits-r2337-instanced-energy-r2338-settled-perimeter-r2348-transit-ack-r2350-delivery';
   if(root.dataset.fxArchiveExperience) return;
   const params=new URLSearchParams(location.search);
   const audit=/Chrome-Lighthouse/i.test(navigator.userAgent||'')||params.get('lighthouse')==='1';
