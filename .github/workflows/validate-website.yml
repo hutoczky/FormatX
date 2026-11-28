@@ -55,9 +55,12 @@ permissions:
   contents: read
   statuses: write
 
+# R2344: release evidence belongs to the exact candidate SHA. Do not
+# cancel a release's browser matrix when another revision is pushed.
+# Ordinary development runs still supersede earlier development runs.
 concurrency:
-  group: formatx-canonical-content-${{ github.ref }}
-  cancel-in-progress: true
+  group: formatx-canonical-content-${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]') && github.sha || github.ref }}
+  cancel-in-progress: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-production]')) }}
 
 jobs:
   validate:
