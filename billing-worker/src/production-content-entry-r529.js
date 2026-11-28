@@ -151,7 +151,12 @@ export default {
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
     }
 
-    let html = restoreCriticalCoreFirstPaint(await response.text());
+    // R2342: canonical homepage owns first-paint/deferred media. Restoring
+    // this legacy critical-core link before paint on production only causes
+    // a different cascade and a blocking desktop CSS request. Preserve the
+    // validated source scheduler on all homepage aliases, for every visitor.
+    let html = await response.text();
+    if (!HOMEPAGE_PATHS.has(url.pathname)) html = restoreCriticalCoreFirstPaint(html);
     html = html.replace(DEFERRED_SCHEDULER_RE, DEFERRED_SCHEDULER_URL);
     html = html.replace(EVENT_HORIZON_RE, EVENT_HORIZON_URL);
     html = html.replace(DEFERRED_REDUCED_RE, DEFERRED_REDUCED_URL);
