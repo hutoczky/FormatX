@@ -2798,7 +2798,20 @@
       if(raf&&!scrollTransitPermit){cancelAnimationFrame(raf);raf=0;}
       burstFrames=Math.min(1,burstFrames);
       clearTimeout(scrollSettleTimer);
-      scrollSettleTimer=setTimeout(()=>{scrollSettleTimer=0;scrollTransitPermit=false;schedule(1);},180);
+      scrollSettleTimer=setTimeout(()=>{
+        scrollSettleTimer=0;scrollTransitPermit=false;
+        // R2352: the software scroll owner must deliver its final frame,
+        // even if an earlier RAF request was stranded by compositor work.
+        // This is a one-shot after quiet input, never a polling render loop.
+        if(root.dataset.fxArchiveDock==='active'&&!blocked()){
+          if(raf){cancelAnimationFrame(raf);raf=0;}
+          if(surfaceFrameTimer){clearTimeout(surfaceFrameTimer);delayed.delete(surfaceFrameTimer);surfaceFrameTimer=0;}
+          burstFrames=1;
+          prepareFrameClock();
+          root.dataset.fxCoreArchiveSettleR2352='submitted';
+          frame(performance.now());
+        }else schedule(1);
+      },180);
     }
     function onScroll(){
       holdSoftwareScroll();
@@ -3128,6 +3141,12 @@
       rotateBy:(x,y,source)=>rotateBy(Number(x)||0,Number(y)||0,source||'api-rotate'),
       requestRender:schedule,
       requestTransitRender,
+      // Read-only diagnostic snapshot; querying it never schedules a frame.
+      get renderState(){return {blocked:blocked(),paused,visible,contextLost,disposed,
+        archiveLive:root.dataset.fxArchiveDock==='active',rafPending:Boolean(raf),
+        scrollSettling:Boolean(scrollSettleTimer),transitPermit:scrollTransitPermit,
+        burstFrames,scenePasses:scenePasses.size,lastScrollTransit:Number.isFinite(lastScrollTransit)?lastScrollTransit:null,
+        settle:root.dataset.fxCoreArchiveSettleR2352||null};},
       registerScenePass:(pass)=>{
         if(!webgl2||typeof pass!=='function'||disposed)return()=>{};
         scenePasses.add(pass);schedule(1);

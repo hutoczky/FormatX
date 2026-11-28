@@ -270,3 +270,6 @@ archive_cache_delivery_scope=Correct R2348 cache suffix on the actual native arc
 
 paint_watchdog_revision=20261128-r2351-paint-watchdog
 paint_watchdog_scope=Bound missing first-paint notifications to 1200ms after deferred CSS scheduler startup, retain single committed-frame activation and listen for visibility changes on document. Validate early FCP, missing FCP, hidden tab and canonical Worker delivery. Actual live LCP and CLS require new browser measurements.
+
+archive_settle_revision=20261128-r2352-settled-frame
+archive_settle_scope=One bounded software-rendered archive final frame after the existing 180ms input quiet period, honoring pause/visibility/context loss; read-only native scheduler diagnostics in real scroll proof. Full hardware geometry and quality gates unchanged. Production performance requires browser verification.

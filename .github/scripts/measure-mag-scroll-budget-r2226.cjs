@@ -59,6 +59,9 @@ async function proveReactor(page,spec){
         if(e.name!=='TimeoutError')throw e;
         const diagnostic=await page.evaluate(()=>({scrollY,viewport:innerHeight,
           scene:window.FormatXArchiveExperience?.state,
+          scheduler:window.FormatXLivingCore?.renderState||null,
+          archiveVersion:window.FormatXArchiveExperience?.version||null,
+          transitAck:document.documentElement.dataset.fxArchiveTransitAckR2348||null,
           gate:document.documentElement.dataset.fxArchiveReactorEntryR2261,
           corridor:document.documentElement.dataset.fxArchiveCorridorR2265,
           hosts:Array.from(document.querySelectorAll('main#main-content > [data-fx-cinema-anchor-height]')).map(n=>({id:n.id,top:n.getBoundingClientRect().top,active:n.dataset.fxCinemaHostActive}))}));
