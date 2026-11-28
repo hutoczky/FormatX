@@ -436,32 +436,41 @@ console.log('R2286_TRUSTED_CAPTURE_PASS '+JSON.stringify({inputTypes:3,synthetic
  const a=src.slice(src.indexOf('    function onPageHide(event){'),src.indexOf("    addEventListener('pageshow',onPageShow"));
  const n=native.slice(native.indexOf('    function onPageShow(event){'),native.indexOf("    listen(window,'pageshow',onPageShow"));
  assert(a.includes('function onPageShow')&&n.includes('function onPageHide'));
+ const ackStart=src.indexOf('  function cancelTransitAck(){'),ackEnd=src.indexOf('  function armTransitAck(){',ackStart);
+ assert(ackStart>=0&&ackEnd>ackStart);
+ const cancelAck=src.slice(ackStart,ackEnd);
  const simulate=handlers=>new Function(`
  let raf=1,domRaf=2,gpuTailTimer=3,scrollFrame=4,scrollSettleTimer=5;
+ let transitAckTimer=8,lastPaintedSelection={},lastSyncedCinemaHost={};
  let scrollTransitPermit=true,burstFrames=4,idleComposed=true,lastGpu=123;
  let schedulerLastFrame=123,schedulerTick=2,lastScrollTransit=123,last=123;
  let ambientPointerFrame=6,pendingAmbientPointer={clientX:0},surfaceFrameTimer=7;
  const delayed=new Set([7]),performance={now:()=>456};
  let stops=0,invalidates=0,draws=0,pulses=0;
- const root={dataset:{}},mobile=false,cancelAnimationFrame=()=>{},clearTimeout=()=>{};
+ const cleared=new Set();
+ const root={dataset:{}},mobile=false,cancelAnimationFrame=()=>{},clearTimeout=id=>cleared.add(id);
  const stop=()=>stops++,destroy=stop,invalidate=()=>invalidates++;
+ ${cancelAck}
  const boost=()=>{},schedule=()=>draws++,scheduleSurfacePulse=()=>pulses++;
  ${handlers}
  return {hide:p=>onPageHide({persisted:p}),show:p=>onPageShow({persisted:p}),
- arm:()=>{raf=1;scrollFrame=4;scrollSettleTimer=5;ambientPointerFrame=6;pendingAmbientPointer={clientX:0};surfaceFrameTimer=7;delayed.add(7);},
- state:()=>({raf,domRaf,gpuTailTimer,scrollFrame,scrollSettleTimer,scrollTransitPermit,burstFrames,idleComposed,lastGpu,schedulerLastFrame,schedulerTick,lastScrollTransit,last,ambientPointerFrame,pendingAmbientPointer,surfaceFrameTimer,delayedCount:delayed.size,stops,invalidates,draws,pulses,dataset:root.dataset})};
+ arm:()=>{raf=1;domRaf=2;gpuTailTimer=3;scrollFrame=4;scrollSettleTimer=5;ambientPointerFrame=6;pendingAmbientPointer={clientX:0};surfaceFrameTimer=7;delayed.add(7);transitAckTimer=8;lastPaintedSelection={};lastSyncedCinemaHost={};cleared.clear();},
+ state:()=>({raf,domRaf,gpuTailTimer,scrollFrame,scrollSettleTimer,scrollTransitPermit,burstFrames,idleComposed,lastGpu,schedulerLastFrame,schedulerTick,lastScrollTransit,last,ambientPointerFrame,pendingAmbientPointer,surfaceFrameTimer,delayedCount:delayed.size,stops,invalidates,draws,pulses,dataset:root.dataset,transitAckTimer,lastPaintedSelection,lastSyncedCinemaHost,ackTimerCleared:cleared.has(8)})};
  `)();
  const archive=simulate(a),renderer=simulate(n);
  for(let i=0;i<2;i++){
-   renderer.arm();archive.hide(true);renderer.hide(true);
+   archive.arm();renderer.arm();archive.hide(true);renderer.hide(true);
    assert.equal(archive.state().stops,0);assert.equal(renderer.state().stops,0);
    assert.equal(archive.state().raf,0);assert.equal(archive.state().domRaf,0);assert.equal(archive.state().gpuTailTimer,0);
+   assert.equal(archive.state().transitAckTimer,0);assert.equal(archive.state().lastPaintedSelection,null);
+   assert.equal(archive.state().ackTimerCleared,true);
    assert.equal(renderer.state().raf,0);assert.equal(renderer.state().scrollFrame,0);assert.equal(renderer.state().scrollSettleTimer,0);
    assert.equal(renderer.state().scrollTransitPermit,false);
    assert.equal(renderer.state().ambientPointerFrame,0);assert.equal(renderer.state().pendingAmbientPointer,null);
    assert.equal(renderer.state().surfaceFrameTimer,0);assert.equal(renderer.state().delayedCount,0);
    archive.show(true);renderer.show(true);
    assert.equal(archive.state().lastGpu,0);assert.equal(renderer.state().schedulerLastFrame,0);
+   assert.equal(archive.state().lastSyncedCinemaHost,undefined);
    assert.equal(renderer.state().lastScrollTransit,-Infinity);assert.equal(renderer.state().last,456);
    assert.equal(archive.state().invalidates,i+1);assert.equal(renderer.state().draws,i+1);
  }

@@ -261,3 +261,6 @@ production_delivery_scope=R2339 canonical critical CSS ordering, R2340 single re
 
 archive_transit_delivery_revision=20261128-r2348-transit-ack
 archive_transit_delivery_scope=Bounded software-rendered gate acknowledgement retry, lifecycle cancellation and explicit native-content fail-open on throwing scene pass. Live scroll and Lighthouse verification remain required.
+
+archive_regression_revision=20261128-r2349-transit-lifecycle-proof
+archive_regression_scope=Exercise actual transit acknowledgement cancellation in the existing BFCache lifecycle regression, including two cycles, timer identity and painted selection reset. No production runtime or graphics changes from R2348.
