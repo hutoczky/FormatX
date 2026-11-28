@@ -267,3 +267,6 @@ archive_regression_scope=Exercise actual transit acknowledgement cancellation in
 
 archive_cache_delivery_revision=20261128-r2350-delivery
 archive_cache_delivery_scope=Correct R2348 cache suffix on the actual native archive JavaScript script element, validate runtime version parity and Worker rewrite. No change to shaders, checkout, intro or quality gates. Live browser verification required.
+
+paint_watchdog_revision=20261128-r2351-paint-watchdog
+paint_watchdog_scope=Bound missing first-paint notifications to 1200ms after deferred CSS scheduler startup, retain single committed-frame activation and listen for visibility changes on document. Validate early FCP, missing FCP, hidden tab and canonical Worker delivery. Actual live LCP and CLS require new browser measurements.

@@ -47,7 +47,7 @@
     frame = fallback = activationTask = 0;
     observer?.disconnect?.();
     observer = null;
-    removeEventListener('visibilitychange', onVisibility);
+    document.removeEventListener('visibilitychange', onVisibility);
 
     observeStyleLinks();
     const links = Array.from(document.querySelectorAll('link[data-fx-r487-deferred-style]'));
@@ -134,15 +134,16 @@
     if (activated || document.visibilityState !== 'visible') return;
     if (hasFcp()) activateAfterCommittedFrame('visibility-buffered-fcp');
   }
-  addEventListener('visibilitychange', onVisibility, { passive: true });
+  document.addEventListener('visibilitychange', onVisibility, { passive: true });
 
   // R2022 visible-tab fail-open: certain clients report no buffered FCP and
   // lose the PerformanceObserver event. Without a watchdog every cinematic
   // stylesheet remains at media=print indefinitely and the MAG appears missing.
+  // R2351: bound missing paint notifications to 1200ms after script startup.
   // Keep the critical first paint asynchronous, then guarantee activation.
   fallback = setTimeout(() => {
     if (activated) return;
     if (document.visibilityState === 'hidden') activate('hidden-tab-fail-open');
     else activateAfterCommittedFrame('visible-tab-fcp-watchdog');
-  }, 3500);
+  }, 1200);
 }());
