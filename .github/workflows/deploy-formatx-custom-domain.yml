@@ -127,6 +127,7 @@ jobs:
           node .github/scripts/validate-reference-bootstrap-r2340.cjs
           node .github/scripts/validate-production-core-media-r2342.cjs
           node .github/scripts/validate-loop-geometry-r2343.cjs
+          node .github/scripts/validate-copy-anchor-r2346.cjs
           node .github/scripts/validate-genesis-cinematic.cjs
           node .github/scripts/validate-genesis-studio-r2161.cjs
           node .github/scripts/production-preflight.cjs
