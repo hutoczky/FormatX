@@ -255,3 +255,6 @@ studio_scope=Native desktop MAG UHD pixel ceiling 8294400, continuous clearcoat 
 
 archive_perimeter_revision=20261127-r2338-settled-perimeter
 archive_perimeter_scope=Retain a restrained settled studio rim after the MAG folio assembly completes so the intro-to-page object keeps one lighting character. Preserve licensing and payment states, geometry, camera, WebGL ownership and render cadence.
+
+production_delivery_revision=20261128-r2345-release-proof
+production_delivery_scope=R2339 canonical critical CSS ordering, R2340 single reference bootstrap, R2341 dual-domain robots verification, R2342 canonical deferred core media, R2343 idempotent idle scroll geometry and R2344 per-release browser validation isolation. Each production push must change this marker before release convergence can be asserted. Live Lighthouse and hardware UHD frame cadence remain unverified.
