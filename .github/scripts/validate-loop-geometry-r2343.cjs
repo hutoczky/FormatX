@@ -1,0 +1,18 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const s=fs.readFileSync('docs/scifi-ui/scripts/formatx-infinite-scroll-desktop-v7.js','utf8');
+assert.doesNotThrow(()=>new Function(s));
+const a=s.indexOf('  function refreshGeometry()'),b=s.indexOf('  function scheduleGeometryRefresh()',a);
+let reads=0,writes=0,dataWrites=0,stored='',height=620;
+const bridge={isConnected:true,get offsetTop(){reads++;return 4200},style:{getPropertyValue:()=>stored,setProperty:(_k,v)=>{stored=v;writes++}}};
+const hero={isConnected:true,get offsetTop(){return 80},get offsetHeight(){reads++;return height}};
+const root={dataset:new Proxy({}, {set(o,k,v){dataWrites++;o[k]=v;return true}})};
+const document={querySelector:()=>hero,documentElement:{scrollHeight:4900}};
+const api=new Function('bridge','document','root','innerHeight','isMobileFlow','let sourceHero,loopGeometry,stableDesktopBridgeTop,stableDesktopSourceHeight;function resetGeometry(){};'+s.slice(a,b)+'return {step(){refreshGeometry();captureStableDesktopGeometry("idle",loopGeometry)},live(){captureStableDesktopGeometry("live")}};')(bridge,document,root,900,()=>false);
+api.step();const first=dataWrites;
+for(let i=0;i<1000;i++)api.step();
+assert.equal(writes,1);assert.equal(reads,2002);assert.equal(dataWrites,first);
+height=700;api.step();assert.equal(writes,2);assert.equal(stored,'700px');
+const n=reads;api.live();assert.equal(reads,n+2);
+assert.ok(s.includes("captureStableDesktopGeometry('idle-geometry-refresh',loopGeometry)"));
+console.log('R2343 geometry cache: PASS, 1000 unchanged refreshes without style or telemetry writes');

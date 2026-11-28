@@ -415,7 +415,10 @@
     const reachableLimit = Math.max(0, documentEnd - 2);
     const reachableThreshold = Math.max(0, Math.min(desiredThreshold, reachableLimit));
 
-    bridge.style.setProperty('--fx-loop-source-height', `${Math.round(sourceHeight)}px`);
+    // R2343: a repeated geometry observation must not invalidate style.
+    const sourceHeightCss = `${Math.round(sourceHeight)}px`;
+    if (bridge.style.getPropertyValue('--fx-loop-source-height') !== sourceHeightCss)
+      bridge.style.setProperty('--fx-loop-source-height', sourceHeightCss);
 
     loopGeometry = Object.freeze({
       ready: true,
@@ -425,21 +428,26 @@
       sourceHeight,
       documentEnd,
     });
-    root.dataset.fxLoopReachableThresholdR1723 = String(Math.round(reachableThreshold));
-    root.dataset.fxLoopReachableThresholdR1724 = documentEnd < bridgeTop ? 'final-viewport-safe' : 'bridge-relative-safe';
+    writeGeometryData('fxLoopReachableThresholdR1723', String(Math.round(reachableThreshold)));
+    writeGeometryData('fxLoopReachableThresholdR1724', documentEnd < bridgeTop ? 'final-viewport-safe' : 'bridge-relative-safe');
     return true;
   }
 
-  function captureStableDesktopGeometry(reason='idle') {
+  function writeGeometryData(key,value) {
+    if(root.dataset[key]!==value)root.dataset[key]=value;
+  }
+  function captureStableDesktopGeometry(reason='idle',fresh=null) {
     if (isMobileFlow() || !bridge?.isConnected || !sourceHero?.isConnected) return false;
-    const top=Number(bridge.offsetTop);
-    const sourceHeight=Number(sourceHero.offsetHeight);
+    // Only the synchronous caller that just measured the same frame can
+    // reuse its snapshot. Independent gesture/settle callers still read live.
+    const top=Number(fresh?.ready?fresh.bridgeTop:bridge.offsetTop);
+    const sourceHeight=Number(fresh?.ready?fresh.sourceHeight:sourceHero.offsetHeight);
     if(!Number.isFinite(top) || !Number.isFinite(sourceHeight))return false;
     stableDesktopBridgeTop=Math.max(0,top);
     stableDesktopSourceHeight=Math.max(0,sourceHeight);
-    root.dataset.fxLoopStableBridgeTopR1727=String(Math.round(stableDesktopBridgeTop));
-    root.dataset.fxLoopStableSourceHeightR1727=String(Math.round(stableDesktopSourceHeight));
-    root.dataset.fxLoopStableGeometrySourceR1727=reason;
+    writeGeometryData('fxLoopStableBridgeTopR1727',String(Math.round(stableDesktopBridgeTop)));
+    writeGeometryData('fxLoopStableSourceHeightR1727',String(Math.round(stableDesktopSourceHeight)));
+    writeGeometryData('fxLoopStableGeometrySourceR1727',reason);
     return true;
   }
 
@@ -453,7 +461,7 @@
         && !root.classList.contains('fx-seamless-loop-transfer')
         && !root.classList.contains('fx-section-navigation-active')
         && !Number.isFinite(desktopGestureAnchorY);
-      if(quiet)captureStableDesktopGeometry('idle-geometry-refresh');
+      if(quiet)captureStableDesktopGeometry('idle-geometry-refresh',loopGeometry);
     });
   }
 
